@@ -1,0 +1,119 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email.matches('(?i)basim5252@gmail.com');
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function getUserData(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data;
+    }
+
+    function isParentOf(studentId) {
+      return isSignedIn() && (
+        getUserData(request.auth.uid).get('linkedStudentId', '') == studentId || 
+        studentId in getUserData(request.auth.uid).get('childrenIds', [])
+      );
+    }
+
+    // --- Rules ---
+    
+    match /modules/{moduleId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /lessons/{lessonId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) && (
+        isAdmin() || (
+            request.resource.data.role == resource.data.role &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'avatarUrl', 'email', 'createdAt', 'linkedStudentId', 'childrenIds'])
+        )
+      );
+    }
+
+    match /students/{userId} {
+      allow get: if isOwner(userId) || isParentOf(userId) || isAdmin();
+      allow list: if isAdmin();
+      
+      allow create: if isOwner(userId) || isAdmin();
+      allow update: if isOwner(userId) || isParentOf(userId) || isAdmin();
+    }
+
+    match /schedules/{scheduleId} {
+      allow read: if isSignedIn() && (
+        isOwner(resource.data.studentId) || 
+        isParentOf(resource.data.studentId) || 
+        isAdmin()
+      );
+      allow create: if isSignedIn() && (
+        isOwner(request.resource.data.studentId) || 
+        isParentOf(request.resource.data.studentId) || 
+        isAdmin()
+      );
+      allow update, delete: if isSignedIn() && (
+        isOwner(resource.data.studentId) || 
+        isParentOf(resource.data.studentId) || 
+        isAdmin()
+      );
+    }
+
+    match /parentNotes/{noteId} {
+      allow read: if isSignedIn() && (
+        isOwner(resource.data.parentId) || 
+        isOwner(resource.data.studentId) || 
+        isAdmin()
+      );
+      allow create: if isSignedIn() && (
+        isOwner(request.resource.data.parentId) || 
+        isAdmin()
+      );
+      allow update, delete: if isAdmin();
+    }
+
+    match /grades/{gradeId} {
+      allow read: if isSignedIn() && (isOwner(resource.data.studentId) || isParentOf(resource.data.studentId) || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    match /conversations/{sessionId} {
+      allow read: if isSignedIn() && (isOwner(resource.data.studentId) || isParentOf(resource.data.studentId) || isAdmin());
+      allow create: if isSignedIn() && (isOwner(request.resource.data.studentId) || isAdmin());
+      allow update: if isAdmin() || (isSignedIn() && isOwner(resource.data.studentId));
+    }
+
+    match /global_chat/{msgId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+  }
+}

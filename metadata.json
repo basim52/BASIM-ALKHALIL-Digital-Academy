@@ -1,0 +1,11 @@
+{
+  "name": "BASIM ALKHALIL Digital Academy",
+  "description": "أكاديمية باسم الخليل الرقمية لتعليم الإنجليزية، مع شريك محادثة بالذكاء الاصطناعي وتقارير أداء متقدمة.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "ai_conversations",
+    "learning_management"
+  ]
+}

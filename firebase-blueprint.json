@@ -1,0 +1,166 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Base information for any user of the platform",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["student", "parent", "teacher", "admin"] },
+        "avatarUrl": { "type": "string" },
+        "createdAt": { "type": "integer" }
+      },
+      "required": ["uid", "email", "displayName", "role", "createdAt"]
+    },
+    "StudentProfile": {
+      "title": "Student Profile",
+      "description": "Extended information for student users",
+      "type": "object",
+      "properties": {
+        "parentId": { "type": "string" },
+        "level": { "type": "string", "enum": ["A1", "A2", "B1", "B2", "C1", "C2"] },
+        "points": { "type": "integer" },
+        "learningPath": { "type": "array", "items": { "type": "string" } },
+        "currentModuleId": { "type": "string" }
+      },
+      "required": ["level", "points"]
+    },
+    "Grade": {
+      "title": "Grade",
+      "description": "A record of a student's test score",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "testId": { "type": "string" },
+        "score": { "type": "number" },
+        "total": { "type": "number" },
+        "feedback": { "type": "string" },
+        "date": { "type": "integer" }
+      },
+      "required": ["studentId", "testId", "score", "total"]
+    },
+    "AIConversation": {
+      "title": "AI Conversation",
+      "description": "Log of a conversation session with the AI language partner",
+      "type": "object",
+      "properties": {
+        "sessionId": { "type": "string" },
+        "studentId": { "type": "string" },
+        "transcript": { 
+          "type": "array", 
+          "items": { 
+            "type": "object", 
+            "properties": {
+              "role": { "type": "string", "enum": ["user", "ai"] },
+              "text": { "type": "string" }
+            }
+          }
+        },
+        "feedback": {
+          "type": "object",
+          "properties": {
+            "fluency": { "type": "number" },
+            "grammar": { "type": "number" },
+            "vocabulary": { "type": "number" },
+            "suggestions": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "date": { "type": "integer" }
+      },
+      "required": ["sessionId", "studentId", "transcript"]
+    },
+    "LearningModule": {
+      "title": "Learning Module",
+      "description": "A structural unit of the curriculum (e.g. Beginners Level 1)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "titleAr": { "type": "string" },
+        "description": { "type": "string" },
+        "descriptionAr": { "type": "string" },
+        "level": { "type": "string", "enum": ["A1", "A2", "B1", "B2", "C1", "C2"] },
+        "order": { "type": "integer" }
+      },
+      "required": ["id", "title", "level", "order"]
+    },
+    "Lesson": {
+      "title": "Lesson",
+      "description": "A specific lesson within a module",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "moduleId": { "type": "string" },
+        "title": { "type": "string" },
+        "titleAr": { "type": "string" },
+        "content": { "type": "string" },
+        "contentAr": { "type": "string" },
+        "order": { "type": "integer" },
+        "imageryPrompt": { "type": "string" }
+      },
+      "required": ["id", "moduleId", "title", "order"]
+    },
+    "Schedule": {
+      "title": "Schedule",
+      "description": "A scheduled study session",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "day": { "type": "string" },
+        "time": { "type": "string" },
+        "subject": { "type": "string" },
+        "unitTitle": { "type": "string" },
+        "isCustom": { "type": "boolean" }
+      },
+      "required": ["studentId", "day", "time", "subject"]
+    },
+    "ParentNote": {
+      "title": "Parent Note",
+      "description": "A note from a parent to a student or teacher",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "parentId": { "type": "string" },
+        "content": { "type": "string" },
+        "createdAt": { "type": "integer" }
+      },
+      "required": ["studentId", "parentId", "content"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Public and private user profile data"
+    },
+    "/students/{userId}": {
+      "schema": "StudentProfile",
+      "description": "Student-specific metadata"
+    },
+    "/grades/{gradeId}": {
+      "schema": "Grade",
+      "description": "Historical grades for all students"
+    },
+    "/conversations/{sessionId}": {
+      "schema": "AIConversation",
+      "description": "AI conversation logs"
+    },
+    "/modules/{moduleId}": {
+      "schema": "LearningModule",
+      "description": "Available learning modules"
+    },
+    "/lessons/{lessonId}": {
+      "schema": "Lesson",
+      "description": "Detailed lesson content"
+    },
+    "/schedules/{scheduleId}": {
+      "schema": "Schedule",
+      "description": "Student study schedules"
+    },
+    "/parentNotes/{noteId}": {
+      "schema": "ParentNote",
+      "description": "Notes for communication between parents and students"
+    }
+  }
+}
