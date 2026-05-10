@@ -20,66 +20,66 @@ export const familyConstellationsLesson: Partial<Lesson> = {
     ]
   },
   content: `
-### 1. Nuclear Family (العائلة الصغيرة)
+### 1. Nuclear Family
 The "Nuclear Family" consists of the people living in your home.
 
-*   **Father / Dad**: (أب) - "My father is a teacher."
-*   **Mother / Mom**: (أم) - "My mother is a doctor."
-*   **Brother**: (أخ) - "I have one brother."
-*   **Sister**: (أخت) - "My sister is younger than me."
+*   **Father / Dad**: Male parent.
+*   **Mother / Mom**: Female parent.
+*   **Brother**: Male sibling.
+*   **Sister**: Female sibling.
 
-> **Formula/Rule:** 
-> **Possessive + Member** 
-> *My father* = والدي | *Your sister* = أختك
+> **Grammar Rule:** 
+> Use possessive adjectives before family members. 
+> *My father* | *Your sister*
 
-### 2. Extended Family (العائلة الممتدة)
+### 2. Extended Family
 These are relatives who live outside your immediate house.
 
-| Term (الإنجليزية) | Meaning (المعنى) | Example (مثال) |
+| Term | Meaning | Example |
 | :--- | :--- | :--- |
-| Grandfather | الجد | My grandfather is 70 years old. |
-| Grandmother | الجدة | I love my grandmother's food. |
-| Uncle | العم / الخال | My uncle lives in London. |
-| Aunt | العمة / الخالة | My aunt is very kind. |
-| Cousin | ابن العم / الخال | I play with my cousin. |
+| Grandfather | Parent's father | My grandfather is 70 years old. |
+| Grandmother | Parent's mother | I love my grandmother's food. |
+| Uncle | Parent's brother | My uncle lives in London. |
+| Aunt | Parent's sister | My aunt is very kind. |
+| Cousin | Aunt's or Uncle's child | I play with my cousin. |
 
-### 3. Sentence Patterns (أنماط الجمل)
-When we talk about family at the A1 level, we use the verb **'to be'** (is/are) or **'to have'**.
+### 3. Sentence Patterns
+When we talk about family, we use the verb **'to be'** or **'to have'**.
 
-1.  "This **is** my brother." (هذا أخي)
-2.  "I **have** two sisters." (لدي أختان)
-3.  "My father **is** tall." (أبي طويل القامة)
+1.  "This **is** my brother."
+2.  "I **have** two sisters."
+3.  "My father **is** tall."
 `,
   contentAr: `
-### 1. العائلة الصغيرة (Nuclear Family)
+### 1. العائلة الصغيرة
 تتكون "العائلة الصغيرة" من الأشخاص الذين يعيشون معك في المنزل.
 
-*   **Father / Dad**: (أب) - "أبي معلم."
-*   **Mother / Mom**: (أم) - "أمي طبيبة."
-*   **Brother**: (أخ) - "لدي أخ واحد."
-*   **Sister**: (أخت) - "أختي أصغر مني."
+*   **الأب**: "أبي معلم."
+*   **الأم**: "أمي طبيبة."
+*   **الأخ**: "لدي أخ واحد."
+*   **الأخت**: "أختي أصغر مني."
 
 > **قاعدة ذهبية:** 
-> **صفة الملكية + فرد العائلة** 
-> *My father* = والدي | *Your sister* = أختك
+> نستخدم صيفة الملكية قبل فرد العائلة للدلالة على القرابة.
+> مثال: والدي، أختك.
 
-### 2. العائلة الممتدة (Extended Family)
+### 2. العائلة الممتدة
 هؤلاء هم الأقارب الذين يعيشون خارج منزلك المباشر.
 
 | المصطلح | المعنى | مثال |
 | :--- | :--- | :--- |
-| Grandfather | الجد | جدي يبلغ من العمر 70 عاماً. |
-| Grandmother | الجدة | أحب طعام جدتي. |
-| Uncle | العم / الخال | خالي يعيش في لندن. |
-| Aunt | العمة / الخالة | عمتي طيبة جداً. |
-| Cousin | ابن العم / الخال | ألعب مع ابن عمي. |
+| الجد | والد الأب أو الأم | جدي يبلغ من العمر 70 عاماً. |
+| الجدة | والدة الأب أو الأم | أحب طعام جدتي. |
+| العم أو الخال | أخو الأب أو الأم | خالي يعيش في لندن. |
+| العمة أو الخالة | أخت الأب أو الأم | عمتي طيبة جداً. |
+| ابن العم أو الخال | طفل العم أو الخال | ألعب مع ابن عمي. |
 
-### 3. أنماط الجمل (Sentence Patterns)
-عندما نتحدث عن العائلة في المستوى A1، نستخدم فعل الكينونة **'to be'** أو فعل الملكية **'to have'**.
+### 3. أنماط الجمل
+عندما نتحدث عن العائلة، نستخدم أفعال الكينونة أو التملك.
 
-1.  "This **is** my brother." (هذا أخي)
-2.  "I **have** two sisters." (لدي أختان)
-3.  "My father **is** tall." (أبي طويل القامة)
+1.  "هذا أخي."
+2.  "لدي أختان."
+3.  "أبي طويل القامة."
 `,
   exercises: [
     {

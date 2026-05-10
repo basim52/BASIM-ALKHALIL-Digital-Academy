@@ -20,13 +20,13 @@ export const interrogativePatternsA2: Partial<Lesson> = {
     ]
   },
   content: `
-### 1. Reading Questionnaires (قراءة الاستبيانات)
+### 1. Reading Questionnaires
 Questionnaires often use **Direct Questions** or **Statements** to find your opinion.
 
-*   *Direct:* "How often do you exercise?" (كم مرة تمارس الرياضة؟)
-*   *Statement:* "Rate your satisfaction: 1 (Poor) to 5 (Excellent)." (قيم رضاك: من 1 إلى 5)
+*   *Direct:* "How often do you exercise?"
+*   *Statement:* "Rate your satisfaction: 1 (Poor) to 5 (Excellent)."
 
-### 2. The Power of "WH" Words (قوة كلمات الاستفهام)
+### 2. The Power of "WH" Words
 When reading a form, match the "WH" word to the required data:
 *   **Who?** → Requires a Name.
 *   **Where?** → Requires an Address/Location.
@@ -35,27 +35,27 @@ When reading a form, match the "WH" word to the required data:
 
 > **Formula/Rule:** 
 > **Question Word + Helping Verb + Subject + Main Verb?**
-> *Where [Q] + do [H] + you [S] + live [M]?*
+> *Where + do + you + live?*
 
-### 3. Digital Forms Symbols (رموز النماذج الرقمية)
-*   **(*) Asterisk**: Means the question is **Required** (إلزامي).
-*   **Check-box**: Select one or more (مربع اختيار).
-*   **Radio button**: Select only one (زر اختيار دائري).
+### 3. Digital Forms Symbols
+*   **Asterisk (*)**: Means the question is **Required**.
+*   **Check-box**: Select one or more options.
+*   **Radio button**: Select only one option.
 `,
   contentAr: `
-### 1. قراءة الاستبيانات (Questionnaires)
-تستخدم الاستبيانات عادةً أسئلة مباشرة أو مقاييس تقييم.
+### 1. قراءة الاستبيانات
+تستخدم الاستبيانات عادةً أسئلة مباشرة أو مقاييس لتقييم الآراء والرضا.
 
-*   **How often:** تسأل عن التكرار (دائماً، غالباً، نادراً).
-*   **How much:** تسأل عن الكمية أو السعر.
+*   **متى وكيف:** أسئلة تسأل عن التكرار والمعدل الزمني.
+*   **بكم:** أسئلة تسأل عن الكمية أو السعر.
 
-### 2. دلالات أدوات الاستفهام (WH Indicators)
-عندما ترى أداة استفهام في نموذج، توقع نوع الإجابة:
-*   **Who:** ابحث عن اسم شخص.
-*   **Where:** ابحث عن اسم مكان أو عنوان.
-*   **When:** ابحث عن تاريخ أو وقت.
+### 2. دلالات أدوات الاستفهام
+عندما ترى أداة استفهام في أي نموذج، يمكنك توقع نوع الإجابة المطلوبة:
+*   **من:** ابحث عن اسم شخص أو جهة.
+*   **أين:** ابحث عن اسم مكان أو عنوان بريدي.
+*   **متى:** ابحث عن تاريخ محدد أو وقت زمني.
 
-> **ملاحظة فنية:** وجود علامة النجمة (*) بجانب السؤال تعني أنه لا يمكنك تجاوز هذا الحقل دون إجابة.
+> **ملاحظة فنية:** وجود علامة النجمة بجانب أي سؤال في النماذج الإلكترونية تعني أنه حقل إلزامي لا يمكن تجاوزه دون إجابة.
 `,
   exercises: [
     {

@@ -20,15 +20,15 @@ export const narrativeSequencesA2: Partial<Lesson> = {
     ]
   },
   content: `
-### 1. The Timeline of Reading (الخط الزمني للقراءة)
+### 1. The Timeline of Reading
 In A2 reading, stories are rarely a single sentence. We use **Sequence Markers** to show order.
 
-*   **First**: Start here (أولاً).
-*   **Next / Then**: The next steps (تالياً / ثم).
-*   **After that**: Continuing the action (بعد ذلك).
-*   **Finally**: The end (أخيراً).
+*   **First**: Start here.
+*   **Next / Then**: The next steps.
+*   **After that**: Continuing the action.
+*   **Finally**: The end.
 
-### 2. Following Instructions (اتباع التعليمات)
+### 2. Following Instructions
 Procedures (like cooking or assembling a chair) depend on sequence.
 
 *Example:*
@@ -38,26 +38,26 @@ Procedures (like cooking or assembling a chair) depend on sequence.
 
 > **Formula/Rule:**
 > **Marker + Imperative Verb**
-> *Finally [Marker] + click [Verb] the button.*
+> *Finally + click the button.*
 
-### 3. Past Tense in Sequences (الماضي في التسلسلات)
+### 3. Past Tense in Sequences
 Narratives often use the **Simple Past** (-ed verbs).
 *   "In the morning, he **walked** to the park. **Then**, he **sat** on the bench."
 `,
   contentAr: `
-### 1. الروابط الزمنية (Sequence Markers)
-لفهم القصص أو التعليمات، يجب أن تعرف ترتيب الأحداث:
+### 1. الروابط الزمنية
+لفهم القصص أو التعليمات، يجب أن تعرف ترتيب الأحداث بشكل دقيق:
 
-*   **First (أولاً):** يحدد نقطة البداية.
-*   **Next / Then (تالياً/ثم):** يربط بين الخطوات الوسطى.
-*   **Finally (أخيراً):** يحدد الخاتمة أو النتيجة النهائية.
+*   **أولاً:** يحدد نقطة البداية.
+*   **تالياً أو ثم:** يربط بين الخطوات المتتابعة.
+*   **أخيراً:** يحدد الخاتمة أو النتيجة النهائية للعملية.
 
-### 2. فهم الروتين اليومي (Daily Routine)
-عند قراءة الروتين، الترتيب هو الأهم.
+### 2. فهم الروتين اليومي
+عند قراءة الروتين اليومي، الترتيب المنطقي هو الأهم للحفاظ على السياق.
 *مثال:*
-"أولاً (First) استيقظت، ثم (Then) تناولت الفطور، وأخيراً (Finally) ذهبت للعمل."
+"أولاً استيقظت، ثم تناولت وجبة الفطور، وأخيراً ذهبت إلى العمل."
 
-> **نصيحة للقراءة:** إذا فقدت تركيزك في نص طويل، ابحث عن الكلمات التي تنتهي بـ (ly) مثل Finally فهي غالباً تشير إلى أن النص يقترب من نهايته.
+> **نصيحة للقراءة:** إذا فقدت تركيزك في نص طويل، ابحث عن الكلمات التي تظهر التدرج الزمني فهي تساعدك على إعادة بناء القصة في ذهنك.
 `,
   exercises: [
     {

@@ -20,51 +20,50 @@ export const basicSentenceStructureA2: Partial<Lesson> = {
     ]
   },
   content: `
-### 1. Expanding the Sentence (توسيع الجملة)
+### 1. Expanding the Sentence
 In A1, we learned: *I like apples.* In A2, we connect: *I like apples **and** I like oranges.*
 
-*   **And (و)**: Used to add similar information.
+*   **And**: Used to add similar information.
     *   *Example:* "She speaks English **and** she studies French."
-*   **But (لكن)**: Used to show a difference or contrast.
+*   **But**: Used to show a difference or contrast.
     *   *Example:* "I want to go out, **but** it is raining."
-*   **Because (لأن)**: Used to give a reason.
+*   **Because**: Used to give a reason.
     *   *Example:* "He is happy **because** he won the game."
 
 > **Formula/Rule:** 
 > **Sentence A + Connector + Sentence B**
 > *Subject + Verb ... [and/but/because] ... Subject + Verb*
 
-### 2. Sentence Order in Reading (ترتيب الجمل في القراءة)
+### 2. Sentence Order in Reading
 When reading A2 texts, look for the connector to understand the logic.
 1.  **Addition:** Look for 'and', 'also', 'too'.
 2.  **Contrast:** Look for 'but', 'however'.
 3.  **Cause:** Look for 'because', 'so'.
 
-### 3. Practical Comparison (مقارنة عملية)
-| Simple (بسيطة) | Compound (مركبة) |
+### 3. Practical Comparison
+| Simple | Compound |
 | :--- | :--- |
 | I study. I sleep. | I study **and** then I sleep. |
 | It is hot. I am cool. | It is hot, **but** I am cool. |
 `,
   contentAr: `
-### 1. توسيع الجملة (Expanding the Sentence)
-في المستوى A1 تعلمنا: *I like apples.* في المستوى A2 نربط الأفكار: *I like apples **and** I like oranges.*
-
-*   **And (و)**: تستخدم لإضافة معلومات متشابهة.
-    *   *مثال:* "هي تتحدث الإنجليزية **و** تدرس الفرنسية."
-*   **But (لكن)**: تستخدم لإظهار التناقض أو الاختلاف.
-    *   *مثال:* "أريد الخروج، **لكن** السماء تمطر."
-*   **Because (لأن)**: تستخدم لإعطاء سبب.
-    *   *مثال:* "هو سعيد **لأنه** فاز بالمباراة."
+### 1. توسيع الجملة
+في المستوى التأسيسي السابق تعلمنا الجمل البسيطة. في هذا المستوى نربط الأفكار مع بعضها:
+*   **و (أداة الإضافة)**: تستخدم لإضافة معلومات متشابهة.
+    *   مثال: "هي تتحدث الإنجليزية وتدرس الفرنسية."
+*   **لكن (أداة التناقض)**: تستخدم لإظهار التناقض أو الاختلاف بين جملتين.
+    *   مثال: "أريد الخروج، لكن السماء تمطر."
+*   **لأن (أداة التعليل)**: تستخدم لإعطاء سبب للحدث.
+    *   مثال: "هو سعيد لأنه فاز بالمباراة."
 
 > **قاعدة ذهبية:** 
-> نستخدم الفاصلة (,) غالباً قبل **but** في الجمل الطويلة لراحة القارئ.
+> نستخدم الفاصلة غالباً قبل أداة التناقض في الجمل الطويلة لراحة القارئ وتوضيح الفرق.
 
-### 2. منطق الروابط (Logical Connectors)
-عند قراءة نصوص A2، ابحث عن الرابط لفهم المعنى:
-1.  **الإضافة:** ابحث عن 'and'.
-2.  **التناقض:** ابحث عن 'but'.
-3.  **السبب:** ابحث عن 'because'.
+### 2. منطق الروابط في القراءة
+عند قراءة النصوص المتقدمة قليلاً، ابحث عن الروابط لفهم المعنى المنطقي:
+1.  **الإضافة:** البحث عن أدوات العطف والإضافة.
+2.  **التناقض:** البحث عن أدوات الاستدراك والاختلاف.
+3.  **السبب:** البحث عن أدوات التعليل والنتيجة.
 `,
   exercises: [
     {

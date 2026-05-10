@@ -20,48 +20,44 @@ export const workplaceCultureA2: Partial<Lesson> = {
     ]
   },
   content: `
-### 1. Professional Email Structure (هيكل الإيميل)
+### 1. Professional Email Structure
 In a workplace, emails always follow a fixed pattern.
 
-*   **From:** The sender (المرسل).
-*   **To:** The receiver (المستقبل).
-*   **Subject:** The main topic (الموضوع).
-*   **Greeting:** "Dear Team," or "Hi [Name]," (التحية).
-*   **Body:** The actual message (محتوى الرسالة).
-*   **Closing:** "Regards," or "Best," (الخاتمة).
+*   **From:** The sender.
+*   **To:** The receiver.
+*   **Subject:** The main topic.
+*   **Greeting:** "Dear Team," or "Hi [Name],"
+*   **Body:** The actual message.
+*   **Closing:** "Regards," or "Best,"
 
-### 2. Common Workplace Vocabulary (مفردات العمل)
+### 2. Common Workplace Vocabulary
 | Term | Meaning | Use in Reading |
 | :--- | :--- | :--- |
-| **Meeting** | اجتماع | Look for time/date. |
-| **Deadline** | الموعد النهائي | Look for a specific day. |
-| **ASAP** | في أقرب وقت | Means the task is urgent. |
-| **Attached** | مرفق | There is a file to open. |
+| **Meeting** | An organized event | Look for time/date. |
+| **Deadline** | Final time for a task | Look for a specific day. |
+| **ASAP** | As soon as possible | Means the task is urgent. |
+| **Attached** | File included | There is a file to open. |
 
-> **Formula/Rule:**
-> **Action + Deadline**
-> *Please finish the report [Action] by Friday [Deadline].*
-
-### 3. Understanding Announcements (فهم الإعلانات)
+### 3. Understanding Announcements
 Workplace posters often use **Imperatives** (orders).
 *   "Please **sign** here."
 *   "**Do not** smoke."
 *   "**Attend** the meeting at 10 AM."
 `,
   contentAr: `
-### 1. هيكل البريد الإلكتروني المهني (Email Structure)
-في العمل، تتبع الرسائل دائماً نمطاً ثابتاً.
+### 1. هيكل البريد الإلكتروني المهني
+في بيئة العمل، تتبع الرسائل دائماً نمطاً ثابتاً وواضحاً.
 
-*   **Subject (الموضوع):** أهم جزء لمعرفة محتوى الرسالة بسرعة.
-*   **Greeting (التحية):** نستخدم "Dear" للرسمية و "Hi" للزملاء المقربين.
-*   **Closing (الخاتمة):** نستخدم "Regards" أو "Sincerely".
+*   **الموضوع:** أهم جزء لمعرفة فحوى الرسالة بسرعة ودقة.
+*   **التحية:** نستخدم عبارات رسمية مع الغرباء وعبارات ودية مع الزملاء المقربين.
+*   **الخاتمة:** نستخدم عبارات مهنية لإنهاء الرسالة بشكل لائق.
 
-### 2. مفردات تقنية في العمل (Vocabulary)
-*   **Deadline:** هو الوقت الذي يجب أن تنتهي فيه من العمل.
-*   **Attached:** تعني أن هناك ملفاً (صورة أو مستند) مع الرسالة.
-*   **ASAP:** اختصار لـ "As Soon As Possible" أي "في أسرع وقت ممكن".
+### 2. مفردات تقنية في العمل
+*   **الموعد النهائي:** هو الوقت الأخير الذي يجب أن ينتهي فيه العمل المكلف به.
+*   **مرفق:** تعني أن هناك ملفاً أو مستنداً إضافياً يجب فتحه مع الرسالة.
+*   **في أسرع وقت ممكن:** تعبير يستخدم للإشارة إلى أن المهمة عاجلة جداً.
 
-> **نصيحة للقراءة:** دائماً ابحث عن الفعل في بداية الجملة في الإعلانات، فهو يخبرك بما يجب عليك فعله (مثلاً: Submit, Attend, Finish).
+> **نصيحة للقراءة:** دائماً ابحث عن الأفعال التي تأتي في صيغة الأمر في بداية الجمل في الإعلانات، فهي تخبرك بالمطلوب منك تنفيذه بدقة.
 `,
   exercises: [
     {

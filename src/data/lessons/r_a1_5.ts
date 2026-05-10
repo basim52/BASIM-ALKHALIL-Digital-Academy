@@ -20,20 +20,20 @@ export const everydayInteractionLesson: Partial<Lesson> = {
     ]
   },
   content: `
-### 1. Essential Public Signs (اللوحات العامة الأساسية)
+### 1. Essential Public Signs
 In an English-speaking environment, understanding single-word signs is critical for navigation.
 
-| Sign (اللوحة) | Meaning (المعنى) | Action (الإجراء) |
+| Sign | Meaning | Action |
 | :--- | :--- | :--- |
-| **PUSH** | ادفع | Push the door forward. |
-| **PULL** | اسحب | Pull the door toward you. |
-| **OPEN** | مفتوح | The shop is ready for customers. |
-| **CLOSED** | مغلق | The shop is not operating. |
-| **EXIT** | مخرج | The way out of the building. |
+| **PUSH** | Direct force | Push the door forward. |
+| **PULL** | Toward you | Pull the door toward you. |
+| **OPEN** | Available | The shop is ready for customers. |
+| **CLOSED** | Not available | The shop is not operating. |
+| **EXIT** | Way out | The way out of the building. |
 
 > **Graphic Rule:** Red signs usually mean danger or "Stop", while Green signs often indicate safety or "Exit".
 
-### 2. Digital Text Messages (الرسائل الرقمية)
+### 2. Digital Text Messages
 At level A1, messages are short and focus on "Who, Where, and When".
 
 *Example Conversation:*
@@ -42,10 +42,10 @@ At level A1, messages are short and focus on "Who, Where, and When".
 *   **User A:** "See you at 5:00 PM."
 
 **Key Vocabulary:**
-*   **At**: (في / عند) - used for locations.
-*   **See you**: (أراك لاحقاً) - a common closing.
+*   **At**: Used for locations.
+*   **See you**: A common closing.
 
-### 3. Reading a Simple Menu (قراءة قائمة بسيطة)
+### 3. Reading a Simple Menu
 Menus use a "Item — Price" structure.
 
 *   **Coffee** ............ $3.00
@@ -55,41 +55,40 @@ Menus use a "Item — Price" structure.
 
 > **Formula/Rule:** 
 > **Subject + Verb + Price** 
-> *The coffee is $3.* (القهوة بـ 3 دولارات)
+> *The coffee is $3.*
 `,
   contentAr: `
-### 1. اللوحات العامة الأساسية (Essential Public Signs)
+### 1. اللوحات العامة الأساسية
 في البيئة الناطقة بالإنجليزية، يعد فهم اللوحات المكونة من كلمة واحدة أمراً حيوياً للتنقل.
 
 | اللوحة | المعنى | الإجراء المتبع |
 | :--- | :--- | :--- |
-| **PUSH** | ادفع | ادفع الباب للأمام. |
-| **PULL** | اسحب | اسحب الباب باتجاهك. |
-| **OPEN** | مفتوح | المتجر جاهز لاستقبال الزبائن. |
-| **CLOSED** | مغلق | المتجر لا يعمل حالياً. |
-| **EXIT** | مخرج | الطريق للخروج من المبنى. |
+| **ادفع** | حرك الباب للأمام | ادفع الباب للأمام. |
+| **اسحب** | حرك الباب باتجاهك | اسحب الباب باتجاهك. |
+| **مفتوح** | جاهز لاستقبال الزبائن | المتجر جاهز لاستقبال الزبائن. |
+| **مغلق** | لا يعمل حالياً | المتجر لا يعمل حالياً. |
+| **مخرج** | طريق الخروج | الطريق للخروج من المبنى. |
 
-### 2. الرسائل النصية الرقمية (Digital Text Messages)
-في المستوى A1، تكون الرسائل قصيرة وتركز على "من، أين، ومتى".
+### 2. الرسائل النصية الرقمية
+في المستوى A1، تكون الرسائل قصيرة وتركز على المبتدأ والمكان والزمان.
 
 *محادثة تجريبية:*
 *   **الشخص أ:** "مرحباً! أين أنت؟"
 *   **الشخص ب:** "أنا في المقهى."
-*   **الشخص أ:** "أراك في الساعة 5:00 مساءً."
+*   **الشخص أ:** "أراك في الساعة الخامسة مساءً."
 
 **مفردات هامة:**
-*   **At**: تستخدم لتحديد الموقع (في / عند).
-*   **See you**: عبارة ختامية شائعة تعني (أراك لاحقاً).
+*   **في**: تستخدم لتحديد الموقع.
+*   **أراك لاحقاً**: عبارة ختامية شائعة.
 
-### 3. قراءة قائمة طعام بسيطة (Reading a Menu)
+### 3. قراءة قائمة طعام بسيطة
 تستخدم القوائم عادةً هيكل "الصنف — السعر".
 
-*   **Coffee** (قهوة) ............ $3.00
-*   **Tea** (شاي) ............... $2.00
+*   **قهوة** ............ $3.00
+*   **شاي** ............... $2.00
 
 > **قاعدة لغوية:** 
-> نستخدم فعل الكينونة **is** لوصف السعر:
-> *The coffee **is** $3.*
+> نستخدم فعل الكينونة لوصف السعر.
 `,
   exercises: [
     {

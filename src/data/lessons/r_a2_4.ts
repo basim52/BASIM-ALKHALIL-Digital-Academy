@@ -20,45 +20,41 @@ export const tradeTransactionsA2: Partial<Lesson> = {
     ]
   },
   content: `
-### 1. Reading a Receipt (قراءة الإيصال)
+### 1. Reading a Receipt
 A typical transaction document has headers you must know:
 
-*   **QTY (Quantity)**: How many items (الكمية).
-*   **Unit Price**: Cost for one item (سعر الوحدة).
-*   **Subtotal**: Price before tax (المجموع الفرعي).
-*   **VAT / Tax**: Government fees (الضريبة).
-*   **Total / Grand Total**: Final amount to pay (المجموع الكلي).
+*   **QTY (Quantity)**: How many items.
+*   **Unit Price**: Cost for one item.
+*   **Subtotal**: Price before tax.
+*   **VAT / Tax**: Government fees.
+*   **Total / Grand Total**: Final amount to pay.
 
-### 2. Shipping and Delivery Terms (مصطلحات الشحن)
+### 2. Shipping and Delivery Terms
 When shopping online, look for:
-*   **Standard Shipping**: 3-5 days (شحن عادي).
-*   **Express Shipping**: Next day (شحن سريع).
-*   **Tracking Number**: To follow your package (رقم التتبع).
+*   **Standard Shipping**: 3-5 days.
+*   **Express Shipping**: Next day.
+*   **Tracking Number**: To follow your package.
 
-> **Formula/Rule:**
-> **Quantity x Unit Price = Subtotal**
-> *2 [Qty] x $5 [Price] = $10 [Subtotal]*
-
-### 3. Refunds and Exchanges (الاسترجاع والتبديل)
+### 3. Refunds and Exchanges
 Important phrases in "Terms and Conditions":
 *   "No returns after 14 days."
 *   "Original receipt required."
-*   "Full **Refund**." (استرداد كامل للمال)
+*   "Full **Refund**."
 `,
   contentAr: `
-### 1. قراءة الإيصالات (Reading a Receipt)
-يحتوي مستند المعاملة المالية على رؤوس أعمدة هامة:
+### 1. قراءة الإيصالات
+يحتوي مستند المعاملة المالية على رؤوس أعمدة هامة يجب معرفتها:
 
-*   **QTY:** اختصار لـ Quantity وتعني الكمية.
-*   **Amount:** تعني القيمة أو المبلغ.
-*   **Change:** تعني "الفكة" أو المبلغ المتبقي المسترد بعد الدفع.
+*   **الكمية:** اختصار يرمز لعدد القطع المشتراة.
+*   **المبلغ:** تعني القيمة الإجمالية لكل صنف.
+*   **الباقي:** تعني المبلغ المتبقي المسترد لك بعد عملية الدفع النقدي.
 
-### 2. مصطلحات المعاملات التجارية (Trade Vocabulary)
-*   **Total:** هو المبلغ النهائي الذي يجب عليك دفعه.
-*   **Refund:** هو استرداد مالك إذا لم يعجبك المنتج.
-*   **Cashier:** هو الشخص المسؤول عن استلام المال.
+### 2. مصطلحات المعاملات التجارية
+*   **الإجمالي:** هو المبلغ النهائي الذي يجب عليك دفعه بعد إضافة الضرائب.
+*   **الاسترداد:** هو استرجاع مالك في حال قمت بإرجاع المنتج.
+*   **المحاسب:** هو الشخص المسؤول عن استلام المال وإتمام المعاملة.
 
-> **قاعدة مالية:** دائماً تأكد من كلمة **Total** في نهاية القائمة لتعرف التزامك المالي النهائي.
+> **قاعدة مالية:** دائماً تأكد من خانة الإجمالي في نهاية القائمة لتعرف التزامك المالي النهائي بدقة.
 `,
   exercises: [
     {
