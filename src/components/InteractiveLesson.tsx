@@ -114,7 +114,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
                 onClick={() => speak(isRtl ? lesson.titleAr || '' : lesson.title || '', isRtl ? 'ar' : 'en', 'title-audio')}
                 className={`w-8 h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all ${isPlayingId === 'title-audio' ? 'bg-amber-accent text-white scale-110 shadow-lg' : 'bg-white/10 text-cream hover:bg-amber-accent hover:scale-110'}`}
               >
-                {isPlayingId === 'title-audio' ? <Pause size={14} md:size={20} /> : <Volume2 size={14} md:size={20} />}
+                {isPlayingId === 'title-audio' ? <Pause size={20} /> : <Volume2 size={20} />}
               </button>
             </div>
           </div>
@@ -127,7 +127,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
               onClick={() => speak(isRtl ? lesson.warmup?.missionAr || '' : lesson.warmup?.mission || '', isRtl ? 'ar' : 'en', 'mission-audio')}
               className={`mt-1 hover:text-amber-accent transition-colors ${isPlayingId === 'mission-audio' ? 'text-amber-accent' : 'text-oxford-gold/40'}`}
             >
-              <Volume2 size={20} md:size={24} />
+              <Volume2 size={24} />
             </button>
           </div>
         </div>
@@ -150,7 +150,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
                 }`}
               >
                 <div className={`p-1.5 md:p-2 rounded-xl transition-colors ${activeTab === tab.id ? 'bg-amber-accent/10 text-amber-accent' : 'bg-transparent text-oxford-navy/40'}`}>
-                  {React.cloneElement(tab.icon as React.ReactElement, { size: 16 })}
+                  {React.cloneElement(tab.icon as React.ReactElement<{ size: number }>, { size: 16 })}
                 </div>
                 <span>{tab.label}</span>
                 {activeTab === tab.id && (
@@ -252,7 +252,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
               <div className="flex justify-between items-center bg-white p-4 md:p-6 rounded-[2rem] border border-ink/5 shadow-sm">
                 <div className="flex items-center gap-3 md:gap-4">
                   <div className="w-10 h-10 md:w-12 md:h-12 bg-oxford-navy text-white rounded-xl md:rounded-2xl flex items-center justify-center">
-                    <MessageCircle size={20} md:size={24} />
+                    <MessageCircle size={24} />
                   </div>
                   <div>
                     <h3 className="text-sm md:text-base font-serif font-black leading-tight">{isRtl ? 'استمع للشرح الأكاديمي' : 'Listen to Academic Explanation'}</h3>
@@ -265,7 +265,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
                   onClick={() => speak(isRtl ? lesson.contentAr || '' : lesson.content || '', isRtl ? 'ar' : 'en', 'explanation-audio')}
                   className={`w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center transition-all ${isPlayingId === 'explanation-audio' ? 'bg-amber-accent text-white scale-110 shadow-lg' : 'bg-oxford-navy text-white hover:bg-amber-accent'}`}
                 >
-                  {isPlayingId === 'explanation-audio' ? <Pause size={20} md:size={28} /> : <Volume2 size={20} md:size={28} />}
+                  {isPlayingId === 'explanation-audio' ? <Pause size={28} /> : <Volume2 size={28} />}
                 </button>
               </div>
 

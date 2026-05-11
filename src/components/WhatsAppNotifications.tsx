@@ -81,7 +81,7 @@ export const WhatsAppNotifications = ({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 md:mb-10 relative z-10 gap-4">
         <h3 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-3 md:gap-4">
           <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-500 text-white rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-            <MessageCircle size={20} md:size={24} />
+            <MessageCircle size={24} />
           </div>
           {t.reminders}
         </h3>

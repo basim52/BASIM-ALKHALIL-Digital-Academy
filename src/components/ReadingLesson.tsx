@@ -141,7 +141,7 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
                 onClick={() => speak(isRtl ? lesson.titleAr || '' : lesson.title || '', isRtl ? 'ar' : 'en', 'title-audio')}
                 className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all ${isPlaying === 'title-audio' ? 'bg-amber-accent text-white scale-110 shadow-lg' : 'bg-white/10 text-cream hover:bg-amber-accent hover:scale-110'}`}
               >
-                {isPlaying === 'title-audio' ? <Pause size={14} md:size={18} /> : <Volume2 size={14} md:size={18} />}
+                {isPlaying === 'title-audio' ? <Pause size={18} /> : <Volume2 size={18} />}
               </button>
             </div>
           </div>
@@ -177,7 +177,7 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
                 }`}
               >
                 <div className={`p-1 md:p-1.5 rounded-lg transition-colors ${activeTab === tab.id ? 'bg-amber-accent/10 text-amber-accent' : 'bg-transparent text-oxford-navy/40'}`}>
-                  {React.cloneElement(tab.icon as React.ReactElement, { size: 16 })}
+                  {React.cloneElement(tab.icon as React.ReactElement<{ size: number }>, { size: 16 })}
                 </div>
                 <span>{tab.label}</span>
                 {activeTab === tab.id && (
@@ -296,7 +296,7 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
                               onClick={() => speak(para.en, 'en', `para-en-${idx}`)}
                               className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all ${isPlaying === `para-en-${idx}` ? 'bg-amber-accent text-white' : 'bg-oxford-navy text-white hover:bg-amber-accent hover:scale-110'}`}
                             >
-                              {isPlaying === `para-en-${idx}` ? <Pause size={16} md:size={20} /> : <Volume2 size={16} md:size={20} />}
+                              {isPlaying === `para-en-${idx}` ? <Pause size={20} /> : <Volume2 size={20} />}
                             </button>
                           </div>
                           <div className="prose prose-slate max-w-none prose-p:text-lg md:prose-p:text-2xl prose-p:leading-[1.8] prose-p:font-roboto prose-p:font-medium prose-p:text-oxford-navy prose-strong:text-[#C49E3A] prose-table:border prose-table:border-slate-200 prose-th:bg-slate-50 prose-th:p-4 prose-td:p-4 prose-td:border prose-td:border-slate-100 overflow-x-auto custom-markdown-content font-roboto">
@@ -311,7 +311,7 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
                                 onClick={() => speak(para.ar, 'ar', `para-ar-${idx}`)}
                                 className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-tajawal font-bold text-xs md:text-sm transition-all ${isPlaying === `para-ar-${idx}` ? 'bg-oxford-gold text-oxford-navy' : 'text-oxford-navy/40 hover:text-oxford-gold hover:bg-oxford-gold/10'}`}
                               >
-                                {isPlaying === `para-ar-${idx}` ? <Pause size={12} md:size={14} /> : <Volume2 size={12} md:size={14} />}
+                                {isPlaying === `para-ar-${idx}` ? <Pause size={14} /> : <Volume2 size={14} />}
                                 {isRtl ? 'استمع للترجمة' : 'Listen to Arabic'}
                               </button>
                            </div>

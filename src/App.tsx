@@ -49,6 +49,158 @@ import { InteractiveLesson } from './components/InteractiveLesson';
 import { WhatsAppNotifications } from './components/WhatsAppNotifications';
 import { ReadingLesson } from './components/ReadingLesson';
 import ReactMarkdown from 'react-markdown';
+import { familyConstellationsLesson } from './data/lessons/r_a1_4';
+import { everydayInteractionLesson } from './data/lessons/r_a1_5';
+import { basicSentenceStructureA2 } from './data/lessons/r_a2_1';
+import { workplaceCultureA2 } from './data/lessons/r_a2_2';
+import { interrogativePatternsA2 } from './data/lessons/r_a2_3';
+import { tradeTransactionsA2 } from './data/lessons/r_a2_4';
+import { narrativeSequencesA2 } from './data/lessons/r_a2_5';
+import { subtextualInferenceB1 } from './data/lessons/r_b1_1';
+import { factVsOpinionB1 } from './data/lessons/r_b1_2';
+import { authorialIntentB1 } from './data/lessons/r_b1_3';
+import { culturalHeritageB1 } from './data/lessons/r_b1_4';
+import { mediaJournalismB1 } from './data/lessons/r_b1_5';
+import { rhetoricalStructuresB2 } from './data/lessons/r_b2_1';
+import { reportAuditsB2 } from './data/lessons/r_b2_2';
+import { criticalPerspectiveB2 } from './data/lessons/r_b2_3';
+import { environmentalDiscourseB2 } from './data/lessons/r_b2_4';
+import { persuasionTechniquesB2 } from './data/lessons/r_b2_5';
+import { academicAbstractsC1 } from './data/lessons/r_c1_1';
+import { legalContractualC1 } from './data/lessons/r_c1_2';
+import { philosophyReadingC1 } from './data/lessons/r_c1_3';
+import { socioPoliticalCritiqueC1 } from './data/lessons/r_c1_4';
+import { technicalInnovationC1 } from './data/lessons/r_c1_5';
+import { etymologicalExcavationC2 } from './data/lessons/r_c2_1';
+import { linguisticNuanceC2 } from './data/lessons/r_c2_2';
+import { crossDisciplinaryC2 } from './data/lessons/r_c2_3';
+import { strategicDiscursiveC2 } from './data/lessons/r_c2_4';
+import { archaicClassicalC2 } from './data/lessons/r_c2_5';
+import { partsOfSpeechA1 } from './data/lessons/g_a1_1';
+import { presentSimpleA1 } from './data/lessons/g_a1_2';
+import { singularPluralA1 } from './data/lessons/g_a1_3';
+import { articlesA1 } from './data/lessons/g_a1_4';
+import { wordOrderA1 } from './data/lessons/g_a1_5';
+import { presentPerfectB1 } from './data/lessons/g_b1_1';
+import { relativeClausesB1 } from './data/lessons/g_b1_2';
+import { passiveVoiceB1 } from './data/lessons/g_b1_3';
+import { conditionalsB1 } from './data/lessons/g_b1_4';
+import { modalsObligationB1 } from './data/lessons/g_b1_5';
+import { narrativeTensesB2 } from './data/lessons/g_b2_1';
+import { conditionalsB2 } from './data/lessons/g_b2_2';
+import { reportedSpeechB2 } from './data/lessons/g_b2_3';
+import { advancedPassiveB2 } from './data/lessons/g_b2_4';
+import { futureAdvancedB2 } from './data/lessons/g_b2_5';
+import { inversionC1 } from './data/lessons/g_c1_1';
+import { cleftSentencesC1 } from './data/lessons/g_c1_2';
+import { advancedGerundsC1 } from './data/lessons/g_c1_3';
+import { participleClausesC1 } from './data/lessons/g_c1_4';
+import { subjunctiveC1 } from './data/lessons/g_c1_5';
+import { stylisticInversionC2 } from './data/lessons/g_c2_1';
+import { complexConditionalsC2 } from './data/lessons/g_c2_2';
+import { perfectModalsC2 } from './data/lessons/g_c2_3';
+import { nominalizationC2 } from './data/lessons/g_c2_4';
+import { registerShiftC2 } from './data/lessons/g_c2_5';
+import { pastSimpleA2 } from './data/lessons/g_a2_1';
+import { futureSimpleA2 } from './data/lessons/g_a2_2';
+import { comparisonA2 } from './data/lessons/g_a2_3';
+import { presentContinuousA2 } from './data/lessons/g_a2_4';
+import { modalsA2 } from './data/lessons/g_a2_5';
+import { greetingsA1 } from './data/lessons/c_a1_1';
+import { familyHomeA1 } from './data/lessons/c_a1_2';
+import { orderingFoodA1 } from './data/lessons/c_a1_3';
+import { shoppingA1 } from './data/lessons/c_a1_4';
+import { routinesA1 } from './data/lessons/c_a1_5';
+import { makingPlansA2 } from './data/lessons/c_a2_1';
+import { describingPeopleA2 } from './data/lessons/c_a2_2';
+import { travelA2 } from './data/lessons/c_a2_3';
+import { healthFitnessA2 } from './data/lessons/c_a2_4';
+import { hobbiesA2 } from './data/lessons/c_a2_5';
+import { givingAdviceB1 } from './data/lessons/c_b1_1';
+import { expressingOpinionsB1 } from './data/lessons/c_b1_2';
+import { jobInterviewsB1 } from './data/lessons/c_b1_3';
+import { travelingExperiencesB1 } from './data/lessons/c_b1_4';
+import { dreamsAmbitionsB1 } from './data/lessons/c_b1_5';
+import { debatingTopicsB2 } from './data/lessons/c_b2_1';
+import { dealingProblemsB2 } from './data/lessons/c_b2_2';
+import { businessMeetingsB2 } from './data/lessons/c_b2_3';
+import { mediaNewsB2 } from './data/lessons/c_b2_4';
+import { culturalDifferencesB2 } from './data/lessons/c_b2_5';
+import { nuancedDiscussionsC1 } from './data/lessons/c_c1_1';
+import { persuasiveSpeakingC1 } from './data/lessons/c_c1_2';
+import { professionalPresentationsC1 } from './data/lessons/c_c1_3';
+import { problemSolvingC1 } from './data/lessons/c_c1_4';
+import { abstractConceptsC1 } from './data/lessons/c_c1_5';
+import { idiomaticPrecisionC2 } from './data/lessons/c_c2_1';
+import { ironyHumourC2 } from './data/lessons/c_c2_2';
+import { negotiationsC2 } from './data/lessons/c_c2_3';
+import { philosophicalInquiryC2 } from './data/lessons/c_c2_4';
+import { linguisticFlexibilityC2 } from './data/lessons/c_c2_5';
+import { alphabetA1 } from './data/lessons/w_a1_1';
+import { sentencesA1 } from './data/lessons/w_a1_2';
+import { punctuationA1 } from './data/lessons/w_a1_3';
+import { personalInfoA1 } from './data/lessons/w_a1_4';
+import { listsNotesA1 } from './data/lessons/w_a1_5';
+import { connectivesA2 } from './data/lessons/w_a2_1';
+import { describingDayA2 } from './data/lessons/w_a2_2';
+import { socialMediaA2 } from './data/lessons/w_a2_3';
+import { shortEmailsA2 } from './data/lessons/w_a2_4';
+import { describingPlacesA2 } from './data/lessons/w_a2_5';
+import { paragraphStructureB1 } from './data/lessons/w_b1_1';
+import { storytellingB1 } from './data/lessons/w_b1_2';
+import { persuasiveB1 } from './data/lessons/w_b1_3';
+import { formalEmailsB1 } from './data/lessons/w_b1_4';
+import { comparativeWritingB1 } from './data/lessons/w_b1_5';
+import { essayFoundationsB2 } from './data/lessons/w_b2_1';
+import { summaryWritingB2 } from './data/lessons/w_b2_2';
+import { transitionsB2 } from './data/lessons/w_b2_3';
+import { creativeNarrativeB2 } from './data/lessons/w_b2_4';
+import { reviewWritingB2 } from './data/lessons/w_b2_5';
+import { thesisDesignC1 } from './data/lessons/w_c1_1';
+import { nuanceStyleC1 } from './data/lessons/w_c1_2';
+import { professionalProposalsC1 } from './data/lessons/w_c1_3';
+import { criticalAnalysisC1 } from './data/lessons/w_c1_4';
+import { abstractConceptsWritingC1 } from './data/lessons/w_c1_5';
+import { stylisticMasteryC2 } from './data/lessons/w_c2_1';
+import { researchLogicC2 } from './data/lessons/w_c2_2';
+import { playfulnessC2 } from './data/lessons/w_c2_3';
+import { philosophicalDiscourseC2 } from './data/lessons/w_c2_4';
+import { syntacticPrecisionC2 } from './data/lessons/w_c2_5';
+
+import { phonemicA1 } from './data/lessons/r_a1_1';
+import { sightWordsA1 } from './data/lessons/r_a1_2';
+import { environmentalPrintA1 } from './data/lessons/r_a1_3';
+
+import { emotionsE1 } from './data/lessons/e_a1_1';
+import { familyFriendsE1 } from './data/lessons/e_a1_2';
+import { colorsArtE1 } from './data/lessons/e_a1_3';
+import { routineE1 } from './data/lessons/e_a1_4';
+import { likesDislikesE1 } from './data/lessons/e_a1_5';
+import { hobbiesE2 } from './data/lessons/e_a2_1';
+import { storytellingE2 } from './data/lessons/e_a2_2';
+import { directionsE2 } from './data/lessons/e_a2_3';
+import { describingPeopleE2 } from './data/lessons/e_a2_4';
+import { futureIntentionsE2 } from './data/lessons/e_a2_5';
+import { culturalExperiencesE1 } from './data/lessons/e_b1_1';
+import { opinionsE1 } from './data/lessons/e_b1_2';
+import { ambitionsE1 } from './data/lessons/e_b1_3';
+import { adviceE1 } from './data/lessons/e_b1_4';
+import { logicE1 } from './data/lessons/e_b1_5';
+import { abstractDebateE1 } from './data/lessons/e_b2_1';
+import { hypotheticalsE1 } from './data/lessons/e_b2_2';
+import { socialIssuesE1 } from './data/lessons/e_b2_3';
+import { mediaE1 } from './data/lessons/e_b2_4';
+import { environmentE1 } from './data/lessons/e_b2_5';
+import { ethicsE1 } from './data/lessons/e_c1_1';
+import { aestheticsE1 } from './data/lessons/e_c1_2';
+import { diplomacyE1 } from './data/lessons/e_c1_3';
+import { strategicThinkingE1 } from './data/lessons/e_c1_4';
+import { advocacyE1 } from './data/lessons/e_c1_5';
+import { strategicSovereigntyE1 } from './data/lessons/e_c2_1';
+import { macroeconomicAuditsE1 } from './data/lessons/e_c2_2';
+import { existentialInquiryE1 } from './data/lessons/e_c2_3';
+import { linguisticFluidityE1 } from './data/lessons/e_c2_4';
+import { aestheticSynthesisE1 } from './data/lessons/e_c2_5';
 
 type AppView = 'dashboard' | 'ai-chat' | 'placement-test' | 'curriculum' | 'lesson' | 'progress' | 'leaderboard' | 'chat';
 
@@ -1054,7 +1206,7 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
                           onClick={() => handleStartLesson(isRtl ? unit.titleAr : unit.title)}
                           className="flex-1 bg-emerald-50 text-emerald-600 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-xs md:text-sm flex items-center justify-center gap-3 hover:bg-emerald-600 hover:text-white transition-all group"
                         >
-                          <Play size={16} md:size={18} fill="currentColor" />
+                          <Play size={18} fill="currentColor" />
                           {isRtl ? 'بدء الدرس' : 'Start Lesson'}
                         </button>
                         <button
@@ -1071,12 +1223,12 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
                         >
                           {bookingStatus[unit.id] === 'success' ? (
                             <>
-                              <CheckCircle size={16} md:size={18} />
+                              <CheckCircle size={18} />
                               <span className="text-[10px] md:text-xs">{isRtl ? 'تم الحجز' : 'Booked'}</span>
                             </>
                           ) : (
                             <>
-                              <Calendar size={16} md:size={18} />
+                              <Calendar size={18} />
                               <span className="sm:hidden">{isRtl ? 'إضافة للجدول' : 'Add to Schedule'}</span>
                             </>
                           )}
@@ -1094,158 +1246,6 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
   );
 };
 
-import { familyConstellationsLesson } from './data/lessons/r_a1_4';
-import { everydayInteractionLesson } from './data/lessons/r_a1_5';
-import { basicSentenceStructureA2 } from './data/lessons/r_a2_1';
-import { workplaceCultureA2 } from './data/lessons/r_a2_2';
-import { interrogativePatternsA2 } from './data/lessons/r_a2_3';
-import { tradeTransactionsA2 } from './data/lessons/r_a2_4';
-import { narrativeSequencesA2 } from './data/lessons/r_a2_5';
-import { subtextualInferenceB1 } from './data/lessons/r_b1_1';
-import { factVsOpinionB1 } from './data/lessons/r_b1_2';
-import { authorialIntentB1 } from './data/lessons/r_b1_3';
-import { culturalHeritageB1 } from './data/lessons/r_b1_4';
-import { mediaJournalismB1 } from './data/lessons/r_b1_5';
-import { rhetoricalStructuresB2 } from './data/lessons/r_b2_1';
-import { reportAuditsB2 } from './data/lessons/r_b2_2';
-import { criticalPerspectiveB2 } from './data/lessons/r_b2_3';
-import { environmentalDiscourseB2 } from './data/lessons/r_b2_4';
-import { persuasionTechniquesB2 } from './data/lessons/r_b2_5';
-import { academicAbstractsC1 } from './data/lessons/r_c1_1';
-import { legalContractualC1 } from './data/lessons/r_c1_2';
-import { philosophyReadingC1 } from './data/lessons/r_c1_3';
-import { socioPoliticalCritiqueC1 } from './data/lessons/r_c1_4';
-import { technicalInnovationC1 } from './data/lessons/r_c1_5';
-import { etymologicalExcavationC2 } from './data/lessons/r_c2_1';
-import { linguisticNuanceC2 } from './data/lessons/r_c2_2';
-import { crossDisciplinaryC2 } from './data/lessons/r_c2_3';
-import { strategicDiscursiveC2 } from './data/lessons/r_c2_4';
-import { archaicClassicalC2 } from './data/lessons/r_c2_5';
-import { partsOfSpeechA1 } from './data/lessons/g_a1_1';
-import { presentSimpleA1 } from './data/lessons/g_a1_2';
-import { singularPluralA1 } from './data/lessons/g_a1_3';
-import { articlesA1 } from './data/lessons/g_a1_4';
-import { wordOrderA1 } from './data/lessons/g_a1_5';
-import { presentPerfectB1 } from './data/lessons/g_b1_1';
-import { relativeClausesB1 } from './data/lessons/g_b1_2';
-import { passiveVoiceB1 } from './data/lessons/g_b1_3';
-import { conditionalsB1 } from './data/lessons/g_b1_4';
-import { modalsObligationB1 } from './data/lessons/g_b1_5';
-import { narrativeTensesB2 } from './data/lessons/g_b2_1';
-import { conditionalsB2 } from './data/lessons/g_b2_2';
-import { reportedSpeechB2 } from './data/lessons/g_b2_3';
-import { advancedPassiveB2 } from './data/lessons/g_b2_4';
-import { futureAdvancedB2 } from './data/lessons/g_b2_5';
-import { inversionC1 } from './data/lessons/g_c1_1';
-import { cleftSentencesC1 } from './data/lessons/g_c1_2';
-import { advancedGerundsC1 } from './data/lessons/g_c1_3';
-import { participleClausesC1 } from './data/lessons/g_c1_4';
-import { subjunctiveC1 } from './data/lessons/g_c1_5';
-import { stylisticInversionC2 } from './data/lessons/g_c2_1';
-import { complexConditionalsC2 } from './data/lessons/g_c2_2';
-import { perfectModalsC2 } from './data/lessons/g_c2_3';
-import { nominalizationC2 } from './data/lessons/g_c2_4';
-import { registerShiftC2 } from './data/lessons/g_c2_5';
-import { pastSimpleA2 } from './data/lessons/g_a2_1';
-import { futureSimpleA2 } from './data/lessons/g_a2_2';
-import { comparisonA2 } from './data/lessons/g_a2_3';
-import { presentContinuousA2 } from './data/lessons/g_a2_4';
-import { modalsA2 } from './data/lessons/g_a2_5';
-import { greetingsA1 } from './data/lessons/c_a1_1';
-import { familyHomeA1 } from './data/lessons/c_a1_2';
-import { orderingFoodA1 } from './data/lessons/c_a1_3';
-import { shoppingA1 } from './data/lessons/c_a1_4';
-import { routinesA1 } from './data/lessons/c_a1_5';
-import { makingPlansA2 } from './data/lessons/c_a2_1';
-import { describingPeopleA2 } from './data/lessons/c_a2_2';
-import { travelA2 } from './data/lessons/c_a2_3';
-import { healthFitnessA2 } from './data/lessons/c_a2_4';
-import { hobbiesA2 } from './data/lessons/c_a2_5';
-import { givingAdviceB1 } from './data/lessons/c_b1_1';
-import { expressingOpinionsB1 } from './data/lessons/c_b1_2';
-import { jobInterviewsB1 } from './data/lessons/c_b1_3';
-import { travelingExperiencesB1 } from './data/lessons/c_b1_4';
-import { dreamsAmbitionsB1 } from './data/lessons/c_b1_5';
-import { debatingTopicsB2 } from './data/lessons/c_b2_1';
-import { dealingProblemsB2 } from './data/lessons/c_b2_2';
-import { businessMeetingsB2 } from './data/lessons/c_b2_3';
-import { mediaNewsB2 } from './data/lessons/c_b2_4';
-import { culturalDifferencesB2 } from './data/lessons/c_b2_5';
-import { nuancedDiscussionsC1 } from './data/lessons/c_c1_1';
-import { persuasiveSpeakingC1 } from './data/lessons/c_c1_2';
-import { professionalPresentationsC1 } from './data/lessons/c_c1_3';
-import { problemSolvingC1 } from './data/lessons/c_c1_4';
-import { abstractConceptsC1 } from './data/lessons/c_c1_5';
-import { idiomaticPrecisionC2 } from './data/lessons/c_c2_1';
-import { ironyHumourC2 } from './data/lessons/c_c2_2';
-import { negotiationsC2 } from './data/lessons/c_c2_3';
-import { philosophicalInquiryC2 } from './data/lessons/c_c2_4';
-import { linguisticFlexibilityC2 } from './data/lessons/c_c2_5';
-import { alphabetA1 } from './data/lessons/w_a1_1';
-import { sentencesA1 } from './data/lessons/w_a1_2';
-import { punctuationA1 } from './data/lessons/w_a1_3';
-import { personalInfoA1 } from './data/lessons/w_a1_4';
-import { listsNotesA1 } from './data/lessons/w_a1_5';
-import { connectivesA2 } from './data/lessons/w_a2_1';
-import { describingDayA2 } from './data/lessons/w_a2_2';
-import { socialMediaA2 } from './data/lessons/w_a2_3';
-import { shortEmailsA2 } from './data/lessons/w_a2_4';
-import { describingPlacesA2 } from './data/lessons/w_a2_5';
-import { paragraphStructureB1 } from './data/lessons/w_b1_1';
-import { storytellingB1 } from './data/lessons/w_b1_2';
-import { persuasiveB1 } from './data/lessons/w_b1_3';
-import { formalEmailsB1 } from './data/lessons/w_b1_4';
-import { comparativeWritingB1 } from './data/lessons/w_b1_5';
-import { essayFoundationsB2 } from './data/lessons/w_b2_1';
-import { summaryWritingB2 } from './data/lessons/w_b2_2';
-import { transitionsB2 } from './data/lessons/w_b2_3';
-import { creativeNarrativeB2 } from './data/lessons/w_b2_4';
-import { reviewWritingB2 } from './data/lessons/w_b2_5';
-import { thesisDesignC1 } from './data/lessons/w_c1_1';
-import { nuanceStyleC1 } from './data/lessons/w_c1_2';
-import { professionalProposalsC1 } from './data/lessons/w_c1_3';
-import { criticalAnalysisC1 } from './data/lessons/w_c1_4';
-import { abstractConceptsWritingC1 } from './data/lessons/w_c1_5';
-import { stylisticMasteryC2 } from './data/lessons/w_c2_1';
-import { researchLogicC2 } from './data/lessons/w_c2_2';
-import { playfulnessC2 } from './data/lessons/w_c2_3';
-import { philosophicalDiscourseC2 } from './data/lessons/w_c2_4';
-import { syntacticPrecisionC2 } from './data/lessons/w_c2_5';
-
-import { phonemicA1 } from './data/lessons/r_a1_1';
-import { sightWordsA1 } from './data/lessons/r_a1_2';
-import { environmentalPrintA1 } from './data/lessons/r_a1_3';
-
-import { emotionsE1 } from './data/lessons/e_a1_1';
-import { familyFriendsE1 } from './data/lessons/e_a1_2';
-import { colorsArtE1 } from './data/lessons/e_a1_3';
-import { routineE1 } from './data/lessons/e_a1_4';
-import { likesDislikesE1 } from './data/lessons/e_a1_5';
-import { hobbiesE2 } from './data/lessons/e_a2_1';
-import { storytellingE2 } from './data/lessons/e_a2_2';
-import { directionsE2 } from './data/lessons/e_a2_3';
-import { describingPeopleE2 } from './data/lessons/e_a2_4';
-import { futureIntentionsE2 } from './data/lessons/e_a2_5';
-import { culturalExperiencesE1 } from './data/lessons/e_b1_1';
-import { opinionsE1 } from './data/lessons/e_b1_2';
-import { ambitionsE1 } from './data/lessons/e_b1_3';
-import { adviceE1 } from './data/lessons/e_b1_4';
-import { logicE1 } from './data/lessons/e_b1_5';
-import { abstractDebateE1 } from './data/lessons/e_b2_1';
-import { hypotheticalsE1 } from './data/lessons/e_b2_2';
-import { socialIssuesE1 } from './data/lessons/e_b2_3';
-import { mediaE1 } from './data/lessons/e_b2_4';
-import { environmentE1 } from './data/lessons/e_b2_5';
-import { ethicsE1 } from './data/lessons/e_c1_1';
-import { aestheticsE1 } from './data/lessons/e_c1_2';
-import { diplomacyE1 } from './data/lessons/e_c1_3';
-import { strategicThinkingE1 } from './data/lessons/e_c1_4';
-import { advocacyE1 } from './data/lessons/e_c1_5';
-import { strategicSovereigntyE1 } from './data/lessons/e_c2_1';
-import { macroeconomicAuditsE1 } from './data/lessons/e_c2_2';
-import { existentialInquiryE1 } from './data/lessons/e_c2_3';
-import { linguisticFluidityE1 } from './data/lessons/e_c2_4';
-import { aestheticSynthesisE1 } from './data/lessons/e_c2_5';
 
 const LessonPlayer = ({ lang, lesson, onBack, onComplete, category, level }: { lang: Language, lesson: Lesson, onBack: () => void, onComplete: () => void, category?: CurriculumCategory, level?: proficiencyLevel }) => {
   const isRtl = lang === 'ar';
