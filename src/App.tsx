@@ -724,57 +724,92 @@ const RoleSelector = ({ onSelect, lang }: { onSelect: (role: UserRole) => void, 
 const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfile }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
-  const [studentId, setStudentId] = useState('');
-  const [studentData, setStudentData] = useState<any>(null);
+  const [studentIdInput, setStudentIdInput] = useState('');
+  const [linkedStudents, setLinkedStudents] = useState<any[]>([]);
+  const [selectedStudentIndex, setSelectedStudentIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [linking, setLinking] = useState(false);
+  const [showAddStudent, setShowAddStudent] = useState(false);
 
   useEffect(() => {
-    const fetchStudentData = async () => {
-      // For this demo, we check if the parent already has linked children
-      // In a real app, this would be an array in the user's profile
+    const fetchStudentsData = async () => {
       const userDoc = await getDoc(doc(db, 'users', profile.uid));
       const userData = userDoc.data() as any;
       
-      if (userData?.linkedStudentId) {
-        try {
-          const sDoc = await getDoc(doc(db, 'users', userData.linkedStudentId));
-          const sMeta = await getDoc(doc(db, 'students', userData.linkedStudentId));
-          if (sDoc.exists() && sMeta.exists()) {
-            setStudentData({ 
-              ...sDoc.data(), 
-              ...sMeta.data(), 
-              phoneNumber: userData.phoneNumber, 
-              studentPhoneNumber: userData.studentPhoneNumber 
-            });
+      const studentIds: string[] = [];
+      if (userData?.linkedStudentIds && Array.isArray(userData.linkedStudentIds)) {
+        studentIds.push(...userData.linkedStudentIds);
+      } else if (userData?.linkedStudentId) {
+        // Migration: convert single ID to array
+        studentIds.push(userData.linkedStudentId);
+      }
+
+      if (studentIds.length > 0) {
+        const students = await Promise.all(studentIds.map(async (id) => {
+          try {
+            const sDoc = await getDoc(doc(db, 'users', id));
+            const sMeta = await getDoc(doc(db, 'students', id));
+            if (sDoc.exists() && sMeta.exists()) {
+              return { 
+                ...sDoc.data(), 
+                ...sMeta.data(), 
+                phoneNumber: userData.phoneNumber, 
+                studentPhoneNumber: userData.studentPhoneNumber 
+              };
+            }
+          } catch (err) {
+            console.error(`Error fetching student ${id}:`, err);
           }
-        } catch (err) {
-          console.error("Error fetching student:", err);
+          return null;
+        }));
+        
+        const validStudents = students.filter(s => s !== null);
+        setLinkedStudents(validStudents);
+        if (validStudents.length > 0) {
+          setSelectedStudentIndex(0);
         }
       }
       setLoading(false);
     };
-    fetchStudentData();
+    fetchStudentsData();
   }, [profile.uid]);
 
   const handleLink = async () => {
-    if (!studentId.trim()) return;
+    if (!studentIdInput.trim()) return;
     setLinking(true);
     setError('');
     try {
-      const sDoc = await getDoc(doc(db, 'users', studentId));
+      const sDoc = await getDoc(doc(db, 'users', studentIdInput));
       if (sDoc.exists() && sDoc.data().role === UserRole.STUDENT) {
-        await setDoc(doc(db, 'users', profile.uid), { linkedStudentId: studentId }, { merge: true });
-        const pDoc = await getDoc(doc(db, 'users', profile.uid));
-        const pData = pDoc.data();
-        const sMeta = await getDoc(doc(db, 'students', studentId));
-        setStudentData({ 
+        const userDoc = await getDoc(doc(db, 'users', profile.uid));
+        const userData = userDoc.data() as any;
+        const currentIds = userData?.linkedStudentIds || (userData?.linkedStudentId ? [userData.linkedStudentId] : []);
+        
+        if (currentIds.includes(studentIdInput)) {
+          setError(isRtl ? 'هذا الطالب مربوط بالفعل.' : 'This student is already linked.');
+          setLinking(false);
+          return;
+        }
+
+        const nextIds = [...currentIds, studentIdInput];
+        await setDoc(doc(db, 'users', profile.uid), { 
+          linkedStudentIds: nextIds,
+          linkedStudentId: nextIds[0] // Backward compatibility
+        }, { merge: true });
+        
+        const sMeta = await getDoc(doc(db, 'students', studentIdInput));
+        const newStudent = { 
           ...sDoc.data(), 
           ...sMeta.data(), 
-          phoneNumber: pData?.phoneNumber, 
-          studentPhoneNumber: pData?.studentPhoneNumber 
-        });
+          phoneNumber: userData?.phoneNumber, 
+          studentPhoneNumber: userData?.studentPhoneNumber 
+        };
+
+        setLinkedStudents(prev => [...prev, newStudent]);
+        setSelectedStudentIndex(linkedStudents.length);
+        setStudentIdInput('');
+        setShowAddStudent(false);
       } else {
         setError(t.invalidStudentId);
       }
@@ -784,15 +819,45 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
     setLinking(false);
   };
 
+  const handleDelete = async (id: string, index: number) => {
+    if (!confirm(t.confirmDeleteStudent)) return;
+    
+    try {
+      const userDoc = await getDoc(doc(db, 'users', profile.uid));
+      const userData = userDoc.data() as any;
+      const nextIds = (userData?.linkedStudentIds || []).filter((sid: string) => sid !== id);
+      
+      await setDoc(doc(db, 'users', profile.uid), { 
+        linkedStudentIds: nextIds,
+        linkedStudentId: nextIds.length > 0 ? nextIds[0] : null
+      }, { merge: true });
+
+      const nextStudents = linkedStudents.filter((_, i) => i !== index);
+      setLinkedStudents(nextStudents);
+      
+      if (nextStudents.length === 0) {
+        setSelectedStudentIndex(null);
+      } else if (selectedStudentIndex === index) {
+        setSelectedStudentIndex(0);
+      } else if (selectedStudentIndex !== null && selectedStudentIndex > index) {
+        setSelectedStudentIndex(selectedStudentIndex - 1);
+      }
+    } catch (err) {
+      console.error("Error deleting student link:", err);
+    }
+  };
+
   const handleUpdatePhone = async (type: 'parent' | 'student', phone: string) => {
     try {
       const field = type === 'parent' ? 'phoneNumber' : 'studentPhoneNumber';
       await setDoc(doc(db, 'users', profile.uid), { [field]: phone }, { merge: true });
-      setStudentData((prev: any) => ({ ...prev, [field]: phone }));
+      setLinkedStudents(prev => prev.map((s, i) => i === selectedStudentIndex ? { ...s, [field]: phone } : s));
     } catch (err) {
       console.error("Error updating phone:", err);
     }
   };
+
+  const currentStudent = selectedStudentIndex !== null ? linkedStudents[selectedStudentIndex] : null;
 
   if (loading) return (
     <div className="p-20 text-center">
@@ -801,7 +866,7 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
     </div>
   );
 
-  if (!studentData) {
+  if (linkedStudents.length === 0 || showAddStudent) {
     return (
       <div className={`p-8 max-w-2xl mx-auto w-full ${isRtl ? 'font-arabic' : ''}`} dir={isRtl ? 'rtl' : 'ltr'}>
         <motion.div 
@@ -809,6 +874,14 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-[2.5rem] p-10 shadow-xl border border-slate-100 text-center"
         >
+          {linkedStudents.length > 0 && (
+            <button 
+              onClick={() => setShowAddStudent(false)}
+              className="absolute top-6 right-6 text-slate-400 hover:text-[#002147] transition-colors"
+            >
+              ×
+            </button>
+          )}
           <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-8">
             <Users size={40} />
           </div>
@@ -818,8 +891,8 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
           <div className="space-y-4">
             <input 
               type="text" 
-              value={studentId}
-              onChange={(e) => setStudentId(e.target.value)}
+              value={studentIdInput}
+              onChange={(e) => setStudentIdInput(e.target.value)}
               placeholder={t.studentIdPlaceholder}
               className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 focus:outline-none focus:border-[#002147] transition-all font-mono"
             />
@@ -843,20 +916,58 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
     );
   }
 
+  if (!currentStudent) return null;
+
   return (
     <div className={`p-4 md:p-8 max-w-7xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      <header className={`mb-8 md:mb-12 border-b border-slate-200 pb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 ${isRtl ? 'text-right' : 'text-left'}`}>
+      <header className={`mb-8 md:mb-12 border-b border-slate-200 pb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 ${isRtl ? 'text-right' : 'text-left'}`}>
         <div>
           <h2 className="text-2xl md:text-3xl font-bold text-[#002147]">{t.parentPortal}</h2>
           <p className="text-slate-400 italic mt-2 text-sm md:text-base">{t.trackProgress}</p>
         </div>
-        <div className={`flex items-center gap-3 bg-white p-3 rounded-2xl shadow-sm border border-slate-100 ${!isRtl ? 'flex-row-reverse' : ''} w-full md:w-auto`}>
-          <div className={isRtl ? 'text-right' : 'text-left'}>
-            <h4 className="text-sm font-bold text-[#002147]">{studentData.displayName}</h4>
-            <span className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">{t.registeredStudent}</span>
-          </div>
-          <div className="w-12 h-12 rounded-xl bg-blue-50 overflow-hidden flex items-center justify-center text-2xl border border-blue-100 shadow-inner">
-            <img src={studentData.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${studentData.displayName}`} alt="student" />
+        
+        <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
+          <div className="flex -space-x-2 rtl:space-x-reverse items-center overflow-x-auto pb-2 md:pb-0 scrollbar-hide py-1 px-1">
+            {linkedStudents.map((student, idx) => (
+              <div key={student.uid} className="relative group flex-shrink-0">
+                <button
+                  onClick={() => setSelectedStudentIndex(idx)}
+                  className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl border-4 transition-all duration-300 overflow-hidden relative ${
+                    selectedStudentIndex === idx 
+                      ? 'border-[#C49E3A] scale-110 shadow-lg z-10' 
+                      : 'border-white hover:border-slate-200 z-0 opacity-60 hover:opacity-100'
+                  }`}
+                >
+                  <img src={student.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${student.displayName}`} alt={student.displayName} className="w-full h-full object-cover" />
+                </button>
+                {selectedStudentIndex === idx && (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(student.uid, idx);
+                    }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-20 hover:bg-red-600"
+                    title={t.deleteStudent}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                )}
+                {/* Name Label on Hover */}
+                <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-[#002147] text-white text-[10px] py-1 px-2 rounded font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-30">
+                  {student.displayName}
+                </span>
+              </div>
+            ))}
+            <button 
+              onClick={() => setShowAddStudent(true)}
+              className="w-12 h-12 md:w-14 md:h-14 rounded-2xl border-2 border-dashed border-slate-300 text-slate-400 hover:text-blue-600 hover:border-blue-600 flex items-center justify-center transition-all flex-shrink-0 ml-4 group relative"
+              title={t.addAnotherStudent}
+            >
+              <Plus size={24} />
+              <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] py-1 px-2 rounded font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-30">
+                {t.addAnotherStudent}
+              </span>
+            </button>
           </div>
         </div>
       </header>
@@ -864,9 +975,9 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
         {[
           { label: t.attendance, value: '98%', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: t.gradeAverage, value: studentData.level || 'A-', icon: GraduationCap, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: t.gradeAverage, value: currentStudent.level || 'A-', icon: GraduationCap, color: 'text-emerald-600', bg: 'bg-emerald-50' },
           { label: t.completedAssignments, value: '12/15', icon: CheckCircle2, color: 'text-purple-600', bg: 'bg-purple-50' },
-          { label: t.speakingHours, value: studentData.points > 0 ? (studentData.points / 10).toFixed(1) : '1.2', icon: Mic2, color: 'text-[#C49E3A]', bg: 'bg-orange-50' },
+          { label: t.speakingHours, value: currentStudent.points > 0 ? (currentStudent.points / 10).toFixed(1) : '1.2', icon: Mic2, color: 'text-[#C49E3A]', bg: 'bg-orange-50' },
         ].map((stat, i) => (
           <div key={i} className={`bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex items-center gap-6 ${isRtl ? 'flex-row-reverse' : ''} relative overflow-hidden group`}>
             <div className={`${stat.bg} ${stat.color} p-4 rounded-2xl shrink-0 group-hover:scale-110 transition-transform`}>
@@ -912,11 +1023,11 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
         <section className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 flex flex-col">
           <h3 className={`text-xl font-bold text-[#002147] mb-10 ${lang === 'ar' ? 'text-right' : 'text-left'} flex items-center gap-3 ${lang === 'ar' ? 'flex-row-reverse' : ''}`}>
              <LayoutDashboard className="text-[#C49E3A]" />
-             <span className={`flex-1 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>{lang === 'ar' ? `نشاط ${studentData.displayName} الأخير` : `Recent activity of ${studentData.displayName}`}</span>
+             <span className={`flex-1 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>{lang === 'ar' ? `نشاط ${currentStudent.displayName} الأخير` : `Recent activity of ${currentStudent.displayName}`}</span>
           </h3>
           <div className={`space-y-8 ${lang === 'ar' ? 'text-right' : 'text-left'} flex-1`}>
             {[
-              { textAr: 'أكمل اختبار تحديد المستوى وحصل على نتيجة ' + (studentData.level || 'B1'), textEn: 'Completed placement test and reached result ' + (studentData.level || 'B1'), timeAr: 'منذ ساعتين', timeEn: '2 hours ago', icon: CheckCircle2, iconColor: 'text-emerald-500' },
+              { textAr: 'أكمل اختبار تحديد المستوى وحصل على نتيجة ' + (currentStudent.level || 'B1'), textEn: 'Completed placement test and reached result ' + (currentStudent.level || 'B1'), timeAr: 'منذ ساعتين', timeEn: '2 hours ago', icon: CheckCircle2, iconColor: 'text-emerald-500' },
               { textAr: 'تحدث مع "شريك المحادثة" لمدة 15 دقيقة (موضوع: الهوايات)', textEn: 'Talked with AI Partner for 15 minutes (Topic: Hobbies)', timeAr: 'صباح اليوم', timeEn: 'This morning', icon: Mic2, iconColor: 'text-blue-500' },
               { textAr: 'تم تصحيح واجب "مقال الرحلات" - الدرجة 9/10', textEn: 'Graded Essay "Trips" - Score 9/10', timeAr: 'أمس', timeEn: 'Yesterday', icon: BookOpen, iconColor: 'text-[#C49E3A]' },
             ].map((activity, i) => (
@@ -935,7 +1046,7 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
             className="w-full mt-10 p-4 border border-dashed border-slate-200 rounded-xl text-[10px] font-mono text-slate-400 break-all select-all text-center"
             title="Student Code"
           >
-            {studentData.uid}
+            {currentStudent.uid}
           </button>
         </section>
       </div>
@@ -944,20 +1055,20 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
         <div className="lg:col-span-1">
           <WhatsAppNotifications 
             lang={lang}
-            studentId={studentData.uid}
-            studentName={studentData.displayName}
-            parentPhone={studentData.phoneNumber}
-            studentPhone={studentData.studentPhoneNumber}
+            studentId={currentStudent.uid}
+            studentName={currentStudent.displayName}
+            parentPhone={currentStudent.phoneNumber}
+            studentPhone={currentStudent.studentPhoneNumber}
             onUpdatePhone={handleUpdatePhone}
           />
         </div>
         <div className="lg:col-span-1">
-          <ScheduleManager studentId={studentData.uid} lang={lang} canEdit={true} />
+          <ScheduleManager studentId={currentStudent.uid} lang={lang} canEdit={true} />
         </div>
       </div>
       
       <div className="mb-10">
-        <AIParentNotes profile={profile} studentId={studentData.uid} lang={lang} />
+        <AIParentNotes profile={profile} studentId={currentStudent.uid} lang={lang} />
       </div>
     </div>
   );
