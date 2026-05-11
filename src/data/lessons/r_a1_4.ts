@@ -1,107 +1,48 @@
 
 import { Lesson, proficiencyLevel } from "../../types";
 
-export const familyConstellationsLesson: Partial<Lesson> = {
+export const familyConstellationsLesson: Lesson = {
+  id: 'r_a1_4',
   title: "Family Constellations",
   titleAr: "تشكيلات العائلة",
-  proficiencyLevel: proficiencyLevel.A1,
   warmup: {
     mission: "Identify primary family members and understand basic kinship vocabulary in English.",
     missionAr: "التعرف على أفراد الأسرة الأساسيين وفهم مفردات القرابة البسيطة باللغة الإنجليزية.",
     objectives: [
-      "Memorize 10 basic family keywords (Father, Mother, Brother, etc.).",
-      "Use possessive adjectives (My, Your) with family terms.",
-      "Read a simple family tree narrative."
+      "Memorize basic family keywords (Father, Mother, Brother, Sister).",
+      "Understand the difference between Nuclear and Extended family.",
+      "Read simple descriptions of family relationships."
     ],
     objectivesAr: [
-      "حفظ 10 كلمات أساسية عن العائلة (أب، أم، أخ، إلخ).",
-      "استخدام صفات الملكية (My, Your) مع مصطلحات العائلة.",
-      "قراءة نص بسيط يصف شجرة العائلة."
+      "حفظ الكلمات الأساسية عن العائلة (أب، أم، أخ، أخت).",
+      "فهم الفرق بين العائلة الصغيرة والعائلة الممتدة.",
+      "قراءة أوصاف بسيطة لعلاقات العائلة."
     ]
   },
-  content: `
-### 1. Nuclear Family
-The "Nuclear Family" consists of the people living in your home.
-
-*   **Father / Dad**: Male parent.
-*   **Mother / Mom**: Female parent.
-*   **Brother**: Male sibling.
-*   **Sister**: Female sibling.
-
-> **Grammar Rule:** 
-> Use possessive adjectives before family members. 
-> *My father* | *Your sister*
-
-### 2. Extended Family
-These are relatives who live outside your immediate house.
-
-| Term | Meaning | Example |
-| :--- | :--- | :--- |
-| Grandfather | Parent's father | My grandfather is 70 years old. |
-| Grandmother | Parent's mother | I love my grandmother's food. |
-| Uncle | Parent's brother | My uncle lives in London. |
-| Aunt | Parent's sister | My aunt is very kind. |
-| Cousin | Aunt's or Uncle's child | I play with my cousin. |
-
-### 3. Sentence Patterns
-When we talk about family, we use the verb **'to be'** or **'to have'**.
-
-1.  "This **is** my brother."
-2.  "I **have** two sisters."
-3.  "My father **is** tall."
-`,
-  contentAr: `
-### 1. العائلة الصغيرة
-تتكون "العائلة الصغيرة" من الأشخاص الذين يعيشون معك في المنزل.
-
-*   **الأب**: "أبي معلم."
-*   **الأم**: "أمي طبيبة."
-*   **الأخ**: "لدي أخ واحد."
-*   **الأخت**: "أختي أصغر مني."
-
-> **قاعدة ذهبية:** 
-> نستخدم صيفة الملكية قبل فرد العائلة للدلالة على القرابة.
-> مثال: والدي، أختك.
-
-### 2. العائلة الممتدة
-هؤلاء هم الأقارب الذين يعيشون خارج منزلك المباشر.
-
-| المصطلح | المعنى | مثال |
-| :--- | :--- | :--- |
-| الجد | والد الأب أو الأم | جدي يبلغ من العمر 70 عاماً. |
-| الجدة | والدة الأب أو الأم | أحب طعام جدتي. |
-| العم أو الخال | أخو الأب أو الأم | خالي يعيش في لندن. |
-| العمة أو الخالة | أخت الأب أو الأم | عمتي طيبة جداً. |
-| ابن العم أو الخال | طفل العم أو الخال | ألعب مع ابن عمي. |
-
-### 3. أنماط الجمل
-عندما نتحدث عن العائلة، نستخدم أفعال الكينونة أو التملك.
-
-1.  "هذا أخي."
-2.  "لدي أختان."
-3.  "أبي طويل القامة."
-`,
-  exercises: [
+  readingText: {
+    paragraphs: [
+      {
+        en: 'A nuclear family is usually small. It has a father, a mother, and their children. In many homes, brothers and sisters play together and help each other. My father is a teacher and my mother is a doctor.',
+        ar: 'العائلة الصغيرة عادة ما تكون صغيرة. تتكون من أب وأم وأطفالهم. في العديد من المنازل، يلعب الإخوة والأخوات معاً ويساعدون بعضهم البعض. والدي معلم وأمي طبيبة.'
+      },
+      {
+        en: 'An extended family includes more relatives. Your grandfather and grandmother are your parents\' parents. You might also have uncles, aunts, and cousins. It is wonderful to have a big family!',
+        ar: 'العائلة الممتدة تشمل أقارب أكثر. جدك وجدتك هما والدا والديك. قد يكون لديك أيضاً أعمام وعمات وأبناء عمومة. من الرائع أن يكون لديك عائلة كبيرة!'
+      }
+    ]
+  },
+  vocabulary: [
     {
-      type: 'fill',
-      instruction: 'Complete the sentences with: Father, Sister, Daughter.',
-      instructionAr: 'أكمل الجمل باستخدام: Father, Sister, Daughter.',
-      items: [
-        { text: "My _______ is my mother's husband.", textAr: "أبي هو زوج أمي." },
-        { text: "My _______ is my parents' girl child.", textAr: "ابنتي هي طفلة والديّ." },
-        { text: "My _______ is my father's other daughter.", textAr: "أختي هي ابنة أبي الأخرى." }
-      ]
+      word: 'Relative',
+      phonetic: 'ˈrelətɪv',
+      meaningAr: 'قريب (من العائلة)',
+      example: 'I have many relatives in Cairo.'
     },
     {
-      type: 'match',
-      instruction: 'Match the opposite genders.',
-      instructionAr: 'صل بين الجنسين المتقابلين.',
-      items: [
-        { text: "Father", answer: "Mother" },
-        { text: "Brother", answer: "Sister" },
-        { text: "Uncle", answer: "Aunt" },
-        { text: "Son", answer: "Daughter" }
-      ]
+      word: 'Sibling',
+      phonetic: 'ˈsɪblɪŋ',
+      meaningAr: 'شقيق (أخ أو أخت)',
+      example: 'Do you have any siblings?'
     }
   ],
   quiz: [
@@ -115,13 +56,13 @@ When we talk about family, we use the verb **'to be'** or **'to have'**.
       explanationAr: "أخت أمك هي خالتك (Aunt)."
     },
     {
-      question: "Choose the correct sentence:",
-      questionAr: "اختر الجملة الصحيحة:",
-      options: ["I have one sister.", "I has one sister.", "I is one sister.", "I am one sister."],
-      optionsAr: ["لدي أخت واحدة.", "أنا لديه أخت واحدة (خطأ نحوي).", "أنا يكون أخت واحدة (خطأ نحوي).", "أنا أخت واحدة (خطأ سياقي)."],
-      correctIndex: 0,
-      explanation: "With 'I', we use 'have' for possession.",
-      explanationAr: "مع الضمير 'I'، نستخدم الفعل 'have' للتعبير عن الملكية."
+      question: "What does 'Nuclear Family' mean?",
+      questionAr: "ماذا تعني 'Nuclear Family'؟",
+      options: ["A very large family", "Parents and children only", "Friends who live together", "People at work"],
+      optionsAr: ["عائلة كبيرة جداً", "الوالدان والأطفال فقط", "أصدقاء يعيشون معاً", "أشخاص في العمل"],
+      correctIndex: 1,
+      explanation: "A nuclear family consists of parents and their children.",
+      explanationAr: "تتكون العائلة الصغيرة من الوالدين وأطفالهم فقط."
     }
   ]
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Play, Pause, ChevronDown, Check, X, ArrowRight, Timer, Award, MessageCircle, BookOpen, PenTool, HelpCircle } from 'lucide-react';
+import { Play, Pause, ChevronDown, Check, X, ArrowRight, Timer, Award, MessageCircle, BookOpen, PenTool, HelpCircle, Volume2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Lesson } from '../types';
 
@@ -12,46 +12,38 @@ interface InteractiveLessonProps {
 
 export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, isRtl, onFinish }) => {
   const [activeTab, setActiveTab] = useState<'warmup' | 'explanation' | 'exercises' | 'quiz'>('warmup');
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlayingId, setIsPlayingId] = useState<string | null>(null);
   const [playbackProgress, setPlaybackProgress] = useState(0);
-  const [progress, setProgress] = useState(0);
   const [score, setScore] = useState(0);
 
-  const toggleAudio = () => {
-    if (isPlaying) {
-      window.speechSynthesis.cancel();
-      setIsPlaying(false);
-      setPlaybackProgress(0);
-    } else {
-      const textToRead = isRtl 
-        ? `${lesson.titleAr}. ${lesson.warmup?.missionAr || ''}` 
-        : `${lesson.title}. ${lesson.warmup?.mission || ''}`;
-      
-      const utterance = new SpeechSynthesisUtterance(textToRead);
-      utterance.lang = isRtl ? 'ar-SA' : 'en-US';
-      utterance.rate = 0.9; // Slightly slower for A1 learners
-      
-      utterance.onend = () => {
-        setIsPlaying(false);
-        setPlaybackProgress(100);
-      };
+  const synthesis = typeof window !== 'undefined' ? window.speechSynthesis : null;
 
-      // Mock progress handling
-      let startTime = Date.now();
-      const estimatedDuration = textToRead.length * 80; // Rough estimate in ms
-      const progressInterval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const currentProgress = Math.min((elapsed / estimatedDuration) * 100, 99);
-        if (!window.speechSynthesis.speaking) {
-          clearInterval(progressInterval);
-        } else {
-          setPlaybackProgress(currentProgress);
-        }
-      }, 100);
-
-      window.speechSynthesis.speak(utterance);
-      setIsPlaying(true);
+  const stopSpeaking = () => {
+    if (synthesis) {
+      synthesis.cancel();
+      setIsPlayingId(null);
     }
+  };
+
+  const speak = (text: string, lang: 'en' | 'ar', id: string) => {
+    if (!synthesis) return;
+
+    if (isPlayingId === id) {
+      stopSpeaking();
+      return;
+    }
+
+    stopSpeaking();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang === 'en' ? 'en-US' : 'ar-SA';
+    utterance.rate = 0.9;
+    
+    utterance.onend = () => {
+      setIsPlayingId(null);
+    };
+
+    setIsPlayingId(id);
+    synthesis.speak(utterance);
   };
 
   useEffect(() => {
@@ -97,70 +89,70 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
   
   return (
     <div className={`min-h-screen bg-cream text-ink font-sans selection:bg-amber-accent/20 ${isRtl ? 'rtl' : 'ltr'}`}>
-      {/* Header */}
-      <header className="pt-12 pb-6 px-4 md:px-8 max-w-5xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-          <div>
-            <div className="flex flex-wrap gap-2 mb-4">
-              <span className="bg-amber-accent/10 text-amber-accent px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-accent/20">
-                {isRtl ? 'المستوى' : 'Level'} {lesson.proficiencyLevel || 'B1'}
-              </span>
-              <span className="bg-ink/5 text-ink/60 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
-                {isRtl ? '١٥ دقيقة' : '15 min read'}
-              </span>
-            </div>
-            <h1 className="text-4xl md:text-6xl font-serif font-black leading-tight tracking-tight max-w-3xl">
+      {/* Premium Header - Matching ReadingLesson Style */}
+      <header className="bg-oxford-navy text-cream pt-16 pb-24 px-4 md:px-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-accent/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="max-w-5xl mx-auto relative z-10">
+          <div className="flex flex-wrap gap-2 mb-6">
+            <span className="bg-oxford-gold text-oxford-navy px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest leading-none">
+              {isRtl ? 'المنهج الأكاديمي' : 'Academic Curriculum'}
+            </span>
+            <span className="bg-white/10 text-cream/80 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest leading-none border border-white/10">
+              {lesson.proficiencyLevel || 'A1'}
+            </span>
+            <span className="bg-white/10 text-cream/80 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest leading-none border border-white/10">
+              {isRtl ? '٢٠ دقيقة' : '20 min lesson'}
+            </span>
+          </div>
+          
+          <div className="flex flex-col md:flex-row md:items-center gap-6 mb-4">
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-serif font-black leading-tight tracking-tight">
               {isRtl ? lesson.titleAr : lesson.title}
             </h1>
-          </div>
-          <div className="hidden lg:block">
-            <div className="w-24 h-24 rounded-full border-4 border-amber-accent/20 flex items-center justify-center relative">
-              <span className="font-mono text-2xl font-black text-amber-accent">
-                {score}/{lesson.quiz?.length || 0}
-              </span>
-              <Award className="absolute -bottom-2 -right-2 text-amber-accent bg-cream p-1 rounded-full border border-amber-accent/20" size={24} />
+            <div className="flex gap-2">
+              <button 
+                onClick={() => speak(isRtl ? lesson.titleAr || '' : lesson.title || '', isRtl ? 'ar' : 'en', 'title-audio')}
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${isPlayingId === 'title-audio' ? 'bg-amber-accent text-white scale-110 shadow-lg' : 'bg-white/10 text-cream hover:bg-amber-accent hover:scale-110'}`}
+              >
+                {isPlayingId === 'title-audio' ? <Pause size={20} /> : <Volume2 size={20} />}
+              </button>
             </div>
+          </div>
+          
+          <div className="flex items-start gap-4">
+            <p className="text-oxford-gold/80 font-medium text-lg md:text-xl max-w-2xl font-tajawal leading-relaxed">
+              {isRtl ? lesson.warmup?.missionAr : lesson.warmup?.mission}
+            </p>
+            <button 
+              onClick={() => speak(isRtl ? lesson.warmup?.missionAr || '' : lesson.warmup?.mission || '', isRtl ? 'ar' : 'en', 'mission-audio')}
+              className={`mt-1 hover:text-amber-accent transition-colors ${isPlayingId === 'mission-audio' ? 'text-amber-accent' : 'text-oxford-gold/40'}`}
+            >
+              <Volume2 size={24} />
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Sticky Progress & Timer */}
-      <div className="sticky top-0 z-50 bg-cream/80 backdrop-blur-xl border-b border-ink/5">
-        <div className="max-w-5xl mx-auto px-4 md:px-8 py-4 flex items-center gap-6">
-          <button 
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="w-10 h-10 rounded-full bg-ink text-cream flex items-center justify-center hover:bg-amber-accent transition-colors shadow-lg"
-          >
-            {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} className={isRtl ? "rotate-180" : ""} fill="currentColor" />}
-          </button>
-          <div className="flex-1 h-3 bg-ink/10 rounded-full overflow-hidden relative">
-            <motion.div 
-              className="absolute inset-y-0 left-0 bg-amber-accent h-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${playbackProgress}%` }}
-              transition={{ duration: 0.5 }}
-            />
-          </div>
-          <div className="font-mono text-lg font-black tabular-nums tracking-tighter text-ink/40">
-            {Math.floor(playbackProgress)}%
-          </div>
-        </div>
-
-        {/* Tabs Bar */}
-        <div className="max-w-5xl mx-auto px-4 md:px-8 overflow-x-auto">
-          <div className="flex gap-1 py-1">
+      {/* Main Content Area - Overlapping Container */}
+      <div className="max-w-5xl mx-auto -mt-12 mb-24 px-4 md:px-8 relative z-20">
+        <div className="bg-white rounded-[2.5rem] shadow-[0_30px_60px_rgba(26,18,9,0.08)] border border-oxford-navy/5 overflow-hidden">
+          
+          {/* Custom Tabs Bar */}
+          <div className="flex border-b border-oxford-navy/5 overflow-x-auto no-scrollbar bg-[#fcfdfd]">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-t-2xl transition-all relative font-black text-xs uppercase tracking-widest whitespace-nowrap ${
+                className={`flex-1 min-w-[140px] flex items-center justify-center gap-3 py-6 px-4 transition-all relative font-black text-[10px] uppercase tracking-[0.15em] ${
                   activeTab === tab.id 
-                    ? 'bg-cream text-amber-accent' 
-                    : 'text-ink/40 hover:text-ink/80 hover:bg-ink/5'
+                    ? 'text-amber-accent bg-white' 
+                    : 'text-oxford-navy/40 hover:text-oxford-navy/80 hover:bg-white/50'
                 }`}
               >
-                {tab.icon}
-                {tab.label}
+                <div className={`p-2 rounded-xl transition-colors ${activeTab === tab.id ? 'bg-amber-accent/10 text-amber-accent' : 'bg-transparent text-oxford-navy/40'}`}>
+                  {tab.icon}
+                </div>
+                <span>{tab.label}</span>
                 {activeTab === tab.id && (
                   <motion.div 
                     layoutId="activeTabUnderline"
@@ -170,11 +162,8 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
               </button>
             ))}
           </div>
-        </div>
-      </div>
 
-      {/* Main Content Area */}
-      <main className="max-w-5xl mx-auto px-4 md:px-8 py-12 pb-32">
+          <div className="p-8 md:p-14 lg:p-20 min-h-[600px]">
         <AnimatePresence mode="wait">
           {activeTab === 'warmup' && (
             <motion.section 
@@ -199,37 +188,42 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
                 {/* Audio Player UI */}
                 <div className="mt-8 flex items-center gap-4 bg-white/10 p-4 rounded-2xl border border-white/10 backdrop-blur-sm">
                   <button 
-                    onClick={toggleAudio}
+                    onClick={() => speak(isRtl ? lesson.warmup?.missionAr || '' : lesson.warmup?.mission || '', isRtl ? 'ar' : 'en', 'mission')}
                     className="w-12 h-12 rounded-xl bg-amber-accent flex items-center justify-center text-white hover:scale-105 transition-transform"
                   >
-                    {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
+                    {isPlayingId === 'mission' ? <Pause size={20} /> : <Volume2 size={20} />}
                   </button>
                   <div className="flex-1">
-                    <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-amber-accent transition-all duration-300" 
-                        style={{ width: `${playbackProgress}%` }}
-                      />
-                    </div>
-                    <div className="flex justify-between mt-2 text-[10px] font-black uppercase tracking-widest text-cream/40">
-                      <span>{isPlaying ? 'Playing...' : '0:00'}</span>
-                      <span>{isRtl ? 'استمع للمقدمة العلمية' : 'Listen to Academic Intro'}</span>
-                      <span>{isRtl ? 'صوت ذكاء اصطناعي' : 'AI Voice'}</span>
-                    </div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-cream/40 mb-1">
+                      {isRtl ? 'استمع للمهمة العلمية' : 'Listen to Academic Mission'}
+                    </p>
+                    <p className="text-xs text-oxford-gold font-bold">
+                      {isRtl ? 'صوت ذكاء اصطناعي لتعزيز النطق' : 'AI Voice for pronunciation'}
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="grid md:grid-cols-3 gap-6">
                 {(isRtl ? (lesson.warmup?.objectivesAr || []) : (lesson.warmup?.objectives || [])).map((obj, i) => (
-                  <div key={i} className="bg-white/50 border border-ink/5 p-8 rounded-3xl hover:border-amber-accent/30 transition-all group">
-                    <div className="w-12 h-12 bg-cream border border-ink/5 rounded-2xl flex items-center justify-center text-amber-accent mb-6 font-mono text-xl font-black group-hover:scale-110 transition-transform">
-                      0{i+1}
+                  <div key={i} className="bg-white/50 border border-ink/5 p-8 rounded-3xl hover:border-amber-accent/30 transition-all group flex flex-col justify-between">
+                    <div>
+                      <div className="flex justify-between items-start mb-6">
+                        <div className="w-12 h-12 bg-cream border border-ink/5 rounded-2xl flex items-center justify-center text-amber-accent font-mono text-xl font-black group-hover:scale-110 transition-transform">
+                          0{i+1}
+                        </div>
+                        <button 
+                          onClick={() => speak(obj, isRtl ? 'ar' : 'en', `obj-${i}`)}
+                          className={`p-2 rounded-lg transition-colors ${isPlayingId === `obj-${i}` ? 'bg-amber-accent text-white' : 'text-ink/10 hover:text-amber-accent hover:bg-amber-accent/10'}`}
+                        >
+                          <Volume2 size={16} />
+                        </button>
+                      </div>
+                      <h3 className="text-xl font-bold mb-4 font-serif">{isRtl ? `الهدف رقم ${i+1}` : `Objective 0${i+1}`}</h3>
+                      <p className="text-ink/60 leading-relaxed">
+                        {obj}
+                      </p>
                     </div>
-                    <h3 className="text-xl font-bold mb-4 font-serif">{isRtl ? `الهدف رقم ${i+1}` : `Objective 0${i+1}`}</h3>
-                    <p className="text-ink/60 leading-relaxed">
-                      {obj}
-                    </p>
                   </div>
                 ))}
                 {(!lesson.warmup?.objectives) && [1, 2, 3].map(i => (
@@ -255,12 +249,33 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
               exit={{ opacity: 0, y: -20 }}
               className="space-y-8"
             >
-              <div className="markdown-body prose prose-lg max-w-none 
+              <div className="flex justify-between items-center bg-white p-6 rounded-[2rem] border border-ink/5 shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-oxford-navy text-white rounded-2xl flex items-center justify-center">
+                    <MessageCircle size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-serif font-black">{isRtl ? 'استمع للشرح الأكاديمي' : 'Listen to Academic Explanation'}</h3>
+                    <p className="text-xs text-oxford-navy/40 font-black uppercase tracking-widest leading-none mt-1">
+                      {isRtl ? 'صوت ذكاء اصطناعي' : 'AI Voice Assistance'}
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => speak(isRtl ? lesson.contentAr || '' : lesson.content || '', isRtl ? 'ar' : 'en', 'explanation-audio')}
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${isPlayingId === 'explanation-audio' ? 'bg-amber-accent text-white scale-110 shadow-lg' : 'bg-oxford-navy text-white hover:bg-amber-accent'}`}
+                >
+                  {isPlayingId === 'explanation-audio' ? <Pause size={28} /> : <Volume2 size={28} />}
+                </button>
+              </div>
+
+              <div className={`markdown-body prose prose-lg max-w-none 
                 prose-headings:font-serif prose-headings:font-black prose-headings:text-ink
                 prose-p:text-ink/70 prose-p:leading-relaxed
                 prose-strong:text-amber-accent prose-strong:font-black
                 prose-blockquote:border-l-4 prose-blockquote:border-amber-accent prose-blockquote:bg-amber-accent/5 prose-blockquote:py-2 prose-blockquote:rounded-r-2xl
-              ">
+                ${isRtl ? 'font-tajawal' : 'font-roboto'}
+              `}>
                 <ReactMarkdown>{isRtl ? lesson.contentAr || '' : lesson.content || ''}</ReactMarkdown>
               </div>
             </motion.section>
@@ -464,16 +479,9 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
             </motion.section>
           )}
         </AnimatePresence>
-      </main>
-
-      {/* Quick Navigation Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 p-6 pointer-events-none z-40 bg-gradient-to-t from-cream via-cream/80 to-transparent">
-        <div className="max-w-5xl mx-auto flex justify-end pointer-events-auto">
-          <button className="bg-ink text-cream w-16 h-16 rounded-full shadow-2xl hover:bg-amber-accent transition-all flex items-center justify-center group">
-            <MessageCircle className="group-hover:scale-110 transition-transform" />
-          </button>
-        </div>
-      </footer>
+      </div>
     </div>
+  </div>
+</div>
   );
 };

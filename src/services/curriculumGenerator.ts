@@ -135,41 +135,56 @@ export async function generateLessonContent(
     Output JSON STRICTLY following the schema.
   `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: lessonSchema as any
-      }
-    });
+  let lastError: any = null;
+  const maxRetries = 2;
 
-    const text = response.text;
-    if (!text) throw new Error("Empty response from AI");
-    
-    const data = extractJson(text);
-    
-    if (!data) {
-      console.warn("AI returned invalid JSON structure, using fallback");
-      return fallbackLesson(topic, level);
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: lessonSchema as any
+        }
+      });
+
+      const text = response.text;
+      if (!text) throw new Error("Empty response from AI");
+      
+      const data = extractJson(text);
+      
+      if (!data) {
+        console.warn("AI returned invalid JSON structure, using fallback");
+        return fallbackLesson(topic, level);
+      }
+      
+      return {
+        title: data.title || topic,
+        titleAr: data.titleAr || topic,
+        warmup: data.warmup,
+        content: data.content || "Lesson content loading...",
+        contentAr: data.contentAr || "جاري تحميل محتوى الدرس...",
+        imageryPrompt: data.imageryPrompt || topic,
+        exercises: data.exercises,
+        quiz: Array.isArray(data.quiz) ? data.quiz : (data.quiz ? [data.quiz] : []),
+        proficiencyLevel: level
+      };
+    } catch (error: any) {
+      lastError = error;
+      console.error(`Lesson Generation attempt ${attempt + 1} failed:`, error);
+      
+      // If it's a 503 or 429, wait before retrying
+      if (attempt < maxRetries && (error.message?.includes('503') || error.message?.includes('429') || error.status === 503)) {
+        await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)));
+        continue;
+      }
+      break; 
     }
-    
-    return {
-      title: data.title || topic,
-      titleAr: data.titleAr || topic,
-      warmup: data.warmup,
-      content: data.content || "Lesson content loading...",
-      contentAr: data.contentAr || "جاري تحميل محتوى الدرس...",
-      imageryPrompt: data.imageryPrompt || topic,
-      exercises: data.exercises,
-      quiz: Array.isArray(data.quiz) ? data.quiz : (data.quiz ? [data.quiz] : []),
-      proficiencyLevel: level
-    };
-  } catch (error) {
-    console.error("Deep Lesson Generation Failed:", error);
-    return fallbackLesson(topic, level);
   }
+
+  console.error("Deep Lesson Generation Final Failure:", lastError);
+  return fallbackLesson(topic, level);
 }
 
 function fallbackLesson(topic: string, level: string): Partial<Lesson> {

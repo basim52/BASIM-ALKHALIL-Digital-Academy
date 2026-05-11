@@ -45,6 +45,8 @@ import { Leaderboard } from './components/Leaderboard';
 import { PeerChat } from './components/PeerChat';
 import { generateLessonContent, generateCurriculumUnits } from './services/curriculumGenerator';
 import { InteractiveLesson } from './components/InteractiveLesson';
+import { WhatsAppNotifications } from './components/WhatsAppNotifications';
+import { ReadingLesson } from './components/ReadingLesson';
 import ReactMarkdown from 'react-markdown';
 
 type AppView = 'dashboard' | 'ai-chat' | 'placement-test' | 'curriculum' | 'lesson' | 'progress' | 'leaderboard' | 'chat';
@@ -269,7 +271,7 @@ const AIParentNotes = ({ profile, studentId, lang }: { profile: UserProfile, stu
   };
 
   return (
-    <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col h-full">
+    <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col">
       <h3 className="text-xl font-bold text-[#002147] mb-8 flex items-center gap-3">
         <MessageSquare className="text-blue-600" />
         {t.notes}
@@ -590,7 +592,12 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
           const sDoc = await getDoc(doc(db, 'users', userData.linkedStudentId));
           const sMeta = await getDoc(doc(db, 'students', userData.linkedStudentId));
           if (sDoc.exists() && sMeta.exists()) {
-            setStudentData({ ...sDoc.data(), ...sMeta.data() });
+            setStudentData({ 
+              ...sDoc.data(), 
+              ...sMeta.data(), 
+              phoneNumber: userData.phoneNumber, 
+              studentPhoneNumber: userData.studentPhoneNumber 
+            });
           }
         } catch (err) {
           console.error("Error fetching student:", err);
@@ -609,8 +616,15 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
       const sDoc = await getDoc(doc(db, 'users', studentId));
       if (sDoc.exists() && sDoc.data().role === UserRole.STUDENT) {
         await setDoc(doc(db, 'users', profile.uid), { linkedStudentId: studentId }, { merge: true });
+        const pDoc = await getDoc(doc(db, 'users', profile.uid));
+        const pData = pDoc.data();
         const sMeta = await getDoc(doc(db, 'students', studentId));
-        setStudentData({ ...sDoc.data(), ...sMeta.data() });
+        setStudentData({ 
+          ...sDoc.data(), 
+          ...sMeta.data(), 
+          phoneNumber: pData?.phoneNumber, 
+          studentPhoneNumber: pData?.studentPhoneNumber 
+        });
       } else {
         setError(t.invalidStudentId);
       }
@@ -618,6 +632,16 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
       setError(t.invalidStudentId);
     }
     setLinking(false);
+  };
+
+  const handleUpdatePhone = async (type: 'parent' | 'student', phone: string) => {
+    try {
+      const field = type === 'parent' ? 'phoneNumber' : 'studentPhoneNumber';
+      await setDoc(doc(db, 'users', profile.uid), { [field]: phone }, { merge: true });
+      setStudentData((prev: any) => ({ ...prev, [field]: phone }));
+    } catch (err) {
+      console.error("Error updating phone:", err);
+    }
   };
 
   if (loading) return (
@@ -766,19 +790,30 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
         </section>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10">
+        <div className="lg:col-span-1">
+          <WhatsAppNotifications 
+            lang={lang}
+            studentId={studentData.uid}
+            studentName={studentData.displayName}
+            parentPhone={studentData.phoneNumber}
+            studentPhone={studentData.studentPhoneNumber}
+            onUpdatePhone={handleUpdatePhone}
+          />
+        </div>
         <div className="lg:col-span-1">
           <ScheduleManager studentId={studentData.uid} lang={lang} canEdit={true} />
         </div>
-        <div className="lg:col-span-2">
-          <AIParentNotes profile={profile} studentId={studentData.uid} lang={lang} />
-        </div>
+      </div>
+      
+      <div className="mb-10">
+        <AIParentNotes profile={profile} studentId={studentData.uid} lang={lang} />
       </div>
     </div>
   );
 };
 
-const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId }: { lang: Language, onSelectLesson: (lesson: Lesson) => void, onBack: () => void, studentId: string }) => {
+const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, seedCurriculum }: { lang: Language, onSelectLesson: (lesson: Lesson, category: CurriculumCategory, level: proficiencyLevel) => void, onBack: () => void, studentId: string, profile: UserProfile, seedCurriculum: () => void }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [selectedCategory, setSelectedCategory] = useState<CurriculumCategory | null>(null);
@@ -786,7 +821,7 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId }: { lang: 
   const [units, setUnits] = useState<{ id: string, title: string, titleAr: string, description: string, descriptionAr: string }[]>([]);
   const [loadingUnits, setLoadingUnits] = useState(false);
   const [generatingLesson, setGeneratingLesson] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<React.ReactNode | null>(null);
 
   const categories = [
     { id: CurriculumCategory.READING, label: t.curr_reading, icon: BookOpen, color: 'bg-blue-50 text-blue-600' },
@@ -832,10 +867,20 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId }: { lang: 
         order: 1,
         ...lessonData
       } as Lesson;
-      onSelectLesson(fullLesson);
+      onSelectLesson(fullLesson, selectedCategory, selectedLevel);
     } catch (err) {
       console.error("Lesson generation failed:", err);
-      setError(isRtl ? 'حدث خطأ أثناء تصميم الدرس. يرجى المحاولة مرة أخرى.' : 'Error generating lesson. Please try again.');
+      setError(
+        <div className="flex flex-col items-center gap-4">
+          <p>{isRtl ? 'حدث خطأ أثناء تصميم الدرس. يرجى المحاولة مرة أخرى.' : 'Error generating lesson. Please try again.'}</p>
+          <button 
+            onClick={() => handleStartLesson(topic)}
+            className="px-6 py-2 bg-amber-accent text-white rounded-xl font-bold hover:shadow-lg transition-all"
+          >
+            {isRtl ? 'إعادة المحاولة' : 'Retry Now'}
+          </button>
+        </div>
+      );
     } finally {
       setGeneratingLesson(false);
     }
@@ -911,9 +956,20 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId }: { lang: 
             <ChevronRight className={isRtl ? '' : 'rotate-180'} />
             <span className="font-bold text-sm uppercase tracking-widest">{selectedCategory ? t.backToCurriculum : t.goToDashboard}</span>
           </button>
-          <div className="text-right">
-            <h1 className="text-4xl font-black text-[#002147] mb-2">{t.curriculum}</h1>
-            <p className="text-slate-400 font-medium text-sm">{t.learningProgress}</p>
+          <div className="flex items-center gap-4">
+            {profile.role === UserRole.ADMIN && (
+               <button 
+                onClick={seedCurriculum}
+                className="px-6 py-3 bg-red-50 text-red-600 rounded-2xl font-black text-xs hover:bg-red-600 hover:text-white transition-all flex items-center gap-2"
+              >
+                <Sparkles size={16} />
+                {lang === 'ar' ? 'مزامنة المنهج' : 'Sync Curriculum'}
+              </button>
+            )}
+            <div className="text-right">
+              <h1 className="text-4xl font-black text-[#002147] mb-2">{t.curriculum}</h1>
+              <p className="text-slate-400 font-medium text-sm">{t.learningProgress}</p>
+            </div>
           </div>
         </div>
 
@@ -1182,7 +1238,7 @@ import { existentialInquiryE1 } from './data/lessons/e_c2_3';
 import { linguisticFluidityE1 } from './data/lessons/e_c2_4';
 import { aestheticSynthesisE1 } from './data/lessons/e_c2_5';
 
-const LessonPlayer = ({ lang, lesson, onBack, onComplete }: { lang: Language, lesson: Lesson, onBack: () => void, onComplete: () => void }) => {
+const LessonPlayer = ({ lang, lesson, onBack, onComplete, category, level }: { lang: Language, lesson: Lesson, onBack: () => void, onComplete: () => void, category?: CurriculumCategory, level?: proficiencyLevel }) => {
   const isRtl = lang === 'ar';
   const [fullLesson, setFullLesson] = useState<Lesson | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -1354,12 +1410,26 @@ const LessonPlayer = ({ lang, lesson, onBack, onComplete }: { lang: Language, le
         return;
       }
 
+      // Determine properties from lesson or fallback
+      const getCategoryFromId = (id?: string) => {
+        if (!id) return CurriculumCategory.READING;
+        if (id.startsWith('r_')) return CurriculumCategory.READING;
+        if (id.startsWith('g_')) return CurriculumCategory.GRAMMAR;
+        if (id.startsWith('c_')) return CurriculumCategory.CONVERSATION;
+        if (id.startsWith('w_')) return CurriculumCategory.WRITING;
+        if (id.startsWith('e_')) return CurriculumCategory.EXPRESSION;
+        return CurriculumCategory.READING;
+      };
+
+      const effectiveCategory = category || getCategoryFromId(lesson.id);
+      const effectiveLevel = level || lesson.proficiencyLevel || proficiencyLevel.A1;
+
       // Otherwise generate
       setGenerating(true);
       try {
         const generated = await generateLessonContent(
-          CurriculumCategory.READING,
-          lesson.proficiencyLevel || proficiencyLevel.A1,
+          effectiveCategory,
+          effectiveLevel,
           lesson.title,
           lang
         );
@@ -1388,6 +1458,16 @@ const LessonPlayer = ({ lang, lesson, onBack, onComplete }: { lang: Language, le
   }
 
   if (!fullLesson) return null;
+
+  if (fullLesson.moduleId?.startsWith('mod_r') || fullLesson.id?.startsWith('r_')) {
+    return (
+      <ReadingLesson 
+        lesson={fullLesson} 
+        isRtl={isRtl} 
+        onFinish={(score) => onComplete()} 
+      />
+    );
+  }
 
   return (
     <InteractiveLesson 
@@ -1445,6 +1525,16 @@ export default function App() {
   const seedCurriculum = async () => {
     const initialMods: LearningModule[] = [
       { 
+        id: 'mod_r_a1', 
+        category: CurriculumCategory.READING,
+        title: 'Foundations of Reading', 
+        titleAr: 'أسس القراءة', 
+        description: 'Phonemic awareness and basic decoding skills.',
+        descriptionAr: 'الوعي الصوتي ومهارات فك الرموز الأساسية.',
+        level: proficiencyLevel.A1,
+        order: 0
+      },
+      { 
         id: 'mod_1', 
         category: CurriculumCategory.CONVERSATION,
         title: 'Foundations of Modern Communication', 
@@ -1470,55 +1560,44 @@ export default function App() {
       await setDoc(doc(db, 'modules', m.id), m);
     }
     
+    // Import the reading lessons we defined
+    // Since we are in App.tsx, we can't easily import them all if they are many
+    // But we can define them here or use a helper
     const initialLessons: Lesson[] = [
+      phonemicA1 as Lesson,
+      sightWordsA1 as Lesson,
+      environmentalPrintA1 as Lesson,
+      familyConstellationsLesson as Lesson,
+      everydayInteractionLesson as Lesson,
       {
         id: 'les_1',
         moduleId: 'mod_1',
         title: 'The Art of Greeting',
         titleAr: 'فن التحية والترحيب',
         order: 1,
-        content: 'Greetings are the gateway to any relationship. In this lesson, we explore how cultural nuances affect our first words...',
-        contentAr: 'التحيات هي بوابة أي علاقة. في هذا الدرس، نستكشف كيف تؤثر الفروق الثقافية على كلماتنا الأولى...',
-        imageryPrompt: 'A warm, professional business greeting in a modern minimalist office lounge, 8k resolution, cinematic lighting.',
+        content: 'Greetings are the gateway to any relationship...',
+        contentAr: 'التحيات هي بوابة أي علاقة...',
         quiz: [
           {
-            question: "What is considered the 'gateway' to a relationship in this lesson?",
-            questionAr: "ما الذي يعتبر 'بوابة' العلاقة في هذا الدرس؟",
-            options: ["Formal contracts", "Greetings", "Direct eye contact", "Long silence"],
-            optionsAr: ["العقود الرسمية", "التحيات", "التواصل المباشر بالعين", "الصمت الطويل"],
+            question: "What is the gateway?",
+            questionAr: "ما هي البوابة؟",
+            options: ["Formal contracts", "Greetings"],
+            optionsAr: ["العقود", "التحيات"],
             correctIndex: 1,
-            explanation: "Greetings are the first bridge built between people.",
-            explanationAr: "التحيات هي الجسر الأول الذي يبنى بين الناس."
-          }
-        ]
-      },
-      {
-        id: 'les_2',
-        moduleId: 'mod_1',
-        title: 'Professional Identity',
-        titleAr: 'الهوية المهنية',
-        order: 2,
-        content: 'Defining yourself in a global market requires clarity and confidence. Learn to synthesize your skills into a concise introduction.',
-        contentAr: 'تعريف نفسك في سوق عالمي يتطلب وضوحاً وثقة. تعلم كيف تجمع مهاراتك في مقدمة موجزة.',
-        imageryPrompt: 'An abstract visualization of a professional identity and career path, glowing digital connections, sleek architectural style.',
-        quiz: [
-          {
-            question: "What two qualities are essential for defining yourself globally?",
-            questionAr: "ما هما الصفتان الأساسيتان لتعريف نفسك عالمياً؟",
-            options: ["Speed and Volume", "Clarity and Confidence", "Mystery and Style", "Age and Location"],
-            optionsAr: ["السرعة والصوت العالي", "الوضوح والثقة", "الغموض والأناقة", "العمر والموقع"],
-            correctIndex: 1,
-            explanation: "Clarity ensures people understand your value, while confidence builds trust.",
-            explanationAr: "الوضوح يضمن فهم الناس لقيمتك، بينما الثقة تبني الروابط."
+            explanation: "Greetings are the first bridge.",
+            explanationAr: "التحيات هي الجسر الأول."
           }
         ]
       }
     ];
 
     for (const l of initialLessons) {
-      await setDoc(doc(db, 'lessons', l.id), l);
+      if (l.id) {
+        await setDoc(doc(db, 'lessons', l.id), l);
+      }
     }
     fetchCurriculum();
+    alert('Curriculum seeded successfully!');
   };
 
   const startLesson = async (lessonId: string | null) => {
@@ -1692,18 +1771,31 @@ export default function App() {
     if (view === 'curriculum') {
       return <CurriculumBrowser 
         lang={lang} 
-        onSelectLesson={(lesson) => { setActiveLesson(lesson); setView('lesson'); }}
+        onSelectLesson={(lesson, category, level) => { 
+          setActiveLesson({ ...lesson }); 
+          // We could keep track of selectedCategory/Level in App if needed
+          setView('lesson'); 
+        }}
         onBack={() => setView('dashboard')}
         studentId={userProfile.uid}
+        profile={userProfile}
+        seedCurriculum={seedCurriculum}
       />;
     }
 
     if (view === 'lesson' && activeLesson) {
+      // Determine category from ID prefix if possible
+      const cat = activeLesson.id?.startsWith('r_') ? CurriculumCategory.READING : 
+                  activeLesson.id?.startsWith('g_') ? CurriculumCategory.GRAMMAR : 
+                  CurriculumCategory.GRAMMAR;
+      
       return <LessonPlayer 
         lang={lang} 
         lesson={activeLesson} 
         onBack={() => setView('curriculum')}
         onComplete={handleLessonComplete}
+        category={cat}
+        level={activeLesson.proficiencyLevel}
       />;
     }
 

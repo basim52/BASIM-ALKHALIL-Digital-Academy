@@ -25,6 +25,18 @@ export interface UserProfile {
   avatarUrl?: string;
   createdAt: any; // Using any to support serverTimestamp during creation and Timestamp object on read
   linkedStudentId?: string;
+  phoneNumber?: string;
+}
+
+export interface WhatsAppNotification {
+  id: string;
+  studentId: string;
+  type: 'reminder' | 'encouragement' | 'absence' | 'booking';
+  recipient: 'parent' | 'student';
+  sentBy: string;
+  content: string;
+  sentAt: any;
+  status: 'pending' | 'sent';
 }
 
 export interface ScheduleItem {
@@ -75,12 +87,13 @@ export interface Lesson {
   id: string;
   title: string;
   titleAr: string;
-  content: string; // AI generated markdown content
-  contentAr: string;
-  order: number;
+  content?: string; // AI generated markdown content
+  contentAr?: string;
+  order?: number;
   unitId?: string;
   moduleId?: string;
   imageryPrompt?: string;
+  slides?: any[]; // Legacy support for older lessons
   warmup?: {
     mission: string;
     missionAr: string;
@@ -101,6 +114,20 @@ export interface Lesson {
     correctIndex: number;
     explanation: string;
     explanationAr: string;
+  }[];
+  readingText?: {
+    paragraphs: {
+      en: string;
+      ar: string;
+      audioUrl?: string;
+    }[];
+  };
+  vocabulary?: {
+    word: string;
+    phonetic: string;
+    meaningAr: string;
+    example: string;
+    audioUrl?: string;
   }[];
   proficiencyLevel?: proficiencyLevel;
 }
