@@ -886,18 +886,28 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
     }
   };
 
-  const addToSchedule = async (unitTitle: string) => {
+  const [bookingStatus, setBookingStatus] = useState<Record<string, 'idle' | 'booking' | 'success'>>({});
+
+  const addToSchedule = async (unitId: string, unitTitle: string) => {
+    setBookingStatus(prev => ({ ...prev, [unitId]: 'booking' }));
     try {
       await addDoc(collection(db, 'schedules'), {
         studentId,
-        day: 'Monday', // Default to Monday, student can move it
-        time: '14:00',
+        day: 'Monday', // Default to Monday, student can move it in manager
+        time: '16:00',
         subject: selectedCategory || 'General',
         isCustom: true,
-        unitTitle: unitTitle
+        unitTitle: unitTitle,
+        createdAt: serverTimestamp()
       });
-      // Maybe show a toast
+      
+      setBookingStatus(prev => ({ ...prev, [unitId]: 'success' }));
+      setTimeout(() => {
+        setBookingStatus(prev => ({ ...prev, [unitId]: 'idle' }));
+      }, 3000);
     } catch (err) {
+      console.error("Booking error:", err);
+      setBookingStatus(prev => ({ ...prev, [unitId]: 'idle' }));
       handleFirestoreError(err, OperationType.WRITE, 'schedules');
     }
   };
@@ -1066,11 +1076,25 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
                           {isRtl ? 'بدء الدرس' : 'Start Lesson'}
                         </button>
                         <button
-                          onClick={() => addToSchedule(isRtl ? unit.titleAr : unit.title)}
-                          className="px-6 bg-slate-50 text-slate-400 py-4 rounded-2xl font-black text-sm hover:bg-[#002147] hover:text-white transition-all flex items-center gap-2"
+                          onClick={() => addToSchedule(unit.id, isRtl ? unit.titleAr : unit.title)}
+                          disabled={bookingStatus[unit.id] === 'booking' || bookingStatus[unit.id] === 'success'}
+                          className={`px-6 py-4 rounded-2xl font-black text-sm transition-all flex items-center gap-2 ${
+                            bookingStatus[unit.id] === 'success' 
+                              ? 'bg-emerald-500 text-white' 
+                              : bookingStatus[unit.id] === 'booking'
+                              ? 'bg-slate-100 text-slate-300 animate-pulse'
+                              : 'bg-slate-50 text-slate-400 hover:bg-[#002147] hover:text-white'
+                          }`}
                           title={isRtl ? 'إضافة للجدول' : 'Add to Schedule'}
                         >
-                          <Calendar size={18} />
+                          {bookingStatus[unit.id] === 'success' ? (
+                            <>
+                              <CheckCircle size={18} />
+                              <span className="text-xs">{isRtl ? 'تم الحجز' : 'Booked'}</span>
+                            </>
+                          ) : (
+                            <Calendar size={18} />
+                          )}
                         </button>
                       </div>
                     </div>
