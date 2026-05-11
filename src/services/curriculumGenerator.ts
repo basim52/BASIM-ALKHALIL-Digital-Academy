@@ -66,6 +66,36 @@ const lessonSchema = {
     content: { type: Type.STRING, description: "Detailed Markdown lesson content in English" },
     contentAr: { type: Type.STRING, description: "Detailed Markdown lesson content in Arabic" },
     imageryPrompt: { type: Type.STRING, description: "Image generation prompt for Unsplash" },
+    readingText: {
+      type: Type.OBJECT,
+      properties: {
+        paragraphs: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              en: { type: Type.STRING },
+              ar: { type: Type.STRING }
+            },
+            required: ["en", "ar"]
+          }
+        }
+      },
+      required: ["paragraphs"]
+    },
+    vocabulary: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          word: { type: Type.STRING },
+          phonetic: { type: Type.STRING },
+          meaningAr: { type: Type.STRING },
+          example: { type: Type.STRING }
+        },
+        required: ["word", "phonetic", "meaningAr", "example"]
+      }
+    },
     exercises: {
       type: Type.ARRAY,
       items: {
@@ -96,7 +126,7 @@ const lessonSchema = {
       }
     }
   },
-  required: ["title", "titleAr", "content", "contentAr", "quiz", "warmup", "exercises"]
+  required: ["title", "titleAr", "content", "contentAr", "quiz", "warmup", "exercises", "readingText", "vocabulary"]
 };
 
 export async function generateLessonContent(
@@ -105,34 +135,36 @@ export async function generateLessonContent(
   topic: string,
   lang: 'ar' | 'en'
 ): Promise<Partial<Lesson>> {
+  const isReadingOrExpression = category === CurriculumCategory.READING || category === CurriculumCategory.EXPRESSION;
+
   const prompt = `
     You are an expert academic curriculum designer for Basim Alkhalil Digital Academy.
     Topic: "${topic}".
     Category: ${category}
     Level: ${level} (Oxford/CEFR Standard)
     
-    Task: Create a deep, high-quality interactive lesson with 4 distinct sections.
+    Task: Create a deep, high-quality interactive lesson with specialized sections.
     
     CRITICAL INSTRUCTIONS:
     1. SECTION 1: WARM-UP (التهيئة)
        - Mission: A "Mission" statement explaining the lesson's goal.
        - Objectives: 3 clear educational objectives.
-    2. SECTION 2: EXPLANATION (الشرح)
-       - Content: Deep, step-by-step logic.
-       - Examples: At least 5-7 clear examples (English + Arabic translation).
-       - Rules: Use "> **Formula/Rule:** [Logic]" for key takeaways.
-       - Use data tables in Markdown where possible.
-    3. SECTION 3: EXERCISES (التمارين)
+    2. SECTION 2: THE CORE TEXT/SCENARIO (النص الأساسي)
+       - Paragraphs: At least 3-4 segments (English + Professional Arabic).
+       - For READING: Each paragraph should be part of a informative or narrative text.
+       - For EXPRESSION: Each paragraph should describe a specific scenario, social situation, or logical problem to be analyzed.
+    3. SECTION 3: VOCABULARY (المفردات)
+       - Provide 4-6 key terms found in the text.
+       - Each MUST have: Word, Phonetic, MeaningAr, and Example.
+    4. SECTION 4: EXPLANATION (الشرح)
+       - Content: Deep, step-by-step logic in Markdown.
+       - Use tables/formulas for key rules.
+    5. SECTION 5: EXERCISES (التمارين)
        - Create 2 interactive exercises (fill, match, or drag).
-       - Exercise 1: Fill in the blanks.
-       - Exercise 2: Matching concepts.
-    4. SECTION 4: QUIZ (الاختبار)
-       - At least 5 high-quality quiz questions.
-       - Each question MUST have a detailed explanationAr explaining "why" it's correct.
-    5. MULTILINGUAL: Everything must be in BOTH English and Professional Academic Arabic.
-    6. HIERARCHY: Level A1 should be simple and translated. C2 should be academic and complex.
+    6. SECTION 6: QUIZ (الاختبار)
+       - At least 5 high-quality quiz questions verifying deep comprehension.
     
-    Output JSON STRICTLY following the schema.
+    Output JSON STRICTLY following the schema. Ensure everything is in BOTH English and Professional Academic Arabic.
   `;
 
   let lastError: any = null;

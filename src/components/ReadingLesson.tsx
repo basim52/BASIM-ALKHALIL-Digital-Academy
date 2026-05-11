@@ -20,14 +20,24 @@ import { Lesson } from '../types';
 interface ReadingLessonProps {
   lesson: Partial<Lesson>;
   isRtl: boolean;
+  category?: string;
   onFinish: (score?: number) => void;
 }
 
 type TabType = 'warmup' | 'reading' | 'vocabulary' | 'comprehension';
 
-export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, onFinish }) => {
+export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, category, onFinish }) => {
   const [activeTab, setActiveTab] = useState<TabType>('warmup');
   const [isPlaying, setIsPlaying] = useState<string | null>(null); // paragraph index or null
+
+  const isExpression = category === 'expression' || lesson.id?.startsWith('e_');
+  const categoryLabel = isExpression 
+    ? (isRtl ? 'منهج التعبير' : 'Expression Curriculum')
+    : (isRtl ? 'منهج القراءة' : 'Reading Curriculum');
+
+  const readingTabLabel = isExpression
+    ? (isRtl ? 'السيناريو / المهمة' : 'Scenario / Task')
+    : (isRtl ? 'النص المقروء' : 'The Text');
   const [score, setScore] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
@@ -76,7 +86,7 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, onF
 
   const tabs = [
     { id: 'warmup', label: isRtl ? 'التهيئة' : 'Warm-Up', icon: <Lightbulb size={20} /> },
-    { id: 'reading', label: isRtl ? 'النص المقروء' : 'The Text', icon: <BookOpen size={20} /> },
+    { id: 'reading', label: readingTabLabel, icon: <BookOpen size={20} /> },
     { id: 'vocabulary', label: isRtl ? 'المفردات' : 'Vocabulary', icon: <Layers size={20} /> },
     { id: 'comprehension', label: isRtl ? 'الفهم والاستيعاب' : 'Comprehension', icon: <CheckCircle2 size={20} /> },
   ];
@@ -111,7 +121,7 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, onF
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="flex flex-wrap gap-2 mb-6">
             <span className="bg-oxford-gold text-oxford-navy px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest leading-none">
-              {isRtl ? 'منهج القراءة' : 'Reading Curriculum'}
+              {categoryLabel}
             </span>
             <span className="bg-white/10 text-cream/80 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest leading-none border border-white/10">
               {lesson.proficiencyLevel || 'A1'}
@@ -123,7 +133,7 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, onF
           
           <div className="flex flex-col md:flex-row md:items-center gap-6 mb-4">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-black leading-tight tracking-tight">
-              {isRtl ? `منهج القراءة — ${lesson.titleAr}` : `Reading Curriculum — ${lesson.title}`}
+              {categoryLabel} — {isRtl ? lesson.titleAr : lesson.title}
             </h1>
             <div className="flex gap-2">
               <button 
@@ -256,8 +266,12 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, onF
                 >
                   <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-oxford-navy/5">
                     <div>
-                      <h2 className="text-3xl font-serif font-black mb-2">{isRtl ? 'النص القرائي' : 'The Reading Passage'}</h2>
-                      <p className="text-oxford-navy/50 font-tajawal">{isRtl ? 'اقرأ واستمع بدقة' : 'Read and listen carefully'}</p>
+                      <h2 className="text-3xl font-serif font-black mb-2">{readingTabLabel}</h2>
+                      <p className="text-oxford-navy/50 font-tajawal">
+                        {isExpression 
+                          ? (isRtl ? 'حلل الموقف وتدرب على التعبير' : 'Analyze the situation and practice expression')
+                          : (isRtl ? 'اقرأ واستمع بدقة' : 'Read and listen carefully')}
+                      </p>
                     </div>
                     <div className="flex gap-2">
                        <button 
@@ -461,9 +475,15 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, onF
                        <div className="w-32 h-32 bg-oxford-gold rounded-full flex items-center justify-center mx-auto mb-10 relative shadow-[0_0_50px_rgba(196,158,58,0.3)]">
                           <Trophy size={64} className="text-oxford-navy" />
                        </div>
-                       <h2 className="text-4xl md:text-5xl font-serif font-black mb-6 leading-tight">{isRtl ? 'خبير القراءة!' : 'Reading Expert!'}</h2>
+                       <h2 className="text-4xl md:text-5xl font-serif font-black mb-6 leading-tight">
+                         {isExpression ? (isRtl ? 'خبير التعبير!' : 'Expression Expert!') : (isRtl ? 'خبير القراءة!' : 'Reading Expert!')}
+                       </h2>
                        <p className="text-xl text-cream/70 mb-12 max-w-lg mx-auto leading-relaxed font-tajawal">
-                         {isRtl ? `درجة رائعة: ${score} من ${lesson.quiz?.length || 0}. لقد أثبت أنك تستطيع استخلاص المعاني بدقة متناهية.` : `Impressive Score: ${score}/${lesson.quiz?.length || 0}. You've proven your ability to extract meaning with surgical precision.`}
+                         {isRtl 
+                           ? `درجة رائعة: ${score} من ${lesson.quiz?.length || 0}. لقد أثبت أنك تستطيع استخلاص المعاني بدقة متناهية.` 
+                           : (isExpression 
+                              ? `Impressive Score: ${score}/${lesson.quiz?.length || 0}. You've proven your ability to articulate complex concepts.`
+                              : `Impressive Score: ${score}/${lesson.quiz?.length || 0}. You've proven your ability to extract meaning with surgical precision.`)}
                        </p>
                        <button 
                          onClick={() => onFinish(score)}

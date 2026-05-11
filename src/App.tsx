@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Play,
   CheckCircle2,
+  CheckCircle,
   XCircle,
   AlertCircle,
   LogIn,
@@ -1483,11 +1484,12 @@ const LessonPlayer = ({ lang, lesson, onBack, onComplete, category, level }: { l
 
   if (!fullLesson) return null;
 
-  if (fullLesson.moduleId?.startsWith('mod_r') || fullLesson.id?.startsWith('r_')) {
+  if (fullLesson.moduleId?.startsWith('mod_r') || fullLesson.id?.startsWith('r_') || fullLesson.id?.startsWith('e_')) {
     return (
       <ReadingLesson 
         lesson={fullLesson} 
         isRtl={isRtl} 
+        category={fullLesson.id?.startsWith('e_') ? 'expression' : 'reading'}
         onFinish={(score) => onComplete()} 
       />
     );

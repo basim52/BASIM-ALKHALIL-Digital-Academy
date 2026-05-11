@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { MessageCircle, Bell, Send, Heart, AlertTriangle, CheckCircle, Save, Phone } from 'lucide-react';
+import { MessageCircle, Bell, Send, Heart, AlertTriangle, CheckCircle, Save, Phone, PenTool } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Language, translations } from '../lib/translations';
 import { generateWhatsAppLink, NOTIFICATION_TEMPLATES } from '../lib/whatsapp';
@@ -66,54 +66,68 @@ export const WhatsAppNotifications = ({
     if (editingType) {
       onUpdatePhone(editingType, tempPhone);
       setEditingType(null);
+      // Show short feedback
+      setSavedFeedback(editingType);
+      setTimeout(() => setSavedFeedback(null), 3000);
     }
   };
 
+  const [savedFeedback, setSavedFeedback] = useState<'parent' | 'student' | null>(null);
+
   return (
-    <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col">
-      <div className="flex justify-between items-center mb-8">
-        <h3 className="text-xl font-bold text-[#002147] flex items-center gap-3">
-          <MessageCircle className="text-emerald-500" />
+    <div className="bg-white rounded-[2.5rem] p-10 border border-slate-200 shadow-xl flex flex-col relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2" />
+      
+      <div className="flex justify-between items-center mb-10 relative z-10">
+        <h3 className="text-2xl font-black text-[#002147] flex items-center gap-4">
+          <div className="w-12 h-12 bg-emerald-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+            <MessageCircle size={24} />
+          </div>
           {t.reminders}
         </h3>
-        <div className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100">
-          WhatsApp Direct
+        <div className="px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100 flex items-center gap-2">
+          <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+          WhatsApp Cloud Direct
         </div>
       </div>
 
-      <div className="space-y-6 mb-8">
+      <div className="space-y-8 mb-10 relative z-10">
         {/* Phone Setup */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
-            { type: 'parent', label: t.parentPhoneNumber, value: parentPhone, icon: Users },
-            { type: 'student', label: t.studentPhoneNumber, value: studentPhone, icon: GraduationCap }
+            { type: 'parent', label: t.parentPhoneNumber, value: parentPhone, icon: Users, color: 'emerald' },
+            { type: 'student', label: t.studentPhoneNumber, value: studentPhone, icon: GraduationCap, color: 'blue' }
           ].map((item) => (
-            <div key={item.type} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 relative group min-h-[100px] flex flex-col justify-center">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">{item.label}</span>
+            <div key={item.type} className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col justify-center relative overflow-hidden ${editingType === item.type ? 'bg-white border-emerald-500 shadow-xl' : 'bg-slate-50 border-transparent shadow-sm hover:border-slate-200'}`}>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-4">{item.label}</span>
+              
               {editingType === item.type ? (
-                <div className="flex flex-col gap-2">
-                  <input 
-                    type="text" 
-                    value={tempPhone}
-                    onChange={(e) => setTempPhone(e.target.value)}
-                    placeholder={t.phoneNumberPlaceholder}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-mono"
-                    autoFocus
-                  />
-                  <div className="flex gap-2">
+                <div className="space-y-4">
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                    <input 
+                      type="text" 
+                      value={tempPhone}
+                      onChange={(e) => setTempPhone(e.target.value)}
+                      placeholder="+9665..."
+                      className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-6 py-4 text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-mono font-bold"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="flex gap-3">
                     <button 
                       onClick={savePhone} 
-                      className="flex-1 bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2"
+                      className="flex-1 bg-emerald-500 text-white px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 active:scale-95"
                     >
-                      <Save size={14} />
-                      {isRtl ? 'حفظ رقم الواتساب' : 'Save WhatsApp Number'}
+                      <Save size={16} />
+                      {isRtl ? 'حفظ الآن' : 'Save Now'}
                     </button>
                     <button 
                       onClick={() => {
                         setEditingType(null);
                         setTempPhone('');
                       }} 
-                      className="px-4 py-2 bg-slate-100 text-slate-400 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors"
+                      className="px-6 bg-slate-100 text-slate-400 rounded-2xl text-xs font-bold hover:bg-slate-200 transition-colors"
                     >
                       {isRtl ? 'إلغاء' : 'Cancel'}
                     </button>
@@ -121,17 +135,30 @@ export const WhatsAppNotifications = ({
                 </div>
               ) : (
                 <div className="flex justify-between items-center group">
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-slate-300 group-hover:text-emerald-500 transition-colors shrink-0 border border-slate-100">
-                      <Phone size={14} />
+                  <div className="flex items-center gap-4 overflow-hidden">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner transition-all ${item.value ? 'bg-white text-emerald-500 border border-emerald-100' : 'bg-white text-slate-300 border border-slate-100'}`}>
+                      {savedFeedback === item.type ? <CheckCircle className="animate-bounce" size={24} /> : <Phone size={20} />}
                     </div>
-                    <span className="font-bold text-[#002147] truncate">{item.value || '---'}</span>
+                    <div className="truncate">
+                      <span className={`block font-mono text-lg font-black tracking-tight ${item.value ? 'text-[#002147]' : 'text-slate-300 italic'}`}>
+                        {item.value || '--- --- ---'}
+                      </span>
+                      {savedFeedback === item.type && (
+                        <motion.span 
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest"
+                        >
+                          {isRtl ? 'تم الحفظ بنجاح ✓' : 'Saved Successfully ✓'}
+                        </motion.span>
+                      )}
+                    </div>
                   </div>
                   <button 
                     onClick={() => startEditing(item.type as any)}
-                    className="text-xs text-blue-600 font-black hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg transition-all shrink-0"
+                    className="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:bg-[#002147] hover:text-white hover:border-[#002147] transition-all shadow-sm"
                   >
-                    {item.value ? (isRtl ? 'تعديل' : 'Edit') : (isRtl ? 'إضافة' : 'Add')}
+                    {item.value ? <PenTool size={16} /> : <Phone size={16} />}
                   </button>
                 </div>
               )}
