@@ -138,10 +138,10 @@ const ScheduleManager = ({ studentId, lang, canEdit = false }: { studentId: stri
   };
 
   return (
-    <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
-      <div className="flex justify-between items-center mb-8">
-        <h3 className="text-xl font-bold text-[#002147] flex items-center gap-3">
-          <Calendar className="text-[#C49E3A]" />
+    <div className="bg-white rounded-[2rem] p-6 md:p-8 border border-slate-200 shadow-sm">
+      <div className="flex justify-between items-center mb-6 md:mb-8">
+        <h3 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-3">
+          <Calendar className="text-[#C49E3A] w-5 h-5 md:w-6 md:h-6" />
           {t.schedule}
         </h3>
         {canEdit && (
@@ -152,7 +152,7 @@ const ScheduleManager = ({ studentId, lang, canEdit = false }: { studentId: stri
       </div>
 
       {canEdit && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 p-4 bg-slate-50 rounded-2xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8 p-4 bg-slate-50 rounded-[1.5rem]">
           <select 
             value={newItem.day} 
             onChange={(e) => setNewItem({...newItem, day: e.target.value})}
@@ -272,13 +272,13 @@ const AIParentNotes = ({ profile, studentId, lang }: { profile: UserProfile, stu
   };
 
   return (
-    <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col">
-      <h3 className="text-xl font-bold text-[#002147] mb-8 flex items-center gap-3">
-        <MessageSquare className="text-blue-600" />
+    <div className="bg-white rounded-[2rem] p-6 md:p-8 border border-slate-200 shadow-sm flex flex-col">
+      <h3 className="text-xl md:text-2xl font-black text-[#002147] mb-6 md:mb-8 flex items-center gap-3">
+        <MessageSquare className="text-blue-600 w-5 h-5 md:w-6 md:h-6" />
         {t.notes}
       </h3>
       
-      <div className="flex-1 space-y-6 overflow-y-auto mb-8 pr-2 max-h-[400px]">
+      <div className="flex-1 space-y-6 overflow-y-auto mb-6 md:mb-8 pr-2 max-h-[400px]">
         {notes.map((note) => (
           <div key={note.id} className="space-y-4">
             <div className={`p-4 rounded-2xl ${isRtl ? 'bg-slate-50 border-r-4 border-[#002147]' : 'bg-slate-50 border-l-4 border-[#002147] shadow-sm'}`}>
@@ -324,9 +324,9 @@ const StudentHome = ({ lang, profile, onStartConversation, onOpenCurriculum }: {
   const isRtl = lang === 'ar';
 
   return (
-    <div className={`flex-1 p-6 md:p-12 overflow-y-auto ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className={`flex-1 p-5 md:p-12 overflow-y-auto ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-6xl mx-auto">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 md:mb-12">
           <div>
             <h1 className="text-3xl md:text-5xl font-black text-[#002147] mb-2 tracking-tight">
               {t.welcomeUser} {profile.displayName.split(' ')[0]}
@@ -341,10 +341,10 @@ const StudentHome = ({ lang, profile, onStartConversation, onOpenCurriculum }: {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-4 bg-white p-2 rounded-3xl border border-slate-200 shadow-sm">
-            <div className={`flex items-center gap-3 px-6 py-3 bg-slate-50 rounded-2xl ${isRtl ? 'flex-row-reverse' : ''}`}>
-              <Trophy className="text-[#C49E3A]" />
-              <span className="font-black text-[#002147] text-xl">1,240 <span className="text-[10px] text-slate-400 uppercase tracking-widest block">{t.points}</span></span>
+          <div className="flex items-center gap-4 bg-white p-2 rounded-3xl border border-slate-200 shadow-sm w-full md:w-auto overflow-hidden">
+            <div className={`flex flex-1 md:flex-none items-center justify-center md:justify-start gap-3 px-6 py-3 bg-slate-50 rounded-2xl ${isRtl ? 'flex-row-reverse' : ''}`}>
+              <Trophy className="text-[#C49E3A] w-6 h-6" />
+              <span className="font-black text-[#002147] text-xl shrink-0">1,240 <span className="text-[10px] text-slate-400 uppercase tracking-widest inline md:block ml-1 md:ml-0">{t.points}</span></span>
             </div>
             <button 
               onClick={() => {
@@ -359,49 +359,46 @@ const StudentHome = ({ lang, profile, onStartConversation, onOpenCurriculum }: {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-12">
           {/* Journey Section */}
-          <section className="lg:col-span-2 bg-white rounded-[2.5rem] p-8 md:p-12 border border-slate-200 shadow-sm relative overflow-hidden">
-            <div className={`flex justify-between items-center mb-10 ${isRtl ? 'flex-row-reverse' : ''}`}>
-              <h3 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-3">
+          <section className="lg:col-span-2 bg-white rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-12 border border-slate-200 shadow-sm relative overflow-hidden">
+            <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 md:mb-10 gap-4 ${isRtl ? 'sm:flex-row-reverse' : ''}`}>
+              <h3 className="text-2xl font-black text-[#002147] flex items-center gap-3">
                 <BookOpen className="text-blue-600" />
                 {t.learningProgress}
               </h3>
               <button 
                 onClick={onOpenCurriculum}
-                className="text-blue-600 font-bold text-sm hover:underline"
+                className="text-blue-600 font-bold text-sm md:text-base hover:underline"
               >
                 {lang === 'ar' ? 'عرض جميع المناهج' : 'Browse All Modules'}
               </button>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-6">
               {MASTER_CURRICULUM[CurriculumCategory.READING][(profile as any).level || proficiencyLevel.A1].slice(0, 3).map((unit, i) => (
-                <div key={unit.id} className={`p-4 md:p-6 rounded-2xl md:rounded-3xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all ${i === 0 ? 'border-blue-600 bg-blue-50/30' : 'border-slate-100'}`}>
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center font-bold text-base md:text-lg shrink-0 ${
+                <div key={unit.id} className={`p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6 transition-all ${i === 0 ? 'border-blue-600 bg-blue-50/30' : 'border-slate-100'}`}>
+                  <div className="flex items-center gap-6">
+                    <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center font-bold text-xl md:text-2xl shrink-0 ${
                       i === 0 ? 'bg-[#002147] text-white shadow-xl shadow-blue-200' : 'bg-slate-50 text-slate-300'
                     }`}>
                       {i + 1}
                     </div>
                     <div className={isRtl ? 'text-right' : 'text-left'}>
-                      <h4 className={`font-bold text-sm md:text-base ${i > 0 ? 'text-slate-400' : 'text-[#002147]'}`}>
+                      <h4 className={`font-bold text-base md:text-lg ${i > 0 ? 'text-slate-400' : 'text-[#002147]'}`}>
                         {isRtl ? unit.titleAr : unit.title}
                       </h4>
-                      <p className="text-[10px] md:text-xs text-slate-500 font-medium">
+                      <p className="text-xs md:text-sm text-slate-500 font-medium line-clamp-1">
                         {isRtl ? unit.descriptionAr : unit.description}
                       </p>
                     </div>
                   </div>
                   {i === 0 && (
                     <button 
-                      onClick={() => {
-                        // Logic to start this lesson
-                        onOpenCurriculum();
-                      }}
-                      className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold flex items-center justify-center gap-2 hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all"
+                      onClick={onOpenCurriculum}
+                      className="w-full md:w-auto bg-blue-600 text-white px-8 py-4 rounded-xl md:rounded-2xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all"
                     >
-                      <Play size={14} fill="currentColor" />
+                      <Play size={16} fill="currentColor" />
                       {t.currentLesson}
                     </button>
                   )}
@@ -410,10 +407,10 @@ const StudentHome = ({ lang, profile, onStartConversation, onOpenCurriculum }: {
             </div>
           </section>
 
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <section className="grid grid-cols-1 gap-10">
             <motion.div 
               whileHover={{ scale: 1.02 }}
-              className="bg-[#002147] text-white rounded-3xl p-8 relative overflow-hidden group shadow-xl shadow-blue-900/10 border-b-4 border-[#C49E3A]"
+              className="bg-[#002147] text-white rounded-[2.5rem] p-10 relative overflow-hidden group shadow-xl shadow-blue-900/10 border-b-8 border-[#C49E3A]"
             >
                   <div className="relative z-10">
                 <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-md">
@@ -938,36 +935,26 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
         >
           <p className="text-slate-500 font-medium max-w-md mx-auto leading-relaxed">
             {isRtl 
-              ? 'يقوم المعلم الذكي الآن بتصميم محتوى تعليمي تفاعلي شامل يتضمن الشروحات والوسائل التوضيحية والتمارين وفق معايير الجودة العالمية.' 
-              : 'The Smart Tutor is now designing comprehensive interactive educational content including explanations, visual aids, and exercises according to global quality standards.'}
+              ? 'يقوم المعلم الذكي الآن بتصميم محتوى تعليمي حصري لك بناءً على المعايير العالمية.'
+              : 'Our AI Teacher is now designing an exclusive educational content for you based on the latest academic standards.'}
           </p>
-          <div className="flex justify-center gap-2">
-            {[0, 1, 2].map(i => (
-              <motion.div 
-                key={i}
-                animate={{ opacity: [0.3, 1, 0.3] }}
-                transition={{ repeat: Infinity, duration: 1.5, delay: i * 0.2 }}
-                className="w-2 h-2 bg-[#C49E3A] rounded-full"
-              />
-            ))}
-          </div>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 p-6 md:p-12 overflow-y-auto" dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className="flex-1 p-4 md:p-12 overflow-y-auto" dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-12">
+        <div className="flex flex-col sm:flex-row items-center sm:items-center justify-between mb-8 md:mb-12 gap-6">
           <button 
             onClick={selectedLevel ? () => setSelectedLevel(null) : (selectedCategory ? () => setSelectedCategory(null) : onBack)} 
-            className="p-3 bg-white rounded-2xl border border-slate-200 text-slate-400 hover:text-[#002147] transition-all flex items-center gap-2"
+            className="w-full sm:w-auto p-4 md:p-3 bg-white rounded-2xl border border-slate-200 text-slate-400 hover:text-[#002147] transition-all flex items-center justify-center gap-3 shadow-sm active:scale-95"
           >
-            <ChevronRight className={isRtl ? '' : 'rotate-180'} />
-            <span className="font-bold text-sm uppercase tracking-widest">{selectedCategory ? t.backToCurriculum : t.goToDashboard}</span>
+            <ChevronRight className={isRtl ? '' : 'rotate-180'} size={20} />
+            <span className="font-black text-[10px] md:text-xs uppercase tracking-widest">{selectedCategory ? t.backToCurriculum : t.goToDashboard}</span>
           </button>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-right">
             {profile.role === UserRole.ADMIN && (
                <button 
                 onClick={seedCurriculum}
@@ -977,15 +964,15 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
                 {lang === 'ar' ? 'مزامنة المنهج' : 'Sync Curriculum'}
               </button>
             )}
-            <div className="text-right">
-              <h1 className="text-4xl font-black text-[#002147] mb-2">{t.curriculum}</h1>
-              <p className="text-slate-400 font-medium text-sm">{t.learningProgress}</p>
+            <div>
+              <h1 className="text-2xl md:text-4xl font-black text-[#002147] mb-1 md:mb-2">{t.curriculum}</h1>
+              <p className="text-slate-400 font-medium text-xs md:text-sm">{t.learningProgress}</p>
             </div>
           </div>
         </div>
 
         {!selectedCategory ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {categories.map((cat, idx) => (
               <motion.div
                 key={cat.id}
@@ -993,35 +980,29 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
                 onClick={() => setSelectedCategory(cat.id)}
-                className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer group flex flex-col items-center text-center"
+                className="bg-white p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group flex flex-col items-center text-center active:bg-blue-50 active:scale-95 touch-manipulation"
               >
-                <div className={`w-24 h-24 ${cat.color} rounded-[2rem] flex items-center justify-center mb-8 shadow-inner group-hover:scale-110 transition-transform`}>
-                  <cat.icon size={48} strokeWidth={2.5} />
+                <div className={`w-20 h-20 md:w-24 md:h-24 ${cat.color} rounded-[2rem] flex items-center justify-center mb-6 md:mb-8 shadow-inner group-hover:scale-110 transition-transform`}>
+                  <cat.icon size={innerWidth < 768 ? 32 : 48} strokeWidth={2.5} />
                 </div>
-                <h3 className="text-2xl font-black text-[#002147] mb-4">{cat.label}</h3>
-                <p className="text-slate-400 text-sm font-medium leading-relaxed mb-8">
-                  {isRtl ? 'منهج تعليمي شامل مصمم وفق المعايير العالمية لتعزيز مهاراتك.' : 'Comprehensive educational curriculum designed according to global standards.'}
-                </p>
-                <div className="mt-auto w-full flex items-center justify-center gap-2 text-blue-600 font-black text-xs uppercase tracking-widest">
-                  {t.startLesson}
-                  <ChevronRight size={16} className={isRtl ? 'rotate-180' : ''} />
-                </div>
+                <h3 className="text-xl md:text-2xl font-black text-[#002147] mb-2">{cat.label}</h3>
+                <p className="text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest">{lang === 'ar' ? 'استعرض المستويات' : 'EXPLORE LEVELS'}</p>
               </motion.div>
             ))}
           </div>
         ) : (
-          <div className="space-y-12">
+          <div className="space-y-8 md:space-y-12">
             <section>
-              <h2 className="text-2xl font-black text-[#002147] mb-8 flex items-center gap-4">
-                <span className="w-10 h-10 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-sm">1</span>
+              <h2 className="text-xl md:text-2xl font-black text-[#002147] mb-6 md:mb-8 flex items-center gap-4">
+                <span className="w-8 h-8 md:w-10 md:h-10 bg-blue-600 text-white rounded-xl md:rounded-2xl flex items-center justify-center text-xs md:text-sm">1</span>
                 {t.chooseLevel}
               </h2>
-              <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 md:gap-4">
                 {levels.map((lvl) => (
                   <button
                     key={lvl}
                     onClick={() => setSelectedLevel(lvl)}
-                    className={`py-6 rounded-3xl border-2 font-black text-xl transition-all ${
+                    className={`py-4 md:py-6 rounded-2xl md:rounded-3xl border-2 font-black text-lg md:text-xl transition-all ${
                       selectedLevel === lvl 
                         ? 'bg-[#002147] border-[#002147] text-white shadow-xl scale-105' 
                         : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
@@ -1038,48 +1019,48 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                <h2 className="text-2xl font-black text-[#002147] mb-8 flex items-center gap-4">
-                  <span className="w-10 h-10 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-sm">2</span>
+                <h2 className="text-xl md:text-2xl font-black text-[#002147] mb-6 md:mb-8 flex items-center gap-4">
+                  <span className="w-8 h-8 md:w-10 md:h-10 bg-blue-600 text-white rounded-xl md:rounded-2xl flex items-center justify-center text-xs md:text-sm">2</span>
                   {t.units}
-                  {loadingUnits && <span className="text-sm font-medium text-slate-400 animate-pulse">({t.loadingText})</span>}
+                  {loadingUnits && <span className="text-xs md:text-sm font-medium text-slate-400 animate-pulse">({t.loadingText})</span>}
                 </h2>
                 
                 {error && (
-                  <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-2xl text-sm font-bold border border-red-100 flex items-center gap-3">
+                  <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-2xl text-xs md:text-sm font-bold border border-red-100 flex items-center gap-3">
                     <AlertCircle size={20} />
                     {error}
                   </div>
                 )}
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   {units.map((unit, i) => (
                     <div
                       key={unit.id}
-                      className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-lg transition-all"
+                      className="bg-white p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-lg transition-all"
                     >
-                      <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-6">
-                          <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-[#002147] font-black text-xl">
+                      <div className="flex items-start sm:items-center justify-between mb-4 md:mb-6">
+                        <div className="flex items-center gap-4 md:gap-6">
+                          <div className="w-12 h-12 md:w-16 md:h-16 bg-slate-50 rounded-xl md:rounded-2xl flex items-center justify-center text-[#002147] font-black text-lg md:text-xl">
                             {i + 1}
                           </div>
                           <div>
-                            <h4 className="font-black text-xl text-[#002147] mb-1">{isRtl ? unit.titleAr : unit.title}</h4>
-                            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">{isRtl ? unit.descriptionAr : unit.description}</p>
+                            <h4 className="font-black text-lg md:text-xl text-[#002147] mb-0.5 md:mb-1">{isRtl ? unit.titleAr : unit.title}</h4>
+                            <p className="text-slate-400 text-[9px] md:text-xs font-bold uppercase tracking-widest">{isRtl ? unit.descriptionAr : unit.description}</p>
                           </div>
                         </div>
                       </div>
-                      <div className="flex gap-4">
+                      <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
                         <button
                           onClick={() => handleStartLesson(isRtl ? unit.titleAr : unit.title)}
-                          className="flex-1 bg-emerald-50 text-emerald-600 py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-3 hover:bg-emerald-600 hover:text-white transition-all group"
+                          className="flex-1 bg-emerald-50 text-emerald-600 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-xs md:text-sm flex items-center justify-center gap-3 hover:bg-emerald-600 hover:text-white transition-all group"
                         >
-                          <Play size={18} fill="currentColor" />
+                          <Play size={16} md:size={18} fill="currentColor" />
                           {isRtl ? 'بدء الدرس' : 'Start Lesson'}
                         </button>
                         <button
                           onClick={() => addToSchedule(unit.id, isRtl ? unit.titleAr : unit.title)}
                           disabled={bookingStatus[unit.id] === 'booking' || bookingStatus[unit.id] === 'success'}
-                          className={`px-6 py-4 rounded-2xl font-black text-sm transition-all flex items-center gap-2 ${
+                          className={`w-full sm:w-auto px-6 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-xs md:text-sm transition-all flex items-center justify-center gap-2 ${
                             bookingStatus[unit.id] === 'success' 
                               ? 'bg-emerald-500 text-white' 
                               : bookingStatus[unit.id] === 'booking'
@@ -1090,11 +1071,14 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
                         >
                           {bookingStatus[unit.id] === 'success' ? (
                             <>
-                              <CheckCircle size={18} />
-                              <span className="text-xs">{isRtl ? 'تم الحجز' : 'Booked'}</span>
+                              <CheckCircle size={16} md:size={18} />
+                              <span className="text-[10px] md:text-xs">{isRtl ? 'تم الحجز' : 'Booked'}</span>
                             </>
                           ) : (
-                            <Calendar size={18} />
+                            <>
+                              <Calendar size={16} md:size={18} />
+                              <span className="sm:hidden">{isRtl ? 'إضافة للجدول' : 'Add to Schedule'}</span>
+                            </>
                           )}
                         </button>
                       </div>
@@ -1862,17 +1846,17 @@ export default function App() {
           {view !== 'placement-test' && (
             <>
               {/* Mobile Top Header */}
-              <header className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-slate-100 z-50 px-6 py-4 flex justify-between items-center shadow-sm">
+              <header className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-slate-100 z-50 px-4 py-4 flex justify-between items-center shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#002147] rounded-xl flex items-center justify-center text-white font-black">B</div>
+                  <div className="w-8 h-8 bg-[#002147] rounded-lg flex items-center justify-center text-white font-black text-sm">B</div>
                   <div className="leading-tight">
-                    <h2 className="text-sm font-black text-[#002147]">{t.academyName}</h2>
-                    <p className="text-[9px] text-[#C49E3A] font-bold uppercase tracking-widest">{t.academySubName}</p>
+                    <h2 className="text-xs font-black text-[#002147]">{t.academyName}</h2>
+                    <p className="text-[8px] text-[#C49E3A] font-bold uppercase tracking-widest">{t.academySubName}</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-                  className="bg-slate-50 p-2 rounded-xl border border-slate-100 text-[#002147] font-bold text-xs"
+                  className="bg-slate-50 p-2 rounded-lg border border-slate-100 text-[#002147] font-black text-[10px]"
                 >
                   {t.languageToggle}
                 </button>
@@ -1934,7 +1918,7 @@ export default function App() {
               </aside>
 
               {/* Mobile Bottom Navigation */}
-              <nav className="md:hidden fixed bottom-6 left-6 right-6 bg-[#002147] text-white rounded-[2.5rem] p-3 flex justify-around items-center z-50 shadow-2xl border-b-4 border-[#C49E3A]">
+              <nav className="md:hidden fixed bottom-6 left-4 right-4 bg-[#002147] text-white rounded-[2.5rem] px-2 py-3 flex justify-around items-center z-50 shadow-2xl border-b-4 border-[#C49E3A]">
                 {[
                   { id: 'dashboard', icon: LayoutDashboard },
                   { id: 'curriculum', icon: BookOpen },
@@ -1949,12 +1933,18 @@ export default function App() {
                       if (item.action) item.action();
                       else setView(item.id as AppView);
                     }}
-                    className={`p-4 rounded-full transition-all ${
+                    className={`flex flex-col items-center justify-center p-2 rounded-2xl transition-all relative ${
                       view === item.id 
-                      ? 'bg-[#C49E3A] text-[#002147] shadow-lg' : 'text-white/70'
+                      ? 'text-[#C49E3A] scale-110' : 'text-white/40'
                     }`}
                   >
-                    <item.icon size={22} />
+                    <item.icon size={22} strokeWidth={view === item.id ? 3 : 2} />
+                    {view === item.id && (
+                      <motion.div 
+                        layoutId="activeTab"
+                        className="absolute -bottom-1 w-1 h-1 bg-[#C49E3A] rounded-full"
+                      />
+                    )}
                   </button>
                 ))}
               </nav>

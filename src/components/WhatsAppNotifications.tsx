@@ -75,19 +75,19 @@ export const WhatsAppNotifications = ({
   const [savedFeedback, setSavedFeedback] = useState<'parent' | 'student' | null>(null);
 
   return (
-    <div className="bg-white rounded-[2.5rem] p-10 border border-slate-200 shadow-xl flex flex-col relative overflow-hidden">
+    <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 border border-slate-200 shadow-xl flex flex-col relative overflow-hidden">
       <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2" />
       
-      <div className="flex justify-between items-center mb-10 relative z-10">
-        <h3 className="text-2xl font-black text-[#002147] flex items-center gap-4">
-          <div className="w-12 h-12 bg-emerald-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-            <MessageCircle size={24} />
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 md:mb-10 relative z-10 gap-4">
+        <h3 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-3 md:gap-4">
+          <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-500 text-white rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+            <MessageCircle size={20} md:size={24} />
           </div>
           {t.reminders}
         </h3>
-        <div className="px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100 flex items-center gap-2">
+        <div className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest border border-emerald-100 flex items-center gap-2">
           <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-          WhatsApp Cloud Direct
+          WhatsApp Cloud
         </div>
       </div>
 

@@ -90,44 +90,44 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
   return (
     <div className={`min-h-screen bg-cream text-ink font-sans selection:bg-amber-accent/20 ${isRtl ? 'rtl' : 'ltr'}`}>
       {/* Premium Header - Matching ReadingLesson Style */}
-      <header className="bg-oxford-navy text-cream pt-16 pb-24 px-4 md:px-8 relative overflow-hidden">
+      <header className="bg-oxford-navy text-cream pt-10 pb-20 md:pt-16 md:pb-24 px-4 md:px-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-amber-accent/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="flex flex-wrap gap-2 mb-6">
-            <span className="bg-oxford-gold text-oxford-navy px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest leading-none">
+            <span className="bg-oxford-gold text-oxford-navy px-3 md:px-4 py-1 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest leading-none">
               {isRtl ? 'المنهج الأكاديمي' : 'Academic Curriculum'}
             </span>
-            <span className="bg-white/10 text-cream/80 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest leading-none border border-white/10">
+            <span className="bg-white/10 text-cream/80 px-3 md:px-4 py-1 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest leading-none border border-white/10">
               {lesson.proficiencyLevel || 'A1'}
             </span>
-            <span className="bg-white/10 text-cream/80 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest leading-none border border-white/10">
+            <span className="bg-white/10 text-cream/80 px-3 md:px-4 py-1 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest leading-none border border-white/10">
               {isRtl ? '٢٠ دقيقة' : '20 min lesson'}
             </span>
           </div>
           
-          <div className="flex flex-col md:flex-row md:items-center gap-6 mb-4">
-            <h1 className="text-4xl md:text-5xl lg:text-7xl font-serif font-black leading-tight tracking-tight">
+          <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 mb-4">
+            <h1 className="text-3xl md:text-5xl lg:text-7xl font-serif font-black leading-tight tracking-tight">
               {isRtl ? lesson.titleAr : lesson.title}
             </h1>
             <div className="flex gap-2">
               <button 
                 onClick={() => speak(isRtl ? lesson.titleAr || '' : lesson.title || '', isRtl ? 'ar' : 'en', 'title-audio')}
-                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${isPlayingId === 'title-audio' ? 'bg-amber-accent text-white scale-110 shadow-lg' : 'bg-white/10 text-cream hover:bg-amber-accent hover:scale-110'}`}
+                className={`w-8 h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all ${isPlayingId === 'title-audio' ? 'bg-amber-accent text-white scale-110 shadow-lg' : 'bg-white/10 text-cream hover:bg-amber-accent hover:scale-110'}`}
               >
-                {isPlayingId === 'title-audio' ? <Pause size={20} /> : <Volume2 size={20} />}
+                {isPlayingId === 'title-audio' ? <Pause size={14} md:size={20} /> : <Volume2 size={14} md:size={20} />}
               </button>
             </div>
           </div>
           
           <div className="flex items-start gap-4">
-            <p className="text-oxford-gold/80 font-medium text-lg md:text-xl max-w-2xl font-tajawal leading-relaxed">
+            <p className="text-oxford-gold/80 font-medium text-base md:text-xl max-w-2xl font-tajawal leading-relaxed">
               {isRtl ? lesson.warmup?.missionAr : lesson.warmup?.mission}
             </p>
             <button 
               onClick={() => speak(isRtl ? lesson.warmup?.missionAr || '' : lesson.warmup?.mission || '', isRtl ? 'ar' : 'en', 'mission-audio')}
               className={`mt-1 hover:text-amber-accent transition-colors ${isPlayingId === 'mission-audio' ? 'text-amber-accent' : 'text-oxford-gold/40'}`}
             >
-              <Volume2 size={24} />
+              <Volume2 size={20} md:size={24} />
             </button>
           </div>
         </div>
@@ -143,14 +143,14 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex-1 min-w-[140px] flex items-center justify-center gap-3 py-6 px-4 transition-all relative font-black text-[10px] uppercase tracking-[0.15em] ${
+                className={`flex-1 md:flex-1 min-w-[max-content] md:min-w-[140px] flex items-center justify-center gap-2 md:gap-3 py-4 md:py-6 px-4 transition-all relative font-black text-[10px] md:text-xs uppercase tracking-[0.15em] whitespace-nowrap ${
                   activeTab === tab.id 
-                    ? 'text-amber-accent bg-white' 
+                    ? 'text-amber-accent bg-white shadow-inner' 
                     : 'text-oxford-navy/40 hover:text-oxford-navy/80 hover:bg-white/50'
                 }`}
               >
-                <div className={`p-2 rounded-xl transition-colors ${activeTab === tab.id ? 'bg-amber-accent/10 text-amber-accent' : 'bg-transparent text-oxford-navy/40'}`}>
-                  {tab.icon}
+                <div className={`p-1.5 md:p-2 rounded-xl transition-colors ${activeTab === tab.id ? 'bg-amber-accent/10 text-amber-accent' : 'bg-transparent text-oxford-navy/40'}`}>
+                  {React.cloneElement(tab.icon as React.ReactElement, { size: 16 })}
                 </div>
                 <span>{tab.label}</span>
                 {activeTab === tab.id && (
@@ -163,7 +163,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
             ))}
           </div>
 
-          <div className="p-8 md:p-14 lg:p-20 min-h-[600px]">
+          <div className="p-6 md:p-14 lg:p-20 min-h-[600px]">
         <AnimatePresence mode="wait">
           {activeTab === 'warmup' && (
             <motion.section 
@@ -249,31 +249,32 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
               exit={{ opacity: 0, y: -20 }}
               className="space-y-8"
             >
-              <div className="flex justify-between items-center bg-white p-6 rounded-[2rem] border border-ink/5 shadow-sm">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-oxford-navy text-white rounded-2xl flex items-center justify-center">
-                    <MessageCircle size={24} />
+              <div className="flex justify-between items-center bg-white p-4 md:p-6 rounded-[2rem] border border-ink/5 shadow-sm">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-oxford-navy text-white rounded-xl md:rounded-2xl flex items-center justify-center">
+                    <MessageCircle size={20} md:size={24} />
                   </div>
                   <div>
-                    <h3 className="font-serif font-black">{isRtl ? 'استمع للشرح الأكاديمي' : 'Listen to Academic Explanation'}</h3>
-                    <p className="text-xs text-oxford-navy/40 font-black uppercase tracking-widest leading-none mt-1">
+                    <h3 className="text-sm md:text-base font-serif font-black leading-tight">{isRtl ? 'استمع للشرح الأكاديمي' : 'Listen to Academic Explanation'}</h3>
+                    <p className="text-[10px] text-oxford-navy/40 font-black uppercase tracking-widest leading-none mt-1">
                       {isRtl ? 'صوت ذكاء اصطناعي' : 'AI Voice Assistance'}
                     </p>
                   </div>
                 </div>
                 <button 
                   onClick={() => speak(isRtl ? lesson.contentAr || '' : lesson.content || '', isRtl ? 'ar' : 'en', 'explanation-audio')}
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${isPlayingId === 'explanation-audio' ? 'bg-amber-accent text-white scale-110 shadow-lg' : 'bg-oxford-navy text-white hover:bg-amber-accent'}`}
+                  className={`w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center transition-all ${isPlayingId === 'explanation-audio' ? 'bg-amber-accent text-white scale-110 shadow-lg' : 'bg-oxford-navy text-white hover:bg-amber-accent'}`}
                 >
-                  {isPlayingId === 'explanation-audio' ? <Pause size={28} /> : <Volume2 size={28} />}
+                  {isPlayingId === 'explanation-audio' ? <Pause size={20} md:size={28} /> : <Volume2 size={20} md:size={28} />}
                 </button>
               </div>
 
-              <div className={`markdown-body prose prose-lg max-w-none 
+              <div className={`markdown-body prose prose-slate md:prose-lg max-w-none 
                 prose-headings:font-serif prose-headings:font-black prose-headings:text-ink
                 prose-p:text-ink/70 prose-p:leading-relaxed
                 prose-strong:text-amber-accent prose-strong:font-black
                 prose-blockquote:border-l-4 prose-blockquote:border-amber-accent prose-blockquote:bg-amber-accent/5 prose-blockquote:py-2 prose-blockquote:rounded-r-2xl
+                prose-table:border prose-table:border-slate-200 prose-th:bg-slate-50 prose-th:p-4 prose-td:p-4 prose-td:border prose-td:border-slate-100 overflow-x-auto custom-markdown-content
                 ${isRtl ? 'font-tajawal' : 'font-roboto'}
               `}>
                 <ReactMarkdown>{isRtl ? lesson.contentAr || '' : lesson.content || ''}</ReactMarkdown>
