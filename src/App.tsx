@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   BookOpen, 
   Mic2, 
@@ -29,16 +29,19 @@ import {
   Clock,
   Send,
   Hash,
-  PenTool
+  PenTool,
+  ShieldAlert,
+  Bell,
+  Baby
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { UserRole, CurriculumCategory, proficiencyLevel, UserProfile, ScheduleItem, ParentNote, LearningModule, Lesson } from './types';
+import { UserRole, CurriculumCategory, proficiencyLevel, UserProfile, ScheduleItem, ParentNote, LearningModule, Lesson, AppView, StudentProfile, CreditCost } from './types';
 import { MASTER_CURRICULUM } from './data/masterCurriculum';
 import { AIConversation } from './components/AIConversation';
 import { PlacementTest } from './components/PlacementTest';
-import { auth, googleProvider, db, handleFirestoreError, OperationType, testConnection } from './lib/firebase';
+import { auth, googleProvider, db, handleFirestoreError, OperationType, testConnection, deductCredits } from './lib/firebase';
 import { onAuthStateChanged, signInWithPopup, signOut, User } from 'firebase/auth';
-import { doc, getDoc, setDoc, addDoc, serverTimestamp, collection, query, where, onSnapshot, deleteDoc, orderBy, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, addDoc, serverTimestamp, collection, query, where, onSnapshot, deleteDoc, orderBy, getDocs, updateDoc, limit, writeBatch } from 'firebase/firestore';
 import { translations, Language } from './lib/translations';
 import { GoogleGenAI } from "@google/genai";
 import { StudentStats } from './components/StudentStats';
@@ -47,7 +50,16 @@ import { PeerChat } from './components/PeerChat';
 import { generateLessonContent, generateCurriculumUnits } from './services/curriculumGenerator';
 import { InteractiveLesson } from './components/InteractiveLesson';
 import { WhatsAppNotifications } from './components/WhatsAppNotifications';
+import { AdminDashboard } from './components/AdminDashboard';
+import { VideoLibrary } from './components/VideoLibrary';
+import { StoryLibrary } from './components/StoryLibrary';
+import { ParentAIInsights } from './components/ParentAIInsights';
+import { ProgressRoadmap } from './components/ProgressRoadmap';
 import { ReadingLesson } from './components/ReadingLesson';
+import { CreditSystem } from './components/CreditSystem';
+import { OxfordLesson } from './components/OxfordLesson';
+import { EarlyChildhoodHome } from './components/EarlyChildhood/EarlyChildhoodHome';
+import { Wallet } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { familyConstellationsLesson } from './data/lessons/r_a1_4';
 import { everydayInteractionLesson } from './data/lessons/r_a1_5';
@@ -202,7 +214,7 @@ import { existentialInquiryE1 } from './data/lessons/e_c2_3';
 import { linguisticFluidityE1 } from './data/lessons/e_c2_4';
 import { aestheticSynthesisE1 } from './data/lessons/e_c2_5';
 
-type AppView = 'dashboard' | 'ai-chat' | 'placement-test' | 'curriculum' | 'lesson' | 'progress' | 'leaderboard' | 'chat';
+// Removed local AppView declaration as it is now imported from ./types
 
 // Auth View
 const LoginScreen = ({ lang, onToggleLang }: { lang: Language, onToggleLang: () => void }) => {
@@ -365,6 +377,7 @@ const AIParentNotes = ({ profile, studentId, lang }: { profile: UserProfile, stu
   const [notes, setNotes] = useState<ParentNote[]>([]);
   const [newNote, setNewNote] = useState('');
   const [sending, setSending] = useState(false);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const q = query(collection(db, 'parentNotes'), where('studentId', '==', studentId), where('parentId', '==', profile.uid));
@@ -373,14 +386,22 @@ const AIParentNotes = ({ profile, studentId, lang }: { profile: UserProfile, stu
       snapshot.forEach((doc) => {
         items.push({ id: doc.id, ...doc.data() } as ParentNote);
       });
-      setNotes(items.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis()));
+      setNotes(items.sort((a, b) => (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0)));
     });
     return () => unsubscribe();
   }, [studentId, profile.uid]);
 
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [notes]);
+
   const sendNote = async () => {
     if (!newNote.trim()) return;
     setSending(true);
+    const textToSend = newNote;
+    setNewNote('');
     
     try {
       const sDoc = await getDoc(doc(db, 'students', studentId));
@@ -392,13 +413,13 @@ const AIParentNotes = ({ profile, studentId, lang }: { profile: UserProfile, stu
         Student Level: ${studentData?.level || 'B1'}.
         Student Points: ${studentData?.points || 0}.
         
-        Parent's note: "${newNote}"
+        Parent's note: "${textToSend}"
         
         Provide a professional, reassuring, and academic response in ${lang === 'ar' ? 'Arabic' : 'English'}.
         Address the parent as a partner in their child's education.
       `;
       
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+      const ai = new GoogleGenAI({ apiKey: (process.env as any).GEMINI_API_KEY || '' });
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: prompt,
@@ -406,17 +427,15 @@ const AIParentNotes = ({ profile, studentId, lang }: { profile: UserProfile, stu
 
       const aiResponse = response.text || (lang === 'ar' ? "سأقوم بمراجعة هذا الأمر شخصياً." : "I will look into this personally.");
 
-      // 3. Save to Firestore
       const noteId = Math.random().toString(36).substr(2, 9);
       await setDoc(doc(db, 'parentNotes', noteId), {
         parentId: profile.uid,
         studentId,
-        text: newNote,
+        text: textToSend,
         aiResponse,
         createdAt: serverTimestamp()
       });
       
-      setNewNote('');
     } catch (error) {
       console.error("Error sending note:", error);
     }
@@ -424,45 +443,110 @@ const AIParentNotes = ({ profile, studentId, lang }: { profile: UserProfile, stu
   };
 
   return (
-    <div className="bg-white rounded-[2rem] p-6 md:p-8 border border-slate-200 shadow-sm flex flex-col">
-      <h3 className="text-xl md:text-2xl font-black text-[#002147] mb-6 md:mb-8 flex items-center gap-3">
-        <MessageSquare className="text-blue-600 w-5 h-5 md:w-6 md:h-6" />
-        {t.notes}
-      </h3>
-      
-      <div className="flex-1 space-y-6 overflow-y-auto mb-6 md:mb-8 pr-2 max-h-[400px]">
-        {notes.map((note) => (
-          <div key={note.id} className="space-y-4">
-            <div className={`p-4 rounded-2xl ${isRtl ? 'bg-slate-50 border-r-4 border-[#002147]' : 'bg-slate-50 border-l-4 border-[#002147] shadow-sm'}`}>
-              <p className="text-sm font-bold text-[#002147]">{note.text}</p>
+    <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col h-[600px] overflow-hidden">
+      <header className="p-6 md:p-8 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center shadow-sm">
+            <MessageSquare size={24} />
+          </div>
+          <div>
+            <h3 className="text-lg md:text-xl font-black text-[#002147]">{t.notes}</h3>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{isRtl ? 'المعلم متصل' : 'Teacher Online'}</span>
             </div>
-            {note.aiResponse && (
-              <div className={`p-4 rounded-2xl bg-blue-50/50 border border-blue-100 ${isRtl ? 'mr-8' : 'ml-8'}`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles size={14} className="text-blue-600" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-blue-600">{t.aiResponse}</span>
+          </div>
+        </div>
+      </header>
+      
+      <div 
+        ref={scrollRef}
+        className="flex-1 p-6 md:p-8 space-y-6 overflow-y-auto bg-slate-50/30 scroll-smooth"
+      >
+        {notes.length === 0 && (
+          <div className="h-full flex flex-col items-center justify-center text-center p-10 opacity-40">
+            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+              <MessageSquare size={32} />
+            </div>
+            <p className="text-sm font-bold text-slate-500">{isRtl ? 'ابدأ المحادثة مع الإدارة التعليمية' : 'Start conversation with education management'}</p>
+          </div>
+        )}
+        {notes.map((note) => (
+          <React.Fragment key={note.id}>
+            <div className={`flex ${isRtl ? 'justify-start' : 'justify-end'}`}>
+              <div className={`max-w-[80%] p-5 rounded-2xl shadow-sm ${
+                isRtl 
+                ? 'bg-blue-600 text-white rounded-br-none' 
+                : 'bg-blue-600 text-white rounded-bl-none'
+              }`}>
+                <div className="flex items-center gap-2 mb-2 opacity-60">
+                   <span className="text-[10px] font-black uppercase tracking-widest">{t.parent}</span>
                 </div>
-                <p className="text-xs text-slate-700 leading-relaxed italic">{note.aiResponse}</p>
+                <p className="text-sm leading-relaxed">{note.text}</p>
+                <div className="text-[9px] mt-2 opacity-40 font-bold text-right">
+                  {note.createdAt ? new Date(note.createdAt.toMillis()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : t.justNow}
+                </div>
+              </div>
+            </div>
+
+            {note.aiResponse && (
+              <div className={`flex ${isRtl ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[80%] p-5 rounded-2xl border border-slate-200 shadow-sm ${
+                  isRtl 
+                  ? 'bg-white text-[#002147] rounded-bl-none' 
+                  : 'bg-white text-[#002147] rounded-br-none'
+                }`}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-6 h-6 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center">
+                      <Sparkles size={12} />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[#C49E3A]">{t.aiResponse}</span>
+                  </div>
+                  <p className="text-sm leading-relaxed text-slate-600 italic">
+                    {note.aiResponse}
+                  </p>
+                  <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-100">
+                    <div className="w-5 h-5 bg-emerald-100 rounded-full flex items-center justify-center">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full" />
+                    </div>
+                    <span className="text-[10px] text-slate-400 font-bold">{t.teacher}</span>
+                  </div>
+                </div>
               </div>
             )}
-          </div>
+          </React.Fragment>
         ))}
       </div>
 
-      <div className="mt-auto pt-6 border-t border-slate-100">
-        <div className="relative">
-          <textarea 
-            value={newNote}
-            onChange={(e) => setNewNote(e.target.value)}
-            placeholder={t.parentNotePlaceholder}
-            className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm focus:outline-none focus:border-blue-600 h-24 transition-all"
-          />
+      <div className="p-6 md:p-8 bg-white border-t border-slate-100">
+        <div className="flex gap-4 items-end">
+          <div className="flex-1 relative">
+            <textarea 
+              value={newNote}
+              onChange={(e) => setNewNote(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  sendNote();
+                }
+              }}
+              placeholder={t.parentNotePlaceholder}
+              className="w-full bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] px-6 py-4 text-sm focus:outline-none focus:border-blue-600 h-14 md:h-14 resize-none transition-all pr-12"
+            />
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300">
+              <PenTool size={16} />
+            </div>
+          </div>
           <button 
             onClick={sendNote}
-            disabled={sending}
-            className="absolute bottom-3 left-3 bg-[#002147] text-white p-3 rounded-xl hover:bg-[#C49E3A] transition-all disabled:opacity-50"
+            disabled={sending || !newNote.trim()}
+            className="w-12 h-12 md:w-14 md:h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center hover:bg-[#002147] hover:scale-105 transition-all shadow-lg shadow-blue-200 disabled:opacity-50 shrink-0"
           >
-            <Send size={18} />
+            {sending ? (
+              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Send size={24} className={isRtl ? 'rotate-180' : ''} />
+            )}
           </button>
         </div>
       </div>
@@ -847,6 +931,45 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
     }
   };
 
+  const [generatingReport, setGeneratingReport] = useState(false);
+  const [smartReport, setSmartReport] = useState<string | null>(null);
+
+  const generateReport = async () => {
+    if (!currentStudent) return;
+    setGeneratingReport(true);
+    try {
+      const ai = new GoogleGenAI({ apiKey: (process.env as any).GEMINI_API_KEY });
+      const prompt = `
+        بصفتك خبيراً تربوياً في أكاديمية "باسم الخليل" لتعليم اللغات، قم بتحليل أداء الطالب التالي وتقديم تقرير مفصل لولي أمره باللغة العربية.
+        
+        بيانات الطالب:
+        - الاسم: ${currentStudent.displayName}
+        - المستوى الحالي: ${currentStudent.level || 'غير محدد بعد'}
+        - نقاط الخبرة (XP): ${currentStudent.points || 0}
+        
+        المطلوب في التقرير (بتنسيق Markdown):
+        1. ملخص عام للأداء.
+        2. تحليل نقاط القوة بناءً على مستواه.
+        3. توصيات محددة لولي الأمر لمساعدته في المنزل.
+        4. خطة عمل مقترحة للأسبوع القادم.
+        
+        اجعل الأسلوب مشجعاً ومهنياً.
+      `;
+
+      const result = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt,
+      });
+
+      setSmartReport(result.text || "عذراً، تعذر توليد التقرير حالياً.");
+    } catch (err) {
+      console.error("AI Report Error:", err);
+      setError("فشل في توليد التقرير الذكي.");
+    } finally {
+      setGeneratingReport(false);
+    }
+  };
+
   const handleUpdatePhone = async (type: 'parent' | 'student', phone: string) => {
     try {
       const field = type === 'parent' ? 'phoneNumber' : 'studentPhoneNumber';
@@ -927,6 +1050,18 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
         </div>
         
         <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
+          <button 
+            onClick={generateReport}
+            disabled={generatingReport}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-3 hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50"
+          >
+            {generatingReport ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Sparkles size={20} />
+            )}
+            {isRtl ? 'طلب تقرير ذكي' : 'Get AI Smart Report'}
+          </button>
           <div className="flex -space-x-2 rtl:space-x-reverse items-center overflow-x-auto pb-2 md:pb-0 scrollbar-hide py-1 px-1">
             {linkedStudents.map((student, idx) => (
               <div key={student.uid} className="relative group flex-shrink-0">
@@ -990,6 +1125,18 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
             <div className={`absolute top-0 bottom-0 ${isRtl ? 'left-0' : 'right-0'} w-1 ${stat.color.replace('text', 'bg')}`} />
           </div>
         ))}
+      </div>
+
+      <div className="mb-10">
+        <ProgressRoadmap lang={lang} currentLevel={currentStudent.level || 'A1'} />
+      </div>
+
+      <div className="mb-10">
+        <ParentAIInsights 
+          lang={lang} 
+          studentName={currentStudent.displayName} 
+          studentLevel={currentStudent.level || 'A1'} 
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10">
@@ -1070,6 +1217,60 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
       <div className="mb-10">
         <AIParentNotes profile={profile} studentId={currentStudent.uid} lang={lang} />
       </div>
+
+      <AnimatePresence>
+        {smartReport && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSmartReport(null)}
+              className="absolute inset-0 bg-[#002147]/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white w-full max-w-3xl max-h-[85vh] rounded-[2.5rem] shadow-2xl relative z-10 flex flex-col overflow-hidden"
+            >
+              <header className="p-6 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+                    <Sparkles size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-lg md:text-xl text-[#002147]">
+                      {isRtl ? 'التقرير الذكي للأداء' : 'AI Performance Report'}
+                    </h3>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                      {isRtl ? 'توليد بواسطة الذكاء الاصطناعي' : 'Generated by AI'}
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setSmartReport(null)}
+                  className="w-10 h-10 rounded-xl hover:bg-slate-200 flex items-center justify-center text-slate-400 transition-colors"
+                >
+                  <XCircle size={24} />
+                </button>
+              </header>
+
+              <div className="flex-1 overflow-y-auto p-6 md:p-12 prose prose-slate max-w-none custom-markdown-content font-arabic leading-relaxed prose-headings:text-[#002147] prose-headings:font-black prose-p:text-slate-600 prose-strong:text-[#C49E3A]">
+                <ReactMarkdown>{smartReport}</ReactMarkdown>
+              </div>
+
+              <footer className="p-6 border-t border-slate-100 bg-slate-50 text-center">
+                <p className="text-[10px] md:text-xs text-slate-400 font-medium">
+                  {isRtl 
+                    ? 'هذا التقرير تم إنشاؤه بناءً على البيانات المتوفرة حالياً، يرجى استخدامه كأداة استرشادية لتعزيز تجربة الطالب.' 
+                    : 'This report is generated based on current data, please use it as a guidance tool to enhance student experience.'}
+                </p>
+              </footer>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -1610,9 +1811,68 @@ export default function App() {
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
   const [loadingCurriculum, setLoadingCurriculum] = useState(false);
+  const [activeNotification, setActiveNotification] = useState<any>(null);
 
   const t = translations[lang];
   const isRtl = lang === 'ar';
+  const [videoLessonsEnabled, setVideoLessonsEnabled] = useState(true);
+
+  useEffect(() => {
+    // Global Settings Listener
+    const settingsUnsubscribe = onSnapshot(doc(db, 'settings', 'global'), (snapshot) => {
+      if (snapshot.exists()) {
+        setVideoLessonsEnabled(snapshot.data().videoLessonsEnabled !== false);
+      }
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'settings/global');
+    });
+    return () => settingsUnsubscribe();
+  }, []);
+
+  const isAdmin = userProfile?.email?.toLowerCase() === 'basim5252@gmail.com';
+
+  useEffect(() => {
+    if (currentUser) {
+      const updateLastSeen = async () => {
+        try {
+          await updateDoc(doc(db, 'users', currentUser.uid), {
+            lastSeen: Date.now()
+          });
+        } catch (err) {
+          console.error("Error updating lastSeen:", err);
+        }
+      };
+
+      updateLastSeen();
+      const interval = setInterval(updateLastSeen, 2 * 60 * 1000); // Every 2 mins
+      return () => clearInterval(interval);
+    }
+  }, [currentUser]);
+
+  // Global Notifications Listener for Students
+  useEffect(() => {
+    if (userProfile?.role === UserRole.STUDENT) {
+      const q = query(
+        collection(db, 'notifications'), 
+        orderBy('createdAt', 'desc'), 
+        limit(1)
+      );
+      
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        if (!snapshot.empty) {
+          const latest = snapshot.docs[0].data();
+          // Only show if it's new (created in the last 30 seconds)
+          const createdAt = latest.createdAt?.toMillis() || 0;
+          if (Date.now() - createdAt < 30000) {
+             setActiveNotification({ id: snapshot.docs[0].id, ...latest });
+             // Auto hide after 10 seconds
+             setTimeout(() => setActiveNotification(null), 10000);
+          }
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [userProfile]);
 
   useEffect(() => {
     testConnection();
@@ -1835,6 +2095,23 @@ export default function App() {
 
   const handleLogout = () => signOut(auth);
 
+  const handleStartAiChat = async () => {
+    if (!userProfile) return;
+    const currentCredits = (userProfile as any).credits || 0;
+    if (currentCredits < CreditCost.AI_CONVERSATION) {
+      alert(t.insufficientCredits);
+      setView('credits');
+      return;
+    }
+    try {
+      await deductCredits(userProfile.uid, CreditCost.AI_CONVERSATION, `AI Conversation: 3-min Session`);
+      setUserProfile({ ...userProfile, credits: currentCredits - CreditCost.AI_CONVERSATION } as UserProfile);
+      setView('ai-chat');
+    } catch (err) {
+      console.error("AI Deduction error:", err);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -1853,24 +2130,51 @@ export default function App() {
   const handleLessonComplete = async () => {
     if (!userProfile || !activeLesson) return;
     
+    // Deduct Credit
+    const cost = CreditCost.READING_LESSON;
+    const currentCredits = (userProfile as any).credits || 0;
+
     // Increment XP and points
     const xpToAdd = 50; 
     const updatedPoints = (userProfile as any).points + xpToAdd;
+    const updatedCredits = Math.max(0, currentCredits - cost);
     
     try {
-      await setDoc(doc(db, 'users', userProfile.uid), { 
-        points: updatedPoints 
-      }, { merge: true });
-      
-      setUserProfile({ ...userProfile, points: updatedPoints } as UserProfile);
+      await deductCredits(userProfile.uid, cost, `أكملت درس: ${activeLesson.title}`);
+
+      setUserProfile({ ...userProfile, points: updatedPoints, credits: updatedCredits } as UserProfile);
       setView('curriculum');
       alert(`${t.xpEarned}: +${xpToAdd}`);
     } catch (err) {
-      console.error("Error updating points:", err);
+      console.error("Error completing lesson:", err);
     }
   };
 
   const renderContent = () => {
+    if (view === 'admin' && isAdmin) {
+      return <AdminDashboard lang={lang} />;
+    }
+    if (view === 'video-library') {
+      return (
+        <VideoLibrary 
+          lang={lang} 
+          profile={userProfile} 
+          onUpdateProfile={(p) => setUserProfile(p as StudentProfile)} 
+          onNavigate={setView} 
+          enabled={videoLessonsEnabled || isAdmin}
+        />
+      );
+    }
+    if (view === 'credits') {
+      return <CreditSystem lang={lang} />;
+    }
+    if (view === 'early-childhood') {
+      return <EarlyChildhoodHome lang={lang} />;
+    }
+    if (view === 'story-library') {
+      return <StoryLibrary lang={lang} profile={userProfile} onUpdateProfile={(p) => setUserProfile(p as StudentProfile)} onNavigate={setView} />;
+    }
+
     if (view === 'placement-test') {
       return (
         <PlacementTest lang={lang} onComplete={async (level) => {
@@ -1892,9 +2196,23 @@ export default function App() {
     if (view === 'curriculum') {
       return <CurriculumBrowser 
         lang={lang} 
-        onSelectLesson={(lesson, category, level) => { 
+        onSelectLesson={async (lesson, category, level) => { 
+          if (!userProfile) return;
+          if (category === CurriculumCategory.CONVERSATION) {
+            handleStartAiChat();
+            return;
+          }
+          
+          const currentCredits = (userProfile as any).credits || 0;
+          const cost = CreditCost.READING_LESSON;
+          
+          if (currentCredits < cost) {
+            alert(t.insufficientCredits);
+            setView('credits');
+            return;
+          }
+
           setActiveLesson({ ...lesson }); 
-          // We could keep track of selectedCategory/Level in App if needed
           setView('lesson'); 
         }}
         onBack={() => setView('dashboard')}
@@ -1905,6 +2223,15 @@ export default function App() {
     }
 
     if (view === 'lesson' && activeLesson) {
+      // Oxford Lesson specific check
+      if (activeLesson.id === 'oxford-1') {
+        return <OxfordLesson 
+          lang={lang} 
+          onComplete={handleLessonComplete}
+          onBack={() => setView('curriculum')}
+        />;
+      }
+
       // Determine category from ID prefix if possible
       const cat = activeLesson.id?.startsWith('r_') ? CurriculumCategory.READING : 
                   activeLesson.id?.startsWith('g_') ? CurriculumCategory.GRAMMAR : 
@@ -1925,7 +2252,12 @@ export default function App() {
     }
     
     if (view === 'leaderboard') {
-      return <Leaderboard lang={lang} />;
+      return (
+        <Leaderboard 
+          lang={lang} 
+          isAdmin={userProfile?.email?.toLowerCase() === 'basim5252@gmail.com'} 
+        />
+      );
     }
 
     if (view === 'chat') {
@@ -1935,7 +2267,7 @@ export default function App() {
     // Role-specific Default Dashboards
     switch (userProfile.role) {
       case UserRole.STUDENT:
-        return <StudentHome lang={lang} onStartConversation={() => setView('ai-chat')} profile={userProfile} onOpenCurriculum={() => setView('curriculum')} />;
+        return <StudentHome lang={lang} onStartConversation={handleStartAiChat} profile={userProfile} onOpenCurriculum={() => setView('curriculum')} />;
       case UserRole.PARENT:
       case UserRole.ADMIN:
         return <ParentDashboard lang={lang} profile={userProfile} />;
@@ -1990,24 +2322,46 @@ export default function App() {
                 <nav className="flex-1 space-y-3">
                   {[
                     { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
+                    { id: 'credits', label: t.credits, icon: Wallet },
+                    { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
+                    { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
+                    { id: 'early-childhood', label: t.earlyChildhood, icon: Baby },
+                    { id: 'story-library', label: t.storyLibrary, icon: BookOpen },
                     { id: 'curriculum', label: t.curriculum, icon: BookOpen },
                     { id: 'ai-chat', label: t.aiPartner, icon: Mic2 },
                     { id: 'progress', label: t.performance, icon: BarChart3 },
                     { id: 'leaderboard', label: t.leaderboard, icon: Trophy },
                     { id: 'chat', label: t.chat, icon: MessageSquare },
-                  ].map((item) => (
-                    <button 
-                      key={item.id}
-                      onClick={() => setView(item.id as AppView)}
-                      className={`w-full flex items-center gap-4 px-4 py-4 rounded-2xl transition-all group relative overflow-hidden ${
-                        view === item.id 
-                        ? 'bg-[#C49E3A] text-[#002147] font-black shadow-lg' : 'hover:bg-white/10 text-white/70 hover:text-white'
-                      }`}
-                    >
-                      <item.icon size={22} className="shrink-0 group-hover:scale-110 transition-transform" />
-                      <span className={`text-xs font-bold hidden lg:block uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'} w-full`}>{item.label}</span>
-                    </button>
-                  ))}
+                  ].filter(item => item.show !== false).map((item) => {
+                    const isDisabled = (item as any).disabled;
+                    return (
+                      <button 
+                        key={item.id}
+                        disabled={isDisabled}
+                        onClick={() => {
+                        if (item.id === 'ai-chat') {
+                          handleStartAiChat();
+                        } else {
+                          setView(item.id as AppView);
+                        }
+                      }}
+                        className={`w-full flex items-center gap-4 px-4 py-4 rounded-2xl transition-all group relative overflow-hidden ${
+                          view === item.id 
+                          ? 'bg-[#C49E3A] text-[#002147] font-black shadow-lg' : 'hover:bg-white/10 text-white/70 hover:text-white'
+                        } ${isDisabled ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
+                      >
+                        <item.icon size={22} className="shrink-0 group-hover:scale-110 transition-transform" />
+                        <span className={`text-xs font-bold hidden lg:block uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'} w-full`}>
+                          {item.label}
+                          {isDisabled && (
+                            <span className={`block text-[8px] font-black tracking-widest ${isRtl ? 'mt-0.5' : 'mt-0.5'}`}>
+                              ({t.comingSoon})
+                            </span>
+                          )}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </nav>
 
                 <div className="pt-8 border-t border-white/10 space-y-3">
@@ -2028,43 +2382,96 @@ export default function App() {
                 </div>
               </aside>
 
-              {/* Mobile Bottom Navigation */}
-              <nav className="md:hidden fixed bottom-6 left-4 right-4 bg-[#002147] text-white rounded-[2.5rem] px-2 py-3 flex justify-around items-center z-50 shadow-2xl border-b-4 border-[#C49E3A]">
+              {/* Mobile Bottom Navigation - Two Floors */}
+              <nav className="md:hidden fixed bottom-2 left-3 right-3 bg-[#002147] text-white rounded-[2rem] p-2 flex flex-col gap-1 z-50 shadow-2xl border-b-4 border-[#C49E3A] overflow-hidden">
                 {[
-                  { id: 'dashboard', icon: LayoutDashboard },
-                  { id: 'curriculum', icon: BookOpen },
-                  { id: 'ai-chat', icon: Mic2 },
-                  { id: 'leaderboard', icon: Trophy },
-                  { id: 'progress', icon: BarChart3 },
-                  { id: 'logout', icon: LogOut, action: handleLogout },
-                ].map((item) => (
-                  <button 
-                    key={item.id}
-                    onClick={() => {
-                      if (item.action) item.action();
-                      else setView(item.id as AppView);
-                    }}
-                    className={`flex flex-col items-center justify-center p-2 rounded-2xl transition-all relative ${
-                      view === item.id 
-                      ? 'text-[#C49E3A] scale-110' : 'text-white/40'
-                    }`}
-                  >
-                    <item.icon size={22} strokeWidth={view === item.id ? 3 : 2} />
-                    {view === item.id && (
-                      <motion.div 
-                        layoutId="activeTab"
-                        className="absolute -bottom-1 w-1 h-1 bg-[#C49E3A] rounded-full"
-                      />
-                    )}
-                  </button>
+                  [
+                    { id: 'dashboard', icon: LayoutDashboard },
+                    { id: 'credits', icon: Wallet },
+                    { id: 'admin', icon: ShieldAlert, show: isAdmin },
+                    { id: 'early-childhood', icon: Baby },
+                    { id: 'video-library', icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
+                    { id: 'story-library', icon: BookOpen },
+                  ],
+                  [
+                    { id: 'curriculum', icon: BookOpen },
+                    { id: 'ai-chat', icon: Mic2 },
+                    { id: 'leaderboard', icon: Trophy },
+                    { id: 'progress', icon: BarChart3 },
+                    { id: 'logout', icon: LogOut, action: handleLogout },
+                  ]
+                ].map((row, rowIndex) => (
+                  <div key={rowIndex} className={`flex justify-around items-center w-full ${rowIndex === 1 ? 'border-t border-white/5 pt-1' : ''}`}>
+                    {row.filter((item: any) => item.show !== false).map((item: any) => {
+                      const isDisabled = item.disabled;
+                      return (
+                        <button 
+                          key={item.id}
+                          disabled={isDisabled}
+                          onClick={() => {
+                            if (item.id === 'ai-chat') {
+                              handleStartAiChat();
+                            } else if (item.action) {
+                              item.action();
+                            } else {
+                              setView(item.id as AppView);
+                            }
+                          }}
+                          className={`flex flex-col items-center justify-center p-1 rounded-xl transition-all relative ${
+                            view === item.id 
+                            ? 'text-[#C49E3A] scale-110' : 'text-white/40'
+                          } ${isDisabled ? 'opacity-30 grayscale cursor-not-allowed' : ''}`}
+                        >
+                          <item.icon size={18} strokeWidth={view === item.id ? 3 : 2} />
+                          {view === item.id && (
+                            <motion.div 
+                              layoutId="activeTab"
+                              className="absolute -bottom-0.5 w-1 h-1 bg-[#C49E3A] rounded-full"
+                            />
+                          )}
+                          {isDisabled && (
+                            <span className="absolute -top-1 -right-1 text-[5px] font-black bg-red-500 text-white px-1 rounded-full">{isRtl ? 'قريباً' : 'SOON'}</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 ))}
               </nav>
             </>
           )}
 
-          {/* Main Content Area */}
-          <main className={`flex-1 transition-all ${view !== 'placement-test' ? (isRtl ? 'md:mr-20 lg:mr-64 mb-24 md:mb-0 pt-20 md:pt-0' : 'md:ml-20 lg:ml-64 mb-24 md:mb-0 pt-20 md:pt-0') : ''}`}>
+          <main className={`flex-1 transition-all ${view !== 'placement-test' ? (isRtl ? 'md:mr-20 lg:mr-64 mb-32 md:mb-0 pt-20 md:pt-0' : 'md:ml-20 lg:ml-64 mb-32 md:mb-0 pt-20 md:pt-0') : ''}`}>
             {renderContent()}
+
+            {/* Global Notification Toast */}
+            <AnimatePresence>
+              {activeNotification && (
+                <motion.div 
+                  initial={{ y: -100, opacity: 0, scale: 0.9 }}
+                  animate={{ y: 80, opacity: 1, scale: 1 }}
+                  exit={{ y: -100, opacity: 0, scale: 0.9 }}
+                  className={`fixed top-0 left-4 right-4 md:left-auto md:right-12 md:max-w-md z-[100] bg-white rounded-[2.5rem] p-6 shadow-2xl border-4 border-[#002147] ${isRtl ? 'font-arabic' : 'font-sans'}`}
+                  dir={isRtl ? 'rtl' : 'ltr'}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-3xl flex items-center justify-center shrink-0 shadow-sm">
+                      <Bell size={24} />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-sm font-black text-[#002147] mb-1">{isRtl ? activeNotification.titleAr : activeNotification.titleEn}</h4>
+                      <p className="text-xs text-slate-500 font-bold leading-relaxed">{isRtl ? activeNotification.messageAr : activeNotification.messageEn}</p>
+                    </div>
+                    <button 
+                      onClick={() => setActiveNotification(null)}
+                      className="text-slate-300 hover:text-slate-600 transition-colors"
+                    >
+                      <XCircle size={18} />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </main>
         </motion.div>
       </AnimatePresence>

@@ -10,9 +10,52 @@
         "displayName": { "type": "string" },
         "role": { "type": "string", "enum": ["student", "parent", "teacher", "admin"] },
         "avatarUrl": { "type": "string" },
-        "createdAt": { "type": "integer" }
+        "credits": { "type": "integer" },
+        "createdAt": { "type": "integer" },
+        "lastSeen": { "type": "integer" }
       },
       "required": ["uid", "email", "displayName", "role", "createdAt"]
+    },
+    "CreditTransaction": {
+      "title": "Credit Transaction",
+      "description": "Log of credit purchase or consumption",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "amount": { "type": "integer" },
+        "type": { "type": "string", "enum": ["purchase", "consumption", "redeem"] },
+        "description": { "type": "string" },
+        "timestamp": { "type": "integer" }
+      },
+      "required": ["id", "userId", "amount", "type", "timestamp"]
+    },
+    "Voucher": {
+      "title": "Credit Voucher",
+      "description": "Prepaid code to activate credits",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "credits": { "type": "integer" },
+        "status": { "type": "string", "enum": ["active", "used"] },
+        "usedBy": { "type": "string" },
+        "usedAt": { "type": "integer" },
+        "createdAt": { "type": "integer" }
+      },
+      "required": ["code", "credits", "status", "createdAt"]
+    },
+    "BroadcastNotification": {
+      "title": "Broadcast Notification",
+      "description": "A notification sent by the admin to all students",
+      "type": "object",
+      "properties": {
+        "titleAr": { "type": "string" },
+        "titleEn": { "type": "string" },
+        "messageAr": { "type": "string" },
+        "messageEn": { "type": "string" },
+        "createdAt": { "type": "integer" }
+      },
+      "required": ["titleAr", "messageAr", "createdAt"]
     },
     "StudentProfile": {
       "title": "Student Profile",
@@ -127,6 +170,16 @@
         "createdAt": { "type": "integer" }
       },
       "required": ["studentId", "parentId", "content"]
+    },
+    "GlobalSettings": {
+      "title": "Global Settings",
+      "description": "System-wide feature toggles and configuration",
+      "type": "object",
+      "properties": {
+        "videoLessonsEnabled": { "type": "boolean" },
+        "updatedAt": { "type": "integer" }
+      },
+      "required": ["videoLessonsEnabled"]
     }
   },
   "firestore": {
@@ -161,6 +214,22 @@
     "/parentNotes/{noteId}": {
       "schema": "ParentNote",
       "description": "Notes for communication between parents and students"
+    },
+    "/transactions/{transactionId}": {
+      "schema": "CreditTransaction",
+      "description": "Historical record of credit changes"
+    },
+    "/vouchers/{code}": {
+      "schema": "Voucher",
+      "description": "Prepaid credit activation codes"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "BroadcastNotification",
+      "description": "Admin broadcast messages"
+    },
+    "/settings/global": {
+      "schema": "GlobalSettings",
+      "description": "Global application configuration"
     }
   }
 }

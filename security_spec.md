@@ -1,27 +1,30 @@
-# Security Specification: O.D. Academy
+# AI Studio Security Specification - Al Khalil Digital Academy
 
-## Data Invariants
-1. **User Identity**: A user profile MUST match the `auth.uid`. Role and `createdAt` are immutable after creation.
-2. **Student Identity**: A student profile MUST belong to a valid user who has the 'student' role.
-3. **Relational Integrity**: 
-   - A `Grade` MUST reference a valid `studentId`.
-   - A `Conversation` MUST reference a valid `studentId` who is the current user.
-4. **Temporal Integrity**: All `date`, `createdAt`, and `updatedAt` fields MUST use `request.time` (server timestamp).
+## 1. Data Invariants
+- A user's `credits` balance must always be an integer and cannot be negative (unless a temporary overdraft is allowed, but typically >= 0).
+- Every `CreditTransaction` MUST correspond to an actual change in the user's `credits`.
+- Only the user (owner) or an admin can read their own `UserProfile`.
+- `LearningModule` and `Lesson` are read-only for students/parents and writeable only by admins.
+- `AIConversation` logs are private to the student and their parent.
+- `Grade` records are private to the student and parent.
 
-## The "Dirty Dozen" Payloads (Red Team Test Cases)
+## 2. The "Dirty Dozen" Payloads
 
-1. **Role Spoofing**: Logged in as student `A`, try to create user profile with `role: 'teacher'`.
-2. **Identity Theft**: Logged in as user `A`, try to create/update `/users/B`.
-3. **Shadow Field Injection**: Try to add `isAdmin: true` to a user profile.
-4. **Immutability Breach**: Try to change `role` or `createdAt` on an existing user profile.
-5. **ID Poisoning**: Use a 2KB string as a `studentId`.
-6. **Self-Parenting**: Try to set `parentId` to one's own `uid` (circular).
-7. **Score Padding**: Try to upload a grade where `score > total`.
-8. **Time Travel**: Try to set `date` to a future/past timestamp instead of `serverTimestamp()`.
-9. **Resource Exhaustion**: Send a transcript with 1,000,000 characters.
-10. **Unverified Account Access**: Attempt a write while `email_verified` is `false`.
-11. **PII Leak**: Non-parent/non-teacher reading another student's grade.
-12. **State Skipping**: Trying to update `points` without being a teacher.
+1. **Identity Theft (Credit Stealing):** Attempt to update another user's `credits` field.
+2. **Negative Purchase:** Attempt to create a `CreditTransaction` with a negative amount and type 'purchase'.
+3. **Price Spoofing:** Creating a transaction for 80 credits but only "paying" for the starter pack (validated via backend in reality, but here rules check size/enums).
+4. **Self-Promotion:** A student attempting to update their own `role` to 'admin'.
+5. **Orphaned Transaction:** Creating a `CreditTransaction` without updating the `UserProfile.credits` (Checked via `existsAfter` or `getAfter` if atomic).
+6. **Double Spending:** Attempting to consume credits twice for the same lesson (requires state check).
+7. **Junk Data Injection:** Injected 1MB string into `displayName`.
+8. **Malicious Module Creation:** Student trying to create a `LearningModule`.
+9. **Private Note Sniffing:** User trying to read `ParentNote` that doesn't belong to their child's `studentId`.
+10. **Unauthorized Log Access:** Reading `AIConversation` of another student.
+11. **Future Timestamping:** Sending `createdAt` with a timestamp 10 years in the future.
+12. **Shadow Field:** Adding `isPro: true` to `UserProfile`.
 
-## Test Runner Logic (Schema)
-The `firestore.rules.test.ts` will verify these cases.
+## 3. The Test Runner (Plan)
+We will verify that:
+- `create` on `transactions` requires matching `request.auth.uid`.
+- `update` on `users` `credits` field is strictly tied to the transaction atomicity (where possible in rules) or whitelisted actions.
+- `role` is immutable for the user.

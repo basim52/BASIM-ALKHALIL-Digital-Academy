@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
+import { getFirestore, doc, getDocFromServer, writeBatch, increment, serverTimestamp, getDoc } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
@@ -15,6 +15,84 @@ export enum OperationType {
   LIST = 'list',
   GET = 'get',
   WRITE = 'write',
+}
+
+export async function deductCredits(userId: string, amount: number, description: string) {
+  try {
+    const batch = writeBatch(db);
+    const timestamp = new Date().getTime();
+    const transactionId = `${userId}_cons_${timestamp}`;
+    
+    const transRef = doc(db, 'transactions', transactionId);
+    batch.set(transRef, {
+      id: transactionId,
+      userId,
+      amount: -amount,
+      type: 'consumption',
+      description,
+      timestamp: serverTimestamp()
+    });
+
+    const userRef = doc(db, 'users', userId);
+    batch.update(userRef, {
+      credits: increment(-amount),
+      lastSeen: serverTimestamp()
+    });
+
+    await batch.commit();
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, 'transactions/users');
+  }
+}
+
+export async function redeemVoucher(userId: string, code: string) {
+  try {
+    const voucherRef = doc(db, 'vouchers', code);
+    const voucherSnap = await getDoc(voucherRef);
+    
+    if (!voucherSnap.exists()) {
+      throw new Error('invalid-code');
+    }
+    
+    const voucherData = voucherSnap.data();
+    if (voucherData.status === 'used') {
+      throw new Error('already-used');
+    }
+    
+    const batch = writeBatch(db);
+    const timestamp = new Date().getTime();
+    const transactionId = `${userId}_redeem_${timestamp}`;
+    
+    batch.update(voucherRef, {
+      status: 'used',
+      usedBy: userId,
+      usedAt: serverTimestamp()
+    });
+    
+    const transRef = doc(db, 'transactions', transactionId);
+    batch.set(transRef, {
+      id: transactionId,
+      userId,
+      amount: voucherData.credits,
+      type: 'redeem',
+      description: `Gift Code Redeemed: ${code}`,
+      timestamp: serverTimestamp()
+    });
+    
+    const userRef = doc(db, 'users', userId);
+    batch.update(userRef, {
+      credits: increment(voucherData.credits),
+      lastSeen: serverTimestamp()
+    });
+    
+    await batch.commit();
+    return voucherData.credits;
+  } catch (error: any) {
+    if (error.message === 'invalid-code' || error.message === 'already-used') {
+      throw error;
+    }
+    handleFirestoreError(error, OperationType.WRITE, `vouchers/${code}`);
+  }
 }
 
 export function handleFirestoreError(error: any, operation: OperationType, path: string | null) {

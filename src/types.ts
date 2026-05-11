@@ -26,7 +26,42 @@ export interface UserProfile {
   createdAt: any; // Using any to support serverTimestamp during creation and Timestamp object on read
   linkedStudentId?: string;
   phoneNumber?: string;
+  lastSeen?: number;
+  credits?: number; // Credit balance
 }
+
+export interface CreditTransaction {
+  id: string;
+  userId: string;
+  amount: number; // Positive for purchase, negative for usage
+  type: 'purchase' | 'consumption';
+  description: string;
+  timestamp: any;
+}
+
+export interface SubscriptionPackage {
+  id: string;
+  priceSAR: number;
+  credits: number;
+  label: string;
+}
+
+export const CREDIT_PACKAGES: SubscriptionPackage[] = [
+  { id: 'starter', priceSAR: 30, credits: 12, label: 'باقة الانطلاق - 12 درس' },
+  { id: 'standard', priceSAR: 60, credits: 35, label: 'باقة المهارة - 35 درس' },
+  { id: 'pro', priceSAR: 120, credits: 80, label: 'باقة الإتقان - 80 درس' }
+];
+
+export const GIFT_PACKAGE = { id: 'gift', priceSAR: 0, credits: 2, label: 'باقة الهدية - 2 درس مجاناً' };
+
+export enum CreditCost {
+  READING_LESSON = 1,
+  AI_CONVERSATION = 3,
+  VIDEO_LESSON = 5,
+  AUDIO_STORY = 2
+}
+
+export type AppView = 'dashboard' | 'placement-test' | 'curriculum' | 'lesson' | 'progress' | 'leaderboard' | 'chat' | 'admin' | 'ai-chat' | 'video-library' | 'story-library' | 'credits' | 'early-childhood';
 
 export interface WhatsAppNotification {
   id: string;
