@@ -101,15 +101,29 @@ export const NumbersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
   const handleNumberClick = (num: NumberOption) => {
     if (gameMode && targetNumber) {
         if (num.value === targetNumber.value) {
-            setScore(prev => prev + 1);
-            speak(`Excellent! This is the number ${num.value}`);
+            const nextScore = score + 1;
+            setScore(nextScore);
+            
+            if (nextScore >= 10) {
+              speak(isRtl ? "رائع! لقد وجدت جميع الأرقام العشرة! أنت بطل!" : "Amazing! You found all 10 numbers! You are a champion!");
+              setShowExcellent(true);
+              setTimeout(() => {
+                setShowExcellent(false);
+                setGameMode(false);
+                setScore(0);
+                setTargetNumber(null);
+              }, 4000);
+              return;
+            }
+
+            speak(isRtl ? `ممتاز! هذا هو الرقم ${num.value}` : `Excellent! This is the number ${num.value}`);
             setShowExcellent(true);
             setTimeout(() => {
                 setShowExcellent(false);
                 startNewLevel();
             }, 1500);
         } else {
-            speak(`No, that is the number ${num.value}. Try again!`);
+            speak(isRtl ? `لا، هذا هو الرقم ${num.value}. حاول مرة أخرى!` : `No, that is the number ${num.value}. Try again!`);
         }
     } else {
         setActiveNumber(num);

@@ -144,15 +144,29 @@ export const LettersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
   const handleLetterClick = (item: LetterOption) => {
     if (gameMode && targetLetter) {
         if (item.letter === targetLetter.letter) {
-            setScore(prev => prev + 1);
-            speak(`Excellent! This is the letter ${item.letter}`);
+            const nextScore = score + 1;
+            setScore(nextScore);
+            
+            if (nextScore >= 10) {
+              speak(isRtl ? "رائع! لقد وجدت جميع الحروف العشرة! أنت عبقري في الحروف!" : "Amazing! You found all 10 letters! You are a letter genius!");
+              setShowExcellent(true);
+              setTimeout(() => {
+                setShowExcellent(false);
+                setGameMode(false);
+                setScore(0);
+                setTargetLetter(null);
+              }, 4000);
+              return;
+            }
+
+            speak(isRtl ? `ممتاز! هذا هو حرف ${item.letter}` : `Excellent! This is the letter ${item.letter}`);
             setShowExcellent(true);
             setTimeout(() => {
                 setShowExcellent(false);
                 startNewLevel();
             }, 1500);
         } else {
-            speak(`No, that is the letter ${item.letter}. Try again!`);
+            speak(isRtl ? `لا، هذا هو حرف ${item.letter}. حاول مرة أخرى!` : `No, that is the letter ${item.letter}. Try again!`);
         }
     } else {
         setActiveLetter(item);

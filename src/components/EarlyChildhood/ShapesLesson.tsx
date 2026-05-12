@@ -104,9 +104,23 @@ export const ShapesLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
     
     if (gameMode && targetShape) {
       if (shape.name === targetShape.name) {
-        setScore(prev => prev + 1);
+        const nextScore = score + 1;
+        setScore(nextScore);
         setStreak(prev => prev + 1);
-        speak("Excellent! Great job!");
+        
+        if (nextScore >= 10) {
+          speak(isRtl ? "رائع! لقد وجدت جميع الأشكال العشرة! أنت مهندس صغير بطل!" : "Fantastic! You found all 10 shapes! You are a champion little engineer!");
+          setShowExcellent(true);
+          setTimeout(() => {
+            setShowExcellent(false);
+            setGameMode(false);
+            setScore(0);
+            setTargetShape(null);
+          }, 4000);
+          return;
+        }
+
+        speak(isRtl ? "ممتاز! عمل رائع!" : "Excellent! Great job!");
         setShowExcellent(true);
         
         setTimeout(() => {
@@ -115,7 +129,7 @@ export const ShapesLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
         }, 1500);
       } else {
         setStreak(0);
-        speak(`That is a ${shape.name}. Try again!`);
+        speak(isRtl ? `هذا ${shape.nameAr}. حاول مرة أخرى!` : `That is a ${shape.name}. Try again!`);
       }
     } else {
       speak(shape.name);

@@ -82,34 +82,43 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
 
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitRecognition || (window as any).webkitSpeechRecognition;
+    
     if (SpeechRecognition && !recognitionRef.current) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'en-US';
-    }
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
 
-    if (recognitionRef.current) {
-      recognitionRef.current.onresult = (event: any) => {
+      recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript.toLowerCase().trim();
         setRecognizedText(transcript);
         if (validateRef.current) {
           validateRef.current(transcript);
         }
+        setIsListening(false);
       };
 
-      recognitionRef.current.onerror = (event: any) => {
+      recognition.onerror = (event: any) => {
         console.error('Speech recognition error', event.error);
         if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
           setMicError('denied');
         }
         setIsListening(false);
+        setIsProcessingState(false);
       };
 
-      recognitionRef.current.onend = () => {
+      recognition.onend = () => {
         setIsListening(false);
       };
+
+      recognitionRef.current = recognition;
     }
+    
+    return () => {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch(e) {}
+      }
+    };
   }, []);
 
   const speak = useCallback((text: string, forceLang?: string) => {
@@ -123,7 +132,7 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
   }, []);
 
   const startListening = async () => {
-    if (!recognitionRef.current || isProcessing) {
+    if (!recognitionRef.current || isProcessingRef.current) {
       if (!recognitionRef.current) setMicError('unsupported');
       return;
     }
@@ -139,7 +148,7 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
     
     try {
       if (isListening) {
-        recognitionRef.current.stop();
+        try { recognitionRef.current.stop(); } catch(e) {}
         return;
       }
 
@@ -216,15 +225,19 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
   };
 
   const validatePronunciation = (transcript: string) => {
+    if (isProcessingRef.current) return;
+
     const wordIdx = isReviewingRef.current ? reviewQueueRef.current[reviewIndexRef.current] : currentIndexRef.current;
     const targetWord = PRACTICE_WORDS[wordIdx];
     const target = targetWord.word.toLowerCase();
     
-    // More robust matching
-    const transcriptParts = transcript.split(' ');
-    const isCorrect = transcript.includes(target) || 
-                      transcriptParts.some(p => p === target) ||
-                      (transcript.length >= 3 && target.includes(transcript));
+    // Clean and split
+    const cleanTranscript = transcript.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "").trim();
+    const transcriptParts = cleanTranscript.split(/\s+/);
+    
+    const isCorrect = cleanTranscript === target || 
+                      transcriptParts.includes(target) ||
+                      (cleanTranscript.length >= 3 && target.includes(cleanTranscript));
 
     if (isCorrect) {
       setFeedback('correct');
@@ -239,7 +252,7 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
           speak("Excellent! You mastered it!");
           transitionTimeoutRef.current = setTimeout(nextModeOrFinish, 2000);
         } else {
-          speak("One more time!");
+          speak("Great! One more time!");
           transitionTimeoutRef.current = setTimeout(() => {
             setFeedback('none');
             setIsProcessingState(false);
@@ -247,7 +260,7 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
         }
       } else {
         setScore(prev => prev + 1);
-        speak("Excellent! Well done!");
+        speak("Great job!");
         transitionTimeoutRef.current = setTimeout(nextModeOrFinish, 2000);
       }
     } else {
@@ -258,13 +271,15 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
       if (nextAttempts >= 3 && !isReviewingRef.current) {
         setIsProcessingState(true);
         setReviewQueue(prev => [...prev, currentIndexRef.current]);
-        speak("Let's try this one later. Next word!");
+        speak(`Let's move on. That was ${target}.`);
         transitionTimeoutRef.current = setTimeout(nextModeOrFinish, 2500);
       } else {
-        speak("Good try! Listen and repeat.");
+        speak("Try again!");
         transitionTimeoutRef.current = setTimeout(() => {
+          setFeedback('none');
+          setIsProcessingState(false);
           speak(targetWord.word);
-        }, 2000);
+        }, 1500);
       }
     }
   };

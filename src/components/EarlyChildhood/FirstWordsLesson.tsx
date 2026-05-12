@@ -170,15 +170,29 @@ export const FirstWordsLesson: React.FC<FirstWordsLessonProps> = ({ onBack, isRt
   const handleWordClick = (word: WordOption) => {
     if (gameMode && targetWord) {
         if (word.id === targetWord.id) {
-            setScore(prev => prev + 1);
-            speak(`Excellent! This is ${word.word}`);
+            const nextScore = score + 1;
+            setScore(nextScore);
+            
+            if (nextScore >= 10) {
+              speak(isRtl ? "رائع! لقد وجدت جميع الكلمات العشرة! أنت قارئ متميز!" : "Amazing! You found all 10 words! You are an outstanding reader!");
+              setShowExcellent(true);
+              setTimeout(() => {
+                setShowExcellent(false);
+                setGameMode(false);
+                setScore(0);
+                setTargetWord(null);
+              }, 4000);
+              return;
+            }
+
+            speak(isRtl ? `ممتاز! هذه هي كلمة ${word.wordAr}` : `Excellent! This is ${word.word}`);
             setShowExcellent(true);
             setTimeout(() => {
                 setShowExcellent(false);
                 startNewLevel();
             }, 1500);
         } else {
-            speak(`No, that is ${word.word}. Try again!`);
+            speak(isRtl ? `لا، هذه كلمة ${word.wordAr}. حاول مرة أخرى!` : `No, that is ${word.word}. Try again!`);
         }
     } else {
         setActiveId(word.id);

@@ -116,15 +116,29 @@ export const AnimalsLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
   const handleAnimalClick = (animal: AnimalOption) => {
     if (gameMode && targetAnimal) {
       if (animal.id === targetAnimal.id) {
-        setScore(prev => prev + 1);
-        speak(`Excellent! That is the ${animal.name}`);
+        const nextScore = score + 1;
+        setScore(nextScore);
+        
+        if (nextScore >= 10) {
+          speak(isRtl ? "رائع! لقد وجدت جميع الحيوانات العشرة! أنت مستكشف حيوانات عظيم!" : "Amazing! You found all 10 animals! You are a great animal explorer!");
+          setShowExcellent(true);
+          setTimeout(() => {
+            setShowExcellent(false);
+            setGameMode(false);
+            setScore(0);
+            setTargetAnimal(null);
+          }, 4000);
+          return;
+        }
+
+        speak(isRtl ? `ممتاز! هذا هو ${animal.nameAr}` : `Excellent! That is the ${animal.name}`);
         setShowExcellent(true);
         setTimeout(() => {
           setShowExcellent(false);
           startNewLevel();
         }, 1500);
       } else {
-        speak(`No, that is the ${animal.name}. Try again!`);
+        speak(isRtl ? `لا، هذا هو ${animal.nameAr}. حاول مرة أخرى!` : `No, that is the ${animal.name}. Try again!`);
       }
     } else {
       setActiveAnimal(animal);

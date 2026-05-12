@@ -92,9 +92,23 @@ export const ColorsLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
     if (gameMode && targetColor) {
       if (color.name === targetColor.name) {
         // Correct!
-        setScore(prev => prev + 1);
+        const nextScore = score + 1;
+        setScore(nextScore);
         setStreak(prev => prev + 1);
-        speak("Excellent! You found it!");
+        
+        if (nextScore >= 10) {
+          speak(isRtl ? "رائع! لقد ميزت جميع الألوان العشرة ببراعة!" : "Fantastic! You identified all 10 colors perfectly!");
+          setShowExcellent(true);
+          setTimeout(() => {
+            setShowExcellent(false);
+            setGameMode(false);
+            setScore(0);
+            setTargetColor(null);
+          }, 4000);
+          return;
+        }
+
+        speak(isRtl ? "ممتاز! لقد وجدته!" : "Excellent! You found it!");
         setShowExcellent(true);
         
         setTimeout(() => {
@@ -104,7 +118,7 @@ export const ColorsLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
       } else {
         // Incorrect
         setStreak(0);
-        speak(`That is ${color.name}. Try again!`);
+        speak(isRtl ? `هذا هو اللون ${color.nameAr}. حاول مرة أخرى!` : `That is ${color.name}. Try again!`);
       }
     } else {
       // Normal learning mode
