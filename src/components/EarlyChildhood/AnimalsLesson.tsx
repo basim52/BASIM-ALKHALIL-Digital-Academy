@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations, Language } from '../../lib/translations';
 import { 
@@ -17,7 +17,10 @@ import {
   Squirrel,
   Snail,
   Shrimp,
-  Shell
+  Shell,
+  Gamepad2,
+  Trophy,
+  Star
 } from 'lucide-react';
 
 interface AnimalOption {
@@ -29,6 +32,7 @@ interface AnimalOption {
   shadowColor: string;
   fact: string;
   factAr: string;
+  soundEmoji?: string;
 }
 
 const ANIMAL_GROUPS = [
@@ -37,10 +41,10 @@ const ANIMAL_GROUPS = [
     title: 'Farm & Home',
     titleAr: 'المزرعة والمنزل',
     animals: [
-      { id: 'dog', name: 'Dog', nameAr: 'كلب', icon: Dog, color: '#f97316', shadowColor: 'rgba(249, 115, 22, 0.4)', fact: 'A loyal friend!', factAr: 'صديق وفي!' },
-      { id: 'cat', name: 'Cat', nameAr: 'قطة', icon: Cat, color: '#a855f7', shadowColor: 'rgba(168, 85, 247, 0.4)', fact: 'Meow meow!', factAr: 'مياو مياو!' },
-      { id: 'bird', name: 'Bird', nameAr: 'عصفور', icon: Bird, color: '#3b82f6', shadowColor: 'rgba(59, 130, 246, 0.4)', fact: 'I can fly!', factAr: 'أستطيع الطيران!' },
-      { id: 'rabbit', name: 'Rabbit', nameAr: 'أرنب', icon: Rabbit, color: '#ec4899', shadowColor: 'rgba(236, 72, 153, 0.4)', fact: 'I love carrots!', factAr: 'أحب الجزر!' },
+      { id: 'dog', name: 'Dog', nameAr: 'كلب', icon: Dog, color: '#f97316', shadowColor: 'rgba(249, 115, 22, 0.4)', fact: 'A loyal friend!', factAr: 'صديق وفي!', soundEmoji: 'Woof woof!' },
+      { id: 'cat', name: 'Cat', nameAr: 'قطة', icon: Cat, color: '#a855f7', shadowColor: 'rgba(168, 85, 247, 0.4)', fact: 'Meow meow!', factAr: 'مياو مياو!', soundEmoji: 'Meow meow!' },
+      { id: 'bird', name: 'Bird', nameAr: 'عصفور', icon: Bird, color: '#3b82f6', shadowColor: 'rgba(59, 130, 246, 0.4)', fact: 'I can fly!', factAr: 'أستطيع الطيران!', soundEmoji: 'Tweet tweet!' },
+      { id: 'rabbit', name: 'Rabbit', nameAr: 'أرنب', icon: Rabbit, color: '#ec4899', shadowColor: 'rgba(236, 72, 153, 0.4)', fact: 'I love carrots!', factAr: 'أحب الجزر!', soundEmoji: 'Hop hop!' },
     ]
   },
   {
@@ -48,10 +52,10 @@ const ANIMAL_GROUPS = [
     title: 'Wild Jungle',
     titleAr: 'الغابة البرية',
     animals: [
-      { id: 'bug', name: 'Bug', nameAr: 'حشرة', icon: Bug, color: '#ef4444', shadowColor: 'rgba(239, 68, 68, 0.4)', fact: 'Tiny but strong!', factAr: 'صغير وقوي!' },
-      { id: 'mouse', name: 'Mouse', nameAr: 'فأر', icon: Mouse, color: '#64748b', shadowColor: 'rgba(100, 116, 139, 0.4)', fact: 'I like cheese!', factAr: 'أحب الجبن!' },
-      { id: 'squirrel', name: 'Squirrel', nameAr: 'سنجاب', icon: Squirrel, color: '#92400e', shadowColor: 'rgba(146, 64, 14, 0.4)', fact: 'I love nuts!', factAr: 'أحب البندق!' },
-      { id: 'snail', name: 'Snail', nameAr: 'حلزون', icon: Snail, color: '#84cc16', shadowColor: 'rgba(132, 204, 22, 0.4)', fact: 'I am slow!', factAr: 'أنا بطيء!' },
+      { id: 'bug', name: 'Bug', nameAr: 'حشرة', icon: Bug, color: '#ef4444', shadowColor: 'rgba(239, 68, 68, 0.4)', fact: 'Tiny but strong!', factAr: 'صغير وقوي!', soundEmoji: 'Bzzz bzzz!' },
+      { id: 'mouse', name: 'Mouse', nameAr: 'فأر', icon: Mouse, color: '#64748b', shadowColor: 'rgba(100, 116, 139, 0.4)', fact: 'I like cheese!', factAr: 'أحب الجبن!', soundEmoji: 'Squeak squeak!' },
+      { id: 'squirrel', name: 'Squirrel', nameAr: 'سنجاب', icon: Squirrel, color: '#92400e', shadowColor: 'rgba(146, 64, 14, 0.4)', fact: 'I love nuts!', factAr: 'أحب البندق!', soundEmoji: 'Chirp chirp!' },
+      { id: 'snail', name: 'Snail', nameAr: 'حلزون', icon: Snail, color: '#84cc16', shadowColor: 'rgba(132, 204, 22, 0.4)', fact: 'I am slow!', factAr: 'أنا بطيء!', soundEmoji: 'Slither slither!' },
     ]
   },
   {
@@ -59,10 +63,10 @@ const ANIMAL_GROUPS = [
     title: 'Blue Sea',
     titleAr: 'البحر الأزرق',
     animals: [
-      { id: 'fish', name: 'Fish', nameAr: 'سمكة', icon: Fish, color: '#06b6d4', shadowColor: 'rgba(6, 182, 212, 0.4)', fact: 'I love water!', factAr: 'أحب الماء!' },
-      { id: 'turtle', name: 'Turtle', nameAr: 'سلحفاة', icon: Turtle, color: '#22c55e', shadowColor: 'rgba(34, 197, 94, 0.4)', fact: 'I live long!', factAr: 'أعيش طويلاً!' },
-      { id: 'shrimp', name: 'Shrimp', nameAr: 'جمبري', icon: Shrimp, color: '#f43f5e', shadowColor: 'rgba(244, 63, 94, 0.4)', fact: 'Deep sea friend!', factAr: 'صديق البحر!' },
-      { id: 'shell', name: 'Shell', nameAr: 'صدفة', icon: Shell, color: '#fbbf24', shadowColor: 'rgba(251, 191, 36, 0.4)', fact: 'Under the sea!', factAr: 'تحت البحر!' },
+      { id: 'fish', name: 'Fish', nameAr: 'سمكة', icon: Fish, color: '#06b6d4', shadowColor: 'rgba(6, 182, 212, 0.4)', fact: 'I love water!', factAr: 'أحب الماء!', soundEmoji: 'Blub blub!' },
+      { id: 'turtle', name: 'Turtle', nameAr: 'سلحفاة', icon: Turtle, color: '#22c55e', shadowColor: 'rgba(34, 197, 94, 0.4)', fact: 'I live long!', factAr: 'أعيش طويلاً!', soundEmoji: 'Slow and steady!' },
+      { id: 'shrimp', name: 'Shrimp', nameAr: 'جمبري', icon: Shrimp, color: '#f43f5e', shadowColor: 'rgba(244, 63, 94, 0.4)', fact: 'Deep sea friend!', factAr: 'صديق البحر!', soundEmoji: 'Click click!' },
+      { id: 'shell', name: 'Shell', nameAr: 'صدفة', icon: Shell, color: '#fbbf24', shadowColor: 'rgba(251, 191, 36, 0.4)', fact: 'Under the sea!', factAr: 'تحت البحر!', soundEmoji: 'Whoosh whoosh!' },
     ]
   }
 ];
@@ -73,26 +77,66 @@ export const AnimalsLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
   const [activeTab, setActiveTab] = useState('farm');
   const [activeAnimal, setActiveAnimal] = useState<AnimalOption | null>(null);
   const [showExcellent, setShowExcellent] = useState(false);
+  const [gameMode, setGameMode] = useState(false);
+  const [targetAnimal, setTargetAnimal] = useState<AnimalOption | null>(null);
+  const [score, setScore] = useState(0);
 
-  const speak = (text: string) => {
+  const speak = useCallback((text: string) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
-    utterance.rate = 0.8;
+    utterance.rate = 0.85;
     utterance.pitch = 1.1;
     window.speechSynthesis.speak(utterance);
+  }, []);
+
+  const startNewLevel = useCallback(() => {
+    const currentGroup = ANIMAL_GROUPS.find(g => g.id === activeTab) || ANIMAL_GROUPS[0];
+    const randomIndex = Math.floor(Math.random() * currentGroup.animals.length);
+    const newTarget = currentGroup.animals[randomIndex];
+    setTargetAnimal(newTarget);
+    
+    setTimeout(() => {
+      speak(`Find the ${newTarget.name}`);
+    }, 500);
+  }, [activeTab, speak]);
+
+  const toggleGameMode = () => {
+    const nextMode = !gameMode;
+    setGameMode(nextMode);
+    if (nextMode) {
+      setScore(0);
+      startNewLevel();
+    } else {
+      setTargetAnimal(null);
+    }
   };
 
   const handleAnimalClick = (animal: AnimalOption) => {
-    setActiveAnimal(animal);
-    speak(animal.name);
-    
-    setShowExcellent(true);
-    setTimeout(() => setShowExcellent(false), 2000);
-
-    if ('vibrate' in navigator) {
-      navigator.vibrate(50);
+    if (gameMode && targetAnimal) {
+      if (animal.id === targetAnimal.id) {
+        setScore(prev => prev + 1);
+        speak(`Excellent! That is the ${animal.name}`);
+        setShowExcellent(true);
+        setTimeout(() => {
+          setShowExcellent(false);
+          startNewLevel();
+        }, 1500);
+      } else {
+        speak(`No, that is the ${animal.name}. Try again!`);
+      }
+    } else {
+      setActiveAnimal(animal);
+      speak(animal.name);
+      if (animal.soundEmoji) {
+        setTimeout(() => speak(animal.soundEmoji!), 1000);
+      }
+      setShowExcellent(true);
+      setTimeout(() => setShowExcellent(false), 2000);
+      if ('vibrate' in navigator) {
+        navigator.vibrate(50);
+      }
     }
   };
 
@@ -112,44 +156,70 @@ export const AnimalsLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
         </button>
         
         <div className="text-center px-1">
-          <h1 className="text-xl md:text-5xl font-black text-[#002147] mb-1 tracking-tight">
-            {t.animals}
-          </h1>
-          <div className="flex items-center justify-center gap-1.5 text-slate-500 bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full border border-white/80 shadow-sm">
-            <Volume2 size={16} />
-            <span className="text-[10px] md:text-sm font-bold uppercase tracking-wider">{t.pressToHear}</span>
-          </div>
+          {gameMode ? (
+            <div className="animate-bounce">
+              <h1 className="text-2xl md:text-5xl font-black text-[#002147] mb-1 md:mb-2 tracking-tight">
+                {isRtl ? `أين هو ${targetAnimal?.nameAr}؟` : `Find the ${targetAnimal?.name}!`}
+              </h1>
+              <div className="flex items-center justify-center gap-2">
+                <div className="bg-[#002147] text-white px-4 py-1 rounded-full text-sm font-bold flex items-center gap-2">
+                  <Trophy size={16} className="text-yellow-400" />
+                  <span>{score}</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-xl md:text-5xl font-black text-[#002147] mb-1 tracking-tight">
+                {t.animals}
+              </h1>
+              <div className="flex items-center justify-center gap-1.5 text-slate-500 bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full border border-white/80 shadow-sm">
+                <Volume2 size={16} />
+                <span className="text-[10px] md:text-sm font-bold uppercase tracking-wider">{t.pressToHear}</span>
+              </div>
+            </>
+          )}
         </div>
 
-        <div className="w-12 h-12 md:w-16 md:h-16" />
+        <button 
+          onClick={toggleGameMode}
+          className={`w-12 h-12 md:w-16 md:h-16 shadow-lg rounded-xl md:rounded-2xl flex items-center justify-center transition-all outline-none border ${
+            gameMode 
+            ? 'bg-[#002147] text-white border-white/20' 
+            : 'bg-white text-[#C49E3A] border-slate-50 hover:bg-slate-50'
+          }`}
+        >
+          <Gamepad2 size={24} />
+        </button>
       </div>
 
-      {/* Tabs - Mobile optimized */}
-      <div className="flex justify-center flex-wrap gap-2 md:gap-4 mb-8 z-10">
-        {ANIMAL_GROUPS.map((group) => (
-          <button
-            key={group.id}
-            onClick={() => {
-              setActiveTab(group.id);
-              setActiveAnimal(null);
-              speak(group.title);
-            }}
-            className={`px-4 md:px-8 py-2 md:py-4 rounded-xl md:rounded-3xl font-black text-[10px] md:text-sm uppercase tracking-widest transition-all ${
-              activeTab === group.id 
-              ? 'bg-[#002147] text-white shadow-xl scale-105' 
-              : 'bg-white text-[#002147] hover:bg-slate-50 border border-slate-100'
-            }`}
-          >
-            {isRtl ? group.titleAr : group.title}
-          </button>
-        ))}
-      </div>
+      {!gameMode && (
+        <div className="flex justify-center flex-wrap gap-2 md:gap-4 mb-8 z-10">
+          {ANIMAL_GROUPS.map((group) => (
+            <button
+              key={group.id}
+              onClick={() => {
+                setActiveTab(group.id);
+                setActiveAnimal(null);
+                speak(group.title);
+              }}
+              className={`px-4 md:px-8 py-2 md:py-4 rounded-xl md:rounded-3xl font-black text-[10px] md:text-sm uppercase tracking-widest transition-all ${
+                activeTab === group.id 
+                ? 'bg-[#002147] text-white shadow-xl scale-105' 
+                : 'bg-white text-[#002147] hover:bg-slate-50 border border-slate-100'
+              }`}
+            >
+              {isRtl ? group.titleAr : group.title}
+            </button>
+          ))}
+        </div>
+      )}
 
       <motion.div 
         key={activeTab}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-10 w-full max-w-5xl z-10 px-2 pb-20"
+        className={`grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-10 w-full max-w-5xl z-10 px-2 pb-20 ${gameMode ? 'mt-8' : ''}`}
       >
         {currentGroup.animals.map((animal) => (
           <motion.button
@@ -175,7 +245,7 @@ export const AnimalsLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
       </motion.div>
 
       <AnimatePresence>
-        {activeAnimal && (
+        {activeAnimal && !gameMode && (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -203,7 +273,6 @@ export const AnimalsLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
         )}
       </AnimatePresence>
 
-      {/* Decorative Blobs */}
       <div className="absolute inset-0 pointer-events-none -z-10">
         <div className="absolute top-1/2 left-0 w-96 h-96 bg-emerald-400/5 rounded-full blur-3xl" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-400/5 rounded-full blur-3xl" />

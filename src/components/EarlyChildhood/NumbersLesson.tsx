@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations, Language } from '../../lib/translations';
 import { 
@@ -6,7 +6,9 @@ import {
   Volume2, 
   Sparkles,
   PartyPopper,
-  Star
+  Star,
+  Gamepad2,
+  Trophy
 } from 'lucide-react';
 
 interface NumberOption {
@@ -60,26 +62,63 @@ export const NumbersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
   const [activeLevel, setActiveLevel] = useState(1);
   const [activeNumber, setActiveNumber] = useState<NumberOption | null>(null);
   const [showExcellent, setShowExcellent] = useState(false);
+  const [gameMode, setGameMode] = useState(false);
+  const [targetNumber, setTargetNumber] = useState<NumberOption | null>(null);
+  const [score, setScore] = useState(0);
 
-  const speak = (text: string) => {
+  const speak = useCallback((text: string) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
-    utterance.rate = 0.8;
+    utterance.rate = 0.85;
     utterance.pitch = 1.2;
     window.speechSynthesis.speak(utterance);
+  }, []);
+
+  const startNewLevel = useCallback(() => {
+    const currentGroup = NUMBER_GROUPS.find(g => g.id === activeLevel) || NUMBER_GROUPS[0];
+    const randomIndex = Math.floor(Math.random() * currentGroup.numbers.length);
+    const newTarget = currentGroup.numbers[randomIndex];
+    setTargetNumber(newTarget);
+    
+    setTimeout(() => {
+      speak(`Find the number ${newTarget.value}`);
+    }, 500);
+  }, [activeLevel, speak]);
+
+  const toggleGameMode = () => {
+    const nextMode = !gameMode;
+    setGameMode(nextMode);
+    if (nextMode) {
+      setScore(0);
+      startNewLevel();
+    } else {
+      setTargetNumber(null);
+    }
   };
 
   const handleNumberClick = (num: NumberOption) => {
-    setActiveNumber(num);
-    speak(num.name);
-    
-    setShowExcellent(true);
-    setTimeout(() => setShowExcellent(false), 2000);
-
-    if ('vibrate' in navigator) {
-      navigator.vibrate(50);
+    if (gameMode && targetNumber) {
+        if (num.value === targetNumber.value) {
+            setScore(prev => prev + 1);
+            speak(`Excellent! This is the number ${num.value}`);
+            setShowExcellent(true);
+            setTimeout(() => {
+                setShowExcellent(false);
+                startNewLevel();
+            }, 1500);
+        } else {
+            speak(`No, that is the number ${num.value}. Try again!`);
+        }
+    } else {
+        setActiveNumber(num);
+        speak(num.name);
+        setShowExcellent(true);
+        setTimeout(() => setShowExcellent(false), 2000);
+        if ('vibrate' in navigator) {
+            navigator.vibrate(50);
+        }
     }
   };
 
@@ -98,45 +137,71 @@ export const NumbersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
           <ArrowLeft size={24} className={isRtl ? 'rotate-180' : ''} />
         </button>
         
-        <div className="text-center px-2">
-          <h1 className="text-xl md:text-5xl font-black text-[#002147] mb-1 tracking-tight">
-            {t.numbers}
-          </h1>
-          <div className="flex items-center justify-center gap-1.5 text-slate-500 bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full border border-white/80 shadow-sm">
-            <Volume2 size={16} />
-            <span className="text-[10px] md:text-sm font-bold uppercase tracking-wider">{t.pressToHear}</span>
-          </div>
+        <div className="text-center px-1">
+          {gameMode ? (
+            <div className="animate-bounce">
+              <h1 className="text-2xl md:text-5xl font-black text-[#002147] mb-1 md:mb-2 tracking-tight">
+                {isRtl ? `أين الرقم ${targetNumber?.value}؟` : `Find the Number ${targetNumber?.value}!`}
+              </h1>
+              <div className="flex items-center justify-center gap-2">
+                <div className="bg-[#002147] text-white px-4 py-1 rounded-full text-sm font-bold flex items-center gap-2">
+                  <Trophy size={16} className="text-yellow-400" />
+                  <span>{score}</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-xl md:text-5xl font-black text-[#002147] mb-1 tracking-tight">
+                {t.numbers}
+              </h1>
+              <div className="flex items-center justify-center gap-1.5 text-slate-500 bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full border border-white/80 shadow-sm">
+                <Volume2 size={16} />
+                <span className="text-[10px] md:text-sm font-bold uppercase tracking-wider">{t.pressToHear}</span>
+              </div>
+            </>
+          )}
         </div>
 
-        <div className="w-12 h-12 md:w-16 md:h-16" />
+        <button 
+          onClick={toggleGameMode}
+          className={`w-12 h-12 md:w-16 md:h-16 shadow-lg rounded-xl md:rounded-2xl flex items-center justify-center transition-all outline-none border ${
+            gameMode 
+            ? 'bg-[#002147] text-white border-white/20' 
+            : 'bg-white text-[#C49E3A] border-slate-50 hover:bg-slate-50'
+          }`}
+        >
+          <Gamepad2 size={24} />
+        </button>
       </div>
 
-      {/* Level Selector - Mobile optimized */}
-      <div className="flex justify-center flex-wrap gap-2 md:gap-4 mb-8 z-10">
-         {NUMBER_GROUPS.map((group) => (
-           <button
-             key={group.id}
-             onClick={() => {
-               setActiveLevel(group.id);
-               setActiveNumber(null);
-               speak(group.title);
-             }}
-             className={`px-4 md:px-8 py-2 md:py-4 rounded-xl md:rounded-3xl font-black text-[10px] md:text-sm uppercase tracking-widest transition-all ${
-               activeLevel === group.id 
-               ? 'bg-[#002147] text-white shadow-xl scale-105' 
-               : 'bg-white text-[#002147] hover:bg-slate-50 border border-slate-100 shadow-sm'
-             }`}
-           >
-             {isRtl ? group.titleAr : group.title}
-           </button>
-         ))}
-      </div>
+      {!gameMode && (
+        <div className="flex justify-center flex-wrap gap-2 md:gap-4 mb-8 z-10">
+           {NUMBER_GROUPS.map((group) => (
+             <button
+               key={group.id}
+               onClick={() => {
+                 setActiveLevel(group.id);
+                 setActiveNumber(null);
+                 speak(group.title);
+               }}
+               className={`px-4 md:px-8 py-2 md:py-4 rounded-xl md:rounded-3xl font-black text-[10px] md:text-sm uppercase tracking-widest transition-all ${
+                 activeLevel === group.id 
+                 ? 'bg-[#002147] text-white shadow-xl scale-105' 
+                 : 'bg-white text-[#002147] hover:bg-slate-50 border border-slate-100 shadow-sm'
+               }`}
+             >
+               {isRtl ? group.titleAr : group.title}
+             </button>
+           ))}
+        </div>
+      )}
 
       <motion.div 
         key={activeLevel}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-3 md:gap-6 w-full max-w-5xl z-10 px-2"
+        className={`grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-3 md:gap-6 w-full max-w-5xl z-10 px-2 ${gameMode ? 'mt-8' : ''}`}
       >
         {currentGroup.numbers.map((num) => (
           <motion.button
@@ -160,7 +225,7 @@ export const NumbersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
         ))}
       </motion.div>
 
-      {activeNumber && (
+      {activeNumber && !gameMode && (
         <div className="mt-8 md:mt-12 flex flex-wrap justify-center gap-2 md:gap-3 max-w-3xl z-10 pb-10">
           <AnimatePresence mode="popLayout">
             {Array.from({ length: activeNumber.value }).map((_, i) => (
@@ -198,16 +263,10 @@ export const NumbersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
         )}
       </AnimatePresence>
 
-      {/* Mascot */}
-      <motion.div 
-        animate={{ y: [0, -10, 0] }}
-        transition={{ duration: 3, repeat: Infinity }}
-        className="absolute bottom-10 left-10 opacity-20 pointer-events-none"
-      >
-        <div className="w-40 h-40 bg-blue-100 rounded-full flex items-center justify-center">
-            <Sparkles size={80} className="text-blue-400" />
-        </div>
-      </motion.div>
+      <div className="absolute inset-0 pointer-events-none -z-10">
+        <div className="absolute top-1/2 left-0 w-96 h-96 bg-emerald-400/5 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-orange-400/5 rounded-full blur-3xl" />
+      </div>
     </div>
   );
 };

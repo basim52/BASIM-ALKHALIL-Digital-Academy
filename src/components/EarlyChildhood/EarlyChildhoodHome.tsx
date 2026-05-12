@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { translations, Language } from '../../lib/translations';
 import { 
   Palette, 
@@ -13,7 +13,13 @@ import {
   User,
   Clock,
   Sparkles,
-  Mic
+  Mic,
+  BookOpen,
+  Trophy,
+  Star,
+  BrainCircuit,
+  ArrowLeft,
+  X
 } from 'lucide-react';
 import { ColorsLesson } from './ColorsLesson';
 import { NumbersLesson } from './NumbersLesson';
@@ -22,6 +28,7 @@ import { ShapesLesson } from './ShapesLesson';
 import { LettersLesson } from './LettersLesson';
 import { FirstWordsLesson } from './FirstWordsLesson';
 import { PronunciationLesson } from './PronunciationLesson';
+import { MagicStoryMode } from './MagicStoryMode';
 
 const KID_COURSES = [
   { id: 'first-words', nameKey: 'firstWords', icon: Sparkles, color: 'bg-yellow-400', shadow: 'shadow-yellow-900/20', unlocked: true },
@@ -37,7 +44,15 @@ export const EarlyChildhoodHome = ({ lang }: { lang: Language }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [activeLesson, setActiveLesson] = useState<string | null>(null);
-  const [showParentDashboard, setShowParentDashboard] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
+
+  // Stats (Mocked or persistent in real app)
+  const stats = {
+    wordsLearned: 42,
+    pronunciationScore: 125,
+    levelsCompleted: 8,
+    dailyStreak: 5
+  };
 
   if (activeLesson === 'first-words') {
     return <FirstWordsLesson t={t} isRtl={isRtl} onBack={() => setActiveLesson(null)} />;
@@ -60,104 +75,215 @@ export const EarlyChildhoodHome = ({ lang }: { lang: Language }) => {
   if (activeLesson === 'letters') {
     return <LettersLesson lang={lang} onBack={() => setActiveLesson(null)} />;
   }
+  if (activeLesson === 'magic-story') {
+    return <MagicStoryMode lang={lang} onBack={() => setActiveLesson(null)} />;
+  }
 
   return (
-    <div className={`min-h-screen bg-[#f8fafc] p-4 md:p-10 ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      <header className="max-w-6xl mx-auto flex flex-col items-center justify-between gap-6 mb-8 md:mb-16">
+    <div className={`min-h-screen bg-[#f8fafc] p-4 md:p-10 ${isRtl ? 'font-arabic' : 'font-sans'} relative overflow-x-hidden`} dir={isRtl ? 'rtl' : 'ltr'}>
+      <header className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 mb-8 md:mb-16">
         <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-start">
-          <div className="w-16 md:w-24 h-16 md:h-24 bg-[#002147] text-white rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shadow-xl relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <TrendingUp className="w-8 h-8 md:w-10 md:h-10 relative z-10" />
-          </div>
+          <motion.div 
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            className="w-16 md:w-24 h-16 md:h-24 bg-[#002147] text-white rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shadow-xl relative overflow-hidden"
+          >
+            <TrendingUp className="w-8 h-8 md:w-10 md:h-10" />
+          </motion.div>
           <div>
             <h1 className="text-2xl md:text-5xl font-black text-[#002147] mb-1 tracking-tight">{t.earlyChildhood}</h1>
-            <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px] md:text-xs">{t.kidsLearningDesc}</p>
+            <div className="flex items-center justify-center md:justify-start gap-2">
+              <span className="text-slate-400 font-bold uppercase tracking-widest text-[9px] md:text-xs">{isRtl ? 'رحلة تعلم ذكية وممتعة' : 'Smart & Fun Learning Journey'}</span>
+              <div className="flex items-center gap-1 bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full text-[10px] font-black uppercase">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                {isRtl ? 'تعلم نشط' : 'Active Learning'}
+              </div>
+            </div>
           </div>
         </div>
 
-        <button 
-          onClick={() => setShowParentDashboard(!showParentDashboard)}
-          className="w-full md:w-auto flex items-center justify-center gap-2 bg-white px-5 py-3 rounded-2xl border-2 border-slate-100 shadow-sm hover:border-[#C49E3A] active:scale-95 transition-all text-[#002147]"
-        >
-          <User size={18} />
-          <span className="font-black text-[10px] md:text-sm uppercase tracking-widest">{isRtl ? 'لوحة ولي الأمر' : 'Parent Dashboard'}</span>
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => setShowProgress(!showProgress)}
+            className={`flex items-center gap-2 px-5 py-3 rounded-2xl border-2 transition-all shadow-sm ${
+              showProgress ? 'bg-[#002147] text-white border-[#002147]' : 'bg-white text-[#002147] border-slate-100 hover:border-[#002147]/20 shadow-sm'
+            }`}
+          >
+            <Trophy size={18} />
+            <span className="font-black text-[10px] md:text-sm uppercase tracking-widest">{isRtl ? 'إنجازاتي' : 'My Trophies'}</span>
+          </button>
+        </div>
       </header>
 
-      {showParentDashboard ? (
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-4xl mx-auto bg-white rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden border border-slate-100 mb-20"
-        >
-          <div className="p-6 md:p-12 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
-            <div>
-              <h2 className="text-lg md:text-2xl font-black text-[#002147]">{isRtl ? 'متابعة الطفل' : 'Progress Tracking'}</h2>
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-[8px] md:text-[10px] mt-0.5">{isRtl ? 'آخر إنجازات طفلك' : 'Your kid\'s latest achievements'}</p>
-            </div>
-            <button onClick={() => setShowParentDashboard(false)} className="text-[#002147] font-black text-sm">{isRtl ? 'إغلاق' : 'Close'}</button>
-          </div>
-          <div className="p-6 md:p-12 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-            <div className="bg-blue-50/50 rounded-2xl md:rounded-3xl p-5 md:p-6 border border-blue-100">
-               <Clock className="text-blue-600 mb-3 md:mb-4 w-6 h-6 md:w-8 md:h-8" />
-               <h3 className="text-[#002147] font-bold text-xs md:text-base mb-0.5">{isRtl ? 'وقت الشاشة اليوم' : 'Daily Screen Time'}</h3>
-               <p className="text-xl md:text-2xl font-black text-blue-600">45 Min</p>
-            </div>
-            <div className="bg-emerald-50/50 rounded-2xl md:rounded-3xl p-5 md:p-6 border border-emerald-100">
-               <TrendingUp className="text-emerald-600 mb-3 md:mb-4 w-6 h-6 md:w-8 md:h-8" />
-               <h3 className="text-[#002147] font-bold text-xs md:text-base mb-0.5">{isRtl ? 'مستوى التقدم' : 'Progress Rate'}</h3>
-               <p className="text-xl md:text-2xl font-black text-emerald-600">82%</p>
-            </div>
-            <div className="bg-purple-50/50 rounded-2xl md:rounded-3xl p-5 md:p-6 border border-purple-100">
-               <Palette className="text-purple-600 mb-3 md:mb-4 w-6 h-6 md:w-8 md:h-8" />
-               <h3 className="text-[#002147] font-bold text-xs md:text-base mb-0.5">{isRtl ? 'الدرس النشط' : 'Active Lesson'}</h3>
-               <p className="text-xl md:text-2xl font-black text-purple-600">{isRtl ? 'الألوان' : 'Colors'}</p>
-            </div>
-          </div>
-        </motion.div>
-      ) : (
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8 pb-20">
-          {KID_COURSES.map((course) => (
-            <motion.button
-              key={course.id}
-              whileHover={course.unlocked ? { y: -8, scale: 1.02 } : {}}
-              whileTap={course.unlocked ? { scale: 0.95 } : {}}
-              onClick={() => course.unlocked && setActiveLesson(course.id)}
-              className={`relative bg-white rounded-2xl md:rounded-[3rem] p-4 md:p-10 text-center border-2 transition-all flex flex-col items-center group overflow-hidden ${
-                course.unlocked 
-                ? `border-slate-50 hover:border-[#002147]/10 ${course.shadow} shadow-sm` 
-                : 'border-slate-100 opacity-60 grayscale'
-              }`}
-            >
-              {!course.unlocked && (
-                <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
-                  <div className="w-10 h-10 md:w-16 md:h-16 bg-[#002147] text-white rounded-xl md:rounded-2xl flex items-center justify-center shadow-xl">
-                    <Lock size={18} className="md:w-7 md:h-7" />
+      <AnimatePresence>
+        {showProgress && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#002147]/40 backdrop-blur-sm"
+          >
+            <motion.div className="bg-white rounded-[2rem] md:rounded-[3rem] p-8 md:p-12 shadow-2xl max-w-4xl w-full relative">
+              <button 
+                onClick={() => setShowProgress(false)}
+                className="absolute top-6 right-6 w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="text-center mb-10">
+                <h2 className="text-3xl md:text-5xl font-black text-[#002147] mb-2">{isRtl ? 'بطل الأكاديمية الصغير' : 'Academy Hero Progress'}</h2>
+                <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">{isRtl ? 'استمر في التعلم لتفتح المزيد من الجوائز!' : 'Keep learning to unlock more rewards!'}</p>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                <div className="flex flex-col items-center text-center p-6 bg-yellow-50 rounded-[2rem] border-2 border-yellow-100/50 shadow-sm">
+                  <div className="w-16 h-16 bg-yellow-400 text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-yellow-200">
+                    <Star className="w-8 h-8" fill="currentColor" />
+                  </div>
+                  <span className="text-3xl font-black text-[#002147]">{stats.wordsLearned}</span>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{isRtl ? 'كلمة تعلمت' : 'Words Learned'}</span>
+                </div>
+                
+                <div className="flex flex-col items-center text-center p-6 bg-indigo-50 rounded-[2rem] border-2 border-indigo-100/50 shadow-sm">
+                  <div className="w-16 h-16 bg-indigo-500 text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-indigo-200">
+                    <Mic className="w-8 h-8" />
+                  </div>
+                  <span className="text-3xl font-black text-[#002147]">{stats.pronunciationScore}</span>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{isRtl ? 'نقاط النطق' : 'Speech Score'}</span>
+                </div>
+
+                <div className="flex flex-col items-center text-center p-6 bg-emerald-50 rounded-[2rem] border-2 border-emerald-100/50 shadow-sm">
+                  <div className="w-16 h-16 bg-emerald-500 text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-emerald-200">
+                    <Trophy className="w-8 h-8" />
+                  </div>
+                  <span className="text-3xl font-black text-[#002147]">{stats.levelsCompleted}</span>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{isRtl ? 'مستوى منجز' : 'Levels Done'}</span>
+                </div>
+
+                <div className="flex flex-col items-center text-center p-6 bg-rose-50 rounded-[2rem] border-2 border-rose-100/50 shadow-sm">
+                  <div className="w-16 h-16 bg-rose-500 text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-rose-200">
+                    <Clock className="w-8 h-8" />
+                  </div>
+                  <span className="text-3xl font-black text-[#002147]">{stats.dailyStreak}</span>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{isRtl ? 'أيام متتالية' : 'Day Streak'}</span>
+                </div>
+              </div>
+
+              <div className="mt-10 p-6 bg-[#002147] text-white rounded-[2rem] flex items-center justify-between">
+                <div>
+                  <h3 className="font-black text-xl mb-1">{isRtl ? 'طاقة التعلم' : 'Learning Energy'}</h3>
+                  <div className="w-48 h-3 bg-white/20 rounded-full overflow-hidden">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: '75%' }}
+                      className="h-full bg-yellow-400" 
+                    />
                   </div>
                 </div>
-              )}
-
-              <div className={`w-16 md:w-32 h-16 md:h-32 ${course.color} text-white rounded-2xl md:rounded-[2.5rem] flex items-center justify-center mb-4 md:mb-8 shadow-xl transition-transform group-hover:rotate-12`}>
-                <course.icon className="w-8 h-8 md:w-14 md:h-14" strokeWidth={2.5} />
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-black">75%</span>
+                  <Sparkles className="text-yellow-400" />
+                </div>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-              <h3 className="text-base md:text-3xl font-black text-[#002147] leading-tight mb-1 md:mb-2">{(t as any)[course.nameKey]}</h3>
-              
-              <div className="flex items-center gap-1 text-slate-400 font-bold uppercase tracking-widest text-[8px] md:text-xs mt-1">
-                <span>{course.unlocked ? (isRtl ? 'ابدأ اللعب' : 'Start Playing') : (isRtl ? 'فتح بـ 10' : 'Unlock for 10')}</span>
-                <ChevronRight size={10} className={`md:w-4 md:h-4 ${isRtl ? 'rotate-180' : ''}`} />
+      {/* Magical AI Story Banner */}
+      <div className="max-w-6xl mx-auto mb-10">
+        <motion.button 
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => setActiveLesson('magic-story')}
+          className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-16 text-start relative overflow-hidden group shadow-2xl"
+        >
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-white/20 backdrop-blur-md p-3 rounded-[1.25rem]">
+                <BrainCircuit className="w-6 h-6 md:w-10 md:h-10 text-white" strokeWidth={2.5} />
               </div>
+              <span className="text-[10px] md:text-sm font-black uppercase tracking-widest bg-white/10 px-4 py-1.5 rounded-full border border-white/10">AI Story Adventure</span>
+            </div>
+            
+            <h2 className="text-3xl md:text-7xl font-black mb-3 tracking-tighter leading-none">{isRtl ? 'اصنع قصتك السحرية' : 'Create Your Magic Story'}</h2>
+            
+            <p className="text-blue-100 font-bold max-w-lg text-sm md:text-xl mb-8 leading-relaxed opacity-90">
+              {isRtl ? 'سأقوم بتأليف قصة مذهلة باستخدام الكلمات التي تعلمتها اليوم! هيا بنا نبدأ المغامرة.' : 'I\'ll write an amazing story using the words you learned today! Let\'s start the adventure.'}
+            </p>
+            
+            <div className="flex flex-wrap items-center gap-6">
+               <div className="bg-white text-indigo-600 px-8 py-4 rounded-2xl font-black text-sm md:text-lg uppercase tracking-widest shadow-xl group-hover:bg-yellow-400 group-hover:text-yellow-900 transition-all flex items-center gap-2">
+                 {isRtl ? 'ابدأ الآن' : 'Start My Story'}
+                 <ChevronRight size={20} strokeWidth={3} className={isRtl ? 'rotate-180' : ''} />
+               </div>
+               
+               <div className="flex -space-x-4 items-center">
+                 {['🐶', '🍎', '🌈', '🚀', '🐙'].map((e, i) => (
+                   <motion.div 
+                    key={i} 
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{ duration: 2, delay: i * 0.2, repeat: Infinity }}
+                    className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-xl md:text-2xl border-4 border-white/10 shadow-lg"
+                   >
+                    {e}
+                   </motion.div>
+                 ))}
+               </div>
+            </div>
+          </div>
 
-              {/* Decorative Circle */}
-              <div className={`absolute -bottom-8 -right-8 w-16 h-16 md:w-32 md:h-32 ${course.color} opacity-5 rounded-full`} />
-            </motion.button>
-          ))}
-        </div>
-      )}
+          <motion.div 
+            animate={{ rotate: 360 }}
+            transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+            className="absolute -top-40 -right-40 w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-white/10 rounded-full blur-[100px] pointer-events-none"
+          />
+          <div className="absolute -bottom-10 right-10 opacity-10 group-hover:opacity-20 transition-opacity">
+             <BookOpen size={240} strokeWidth={1} />
+          </div>
+        </motion.button>
+      </div>
+
+      <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8 pb-20">
+        {KID_COURSES.map((course) => (
+          <motion.button
+            key={course.id}
+            whileHover={course.unlocked ? { y: -8, scale: 1.02 } : {}}
+            whileTap={course.unlocked ? { scale: 0.95 } : {}}
+            onClick={() => course.unlocked && setActiveLesson(course.id)}
+            className={`relative bg-white rounded-2xl md:rounded-[3rem] p-4 md:p-10 text-center border-2 transition-all flex flex-col items-center group overflow-hidden ${
+              course.unlocked 
+              ? `border-slate-50 hover:border-[#002147]/10 ${course.shadow} shadow-sm` 
+              : 'border-slate-100 opacity-60 grayscale'
+            }`}
+          >
+            {!course.unlocked && (
+              <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                <div className="w-10 h-10 md:w-16 md:h-16 bg-[#002147] text-white rounded-xl md:rounded-2xl flex items-center justify-center shadow-xl">
+                  <Lock size={18} className="md:w-7 md:h-7" />
+                </div>
+              </div>
+            )}
+
+            <div className={`w-16 md:w-32 h-16 md:h-32 ${course.color} text-white rounded-2xl md:rounded-[2.5rem] flex items-center justify-center mb-4 md:mb-8 shadow-xl transition-transform group-hover:rotate-12 group-hover:scale-110`}>
+              <course.icon className="w-8 h-8 md:w-14 md:h-14" strokeWidth={2.5} />
+            </div>
+
+            <h3 className="text-base md:text-3xl font-black text-[#002147] leading-tight mb-1 md:mb-2 line-clamp-1">{(t as any)[course.nameKey]}</h3>
+            
+            <div className="flex items-center gap-1 text-slate-400 font-bold uppercase tracking-widest text-[8px] md:text-xs mt-1">
+              <span>{course.unlocked ? (isRtl ? 'ابدأ اللعب' : 'Start Playing') : (isRtl ? 'فتح بـ 10' : 'Unlock for 10')}</span>
+              <ChevronRight size={10} className={`md:w-4 md:h-4 ${isRtl ? 'rotate-180' : ''}`} />
+            </div>
+
+            <div className={`absolute -bottom-8 -right-8 w-16 h-16 md:w-32 md:h-32 ${course.color} opacity-5 rounded-full`} />
+          </motion.button>
+        ))}
+      </div>
 
       {/* Decorative background mascot */}
-      <div className="fixed bottom-0 right-0 w-64 md:w-96 pointer-events-none opacity-20 -z-10 grayscale">
-         {/* Placeholder for mascot illustration */}
+      <div className="fixed bottom-0 right-[-5%] w-64 md:w-[400px] pointer-events-none opacity-[0.03] -z-10 select-none grayscale">
+         <div className="text-[200px] md:text-[400px]">🦄</div>
       </div>
     </div>
   );

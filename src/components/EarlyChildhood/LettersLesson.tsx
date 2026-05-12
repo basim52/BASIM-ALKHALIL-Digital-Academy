@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations, Language } from '../../lib/translations';
 import { 
@@ -14,7 +14,6 @@ import {
   Sun,
   Umbrella,
   Smartphone,
-  Gamepad,
   Music,
   Camera,
   Heart,
@@ -27,7 +26,10 @@ import {
   Car,
   Plane,
   Ship,
-  Wind
+  Wind,
+  Gamepad2,
+  Trophy,
+  Star
 } from 'lucide-react';
 
 interface LetterOption {
@@ -103,26 +105,63 @@ export const LettersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
   const [activeLevel, setActiveLevel] = useState(1);
   const [activeLetter, setActiveLetter] = useState<LetterOption | null>(null);
   const [showExcellent, setShowExcellent] = useState(false);
+  const [gameMode, setGameMode] = useState(false);
+  const [targetLetter, setTargetLetter] = useState<LetterOption | null>(null);
+  const [score, setScore] = useState(0);
 
-  const speak = (text: string) => {
+  const speak = useCallback((text: string) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
-    utterance.rate = 0.7;
+    utterance.rate = 0.75;
     utterance.pitch = 1.2;
     window.speechSynthesis.speak(utterance);
+  }, []);
+
+  const startNewLevel = useCallback(() => {
+    const currentGroup = LETTER_GROUPS.find(g => g.id === activeLevel) || LETTER_GROUPS[0];
+    const randomIndex = Math.floor(Math.random() * currentGroup.letters.length);
+    const newTarget = currentGroup.letters[randomIndex];
+    setTargetLetter(newTarget);
+    
+    setTimeout(() => {
+      speak(`Find the letter ${newTarget.letter}`);
+    }, 500);
+  }, [activeLevel, speak]);
+
+  const toggleGameMode = () => {
+    const nextMode = !gameMode;
+    setGameMode(nextMode);
+    if (nextMode) {
+      setScore(0);
+      startNewLevel();
+    } else {
+      setTargetLetter(null);
+    }
   };
 
   const handleLetterClick = (item: LetterOption) => {
-    setActiveLetter(item);
-    speak(`${item.letter}. ${item.word}`);
-    
-    setShowExcellent(true);
-    setTimeout(() => setShowExcellent(false), 2000);
-
-    if ('vibrate' in navigator) {
-      navigator.vibrate(50);
+    if (gameMode && targetLetter) {
+        if (item.letter === targetLetter.letter) {
+            setScore(prev => prev + 1);
+            speak(`Excellent! This is the letter ${item.letter}`);
+            setShowExcellent(true);
+            setTimeout(() => {
+                setShowExcellent(false);
+                startNewLevel();
+            }, 1500);
+        } else {
+            speak(`No, that is the letter ${item.letter}. Try again!`);
+        }
+    } else {
+        setActiveLetter(item);
+        speak(`${item.letter}. ${item.word}`);
+        setShowExcellent(true);
+        setTimeout(() => setShowExcellent(false), 2000);
+        if ('vibrate' in navigator) {
+            navigator.vibrate(50);
+        }
     }
   };
 
@@ -142,44 +181,70 @@ export const LettersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
         </button>
         
         <div className="text-center px-1">
-          <h1 className="text-xl md:text-5xl font-black text-[#002147] mb-1 tracking-tight">
-            {t.letters}
-          </h1>
-          <div className="flex items-center justify-center gap-1.5 text-slate-500 bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full border border-white/80 shadow-sm">
-            <Volume2 size={16} />
-            <span className="text-[10px] md:text-sm font-bold uppercase tracking-wider">{t.pressToHear}</span>
-          </div>
+          {gameMode ? (
+            <div className="animate-bounce">
+              <h1 className="text-2xl md:text-5xl font-black text-[#002147] mb-1 md:mb-2 tracking-tight">
+                {isRtl ? `أين الحرف ${targetLetter?.letter}؟` : `Find the Letter ${targetLetter?.letter}!`}
+              </h1>
+              <div className="flex items-center justify-center gap-2">
+                <div className="bg-[#002147] text-white px-4 py-1 rounded-full text-sm font-bold flex items-center gap-2">
+                  <Trophy size={16} className="text-yellow-400" />
+                  <span>{score}</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-xl md:text-5xl font-black text-[#002147] mb-1 tracking-tight">
+                {t.letters}
+              </h1>
+              <div className="flex items-center justify-center gap-1.5 text-slate-500 bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full border border-white/80 shadow-sm">
+                <Volume2 size={16} />
+                <span className="text-[10px] md:text-sm font-bold uppercase tracking-wider">{t.pressToHear}</span>
+              </div>
+            </>
+          )}
         </div>
 
-        <div className="w-12 h-12 md:w-16 md:h-16" />
+        <button 
+          onClick={toggleGameMode}
+          className={`w-12 h-12 md:w-16 md:h-16 shadow-lg rounded-xl md:rounded-2xl flex items-center justify-center transition-all outline-none border ${
+            gameMode 
+            ? 'bg-[#002147] text-white border-white/20' 
+            : 'bg-white text-[#C49E3A] border-slate-50 hover:bg-slate-50'
+          }`}
+        >
+          <Gamepad2 size={24} />
+        </button>
       </div>
 
-      {/* Level Selector - Mobile optimized */}
-      <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-8 z-10">
-         {LETTER_GROUPS.map((group) => (
-           <button
-             key={group.id}
-             onClick={() => {
-               setActiveLevel(group.id);
-               setActiveLetter(null);
-               speak(group.title);
-             }}
-             className={`px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase tracking-widest transition-all ${
-               activeLevel === group.id 
-               ? 'bg-[#002147] text-white shadow-xl scale-105' 
-               : 'bg-white text-[#002147] hover:bg-slate-50 border border-slate-100'
-             }`}
-           >
-             {isRtl ? group.titleAr : group.title}
-           </button>
-         ))}
-      </div>
+      {!gameMode && (
+        <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-8 z-10">
+           {LETTER_GROUPS.map((group) => (
+             <button
+               key={group.id}
+               onClick={() => {
+                 setActiveLevel(group.id);
+                 setActiveLetter(null);
+                 speak(group.title);
+               }}
+               className={`px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase tracking-widest transition-all ${
+                 activeLevel === group.id 
+                 ? 'bg-[#002147] text-white shadow-xl scale-105' 
+                 : 'bg-white text-[#002147] hover:bg-slate-50 border border-slate-100'
+               }`}
+             >
+               {isRtl ? group.titleAr : group.title}
+             </button>
+           ))}
+        </div>
+      )}
 
       <motion.div 
         key={activeLevel}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-6 w-full max-w-6xl z-10 px-2"
+        className={`grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-6 w-full max-w-6xl z-10 px-2 ${gameMode ? 'mt-8' : ''}`}
       >
         {currentGroup.letters.map((item) => (
           <motion.button
@@ -209,7 +274,7 @@ export const LettersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
       </motion.div>
 
       <AnimatePresence>
-        {activeLetter && (
+        {activeLetter && !gameMode && (
           <motion.div 
             initial={{ scale: 0.8, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -256,7 +321,6 @@ export const LettersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
         )}
       </AnimatePresence>
 
-      {/* Decorative background blobs */}
       <div className="absolute inset-0 pointer-events-none -z-10">
         <motion.div 
           animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
