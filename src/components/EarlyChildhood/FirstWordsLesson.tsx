@@ -24,6 +24,7 @@ interface WordLevel {
   id: number;
   title: string;
   titleAr: string;
+  emoji: string;
   words: WordOption[];
 }
 
@@ -38,6 +39,7 @@ const WORD_LEVELS: WordLevel[] = [
     id: 1,
     title: 'Greetings',
     titleAr: 'التحيات',
+    emoji: '👋',
     words: [
       { id: 'hello', word: 'Hello', wordAr: 'مرحباً', emoji: '👋', color: '#FFADAD', shadowColor: 'rgba(255, 173, 173, 0.4)' },
       { id: 'bye', word: 'Goodbye', wordAr: 'مع السلامة', emoji: '👋', color: '#9BFBC1', shadowColor: 'rgba(155, 251, 193, 0.4)' },
@@ -55,6 +57,7 @@ const WORD_LEVELS: WordLevel[] = [
     id: 2,
     title: 'Manners',
     titleAr: 'الأدب والذوق',
+    emoji: '💖',
     words: [
       { id: 'please', word: 'Please', wordAr: 'من فضلك', emoji: '🙏', color: '#FFADAD', shadowColor: 'rgba(255, 173, 173, 0.4)' },
       { id: 'thanks', word: 'Thank you', wordAr: 'شكراً لك', emoji: '💖', color: '#9BFBC1', shadowColor: 'rgba(155, 251, 193, 0.4)' },
@@ -72,6 +75,7 @@ const WORD_LEVELS: WordLevel[] = [
     id: 3,
     title: 'About Me',
     titleAr: 'عني أنا',
+    emoji: '🧒',
     words: [
       { id: 'me', word: 'Me', wordAr: 'أنا', emoji: '🧒', color: '#FFADAD', shadowColor: 'rgba(255, 173, 173, 0.4)' },
       { id: 'name', word: 'My Name', wordAr: 'اسمي', emoji: '🏷️', color: '#9BFBC1', shadowColor: 'rgba(155, 251, 193, 0.4)' },
@@ -89,6 +93,7 @@ const WORD_LEVELS: WordLevel[] = [
     id: 4,
     title: 'Actions',
     titleAr: 'أفعال',
+    emoji: '🏃',
     words: [
       { id: 'run', word: 'Run', wordAr: 'يجري', emoji: '🏃', color: '#FFADAD', shadowColor: 'rgba(255, 173, 173, 0.4)' },
       { id: 'jump', word: 'Jump', wordAr: 'يقفز', emoji: '🦘', color: '#9BFBC1', shadowColor: 'rgba(155, 251, 193, 0.4)' },
@@ -106,6 +111,7 @@ const WORD_LEVELS: WordLevel[] = [
     id: 5,
     title: 'Feelings',
     titleAr: 'المشاعر',
+    emoji: '😊',
     words: [
       { id: 'happy', word: 'Happy', wordAr: 'سعيد', emoji: '😊', color: '#FFADAD', shadowColor: 'rgba(255, 173, 173, 0.4)' },
       { id: 'sad', word: 'Sad', wordAr: 'حزين', emoji: '😢', color: '#A0C4FF', shadowColor: 'rgba(160, 196, 255, 0.4)' },
@@ -123,6 +129,7 @@ const WORD_LEVELS: WordLevel[] = [
     id: 6,
     title: 'Daily Routine',
     titleAr: 'الروتين اليومي',
+    emoji: '🌅',
     words: [
       { id: 'wake', word: 'Wake up', wordAr: 'استيقظ', emoji: '🌅', color: '#FFADAD', shadowColor: 'rgba(255, 173, 173, 0.4)' },
       { id: 'brush', word: 'Brush teeth', wordAr: 'فرش أسنانك', emoji: '🪥', color: '#9BFBC1', shadowColor: 'rgba(155, 251, 193, 0.4)' },
@@ -140,6 +147,7 @@ const WORD_LEVELS: WordLevel[] = [
     id: 7,
     title: 'Food & Drink',
     titleAr: 'طعام وشراب',
+    emoji: '🍎',
     words: [
       { id: 'milk', word: 'Milk', wordAr: 'حليب', emoji: '🥛', color: '#FFADAD', shadowColor: 'rgba(255, 173, 173, 0.4)' },
       { id: 'water', word: 'Water', wordAr: 'ماء', emoji: '💧', color: '#3b82f6', shadowColor: 'rgba(59, 130, 246, 0.4)' },
@@ -157,6 +165,7 @@ const WORD_LEVELS: WordLevel[] = [
     id: 8,
     title: 'Around Us',
     titleAr: 'ما حولنا',
+    emoji: '🌳',
     words: [
       { id: 'car-t', word: 'Car', wordAr: 'سيارة', emoji: '🚗', color: '#FFADAD', shadowColor: 'rgba(255, 173, 173, 0.4)' },
       { id: 'tree', word: 'Tree', wordAr: 'شجرة', emoji: '🌳', color: '#22c55e', shadowColor: 'rgba(34, 197, 94, 0.4)' },
@@ -174,6 +183,7 @@ const WORD_LEVELS: WordLevel[] = [
     id: 9,
     title: 'Colors Review',
     titleAr: 'مراجعة الألوان',
+    emoji: '🎨',
     words: [
       { id: 'red', word: 'Red', wordAr: 'أحمر', emoji: '🔴', color: '#ef4444', shadowColor: 'rgba(239, 68, 68, 0.4)' },
       { id: 'blue', word: 'Blue', wordAr: 'أزرق', emoji: '🔵', color: '#3b82f6', shadowColor: 'rgba(59, 130, 246, 0.4)' },
@@ -191,6 +201,7 @@ const WORD_LEVELS: WordLevel[] = [
     id: 10,
     title: 'Number Review',
     titleAr: 'مراجعة الأرقام',
+    emoji: '🔢',
     words: [
       { id: 'one', word: 'One', wordAr: 'واحد', emoji: '1️⃣', color: '#FFADAD', shadowColor: 'rgba(255, 173, 173, 0.4)' },
       { id: 'two', word: 'Two', wordAr: 'اثنان', emoji: '2️⃣', color: '#9BFBC1', shadowColor: 'rgba(155, 251, 193, 0.4)' },
@@ -278,7 +289,7 @@ export const FirstWordsLesson: React.FC<FirstWordsLessonProps> = ({ onBack, isRt
         </div>
       </div>
 
-      {/* Level Selector - Improved for touch */}
+      {/* Level Selector - Improved for touch and content-aware */}
       <div className="px-4 mb-6">
         <div className="max-w-6xl mx-auto flex overflow-x-auto gap-2 pb-4 no-scrollbar snap-x scroll-smooth -mx-4 px-4">
            {WORD_LEVELS.map((level) => (
@@ -286,26 +297,31 @@ export const FirstWordsLesson: React.FC<FirstWordsLessonProps> = ({ onBack, isRt
                key={level.id}
                onClick={() => {
                  setActiveLevel(level.id);
-                 speak(level.title);
+                 speak(isRtl ? level.titleAr : level.title);
                }}
-               className={`flex-shrink-0 snap-start px-5 py-2.5 rounded-xl font-bold text-[10px] md:text-xs uppercase tracking-wider transition-all duration-300 ${
+               className={`flex-shrink-0 snap-start px-4 md:px-6 py-3 md:py-3.5 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase tracking-wider transition-all duration-300 flex items-center gap-2 ${
                  activeLevel === level.id 
-                 ? 'bg-yellow-400 text-[#002147] shadow-lg shadow-yellow-200 -translate-y-0.5' 
-                 : 'bg-white text-[#002147] border border-slate-200'
+                 ? 'bg-[#002147] text-white shadow-xl -translate-y-0.5' 
+                 : 'bg-white text-[#002147] border border-slate-200 hover:border-[#002147]/20'
                }`}
              >
-               {isRtl ? `مستوى ${level.id}` : `Level ${level.id}`}
+               <span className="text-base md:text-xl">
+                 {level.emoji}
+               </span>
+               <span className="truncate max-w-[100px] md:max-w-none">
+                 {isRtl ? level.titleAr : level.title}
+               </span>
              </button>
            ))}
         </div>
       </div>
 
-      {/* Main Content - Grid optimized for mobile */}
+      {/* Main Content - Grid optimized for responsiveness */}
       <motion.div 
         key={activeLevel}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-6 px-4"
+        className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6 px-4 pb-12"
       >
         {currentLevel.words.map((word) => (
           <motion.button
@@ -318,10 +334,10 @@ export const FirstWordsLesson: React.FC<FirstWordsLessonProps> = ({ onBack, isRt
               scale: [1, 1.05, 1],
               filter: ["brightness(1)", "brightness(1.2)", "brightness(1)"]
             } : {}}
-            className="relative group p-0"
+            className="relative group p-0 outline-none"
           >
             <div 
-              className={`aspect-square rounded-[1.75rem] md:rounded-[2.5rem] p-3 md:p-6 flex flex-col items-center justify-center transition-all duration-300 shadow-lg border-b-4 ${
+              className={`aspect-square rounded-[1.5rem] md:rounded-[2.5rem] p-3 md:p-6 flex flex-col items-center justify-center transition-all duration-300 shadow-md md:shadow-lg border-b-4 ${
                 learnedWords.has(word.id) 
                 ? 'ring-4 ring-emerald-400/30' 
                 : 'hover:shadow-xl'
@@ -331,16 +347,18 @@ export const FirstWordsLesson: React.FC<FirstWordsLessonProps> = ({ onBack, isRt
                 borderColor: word.shadowColor,
               }}
             >
-              <span className="text-5xl md:text-7xl drop-shadow-md mb-2 group-activeList:scale-110 transition-transform">
-                {word.emoji}
-              </span>
+              <div className="flex-1 flex items-center justify-center">
+                <span className="text-4xl md:text-7xl drop-shadow-md group-activeList:scale-110 transition-transform">
+                  {word.emoji}
+                </span>
+              </div>
               
-              <div className="bg-white/40 backdrop-blur-sm px-2 md:px-4 py-1.5 rounded-xl md:rounded-2xl border border-white/40 text-center w-full mt-auto">
-                <p className="text-[11px] md:text-lg font-black text-[#002147] truncate leading-none mb-0.5">
+              <div className="bg-white/50 backdrop-blur-sm px-2 md:px-4 py-1.5 md:py-2.5 rounded-xl md:rounded-2xl border border-white/40 text-center w-full mt-2">
+                <p className="text-[10px] md:text-base lg:text-lg font-black text-[#002147] truncate leading-none mb-0.5">
                   {word.word}
                 </p>
                 {isRtl && (
-                  <p className="text-[9px] md:text-xs font-bold text-[#002147]/70 truncate leading-none">
+                  <p className="text-[8px] md:text-xs font-bold text-[#002147]/70 truncate leading-none">
                     {word.wordAr}
                   </p>
                 )}

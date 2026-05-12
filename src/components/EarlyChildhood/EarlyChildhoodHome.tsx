@@ -12,7 +12,8 @@ import {
   TrendingUp,
   User,
   Clock,
-  Sparkles
+  Sparkles,
+  Mic
 } from 'lucide-react';
 import { ColorsLesson } from './ColorsLesson';
 import { NumbersLesson } from './NumbersLesson';
@@ -20,9 +21,11 @@ import { AnimalsLesson } from './AnimalsLesson';
 import { ShapesLesson } from './ShapesLesson';
 import { LettersLesson } from './LettersLesson';
 import { FirstWordsLesson } from './FirstWordsLesson';
+import { PronunciationLesson } from './PronunciationLesson';
 
 const KID_COURSES = [
   { id: 'first-words', nameKey: 'firstWords', icon: Sparkles, color: 'bg-yellow-400', shadow: 'shadow-yellow-900/20', unlocked: true },
+  { id: 'pronunciation', nameKey: 'pronunciation', icon: Mic, color: 'bg-indigo-500', shadow: 'shadow-indigo-900/20', unlocked: true },
   { id: 'colors', nameKey: 'colors', icon: Palette, color: 'bg-rose-500', shadow: 'shadow-rose-900/20', unlocked: true },
   { id: 'numbers', nameKey: 'numbers', icon: Hash, color: 'bg-blue-500', shadow: 'shadow-blue-900/20', unlocked: true },
   { id: 'animals', nameKey: 'animals', icon: Dog, color: 'bg-emerald-500', shadow: 'shadow-emerald-900/20', unlocked: true },
@@ -38,6 +41,9 @@ export const EarlyChildhoodHome = ({ lang }: { lang: Language }) => {
 
   if (activeLesson === 'first-words') {
     return <FirstWordsLesson t={t} isRtl={isRtl} onBack={() => setActiveLesson(null)} />;
+  }
+  if (activeLesson === 'pronunciation') {
+    return <PronunciationLesson lang={lang} onBack={() => setActiveLesson(null)} />;
   }
   if (activeLesson === 'colors') {
     return <ColorsLesson lang={lang} onBack={() => setActiveLesson(null)} />;

@@ -2306,20 +2306,20 @@ export default function App() {
               </header>
 
               {/* Desktop/Tablet Sidebar */}
-              <aside className={`hidden md:flex ${isRtl ? 'right-0 border-l-4' : 'left-0 border-r-4'} w-20 lg:w-64 bg-[#002147] text-white flex-col p-6 fixed h-full z-40 transition-all border-[#C49E3A]`}>
-                <div className="flex items-center gap-4 px-2 mb-12 overflow-hidden">
-                  <div className="w-12 h-12 bg-white rounded-2xl flex shrink-0 items-center justify-center text-[#002147] shadow-xl font-black text-2xl">
+              <aside className={`hidden md:flex ${isRtl ? 'right-0 border-l-[3px]' : 'left-0 border-r-[3px]'} w-20 lg:w-56 bg-[#002147] text-white flex-col p-4 lg:p-5 fixed h-full z-40 transition-all border-[#C49E3A]`}>
+                <div className="flex items-center gap-3 px-1 mb-10 overflow-hidden">
+                  <div className="w-10 h-10 lg:w-11 lg:h-11 bg-white rounded-xl flex shrink-0 items-center justify-center text-[#002147] shadow-xl font-black text-xl lg:text-2xl">
                     B
                   </div>
-                  <h1 className={`font-black text-xl tracking-tight hidden lg:block leading-tight ${isRtl ? 'text-right' : 'text-left'}`}>
-                    {t.academyName}<br/><span className="text-[#C49E3A] text-xs font-bold">{t.academySubName}</span>
+                  <h1 className={`font-black text-sm lg:text-lg tracking-tight hidden lg:block leading-tight ${isRtl ? 'text-right' : 'text-left'}`}>
+                    {t.academyName}<br/><span className="text-[#C49E3A] text-[10px] font-bold tracking-widest">{t.academySubName}</span>
                     {userProfile?.role === UserRole.ADMIN && (
-                      <span className="block mt-1 text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-full w-fit uppercase font-black tracking-widest">Master Admin</span>
+                      <span className="block mt-1 text-[9px] bg-red-500 text-white px-2 py-0.5 rounded-full w-fit uppercase font-black tracking-widest">Admin</span>
                     )}
                   </h1>
                 </div>
                 
-                <nav className="flex-1 space-y-3">
+                <nav className="flex-1 space-y-2 overflow-y-auto no-scrollbar">
                   {[
                     { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
                     { id: 'credits', label: t.credits, icon: Wallet },
@@ -2345,16 +2345,16 @@ export default function App() {
                           setView(item.id as AppView);
                         }
                       }}
-                        className={`w-full flex items-center gap-4 px-4 py-4 rounded-2xl transition-all group relative overflow-hidden ${
+                        className={`w-full flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-3 lg:py-3.5 rounded-xl lg:rounded-2xl transition-all group relative overflow-hidden ${
                           view === item.id 
-                          ? 'bg-[#C49E3A] text-[#002147] font-black shadow-lg' : 'hover:bg-white/10 text-white/70 hover:text-white'
-                        } ${isDisabled ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
+                          ? 'bg-[#C49E3A] text-[#002147] font-black shadow-lg shadow-black/20 scale-[1.02]' : 'hover:bg-white/5 text-white/60 hover:text-white'
+                        } ${isDisabled ? 'opacity-30 cursor-not-allowed grayscale' : ''}`}
                       >
-                        <item.icon size={22} className="shrink-0 group-hover:scale-110 transition-transform" />
-                        <span className={`text-xs font-bold hidden lg:block uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'} w-full`}>
+                        <item.icon size={innerWidth < 1024 ? 22 : 20} className="shrink-0 group-hover:scale-110 transition-transform" />
+                        <span className={`text-[11px] lg:text-xs font-bold hidden lg:block uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'} w-full truncate`}>
                           {item.label}
                           {isDisabled && (
-                            <span className={`block text-[8px] font-black tracking-widest ${isRtl ? 'mt-0.5' : 'mt-0.5'}`}>
+                            <span className={`block text-[7px] font-black tracking-widest ${isRtl ? 'mt-0.5' : 'mt-0.5'} opacity-60`}>
                               ({t.comingSoon})
                             </span>
                           )}
@@ -2364,20 +2364,20 @@ export default function App() {
                   })}
                 </nav>
 
-                <div className="pt-8 border-t border-white/10 space-y-3">
+                <div className="pt-6 mt-6 border-t border-white/5 space-y-2">
                   <button 
                     onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-                    className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-white transition-all group"
+                    className="w-full flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-all group"
                   >
-                    <Settings size={22} className="shrink-0" />
-                    <span className={`text-xs font-bold hidden lg:block uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'} w-full`}>{t.languageToggle}</span>
+                    <Settings size={20} className="shrink-0" />
+                    <span className={`text-[10px] lg:text-[11px] font-bold hidden lg:block uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'} w-full truncate`}>{t.languageToggle}</span>
                   </button>
                   <button 
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl hover:bg-red-500/10 text-red-100 transition-all group"
+                    className="w-full flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-3 rounded-xl hover:bg-red-500/10 text-red-100/60 hover:text-red-100 transition-all group"
                   >
-                    <LogOut size={22} className="shrink-0" />
-                    <span className={`text-xs font-bold hidden lg:block uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'} w-full`}>{t.logout}</span>
+                    <LogOut size={20} className="shrink-0" />
+                    <span className={`text-[10px] lg:text-[11px] font-bold hidden lg:block uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'} w-full truncate`}>{t.logout}</span>
                   </button>
                 </div>
               </aside>
@@ -2441,7 +2441,7 @@ export default function App() {
             </>
           )}
 
-          <main className={`flex-1 transition-all ${view !== 'placement-test' ? (isRtl ? 'md:mr-20 lg:mr-64 mb-32 md:mb-0 pt-20 md:pt-0' : 'md:ml-20 lg:ml-64 mb-32 md:mb-0 pt-20 md:pt-0') : ''}`}>
+          <main className={`flex-1 transition-all ${view !== 'placement-test' ? (isRtl ? 'md:mr-20 lg:mr-56 mb-32 md:mb-0 pt-20 md:pt-0' : 'md:ml-20 lg:ml-56 mb-32 md:mb-0 pt-20 md:pt-0') : ''}`}>
             {renderContent()}
 
             {/* Global Notification Toast */}

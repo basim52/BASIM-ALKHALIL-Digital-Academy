@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations, Language } from '../../lib/translations';
 import { 
@@ -6,7 +6,10 @@ import {
   Volume2, 
   Palette, 
   Sparkles,
-  PartyPopper
+  PartyPopper,
+  Gamepad2,
+  Trophy,
+  Star
 } from 'lucide-react';
 
 interface ColorOption {
@@ -34,28 +37,81 @@ const COLORS: ColorOption[] = [
 export const ColorsLesson = ({ lang, onBack }: { lang: Language, onBack: () => void }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
+  
   const [activeColor, setActiveColor] = useState<ColorOption | null>(null);
   const [showExcellent, setShowExcellent] = useState(false);
+  const [gameMode, setGameMode] = useState(false);
+  const [targetColor, setTargetColor] = useState<ColorOption | null>(null);
+  const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [gameStarted, setGameStarted] = useState(false);
 
-  const speak = (text: string) => {
+  const speak = useCallback((text: string, forceLang?: string) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    utterance.rate = 0.9;
+    // If it's a color name and we're in learning mode, use English to help them learn English names
+    utterance.lang = forceLang || 'en-US';
+    utterance.rate = 0.85;
     utterance.pitch = 1.1; 
     window.speechSynthesis.speak(utterance);
+  }, []);
+
+  const startNewGameLevel = useCallback(() => {
+    const randomIndex = Math.floor(Math.random() * COLORS.length);
+    const newTarget = COLORS[randomIndex];
+    setTargetColor(newTarget);
+    
+    // Give voice instruction
+    setTimeout(() => {
+      if (isRtl) {
+        speak(`Find the color ${newTarget.name}`, 'en-US'); // Keeping English name for learning
+      } else {
+        speak(`Find the color ${newTarget.name}`);
+      }
+    }, 500);
+  }, [isRtl, speak]);
+
+  const toggleGameMode = () => {
+    const nextMode = !gameMode;
+    setGameMode(nextMode);
+    if (nextMode) {
+      setScore(0);
+      setStreak(0);
+      setGameStarted(true);
+      startNewGameLevel();
+    } else {
+      setGameStarted(false);
+      setTargetColor(null);
+    }
   };
 
   const handleColorClick = (color: ColorOption) => {
     setActiveColor(color);
-    speak(color.name);
     
-    setShowExcellent(true);
-    setTimeout(() => setShowExcellent(false), 2000);
-
-    if ('vibrate' in navigator) {
-      navigator.vibrate(50);
+    if (gameMode && targetColor) {
+      if (color.name === targetColor.name) {
+        // Correct!
+        setScore(prev => prev + 1);
+        setStreak(prev => prev + 1);
+        speak("Excellent! You found it!");
+        setShowExcellent(true);
+        
+        setTimeout(() => {
+          setShowExcellent(false);
+          startNewGameLevel();
+        }, 1500);
+      } else {
+        // Incorrect
+        setStreak(0);
+        speak(`That is ${color.name}. Try again!`);
+      }
+    } else {
+      // Normal learning mode
+      speak(color.name);
+      if ('vibrate' in navigator) {
+        navigator.vibrate(50);
+      }
     }
   };
 
@@ -64,6 +120,7 @@ export const ColorsLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
       className="min-h-screen transition-colors duration-700 p-4 md:p-10 flex flex-col items-center relative overflow-hidden"
       style={{ backgroundColor: activeColor ? `${activeColor.hex}20` : '#f8fafc' }}
     >
+      {/* Dynamic Header */}
       <div className="w-full max-w-6xl flex items-center justify-between mb-6 md:mb-8 z-20">
         <button 
           onClick={onBack}
@@ -73,42 +130,80 @@ export const ColorsLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
         </button>
         
         <div className="text-center px-1">
-          <h1 className="text-xl md:text-5xl font-black text-[#002147] mb-1 md:mb-2 tracking-tight">
-            {t.learnColors}
-          </h1>
-          <div className="flex items-center justify-center gap-1.5 text-slate-500 bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full border border-white/80 shadow-sm">
-            <Volume2 size={16} className="md:w-6 md:h-6" />
-            <span className="text-[10px] md:text-sm font-bold uppercase tracking-wider">{t.pressToHear}</span>
-          </div>
+          {gameMode ? (
+            <div className="animate-bounce">
+              <h1 className="text-2xl md:text-5xl font-black text-[#002147] mb-1 md:mb-2 tracking-tight">
+                {isRtl ? `أين اللون ${targetColor?.nameAr}؟` : `Find the ${targetColor?.name}!`}
+              </h1>
+              <div className="flex items-center justify-center gap-2">
+                <div className="bg-[#002147] text-white px-4 py-1 rounded-full text-sm font-bold flex items-center gap-2">
+                  <Trophy size={16} className="text-yellow-400" />
+                  <span>{score}</span>
+                </div>
+                {streak > 2 && (
+                  <div className="bg-orange-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1 animate-pulse">
+                    <Sparkles size={12} />
+                    <span>On Fire!</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-xl md:text-5xl font-black text-[#002147] mb-1 md:mb-2 tracking-tight">
+                {t.learnColors}
+              </h1>
+              <div className="flex items-center justify-center gap-1.5 text-slate-500 bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full border border-white/80 shadow-sm">
+                <Volume2 size={16} className="md:w-6 md:h-6" />
+                <span className="text-[10px] md:text-sm font-bold uppercase tracking-wider">{t.pressToHear}</span>
+              </div>
+            </>
+          )}
         </div>
 
-        <div className="w-12 h-12 md:w-16 md:h-16" />
+        <button 
+          onClick={toggleGameMode}
+          className={`w-12 h-12 md:w-16 md:h-16 shadow-lg rounded-xl md:rounded-2xl flex items-center justify-center transition-all outline-none border ${
+            gameMode 
+            ? 'bg-[#002147] text-white border-white/20' 
+            : 'bg-white text-[#C49E3A] border-slate-50 hover:bg-slate-50'
+          }`}
+        >
+          <Gamepad2 size={24} />
+        </button>
       </div>
 
+      {/* Grid of Colors */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-6 w-full max-w-6xl z-10 pb-20">
-        {COLORS.map((color) => (
-          <motion.button
-            key={color.name}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => handleColorClick(color)}
-            className={`aspect-square rounded-[1.75rem] md:rounded-[2.5rem] shadow-lg flex flex-col items-center justify-center gap-2 md:gap-3 relative group overflow-hidden border-4 transition-all ${
-              activeColor?.name === color.name 
-              ? 'border-[#002147] ring-4 ring-[#002147]/10 scale-105' 
-              : 'border-white'
-            }`}
-            style={{ 
-              backgroundColor: color.hex,
-            }}
-          >
-            <div className="p-2 md:p-4 bg-white/20 backdrop-blur-md rounded-xl md:rounded-2xl flex items-center justify-center text-white border border-white/20">
-              <Palette className="w-6 h-6 md:w-10 md:h-10" strokeWidth={2.5} />
-            </div>
-            <span className={`text-sm md:text-xl font-black drop-shadow-sm ${color.hex === '#ffffff' ? 'text-slate-800' : 'text-white'}`}>
-              {isRtl ? color.nameAr : color.name}
-            </span>
-          </motion.button>
-        ))}
+        {COLORS.map((color) => {
+          const isTarget = gameMode && targetColor?.name === color.name;
+          const isActive = activeColor?.name === color.name;
+          
+          return (
+            <motion.button
+              key={color.name}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => handleColorClick(color)}
+              className={`aspect-square rounded-[1.75rem] md:rounded-[2.5rem] shadow-lg flex flex-col items-center justify-center gap-2 md:gap-3 relative group overflow-hidden border-4 transition-all ${
+                isActive 
+                ? 'border-[#002147] ring-4 ring-[#002147]/10 scale-105 z-20' 
+                : 'border-white'
+              }`}
+              style={{ 
+                backgroundColor: color.hex,
+              }}
+            >
+              <div className="p-2 md:p-4 bg-white/20 backdrop-blur-md rounded-xl md:rounded-2xl flex items-center justify-center text-white border border-white/20">
+                <Palette className="w-6 h-6 md:w-10 md:h-10" strokeWidth={2.5} />
+              </div>
+              
+              <span className={`text-sm md:text-xl font-black drop-shadow-sm ${color.hex === '#ffffff' ? 'text-slate-800' : 'text-white'}`}>
+                {isRtl ? color.nameAr : color.name}
+              </span>
+            </motion.button>
+          );
+        })}
       </div>
 
       {/* Success Animation overlay */}
@@ -126,8 +221,17 @@ export const ColorsLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
               </div>
               <div>
                 <h2 className="text-3xl md:text-6xl font-black text-[#002147] mb-1">{t.excellent}</h2>
-                <p className="text-base md:text-2xl font-bold text-emerald-600 tracking-tight">{t.congratulations}</p>
+                <p className="text-base md:text-2xl font-bold text-emerald-600 tracking-tight">
+                  {gameMode ? (isRtl ? 'رائع جداً!' : 'Keep it up!') : t.congratulations}
+                </p>
               </div>
+              {gameMode && streak > 1 && (
+                <div className="flex gap-1">
+                  {Array.from({ length: Math.min(streak, 5) }).map((_, i) => (
+                    <Star key={i} fill="#fbbf24" className="text-yellow-400 w-8 h-8" />
+                  ))}
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -149,3 +253,4 @@ export const ColorsLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
     </div>
   );
 };
+

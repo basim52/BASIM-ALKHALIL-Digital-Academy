@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations, Language } from '../../lib/translations';
 import { 
@@ -14,7 +14,9 @@ import {
   Diamond,
   Pentagon,
   Moon,
-  Heart
+  Heart,
+  Gamepad2,
+  Trophy
 } from 'lucide-react';
 
 interface ShapeOption {
@@ -55,29 +57,71 @@ const SHAPE_GROUPS = [
 export const ShapesLesson = ({ lang, onBack }: { lang: Language, onBack: () => void }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
+  
   const [activeLevel, setActiveLevel] = useState(1);
   const [activeShape, setActiveShape] = useState<ShapeOption | null>(null);
   const [showExcellent, setShowExcellent] = useState(false);
+  const [gameMode, setGameMode] = useState(false);
+  const [targetShape, setTargetShape] = useState<ShapeOption | null>(null);
+  const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
 
-  const speak = (text: string) => {
+  const speak = useCallback((text: string, forceLang?: string) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    utterance.rate = 0.8;
+    utterance.lang = forceLang || 'en-US';
+    utterance.rate = 0.85;
     utterance.pitch = 1.1;
     window.speechSynthesis.speak(utterance);
+  }, []);
+
+  const startNewGameLevel = useCallback(() => {
+    const currentGroup = SHAPE_GROUPS.find(g => g.id === activeLevel) || SHAPE_GROUPS[0];
+    const randomIndex = Math.floor(Math.random() * currentGroup.shapes.length);
+    const newTarget = currentGroup.shapes[randomIndex];
+    setTargetShape(newTarget);
+    
+    setTimeout(() => {
+      speak(`Find the ${newTarget.name}`);
+    }, 500);
+  }, [activeLevel, speak]);
+
+  const toggleGameMode = () => {
+    const nextMode = !gameMode;
+    setGameMode(nextMode);
+    if (nextMode) {
+      setScore(0);
+      setStreak(0);
+      startNewGameLevel();
+    } else {
+      setTargetShape(null);
+    }
   };
 
   const handleShapeClick = (shape: ShapeOption) => {
     setActiveShape(shape);
-    speak(shape.name);
     
-    setShowExcellent(true);
-    setTimeout(() => setShowExcellent(false), 2000);
-
-    if ('vibrate' in navigator) {
-      navigator.vibrate(50);
+    if (gameMode && targetShape) {
+      if (shape.name === targetShape.name) {
+        setScore(prev => prev + 1);
+        setStreak(prev => prev + 1);
+        speak("Excellent! Great job!");
+        setShowExcellent(true);
+        
+        setTimeout(() => {
+          setShowExcellent(false);
+          startNewGameLevel();
+        }, 1500);
+      } else {
+        setStreak(0);
+        speak(`That is a ${shape.name}. Try again!`);
+      }
+    } else {
+      speak(shape.name);
+      if ('vibrate' in navigator) {
+        navigator.vibrate(50);
+      }
     }
   };
 
@@ -97,44 +141,71 @@ export const ShapesLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
         </button>
         
         <div className="text-center px-1">
-          <h1 className="text-xl md:text-5xl font-black text-[#002147] mb-1 tracking-tight">
-            {t.shapes}
-          </h1>
-          <div className="flex items-center justify-center gap-1.5 text-slate-500 bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full border border-white/80 shadow-sm">
-            <Volume2 size={16} />
-            <span className="text-[10px] md:text-sm font-bold uppercase tracking-wider">{t.pressToHear}</span>
-          </div>
+          {gameMode ? (
+            <div className="animate-bounce">
+              <h1 className="text-2xl md:text-5xl font-black text-[#002147] mb-1 md:mb-2 tracking-tight">
+                {isRtl ? `أين الشكل ${targetShape?.nameAr}؟` : `Find the ${targetShape?.name}!`}
+              </h1>
+              <div className="flex items-center justify-center gap-2">
+                <div className="bg-[#002147] text-white px-4 py-1 rounded-full text-sm font-bold flex items-center gap-2">
+                  <Trophy size={16} className="text-yellow-400" />
+                  <span>{score}</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-xl md:text-5xl font-black text-[#002147] mb-1 tracking-tight">
+                {t.shapes}
+              </h1>
+              <div className="flex items-center justify-center gap-1.5 text-slate-500 bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full border border-white/80 shadow-sm">
+                <Volume2 size={16} />
+                <span className="text-[10px] md:text-sm font-bold uppercase tracking-wider">{t.pressToHear}</span>
+              </div>
+            </>
+          )}
         </div>
 
-        <div className="w-12 h-12 md:w-16 md:h-16" />
+        <button 
+          onClick={toggleGameMode}
+          className={`w-12 h-12 md:w-16 md:h-16 shadow-lg rounded-xl md:rounded-2xl flex items-center justify-center transition-all outline-none border ${
+            gameMode 
+            ? 'bg-[#002147] text-white border-white/20' 
+            : 'bg-white text-[#C49E3A] border-slate-50 hover:bg-slate-50'
+          }`}
+        >
+          <Gamepad2 size={24} />
+        </button>
       </div>
 
-      {/* Level Selector - Mobile optimized */}
-      <div className="flex justify-center flex-wrap gap-2 md:gap-4 mb-8 z-10">
-         {SHAPE_GROUPS.map((group) => (
-           <button
-             key={group.id}
-             onClick={() => {
-               setActiveLevel(group.id);
-               setActiveShape(null);
-               speak(group.title);
-             }}
-             className={`px-4 md:px-8 py-2 md:py-4 rounded-xl md:rounded-3xl font-black text-[10px] md:text-sm uppercase tracking-widest transition-all ${
-               activeLevel === group.id 
-               ? 'bg-[#002147] text-white shadow-xl scale-105' 
-               : 'bg-white text-[#002147] hover:bg-slate-50 border border-slate-100 shadow-sm'
-             }`}
-           >
-             {isRtl ? group.titleAr : group.title}
-           </button>
-         ))}
-      </div>
+      {/* Level Selector */}
+      {!gameMode && (
+        <div className="flex justify-center flex-wrap gap-2 md:gap-4 mb-8 z-10">
+           {SHAPE_GROUPS.map((group) => (
+             <button
+               key={group.id}
+               onClick={() => {
+                 setActiveLevel(group.id);
+                 setActiveShape(null);
+                 speak(group.title);
+               }}
+               className={`px-4 md:px-8 py-2 md:py-4 rounded-xl md:rounded-3xl font-black text-[10px] md:text-sm uppercase tracking-widest transition-all ${
+                 activeLevel === group.id 
+                 ? 'bg-[#002147] text-white shadow-xl scale-105' 
+                 : 'bg-white text-[#002147] hover:bg-slate-50 border border-slate-100 shadow-sm'
+               }`}
+             >
+               {isRtl ? group.titleAr : group.title}
+             </button>
+           ))}
+        </div>
+      )}
 
       <motion.div 
         key={activeLevel}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8 w-full max-w-5xl z-10 px-2 pb-20"
+        className={`grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8 w-full max-w-5xl z-10 px-2 pb-20 ${gameMode ? 'mt-8' : ''}`}
       >
         {currentGroup.shapes.map((shape) => (
           <motion.button
@@ -172,6 +243,13 @@ export const ShapesLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
             <div className="bg-white/95 backdrop-blur-xl p-8 rounded-[3rem] shadow-2xl border-4 border-emerald-400 text-center flex flex-col items-center gap-4">
               <PartyPopper size={48} className="text-emerald-500 md:w-16 md:h-16" />
               <h2 className="text-3xl md:text-4xl font-black text-[#002147]">{t.excellent}</h2>
+              {streak > 1 && (
+                <div className="flex gap-1 mt-2">
+                  {Array.from({ length: Math.min(streak, 3) }).map((_, i) => (
+                    <Trophy key={i} className="text-yellow-400 w-8 h-8 md:w-10 md:h-10" />
+                  ))}
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -185,3 +263,4 @@ export const ShapesLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
     </div>
   );
 };
+
