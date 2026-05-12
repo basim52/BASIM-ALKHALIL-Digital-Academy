@@ -46,6 +46,7 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
   const [score, setScore] = useState(0);
   const [recognizedText, setRecognizedText] = useState('');
   const [showCelebration, setShowCelebration] = useState(false);
+  const [micError, setMicError] = useState<'none' | 'denied' | 'unsupported'>('none');
   
   // New game logic states
   const [attempts, setAttempts] = useState(0);
@@ -76,6 +77,11 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
 
       recognitionRef.current.onerror = (event: any) => {
         console.error('Speech recognition error', event.error);
+        if (event.error === 'not-allowed') {
+          setMicError('denied');
+        } else if (event.error === 'service-not-allowed') {
+          setMicError('denied');
+        }
         setIsListening(false);
       };
 
@@ -95,15 +101,43 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
     window.speechSynthesis.speak(utterance);
   }, []);
 
-  const startListening = () => {
+  const startListening = async () => {
     if (!recognitionRef.current) {
-      alert('Speech recognition is not supported in your browser.');
+      setMicError('unsupported');
       return;
     }
-    setRecognizedText('');
-    setFeedback('none');
-    setIsListening(true);
-    recognitionRef.current.start();
+    
+    setMicError('none');
+    
+    try {
+      // First, ensure we have microphone permission via getUserMedia
+      // This often "wakes up" the permission prompt more reliably than speech recognition alone
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Stop the stream immediately, speech recognition will handle its own stream
+      stream.getTracks().forEach(track => track.stop());
+
+      setRecognizedText('');
+      setFeedback('none');
+      setIsListening(true);
+      
+      // Some browsers might throw if recognition is already running
+      try {
+        recognitionRef.current.start();
+      } catch (e) {
+        console.warn('Recognition already started or failed to start:', e);
+        // If it was already running, just keep isListening true
+      }
+    } catch (err: any) {
+      console.error('Detailed Mic access error:', err);
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setMicError('denied');
+      } else if (err.name === 'NotFoundError') {
+        setMicError('unsupported');
+      } else {
+        setMicError('denied');
+      }
+      setIsListening(false);
+    }
   };
 
   const nextModeOrFinish = () => {
@@ -238,7 +272,33 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
 
       <div className="flex-1 flex flex-col items-center justify-center w-full max-w-4xl z-10 transition-all">
         <AnimatePresence mode="wait">
-          {!showCelebration ? (
+          {micError !== 'none' ? (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-[3rem] p-8 md:p-12 text-center shadow-2xl flex flex-col items-center gap-6 border-4 border-rose-100"
+            >
+              <div className="w-20 h-20 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500">
+                <Mic size={40} className="opacity-50" />
+                <XCircle size={24} className="absolute mt-10 ml-10" />
+              </div>
+              <div>
+                <h2 className="text-2xl md:text-3xl font-black text-[#002147] mb-2">{(t as any).micErrorTitle}</h2>
+                <p className="text-slate-500 max-w-md">
+                  {micError === 'denied' ? (t as any).micError : (t as any).micNotSupported}
+                </p>
+              </div>
+              <button 
+                onClick={() => {
+                  setMicError('none');
+                  startListening();
+                }}
+                className="px-8 py-3 bg-[#002147] text-white rounded-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-lg"
+              >
+                {isRtl ? 'حاول مرة أخرى' : 'Try Again'}
+              </button>
+            </motion.div>
+          ) : !showCelebration ? (
             <motion.div 
               key={currentWord.id}
               initial={{ opacity: 0, scale: 0.8, y: 20 }}
