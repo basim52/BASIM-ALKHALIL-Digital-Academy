@@ -46,8 +46,16 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
   const [score, setScore] = useState(0);
   const [recognizedText, setRecognizedText] = useState('');
   const [showCelebration, setShowCelebration] = useState(false);
+  
+  // New game logic states
+  const [attempts, setAttempts] = useState(0);
+  const [reviewQueue, setReviewQueue] = useState<number[]>([]);
+  const [isReviewing, setIsReviewing] = useState(false);
+  const [reviewIndex, setReviewIndex] = useState(0);
+  const [reviewSuccesses, setReviewSuccesses] = useState(0);
 
-  const currentWord = PRACTICE_WORDS[currentIndex];
+  const wordIndex = isReviewing ? reviewQueue[reviewIndex] : currentIndex;
+  const currentWord = PRACTICE_WORDS[wordIndex];
   
   // Speech Recognition setup
   const recognitionRef = useRef<any>(null);
@@ -98,31 +106,82 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
     recognitionRef.current.start();
   };
 
-  const validatePronunciation = (transcript: string) => {
-    const target = currentWord.word.toLowerCase();
-    
-    // Fuzzy matching logic - very simple for children
-    if (transcript.includes(target) || target.includes(transcript)) {
-      setFeedback('correct');
-      setScore(prev => prev + 1);
-      speak("Excellent! Well done!");
-      
-      setTimeout(() => {
-        if (currentIndex < PRACTICE_WORDS.length - 1) {
-          setCurrentIndex(prev => prev + 1);
+  const nextModeOrFinish = () => {
+    if (!isReviewing) {
+      // Finished initial pass
+      if (currentIndex < PRACTICE_WORDS.length - 1) {
+        setCurrentIndex(prev => prev + 1);
+        setAttempts(0);
+        setFeedback('none');
+        setRecognizedText('');
+      } else {
+        // End of initial pass, check review queue
+        if (reviewQueue.length > 0) {
+          setIsReviewing(true);
+          setReviewIndex(0);
+          setReviewSuccesses(0);
+          setAttempts(0);
           setFeedback('none');
           setRecognizedText('');
+          speak("Now let's review the hard ones! You need to say them correctly twice.");
         } else {
           setShowCelebration(true);
         }
-      }, 2000);
+      }
+    } else {
+      // In review pass
+      if (reviewIndex < reviewQueue.length - 1) {
+        setReviewIndex(prev => prev + 1);
+        setReviewSuccesses(0);
+        setAttempts(0);
+        setFeedback('none');
+        setRecognizedText('');
+      } else {
+        setShowCelebration(true);
+      }
+    }
+  };
+
+  const validatePronunciation = (transcript: string) => {
+    const target = currentWord.word.toLowerCase();
+    const isCorrect = transcript.includes(target) || target.includes(transcript);
+
+    if (isCorrect) {
+      setFeedback('correct');
+      
+      if (isReviewing) {
+        const nextSuccessCount = reviewSuccesses + 1;
+        setReviewSuccesses(nextSuccessCount);
+        
+        if (nextSuccessCount >= 2) {
+          setScore(prev => prev + 1);
+          speak("Excellent! You mastered it!");
+          setTimeout(nextModeOrFinish, 2000);
+        } else {
+          speak("One more time!");
+          setTimeout(() => setFeedback('none'), 1500);
+        }
+      } else {
+        setScore(prev => prev + 1);
+        speak("Excellent! Well done!");
+        setTimeout(nextModeOrFinish, 2000);
+      }
     } else {
       setFeedback('wrong');
-      speak("Good try! Listen again and try to repeat.");
-      // Automatically play the correct pronunciation after a short delay
-      setTimeout(() => {
-        speak(currentWord.word);
-      }, 2000);
+      const nextAttempts = attempts + 1;
+      setAttempts(nextAttempts);
+
+      if (nextAttempts >= 3 && !isReviewing) {
+        // Hit 3 strikes in normal mode
+        setReviewQueue(prev => [...prev, currentIndex]);
+        speak("Let's try this one later. Moving to the next word.");
+        setTimeout(nextModeOrFinish, 2500);
+      } else {
+        speak("Good try! Listen again and try to repeat.");
+        setTimeout(() => {
+          speak(currentWord.word);
+        }, 2000);
+      }
     }
   };
 
@@ -132,6 +191,11 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
     setFeedback('none');
     setShowCelebration(false);
     setRecognizedText('');
+    setAttempts(0);
+    setReviewQueue([]);
+    setIsReviewing(false);
+    setReviewIndex(0);
+    setReviewSuccesses(0);
   };
 
   return (
@@ -149,13 +213,18 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
         
         <div className="text-center px-1">
           <h1 className="text-xl md:text-5xl font-black text-[#002147] mb-1 tracking-tight">
-            {(t as any).pronunciationTitle}
+            {isReviewing ? (isRtl ? 'مراجعة الكلمات' : 'Review Mode') : (t as any).pronunciationTitle}
           </h1>
           <div className="flex items-center justify-center gap-2">
             <div className="bg-[#002147] text-white px-4 py-1 rounded-full text-sm font-bold flex items-center gap-2">
               <Trophy size={16} className="text-yellow-400" />
               <span>{score}</span>
             </div>
+            {isReviewing && (
+              <div className="bg-indigo-500 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse">
+                Reviewing
+              </div>
+            )}
           </div>
         </div>
 
@@ -178,16 +247,38 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
               className="w-full flex flex-col items-center text-center gap-6 md:gap-10"
             >
               <div 
-                className="w-48 h-48 md:w-72 md:h-72 rounded-[3rem] md:rounded-[5rem] shadow-2xl flex items-center justify-center text-[100px] md:text-[150px] bg-white border-8 transition-colors"
+                className="w-48 h-48 md:w-72 md:h-72 rounded-[3rem] md:rounded-[5rem] shadow-2xl flex flex-col items-center justify-center text-[100px] md:text-[150px] bg-white border-8 transition-colors relative"
                 style={{ borderColor: feedback === 'correct' ? '#10b981' : feedback === 'wrong' ? '#ef4444' : 'white' }}
               >
-                {currentWord.emoji}
+                <span>{currentWord.emoji}</span>
+                
+                {/* Attempt Dots */}
+                <div className="absolute -bottom-4 bg-white px-4 py-1 rounded-full shadow-lg border border-slate-100 flex gap-1.5">
+                  {[...Array(3)].map((_, i) => (
+                    <div 
+                      key={i} 
+                      className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                        i < attempts ? 'bg-rose-500' : 'bg-slate-200'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
 
               <div>
                 <h2 className="text-4xl md:text-7xl font-black text-[#002147] mb-2 md:mb-4">
                   {currentWord.word}
                 </h2>
+                {isReviewing && (
+                  <div className="flex justify-center gap-2 mb-2">
+                    <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 ${reviewSuccesses >= 1 ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                      <CheckCircle2 size={12} /> Step 1
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 ${reviewSuccesses >= 2 ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                      <CheckCircle2 size={12} /> Step 2
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-center justify-center gap-3">
                   <span className="text-xl md:text-3xl font-bold text-[#002147]/60">
                     {currentWord.wordAr}
@@ -266,7 +357,18 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
               </div>
               <div>
                 <h2 className="text-3xl md:text-5xl font-black text-[#002147] mb-2">{t.excellent}</h2>
-                <p className="text-xl md:text-2xl font-bold text-slate-400">{isRtl ? 'أكملت جميع الكلمات بنجاح!' : 'You mastered all the words!'}</p>
+                <p className="text-xl md:text-2xl font-bold text-slate-400 mb-4">{isRtl ? 'أكملت جميع الكلمات بنجاح!' : 'You mastered all the words!'}</p>
+                
+                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col gap-3 w-full max-w-xs">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Perfect Score</span>
+                    <span className="text-xl font-black text-[#002147]">{PRACTICE_WORDS.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Words Reviewed</span>
+                    <span className="text-xl font-black text-indigo-500">{reviewQueue.length}</span>
+                  </div>
+                </div>
               </div>
               <div className="flex gap-2">
                 {[1, 2, 3, 4, 5].map(i => <Star key={i} fill="#fbbf24" className="text-yellow-400 w-8 h-8 md:w-10 md:h-10" />)}
