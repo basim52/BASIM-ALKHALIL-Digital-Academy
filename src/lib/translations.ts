@@ -212,6 +212,7 @@ export const translations = {
     micError: 'عذراً، نحتاج إذن الميكروفون للعمل. يرجى تفعيله من إعدادات المتصفح.',
     micErrorTitle: 'خطأ في الميكروفون',
     micNotSupported: 'المتصفح لا يدعم خاصية التعرف على الصوت.',
+    micNotFound: 'لم نجد ميكروفون متصل. يرجى التأكد من توصيل الميكروفون.',
     // Oxford Curriculum
     oxfordMethod: 'منهج أكسفورد المعتمد',
     prepTab: 'تهيئة',
@@ -434,6 +435,7 @@ export const translations = {
     micError: 'Sorry, we need microphone permission to work. Please enable it in browser settings.',
     micErrorTitle: 'Microphone Error',
     micNotSupported: 'Your browser does not support speech recognition.',
+    micNotFound: 'No microphone found. Please check your connection.',
     // Oxford Curriculum
     oxfordMethod: 'Certified Oxford Method',
     prepTab: 'Intro',

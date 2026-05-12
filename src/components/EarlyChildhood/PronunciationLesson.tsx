@@ -46,7 +46,7 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
   const [score, setScore] = useState(0);
   const [recognizedText, setRecognizedText] = useState('');
   const [showCelebration, setShowCelebration] = useState(false);
-  const [micError, setMicError] = useState<'none' | 'denied' | 'unsupported'>('none');
+  const [micError, setMicError] = useState<'none' | 'denied' | 'unsupported' | 'notFound'>('none');
   
   // New game logic states
   const [attempts, setAttempts] = useState(0);
@@ -77,10 +77,11 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
 
       recognitionRef.current.onerror = (event: any) => {
         console.error('Speech recognition error', event.error);
-        if (event.error === 'not-allowed') {
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
           setMicError('denied');
-        } else if (event.error === 'service-not-allowed') {
-          setMicError('denied');
+        } else if (event.error === 'no-speech' || event.error === 'audio-capture') {
+          // These are often transient or hardware issues
+          setIsListening(false);
         }
         setIsListening(false);
       };
@@ -110,29 +111,32 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
     setMicError('none');
     
     try {
+      // Check if mediaDevices is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setMicError('unsupported');
+        return;
+      }
+
       // First, ensure we have microphone permission via getUserMedia
-      // This often "wakes up" the permission prompt more reliably than speech recognition alone
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Stop the stream immediately, speech recognition will handle its own stream
+      // Stop the stream immediately
       stream.getTracks().forEach(track => track.stop());
 
       setRecognizedText('');
       setFeedback('none');
       setIsListening(true);
       
-      // Some browsers might throw if recognition is already running
       try {
         recognitionRef.current.start();
       } catch (e) {
         console.warn('Recognition already started or failed to start:', e);
-        // If it was already running, just keep isListening true
       }
     } catch (err: any) {
       console.error('Detailed Mic access error:', err);
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         setMicError('denied');
-      } else if (err.name === 'NotFoundError') {
-        setMicError('unsupported');
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        setMicError('notFound');
       } else {
         setMicError('denied');
       }
@@ -285,7 +289,9 @@ export const PronunciationLesson = ({ lang, onBack }: { lang: Language, onBack: 
               <div>
                 <h2 className="text-2xl md:text-3xl font-black text-[#002147] mb-2">{(t as any).micErrorTitle}</h2>
                 <p className="text-slate-500 max-w-md">
-                  {micError === 'denied' ? (t as any).micError : (t as any).micNotSupported}
+                  {micError === 'denied' ? (t as any).micError : 
+                   micError === 'notFound' ? (t as any).micNotFound : 
+                   (t as any).micNotSupported}
                 </p>
               </div>
               <button 
