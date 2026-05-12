@@ -80,6 +80,9 @@ export const AnimalsLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
   const [gameMode, setGameMode] = useState(false);
   const [targetAnimal, setTargetAnimal] = useState<AnimalOption | null>(null);
   const [score, setScore] = useState(0);
+  const [totalAttempts, setTotalAttempts] = useState(0);
+  const [itemAttempts, setItemAttempts] = useState(0);
+  const MAX_TOTAL_ATTEMPTS = 12;
 
   const speak = useCallback((text: string) => {
     if (!window.speechSynthesis) return;
@@ -91,11 +94,27 @@ export const AnimalsLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
     window.speechSynthesis.speak(utterance);
   }, []);
 
+  const finishGame = useCallback((finalScore: number) => {
+    speak(isRtl 
+      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${totalAttempts + 1}. عمل رائع!` 
+      : `Game over! Your score is ${finalScore} out of ${totalAttempts + 1}. Great job!`);
+    setShowExcellent(true);
+    setTimeout(() => {
+      setShowExcellent(false);
+      setGameMode(false);
+      setScore(0);
+      setTotalAttempts(0);
+      setItemAttempts(0);
+      setTargetAnimal(null);
+    }, 4000);
+  }, [isRtl, speak, totalAttempts]);
+
   const startNewLevel = useCallback(() => {
     const currentGroup = ANIMAL_GROUPS.find(g => g.id === activeTab) || ANIMAL_GROUPS[0];
     const randomIndex = Math.floor(Math.random() * currentGroup.animals.length);
     const newTarget = currentGroup.animals[randomIndex];
     setTargetAnimal(newTarget);
+    setItemAttempts(0);
     
     setTimeout(() => {
       speak(`Find the ${newTarget.name}`);
@@ -107,6 +126,8 @@ export const AnimalsLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
     setGameMode(nextMode);
     if (nextMode) {
       setScore(0);
+      setTotalAttempts(0);
+      setItemAttempts(0);
       startNewLevel();
     } else {
       setTargetAnimal(null);
@@ -115,19 +136,15 @@ export const AnimalsLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
 
   const handleAnimalClick = (animal: AnimalOption) => {
     if (gameMode && targetAnimal) {
+      const currentTotal = totalAttempts + 1;
+      setTotalAttempts(currentTotal);
+
       if (animal.id === targetAnimal.id) {
         const nextScore = score + 1;
         setScore(nextScore);
         
-        if (nextScore >= 10) {
-          speak(isRtl ? "رائع! لقد وجدت جميع الحيوانات العشرة! أنت مستكشف حيوانات عظيم!" : "Amazing! You found all 10 animals! You are a great animal explorer!");
-          setShowExcellent(true);
-          setTimeout(() => {
-            setShowExcellent(false);
-            setGameMode(false);
-            setScore(0);
-            setTargetAnimal(null);
-          }, 4000);
+        if (currentTotal >= MAX_TOTAL_ATTEMPTS) {
+          finishGame(nextScore);
           return;
         }
 
@@ -138,7 +155,20 @@ export const AnimalsLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
           startNewLevel();
         }, 1500);
       } else {
-        speak(isRtl ? `لا، هذا هو ${animal.nameAr}. حاول مرة أخرى!` : `No, that is the ${animal.name}. Try again!`);
+        const nextItemAttempts = itemAttempts + 1;
+        if (nextItemAttempts >= 2) {
+          // Second mistake - move to next
+          speak(isRtl ? `لا بأس، لنجرب حيواناً آخر. هذا كان ${targetAnimal.nameAr}.` : `It's okay, let's try another animal. That was the ${targetAnimal.name}.`);
+          
+          if (currentTotal >= MAX_TOTAL_ATTEMPTS) {
+            setTimeout(() => finishGame(score), 2000);
+          } else {
+            setTimeout(startNewLevel, 2000);
+          }
+        } else {
+          setItemAttempts(nextItemAttempts);
+          speak(isRtl ? `لا، هذا هو ${animal.nameAr}. حاول مرة أخرى!` : `No, that is the ${animal.name}. Try again!`);
+        }
       }
     } else {
       setActiveAnimal(animal);
@@ -175,10 +205,14 @@ export const AnimalsLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
               <h1 className="text-2xl md:text-5xl font-black text-[#002147] mb-1 md:mb-2 tracking-tight">
                 {isRtl ? `أين هو ${targetAnimal?.nameAr}؟` : `Find the ${targetAnimal?.name}!`}
               </h1>
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-4">
                 <div className="bg-[#002147] text-white px-4 py-1 rounded-full text-sm font-bold flex items-center gap-2">
                   <Trophy size={16} className="text-yellow-400" />
                   <span>{score}</span>
+                </div>
+                <div className="bg-white/80 text-[#002147] px-4 py-1 rounded-full text-sm font-bold flex items-center gap-2 border border-[#002147]/10">
+                  <Star size={16} className="text-indigo-500" />
+                  <span>{totalAttempts} / {MAX_TOTAL_ATTEMPTS}</span>
                 </div>
               </div>
             </div>

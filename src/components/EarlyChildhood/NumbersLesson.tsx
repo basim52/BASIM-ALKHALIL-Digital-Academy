@@ -65,6 +65,9 @@ export const NumbersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
   const [gameMode, setGameMode] = useState(false);
   const [targetNumber, setTargetNumber] = useState<NumberOption | null>(null);
   const [score, setScore] = useState(0);
+  const [totalAttempts, setTotalAttempts] = useState(0);
+  const [itemAttempts, setItemAttempts] = useState(0);
+  const MAX_TOTAL_ATTEMPTS = 12;
 
   const speak = useCallback((text: string) => {
     if (!window.speechSynthesis) return;
@@ -76,11 +79,27 @@ export const NumbersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
     window.speechSynthesis.speak(utterance);
   }, []);
 
+  const finishGame = useCallback((finalScore: number) => {
+    speak(isRtl 
+      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${totalAttempts + 1}. عمل رائع!` 
+      : `Game over! Your score is ${finalScore} out of ${totalAttempts + 1}. Great job!`);
+    setShowExcellent(true);
+    setTimeout(() => {
+      setShowExcellent(false);
+      setGameMode(false);
+      setScore(0);
+      setTotalAttempts(0);
+      setItemAttempts(0);
+      setTargetNumber(null);
+    }, 4000);
+  }, [isRtl, speak, totalAttempts]);
+
   const startNewLevel = useCallback(() => {
     const currentGroup = NUMBER_GROUPS.find(g => g.id === activeLevel) || NUMBER_GROUPS[0];
     const randomIndex = Math.floor(Math.random() * currentGroup.numbers.length);
     const newTarget = currentGroup.numbers[randomIndex];
     setTargetNumber(newTarget);
+    setItemAttempts(0);
     
     setTimeout(() => {
       speak(`Find the number ${newTarget.value}`);
@@ -92,6 +111,8 @@ export const NumbersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
     setGameMode(nextMode);
     if (nextMode) {
       setScore(0);
+      setTotalAttempts(0);
+      setItemAttempts(0);
       startNewLevel();
     } else {
       setTargetNumber(null);
@@ -100,19 +121,15 @@ export const NumbersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
 
   const handleNumberClick = (num: NumberOption) => {
     if (gameMode && targetNumber) {
+        const currentTotal = totalAttempts + 1;
+        setTotalAttempts(currentTotal);
+
         if (num.value === targetNumber.value) {
             const nextScore = score + 1;
             setScore(nextScore);
             
-            if (nextScore >= 10) {
-              speak(isRtl ? "رائع! لقد وجدت جميع الأرقام العشرة! أنت بطل!" : "Amazing! You found all 10 numbers! You are a champion!");
-              setShowExcellent(true);
-              setTimeout(() => {
-                setShowExcellent(false);
-                setGameMode(false);
-                setScore(0);
-                setTargetNumber(null);
-              }, 4000);
+            if (currentTotal >= MAX_TOTAL_ATTEMPTS) {
+              finishGame(nextScore);
               return;
             }
 
@@ -123,7 +140,19 @@ export const NumbersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
                 startNewLevel();
             }, 1500);
         } else {
-            speak(isRtl ? `لا، هذا هو الرقم ${num.value}. حاول مرة أخرى!` : `No, that is the number ${num.value}. Try again!`);
+            const nextItemAttempts = itemAttempts + 1;
+            if (nextItemAttempts >= 2) {
+              speak(isRtl ? `لا بأس، لنجرب رقماً آخر. هذا كان الرقم ${targetNumber.value}.` : `It's okay, let's try another number. That was the number ${targetNumber.value}.`);
+              
+              if (currentTotal >= MAX_TOTAL_ATTEMPTS) {
+                setTimeout(() => finishGame(score), 2000);
+              } else {
+                setTimeout(startNewLevel, 2000);
+              }
+            } else {
+              setItemAttempts(nextItemAttempts);
+              speak(isRtl ? `لا، هذا هو الرقم ${num.value}. حاول مرة أخرى!` : `No, that is the number ${num.value}. Try again!`);
+            }
         }
     } else {
         setActiveNumber(num);
@@ -157,10 +186,14 @@ export const NumbersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
               <h1 className="text-2xl md:text-5xl font-black text-[#002147] mb-1 md:mb-2 tracking-tight">
                 {isRtl ? `أين الرقم ${targetNumber?.value}؟` : `Find the Number ${targetNumber?.value}!`}
               </h1>
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-4">
                 <div className="bg-[#002147] text-white px-4 py-1 rounded-full text-sm font-bold flex items-center gap-2">
                   <Trophy size={16} className="text-yellow-400" />
                   <span>{score}</span>
+                </div>
+                <div className="bg-white/80 text-[#002147] px-4 py-1 rounded-full text-sm font-bold flex items-center gap-2 border border-[#002147]/10">
+                  <Star size={16} className="text-indigo-500" />
+                  <span>{totalAttempts} / {MAX_TOTAL_ATTEMPTS}</span>
                 </div>
               </div>
             </div>

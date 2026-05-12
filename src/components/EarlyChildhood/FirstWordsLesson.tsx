@@ -134,6 +134,9 @@ export const FirstWordsLesson: React.FC<FirstWordsLessonProps> = ({ onBack, isRt
   const [gameMode, setGameMode] = useState(false);
   const [targetWord, setTargetWord] = useState<WordOption | null>(null);
   const [score, setScore] = useState(0);
+  const [totalAttempts, setTotalAttempts] = useState(0);
+  const [itemAttempts, setItemAttempts] = useState(0);
+  const MAX_TOTAL_ATTEMPTS = 12;
 
   const currentLevel = WORD_LEVELS.find(l => l.id === activeLevel) || WORD_LEVELS[0];
 
@@ -146,10 +149,26 @@ export const FirstWordsLesson: React.FC<FirstWordsLessonProps> = ({ onBack, isRt
     window.speechSynthesis.speak(utterance);
   }, []);
 
+  const finishGame = useCallback((finalScore: number) => {
+    speak(isRtl 
+      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${totalAttempts + 1}. عمل رائع!` 
+      : `Game over! Your score is ${finalScore} out of ${totalAttempts + 1}. Great job!`);
+    setShowExcellent(true);
+    setTimeout(() => {
+      setShowExcellent(false);
+      setGameMode(false);
+      setScore(0);
+      setTotalAttempts(0);
+      setItemAttempts(0);
+      setTargetWord(null);
+    }, 4000);
+  }, [isRtl, speak, totalAttempts]);
+
   const startNewLevel = useCallback(() => {
     const randomIndex = Math.floor(Math.random() * currentLevel.words.length);
     const newTarget = currentLevel.words[randomIndex];
     setTargetWord(newTarget);
+    setItemAttempts(0);
     
     setTimeout(() => {
       speak(`Find the word ${newTarget.word}`);
@@ -161,6 +180,8 @@ export const FirstWordsLesson: React.FC<FirstWordsLessonProps> = ({ onBack, isRt
     setGameMode(nextMode);
     if (nextMode) {
       setScore(0);
+      setTotalAttempts(0);
+      setItemAttempts(0);
       startNewLevel();
     } else {
       setTargetWord(null);
@@ -169,19 +190,15 @@ export const FirstWordsLesson: React.FC<FirstWordsLessonProps> = ({ onBack, isRt
 
   const handleWordClick = (word: WordOption) => {
     if (gameMode && targetWord) {
+        const currentTotal = totalAttempts + 1;
+        setTotalAttempts(currentTotal);
+
         if (word.id === targetWord.id) {
             const nextScore = score + 1;
             setScore(nextScore);
             
-            if (nextScore >= 10) {
-              speak(isRtl ? "رائع! لقد وجدت جميع الكلمات العشرة! أنت قارئ متميز!" : "Amazing! You found all 10 words! You are an outstanding reader!");
-              setShowExcellent(true);
-              setTimeout(() => {
-                setShowExcellent(false);
-                setGameMode(false);
-                setScore(0);
-                setTargetWord(null);
-              }, 4000);
+            if (currentTotal >= MAX_TOTAL_ATTEMPTS) {
+              finishGame(nextScore);
               return;
             }
 
@@ -192,7 +209,19 @@ export const FirstWordsLesson: React.FC<FirstWordsLessonProps> = ({ onBack, isRt
                 startNewLevel();
             }, 1500);
         } else {
-            speak(isRtl ? `لا، هذه كلمة ${word.wordAr}. حاول مرة أخرى!` : `No, that is ${word.word}. Try again!`);
+            const nextItemAttempts = itemAttempts + 1;
+            if (nextItemAttempts >= 2) {
+              speak(isRtl ? `لا بأس، لنجرب كلمة أخرى. هذه كانت كلمة ${targetWord.wordAr}.` : `It's okay, let's try another word. That was the word ${targetWord.word}.`);
+              
+              if (currentTotal >= MAX_TOTAL_ATTEMPTS) {
+                setTimeout(() => finishGame(score), 2000);
+              } else {
+                setTimeout(startNewLevel, 2000);
+              }
+            } else {
+              setItemAttempts(nextItemAttempts);
+              speak(isRtl ? `لا، هذه كلمة ${word.wordAr}. حاول مرة أخرى!` : `No, that is ${word.word}. Try again!`);
+            }
         }
     } else {
         setActiveId(word.id);
@@ -241,9 +270,15 @@ export const FirstWordsLesson: React.FC<FirstWordsLessonProps> = ({ onBack, isRt
                 <h1 className="text-lg md:text-2xl font-black text-[#002147] leading-tight">
                   {isRtl ? `أين هو "${targetWord?.wordAr}"؟` : `Find "${targetWord?.word}"!`}
                 </h1>
-                <div className="flex items-center justify-center gap-1.5">
-                   <Trophy size={14} className="text-yellow-500" />
-                   <span className="text-sm font-black text-[#002147]">{score}</span>
+                <div className="flex items-center justify-center gap-4">
+                   <div className="flex items-center gap-1.5">
+                     <Trophy size={14} className="text-yellow-500" />
+                     <span className="text-sm font-black text-[#002147]">{score}</span>
+                   </div>
+                   <div className="flex items-center gap-1.5 bg-white/50 px-2 py-0.5 rounded-full border border-[#002147]/5">
+                     <Star size={14} className="text-indigo-500" />
+                     <span className="text-xs font-black text-[#002147]">{totalAttempts} / {MAX_TOTAL_ATTEMPTS}</span>
+                   </div>
                 </div>
               </div>
             ) : (

@@ -108,6 +108,9 @@ export const LettersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
   const [gameMode, setGameMode] = useState(false);
   const [targetLetter, setTargetLetter] = useState<LetterOption | null>(null);
   const [score, setScore] = useState(0);
+  const [totalAttempts, setTotalAttempts] = useState(0);
+  const [itemAttempts, setItemAttempts] = useState(0);
+  const MAX_TOTAL_ATTEMPTS = 12;
 
   const speak = useCallback((text: string) => {
     if (!window.speechSynthesis) return;
@@ -119,11 +122,27 @@ export const LettersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
     window.speechSynthesis.speak(utterance);
   }, []);
 
+  const finishGame = useCallback((finalScore: number) => {
+    speak(isRtl 
+      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${totalAttempts + 1}. عمل رائع!` 
+      : `Game over! Your score is ${finalScore} out of ${totalAttempts + 1}. Great job!`);
+    setShowExcellent(true);
+    setTimeout(() => {
+      setShowExcellent(false);
+      setGameMode(false);
+      setScore(0);
+      setTotalAttempts(0);
+      setItemAttempts(0);
+      setTargetLetter(null);
+    }, 4000);
+  }, [isRtl, speak, totalAttempts]);
+
   const startNewLevel = useCallback(() => {
     const currentGroup = LETTER_GROUPS.find(g => g.id === activeLevel) || LETTER_GROUPS[0];
     const randomIndex = Math.floor(Math.random() * currentGroup.letters.length);
     const newTarget = currentGroup.letters[randomIndex];
     setTargetLetter(newTarget);
+    setItemAttempts(0);
     
     setTimeout(() => {
       speak(`Find the letter ${newTarget.letter}`);
@@ -135,6 +154,8 @@ export const LettersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
     setGameMode(nextMode);
     if (nextMode) {
       setScore(0);
+      setTotalAttempts(0);
+      setItemAttempts(0);
       startNewLevel();
     } else {
       setTargetLetter(null);
@@ -143,19 +164,15 @@ export const LettersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
 
   const handleLetterClick = (item: LetterOption) => {
     if (gameMode && targetLetter) {
+        const currentTotal = totalAttempts + 1;
+        setTotalAttempts(currentTotal);
+
         if (item.letter === targetLetter.letter) {
             const nextScore = score + 1;
             setScore(nextScore);
             
-            if (nextScore >= 10) {
-              speak(isRtl ? "رائع! لقد وجدت جميع الحروف العشرة! أنت عبقري في الحروف!" : "Amazing! You found all 10 letters! You are a letter genius!");
-              setShowExcellent(true);
-              setTimeout(() => {
-                setShowExcellent(false);
-                setGameMode(false);
-                setScore(0);
-                setTargetLetter(null);
-              }, 4000);
+            if (currentTotal >= MAX_TOTAL_ATTEMPTS) {
+              finishGame(nextScore);
               return;
             }
 
@@ -166,7 +183,19 @@ export const LettersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
                 startNewLevel();
             }, 1500);
         } else {
-            speak(isRtl ? `لا، هذا هو حرف ${item.letter}. حاول مرة أخرى!` : `No, that is the letter ${item.letter}. Try again!`);
+            const nextItemAttempts = itemAttempts + 1;
+            if (nextItemAttempts >= 2) {
+              speak(isRtl ? `لا بأس، لنجرب حرفاً آخر. هذا كان حرف ${targetLetter.letter}.` : `It's okay, let's try another letter. That was the letter ${targetLetter.letter}.`);
+              
+              if (currentTotal >= MAX_TOTAL_ATTEMPTS) {
+                setTimeout(() => finishGame(score), 2000);
+              } else {
+                setTimeout(startNewLevel, 2000);
+              }
+            } else {
+              setItemAttempts(nextItemAttempts);
+              speak(isRtl ? `لا، هذا هو حرف ${item.letter}. حاول مرة أخرى!` : `No, that is the letter ${item.letter}. Try again!`);
+            }
         }
     } else {
         setActiveLetter(item);
@@ -200,10 +229,14 @@ export const LettersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
               <h1 className="text-2xl md:text-5xl font-black text-[#002147] mb-1 md:mb-2 tracking-tight">
                 {isRtl ? `أين الحرف ${targetLetter?.letter}؟` : `Find the Letter ${targetLetter?.letter}!`}
               </h1>
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-4">
                 <div className="bg-[#002147] text-white px-4 py-1 rounded-full text-sm font-bold flex items-center gap-2">
                   <Trophy size={16} className="text-yellow-400" />
                   <span>{score}</span>
+                </div>
+                <div className="bg-white/80 text-[#002147] px-4 py-1 rounded-full text-sm font-bold flex items-center gap-2 border border-[#002147]/10">
+                  <Star size={16} className="text-indigo-500" />
+                  <span>{totalAttempts} / {MAX_TOTAL_ATTEMPTS}</span>
                 </div>
               </div>
             </div>

@@ -43,29 +43,45 @@ export const ColorsLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
   const [gameMode, setGameMode] = useState(false);
   const [targetColor, setTargetColor] = useState<ColorOption | null>(null);
   const [score, setScore] = useState(0);
+  const [totalAttempts, setTotalAttempts] = useState(0);
+  const [itemAttempts, setItemAttempts] = useState(0);
+  const MAX_TOTAL_ATTEMPTS = 12;
   const [streak, setStreak] = useState(0);
-  const [gameStarted, setGameStarted] = useState(false);
 
   const speak = useCallback((text: string, forceLang?: string) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    // If it's a color name and we're in learning mode, use English to help them learn English names
     utterance.lang = forceLang || 'en-US';
     utterance.rate = 0.85;
     utterance.pitch = 1.1; 
     window.speechSynthesis.speak(utterance);
   }, []);
 
+  const finishGame = useCallback((finalScore: number) => {
+    speak(isRtl 
+      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${totalAttempts + 1}. عمل رائع!` 
+      : `Game over! Your score is ${finalScore} out of ${totalAttempts + 1}. Great job!`);
+    setShowExcellent(true);
+    setTimeout(() => {
+      setShowExcellent(false);
+      setGameMode(false);
+      setScore(0);
+      setTotalAttempts(0);
+      setItemAttempts(0);
+      setTargetColor(null);
+    }, 4000);
+  }, [isRtl, speak, totalAttempts]);
+
   const startNewGameLevel = useCallback(() => {
     const randomIndex = Math.floor(Math.random() * COLORS.length);
     const newTarget = COLORS[randomIndex];
     setTargetColor(newTarget);
+    setItemAttempts(0);
     
-    // Give voice instruction
     setTimeout(() => {
       if (isRtl) {
-        speak(`Find the color ${newTarget.name}`, 'en-US'); // Keeping English name for learning
+        speak(`Find the color ${newTarget.name}`, 'en-US');
       } else {
         speak(`Find the color ${newTarget.name}`);
       }
@@ -78,6 +94,8 @@ export const ColorsLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
     if (nextMode) {
       setScore(0);
       setStreak(0);
+      setTotalAttempts(0);
+      setItemAttempts(0);
       setGameStarted(true);
       startNewGameLevel();
     } else {
@@ -90,21 +108,16 @@ export const ColorsLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
     setActiveColor(color);
     
     if (gameMode && targetColor) {
+      const currentTotal = totalAttempts + 1;
+      setTotalAttempts(currentTotal);
+
       if (color.name === targetColor.name) {
-        // Correct!
         const nextScore = score + 1;
         setScore(nextScore);
         setStreak(prev => prev + 1);
         
-        if (nextScore >= 10) {
-          speak(isRtl ? "رائع! لقد ميزت جميع الألوان العشرة ببراعة!" : "Fantastic! You identified all 10 colors perfectly!");
-          setShowExcellent(true);
-          setTimeout(() => {
-            setShowExcellent(false);
-            setGameMode(false);
-            setScore(0);
-            setTargetColor(null);
-          }, 4000);
+        if (currentTotal >= MAX_TOTAL_ATTEMPTS) {
+          finishGame(nextScore);
           return;
         }
 
@@ -116,9 +129,21 @@ export const ColorsLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
           startNewGameLevel();
         }, 1500);
       } else {
-        // Incorrect
+        const nextItemAttempts = itemAttempts + 1;
         setStreak(0);
-        speak(isRtl ? `هذا هو اللون ${color.nameAr}. حاول مرة أخرى!` : `That is ${color.name}. Try again!`);
+
+        if (nextItemAttempts >= 2) {
+          speak(isRtl ? `لا بأس، لنجرب لوناً آخر. هذا كان ${targetColor.nameAr}.` : `It's okay, let's try another color. That was ${targetColor.name}.`);
+          
+          if (currentTotal >= MAX_TOTAL_ATTEMPTS) {
+            setTimeout(() => finishGame(score), 2000);
+          } else {
+            setTimeout(startNewGameLevel, 2000);
+          }
+        } else {
+          setItemAttempts(nextItemAttempts);
+          speak(isRtl ? `هذا هو اللون ${color.nameAr}. حاول مرة أخرى!` : `That is ${color.name}. Try again!`);
+        }
       }
     } else {
       // Normal learning mode
@@ -149,17 +174,15 @@ export const ColorsLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
               <h1 className="text-2xl md:text-5xl font-black text-[#002147] mb-1 md:mb-2 tracking-tight">
                 {isRtl ? `أين اللون ${targetColor?.nameAr}؟` : `Find the ${targetColor?.name}!`}
               </h1>
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-4">
                 <div className="bg-[#002147] text-white px-4 py-1 rounded-full text-sm font-bold flex items-center gap-2">
                   <Trophy size={16} className="text-yellow-400" />
                   <span>{score}</span>
                 </div>
-                {streak > 2 && (
-                  <div className="bg-orange-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1 animate-pulse">
-                    <Sparkles size={12} />
-                    <span>On Fire!</span>
-                  </div>
-                )}
+                <div className="bg-white/80 text-[#002147] px-4 py-1 rounded-full text-sm font-bold flex items-center gap-2 border border-[#002147]/10">
+                  <Star size={16} className="text-indigo-500" />
+                  <span>{totalAttempts} / {MAX_TOTAL_ATTEMPTS}</span>
+                </div>
               </div>
             </div>
           ) : (

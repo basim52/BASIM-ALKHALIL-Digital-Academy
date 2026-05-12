@@ -64,6 +64,9 @@ export const ShapesLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
   const [gameMode, setGameMode] = useState(false);
   const [targetShape, setTargetShape] = useState<ShapeOption | null>(null);
   const [score, setScore] = useState(0);
+  const [totalAttempts, setTotalAttempts] = useState(0);
+  const [itemAttempts, setItemAttempts] = useState(0);
+  const MAX_TOTAL_ATTEMPTS = 12;
   const [streak, setStreak] = useState(0);
 
   const speak = useCallback((text: string, forceLang?: string) => {
@@ -76,11 +79,27 @@ export const ShapesLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
     window.speechSynthesis.speak(utterance);
   }, []);
 
+  const finishGame = useCallback((finalScore: number) => {
+    speak(isRtl 
+      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${totalAttempts + 1}. عمل رائع!` 
+      : `Game over! Your score is ${finalScore} out of ${totalAttempts + 1}. Great job!`);
+    setShowExcellent(true);
+    setTimeout(() => {
+      setShowExcellent(false);
+      setGameMode(false);
+      setScore(0);
+      setTotalAttempts(0);
+      setItemAttempts(0);
+      setTargetShape(null);
+    }, 4000);
+  }, [isRtl, speak, totalAttempts]);
+
   const startNewGameLevel = useCallback(() => {
     const currentGroup = SHAPE_GROUPS.find(g => g.id === activeLevel) || SHAPE_GROUPS[0];
     const randomIndex = Math.floor(Math.random() * currentGroup.shapes.length);
     const newTarget = currentGroup.shapes[randomIndex];
     setTargetShape(newTarget);
+    setItemAttempts(0);
     
     setTimeout(() => {
       speak(`Find the ${newTarget.name}`);
@@ -93,6 +112,8 @@ export const ShapesLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
     if (nextMode) {
       setScore(0);
       setStreak(0);
+      setTotalAttempts(0);
+      setItemAttempts(0);
       startNewGameLevel();
     } else {
       setTargetShape(null);
@@ -103,20 +124,16 @@ export const ShapesLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
     setActiveShape(shape);
     
     if (gameMode && targetShape) {
+      const currentTotal = totalAttempts + 1;
+      setTotalAttempts(currentTotal);
+
       if (shape.name === targetShape.name) {
         const nextScore = score + 1;
         setScore(nextScore);
         setStreak(prev => prev + 1);
         
-        if (nextScore >= 10) {
-          speak(isRtl ? "رائع! لقد وجدت جميع الأشكال العشرة! أنت مهندس صغير بطل!" : "Fantastic! You found all 10 shapes! You are a champion little engineer!");
-          setShowExcellent(true);
-          setTimeout(() => {
-            setShowExcellent(false);
-            setGameMode(false);
-            setScore(0);
-            setTargetShape(null);
-          }, 4000);
+        if (currentTotal >= MAX_TOTAL_ATTEMPTS) {
+          finishGame(nextScore);
           return;
         }
 
@@ -128,8 +145,21 @@ export const ShapesLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
           startNewGameLevel();
         }, 1500);
       } else {
+        const nextItemAttempts = itemAttempts + 1;
         setStreak(0);
-        speak(isRtl ? `هذا ${shape.nameAr}. حاول مرة أخرى!` : `That is a ${shape.name}. Try again!`);
+
+        if (nextItemAttempts >= 2) {
+          speak(isRtl ? `لا بأس، لنجرب شكلاً آخر. هذا كان ${targetShape.nameAr}.` : `It's okay, let's try another shape. That was a ${targetShape.name}.`);
+          
+          if (currentTotal >= MAX_TOTAL_ATTEMPTS) {
+            setTimeout(() => finishGame(score), 2000);
+          } else {
+            setTimeout(startNewGameLevel, 2000);
+          }
+        } else {
+          setItemAttempts(nextItemAttempts);
+          speak(isRtl ? `هذا ${shape.nameAr}. حاول مرة أخرى!` : `That is a ${shape.name}. Try again!`);
+        }
       }
     } else {
       speak(shape.name);
@@ -160,10 +190,14 @@ export const ShapesLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
               <h1 className="text-2xl md:text-5xl font-black text-[#002147] mb-1 md:mb-2 tracking-tight">
                 {isRtl ? `أين الشكل ${targetShape?.nameAr}؟` : `Find the ${targetShape?.name}!`}
               </h1>
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-4">
                 <div className="bg-[#002147] text-white px-4 py-1 rounded-full text-sm font-bold flex items-center gap-2">
                   <Trophy size={16} className="text-yellow-400" />
                   <span>{score}</span>
+                </div>
+                <div className="bg-white/80 text-[#002147] px-4 py-1 rounded-full text-sm font-bold flex items-center gap-2 border border-[#002147]/10">
+                  <Star size={16} className="text-indigo-500" />
+                  <span>{totalAttempts} / {MAX_TOTAL_ATTEMPTS}</span>
                 </div>
               </div>
             </div>
