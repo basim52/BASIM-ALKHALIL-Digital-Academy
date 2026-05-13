@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Mic, MicOff, Send, Sparkles, RefreshCw, ChevronLeft, Award } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { GoogleGenAI } from "@google/genai";
 import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -38,7 +37,6 @@ export const AIConversation = ({ onBack, lang }: { onBack: () => void, lang: Lan
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
-  const aiRef = useRef(new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' }));
 
   // Initialize Speech Recognition
   useEffect(() => {
@@ -139,7 +137,10 @@ export const AIConversation = ({ onBack, lang }: { onBack: () => void, lang: Lan
         })
       });
 
-      if (!resp.ok) throw new Error('Server responded with error');
+      if (!resp.ok) {
+        const errorData = await resp.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server responded with ${resp.status}`);
+      }
       
       const data = await resp.json();
       const responseText = data.text || "I'm sorry, I couldn't process that.";
@@ -170,9 +171,10 @@ export const AIConversation = ({ onBack, lang }: { onBack: () => void, lang: Lan
         await saveSession(newFeedback, updatedMessages);
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("AI Error:", error);
-      setMessages(prev => [...prev, { role: 'ai', text: "Sorry, I had some trouble understanding. Can we try again?", timestamp: Date.now() }]);
+      const errorMessage = error.message.startsWith('{') ? JSON.parse(error.message).error : error.message;
+      setMessages(prev => [...prev, { role: 'ai', text: `Error: ${errorMessage}. Please try again.`, timestamp: Date.now() }]);
     } finally {
       setIsThinking(false);
     }

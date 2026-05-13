@@ -70,13 +70,19 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
           context: `Lesson Title: ${lessonTitle}\nContent: ${lessonContent}`
         })
       });
+      if (!resp.ok) {
+        const errorData = await resp.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server responded with ${resp.status}`);
+      }
+
       const data = await resp.json();
       if (data.text) {
         setMessages(prev => [...prev, { role: 'assistant', text: data.text }]);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Chat error:", err);
-      setError(isRtl ? 'عذراً، حدث خطأ في محاولة التواصل.' : 'Sorry, something went wrong with the chat.');
+      const errorMessage = err.message.startsWith('{') ? JSON.parse(err.message).error : err.message;
+      setError(`${isRtl ? 'خطأ:' : 'Error:'} ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }

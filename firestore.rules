@@ -25,7 +25,12 @@ service cloud.firestore {
 
     // --- Collections ---
 
-    // Global Settings
+    // Global Settings - Explicitly public
+    match /settings/global {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     match /settings/{settingId} {
       allow read: if isSignedIn();
       allow write: if isAdmin();

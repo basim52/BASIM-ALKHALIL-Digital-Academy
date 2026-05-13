@@ -5,6 +5,19 @@ import { createServer } from "http";
 import { WebSocketServer } from "ws";
 import { GoogleGenAI, Modality } from "@google/genai";
 import "dotenv/config";
+import fs from "fs";
+
+// Log function to a file for persistent debugging
+const logFile = path.join(process.cwd(), 'server-debug.log');
+function logToFile(msg: string) {
+  const timestamp = new Date().toISOString();
+  try {
+    fs.appendFileSync(logFile, `[${timestamp}] ${msg}\n`);
+  } catch (e) {}
+}
+
+logToFile("Server process initializing...");
+logToFile(`GEMINI_API_KEY present: ${!!process.env.GEMINI_API_KEY}`);
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -44,9 +57,16 @@ async function startServer() {
 
   // Regular Chat Endpoint for Lessons
   app.post("/api/lesson/chat", async (req, res) => {
+    console.log("POST /api/lesson/chat called");
     try {
       const { prompt, context } = req.body;
+      console.log(`Prompt length: ${prompt?.length}, Context length: ${context?.length}`);
       
+      if (!process.env.GEMINI_API_KEY) {
+        console.error("GEMINI_API_KEY is not set!");
+        return res.status(500).json({ error: "Gemini API key is missing on server" });
+      }
+
       let aiResponse = "";
       const maxRetries = 3;
 
@@ -80,16 +100,24 @@ async function startServer() {
       }
 
       res.json({ text: aiResponse });
-    } catch (error) {
+    } catch (error: any) {
+      logToFile(`Lesson Chat Error: ${error.message}`);
       console.error("Lesson Chat Error:", error);
-      res.status(500).json({ error: "Failed to generate response" });
+      res.status(500).json({ error: error.message || "Failed to generate response" });
     }
   });
 
   // AI Language Partner Endpoint
   app.post("/api/ai-partner/chat", async (req, res) => {
+    console.log("POST /api/ai-partner/chat called");
     try {
       const { prompt, history } = req.body;
+      console.log(`Prompt: ${prompt}, History length: ${history?.length}`);
+      
+      if (!process.env.GEMINI_API_KEY) {
+        console.error("GEMINI_API_KEY is not set!");
+        return res.status(500).json({ error: "Gemini API key is missing on server" });
+      }
       
       const systemInstruction = `
         You are an Oxford English Language Partner at Basim Alkhalil Digital Academy. 
@@ -119,19 +147,22 @@ async function startServer() {
       });
 
       res.json({ text: result.text || "" });
-    } catch (error) {
+    } catch (error: any) {
+      logToFile(`AI Partner Chat Error: ${error.message}`);
       console.error("AI Partner Chat Error:", error);
-      res.status(500).json({ error: "Failed to generate response" });
+      res.status(500).json({ error: error.message || "Failed to generate response" });
     }
   });
 
     // WebSocket for Live Audio Chat (Experimental)
     wss.on("connection", async (clientWs, req) => {
-      console.log(`New Live API connection from ${req.socket.remoteAddress}. Path: ${req.url}`);
+      const remoteAddr = req.socket.remoteAddress;
+      console.log(`New Live API connection from ${remoteAddr}. Path: ${req.url}`);
       let session: any = null;
       let isConnecting = false;
   
       clientWs.on("message", async (data) => {
+        console.log("WS Message received");
         try {
           const msg = JSON.parse(data.toString());
           
@@ -189,8 +220,9 @@ async function startServer() {
             isConnecting = false;
             console.log("Gemini Live session ready");
             clientWs.send(JSON.stringify({ status: 'ready' }));
-          } catch (err) {
+          } catch (err: any) {
             isConnecting = false;
+            logToFile(`Gemini Live connection error: ${err.message}`);
             console.error("Failed to connect to Gemini Live:", err);
             clientWs.send(JSON.stringify({ error: "Failed to start voice assistant. Please check if your API key supports this model." }));
           }
