@@ -34,6 +34,22 @@ async function startServer() {
   const wss = new WebSocketServer({ noServer: true });
   const PORT = 3000;
 
+  // Root test route
+  app.get("/ping", (req, res) => {
+    res.send("pong");
+  });
+
+  // API Routes - AT THE VERY TOP
+  app.get(["/api/health", "/api/health/"], (req, res) => {
+    logToFile("Health check requested - Success");
+    res.json({ 
+      status: "ok", 
+      geminiKeySet: !!process.env.GEMINI_API_KEY,
+      isProduction: process.env.NODE_ENV === "production",
+      time: new Date().toISOString()
+    });
+  });
+
   server.on('upgrade', (request, socket, head) => {
     const rawUrl = request.url || '';
     const pathname = rawUrl.split('?')[0]; // Simple path extraction
@@ -57,24 +73,12 @@ async function startServer() {
 
   // Request logger
   app.use((req, res, next) => {
-    logToFile(`${req.method} ${req.path}`);
+    if (req.path.startsWith('/api')) {
+      logToFile(`DEBUG API REK: ${req.method} ${req.path} (Orig: ${req.originalUrl})`);
+    } else {
+      logToFile(`${req.method} ${req.path}`);
+    }
     next();
-  });
-
-  // API Routes
-  app.get("/api/health", (req, res) => {
-    logToFile("Health check requested");
-    res.json({ 
-      status: "ok", 
-      geminiKeySet: !!process.env.GEMINI_API_KEY,
-      isProduction: process.env.NODE_ENV === "production",
-      time: new Date().toISOString()
-    });
-  });
-
-  app.get("/api/test-get", (req, res) => {
-    logToFile("Test GET requested");
-    res.json({ message: "GET request successful" });
   });
 
   // Regular Chat Endpoint for Lessons
@@ -311,9 +315,13 @@ async function startServer() {
     });
 
   // 404 for API routes
-  app.use("/api/*", (req, res) => {
-    logToFile(`API 404: ${req.method} ${req.originalUrl}`);
-    res.status(404).json({ error: `API route ${req.method} ${req.originalUrl} not found` });
+  app.all("/api/*", (req, res) => {
+    logToFile(`API 404 HIT: ${req.method} ${req.path} (Full URL: ${req.originalUrl})`);
+    res.status(404).json({ 
+      error: `API route not found`,
+      method: req.method,
+      path: req.path
+    });
   });
 
   // Vite middleware for development

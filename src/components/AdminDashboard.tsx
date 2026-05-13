@@ -268,7 +268,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                className="w-full py-4 bg-emerald-500 rounded-2xl font-black text-sm flex items-center justify-center gap-3 hover:bg-emerald-400 transition-all active:scale-95 disabled:opacity-50"
             >
               <BrainCircuit size={18} />
-              {analyzing ? (isRtl ? 'جاري الفحص...' : 'Checking...') : (isRtl ? 'فحص اتصال API' : 'Test API Connection')}
+              {analyzing ? (isRtl ? 'جاري الفحص...' : 'Checking...') : (isRtl ? 'فحص اتصال API V2' : 'Test API Connection V2')}
             </button>
             
             {analysisResult && (
