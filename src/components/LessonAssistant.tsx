@@ -35,6 +35,7 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
   const [isLoading, setIsLoading] = useState(false);
   const [isLiveMode, setIsLiveMode] = useState(false);
   const [isLiveReady, setIsLiveReady] = useState(false);
+  const isLiveReadyRef = useRef(false);
   const [isRecording, setIsRecording] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -93,6 +94,17 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
     if (!isLiveMode) {
       // Start Live Mode
       setError(null);
+      
+      if (!window.AudioContext && !(window as any).webkitAudioContext) {
+        setError(isRtl ? 'متصفحك لا يدعم الصوت المتقدم' : 'Browser does not support required Audio API');
+        return;
+      }
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setError(isRtl ? 'متصفحك لا يدعم الوصول للميكروفون' : 'Browser does not support microphone access');
+        return;
+      }
+
       try {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const ws = new WebSocket(`${protocol}//${window.location.host}/live`);
@@ -108,6 +120,7 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
           if (msg.status === 'ready') {
             setIsLiveMode(true);
             setIsLiveReady(true);
+            isLiveReadyRef.current = true;
             startRecording();
             return;
           }
@@ -158,6 +171,7 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
         ws.onclose = () => {
           setIsLiveMode(false);
           setIsLiveReady(false);
+          isLiveReadyRef.current = false;
           stopRecording();
           clearAudioQueue();
         };
@@ -194,7 +208,7 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
         const inputData = e.inputBuffer.getChannelData(0);
         const pcm16 = float32ToInt16(inputData);
         const base64 = arrayBufferToBase64(pcm16.buffer);
-        if (wsRef.current?.readyState === WebSocket.OPEN && isLiveReady) {
+        if (wsRef.current?.readyState === WebSocket.OPEN && isLiveReadyRef.current) {
           wsRef.current.send(JSON.stringify({ audio: base64 }));
         }
       };

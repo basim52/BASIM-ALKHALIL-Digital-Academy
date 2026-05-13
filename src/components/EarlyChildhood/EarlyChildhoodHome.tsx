@@ -29,6 +29,7 @@ import { LettersLesson } from './LettersLesson';
 import { FirstWordsLesson } from './FirstWordsLesson';
 import { PronunciationLesson } from './PronunciationLesson';
 import { MagicStoryMode } from './MagicStoryMode';
+import { StickerBook } from './StickerBook';
 
 import { StudentProfile } from '../../types';
 import { db } from '../../lib/firebase';
@@ -49,6 +50,16 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
   const isRtl = lang === 'ar';
   const [activeLesson, setActiveLesson] = useState<string | null>(null);
   const [showProgress, setShowProgress] = useState(false);
+  const [showStickerBook, setShowStickerBook] = useState(false);
+  const [recentLearnings, setRecentLearnings] = useState<string[]>([]);
+  const [mood, setMood] = useState<string | null>(null);
+
+  const moods = [
+    { id: 'happy', emoji: '😊', label: isRtl ? 'سعيد' : 'Happy', color: 'bg-yellow-400' },
+    { id: 'curious', emoji: '🧐', label: isRtl ? 'فضولي' : 'Curious', color: 'bg-blue-400' },
+    { id: 'sleepy', emoji: '😴', label: isRtl ? 'نعسان' : 'Sleepy', color: 'bg-purple-400' },
+    { id: 'energetic', emoji: '🚀', label: isRtl ? 'نشيط' : 'Energetic', color: 'bg-orange-500' },
+  ];
 
   // Stats derived from profile
   const stats = {
@@ -61,6 +72,10 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
   const saveProgress = async (lessonId: string, score: number, total: number) => {
     if (!profile?.uid) return;
     
+    // Track what names or concepts they learned
+    const lessonTitle = KID_COURSES.find(c => c.id === lessonId)?.nameKey || lessonId;
+    setRecentLearnings(prev => [...new Set([...prev, lessonTitle])].slice(-5));
+
     try {
       const progressRef = doc(db, 'user_progress', `${profile.uid}_early_${lessonId}`);
       await setDoc(progressRef, {
@@ -71,6 +86,29 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
         completed: true,
         updatedAt: new Date()
       }, { merge: true });
+
+      // Logic to unlock a random sticker if score is high
+      if (score / total >= 0.8) {
+        const stickersRef = doc(db, 'users', profile.uid, 'earlyChildhood', 'stickers');
+        const snap = await getDoc(stickersRef);
+        let unlockedIds = snap.exists() ? snap.data().unlockedIds || [] : [];
+        
+        // Simple mapping of lessons to potential sticker IDs
+        const lessonStickers: Record<string, string> = {
+          'animals': 'lion',
+          'colors': 'rainbow',
+          'numbers': 'star_gold',
+          'first-words': 'apple',
+          'letters': 'robot',
+          'shapes': 'crown'
+        };
+
+        const targetSticker = lessonStickers[lessonId];
+        if (targetSticker && !unlockedIds.includes(targetSticker)) {
+          unlockedIds.push(targetSticker);
+          await setDoc(stickersRef, { unlockedIds }, { merge: true });
+        }
+      }
 
       // Also update student profile points
       const studentRef = doc(db, 'student_profiles', profile.uid);
@@ -104,7 +142,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
     return <LettersLesson lang={lang} onBack={() => setActiveLesson(null)} onComplete={(s, t) => saveProgress('letters', s, t)} />;
   }
   if (activeLesson === 'magic-story') {
-    return <MagicStoryMode lang={lang} onBack={() => setActiveLesson(null)} />;
+    return <MagicStoryMode lang={lang} onBack={() => setActiveLesson(null)} context={recentLearnings.join(', ')} />;
   }
 
   return (
@@ -131,6 +169,13 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
 
         <div className="flex gap-2">
           <button 
+            onClick={() => setShowStickerBook(true)}
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-amber-50 text-amber-600 border-2 border-amber-100 hover:bg-amber-100 transition-all shadow-sm"
+          >
+            <Layout size={18} />
+            <span className="font-black text-[10px] md:text-sm uppercase tracking-widest">{isRtl ? 'ملصقاتي' : 'Stickers'}</span>
+          </button>
+          <button 
             onClick={() => setShowProgress(!showProgress)}
             className={`flex items-center gap-2 px-5 py-3 rounded-2xl border-2 transition-all shadow-sm ${
               showProgress ? 'bg-[#002147] text-white border-[#002147]' : 'bg-white text-[#002147] border-slate-100 hover:border-[#002147]/20 shadow-sm'
@@ -141,6 +186,12 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
           </button>
         </div>
       </header>
+
+      <AnimatePresence>
+        {showStickerBook && (
+          <StickerBook isRtl={isRtl} onClose={() => setShowStickerBook(false)} />
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {showProgress && (
@@ -271,6 +322,35 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
           </div>
         </motion.button>
       </div>
+
+      {/* Mood Selector - Very Early Childhood Distinguishing Feature */}
+      {!mood && (
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-6xl mx-auto mb-10 bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 flex flex-col items-center"
+        >
+          <h2 className="text-xl md:text-2xl font-black text-[#002147] mb-6 text-center">
+            {isRtl ? 'كيف تشعر اليوم يا بطل؟' : 'How are you feeling today, Champ?'}
+          </h2>
+          <div className="flex gap-4 md:gap-8">
+            {moods.map((m) => (
+              <motion.button
+                key={m.id}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setMood(m.id)}
+                className="flex flex-col items-center gap-2 group"
+              >
+                <div className={`w-16 h-16 md:w-20 md:h-20 ${m.color} rounded-full flex items-center justify-center text-3xl md:text-4xl shadow-lg shadow-black/5`}>
+                  {m.emoji}
+                </div>
+                <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 group-hover:text-[#002147] transition-colors">{m.label}</span>
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8 pb-20">
         {KID_COURSES.map((course) => (

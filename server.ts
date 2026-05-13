@@ -25,7 +25,11 @@ async function startServer() {
 
   // API Routes
   app.get("/api/health", (req, res) => {
-    res.json({ status: "ok" });
+    res.json({ 
+      status: "ok", 
+      geminiKeySet: !!process.env.GEMINI_API_KEY,
+      isProduction: process.env.NODE_ENV === "production"
+    });
   });
 
   // Regular Chat Endpoint for Lessons
@@ -76,64 +80,72 @@ async function startServer() {
   wss.on("connection", async (clientWs) => {
     console.log("New Live API connection");
     let session: any = null;
+    let isConnecting = false;
 
     clientWs.on("message", async (data) => {
       try {
         const msg = JSON.parse(data.toString());
         
-      // Start session on first message
-      if (!session) {
-        try {
-          const contextText = msg.context || `General help at Basim Alkhalil Academy.`;
-          session = await ai.live.connect({
-            model: "gemini-3.1-flash-live-preview",
-            callbacks: {
-              onmessage: (message: any) => {
-                const audio = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
-                if (audio) clientWs.send(JSON.stringify({ audio }));
-                
-                // Handle interruptions
-                if (message.serverContent?.interrupted) {
-                  clientWs.send(JSON.stringify({ interrupted: true }));
+        // Start session on first message
+        if (!session && !isConnecting) {
+          isConnecting = true;
+          console.log("Starting Gemini Live session...");
+          try {
+            const contextText = msg.context || `General help at Basim Alkhalil Academy.`;
+            session = await ai.live.connect({
+              model: "gemini-3.1-flash-live-preview",
+              callbacks: {
+                onmessage: (message: any) => {
+                  if (message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data) {
+                    const audio = message.serverContent.modelTurn.parts[0].inlineData.data;
+                    clientWs.send(JSON.stringify({ audio }));
+                  }
+                  
+                  // Handle interruptions
+                  if (message.serverContent?.interrupted) {
+                    clientWs.send(JSON.stringify({ interrupted: true }));
+                  }
+                  
+                  // Handle transcription for UI display
+                  const transcription = message.serverContent?.modelTurn?.parts?.[0]?.text;
+                  if (transcription) clientWs.send(JSON.stringify({ text: transcription }));
+                  
+                  // Also handle user transcription if enabled
+                  const userTranscription = message.serverContent?.userTurn?.parts?.[0]?.text;
+                  if (userTranscription) clientWs.send(JSON.stringify({ userText: userTranscription }));
+                },
+                onclose: () => {
+                  console.log("Gemini Live session closed");
+                  clientWs.close();
+                },
+                onerror: (err: any) => {
+                  console.error("Gemini Live session error:", err);
+                  clientWs.send(JSON.stringify({ error: "Voice assistant encountered an error." }));
                 }
-                
-                // Handle transcription for UI display
-                const transcription = message.serverContent?.modelTurn?.parts[0]?.text;
-                if (transcription) clientWs.send(JSON.stringify({ text: transcription }));
-                
-                // Also handle user transcription if enabled
-                const userTranscription = message.serverContent?.userTurn?.parts[0]?.text;
-                if (userTranscription) clientWs.send(JSON.stringify({ userText: userTranscription }));
               },
-              onclose: () => {
-                console.log("Gemini Live session closed");
+              config: {
+                responseModalities: [Modality.AUDIO],
+                speechConfig: {
+                  voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zephyr" } },
+                },
+                outputAudioTranscription: {},
+                inputAudioTranscription: {},
+                systemInstruction: `You are a live audio teaching assistant for Basim Alkhalil Digital Academy. 
+                  Help the student with this lesson context: ${contextText}. 
+                  Be concise, spoken-friendly, and maintain the persona of a helpful private tutor.
+                  ALWAYS respond in the language the student uses. If they speak Arabic, respond in Arabic. If English, respond in English.`,
               },
-              onerror: (err: any) => {
-                console.error("Gemini Live session error:", err);
-                clientWs.send(JSON.stringify({ error: "Voice assistant encountered an error." }));
-              }
-            },
-            config: {
-              responseModalities: [Modality.AUDIO],
-              speechConfig: {
-                voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zephyr" } },
-              },
-              // Enable transcription
-              outputAudioTranscription: {},
-              inputAudioTranscription: {},
-              systemInstruction: `You are a live audio teaching assistant for Basim Alkhalil Digital Academy. 
-              Help the student with this lesson context: ${contextText}. 
-              Be concise, spoken-friendly, and maintain the persona of a helpful private tutor.
-              ALWAYS respond in the language the student uses. If they speak Arabic, respond in Arabic. If English, respond in English.`,
-            },
-          });
-          clientWs.send(JSON.stringify({ status: 'ready' }));
-        } catch (err) {
-          console.error("Failed to connect to Gemini Live:", err);
-          clientWs.send(JSON.stringify({ error: "Failed to start voice assistant." }));
+            });
+            isConnecting = false;
+            console.log("Gemini Live session ready");
+            clientWs.send(JSON.stringify({ status: 'ready' }));
+          } catch (err) {
+            isConnecting = false;
+            console.error("Failed to connect to Gemini Live:", err);
+            clientWs.send(JSON.stringify({ error: "Failed to start voice assistant. Please check if your API key supports this model." }));
+          }
+          return;
         }
-        return;
-      }
 
         if (session && msg.audio) {
           session.sendRealtimeInput({

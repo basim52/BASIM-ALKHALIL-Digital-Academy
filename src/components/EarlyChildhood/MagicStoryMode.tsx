@@ -7,36 +7,53 @@ import { Language } from '../../lib/translations';
 interface MagicStoryModeProps {
   lang: Language;
   onBack: () => void;
+  context?: string;
 }
 
-export const MagicStoryMode: React.FC<MagicStoryModeProps> = ({ lang, onBack }) => {
+const THEMES = [
+  { id: 'space', icon: '🚀', name: 'Space', nameAr: 'الفضاء', color: 'bg-indigo-600' },
+  { id: 'jungle', icon: '🌴', name: 'Jungle', nameAr: 'الغابة', color: 'bg-emerald-600' },
+  { id: 'ocean', icon: '🌊', name: 'Ocean', nameAr: 'المحيط', color: 'bg-blue-600' },
+  { id: 'magic', icon: '✨', name: 'Magic', nameAr: 'السحر', color: 'bg-purple-600' },
+];
+
+export const MagicStoryMode: React.FC<MagicStoryModeProps> = ({ lang, onBack, context }) => {
   const isRtl = lang === 'ar';
   const [loading, setLoading] = useState(false);
-  const [story, setStory] = useState<{ title: string; paragraphs: string[] } | null>(null);
+  const [story, setStory] = useState<{ title: string; paragraphs: string[]; emojis: string[] } | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
+  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
 
-  const generateStory = async () => {
+  const generateStory = async (themeId: string) => {
     setLoading(true);
     setStory(null);
     setCurrentStep(0);
+    const theme = THEMES.find(t => t.id === themeId);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const ai = new GoogleGenAI({ apiKey: (process.env as any).GEMINI_API_KEY });
       const prompt = `You are a professional children's storyteller.
       Write a very short (max 100 words), fun, and educational story for a 3-5 year old child. 
-      The theme should be about discovery and kindness. 
-      Use simple words.
+      THEME: ${theme?.name}.
+      ADDITIONAL CONTEXT (Words learned today): ${context || 'None'}.
+      
+      Requirements:
+      1. Use 3 simple paragraphs.
+      2. Incorporate the words from Additional Context naturally.
+      3. For each paragraph, provide one matching EMOJI that represents the scene.
+      
       Output format: 
       Title: [Fun Title]
-      Story: [3 simple paragraphs]
+      Story: [Paragraph 1] | [Paragraph 2] | [Paragraph 3]
+      Emojis: [Emoji 1], [Emoji 2], [Emoji 3]
       Language: ${lang === 'ar' ? 'Arabic' : 'English'}`;
 
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: prompt,
         config: {
-            systemInstruction: "You are a friendly storyteller assistant for a kids learning app.",
-            temperature: 0.8
+            systemInstruction: "You are a friendly storyteller assistant for a kids learning app. Always respond in the requested language.",
+            temperature: 0.9
         }
       });
 
@@ -45,18 +62,23 @@ export const MagicStoryMode: React.FC<MagicStoryModeProps> = ({ lang, onBack }) 
       
       let title = isRtl ? "قصة سحرية" : "Magic Story";
       let storyText = "";
+      let emojis: string[] = ['✨', '✨', '✨'];
 
       lines.forEach(line => {
         if (line.toLowerCase().startsWith('title:')) title = line.replace(/title:/i, '').trim();
-        else if (line.toLowerCase().startsWith('story:')) storyText += line.replace(/story:/i, '').trim() + " ";
-        else storyText += line.trim() + " ";
+        else if (line.toLowerCase().startsWith('story:')) storyText = line.replace(/story:/i, '').trim();
+        else if (line.toLowerCase().startsWith('emojis:')) {
+          const emojiStr = line.replace(/emojis:/i, '').trim();
+          emojis = emojiStr.split(',').map(e => e.trim());
+        }
       });
 
-      const paragraphs = storyText.split(/[.!?]+/).filter(p => p.trim().length > 5).map(p => p.trim() + ".");
+      const paragraphs = storyText.split('|').map(p => p.trim());
 
       setStory({ 
         title, 
-        paragraphs: paragraphs.slice(0, 3) // Ensure we have 3 parts max
+        paragraphs: paragraphs.slice(0, 3),
+        emojis: emojis.slice(0, 3)
       });
     } catch (error) {
       console.error("Story generation failed:", error);
@@ -114,26 +136,44 @@ export const MagicStoryMode: React.FC<MagicStoryModeProps> = ({ lang, onBack }) 
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 1.1, opacity: 0 }}
-              className="text-center"
+              className="text-center w-full"
             >
-              <div className="w-32 h-32 md:w-48 md:h-48 bg-white rounded-[2rem] md:rounded-[3rem] shadow-2xl flex items-center justify-center mb-8 mx-auto relative group">
-                <Wand2 size={48} className="text-indigo-600 transition-transform group-hover:rotate-12 group-hover:scale-110" strokeWidth={2.5} />
+              <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-[2rem] shadow-xl flex items-center justify-center mb-8 mx-auto relative group">
+                <Wand2 size={40} className="text-indigo-600 transition-transform group-hover:rotate-12 group-hover:scale-110" strokeWidth={2.5} />
                 <motion.div 
                   animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
                   transition={{ duration: 3, repeat: Infinity }}
                   className="absolute inset-0 bg-indigo-500 rounded-full blur-3xl -z-10"
                 />
               </div>
-              <h2 className="text-2xl md:text-4xl font-black text-[#002147] mb-4">
-                {isRtl ? 'هل أنت مستعد لمغامرة جديدة؟' : 'Ready for a new adventure?'}
+
+              <h2 className={`text-2xl md:text-3xl font-black text-[#002147] mb-8 ${isRtl ? 'font-tajawal' : ''}`}>
+                {isRtl ? 'اختر موضوع قصتك اليوم' : 'Choose your story theme today'}
               </h2>
-              <button 
-                onClick={generateStory}
-                className="bg-[#002147] text-white px-10 py-5 rounded-3xl font-black text-lg md:text-xl uppercase tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3"
-              >
-                <Sparkles size={24} className="text-yellow-400" />
-                {isRtl ? 'اصنع السحر' : 'Create Magic'}
-              </button>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 w-full">
+                {THEMES.map((theme) => (
+                  <motion.button
+                    key={theme.id}
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => generateStory(theme.id)}
+                    className={`${theme.color} p-6 rounded-[2.5rem] text-white shadow-lg flex flex-col items-center group relative overflow-hidden`}
+                  >
+                    <span className="text-4xl mb-3 group-hover:scale-125 transition-transform">{theme.icon}</span>
+                    <span className={`font-black text-xs uppercase tracking-widest ${isRtl ? 'font-tajawal' : ''}`}>
+                      {isRtl ? theme.nameAr : theme.name}
+                    </span>
+                    <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20">
+                      <Sparkles size={40} />
+                    </div>
+                  </motion.button>
+                ))}
+              </div>
+
+              <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] animate-pulse">
+                {isRtl ? 'باسم الأكاديمية سيصنع لك قصة فريدة!' : 'Basim Academy will make a unique story for you!'}
+              </p>
             </motion.div>
           )}
 
@@ -160,13 +200,19 @@ export const MagicStoryMode: React.FC<MagicStoryModeProps> = ({ lang, onBack }) 
               key="story"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="w-full bg-white rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-16 shadow-2xl relative overflow-hidden"
+              className="w-full bg-white rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-16 shadow-2xl relative overflow-hidden border border-slate-100"
             >
               <div className="relative z-10">
-                <span className="text-[10px] md:text-sm font-black text-indigo-400 uppercase tracking-widest mb-2 block">
-                  {isRtl ? 'فصل جديد' : 'Chapter 1: The Discovery'}
-                </span>
-                <h2 className="text-2xl md:text-5xl font-black text-[#002147] mb-8 leading-tight">
+                <div className="flex items-center justify-between mb-8">
+                  <span className="text-[10px] md:text-sm font-black text-indigo-400 uppercase tracking-widest">
+                    {isRtl ? 'فصل جديد' : 'Live Adventure'}
+                  </span>
+                  <div className="text-4xl">
+                    {story.emojis[currentStep]}
+                  </div>
+                </div>
+
+                <h2 className="text-2xl md:text-4xl font-black text-[#002147] mb-8 leading-tight">
                   {story.title}
                 </h2>
                 
@@ -174,7 +220,7 @@ export const MagicStoryMode: React.FC<MagicStoryModeProps> = ({ lang, onBack }) 
                   key={currentStep}
                   initial={{ opacity: 0, x: isRtl ? 20 : -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="mb-12"
+                  className="mb-12 h-[150px] md:h-[200px] flex items-center"
                 >
                   <p className="text-xl md:text-3xl font-bold text-slate-700 leading-relaxed md:leading-snug">
                     {story.paragraphs[currentStep]}
@@ -194,7 +240,7 @@ export const MagicStoryMode: React.FC<MagicStoryModeProps> = ({ lang, onBack }) 
                    <div className="flex gap-2">
                      <button 
                         onClick={() => speak(story.paragraphs[currentStep])}
-                        className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center hover:bg-indigo-100 transition-colors"
+                        className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center hover:bg-indigo-100 transition-colors shadow-inner"
                      >
                        <Volume2 size={24} />
                      </button>
@@ -202,17 +248,17 @@ export const MagicStoryMode: React.FC<MagicStoryModeProps> = ({ lang, onBack }) 
                      {currentStep < story.paragraphs.length - 1 ? (
                        <button 
                          onClick={() => setCurrentStep(prev => prev + 1)}
-                         className="bg-[#002147] text-white px-8 py-3 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg hover:scale-105 active:scale-95 transition-all"
+                         className="bg-[#002147] text-white px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all"
                        >
-                         {isRtl ? 'التالي' : 'Next'}
+                         {isRtl ? 'المتابعة' : 'Continue'}
                        </button>
                      ) : (
                        <button 
-                         onClick={generateStory}
-                         className="bg-emerald-500 text-white px-8 py-3 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                         onClick={() => setStory(null)}
+                         className="bg-emerald-500 text-white px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
                        >
                          <PartyPopper size={18} />
-                         {isRtl ? 'قصة أخرى' : 'Another Story'}
+                         {isRtl ? 'رائع' : 'Amazing'}
                        </button>
                      )}
                    </div>
@@ -220,8 +266,8 @@ export const MagicStoryMode: React.FC<MagicStoryModeProps> = ({ lang, onBack }) 
               </div>
 
               <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-[80px] pointer-events-none" />
-              <div className="absolute bottom-4 left-6 opacity-5">
-                <BookOpen size={180} strokeWidth={1} />
+              <div className="absolute bottom-4 left-6 opacity-10">
+                <Sparkles size={120} strokeWidth={1} className="text-amber-400" />
               </div>
             </motion.div>
           )}

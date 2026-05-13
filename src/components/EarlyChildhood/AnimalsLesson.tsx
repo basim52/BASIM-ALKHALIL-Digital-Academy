@@ -23,6 +23,7 @@ import {
   Star
 } from 'lucide-react';
 import { LessonAssistant } from '../LessonAssistant';
+import { Mascot } from './Mascot';
 
 interface AnimalOption {
   id: string;
@@ -83,6 +84,7 @@ export const AnimalsLesson = ({ lang, onBack, onComplete }: { lang: Language, on
   const [score, setScore] = useState(0);
   const [totalAttempts, setTotalAttempts] = useState(0);
   const [itemAttempts, setItemAttempts] = useState(0);
+  const [mascotMood, setMascotMood] = useState<'happy' | 'thinking' | 'celebrating' | 'idle'>('idle');
   const MAX_TOTAL_ATTEMPTS = 12;
 
   const speak = useCallback((text: string) => {
@@ -117,6 +119,7 @@ export const AnimalsLesson = ({ lang, onBack, onComplete }: { lang: Language, on
     const newTarget = currentGroup.animals[randomIndex];
     setTargetAnimal(newTarget);
     setItemAttempts(0);
+    setMascotMood('thinking');
     
     setTimeout(() => {
       speak(`Find the ${newTarget.name}`);
@@ -144,6 +147,7 @@ export const AnimalsLesson = ({ lang, onBack, onComplete }: { lang: Language, on
       if (animal.id === targetAnimal.id) {
         const nextScore = score + 1;
         setScore(nextScore);
+        setMascotMood('celebrating');
         
         if (currentTotal >= MAX_TOTAL_ATTEMPTS) {
           finishGame(nextScore);
@@ -332,6 +336,7 @@ export const AnimalsLesson = ({ lang, onBack, onComplete }: { lang: Language, on
         lessonContent={JSON.stringify(ANIMAL_GROUPS)} 
         isRtl={isRtl} 
       />
+      <Mascot mood={mascotMood} isRtl={isRtl} />
     </div>
   );
 };
