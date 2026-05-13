@@ -11,6 +11,7 @@ import {
   Trophy,
   Star
 } from 'lucide-react';
+import { LessonAssistant } from '../LessonAssistant';
 
 interface ColorOption {
   name: string;
@@ -34,7 +35,7 @@ const COLORS: ColorOption[] = [
   { name: 'White', nameAr: 'أبيض', hex: '#ffffff', textColor: 'slate-900', shadowColor: 'rgba(255, 255, 255, 0.4)' },
 ];
 
-export const ColorsLesson = ({ lang, onBack }: { lang: Language, onBack: () => void }) => {
+export const ColorsLesson = ({ lang, onBack, onComplete }: { lang: Language, onBack: () => void, onComplete?: (score: number, total: number) => void }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   
@@ -60,9 +61,10 @@ export const ColorsLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
 
   const finishGame = useCallback((finalScore: number) => {
     speak(isRtl 
-      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${totalAttempts + 1}. عمل رائع!` 
-      : `Game over! Your score is ${finalScore} out of ${totalAttempts + 1}. Great job!`);
+      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${MAX_TOTAL_ATTEMPTS}. عمل رائع!` 
+      : `Game over! Your score is ${finalScore} out of ${MAX_TOTAL_ATTEMPTS}. Great job!`);
     setShowExcellent(true);
+    if (onComplete) onComplete(finalScore, MAX_TOTAL_ATTEMPTS);
     setTimeout(() => {
       setShowExcellent(false);
       setGameMode(false);
@@ -96,10 +98,8 @@ export const ColorsLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
       setStreak(0);
       setTotalAttempts(0);
       setItemAttempts(0);
-      setGameStarted(true);
       startNewGameLevel();
     } else {
-      setGameStarted(false);
       setTargetColor(null);
     }
   };
@@ -287,6 +287,11 @@ export const ColorsLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
           className="absolute bottom-[10%] right-[10%] w-96 h-96 bg-blue-400/10 rounded-full blur-3xl" 
         />
       </div>
+      <LessonAssistant 
+        lessonTitle={isRtl ? 'درس الألوان' : 'Colors Lesson'} 
+        lessonContent="Interactive lesson teaching colors like Red, Blue, Green, Yellow, Orange, Purple, Pink, Black, and White with multi-sensory feedback." 
+        isRtl={isRtl} 
+      />
     </div>
   );
 };

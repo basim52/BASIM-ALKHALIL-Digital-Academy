@@ -168,7 +168,7 @@ export async function generateLessonContent(
   `;
 
   let lastError: any = null;
-  const maxRetries = 2;
+  const maxRetries = 4; // Increased from 2 to 4
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -204,11 +204,19 @@ export async function generateLessonContent(
       };
     } catch (error: any) {
       lastError = error;
+      const isOverloaded = error.message?.includes('503') || 
+                          error.message?.includes('429') || 
+                          error.message?.includes('UNAVAILABLE') ||
+                          error.status === 503 ||
+                          error.status === 429;
+
       console.error(`Lesson Generation attempt ${attempt + 1} failed:`, error);
       
-      // If it's a 503 or 429, wait before retrying
-      if (attempt < maxRetries && (error.message?.includes('503') || error.message?.includes('429') || error.status === 503)) {
-        await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)));
+      if (attempt < maxRetries && isOverloaded) {
+        // Exponential backoff: 3s, 8s, 15s, 30s
+        const waitTime = [3000, 8000, 15000, 30000][attempt] || 2000;
+        console.log(`Retrying after ${waitTime}ms (Attempt ${attempt + 1})...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
         continue;
       }
       break; 

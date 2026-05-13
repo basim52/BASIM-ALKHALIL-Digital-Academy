@@ -145,12 +145,27 @@ export const AIConversation = ({ onBack, lang }: { onBack: () => void, lang: Lan
         }
       `;
 
-      const response = await aiRef.current.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-      });
+      let responseText = "";
+      const maxRetries = 3;
 
-      const responseText = response.text || "I'm sorry, I couldn't process that.";
+      for (let i = 0; i <= maxRetries; i++) {
+        try {
+          const response = await aiRef.current.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: prompt,
+          });
+          responseText = response.text || "I'm sorry, I couldn't process that.";
+          break;
+        } catch (err: any) {
+          if (i === maxRetries) throw err;
+          const isOverloaded = err.message?.includes('503') || err.message?.includes('429') || err.message?.includes('UNAVAILABLE');
+          if (isOverloaded) {
+            await new Promise(r => setTimeout(r, 2000 * (i + 1)));
+            continue;
+          }
+          throw err;
+        }
+      }
       
       let finalAiResponse = responseText;
       let newFeedback: Feedback | null = null;

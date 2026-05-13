@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Play, Pause, ChevronDown, Check, X, ArrowRight, Timer, Award, MessageCircle, BookOpen, PenTool, HelpCircle, Volume2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Lesson } from '../types';
+import { LessonAssistant } from './LessonAssistant';
 
 interface InteractiveLessonProps {
   lesson: Partial<Lesson>;
@@ -481,6 +482,11 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
           )}
         </AnimatePresence>
       </div>
+      <LessonAssistant 
+        lessonTitle={isRtl ? lesson.titleAr || '' : lesson.title || ''} 
+        lessonContent={JSON.stringify(lesson)} 
+        isRtl={isRtl} 
+      />
     </div>
   </div>
 </div>

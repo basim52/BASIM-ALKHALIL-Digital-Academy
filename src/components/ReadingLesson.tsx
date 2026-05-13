@@ -17,6 +17,7 @@ import {
   Trophy
 } from 'lucide-react';
 import { Lesson } from '../types';
+import { LessonAssistant } from './LessonAssistant';
 
 interface ReadingLessonProps {
   lesson: Partial<Lesson>;
@@ -501,6 +502,12 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
           </div>
         </div>
       </div>
+      
+      <LessonAssistant 
+        lessonTitle={lesson.title || ''} 
+        lessonContent={JSON.stringify(lesson)} 
+        isRtl={isRtl} 
+      />
       
       {/* Navigation Footer for Scrolling UX */}
       <footer className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex gap-2 p-2 bg-oxford-navy/90 backdrop-blur-md rounded-full shadow-2xl border border-white/10">

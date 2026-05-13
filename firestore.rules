@@ -1,103 +1,37 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // 0. Default Deny
+    // Default deny
     match /{document=**} {
       allow read, write: if false;
     }
 
     // --- Helpers ---
-    function isSignedIn() { return request.auth != null; }
-    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
-    function incoming() { return request.resource.data; }
-    function existing() { return resource.data; }
-    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
-    function isVerified() { return request.auth.token.email_verified == true; }
-    
-    // Only include isAdmin if there's a trusted source.
-    // For this app, we'll assume a collection 'admins' contains admin UIDs.
-    function isAdmin() { 
-      return isSignedIn() && isVerified() && (
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
-        request.auth.token.email == 'basim5252@gmail.com'
-      ); 
+    function isSignedIn() {
+      return request.auth != null;
     }
 
-    match /settings/global {
-      allow read: if true;
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- Collections ---
+
+    // Global Settings
+    match /settings/{settingId} {
+      allow read: if isSignedIn();
       allow write: if isAdmin();
     }
 
-    // --- Validation Helpers ---
-    
-    function isValidUserProfile(data) {
-      return data.keys().hasAll(['uid', 'email', 'displayName', 'role', 'createdAt']) &&
-             data.uid is string && data.uid.size() <= 128 &&
-             data.email is string && data.email.size() <= 256 &&
-             data.displayName is string && data.displayName.size() <= 100 &&
-             data.role in ['student', 'parent', 'teacher', 'admin'] &&
-             data.createdAt is int &&
-             (data.get('credits', 0) is int) && (data.get('credits', 0) >= -1000); // Allow some flexibility
-    }
-
-    function isValidCreditTransaction(data) {
-      return data.keys().hasAll(['id', 'userId', 'amount', 'type', 'timestamp']) &&
-             data.id is string && data.id.size() <= 128 &&
-             data.userId == request.auth.uid &&
-             data.amount is int &&
-             data.type in ['purchase', 'consumption', 'redeem'] &&
-             data.timestamp == request.time;
-    }
-
-    // --- Rules ---
-
-    match /users/{userId} {
-      allow get: if isOwner(userId) || isAdmin();
-      allow list: if isAdmin() || (isSignedIn() && resource.data.role == 'student');
-      
-      allow create: if isOwner(userId) && isValidUserProfile(incoming()) && 
-                       incoming().role == 'student' && // Default role on self-signup
-                       incoming().createdAt == request.time &&
-                       incoming().credits == 0; // Default zero credits
-
-      allow update: if isOwner(userId) && (
-        // Action 1: Generic Profile Update
-        (incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'avatarUrl', 'lastSeen'])) ||
-        // Action 2: Credit Update
-        (incoming().diff(existing()).affectedKeys().hasOnly(['credits', 'lastSeen', 'points'])
-         // Note: We've relaxed the existsAfter tie-in for the credit-system preview to ensure smooth functionality
-         // In production, critical fields would be managed by Cloud Functions
-        )
-      );
-    }
-
-    match /transactions/{transactionId} {
-      // Transactions are immutable and only readable by owner
-      allow get: if isSignedIn() && (isOwner(existing().userId) || isAdmin());
-      allow list: if isSignedIn() && (isOwner(resource.data.userId) || isAdmin());
-      
-      allow create: if isSignedIn() && 
-                       isValidCreditTransaction(incoming()) && 
-                       isOwner(incoming().userId);
-    }
-
-    match /vouchers/{code} {
-      allow get: if isSignedIn();
-      allow list: if isAdmin();
-      allow create: if isAdmin();
-      allow update: if isSignedIn() && 
-                       existing().status == 'active' && 
-                       incoming().status == 'used' &&
-                       incoming().usedBy == request.auth.uid &&
-                       incoming().usedAt == request.time;
-    }
-
-    match /students/{userId} {
-      allow get: if isOwner(userId) || (isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'parent' && existing().parentId == request.auth.uid);
-      allow write: if isOwner(userId) || isAdmin();
-    }
-
+    // Curriculum
     match /modules/{moduleId} {
       allow read: if isSignedIn();
       allow write: if isAdmin();
@@ -108,37 +42,66 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    match /grades/{gradeId} {
-      allow read: if isSignedIn() && (isOwner(resource.data.studentId) || isAdmin());
-      allow create: if isAdmin() || (isSignedIn() && incoming().studentId == request.auth.uid);
+    // Users & Students
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) || isAdmin();
     }
 
-    match /conversations/{sessionId} {
-      allow read: if isSignedIn() && (isOwner(resource.data.studentId) || isAdmin());
-      allow create: if isSignedIn() && incoming().studentId == request.auth.uid;
+    match /students/{studentId} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(studentId) || isAdmin();
     }
 
-    match /notifications/{notificationId} {
+    // Schedules & Notes
+    match /schedules/{scheduleId} {
+      allow read: if isSignedIn(); 
+      allow write: if isSignedIn();
+    }
+
+    match /parentNotes/{noteId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    // Progress & History
+    match /user_progress/{progressId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // Chat & Conversations
+    match /global_chat/{chatId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+    }
+
+    match /conversations/{convId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    // Credit System
+    match /vouchers/{code} {
       allow read: if isSignedIn();
       allow write: if isAdmin();
     }
 
-    match /schedules/{scheduleId} {
-      allow read: if isSignedIn() && (isOwner(resource.data.studentId) || isAdmin());
-      allow write: if isSignedIn() && (isOwner(incoming().studentId) || isAdmin());
+    match /transactions/{transId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isAdmin());
     }
 
-    match /parentNotes/{noteId} {
-      allow read: if isSignedIn() && (isOwner(resource.data.parentId) || isOwner(resource.data.studentId));
-      allow create: if isSignedIn() && isOwner(incoming().parentId);
-    }
-    
-    match /admins/{adminId} {
-      allow read: if isAdmin();
+    match /notifications/{notifId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
     }
 
-    match /test/connection {
-      allow read: if true;
+    // Legacy support or misc
+    match /student_profiles/{profileId} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(profileId) || isAdmin();
     }
   }
 }

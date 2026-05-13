@@ -18,6 +18,7 @@ import {
   Gamepad2,
   Trophy
 } from 'lucide-react';
+import { LessonAssistant } from '../LessonAssistant';
 
 interface ShapeOption {
   id: string;
@@ -54,7 +55,7 @@ const SHAPE_GROUPS = [
   }
 ];
 
-export const ShapesLesson = ({ lang, onBack }: { lang: Language, onBack: () => void }) => {
+export const ShapesLesson = ({ lang, onBack, onComplete }: { lang: Language, onBack: () => void, onComplete?: (score: number, total: number) => void }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   
@@ -81,9 +82,10 @@ export const ShapesLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
 
   const finishGame = useCallback((finalScore: number) => {
     speak(isRtl 
-      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${totalAttempts + 1}. عمل رائع!` 
-      : `Game over! Your score is ${finalScore} out of ${totalAttempts + 1}. Great job!`);
+      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${MAX_TOTAL_ATTEMPTS}. عمل رائع!` 
+      : `Game over! Your score is ${finalScore} out of ${MAX_TOTAL_ATTEMPTS}. Great job!`);
     setShowExcellent(true);
+    if (onComplete) onComplete(finalScore, MAX_TOTAL_ATTEMPTS);
     setTimeout(() => {
       setShowExcellent(false);
       setGameMode(false);
@@ -307,6 +309,11 @@ export const ShapesLesson = ({ lang, onBack }: { lang: Language, onBack: () => v
         animate={{ rotate: 360 }}
         transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
         className="absolute -top-20 -left-20 w-80 h-80 bg-blue-400/5 rounded-full blur-3xl pointer-events-none" 
+      />
+      <LessonAssistant 
+        lessonTitle={isRtl ? 'درس الأشكال' : 'Shapes Lesson'} 
+        lessonContent="Learning basic shapes: Circle, Square, Triangle, Rectangle, Star, Heart, Oval, and Diamond with interactive matching games." 
+        isRtl={isRtl} 
       />
     </div>
   );

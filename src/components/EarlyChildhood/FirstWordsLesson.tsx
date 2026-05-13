@@ -27,8 +27,11 @@ interface WordLevel {
   words: WordOption[];
 }
 
+import { LessonAssistant } from '../LessonAssistant';
+
 interface FirstWordsLessonProps {
   onBack: () => void;
+  onComplete?: (score: number, total: number) => void;
   isRtl: boolean;
   t: any;
 }
@@ -126,7 +129,7 @@ const WORD_LEVELS: WordLevel[] = [
   }
 ];
 
-export const FirstWordsLesson: React.FC<FirstWordsLessonProps> = ({ onBack, isRtl, t }) => {
+export const FirstWordsLesson: React.FC<FirstWordsLessonProps> = ({ onBack, onComplete, isRtl, t }) => {
   const [activeLevel, setActiveLevel] = useState(1);
   const [learnedWords, setLearnedWords] = useState<Set<string>>(new Set());
   const [showExcellent, setShowExcellent] = useState(false);
@@ -151,9 +154,10 @@ export const FirstWordsLesson: React.FC<FirstWordsLessonProps> = ({ onBack, isRt
 
   const finishGame = useCallback((finalScore: number) => {
     speak(isRtl 
-      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${totalAttempts + 1}. عمل رائع!` 
-      : `Game over! Your score is ${finalScore} out of ${totalAttempts + 1}. Great job!`);
+      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${MAX_TOTAL_ATTEMPTS}. عمل رائع!` 
+      : `Game over! Your score is ${finalScore} out of ${MAX_TOTAL_ATTEMPTS}. Great job!`);
     setShowExcellent(true);
+    if (onComplete) onComplete(finalScore, MAX_TOTAL_ATTEMPTS);
     setTimeout(() => {
       setShowExcellent(false);
       setGameMode(false);
@@ -392,6 +396,11 @@ export const FirstWordsLesson: React.FC<FirstWordsLessonProps> = ({ onBack, isRt
           </motion.div>
         )}
       </AnimatePresence>
+      <LessonAssistant 
+        lessonTitle={isRtl ? 'الكلمات الأولى' : 'First Words'} 
+        lessonContent="Early Childhood Vocabulary: Learning basic objects, food, and household items in English and Arabic." 
+        isRtl={isRtl} 
+      />
     </div>
   );
 };

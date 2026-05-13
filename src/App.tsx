@@ -420,12 +420,27 @@ const AIParentNotes = ({ profile, studentId, lang }: { profile: UserProfile, stu
       `;
       
       const ai = new GoogleGenAI({ apiKey: (process.env as any).GEMINI_API_KEY || '' });
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-      });
+      let aiResponse = "";
+      const maxRetries = 3;
 
-      const aiResponse = response.text || (lang === 'ar' ? "سأقوم بمراجعة هذا الأمر شخصياً." : "I will look into this personally.");
+      for (let i = 0; i <= maxRetries; i++) {
+        try {
+          const response = await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: prompt,
+          });
+          aiResponse = response.text || (lang === 'ar' ? "سأقوم بمراجعة هذا الأمر شخصياً." : "I will look into this personally.");
+          break;
+        } catch (err: any) {
+          if (i === maxRetries) throw err;
+          const isOverloaded = err.message?.includes('503') || err.message?.includes('429') || err.message?.includes('UNAVAILABLE');
+          if (isOverloaded) {
+            await new Promise(r => setTimeout(r, 2000 * (i + 1)));
+            continue;
+          }
+          throw err;
+        }
+      }
 
       const noteId = Math.random().toString(36).substr(2, 9);
       await setDoc(doc(db, 'parentNotes', noteId), {
@@ -2169,7 +2184,7 @@ export default function App() {
       return <CreditSystem lang={lang} />;
     }
     if (view === 'early-childhood') {
-      return <EarlyChildhoodHome lang={lang} />;
+      return <EarlyChildhoodHome lang={lang} profile={userProfile as StudentProfile} onBack={() => setView('dashboard')} />;
     }
     if (view === 'story-library') {
       return <StoryLibrary lang={lang} profile={userProfile} onUpdateProfile={(p) => setUserProfile(p as StudentProfile)} onNavigate={setView} />;

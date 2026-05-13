@@ -30,6 +30,10 @@ import { FirstWordsLesson } from './FirstWordsLesson';
 import { PronunciationLesson } from './PronunciationLesson';
 import { MagicStoryMode } from './MagicStoryMode';
 
+import { StudentProfile } from '../../types';
+import { db } from '../../lib/firebase';
+import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
+
 const KID_COURSES = [
   { id: 'first-words', nameKey: 'firstWords', icon: Sparkles, color: 'bg-yellow-400', shadow: 'shadow-yellow-900/20', unlocked: true },
   { id: 'pronunciation', nameKey: 'pronunciation', icon: Mic, color: 'bg-indigo-500', shadow: 'shadow-indigo-900/20', unlocked: true },
@@ -40,40 +44,64 @@ const KID_COURSES = [
   { id: 'letters', nameKey: 'letters', icon: Type, color: 'bg-purple-500', shadow: 'shadow-purple-900/20', unlocked: true },
 ];
 
-export const EarlyChildhoodHome = ({ lang }: { lang: Language }) => {
+export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, profile?: StudentProfile | null, onBack: () => void }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [activeLesson, setActiveLesson] = useState<string | null>(null);
   const [showProgress, setShowProgress] = useState(false);
 
-  // Stats (Mocked or persistent in real app)
+  // Stats derived from profile
   const stats = {
-    wordsLearned: 42,
-    pronunciationScore: 125,
-    levelsCompleted: 8,
+    wordsLearned: 42, // Would fetch count from progress docs in real app
+    pronunciationScore: profile?.points || 0,
+    levelsCompleted: profile?.points ? Math.floor(profile.points / 100) : 0,
     dailyStreak: 5
   };
 
+  const saveProgress = async (lessonId: string, score: number, total: number) => {
+    if (!profile?.uid) return;
+    
+    try {
+      const progressRef = doc(db, 'user_progress', `${profile.uid}_early_${lessonId}`);
+      await setDoc(progressRef, {
+        userId: profile.uid,
+        lessonId: `early_${lessonId}`,
+        score,
+        total,
+        completed: true,
+        updatedAt: new Date()
+      }, { merge: true });
+
+      // Also update student profile points
+      const studentRef = doc(db, 'student_profiles', profile.uid);
+      await updateDoc(studentRef, {
+        points: increment(score * 10)
+      });
+    } catch (error) {
+      console.error("Error saving early childhood progress:", error);
+    }
+  };
+
   if (activeLesson === 'first-words') {
-    return <FirstWordsLesson t={t} isRtl={isRtl} onBack={() => setActiveLesson(null)} />;
+    return <FirstWordsLesson t={t} isRtl={isRtl} onBack={() => setActiveLesson(null)} onComplete={(s, t) => saveProgress('first-words', s, t)} />;
   }
   if (activeLesson === 'pronunciation') {
-    return <PronunciationLesson lang={lang} onBack={() => setActiveLesson(null)} />;
+    return <PronunciationLesson lang={lang} onBack={() => setActiveLesson(null)} onComplete={(s, t) => saveProgress('pronunciation', s, t)} />;
   }
   if (activeLesson === 'colors') {
-    return <ColorsLesson lang={lang} onBack={() => setActiveLesson(null)} />;
+    return <ColorsLesson lang={lang} onBack={() => setActiveLesson(null)} onComplete={(s, t) => saveProgress('colors', s, t)} />;
   }
   if (activeLesson === 'numbers') {
-    return <NumbersLesson lang={lang} onBack={() => setActiveLesson(null)} />;
+    return <NumbersLesson lang={lang} onBack={() => setActiveLesson(null)} onComplete={(s, t) => saveProgress('numbers', s, t)} />;
   }
   if (activeLesson === 'animals') {
-    return <AnimalsLesson lang={lang} onBack={() => setActiveLesson(null)} />;
+    return <AnimalsLesson lang={lang} onBack={() => setActiveLesson(null)} onComplete={(s, t) => saveProgress('animals', s, t)} />;
   }
   if (activeLesson === 'shapes') {
-    return <ShapesLesson lang={lang} onBack={() => setActiveLesson(null)} />;
+    return <ShapesLesson lang={lang} onBack={() => setActiveLesson(null)} onComplete={(s, t) => saveProgress('shapes', s, t)} />;
   }
   if (activeLesson === 'letters') {
-    return <LettersLesson lang={lang} onBack={() => setActiveLesson(null)} />;
+    return <LettersLesson lang={lang} onBack={() => setActiveLesson(null)} onComplete={(s, t) => saveProgress('letters', s, t)} />;
   }
   if (activeLesson === 'magic-story') {
     return <MagicStoryMode lang={lang} onBack={() => setActiveLesson(null)} />;

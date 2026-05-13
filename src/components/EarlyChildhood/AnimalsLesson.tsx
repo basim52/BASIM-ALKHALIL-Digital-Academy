@@ -22,6 +22,7 @@ import {
   Trophy,
   Star
 } from 'lucide-react';
+import { LessonAssistant } from '../LessonAssistant';
 
 interface AnimalOption {
   id: string;
@@ -71,7 +72,7 @@ const ANIMAL_GROUPS = [
   }
 ];
 
-export const AnimalsLesson = ({ lang, onBack }: { lang: Language, onBack: () => void }) => {
+export const AnimalsLesson = ({ lang, onBack, onComplete }: { lang: Language, onBack: () => void, onComplete?: (score: number, total: number) => void }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [activeTab, setActiveTab] = useState('farm');
@@ -96,9 +97,10 @@ export const AnimalsLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
 
   const finishGame = useCallback((finalScore: number) => {
     speak(isRtl 
-      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${totalAttempts + 1}. عمل رائع!` 
-      : `Game over! Your score is ${finalScore} out of ${totalAttempts + 1}. Great job!`);
+      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${MAX_TOTAL_ATTEMPTS}. عمل رائع!` 
+      : `Game over! Your score is ${finalScore} out of ${MAX_TOTAL_ATTEMPTS}. Great job!`);
     setShowExcellent(true);
+    if (onComplete) onComplete(finalScore, MAX_TOTAL_ATTEMPTS);
     setTimeout(() => {
       setShowExcellent(false);
       setGameMode(false);
@@ -325,6 +327,11 @@ export const AnimalsLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
         <div className="absolute top-1/2 left-0 w-96 h-96 bg-emerald-400/5 rounded-full blur-3xl" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-400/5 rounded-full blur-3xl" />
       </div>
+      <LessonAssistant 
+        lessonTitle={isRtl ? 'درس الحيوانات' : 'Animals Lesson'} 
+        lessonContent={JSON.stringify(ANIMAL_GROUPS)} 
+        isRtl={isRtl} 
+      />
     </div>
   );
 };

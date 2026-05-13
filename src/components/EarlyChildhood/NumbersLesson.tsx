@@ -10,6 +10,7 @@ import {
   Gamepad2,
   Trophy
 } from 'lucide-react';
+import { LessonAssistant } from '../LessonAssistant';
 
 interface NumberOption {
   value: number;
@@ -56,7 +57,7 @@ const NUMBER_GROUPS = [
   }
 ];
 
-export const NumbersLesson = ({ lang, onBack }: { lang: Language, onBack: () => void }) => {
+export const NumbersLesson = ({ lang, onBack, onComplete }: { lang: Language, onBack: () => void, onComplete?: (score: number, total: number) => void }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [activeLevel, setActiveLevel] = useState(1);
@@ -81,9 +82,10 @@ export const NumbersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
 
   const finishGame = useCallback((finalScore: number) => {
     speak(isRtl 
-      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${totalAttempts + 1}. عمل رائع!` 
-      : `Game over! Your score is ${finalScore} out of ${totalAttempts + 1}. Great job!`);
+      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${MAX_TOTAL_ATTEMPTS}. عمل رائع!` 
+      : `Game over! Your score is ${finalScore} out of ${MAX_TOTAL_ATTEMPTS}. Great job!`);
     setShowExcellent(true);
+    if (onComplete) onComplete(finalScore, MAX_TOTAL_ATTEMPTS);
     setTimeout(() => {
       setShowExcellent(false);
       setGameMode(false);
@@ -314,6 +316,11 @@ export const NumbersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
         <div className="absolute top-1/2 left-0 w-96 h-96 bg-emerald-400/5 rounded-full blur-3xl" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-400/5 rounded-full blur-3xl" />
       </div>
+      <LessonAssistant 
+        lessonTitle={isRtl ? 'درس الأرقام' : 'Numbers Lesson'} 
+        lessonContent="Counting from 1 to 10 with visuals, numerals, and pronunciation practice for young learners." 
+        isRtl={isRtl} 
+      />
     </div>
   );
 };

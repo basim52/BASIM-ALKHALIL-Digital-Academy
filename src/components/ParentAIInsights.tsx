@@ -49,13 +49,29 @@ export const ParentAIInsights = ({ lang, studentName, studentLevel }: ParentAIIn
         Language: ${isRtl ? 'Arabic' : 'English'}.
       `;
 
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-      });
+      let data = null;
+      const maxRetries = 3;
 
-      const text = result.text.replace(/```json|```/g, '').trim();
-      const data = JSON.parse(text);
+      for (let i = 0; i <= maxRetries; i++) {
+        try {
+          const result = await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: prompt,
+          });
+
+          const text = result.text.replace(/```json|```/g, '').trim();
+          data = JSON.parse(text);
+          break;
+        } catch (err: any) {
+          if (i === maxRetries) throw err;
+          const isOverloaded = err.message?.includes('503') || err.message?.includes('429') || err.message?.includes('UNAVAILABLE');
+          if (isOverloaded) {
+            await new Promise(r => setTimeout(r, 2000 * (i + 1)));
+            continue;
+          }
+          throw err;
+        }
+      }
       setRecommendation(data);
     } catch (err) {
       console.error("AI Insight Error:", err);

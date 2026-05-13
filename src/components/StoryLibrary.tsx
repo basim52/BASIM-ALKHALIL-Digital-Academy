@@ -91,13 +91,30 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { l
       const ai = new GoogleGenAI({ apiKey: (process.env as any).GEMINI_API_KEY });
       const prompt = `Translate the English word "${cleanWord}" to Arabic and provide a phonetic pronunciation guide. Return JSON: { "translation": "...", "pronunciation": "..." }`;
       
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-      });
+      let data = { translation: '', pronunciation: '' };
+      const maxRetries = 3;
 
-      const text = result.text.replace(/```json|```/g, '').trim();
-      const data = JSON.parse(text);
+      for (let i = 0; i <= maxRetries; i++) {
+        try {
+          const result = await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: prompt,
+          });
+
+          const text = result.text.replace(/```json|```/g, '').trim();
+          data = JSON.parse(text);
+          break;
+        } catch (err: any) {
+          if (i === maxRetries) throw err;
+          const isOverloaded = err.message?.includes('503') || err.message?.includes('429') || err.message?.includes('UNAVAILABLE');
+          if (isOverloaded) {
+            await new Promise(r => setTimeout(r, 2000 * (i + 1)));
+            continue;
+          }
+          throw err;
+        }
+      }
+
       setWordData({ word: cleanWord, ...data });
       
       // Speak the word

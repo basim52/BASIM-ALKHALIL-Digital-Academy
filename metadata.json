@@ -2,10 +2,10 @@
   "name": "أكاديمية آل خليل الرقمية",
   "description": "منصة متكاملة لتعليم اللغة الإنجليزية للأطفال والشباب بناءً على مناهج أكسفورد، مع نظام رصيد متطور وشريك محادثة بالذكاء الاصطناعي.",
   "requestFramePermissions": [
+    "camera",
     "microphone"
   ],
   "majorCapabilities": [
-    "ai_conversations",
-    "learning_management"
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ]
 }

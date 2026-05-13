@@ -31,6 +31,7 @@ import {
   Trophy,
   Star
 } from 'lucide-react';
+import { LessonAssistant } from '../LessonAssistant';
 
 interface LetterOption {
   letter: string;
@@ -99,7 +100,7 @@ const LETTER_GROUPS = [
   }
 ];
 
-export const LettersLesson = ({ lang, onBack }: { lang: Language, onBack: () => void }) => {
+export const LettersLesson = ({ lang, onBack, onComplete }: { lang: Language, onBack: () => void, onComplete?: (score: number, total: number) => void }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [activeLevel, setActiveLevel] = useState(1);
@@ -124,9 +125,10 @@ export const LettersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
 
   const finishGame = useCallback((finalScore: number) => {
     speak(isRtl 
-      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${totalAttempts + 1}. عمل رائع!` 
-      : `Game over! Your score is ${finalScore} out of ${totalAttempts + 1}. Great job!`);
+      ? `انتهى اللعب! نتيجتك هي ${finalScore} من ${MAX_TOTAL_ATTEMPTS}. عمل رائع!` 
+      : `Game over! Your score is ${finalScore} out of ${MAX_TOTAL_ATTEMPTS}. Great job!`);
     setShowExcellent(true);
+    if (onComplete) onComplete(finalScore, MAX_TOTAL_ATTEMPTS);
     setTimeout(() => {
       setShowExcellent(false);
       setGameMode(false);
@@ -380,6 +382,11 @@ export const LettersLesson = ({ lang, onBack }: { lang: Language, onBack: () => 
           className="absolute -bottom-20 -left-20 w-96 h-96 bg-emerald-400/5 rounded-full blur-3xl"
         />
       </div>
+      <LessonAssistant 
+        lessonTitle={isRtl ? 'درس الحروف' : 'Letters Lesson'} 
+        lessonContent="English Alphabet A-Z: Learning letters with associated objects (A for Apple, B for Ball, etc.) and visual tracing." 
+        isRtl={isRtl} 
+      />
     </div>
   );
 };

@@ -1,235 +1,115 @@
 {
   "entities": {
-    "UserProfile": {
+    "User": {
       "title": "User Profile",
-      "description": "Base information for any user of the platform",
+      "description": "Base user profile for students, parents, and admins",
       "type": "object",
       "properties": {
         "uid": { "type": "string" },
-        "email": { "type": "string", "format": "email" },
+        "email": { "type": "string" },
         "displayName": { "type": "string" },
-        "role": { "type": "string", "enum": ["student", "parent", "teacher", "admin"] },
-        "avatarUrl": { "type": "string" },
-        "credits": { "type": "integer" },
-        "createdAt": { "type": "integer" },
-        "lastSeen": { "type": "integer" }
+        "role": { "type": "string", "enum": ["student", "parent", "admin"] },
+        "credits": { "type": "number" },
+        "linkedStudentIds": { "type": "array" }
       },
-      "required": ["uid", "email", "displayName", "role", "createdAt"]
-    },
-    "CreditTransaction": {
-      "title": "Credit Transaction",
-      "description": "Log of credit purchase or consumption",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "userId": { "type": "string" },
-        "amount": { "type": "integer" },
-        "type": { "type": "string", "enum": ["purchase", "consumption", "redeem"] },
-        "description": { "type": "string" },
-        "timestamp": { "type": "integer" }
-      },
-      "required": ["id", "userId", "amount", "type", "timestamp"]
-    },
-    "Voucher": {
-      "title": "Credit Voucher",
-      "description": "Prepaid code to activate credits",
-      "type": "object",
-      "properties": {
-        "code": { "type": "string" },
-        "credits": { "type": "integer" },
-        "status": { "type": "string", "enum": ["active", "used"] },
-        "usedBy": { "type": "string" },
-        "usedAt": { "type": "integer" },
-        "createdAt": { "type": "integer" }
-      },
-      "required": ["code", "credits", "status", "createdAt"]
-    },
-    "BroadcastNotification": {
-      "title": "Broadcast Notification",
-      "description": "A notification sent by the admin to all students",
-      "type": "object",
-      "properties": {
-        "titleAr": { "type": "string" },
-        "titleEn": { "type": "string" },
-        "messageAr": { "type": "string" },
-        "messageEn": { "type": "string" },
-        "createdAt": { "type": "integer" }
-      },
-      "required": ["titleAr", "messageAr", "createdAt"]
+      "required": ["uid", "email", "role"]
     },
     "StudentProfile": {
-      "title": "Student Profile",
-      "description": "Extended information for student users",
+      "title": "Student Metadata",
+      "description": "Additional metadata specific to students",
       "type": "object",
       "properties": {
-        "parentId": { "type": "string" },
-        "level": { "type": "string", "enum": ["A1", "A2", "B1", "B2", "C1", "C2"] },
-        "points": { "type": "integer" },
-        "learningPath": { "type": "array", "items": { "type": "string" } },
+        "level": { "type": "string" },
+        "points": { "type": "number" },
+        "learningPath": { "type": "array" },
         "currentModuleId": { "type": "string" }
-      },
-      "required": ["level", "points"]
-    },
-    "Grade": {
-      "title": "Grade",
-      "description": "A record of a student's test score",
-      "type": "object",
-      "properties": {
-        "studentId": { "type": "string" },
-        "testId": { "type": "string" },
-        "score": { "type": "number" },
-        "total": { "type": "number" },
-        "feedback": { "type": "string" },
-        "date": { "type": "integer" }
-      },
-      "required": ["studentId", "testId", "score", "total"]
-    },
-    "AIConversation": {
-      "title": "AI Conversation",
-      "description": "Log of a conversation session with the AI language partner",
-      "type": "object",
-      "properties": {
-        "sessionId": { "type": "string" },
-        "studentId": { "type": "string" },
-        "transcript": { 
-          "type": "array", 
-          "items": { 
-            "type": "object", 
-            "properties": {
-              "role": { "type": "string", "enum": ["user", "ai"] },
-              "text": { "type": "string" }
-            }
-          }
-        },
-        "feedback": {
-          "type": "object",
-          "properties": {
-            "fluency": { "type": "number" },
-            "grammar": { "type": "number" },
-            "vocabulary": { "type": "number" },
-            "suggestions": { "type": "array", "items": { "type": "string" } }
-          }
-        },
-        "date": { "type": "integer" }
-      },
-      "required": ["sessionId", "studentId", "transcript"]
+      }
     },
     "LearningModule": {
       "title": "Learning Module",
-      "description": "A structural unit of the curriculum (e.g. Beginners Level 1)",
+      "description": "A module containing several lessons",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
+        "category": { "type": "string" },
+        "level": { "type": "string" },
         "title": { "type": "string" },
-        "titleAr": { "type": "string" },
-        "description": { "type": "string" },
-        "descriptionAr": { "type": "string" },
-        "level": { "type": "string", "enum": ["A1", "A2", "B1", "B2", "C1", "C2"] },
-        "order": { "type": "integer" }
-      },
-      "required": ["id", "title", "level", "order"]
+        "order": { "type": "number" }
+      }
     },
     "Lesson": {
       "title": "Lesson",
-      "description": "A specific lesson within a module",
+      "description": "An individual lesson within a module",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
         "moduleId": { "type": "string" },
         "title": { "type": "string" },
-        "titleAr": { "type": "string" },
-        "content": { "type": "string" },
-        "contentAr": { "type": "string" },
-        "order": { "type": "integer" },
-        "imageryPrompt": { "type": "string" }
-      },
-      "required": ["id", "moduleId", "title", "order"]
+        "content": { "type": "string" }
+      }
     },
-    "Schedule": {
-      "title": "Schedule",
-      "description": "A scheduled study session",
-      "type": "object",
-      "properties": {
-        "studentId": { "type": "string" },
-        "day": { "type": "string" },
-        "time": { "type": "string" },
-        "subject": { "type": "string" },
-        "unitTitle": { "type": "string" },
-        "isCustom": { "type": "boolean" }
-      },
-      "required": ["studentId", "day", "time", "subject"]
-    },
-    "ParentNote": {
-      "title": "Parent Note",
-      "description": "A note from a parent to a student or teacher",
-      "type": "object",
-      "properties": {
-        "studentId": { "type": "string" },
-        "parentId": { "type": "string" },
-        "content": { "type": "string" },
-        "createdAt": { "type": "integer" }
-      },
-      "required": ["studentId", "parentId", "content"]
-    },
-    "GlobalSettings": {
+    "Settings": {
       "title": "Global Settings",
-      "description": "System-wide feature toggles and configuration",
+      "description": "Global application configuration",
       "type": "object",
       "properties": {
-        "videoLessonsEnabled": { "type": "boolean" },
-        "updatedAt": { "type": "integer" }
-      },
-      "required": ["videoLessonsEnabled"]
+        "maintenance": { "type": "boolean" },
+        "welcomeMessage": { "type": "string" }
+      }
     }
   },
   "firestore": {
     "/users/{userId}": {
-      "schema": "UserProfile",
-      "description": "Public and private user profile data"
+      "schema": "User",
+      "description": "Main user collection"
     },
-    "/students/{userId}": {
+    "/students/{studentId}": {
       "schema": "StudentProfile",
       "description": "Student-specific metadata"
     },
-    "/grades/{gradeId}": {
-      "schema": "Grade",
-      "description": "Historical grades for all students"
-    },
-    "/conversations/{sessionId}": {
-      "schema": "AIConversation",
-      "description": "AI conversation logs"
-    },
     "/modules/{moduleId}": {
       "schema": "LearningModule",
-      "description": "Available learning modules"
+      "description": "Curriculum modules"
     },
     "/lessons/{lessonId}": {
       "schema": "Lesson",
-      "description": "Detailed lesson content"
+      "description": "Individual lessons"
     },
-    "/schedules/{scheduleId}": {
-      "schema": "Schedule",
-      "description": "Student study schedules"
-    },
-    "/parentNotes/{noteId}": {
-      "schema": "ParentNote",
-      "description": "Notes for communication between parents and students"
-    },
-    "/transactions/{transactionId}": {
-      "schema": "CreditTransaction",
-      "description": "Historical record of credit changes"
+    "/settings/{settingId}": {
+      "schema": "Settings",
+      "description": "Global system settings"
     },
     "/vouchers/{code}": {
-      "schema": "Voucher",
-      "description": "Prepaid credit activation codes"
+      "schema": "object",
+      "description": "Credit vouchers"
+    },
+    "/transactions/{transactionId}": {
+      "schema": "object",
+      "description": "Credit transactions"
     },
     "/notifications/{notificationId}": {
-      "schema": "BroadcastNotification",
-      "description": "Admin broadcast messages"
+      "schema": "object",
+      "description": "System notifications"
     },
-    "/settings/global": {
-      "schema": "GlobalSettings",
-      "description": "Global application configuration"
+    "/global_chat/{chatId}": {
+      "schema": "object",
+      "description": "Global community chat"
+    },
+    "/conversations/{convId}": {
+      "schema": "object",
+      "description": "AI conversation logs"
+    },
+    "/schedules/{scheduleId}": {
+      "schema": "object",
+      "description": "Class schedules"
+    },
+    "/parentNotes/{noteId}": {
+      "schema": "object",
+      "description": "Notes between parents and AI/Admins"
+    },
+    "/user_progress/{progressId}": {
+      "schema": "object",
+      "description": "Individual student progress"
     }
   }
 }
