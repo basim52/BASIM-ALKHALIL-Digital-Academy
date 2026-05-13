@@ -230,4 +230,15 @@ export const MASTER_CURRICULUM: Record<CurriculumCategory, Record<proficiencyLev
       { id: 'e_c2_5', title: 'Total Holistic Synthesis', titleAr: 'التركيب الشمولى المطلق', description: 'Integrating all forms of expression into a unified master logic.', descriptionAr: 'دمج كافة أشكال التعبير في منطق رئيسي موحد.' },
     ],
   },
+  [CurriculumCategory.EARLY_CHILDHOOD]: {
+    [proficiencyLevel.A1]: [
+      { id: 'early_words', title: 'First Words Adventure', titleAr: 'مغامرة الكلمات الأولى', description: 'Learning basic nouns through play.', descriptionAr: 'تعلم الأسماء الأساسية من خلال اللعب.' },
+      { id: 'early_colors', title: 'Magical Colors', titleAr: 'الألوان السحرية', description: 'Exploring the rainbow and mixing colors.', descriptionAr: 'استكشاف قوس قزح وخلط الألوان.' }
+    ],
+    [proficiencyLevel.A2]: [],
+    [proficiencyLevel.B1]: [],
+    [proficiencyLevel.B2]: [],
+    [proficiencyLevel.C1]: [],
+    [proficiencyLevel.C2]: [],
+  }
 };

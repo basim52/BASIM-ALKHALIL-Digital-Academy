@@ -35,15 +35,21 @@ async function startServer() {
   const PORT = 3000;
 
   server.on('upgrade', (request, socket, head) => {
-    const { pathname } = new URL(request.url || '', `http://${request.headers.host}`);
-    logToFile(`Upgrade request for pathname: ${pathname}`);
-    if (pathname === '/ws/live') {
-      console.log('Manual upgrade for /ws/live');
+    const rawUrl = request.url || '';
+    const pathname = rawUrl.split('?')[0]; // Simple path extraction
+    
+    logToFile(`Upgrade request for pathname: ${pathname} (Full: ${rawUrl}) from ${request.headers.origin || 'unknown'}`);
+    
+    // Support both with and without trailing slash
+    if (pathname === '/ws/live' || pathname === '/ws/live/') {
+      logToFile('Handshaking /ws/live - Matches!');
       wss.handleUpgrade(request, socket, head, (ws) => {
+        logToFile('Upgrade completed successfully');
         wss.emit('connection', ws, request);
       });
     } else {
-      socket.destroy();
+      logToFile(`Ignored upgrade for ${pathname} - No match.`);
+      // We don't destroy socket here to allow other potential upgrade handlers (like Vite) to run
     }
   });
 
@@ -177,13 +183,11 @@ async function startServer() {
 
     // WebSocket for Live Audio Chat (Experimental)
     wss.on("connection", async (clientWs, req) => {
-      const remoteAddr = req.socket.remoteAddress;
-      console.log(`New Live API connection from ${remoteAddr}. Path: ${req.url}`);
+      logToFile(`New WebSocket Client connected from ${req.socket.remoteAddress}`);
       let session: any = null;
       let isConnecting = false;
   
       clientWs.on("message", async (data) => {
-        console.log("WS Message received");
         try {
           const msg = JSON.parse(data.toString());
           
@@ -191,7 +195,7 @@ async function startServer() {
           if (!session && !isConnecting) {
             isConnecting = true;
             const modelToUse = "gemini-3.1-flash-live-preview"; 
-            console.log(`Starting Gemini Live session with model: ${modelToUse}...`);
+            logToFile(`Starting Gemini Live session with model: ${modelToUse}...`);
             try {
               const contextText = msg.context || `General help at Basim Alkhalil Academy.`;
               logToFile(`Attempting ai.live.connect with model ${modelToUse} and context: ${contextText.substring(0, 50)}...`);

@@ -96,7 +96,8 @@ export enum CurriculumCategory {
   GRAMMAR = 'grammar',
   CONVERSATION = 'conversation',
   WRITING = 'writing',
-  EXPRESSION = 'expression'
+  EXPRESSION = 'expression',
+  EARLY_CHILDHOOD = 'early-childhood'
 }
 
 export interface LearningModule {

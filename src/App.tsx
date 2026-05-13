@@ -1310,7 +1310,7 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
   );
 };
 
-const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, seedCurriculum }: { lang: Language, onSelectLesson: (lesson: Lesson, category: CurriculumCategory, level: proficiencyLevel) => void, onBack: () => void, studentId: string, profile: UserProfile, seedCurriculum: () => void }) => {
+const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, seedCurriculum, onNavigate }: { lang: Language, onSelectLesson: (lesson: Lesson, category: CurriculumCategory, level: proficiencyLevel) => void, onBack: () => void, studentId: string, profile: UserProfile, seedCurriculum: () => void, onNavigate?: (view: AppView) => void }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [selectedCategory, setSelectedCategory] = useState<CurriculumCategory | null>(null);
@@ -1326,6 +1326,7 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
     { id: CurriculumCategory.CONVERSATION, label: t.curr_conversation, icon: MessageSquare, color: 'bg-purple-50 text-purple-600' },
     { id: CurriculumCategory.WRITING, label: t.curr_writing, icon: PenTool, color: 'bg-orange-50 text-orange-600' },
     { id: CurriculumCategory.EXPRESSION, label: t.curr_expression, icon: Sparkles, color: 'bg-pink-50 text-pink-600' },
+    { id: CurriculumCategory.EARLY_CHILDHOOD, label: t.earlyChildhood, icon: Baby, color: 'bg-yellow-50 text-yellow-600' },
   ];
 
   const levels = Object.values(proficiencyLevel);
@@ -1478,7 +1479,13 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
-                onClick={() => setSelectedCategory(cat.id)}
+                onClick={() => {
+                  if (cat.id === CurriculumCategory.EARLY_CHILDHOOD && onNavigate) {
+                    onNavigate('early-childhood');
+                  } else {
+                    setSelectedCategory(cat.id);
+                  }
+                }}
                 className="bg-white p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group flex flex-col items-center text-center active:bg-blue-50 active:scale-95 touch-manipulation"
               >
                 <div className={`w-20 h-20 md:w-24 md:h-24 ${cat.color} rounded-[2rem] flex items-center justify-center mb-6 md:mb-8 shadow-inner group-hover:scale-110 transition-transform`}>
@@ -2282,6 +2289,7 @@ export default function App() {
         studentId={userProfile.uid}
         profile={userProfile}
         seedCurriculum={seedCurriculum}
+        onNavigate={setView}
       />;
     }
 
