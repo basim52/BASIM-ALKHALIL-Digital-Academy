@@ -183,7 +183,8 @@ async function startServer() {
 
     // WebSocket for Live Audio Chat (Experimental)
     wss.on("connection", async (clientWs, req) => {
-      logToFile(`New WebSocket Client connected from ${req.socket.remoteAddress}`);
+      const clientIp = req.socket.remoteAddress;
+      logToFile(`New WebSocket Client connected from ${clientIp}`);
       let session: any = null;
       let isConnecting = false;
   
@@ -191,27 +192,31 @@ async function startServer() {
         try {
           const msg = JSON.parse(data.toString());
           
-          // Start session on first message
+          // Start session on first message (which should contain context)
           if (!session && !isConnecting) {
             isConnecting = true;
             const modelToUse = "gemini-3.1-flash-live-preview"; 
-            logToFile(`Starting Gemini Live session with model: ${modelToUse}...`);
-            try {
-              const contextText = msg.context || `General help at Basim Alkhalil Academy.`;
-              logToFile(`Attempting ai.live.connect with model ${modelToUse} and context: ${contextText.substring(0, 50)}...`);
-              
-              if (!process.env.GEMINI_API_KEY) {
-                throw new Error("GEMINI_API_KEY is not set on the server.");
-              }
+            logToFile(`Initializing Gemini Live session: ${modelToUse}`);
 
+            if (!process.env.GEMINI_API_KEY) {
+              logToFile("ERROR: GEMINI_API_KEY missing");
+              clientWs.send(JSON.stringify({ error: "Server API key configuration error." }));
+              isConnecting = false;
+              return;
+            }
+
+            try {
+              const contextText = msg.context || `General tutoring at Basim Alkhalil Academy.`;
+              logToFile(`Connecting to Gemini Live... Context: ${contextText.substring(0, 50)}`);
+              
               session = await ai.live.connect({
                 model: modelToUse,
                 callbacks: {
                   onmessage: (message: any) => {
-                    logToFile(`Gemini message type: ${Object.keys(message)}`);
-                    const audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
-                    if (audio) {
-                      clientWs.send(JSON.stringify({ audio }));
+                    // Extract model audio
+                    const audioContent = message.serverContent?.modelTurn?.parts?.[0]?.inlineData;
+                    if (audioContent?.data) {
+                      clientWs.send(JSON.stringify({ audio: audioContent.data }));
                     }
                     
                     // Handle interruptions
@@ -219,21 +224,33 @@ async function startServer() {
                       clientWs.send(JSON.stringify({ interrupted: true }));
                     }
                     
-                    // Handle transcription for UI display
-                    const transcription = message.serverContent?.modelTurn?.parts?.[0]?.text;
-                    if (transcription) clientWs.send(JSON.stringify({ text: transcription }));
+                    // Handle model transcription
+                    const modelText = message.serverContent?.modelTurn?.parts?.[0]?.text;
+                    if (modelText) {
+                      clientWs.send(JSON.stringify({ text: modelText }));
+                    }
                     
-                    // Also handle user transcription if enabled
+                    // Handle user transcription
                     const userText = message.serverContent?.userTurn?.parts?.[0]?.text;
-                    if (userText) clientWs.send(JSON.stringify({ userText }));
+                    if (userText) {
+                      clientWs.send(JSON.stringify({ userText }));
+                    }
+
+                    // Log activity occasionally
+                    if (audioContent?.data || modelText || userText) {
+                      logToFile(`Gemini Response - Audio: ${!!audioContent?.data}, Text: ${!!modelText}, UserText: ${!!userText}`);
+                    }
                   },
                   onclose: () => {
-                    logToFile("Gemini Live session closed");
-                    clientWs.close();
+                    logToFile(`Gemini Live session closed for ${clientIp}`);
+                    if (clientWs.readyState === 1) { // OPEN
+                      clientWs.close();
+                    }
                   },
                   onerror: (err: any) => {
-                    logToFile(`Gemini Live error callback: ${err.message || err.toString()}`);
-                    clientWs.send(JSON.stringify({ error: "Voice assistant encountered a problem." }));
+                    const errMsg = err?.message || err?.toString() || "Unknown Gemini error";
+                    logToFile(`Gemini Live ONERROR: ${errMsg}`);
+                    clientWs.send(JSON.stringify({ error: "The voice assistant encountered a technical issue." }));
                   }
                 },
                 config: {
@@ -243,43 +260,55 @@ async function startServer() {
                   },
                   outputAudioTranscription: {},
                   inputAudioTranscription: {},
-                  systemInstruction: `You are a live audio teaching assistant for Basim Alkhalil Digital Academy. 
-                    Help the student with this lesson context: ${contextText}. 
-                    Be concise, spoken-friendly, and maintain the persona of a helpful private tutor.
-                    ALWAYS respond in the language the student uses. If they speak Arabic, respond in Arabic. If English, respond in English.`,
+                  systemInstruction: `You are the Official AI Teaching Assistant for Basim Alkhalil Digital Academy.
+                    Current context: ${contextText}
+                    Persona: Professional, encouraging private tutor.
+                    Language: ALWAYS match the student's language. If they speak Arabic, use Arabic. If English, use English.
+                    Tone: Concise and suitable for audio conversation.`,
                 },
               });
+
               isConnecting = false;
-              logToFile("Gemini Live session connection successful");
+              logToFile(`Gemini Live Session Successfully Established for ${clientIp}`);
               clientWs.send(JSON.stringify({ status: 'ready' }));
             } catch (err: any) {
               isConnecting = false;
-              logToFile(`Gemini Live connection catch error: ${err.message}`);
-              clientWs.send(JSON.stringify({ error: `Failed to start voice assistant: ${err.message}` }));
+              const errMsg = err.message || "Failed to establish Gemini connection";
+              logToFile(`Gemini Live connection FATAL ERROR: ${errMsg}`);
+              console.error("Gemini Live Connection Error:", err);
+              clientWs.send(JSON.stringify({ error: `Connection failed: ${errMsg}` }));
             }
-          return;
-        }
+            return;
+          }
 
-        if (session && msg.audio) {
-          session.sendRealtimeInput({
-            audio: { data: msg.audio, mimeType: "audio/pcm;rate=16000" },
-          });
+          // Relay audio/text if session is active
+          if (session) {
+            if (msg.audio) {
+              session.sendRealtimeInput({
+                audio: { data: msg.audio, mimeType: "audio/pcm;rate=16000" },
+              });
+            } else if (msg.text) {
+              session.sendRealtimeInput({ text: msg.text });
+            }
+          }
+        } catch (err: any) {
+          logToFile(`WebSocket message processing error: ${err.message}`);
         }
+      });
 
-        if (session && msg.text) {
-          session.sendRealtimeInput({ text: msg.text });
+      clientWs.on("error", (err) => {
+        logToFile(`WebSocket Client Error (${clientIp}): ${err.message}`);
+      });
+
+      clientWs.on("close", () => {
+        logToFile(`WebSocket Client Disconnected (${clientIp})`);
+        if (session) {
+          try {
+            session.close();
+          } catch (e) {}
         }
-
-      } catch (err) {
-        console.error("Live WebSocket Error:", err);
-      }
+      });
     });
-
-    clientWs.on("close", () => {
-      if (session) session.close();
-      console.log("Live API connection closed");
-    });
-  });
 
   // 404 for API routes
   app.use("/api/*", (req, res) => {

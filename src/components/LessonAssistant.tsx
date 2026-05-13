@@ -133,13 +133,17 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
       const processor = audioCtx.createScriptProcessor(4096, 1, 1);
       processorRef.current = processor;
 
+      // More robust WebSocket URL construction
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const url = `${protocol}//${window.location.host}/ws/live`;
+      const host = window.location.host;
+      const url = `${protocol}//${host}/ws/live`;
       
+      console.log(`[Assistant] Connecting to: ${url}`);
       const ws = new WebSocket(url);
       wsRef.current = ws;
 
       ws.onopen = () => {
+        console.log("[Assistant] WebSocket connection opened");
         setIsLiveMode(true);
         ws.send(JSON.stringify({ 
           context: `Lesson: ${lessonTitle}. Content: ${lessonContent}`,
@@ -150,7 +154,9 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
       ws.onmessage = async (event) => {
         try {
           const msg = JSON.parse(event.data);
+          
           if (msg.status === 'ready') {
+            console.log("[Assistant] Live session ready on server");
             setIsLiveReady(true);
             setIsLoading(false);
             
@@ -164,7 +170,15 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
               for (let i = 0; i < inputData.length; i++) {
                 pcmData[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7FFF;
               }
-              const base64Audio = btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer)));
+              
+              // Safe and efficient binary to base64
+              const uint8 = new Uint8Array(pcmData.buffer);
+              let binary = '';
+              for (let i = 0; i < uint8.length; i++) {
+                binary += String.fromCharCode(uint8[i]);
+              }
+              const base64Audio = btoa(binary);
+
               if (ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({ audio: base64Audio }));
               }
@@ -180,27 +194,29 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
           }
 
           if (msg.error) {
+            console.error("[Assistant] Server reported error:", msg.error);
             setError(msg.error);
             cleanupLiveMode();
           }
         } catch (e) {
-          console.error("Error processing websocket message:", e);
+          console.error("[Assistant] Error processing websocket message:", e);
         }
       };
 
       ws.onerror = (e) => {
-        console.error("WS error:", e);
-        setError(isRtl ? "خطأ في الاتصال بالمباشر" : "Error in Live connection");
+        console.error("[Assistant] WebSocket error details:", e);
+        setError(isRtl ? "خطأ في الاتصال بالمساعد المباشر. يرجى المحاولة مرة أخرى." : "Error connecting to Live Assistant. Please try again.");
         cleanupLiveMode();
       };
 
-      ws.onclose = () => {
+      ws.onclose = (event) => {
+        console.log(`[Assistant] WebSocket closed. Code: ${event.code}, Clean: ${event.wasClean}`);
         cleanupLiveMode();
       };
 
     } catch (err: any) {
-      console.error("Live mode start error:", err);
-      setError(isRtl ? "لم نتمكن من الوصول للميكروفون" : "Could not access microphone");
+      console.error("[Assistant] Live mode initialization error:", err);
+      setError(isRtl ? "لم نتمكن من الوصول للميكروفون أو بدء الجلسة" : "Could not access microphone or start session");
       cleanupLiveMode();
     }
   };
@@ -253,7 +269,7 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
                   <Sparkles size={24} />
                 </div>
                 <div>
-                  <h3 className="text-white font-black text-xs sm:text-sm uppercase tracking-widest">AI Lesson Assistant</h3>
+                  <h3 className="text-white font-black text-xs sm:text-sm uppercase tracking-widest">{isRtl ? 'المساعد المباشر' : 'Live Assistant'}</h3>
                   <p className="text-[#C49E3A] text-[9px] sm:text-[10px] uppercase tracking-wider font-bold">Live Learning Support</p>
                 </div>
               </div>
@@ -363,6 +379,7 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
 
       {/* Floating Trigger Button */}
       <motion.button
+        id="live-assistant-toggle"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
