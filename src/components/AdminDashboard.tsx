@@ -44,10 +44,24 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
     setAnalyzing(true);
     setAnalysisResult(null);
     try {
+      const pingResp = await fetch('/ping');
+      const pingText = await pingResp.text();
+      
       const resp = await fetch('/api/health');
-      if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+      const contentType = resp.headers.get("content-type");
+      let errorDetails = "";
+      
+      if (!resp.ok) {
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await resp.json();
+          errorDetails = JSON.stringify(errorData, null, 2);
+        } else {
+          errorDetails = await resp.text();
+        }
+        throw new Error(`HTTP ${resp.status} (Ping: ${pingText}): ${errorDetails.substring(0, 500)}`);
+      }
       const data = await resp.json();
-      setAnalysisResult(`### System Health\n- **Status:** ${data.status}\n- **Gemini Key:** ${data.geminiKeySet ? '✅ Configured' : '❌ NOT SET'}\n- **Environment:** ${data.isProduction ? 'Production' : 'Development'}\n- **Server Time:** ${data.time}`);
+      setAnalysisResult(`### System Health\n- **Ping:** ${pingText}\n- **Status:** ${data.status}\n- **Gemini Key:** ${data.geminiKeySet ? '✅ Configured' : '❌ NOT SET'}\n- **Environment:** ${data.isProduction ? 'Production' : 'Development'}\n- **Server Time:** ${data.time}`);
     } catch (err: any) {
       setAnalysisResult(`### ❌ Connection Failed\nError: ${err.message}`);
     } finally {

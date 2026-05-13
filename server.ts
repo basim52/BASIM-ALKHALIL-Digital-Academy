@@ -7,17 +7,35 @@ import { GoogleGenAI, Modality } from "@google/genai";
 import "dotenv/config";
 import fs from "fs";
 
-// Log function to a file for persistent debugging
-const logFile = path.join(process.cwd(), 'server-debug.log');
+// CATCH-ALL LOG TO ROOT
+const logFile = "./server-debug.log";
 function logToFile(msg: string) {
   const timestamp = new Date().toISOString();
   try {
     fs.appendFileSync(logFile, `[${timestamp}] ${msg}\n`);
-  } catch (e) {}
+  } catch (e) {
+    // No-op
+  }
 }
 
-logToFile("Server process initializing...");
+// FORCE INITIAL CREATE
+try {
+  fs.writeFileSync(logFile, `[${new Date().toISOString()}] Server process start attempt\n`);
+} catch (e) {}
+
+// CATCH STARTUP ERRORS
+process.on('uncaughtException', (err) => {
+  logToFile(`CRITICAL UNCAUGHT EXCEPTION: ${err.message}\n${err.stack}`);
+});
+
+process.on('unhandledRejection', (reason) => {
+  logToFile(`CRITICAL UNHANDLED REJECTION: ${reason}`);
+});
+
+logToFile("Server process initializing with global error handlers...");
 logToFile(`GEMINI_API_KEY present: ${!!process.env.GEMINI_API_KEY}`);
+logToFile(`Current Dir: ${process.cwd()}`);
+logToFile(`Dirname: ${import.meta.url}`);
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -34,14 +52,24 @@ async function startServer() {
   const wss = new WebSocketServer({ noServer: true });
   const PORT = 3000;
 
+  // Request logger - MOVE TO TOP
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      logToFile(`DEBUG API INCOMING: ${req.method} ${req.path} (Orig: ${req.originalUrl})`);
+    } else {
+      logToFile(`${req.method} ${req.path}`);
+    }
+    next();
+  });
+
   // Root test route
   app.get("/ping", (req, res) => {
     res.send("pong");
   });
 
   // API Routes - AT THE VERY TOP
-  app.get(["/api/health", "/api/health/"], (req, res) => {
-    logToFile("Health check requested - Success");
+  app.get("/api/health", (req, res) => {
+    logToFile("Health check matched - Sending response");
     res.json({ 
       status: "ok", 
       geminiKeySet: !!process.env.GEMINI_API_KEY,
@@ -70,16 +98,6 @@ async function startServer() {
   });
 
   app.use(express.json());
-
-  // Request logger
-  app.use((req, res, next) => {
-    if (req.path.startsWith('/api')) {
-      logToFile(`DEBUG API REK: ${req.method} ${req.path} (Orig: ${req.originalUrl})`);
-    } else {
-      logToFile(`${req.method} ${req.path}`);
-    }
-    next();
-  });
 
   // Regular Chat Endpoint for Lessons
   app.post("/api/lesson/chat", async (req, res) => {
