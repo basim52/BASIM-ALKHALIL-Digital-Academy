@@ -12,7 +12,6 @@ import {
   Heart,
   AlertCircle
 } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
 import { UserProfile, CreditCost } from '../types';
 import { deductCredits } from '../lib/firebase';
 
@@ -92,36 +91,26 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { l
     setWordData({ word: cleanWord, translation: '', pronunciation: '' });
 
     try {
-      const ai = new GoogleGenAI({ apiKey: (process.env as any).GEMINI_API_KEY });
-      const prompt = `Translate the English word "${cleanWord}" to Arabic and provide a phonetic pronunciation guide. Return JSON: { "translation": "...", "pronunciation": "..." }`;
-      
-      let data = { translation: '', pronunciation: '' };
-      const maxRetries = 3;
+      const resp = await fetch('/api/admin/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: { word: cleanWord },
+          prompt: `Translate the English word "${cleanWord}" to Arabic and provide a phonetic pronunciation guide. Return JSON: { "translation": "...", "pronunciation": "..." }`
+        })
+      });
 
-      for (let i = 0; i <= maxRetries; i++) {
-        try {
-          const result = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: prompt,
-          });
-
-          const text = result.text.replace(/```json|```/g, '').trim();
-          data = JSON.parse(text);
-          break;
-        } catch (err: any) {
-          if (i === maxRetries) throw err;
-          const isOverloaded = err.message?.includes('503') || err.message?.includes('429') || err.message?.includes('UNAVAILABLE');
-          if (isOverloaded) {
-            await new Promise(r => setTimeout(r, 2000 * (i + 1)));
-            continue;
-          }
-          throw err;
-        }
+      if (!resp.ok) {
+        throw new Error(`Server responded with ${resp.status}`);
       }
+
+      const rawData = await resp.json();
+      const text = rawData.text || "";
+      const jsonStr = text.replace(/```json|```/g, '').trim();
+      const data = JSON.parse(jsonStr);
 
       setWordData({ word: cleanWord, ...data });
       
-      // Speak the word
       const utterance = new SpeechSynthesisUtterance(cleanWord);
       utterance.lang = 'en-US';
       window.speechSynthesis.speak(utterance);

@@ -76,45 +76,54 @@ async function startServer() {
         return res.status(500).json({ error: "Gemini API key is missing on server" });
       }
 
-      let aiResponse = "";
-      const maxRetries = 3;
-
-      for (let i = 0; i <= maxRetries; i++) {
-        try {
-          const result = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: [
-              { role: 'user', parts: [{ text: `CONTEXT:\n${context}\n\nUSER QUESTION:\n${prompt}` }] }
-            ],
-            config: {
-              systemInstruction: "You are a helpful teaching assistant for Basim Alkhalil Digital Academy. You are currently helping a student with a specific lesson. Answer questions ONLY related to the lesson context provided. Be encouraging, professional, and clear. Answer in the language the student asks in (Arabic or English).",
-            }
-          });
-          aiResponse = result.text || "";
-          break;
-        } catch (error: any) {
-          logToFile(`Retry ${i} failed for lesson chat: ${error.message}`);
-          if (i === maxRetries) throw error;
-          const isOverloaded = error.message?.includes('503') || 
-                              error.message?.includes('429') || 
-                              error.message?.includes('UNAVAILABLE') ||
-                              error.status === 503 ||
-                              error.status === 429;
-          
-          if (isOverloaded) {
-            await new Promise(r => setTimeout(r, 2000 * (i + 1)));
-            continue;
-          }
-          throw error;
+      const result = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: [
+          { role: 'user', parts: [{ text: `CONTEXT:\n${context}\n\nUSER QUESTION:\n${prompt}` }] }
+        ],
+        config: {
+          systemInstruction: "You are a helpful teaching assistant for Basim Alkhalil Digital Academy. You are currently helping a student with a specific lesson. Answer questions ONLY related to the lesson context provided. Be encouraging, professional, and clear. Answer in the language the student asks in (Arabic or English).",
         }
-      }
-
+      });
+      
       logToFile("SUCCESS /api/lesson/chat - Response generated");
-      res.json({ text: aiResponse });
+      res.json({ text: result.text || "" });
     } catch (error: any) {
       logToFile(`Lesson Chat Error: ${error.message}`);
-      console.error("Lesson Chat Error:", error);
       res.status(500).json({ error: error.message || "Failed to generate response" });
+    }
+  });
+
+  // New endpoint for generating lesson content
+  app.post("/api/lesson/generate", async (req, res) => {
+    logToFile(`START /api/lesson/generate - Body keys: ${Object.keys(req.body || {})}`);
+    try {
+      const { category, level, topic } = req.body;
+      if (!topic) return res.status(400).json({ error: "Missing topic" });
+
+      const prompt = `
+        You are an expert academic curriculum designer.
+        Topic: "${topic}".
+        Category: ${category}
+        Level: ${level}
+        
+        Task: Create a deep, high-quality interactive lesson with specialized sections.
+        Output JSON STRICTLY following the schema. Ensure everything is in BOTH English and Professional Academic Arabic.
+      `;
+
+      const result = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          systemInstruction: "Generate educational content in JSON matching the requested structure for reading/logic lessons."
+        }
+      });
+
+      res.json(JSON.parse(result.text || "{}"));
+    } catch (error: any) {
+      logToFile(`Lesson Generation Error: ${error.message}`);
+      res.status(500).json({ error: error.message });
     }
   });
 
@@ -123,23 +132,10 @@ async function startServer() {
     logToFile(`START /api/ai-partner/chat - Body keys: ${Object.keys(req.body || {})}`);
     try {
       const { prompt, history = [] } = req.body;
-      
-      if (!process.env.GEMINI_API_KEY) {
-        logToFile("Error: GEMINI_API_KEY not set");
-        return res.status(500).json({ error: "Gemini API key is missing on server" });
-      }
-      
       const systemInstruction = `
         You are an Oxford English Language Partner at Basim Alkhalil Digital Academy. 
-        Respond naturally to keep the conversation going. Keep your response relatively short and clear (suitable for a learner).
-        Also, if this feels like a natural point to give feedback (e.g. after a few exchanges), provide a JSON-like summary of their English skills in this EXACT format:
-        [FEEDBACK]
-        {
-          "fluency": 0-100,
-          "grammar": 0-100,
-          "vocabulary": 0-100,
-          "suggestions": ["short suggestion 1", "short suggestion 2"]
-        }
+        Respond naturally to keep the conversation going. Keep your response relatively short and clear.
+        Also, if this feels like a natural point to give feedback, provide a JSON-like summary [FEEDBACK] { ... }
       `;
 
       const result = await ai.models.generateContent({
@@ -151,17 +147,68 @@ async function startServer() {
           })),
           { role: 'user', parts: [{ text: prompt }] }
         ],
-        config: {
-          systemInstruction,
-        }
+        config: { systemInstruction }
       });
 
-      logToFile("SUCCESS /api/ai-partner/chat - Response generated");
       res.json({ text: result.text || "" });
     } catch (error: any) {
       logToFile(`AI Partner Chat Error: ${error.message}`);
-      console.error("AI Partner Chat Error:", error);
-      res.status(500).json({ error: error.message || "Failed to generate response" });
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Story generation endpoint
+  app.post("/api/generate/story", async (req, res) => {
+    logToFile(`START /api/generate/story - Body: ${JSON.stringify(req.body)}`);
+    try {
+      const { theme, context, lang } = req.body;
+      const prompt = `You are a professional children's storyteller. Write a very short, fun story for a 3-5 year old.
+      THEME: ${theme}. CONTEXT: ${context || 'None'}. 
+      Use 3 simple paragraphs separated by '|'. Provide 3 matching emojis separated by ','.
+      Format: Title: [Title]\nStory: [P1] | [P2] | [P3]\nEmojis: [E1], [E2], [E3]
+      Language: ${lang === 'ar' ? 'Arabic' : 'English'}`;
+
+      const result = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt
+      });
+
+      res.json({ text: result.text || "" });
+    } catch (error: any) {
+      logToFile(`Story Generation Error: ${error.message}`);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Analysis endpoint for parent dashboard
+  app.post("/api/admin/analyze", async (req, res) => {
+    logToFile(`START /api/admin/analyze`);
+    try {
+      const { data, prompt } = req.body;
+      const result = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: `Analyze this data: ${JSON.stringify(data)}\n\nPrompt: ${prompt}`
+      });
+      res.json({ text: result.text || "" });
+    } catch (error: any) {
+      logToFile(`Analysis Error: ${error.message}`);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Video Quiz Generator
+  app.post("/api/generate/video-quiz", async (req, res) => {
+    try {
+      const { videoTitle, level, lang } = req.body;
+      const prompt = `Generate 3 multiple choice questions for: "${videoTitle}". Level: ${level}. JSON array format. Language: ${lang}`;
+      const result = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt,
+        config: { responseMimeType: "application/json" }
+      });
+      res.json(JSON.parse(result.text || "[]"));
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
     }
   });
 

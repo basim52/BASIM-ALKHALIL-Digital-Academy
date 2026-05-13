@@ -12,7 +12,6 @@ import {
   MessageSquare,
   ArrowLeft
 } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
 import ReactMarkdown from 'react-markdown';
 import { UserProfile, CreditCost } from '../types';
 import { deductCredits } from '../lib/firebase';
@@ -119,22 +118,21 @@ export const VideoLibrary = ({
   const generateQuiz = async (video: VideoLesson) => {
     setQuizLoading(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: (process.env as any).GEMINI_API_KEY });
-      const prompt = `
-        Generate 3 multiple choice questions based on the English learning topic: "${video.titleEn}".
-        Level: ${video.level}.
-        Format as JSON array:
-        [{ "question": "...", "options": ["...", "...", "...", "..."], "correctIndex": 0, "explanation": "..." }]
-        Provide questions in ${isRtl ? 'Arabic' : 'English'}.
-      `;
-
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
+      const resp = await fetch('/api/generate/video-quiz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          videoTitle: video.titleEn,
+          level: video.level,
+          lang: isRtl ? 'Arabic' : 'English'
+        })
       });
 
-      const text = result.text.replace(/```json|```/g, '').trim();
-      const questions = JSON.parse(text);
+      if (!resp.ok) {
+        throw new Error(`Server responded with ${resp.status}`);
+      }
+
+      const questions = await resp.json();
       setQuizQuestions(questions);
       setQuizStarted(true);
     } catch (err) {

@@ -10,7 +10,6 @@ import {
   Lightbulb,
   ArrowRight
 } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
 import ReactMarkdown from 'react-markdown';
 
 interface ParentAIInsightsProps {
@@ -28,51 +27,23 @@ export const ParentAIInsights = ({ lang, studentName, studentLevel }: ParentAIIn
   const generateRecommendation = async () => {
     setLoading(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: (process.env as any).GEMINI_API_KEY });
-      const prompt = `
-        As an expert language learning advisor from "Basim Alkhalil Academy", generate a "Smart Home Recommendation" for a parent to help their child (${studentName}) who is currently at ${studentLevel} level.
-        
-        The recommendation should be:
-        1. A simple, fun activity (5-10 mins).
-        2. Focused on ${studentLevel} level English.
-        3. Explain the Learning Goal.
-        4. Explain the Parent's Role clearly.
-        
-        Format as JSON:
-        {
-          "activityTitle": "...",
-          "learningGoal": "...",
-          "parentRole": "...",
-          "steps": ["step 1", "step 2", "..."]
-        }
-        
-        Language: ${isRtl ? 'Arabic' : 'English'}.
-      `;
+      const resp = await fetch('/api/admin/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: { studentName, studentLevel },
+          prompt: `As an expert language learning advisor from "Basim Alkhalil Academy", generate a "Smart Home Recommendation" as JSON: { "activityTitle": "...", "learningGoal": "...", "parentRole": "...", "steps": ["..."] }. Language: ${isRtl ? 'Arabic' : 'English'}`
+        })
+      });
 
-      let data = null;
-      const maxRetries = 3;
-
-      for (let i = 0; i <= maxRetries; i++) {
-        try {
-          const result = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: prompt,
-          });
-
-          const text = result.text.replace(/```json|```/g, '').trim();
-          data = JSON.parse(text);
-          break;
-        } catch (err: any) {
-          if (i === maxRetries) throw err;
-          const isOverloaded = err.message?.includes('503') || err.message?.includes('429') || err.message?.includes('UNAVAILABLE');
-          if (isOverloaded) {
-            await new Promise(r => setTimeout(r, 2000 * (i + 1)));
-            continue;
-          }
-          throw err;
-        }
+      if (!resp.ok) {
+        throw new Error(`Server responded with ${resp.status}`);
       }
-      setRecommendation(data);
+
+      const rawData = await resp.json();
+      const text = rawData.text || "";
+      const jsonStr = text.replace(/```json|```/g, '').trim();
+      setRecommendation(JSON.parse(jsonStr));
     } catch (err) {
       console.error("AI Insight Error:", err);
     } finally {

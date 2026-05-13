@@ -44,7 +44,6 @@ import { auth, googleProvider, db, handleFirestoreError, OperationType, testConn
 import { onAuthStateChanged, signInWithPopup, signOut, User } from 'firebase/auth';
 import { doc, getDoc, setDoc, addDoc, serverTimestamp, collection, query, where, onSnapshot, deleteDoc, orderBy, getDocs, updateDoc, limit, writeBatch } from 'firebase/firestore';
 import { translations, Language } from './lib/translations';
-import { GoogleGenAI } from "@google/genai";
 import { StudentStats } from './components/StudentStats';
 import { Leaderboard } from './components/Leaderboard';
 import { PeerChat } from './components/PeerChat';
@@ -409,40 +408,18 @@ const AIParentNotes = ({ profile, studentId, lang }: { profile: UserProfile, stu
       const sDoc = await getDoc(doc(db, 'students', studentId));
       const studentData = sDoc.data();
       
-      const prompt = `
-        You are the Academic Director at Basim Alkhalil Digital Academy.
-        A parent left a note/question about their child (Student ID: ${studentId}).
-        Student Level: ${studentData?.level || 'B1'}.
-        Student Points: ${studentData?.points || 0}.
-        
-        Parent's note: "${textToSend}"
-        
-        Provide a professional, reassuring, and academic response in ${lang === 'ar' ? 'Arabic' : 'English'}.
-        Address the parent as a partner in their child's education.
-      `;
+      const resp = await fetch('/api/lesson/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: textToSend,
+          context: `Parent questioning about child (Student: ${studentId}, Level: ${studentData?.level || 'B1'}, Points: ${studentData?.points || 0}). Role: Academic Director at Academy.`
+        })
+      });
       
-      const ai = new GoogleGenAI({ apiKey: (process.env as any).GEMINI_API_KEY || '' });
-      let aiResponse = "";
-      const maxRetries = 3;
-
-      for (let i = 0; i <= maxRetries; i++) {
-        try {
-          const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: prompt,
-          });
-          aiResponse = response.text || (lang === 'ar' ? "سأقوم بمراجعة هذا الأمر شخصياً." : "I will look into this personally.");
-          break;
-        } catch (err: any) {
-          if (i === maxRetries) throw err;
-          const isOverloaded = err.message?.includes('503') || err.message?.includes('429') || err.message?.includes('UNAVAILABLE');
-          if (isOverloaded) {
-            await new Promise(r => setTimeout(r, 2000 * (i + 1)));
-            continue;
-          }
-          throw err;
-        }
-      }
+      if (!resp.ok) throw new Error(`Server responded with ${resp.status}`);
+      const data = await resp.json();
+      const aiResponse = data.text || (lang === 'ar' ? "سأقوم بمراجعة هذا الأمر شخصياً." : "I will look into this personally.");
 
       const noteId = Math.random().toString(36).substr(2, 9);
       await setDoc(doc(db, 'parentNotes', noteId), {
@@ -974,30 +951,18 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
     if (!currentStudent) return;
     setGeneratingReport(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: (process.env as any).GEMINI_API_KEY });
-      const prompt = `
-        بصفتك خبيراً تربوياً في أكاديمية "باسم الخليل" لتعليم اللغات، قم بتحليل أداء الطالب التالي وتقديم تقرير مفصل لولي أمره باللغة العربية.
-        
-        بيانات الطالب:
-        - الاسم: ${currentStudent.displayName}
-        - المستوى الحالي: ${currentStudent.level || 'غير محدد بعد'}
-        - نقاط الخبرة (XP): ${currentStudent.points || 0}
-        
-        المطلوب في التقرير (بتنسيق Markdown):
-        1. ملخص عام للأداء.
-        2. تحليل نقاط القوة بناءً على مستواه.
-        3. توصيات محددة لولي الأمر لمساعدته في المنزل.
-        4. خطة عمل مقترحة للأسبوع القادم.
-        
-        اجعل الأسلوب مشجعاً ومهنياً.
-      `;
-
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
+      const resp = await fetch('/api/admin/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: { studentName: currentStudent.displayName, level: currentStudent.level, points: currentStudent.points },
+          prompt: `As an education expert at "Basim Alkhalil Academy", analyze the student's performance and provide a detailed report for the parent. Language: Arabic.`
+        })
       });
 
-      setSmartReport(result.text || "عذراً، تعذر توليد التقرير حالياً.");
+      if (!resp.ok) throw new Error(`Server responded with ${resp.status}`);
+      const data = await resp.json();
+      setSmartReport(data.text || "عذراً، تعذر توليد التقرير حالياً.");
     } catch (err) {
       console.error("AI Report Error:", err);
       setError("فشل في توليد التقرير الذكي.");

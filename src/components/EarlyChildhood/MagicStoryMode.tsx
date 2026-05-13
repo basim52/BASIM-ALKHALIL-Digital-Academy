@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Sparkles, BookOpen, Volume2, Wand2, Loader2, Star, PartyPopper } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
 import { Language } from '../../lib/translations';
 
 interface MagicStoryModeProps {
@@ -31,40 +30,29 @@ export const MagicStoryMode: React.FC<MagicStoryModeProps> = ({ lang, onBack, co
     const theme = THEMES.find(t => t.id === themeId);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: (process.env as any).GEMINI_API_KEY });
-      const prompt = `You are a professional children's storyteller.
-      Write a very short (max 100 words), fun, and educational story for a 3-5 year old child. 
-      THEME: ${theme?.name}.
-      ADDITIONAL CONTEXT (Words learned today): ${context || 'None'}.
-      
-      Requirements:
-      1. Use 3 simple paragraphs.
-      2. Incorporate the words from Additional Context naturally.
-      3. For each paragraph, provide one matching EMOJI that represents the scene.
-      
-      Output format: 
-      Title: [Fun Title]
-      Story: [Paragraph 1] | [Paragraph 2] | [Paragraph 3]
-      Emojis: [Emoji 1], [Emoji 2], [Emoji 3]
-      Language: ${lang === 'ar' ? 'Arabic' : 'English'}`;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-            systemInstruction: "You are a friendly storyteller assistant for a kids learning app. Always respond in the requested language.",
-            temperature: 0.9
-        }
+      const resp = await fetch('/api/generate/story', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: theme?.name,
+          context,
+          lang: isRtl ? 'ar' : 'en'
+        })
       });
 
-      const text = response.text || "";
-      const lines = text.split('\n').filter(l => l.trim() !== "");
+      if (!resp.ok) {
+        throw new Error(`Server responded with ${resp.status}`);
+      }
+
+      const data = await resp.json();
+      const text = data.text || "";
+      const lines = text.split('\n').filter((l: string) => l.trim() !== "");
       
       let title = isRtl ? "قصة سحرية" : "Magic Story";
       let storyText = "";
       let emojis: string[] = ['✨', '✨', '✨'];
 
-      lines.forEach(line => {
+      lines.forEach((line: string) => {
         if (line.toLowerCase().startsWith('title:')) title = line.replace(/title:/i, '').trim();
         else if (line.toLowerCase().startsWith('story:')) storyText = line.replace(/story:/i, '').trim();
         else if (line.toLowerCase().startsWith('emojis:')) {
