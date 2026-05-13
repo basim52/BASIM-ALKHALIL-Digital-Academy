@@ -45,14 +45,14 @@ async function startServer() {
   // Regular Chat Endpoint for Lessons
   app.post("/api/lesson/chat", async (req, res) => {
     try {
-      const { prompt, history, context } = req.body;
+      const { prompt, context } = req.body;
       
       let aiResponse = "";
       const maxRetries = 3;
 
       for (let i = 0; i <= maxRetries; i++) {
         try {
-          const response = await ai.models.generateContent({
+          const result = await ai.models.generateContent({
             model: "gemini-3-flash-preview",
             contents: [
               { role: 'user', parts: [{ text: `CONTEXT:\n${context}\n\nUSER QUESTION:\n${prompt}` }] }
@@ -61,7 +61,7 @@ async function startServer() {
               systemInstruction: "You are a helpful teaching assistant for Basim Alkhalil Digital Academy. You are currently helping a student with a specific lesson. Answer questions ONLY related to the lesson context provided. Be encouraging, professional, and clear. Answer in the language the student asks in (Arabic or English).",
             }
           });
-          aiResponse = response.text || "";
+          aiResponse = result.text || "";
           break;
         } catch (error: any) {
           if (i === maxRetries) throw error;
@@ -82,6 +82,45 @@ async function startServer() {
       res.json({ text: aiResponse });
     } catch (error) {
       console.error("Lesson Chat Error:", error);
+      res.status(500).json({ error: "Failed to generate response" });
+    }
+  });
+
+  // AI Language Partner Endpoint
+  app.post("/api/ai-partner/chat", async (req, res) => {
+    try {
+      const { prompt, history } = req.body;
+      
+      const systemInstruction = `
+        You are an Oxford English Language Partner at Basim Alkhalil Digital Academy. 
+        Respond naturally to keep the conversation going. Keep your response relatively short and clear (suitable for a learner).
+        Also, if this feels like a natural point to give feedback (e.g. after a few exchanges), provide a JSON-like summary of their English skills in this EXACT format:
+        [FEEDBACK]
+        {
+          "fluency": 0-100,
+          "grammar": 0-100,
+          "vocabulary": 0-100,
+          "suggestions": ["short suggestion 1", "short suggestion 2"]
+        }
+      `;
+
+      const result = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: [
+          ...history.map((m: any) => ({
+            role: m.role === 'user' ? 'user' : 'model',
+            parts: [{ text: m.text }]
+          })),
+          { role: 'user', parts: [{ text: prompt }] }
+        ],
+        config: {
+          systemInstruction,
+        }
+      });
+
+      res.json({ text: result.text || "" });
+    } catch (error) {
+      console.error("AI Partner Chat Error:", error);
       res.status(500).json({ error: "Failed to generate response" });
     }
   });
@@ -107,8 +146,8 @@ async function startServer() {
                 model: modelToUse,
               callbacks: {
                 onmessage: (message: any) => {
-                  if (message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data) {
-                    const audio = message.serverContent.modelTurn.parts[0].inlineData.data;
+                  const audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
+                  if (audio) {
                     clientWs.send(JSON.stringify({ audio }));
                   }
                   

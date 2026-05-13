@@ -11,7 +11,8 @@ import {
   AlertCircle,
   Gem,
   ArrowUpRight,
-  TrendingDown
+  TrendingDown,
+  ShieldAlert
 } from 'lucide-react';
 import { auth, db } from '../lib/firebase';
 import { 
@@ -176,6 +177,8 @@ export const CreditSystem = ({ lang }: { lang: Language }) => {
     }
   };
 
+  const isAdmin = auth.currentUser?.email?.toLowerCase() === 'basim5252@gmail.com';
+
   return (
     <div className={`p-4 md:p-10 max-w-7xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <header className="mb-8 md:mb-14">
@@ -187,10 +190,19 @@ export const CreditSystem = ({ lang }: { lang: Language }) => {
             </div>
             <p className="text-slate-400 mt-1 font-medium text-sm md:text-base">{t.creditDescription}</p>
           </div>
-          <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-6 py-3 flex items-center gap-3">
-             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-             <span className="text-xs md:text-sm font-black text-emerald-700">{t.creditsNeverExpire}</span>
-          </div>
+          {isAdmin ? (
+            <div className="bg-[#002147] border border-[#C49E3A] rounded-2xl px-6 py-3 flex items-center gap-3 shadow-xl">
+               <ShieldAlert className="text-[#C49E3A]" size={20} />
+               <span className="text-xs md:text-sm font-black text-white uppercase tracking-widest">
+                  {isRtl ? 'وضع الآدمن: وصول غير محدود' : 'Admin Mode: Unlimited Access'}
+               </span>
+            </div>
+          ) : (
+            <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-6 py-3 flex items-center gap-3">
+               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+               <span className="text-xs md:text-sm font-black text-emerald-700">{t.creditsNeverExpire}</span>
+            </div>
+          )}
         </div>
       </header>
 

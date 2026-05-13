@@ -93,8 +93,10 @@ export const VideoLibrary = ({
     if (!enabled) return;
     if (selectedVideo?.id === video.id) return;
 
+    const isAdmin = profile.email?.toLowerCase() === 'basim5252@gmail.com';
     const credits = (profile as any).credits || 0;
-    if (credits < CreditCost.VIDEO_LESSON) {
+    
+    if (!isAdmin && credits < CreditCost.VIDEO_LESSON) {
       alert(t.insufficientCredits);
       onNavigate('credits');
       return;
@@ -102,8 +104,10 @@ export const VideoLibrary = ({
 
     setDeducting(true);
     try {
-      await deductCredits(profile.uid, CreditCost.VIDEO_LESSON, `Video Lesson: ${video.titleEn}`);
-      onUpdateProfile({ ...profile, credits: credits - CreditCost.VIDEO_LESSON } as UserProfile);
+      if (!isAdmin) {
+        await deductCredits(profile.uid, CreditCost.VIDEO_LESSON, `Video Lesson: ${video.titleEn}`);
+        onUpdateProfile({ ...profile, credits: credits - CreditCost.VIDEO_LESSON } as UserProfile);
+      }
       setSelectedVideo(video);
     } catch (err) {
       console.error("Video deduction error:", err);

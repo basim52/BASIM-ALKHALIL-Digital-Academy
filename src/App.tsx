@@ -570,7 +570,7 @@ const AIParentNotes = ({ profile, studentId, lang }: { profile: UserProfile, stu
 };
 
 // StudentDashboard internal component
-const StudentHome = ({ lang, profile, onStartConversation, onOpenCurriculum }: { lang: Language, profile: UserProfile, onStartConversation: () => void, onOpenCurriculum: () => void }) => {
+const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCurriculum }: { lang: Language, profile: UserProfile, onStartConversation: () => void, onStartChat: () => void, onOpenCurriculum: () => void }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
 
@@ -2112,15 +2112,19 @@ export default function App() {
 
   const handleStartAiChat = async () => {
     if (!userProfile) return;
+    const isAdmin = userProfile.email?.toLowerCase() === 'basim5252@gmail.com';
     const currentCredits = (userProfile as any).credits || 0;
-    if (currentCredits < CreditCost.AI_CONVERSATION) {
+    
+    if (!isAdmin && currentCredits < CreditCost.AI_CONVERSATION) {
       alert(t.insufficientCredits);
       setView('credits');
       return;
     }
     try {
-      await deductCredits(userProfile.uid, CreditCost.AI_CONVERSATION, `AI Conversation: 3-min Session`);
-      setUserProfile({ ...userProfile, credits: currentCredits - CreditCost.AI_CONVERSATION } as UserProfile);
+      if (!isAdmin) {
+        await deductCredits(userProfile.uid, CreditCost.AI_CONVERSATION, `AI Conversation: 3-min Session`);
+        setUserProfile({ ...userProfile, credits: currentCredits - CreditCost.AI_CONVERSATION } as UserProfile);
+      }
       setView('ai-chat');
     } catch (err) {
       console.error("AI Deduction error:", err);
@@ -2145,6 +2149,7 @@ export default function App() {
   const handleLessonComplete = async () => {
     if (!userProfile || !activeLesson) return;
     
+    const isAdmin = userProfile.email?.toLowerCase() === 'basim5252@gmail.com';
     // Deduct Credit
     const cost = CreditCost.READING_LESSON;
     const currentCredits = (userProfile as any).credits || 0;
@@ -2152,10 +2157,12 @@ export default function App() {
     // Increment XP and points
     const xpToAdd = 50; 
     const updatedPoints = (userProfile as any).points + xpToAdd;
-    const updatedCredits = Math.max(0, currentCredits - cost);
+    const updatedCredits = isAdmin ? currentCredits : Math.max(0, currentCredits - cost);
     
     try {
-      await deductCredits(userProfile.uid, cost, `أكملت درس: ${activeLesson.title}`);
+      if (!isAdmin) {
+        await deductCredits(userProfile.uid, cost, `أكملت درس: ${activeLesson.title}`);
+      }
 
       setUserProfile({ ...userProfile, points: updatedPoints, credits: updatedCredits } as UserProfile);
       setView('curriculum');
@@ -2213,6 +2220,8 @@ export default function App() {
         lang={lang} 
         onSelectLesson={async (lesson, category, level) => { 
           if (!userProfile) return;
+          const isAdmin = userProfile.email?.toLowerCase() === 'basim5252@gmail.com';
+          
           if (category === CurriculumCategory.CONVERSATION) {
             handleStartAiChat();
             return;
@@ -2221,7 +2230,7 @@ export default function App() {
           const currentCredits = (userProfile as any).credits || 0;
           const cost = CreditCost.READING_LESSON;
           
-          if (currentCredits < cost) {
+          if (!isAdmin && currentCredits < cost) {
             alert(t.insufficientCredits);
             setView('credits');
             return;
@@ -2282,7 +2291,15 @@ export default function App() {
     // Role-specific Default Dashboards
     switch (userProfile.role) {
       case UserRole.STUDENT:
-        return <StudentHome lang={lang} onStartConversation={handleStartAiChat} profile={userProfile} onOpenCurriculum={() => setView('curriculum')} />;
+        return (
+          <StudentHome 
+            lang={lang} 
+            onStartConversation={handleStartAiChat} 
+            profile={userProfile} 
+            onOpenCurriculum={() => setView('curriculum')} 
+            onStartChat={() => setView('chat')}
+          />
+        );
       case UserRole.PARENT:
       case UserRole.ADMIN:
         return <ParentDashboard lang={lang} profile={userProfile} />;

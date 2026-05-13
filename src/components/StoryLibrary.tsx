@@ -63,8 +63,10 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { l
   const handleSelectStory = async (story: Story) => {
     if (selectedStory?.id === story.id) return;
     
-    const credits = profile.credits || 0;
-    if (credits < CreditCost.AUDIO_STORY) {
+    const isAdmin = profile.email?.toLowerCase() === 'basim5252@gmail.com';
+    const credits = (profile as any).credits || 0;
+    
+    if (!isAdmin && credits < CreditCost.AUDIO_STORY) {
       alert(t.insufficientCredits);
       onNavigate('credits');
       return;
@@ -72,8 +74,10 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { l
 
     setDeducting(true);
     try {
-      await deductCredits(profile.uid, CreditCost.AUDIO_STORY, `Audio Story: ${story.titleEn}`);
-      onUpdateProfile({ ...profile, credits: credits - CreditCost.AUDIO_STORY });
+      if (!isAdmin) {
+        await deductCredits(profile.uid, CreditCost.AUDIO_STORY, `Audio Story: ${story.titleEn}`);
+        onUpdateProfile({ ...profile, credits: credits - CreditCost.AUDIO_STORY } as UserProfile);
+      }
       setSelectedStory(story);
     } catch (err) {
       console.error("Story deduction error:", err);

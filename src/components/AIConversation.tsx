@@ -121,6 +121,7 @@ export const AIConversation = ({ onBack, lang }: { onBack: () => void, lang: Lan
   const handleSendMessage = async (textOverride?: string) => {
     const textToSend = textOverride || inputText;
     if (!textToSend.trim()) return;
+    if (isThinking) return;
 
     const userMsg: Message = { role: 'user', text: textToSend, timestamp: Date.now() };
     const newMessages = [...messages, userMsg];
@@ -129,43 +130,19 @@ export const AIConversation = ({ onBack, lang }: { onBack: () => void, lang: Lan
     setIsThinking(true);
 
     try {
-      const prompt = `
-        You are an Oxford English Language Partner at Basim Alkhalil Digital Academy. 
-        Current conversation history: ${newMessages.map(m => `${m.role}: ${m.text}`).join('\n')}
-        User just said: "${textToSend}"
-        
-        Respond naturally to keep the conversation going. Keep your response relatively short and clear (suitable for a learner).
-        Also, if this feels like a natural point to give feedback (e.g. after a few exchanges), provide a JSON-like summary of their English skills in this EXACT format:
-        [FEEDBACK]
-        {
-          "fluency": 0-100,
-          "grammar": 0-100,
-          "vocabulary": 0-100,
-          "suggestions": ["short suggestion 1", "short suggestion 2"]
-        }
-      `;
+      const resp = await fetch('/api/ai-partner/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: textToSend,
+          history: messages.slice(-10) // Send recent context
+        })
+      });
 
-      let responseText = "";
-      const maxRetries = 3;
-
-      for (let i = 0; i <= maxRetries; i++) {
-        try {
-          const response = await aiRef.current.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: prompt,
-          });
-          responseText = response.text || "I'm sorry, I couldn't process that.";
-          break;
-        } catch (err: any) {
-          if (i === maxRetries) throw err;
-          const isOverloaded = err.message?.includes('503') || err.message?.includes('429') || err.message?.includes('UNAVAILABLE');
-          if (isOverloaded) {
-            await new Promise(r => setTimeout(r, 2000 * (i + 1)));
-            continue;
-          }
-          throw err;
-        }
-      }
+      if (!resp.ok) throw new Error('Server responded with error');
+      
+      const data = await resp.json();
+      const responseText = data.text || "I'm sorry, I couldn't process that.";
       
       let finalAiResponse = responseText;
       let newFeedback: Feedback | null = null;
