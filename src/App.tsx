@@ -664,6 +664,25 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
               className="bg-[#002147] text-white rounded-[2.5rem] p-10 relative overflow-hidden group shadow-xl shadow-blue-900/10 border-b-8 border-[#C49E3A]"
             >
                   <div className="relative z-10">
+                {/* Connection Tester for Admin */}
+                {profile?.email?.toLowerCase() === 'basim5252@gmail.com' && (
+                  <div className="absolute top-0 right-0 z-20">
+                    <button 
+                      onClick={async () => {
+                        try {
+                          const resp = await fetch('/api/health');
+                          const data = await resp.json();
+                          alert(`Connection OK: ${JSON.stringify(data)}`);
+                        } catch (e: any) {
+                          alert(`Connection FAILED: ${e.message}`);
+                        }
+                      }}
+                      className="text-[8px] bg-white/10 px-3 py-1 rounded-full hover:bg-white/20 whitespace-nowrap"
+                    >
+                      🧪 Test Conn
+                    </button>
+                  </div>
+                )}
                 <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-md">
                   <Mic2 className="text-white" />
                 </div>
@@ -1536,6 +1555,27 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
                           <Play size={18} fill="currentColor" />
                           {isRtl ? 'بدء الدرس' : 'Start Lesson'}
                         </button>
+                        {selectedCategory !== CurriculumCategory.CONVERSATION && (
+                          <button
+                            onClick={() => {
+                              onSelectLesson({
+                                id: `ai_support_${unit.id}`,
+                                title: unit.title,
+                                titleAr: unit.titleAr,
+                                content: `Interactive AI Support for ${unit.title}. Ask anything!`,
+                                contentAr: `دعم ذكي تفاعلي لـ ${unit.titleAr}. اسأل عن أي شيء!`,
+                                exercises: [],
+                                quiz: [],
+                                proficiencyLevel: selectedLevel!,
+                                order: 99
+                              } as Lesson, selectedCategory, selectedLevel!);
+                            }}
+                            className="flex-1 bg-purple-50 text-purple-600 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-xs md:text-sm flex items-center justify-center gap-3 hover:bg-purple-600 hover:text-white transition-all group"
+                          >
+                            <MessageSquare size={18} />
+                            {isRtl ? 'مساعد ذكي' : 'AI Support'}
+                          </button>
+                        )}
                         <button
                           onClick={() => addToSchedule(unit.id, isRtl ? unit.titleAr : unit.title)}
                           disabled={bookingStatus[unit.id] === 'booking' || bookingStatus[unit.id] === 'success'}

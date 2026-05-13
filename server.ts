@@ -54,22 +54,32 @@ async function startServer() {
 
   // API Routes
   app.get("/api/health", (req, res) => {
+    logToFile("Health check requested");
     res.json({ 
       status: "ok", 
       geminiKeySet: !!process.env.GEMINI_API_KEY,
-      isProduction: process.env.NODE_ENV === "production"
+      isProduction: process.env.NODE_ENV === "production",
+      time: new Date().toISOString()
     });
+  });
+
+  app.get("/api/test-get", (req, res) => {
+    logToFile("Test GET requested");
+    res.json({ message: "GET request successful" });
   });
 
   // Regular Chat Endpoint for Lessons
   app.post("/api/lesson/chat", async (req, res) => {
-    console.log("POST /api/lesson/chat called");
+    logToFile(`START /api/lesson/chat - Body keys: ${Object.keys(req.body || {})}`);
     try {
       const { prompt, context } = req.body;
-      console.log(`Prompt length: ${prompt?.length}, Context length: ${context?.length}`);
-      
+      if (!prompt) {
+        logToFile("Error: Missing prompt in request body");
+        return res.status(400).json({ error: "Missing prompt" });
+      }
+
       if (!process.env.GEMINI_API_KEY) {
-        console.error("GEMINI_API_KEY is not set!");
+        logToFile("Error: GEMINI_API_KEY not set");
         return res.status(500).json({ error: "Gemini API key is missing on server" });
       }
 
@@ -90,6 +100,7 @@ async function startServer() {
           aiResponse = result.text || "";
           break;
         } catch (error: any) {
+          logToFile(`Retry ${i} failed for lesson chat: ${error.message}`);
           if (i === maxRetries) throw error;
           const isOverloaded = error.message?.includes('503') || 
                               error.message?.includes('429') || 
@@ -105,6 +116,7 @@ async function startServer() {
         }
       }
 
+      logToFile("SUCCESS /api/lesson/chat - Response generated");
       res.json({ text: aiResponse });
     } catch (error: any) {
       logToFile(`Lesson Chat Error: ${error.message}`);
@@ -115,13 +127,12 @@ async function startServer() {
 
   // AI Language Partner Endpoint
   app.post("/api/ai-partner/chat", async (req, res) => {
-    console.log("POST /api/ai-partner/chat called");
+    logToFile(`START /api/ai-partner/chat - Body keys: ${Object.keys(req.body || {})}`);
     try {
-      const { prompt, history } = req.body;
-      console.log(`Prompt: ${prompt}, History length: ${history?.length}`);
+      const { prompt, history = [] } = req.body;
       
       if (!process.env.GEMINI_API_KEY) {
-        console.error("GEMINI_API_KEY is not set!");
+        logToFile("Error: GEMINI_API_KEY not set");
         return res.status(500).json({ error: "Gemini API key is missing on server" });
       }
       
@@ -141,7 +152,7 @@ async function startServer() {
       const result = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: [
-          ...history.map((m: any) => ({
+          ...(Array.isArray(history) ? history : []).map((m: any) => ({
             role: m.role === 'user' ? 'user' : 'model',
             parts: [{ text: m.text }]
           })),
@@ -152,6 +163,7 @@ async function startServer() {
         }
       });
 
+      logToFile("SUCCESS /api/ai-partner/chat - Response generated");
       res.json({ text: result.text || "" });
     } catch (error: any) {
       logToFile(`AI Partner Chat Error: ${error.message}`);
