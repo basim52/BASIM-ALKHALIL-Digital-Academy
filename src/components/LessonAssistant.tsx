@@ -95,7 +95,8 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
       // Start Live Mode
       setError(null);
       
-      if (!window.AudioContext && !(window as any).webkitAudioContext) {
+      const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtxClass) {
         setError(isRtl ? 'متصفحك لا يدعم الصوت المتقدم' : 'Browser does not support required Audio API');
         return;
       }
@@ -106,8 +107,18 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
       }
 
       try {
+        // Initialize AudioContext immediately on user gesture
+        if (!audioCtxRef.current) {
+          audioCtxRef.current = new AudioCtxClass({ sampleRate: 16000 });
+        }
+        if (audioCtxRef.current.state === 'suspended') {
+          await audioCtxRef.current.resume();
+        }
+
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const ws = new WebSocket(`${protocol}//${window.location.host}/live`);
+        const url = `${protocol}//${window.location.host}/ws/live`;
+        console.log("Connecting to WebSocket:", url);
+        const ws = new WebSocket(url);
         wsRef.current = ws;
 
         ws.onopen = () => {
@@ -191,15 +202,8 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
 
   const startRecording = async () => {
     try {
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new AudioContext({ sampleRate: 16000 });
-      }
+      if (!audioCtxRef.current) return;
       
-      // Ensure AudioContext is resumed (browser policy)
-      if (audioCtxRef.current.state === 'suspended') {
-        await audioCtxRef.current.resume();
-      }
-
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const source = audioCtxRef.current.createMediaStreamSource(stream);
       const processor = audioCtxRef.current.createScriptProcessor(4096, 1, 1);

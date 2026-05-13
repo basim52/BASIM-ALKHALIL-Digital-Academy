@@ -18,8 +18,18 @@ const ai = new GoogleGenAI({
 async function startServer() {
   const app = express();
   const server = createServer(app);
-  const wss = new WebSocketServer({ server, path: '/live' });
+  const wss = new WebSocketServer({ noServer: true });
   const PORT = 3000;
+
+  server.on('upgrade', (request, socket, head) => {
+    const { pathname } = new URL(request.url || '', `http://${request.headers.host}`);
+    if (pathname === '/ws/live') {
+      console.log('Manual upgrade for /ws/live');
+      wss.handleUpgrade(request, socket, head, (ws) => {
+        wss.emit('connection', ws, request);
+      });
+    }
+  });
 
   app.use(express.json());
 
@@ -76,24 +86,25 @@ async function startServer() {
     }
   });
 
-  // WebSocket for Live Audio Chat (Experimental)
-  wss.on("connection", async (clientWs) => {
-    console.log("New Live API connection");
-    let session: any = null;
-    let isConnecting = false;
-
-    clientWs.on("message", async (data) => {
-      try {
-        const msg = JSON.parse(data.toString());
-        
-        // Start session on first message
-        if (!session && !isConnecting) {
-          isConnecting = true;
-          console.log("Starting Gemini Live session...");
-          try {
-            const contextText = msg.context || `General help at Basim Alkhalil Academy.`;
-            session = await ai.live.connect({
-              model: "gemini-3.1-flash-live-preview",
+    // WebSocket for Live Audio Chat (Experimental)
+    wss.on("connection", async (clientWs, req) => {
+      console.log(`New Live API connection from ${req.socket.remoteAddress}. Path: ${req.url}`);
+      let session: any = null;
+      let isConnecting = false;
+  
+      clientWs.on("message", async (data) => {
+        try {
+          const msg = JSON.parse(data.toString());
+          
+          // Start session on first message
+          if (!session && !isConnecting) {
+            isConnecting = true;
+            const modelToUse = "gemini-3.1-flash-live-preview"; 
+            console.log(`Starting Gemini Live session with model: ${modelToUse}...`);
+            try {
+              const contextText = msg.context || `General help at Basim Alkhalil Academy.`;
+              session = await ai.live.connect({
+                model: modelToUse,
               callbacks: {
                 onmessage: (message: any) => {
                   if (message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data) {
