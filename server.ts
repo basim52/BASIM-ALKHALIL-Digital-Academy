@@ -81,34 +81,59 @@ async function startServer() {
       try {
         const msg = JSON.parse(data.toString());
         
-        // Initialize session on first real message if not exists
-        if (!session && msg.context) {
+      // Start session on first message
+      if (!session) {
+        try {
+          const contextText = msg.context || `General help at Basim Alkhalil Academy.`;
           session = await ai.live.connect({
             model: "gemini-3.1-flash-live-preview",
             callbacks: {
               onmessage: (message: any) => {
                 const audio = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
                 if (audio) clientWs.send(JSON.stringify({ audio }));
-                if (message.serverContent?.interrupted)
-                  clientWs.send(JSON.stringify({ interrupted: true }));
                 
-                // Also send transcription if available
+                // Handle interruptions
+                if (message.serverContent?.interrupted) {
+                  clientWs.send(JSON.stringify({ interrupted: true }));
+                }
+                
+                // Handle transcription for UI display
                 const transcription = message.serverContent?.modelTurn?.parts[0]?.text;
                 if (transcription) clientWs.send(JSON.stringify({ text: transcription }));
+                
+                // Also handle user transcription if enabled
+                const userTranscription = message.serverContent?.userTurn?.parts[0]?.text;
+                if (userTranscription) clientWs.send(JSON.stringify({ userText: userTranscription }));
               },
+              onclose: () => {
+                console.log("Gemini Live session closed");
+              },
+              onerror: (err: any) => {
+                console.error("Gemini Live session error:", err);
+                clientWs.send(JSON.stringify({ error: "Voice assistant encountered an error." }));
+              }
             },
             config: {
               responseModalities: [Modality.AUDIO],
               speechConfig: {
                 voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zephyr" } },
               },
+              // Enable transcription
+              outputAudioTranscription: {},
+              inputAudioTranscription: {},
               systemInstruction: `You are a live audio teaching assistant for Basim Alkhalil Digital Academy. 
-              Help the student with this lesson context: ${msg.context}. 
-              Be concise, spoken-friendly, and maintain the persona of a helpful private tutor.`,
+              Help the student with this lesson context: ${contextText}. 
+              Be concise, spoken-friendly, and maintain the persona of a helpful private tutor.
+              ALWAYS respond in the language the student uses. If they speak Arabic, respond in Arabic. If English, respond in English.`,
             },
           });
-          return;
+          clientWs.send(JSON.stringify({ status: 'ready' }));
+        } catch (err) {
+          console.error("Failed to connect to Gemini Live:", err);
+          clientWs.send(JSON.stringify({ error: "Failed to start voice assistant." }));
         }
+        return;
+      }
 
         if (session && msg.audio) {
           session.sendRealtimeInput({

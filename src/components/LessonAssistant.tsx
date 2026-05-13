@@ -34,13 +34,16 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isLiveMode, setIsLiveMode] = useState(false);
+  const [isLiveReady, setIsLiveReady] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const nextStartTimeRef = useRef<number>(0);
+  const audioQueueRef = useRef<AudioBufferSourceNode[]>([]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -55,6 +58,7 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
     setMessages(prev => [...prev, userMsg]);
     setInputText('');
     setIsLoading(true);
+    setError(null);
 
     try {
       const resp = await fetch('/api/lesson/chat', {
@@ -71,14 +75,24 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
       }
     } catch (err) {
       console.error("Chat error:", err);
+      setError(isRtl ? 'عذراً، حدث خطأ في محاولة التواصل.' : 'Sorry, something went wrong with the chat.');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const clearAudioQueue = () => {
+    audioQueueRef.current.forEach(source => {
+      try { source.stop(); } catch(e) {}
+    });
+    audioQueueRef.current = [];
+    nextStartTimeRef.current = 0;
+  };
+
   const toggleLiveMode = async () => {
     if (!isLiveMode) {
       // Start Live Mode
+      setError(null);
       try {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const ws = new WebSocket(`${protocol}//${window.location.host}/live`);
@@ -86,19 +100,34 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
 
         ws.onopen = () => {
           ws.send(JSON.stringify({ context: `Lesson: ${lessonTitle}. Content: ${lessonContent}` }));
-          setIsLiveMode(true);
-          startRecording();
         };
 
         ws.onmessage = (event) => {
           const msg = JSON.parse(event.data);
+          
+          if (msg.status === 'ready') {
+            setIsLiveMode(true);
+            setIsLiveReady(true);
+            startRecording();
+            return;
+          }
+
+          if (msg.error) {
+            setError(msg.error);
+            ws.close();
+            return;
+          }
+
           if (msg.audio) {
             playAudio(msg.audio);
           }
+
+          if (msg.interrupted) {
+            clearAudioQueue();
+          }
+
           if (msg.text) {
-            // Optionally update message history with transcript
             setMessages(prev => {
-               // Only add if last message is not assistant or different text
                const last = prev[prev.length - 1];
                if (last?.role === 'assistant') {
                  const newMessages = [...prev];
@@ -108,20 +137,40 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
                return [...prev, { role: 'assistant', text: msg.text }];
             });
           }
+
+          if (msg.userText) {
+             // Optional: show what user said in real-time
+             setMessages(prev => {
+                const filtered = prev.filter(m => m.role === 'user' && m.text === msg.userText);
+                if (filtered.length > 0) return prev;
+                // Add temporary user message
+                return [...prev, { role: 'user', text: msg.userText }];
+             });
+          }
+        };
+
+        ws.onerror = () => {
+          setError(isRtl ? 'خطأ في الاتصال بالمباشر' : 'Live connection error');
+          setIsLiveMode(false);
+          setIsLiveReady(false);
         };
 
         ws.onclose = () => {
           setIsLiveMode(false);
+          setIsLiveReady(false);
           stopRecording();
+          clearAudioQueue();
         };
 
       } catch (err) {
         console.error("Failed to start Live Mode:", err);
+        setError(isRtl ? 'لم نتمكن من بدء الوضع المباشر' : 'Failed to start Live Mode');
       }
     } else {
       // Stop Live Mode
       wsRef.current?.close();
       setIsLiveMode(false);
+      setIsLiveReady(false);
       stopRecording();
     }
   };
@@ -131,17 +180,21 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
       if (!audioCtxRef.current) {
         audioCtxRef.current = new AudioContext({ sampleRate: 16000 });
       }
+      
+      // Ensure AudioContext is resumed (browser policy)
+      if (audioCtxRef.current.state === 'suspended') {
+        await audioCtxRef.current.resume();
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const source = audioCtxRef.current.createMediaStreamSource(stream);
       const processor = audioCtxRef.current.createScriptProcessor(4096, 1, 1);
       
       processor.onaudioprocess = (e) => {
         const inputData = e.inputBuffer.getChannelData(0);
-        // Convert to PCM int16 or just send as float if server handles it.
-        // Guidelines say: pcmToBase64(e.inputBuffer.getChannelData(0))
         const pcm16 = float32ToInt16(inputData);
         const base64 = arrayBufferToBase64(pcm16.buffer);
-        if (wsRef.current?.readyState === WebSocket.OPEN) {
+        if (wsRef.current?.readyState === WebSocket.OPEN && isLiveReady) {
           wsRef.current.send(JSON.stringify({ audio: base64 }));
         }
       };
@@ -150,8 +203,12 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
       processor.connect(audioCtxRef.current.destination);
       processorRef.current = processor;
       setIsRecording(true);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Mic error:", err);
+      setError(isRtl ? 'يجب السماح بالوصول للميكروفون' : 'Microphone access required');
+      setIsLiveMode(false);
+      setIsLiveReady(false);
+      wsRef.current?.close();
     }
   };
 
@@ -164,7 +221,7 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
     let l = buffer.length;
     let buf = new Int16Array(l);
     while (l--) {
-      buf[l] = Math.min(1, buffer[l]) * 0x7FFF;
+      buf[l] = Math.max(-1, Math.min(1, buffer[l])) * 0x7FFF;
     }
     return buf;
   };
@@ -181,26 +238,35 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
 
   const playAudio = async (base64: string) => {
     if (!audioCtxRef.current) return;
-    const binary = window.atob(base64);
-    const len = binary.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
-    const pcm16 = new Int16Array(bytes.buffer);
-    const float32 = new Float32Array(pcm16.length);
-    for (let i = 0; i < pcm16.length; i++) float32[i] = pcm16[i] / 32768;
+    try {
+      const binary = window.atob(base64);
+      const len = binary.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+      const pcm16 = new Int16Array(bytes.buffer);
+      const float32 = new Float32Array(pcm16.length);
+      for (let i = 0; i < pcm16.length; i++) float32[i] = pcm16[i] / 32768;
 
-    const buffer = audioCtxRef.current.createBuffer(1, float32.length, 16000);
-    buffer.getChannelData(0).set(float32);
-    
-    const source = audioCtxRef.current.createBufferSource();
-    source.buffer = buffer;
-    source.connect(audioCtxRef.current.destination);
-    
-    // Simple scheduling
-    const now = audioCtxRef.current.currentTime;
-    if (nextStartTimeRef.current < now) nextStartTimeRef.current = now;
-    source.start(nextStartTimeRef.current);
-    nextStartTimeRef.current += buffer.duration;
+      const buffer = audioCtxRef.current.createBuffer(1, float32.length, 16000);
+      buffer.getChannelData(0).set(float32);
+      
+      const source = audioCtxRef.current.createBufferSource();
+      source.buffer = buffer;
+      source.connect(audioCtxRef.current.destination);
+      
+      const now = audioCtxRef.current.currentTime;
+      if (nextStartTimeRef.current < now) nextStartTimeRef.current = now;
+      source.start(nextStartTimeRef.current);
+      
+      audioQueueRef.current.push(source);
+      nextStartTimeRef.current += buffer.duration;
+      
+      source.onended = () => {
+        audioQueueRef.current = audioQueueRef.current.filter(s => s !== source);
+      };
+    } catch(err) {
+      console.error("Audio playback error:", err);
+    }
   };
 
   const welcomeText = isRtl 
@@ -215,7 +281,7 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="mb-4 w-[350px] md:w-[450px] h-[600px] max-h-[80vh] bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-200 overflow-hidden flex flex-col"
+            className="mb-4 w-[calc(100vw-2.5rem)] sm:w-[400px] md:w-[450px] h-[600px] max-h-[85vh] bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-200 overflow-hidden flex flex-col"
           >
             {/* Header */}
             <div className="bg-oxford-navy p-6 flex items-center justify-between">
@@ -224,20 +290,20 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
                   <Sparkles size={24} />
                 </div>
                 <div>
-                  <h3 className="text-white font-black text-sm uppercase tracking-widest">AI Lesson Tutor</h3>
-                  <p className="text-oxford-gold text-[10px] uppercase tracking-wider font-bold">Powered by Gemini</p>
+                  <h3 className="text-white font-black text-xs sm:text-sm uppercase tracking-widest">AI Lesson Assistant</h3>
+                  <p className="text-oxford-gold text-[9px] sm:text-[10px] uppercase tracking-wider font-bold">Live Learning Support</p>
                 </div>
               </div>
               <button 
                 onClick={() => setIsOpen(false)}
-                className="text-white/40 hover:text-white transition-colors"
+                className="w-10 h-10 flex items-center justify-center text-white/40 hover:text-white transition-colors"
               >
-                <X size={24} />
+                <X size={20} />
               </button>
             </div>
 
             {/* Live Mode Toggle Bar */}
-            <div className="bg-slate-50 border-b border-slate-100 p-3 flex items-center justify-between px-6">
+            <div className="bg-slate-50 border-b border-slate-100 p-3 flex flex-col sm:flex-row items-center justify-between px-6 gap-2 sm:gap-0">
                <div className="flex items-center gap-2">
                  <div className={`w-2 h-2 rounded-full ${isLiveMode ? 'bg-green-500 animate-pulse' : 'bg-slate-300'}`} />
                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
@@ -246,21 +312,28 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
                </div>
                <button 
                  onClick={toggleLiveMode}
-                 className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all min-h-[44px] sm:min-h-0 ${
                    isLiveMode 
                      ? 'bg-red-500 text-white shadow-lg' 
                      : 'bg-oxford-navy/5 text-oxford-navy hover:bg-oxford-navy hover:text-white'
                  }`}
                >
-                 {isLiveMode ? <Headset size={14} /> : <Headset size={14} />}
+                 <Headset size={16} />
                  {isLiveMode ? (isRtl ? 'إيقاف المباشر' : 'Stop Live') : (isRtl ? 'بدء الوضع المباشر' : 'Start Live Mode')}
                </button>
             </div>
 
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 text-red-600 px-6 py-2 text-[10px] font-tajawal font-bold border-b border-red-100">
+                ⚠️ {error}
+              </div>
+            )}
+
             {/* Messages Area */}
             <div 
               ref={scrollRef}
-              className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/30 no-scrollbar"
+              className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 bg-slate-50/30 no-scrollbar"
             >
               {messages.length === 0 && (
                 <div className="text-center py-10 opacity-50">
@@ -275,21 +348,24 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
                   animate={{ opacity: 1, x: 0 }}
                   className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`max-w-[85%] p-4 rounded-2xl shadow-sm ${
+                  <div className={`max-w-[90%] sm:max-w-[85%] p-4 rounded-2xl shadow-sm ${
                     m.role === 'user' 
                       ? 'bg-oxford-navy text-white rounded-br-none' 
                       : 'bg-white text-oxford-navy border border-slate-100 rounded-bl-none'
                   }`}>
-                    <div className="prose prose-sm prose-slate max-w-none">
+                    <div className="prose prose-sm prose-slate max-w-none prose-p:my-1">
                       <ReactMarkdown>{m.text}</ReactMarkdown>
                     </div>
                   </div>
                 </motion.div>
               ))}
-              {isLoading && (
+              {(isLoading || (isLiveMode && !isLiveReady)) && (
                 <div className="flex justify-start">
-                  <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 rounded-bl-none flex gap-2">
+                  <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 rounded-bl-none flex items-center gap-2">
                     <Loader2 size={16} className="animate-spin text-oxford-navy/40" />
+                    <span className="text-[10px] font-black uppercase text-slate-300">
+                      {isLiveMode ? 'Connecting Voice...' : 'Thinkng...'}
+                    </span>
                   </div>
                 </div>
               )}
@@ -304,18 +380,18 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                     placeholder={isRtl ? 'اسأل أي شيء حول الدرس...' : 'Ask anything about the lesson...'}
-                    className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 font-tajawal text-sm focus:outline-none focus:ring-2 focus:ring-oxford-gold transition-all"
+                    className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 font-tajawal text-sm focus:outline-none focus:ring-2 focus:ring-oxford-gold transition-all min-h-[44px]"
                   />
                   <button 
                     onClick={handleSend}
-                    disabled={isLoading || !inputText.trim()}
+                    disabled={isLoading || !inputText.trim() || isLiveMode}
                     className="w-12 h-12 bg-oxford-navy text-white rounded-xl flex items-center justify-center hover:bg-amber-accent transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                   >
                     <Send size={20} />
                   </button>
                </div>
                <p className="mt-2 text-[8px] text-center text-slate-400 uppercase tracking-widest font-black">
-                 {isRtl ? 'المساعد التعليمي الذكي - مدرسة باسم الخليل' : 'Basim Alkhalil Smart Assistant'}
+                 {isRtl ? 'المساعد التعليمي الذكي - مدرسة باسم الخليل' : 'Basim Alkhalil AI Academic Assistant'}
                </p>
             </div>
           </motion.div>
