@@ -46,6 +46,12 @@ async function startServer() {
 
   app.use(express.json());
 
+  // Request logger
+  app.use((req, res, next) => {
+    logToFile(`${req.method} ${req.path}`);
+    next();
+  });
+
   // API Routes
   app.get("/api/health", (req, res) => {
     res.json({ 
@@ -248,6 +254,12 @@ async function startServer() {
       if (session) session.close();
       console.log("Live API connection closed");
     });
+  });
+
+  // 404 for API routes
+  app.use("/api/*", (req, res) => {
+    logToFile(`API 404: ${req.method} ${req.originalUrl}`);
+    res.status(404).json({ error: `API route ${req.method} ${req.originalUrl} not found` });
   });
 
   // Vite middleware for development
