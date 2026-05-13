@@ -16,10 +16,12 @@ app.get("/ping", (req, res) => {
 
 // Health check
 app.get("/api/health", (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
   res.json({ 
     status: "ok", 
     geminiKeySet: !!process.env.GEMINI_API_KEY,
     env: process.env.NODE_ENV || "not set",
+    server: "Vercel Serverless Function",
     time: new Date().toISOString()
   });
 });
