@@ -15,6 +15,7 @@ import {
   Sparkles,
   Mic,
   BookOpen,
+  Layout,
   Trophy,
   Star,
   BrainCircuit,
