@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { db, auth } from '../../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { handleFirestoreError, OperationType } from '../../lib/firestoreUtils';
 
 interface Sticker {
   id: string;
@@ -47,6 +48,7 @@ export const StickerBook: React.FC<{ isRtl: boolean; onClose: () => void }> = ({
 
   const loadStickers = async () => {
     if (!auth.currentUser) return;
+    const path = `users/${auth.currentUser.uid}/earlyChildhood/stickers`;
     try {
       const docRef = doc(db, 'users', auth.currentUser.uid, 'earlyChildhood', 'stickers');
       const docSnap = await getDoc(docRef);
@@ -58,7 +60,7 @@ export const StickerBook: React.FC<{ isRtl: boolean; onClose: () => void }> = ({
         })));
       }
     } catch (err) {
-      console.error("Error loading stickers:", err);
+      handleFirestoreError(err, OperationType.GET, path);
     } finally {
       setLoading(false);
     }

@@ -35,6 +35,7 @@ import { StickerBook } from './StickerBook';
 import { StudentProfile } from '../../types';
 import { db } from '../../lib/firebase';
 import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
+import { handleFirestoreError, OperationType } from '../../lib/firestoreUtils';
 
 const KID_COURSES = [
   { id: 'first-words', nameKey: 'firstWords', icon: Sparkles, color: 'bg-yellow-400', shadow: 'shadow-yellow-900/20', unlocked: true },
@@ -90,24 +91,28 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
 
       // Logic to unlock a random sticker if score is high
       if (score / total >= 0.8) {
+        const stickersPath = `users/${profile.uid}/earlyChildhood/stickers`;
         const stickersRef = doc(db, 'users', profile.uid, 'earlyChildhood', 'stickers');
-        const snap = await getDoc(stickersRef);
-        let unlockedIds = snap.exists() ? snap.data().unlockedIds || [] : [];
-        
-        // Simple mapping of lessons to potential sticker IDs
-        const lessonStickers: Record<string, string> = {
-          'animals': 'lion',
-          'colors': 'rainbow',
-          'numbers': 'star_gold',
-          'first-words': 'apple',
-          'letters': 'robot',
-          'shapes': 'crown'
-        };
+        try {
+          const snap = await getDoc(stickersRef);
+          let unlockedIds = snap.exists() ? snap.data().unlockedIds || [] : [];
+          
+          const lessonStickers: Record<string, string> = {
+            'animals': 'lion',
+            'colors': 'rainbow',
+            'numbers': 'star_gold',
+            'first-words': 'apple',
+            'letters': 'robot',
+            'shapes': 'crown'
+          };
 
-        const targetSticker = lessonStickers[lessonId];
-        if (targetSticker && !unlockedIds.includes(targetSticker)) {
-          unlockedIds.push(targetSticker);
-          await setDoc(stickersRef, { unlockedIds }, { merge: true });
+          const targetSticker = lessonStickers[lessonId];
+          if (targetSticker && !unlockedIds.includes(targetSticker)) {
+            unlockedIds.push(targetSticker);
+            await setDoc(stickersRef, { unlockedIds }, { merge: true });
+          }
+        } catch (error) {
+          handleFirestoreError(error, OperationType.WRITE, stickersPath);
         }
       }
 
@@ -117,7 +122,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
         points: increment(score * 10)
       });
     } catch (error) {
-      console.error("Error saving early childhood progress:", error);
+      handleFirestoreError(error, OperationType.WRITE, `user_progress/${profile.uid}_early_${lessonId}`);
     }
   };
 

@@ -47,6 +47,11 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow create: if isOwner(userId);
       allow update: if isOwner(userId) || isAdmin();
+
+      match /earlyChildhood/stickers {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId);
+      }
     }
 
     match /students/{studentId} {

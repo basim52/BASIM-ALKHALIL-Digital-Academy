@@ -56,6 +56,14 @@
         "maintenance": { "type": "boolean" },
         "welcomeMessage": { "type": "string" }
       }
+    },
+    "Stickers": {
+      "title": "Sticker Book",
+      "description": "Unlocked stickers for early childhood students",
+      "type": "object",
+      "properties": {
+        "unlockedIds": { "type": "array" }
+      }
     }
   },
   "firestore": {
@@ -110,6 +118,10 @@
     "/user_progress/{progressId}": {
       "schema": "object",
       "description": "Individual student progress"
+    },
+    "/users/{userId}/earlyChildhood/stickers": {
+      "schema": "Stickers",
+      "description": "Early childhood stickers collection"
     }
   }
 }
