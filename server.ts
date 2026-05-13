@@ -5,46 +5,8 @@ import { createServer } from "http";
 import { WebSocketServer } from "ws";
 import { GoogleGenAI, Modality } from "@google/genai";
 import "dotenv/config";
-import fs from "fs";
 
-// CATCH-ALL LOG TO ROOT
-const logFile = "./server-debug.log";
-function logToFile(msg: string) {
-  const timestamp = new Date().toISOString();
-  try {
-    fs.appendFileSync(logFile, `[${timestamp}] ${msg}\n`);
-  } catch (e) {
-    // No-op
-  }
-}
-
-// FORCE INITIAL CREATE
-try {
-  fs.writeFileSync(logFile, `[${new Date().toISOString()}] Server process start attempt\n`);
-} catch (e) {}
-
-// CATCH STARTUP ERRORS
-process.on('uncaughtException', (err) => {
-  logToFile(`CRITICAL UNCAUGHT EXCEPTION: ${err.message}\n${err.stack}`);
-});
-
-process.on('unhandledRejection', (reason) => {
-  logToFile(`CRITICAL UNHANDLED REJECTION: ${reason}`);
-});
-
-logToFile("Server process initializing with global error handlers...");
-logToFile(`GEMINI_API_KEY present: ${!!process.env.GEMINI_API_KEY}`);
-logToFile(`Current Dir: ${process.cwd()}`);
-logToFile(`Dirname: ${import.meta.url}`);
-
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
-    }
-  }
-});
+const logToFile = (msg: string) => console.log(`[Server] ${msg}`);
 
 async function startServer() {
   const app = express();
@@ -52,28 +14,28 @@ async function startServer() {
   const wss = new WebSocketServer({ noServer: true });
   const PORT = 3000;
 
-  // Request logger - MOVE TO TOP
+  const ai = new GoogleGenAI({
+    apiKey: process.env.GEMINI_API_KEY,
+  });
+
+  // Debug Headers
   app.use((req, res, next) => {
-    if (req.path.startsWith('/api')) {
-      logToFile(`DEBUG API INCOMING: ${req.method} ${req.path} (Orig: ${req.originalUrl})`);
-    } else {
-      logToFile(`${req.method} ${req.path}`);
-    }
+    res.setHeader('X-Debug-Path', req.path);
+    res.setHeader('X-Debug-Env', process.env.NODE_ENV || 'undefined');
     next();
   });
 
   // Root test route
   app.get("/ping", (req, res) => {
-    res.send("pong");
+    res.send("pong_v4_stable");
   });
 
-  // API Routes - AT THE VERY TOP
+  // API Routes
   app.get("/api/health", (req, res) => {
-    logToFile("Health check matched - Sending response");
     res.json({ 
       status: "ok", 
       geminiKeySet: !!process.env.GEMINI_API_KEY,
-      isProduction: process.env.NODE_ENV === "production",
+      nodeEnv: process.env.NODE_ENV || 'undefined',
       time: new Date().toISOString()
     });
   });

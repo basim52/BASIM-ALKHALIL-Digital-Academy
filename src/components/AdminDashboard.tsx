@@ -27,7 +27,6 @@ import {
 } from 'firebase/firestore';
 import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { UserRole } from '../types';
-import { GoogleGenAI } from "@google/genai";
 import ReactMarkdown from 'react-markdown';
 
 export const AdminDashboard = ({ lang }: { lang: Language }) => {
@@ -196,7 +195,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
   const handleAnalyze = async () => {
     setAnalyzing(true);
     try {
-      const studentsMeta = await getDocs(query(collection(db, 'students'), limit(20)));
+      const studentsMeta = await getDocs(query(collection(db, 'users'), where('role', '==', UserRole.STUDENT), limit(20)));
       const grades = await getDocs(query(collection(db, 'grades'), limit(50)));
       
       const dataForAI = {
@@ -204,31 +203,18 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
         grades: grades.docs.map(d => d.data())
       };
 
-      const ai = new GoogleGenAI({ apiKey: (process.env as any).GEMINI_API_KEY });
-      const prompt = `
-        As an expert language Academy Director (Basim Alkhalil), analyze this platform data and provide a strategic report for the management team.
-        
-        Data Overview:
-        ${JSON.stringify(dataForAI)}
-        
-        Requirements (Markdown):
-        1. General Learning Trends across the platform.
-        2. Identified Common Weaknesses (systemic issues to address).
-        3. General Strengths of the current cohort.
-        4. Specific recommendations for teaching adjustments.
-        
-        Language: ${isRtl ? 'Arabic' : 'English'}.
-        Style: Professional, data-driven, and visionary.
-      `;
-
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
+      const resp = await fetch('/api/admin/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: dataForAI })
       });
 
+      if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+      const result = await resp.json();
       setAnalysisResult(result.text || "No analysis available.");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Analysis Error:", err);
+      setAnalysisResult(`### ❌ Analysis Failed\nError: ${err.message}`);
     } finally {
       setAnalyzing(false);
     }
