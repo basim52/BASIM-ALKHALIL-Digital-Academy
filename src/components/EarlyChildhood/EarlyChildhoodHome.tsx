@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations, Language } from '../../lib/translations';
 import { 
@@ -31,9 +31,10 @@ import { FirstWordsLesson } from './FirstWordsLesson';
 import { PronunciationLesson } from './PronunciationLesson';
 import { MagicStoryMode } from './MagicStoryMode';
 import { StickerBook } from './StickerBook';
+import { InteractionTimer } from './InteractionTimer';
 
-import { StudentProfile } from '../../types';
-import { db } from '../../lib/firebase';
+import { StudentProfile, CHILDHOOD_PACKAGES } from '../../types';
+import { db, resetDailyMinutes, updateRemainingMinutes } from '../../lib/firebase';
 import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../../lib/firestoreUtils';
 
@@ -55,6 +56,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
   const [showStickerBook, setShowStickerBook] = useState(false);
   const [recentLearnings, setRecentLearnings] = useState<string[]>([]);
   const [mood, setMood] = useState<string | null>(null);
+  const [timeIsUp, setTimeIsUp] = useState(false);
 
   const moods = [
     { id: 'happy', emoji: '😊', label: isRtl ? 'سعيد' : 'Happy', color: 'bg-yellow-400' },
@@ -91,7 +93,6 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
 
       // Logic to unlock a random sticker if score is high
       if (score / total >= 0.8) {
-        const stickersPath = `users/${profile.uid}/earlyChildhood/stickers`;
         const stickersRef = doc(db, 'users', profile.uid, 'earlyChildhood', 'stickers');
         try {
           const snap = await getDoc(stickersRef);
@@ -112,7 +113,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
             await setDoc(stickersRef, { unlockedIds }, { merge: true });
           }
         } catch (error) {
-          handleFirestoreError(error, OperationType.WRITE, stickersPath);
+          console.error("Error saving stickers:", error);
         }
       }
 
@@ -122,34 +123,98 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
         points: increment(score * 10)
       });
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, `user_progress/${profile.uid}_early_${lessonId}`);
+      console.error("Error saving progress:", error);
     }
   };
 
-  if (activeLesson === 'first-words') {
-    return <FirstWordsLesson t={t} isRtl={isRtl} onBack={() => setActiveLesson(null)} onComplete={(s, t) => saveProgress('first-words', s, t)} />;
+  // Daily Minutes Logic
+  useEffect(() => {
+    if (profile?.uid && profile.dailyMinutesLimit) {
+      const today = new Date().toISOString().split('T')[0];
+      if (profile.lastMinutesResetDate !== today) {
+        resetDailyMinutes(profile.uid, profile.dailyMinutesLimit);
+      }
+    }
+  }, [profile]);
+
+  const remainingMinutes = profile?.remainingMinutesToday ?? 0;
+  const hasLimit = !!profile?.dailyMinutesLimit;
+
+  const handleLessonEnd = () => {
+    setActiveLesson(null);
+  };
+
+  const onTick = (remainingSeconds: number) => {
+    if (profile?.uid && Math.floor(remainingSeconds % 10) === 0) {
+      updateRemainingMinutes(profile.uid, remainingSeconds / 60);
+    }
+  };
+
+  const onTimeUp = () => {
+    setTimeIsUp(true);
+    setActiveLesson(null);
+  };
+
+  if (timeIsUp || (hasLimit && remainingMinutes <= 0 && !activeLesson)) {
+    return (
+      <div className="min-h-screen bg-indigo-900 flex items-center justify-center p-6 text-center text-white">
+        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
+          <div className="text-[120px] mb-8">😴</div>
+          <h1 className="text-4xl md:text-6xl font-black mb-4">
+            {isRtl ? 'انتهى وقتك اليوم يا بطل!' : 'Time\'s up for today, Champ!'}
+          </h1>
+          <p className="text-indigo-200 text-xl mb-10 max-w-md mx-auto">
+            {isRtl ? 'لقد أبليت حسناً! نراك غداً لمزيد من المغامرات الممتعة.' : 'You did amazing! See you tomorrow for more fun adventures.'}
+          </p>
+          <button 
+            onClick={onBack}
+            className="bg-white text-indigo-900 px-10 py-4 rounded-3xl font-black text-xl shadow-2xl hover:bg-yellow-400 transition-colors"
+          >
+            {isRtl ? 'الرجوع للقائمة' : 'Back to Menu'}
+          </button>
+        </motion.div>
+      </div>
+    );
   }
-  if (activeLesson === 'pronunciation') {
-    return <PronunciationLesson lang={lang} onBack={() => setActiveLesson(null)} onComplete={(s, t) => saveProgress('pronunciation', s, t)} />;
-  }
-  if (activeLesson === 'colors') {
-    return <ColorsLesson lang={lang} onBack={() => setActiveLesson(null)} onComplete={(s, t) => saveProgress('colors', s, t)} />;
-  }
-  if (activeLesson === 'numbers') {
-    return <NumbersLesson lang={lang} onBack={() => setActiveLesson(null)} onComplete={(s, t) => saveProgress('numbers', s, t)} />;
-  }
-  if (activeLesson === 'animals') {
-    return <AnimalsLesson lang={lang} onBack={() => setActiveLesson(null)} onComplete={(s, t) => saveProgress('animals', s, t)} />;
-  }
-  if (activeLesson === 'shapes') {
-    return <ShapesLesson lang={lang} onBack={() => setActiveLesson(null)} onComplete={(s, t) => saveProgress('shapes', s, t)} />;
-  }
-  if (activeLesson === 'letters') {
-    return <LettersLesson lang={lang} onBack={() => setActiveLesson(null)} onComplete={(s, t) => saveProgress('letters', s, t)} />;
-  }
-  if (activeLesson === 'magic-story') {
-    return <MagicStoryMode lang={lang} onBack={() => setActiveLesson(null)} context={recentLearnings.join(', ')} />;
-  }
+
+  // Wrapper for lessons to include timer
+  const renderActiveLesson = () => {
+    const timer = hasLimit && (
+      <InteractionTimer 
+        remainingMinutes={remainingMinutes} 
+        onTimeUp={onTimeUp} 
+        onTick={onTick} 
+      />
+    );
+
+    let content = null;
+    if (activeLesson === 'first-words') {
+      content = <FirstWordsLesson t={t} isRtl={isRtl} onBack={handleLessonEnd} onComplete={(s, t) => saveProgress('first-words', s, t)} />;
+    } else if (activeLesson === 'pronunciation') {
+      content = <PronunciationLesson lang={lang} onBack={handleLessonEnd} onComplete={(s, t) => saveProgress('pronunciation', s, t)} />;
+    } else if (activeLesson === 'colors') {
+      content = <ColorsLesson lang={lang} onBack={handleLessonEnd} onComplete={(s, t) => saveProgress('colors', s, t)} />;
+    } else if (activeLesson === 'numbers') {
+      content = <NumbersLesson lang={lang} onBack={handleLessonEnd} onComplete={(s, t) => saveProgress('numbers', s, t)} />;
+    } else if (activeLesson === 'animals') {
+      content = <AnimalsLesson lang={lang} onBack={handleLessonEnd} onComplete={(s, t) => saveProgress('animals', s, t)} />;
+    } else if (activeLesson === 'shapes') {
+      content = <ShapesLesson lang={lang} onBack={handleLessonEnd} onComplete={(s, t) => saveProgress('shapes', s, t)} />;
+    } else if (activeLesson === 'letters') {
+      content = <LettersLesson lang={lang} onBack={handleLessonEnd} onComplete={(s, t) => saveProgress('letters', s, t)} />;
+    } else if (activeLesson === 'magic-story') {
+      content = <MagicStoryMode lang={lang} onBack={handleLessonEnd} context={recentLearnings.join(', ')} />;
+    }
+
+    return (
+      <div className="relative">
+        {timer}
+        {content}
+      </div>
+    );
+  };
+
+  if (activeLesson) return renderActiveLesson();
 
   return (
     <div className={`min-h-screen bg-[#f8fafc] p-4 md:p-10 ${isRtl ? 'font-arabic' : 'font-sans'} relative overflow-x-hidden`} dir={isRtl ? 'rtl' : 'ltr'}>

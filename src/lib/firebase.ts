@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer, writeBatch, increment, serverTimestamp, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDocFromServer, writeBatch, increment, serverTimestamp, getDoc, updateDoc } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
@@ -92,6 +92,64 @@ export async function redeemVoucher(userId: string, code: string) {
       throw error;
     }
     handleFirestoreError(error, OperationType.WRITE, `vouchers/${code}`);
+  }
+}
+
+export async function buyChildhoodSubscription(userId: string, pkg: any) {
+  try {
+    const batch = writeBatch(db);
+    const timestamp = new Date().getTime();
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + (pkg.durationDays || 30));
+    
+    const transactionId = `${userId}_childsub_${timestamp}`;
+    const transRef = doc(db, 'transactions', transactionId);
+    batch.set(transRef, {
+      id: transactionId,
+      userId,
+      amount: -pkg.priceSAR,
+      type: 'childhood_subscription',
+      description: `Subscription: ${pkg.label}`,
+      timestamp: serverTimestamp()
+    });
+
+    const userRef = doc(db, 'users', userId);
+    batch.update(userRef, {
+      childhoodSubscriptionType: pkg.id.split('_')[0],
+      dailyMinutesLimit: pkg.dailyMinutes,
+      remainingMinutesToday: pkg.dailyMinutes,
+      lastMinutesResetDate: new Date().toISOString().split('T')[0],
+      subscriptionExpiryDate: expiryDate,
+      lastSeen: serverTimestamp()
+    });
+
+    await batch.commit();
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, 'users/subscriptions');
+  }
+}
+
+export async function resetDailyMinutes(userId: string, limit: number) {
+  try {
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+      remainingMinutesToday: limit,
+      lastMinutesResetDate: new Date().toISOString().split('T')[0]
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `users/${userId}`);
+  }
+}
+
+export async function updateRemainingMinutes(userId: string, minutes: number) {
+  try {
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+      remainingMinutesToday: minutes
+    });
+  } catch (error) {
+    // Avoid blocking on frequent updates, just log
+    console.error("Failed to update minutes:", error);
   }
 }
 

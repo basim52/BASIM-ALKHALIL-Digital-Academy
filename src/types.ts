@@ -28,13 +28,19 @@ export interface UserProfile {
   phoneNumber?: string;
   lastSeen?: number;
   credits?: number; // Credit balance
+  // Childhood Minutes System
+  dailyMinutesLimit?: number;
+  remainingMinutesToday?: number;
+  lastMinutesResetDate?: string; // YYYY-MM-DD
+  childhoodSubscriptionType?: 'bronze' | 'silver' | 'gold' | null;
+  subscriptionExpiryDate?: any;
 }
 
 export interface CreditTransaction {
   id: string;
   userId: string;
   amount: number; // Positive for purchase, negative for usage
-  type: 'purchase' | 'consumption';
+  type: 'purchase' | 'consumption' | 'childhood_subscription';
   description: string;
   timestamp: any;
 }
@@ -44,12 +50,22 @@ export interface SubscriptionPackage {
   priceSAR: number;
   credits: number;
   label: string;
+  dailyMinutes?: number;
 }
 
 export const CREDIT_PACKAGES: SubscriptionPackage[] = [
   { id: 'starter', priceSAR: 30, credits: 12, label: 'باقة الانطلاق - 12 درس' },
   { id: 'standard', priceSAR: 60, credits: 35, label: 'باقة المهارة - 35 درس' },
   { id: 'pro', priceSAR: 120, credits: 80, label: 'باقة الإتقان - 80 درس' }
+];
+
+export const CHILDHOOD_PACKAGES = [
+  { id: 'bronze_3', priceSAR: 10, dailyMinutes: 10, durationDays: 3, label: 'برونزية (تجربة 3 أيام) - 10 دقائق يومياً' },
+  { id: 'bronze_monthly', priceSAR: 35, dailyMinutes: 10, durationDays: 30, label: 'برونزية شهرية - 10 دقائق يومياً' },
+  { id: 'silver_3', priceSAR: 18, dailyMinutes: 20, durationDays: 3, label: 'فضية (تجربة 3 أيام) - 20 دقيقة يومياً' },
+  { id: 'silver_monthly', priceSAR: 55, dailyMinutes: 20, durationDays: 30, label: 'فضية شهرية - 20 دقيقة يومياً' },
+  { id: 'gold_3', priceSAR: 25, dailyMinutes: 30, durationDays: 3, label: 'ذهبية (تجربة 3 أيام) - 30 دقيقة يومياً' },
+  { id: 'gold_monthly', priceSAR: 70, dailyMinutes: 30, durationDays: 30, label: 'ذهبية شهرية - 30 دقيقة يومياً' },
 ];
 
 export const GIFT_PACKAGE = { id: 'gift', priceSAR: 0, credits: 2, label: 'باقة الهدية - 2 درس مجاناً' };

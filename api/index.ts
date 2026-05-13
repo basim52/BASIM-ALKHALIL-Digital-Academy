@@ -41,7 +41,7 @@ app.post("/api/lesson/chat", async (req, res) => {
     
     const ai = getAI();
     const result = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-2.0-flash",
       contents: [{ role: 'user', parts: [{ text: `CONTEXT:\n${context}\n\nUSER QUESTION:\n${prompt}` }] }],
       config: {
         systemInstruction: "You are a helpful teaching assistant for Basim Alkhalil Digital Academy.",
@@ -50,6 +50,7 @@ app.post("/api/lesson/chat", async (req, res) => {
 
     res.json({ text: result.text || "" });
   } catch (error: any) {
+    console.error("Chat Error:", error);
     res.status(500).json({ error: error.message || "Failed to generate" });
   }
 });
@@ -61,7 +62,7 @@ app.post("/api/ai-partner/chat", async (req, res) => {
     
     const ai = getAI();
     const result = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-2.0-flash",
       contents: [
         ...(Array.isArray(history) ? history : []).map((m: any) => ({
           role: m.role === 'user' ? 'user' : 'model',
@@ -76,6 +77,7 @@ app.post("/api/ai-partner/chat", async (req, res) => {
 
     res.json({ text: result.text || "" });
   } catch (error: any) {
+    console.error("Partner Chat Error:", error);
     res.status(500).json({ error: error.message || "Failed to generate" });
   }
 });
@@ -87,7 +89,7 @@ app.post("/api/admin/analyze", async (req, res) => {
     
     const ai = getAI();
     const result = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-2.0-flash",
       contents: [{ 
         role: 'user', 
         parts: [{ 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations, Language } from '../lib/translations';
-import { CREDIT_PACKAGES, CreditCost, GIFT_PACKAGE } from '../types';
+import { CREDIT_PACKAGES, CreditCost, GIFT_PACKAGE, CHILDHOOD_PACKAGES } from '../types';
 import { 
   Wallet, 
   CreditCard, 
@@ -12,9 +12,12 @@ import {
   Gem,
   ArrowUpRight,
   TrendingDown,
-  ShieldAlert
+  ShieldAlert,
+  Baby,
+  Star,
+  Zap
 } from 'lucide-react';
-import { auth, db } from '../lib/firebase';
+import { auth, db, buyChildhoodSubscription } from '../lib/firebase';
 import { 
   doc, 
   getDoc, 
@@ -144,34 +147,40 @@ export const CreditSystem = ({ lang }: { lang: Language }) => {
     setBuying(pkg.id);
     
     try {
-      const timestamp = new Date().getTime();
-      const transactionId = `${auth.currentUser.uid}_${timestamp}`;
-      const batch = writeBatch(db);
+      if (pkg.dailyMinutes) {
+        // Childhood subscription
+        await buyChildhoodSubscription(auth.currentUser.uid, pkg);
+      } else {
+        // Regular credits
+        const timestamp = new Date().getTime();
+        const transactionId = `${auth.currentUser.uid}_${timestamp}`;
+        const batch = writeBatch(db);
 
-      // Create transaction
-      const transRef = doc(db, 'transactions', transactionId);
-      batch.set(transRef, {
-        id: transactionId,
-        userId: auth.currentUser.uid,
-        amount: pkg.credits,
-        type: 'purchase',
-        description: `شراء ${pkg.label}`,
-        timestamp: serverTimestamp()
-      });
+        // Create transaction
+        const transRef = doc(db, 'transactions', transactionId);
+        batch.set(transRef, {
+          id: transactionId,
+          userId: auth.currentUser.uid,
+          amount: pkg.credits,
+          type: 'purchase',
+          description: `شراء ${pkg.label}`,
+          timestamp: serverTimestamp()
+        });
 
-      // Update user credits
-      const userRef = doc(db, 'users', auth.currentUser.uid);
-      batch.update(userRef, {
-        credits: increment(pkg.credits),
-        lastSeen: serverTimestamp()
-      });
+        // Update user credits
+        const userRef = doc(db, 'users', auth.currentUser.uid);
+        batch.update(userRef, {
+          credits: increment(pkg.credits),
+          lastSeen: serverTimestamp()
+        });
 
-      await batch.commit();
-      setCredits(prev => prev + pkg.credits);
-      // Success animation or message
+        await batch.commit();
+        setCredits(prev => prev + pkg.credits);
+      }
+      setMessage({ type: 'success', text: isRtl ? 'تم تفعيل الباقة بنجاح!' : 'Package activated successfully!' });
     } catch (err) {
       console.error("Purchase error:", err);
-      alert(t.insufficientCredits); // Simplified error for demo
+      setMessage({ type: 'error', text: isRtl ? 'حدث خطأ في عملية الشراء' : 'Purchase error occurred' });
     } finally {
       setBuying(null);
     }
@@ -347,6 +356,49 @@ export const CreditSystem = ({ lang }: { lang: Language }) => {
                 </button>
               </motion.div>
             ))}
+          </div>
+
+          <div className="mt-12 mb-8">
+            <div className="flex items-center gap-4 mb-6">
+              <Baby className="text-indigo-600" size={32} />
+              <h3 className="text-3xl font-black text-[#002147]">{isRtl ? 'باقات الطفولة المبكرة' : 'Early Childhood Packages'}</h3>
+            </div>
+            <p className="text-slate-500 font-medium mb-8">
+              {isRtl ? 'باقات تعتمد على دقائق التفاعل الصوتي اليومية مع الميكروفون المذكي.' : 'Packages based on daily voice interaction minutes via smart microphone.'}
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {CHILDHOOD_PACKAGES.map((pkg) => (
+                <motion.div 
+                  key={pkg.id}
+                  whileHover={{ x: 8 }}
+                  className="bg-white border-2 border-slate-50 rounded-[2rem] p-6 flex items-center justify-between group hover:border-indigo-100 transition-all shadow-sm"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
+                      pkg.id.includes('bronze') ? 'bg-orange-50 text-orange-600' :
+                      pkg.id.includes('silver') ? 'bg-slate-50 text-slate-400' :
+                      'bg-yellow-50 text-yellow-600'
+                    }`}>
+                      {pkg.dailyMinutes === 10 ? <Zap size={24} /> : pkg.dailyMinutes === 20 ? <Star size={24} /> : <Gem size={24} />}
+                    </div>
+                    <div>
+                      <h4 className="font-black text-[#002147] text-sm md:text-base leading-tight">{pkg.label}</h4>
+                      <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
+                        {pkg.dailyMinutes} {isRtl ? 'دقيقة يومياً' : 'Mins daily'} • {pkg.priceSAR} SAR
+                      </p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => purchasePackage(pkg)}
+                    disabled={buying !== null}
+                    className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest group-hover:bg-indigo-700 transition-all disabled:opacity-50"
+                  >
+                    {buying === pkg.id ? '...' : (isRtl ? 'اشترك' : 'Subscribe')}
+                  </button>
+                </motion.div>
+              ))}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
