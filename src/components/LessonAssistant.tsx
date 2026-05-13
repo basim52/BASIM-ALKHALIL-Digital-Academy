@@ -434,7 +434,7 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
             <X key="close" size={28} />
           ) : (
             <div key="open" className="relative">
-              <MessageCircle size={28} />
+              <BrainCircuit size={28} />
               <motion.div 
                 animate={{ scale: [1, 1.2, 1] }} 
                 transition={{ repeat: Infinity, duration: 2 }}

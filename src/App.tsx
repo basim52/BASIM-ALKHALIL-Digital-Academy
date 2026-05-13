@@ -59,6 +59,7 @@ import { ReadingLesson } from './components/ReadingLesson';
 import { CreditSystem } from './components/CreditSystem';
 import { OxfordLesson } from './components/OxfordLesson';
 import { EarlyChildhoodHome } from './components/EarlyChildhood/EarlyChildhoodHome';
+import { LessonAssistant } from './components/LessonAssistant';
 import { Wallet } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { familyConstellationsLesson } from './data/lessons/r_a1_4';
@@ -1555,27 +1556,25 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
                           <Play size={18} fill="currentColor" />
                           {isRtl ? 'بدء الدرس' : 'Start Lesson'}
                         </button>
-                        {selectedCategory !== CurriculumCategory.CONVERSATION && (
-                          <button
-                            onClick={() => {
-                              onSelectLesson({
-                                id: `ai_support_${unit.id}`,
-                                title: unit.title,
-                                titleAr: unit.titleAr,
-                                content: `Interactive AI Support for ${unit.title}. Ask anything!`,
-                                contentAr: `دعم ذكي تفاعلي لـ ${unit.titleAr}. اسأل عن أي شيء!`,
-                                exercises: [],
-                                quiz: [],
-                                proficiencyLevel: selectedLevel!,
-                                order: 99
-                              } as Lesson, selectedCategory, selectedLevel!);
-                            }}
-                            className="flex-1 bg-purple-50 text-purple-600 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-xs md:text-sm flex items-center justify-center gap-3 hover:bg-purple-600 hover:text-white transition-all group"
-                          >
-                            <MessageSquare size={18} />
-                            {isRtl ? 'مساعد ذكي' : 'AI Support'}
-                          </button>
-                        )}
+                        <button
+                          onClick={() => {
+                            onSelectLesson({
+                              id: `ai_support_${unit.id}`,
+                              title: unit.title,
+                              titleAr: unit.titleAr,
+                              content: `Interactive AI Support for ${unit.title}. Ask anything!`,
+                              contentAr: `دعم ذكي تفاعلي لـ ${unit.titleAr}. اسأل عن أي شيء!`,
+                              exercises: [],
+                              quiz: [],
+                              proficiencyLevel: selectedLevel!,
+                              order: 99
+                            } as Lesson, selectedCategory, selectedLevel!);
+                          }}
+                          className="flex-1 bg-purple-50 text-purple-600 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-xs md:text-sm flex items-center justify-center gap-3 hover:bg-purple-600 hover:text-white transition-all group"
+                        >
+                          <MessageSquare size={18} />
+                          {isRtl ? 'مساعد ذكي' : 'AI Support'}
+                        </button>
                         <button
                           onClick={() => addToSchedule(unit.id, isRtl ? unit.titleAr : unit.title)}
                           disabled={bookingStatus[unit.id] === 'booking' || bookingStatus[unit.id] === 'success'}
@@ -2547,6 +2546,13 @@ export default function App() {
           </main>
         </motion.div>
       </AnimatePresence>
+      {userProfile && (
+        <LessonAssistant 
+          lessonTitle={activeLesson ? (isRtl ? activeLesson.titleAr : activeLesson.title) : (isRtl ? "مساعد الأكاديمية" : "Academy Assistant")}
+          lessonContent={activeLesson ? (isRtl ? activeLesson.contentAr : activeLesson.content) : (isRtl ? "أنا هنا لمساعدتك في أي استفسار حول الأكاديمية أو المناهج." : "I am here to help you with any questions about the academy or curriculum.") }
+          isRtl={isRtl}
+        />
+      )}
     </div>
   );
 }

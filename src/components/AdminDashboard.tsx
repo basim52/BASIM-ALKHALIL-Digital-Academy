@@ -40,6 +40,21 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   
+  const testApiConnection = async () => {
+    setAnalyzing(true);
+    setAnalysisResult(null);
+    try {
+      const resp = await fetch('/api/health');
+      if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+      const data = await resp.json();
+      setAnalysisResult(`### System Health\n- **Status:** ${data.status}\n- **Gemini Key:** ${data.geminiKeySet ? '✅ Configured' : '❌ NOT SET'}\n- **Environment:** ${data.isProduction ? 'Production' : 'Development'}\n- **Server Time:** ${data.time}`);
+    } catch (err: any) {
+      setAnalysisResult(`### ❌ Connection Failed\nError: ${err.message}`);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+  
   // Voucher State
   const [voucherCredits, setVoucherCredits] = useState(12);
   const [generating, setGenerating] = useState(false);
@@ -233,6 +248,51 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
            </div>
         </div>
       </header>
+
+      {/* Diagnostics Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        <div className="bg-[#002147] p-8 rounded-[2.5rem] shadow-xl text-white">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
+              <Activity className="text-emerald-400" size={24} />
+            </div>
+            <div>
+              <h2 className="text-xl font-black">{isRtl ? 'حالة النظام' : 'System Diagnostics'}</h2>
+              <p className="text-white/60 text-xs font-bold uppercase tracking-widest">{isRtl ? 'فحص الاتصال والذكاء الاصطناعي' : 'VERIFY CONNECTIVITY'}</p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <button
+               onClick={testApiConnection}
+               disabled={analyzing}
+               className="w-full py-4 bg-emerald-500 rounded-2xl font-black text-sm flex items-center justify-center gap-3 hover:bg-emerald-400 transition-all active:scale-95 disabled:opacity-50"
+            >
+              <BrainCircuit size={18} />
+              {analyzing ? (isRtl ? 'جاري الفحص...' : 'Checking...') : (isRtl ? 'فحص اتصال API' : 'Test API Connection')}
+            </button>
+            
+            {analysisResult && (
+              <div className="bg-white/10 p-6 rounded-2xl border border-white/5 prose prose-invert prose-sm max-w-none">
+                <ReactMarkdown>{analysisResult}</ReactMarkdown>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col justify-center">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center">
+              <Users className="text-blue-600" size={24} />
+            </div>
+            <div>
+              <h2 className="text-xl font-black text-[#002147]">{isRtl ? 'الطلاب النشطون' : 'Active Students'}</h2>
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">{isRtl ? 'إحصائيات فورية' : 'REAL-TIME STATS'}</p>
+            </div>
+          </div>
+          <div className="text-5xl font-black text-[#002147] mb-2">{onlineStudents.length}</div>
+          <p className="text-sm font-bold text-slate-400">{isRtl ? 'من إجمالي' : 'out of'} {allStudents.length} {isRtl ? 'طالباً مسجلاً' : 'registered students'}</p>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left: Active Students & Stats */}
