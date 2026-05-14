@@ -122,9 +122,44 @@ async function startServer() {
         Category: ${category}
         Level: ${level}
         
-        Task: Create a deep, high-quality interactive lesson with specialized sections (warmup, content, exercises, quiz).
-        Output JSON STRICTLY following the schema. Ensure everything is in BOTH English and Professional Academic Arabic.
-        JSON format: { "title": "...", "titleAr": "...", "warmup": {...}, "content": "...", "contentAr": "...", "imageryPrompt": "...", "exercises": [...], "quiz": [...] }
+        Task: Create a deep, high-quality interactive lesson with specialized sections.
+        Output JSON STRICTLY following this schema:
+        {
+          "title": "Topic Title",
+          "titleAr": "العنوان بالعربية",
+          "warmup": {
+            "mission": "Mission statement",
+            "missionAr": "بيان المهمة",
+            "objectives": ["Obj 1", "Obj 2"],
+            "objectivesAr": ["هدف 1", "هدف 2"]
+          },
+          "content": "Detailed markdown content in English",
+          "contentAr": "محتوى مفصل بالعربية بتنسيق مارك داون",
+          "imageryPrompt": "DALL-E style prompt for lesson image",
+          "exercises": [
+            {
+              "type": "fill",
+              "instruction": "Complete the sentences",
+              "instructionAr": "أكمل الجمل التالية",
+              "items": [
+                { "text": "The cat ___ on the mat.", "textAr": "القطة ___ على السجادة.", "answer": "sat" }
+              ]
+            }
+          ],
+          "quiz": [
+            {
+              "question": "Question text",
+              "questionAr": "نص السؤال",
+              "options": ["A", "B", "C", "D"],
+              "optionsAr": ["أ", "ب", "ج", "د"],
+              "correctIndex": 0,
+              "explanation": "Why it's correct",
+              "explanationAr": "سبب صحة الإجابة"
+            }
+          ]
+        }
+        
+        Ensure everything is in BOTH English and Professional Academic Arabic.
       `;
 
       const result = await ai.models.generateContent({

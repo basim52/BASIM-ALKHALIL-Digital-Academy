@@ -10,7 +10,10 @@ import {
   BrainCircuit,
   Bell,
   Ticket,
-  Plus
+  Plus,
+  Hash,
+  LayoutDashboard,
+  CheckCircle
 } from 'lucide-react';
 import { 
   collection, 

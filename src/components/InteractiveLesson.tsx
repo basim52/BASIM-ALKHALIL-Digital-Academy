@@ -54,6 +54,10 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastQuizResult, setLastQuizResult] = useState<{ correct: boolean, explanation: string } | null>(null);
+  
+  // Exercise state
+  const [exerciseAnswers, setExerciseAnswers] = useState<Record<string, string>>({});
+  const [showExerciseValidation, setShowExerciseValidation] = useState(false);
 
   const tabs = [
     { id: 'warmup', label: isRtl ? 'التهيئة' : 'Warm-Up', icon: <BookOpen size={18} /> },
@@ -82,6 +86,17 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
       explanation: isRtl ? q.explanationAr : q.explanation
     });
     setShowFeedback(true);
+  };
+
+  const handleExerciseInput = (exIdx: number, itemIdx: number, val: string) => {
+    setExerciseAnswers(prev => ({
+      ...prev,
+      [`${exIdx}-${itemIdx}`]: val
+    }));
+  };
+
+  const checkExerciseAnswers = () => {
+    setShowExerciseValidation(true);
   };
 
   // Content processing for "Grammar" view
@@ -296,31 +311,52 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
                   <div key={idx} className="bg-white p-10 rounded-[2.5rem] border border-ink/5 shadow-xl">
                     <div className="flex items-center gap-3 mb-10">
                       <PenTool className="text-amber-accent" size={24} />
-                      <h3 className="text-2xl font-serif font-black">{isRtl ? ex.instructionAr : ex.instruction}</h3>
+                      <h3 className="text-2xl font-serif font-black">
+                        {(isRtl ? ex.instructionAr : ex.instruction) || (isRtl ? "تمرين تطبيقي" : "Practical Exercise")}
+                      </h3>
                     </div>
 
                     <div className="space-y-10">
-                      {ex.type === 'fill' && (
+                      {(ex.type === 'fill' || !ex.type) && (
                         <div className="space-y-6">
-                           {ex.items.map((item: any, i: number) => (
-                             <div key={i} className="text-2xl leading-loose font-medium">
-                               <span className="text-ink/30 mr-4 font-mono text-sm leading-none">{i+1}.</span>
-                               {isRtl ? item.textAr : item.text}
-                             </div>
-                           ))}
-                           <div className="mt-8 p-6 bg-cream rounded-2xl border border-dashed border-ink/10">
-                             <p className="text-xs font-black uppercase tracking-widest text-ink/40 mb-4">{isRtl ? 'اكتب إجابتك هنا:' : 'Type your answers:'}</p>
-                             <div className="flex flex-wrap gap-4">
-                               {ex.items.map((_: any, i: number) => (
-                                 <input 
-                                   key={i}
-                                   type="text" 
-                                   placeholder={`(${i+1})`}
-                                   className="w-32 p-3 bg-white border border-ink/10 rounded-xl focus:border-amber-accent outline-none font-bold"
-                                 />
-                               ))}
-                             </div>
-                           </div>
+                           {ex.items.map((item: any, i: number) => {
+                             const userAns = exerciseAnswers[`${idx}-${i}`] || "";
+                             const isCorrect = userAns.trim().toLowerCase() === (item.answer || "").trim().toLowerCase();
+                             
+                             return (
+                               <div key={i} className="space-y-4">
+                                 <div className="text-2xl leading-loose font-medium flex gap-4">
+                                   <span className="text-ink/30 font-mono text-sm leading-none mt-4">{i+1}.</span>
+                                   <div className="flex-1">
+                                      <ReactMarkdown>{isRtl ? (item.textAr || item.text) : item.text}</ReactMarkdown>
+                                   </div>
+                                 </div>
+                                 <div className="flex items-center gap-3">
+                                   <input 
+                                     type="text" 
+                                     value={userAns}
+                                     onChange={(e) => handleExerciseInput(idx, i, e.target.value)}
+                                     placeholder={isRtl ? "اكتب الإجابة..." : "Type answer..."}
+                                     className={`flex-1 max-w-md p-4 bg-cream/30 border-2 rounded-2xl outline-none font-bold transition-all ${
+                                       showExerciseValidation 
+                                         ? isCorrect ? 'border-correct bg-correct/5 text-correct' : 'border-wrong bg-wrong/5 text-wrong'
+                                         : 'border-ink/5 focus:border-amber-accent'
+                                     }`}
+                                   />
+                                   {showExerciseValidation && (
+                                     <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                                       {isCorrect ? <Check className="text-correct" size={20} /> : <X className="text-wrong" size={20} />}
+                                     </motion.div>
+                                   )}
+                                 </div>
+                                 {showExerciseValidation && !isCorrect && (
+                                   <p className="text-xs font-bold text-correct">
+                                     {isRtl ? `الإجابة الصحيحة: ${item.answer}` : `Correct answer: ${item.answer}`}
+                                   </p>
+                                 )}
+                               </div>
+                             );
+                           })}
                         </div>
                       )}
                       
@@ -338,7 +374,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
                              {[...ex.items].sort(() => Math.random() - 0.5).map((item: any, i: number) => (
                                <button key={i} className="w-full text-right p-5 bg-white border-2 border-ink/5 hover:border-amber-accent rounded-2xl font-bold transition-all">
                                  {isRtl ? item.answerAr || item.answer : item.answer}
-                               </button>
+                                </button>
                              ))}
                            </div>
                          </div>
@@ -357,7 +393,10 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
               )}
               
               {lesson.exercises && lesson.exercises.length > 0 && (
-                <button className="w-full py-5 bg-ink text-cream rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-amber-accent transition-all shadow-xl hover:-translate-y-1">
+                <button 
+                  onClick={checkExerciseAnswers}
+                  className="w-full py-5 bg-oxford-navy text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-amber-accent transition-all shadow-xl hover:-translate-y-1"
+                >
                   {isRtl ? 'تحقق من الإجابات' : 'Check Answers'}
                 </button>
               )}
