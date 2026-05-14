@@ -159,7 +159,7 @@ export const WhatsAppNotifications = ({
           setSharingData(null);
         }
       }
-    }, 100);
+    }, 300);
   };
 
   return (

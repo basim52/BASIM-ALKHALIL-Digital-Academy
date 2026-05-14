@@ -374,6 +374,7 @@ const ScheduleManager = ({ studentId, studentName, lang, canEdit = false }: { st
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const [newItem, setNewItem] = useState({ day: 'Monday', time: '10:00', subject: '' });
   const [isExporting, setIsExporting] = useState(false);
+  const [itemToExport, setItemToExport] = useState<ScheduleItem | null>(null);
 
   useEffect(() => {
     const q = query(collection(db, 'schedules'), where('studentId', '==', studentId));
@@ -435,7 +436,53 @@ const ScheduleManager = ({ studentId, studentName, lang, canEdit = false }: { st
       } else {
         setIsExporting(false);
       }
-    }, 100);
+    }, 300);
+  };
+
+  const handleExportItemImage = (item: ScheduleItem) => {
+    setItemToExport(item);
+    setIsExporting(true);
+    
+    setTimeout(async () => {
+      const element = document.getElementById('single-item-capture-card');
+      if (element) {
+        try {
+          const canvas = await html2canvas(element, {
+            useCORS: true,
+            scale: 2,
+            backgroundColor: '#ffffff',
+            logging: false,
+            onclone: (clonedDoc) => {
+              const el = clonedDoc.getElementById('single-item-capture-card');
+              if (el) el.style.display = 'block';
+              
+              // Remove oklch to prevent parser errors in captured image
+              const styles = clonedDoc.getElementsByTagName('style');
+              for (let i = 0; i < styles.length; i++) {
+                const style = styles[i];
+                if (style.innerHTML.includes('oklch')) {
+                  style.innerHTML = style.innerHTML.replace(/oklch\([^)]+\)/g, '#f1f5f9');
+                }
+              }
+            }
+          });
+          
+          const dataUrl = canvas.toDataURL('image/png');
+          const link = document.createElement('a');
+          link.download = `Lesson-${item.subject || item.unitTitle}-${item.time}.png`;
+          link.href = dataUrl;
+          link.click();
+        } catch (err) {
+          console.error("Failed to capture item:", err);
+        } finally {
+          setIsExporting(false);
+          setItemToExport(null);
+        }
+      } else {
+        setIsExporting(false);
+        setItemToExport(null);
+      }
+    }, 300);
   };
 
   const addItem = async () => {
@@ -505,6 +552,22 @@ const ScheduleManager = ({ studentId, studentName, lang, canEdit = false }: { st
         />
       </div>
 
+      {/* Hidden Card for Single Item Capture */}
+      <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+        {itemToExport && (
+          <ShareableNotification 
+            id="single-item-capture-card"
+            lang={lang}
+            studentName={studentName}
+            type="schedule"
+            schedule={[{
+              day: t.days[itemToExport.day as keyof typeof t.days],
+              time: itemToExport.time
+            }]}
+          />
+        )}
+      </div>
+
       {canEdit && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8 p-4 bg-slate-50 rounded-[1.5rem]">
           <select 
@@ -551,6 +614,14 @@ const ScheduleManager = ({ studentId, studentName, lang, canEdit = false }: { st
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => handleExportItemImage(item)}
+                  disabled={isExporting}
+                  className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
+                  title={isRtl ? 'تحميل كصورة' : 'Download as Image'}
+                >
+                  <Download size={14} className={isExporting && itemToExport?.id === item.id ? "animate-pulse" : ""} />
+                </button>
                 <button 
                   onClick={() => handleWhatsAppShare(item)}
                   className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-all shadow-sm"

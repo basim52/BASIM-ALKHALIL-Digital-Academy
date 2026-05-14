@@ -20,15 +20,16 @@ export const ShareableNotification = ({ lang, studentName, message, schedule, ty
       style={{ 
         position: 'relative',
         overflow: 'hidden',
-        textAlign: isRtl ? 'right' : 'left',
         width: '600px',
         padding: '3rem',
-        direction: isRtl ? 'rtl' : 'ltr',
         backgroundColor: '#ffffff',
         border: '12px solid #ecfdf5',
         borderRadius: '3rem',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.2)',
-        fontFamily: 'Cairo, "IBM Plex Sans Arabic", sans-serif'
+        fontFamily: 'Cairo, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+        // Force LTR for the container to maintain layout stability in canvas
+        direction: 'ltr',
+        textAlign: 'left'
       }}
     >
       {/* Background Decorations */}
@@ -63,6 +64,8 @@ export const ShareableNotification = ({ lang, studentName, message, schedule, ty
       <div 
         style={{ 
           display: 'flex',
+          // If RTL, we reverse the row to pull logo to the left and text to the right
+          flexDirection: isRtl ? 'row-reverse' : 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
           position: 'relative',
@@ -72,7 +75,7 @@ export const ShareableNotification = ({ lang, studentName, message, schedule, ty
           paddingBottom: '2rem' 
         }}
       >
-        <div>
+        <div style={{ textAlign: isRtl ? 'right' : 'left' }}>
           <h1 
             style={{ 
               fontSize: '1.875rem', 
@@ -114,7 +117,7 @@ export const ShareableNotification = ({ lang, studentName, message, schedule, ty
       </div>
 
       {/* Content */}
-      <div style={{ position: 'relative', zIndex: 10, marginBottom: '3rem' }}>
+      <div style={{ position: 'relative', zIndex: 10, marginBottom: '3rem', textAlign: isRtl ? 'right' : 'left' }}>
         <div 
           style={{ 
             display: 'inline-block',
@@ -130,7 +133,9 @@ export const ShareableNotification = ({ lang, studentName, message, schedule, ty
             color: '#047857'
           }}
         >
-          {type === 'schedule' ? 'Weekly Schedule' : (type === 'encouragement' ? 'Encouragement' : 'Academic Alert')}
+          {type === 'schedule' 
+            ? (schedule && schedule.length === 1 ? 'Class Details' : 'Weekly Schedule') 
+            : (type === 'encouragement' ? 'Encouragement' : 'Academic Alert')}
         </div>
         
         <h2 
@@ -151,13 +156,14 @@ export const ShareableNotification = ({ lang, studentName, message, schedule, ty
             padding: '2rem', 
             borderRadius: '2rem', 
             border: '1px solid #f1f5f9',
-            backgroundColor: '#f8fafc' 
+            backgroundColor: '#f8fafc',
+            textAlign: isRtl ? 'right' : 'left'
           }}
         >
           {type === 'schedule' && schedule ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {schedule.map((item, index) => (
-                <div key={index} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #e2e8f0', paddingBottom: '0.75rem' }}>
+                <div key={index} style={{ display: 'flex', flexDirection: isRtl ? 'row-reverse' : 'row', justifyContent: 'space-between', borderBottom: '1px dashed #e2e8f0', paddingBottom: '0.75rem' }}>
                   <span style={{ fontWeight: 900, color: '#002147' }}>{item.day}</span>
                   <span style={{ fontWeight: 700, color: '#10b981' }}>{item.time}</span>
                 </div>
@@ -176,7 +182,8 @@ export const ShareableNotification = ({ lang, studentName, message, schedule, ty
                   width: '3rem', 
                   height: '3rem', 
                   color: '#f1f5f9',
-                  transform: isRtl ? 'none' : 'scaleX(-1)'
+                  transform: isRtl ? 'none' : 'scaleX(-1)',
+                  opacity: 0.5
                 }}
               >
                 <path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H15.017C14.4647 8 14.017 8.44772 14.017 9V11C14.017 12.1046 13.1216 13 12.017 13H11.017C10.4647 13 10.017 12.5523 10.017 12V5C10.017 4.44772 10.4647 4 11.017 4H19.017C20.6738 4 22.017 5.34315 22.017 7V15C22.017 16.6569 20.6738 18 19.017 18H16.017C15.4647 18 15.017 18.4477 15.017 19V21H14.017ZM4.017 21L4.017 18C4.017 16.8954 4.9124 16 6.017 16H9.017C9.56931 16 10.017 15.5523 10.017 15V9C10.017 8.44772 9.56931 8 9.017 8H5.017C4.46474 8 4.017 8.44772 4.017 9V11C4.017 12.1046 3.1216 13 2.017 13H1.017C0.464741 13 0.0170068 12.5523 0.0170068 12V5C0.0170068 4.44772 0.464741 4 1.017 4H9.017C10.6738 4 12.017 5.34315 12.017 7V15C12.017 16.6569 10.6738 18 9.017 18H6.017C5.46474 18 5.017 18.4477 5.017 19V21H4.017Z" />
@@ -187,9 +194,11 @@ export const ShareableNotification = ({ lang, studentName, message, schedule, ty
                   zIndex: 10,
                   fontSize: '1.5rem', 
                   fontWeight: 700, 
-                  lineHeight: 1.625, 
+                  lineHeight: 1.8, 
                   margin: 0,
-                  color: '#334155' 
+                  color: '#334155',
+                  wordBreak: 'break-word',
+                  whiteSpace: 'pre-wrap'
                 }}
               >
                 {message}
@@ -203,13 +212,14 @@ export const ShareableNotification = ({ lang, studentName, message, schedule, ty
       <div 
         style={{ 
           display: 'flex',
+          flexDirection: isRtl ? 'row-reverse' : 'row',
           justifyContent: 'space-between',
           alignItems: 'flex-end',
           position: 'relative',
           zIndex: 10
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: '0.75rem' }}>
           <div 
             style={{ 
               width: '1rem', 
@@ -231,7 +241,7 @@ export const ShareableNotification = ({ lang, studentName, message, schedule, ty
             Verification: {new Date().toLocaleDateString('en-US')}
           </span>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: isRtl ? 'flex-start' : 'flex-end', textAlign: isRtl ? 'left' : 'right' }}>
           <span 
             style={{ 
               fontSize: '10px', 
