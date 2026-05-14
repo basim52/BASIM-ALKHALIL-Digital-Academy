@@ -417,7 +417,10 @@ const AIParentNotes = ({ profile, studentId, lang }: { profile: UserProfile, stu
         })
       });
       
-      if (!resp.ok) throw new Error(`Server responded with ${resp.status}`);
+      if (!resp.ok) {
+        const errorData = await resp.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server error: ${resp.status}`);
+      }
       const data = await resp.json();
       const aiResponse = data.text || (lang === 'ar' ? "سأقوم بمراجعة هذا الأمر شخصياً." : "I will look into this personally.");
 
@@ -960,12 +963,16 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
         })
       });
 
-      if (!resp.ok) throw new Error(`Server responded with ${resp.status}`);
+      if (!resp.ok) {
+        const errorData = await resp.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server error: ${resp.status}`);
+      }
       const data = await resp.json();
       setSmartReport(data.text || "عذراً، تعذر توليد التقرير حالياً.");
-    } catch (err) {
+    } catch (err: any) {
       console.error("AI Report Error:", err);
-      setError("فشل في توليد التقرير الذكي.");
+      const msg = err.error || err.message || (typeof err === 'string' ? err : JSON.stringify(err));
+      setError(`فشل في توليد التقرير: ${msg}`);
     } finally {
       setGeneratingReport(false);
     }

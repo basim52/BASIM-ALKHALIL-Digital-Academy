@@ -173,7 +173,13 @@ export const AIConversation = ({ onBack, lang }: { onBack: () => void, lang: Lan
 
     } catch (error: any) {
       console.error("AI Error:", error);
-      const errorMessage = error.message.startsWith('{') ? JSON.parse(error.message).error : error.message;
+      let errorMessage = "Unknown Error";
+      if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        errorMessage = error.error || error.message || JSON.stringify(error);
+      }
+      
       setMessages(prev => [...prev, { role: 'ai', text: `Error: ${errorMessage}. Please try again.`, timestamp: Date.now() }]);
     } finally {
       setIsThinking(false);

@@ -107,7 +107,8 @@ export const LessonAssistant: React.FC<LessonAssistantProps> = ({ lessonTitle, l
       }
     } catch (err: any) {
       console.error("Chat error:", err);
-      setError(`${isRtl ? 'خطأ:' : 'Error:'} ${err.message}`);
+      const msg = err.error || err.message || (typeof err === 'string' ? err : JSON.stringify(err));
+      setError(`${isRtl ? 'خطأ:' : 'Error:'} ${msg}`);
     } finally {
       setIsLoading(false);
     }

@@ -82,7 +82,7 @@ async function startServer() {
       }
 
       const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-flash-latest",
         contents: [
           { role: 'user', parts: [{ text: `CONTEXT:\n${context}\n\nUSER QUESTION:\n${prompt}` }] }
         ],
@@ -91,11 +91,16 @@ async function startServer() {
         }
       });
       
+      if (!result || !result.text) {
+        throw new Error("Empty response from AI");
+      }
+
       logToFile("SUCCESS /api/lesson/chat - Response generated");
-      res.json({ text: result.text || "" });
+      res.json({ text: result.text });
     } catch (error: any) {
-      logToFile(`Lesson Chat Error: ${error.message}`);
-      res.status(500).json({ error: error.message || "Failed to generate response" });
+      const errDetail = error.message || JSON.stringify(error);
+      logToFile(`Lesson Chat Error: ${errDetail}`);
+      res.status(500).json({ error: typeof errDetail === 'string' ? errDetail : "Internal Error" });
     }
   });
 
@@ -117,7 +122,7 @@ async function startServer() {
       `;
 
       const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-flash-latest",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -125,10 +130,11 @@ async function startServer() {
         }
       });
 
-      res.json(JSON.parse(result.text || "{}"));
+      if (!result || !result.text) throw new Error("Empty response from AI generator");
+      res.json(JSON.parse(result.text));
     } catch (error: any) {
       logToFile(`Lesson Generation Error: ${error.message}`);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error.message || "Failed to generate lesson content" });
     }
   });
 
@@ -140,25 +146,31 @@ async function startServer() {
       const systemInstruction = `
         You are an Oxford English Language Partner at Basim Alkhalil Digital Academy. 
         Respond naturally to keep the conversation going. Keep your response relatively short and clear.
-        Also, if this feels like a natural point to give feedback, provide a JSON-like summary [FEEDBACK] { ... }
+        Also, if this feels like a natural point to give feedback, provide a JSON-like summary [FEEDBACK] { "fluency": 0-100, "grammar": 0-100, "vocabulary": 0-100, "suggestions": ["..."] }
       `;
 
       const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-flash-latest",
         contents: [
           ...(Array.isArray(history) ? history : []).map((m: any) => ({
             role: m.role === 'user' ? 'user' : 'model',
-            parts: [{ text: m.text }]
-          })),
+            parts: [{ text: m.text || "" }]
+          })).filter(m => m.parts[0].text),
           { role: 'user', parts: [{ text: prompt }] }
         ],
         config: { systemInstruction }
       });
 
-      res.json({ text: result.text || "" });
+      if (!result || !result.text) {
+        logToFile("EMPTY result from Gemini");
+        return res.status(500).json({ error: "AI returned an empty response." });
+      }
+
+      res.json({ text: result.text });
     } catch (error: any) {
-      logToFile(`AI Partner Chat Error: ${error.message}`);
-      res.status(500).json({ error: error.message });
+      const errorDetail = error.message || JSON.stringify(error);
+      logToFile(`AI Partner Chat Error: ${errorDetail}`);
+      res.status(500).json({ error: typeof errorDetail === 'string' ? errorDetail : "Internal AI Error" });
     }
   });
 
@@ -174,14 +186,14 @@ async function startServer() {
       Language: ${lang === 'ar' ? 'Arabic' : 'English'}`;
 
       const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-flash-latest",
         contents: prompt
       });
 
       res.json({ text: result.text || "" });
     } catch (error: any) {
       logToFile(`Story Generation Error: ${error.message}`);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error.message || "Failed to generate story" });
     }
   });
 
@@ -191,7 +203,7 @@ async function startServer() {
     try {
       const { data, prompt } = req.body;
       const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-flash-latest",
         contents: `Analyze this data: ${JSON.stringify(data)}\n\nPrompt: ${prompt}`
       });
       res.json({ text: result.text || "" });
@@ -207,13 +219,13 @@ async function startServer() {
       const { videoTitle, level, lang } = req.body;
       const prompt = `Generate 3 multiple choice questions for: "${videoTitle}". Level: ${level}. JSON array format. Language: ${lang}`;
       const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-flash-latest",
         contents: prompt,
         config: { responseMimeType: "application/json" }
       });
       res.json(JSON.parse(result.text || "[]"));
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error.message || "Quiz generation failed" });
     }
   });
 
@@ -231,7 +243,7 @@ async function startServer() {
           // Start session on first message (which should contain context)
           if (!session && !isConnecting) {
             isConnecting = true;
-            const modelToUse = "gemini-3.1-flash-live-preview"; 
+            const modelToUse = "gemini-flash-live-latest"; 
             logToFile(`Initializing Gemini Live session: ${modelToUse}`);
 
             if (!process.env.GEMINI_API_KEY) {
