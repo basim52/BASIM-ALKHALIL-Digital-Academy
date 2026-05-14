@@ -971,7 +971,7 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             >
                   <div className="relative z-10">
                 {/* Connection Tester for Admin */}
-                {profile?.email?.toLowerCase() === 'basim5252@gmail.com' && (
+                {['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(profile?.email?.toLowerCase() || '') && (
                   <div className="absolute top-0 right-0 z-20">
                     <button 
                       onClick={async () => {
@@ -2296,7 +2296,7 @@ export default function App() {
     return () => settingsUnsubscribe();
   }, []);
 
-  const isAdmin = userProfile?.email?.toLowerCase() === 'basim5252@gmail.com';
+  const isAdmin = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(userProfile?.email?.toLowerCase() || '');
 
   useEffect(() => {
     if (userProfile?.role === UserRole.STUDENT && !userProfile.studentCode && currentUser) {
@@ -2487,7 +2487,7 @@ export default function App() {
         setActiveStudentId(user.uid); // Default to own UID
         try {
           // Special case for the master admin: ensure they have admin profile even if fetch fails
-          if (user.email === 'basim5252@gmail.com') {
+          if (['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(user.email || '')) {
             const adminProfile: UserProfile = {
               uid: user.uid,
               email: user.email,
@@ -2532,7 +2532,7 @@ export default function App() {
         } catch (error) {
           console.error("Auth profile fetch error:", error);
           // Only show fatal error if not the master admin (who has fallback)
-          if (user.email !== 'basim5252@gmail.com') {
+          if (!['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(user.email || '')) {
             handleFirestoreError(error, OperationType.GET, `users/${user.uid}`);
           }
         }
@@ -2584,7 +2584,7 @@ export default function App() {
 
   const handleStartAiChat = async () => {
     if (!userProfile) return;
-    const isAdmin = userProfile.email?.toLowerCase() === 'basim5252@gmail.com';
+    const isAdmin = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(userProfile.email?.toLowerCase() || '');
     const currentCredits = (userProfile as any).credits || 0;
     
     if (!isAdmin && currentCredits < CreditCost.AI_CONVERSATION) {
@@ -2621,7 +2621,7 @@ export default function App() {
   const handleLessonComplete = async () => {
     if (!userProfile || !activeLesson) return;
     
-    const isAdmin = userProfile.email?.toLowerCase() === 'basim5252@gmail.com';
+    const isAdmin = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(userProfile.email?.toLowerCase() || '');
     // Deduct Credit
     const cost = CreditCost.READING_LESSON;
     const currentCredits = (userProfile as any).credits || 0;
@@ -2692,7 +2692,7 @@ export default function App() {
         lang={lang} 
         onSelectLesson={async (lesson, category, level) => { 
           if (!userProfile) return;
-          const isAdmin = userProfile.email?.toLowerCase() === 'basim5252@gmail.com';
+          const isAdmin = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(userProfile.email?.toLowerCase() || '');
           
           if (category === CurriculumCategory.CONVERSATION) {
             handleStartAiChat();
@@ -2752,7 +2752,7 @@ export default function App() {
       return (
         <Leaderboard 
           lang={lang} 
-          isAdmin={userProfile?.email?.toLowerCase() === 'basim5252@gmail.com'} 
+          isAdmin={['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(userProfile?.email?.toLowerCase() || '')} 
         />
       );
     }

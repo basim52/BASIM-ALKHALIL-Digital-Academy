@@ -152,10 +152,10 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { l
   const handleSelectStory = async (story: Story) => {
     if (selectedStory?.id === story.id) return;
     
-    const isAdmin = profile.email?.toLowerCase() === 'basim5252@gmail.com';
+    const isWhitelisted = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(profile.email?.toLowerCase() || '');
     const credits = (profile as any).credits || 0;
     
-    if (!isAdmin && credits < CreditCost.AUDIO_STORY) {
+    if (!isWhitelisted && credits < CreditCost.AUDIO_STORY) {
       alert(t.insufficientCredits);
       onNavigate('credits');
       return;
@@ -163,7 +163,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { l
 
     setDeducting(true);
     try {
-      if (!isAdmin) {
+      if (!isWhitelisted) {
         await deductCredits(profile.uid, CreditCost.AUDIO_STORY, `Audio Story: ${story.titleEn}`);
         onUpdateProfile({ ...profile, credits: credits - CreditCost.AUDIO_STORY } as UserProfile);
       }

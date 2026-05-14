@@ -197,7 +197,7 @@ export const CreditSystem = ({ lang }: { lang: Language }) => {
     }
   };
 
-  const isAdmin = auth.currentUser?.email?.toLowerCase() === 'basim5252@gmail.com';
+  const isAdmin = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(auth.currentUser?.email?.toLowerCase() || '');
 
   return (
     <div className={`p-4 md:p-10 max-w-7xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
