@@ -98,7 +98,7 @@ export const WhatsAppNotifications = ({
 
     setSharingData({ studentName, message, type });
     
-    // Small delay to ensure DOM is updated
+    // Small delay to ensure DOM is updated and fonts are loaded
     setTimeout(async () => {
       const element = document.getElementById('shareable-card');
       if (element) {
@@ -106,7 +106,14 @@ export const WhatsAppNotifications = ({
           const canvas = await html2canvas(element, {
             useCORS: true,
             scale: 2,
-            backgroundColor: '#ffffff'
+            backgroundColor: '#ffffff',
+            logging: false,
+            onclone: (clonedDoc) => {
+              const el = clonedDoc.getElementById('shareable-card');
+              if (el) {
+                el.style.display = 'block';
+              }
+            }
           });
           
           const dataUrl = canvas.toDataURL('image/png');
