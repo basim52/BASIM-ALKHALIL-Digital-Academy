@@ -56,7 +56,18 @@ export const CreditSystem = ({ lang }: { lang: Language }) => {
     setMessage(null);
 
     try {
-      const voucherRef = doc(db, 'vouchers', voucherCode.trim());
+      let code = voucherCode.trim().toUpperCase();
+      
+      // If user provided no dashes but it's the right length (9 alpha-numeric chars after AK)
+      // or 11 total chars (AK + 9), normalize it to AK-XXXX-XXXXX
+      const clean = code.replace(/[^A-Z0-9]/g, '');
+      if (clean.length === 11 && clean.startsWith('AK')) {
+        code = `AK-${clean.substring(2, 6)}-${clean.substring(6, 11)}`;
+      } else if (clean.length === 9 && !code.startsWith('AK')) {
+        code = `AK-${clean.substring(0, 4)}-${clean.substring(4, 9)}`;
+      }
+
+      const voucherRef = doc(db, 'vouchers', code);
       const voucherSnap = await getDoc(voucherRef);
 
       if (!voucherSnap.exists()) {
@@ -64,12 +75,12 @@ export const CreditSystem = ({ lang }: { lang: Language }) => {
         return;
       }
 
-      if (voucherSnap.data()?.status !== 'active') {
+      const voucherData = voucherSnap.data();
+      if (voucherData.status !== 'active') {
         setMessage({ type: 'error', text: t.codeUsed });
         return;
       }
 
-      const voucherData = voucherSnap.data();
       const batch = writeBatch(db);
 
       // 1. Mark voucher as used
@@ -88,7 +99,7 @@ export const CreditSystem = ({ lang }: { lang: Language }) => {
         userId: auth.currentUser.uid,
         amount: voucherData.credits,
         type: 'redeem',
-        description: `تفعيل قسيمة: ${voucherCode}`,
+        description: `تفعيل قسيمة: ${code}`,
         timestamp: serverTimestamp()
       });
 

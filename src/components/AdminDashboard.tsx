@@ -27,6 +27,7 @@ import {
   getDocs,
   limit,
   doc,
+  getDoc,
   setDoc,
   orderBy
 } from 'firebase/firestore';
@@ -178,11 +179,25 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
     if (voucherCredits <= 0) return;
     setGenerating(true);
     try {
-      // Generate a random code AK-XXXX-XXXX
-      const randomPart = Math.random().toString(36).substring(2, 11).toUpperCase();
+      // Generate a more robust random code
+      // We want exactly 9 random alphanumeric chars after AK-
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Excluded confusing chars like 0, O, 1, I
+      let randomPart = '';
+      for (let i = 0; i < 9; i++) {
+        randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      
       const code = `AK-${randomPart.substring(0, 4)}-${randomPart.substring(4, 9)}`;
       
-      await setDoc(doc(db, 'vouchers', code), {
+      const voucherRef = doc(db, 'vouchers', code);
+      const voucherSnap = await getDoc(voucherRef);
+      
+      if (voucherSnap.exists()) {
+        // Collision! Try again once
+        return generateVoucher();
+      }
+
+      await setDoc(voucherRef, {
         code,
         credits: voucherCredits,
         status: 'active',
@@ -190,9 +205,10 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
         createdBy: 'admin'
       });
       
-      alert(isRtl ? `تم توليد الكود: ${code}` : `Voucher generated: ${code}`);
+      alert(isRtl ? `تم توليد الكود بنجاح: ${code}` : `Voucher generated successfully: ${code}`);
     } catch (err) {
       console.error("Voucher Generation Error:", err);
+      alert(isRtl ? "فشل في توليد الكود" : "Failed to generate voucher");
     } finally {
       setGenerating(false);
     }
