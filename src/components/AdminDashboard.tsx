@@ -60,7 +60,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
         throw new Error(`HTTP ${resp.status} (Ping: ${pingText}): ${errorDetails.substring(0, 500)}`);
       }
       const data = await resp.json();
-      setAnalysisResult(`### System Health\n- **Ping:** ${pingText}\n- **Status:** ${data.status}\n- **Gemini Key:** ${data.geminiKeySet ? '✅ Configured' : '❌ NOT SET'}\n- **Environment:** ${data.isProduction ? 'Production' : 'Development'}\n- **Server Time:** ${data.time}`);
+      setAnalysisResult(`### System Health\n- **Intelligence Engine:** 🚀 Gemini 3 Flash Preview (Active)\n- **Ping:** ${pingText}\n- **Status:** ${data.status}\n- **Gemini Key:** ${data.geminiKeySet ? '✅ Configured' : '❌ NOT SET'}\n- **Environment:** ${data.isProduction ? 'Production' : 'Development'}\n- **Server Time:** ${data.time}`);
     } catch (err: any) {
       setAnalysisResult(`### ❌ Connection Failed\nError: ${err.message}`);
     } finally {
@@ -538,6 +538,46 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                 ))}
               </div>
             )}
+          </section>
+
+          {/* Technical Replacement Strategy (User Request) */}
+          <section className="bg-[#002147] rounded-[2.5rem] p-8 md:p-12 text-white overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 blur-[100px] pointer-events-none" />
+            <div className="relative z-10">
+              <h3 className="text-2xl font-black mb-8 flex items-center gap-3">
+                <Sparkles className="text-blue-400" />
+                {isRtl ? 'خطة إحلال التقنية وتطوير المناهج' : 'Technology Replacement & Curriculum Strategy'}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-sm">
+                  <div className="w-10 h-10 bg-blue-500 rounded-xl mb-4 flex items-center justify-center">
+                    <Hash className="text-white w-5 h-5" />
+                  </div>
+                  <h4 className="font-bold text-sm mb-2">{isRtl ? 'إحلال المحرك الأساسي (G3)' : 'Core Engine Replacement (G3)'}</h4>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    {isRtl ? 'تم ترقية الأكاديمية بالكامل إلى Gemini 3 Flash بنظام المعاينة لدقة فائقة وسرعة تفاعلية غير مسبوقة.' : 'The academy has been fully upgraded to Gemini 3 Flash Preview for superior precision and unprecedented interactive speed.'}
+                  </p>
+                </div>
+                <div className="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-sm">
+                  <div className="w-10 h-10 bg-indigo-500 rounded-xl mb-4 flex items-center justify-center">
+                    <LayoutDashboard className="text-white w-5 h-5" />
+                  </div>
+                  <h4 className="font-bold text-sm mb-2">{isRtl ? 'المناهج الديناميكية' : 'Dynamic Curriculums'}</h4>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    {isRtl ? 'توليد مسارات تعلم مخصصة لكل طالب بدلاً من المناهج الثابتة، مما يزيد من معدل الإنجاز.' : 'Generating personalized learning paths for each student instead of static content, increasing completion rates.'}
+                  </p>
+                </div>
+                <div className="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-sm">
+                  <div className="w-10 h-10 bg-emerald-500 rounded-xl mb-4 flex items-center justify-center">
+                    <CheckCircle className="text-white w-5 h-5" />
+                  </div>
+                  <h4 className="font-bold text-sm mb-2">{isRtl ? 'التقييم الآلي' : 'Automated Assessment'}</h4>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    {isRtl ? 'إلغاء التقييم اليدوي واستبداله بتحليل ذكاء اصطناعي فوري لمستوى الكفاءة (CEFR).' : 'Eliminating manual assessment and replacing it with real-time AI analysis of proficiency levels (CEFR).'}
+                  </p>
+                </div>
+              </div>
+            </div>
           </section>
         </div>
       </div>

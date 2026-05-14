@@ -262,7 +262,10 @@ const LoginScreen = ({ lang, onToggleLang }: { lang: Language, onToggleLang: () 
         
         <div className="mt-8 pt-8 border-t border-slate-100 flex flex-wrap justify-center gap-4 opacity-50 grayscale transition-all hover:grayscale-0">
           <span className="text-[10px] font-bold text-[#002147]">BASIM ALKHALIL DIGITAL ACADEMY</span>
-          <span className="text-[10px] font-bold text-[#002147]">GEMINI AI POWERED</span>
+          <div className="flex items-center gap-2 bg-[#002147] text-white px-3 py-1 rounded-full">
+            <Sparkles size={10} className="animate-pulse text-amber-400" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#C49E3A]">Gemini 3 Flash ACTIVE</span>
+          </div>
         </div>
       </motion.div>
     </div>
@@ -593,6 +596,13 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
               <p className="text-slate-400 font-medium text-sm md:text-lg">
                 {lang === 'ar' ? 'استمر بمسار المناهج الرقمية الخاص بك' : 'Continue your digital curriculum path'}
               </p>
+              <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl shadow-lg">
+                <Sparkles size={14} className="text-[#C49E3A] animate-pulse" />
+                <div className="flex flex-col">
+                  <span className="text-[8px] font-black text-white/50 uppercase leading-none">Intelligence Engine</span>
+                  <span className="text-[10px] font-black text-white tracking-tighter">GEMINI 3 FLASH PREVIEW</span>
+                </div>
+              </div>
               <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100">
                 <span className="text-[10px] font-black text-blue-600 uppercase tracking-tighter">{isRtl ? 'كود الطالب:' : 'STUDENT CODE:'}</span>
                 <code className="text-xs font-mono font-bold text-[#002147] select-all">{profile.uid}</code>

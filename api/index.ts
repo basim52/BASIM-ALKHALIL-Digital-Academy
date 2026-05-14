@@ -51,7 +51,7 @@ app.post("/api/lesson/chat", async (req, res) => {
     `;
 
     const result = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-3-flash-preview",
       contents: [{ role: 'user', parts: [{ text: promptText }] }]
     });
 
@@ -83,7 +83,7 @@ app.post("/api/lesson/generate", async (req, res) => {
     `;
 
     const result = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-3-flash-preview",
       contents: [{ role: 'user', parts: [{ text: promptText }] }],
       config: {
         responseMimeType: "application/json"
@@ -116,7 +116,7 @@ app.post("/api/ai-partner/chat", async (req, res) => {
     `;
 
     const result = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-3-flash-preview",
       contents: [
         ...(Array.isArray(history) ? history : []).map((m: any) => ({
           role: m.role === 'user' ? 'user' : 'model',
@@ -140,7 +140,7 @@ app.post("/api/admin/analyze", async (req, res) => {
     
     const ai = getAI();
     const result = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-3-flash-preview",
       contents: [{ 
         role: 'user', 
         parts: [{ 

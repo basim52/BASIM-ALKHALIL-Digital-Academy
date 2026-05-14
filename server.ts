@@ -88,7 +88,7 @@ async function startServer() {
       `;
 
       const result = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: [
           { role: 'user', parts: [{ text: promptText }] }
         ]
@@ -128,7 +128,7 @@ async function startServer() {
       `;
 
       const result = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: [{ role: 'user', parts: [{ text: promptText }] }],
         config: {
           responseMimeType: "application/json"
@@ -172,7 +172,7 @@ async function startServer() {
       `;
 
       const result = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: [
           ...(Array.isArray(history) ? history : []).map((m: any) => ({
             role: m.role === 'user' ? 'user' : 'model',
@@ -207,7 +207,7 @@ async function startServer() {
       Language: ${lang === 'ar' ? 'Arabic' : 'English'}`;
 
       const result = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: [{ role: 'user', parts: [{ text: promptText }] }]
       });
 
@@ -224,7 +224,7 @@ async function startServer() {
     try {
       const { data, prompt } = req.body;
       const result = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: [{ role: 'user', parts: [{ text: `Analyze this data: ${JSON.stringify(data)}\n\nPrompt: ${prompt}` }] }]
       });
       res.json({ text: result.text || "" });
@@ -252,7 +252,7 @@ async function startServer() {
       `;
 
       const result = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: [{ role: 'user', parts: [{ text: promptText }] }],
         config: { responseMimeType: "application/json" }
       });
@@ -275,7 +275,7 @@ async function startServer() {
       const prompt = `Generate 3 multiple choice questions for: "${videoTitle}". Level: ${level}. JSON array format. Language: ${lang}`;
       const promptText = `Generate 3 multiple choice questions for: "${videoTitle}". Level: ${level}. JSON array format. Language: ${lang}`;
       const result = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         contents: [{ role: 'user', parts: [{ text: promptText }] }],
         config: { responseMimeType: "application/json" }
       });
@@ -304,7 +304,7 @@ async function startServer() {
           // Start session on first message (which should contain context)
           if (!session && !isConnecting) {
             isConnecting = true;
-            const modelToUse = "gemini-1.5-flash"; 
+            const modelToUse = "gemini-3-flash-preview"; 
             logToFile(`Initializing Gemini Live session: ${modelToUse}`);
 
             if (!process.env.GEMINI_API_KEY) {
