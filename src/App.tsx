@@ -33,11 +33,14 @@ import {
   ShieldAlert,
   Bell,
   Baby,
-  Headset
+  Headset,
+  ExternalLink,
+  Smartphone
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserRole, CurriculumCategory, proficiencyLevel, UserProfile, ScheduleItem, ParentNote, LearningModule, Lesson, AppView, StudentProfile, CreditCost } from './types';
 import { MASTER_CURRICULUM } from './data/masterCurriculum';
+import { generateWhatsAppLink, NOTIFICATION_TEMPLATES } from './lib/whatsapp';
 import { AIConversation } from './components/AIConversation';
 import { PlacementTest } from './components/PlacementTest';
 import { auth, googleProvider, db, handleFirestoreError, OperationType, testConnection, deductCredits } from './lib/firebase';
@@ -272,7 +275,97 @@ const LoginScreen = ({ lang, onToggleLang }: { lang: Language, onToggleLang: () 
   );
 };
 
-const ScheduleManager = ({ studentId, lang, canEdit = false }: { studentId: string, lang: Language, canEdit?: boolean }) => {
+const BookingDialog = ({ lang, unit, onClose, onConfirm }: { lang: Language, unit: { id: string, title: string }, onClose: () => void, onConfirm: (day: string, time: string) => void }) => {
+  const t = translations[lang];
+  const isRtl = lang === 'ar';
+  const [selectedDay, setSelectedDay] = useState('Monday');
+  const [selectedTime, setSelectedTime] = useState('16:00');
+
+  const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const TIMES = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00'];
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-[#002147]/40 backdrop-blur-sm" 
+      />
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+        className="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden"
+      >
+        <div className="p-8 pb-0">
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h3 className="text-2xl font-black text-[#002147] mb-2">{t.selectDayTime}</h3>
+              <div className="flex items-center gap-2 text-slate-400 font-bold text-xs uppercase tracking-widest">
+                <BookOpen size={14} className="text-amber-500" />
+                {unit.title}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">{t.day}</label>
+              <div className="grid grid-cols-4 gap-2">
+                {DAYS.map(day => (
+                  <button
+                    key={day}
+                    onClick={() => setSelectedDay(day)}
+                    className={`py-2 px-1 rounded-xl text-[10px] font-bold transition-all border ${
+                      selectedDay === day 
+                        ? 'bg-[#002147] text-white border-[#002147]' 
+                        : 'bg-white text-slate-500 border-slate-100 hover:border-slate-300'
+                    }`}
+                  >
+                    {t.days[day as keyof typeof t.days]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">{t.time}</label>
+              <div className="grid grid-cols-4 gap-2 max-h-40 overflow-y-auto p-1 custom-scrollbar">
+                {TIMES.map(time => (
+                  <button
+                    key={time}
+                    onClick={() => setSelectedTime(time)}
+                    className={`py-2 px-1 rounded-xl text-xs font-mono font-bold transition-all border ${
+                      selectedTime === time 
+                        ? 'bg-amber-accent text-white border-amber-accent shadow-lg shadow-amber-500/20' 
+                        : 'bg-white text-slate-500 border-slate-100 hover:border-slate-300'
+                    }`}
+                  >
+                    {time}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-8">
+          <button
+            onClick={() => onConfirm(selectedDay, selectedTime)}
+            className="w-full bg-[#002147] text-white py-4 rounded-2xl font-black text-sm hover:bg-[#C49E3A] shadow-xl shadow-slate-900/10 transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
+          >
+            <Calendar size={18} />
+            {t.bookNow}
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+const ScheduleManager = ({ studentId, studentName, lang, canEdit = false }: { studentId: string, studentName: string, lang: Language, canEdit?: boolean }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
@@ -280,12 +373,19 @@ const ScheduleManager = ({ studentId, lang, canEdit = false }: { studentId: stri
 
   useEffect(() => {
     const q = query(collection(db, 'schedules'), where('studentId', '==', studentId));
+    const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const items: ScheduleItem[] = [];
       snapshot.forEach((doc) => {
         items.push({ id: doc.id, ...doc.data() } as ScheduleItem);
       });
-      setSchedule(items.sort((a, b) => a.day.localeCompare(b.day)));
+      setSchedule(items.sort((a, b) => {
+        const dayDiff = dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day);
+        if (dayDiff !== 0) return dayDiff;
+        return a.time.localeCompare(b.time);
+      }));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'schedules');
     });
     return () => unsubscribe();
   }, [studentId]);
@@ -303,6 +403,17 @@ const ScheduleManager = ({ studentId, lang, canEdit = false }: { studentId: stri
 
   const removeItem = async (id: string) => {
     await deleteDoc(doc(db, 'schedules', id));
+  };
+
+  const handleWhatsAppShare = (item: ScheduleItem) => {
+    const dayName = t.days[item.day as keyof typeof t.days];
+    const message = isRtl 
+      ? `مرحباً، أود تأكيد موعد الدرس للطالب ${studentName} يوم ${dayName} الساعة ${item.time}. المادة: ${item.subject || item.unitTitle || ''}`
+      : `Hello, I'd like to confirm the lesson for ${studentName} on ${dayName} at ${item.time}. Subject: ${item.subject || item.unitTitle || ''}`;
+    
+    // We open WhatsApp with the message, let user pick the contact
+    const link = generateWhatsAppLink('', message);
+    window.open(link, '_blank');
   };
 
   return (
@@ -326,7 +437,9 @@ const ScheduleManager = ({ studentId, lang, canEdit = false }: { studentId: stri
             onChange={(e) => setNewItem({...newItem, day: e.target.value})}
             className="bg-white border border-slate-200 rounded-xl px-4 py-2"
           >
-            {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(d => <option key={d} value={d}>{d}</option>)}
+            {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(d => (
+              <option key={d} value={d}>{t.days[d as keyof typeof t.days]}</option>
+            ))}
           </select>
           <input 
             type="time" 
@@ -358,15 +471,24 @@ const ScheduleManager = ({ studentId, lang, canEdit = false }: { studentId: stri
                   <Clock size={18} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-[#002147] text-sm md:text-base">{item.subject}</h4>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.day} • {item.time}</p>
+                  <h4 className="font-bold text-[#002147] text-sm md:text-base">{item.subject || item.unitTitle}</h4>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{t.days[item.day as keyof typeof t.days]} • {item.time}</p>
                 </div>
               </div>
-              {canEdit && (
-                <button onClick={() => removeItem(item.id)} className="text-red-300 hover:text-red-500 transition-colors">
-                  <Trash2 size={18} />
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => handleWhatsAppShare(item)}
+                  className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
+                  title={isRtl ? 'مشاركة عبر واتساب' : 'Share via WhatsApp'}
+                >
+                  <MessageSquare size={14} />
                 </button>
-              )}
+                {canEdit && (
+                  <button onClick={() => removeItem(item.id)} className="w-8 h-8 rounded-lg bg-slate-200/50 text-slate-400 hover:bg-red-500 hover:text-white transition-all">
+                    <Trash2 size={14} />
+                  </button>
+                )}
+              </div>
             </div>
           ))
         )}
@@ -764,7 +886,7 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
               </div>
             </div>
 
-            <ScheduleManager studentId={profile.uid} lang={lang} canEdit={true} />
+            <ScheduleManager studentId={profile.uid} studentName={profile.displayName || ''} lang={lang} canEdit={true} />
           </section>
         </div>
 
@@ -875,7 +997,7 @@ const RoleSelector = ({ onSelect, lang }: { onSelect: (role: UserRole) => void, 
   );
 };
 
-const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfile }) => {
+const ParentDashboard = ({ lang, profile, onStudentSelect }: { lang: Language, profile: UserProfile, onStudentSelect?: (id: string) => void }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [studentIdInput, setStudentIdInput] = useState('');
@@ -885,6 +1007,12 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
   const [error, setError] = useState('');
   const [linking, setLinking] = useState(false);
   const [showAddStudent, setShowAddStudent] = useState(false);
+
+  useEffect(() => {
+    if (selectedStudentIndex !== null && linkedStudents[selectedStudentIndex] && onStudentSelect) {
+      onStudentSelect(linkedStudents[selectedStudentIndex].uid);
+    }
+  }, [selectedStudentIndex, linkedStudents, onStudentSelect]);
 
   useEffect(() => {
     const fetchStudentsData = async () => {
@@ -1299,7 +1427,7 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
           />
         </div>
         <div className="lg:col-span-1">
-          <ScheduleManager studentId={currentStudent.uid} lang={lang} canEdit={true} />
+          <ScheduleManager studentId={currentStudent.uid} studentName={currentStudent.displayName || ''} lang={lang} canEdit={true} />
         </div>
       </div>
       
@@ -1439,14 +1567,20 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
   };
 
   const [bookingStatus, setBookingStatus] = useState<Record<string, 'idle' | 'booking' | 'success'>>({});
+  const [showBookingDialog, setShowBookingDialog] = useState(false);
+  const [bookingContext, setBookingContext] = useState<{ id: string, title: string } | null>(null);
 
-  const addToSchedule = async (unitId: string, unitTitle: string) => {
+  const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const TIMES = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00'];
+
+  const addToSchedule = async (unitId: string, unitTitle: string, day: string, time: string) => {
+    if (!studentId) return;
     setBookingStatus(prev => ({ ...prev, [unitId]: 'booking' }));
     try {
       await addDoc(collection(db, 'schedules'), {
         studentId,
-        day: 'Monday', // Default to Monday, student can move it in manager
-        time: '16:00',
+        day,
+        time,
         subject: selectedCategory || 'General',
         isCustom: true,
         unitTitle: unitTitle,
@@ -1454,12 +1588,15 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
       });
       
       setBookingStatus(prev => ({ ...prev, [unitId]: 'success' }));
+      setShowBookingDialog(false);
+      alert(isRtl ? 'تمت إضافة الدرس إلى جدولك بنجاح!' : 'Lesson added to your schedule successfully!');
       setTimeout(() => {
         setBookingStatus(prev => ({ ...prev, [unitId]: 'idle' }));
       }, 3000);
     } catch (err) {
       console.error("Booking error:", err);
       setBookingStatus(prev => ({ ...prev, [unitId]: 'idle' }));
+      alert(isRtl ? 'حدث خطأ أثناء الحجز. يرجى المحاولة مرة أخرى.' : 'Error booking lesson. Please try again.');
       handleFirestoreError(err, OperationType.WRITE, 'schedules');
     }
   };
@@ -1619,7 +1756,10 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
                         </button>
 
                         <button
-                          onClick={() => addToSchedule(unit.id, isRtl ? unit.titleAr : unit.title)}
+                          onClick={() => {
+                            setBookingContext({ id: unit.id, title: isRtl ? unit.titleAr : unit.title });
+                            setShowBookingDialog(true);
+                          }}
                           disabled={bookingStatus[unit.id] === 'booking' || bookingStatus[unit.id] === 'success'}
                           className={`w-full sm:w-auto px-6 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-xs md:text-sm transition-all flex items-center justify-center gap-2 ${
                             bookingStatus[unit.id] === 'success' 
@@ -1651,6 +1791,16 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
           </div>
         )}
       </div>
+      <AnimatePresence>
+        {showBookingDialog && bookingContext && (
+          <BookingDialog 
+            lang={lang} 
+            unit={bookingContext} 
+            onClose={() => setShowBookingDialog(false)} 
+            onConfirm={(day, time) => addToSchedule(bookingContext.id, bookingContext.title, day, time)} 
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -1909,6 +2059,7 @@ export default function App() {
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
   const [loadingCurriculum, setLoadingCurriculum] = useState(false);
   const [activeNotification, setActiveNotification] = useState<any>(null);
+  const [activeStudentId, setActiveStudentId] = useState<string | null>(null);
 
   const t = translations[lang];
   const isRtl = lang === 'ar';
@@ -2114,6 +2265,7 @@ export default function App() {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
+        setActiveStudentId(user.uid); // Default to own UID
         try {
           // Special case for the master admin: ensure they have admin profile even if fetch fails
           if (user.email === 'basim5252@gmail.com') {
@@ -2149,7 +2301,11 @@ export default function App() {
             // Normal user flow
             const userDoc = await getDoc(doc(db, 'users', user.uid));
             if (userDoc.exists()) {
-              setUserProfile(userDoc.data() as UserProfile);
+              const profileData = userDoc.data() as UserProfile;
+              setUserProfile(profileData);
+              if (profileData.role === UserRole.STUDENT) {
+                setActiveStudentId(profileData.uid);
+              }
             } else {
               // RoleSelector will handle new non-admin users
             }
@@ -2190,6 +2346,7 @@ export default function App() {
       await setDoc(doc(db, 'users', currentUser.uid), profile, { merge: true });
       setUserProfile(profile);
       if (role === UserRole.STUDENT) {
+        setActiveStudentId(currentUser.uid);
         // Prepare initial student metadata
         await setDoc(doc(db, 'students', currentUser.uid), {
           level: proficiencyLevel.A1,
@@ -2336,7 +2493,7 @@ export default function App() {
           setView('lesson'); 
         }}
         onBack={() => setView('dashboard')}
-        studentId={userProfile.uid}
+        studentId={activeStudentId || userProfile.uid}
         profile={userProfile}
         seedCurriculum={seedCurriculum}
         onNavigate={setView}
@@ -2399,7 +2556,7 @@ export default function App() {
         );
       case UserRole.PARENT:
       case UserRole.ADMIN:
-        return <ParentDashboard lang={lang} profile={userProfile} />;
+        return <ParentDashboard lang={lang} profile={userProfile} onStudentSelect={setActiveStudentId} />;
       default:
         return <div className="p-20 text-center text-slate-400">{t.loadingText}</div>;
     }

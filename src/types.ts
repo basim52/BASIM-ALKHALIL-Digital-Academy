@@ -98,6 +98,8 @@ export interface ScheduleItem {
   time: string;
   subject: string;
   isCustom?: boolean;
+  unitTitle?: string;
+  studentId?: string;
 }
 
 export interface ParentNote {

@@ -147,7 +147,7 @@ export const OxfordLesson = ({ lang, onComplete, onBack }: OxfordLessonProps) =>
             onClick={() => setActiveTab(tab)}
             className={`flex-1 py-3 rounded-[1.5rem] text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-[#002147] text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
           >
-            {t[`${tab}Tab` as keyof typeof t] || tab}
+            {(t[`${tab}Tab` as keyof typeof t] as string) || tab}
           </button>
         ))}
       </div>

@@ -1,11 +1,13 @@
 
-import React, { useState } from 'react';
-import { MessageCircle, Bell, Send, Heart, AlertTriangle, CheckCircle, Save, Phone, PenTool } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { MessageCircle, Bell, Send, Heart, AlertTriangle, CheckCircle, Save, Phone, PenTool, Image as ImageIcon, Download, Share2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Language, translations } from '../lib/translations';
 import { generateWhatsAppLink, NOTIFICATION_TEMPLATES } from '../lib/whatsapp';
 import { db } from '../lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
+import html2canvas from 'html2canvas';
+import { ShareableNotification } from './ShareableNotification';
 
 interface WhatsAppNotificationsProps {
   lang: Language;
@@ -73,6 +75,73 @@ export const WhatsAppNotifications = ({
   };
 
   const [savedFeedback, setSavedFeedback] = useState<'parent' | 'student' | null>(null);
+  const [sharingImage, setSharingImage] = useState<string | null>(null);
+  const [sharingData, setSharingData] = useState<{ studentName: string, message: string, type: string } | null>(null);
+  const shareRef = useRef<HTMLDivElement>(null);
+
+  const handleShareImage = async (type: 'lesson_reminder' | 'booking_confirmed' | 'absence_alert' | 'encouragement') => {
+    let message = '';
+    switch (type) {
+      case 'lesson_reminder':
+        message = NOTIFICATION_TEMPLATES[lang].lesson_reminder(studentName, '10:00 AM');
+        break;
+      case 'booking_confirmed':
+        message = NOTIFICATION_TEMPLATES[lang].booking_confirmed(studentName, 'Reading Curriculum - Level A1');
+        break;
+      case 'absence_alert':
+        message = NOTIFICATION_TEMPLATES[lang].absence_alert(studentName);
+        break;
+      case 'encouragement':
+        message = NOTIFICATION_TEMPLATES[lang].encouragement('Parent', studentName);
+        break;
+    }
+
+    setSharingData({ studentName, message, type });
+    
+    // Small delay to ensure DOM is updated
+    setTimeout(async () => {
+      const element = document.getElementById('shareable-card');
+      if (element) {
+        try {
+          const canvas = await html2canvas(element, {
+            useCORS: true,
+            scale: 2,
+            backgroundColor: '#ffffff'
+          });
+          
+          const dataUrl = canvas.toDataURL('image/png');
+          
+          // Try Web Share API if supported
+          if (navigator.share && navigator.canShare) {
+            const blob = await (await fetch(dataUrl)).blob();
+            const file = new File([blob], `BKD-Academy-${type}.png`, { type: 'image/png' });
+            
+            if (navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                files: [file],
+                title: isRtl ? 'رسالة من الأكاديمية' : 'Academy Message',
+                text: message
+              });
+              setSharingData(null);
+              return;
+            }
+          }
+
+          // Fallback: Download
+          const link = document.createElement('a');
+          link.download = `BKD-Academy-${type}.png`;
+          link.href = dataUrl;
+          link.click();
+          
+          setSharingData(null);
+          alert(isRtl ? 'تم تحميل الصورة بنجاح! يمكنك الآن مشاركتها عبر واتساب.' : 'Image downloaded! You can now share it on WhatsApp.');
+        } catch (err) {
+          console.error("Capture error:", err);
+          setSharingData(null);
+        }
+      }
+    }, 100);
+  };
 
   return (
     <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 border border-slate-200 shadow-xl flex flex-col relative overflow-hidden">
@@ -174,24 +243,46 @@ export const WhatsAppNotifications = ({
             { type: 'absence_alert', icon: AlertTriangle, label: t.absenceAlert, desc: isRtl ? 'تنبيه غياب الطالب عن الحصة' : 'Alert for student absence', color: 'amber', hoverClass: 'hover:border-amber-500', iconBg: 'bg-amber-50', iconText: 'text-amber-600', sendHover: 'group-hover:text-amber-500' },
             { type: 'booking_confirmed', icon: CheckCircle, label: t.bookingAlert, desc: isRtl ? 'تأكيد حجز الحصة الجديدة' : 'Confirming new lesson booking', color: 'blue', hoverClass: 'hover:border-blue-500', iconBg: 'bg-blue-50', iconText: 'text-blue-600', sendHover: 'group-hover:text-blue-500' }
           ].map((action) => (
-            <button 
-              key={action.type}
-              onClick={() => handleSend(action.type as any)}
-              className={`w-full flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl ${action.hoverClass} transition-all group shadow-sm flex-1 min-w-0`}
-            >
-              <div className="flex items-center gap-4 flex-1 min-w-0">
-                <div className={`w-10 h-10 ${action.iconBg} ${action.iconText} rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110`}>
-                  <action.icon size={20} />
+            <div key={action.type} className="flex gap-2">
+              <button 
+                onClick={() => handleSend(action.type as any)}
+                className={`flex-1 flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl ${action.hoverClass} transition-all group shadow-sm min-w-0`}
+              >
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className={`w-10 h-10 ${action.iconBg} ${action.iconText} rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110`}>
+                    <action.icon size={20} />
+                  </div>
+                  <div className={`${isRtl ? 'text-right' : 'text-left'} truncate flex-1 min-w-0`}>
+                    <p className="font-bold text-[#002147] text-sm truncate">{action.label}</p>
+                    <p className="text-[10px] text-slate-400 font-medium truncate">{action.desc}</p>
+                  </div>
                 </div>
-                <div className={`${isRtl ? 'text-right' : 'text-left'} truncate flex-1 min-w-0`}>
-                  <p className="font-bold text-[#002147] text-sm truncate">{action.label}</p>
-                  <p className="text-[10px] text-slate-400 font-medium truncate">{action.desc}</p>
-                </div>
-              </div>
-              <Send size={18} className={`text-slate-200 ${action.sendHover} transition-all ml-2 group-hover:translate-x-${isRtl ? '-1' : '1'} shrink-0`} />
-            </button>
+                <Send size={18} className={`text-slate-200 ${action.sendHover} transition-all ml-2 group-hover:translate-x-${isRtl ? '-1' : '1'} shrink-0`} />
+              </button>
+              
+              <button 
+                onClick={() => handleShareImage(action.type as any)}
+                className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-200 text-slate-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all shadow-sm shrink-0"
+                title={isRtl ? 'مشاركة بصورة' : 'Share as image'}
+              >
+                <ImageIcon size={20} />
+              </button>
+            </div>
           ))}
         </div>
+      </div>
+
+      {/* Hidden Card for Capture */}
+      <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+        {sharingData && (
+          <ShareableNotification 
+            lang={lang} 
+            studentName={sharingData.studentName} 
+            message={sharingData.message} 
+            type={sharingData.type}
+            id="shareable-card"
+          />
+        )}
       </div>
 
       <div className="mt-auto p-4 bg-slate-50 rounded-2xl border border-slate-100 italic text-[10px] text-slate-500 leading-relaxed">
