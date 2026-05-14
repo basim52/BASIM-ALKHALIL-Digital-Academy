@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { translations, Language } from '../lib/translations';
 import { 
@@ -13,8 +13,10 @@ import {
   Plus,
   Hash,
   LayoutDashboard,
-  CheckCircle
+  CheckCircle,
+  Download
 } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import { 
   collection, 
   query, 
@@ -40,7 +42,28 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [analyzingStatus, setAnalyzingStatus] = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+  const reportRef = useRef<HTMLDivElement>(null);
+
+  const handleShareAsImage = async () => {
+    if (!reportRef.current) return;
+    try {
+      const canvas = await html2canvas(reportRef.current, {
+        scale: 2,
+        backgroundColor: '#f8fafc', // Tailwind slate-50
+        logging: false,
+        useCORS: true
+      });
+      const image = canvas.toDataURL("image/png");
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = `Basim-Academy-AI-Report-${new Date().getTime()}.png`;
+      link.click();
+    } catch (err) {
+      console.error("Export Error:", err);
+    }
+  };
   
   const testApiConnection = async () => {
     setAnalyzing(true);
@@ -197,6 +220,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
 
   const handleAnalyze = async () => {
     setAnalyzing(true);
+    setAnalyzingStatus(isRtl ? 'جاري جمع بيانات الطلاب والنتائج...' : 'Gathering student data and grades...');
     try {
       const studentsMeta = await getDocs(query(collection(db, 'users'), where('role', '==', UserRole.STUDENT), limit(20)));
       const grades = await getDocs(query(collection(db, 'grades'), limit(50)));
@@ -206,20 +230,29 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
         grades: grades.docs.map(d => d.data())
       };
 
+      setAnalyzingStatus(isRtl ? 'جاري تحليل البيانات عبر محرك الذكاء الاصطناعي (قد يستغرق وقتاً عند الضغط)...' : 'Analyzing data via AI engine (may take time during high load)...');
+      
       const resp = await fetch('/api/admin/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: dataForAI })
       });
 
-      if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
+      if (!resp.ok) {
+        const errorData = await resp.json().catch(() => ({}));
+        if (resp.status === 503 || errorData.error?.includes('503')) {
+          throw new Error(isRtl ? "المحرك مشغول حالياً بسبب ضغط عالي، يرجى المحاولة بعد قليل." : "The engine is currently busy due to high demand. Please try again in 1-2 minutes.");
+        }
+        throw new Error(errorData.error || `HTTP error! status: ${resp.status}`);
+      }
       const result = await resp.json();
       setAnalysisResult(result.text || "No analysis available.");
     } catch (err: any) {
       console.error("Analysis Error:", err);
-      setAnalysisResult(`### ❌ Analysis Failed\nError: ${err.message}`);
+      setAnalysisResult(`### ❌ ${isRtl ? 'فشل التحليل' : 'Analysis Failed'}\n\n${err.message}`);
     } finally {
       setAnalyzing(false);
+      setAnalyzingStatus(null);
     }
   };
 
@@ -474,22 +507,62 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                 {analyzing ? <div className="w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" /> : <Sparkles size={16} />}
                 {t.analyzePlatform}
               </button>
+              {analysisResult && (
+                <button 
+                  onClick={handleShareAsImage}
+                  className="bg-blue-50 text-blue-600 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all flex items-center gap-3 w-full md:w-auto justify-center"
+                >
+                  <Download size={16} />
+                  {isRtl ? 'حفظ كصورة' : 'Save as Image'}
+                </button>
+              )}
             </header>
 
             {analysisResult ? (
               <motion.div 
+                ref={reportRef}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="prose prose-slate max-w-none custom-markdown-content font-arabic leading-relaxed prose-headings:text-[#002147] prose-headings:font-black prose-p:text-slate-600 prose-strong:text-[#C49E3A] bg-slate-50 p-8 rounded-[3rem] border border-slate-100"
+                className="bg-slate-50 p-10 rounded-[3rem] border border-slate-100 shadow-sm relative overflow-hidden"
               >
-                <ReactMarkdown>{analysisResult}</ReactMarkdown>
+                {/* Visual Header for Image Capture */}
+                <div className="flex justify-between items-center mb-8 pb-8 border-b border-slate-200">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-[#002147] text-[#C49E3A] font-black rounded-2xl flex items-center justify-center text-xl shadow-lg">B</div>
+                    <div>
+                      <h4 className="font-black text-[#002147] text-lg leading-tight">{isRtl ? 'أكاديمية باسم الخليل الرقمية' : 'Basim Alkhalil Digital Academy'}</h4>
+                      <p className="text-[10px] font-black text-[#C49E3A] uppercase tracking-widest">{isRtl ? 'تقرير التحليل الذكي المتقدم' : 'ADVANCED AI ANALYSIS REPORT'}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{isRtl ? 'التاريخ' : 'DATE'}</p>
+                    <p className="text-sm font-bold text-[#002147]">{new Date().toLocaleDateString(isRtl ? 'ar-EG' : 'en-US')}</p>
+                  </div>
+                </div>
+
+                <div className="prose prose-slate max-w-none custom-markdown-content font-arabic leading-relaxed prose-headings:text-[#002147] prose-headings:font-black prose-p:text-slate-600 prose-strong:text-[#C49E3A]">
+                  <ReactMarkdown>{analysisResult}</ReactMarkdown>
+                </div>
+
+                {/* Footer for Image Capture */}
+                <div className="mt-12 pt-8 border-t border-slate-100 flex justify-between items-center opacity-40">
+                  <p className="text-[10px] font-black text-[#002147] uppercase tracking-[0.3em]">GEMINI POWERED ENGINE</p>
+                  <p className="text-[8px] font-bold text-slate-400">© {new Date().getFullYear()} BASIM ALKHALIL ACADEMY</p>
+                </div>
               </motion.div>
             ) : (
               <div className="text-center py-20 border-2 border-dashed border-slate-100 rounded-[2.5rem]">
                 <div className="w-16 h-16 bg-blue-50 text-blue-300 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Activity size={32} />
+                  {analyzing ? <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" /> : <Activity size={32} />}
                 </div>
-                <p className="text-slate-400 font-bold text-sm tracking-widest uppercase">{isRtl ? 'بانتظار التحليل الذكي...' : 'Waiting for AI analysis...'}</p>
+                {analyzingStatus ? (
+                  <div className="space-y-2">
+                    <p className="text-blue-600 font-bold text-sm tracking-widest uppercase animate-pulse">{analyzingStatus}</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase">{isRtl ? 'نظام المحاولة التلقائي (Retry System) مفعل' : 'Automatic Retry System Active'}</p>
+                  </div>
+                ) : (
+                  <p className="text-slate-400 font-bold text-sm tracking-widest uppercase">{isRtl ? 'بانتظار التحليل الذكي...' : 'Waiting for AI analysis...'}</p>
+                )}
               </div>
             )}
           </section>

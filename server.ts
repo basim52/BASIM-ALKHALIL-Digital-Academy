@@ -18,6 +18,37 @@ async function startServer() {
     apiKey: process.env.GEMINI_API_KEY
   });
 
+  // Robust AI caller with retry and fallback
+  async function callAiWithRetry(options: any, maxRetries = 2) {
+    let lastError: any;
+    const PRIMARY_MODEL = "gemini-3-flash-preview";
+    const FALLBACK_MODEL = "gemini-1.5-flash";
+
+    for (let i = 0; i <= maxRetries; i++) {
+      try {
+        const modelName = i === maxRetries ? FALLBACK_MODEL : PRIMARY_MODEL;
+        if (i > 0) logToFile(`Retry ${i}/${maxRetries} using ${modelName}...`);
+        
+        const result = await ai.models.generateContent({
+          ...options,
+          model: modelName
+        });
+        return result;
+      } catch (error: any) {
+        lastError = error;
+        const isTransient = error.message?.includes("503") || error.message?.includes("UNAVAILABLE") || error.message?.includes("high demand");
+        
+        if (isTransient && i < maxRetries) {
+          const delay = Math.pow(2, i) * 1000;
+          await new Promise(r => setTimeout(r, delay));
+          continue;
+        }
+        throw error;
+      }
+    }
+    throw lastError;
+  }
+
   // Debug Headers
   app.use((req, res, next) => {
     res.setHeader('X-Debug-Path', req.path);
@@ -87,8 +118,7 @@ async function startServer() {
         ${prompt}
       `;
 
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+      const result = await callAiWithRetry({
         contents: [
           { role: 'user', parts: [{ text: promptText }] }
         ]
@@ -162,8 +192,7 @@ async function startServer() {
         Ensure everything is in BOTH English and Professional Academic Arabic.
       `;
 
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+      const result = await callAiWithRetry({
         contents: [{ role: 'user', parts: [{ text: promptText }] }],
         config: {
           responseMimeType: "application/json"
@@ -206,8 +235,7 @@ async function startServer() {
         USER MESSAGE: ${prompt}
       `;
 
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+      const result = await callAiWithRetry({
         contents: [
           ...(Array.isArray(history) ? history : []).map((m: any) => ({
             role: m.role === 'user' ? 'user' : 'model',
@@ -241,8 +269,7 @@ async function startServer() {
       Format: Title: [Title]\nStory: [P1] | [P2] | [P3]\nEmojis: [E1], [E2], [E3]
       Language: ${lang === 'ar' ? 'Arabic' : 'English'}`;
 
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+      const result = await callAiWithRetry({
         contents: [{ role: 'user', parts: [{ text: promptText }] }]
       });
 
@@ -258,8 +285,7 @@ async function startServer() {
     logToFile(`START /api/admin/analyze`);
     try {
       const { data, prompt } = req.body;
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+      const result = await callAiWithRetry({
         contents: [{ role: 'user', parts: [{ text: `Analyze this data: ${JSON.stringify(data)}\n\nPrompt: ${prompt}` }] }]
       });
       res.json({ text: result.text || "" });
@@ -286,8 +312,7 @@ async function startServer() {
         Language: High-quality ${lang === 'ar' ? 'Arabic' : 'English'}.
       `;
 
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+      const result = await callAiWithRetry({
         contents: [{ role: 'user', parts: [{ text: promptText }] }],
         config: { responseMimeType: "application/json" }
       });
@@ -309,8 +334,7 @@ async function startServer() {
       const { videoTitle, level, lang } = req.body;
       const prompt = `Generate 3 multiple choice questions for: "${videoTitle}". Level: ${level}. JSON array format. Language: ${lang}`;
       const promptText = `Generate 3 multiple choice questions for: "${videoTitle}". Level: ${level}. JSON array format. Language: ${lang}`;
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+      const result = await callAiWithRetry({
         contents: [{ role: 'user', parts: [{ text: promptText }] }],
         config: { responseMimeType: "application/json" }
       });

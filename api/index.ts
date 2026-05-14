@@ -14,6 +14,35 @@ const getAI = () => {
   });
 };
 
+async function callAiWithRetry(options: any, maxRetries = 2) {
+  let lastError: any;
+  const PRIMARY_MODEL = "gemini-3-flash-preview";
+  const FALLBACK_MODEL = "gemini-1.5-flash";
+  const ai = getAI();
+
+  for (let i = 0; i <= maxRetries; i++) {
+    try {
+      const modelName = i === maxRetries ? FALLBACK_MODEL : PRIMARY_MODEL;
+      const result = await ai.models.generateContent({
+        ...options,
+        model: modelName
+      });
+      return result;
+    } catch (error: any) {
+      lastError = error;
+      const isTransient = error.message?.includes("503") || error.message?.includes("UNAVAILABLE") || error.message?.includes("high demand");
+      
+      if (isTransient && i < maxRetries) {
+        const delay = Math.pow(2, i) * 1000;
+        await new Promise(r => setTimeout(r, delay));
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw lastError;
+}
+
 // Root test route
 app.get("/ping", (req, res) => {
   res.send("pong_from_api_folder");
@@ -50,8 +79,7 @@ app.post("/api/lesson/chat", async (req, res) => {
       ${prompt}
     `;
 
-    const result = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+    const result = await callAiWithRetry({
       contents: [{ role: 'user', parts: [{ text: promptText }] }]
     });
 
@@ -82,8 +110,7 @@ app.post("/api/lesson/generate", async (req, res) => {
       JSON format: { "title": "...", "titleAr": "...", "warmup": {...}, "content": "...", "contentAr": "...", "imageryPrompt": "...", "exercises": [...], "quiz": [...] }
     `;
 
-    const result = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+    const result = await callAiWithRetry({
       contents: [{ role: 'user', parts: [{ text: promptText }] }],
       config: {
         responseMimeType: "application/json"
@@ -115,8 +142,7 @@ app.post("/api/ai-partner/chat", async (req, res) => {
       USER MESSAGE: ${prompt}
     `;
 
-    const result = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+    const result = await callAiWithRetry({
       contents: [
         ...(Array.isArray(history) ? history : []).map((m: any) => ({
           role: m.role === 'user' ? 'user' : 'model',
@@ -139,8 +165,7 @@ app.post("/api/admin/analyze", async (req, res) => {
     const { data } = req.body;
     
     const ai = getAI();
-    const result = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+    const result = await callAiWithRetry({
       contents: [{ 
         role: 'user', 
         parts: [{ 
