@@ -1,5 +1,6 @@
 
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Language } from '../lib/translations';
 
 interface ShareableNotificationProps {
@@ -7,13 +8,26 @@ interface ShareableNotificationProps {
   studentName: string;
   message?: string;
   lessonName?: string;
+  reportMarkdown?: string;
+  roadmapLevel?: string;
   schedule?: { day: string, time: string, subject?: string }[];
   type: string;
   id?: string;
 }
 
-export const ShareableNotification = ({ lang, studentName, message, lessonName, schedule, type, id = "shareable-card" }: ShareableNotificationProps) => {
+export const ShareableNotification = ({ lang, studentName, message, lessonName, reportMarkdown, roadmapLevel, schedule, type, id = "shareable-card" }: ShareableNotificationProps) => {
   const isRtl = lang === 'ar';
+
+  const levels = [
+    { id: 'A1', label: 'A1', icon: '🌱' },
+    { id: 'A2', label: 'A2', icon: '🌿' },
+    { id: 'B1', label: 'B1', icon: '🌳' },
+    { id: 'B2', label: 'B2', icon: '🎓' },
+    { id: 'C1', label: 'C1', icon: '🏆' },
+    { id: 'C2', label: 'C2', icon: '👑' }
+  ];
+
+  const currentIdx = levels.findIndex(l => l.id === roadmapLevel);
 
   return (
     <div 
@@ -21,7 +35,6 @@ export const ShareableNotification = ({ lang, studentName, message, lessonName, 
       style={{ 
         position: 'relative',
         overflow: 'hidden',
-        textAlign: isRtl ? 'right' : 'left',
         width: '600px',
         padding: '3rem',
         backgroundColor: '#ffffff',
@@ -137,7 +150,7 @@ export const ShareableNotification = ({ lang, studentName, message, lessonName, 
         >
           {type === 'schedule' 
             ? (schedule && schedule.length === 1 ? 'Class Details' : 'Weekly Schedule') 
-            : (type === 'encouragement' ? 'Encouragement' : 'Academic Alert')}
+            : (type === 'encouragement' ? 'Encouragement' : (type === 'report' ? 'AI Smart Report' : (type === 'roadmap' ? 'Academic Roadmap' : 'Academic Alert')))}
         </div>
         
         <h2 
@@ -145,14 +158,20 @@ export const ShareableNotification = ({ lang, studentName, message, lessonName, 
             fontSize: '2.25rem', 
             fontWeight: 900, 
             lineHeight: 1.25, 
-            marginBottom: lessonName ? '0.5rem' : '2rem',
+            marginBottom: (lessonName || type === 'roadmap') ? '0.5rem' : '2rem',
             color: '#1e293b' 
           }}
         >
           {studentName}
         </h2>
 
-        {lessonName && (
+        {type === 'roadmap' && (
+           <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#10b981', marginBottom: '2rem' }}>
+             Current Level: {roadmapLevel}
+           </div>
+        )}
+
+        {lessonName && type !== 'roadmap' && (
           <div 
             style={{ 
               fontSize: '1.25rem', 
@@ -174,7 +193,8 @@ export const ShareableNotification = ({ lang, studentName, message, lessonName, 
             borderRadius: '2rem', 
             border: '1px solid #f1f5f9',
             backgroundColor: '#f8fafc',
-            textAlign: isRtl ? 'right' : 'left'
+            textAlign: isRtl ? 'right' : 'left',
+            direction: isRtl ? 'rtl' : 'ltr'
           }}
         >
           {type === 'schedule' && schedule ? (
@@ -192,6 +212,103 @@ export const ShareableNotification = ({ lang, studentName, message, lessonName, 
                   )}
                 </div>
               ))}
+            </div>
+          ) : type === 'report' ? (
+            <div style={{ position: 'relative', zIndex: 10 }}>
+               <div 
+                 style={{ 
+                   fontSize: '1rem', 
+                   fontWeight: 500, 
+                   lineHeight: 1.6, 
+                   color: '#475569',
+                   maxHeight: '100%',
+                   overflow: 'visible'
+                 }}
+               >
+                 <ReactMarkdown 
+                   components={{
+                     h1: ({children}) => <h1 style={{fontSize: '1.25rem', fontWeight: 900, color: '#002147', marginBottom: '1rem', marginTop: '1.5rem'}}>{children}</h1>,
+                     h2: ({children}) => <h2 style={{fontSize: '1.125rem', fontWeight: 800, color: '#002147', marginBottom: '0.75rem', marginTop: '1.25rem'}}>{children}</h2>,
+                     h3: ({children}) => <h3 style={{fontSize: '1rem', fontWeight: 800, color: '#002147', marginBottom: '0.5rem', marginTop: '1rem'}}>{children}</h3>,
+                     p: ({children}) => <p style={{marginBottom: '0.75rem'}}>{children}</p>,
+                     ul: ({children}) => <ul style={{marginBottom: '1rem', paddingInlineStart: '1.25rem', listStyleType: 'disc'}}>{children}</ul>,
+                     ol: ({children}) => <ol style={{marginBottom: '1rem', paddingInlineStart: '1.25rem', listStyleType: 'decimal'}}>{children}</ol>,
+                     li: ({children}) => <li style={{marginBottom: '0.25rem'}}>{children}</li>,
+                     strong: ({children}) => <strong style={{fontWeight: 900, color: '#1e293b'}}>{children}</strong>,
+                   }}
+                 >
+                   {reportMarkdown}
+                 </ReactMarkdown>
+               </div>
+               <div style={{ 
+                 marginTop: '1.5rem', 
+                 padding: '1rem', 
+                 backgroundColor: '#002147', 
+                 color: '#ffffff', 
+                 borderRadius: '1rem',
+                 fontSize: '0.75rem',
+                 fontWeight: 800,
+                 textAlign: 'center'
+               }}>
+                 {isRtl ? 'تحليل ذكي مدعوم بـ GEMINI 3 FLASH' : 'SMART ANALYSIS POWERED BY GEMINI 3 FLASH'}
+               </div>
+            </div>
+          ) : type === 'roadmap' ? (
+            <div style={{ padding: '1rem 0' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', marginBottom: '2rem' }}>
+                  {/* Progress Line */}
+                  <div style={{ position: 'absolute', top: '2rem', left: 0, width: '100%', height: '4px', backgroundColor: '#f1f5f9', borderRadius: '2px' }} />
+                  <div style={{ 
+                    position: 'absolute', 
+                    top: '2rem', 
+                    left: 0, 
+                    width: `${(currentIdx / (levels.length - 1)) * 100}%`, 
+                    height: '4px', 
+                    backgroundColor: '#10b981', 
+                    borderRadius: '2px',
+                    transition: 'width 1s ease'
+                  }} />
+                  
+                  {levels.map((level, idx) => (
+                    <div key={level.id} style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{ 
+                        width: '4rem', 
+                        height: '4rem', 
+                        borderRadius: '1rem', 
+                        backgroundColor: idx <= currentIdx ? '#10b981' : '#ffffff',
+                        border: '2px solid',
+                        borderColor: idx <= currentIdx ? '#10b981' : '#f1f5f9',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1.5rem',
+                        boxShadow: idx === currentIdx ? '0 10px 15px -3px rgba(16, 185, 129, 0.3)' : 'none'
+                      }}>
+                        {level.icon}
+                      </div>
+                      <span style={{ 
+                        fontSize: '0.875rem', 
+                        fontWeight: 900, 
+                        color: idx <= currentIdx ? '#002147' : '#cbd5e1' 
+                      }}>
+                        {level.label}
+                      </span>
+                    </div>
+                  ))}
+               </div>
+               <div style={{ 
+                 backgroundColor: '#ecfdf5', 
+                 padding: '1.5rem', 
+                 borderRadius: '1.5rem', 
+                 border: '1px solid #d1fae5',
+                 textAlign: 'center'
+               }}>
+                 <p style={{ margin: 0, fontWeight: 700, color: '#065f46', fontSize: '1rem' }}>
+                   {isRtl 
+                    ? `رائع! لقد أكملت ${((currentIdx + 1) / levels.length * 100).toFixed(0)}% من المسار التعليمي` 
+                    : `Great! You have completed ${((currentIdx + 1) / levels.length * 100).toFixed(0)}% of the learning path`}
+                 </p>
+               </div>
             </div>
           ) : (
             <>

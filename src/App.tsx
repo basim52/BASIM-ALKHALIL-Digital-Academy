@@ -1306,17 +1306,25 @@ const ParentDashboard = ({ lang, profile, onStudentSelect }: { lang: Language, p
 
   const [generatingReport, setGeneratingReport] = useState(false);
   const [smartReport, setSmartReport] = useState<string | null>(null);
+  const [exportingReport, setExportingReport] = useState(false);
 
   const generateReport = async () => {
     if (!currentStudent) return;
     setGeneratingReport(true);
     try {
+      const promptLang = lang === 'ar' ? 'Arabic' : 'English';
       const resp = await fetch('/api/admin/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          data: { studentName: currentStudent.displayName, level: currentStudent.level, points: currentStudent.points },
-          prompt: `As an education expert at "Basim Alkhalil Academy", analyze the student's performance and provide a detailed report for the parent. Language: Arabic.`
+          data: { 
+            studentName: currentStudent.displayName, 
+            level: currentStudent.level, 
+            points: currentStudent.points,
+            attendance: currentStudent.stats?.attendance || 0,
+            avgScore: currentStudent.stats?.avgScore || 0
+          },
+          prompt: `As an education expert at "Basim Alkhalil Academy", analyze the student's performance and provide a detailed, encouraging, and highly professional academic report for the parent. Include specific strengths and clear areas for growth. The report MUST be written entirely in ${promptLang}. Always use a professional and optimistic tone. Use markdown formatting (bold, lists).`
         })
       });
 
@@ -1325,13 +1333,52 @@ const ParentDashboard = ({ lang, profile, onStudentSelect }: { lang: Language, p
         throw new Error(errorData.error || `Server error: ${resp.status}`);
       }
       const data = await resp.json();
-      setSmartReport(data.text || "عذراً، تعذر توليد التقرير حالياً.");
+      setSmartReport(data.text || (lang === 'ar' ? "عذراً، تعذر توليد التقرير حالياً." : "Sorry, report generation failed."));
     } catch (err: any) {
       console.error("AI Report Error:", err);
       const msg = err.error || err.message || (typeof err === 'string' ? err : JSON.stringify(err));
       setError(`فشل في توليد التقرير: ${msg}`);
     } finally {
       setGeneratingReport(false);
+    }
+  };
+
+  const handleExportReportImage = async () => {
+    if (!smartReport || !currentStudent) return;
+    setExportingReport(true);
+    try {
+      const element = document.getElementById('report-share-card');
+      if (!element) return;
+      
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        onclone: (clonedDoc) => {
+          const el = clonedDoc.getElementById('report-share-card');
+          if (el) {
+            el.style.display = 'block';
+            el.style.position = 'relative';
+          }
+          // Remove oklch to prevent parser errors in captured image
+          const styles = clonedDoc.getElementsByTagName('style');
+          for (let i = 0; i < styles.length; i++) {
+            const style = styles[i];
+            if (style.innerHTML.includes('oklch')) {
+              style.innerHTML = style.innerHTML.replace(/oklch\([^)]+\)/g, '#f1f5f9');
+            }
+          }
+        }
+      });
+      
+      const link = document.createElement('a');
+      link.download = `BKD-Report-${currentStudent.displayName}-${new Date().getTime()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err) {
+      console.error("Export error:", err);
+    } finally {
+      setExportingReport(false);
     }
   };
 
@@ -1493,7 +1540,11 @@ const ParentDashboard = ({ lang, profile, onStudentSelect }: { lang: Language, p
       </div>
 
       <div className="mb-10">
-        <ProgressRoadmap lang={lang} currentLevel={currentStudent.level || 'A1'} />
+        <ProgressRoadmap 
+          lang={lang} 
+          currentLevel={currentStudent.level || 'A1'} 
+          studentName={currentStudent.displayName}
+        />
       </div>
 
       <div className="mb-10">
@@ -1583,6 +1634,18 @@ const ParentDashboard = ({ lang, profile, onStudentSelect }: { lang: Language, p
         <AIParentNotes profile={profile} studentId={currentStudent.uid} lang={lang} />
       </div>
 
+      <div style={{ position: 'fixed', left: '-2000px', top: 0 }}>
+        {smartReport && (
+          <ShareableNotification
+            id="report-share-card"
+            lang={lang}
+            studentName={currentStudent.displayName}
+            type="report"
+            reportMarkdown={smartReport}
+          />
+        )}
+      </div>
+
       <AnimatePresence>
         {smartReport && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -1625,8 +1688,16 @@ const ParentDashboard = ({ lang, profile, onStudentSelect }: { lang: Language, p
                 <ReactMarkdown>{smartReport}</ReactMarkdown>
               </div>
 
-              <footer className="p-6 border-t border-slate-100 bg-slate-50 text-center">
-                <p className="text-[10px] md:text-xs text-slate-400 font-medium">
+              <footer className="p-6 border-t border-slate-100 bg-slate-50 flex flex-col md:flex-row justify-between items-center gap-4">
+                <button
+                  onClick={handleExportReportImage}
+                  disabled={exportingReport}
+                  className="bg-[#002147] text-white px-6 py-2 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-[#003366] transition-all disabled:opacity-50"
+                >
+                  {exportingReport ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Download size={14} />}
+                  {isRtl ? 'تحميل كصورة' : 'Download as Image'}
+                </button>
+                <p className="text-[10px] md:text-xs text-slate-400 font-medium max-w-sm">
                   {isRtl 
                     ? 'هذا التقرير تم إنشاؤه بناءً على البيانات المتوفرة حالياً، يرجى استخدامه كأداة استرشادية لتعزيز تجربة الطالب.' 
                     : 'This report is generated based on current data, please use it as a guidance tool to enhance student experience.'}

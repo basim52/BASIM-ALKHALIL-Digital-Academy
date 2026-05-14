@@ -9,6 +9,8 @@ import {
   ArrowLeft,
   X,
   Play,
+  Pause,
+  Square,
   Heart,
   AlertCircle
 } from 'lucide-react';
@@ -48,6 +50,86 @@ const STORIES: Story[] = [
     level: 'B2',
     image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=400&q=80',
     content: 'Artificial intelligence is rapidly transforming our global society. From healthcare diagnostics to autonomous vehicles, the integration of smart algorithms is enhancing efficiency. While ethical concerns remain a subject of debate, the potential for human augmentation through technology is undeniable. Modern education systems must adapt to this technological shift.'
+  },
+  {
+    id: '4',
+    titleEn: 'The Brave Firefighter',
+    titleAr: 'الإطفائي الشجاع',
+    level: 'A1',
+    image: 'https://images.unsplash.com/photo-1582213726894-85816995642d?auto=format&fit=crop&w=800&q=80',
+    content: 'Jack is a firefighter. He is very brave. Every day, he wears a red uniform and a big helmet. When the bell rings, Jack jumps into the red fire truck. He drives quickly to help people. Jack loves his job because he helps save lives.'
+  },
+  {
+    id: '5',
+    titleEn: 'A Journey to the Moon',
+    titleAr: 'رحلة إلى القمر',
+    level: 'A2',
+    image: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=800&q=80',
+    content: 'Astronauts travel into space using large rockets. In 1969, humans landed on the moon for the first time. They wore special space suits to breathe. The moon has no air and no water. Looking at the Earth from the moon is a beautiful sight that few people have seen.'
+  },
+  {
+    id: '6',
+    titleEn: 'The Secret Garden',
+    titleAr: 'الحديقة السرية',
+    level: 'B1',
+    image: 'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?auto=format&fit=crop&w=800&q=80',
+    content: 'Mary found an old key buried in the soil. It belonged to a hidden garden that had been locked for ten years. As she opened the door, she saw beautiful roses and tall trees. She decided to take care of the garden. Working in the garden made her feel happy and healthy.'
+  },
+  {
+    id: '7',
+    titleEn: 'The Mystery of the Old Clock',
+    titleAr: 'لغز الساعة القديمة',
+    level: 'B1',
+    image: 'https://images.unsplash.com/photo-1508057198894-247b23fe5ade?auto=format&fit=crop&w=800&q=80',
+    content: 'In the dusty attic, there stood an ancient wooden clock that never ticked. One evening, thin smoke started coming out of it. Detective Leo was called to investigate the strange event. He found a hidden compartment inside the clock containing a map to a hidden treasure under the stairs.'
+  },
+  {
+    id: '8',
+    titleEn: 'Exploring the Amazon',
+    titleAr: 'استكشاف الأمازون',
+    level: 'B2',
+    image: 'https://images.unsplash.com/photo-1516026672322-bc52d61a5c25?auto=format&fit=crop&w=800&q=80',
+    content: 'The Amazon rainforest is the largest tropical forest in the world. It is home to millions of species of plants and animals. Scientists explore this jungle to discover new medicines. However, deforestation is a serious threat to this diverse ecosystem. We must protect it to maintain the balance of our planet.'
+  },
+  {
+    id: '9',
+    titleEn: 'The History of Olympics',
+    titleAr: 'تاريخ الألعاب الأولمبية',
+    level: 'B2',
+    image: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80',
+    content: 'The Olympic Games originated in ancient Greece as a religious festival. Today, the modern Olympics are a major international sporting event featuring thousands of athletes. They compete in various sports to represent their nations. The spirit of the games is about friendship, solidarity, and fair play among different cultures.'
+  },
+  {
+    id: '10',
+    titleEn: 'The Impact of Climate Change',
+    titleAr: 'تأثير تغير المناخ',
+    level: 'C1',
+    image: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80',
+    content: 'Climate change is primarily driven by anthropogenic greenhouse gas emissions, leading to unprecedented global warming. The melting of polar ice caps and rising sea levels pose significant risks to coastal communities worldwide. Mitigation strategies require international cooperation and a transition toward renewable energy sources. Failure to act swiftly could result in irreversible damage to the biosphere.'
+  },
+  {
+    id: '11',
+    titleEn: 'AI in Modern Medicine',
+    titleAr: 'الذكاء الاصطناعي في الطب الحديث',
+    level: 'C1',
+    image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80',
+    content: 'The implementation of machine learning algorithms in healthcare has revolutionized diagnostic accuracy and personalized treatment plans. AI-driven systems can analyze vast datasets of medical imaging to detect abnormalities at early stages. Furthermore, predictive analytics assist clinicians in anticipating patient outcomes. Despite these advancements, the human element in medicine remains irreplaceable for ethical judgment.'
+  },
+  {
+    id: '12',
+    titleEn: 'The Philosophy of Happiness',
+    titleAr: 'فلسفة السعادة',
+    level: 'C2',
+    image: 'https://images.unsplash.com/photo-1499209974431-9dac3adaf471?auto=format&fit=crop&w=800&q=80',
+    content: 'Philosophical inquiries into the nature of happiness have shifted from purely hedonistic interpretations to eudaimonic perspectives. Eudaimonia emphasizes long-term fulfillment through the realization of one\'s potential and virtuous living. Modern psychology aligns with these ancient concepts, suggesting that purpose and social connection are fundamental pillars of well-being. Ultimately, happiness is a subjective construct influenced by internal and external variables.'
+  },
+  {
+    id: '13',
+    titleEn: 'Global Economic Trends',
+    titleAr: 'الاتجاهات الاقتصادية العالمية',
+    level: 'C2',
+    image: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=800&q=80',
+    content: 'The contemporary global economic landscape is characterized by increasing volatility and the rise of decentralized financial systems. Traditional monetary policies are being challenged by the emergence of digital currencies and cross-border trade complexities. Structural shifts in labor markets, driven by automation, necessitate comprehensive policy reforms. Sustaining equitable growth requires a balanced approach between innovation and social safety nets.'
   }
 ];
 
@@ -58,6 +140,14 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { l
   const [wordData, setWordData] = useState<{ word: string; translation: string; pronunciation: string } | null>(null);
   const [loadingWord, setLoadingWord] = useState(false);
   const [deducting, setDeducting] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  React.useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
 
   const handleSelectStory = async (story: Story) => {
     if (selectedStory?.id === story.id) return;
@@ -111,6 +201,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { l
 
       setWordData({ word: cleanWord, ...data });
       
+      window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(cleanWord);
       utterance.lang = 'en-US';
       window.speechSynthesis.speak(utterance);
@@ -121,17 +212,47 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { l
     }
   };
 
-  const speak = (text: string) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    window.speechSynthesis.speak(utterance);
+  const toggleSpeak = (text: string) => {
+    if (isSpeaking && !isPaused) {
+      window.speechSynthesis.pause();
+      setIsPaused(true);
+    } else if (isSpeaking && isPaused) {
+      window.speechSynthesis.resume();
+      setIsPaused(false);
+    } else {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.onstart = () => {
+        setIsSpeaking(true);
+        setIsPaused(false);
+      };
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        setIsPaused(false);
+      };
+      utterance.onerror = () => {
+        setIsSpeaking(false);
+        setIsPaused(false);
+      };
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  const stopSpeak = () => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    setIsPaused(false);
   };
 
   if (selectedStory) {
     return (
       <div className={`p-8 max-w-4xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
         <button 
-          onClick={() => setSelectedStory(null)}
+          onClick={() => {
+            stopSpeak();
+            setSelectedStory(null);
+          }}
           className="flex items-center gap-2 text-slate-400 hover:text-[#002147] transition-colors mb-8 font-bold"
         >
           <ArrowLeft size={20} className={isRtl ? 'rotate-180' : ''} />
@@ -165,13 +286,26 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { l
             </div>
           </div>
 
-          <button 
-            onClick={() => speak(selectedStory.content)}
-            className="mt-12 bg-[#002147] text-white px-8 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest flex items-center gap-4 hover:bg-[#C49E3A] transition-all shadow-xl shadow-blue-100 mx-auto"
-          >
-            <Volume2 size={24} />
-            {isRtl ? 'استمع للقصة كاملة' : 'Listen to Full Story'}
-          </button>
+          <div className="flex items-center justify-center gap-4 mt-12">
+            <button 
+              onClick={() => toggleSpeak(selectedStory.content)}
+              className={`bg-[#002147] text-white px-8 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest flex items-center gap-4 hover:bg-[#C49E3A] transition-all shadow-xl shadow-blue-100 ${isPaused || !isSpeaking ? 'bg-[#002147]' : 'bg-emerald-600'}`}
+            >
+              {isSpeaking && !isPaused ? <Pause size={24} /> : <Play size={24} />}
+              {isSpeaking && !isPaused 
+                ? (isRtl ? 'إيقاف مؤقت' : 'Pause Audio') 
+                : (isPaused ? (isRtl ? 'استكمال' : 'Resume Story') : (isRtl ? 'استمع للقصة' : 'Listen to Story'))}
+            </button>
+
+            {isSpeaking && (
+              <button 
+                onClick={stopSpeak}
+                className="w-16 h-16 rounded-[1.5rem] bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-lg"
+              >
+                <Square size={24} fill="currentColor" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Word Detail Popup */}
@@ -190,7 +324,12 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { l
                     {loadingWord ? (
                       <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <button onClick={() => speak(wordData.word)} className="text-blue-400 hover:text-white transition-colors">
+                      <button onClick={() => {
+                        window.speechSynthesis.cancel();
+                        const utt = new SpeechSynthesisUtterance(wordData.word);
+                        utt.lang = 'en-US';
+                        window.speechSynthesis.speak(utt);
+                      }} className="text-blue-400 hover:text-white transition-colors">
                         <Volume2 size={20} />
                       </button>
                     )}
