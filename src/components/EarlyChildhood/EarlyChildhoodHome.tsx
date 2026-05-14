@@ -26,7 +26,7 @@ import { ColorsLesson } from './ColorsLesson';
 import { NumbersLesson } from './NumbersLesson';
 import { AnimalsLesson } from './AnimalsLesson';
 import { ShapesLesson } from './ShapesLesson';
-import { LettersLesson } from './LettersLesson';
+import { LettersLesson } from '../LettersLesson';
 import { FirstWordsLesson } from './FirstWordsLesson';
 import { PronunciationLesson } from './PronunciationLesson';
 import { MagicStoryMode } from './MagicStoryMode';

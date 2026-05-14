@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { translations, Language } from '../../lib/translations';
+import { translations, Language } from '../lib/translations';
 import { 
   ArrowLeft, 
   Volume2, 
@@ -31,7 +31,7 @@ import {
   Trophy,
   Star
 } from 'lucide-react';
-import { LessonAssistant } from '../LessonAssistant';
+import { LessonAssistant } from './LessonAssistant';
 
 interface LetterOption {
   letter: string;

@@ -11,6 +11,13 @@ const getAI = () => {
   }
   return new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY,
+    httpOptions: {
+      headers: {
+        'User-Agent': 'aistudio-build',
+        'Referer': 'https://basim-alkhalil-digital-academy.vercel.app/',
+        'Origin': 'https://basim-alkhalil-digital-academy.vercel.app/'
+      }
+    }
   });
 };
 
@@ -41,7 +48,7 @@ app.post("/api/lesson/chat", async (req, res) => {
     
     const ai = getAI();
     const result = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-3-flash-preview",
       contents: [{ role: 'user', parts: [{ text: `CONTEXT:\n${context}\n\nUSER QUESTION:\n${prompt}` }] }],
       config: {
         systemInstruction: "You are a helpful teaching assistant for Basim Alkhalil Digital Academy.",
@@ -62,7 +69,7 @@ app.post("/api/ai-partner/chat", async (req, res) => {
     
     const ai = getAI();
     const result = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-3-flash-preview",
       contents: [
         ...(Array.isArray(history) ? history : []).map((m: any) => ({
           role: m.role === 'user' ? 'user' : 'model',
@@ -89,7 +96,7 @@ app.post("/api/admin/analyze", async (req, res) => {
     
     const ai = getAI();
     const result = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-3-flash-preview",
       contents: [{ 
         role: 'user', 
         parts: [{ 
