@@ -128,7 +128,7 @@ const STORIES: Story[] = [
     titleEn: 'Global Economic Trends',
     titleAr: 'الاتجاهات الاقتصادية العالمية',
     level: 'C2',
-    image: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1611974717482-48216694665a?auto=format&fit=crop&w=800&q=80',
     content: 'The contemporary global economic landscape is characterized by increasing volatility and the rise of decentralized financial systems. Traditional monetary policies are being challenged by the emergence of digital currencies and cross-border trade complexities. Structural shifts in labor markets, driven by automation, necessitate comprehensive policy reforms. Sustaining equitable growth requires a balanced approach between innovation and social safety nets.'
   }
 ];

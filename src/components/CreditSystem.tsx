@@ -271,20 +271,35 @@ export const CreditSystem = ({ lang }: { lang: Language }) => {
              </h4>
              
              <div className="space-y-4">
-               <div className="relative">
-                 <input 
-                   type="text" 
-                   value={voucherCode}
-                   onChange={(e) => setVoucherCode(e.target.value)}
-                   placeholder="AK-XXXX-XXXX"
-                   className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl px-6 py-4 font-black text-[#002147] text-center tracking-widest placeholder:text-slate-300 placeholder:tracking-normal focus:border-[#C49E3A] focus:bg-white outline-none transition-all"
-                 />
-                 {redeeming && (
-                   <div className="absolute inset-y-0 right-4 flex items-center">
-                     <Plus className="animate-spin text-[#C49E3A]" size={20} />
-                   </div>
-                 )}
-               </div>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={voucherCode}
+                    onChange={(e) => setVoucherCode(e.target.value)}
+                    onPaste={(e) => {
+                      const pastedData = e.clipboardData.getData('text');
+                      if (pastedData) {
+                        const cleaned = pastedData.trim().toUpperCase();
+                        setVoucherCode(cleaned);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleRedeem();
+                      }
+                    }}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    spellCheck="false"
+                    placeholder="AK-XXXX-XXXX"
+                    className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl px-6 py-4 font-black text-[#002147] text-center tracking-widest placeholder:text-slate-300 placeholder:tracking-normal focus:border-[#C49E3A] focus:bg-white outline-none transition-all"
+                  />
+                  {redeeming && (
+                    <div className="absolute inset-y-0 right-4 flex items-center">
+                      <Plus className="animate-spin text-[#C49E3A]" size={20} />
+                    </div>
+                  )}
+                </div>
                
                <button 
                 onClick={handleRedeem}
