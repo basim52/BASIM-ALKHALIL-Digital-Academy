@@ -19,6 +19,8 @@ async function startServer() {
     httpOptions: {
       headers: {
         'User-Agent': 'aistudio-build',
+        'Referer': 'https://basim-alkhalil-digital-academy.vercel.app/',
+        'Origin': 'https://basim-alkhalil-digital-academy.vercel.app/'
       }
     }
   });
@@ -82,7 +84,7 @@ async function startServer() {
       }
 
       const result = await ai.models.generateContent({
-        model: "gemini-flash-latest",
+        model: "gemini-1.5-flash",
         contents: [
           { role: 'user', parts: [{ text: `CONTEXT:\n${context}\n\nUSER QUESTION:\n${prompt}` }] }
         ],
@@ -122,7 +124,7 @@ async function startServer() {
       `;
 
       const result = await ai.models.generateContent({
-        model: "gemini-flash-latest",
+        model: "gemini-1.5-flash",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -150,7 +152,7 @@ async function startServer() {
       `;
 
       const result = await ai.models.generateContent({
-        model: "gemini-flash-latest",
+        model: "gemini-1.5-flash",
         contents: [
           ...(Array.isArray(history) ? history : []).map((m: any) => ({
             role: m.role === 'user' ? 'user' : 'model',
@@ -186,7 +188,7 @@ async function startServer() {
       Language: ${lang === 'ar' ? 'Arabic' : 'English'}`;
 
       const result = await ai.models.generateContent({
-        model: "gemini-flash-latest",
+        model: "gemini-1.5-flash",
         contents: prompt
       });
 
@@ -203,7 +205,7 @@ async function startServer() {
     try {
       const { data, prompt } = req.body;
       const result = await ai.models.generateContent({
-        model: "gemini-flash-latest",
+        model: "gemini-1.5-flash",
         contents: `Analyze this data: ${JSON.stringify(data)}\n\nPrompt: ${prompt}`
       });
       res.json({ text: result.text || "" });
@@ -219,7 +221,7 @@ async function startServer() {
       const { videoTitle, level, lang } = req.body;
       const prompt = `Generate 3 multiple choice questions for: "${videoTitle}". Level: ${level}. JSON array format. Language: ${lang}`;
       const result = await ai.models.generateContent({
-        model: "gemini-flash-latest",
+        model: "gemini-1.5-flash",
         contents: prompt,
         config: { responseMimeType: "application/json" }
       });
@@ -243,7 +245,7 @@ async function startServer() {
           // Start session on first message (which should contain context)
           if (!session && !isConnecting) {
             isConnecting = true;
-            const modelToUse = "gemini-flash-live-latest"; 
+            const modelToUse = "gemini-2.0-flash-exp"; 
             logToFile(`Initializing Gemini Live session: ${modelToUse}`);
 
             if (!process.env.GEMINI_API_KEY) {
