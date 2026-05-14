@@ -35,12 +35,15 @@ import {
   Baby,
   Headset,
   ExternalLink,
-  Smartphone
+  Smartphone,
+  Download
 } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserRole, CurriculumCategory, proficiencyLevel, UserProfile, ScheduleItem, ParentNote, LearningModule, Lesson, AppView, StudentProfile, CreditCost } from './types';
 import { MASTER_CURRICULUM } from './data/masterCurriculum';
 import { generateWhatsAppLink, NOTIFICATION_TEMPLATES } from './lib/whatsapp';
+import { ShareableNotification } from './components/ShareableNotification';
 import { AIConversation } from './components/AIConversation';
 import { PlacementTest } from './components/PlacementTest';
 import { auth, googleProvider, db, handleFirestoreError, OperationType, testConnection, deductCredits } from './lib/firebase';
@@ -370,6 +373,7 @@ const ScheduleManager = ({ studentId, studentName, lang, canEdit = false }: { st
   const isRtl = lang === 'ar';
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const [newItem, setNewItem] = useState({ day: 'Monday', time: '10:00', subject: '' });
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     const q = query(collection(db, 'schedules'), where('studentId', '==', studentId));
@@ -389,6 +393,50 @@ const ScheduleManager = ({ studentId, studentName, lang, canEdit = false }: { st
     });
     return () => unsubscribe();
   }, [studentId]);
+
+  const handleExportImage = async () => {
+    setIsExporting(true);
+    
+    // Tiny delay to ensure hidden card is rendered
+    setTimeout(async () => {
+      const element = document.getElementById('schedule-capture-card');
+      if (element) {
+        try {
+          const canvas = await html2canvas(element, {
+            useCORS: true,
+            scale: 2,
+            backgroundColor: '#ffffff',
+            logging: false,
+            onclone: (clonedDoc) => {
+              const el = clonedDoc.getElementById('schedule-capture-card');
+              if (el) el.style.display = 'block';
+              
+              // Remove oklch to prevent parser errors in captured image
+              const styles = clonedDoc.getElementsByTagName('style');
+              for (let i = 0; i < styles.length; i++) {
+                const style = styles[i];
+                if (style.innerHTML.includes('oklch')) {
+                  style.innerHTML = style.innerHTML.replace(/oklch\([^)]+\)/g, '#f1f5f9');
+                }
+              }
+            }
+          });
+          
+          const dataUrl = canvas.toDataURL('image/png');
+          const link = document.createElement('a');
+          link.download = `Schedule-${studentName}-${new Date().toLocaleDateString()}.png`;
+          link.href = dataUrl;
+          link.click();
+        } catch (err) {
+          console.error("Failed to capture schedule:", err);
+        } finally {
+          setIsExporting(false);
+        }
+      } else {
+        setIsExporting(false);
+      }
+    }, 100);
+  };
 
   const addItem = async () => {
     if (!newItem.subject) return;
@@ -423,11 +471,38 @@ const ScheduleManager = ({ studentId, studentName, lang, canEdit = false }: { st
           <Calendar className="text-[#C49E3A] w-5 h-5 md:w-6 md:h-6" />
           {t.schedule}
         </h3>
-        {canEdit && (
-          <button onClick={addItem} className="bg-[#002147] text-white p-2 rounded-xl hover:bg-[#C49E3A] transition-all">
-            <Plus size={20} />
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {schedule.length > 0 && (
+            <button 
+              onClick={handleExportImage}
+              disabled={isExporting}
+              className="bg-emerald-50 text-emerald-600 p-2 rounded-xl hover:bg-emerald-100 transition-all border border-emerald-100 flex items-center gap-2 group"
+              title={isRtl ? "تصدير كصورة" : "Export as Image"}
+            >
+              <Download size={20} className={isExporting ? "animate-pulse" : ""} />
+              <span className="hidden md:inline text-xs font-black uppercase tracking-wider">{isRtl ? "صورة" : "Image"}</span>
+            </button>
+          )}
+          {canEdit && (
+            <button onClick={addItem} className="bg-[#002147] text-white p-2 rounded-xl hover:bg-[#C49E3A] transition-all">
+              <Plus size={20} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Hidden Card for Capture */}
+      <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+        <ShareableNotification 
+          id="schedule-capture-card"
+          lang={lang}
+          studentName={studentName}
+          type="schedule"
+          schedule={schedule.map(item => ({
+            day: t.days[item.day as keyof typeof t.days],
+            time: item.time
+          }))}
+        />
       </div>
 
       {canEdit && (
