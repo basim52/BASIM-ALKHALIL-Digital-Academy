@@ -113,6 +113,18 @@ export const WhatsAppNotifications = ({
               if (el) {
                 el.style.display = 'block';
               }
+              // Remove oklch from styles to prevent parser error
+              const styles = clonedDoc.getElementsByTagName('style');
+              for (let i = 0; i < styles.length; i++) {
+                const style = styles[i];
+                if (style.innerHTML.includes('oklch')) {
+                  // Carefully replace oklch patterns or just remove the offending rules
+                  // Simplest: remove style tags that use oklch if they are purely tailwind-generated
+                  // but we need tailwind for layout in other parts? 
+                  // No, I moved layout to inline styles in ShareableNotification.
+                  style.innerHTML = style.innerHTML.replace(/oklch\([^)]+\)/g, '#cccccc');
+                }
+              }
             }
           });
           

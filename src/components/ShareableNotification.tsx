@@ -17,8 +17,10 @@ export const ShareableNotification = ({ lang, studentName, message, type, id = "
   return (
     <div 
       id={id}
-      className={`relative overflow-hidden ${isRtl ? 'text-right' : 'text-left'}`}
       style={{ 
+        position: 'relative',
+        overflow: 'hidden',
+        textAlign: isRtl ? 'right' : 'left',
         width: '600px',
         padding: '3rem',
         direction: isRtl ? 'rtl' : 'ltr',
@@ -26,13 +28,15 @@ export const ShareableNotification = ({ lang, studentName, message, type, id = "
         border: '12px solid #ecfdf5',
         borderRadius: '3rem',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.2)',
-        fontFamily: 'Cairo, sans-serif'
+        fontFamily: 'Cairo, "IBM Plex Sans Arabic", sans-serif'
       }}
     >
       {/* Background Decorations */}
       <div 
-        className="absolute top-0 right-0" 
         style={{ 
+          position: 'absolute',
+          top: 0,
+          right: 0,
           width: '16rem', 
           height: '16rem', 
           borderRadius: '9999px', 
@@ -42,8 +46,10 @@ export const ShareableNotification = ({ lang, studentName, message, type, id = "
         }} 
       />
       <div 
-        className="absolute bottom-0 left-0" 
         style={{ 
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
           width: '16rem', 
           height: '16rem', 
           borderRadius: '9999px', 
@@ -55,8 +61,12 @@ export const ShareableNotification = ({ lang, studentName, message, type, id = "
       
       {/* Header */}
       <div 
-        className="flex justify-between items-center relative z-10" 
         style={{ 
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          position: 'relative',
+          zIndex: 10,
           marginBottom: '3rem', 
           borderBottom: '2px solid #d1fae5', 
           paddingBottom: '2rem' 
@@ -88,8 +98,10 @@ export const ShareableNotification = ({ lang, studentName, message, type, id = "
           </p>
         </div>
         <div 
-          className="flex items-center justify-center" 
           style={{ 
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             width: '4rem', 
             height: '4rem', 
             borderRadius: '1.5rem', 
@@ -102,7 +114,7 @@ export const ShareableNotification = ({ lang, studentName, message, type, id = "
       </div>
 
       {/* Content */}
-      <div className="relative z-10" style={{ marginBottom: '3rem' }}>
+      <div style={{ position: 'relative', zIndex: 10, marginBottom: '3rem' }}>
         <div 
           style={{ 
             display: 'inline-block',
@@ -134,8 +146,8 @@ export const ShareableNotification = ({ lang, studentName, message, type, id = "
         </h2>
         
         <div 
-          className="relative" 
           style={{ 
+            position: 'relative',
             padding: '2rem', 
             borderRadius: '2rem', 
             border: '1px solid #f1f5f9',
@@ -143,21 +155,25 @@ export const ShareableNotification = ({ lang, studentName, message, type, id = "
           }}
         >
            <svg 
-            className="absolute top-4 left-4" 
             fill="currentColor" 
             viewBox="0 0 24 24" 
             style={{ 
+              position: 'absolute',
+              top: '1rem',
+              left: isRtl ? 'auto' : '1rem',
+              right: isRtl ? '1rem' : 'auto',
               width: '3rem', 
               height: '3rem', 
               color: '#f1f5f9',
-              transform: 'scaleX(-1)'
+              transform: isRtl ? 'none' : 'scaleX(-1)'
             }}
           >
             <path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H15.017C14.4647 8 14.017 8.44772 14.017 9V11C14.017 12.1046 13.1216 13 12.017 13H11.017C10.4647 13 10.017 12.5523 10.017 12V5C10.017 4.44772 10.4647 4 11.017 4H19.017C20.6738 4 22.017 5.34315 22.017 7V15C22.017 16.6569 20.6738 18 19.017 18H16.017C15.4647 18 15.017 18.4477 15.017 19V21H14.017ZM4.017 21L4.017 18C4.017 16.8954 4.9124 16 6.017 16H9.017C9.56931 16 10.017 15.5523 10.017 15V9C10.017 8.44772 9.56931 8 9.017 8H5.017C4.46474 8 4.017 8.44772 4.017 9V11C4.017 12.1046 3.1216 13 2.017 13H1.017C0.464741 13 0.0170068 12.5523 0.0170068 12V5C0.0170068 4.44772 0.464741 4 1.017 4H9.017C10.6738 4 12.017 5.34315 12.017 7V15C12.017 16.6569 10.6738 18 9.017 18H6.017C5.46474 18 5.017 18.4477 5.017 19V21H4.017Z" />
           </svg>
           <p 
-            className="relative z-10" 
             style={{ 
+              position: 'relative',
+              zIndex: 10,
               fontSize: '1.5rem', 
               fontWeight: 700, 
               lineHeight: 1.625, 
@@ -171,8 +187,16 @@ export const ShareableNotification = ({ lang, studentName, message, type, id = "
       </div>
 
       {/* Footer */}
-      <div className="flex justify-between items-end relative z-10">
-        <div className="flex items-center" style={{ gap: '0.75rem' }}>
+      <div 
+        style={{ 
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-end',
+          position: 'relative',
+          zIndex: 10
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div 
             style={{ 
               width: '1rem', 
@@ -194,7 +218,7 @@ export const ShareableNotification = ({ lang, studentName, message, type, id = "
             Verification: {new Date().toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US')}
           </span>
         </div>
-        <div className="flex flex-col items-end">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
           <span 
             style={{ 
               fontSize: '10px', 
