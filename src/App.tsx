@@ -555,6 +555,31 @@ const AIParentNotes = ({ profile, studentId, lang }: { profile: UserProfile, stu
 const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCurriculum }: { lang: Language, profile: UserProfile, onStartConversation: () => void, onStartChat: () => void, onOpenCurriculum: () => void }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
+  const [recommendation, setRecommendation] = useState<string | null>(null);
+  const [loadingRec, setLoadingRec] = useState(false);
+
+  useEffect(() => {
+    const getRec = async () => {
+      setLoadingRec(true);
+      try {
+        const resp = await fetch('/api/admin/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            data: { name: profile.displayName, level: (profile as any).level || 'A1', points: 1240 },
+            prompt: `Give a 1-sentence encouraging study recommendation for this student at Basim Academy. Language: ${lang === 'ar' ? 'Arabic' : 'English'}.`
+          })
+        });
+        const data = await resp.json();
+        setRecommendation(data.text);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingRec(false);
+      }
+    };
+    getRec();
+  }, [profile.uid, lang]);
 
   return (
     <div className={`flex-1 p-5 md:p-12 overflow-y-auto ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -591,6 +616,22 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             </button>
           </div>
         </header>
+
+        {recommendation && (
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="mb-10 p-6 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl text-white shadow-xl flex items-center gap-6"
+          >
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center shrink-0">
+              <Sparkles className="text-white" />
+            </div>
+            <div className="flex-1">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-1 opacity-60">{isRtl ? 'توصية الذكاء الاصطناعي اليوم' : 'AI DAILY RECOMMENDATION'}</p>
+              <p className="font-bold text-sm md:text-base leading-relaxed">"{recommendation}"</p>
+            </div>
+          </motion.div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-12">
           {/* Journey Section */}

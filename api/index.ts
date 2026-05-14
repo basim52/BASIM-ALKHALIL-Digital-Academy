@@ -10,14 +10,7 @@ const getAI = () => {
     throw new Error("GEMINI_API_KEY is not set in environment variables");
   }
   return new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY,
-    httpOptions: {
-      headers: {
-        'User-Agent': 'aistudio-build',
-        'Referer': 'https://basim-alkhalil-digital-academy.vercel.app/',
-        'Origin': 'https://basim-alkhalil-digital-academy.vercel.app/'
-      }
-    }
+    apiKey: process.env.GEMINI_API_KEY
   });
 };
 
@@ -47,12 +40,19 @@ app.post("/api/lesson/chat", async (req, res) => {
     if (!prompt) return res.status(400).json({ error: "Missing prompt" });
     
     const ai = getAI();
+    const promptText = `
+      SYSTEM: You are a helpful teaching assistant for Basim Alkhalil Digital Academy.
+      
+      CONTEXT:
+      ${context}
+      
+      USER QUESTION:
+      ${prompt}
+    `;
+
     const result = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
-      contents: [{ role: 'user', parts: [{ text: `CONTEXT:\n${context}\n\nUSER QUESTION:\n${prompt}` }] }],
-      config: {
-        systemInstruction: "You are a helpful teaching assistant for Basim Alkhalil Digital Academy.",
-      }
+      model: "gemini-1.5-flash",
+      contents: [{ role: 'user', parts: [{ text: promptText }] }]
     });
 
     res.json({ text: result.text || "" });
@@ -62,24 +62,68 @@ app.post("/api/lesson/chat", async (req, res) => {
   }
 });
 
+// Lesson generation
+app.post("/api/lesson/generate", async (req, res) => {
+  try {
+    const { category, level, topic } = req.body;
+    if (!topic) return res.status(400).json({ error: "Missing topic" });
+
+    const ai = getAI();
+    const promptText = `
+      SYSTEM: Generate educational content in JSON matching the requested structure.
+      
+      USER REQUEST:
+      Topic: "${topic}".
+      Category: ${category}
+      Level: ${level}
+      
+      Task: Create a deep, high-quality interactive lesson with specialized sections (warmup, content, exercises, quiz).
+      Output JSON STRICTLY following the schema. Ensure everything is in BOTH English and Professional Academic Arabic.
+      JSON format: { "title": "...", "titleAr": "...", "warmup": {...}, "content": "...", "contentAr": "...", "imageryPrompt": "...", "exercises": [...], "quiz": [...] }
+    `;
+
+    const result = await ai.models.generateContent({
+      model: "gemini-1.5-flash",
+      contents: [{ role: 'user', parts: [{ text: promptText }] }],
+      config: {
+        responseMimeType: "application/json"
+      }
+    });
+
+    if (!result || !result.text) throw new Error("Empty response from AI");
+    
+    let cleanText = result.text.trim();
+    if (cleanText.startsWith("```")) {
+      cleanText = cleanText.replace(/^```json\n?/, "").replace(/\n?```$/, "");
+    }
+    res.json(JSON.parse(cleanText));
+  } catch (error: any) {
+    console.error("Lesson Generate Error:", error);
+    res.status(500).json({ error: error.message || "Failed to generate lesson content" });
+  }
+});
+
 // Language partner
 app.post("/api/ai-partner/chat", async (req, res) => {
   try {
     const { prompt, history = [] } = req.body;
     
     const ai = getAI();
+    const promptText = `
+      SYSTEM: You are a professional Oxford English Language Partner. Respond naturally.
+      
+      USER MESSAGE: ${prompt}
+    `;
+
     const result = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-1.5-flash",
       contents: [
         ...(Array.isArray(history) ? history : []).map((m: any) => ({
           role: m.role === 'user' ? 'user' : 'model',
           parts: [{ text: m.text }]
         })),
-        { role: 'user', parts: [{ text: prompt }] }
-      ],
-      config: {
-        systemInstruction: "You are an Oxford English Language Partner.",
-      }
+        { role: 'user', parts: [{ text: promptText }] }
+      ]
     });
 
     res.json({ text: result.text || "" });
@@ -96,16 +140,13 @@ app.post("/api/admin/analyze", async (req, res) => {
     
     const ai = getAI();
     const result = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-1.5-flash",
       contents: [{ 
         role: 'user', 
         parts: [{ 
-          text: `As an expert Academy Director, analyze this platform data:\n${JSON.stringify(data)}\nProvide a Markdown report.` 
+          text: `Analyze this data: ${JSON.stringify(data)}\n\nPrompt: as an expert Academy Director, provide a Markdown report.` 
         }] 
-      }],
-      config: {
-        systemInstruction: "You are Basim Alkhalil, the Academy Director.",
-      }
+      }]
     });
 
     res.json({ text: result.text || "" });

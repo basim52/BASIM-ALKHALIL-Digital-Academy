@@ -220,6 +220,30 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
     }
   };
 
+  const [designingCurriculum, setDesigningCurriculum] = useState(false);
+  const [designSubject, setDesignSubject] = useState('');
+  const [curriculumDesign, setCurriculumDesign] = useState<any>(null);
+
+  const handleDesignCurriculum = async () => {
+    if (!designSubject.trim()) return;
+    setDesigningCurriculum(true);
+    setCurriculumDesign(null);
+    try {
+      const resp = await fetch('/api/curriculum/design', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject: designSubject, goals: 'High impact education', lang })
+      });
+      if (!resp.ok) throw new Error("Failed to design curriculum");
+      const data = await resp.json();
+      setCurriculumDesign(data);
+    } catch (err) {
+      console.error("Design Error:", err);
+    } finally {
+      setDesigningCurriculum(false);
+    }
+  };
+
   return (
     <div className={`p-4 md:p-8 max-w-7xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <header className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -463,6 +487,55 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                   <Activity size={32} />
                 </div>
                 <p className="text-slate-400 font-bold text-sm tracking-widest uppercase">{isRtl ? 'بانتظار التحليل الذكي...' : 'Waiting for AI analysis...'}</p>
+              </div>
+            )}
+          </section>
+
+          {/* Curriculum Designer Section */}
+          <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm overflow-hidden">
+            <h3 className="text-xl font-black text-[#002147] mb-6 flex items-center gap-3">
+              <Plus className="text-blue-600" />
+              {isRtl ? 'مصمم المناهج الذكي' : 'Smart Curriculum Designer'}
+            </h3>
+            <div className="flex gap-4 mb-8">
+              <input 
+                type="text" 
+                value={designSubject}
+                onChange={(e) => setDesignSubject(e.target.value)}
+                placeholder={isRtl ? 'مثال: فيزياء الجسيمات أو ريادة الأعمال' : 'e.g. Particle Physics or Entrepreneurship'}
+                className="flex-1 bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-blue-600 transition-all font-bold"
+              />
+              <button 
+                onClick={handleDesignCurriculum}
+                disabled={designingCurriculum || !designSubject.trim()}
+                className="bg-blue-600 text-white px-8 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#002147] transition-all disabled:opacity-50 shadow-lg shadow-blue-200"
+              >
+                {designingCurriculum ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  isRtl ? 'تصميم' : 'Design'
+                )}
+              </button>
+            </div>
+
+            {curriculumDesign && (
+              <div className="space-y-6">
+                {Object.entries(curriculumDesign).map(([level, units]: [any, any]) => (
+                  <div key={level} className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                    <h4 className="font-black text-[#002147] mb-4 flex items-center gap-2">
+                       <span className="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center text-xs">{level}</span>
+                       {isRtl ? 'محتوى المستوى' : 'Level Content'}
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {units.map((u: any, i: number) => (
+                        <div key={i} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                           <h5 className="font-bold text-sm text-[#002147]">{isRtl ? u.titleAr : u.title}</h5>
+                           <p className="text-[10px] text-slate-400 mt-1">{isRtl ? u.descriptionAr : u.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </section>

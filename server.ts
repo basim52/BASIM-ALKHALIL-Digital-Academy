@@ -15,14 +15,7 @@ async function startServer() {
   const PORT = 3000;
 
   const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY,
-    httpOptions: {
-      headers: {
-        'User-Agent': 'aistudio-build',
-        'Referer': 'https://basim-alkhalil-digital-academy.vercel.app/',
-        'Origin': 'https://basim-alkhalil-digital-academy.vercel.app/'
-      }
-    }
+    apiKey: process.env.GEMINI_API_KEY
   });
 
   // Debug Headers
@@ -83,14 +76,22 @@ async function startServer() {
         return res.status(500).json({ error: "Gemini API key is missing on server" });
       }
 
+      const promptText = `
+        SYSTEM: You are a helpful teaching assistant for Basim Alkhalil Digital Academy. Answer in the language the student asks in (Arabic or English).
+        
+        USER QUESTION:
+        CONTEXT:
+        ${context}
+        
+        PROMPT:
+        ${prompt}
+      `;
+
       const result = await ai.models.generateContent({
-        model: "gemini-2.0-flash-exp",
+        model: "gemini-1.5-flash",
         contents: [
-          { role: 'user', parts: [{ text: `CONTEXT:\n${context}\n\nUSER QUESTION:\n${prompt}` }] }
-        ],
-        config: {
-          systemInstruction: "You are a helpful teaching assistant for Basim Alkhalil Digital Academy. You are currently helping a student with a specific lesson. Answer questions ONLY related to the lesson context provided. Be encouraging, professional, and clear. Answer in the language the student asks in (Arabic or English).",
-        }
+          { role: 'user', parts: [{ text: promptText }] }
+        ]
       });
       
       if (!result || !result.text) {
@@ -113,29 +114,46 @@ async function startServer() {
       const { category, level, topic } = req.body;
       if (!topic) return res.status(400).json({ error: "Missing topic" });
 
-      const prompt = `
-        You are an expert academic curriculum designer.
+      const promptText = `
+        SYSTEM: Generate educational content in JSON matching the requested structure.
+        
+        USER REQUEST:
         Topic: "${topic}".
         Category: ${category}
         Level: ${level}
         
-        Task: Create a deep, high-quality interactive lesson with specialized sections.
+        Task: Create a deep, high-quality interactive lesson with specialized sections (warmup, content, exercises, quiz).
         Output JSON STRICTLY following the schema. Ensure everything is in BOTH English and Professional Academic Arabic.
+        JSON format: { "title": "...", "titleAr": "...", "warmup": {...}, "content": "...", "contentAr": "...", "imageryPrompt": "...", "exercises": [...], "quiz": [...] }
       `;
 
       const result = await ai.models.generateContent({
-        model: "gemini-2.0-flash-exp",
-        contents: prompt,
+        model: "gemini-1.5-flash",
+        contents: [{ role: 'user', parts: [{ text: promptText }] }],
         config: {
-          responseMimeType: "application/json",
-          systemInstruction: "Generate educational content in JSON matching the requested structure for reading/logic lessons."
+          responseMimeType: "application/json"
         }
       });
 
-      if (!result || !result.text) throw new Error("Empty response from AI generator");
-      res.json(JSON.parse(result.text));
+      if (!result || !result.text) {
+        logToFile("Empty result from AI generator");
+        throw new Error("Empty response from AI generator");
+      }
+      
+      let cleanText = result.text.trim();
+      if (cleanText.startsWith("```")) {
+        cleanText = cleanText.replace(/^```json\n?/, "").replace(/\n?```$/, "");
+      }
+      
+      try {
+        const parsed = JSON.parse(cleanText);
+        res.json(parsed);
+      } catch (parseErr: any) {
+        logToFile(`JSON Parse Error: ${parseErr.message}`);
+        throw new Error(`Failed to parse AI response as JSON`);
+      }
     } catch (error: any) {
-      logToFile(`Lesson Generation Error: ${error.message}`);
+      logToFile(`Lesson Generation Fatal Error: ${error.message}`);
       res.status(500).json({ error: error.message || "Failed to generate lesson content" });
     }
   });
@@ -145,22 +163,23 @@ async function startServer() {
     logToFile(`START /api/ai-partner/chat - Body keys: ${Object.keys(req.body || {})}`);
     try {
       const { prompt, history = [] } = req.body;
-      const systemInstruction = `
-        You are an Oxford English Language Partner at Basim Alkhalil Digital Academy. 
+      const promptText = `
+        SYSTEM: You are a professional Oxford English Language Partner at Basim Alkhalil Digital Academy. 
         Respond naturally to keep the conversation going. Keep your response relatively short and clear.
         Also, if this feels like a natural point to give feedback, provide a JSON-like summary [FEEDBACK] { "fluency": 0-100, "grammar": 0-100, "vocabulary": 0-100, "suggestions": ["..."] }
+        
+        USER MESSAGE: ${prompt}
       `;
 
       const result = await ai.models.generateContent({
-        model: "gemini-2.0-flash-exp",
+        model: "gemini-1.5-flash",
         contents: [
           ...(Array.isArray(history) ? history : []).map((m: any) => ({
             role: m.role === 'user' ? 'user' : 'model',
             parts: [{ text: m.text || "" }]
           })).filter(m => m.parts[0].text),
-          { role: 'user', parts: [{ text: prompt }] }
-        ],
-        config: { systemInstruction }
+          { role: 'user', parts: [{ text: promptText }] }
+        ]
       });
 
       if (!result || !result.text) {
@@ -181,15 +200,15 @@ async function startServer() {
     logToFile(`START /api/generate/story - Body: ${JSON.stringify(req.body)}`);
     try {
       const { theme, context, lang } = req.body;
-      const prompt = `You are a professional children's storyteller. Write a very short, fun story for a 3-5 year old.
+      const promptText = `You are a professional children's storyteller. Write a very short, fun story for a 3-5 year old.
       THEME: ${theme}. CONTEXT: ${context || 'None'}. 
       Use 3 simple paragraphs separated by '|'. Provide 3 matching emojis separated by ','.
       Format: Title: [Title]\nStory: [P1] | [P2] | [P3]\nEmojis: [E1], [E2], [E3]
       Language: ${lang === 'ar' ? 'Arabic' : 'English'}`;
 
       const result = await ai.models.generateContent({
-        model: "gemini-2.0-flash-exp",
-        contents: prompt
+        model: "gemini-1.5-flash",
+        contents: [{ role: 'user', parts: [{ text: promptText }] }]
       });
 
       res.json({ text: result.text || "" });
@@ -205,12 +224,46 @@ async function startServer() {
     try {
       const { data, prompt } = req.body;
       const result = await ai.models.generateContent({
-        model: "gemini-2.0-flash-exp",
-        contents: `Analyze this data: ${JSON.stringify(data)}\n\nPrompt: ${prompt}`
+        model: "gemini-1.5-flash",
+        contents: [{ role: 'user', parts: [{ text: `Analyze this data: ${JSON.stringify(data)}\n\nPrompt: ${prompt}` }] }]
       });
       res.json({ text: result.text || "" });
     } catch (error: any) {
       logToFile(`Analysis Error: ${error.message}`);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Curriculum Design Suggestion Endpoint
+  app.post("/api/curriculum/design", async (req, res) => {
+    logToFile(`START /api/curriculum/design`);
+    try {
+      const { subject, goals, lang } = req.body;
+      const promptText = `
+        SYSTEM: You are a Curriculum Architect at Basim Alkhalil Academy.
+        TASK: Suggest a 6-level curriculum structure for a new subject: "${subject}".
+        GOALS: ${goals}
+        
+        FORMAT: Return a JSON object with 6 levels (A1 to C2). 
+        Each level should have 5 units.
+        JSON format: { "A1": [ { "id": "...", "title": "...", "titleAr": "...", "description": "...", "descriptionAr": "..." }, ... ], ... }
+        
+        Language: High-quality ${lang === 'ar' ? 'Arabic' : 'English'}.
+      `;
+
+      const result = await ai.models.generateContent({
+        model: "gemini-1.5-flash",
+        contents: [{ role: 'user', parts: [{ text: promptText }] }],
+        config: { responseMimeType: "application/json" }
+      });
+
+      let cleanText = result.text || "{}";
+      if (cleanText.trim().startsWith("```")) {
+        cleanText = cleanText.trim().replace(/^```json\n?/, "").replace(/\n?```$/, "");
+      }
+      res.json(JSON.parse(cleanText));
+    } catch (error: any) {
+      logToFile(`Curriculum Design Error: ${error.message}`);
       res.status(500).json({ error: error.message });
     }
   });
@@ -220,12 +273,18 @@ async function startServer() {
     try {
       const { videoTitle, level, lang } = req.body;
       const prompt = `Generate 3 multiple choice questions for: "${videoTitle}". Level: ${level}. JSON array format. Language: ${lang}`;
+      const promptText = `Generate 3 multiple choice questions for: "${videoTitle}". Level: ${level}. JSON array format. Language: ${lang}`;
       const result = await ai.models.generateContent({
-        model: "gemini-2.0-flash-exp",
-        contents: prompt,
+        model: "gemini-1.5-flash",
+        contents: [{ role: 'user', parts: [{ text: promptText }] }],
         config: { responseMimeType: "application/json" }
       });
-      res.json(JSON.parse(result.text || "[]"));
+      
+      let cleanText = result.text || "[]";
+      if (cleanText.trim().startsWith("```")) {
+        cleanText = cleanText.trim().replace(/^```json\n?/, "").replace(/\n?```$/, "");
+      }
+      res.json(JSON.parse(cleanText));
     } catch (error: any) {
       res.status(500).json({ error: error.message || "Quiz generation failed" });
     }
@@ -245,7 +304,7 @@ async function startServer() {
           // Start session on first message (which should contain context)
           if (!session && !isConnecting) {
             isConnecting = true;
-            const modelToUse = "gemini-2.0-flash-exp"; 
+            const modelToUse = "gemini-1.5-flash"; 
             logToFile(`Initializing Gemini Live session: ${modelToUse}`);
 
             if (!process.env.GEMINI_API_KEY) {
