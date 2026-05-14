@@ -31,7 +31,7 @@ import {
   Trophy,
   Star
 } from 'lucide-react';
-import { LessonAssistant } from './LessonAssistant';
+
 
 interface LetterOption {
   letter: string;
@@ -382,11 +382,7 @@ export const LettersLesson = ({ lang, onBack, onComplete }: { lang: Language, on
           className="absolute -bottom-20 -left-20 w-96 h-96 bg-emerald-400/5 rounded-full blur-3xl"
         />
       </div>
-      <LessonAssistant 
-        lessonTitle={isRtl ? 'درس الحروف' : 'Letters Lesson'} 
-        lessonContent="English Alphabet A-Z: Learning letters with associated objects (A for Apple, B for Ball, etc.) and visual tracing." 
-        isRtl={isRtl} 
-      />
+
     </div>
   );
 };

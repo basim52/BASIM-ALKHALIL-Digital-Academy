@@ -27,7 +27,7 @@ interface WordLevel {
   words: WordOption[];
 }
 
-import { LessonAssistant } from '../LessonAssistant';
+
 
 interface FirstWordsLessonProps {
   onBack: () => void;
@@ -396,11 +396,7 @@ export const FirstWordsLesson: React.FC<FirstWordsLessonProps> = ({ onBack, onCo
           </motion.div>
         )}
       </AnimatePresence>
-      <LessonAssistant 
-        lessonTitle={isRtl ? 'الكلمات الأولى' : 'First Words'} 
-        lessonContent="Early Childhood Vocabulary: Learning basic objects, food, and household items in English and Arabic." 
-        isRtl={isRtl} 
-      />
+
     </div>
   );
 };

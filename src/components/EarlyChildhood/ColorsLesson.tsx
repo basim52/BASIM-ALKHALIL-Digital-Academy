@@ -11,7 +11,7 @@ import {
   Trophy,
   Star
 } from 'lucide-react';
-import { LessonAssistant } from '../LessonAssistant';
+
 
 interface ColorOption {
   name: string;
@@ -287,11 +287,7 @@ export const ColorsLesson = ({ lang, onBack, onComplete }: { lang: Language, onB
           className="absolute bottom-[10%] right-[10%] w-96 h-96 bg-blue-400/10 rounded-full blur-3xl" 
         />
       </div>
-      <LessonAssistant 
-        lessonTitle={isRtl ? 'درس الألوان' : 'Colors Lesson'} 
-        lessonContent="Interactive lesson teaching colors like Red, Blue, Green, Yellow, Orange, Purple, Pink, Black, and White with multi-sensory feedback." 
-        isRtl={isRtl} 
-      />
+
     </div>
   );
 };

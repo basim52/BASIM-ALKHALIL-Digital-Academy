@@ -239,16 +239,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
         </div>
 
         <div className="flex gap-2">
-          <button 
-            onClick={() => {
-              const assistantBtn = document.getElementById('live-assistant-toggle');
-              if (assistantBtn) assistantBtn.click();
-            }}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-indigo-50 text-indigo-600 border-2 border-indigo-100 hover:bg-indigo-100 transition-all shadow-sm"
-          >
-            <Mic size={18} />
-            <span className="font-black text-[10px] md:text-sm uppercase tracking-widest">{isRtl ? 'المساعد المباشر' : 'Live Assistant'}</span>
-          </button>
+
           <button 
             onClick={() => setShowStickerBook(true)}
             className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-amber-50 text-amber-600 border-2 border-amber-100 hover:bg-amber-100 transition-all shadow-sm"

@@ -18,7 +18,7 @@ import {
   Gamepad2,
   Trophy
 } from 'lucide-react';
-import { LessonAssistant } from '../LessonAssistant';
+
 
 interface ShapeOption {
   id: string;
@@ -310,11 +310,7 @@ export const ShapesLesson = ({ lang, onBack, onComplete }: { lang: Language, onB
         transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
         className="absolute -top-20 -left-20 w-80 h-80 bg-blue-400/5 rounded-full blur-3xl pointer-events-none" 
       />
-      <LessonAssistant 
-        lessonTitle={isRtl ? 'درس الأشكال' : 'Shapes Lesson'} 
-        lessonContent="Learning basic shapes: Circle, Square, Triangle, Rectangle, Star, Heart, Oval, and Diamond with interactive matching games." 
-        isRtl={isRtl} 
-      />
+
     </div>
   );
 };

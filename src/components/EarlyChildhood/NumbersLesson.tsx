@@ -10,7 +10,7 @@ import {
   Gamepad2,
   Trophy
 } from 'lucide-react';
-import { LessonAssistant } from '../LessonAssistant';
+
 
 interface NumberOption {
   value: number;
@@ -316,11 +316,7 @@ export const NumbersLesson = ({ lang, onBack, onComplete }: { lang: Language, on
         <div className="absolute top-1/2 left-0 w-96 h-96 bg-emerald-400/5 rounded-full blur-3xl" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-400/5 rounded-full blur-3xl" />
       </div>
-      <LessonAssistant 
-        lessonTitle={isRtl ? 'درس الأرقام' : 'Numbers Lesson'} 
-        lessonContent="Counting from 1 to 10 with visuals, numerals, and pronunciation practice for young learners." 
-        isRtl={isRtl} 
-      />
+
     </div>
   );
 };

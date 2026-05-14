@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations, Language } from '../lib/translations';
-import { LessonAssistant } from './LessonAssistant';
+
 import { 
   Volume2, 
   Languages, 
@@ -231,11 +231,7 @@ export const OxfordLesson = ({ lang, onComplete, onBack }: OxfordLessonProps) =>
         {/* Exercises & Quiz omitted for brevity in first draft, can be added later */}
       </AnimatePresence>
 
-      <LessonAssistant 
-        lessonTitle={LESSON_DATA.titleEn} 
-        lessonContent={JSON.stringify(LESSON_DATA)} 
-        isRtl={isRtl} 
-      />
+
     </div>
   );
 };
