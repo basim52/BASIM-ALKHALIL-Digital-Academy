@@ -180,8 +180,8 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
     setGenerating(true);
     try {
       // Generate a more robust random code
-      // We want exactly 9 random alphanumeric chars after AK-
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Excluded confusing chars like 0, O, 1, I
+      // We want exactly 9 random digits after AK-
+      const chars = '0123456789'; 
       let randomPart = '';
       for (let i = 0; i < 9; i++) {
         randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
