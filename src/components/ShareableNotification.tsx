@@ -6,12 +6,13 @@ interface ShareableNotificationProps {
   lang: Language;
   studentName: string;
   message?: string;
-  schedule?: { day: string, time: string }[];
+  lessonName?: string;
+  schedule?: { day: string, time: string, subject?: string }[];
   type: string;
   id?: string;
 }
 
-export const ShareableNotification = ({ lang, studentName, message, schedule, type, id = "shareable-card" }: ShareableNotificationProps) => {
+export const ShareableNotification = ({ lang, studentName, message, lessonName, schedule, type, id = "shareable-card" }: ShareableNotificationProps) => {
   const isRtl = lang === 'ar';
 
   return (
@@ -20,6 +21,7 @@ export const ShareableNotification = ({ lang, studentName, message, schedule, ty
       style={{ 
         position: 'relative',
         overflow: 'hidden',
+        textAlign: isRtl ? 'right' : 'left',
         width: '600px',
         padding: '3rem',
         backgroundColor: '#ffffff',
@@ -143,12 +145,27 @@ export const ShareableNotification = ({ lang, studentName, message, schedule, ty
             fontSize: '2.25rem', 
             fontWeight: 900, 
             lineHeight: 1.25, 
-            marginBottom: '2rem',
+            marginBottom: lessonName ? '0.5rem' : '2rem',
             color: '#1e293b' 
           }}
         >
           {studentName}
         </h2>
+
+        {lessonName && (
+          <div 
+            style={{ 
+              fontSize: '1.25rem', 
+              fontWeight: 700, 
+              color: '#10b981', 
+              marginBottom: '2rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}
+          >
+            {lessonName}
+          </div>
+        )}
         
         <div 
           style={{ 
@@ -163,9 +180,16 @@ export const ShareableNotification = ({ lang, studentName, message, schedule, ty
           {type === 'schedule' && schedule ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {schedule.map((item, index) => (
-                <div key={index} style={{ display: 'flex', flexDirection: isRtl ? 'row-reverse' : 'row', justifyContent: 'space-between', borderBottom: '1px dashed #e2e8f0', paddingBottom: '0.75rem' }}>
-                  <span style={{ fontWeight: 900, color: '#002147' }}>{item.day}</span>
-                  <span style={{ fontWeight: 700, color: '#10b981' }}>{item.time}</span>
+                <div key={index} style={{ borderBottom: '1px dashed #e2e8f0', paddingBottom: '0.75rem' }}>
+                  <div style={{ display: 'flex', flexDirection: isRtl ? 'row-reverse' : 'row', justifyContent: 'space-between', marginBottom: item.subject ? '0.5rem' : 0 }}>
+                    <span style={{ fontWeight: 900, color: '#002147' }}>{item.day}</span>
+                    <span style={{ fontWeight: 700, color: '#10b981' }}>{item.time}</span>
+                  </div>
+                  {item.subject && (
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', textAlign: isRtl ? 'right' : 'left' }}>
+                      {item.subject}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

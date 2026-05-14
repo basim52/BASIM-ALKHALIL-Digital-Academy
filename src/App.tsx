@@ -547,7 +547,8 @@ const ScheduleManager = ({ studentId, studentName, lang, canEdit = false }: { st
           type="schedule"
           schedule={schedule.map(item => ({
             day: t.days[item.day as keyof typeof t.days],
-            time: item.time
+            time: item.time,
+            subject: item.subject || item.unitTitle
           }))}
         />
       </div>
@@ -560,6 +561,7 @@ const ScheduleManager = ({ studentId, studentName, lang, canEdit = false }: { st
             lang={lang}
             studentName={studentName}
             type="schedule"
+            lessonName={itemToExport.subject || itemToExport.unitTitle}
             schedule={[{
               day: t.days[itemToExport.day as keyof typeof t.days],
               time: itemToExport.time
