@@ -25,6 +25,8 @@ export interface UserProfile {
   avatarUrl?: string;
   createdAt: any; // Using any to support serverTimestamp during creation and Timestamp object on read
   linkedStudentId?: string;
+  linkedStudentIds?: string[];
+  studentCode?: string;
   phoneNumber?: string;
   lastSeen?: number;
   credits?: number; // Credit balance

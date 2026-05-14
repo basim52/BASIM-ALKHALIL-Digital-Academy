@@ -605,7 +605,9 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
               </div>
               <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100">
                 <span className="text-[10px] font-black text-blue-600 uppercase tracking-tighter">{isRtl ? 'كود الطالب:' : 'STUDENT CODE:'}</span>
-                <code className="text-xs font-mono font-bold text-[#002147] select-all">{profile.uid}</code>
+                <code className="text-xs font-mono font-bold text-[#002147] select-all">
+                  {profile.studentCode ? `AK${profile.studentCode}` : profile.uid}
+                </code>
               </div>
             </div>
           </div>
@@ -616,7 +618,8 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             </div>
             <button 
               onClick={() => {
-                navigator.clipboard.writeText(profile.uid);
+                const codeToCopy = profile.studentCode ? `AK${profile.studentCode}` : profile.uid;
+                navigator.clipboard.writeText(codeToCopy);
                 alert(lang === 'ar' ? 'تم نسخ كود الطالب!' : 'Student code copied!');
               }}
               className="p-3 hover:bg-slate-50 rounded-2xl transition-all" 
@@ -927,29 +930,55 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
   }, [profile.uid]);
 
   const handleLink = async () => {
-    if (!studentIdInput.trim()) return;
+    let inputId = studentIdInput.trim();
+    if (!inputId) return;
+    
+    // Support "AK123456" format by stripping "AK"
+    if (inputId.toUpperCase().startsWith('AK')) {
+      inputId = inputId.substring(2);
+    }
+    
     setLinking(true);
     setError('');
     try {
-      const sDoc = await getDoc(doc(db, 'users', studentIdInput));
+      // First try by UID (legacy)
+      let sDoc = await getDoc(doc(db, 'users', inputId));
+      let studentId = inputId;
+
+      // If not found by UID, try by studentCode
+      if (!sDoc.exists() || sDoc.data()?.role !== UserRole.STUDENT) {
+        const q = query(collection(db, 'users'), where('studentCode', '==', inputId), limit(1));
+        const qSnap = await getDocs(q);
+        if (!qSnap.empty) {
+          sDoc = qSnap.docs[0];
+          studentId = sDoc.id;
+        } else {
+          // One more try: maybe they entered the full UID but it wasn't found in the first check
+          // (actually the first check covers it, so if we're here it's really not found)
+          setError(t.invalidStudentId);
+          setLinking(false);
+          return;
+        }
+      }
+
       if (sDoc.exists() && sDoc.data().role === UserRole.STUDENT) {
         const userDoc = await getDoc(doc(db, 'users', profile.uid));
         const userData = userDoc.data() as any;
         const currentIds = userData?.linkedStudentIds || (userData?.linkedStudentId ? [userData.linkedStudentId] : []);
         
-        if (currentIds.includes(studentIdInput)) {
+        if (currentIds.includes(studentId)) {
           setError(isRtl ? 'هذا الطالب مربوط بالفعل.' : 'This student is already linked.');
           setLinking(false);
           return;
         }
 
-        const nextIds = [...currentIds, studentIdInput];
+        const nextIds = [...currentIds, studentId];
         await setDoc(doc(db, 'users', profile.uid), { 
           linkedStudentIds: nextIds,
           linkedStudentId: nextIds[0] // Backward compatibility
         }, { merge: true });
         
-        const sMeta = await getDoc(doc(db, 'students', studentIdInput));
+        const sMeta = await getDoc(doc(db, 'students', studentId));
         const newStudent = { 
           ...sDoc.data(), 
           ...sMeta.data(), 
@@ -965,6 +994,7 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
         setError(t.invalidStudentId);
       }
     } catch (err) {
+      console.error("Linking error:", err);
       setError(t.invalidStudentId);
     }
     setLinking(false);
@@ -1090,7 +1120,7 @@ const ParentDashboard = ({ lang, profile }: { lang: Language, profile: UserProfi
           
           <div className="mt-12 p-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
             <p className="text-xs text-slate-400 font-medium">
-              {isRtl ? 'لا تمتلك كود الطالب؟ اطلب من الطالب نسخ الكود من أسفل صفحة بروفايله.' : 'Don\'t have the student code? Ask the student to copy their UID from their profile page.'}
+              {isRtl ? 'لا تمتلك كود الطالب؟ اطلب من الطالب نسخ الكود (6 أرقام مع AK) من أعلى صفحة بروفايله.' : 'Don\'t have the student code? Ask the student to copy their 6-digit code (with AK) from the top of their profile page.'}
             </p>
           </div>
         </motion.div>
@@ -1899,6 +1929,14 @@ export default function App() {
   const isAdmin = userProfile?.email?.toLowerCase() === 'basim5252@gmail.com';
 
   useEffect(() => {
+    if (userProfile?.role === UserRole.STUDENT && !userProfile.studentCode && currentUser) {
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      setDoc(doc(db, 'users', currentUser.uid), { studentCode: code }, { merge: true });
+      setUserProfile({ ...userProfile, studentCode: code });
+    }
+  }, [userProfile, currentUser]);
+
+  useEffect(() => {
     if (currentUser) {
       const updateLastSeen = async () => {
         try {
@@ -2100,7 +2138,7 @@ export default function App() {
                   setUserProfile(profile);
                 }
               } else {
-                await setDoc(doc(db, 'users', user.uid), adminProfile);
+                await setDoc(doc(db, 'users', user.uid), adminProfile, { merge: true });
                 setUserProfile(adminProfile);
               }
             } catch (e) {
@@ -2142,8 +2180,14 @@ export default function App() {
       avatarUrl: currentUser.photoURL || undefined,
       createdAt: serverTimestamp(),
     };
+
+    if (role === UserRole.STUDENT) {
+      // Generate a unique 6-digit student code
+      profile.studentCode = Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
     try {
-      await setDoc(doc(db, 'users', currentUser.uid), profile);
+      await setDoc(doc(db, 'users', currentUser.uid), profile, { merge: true });
       setUserProfile(profile);
       if (role === UserRole.STUDENT) {
         // Prepare initial student metadata
@@ -2152,7 +2196,7 @@ export default function App() {
           points: 0,
           learningPath: [],
           currentModuleId: 'mod_1'
-        });
+        }, { merge: true });
         setView('placement-test');
       }
     } catch (error) {
