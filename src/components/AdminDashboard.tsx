@@ -396,7 +396,42 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{student.email}</p>
                       </div>
                     </div>
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          if (confirm(isRtl ? `هل تريد توليد واجب ذكي لـ ${student.displayName}؟` : `Generate smart homework for ${student.displayName}?`)) {
+                            try {
+                              const resp = await fetch('/api/homework/generate', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ 
+                                  studentName: student.displayName, 
+                                  level: student.level || 'A1',
+                                  lang 
+                                })
+                              });
+                              if (!resp.ok) throw new Error("Failed to generate");
+                              const homework = await resp.json();
+                              
+                              await addDoc(collection(db, 'homework'), {
+                                ...homework,
+                                studentId: student.id,
+                                status: 'pending',
+                                createdAt: serverTimestamp()
+                              });
+                              alert(isRtl ? "تم توليد الواجب بنجاح!" : "Homework generated successfully!");
+                            } catch (err) {
+                              console.error(err);
+                              alert("Error generating homework");
+                            }
+                          }
+                        }}
+                        className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-500 hover:text-white transition-all"
+                        title={isRtl ? 'توليد واجب ذكي' : 'Generate Smart Homework'}
+                      >
+                        <Sparkles size={14} />
+                      </button>
                       <ArrowRight size={16} className="text-blue-600" />
                     </div>
                   </div>

@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   CheckCircle,
   XCircle,
+  X,
   AlertCircle,
   LogIn,
   LogOut,
@@ -830,6 +831,8 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
   const isRtl = lang === 'ar';
   const [recommendation, setRecommendation] = useState<string | null>(null);
   const [loadingRec, setLoadingRec] = useState(false);
+  const [homeworks, setHomeworks] = useState<any[]>([]);
+  const [selectedHomework, setSelectedHomework] = useState<any | null>(null);
 
   useEffect(() => {
     const getRec = async () => {
@@ -853,6 +856,19 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
     };
     getRec();
   }, [profile.uid, lang]);
+
+  useEffect(() => {
+    const q = query(
+      collection(db, 'homework'),
+      where('studentId', '==', profile.uid),
+      orderBy('createdAt', 'desc')
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setHomeworks(docs);
+    });
+    return () => unsubscribe();
+  }, [profile.uid]);
 
   return (
     <div className={`flex-1 p-5 md:p-12 overflow-y-auto ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -1007,31 +1023,132 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
               <Mic2 size={160} className="absolute -bottom-10 -left-10 text-white/5 group-hover:scale-110 transition-transform hidden md:block" />
             </motion.div>
 
-            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative">
               <h3 className="font-bold text-[#002147] mb-6 flex items-center gap-3">
                 <Calendar className="text-[#C49E3A]" />
-                {lang === 'ar' ? 'المهام والواجبات' : 'Tasks and Assignments'}
+                {lang === 'ar' ? 'المهام والواجبات الذكية' : 'Smart Tasks & Homework'}
               </h3>
               <div className={`space-y-4 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
-                <div className={`flex items-center gap-4 p-4 bg-red-50/50 rounded-2xl border border-red-100 ${lang === 'ar' ? 'flex-row-reverse' : ''}`}>
-                  <div className="p-2 bg-red-100 text-red-600 rounded-xl">
-                    <AlertCircle size={20} />
+                {homeworks.length === 0 ? (
+                  <div className="py-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                    <p className="text-slate-400 text-xs font-medium">
+                      {isRtl ? 'لا يوجد واجبات حالياً' : 'No homework assigned yet'}
+                    </p>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-red-800 text-sm">{lang === 'ar' ? 'اختبار الوحدة 4' : 'Unit 4 Test'}</p>
-                    <p className="text-red-600/80 text-[10px] uppercase font-bold tracking-wider">{lang === 'ar' ? 'ينتهي خلال 4 ساعات' : 'Expires in 4 hours'}</p>
-                  </div>
-                </div>
-                <div className={`flex items-center gap-4 p-4 bg-slate-50/50 rounded-2xl border border-slate-100 ${lang === 'ar' ? 'flex-row-reverse' : ''}`}>
-                  <div className="p-2 bg-emerald-100 text-emerald-600 rounded-xl">
-                    <CheckCircle2 size={20} />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-slate-800 text-sm">{lang === 'ar' ? 'كتابة مقال: My City' : 'Writing Essay: My City'}</p>
-                    <p className="text-emerald-600 text-[10px] font-bold">{lang === 'ar' ? 'تم التسليم والتقييم' : 'Submitted and Graded'}</p>
-                  </div>
-                </div>
+                ) : (
+                  homeworks.map((hw) => (
+                    <motion.div 
+                      key={hw.id}
+                      whileHover={{ scale: 1.02 }}
+                      onClick={() => setSelectedHomework(hw)}
+                      className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
+                        hw.status === 'completed' 
+                          ? 'bg-emerald-50/50 border-emerald-100' 
+                          : 'bg-indigo-50/50 border-indigo-100'
+                      } ${lang === 'ar' ? 'flex-row-reverse text-right' : 'text-left'}`}
+                    >
+                      <div className={`p-2 rounded-xl ${
+                        hw.status === 'completed' ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-100 text-indigo-600'
+                      }`}>
+                        {hw.status === 'completed' ? <CheckCircle2 size={20} /> : <Sparkles size={20} />}
+                      </div>
+                      <div className="flex-1">
+                        <p className={`font-bold text-sm ${
+                          hw.status === 'completed' ? 'text-emerald-800' : 'text-indigo-800'
+                        }`}>{isRtl ? hw.titleAr : hw.title}</p>
+                        <p className={`text-[10px] font-bold uppercase tracking-wider ${
+                          hw.status === 'completed' ? 'text-emerald-600/80' : 'text-indigo-600/80'
+                        }`}>
+                          {hw.status === 'completed' ? (isRtl ? 'تم الإنجاز' : 'COMPLETED') : (isRtl ? 'بانتظار الحل' : 'PENDING')}
+                        </p>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
               </div>
+
+              {/* Homework Detail Modal */}
+              <AnimatePresence>
+                {selectedHomework && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <motion.div 
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.9, opacity: 0 }}
+                      className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden"
+                      dir={isRtl ? 'rtl' : 'ltr'}
+                    >
+                      <div className="bg-[#002147] p-8 text-white flex justify-between items-start">
+                        <div>
+                          <p className="text-[10px] font-black tracking-widest text-blue-300 uppercase mb-2">SMART HOMEWORK</p>
+                          <h3 className="text-2xl font-black">{isRtl ? selectedHomework.titleAr : selectedHomework.title}</h3>
+                        </div>
+                        <button 
+                          onClick={() => setSelectedHomework(null)}
+                          className="p-2 hover:bg-white/10 rounded-xl transition-all"
+                        >
+                          <X size={24} />
+                        </button>
+                      </div>
+                      
+                      <div className="p-8 max-h-[60vh] overflow-y-auto space-y-8">
+                        <div>
+                          <p className="text-slate-600 font-medium leading-relaxed italic">
+                            {isRtl ? selectedHomework.descriptionAr : selectedHomework.description}
+                          </p>
+                        </div>
+
+                        <div className="space-y-4">
+                          {selectedHomework.tasks?.map((task: any, idx: number) => (
+                            <div key={task.id} className="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex gap-4">
+                              <div className="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center font-bold shrink-0">
+                                {idx + 1}
+                              </div>
+                              <div className="flex-1">
+                                <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest block mb-1">
+                                  {task.type} • {task.points} {t.points}
+                                </span>
+                                <p className="font-bold text-[#002147] mb-3">
+                                  {isRtl ? task.instructionAr : task.instruction}
+                                </p>
+                                {task.content && (
+                                  <div className="p-4 bg-white rounded-xl border border-slate-200 text-sm text-slate-600 italic">
+                                    {isRtl ? task.contentAr : task.content}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="p-8 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+                        <div className="flex items-center gap-3 text-slate-400">
+                          <Clock size={16} />
+                          <span className="text-xs font-bold">{isRtl ? 'الموعد النهائي: ' : 'Deadline: '} {selectedHomework.deadline}</span>
+                        </div>
+                        {selectedHomework.status !== 'completed' && (
+                          <button 
+                            onClick={async () => {
+                              try {
+                                await updateDoc(doc(db, 'homework', selectedHomework.id), { status: 'completed' });
+                                setSelectedHomework({ ...selectedHomework, status: 'completed' });
+                                alert(isRtl ? 'أحسنت! تم تسليم الواجب.' : 'Well done! Homework submitted.');
+                              } catch (e) {
+                                console.error(e);
+                              }
+                            }}
+                            className="bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-emerald-700 transition-all"
+                          >
+                            <CheckCircle2 size={18} />
+                            {isRtl ? 'تسليم الواجب' : 'Submit Homework'}
+                          </button>
+                        )}
+                      </div>
+                    </motion.div>
+                  </div>
+                )}
+              </AnimatePresence>
             </div>
 
             <ScheduleManager studentId={profile.uid} studentName={profile.displayName || ''} lang={lang} canEdit={true} />

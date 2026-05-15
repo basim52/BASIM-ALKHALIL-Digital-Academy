@@ -295,6 +295,62 @@ async function startServer() {
     }
   });
 
+  // Homework generation endpoint
+  app.post("/api/homework/generate", async (req, res) => {
+    logToFile(`START /api/homework/generate`);
+    try {
+      const { studentName, level, studentPerformance = [], lang } = req.body;
+      const promptText = `
+        SYSTEM: You are a Senior Pedagogy Expert at Basim Alkhalil academy.
+        TASK: Generate a personalized "Smart Homework" for a student.
+        DATA: Name: ${studentName}, Level: ${level}, Performance: ${JSON.stringify(studentPerformance)}.
+        
+        FORMAT: Return a JSON object:
+        {
+          "title": "Homework Title",
+          "titleAr": "عنوان الواجب",
+          "description": "Brief context description",
+          "descriptionAr": "وصف سياق موجز",
+          "tasks": [
+            {
+              "id": "t1",
+              "type": "writing",
+              "instruction": "Write a short paragraph about...",
+              "instructionAr": "اكتب فقرة قصيرة عن...",
+              "points": 50
+            },
+            {
+              "id": "t2",
+              "type": "reading",
+              "instruction": "Read the following text and summarize it...",
+              "instructionAr": "اقرأ النص التالي وقم بتلخيصه...",
+              "content": "Text to read...",
+              "contentAr": "النص المراد قراءته...",
+              "points": 30
+            }
+          ],
+          "deadline": "24 hours"
+        }
+        
+        Language: High-quality ${lang === 'ar' ? 'Arabic' : 'English'}.
+      `;
+
+      const result = await callAiWithRetry({
+        contents: [{ role: 'user', parts: [{ text: promptText }] }],
+        config: { responseMimeType: "application/json" }
+      });
+
+      let cleanText = result.text || "{}";
+      if (cleanText.trim().startsWith("```")) {
+        cleanText = cleanText.trim().replace(/^```json\n?/, "").replace(/\n?```$/, "");
+      }
+      res.json(JSON.parse(cleanText));
+    } catch (error: any) {
+      logToFile(`Homework Generation Error: ${error.message}`);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Curriculum Design Suggestion Endpoint
   app.post("/api/curriculum/design", async (req, res) => {
     logToFile(`START /api/curriculum/design`);
