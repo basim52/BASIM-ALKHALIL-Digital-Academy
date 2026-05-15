@@ -176,7 +176,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { l
   };
 
   const handleWordClick = async (word: string) => {
-    const cleanWord = word.replace(/[.,!?;:]/g, '');
+    const cleanWord = (word || '').replace(/[.,!?;:]/g, '');
     setLoadingWord(true);
     setWordData({ word: cleanWord, translation: '', pronunciation: '' });
 
@@ -196,7 +196,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { l
 
       const rawData = await resp.json();
       const text = rawData.text || "";
-      const jsonStr = text.replace(/```json|```/g, '').trim();
+      const jsonStr = (text || '').replace(/```json|```/g, '').trim();
       const data = JSON.parse(jsonStr);
 
       setWordData({ word: cleanWord, ...data });
@@ -361,9 +361,9 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { l
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {STORIES.map(story => (
+        {STORIES.map((story, sIdx) => (
           <motion.div 
-            key={story.id}
+            key={`story-card-${story.id || sIdx}`}
             whileHover={{ y: -10 }}
             onClick={() => handleSelectStory(story)}
             className="bg-white rounded-[2.5rem] overflow-hidden border border-slate-200 shadow-sm group cursor-pointer relative"

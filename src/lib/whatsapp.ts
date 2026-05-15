@@ -2,7 +2,7 @@
 export const generateWhatsAppLink = (phone: string, message: string) => {
   const encodedMessage = encodeURIComponent(message);
   // Remove non-numeric characters from phone
-  const cleanPhone = phone.replace(/\D/g, '');
+  const cleanPhone = (phone || '').replace(/\D/g, '');
   return `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
 };
 

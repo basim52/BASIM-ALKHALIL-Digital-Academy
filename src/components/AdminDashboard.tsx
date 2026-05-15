@@ -87,7 +87,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
         throw new Error(`HTTP ${resp.status} (Ping: ${pingText}): ${errorDetails.substring(0, 500)}`);
       }
       const data = await resp.json();
-      setAnalysisResult(`### System Health\n- **Intelligence Engine:** 🚀 Gemini 3 Flash Preview (Active)\n- **Ping:** ${pingText}\n- **Status:** ${data.status}\n- **Gemini Key:** ${data.geminiKeySet ? '✅ Configured' : '❌ NOT SET'}\n- **Environment:** ${data.isProduction ? 'Production' : 'Development'}\n- **Server Time:** ${data.time}`);
+      setAnalysisResult(`### System Health\n- **Intelligence Engine:** 🚀 Gemini 1.5 Flash (Active)\n- **Ping:** ${pingText}\n- **Status:** ${data.status}\n- **Gemini Key:** ${data.geminiKeySet ? '✅ Configured' : '❌ NOT SET'}\n- **Environment:** ${data.isProduction ? 'Production' : 'Development'}\n- **Server Time:** ${data.time}`);
     } catch (err: any) {
       setAnalysisResult(`### ❌ Connection Failed\nError: ${err.message}`);
     } finally {
@@ -107,7 +107,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
     if (!db || !auth.currentUser) return;
     
     // Prevent unauthorized listeners that cause console errors
-    const isHardcodedAdmin = auth.currentUser.email === 'basim5252@gmail.com';
+    const isHardcodedAdmin = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(auth.currentUser.email || '');
     if (!isHardcodedAdmin) return;
     
     // Threshold: 5 minutes ago
@@ -385,7 +385,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
               {onlineStudents.length === 0 ? (
                 <div className="text-center py-10 opacity-40 italic text-sm">{t.noActiveStudents}</div>
               ) : (
-                onlineStudents.map(student => (
+                onlineStudents.map((student) => (
                   <div key={student.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-blue-200 transition-all">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-blue-100 overflow-hidden shadow-sm">
@@ -475,7 +475,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                <div className="mt-6 pt-6 border-t border-slate-100">
                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">{isRtl ? 'الأكواد الأخيرة' : 'Recent Codes'}</h4>
                   <div className="space-y-3 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
-                    {recentVouchers.map(v => (
+                    {recentVouchers.map((v) => (
                        <div key={v.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
                           <div>
                             <p className="text-[10px] font-black text-[#002147]">{v.code}</p>
@@ -648,14 +648,14 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
             {curriculumDesign && (
               <div className="space-y-6">
                 {Object.entries(curriculumDesign).map(([level, units]: [any, any]) => (
-                  <div key={level} className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                  <div key={`curriculum-level-${level}`} className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
                     <h4 className="font-black text-[#002147] mb-4 flex items-center gap-2">
                        <span className="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center text-xs">{level}</span>
                        {isRtl ? 'محتوى المستوى' : 'Level Content'}
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {units.map((u: any, i: number) => (
-                        <div key={i} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                      {units.map((u: any, uIdx: number) => (
+                        <div key={u.id || `unit-${level}-${uIdx}-${u.title || u.titleAr}`} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
                            <h5 className="font-bold text-sm text-[#002147]">{isRtl ? u.titleAr : u.title}</h5>
                            <p className="text-[10px] text-slate-400 mt-1">{isRtl ? u.descriptionAr : u.description}</p>
                         </div>

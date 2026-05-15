@@ -23,29 +23,42 @@ export const ParentAIInsights = ({ lang, studentName, studentLevel }: ParentAIIn
   const isRtl = lang === 'ar';
   const [loading, setLoading] = useState(false);
   const [recommendation, setRecommendation] = useState<any | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const generateRecommendation = async () => {
     setLoading(true);
+    setError(null);
     try {
       const resp = await fetch('/api/admin/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           data: { studentName, studentLevel },
-          prompt: `As an expert language learning advisor from "Basim Alkhalil Academy", generate a "Smart Home Recommendation" as JSON: { "activityTitle": "...", "learningGoal": "...", "parentRole": "...", "steps": ["..."] }. Language: ${isRtl ? 'Arabic' : 'English'}`
+          prompt: `As an expert language learning advisor from "Basim Alkhalil Academy", generate a "Smart Home Recommendation" as JSON: { "activityTitle": "...", "learningGoal": "...", "parentRole": "...", "steps": ["..."] }. Language: ${isRtl ? 'Arabic' : 'English'}`,
+          useJson: true
         })
       });
 
       if (!resp.ok) {
-        throw new Error(`Server responded with ${resp.status}`);
+        const errorData = await resp.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server responded with ${resp.status}`);
       }
 
       const rawData = await resp.json();
       const text = rawData.text || "";
-      const jsonStr = text.replace(/```json|```/g, '').trim();
-      setRecommendation(JSON.parse(jsonStr));
-    } catch (err) {
+      if (!text) throw new Error("AI returned an empty response");
+      
+      const jsonStr = (text || '').replace(/```json|```/g, '').trim();
+      try {
+        setRecommendation(JSON.parse(jsonStr));
+      } catch (pErr) {
+        console.error("JSON Parse Error in Insights:", pErr, "Text:", text);
+        // Fallback: if not valid JSON, treat as plain text if we want, but schema expects object
+        throw new Error("AI response was not in the expected format. Please try again.");
+      }
+    } catch (err: any) {
       console.error("AI Insight Error:", err);
+      setError(err.message || String(err));
     } finally {
       setLoading(false);
     }
@@ -77,6 +90,20 @@ export const ParentAIInsights = ({ lang, studentName, studentLevel }: ParentAIIn
       </header>
 
       <AnimatePresence mode="wait">
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mb-8 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm font-bold flex items-center gap-3"
+          >
+            <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center shrink-0">⚠️</div>
+            <div>
+              <p>{isRtl ? 'عذراً، فشل توليد التوصية حالياً.' : 'Sorry, failed to generate recommendation.'}</p>
+              <p className="text-[10px] opacity-70 font-mono mt-1">{error}</p>
+            </div>
+          </motion.div>
+        )}
+
         {recommendation ? (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -116,15 +143,15 @@ export const ParentAIInsights = ({ lang, studentName, studentLevel }: ParentAIIn
                  <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">🚀</div>
                  {isRtl ? 'خطوات التنفيذ' : 'Action Steps'}
                </h4>
-               <div className="space-y-6 relative z-10">
-                 {recommendation.steps.map((step: string, idx: number) => (
-                   <motion.div 
-                    initial={{ opacity: 0, x: isRtl ? 20 : -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                    key={idx} 
-                    className="flex items-start gap-4"
-                   >
+                <div className="space-y-6 relative z-10">
+                  {recommendation.steps.map((step: string, idx: number) => (
+                    <motion.div 
+                     initial={{ opacity: 0, x: isRtl ? 20 : -20 }}
+                     animate={{ opacity: 1, x: 0 }}
+                     transition={{ delay: idx * 0.1 }}
+                     key={`insight-step-${idx}-${step.substring(0, 10)}`} 
+                     className="flex items-start gap-4"
+                    >
                      <div className="w-8 h-8 rounded-full bg-[#C49E3A] text-[#002147] flex items-center justify-center font-black text-xs shrink-0 shadow-lg">
                        {idx + 1}
                      </div>

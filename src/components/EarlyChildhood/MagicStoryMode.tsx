@@ -53,10 +53,11 @@ export const MagicStoryMode: React.FC<MagicStoryModeProps> = ({ lang, onBack, co
       let emojis: string[] = ['✨', '✨', '✨'];
 
       lines.forEach((line: string) => {
-        if (line.toLowerCase().startsWith('title:')) title = line.replace(/title:/i, '').trim();
-        else if (line.toLowerCase().startsWith('story:')) storyText = line.replace(/story:/i, '').trim();
-        else if (line.toLowerCase().startsWith('emojis:')) {
-          const emojiStr = line.replace(/emojis:/i, '').trim();
+        const safeLine = line || '';
+        if (safeLine.toLowerCase().startsWith('title:')) title = safeLine.replace(/title:/i, '').trim();
+        else if (safeLine.toLowerCase().startsWith('story:')) storyText = safeLine.replace(/story:/i, '').trim();
+        else if (safeLine.toLowerCase().startsWith('emojis:')) {
+          const emojiStr = safeLine.replace(/emojis:/i, '').trim();
           emojis = emojiStr.split(',').map(e => e.trim());
         }
       });
@@ -219,7 +220,7 @@ export const MagicStoryMode: React.FC<MagicStoryModeProps> = ({ lang, onBack, co
                    <div className="flex gap-2">
                      {story.paragraphs.map((_, i) => (
                        <div 
-                        key={i} 
+                        key={`story-para-dot-${i}`} 
                         className={`h-2 rounded-full transition-all ${i === currentStep ? 'w-10 bg-indigo-600' : 'w-2 bg-slate-100'}`} 
                        />
                      ))}

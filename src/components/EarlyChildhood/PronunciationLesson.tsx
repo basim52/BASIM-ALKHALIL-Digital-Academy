@@ -217,7 +217,7 @@ export const PronunciationLesson = ({ lang, onBack, onComplete }: { lang: Langua
     const target = currentWord.word.toLowerCase();
     
     // Clean and split
-    const cleanTranscript = transcript.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "").trim();
+    const cleanTranscript = (transcript || '').toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "").trim();
     const transcriptParts = cleanTranscript.split(/\s+/);
     
     const isCorrect = cleanTranscript === target || 

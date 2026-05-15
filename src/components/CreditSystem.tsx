@@ -63,7 +63,7 @@ export const CreditSystem = ({ lang }: { lang: Language }) => {
       const clean = code.replace(/[^A-Z0-9]/g, '');
       if (clean.length === 11 && clean.startsWith('AK')) {
         code = `AK-${clean.substring(2, 6)}-${clean.substring(6, 11)}`;
-      } else if (clean.length === 9 && !code.startsWith('AK')) {
+      } else if (clean.length === 9 && !clean.startsWith('AK')) {
         code = `AK-${clean.substring(0, 4)}-${clean.substring(4, 9)}`;
       }
 
@@ -112,7 +112,8 @@ export const CreditSystem = ({ lang }: { lang: Language }) => {
 
       await batch.commit();
       setCredits(prev => prev + voucherData.credits);
-      setMessage({ type: 'success', text: t.redeemSuccess.replace('{n}', voucherData.credits.toString()) });
+      const successTemplate = t.redeemSuccess || (isRtl ? 'تم شحن {n} رصيد بنجاح' : 'Successfully redeemed {n} credits');
+      setMessage({ type: 'success', text: successTemplate.replace('{n}', voucherData.credits.toString()) });
       setVoucherCode('');
     } catch (err) {
       console.error("Redeem error:", err);
@@ -239,7 +240,7 @@ export const CreditSystem = ({ lang }: { lang: Language }) => {
                 </div>
                 <div>
                   <span className="text-[10px] font-black text-blue-300 uppercase tracking-widest block mb-1">{t.currentBalance}</span>
-                  <h3 className="text-4xl md:text-5xl font-black tabular-nums">{credits}</h3>
+                  <h3 className="text-4xl md:text-5xl font-black tabular-nums">{isAdmin ? (isRtl ? 'غير محدود' : 'Unlimited') : credits}</h3>
                 </div>
               </div>
 
@@ -275,13 +276,9 @@ export const CreditSystem = ({ lang }: { lang: Language }) => {
                   <input 
                     type="text" 
                     value={voucherCode}
-                    onChange={(e) => setVoucherCode(e.target.value)}
+                    onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
                     onPaste={(e) => {
-                      const pastedData = e.clipboardData.getData('text');
-                      if (pastedData) {
-                        const cleaned = pastedData.trim().toUpperCase();
-                        setVoucherCode(cleaned);
-                      }
+                      // Allow default paste, but normalization will happen in redeem
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {

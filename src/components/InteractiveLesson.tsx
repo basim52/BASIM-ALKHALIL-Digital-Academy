@@ -43,6 +43,11 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
       setIsPlayingId(null);
     };
 
+    utterance.onerror = (event) => {
+      console.error("Speech Error:", event);
+      setIsPlayingId(null);
+    };
+
     setIsPlayingId(id);
     synthesis.speak(utterance);
   };
@@ -65,6 +70,16 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
     { id: 'exercises', label: isRtl ? 'تمارين' : 'Exercises', icon: <PenTool size={18} /> },
     { id: 'quiz', label: isRtl ? 'اختبار' : 'Quiz', icon: <HelpCircle size={18} /> },
   ];
+
+  const togglePause = () => {
+    if (!synthesis) return;
+    if (synthesis.paused) {
+      synthesis.resume();
+      setIsPlayingId(isPlayingId); // Keep ID
+    } else {
+      synthesis.pause();
+    }
+  };
 
   const handleNextQuiz = () => {
     if (lesson.quiz && currentQuizIndex < lesson.quiz.length - 1) {
@@ -121,7 +136,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
             </span>
           </div>
           
-          <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 mb-4">
+            <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 mb-4">
             <h1 className="text-3xl md:text-5xl lg:text-7xl font-serif font-black leading-tight tracking-tight">
               {isRtl ? lesson.titleAr : lesson.title}
             </h1>
@@ -132,6 +147,14 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
               >
                 {isPlayingId === 'title-audio' ? <Pause size={20} /> : <Volume2 size={20} />}
               </button>
+              {isPlayingId === 'title-audio' && (
+                <button 
+                  onClick={stopSpeaking}
+                  className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
+                >
+                  <X size={20} />
+                </button>
+              )}
             </div>
           </div>
           
@@ -222,7 +245,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
 
               <div className="grid md:grid-cols-3 gap-6">
                 {(isRtl ? (lesson.warmup?.objectivesAr || []) : (lesson.warmup?.objectives || [])).map((obj, i) => (
-                  <div key={i} className="bg-white/50 border border-ink/5 p-8 rounded-3xl hover:border-amber-accent/30 transition-all group flex flex-col justify-between">
+                  <div key={`objective-${i}`} className="bg-white/50 border border-ink/5 p-8 rounded-3xl hover:border-amber-accent/30 transition-all group flex flex-col justify-between">
                     <div>
                       <div className="flex justify-between items-start mb-6">
                         <div className="w-12 h-12 bg-cream border border-ink/5 rounded-2xl flex items-center justify-center text-amber-accent font-mono text-xl font-black group-hover:scale-110 transition-transform">
@@ -243,7 +266,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
                   </div>
                 ))}
                 {(!lesson.warmup?.objectives) && [1, 2, 3].map(i => (
-                  <div key={i} className="bg-white/50 border border-ink/5 p-8 rounded-3xl hover:border-amber-accent/30 transition-all group">
+                  <div key={`dummy-obj-${i}`} className="bg-white/50 border border-ink/5 p-8 rounded-3xl hover:border-amber-accent/30 transition-all group">
                     <div className="w-12 h-12 bg-cream border border-ink/5 rounded-2xl flex items-center justify-center text-amber-accent mb-6 font-mono text-xl font-black group-hover:scale-110 transition-transform">
                       0{i}
                     </div>
@@ -308,7 +331,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
             >
               {lesson.exercises && lesson.exercises.length > 0 ? (
                 lesson.exercises.map((ex, idx) => (
-                  <div key={idx} className="bg-white p-10 rounded-[2.5rem] border border-ink/5 shadow-xl">
+                  <div key={`exercise-block-${idx}-${ex.type || 'default'}`} className="bg-white p-10 rounded-[2.5rem] border border-ink/5 shadow-xl">
                     <div className="flex items-center gap-3 mb-10">
                       <PenTool className="text-amber-accent" size={24} />
                       <h3 className="text-2xl font-serif font-black">
@@ -324,7 +347,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
                              const isCorrect = userAns.trim().toLowerCase() === (item.answer || "").trim().toLowerCase();
                              
                              return (
-                               <div key={i} className="space-y-4">
+                               <div key={`exercise-item-${idx}-${i}`} className="space-y-4">
                                  <div className="text-2xl leading-loose font-medium flex gap-4">
                                    <span className="text-ink/30 font-mono text-sm leading-none mt-4">{i+1}.</span>
                                    <div className="flex-1">
@@ -364,7 +387,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                            <div className="space-y-4">
                              {ex.items.map((item: any, i: number) => (
-                               <div key={i} className="p-5 bg-ink text-cream rounded-2xl font-bold flex justify-between items-center group cursor-pointer hover:bg-amber-accent transition-colors">
+                               <div key={`match-left-${idx}-${i}`} className="p-5 bg-ink text-cream rounded-2xl font-bold flex justify-between items-center group cursor-pointer hover:bg-amber-accent transition-colors">
                                  {isRtl ? item.textAr : item.text}
                                  <div className="w-6 h-6 rounded-full border border-cream/20 flex items-center justify-center text-[10px]">{i+1}</div>
                                </div>
@@ -372,7 +395,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
                            </div>
                            <div className="space-y-4">
                              {[...ex.items].sort(() => Math.random() - 0.5).map((item: any, i: number) => (
-                               <button key={i} className="w-full text-right p-5 bg-white border-2 border-ink/5 hover:border-amber-accent rounded-2xl font-bold transition-all">
+                               <button key={`match-right-${idx}-${i}`} className="w-full text-right p-5 bg-white border-2 border-ink/5 hover:border-amber-accent rounded-2xl font-bold transition-all">
                                  {isRtl ? item.answerAr || item.answer : item.answer}
                                 </button>
                              ))}
@@ -417,7 +440,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
                     <div className="flex gap-2">
                       {lesson.quiz.map((_, i) => (
                         <div 
-                          key={i} 
+                          key={`quiz-indicator-${i}`} 
                           className={`w-3 h-3 rounded-full transition-all duration-500 ${
                             i === currentQuizIndex ? 'bg-amber-accent w-8' : 
                             i < currentQuizIndex ? 'bg-correct' : 'bg-ink/10'
@@ -440,7 +463,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
                     <div className="grid gap-4">
                       {(isRtl ? lesson.quiz[currentQuizIndex].optionsAr : lesson.quiz[currentQuizIndex].options).map((opt, i) => (
                         <button
-                          key={i}
+                          key={`quiz-option-${currentQuizIndex}-${i}`}
                           onClick={() => checkAnswer(i)}
                           disabled={showFeedback}
                           className={`relative group flex items-center justify-between p-6 rounded-3xl border-2 text-lg font-bold transition-all ${

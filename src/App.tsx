@@ -318,9 +318,9 @@ const BookingDialog = ({ lang, unit, onClose, onConfirm }: { lang: Language, uni
             <div>
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">{t.day}</label>
               <div className="grid grid-cols-4 gap-2">
-                {DAYS.map(day => (
+                {DAYS.map((day, dIdx) => (
                   <button
-                    key={day}
+                    key={`schedule-day-select-${dIdx}`}
                     onClick={() => setSelectedDay(day)}
                     className={`py-2 px-1 rounded-xl text-[10px] font-bold transition-all border ${
                       selectedDay === day 
@@ -337,9 +337,9 @@ const BookingDialog = ({ lang, unit, onClose, onConfirm }: { lang: Language, uni
             <div>
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">{t.time}</label>
               <div className="grid grid-cols-4 gap-2 max-h-40 overflow-y-auto p-1 custom-scrollbar">
-                {TIMES.map(time => (
+                {TIMES.map((time, tIdx) => (
                   <button
-                    key={time}
+                    key={`schedule-time-select-${tIdx}`}
                     onClick={() => setSelectedTime(time)}
                     className={`py-2 px-1 rounded-xl text-xs font-mono font-bold transition-all border ${
                       selectedTime === time 
@@ -578,8 +578,8 @@ const ScheduleManager = ({ studentId, studentName, lang, canEdit = false }: { st
             onChange={(e) => setNewItem({...newItem, day: e.target.value})}
             className="bg-white border border-slate-200 rounded-xl px-4 py-2"
           >
-            {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(d => (
-              <option key={d} value={d}>{t.days[d as keyof typeof t.days]}</option>
+            {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((d, dIdx) => (
+              <option key={d || dIdx} value={d}>{t.days[d as keyof typeof t.days]}</option>
             ))}
           </select>
           <input 
@@ -594,8 +594,8 @@ const ScheduleManager = ({ studentId, studentName, lang, canEdit = false }: { st
             className="bg-white border border-slate-200 rounded-xl px-4 py-2"
           >
             <option value="">{t.subject}</option>
-            {Object.values(CurriculumCategory).map(cat => (
-              <option key={cat} value={cat}>{t[`curr_${cat}` as keyof typeof t] as string}</option>
+            {Object.values(CurriculumCategory).map((cat, catIdx) => (
+              <option key={`cat-option-${catIdx}`} value={cat}>{t[`curr_${cat}` as keyof typeof t] as string}</option>
             ))}
           </select>
         </div>
@@ -864,7 +864,7 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
       orderBy('createdAt', 'desc')
     );
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const docs = snapshot.docs.map((doc, dIdx) => ({ id: doc.id || `doc-${dIdx}`, ...doc.data() as any }));
       setHomeworks(docs);
     });
     return () => unsubscribe();
@@ -949,8 +949,8 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             </div>
             
             <div className="space-y-6">
-              {MASTER_CURRICULUM[CurriculumCategory.READING][(profile as any).level || proficiencyLevel.A1].slice(0, 3).map((unit, i) => (
-                <div key={unit.id} className={`p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6 transition-all ${i === 0 ? 'border-blue-600 bg-blue-50/30' : 'border-slate-100'}`}>
+                {MASTER_CURRICULUM[CurriculumCategory.READING][(profile as any).level || proficiencyLevel.A1].slice(0, 3).map((unit: any, i: number) => (
+                <div key={`unit-reading-${i}-${unit.id || unit.title || ''}`} className={`p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6 transition-all ${i === 0 ? 'border-blue-600 bg-blue-50/30' : 'border-slate-100'}`}>
                   <div className="flex items-center gap-6">
                     <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center font-bold text-xl md:text-2xl shrink-0 ${
                       i === 0 ? 'bg-[#002147] text-white shadow-xl shadow-blue-200' : 'bg-slate-50 text-slate-300'
@@ -1036,9 +1036,9 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
                     </p>
                   </div>
                 ) : (
-                  homeworks.map((hw) => (
+                  homeworks.map((hw, hIdx) => (
                     <motion.div 
-                      key={hw.id}
+                      key={hw.id || `hw-item-${hIdx}`}
                       whileHover={{ scale: 1.02 }}
                       onClick={() => setSelectedHomework(hw)}
                       className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
@@ -1100,7 +1100,7 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
 
                         <div className="space-y-4">
                           {selectedHomework.tasks?.map((task: any, idx: number) => (
-                            <div key={task.id} className="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex gap-4">
+                            <div key={`${task.id || 'task'}-${idx}`} className="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex gap-4">
                               <div className="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center font-bold shrink-0">
                                 {idx + 1}
                               </div>
@@ -1239,9 +1239,9 @@ const RoleSelector = ({ onSelect, lang }: { onSelect: (role: UserRole) => void, 
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-          {roles.map((role) => (
+          {roles.map((role, rIdx) => (
             <motion.button
-              key={role.id}
+              key={`role-select-${role.id}-${rIdx}`}
               whileHover={{ y: -8, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onSelect(role.id)}
@@ -1299,6 +1299,7 @@ const ParentDashboard = ({ lang, profile, onStudentSelect }: { lang: Language, p
             const sMeta = await getDoc(doc(db, 'students', id));
             if (sDoc.exists() && sMeta.exists()) {
               return { 
+                uid: id,
                 ...sDoc.data(), 
                 ...sMeta.data(), 
                 phoneNumber: userData.phoneNumber, 
@@ -1593,7 +1594,7 @@ const ParentDashboard = ({ lang, profile, onStudentSelect }: { lang: Language, p
           </button>
           <div className="flex -space-x-2 rtl:space-x-reverse items-center overflow-x-auto pb-2 md:pb-0 scrollbar-hide py-1 px-1">
             {linkedStudents.map((student, idx) => (
-              <div key={student.uid} className="relative group flex-shrink-0">
+              <div key={`parent-student-${student.uid || idx}`} className="relative group flex-shrink-0">
                 <button
                   onClick={() => setSelectedStudentIndex(idx)}
                   className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl border-4 transition-all duration-300 overflow-hidden relative ${
@@ -1643,15 +1644,15 @@ const ParentDashboard = ({ lang, profile, onStudentSelect }: { lang: Language, p
           { label: t.completedAssignments, value: '12/15', icon: CheckCircle2, color: 'text-purple-600', bg: 'bg-purple-50' },
           { label: t.speakingHours, value: currentStudent.points > 0 ? (currentStudent.points / 10).toFixed(1) : '1.2', icon: Mic2, color: 'text-[#C49E3A]', bg: 'bg-orange-50' },
         ].map((stat, i) => (
-          <div key={i} className={`bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex items-center gap-6 ${isRtl ? 'flex-row-reverse' : ''} relative overflow-hidden group`}>
-            <div className={`${stat.bg} ${stat.color} p-4 rounded-2xl shrink-0 group-hover:scale-110 transition-transform`}>
+          <div key={`stat-card-overview-${currentStudent.uid}-${i}`} className={`bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex items-center gap-6 ${isRtl ? 'flex-row-reverse' : ''} relative overflow-hidden group`}>
+            <div className={`${stat.bg} ${stat.color || ''} p-4 rounded-2xl shrink-0 group-hover:scale-110 transition-transform`}>
               <stat.icon size={28} />
             </div>
             <div className={`flex-1 ${isRtl ? 'text-right' : 'text-left'}`}>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">{stat.label}</p>
               <p className="text-2xl font-black text-[#002147]">{stat.value}</p>
             </div>
-            <div className={`absolute top-0 bottom-0 ${isRtl ? 'left-0' : 'right-0'} w-1 ${stat.color.replace('text', 'bg')}`} />
+            <div className={`absolute top-0 bottom-0 ${isRtl ? 'left-0' : 'right-0'} w-1 ${(stat.color || '').replace('text', 'bg')}`} />
           </div>
         ))}
       </div>
@@ -1683,7 +1684,7 @@ const ParentDashboard = ({ lang, profile, onStudentSelect }: { lang: Language, p
           </div>
           <div className={`h-64 flex items-end gap-5 px-4 overflow-hidden ${lang === 'ar' ? 'flex-row-reverse' : ''}`} dir="ltr">
             {[45, 60, 55, 75, 85, 92].map((h, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center gap-3">
+              <div key={`progress-bar-${i}`} className="flex-1 flex flex-col items-center gap-3">
                 <div className="w-full bg-slate-50 rounded-t-xl relative group h-full flex items-end">
                   <motion.div 
                     initial={{ height: 0 }}
@@ -1707,11 +1708,11 @@ const ParentDashboard = ({ lang, profile, onStudentSelect }: { lang: Language, p
           </h3>
           <div className={`space-y-8 ${lang === 'ar' ? 'text-right' : 'text-left'} flex-1`}>
             {[
-              { textAr: 'أكمل اختبار تحديد المستوى وحصل على نتيجة ' + (currentStudent.level || 'B1'), textEn: 'Completed placement test and reached result ' + (currentStudent.level || 'B1'), timeAr: 'منذ ساعتين', timeEn: '2 hours ago', icon: CheckCircle2, iconColor: 'text-emerald-500' },
-              { textAr: 'تحدث مع "شريك المحادثة" لمدة 15 دقيقة (موضوع: الهوايات)', textEn: 'Talked with AI Partner for 15 minutes (Topic: Hobbies)', timeAr: 'صباح اليوم', timeEn: 'This morning', icon: Mic2, iconColor: 'text-blue-500' },
-              { textAr: 'تم تصحيح واجب "مقال الرحلات" - الدرجة 9/10', textEn: 'Graded Essay "Trips" - Score 9/10', timeAr: 'أمس', timeEn: 'Yesterday', icon: BookOpen, iconColor: 'text-[#C49E3A]' },
-            ].map((activity, i) => (
-              <div key={i} className={`flex gap-5 ${lang === 'ar' ? 'flex-row-reverse' : ''} group`}>
+              { id: 'act-1', textAr: 'أكمل اختبار تحديد المستوى وحصل على نتيجة ' + (currentStudent.level || 'B1'), textEn: 'Completed placement test and reached result ' + (currentStudent.level || 'B1'), timeAr: 'منذ ساعتين', timeEn: '2 hours ago', icon: CheckCircle2, iconColor: 'text-emerald-500' },
+              { id: 'act-2', textAr: 'تحدث مع "شريك المحادثة" لمدة 15 دقيقة (موضوع: الهوايات)', textEn: 'Talked with AI Partner for 15 minutes (Topic: Hobbies)', timeAr: 'صباح اليوم', timeEn: 'This morning', icon: Mic2, iconColor: 'text-blue-500' },
+              { id: 'act-3', textAr: 'تم تصحيح واجب "مقال الرحلات" - الدرجة 9/10', textEn: 'Graded Essay "Trips" - Score 9/10', timeAr: 'أمس', timeEn: 'Yesterday', icon: BookOpen, iconColor: 'text-[#C49E3A]' },
+            ].map((activity) => (
+              <div key={activity.id} className={`flex gap-5 ${lang === 'ar' ? 'flex-row-reverse' : ''} group`}>
                 <div className={`mt-1 ${activity.iconColor} shrink-0 p-3 bg-slate-50 rounded-2xl group-hover:scale-110 transition-transform`}>
                   <activity.icon size={22} />
                 </div>
@@ -2002,7 +2003,7 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {categories.map((cat, idx) => (
               <motion.div
-                key={cat.id}
+                key={`cat-card-${cat.id}-${idx}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
@@ -2031,9 +2032,9 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
                 {t.chooseLevel}
               </h2>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 md:gap-4">
-                {levels.map((lvl) => (
+                {levels.map((lvl, lIdx) => (
                   <button
-                    key={lvl}
+                    key={`level-tab-${lvl}-${lIdx}`}
                     onClick={() => setSelectedLevel(lvl)}
                     className={`py-4 md:py-6 rounded-2xl md:rounded-3xl border-2 font-black text-lg md:text-xl transition-all ${
                       selectedLevel === lvl 
@@ -2068,7 +2069,7 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   {units.map((unit, i) => (
                     <div
-                      key={unit.id}
+                      key={unit.id || `unit-${i}`}
                       className="bg-white p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-lg transition-all"
                     >
                       <div className="flex items-start sm:items-center justify-between mb-4 md:mb-6">
@@ -3023,12 +3024,12 @@ export default function App() {
                     { id: 'logout', icon: LogOut, action: handleLogout },
                   ]
                 ].map((row, rowIndex) => (
-                  <div key={rowIndex} className={`flex justify-around items-center w-full ${rowIndex === 1 ? 'border-t border-white/5 pt-1' : ''}`}>
-                    {row.filter((item: any) => item.show !== false).map((item: any) => {
+                  <div key={`mobile-nav-row-${rowIndex}`} className={`flex justify-around items-center w-full ${rowIndex === 1 ? 'border-t border-white/5 pt-1' : ''}`}>
+                    {row.filter((item: any) => item.show !== false).map((item: any, itemIndex: number) => {
                       const isDisabled = item.disabled;
                       return (
                         <button 
-                          key={item.id}
+                          key={`mobile-nav-item-${item.id}-${itemIndex}`}
                           disabled={isDisabled}
                           onClick={() => {
                             if (item.id === 'ai-chat') {

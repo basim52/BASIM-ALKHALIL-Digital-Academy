@@ -285,9 +285,9 @@ export const VideoLibrary = ({
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        {VIDEOS.map(video => (
+        {VIDEOS.map((video, vIdx) => (
           <motion.div 
-            key={video.id}
+            key={`video-card-${video.id || vIdx}`}
             whileHover={enabled ? { y: -10 } : {}}
             className={`bg-white rounded-[2.5rem] overflow-hidden border border-slate-200 shadow-sm group cursor-pointer relative ${!enabled ? 'grayscale opacity-70 cursor-not-allowed' : ''}`}
             onClick={() => handleSelectVideo(video)}

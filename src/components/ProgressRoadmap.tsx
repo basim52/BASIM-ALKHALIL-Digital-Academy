@@ -45,8 +45,9 @@ export const ProgressRoadmap = ({ lang, currentLevel, studentName }: ProgressRoa
           const styles = clonedDoc.getElementsByTagName('style');
           for (let i = 0; i < styles.length; i++) {
             const style = styles[i];
-            if (style.innerHTML.includes('oklch')) {
-              style.innerHTML = style.innerHTML.replace(/oklch\([^)]+\)/g, '#f1f5f9');
+            const html = style.innerHTML || '';
+            if (html.includes('oklch')) {
+              style.innerHTML = html.replace(/oklch\([^)]+\)/g, '#f1f5f9');
             }
           }
         }

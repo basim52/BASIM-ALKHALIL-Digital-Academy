@@ -3,7 +3,8 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
-import { GoogleGenAI, Modality } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Modality } from "@google/genai";
 import "dotenv/config";
 
 const logToFile = (msg: string) => console.log(`[Server] ${msg}`);
@@ -14,29 +15,54 @@ async function startServer() {
   const wss = new WebSocketServer({ noServer: true });
   const PORT = 3000;
 
-  const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY
-  });
+  const API_KEY = (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "").trim();
+  
+  if (!API_KEY) {
+    logToFile("CRITICAL: GEMINI_API_KEY is not set in the environment variables!");
+  } else {
+    logToFile(`API Key detected (length: ${API_KEY.length}): ${API_KEY.substring(0, 4)}...${API_KEY.substring(API_KEY.length - 4)}`);
+  }
+
+  const ai = new GoogleGenerativeAI(API_KEY);
+  const aiLive = new GoogleGenAI({ apiKey: API_KEY });
 
   // Robust AI caller with retry and fallback
   async function callAiWithRetry(options: any, maxRetries = 2) {
     let lastError: any;
-    const PRIMARY_MODEL = "gemini-3-flash-preview";
-    const FALLBACK_MODEL = "gemini-1.5-flash";
+    const PRIMARY_MODEL = "gemini-1.5-flash"; 
 
     for (let i = 0; i <= maxRetries; i++) {
       try {
-        const modelName = i === maxRetries ? FALLBACK_MODEL : PRIMARY_MODEL;
-        if (i > 0) logToFile(`Retry ${i}/${maxRetries} using ${modelName}...`);
+        let modelToUse = PRIMARY_MODEL;
+        if (i === 1) modelToUse = "gemini-1.5-flash-002";
+        if (i === 2) modelToUse = "gemini-1.5-flash-8b";
         
-        const result = await ai.models.generateContent({
-          ...options,
-          model: modelName
-        });
-        return result;
+        logToFile(`AI Call Attempt ${i+1}/${maxRetries+1} using ${modelToUse} (API Key Status: ${!!API_KEY})`);
+      
+      const { contents, config } = options;
+      
+      const model = ai.getGenerativeModel({ model: modelToUse });
+      const result = await model.generateContent({
+        contents: contents,
+        generationConfig: config
+      });
+      
+      const response = await result.response;
+      const text = response.text();
+      
+      if (!text) {
+        logToFile(`AI Response check: No text found in result from ${modelToUse}`);
+      }
+      return { text };
       } catch (error: any) {
         lastError = error;
-        const isTransient = error.message?.includes("503") || error.message?.includes("UNAVAILABLE") || error.message?.includes("high demand");
+        logToFile(`AI Error on ${i}: ${error.message}`);
+        
+        const isTransient = error.message?.includes("503") || 
+                           error.message?.includes("UNAVAILABLE") || 
+                           error.message?.includes("high demand") ||
+                           error.message?.includes("quota") ||
+                           error.message?.includes("429");
         
         if (isTransient && i < maxRetries) {
           const delay = Math.pow(2, i) * 1000;
@@ -124,12 +150,13 @@ async function startServer() {
         ]
       });
       
-      if (!result || !result.text) {
+      const text = result.text || "";
+      if (!text) {
         throw new Error("Empty response from AI");
       }
 
       logToFile("SUCCESS /api/lesson/chat - Response generated");
-      res.json({ text: result.text });
+      res.json({ text });
     } catch (error: any) {
       const errDetail = error.message || JSON.stringify(error);
       logToFile(`Lesson Chat Error: ${errDetail}`);
@@ -199,12 +226,13 @@ async function startServer() {
         }
       });
 
-      if (!result || !result.text) {
+      const text = result.text || "";
+      if (!text) {
         logToFile("Empty result from AI generator");
         throw new Error("Empty response from AI generator");
       }
       
-      let cleanText = result.text.trim();
+      let cleanText = text.trim();
       if (cleanText.startsWith("```")) {
         cleanText = cleanText.replace(/^```json\n?/, "").replace(/\n?```$/, "");
       }
@@ -245,12 +273,13 @@ async function startServer() {
         ]
       });
 
-      if (!result || !result.text) {
+      const text = result.text || "";
+      if (!text) {
         logToFile("EMPTY result from Gemini");
         return res.status(500).json({ error: "AI returned an empty response." });
       }
 
-      res.json({ text: result.text });
+      res.json({ text });
     } catch (error: any) {
       const errorDetail = error.message || JSON.stringify(error);
       logToFile(`AI Partner Chat Error: ${errorDetail}`);
@@ -273,7 +302,8 @@ async function startServer() {
         contents: [{ role: 'user', parts: [{ text: promptText }] }]
       });
 
-      res.json({ text: result.text || "" });
+      const text = result.text || "";
+      res.json({ text });
     } catch (error: any) {
       logToFile(`Story Generation Error: ${error.message}`);
       res.status(500).json({ error: error.message || "Failed to generate story" });
@@ -284,11 +314,14 @@ async function startServer() {
   app.post("/api/admin/analyze", async (req, res) => {
     logToFile(`START /api/admin/analyze`);
     try {
-      const { data, prompt } = req.body;
+      const { data, prompt, useJson = false } = req.body;
       const result = await callAiWithRetry({
-        contents: [{ role: 'user', parts: [{ text: `Analyze this data: ${JSON.stringify(data)}\n\nPrompt: ${prompt}` }] }]
+        contents: [{ role: 'user', parts: [{ text: `Analyze this data: ${JSON.stringify(data)}\n\nPrompt: ${prompt}` }] }],
+        config: useJson ? { responseMimeType: "application/json" } : undefined
       });
-      res.json({ text: result.text || "" });
+      
+      const text = result.text || "";
+      res.json({ text });
     } catch (error: any) {
       logToFile(`Analysis Error: ${error.message}`);
       res.status(500).json({ error: error.message });
@@ -340,7 +373,8 @@ async function startServer() {
         config: { responseMimeType: "application/json" }
       });
 
-      let cleanText = result.text || "{}";
+      const text = result.text || "";
+      let cleanText = text || "{}";
       if (cleanText.trim().startsWith("```")) {
         cleanText = cleanText.trim().replace(/^```json\n?/, "").replace(/\n?```$/, "");
       }
@@ -373,7 +407,8 @@ async function startServer() {
         config: { responseMimeType: "application/json" }
       });
 
-      let cleanText = result.text || "{}";
+      const text = result.text || "";
+      let cleanText = text || "{}";
       if (cleanText.trim().startsWith("```")) {
         cleanText = cleanText.trim().replace(/^```json\n?/, "").replace(/\n?```$/, "");
       }
@@ -395,7 +430,8 @@ async function startServer() {
         config: { responseMimeType: "application/json" }
       });
       
-      let cleanText = result.text || "[]";
+      const text = result.text || "";
+      let cleanText = text || "[]";
       if (cleanText.trim().startsWith("```")) {
         cleanText = cleanText.trim().replace(/^```json\n?/, "").replace(/\n?```$/, "");
       }
@@ -419,7 +455,7 @@ async function startServer() {
           // Start session on first message (which should contain context)
           if (!session && !isConnecting) {
             isConnecting = true;
-            const modelToUse = "gemini-3-flash-preview"; 
+            const modelToUse = "gemini-3.1-flash-live-preview"; 
             logToFile(`Initializing Gemini Live session: ${modelToUse}`);
 
             if (!process.env.GEMINI_API_KEY) {
@@ -433,7 +469,7 @@ async function startServer() {
               const contextText = msg.context || `General tutoring at Basim Alkhalil Academy.`;
               logToFile(`Connecting to Gemini Live... Context: ${contextText.substring(0, 50)}`);
               
-              session = await ai.live.connect({
+              session = await aiLive.live.connect({
                 model: modelToUse,
                 callbacks: {
                   onmessage: (message: any) => {
