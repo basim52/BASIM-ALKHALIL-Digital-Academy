@@ -987,7 +987,7 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             >
                   <div className="relative z-10">
                 {/* Connection Tester for Admin */}
-                {MASTER_ADMINS.includes(profile?.email?.toLowerCase() || '') && (
+                {MASTER_ADMINS.includes((profile?.email || auth.currentUser?.email || '').toLowerCase()) && (
                   <div className="absolute top-0 right-0 z-20">
                     <button 
                       onClick={async () => {
@@ -2414,7 +2414,7 @@ export default function App() {
     return () => settingsUnsubscribe();
   }, []);
 
-  const isAdmin = MASTER_ADMINS.includes(userProfile?.email?.toLowerCase() || '');
+  const isAdmin = MASTER_ADMINS.includes((userProfile?.email || currentUser?.email || '').toLowerCase());
 
   useEffect(() => {
     if (userProfile?.role === UserRole.STUDENT && !userProfile.studentCode && currentUser) {
@@ -2708,7 +2708,7 @@ export default function App() {
 
   const handleStartAiChat = async () => {
     if (!userProfile) return;
-    const isAdminCheck = MASTER_ADMINS.includes(userProfile.email?.toLowerCase() || '');
+    const isAdminCheck = MASTER_ADMINS.includes((userProfile.email || currentUser?.email || '').toLowerCase());
     const currentCredits = (userProfile as any).credits || 0;
     
     if (!isAdminCheck && currentCredits < CreditCost.AI_CONVERSATION) {
@@ -2745,7 +2745,7 @@ export default function App() {
   const handleLessonComplete = async () => {
     if (!userProfile || !activeLesson) return;
     
-    const isAdminCheck = MASTER_ADMINS.includes(userProfile.email?.toLowerCase() || '');
+    const isAdminCheck = MASTER_ADMINS.includes((userProfile.email || currentUser?.email || '').toLowerCase());
     // Deduct Credit
     const cost = CreditCost.READING_LESSON;
     const currentCredits = (userProfile as any).credits || 0;
@@ -2816,7 +2816,7 @@ export default function App() {
         lang={lang} 
         onSelectLesson={async (lesson, category, level) => { 
           if (!userProfile) return;
-          const isAdminCheck = MASTER_ADMINS.includes(userProfile.email?.toLowerCase() || '');
+          const isAdminCheck = MASTER_ADMINS.includes((userProfile.email || currentUser?.email || '').toLowerCase());
           
           if (category === CurriculumCategory.CONVERSATION) {
             handleStartAiChat();
@@ -2876,7 +2876,7 @@ export default function App() {
       return (
         <Leaderboard 
           lang={lang} 
-          isAdmin={MASTER_ADMINS.includes(userProfile?.email?.toLowerCase() || '')} 
+          isAdmin={MASTER_ADMINS.includes((userProfile?.email || currentUser?.email || '').toLowerCase())} 
         />
       );
     }

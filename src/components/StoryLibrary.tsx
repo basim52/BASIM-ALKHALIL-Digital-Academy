@@ -15,7 +15,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { UserProfile, CreditCost, MASTER_ADMINS } from '../types';
-import { deductCredits } from '../lib/firebase';
+import { deductCredits, auth } from '../lib/firebase';
 
 interface Story {
   id: string;
@@ -152,7 +152,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { l
   const handleSelectStory = async (story: Story) => {
     if (selectedStory?.id === story.id) return;
     
-    const isWhitelisted = MASTER_ADMINS.includes(profile.email?.toLowerCase() || '');
+    const isWhitelisted = MASTER_ADMINS.includes((profile.email || auth.currentUser?.email || '').toLowerCase());
     const credits = (profile as any).credits || 0;
     
     if (!isWhitelisted && credits < CreditCost.AUDIO_STORY) {

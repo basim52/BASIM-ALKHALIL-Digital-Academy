@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { UserProfile, CreditCost, MASTER_ADMINS } from '../types';
-import { deductCredits } from '../lib/firebase';
+import { deductCredits, auth } from '../lib/firebase';
 
 interface VideoLesson {
   id: string;
@@ -92,7 +92,7 @@ export const VideoLibrary = ({
     if (!enabled) return;
     if (selectedVideo?.id === video.id) return;
 
-    const isAdmin = MASTER_ADMINS.includes(profile.email?.toLowerCase() || '');
+    const isAdmin = MASTER_ADMINS.includes((profile.email || auth.currentUser?.email || '').toLowerCase());
     const credits = (profile as any).credits || 0;
     
     if (!isAdmin && credits < CreditCost.VIDEO_LESSON) {
