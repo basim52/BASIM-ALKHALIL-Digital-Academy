@@ -591,6 +591,116 @@ const UNITS = [
     color: 'bg-teal-600',
     lightColor: 'bg-teal-50',
     cards: []
+  },
+  {
+    id: 112,
+    titleEn: 'Unit 2: The World Around Us & Sports',
+    titleAr: 'الوحدة 2: العالم من حولنا والرياضة',
+    descriptionEn: 'Learn words for nature and physical activities.',
+    descriptionAr: 'تعلم كلمات تصف الطبيعة والأنشطة البدنية.',
+    color: 'bg-amber-500',
+    lightColor: 'bg-amber-50',
+    cards: []
+  },
+  {
+    id: 113,
+    titleEn: 'Unit 3: Ancient Civilizations',
+    titleAr: 'الوحدة 3: الحضارات القديمة',
+    descriptionEn: 'Discover the vocabulary of history and archaeology.',
+    descriptionAr: 'اكتشف مفردات التاريخ وعلم الآثار.',
+    color: 'bg-orange-700',
+    lightColor: 'bg-orange-50',
+    cards: []
+  },
+  {
+    id: 114,
+    titleEn: 'Unit 4: Extreme Weather',
+    titleAr: 'الوحدة 4: الطقس القاسي',
+    descriptionEn: 'Words for storms, floods, and climate.',
+    descriptionAr: 'كلمات للعواصف والفيضانات والمناخ.',
+    color: 'bg-blue-800',
+    lightColor: 'bg-blue-50',
+    cards: []
+  },
+  {
+    id: 115,
+    titleEn: 'Unit 5: Health and Nutrition',
+    titleAr: 'الوحدة 5: الصحة والتغذية',
+    descriptionEn: 'Focus on healthy eating and body systems.',
+    descriptionAr: 'التركيز على الأكل الصحي وأجهزة الجسم.',
+    color: 'bg-red-500',
+    lightColor: 'bg-red-50',
+    cards: []
+  },
+  {
+    id: 116,
+    titleEn: 'Unit 6: Technology and Future',
+    titleAr: 'الوحدة 6: التكنولوجيا والمستقبل',
+    descriptionEn: 'Explore digital world concepts.',
+    descriptionAr: 'استكشف مفاهيم العالم الرقمي.',
+    color: 'bg-slate-700',
+    lightColor: 'bg-slate-50',
+    cards: []
+  },
+  {
+    id: 117,
+    titleEn: 'Unit 7: Ocean Life',
+    titleAr: 'الوحدة 7: حياة المحيطات',
+    descriptionEn: 'Discover creatures beneath the waves.',
+    descriptionAr: 'اكتشف الكائنات تحت الأمواج.',
+    color: 'bg-cyan-700',
+    lightColor: 'bg-cyan-50',
+    cards: []
+  },
+  {
+    id: 118,
+    titleEn: 'Unit 8: Space Frontiers',
+    titleAr: 'الوحدة 8: حدود الفضاء',
+    descriptionEn: 'Planets, stars, and space travel.',
+    descriptionAr: 'الكواكب والنجوم والسفر عبر الفضاء.',
+    color: 'bg-indigo-900',
+    lightColor: 'bg-indigo-50',
+    cards: []
+  },
+  {
+    id: 119,
+    titleEn: 'Unit 9: Ecosystems and Biomes',
+    titleAr: 'الوحدة 9: النظم البيئية والمناطق الأحيائية',
+    descriptionEn: 'Different habitats and how animals survive.',
+    descriptionAr: 'الموائل المختلفة وكيفية بقاء الحيوانات.',
+    color: 'bg-green-700',
+    lightColor: 'bg-green-50',
+    cards: []
+  },
+  {
+    id: 120,
+    titleEn: 'Unit 10: Art and Expression',
+    titleAr: 'الوحدة 10: الفن والتعبير',
+    descriptionEn: 'Vocabulary for painting, sculpture, and music.',
+    descriptionAr: 'مفردات الرسم والنحت والموسيقى.',
+    color: 'bg-purple-600',
+    lightColor: 'bg-purple-50',
+    cards: []
+  },
+  {
+    id: 121,
+    titleEn: 'Unit 11: Transport and Travel',
+    titleAr: 'الوحدة 11: النقل والسفر',
+    descriptionEn: 'How we move across the world.',
+    descriptionAr: 'كيف نتنقل عبر العالم.',
+    color: 'bg-sky-600',
+    lightColor: 'bg-sky-50',
+    cards: []
+  },
+  {
+    id: 122,
+    titleEn: 'Unit 12: Values and Communities',
+    titleAr: 'الوحدة 12: القيم والمجتمعات',
+    descriptionEn: 'Learning about rules, sharing, and kindness.',
+    descriptionAr: 'التعلم عن القواعد والمشاركة واللطف.',
+    color: 'bg-rose-500',
+    lightColor: 'bg-rose-50',
+    cards: []
   }
 ];
 
