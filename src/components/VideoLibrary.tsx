@@ -10,7 +10,8 @@ import {
   Trophy,
   BrainCircuit,
   MessageSquare,
-  ArrowLeft
+  ArrowLeft,
+  Image as ImageIcon
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { UserProfile, CreditCost, MASTER_ADMINS } from '../types';
@@ -306,9 +307,19 @@ export const VideoLibrary = ({
                   <div className="w-8 h-8 border-4 border-[#002147] border-t-transparent rounded-full animate-spin" />
                 </div>
             )}
-            <div className="aspect-[4/3] relative overflow-hidden">
-              <img src={video.thumbnail} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <div className="aspect-[4/3] relative overflow-hidden bg-slate-100 flex items-center justify-center text-slate-300">
+              <ImageIcon size={48} className="absolute opacity-20" />
+              <img 
+                src={video.thumbnail} 
+                alt="" 
+                referrerPolicy="no-referrer"
+                loading="lazy"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 relative z-10" 
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.opacity = '0';
+                }}
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20">
                  <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white scale-75 group-hover:scale-100 transition-transform">
                    <Play fill="currentColor" size={32} />
                  </div>

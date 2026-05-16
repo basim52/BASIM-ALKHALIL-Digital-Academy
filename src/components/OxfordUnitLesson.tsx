@@ -9,7 +9,8 @@ import {
   Trophy,
   Sparkles,
   HelpCircle,
-  PlayCircle
+  PlayCircle,
+  Image as ImageIcon
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -633,12 +634,21 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
                     onClick={() => handleMatch(v.id, v.word)}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className={`relative aspect-square rounded-2xl overflow-hidden shadow-sm border-4 transition-all ${
+                    className={`relative aspect-square rounded-2xl overflow-hidden shadow-sm border-4 transition-all bg-slate-50 flex items-center justify-center ${
                       matchingStatus[v.id] ? 'border-emerald-500 grayscale' : 'border-white hover:border-blue-500'
                     }`}
                   >
-                    <img src={v.img} alt={v.word} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-black/20" />
+                    <HelpCircle size={32} className="absolute text-slate-200" />
+                    <img 
+                      src={v.img} 
+                      alt={v.word} 
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover relative z-10"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.opacity = '0';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black/20 z-20" />
                     <div className="absolute bottom-2 left-2 right-2 bg-white/90 backdrop-blur-sm rounded-lg py-1 px-2">
                        <p className="text-[10px] font-black text-[#002147] uppercase truncate">{v.word}</p>
                     </div>
@@ -688,8 +698,17 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
                 {data.quiz.map((q, idx) => (
                   <div key={q.id} className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-xl shadow-slate-100/50">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                      <div className="aspect-[4/3] rounded-3xl overflow-hidden shadow-inner bg-slate-100">
-                        <img src={q.img} alt="Question" className="w-full h-full object-cover" />
+                      <div className="aspect-[4/3] rounded-3xl overflow-hidden shadow-inner bg-slate-100 flex items-center justify-center">
+                        <ImageIcon size={64} className="absolute text-slate-200" />
+                        <img 
+                          src={q.img} 
+                          alt="Question" 
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover relative z-10"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.opacity = '0';
+                          }}
+                        />
                       </div>
                       <div>
                         <div className="flex items-center gap-3 mb-6">

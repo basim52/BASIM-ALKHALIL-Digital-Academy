@@ -12,7 +12,8 @@ import {
   Pause,
   Square,
   Heart,
-  AlertCircle
+  AlertCircle,
+  Image as ImageIcon
 } from 'lucide-react';
 import { UserProfile, CreditCost, MASTER_ADMINS } from '../types';
 import { deductCredits, auth } from '../lib/firebase';
@@ -373,12 +374,22 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { l
                 <div className="w-8 h-8 border-4 border-[#002147] border-t-transparent rounded-full animate-spin" />
               </div>
             )}
-            <div className="h-48 relative overflow-hidden">
-               <img src={story.image} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-               <div className="absolute top-4 left-4">
+            <div className="h-48 relative overflow-hidden bg-slate-100 flex items-center justify-center text-slate-300">
+               <ImageIcon size={48} className="absolute opacity-20" />
+               <img 
+                 src={story.image} 
+                 alt="" 
+                 referrerPolicy="no-referrer"
+                 loading="lazy"
+                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 relative z-10" 
+                 onError={(e) => {
+                   (e.target as HTMLImageElement).style.opacity = '0';
+                 }}
+               />
+               <div className="absolute top-4 left-4 z-20">
                   <span className="bg-[#C49E3A] text-white px-3 py-1 rounded-full text-[10px] font-black shadow-lg">{story.level}</span>
                </div>
-               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6 z-20">
                   <div className="text-white">
                     <h3 className="font-black text-xl mb-1">{isRtl ? story.titleAr : story.titleEn}</h3>
                     <p className="text-blue-200 text-[10px] font-bold uppercase tracking-widest">{story.content.split(' ').length} {isRtl ? 'كلمة' : 'words'}</p>

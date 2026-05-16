@@ -466,7 +466,7 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
                           <>
                             <div className="flex -space-x-2 rtl:space-x-reverse">
                               {unit.cards.slice(0, 3).map((card, idx) => (
-                                <img key={card.id} src={card.img} alt="" className="w-8 h-8 rounded-full border-2 border-white object-cover" />
+                                <img key={card.id} src={card.img} alt="" referrerPolicy="no-referrer" className="w-8 h-8 rounded-full border-2 border-white object-cover bg-slate-100" />
                               ))}
                             </div>
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">+{unit.cards.length} Images</span>
@@ -527,11 +527,17 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
                       exit={{ opacity: 0, scale: 1.1 }}
                       className="col-span-full flex flex-col items-center py-20"
                     >
-                       <div className="w-full max-w-lg mb-12 rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white">
+                       <div className="w-full max-w-lg mb-12 rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white bg-slate-100 flex items-center justify-center text-slate-300">
+                         <ImageIcon size={64} className="absolute opacity-20" />
                          <img 
                            src={selectedUnit?.cards[trainingIndex].img} 
                            alt="" 
-                           className="w-full h-80 object-cover"
+                           referrerPolicy="no-referrer"
+                           className="w-full h-80 object-cover relative z-10"
+                           onError={(e) => {
+                             const target = e.target as HTMLImageElement;
+                             target.style.display = 'none';
+                           }}
                          />
                        </div>
                        <PronunciationTrainer 
@@ -554,14 +560,20 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
                         className="group"
                       >
                         <div className="bg-white rounded-[2rem] overflow-hidden border border-slate-200 shadow-sm group-hover:shadow-2xl group-hover:border-[#002147] transition-all">
-                          <div className="aspect-square relative overflow-hidden">
-                            <img 
-                              src={card.img} 
-                              alt={card.en} 
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
+                          <div className="aspect-square relative overflow-hidden bg-slate-100 flex items-center justify-center text-slate-300">
+                             <ImageIcon size={48} className="absolute opacity-20" />
+                             <img 
+                               src={card.img} 
+                               alt={card.en} 
+                               referrerPolicy="no-referrer"
+                               loading="lazy"
+                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 relative z-10"
+                               onError={(e) => {
+                                 (e.target as HTMLImageElement).style.opacity = '0';
+                               }}
+                             />
+                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20" />
+                             <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 z-30">
                                <button 
                                 onClick={(e) => {
                                   e.stopPropagation();
