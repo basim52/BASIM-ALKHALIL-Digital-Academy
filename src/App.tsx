@@ -67,7 +67,7 @@ import { CreditSystem } from './components/CreditSystem';
 import { OxfordLesson } from './components/OxfordLesson';
 import { EarlyChildhoodHome } from './components/EarlyChildhood/EarlyChildhoodHome';
 import { OxfordDiscoverCompanion } from './components/OxfordDiscoverCompanion';
-import { Wallet, Layers } from 'lucide-react';
+import { Wallet, Layers, Image as OxfordIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { familyConstellationsLesson } from './data/lessons/r_a1_4';
 import { everydayInteractionLesson } from './data/lessons/r_a1_5';
@@ -3029,6 +3029,7 @@ export default function App() {
                   [
                     { id: 'curriculum', icon: BookOpen },
                     { id: 'ai-chat', icon: Mic2 },
+                    { id: 'oxford-discover', icon: OxfordIcon },
                     { id: 'leaderboard', icon: Trophy },
                     { id: 'progress', icon: BarChart3 },
                     { id: 'logout', icon: LogOut, action: handleLogout },
