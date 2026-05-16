@@ -15,7 +15,8 @@ import {
   Mic,
   RotateCcw,
   Check,
-  X
+  X,
+  Square
 } from 'lucide-react';
 
 interface OxfordDiscoverCompanionProps {
@@ -492,8 +493,15 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
   const [activeLessonId, setActiveLessonId] = useState<number | null>(null);
   const [isTraining, setIsTraining] = useState(false);
   const [trainingIndex, setTrainingIndex] = useState(0);
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
 
   const selectedUnit = UNITS.find(u => u.id === selectedUnitId);
+
+  React.useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
 
   const handleTrainingResult = (success: boolean) => {
     if (selectedUnit && trainingIndex < selectedUnit.cards.length - 1) {
@@ -509,10 +517,18 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
     return <OxfordUnitLesson lang={lang} unitId={activeLessonId} onBack={() => setActiveLessonId(null)} />;
   }
 
-  const speak = (text: string, voiceLang: string) => {
+  const speak = (text: string, voiceLang: string, id: string) => {
     window.speechSynthesis.cancel();
+    if (speakingId === id) {
+      setSpeakingId(null);
+      return;
+    }
+
+    setSpeakingId(id);
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = voiceLang;
+    utterance.onend = () => setSpeakingId(null);
+    utterance.onerror = () => setSpeakingId(null);
     window.speechSynthesis.speak(utterance);
   };
 
@@ -552,21 +568,30 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
             <div className="flex flex-col gap-4 w-full md:w-auto">
               <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
                 <button 
-                  onClick={() => setViewMode('bank')}
+                  onClick={() => {
+                    setViewMode('bank');
+                    setSelectedUnitId(null);
+                  }}
                   className={`flex-1 md:px-6 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 ${viewMode === 'bank' ? 'bg-white text-[#002147] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                   <ImageIcon size={18} />
                   {isRtl ? 'بنك الصور' : 'Visual Bank'}
                 </button>
                 <button 
-                  onClick={() => setViewMode('lessons')}
+                  onClick={() => {
+                    setViewMode('lessons');
+                    setSelectedUnitId(null);
+                  }}
                   className={`flex-1 md:px-6 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 ${viewMode === 'lessons' ? 'bg-white text-[#002147] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                   <BookOpen size={18} />
                   {isRtl ? 'الدروس التفاعلية' : 'Lessons'}
                 </button>
                 <button 
-                  onClick={() => setViewMode('reading')}
+                  onClick={() => {
+                    setViewMode('reading');
+                    setSelectedUnitId(null);
+                  }}
                   className={`flex-1 md:px-6 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 ${viewMode === 'reading' ? 'bg-white text-[#002147] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                   <Sparkles size={18} />
@@ -603,7 +628,7 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
                   whileHover={{ y: -5, scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
                   onClick={() => {
-                    if (viewMode === 'lessons') {
+                    if (viewMode === 'lessons' || viewMode === 'reading') {
                       setActiveLessonId(unit.id);
                     } else {
                       setSelectedUnitId(unit.id);
@@ -750,17 +775,17 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
                             <p className="text-sm font-bold text-slate-400 mb-4">{card.ar}</p>
                             <div className="flex gap-2">
                                <button 
-                                onClick={() => speak(card.en, 'en-US')}
-                                className="flex-1 bg-blue-50 text-blue-600 py-3 rounded-xl hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-2"
+                                onClick={() => speak(card.en, 'en-US', `${card.id}-en`)}
+                                className={`flex-1 py-3 rounded-xl transition-all flex items-center justify-center gap-2 ${speakingId === `${card.id}-en` ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white'}`}
                                >
-                                 <Volume2 size={16} />
+                                 {speakingId === `${card.id}-en` ? <Square size={16} fill="currentColor" /> : <Volume2 size={16} />}
                                  <span className="text-[10px] font-black tracking-widest uppercase">EN</span>
                                </button>
                                <button 
-                                onClick={() => speak(card.ar, 'ar-SA')}
-                                className="flex-1 bg-amber-50 text-amber-600 py-3 rounded-xl hover:bg-amber-600 hover:text-white transition-all flex items-center justify-center gap-2"
+                                onClick={() => speak(card.ar, 'ar-SA', `${card.id}-ar`)}
+                                className={`flex-1 py-3 rounded-xl transition-all flex items-center justify-center gap-2 ${speakingId === `${card.id}-ar` ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white'}`}
                                >
-                                 <Volume2 size={16} />
+                                 {speakingId === `${card.id}-ar` ? <Square size={16} fill="currentColor" /> : <Volume2 size={16} />}
                                  <span className="text-[10px] font-black tracking-widest uppercase">AR</span>
                                </button>
                             </div>

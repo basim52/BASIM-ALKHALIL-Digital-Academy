@@ -10,6 +10,7 @@ import {
   Sparkles,
   HelpCircle,
   PlayCircle,
+  Square,
   Image as ImageIcon
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -759,8 +760,15 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
   const [compAnswers, setCompAnswers] = useState<Record<number, string | null>>({});
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string | null>>({});
   const [score, setScore] = useState(0);
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   const isReading = (data as any)?.isReadingLesson;
+
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
 
   const handleStart = () => {
     if (isReading) {
@@ -789,7 +797,17 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = voiceLang;
     utterance.rate = 0.9;
+    
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
     window.speechSynthesis.speak(utterance);
+  };
+
+  const stopSpeak = () => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
   };
 
   const handleMatch = (id: number, word: string) => {
@@ -855,10 +873,14 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
                     {data.bigQuestionAr}
                   </p>
                   <button 
-                    onClick={() => speak(data.bigQuestion)}
+                    onClick={() => isSpeaking ? stopSpeak() : speak(data.bigQuestion)}
                     className="mt-6 w-14 h-14 bg-white/10 hover:bg-white/20 rounded-full mx-auto flex items-center justify-center transition-all group"
                   >
-                    <Volume2 className="group-hover:scale-110 transition-transform" size={24} />
+                    {isSpeaking ? (
+                      <Square className="group-hover:scale-110 transition-transform fill-white" size={24} />
+                    ) : (
+                      <Volume2 className="group-hover:scale-110 transition-transform" size={24} />
+                    )}
                   </button>
                 </div>
               </div>
@@ -923,11 +945,15 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
               <div className="bg-white p-8 md:p-12 rounded-[3.5rem] border border-slate-200 shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-8">
                      <button 
-                       onClick={() => speak((data as any).reading.text)}
-                       className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all shadow-lg group"
-                       title="Listen to Reading"
+                       onClick={() => isSpeaking ? stopSpeak() : speak((data as any).reading.text)}
+                       className={`w-16 h-16 rounded-full flex items-center justify-center transition-all shadow-lg group ${isSpeaking ? 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white' : 'bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white'}`}
+                       title={isSpeaking ? "Stop Reading" : "Listen to Reading"}
                      >
-                       <Volume2 className="group-hover:scale-110 transition-transform" size={28} />
+                       {isSpeaking ? (
+                         <Square className="group-hover:scale-110 transition-transform fill-current" size={28} />
+                       ) : (
+                         <Volume2 className="group-hover:scale-110 transition-transform" size={28} />
+                       )}
                      </button>
                   </div>
 

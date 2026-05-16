@@ -13,7 +13,8 @@ import {
   Play,
   Pause,
   ArrowLeft,
-  Sparkles
+  Sparkles,
+  Square
 } from 'lucide-react';
 
 interface AudioSync {
@@ -84,17 +85,22 @@ export const OxfordLesson = ({ lang, onComplete, onBack }: OxfordLessonProps) =>
   const [currentTime, setCurrentTime] = useState(0);
   const [score, setScore] = useState(0);
 
-  const speak = (text: string, voiceLang: string) => {
+  const speak = (text: string, voiceLang: string, id: string) => {
     // Stop any current speaking
     window.speechSynthesis.cancel();
     
-    setPlayingId(text);
+    if (playingId === id) {
+      setPlayingId(null);
+      return;
+    }
+
+    setPlayingId(id);
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = voiceLang; // 'en-US' or 'ar-SA'
     
     // Simple mock sync for demo
     let timer: any;
-    if (voiceLang === 'en-US') {
+    if (voiceLang === 'en-US' && activeTab === 'expl') {
       let startTime = Date.now();
       timer = setInterval(() => {
         const elapsed = (Date.now() - startTime) / 1000;
@@ -110,7 +116,7 @@ export const OxfordLesson = ({ lang, onComplete, onBack }: OxfordLessonProps) =>
     utterance.onend = () => {
       setPlayingId(null);
       setCurrentTime(0);
-      clearInterval(timer);
+      if (timer) clearInterval(timer);
     };
 
     window.speechSynthesis.speak(utterance);
@@ -200,17 +206,17 @@ export const OxfordLesson = ({ lang, onComplete, onBack }: OxfordLessonProps) =>
                 </div>
                 <div className="md:col-span-4 flex justify-end gap-3">
                    <button 
-                     onClick={() => speak(item.en, 'en-US')}
-                     className="flex-1 md:flex-none aspect-square w-16 bg-blue-50 text-blue-600 rounded-2xl flex flex-col items-center justify-center gap-1 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                     onClick={() => speak(item.en, 'en-US', `${item.id}-en`)}
+                     className={`flex-1 md:flex-none aspect-square w-16 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all shadow-sm ${playingId === `${item.id}-en` ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white'}`}
                    >
-                     <Volume2 size={24} />
+                     {playingId === `${item.id}-en` ? <Square size={24} fill="currentColor" /> : <Volume2 size={24} />}
                      <span className="text-[8px] font-black">{t.listenEN}</span>
                    </button>
                    <button 
-                     onClick={() => speak(item.ar, 'ar-SA')}
-                     className="flex-1 md:flex-none aspect-square w-16 bg-amber-50 text-[#C49E3A] rounded-2xl flex flex-col items-center justify-center gap-1 hover:bg-[#C49E3A] hover:text-white transition-all shadow-sm"
+                     onClick={() => speak(item.ar, 'ar-SA', `${item.id}-ar`)}
+                     className={`flex-1 md:flex-none aspect-square w-16 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all shadow-sm ${playingId === `${item.id}-ar` ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-[#C49E3A] hover:bg-[#C49E3A] hover:text-white'}`}
                    >
-                     <Languages size={24} />
+                     {playingId === `${item.id}-ar` ? <Square size={24} fill="currentColor" /> : <Languages size={24} />}
                      <span className="text-[8px] font-black">{t.listenAR}</span>
                    </button>
                 </div>

@@ -12,7 +12,8 @@ import {
   Star,
   RefreshCcw,
   Play,
-  ChevronRight
+  ChevronRight,
+  Square
 } from 'lucide-react';
 
 interface PracticeWord {
@@ -53,6 +54,7 @@ export const PronunciationLesson = ({ lang, onBack, onComplete }: { lang: Langua
   // Game logic states
   const [attempts, setAttempts] = useState(0);
   const [totalAttempts, setTotalAttempts] = useState(0);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const MAX_TOTAL_ATTEMPTS = 12;
 
   // Refs for logic in callbacks (avoid stale state)
@@ -123,12 +125,23 @@ export const PronunciationLesson = ({ lang, onBack, onComplete }: { lang: Langua
   const speak = useCallback((text: string, forceLang?: string) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
+    
+    if (isSpeaking) {
+      setIsSpeaking(false);
+      return;
+    }
+
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = forceLang || 'en-US';
     utterance.rate = 0.85;
     utterance.pitch = 1.1;
+    
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
     window.speechSynthesis.speak(utterance);
-  }, []);
+  }, [isSpeaking]);
 
   const startListening = async () => {
     if (!recognitionRef.current || isProcessingRef.current) {
@@ -376,9 +389,9 @@ export const PronunciationLesson = ({ lang, onBack, onComplete }: { lang: Langua
                   </span>
                   <button 
                     onClick={() => speak(currentWord.word)}
-                    className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full shadow-md flex items-center justify-center text-[#C49E3A] hover:scale-110 active:scale-90 transition-all"
+                    className={`w-10 h-10 md:w-12 md:h-12 rounded-full shadow-md flex items-center justify-center transition-all ${isSpeaking ? 'bg-red-500 text-white' : 'bg-white text-[#C49E3A] hover:scale-110 active:scale-90'}`}
                   >
-                    <Play fill="currentColor" size={20} />
+                    {isSpeaking ? <Square fill="currentColor" size={20} /> : <Play fill="currentColor" size={20} />}
                   </button>
                 </div>
               </div>
