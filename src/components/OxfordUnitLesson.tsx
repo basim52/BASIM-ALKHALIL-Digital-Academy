@@ -1,18 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations, Language } from '../lib/translations';
-import { 
-  ArrowLeft, 
-  Volume2, 
-  CheckCircle2, 
-  XCircle, 
-  Trophy,
-  Sparkles,
-  HelpCircle,
-  PlayCircle,
-  Square,
-  Image as ImageIcon
-} from 'lucide-react';
+import { Sparkles, HelpCircle, PlayCircle, Square, Image as ImageIcon, BookOpen, Layers, MessageSquare, ChevronRight, Speaker, ArrowLeft, Volume2, CheckCircle2, XCircle, Trophy } from 'lucide-react';
+import { LANGUAGE_LAB_DATA } from '../data/languageLabData';
 import confetti from 'canvas-confetti';
 
 interface OxfordUnitLessonProps {
@@ -816,6 +806,12 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
   const [isSpeaking, setIsSpeaking] = useState(false);
 
   const isReading = (data as any)?.isReadingLesson;
+  const isLanguageLab = unitId >= 100;
+  const languageData = isLanguageLab ? LANGUAGE_LAB_DATA[unitId] : null;
+
+  const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
+  const [exerciseAnswers, setExerciseAnswers] = useState<Record<number, string>>({});
+  const [userInput, setUserInput] = useState('');
 
   useEffect(() => {
     return () => {
@@ -824,7 +820,9 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
   }, []);
 
   const handleStart = () => {
-    if (isReading) {
+    if (isLanguageLab) {
+      setStep('languageLab' as any);
+    } else if (isReading) {
       setStep('reading');
     } else {
       setStep('matching');
@@ -874,26 +872,31 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
     }
   };
 
-  const handleQuiz = (questionId: number, option: string) => {
-    setQuizAnswers(prev => ({ ...prev, [questionId]: option }));
-    const question = data.quiz.find(q => q.id === questionId);
-    if (option === question?.correct) {
+  const handleLanguageExercise = (answer: string) => {
+    if (!languageData) return;
+    const exercise = languageData.exercises[currentExerciseIdx];
+    setExerciseAnswers(prev => ({ ...prev, [exercise.id]: answer }));
+    
+    if (answer.toLowerCase().trim() === exercise.correct.toLowerCase().trim()) {
       setScore(prev => prev + 1);
       speak("Correct!", "en-US");
     } else {
       speak("Try again", "en-US");
     }
 
-    if (Object.keys(quizAnswers).length + 1 === data.quiz.length) {
-      setTimeout(() => {
+    setTimeout(() => {
+      if (currentExerciseIdx < languageData.exercises.length - 1) {
+        setCurrentExerciseIdx(prev => prev + 1);
+        setUserInput('');
+      } else {
         setStep('finish');
         confetti({
           particleCount: 150,
           spread: 70,
           origin: { y: 0.6 }
         });
-      }, 1500);
-    }
+      }
+    }, 1500);
   };
 
   return (
@@ -1011,6 +1014,145 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
                     </motion.button>
                  </div>
               </div>
+            </motion.div>
+          )}
+
+          {step === ('languageLab' as any) && languageData && (
+            <motion.div
+              key="language-lab"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              className="space-y-8"
+            >
+               <div className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-2xl relative overflow-hidden">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="bg-indigo-600 text-white p-3 rounded-2xl shadow-lg">
+                      {languageData.type === 'grammar' ? <BookOpen size={24} /> : <Layers size={24} />}
+                    </div>
+                    <div>
+                      <h2 className="text-3xl font-black text-[#002147]">{isRtl ? languageData.titleAr : languageData.title}</h2>
+                      <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em]">Explanation Lab</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100 mb-8 relative">
+                     <button 
+                       onClick={() => isSpeaking ? stopSpeak() : speak(isRtl ? languageData.explanationAr : languageData.explanation, isRtl ? 'ar-SA' : 'en-US')}
+                       className="absolute top-4 right-4 p-3 bg-white text-indigo-600 rounded-xl shadow-sm hover:bg-indigo-600 hover:text-white transition-all border border-indigo-100"
+                     >
+                       {isSpeaking ? <Square size={18} fill="currentColor" /> : <Volume2 size={18} />}
+                     </button>
+                     <p className="text-xl font-bold text-slate-700 leading-relaxed max-w-[90%]">
+                        {isRtl ? languageData.explanationAr : languageData.explanation}
+                     </p>
+                  </div>
+
+                  <div className="space-y-4">
+                     <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <MessageSquare size={14} />
+                        Examples / أمثلة
+                     </h4>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {languageData.examples.map((ex, idx) => (
+                           <motion.div 
+                             key={idx}
+                             whileHover={{ scale: 1.02 }}
+                             className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-2"
+                           >
+                              <div className="flex items-center justify-between">
+                                 <p className="text-lg font-black text-[#002147]">{ex.en}</p>
+                                 <button onClick={() => speak(ex.en)} className="text-slate-300 hover:text-indigo-600 transition-colors">
+                                    <Volume2 size={16} />
+                                 </button>
+                              </div>
+                              <p className="text-slate-400 font-bold text-sm border-t border-slate-50 pt-2">{ex.ar}</p>
+                           </motion.div>
+                        ))}
+                     </div>
+                  </div>
+               </div>
+
+               <div className="bg-indigo-900 text-white p-10 rounded-[3rem] shadow-2xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-10 opacity-10">
+                     <Sparkles size={120} />
+                  </div>
+                  
+                  <div className="relative z-10">
+                     <div className="flex items-center justify-between mb-10">
+                        <div>
+                           <h3 className="text-2xl font-black mb-2">Practice Exercise</h3>
+                           <p className="text-indigo-300 font-bold">Apply what you learned!</p>
+                        </div>
+                        <div className="bg-white/10 px-6 py-2 rounded-xl border border-white/20">
+                           <span className="font-black text-xl italic">{currentExerciseIdx + 1} / {languageData.exercises.length}</span>
+                        </div>
+                     </div>
+
+                     <AnimatePresence mode="wait">
+                        <motion.div 
+                          key={currentExerciseIdx}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          className="space-y-8"
+                        >
+                           <div className="flex flex-col md:flex-row gap-10">
+                              {languageData.exercises[currentExerciseIdx].img && (
+                                 <div className="w-full md:w-64 aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 flex-shrink-0 bg-white/5">
+                                    <img 
+                                      src={languageData.exercises[currentExerciseIdx].img} 
+                                      alt="" 
+                                      referrerPolicy="no-referrer"
+                                      className="w-full h-full object-cover" 
+                                    />
+                                 </div>
+                              )}
+                              <div className="flex-1">
+                                 <h4 className="text-2xl font-black mb-8 leading-relaxed">
+                                    {languageData.exercises[currentExerciseIdx].question}
+                                    {languageData.exercises[currentExerciseIdx].context && (
+                                       <span className="block text-sm text-indigo-300 mt-2 italic">({languageData.exercises[currentExerciseIdx].context})</span>
+                                    )}
+                                 </h4>
+
+                                 <div className="grid grid-cols-1 gap-4">
+                                    {languageData.exercises[currentExerciseIdx].type === 'choose' || languageData.exercises[currentExerciseIdx].type === 'identify' ? (
+                                       languageData.exercises[currentExerciseIdx].options?.map((opt) => (
+                                          <button
+                                             key={opt}
+                                             onClick={() => handleLanguageExercise(opt)}
+                                             className={`w-full py-5 rounded-2xl bg-white/10 border-2 border-white/10 hover:border-white hover:bg-white/20 transition-all text-left px-8 font-black text-lg flex items-center justify-between group ${exerciseAnswers[languageData.exercises[currentExerciseIdx].id] === opt ? 'border-white bg-white/20' : ''}`}
+                                          >
+                                             {opt}
+                                             <ChevronRight size={20} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                                          </button>
+                                       ))
+                                    ) : (
+                                       <div className="flex flex-col gap-4">
+                                          <input 
+                                             type="text"
+                                             value={userInput}
+                                             onChange={(e) => setUserInput(e.target.value)}
+                                             onKeyDown={(e) => e.key === 'Enter' && handleLanguageExercise(userInput)}
+                                             placeholder="Type your answer here..."
+                                             className="w-full py-5 px-8 rounded-2xl bg-white/5 border-2 border-white/20 focus:border-white focus:bg-white/10 outline-none font-black text-xl placeholder:text-white/20 transition-all"
+                                          />
+                                          <button 
+                                             onClick={() => handleLanguageExercise(userInput)}
+                                             className="py-4 bg-white text-indigo-900 rounded-2xl font-black text-lg hover:bg-indigo-50 transition-colors shadow-xl"
+                                          >
+                                             Check Answer
+                                          </button>
+                                       </div>
+                                    )}
+                                 </div>
+                              </div>
+                           </div>
+                        </motion.div>
+                     </AnimatePresence>
+                  </div>
+               </div>
             </motion.div>
           )}
 
@@ -1251,12 +1393,12 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
                 <Trophy size={80} />
               </div>
               <h2 className="text-5xl font-black text-[#002147] mb-6">
-                {score === data.quiz.length ? t.oxfordExcellent : t.oxfordTryAgain}
+                {score === (isLanguageLab ? languageData.exercises.length : data.quiz.length) ? t.oxfordExcellent : t.oxfordTryAgain}
               </h2>
               <p className="text-xl text-slate-400 font-bold mb-12">
                 {isRtl 
-                  ? `لقد أكملت الدرس بنجاح وحصلت على ${score} من ${data.quiz.length} في الاختبار!` 
-                  : `You completed the lesson and scored ${score} out of ${data.quiz.length} in the quiz!`}
+                  ? `لقد أكملت الدرس بنجاح وحصلت على ${score} من ${isLanguageLab ? languageData.exercises.length : data.quiz.length} في الاختبار!` 
+                  : `You completed the lesson and scored ${score} out of ${isLanguageLab ? languageData.exercises.length : data.quiz.length} in the quiz!`}
               </p>
               
               <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
@@ -1266,6 +1408,9 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
                     setMatchingStatus({});
                     setQuizAnswers({});
                     setScore(0);
+                    setCurrentExerciseIdx(0);
+                    setExerciseAnswers({});
+                    setUserInput('');
                   }}
                   className="bg-white border-2 border-[#002147] text-[#002147] px-10 py-4 rounded-2xl font-black hover:bg-[#002147] hover:text-white transition-all shadow-lg"
                 >

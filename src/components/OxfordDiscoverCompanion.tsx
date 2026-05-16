@@ -481,6 +481,116 @@ const UNITS = [
       { id: 'u25-1', en: 'Producer', ar: 'منتج', img: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=400&q=80' },
       { id: 'u25-2', en: 'Consumer', ar: 'مستهلك', img: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=400&q=80' },
     ]
+  },
+  {
+    id: 101,
+    titleEn: 'Unit 1: Word Study - Nouns and Verbs',
+    titleAr: 'الوحدة 1: دراسة الكلمات - الأسماء والأفعال',
+    descriptionEn: 'Learn how some words can be both nouns and verbs.',
+    descriptionAr: 'تعلم كيف يمكن لبعض الكلمات أن تكون اسماً وفعلاً في آن واحد.',
+    color: 'bg-indigo-600',
+    lightColor: 'bg-indigo-50',
+    cards: []
+  },
+  {
+    id: 102,
+    titleEn: 'Unit 1: Grammar - Adjectives with -ed and -ing',
+    titleAr: 'الوحدة 1: القواعد - الصفات المنتهية بـ -ed و -ing',
+    descriptionEn: 'Understand the difference between adjectives like bored and boring.',
+    descriptionAr: 'افهم الفرق بين الصفات مثل bored و boring.',
+    color: 'bg-pink-600',
+    lightColor: 'bg-pink-50',
+    cards: []
+  },
+  {
+    id: 103,
+    titleEn: 'Unit 2: Suffixes -ful and -less',
+    titleAr: 'الوحدة 2: اللاحقات -ful و -less',
+    descriptionEn: 'How suffixes change the meaning of words.',
+    descriptionAr: 'كيف تغير اللاحقات معنى الكلمات.',
+    color: 'bg-cyan-600',
+    lightColor: 'bg-cyan-50',
+    cards: []
+  },
+  {
+    id: 104,
+    titleEn: 'Unit 2: Prefixes un- and re-',
+    titleAr: 'الوحدة 2: البوادئ un- و re-',
+    descriptionEn: 'Using prefixes to create opposite or repeated actions.',
+    descriptionAr: 'استخدام البوادئ لإنشاء أفعال متضادة أو متكررة.',
+    color: 'bg-orange-600',
+    lightColor: 'bg-orange-50',
+    cards: []
+  },
+  {
+    id: 105,
+    titleEn: 'Unit 3: Compound Words',
+    titleAr: 'الوحدة 3: الكلمات المركبة',
+    descriptionEn: 'Combining two words to make a new one.',
+    descriptionAr: 'جمع كلمتين لتكوين كلمة جديدة.',
+    color: 'bg-green-600',
+    lightColor: 'bg-green-50',
+    cards: []
+  },
+  {
+    id: 106,
+    titleEn: 'Unit 3: Synonyms and Antonyms',
+    titleAr: 'الوحدة 3: المرادفات والمتضادات',
+    descriptionEn: 'Varying your vocabulary with similar and opposite words.',
+    descriptionAr: 'تغيير مفرداتك بكلمات متشابهة ومتضادة.',
+    color: 'bg-rose-600',
+    lightColor: 'bg-rose-50',
+    cards: []
+  },
+  {
+    id: 107,
+    titleEn: 'Unit 4: Comparative & Superlative',
+    titleAr: 'الوحدة 4: المقارنة والتفضيل',
+    descriptionEn: 'Comparing two things or finding the extreme.',
+    descriptionAr: 'مقارنة شيئين أو إيجاد الأفضل/الأسوأ.',
+    color: 'bg-blue-600',
+    lightColor: 'bg-blue-50',
+    cards: []
+  },
+  {
+    id: 108,
+    titleEn: 'Unit 4: Conjunctions (and, but, or)',
+    titleAr: 'الوحدة 4: أدوات الربط (و، لكن، أو)',
+    descriptionEn: 'Connecting ideas in a sentence.',
+    descriptionAr: 'ربط الأفكار في الجملة.',
+    color: 'bg-amber-600',
+    lightColor: 'bg-amber-50',
+    cards: []
+  },
+  {
+    id: 109,
+    titleEn: 'Unit 5: Prepositions of Place',
+    titleAr: 'الوحدة 5: حروف جر المكان',
+    descriptionEn: 'Describing where things are located.',
+    descriptionAr: 'وصف مكان وجود الأشياء.',
+    color: 'bg-emerald-600',
+    lightColor: 'bg-emerald-50',
+    cards: []
+  },
+  {
+    id: 110,
+    titleEn: 'Unit 5: Past Simple Tense',
+    titleAr: 'الوحدة 5: زمن الماضي البسيط',
+    descriptionEn: 'Talking about actions that happened in the past.',
+    descriptionAr: 'التحدث عن أفعال حدثت في الماضي.',
+    color: 'bg-violet-600',
+    lightColor: 'bg-violet-50',
+    cards: []
+  },
+  {
+    id: 111,
+    titleEn: 'Unit 6: Modal Verbs (Can, Must)',
+    titleAr: 'الوحدة 6: الأفعال الناقصة (يستطيع، يجب)',
+    descriptionEn: 'Expressing ability and necessity.',
+    descriptionAr: 'التعبير عن القدرة والضرورة.',
+    color: 'bg-teal-600',
+    lightColor: 'bg-teal-50',
+    cards: []
   }
 ];
 
@@ -489,7 +599,7 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
   const isRtl = lang === 'ar';
   const [selectedUnitId, setSelectedUnitId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState<'bank' | 'lessons' | 'reading'>('bank');
+  const [viewMode, setViewMode] = useState<'bank' | 'lessons' | 'reading' | 'language'>('bank');
   const [activeLessonId, setActiveLessonId] = useState<number | null>(null);
   const [isTraining, setIsTraining] = useState(false);
   const [trainingIndex, setTrainingIndex] = useState(0);
@@ -536,9 +646,10 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
     const matchesSearch = unit.titleEn.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          unit.titleAr.includes(searchQuery);
     
-    if (viewMode === 'reading') return matchesSearch && unit.id >= 15;
+    if (viewMode === 'language') return matchesSearch && unit.id >= 100;
+    if (viewMode === 'reading') return matchesSearch && unit.id >= 15 && unit.id < 100;
     if (viewMode === 'lessons') return matchesSearch && unit.id < 15;
-    return matchesSearch;
+    return matchesSearch && unit.id < 100;
   });
 
   return (
@@ -597,6 +708,16 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
                   <Sparkles size={18} />
                   {isRtl ? 'المختبر القرائي' : 'Reading Lab'}
                 </button>
+                <button 
+                  onClick={() => {
+                    setViewMode('language');
+                    setSelectedUnitId(null);
+                  }}
+                  className={`flex-1 md:px-6 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 ${viewMode === 'language' ? 'bg-white text-[#002147] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  <Layers size={18} />
+                  {isRtl ? 'مختبر اللغة' : 'Language Lab'}
+                </button>
               </div>
 
               <div className="relative w-full md:w-80">
@@ -628,7 +749,7 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
                   whileHover={{ y: -5, scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
                   onClick={() => {
-                    if (viewMode === 'lessons' || viewMode === 'reading') {
+                    if (viewMode === 'lessons' || viewMode === 'reading' || viewMode === 'language') {
                       setActiveLessonId(unit.id);
                     } else {
                       setSelectedUnitId(unit.id);
