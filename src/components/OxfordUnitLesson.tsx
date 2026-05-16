@@ -41,14 +41,110 @@ const LESSON_DATA = {
         question: "She's a ________.",
         options: ['player', 'winner', 'team'],
         correct: 'winner',
-        img: 'https://images.unsplash.com/photo-1549439602-43ebca2327af?auto=format&fit=crop&w=400&q=80' // Winner image
+        img: 'https://images.unsplash.com/photo-1549439602-43ebca2327af?auto=format&fit=crop&w=400&q=80'
       },
       {
         id: 2,
         question: "What's the ________?",
         options: ['winner', 'player', 'score'],
         correct: 'score',
-        img: 'https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=400&q=80' // Scoreboard image
+        img: 'https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=400&q=80'
+      }
+    ]
+  },
+  2: {
+    bigQuestion: "Who are the people in your life?",
+    bigQuestionAr: "من هم الأشخاص في حياتك؟",
+    vocab: [
+      { id: 1, word: 'parent', ar: 'والد/والدة', img: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'grandmother', ar: 'جدة', img: 'https://images.unsplash.com/photo-1552554720-6379512316e6?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'brother', ar: 'أخ', img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80' },
+      { id: 4, word: 'sister', ar: 'أخت', img: 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=400&q=80' },
+      { id: 5, word: 'uncle', ar: 'عم/خال', img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80' },
+      { id: 6, word: 'aunt', ar: 'عمة/خالة', img: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=400&q=80' },
+      { id: 7, word: 'cousin', ar: 'ابن عم/خال', img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80' },
+      { id: 8, word: 'neighbor', ar: 'جار', img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80' },
+      { id: 9, word: 'friends', ar: 'أصدقاء', img: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=400&q=80' },
+      { id: 10, word: 'baby', ar: 'طفل رضيع', img: 'https://images.unsplash.com/photo-1519689689253-ab9750242f77?auto=format&fit=crop&w=400&q=80' },
+    ],
+    quiz: [
+      {
+        id: 1,
+        question: "This is my ________.",
+        options: ['uncle', 'grandmother', 'neighbor'],
+        correct: 'grandmother',
+        img: 'https://images.unsplash.com/photo-1552554720-6379512316e6?auto=format&fit=crop&w=400&q=80'
+      },
+      {
+        id: 2,
+        question: "They are ________.",
+        options: ['friends', 'parents', 'enemies'],
+        correct: 'friends',
+        img: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=400&q=80'
+      }
+    ]
+  },
+  3: {
+    bigQuestion: "How do we buy and sell things?",
+    bigQuestionAr: "كيف نبيع ونشتري الأشياء؟",
+    vocab: [
+      { id: 1, word: 'market', ar: 'سوق', img: 'https://images.unsplash.com/photo-1533900298318-6b8da08a523e?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'apples', ar: 'تفاح', img: 'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'bread', ar: 'خبز', img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80' },
+      { id: 4, word: 'coins', ar: 'عملات', img: 'https://images.unsplash.com/photo-1534030347209-467a5b0ad3e6?auto=format&fit=crop&w=400&q=80' },
+      { id: 5, word: 'vendor', ar: 'بائع', img: 'https://images.unsplash.com/photo-1543083477-4f7f44aad226?auto=format&fit=crop&w=400&q=80' },
+      { id: 6, word: 'scales', ar: 'ميزان', img: 'https://images.unsplash.com/photo-1596727147705-61a532a659bd?auto=format&fit=crop&w=400&q=80' },
+      { id: 7, word: 'basket', ar: 'سلة', img: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=400&q=80' },
+      { id: 8, word: 'wallet', ar: 'محفظة', img: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80' },
+      { id: 9, word: 'shop', ar: 'محل/دكان', img: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=400&q=80' },
+      { id: 10, word: 'customer', ar: 'زبون', img: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=400&q=80' },
+    ],
+    quiz: [
+      {
+        id: 1,
+        question: "Use ________ to weigh fruit.",
+        options: ['wallet', 'scales', 'basket'],
+        correct: 'scales',
+        img: 'https://images.unsplash.com/photo-1596727147705-61a532a659bd?auto=format&fit=crop&w=400&q=80'
+      },
+      {
+        id: 2,
+        question: "I have some ________.",
+        options: ['coins', 'apples', 'shops'],
+        correct: 'coins',
+        img: 'https://images.unsplash.com/photo-1534030347209-467a5b0ad3e6?auto=format&fit=crop&w=400&q=80'
+      }
+    ]
+  },
+  4: {
+    bigQuestion: "How do we learn about the past?",
+    bigQuestionAr: "كيف نتعلم عن الماضي؟",
+    vocab: [
+      { id: 1, word: 'temple', ar: 'معبد', img: 'https://images.unsplash.com/photo-1541432901042-261ec9099837?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'history', ar: 'تاريخ', img: 'https://images.unsplash.com/photo-1461360228754-6e81c478df8b?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'column', ar: 'عمود', img: 'https://images.unsplash.com/photo-1568249826372-c515a4521873?auto=format&fit=crop&w=400&q=80' },
+      { id: 4, word: 'statue', ar: 'تمثال', img: 'https://images.unsplash.com/photo-1534839187421-5a0a3821017b?auto=format&fit=crop&w=400&q=80' },
+      { id: 5, word: 'pyramid', ar: 'هرم', img: 'https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&w=400&q=80' },
+      { id: 6, word: 'tomb', ar: 'مقبرة/قبر', img: 'https://images.unsplash.com/photo-1534839187421-5a0a3821017b?auto=format&fit=crop&w=400&q=80' },
+      { id: 7, word: 'ruins', ar: 'أطلال', img: 'https://images.unsplash.com/photo-1461360228754-6e81c478df8b?auto=format&fit=crop&w=400&q=80' },
+      { id: 8, word: 'artifact', ar: 'قطعة أثرية', img: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80' },
+      { id: 9, word: 'ancient', ar: 'قديم جداً', img: 'https://images.unsplash.com/photo-1541432901042-261ec9099837?auto=format&fit=crop&w=400&q=80' },
+      { id: 10, word: 'pharaoh', ar: 'فرعون', img: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80' },
+    ],
+    quiz: [
+      {
+        id: 1,
+        question: "This is an ________ statue.",
+        options: ['ancient', 'new', 'player'],
+        correct: 'ancient',
+        img: 'https://images.unsplash.com/photo-1534839187421-5a0a3821017b?auto=format&fit=crop&w=400&q=80'
+      },
+      {
+        id: 2,
+        question: "The ________ are in Egypt.",
+        options: ['pyramid', 'forest', 'market'],
+        correct: 'pyramid',
+        img: 'https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&w=400&q=80'
       }
     ]
   }
