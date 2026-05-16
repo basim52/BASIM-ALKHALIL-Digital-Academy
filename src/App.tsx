@@ -66,8 +66,8 @@ import { ReadingLesson } from './components/ReadingLesson';
 import { CreditSystem } from './components/CreditSystem';
 import { OxfordLesson } from './components/OxfordLesson';
 import { EarlyChildhoodHome } from './components/EarlyChildhood/EarlyChildhoodHome';
-
-import { Wallet } from 'lucide-react';
+import { OxfordDiscoverCompanion } from './components/OxfordDiscoverCompanion';
+import { Wallet, Layers } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { familyConstellationsLesson } from './data/lessons/r_a1_4';
 import { everydayInteractionLesson } from './data/lessons/r_a1_5';
@@ -2789,6 +2789,9 @@ export default function App() {
     if (view === 'early-childhood') {
       return <EarlyChildhoodHome lang={lang} profile={userProfile as StudentProfile} onBack={() => setView('dashboard')} />;
     }
+    if (view === 'oxford-discover') {
+      return <OxfordDiscoverCompanion lang={lang} onBack={() => setView('dashboard')} />;
+    }
     if (view === 'story-library') {
       return <StoryLibrary lang={lang} profile={userProfile} onUpdateProfile={(p) => setUserProfile(p as StudentProfile)} onNavigate={setView} />;
     }
@@ -2954,6 +2957,7 @@ export default function App() {
                     { id: 'credits', label: t.credits, icon: Wallet },
                     { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
                     { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
+                    { id: 'oxford-discover', label: t.oxfordCompanion, icon: Layers },
                     { id: 'early-childhood', label: t.earlyChildhood, icon: Baby },
                     { id: 'story-library', label: t.storyLibrary, icon: BookOpen },
                     { id: 'curriculum', label: t.curriculum, icon: BookOpen },

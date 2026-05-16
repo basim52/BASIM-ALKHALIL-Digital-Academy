@@ -235,6 +235,9 @@ export const translations = {
     listenAR: 'شرح (AR)',
     pronunciationCorrection: 'تصحيح النطق الفوري',
     fluencyScore: 'تقييم الطلاقة',
+    oxfordCompanion: 'أوكسفورد المصور',
+    unitSelection: 'اختر الوحدة الدراسية',
+    oxfordVisualBank: 'بنك الصور التعليمي - أوكسفورد 3',
   },
   en: {
     academyName: 'BASIM ALKHALIL',
@@ -470,5 +473,8 @@ export const translations = {
     listenAR: 'Explain (AR)',
     pronunciationCorrection: 'Instant Correction',
     fluencyScore: 'Fluency Score',
+    oxfordCompanion: 'Oxford Visual Companion',
+    unitSelection: 'Select Unit',
+    oxfordVisualBank: 'Oxford 3 Visual Bank',
   }
 };
