@@ -25,10 +25,10 @@ const LESSON_DATA = {
     bigQuestionAr: "كيف يستمتع الناس؟",
     vocab: [
       { id: 1, word: 'festival', ar: 'مهرجان', img: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=400&q=80' },
-      { id: 2, word: 'folk dance', ar: 'رقص شعبي', img: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'folk dance', ar: 'رقص شعبي', img: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=400&q=80' },
       { id: 3, word: 'wedding', ar: 'حفل زفاف', img: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=400&q=80' },
       { id: 4, word: 'family reunion', ar: 'لم شمل العائلة', img: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=400&q=80' },
-      { id: 5, word: 'fair', ar: 'مدينة ملاهي/معرض', img: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=400&q=80' },
+      { id: 5, word: 'fair', ar: 'مدينة ملاهي/معرض', img: 'https://images.unsplash.com/photo-1513885542373-c1c5a9632832?auto=format&fit=crop&w=400&q=80' },
       { id: 6, word: 'race', ar: 'سباق', img: 'https://images.unsplash.com/photo-1530549387074-d562463b3259?auto=format&fit=crop&w=400&q=80' },
       { id: 7, word: 'team', ar: 'فريق', img: 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=400&q=80' },
       { id: 8, word: 'winner', ar: 'فائز', img: 'https://images.unsplash.com/photo-1549439602-43ebca2327af?auto=format&fit=crop&w=400&q=80' },
@@ -56,15 +56,15 @@ const LESSON_DATA = {
     bigQuestion: "Who are the people in your life?",
     bigQuestionAr: "من هم الأشخاص في حياتك؟",
     vocab: [
-      { id: 1, word: 'parent', ar: 'والد/والدة', img: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=400&q=80' },
+      { id: 1, word: 'parent', ar: 'والد/والدة', img: 'https://images.unsplash.com/photo-1536640712247-c04fa6450803?auto=format&fit=crop&w=400&q=80' },
       { id: 2, word: 'grandmother', ar: 'جدة', img: 'https://images.unsplash.com/photo-1552554720-6379512316e6?auto=format&fit=crop&w=400&q=80' },
       { id: 3, word: 'brother', ar: 'أخ', img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80' },
       { id: 4, word: 'sister', ar: 'أخت', img: 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=400&q=80' },
-      { id: 5, word: 'uncle', ar: 'عم/خال', img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80' },
-      { id: 6, word: 'aunt', ar: 'عمة/خالة', img: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=400&q=80' },
-      { id: 7, word: 'cousin', ar: 'ابن عم/خال', img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80' },
-      { id: 8, word: 'neighbor', ar: 'جار', img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80' },
-      { id: 9, word: 'friends', ar: 'أصدقاء', img: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=400&q=80' },
+      { id: 5, word: 'uncle', ar: 'عم/خال', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80' },
+      { id: 6, word: 'aunt', ar: 'عمة/خالة', img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80' },
+      { id: 7, word: 'cousin', ar: 'ابن عم/خال', img: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80' },
+      { id: 8, word: 'neighbor', ar: 'جار', img: 'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?auto=format&fit=crop&w=400&q=80' },
+      { id: 9, word: 'friends', ar: 'أصدقاء', img: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=400&q=80' },
       { id: 10, word: 'baby', ar: 'طفل رضيع', img: 'https://images.unsplash.com/photo-1519689689253-ab9750242f77?auto=format&fit=crop&w=400&q=80' },
     ],
     quiz: [
@@ -80,7 +80,7 @@ const LESSON_DATA = {
         question: "They are ________.",
         options: ['friends', 'parents', 'enemies'],
         correct: 'friends',
-        img: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=400&q=80'
+        img: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=400&q=80'
       }
     ]
   },
@@ -125,11 +125,11 @@ const LESSON_DATA = {
       { id: 3, word: 'column', ar: 'عمود', img: 'https://images.unsplash.com/photo-1568249826372-c515a4521873?auto=format&fit=crop&w=400&q=80' },
       { id: 4, word: 'statue', ar: 'تمثال', img: 'https://images.unsplash.com/photo-1534839187421-5a0a3821017b?auto=format&fit=crop&w=400&q=80' },
       { id: 5, word: 'pyramid', ar: 'هرم', img: 'https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&w=400&q=80' },
-      { id: 6, word: 'tomb', ar: 'مقبرة/قبر', img: 'https://images.unsplash.com/photo-1534839187421-5a0a3821017b?auto=format&fit=crop&w=400&q=80' },
-      { id: 7, word: 'ruins', ar: 'أطلال', img: 'https://images.unsplash.com/photo-1461360228754-6e81c478df8b?auto=format&fit=crop&w=400&q=80' },
+      { id: 6, word: 'tomb', ar: 'مقبرة/قبر', img: 'https://images.unsplash.com/photo-1553913861-c0fddf2619ee?auto=format&fit=crop&w=400&q=80' },
+      { id: 7, word: 'ruins', ar: 'أطلال', img: 'https://images.unsplash.com/photo-1508919892451-4b8495bc441d?auto=format&fit=crop&w=400&q=80' },
       { id: 8, word: 'artifact', ar: 'قطعة أثرية', img: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80' },
-      { id: 9, word: 'ancient', ar: 'قديم جداً', img: 'https://images.unsplash.com/photo-1541432901042-261ec9099837?auto=format&fit=crop&w=400&q=80' },
-      { id: 10, word: 'pharaoh', ar: 'فرعون', img: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80' },
+      { id: 9, word: 'ancient', ar: 'قديم جداً', img: 'https://images.unsplash.com/photo-1605649405073-fdedfb89131d?auto=format&fit=crop&w=400&q=80' },
+      { id: 10, word: 'pharaoh', ar: 'فرعون', img: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=400&q=80' },
     ],
     quiz: [
       {

@@ -44,10 +44,10 @@ const UNITS = [
     color: 'bg-blue-500',
     lightColor: 'bg-blue-50',
     cards: [
-      { id: 'u2-1', en: 'Brother', ar: 'أخ', img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u2-2', en: 'Sister', ar: 'أخت', img: 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u2-3', en: 'Grandmother', ar: 'جدة', img: 'https://images.unsplash.com/photo-1492106087820-71f1a00d2b11?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u2-4', en: 'Friends', ar: 'أصدقاء', img: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u2-1', en: 'Grandmother', ar: 'جدة', img: 'https://images.unsplash.com/photo-1552554720-6379512316e6?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u2-2', en: 'Baby', ar: 'طفل رضيع', img: 'https://images.unsplash.com/photo-1519689689253-ab9750242f77?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u2-3', en: 'Neighbors', ar: 'جيران', img: 'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u2-4', en: 'Friends', ar: 'أصدقاء', img: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=400&q=80' },
     ]
   },
   {
@@ -55,13 +55,13 @@ const UNITS = [
     titleEn: 'Unit 3: Market Day',
     titleAr: 'الوحدة الثالثة: يوم في السوق',
     descriptionEn: 'Buying and selling items at the local market.',
-    descriptionAr: 'بيع وشراء الأشياء في السوق المحلي.',
+    descriptionAr: 'بيع شراء الأشياء في السوق المحلي.',
     color: 'bg-amber-500',
     lightColor: 'bg-amber-50',
     cards: [
       { id: 'u3-1', en: 'Market', ar: 'سوق', img: 'https://images.unsplash.com/photo-1533900298318-6b8da08a523e?auto=format&fit=crop&w=400&q=80' },
       { id: 'u3-2', en: 'Apples', ar: 'تفاح', img: 'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u3-3', en: 'Bread', ar: 'خبز', img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u3-3', en: 'Vendor', ar: 'بائع', img: 'https://images.unsplash.com/photo-1543083477-4f7f44aad226?auto=format&fit=crop&w=400&q=80' },
       { id: 'u3-4', en: 'Coins', ar: 'عملات', img: 'https://images.unsplash.com/photo-1534030347209-467a5b0ad3e6?auto=format&fit=crop&w=400&q=80' },
     ]
   },
@@ -75,9 +75,9 @@ const UNITS = [
     lightColor: 'bg-stone-50',
     cards: [
       { id: 'u4-1', en: 'Temple', ar: 'معبد', img: 'https://images.unsplash.com/photo-1541432901042-261ec9099837?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u4-2', en: 'History', ar: 'تاريخ', img: 'https://images.unsplash.com/photo-1461360228754-6e81c478df8b?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u4-3', en: 'Column', ar: 'عمود', img: 'https://images.unsplash.com/photo-1568249826372-c515a4521873?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u4-4', en: 'Statue', ar: 'تمثال', img: 'https://images.unsplash.com/photo-1534839187421-5a0a3821017b?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u4-2', en: 'Pyramid', ar: 'هرم', img: 'https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u4-3', en: 'Statue', ar: 'تمثال', img: 'https://images.unsplash.com/photo-1534839187421-5a0a3821017b?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u4-4', en: 'Ancient Ruins', ar: 'أطلال قديمة', img: 'https://images.unsplash.com/photo-1508919892451-4b8495bc441d?auto=format&fit=crop&w=400&q=80' },
     ]
   }
 ];
