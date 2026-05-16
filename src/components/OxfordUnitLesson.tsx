@@ -147,6 +147,326 @@ const LESSON_DATA = {
         img: 'https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&w=400&q=80'
       }
     ]
+  },
+  5: {
+    bigQuestion: "Where do animals live?",
+    bigQuestionAr: "أين تعيش الحيوانات؟",
+    vocab: [
+      { id: 1, word: 'nest', ar: 'عش', img: 'https://images.unsplash.com/photo-1549491763-715783339031?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'cave', ar: 'كهف', img: 'https://images.unsplash.com/photo-1578891086254-20510103738e?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'burrow', ar: 'جحر', img: 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?auto=format&fit=crop&w=400&q=80' },
+      { id: 4, word: 'hive', ar: 'خلية', img: 'https://images.unsplash.com/photo-1473973266408-ed4e27abdd47?auto=format&fit=crop&w=400&q=80' },
+      { id: 5, word: 'web', ar: 'شبكة', img: 'https://images.unsplash.com/photo-1510006851264-9d51ba740aa8?auto=format&fit=crop&w=400&q=80' },
+      { id: 6, word: 'ocean', ar: 'محيط', img: 'https://images.unsplash.com/photo-1505118380757-91f5f45d8da8?auto=format&fit=crop&w=400&q=80' },
+      { id: 7, word: 'forest', ar: 'غابة', img: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=400&q=80' },
+      { id: 8, word: 'desert', ar: 'صحراء', img: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=400&q=80' },
+      { id: 9, word: 'jungle', ar: 'غابة استوائية', img: 'https://images.unsplash.com/photo-1549396555-3d8420952d4c?auto=format&fit=crop&w=400&q=80' },
+      { id: 10, word: 'savanna', ar: 'سافانا', img: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=400&q=80' },
+    ],
+    quiz: [
+      {
+        id: 1,
+        question: "Bears sleep in a ________.",
+        options: ['nest', 'cave', 'hive'],
+        correct: 'cave',
+        img: 'https://images.unsplash.com/photo-1578891086254-20510103738e?auto=format&fit=crop&w=400&q=80'
+      },
+      {
+        id: 2,
+        question: "Bees live in a ________.",
+        options: ['burrow', 'hive', 'web'],
+        correct: 'hive',
+        img: 'https://images.unsplash.com/photo-1473973266408-ed4e27abdd47?auto=format&fit=crop&w=400&q=80'
+      }
+    ]
+  },
+  6: {
+    bigQuestion: "How can we help the environment?",
+    bigQuestionAr: "كيف يمكننا مساعدة البيئة؟",
+    vocab: [
+      { id: 1, word: 'recycle', ar: 'إعادة تدوير', img: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'plant', ar: 'نبتة', img: 'https://images.unsplash.com/photo-1416870230247-d0613a53047a?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'solar power', ar: 'طاقة شمسية', img: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=400&q=80' },
+      { id: 4, word: 'pollution', ar: 'تلوث', img: 'https://images.unsplash.com/photo-1526437523294-3349695ea137?auto=format&fit=crop&w=400&q=80' },
+      { id: 5, word: 'earth', ar: 'الأرض', img: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bac4?auto=format&fit=crop&w=400&q=80' },
+      { id: 6, word: 'nature', ar: 'طبيعة', img: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=400&q=80' },
+      { id: 7, word: 'forest', ar: 'غابة', img: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=400&q=80' },
+      { id: 8, word: 'water', ar: 'ماء', img: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&fit=crop&w=400&q=80' },
+      { id: 9, word: 'clean', ar: 'نظيف', img: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=400&q=80' },
+      { id: 10, word: 'garbage', ar: 'قمامة', img: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=400&q=80' },
+    ],
+    quiz: [
+      {
+        id: 1,
+        question: "Don't throw ________ on the ground.",
+        options: ['nature', 'garbage', 'clean'],
+        correct: 'garbage',
+        img: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=400&q=80'
+      },
+      {
+        id: 2,
+        question: "We must ________ paper.",
+        options: ['recycle', 'pollution', 'plant'],
+        correct: 'recycle',
+        img: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=400&q=80'
+      }
+    ]
+  },
+  7: {
+    bigQuestion: "Who are real life heroes?",
+    bigQuestionAr: "من هم الأبطال الحقيقيون؟",
+    vocab: [
+      { id: 1, word: 'firefighter', ar: 'رجل إطفاء', img: 'https://images.unsplash.com/photo-1516567727245-ad8c68f3ec93?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'doctor', ar: 'طبيب', img: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'scientist', ar: 'عالم', img: 'https://images.unsplash.com/photo-1532187875605-1ef6c237f1f1?auto=format&fit=crop&w=400&q=80' },
+      { id: 4, word: 'volunteer', ar: 'متطوع', img: 'https://images.unsplash.com/photo-1559027615-cd99c59630d6?auto=format&fit=crop&w=400&q=80' },
+      { id: 5, word: 'brave', ar: 'شجاع', img: 'https://images.unsplash.com/photo-1516567727245-ad8c68f3ec93?auto=format&fit=crop&w=400&q=80' },
+      { id: 6, word: 'help', ar: 'يساعد', img: 'https://images.unsplash.com/photo-1559027615-cd99c59630d6?auto=format&fit=crop&w=400&q=80' },
+      { id: 7, word: 'nurse', ar: 'ممرضة', img: 'https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&w=400&q=80' },
+      { id: 8, word: 'police', ar: 'شرطة', img: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=400&q=80' },
+      { id: 9, word: 'teach', ar: 'يعلم', img: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=400&q=80' },
+      { id: 10, word: 'discover', ar: 'يكتشف', img: 'https://images.unsplash.com/photo-1532187875605-1ef6c237f1f1?auto=format&fit=crop&w=400&q=80' },
+    ],
+    quiz: [
+      {
+        id: 1,
+        question: "The ________ saves people from fire.",
+        options: ['scientist', 'firefighter', 'doctor'],
+        correct: 'firefighter',
+        img: 'https://images.unsplash.com/photo-1516567727245-ad8c68f3ec93?auto=format&fit=crop&w=400&q=80'
+      },
+      {
+        id: 2,
+        question: "A ________ helps sick people.",
+        options: ['volunteer', 'doctor', 'teacher'],
+        correct: 'doctor',
+        img: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=400&q=80'
+      }
+    ]
+  },
+  8: {
+    bigQuestion: "What is delicious food?",
+    bigQuestionAr: "ما هو الطعام اللذيذ؟",
+    vocab: [
+      { id: 1, word: 'ingredients', ar: 'مكونات', img: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'recipe', ar: 'وصفة', img: 'https://images.unsplash.com/photo-1466632346940-bf69ff716dba?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'healthy', ar: 'صحي', img: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=400&q=80' },
+      { id: 4, word: 'spices', ar: 'توابل', img: 'https://images.unsplash.com/photo-1532336414038-cf19250c5757?auto=format&fit=crop&w=400&q=80' },
+      { id: 5, word: 'tasty', ar: 'لذيذ', img: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80' },
+      { id: 6, word: 'chef', ar: 'طباخ', img: 'https://images.unsplash.com/photo-1577214190288-ce525046ff6f?auto=format&fit=crop&w=400&q=80' },
+      { id: 7, word: 'vegetables', ar: 'خضروات', img: 'https://images.unsplash.com/photo-1518843875459-f738682238a6?auto=format&fit=crop&w=400&q=80' },
+      { id: 8, word: 'fruit', ar: 'فاكهة', img: 'https://images.unsplash.com/photo-1519996529931-28324d5a630e?auto=format&fit=crop&w=400&q=80' },
+      { id: 9, word: 'sugar', ar: 'سكر', img: 'https://images.unsplash.com/photo-1581441363689-1f3c3c414635?auto=format&fit=crop&w=400&q=80' },
+      { id: 10, word: 'salt', ar: 'ملح', img: 'https://images.unsplash.com/photo-1518110925495-5fe2da054255?auto=format&fit=crop&w=400&q=80' },
+    ],
+    quiz: [
+      {
+        id: 1,
+        question: "Apples are a ________.",
+        options: ['vegetable', 'fruit', 'spice'],
+        correct: 'fruit',
+        img: 'https://images.unsplash.com/photo-1519996529931-28324d5a630e?auto=format&fit=crop&w=400&q=80'
+      },
+      {
+        id: 2,
+        question: "Follow the ________ to cook.",
+        options: ['recipe', 'chef', 'salt'],
+        correct: 'recipe',
+        img: 'https://images.unsplash.com/photo-1466632346940-bf69ff716dba?auto=format&fit=crop&w=400&q=80'
+      }
+    ]
+  },
+  9: {
+    bigQuestion: "How do we travel?",
+    bigQuestionAr: "كيف نسافر؟",
+    vocab: [
+      { id: 1, word: 'airplane', ar: 'طائرة', img: 'https://images.unsplash.com/photo-1436491865332-7a61a109c7f3?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'train', ar: 'قطار', img: 'https://images.unsplash.com/photo-1474487548417-781f2f4817bd?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'ship', ar: 'سفينة', img: 'https://images.unsplash.com/photo-1494412519320-aa613dfb7738?auto=format&fit=crop&w=400&q=80' },
+      { id: 4, word: 'bicycle', ar: 'دراجة هوائية', img: 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=400&q=80' },
+      { id: 5, word: 'fast', ar: 'سريع', img: 'https://images.unsplash.com/photo-1436491865332-7a61a109c7f3?auto=format&fit=crop&w=400&q=80' },
+      { id: 6, word: 'car', ar: 'سيارة', img: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=400&q=80' },
+      { id: 7, word: 'bus', ar: 'حافلة', img: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=400&q=80' },
+      { id: 8, word: 'ticket', ar: 'تذكرة', img: 'https://images.unsplash.com/photo-1549451371-64aa98a6f660?auto=format&fit=crop&w=400&q=80' },
+      { id: 9, word: 'station', ar: 'محطة', img: 'https://images.unsplash.com/photo-1474487548417-781f2f4817bd?auto=format&fit=crop&w=400&q=80' },
+      { id: 10, word: 'airport', ar: 'مطار', img: 'https://images.unsplash.com/photo-1436491865332-7a61a109c7f3?auto=format&fit=crop&w=400&q=80' },
+    ],
+    quiz: [
+      {
+        id: 1,
+        question: "Go to the ________ to catch a train.",
+        options: ['airport', 'station', 'ship'],
+        correct: 'station',
+        img: 'https://images.unsplash.com/photo-1474487548417-781f2f4817bd?auto=format&fit=crop&w=400&q=80'
+      },
+      {
+        id: 2,
+        question: "An ________ flies in the sky.",
+        options: ['airplane', 'bus', 'car'],
+        correct: 'airplane',
+        img: 'https://images.unsplash.com/photo-1436491865332-7a61a109c7f3?auto=format&fit=crop&w=400&q=80'
+      }
+    ]
+  },
+  10: {
+    bigQuestion: "What is in outer space?",
+    bigQuestionAr: "ماذا يوجد في الفضاء الخارجي؟",
+    vocab: [
+      { id: 1, word: 'planet', ar: 'كوكب', img: 'https://images.unsplash.com/photo-1614732414444-096e5f1122d5?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'astronaut', ar: 'رائد فضاء', img: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'rocket', ar: 'صاروخ', img: 'https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&w=400&q=80' },
+      { id: 4, word: 'stars', ar: 'نجوم', img: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?auto=format&fit=crop&w=400&q=80' },
+      { id: 5, word: 'moon', ar: 'قمر', img: 'https://images.unsplash.com/photo-1522030299830-16b8d3d049fe?auto=format&fit=crop&w=400&q=80' },
+      { id: 6, word: 'sun', ar: 'شمس', img: 'https://images.unsplash.com/photo-1534353436294-0dbd4bdac845?auto=format&fit=crop&w=400&q=80' },
+      { id: 7, word: 'galaxy', ar: 'مجرة', img: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?auto=format&fit=crop&w=400&q=80' },
+      { id: 8, word: 'telescope', ar: 'تلسكوب', img: 'https://images.unsplash.com/photo-1543722530-d2c3201371e7?auto=format&fit=crop&w=400&q=80' },
+      { id: 9, word: 'spacecraft', ar: 'مركبة فضائية', img: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=400&q=80' },
+      { id: 10, word: 'alien', ar: 'فضائي', img: 'https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&w=400&q=80' },
+    ],
+    quiz: [
+      {
+        id: 1,
+        question: "The ________ is a star.",
+        options: ['sun', 'rocket', 'moon'],
+        correct: 'sun',
+        img: 'https://images.unsplash.com/photo-1534353436294-0dbd4bdac845?auto=format&fit=crop&w=400&q=80'
+      },
+      {
+        id: 2,
+        question: "An ________ goes to space.",
+        options: ['astronaut', 'alien', 'planet'],
+        correct: 'astronaut',
+        img: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=400&q=80'
+      }
+    ]
+  },
+  11: {
+    bigQuestion: "What is modern technology?",
+    bigQuestionAr: "ما هي التكنولوجيا الحديثة؟",
+    vocab: [
+      { id: 1, word: 'computer', ar: 'حاسوب', img: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'robot', ar: 'روبوت', img: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'smartphone', ar: 'هاتف ذكي', img: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80' },
+      { id: 4, word: 'internet', ar: 'إنترنت', img: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=80' },
+      { id: 5, word: 'screen', ar: 'شاشة', img: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=400&q=80' },
+      { id: 6, word: 'keyboard', ar: 'لوحة مفاتيح', img: 'https://images.unsplash.com/photo-1587829741301-dc798b83dadc?auto=format&fit=crop&w=400&q=80' },
+      { id: 7, word: 'mouse', ar: 'فأرة', img: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=400&q=80' },
+      { id: 8, word: 'app', ar: 'تطبيق', img: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=400&q=80' },
+      { id: 9, word: 'coding', ar: 'برمجة', img: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=400&q=80' },
+      { id: 10, word: 'camera', ar: 'كاميرا', img: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=400&q=80' },
+    ],
+    quiz: [
+      {
+        id: 1,
+        question: "Type on the ________.",
+        options: ['mouse', 'keyboard', 'screen'],
+        correct: 'keyboard',
+        img: 'https://images.unsplash.com/photo-1587829741301-dc798b83dadc?auto=format&fit=crop&w=400&q=80'
+      },
+      {
+        id: 2,
+        question: "A ________ can do work for us.",
+        options: ['robot', 'app', 'mouse'],
+        correct: 'robot',
+        img: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=400&q=80'
+      }
+    ]
+  },
+  12: {
+    bigQuestion: "What is the world of art?",
+    bigQuestionAr: "ما هو عالم الفن؟",
+    vocab: [
+      { id: 1, word: 'painting', ar: 'لوحة فنية', img: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'sculpture', ar: 'منحوتة', img: 'https://images.unsplash.com/photo-1554181067-56006e3bb42d?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'colors', ar: 'ألوان', img: 'https://images.unsplash.com/photo-1525909002-1b05e0c869d8?auto=format&fit=crop&w=400&q=80' },
+      { id: 4, word: 'museum', ar: 'متحف', img: 'https://images.unsplash.com/photo-1518998053502-53ec8a29b7ee?auto=format&fit=crop&w=400&q=80' },
+      { id: 5, word: 'artist', ar: 'فنان', img: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=400&q=80' },
+      { id: 6, word: 'brush', ar: 'فرشاة', img: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=400&q=80' },
+      { id: 7, word: 'draw', ar: 'يرسم', img: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=400&q=80' },
+      { id: 8, word: 'gallery', ar: 'معرض فني', img: 'https://images.unsplash.com/photo-1518998053502-53ec8a29b7ee?auto=format&fit=crop&w=400&q=80' },
+      { id: 9, word: 'pencil', ar: 'قلم رصاص', img: 'https://images.unsplash.com/photo-1516962215378-7fa2e1372cf5?auto=format&fit=crop&w=400&q=80' },
+      { id: 10, word: 'paper', ar: 'ورق', img: 'https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=400&q=80' },
+    ],
+    quiz: [
+      {
+        id: 1,
+        question: "Go to the ________ to see art.",
+        options: ['museum', 'market', 'station'],
+        correct: 'museum',
+        img: 'https://images.unsplash.com/photo-1518998053502-53ec8a29b7ee?auto=format&fit=crop&w=400&q=80'
+      },
+      {
+        id: 2,
+        question: "An ________ makes beautiful things.",
+        options: ['artist', 'player', 'vendor'],
+        correct: 'artist',
+        img: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=400&q=80'
+      }
+    ]
+  },
+  13: {
+    bigQuestion: "What is under the sea?",
+    bigQuestionAr: "ماذا يوجد تحت البحر؟",
+    vocab: [
+      { id: 1, word: 'dolphin', ar: 'دولفين', img: 'https://images.unsplash.com/photo-1570481662006-a3a1374699e8?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'coral reef', ar: 'شعاب مرجانية', img: 'https://images.unsplash.com/photo-1546026423-9d2116091386?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'whale', ar: 'حوت', img: 'https://images.unsplash.com/photo-1568430462989-44163eb1752f?auto=format&fit=crop&w=400&q=80' },
+      { id: 4, word: 'shark', ar: 'قرش', img: 'https://images.unsplash.com/photo-1560273552-32957b46c33b?auto=format&fit=crop&w=400&q=80' },
+      { id: 5, word: 'fish', ar: 'سمكة', img: 'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=400&q=80' },
+      { id: 6, word: 'water', ar: 'ماء', img: 'https://images.unsplash.com/photo-1505118380757-91f5f45d8da8?auto=format&fit=crop&w=400&q=80' },
+      { id: 7, word: 'blue', ar: 'أزرق', img: 'https://images.unsplash.com/photo-1505118380757-91f5f45d8da8?auto=format&fit=crop&w=400&q=80' },
+      { id: 8, word: 'deep', ar: 'عميق', img: 'https://images.unsplash.com/photo-1505118380757-91f5f45d8da8?auto=format&fit=crop&w=400&q=80' },
+      { id: 9, word: 'jellyfish', ar: 'قنديل البحر', img: 'https://images.unsplash.com/photo-1545671913-b89ac1b4ac10?auto=format&fit=crop&w=400&q=80' },
+      { id: 10, word: 'octopus', ar: 'أخطبوط', img: 'https://images.unsplash.com/photo-1545671913-b89ac1b4ac10?auto=format&fit=crop&w=400&q=80' },
+    ],
+    quiz: [
+      {
+        id: 1,
+        question: "A ________ is very big.",
+        options: ['fish', 'whale', 'octopus'],
+        correct: 'whale',
+        img: 'https://images.unsplash.com/photo-1568430462989-44163eb1752f?auto=format&fit=crop&w=400&q=80'
+      },
+      {
+        id: 2,
+        question: "Be careful of the ________!",
+        options: ['dolphin', 'shark', 'fish'],
+        correct: 'shark',
+        img: 'https://images.unsplash.com/photo-1560273552-32957b46c33b?auto=format&fit=crop&w=400&q=80'
+      }
+    ]
+  },
+  14: {
+    bigQuestion: "How do we stay healthy?",
+    bigQuestionAr: "كيف نبقى بصحة جيدة؟",
+    vocab: [
+      { id: 1, word: 'exercise', ar: 'تمارين', img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'vegetables', ar: 'خضروات', img: 'https://images.unsplash.com/photo-1518843875459-f738682238a6?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'water', ar: 'ماء', img: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=400&q=80' },
+      { id: 4, word: 'sleep', ar: 'نوم', img: 'https://images.unsplash.com/photo-1520206159889-623126a3375a?auto=format&fit=crop&w=400&q=80' },
+      { id: 5, word: 'strong', ar: 'قوي', img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=400&q=80' },
+      { id: 6, word: 'run', ar: 'يجري', img: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=400&q=80' },
+      { id: 7, word: 'milk', ar: 'حليب', img: 'https://images.unsplash.com/photo-1500315331616-db4f707c24d1?auto=format&fit=crop&w=400&q=80' },
+      { id: 8, word: 'fruit', ar: 'فاكهة', img: 'https://images.unsplash.com/photo-1519996529931-28324d5a630e?auto=format&fit=crop&w=400&q=80' },
+      { id: 9, word: 'wash', ar: 'يغسل', img: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=400&q=80' },
+      { id: 10, word: 'soap', ar: 'صابون', img: 'https://images.unsplash.com/photo-1584622781564-1d987f7333c1?auto=format&fit=crop&w=400&q=80' },
+    ],
+    quiz: [
+      {
+        id: 1,
+        question: "Drink plenty of ________.",
+        options: ['water', 'sugar', 'salt'],
+        correct: 'water',
+        img: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=400&q=80'
+      },
+      {
+        id: 2,
+        question: "________ helps our body.",
+        options: ['exercise', 'sleep', 'both'],
+        correct: 'both',
+        img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=400&q=80'
+      }
+    ]
   }
 };
 
@@ -245,11 +565,19 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
                        <PlayCircle className="text-blue-500" />
                        {isRtl ? 'خطة الدرس' : 'Lesson Plan'}
                     </h3>
-                    <p className="text-sm font-medium text-slate-400 mb-6 leading-relaxed">
-                       {isRtl 
-                         ? 'بدلاً من التوصيل التقليدي بالخطوط، ستقوم بربط الكلمة بالصورة المناسبة لها من خلال النقر المباشر، مما يساعد على تثبيت المعنى عقلياً مع الصورة.' 
-                         : 'Instead of traditional line matching, you will link each word to its appropriate image by clicking directly, which helps fix the meaning mentally with the visual.'}
-                    </p>
+                    <div className="flex items-start gap-4 mb-6">
+                       <p className="text-sm font-medium text-slate-400 leading-relaxed flex-1">
+                          {isRtl 
+                            ? 'بدلاً من التوصيل التقليدي بالخطوط، ستقوم بربط الكلمة بالصورة المناسبة لها من خلال النقر المباشر، مما يساعد على تثبيت المعنى عقلياً مع الصورة.' 
+                            : 'Instead of traditional line matching, you will link each word to its appropriate image by clicking directly, which helps fix the meaning mentally with the visual.'}
+                       </p>
+                       <button 
+                         onClick={() => speak(isRtl ? 'بدلاً من التوصيل التقليدي بالخطوط، ستقوم بربط الكلمة بالصورة المناسبة لها من خلال النقر المباشر، مما يساعد على تثبيت المعنى عقلياً مع الصورة.' : 'Instead of traditional line matching, you will link each word to its appropriate image by clicking directly, which helps fix the meaning mentally with the visual.', isRtl ? 'ar-SA' : 'en-US')}
+                         className="p-2 bg-blue-50 text-blue-500 rounded-lg hover:bg-blue-100 transition-colors"
+                       >
+                         <Volume2 size={16} />
+                       </button>
+                    </div>
                     <ul className="space-y-4 text-slate-500 font-bold">
                        <li className="flex items-center gap-3">
                           <CheckCircle2 className="text-emerald-500" size={18} />
