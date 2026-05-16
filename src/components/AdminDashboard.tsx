@@ -107,7 +107,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
     if (!db || !auth.currentUser) return;
     
     // Prevent unauthorized listeners that cause console errors
-    const isHardcodedAdmin = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(auth.currentUser.email || '');
+    const isHardcodedAdmin = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(auth.currentUser.email?.toLowerCase() || '');
     if (!isHardcodedAdmin) return;
     
     // Threshold: 5 minutes ago

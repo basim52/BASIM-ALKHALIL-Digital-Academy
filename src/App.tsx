@@ -2605,7 +2605,10 @@ export default function App() {
         setActiveStudentId(user.uid); // Default to own UID
         try {
           // Special case for the master admin: ensure they have admin profile even if fetch fails
-          if (['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(user.email || '')) {
+          const userEmail = (user.email || '').toLowerCase();
+          const masterAdmins = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'];
+          
+          if (masterAdmins.includes(userEmail)) {
             const adminProfile: UserProfile = {
               uid: user.uid,
               email: user.email,
@@ -2650,15 +2653,20 @@ export default function App() {
         } catch (error) {
           console.error("Auth profile fetch error:", error);
           // Only show fatal error if not the master admin (who has fallback)
-          if (!['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(user.email || '')) {
+          const userEmail = (user.email || '').toLowerCase();
+          const masterAdmins = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'];
+          
+          if (!masterAdmins.includes(userEmail)) {
             handleFirestoreError(error, OperationType.GET, `users/${user.uid}`);
           }
+        } finally {
+          setLoading(false);
         }
       } else {
         setUserProfile(null);
         setView('dashboard');
+        setLoading(false);
       }
-      setLoading(false);
     });
     return () => unsubscribe();
   }, []);
