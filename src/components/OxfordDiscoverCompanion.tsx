@@ -349,6 +349,137 @@ const UNITS = [
       { id: 'u15-3', en: 'Ice Hockey', ar: 'هوكي الجليد', img: 'https://images.unsplash.com/photo-1551323315-08e8b611867c?auto=format&fit=crop&w=400&q=80' },
       { id: 'u15-4', en: 'Athletes', ar: 'رياضيون', img: 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=400&q=80' },
     ]
+  },
+  {
+    id: 16,
+    titleEn: 'Unit 16: Earth’s Resources',
+    titleAr: 'الوحدة السادسة عشرة: موارد الأرض',
+    descriptionEn: 'Discover natural materials we use daily.',
+    descriptionAr: 'اكتشف المواد الطبيعية التي نستخدمها يومياً.',
+    color: 'bg-green-700',
+    lightColor: 'bg-green-50',
+    cards: [
+      { id: 'u16-1', en: 'Natural Gas', ar: 'غاز طبيعي', img: 'https://images.unsplash.com/photo-1518131359073-ad293c3f90ca?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u16-2', en: 'Metals', ar: 'معادن', img: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u16-3', en: 'Water Cycle', ar: 'دورة المياه', img: 'https://images.unsplash.com/photo-1473116763249-2faaef81ccda?auto=format&fit=crop&w=400&q=80' },
+    ]
+  },
+  {
+    id: 17,
+    titleEn: 'Unit 17: Life Cycles',
+    titleAr: 'الوحدة السابعة عشرة: دورات الحياة',
+    descriptionEn: 'How living things grow and change.',
+    descriptionAr: 'كيف تنمو الكائنات الحية وتتغير.',
+    color: 'bg-amber-600',
+    lightColor: 'bg-amber-50',
+    cards: [
+      { id: 'u17-1', en: 'Butterfly', ar: 'فراشة', img: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u17-2', en: 'Seedling', ar: 'شتلة', img: 'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=400&q=80' },
+    ]
+  },
+  {
+    id: 18,
+    titleEn: 'Unit 18: Maps and Globes',
+    titleAr: 'الوحدة الثامنة عشرة: الخرائط والكرات الأرضية',
+    descriptionEn: 'Reading and understanding geographical tools.',
+    descriptionAr: 'قراءة وفهم الأدوات الجغرافية.',
+    color: 'bg-blue-600',
+    lightColor: 'bg-blue-50',
+    cards: [
+      { id: 'u18-1', en: 'Continent', ar: 'قارة', img: 'https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u18-2', en: 'Compass', ar: 'بوصلة', img: 'https://images.unsplash.com/photo-1511210113110-449e25ca528d?auto=format&fit=crop&w=400&q=80' },
+    ]
+  },
+  {
+    id: 19,
+    titleEn: 'Unit 19: Energy Sources',
+    titleAr: 'الوحدة التاسعة عشرة: مصادر الطاقة',
+    descriptionEn: 'Renewable and non-renewable energy.',
+    descriptionAr: 'الطاقة المتجددة وغير المتجددة.',
+    color: 'bg-orange-600',
+    lightColor: 'bg-orange-50',
+    cards: [
+      { id: 'u19-1', en: 'Wind Turbine', ar: 'توربينات الرياح', img: 'https://images.unsplash.com/photo-1466611653911-954ffea1127b?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u19-2', en: 'Battery', ar: 'بطارية', img: 'https://images.unsplash.com/photo-1548332441-ae9459ca833b?auto=format&fit=crop&w=400&q=80' },
+    ]
+  },
+  {
+    id: 20,
+    titleEn: 'Unit 20: Animal Adaptation',
+    titleAr: 'الوحدة العشرون: تكيف الحيوانات',
+    descriptionEn: 'Surviving in harsh environments.',
+    descriptionAr: 'البقاء على قيد الحياة في البيئات القاسية.',
+    color: 'bg-rose-600',
+    lightColor: 'bg-rose-50',
+    cards: [
+      { id: 'u20-1', en: 'Camouflage', ar: 'تمويه', img: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u20-2', en: 'Polar Bear', ar: 'دب قطبي', img: 'https://images.unsplash.com/photo-1589656966895-2f33e7653819?auto=format&fit=crop&w=400&q=80' },
+    ]
+  },
+  {
+    id: 21,
+    titleEn: 'Unit 21: Weather Patterns',
+    titleAr: 'الوحدة الواحدة والعشرون: أنماط الطقس',
+    descriptionEn: 'Predicting the weather.',
+    descriptionAr: 'التنبؤ بالطقس.',
+    color: 'bg-sky-600',
+    lightColor: 'bg-sky-50',
+    cards: [
+      { id: 'u21-1', en: 'Tornado', ar: 'إعصار قمعي', img: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u21-2', en: 'Blizzard', ar: 'عاصفة ثلجية', img: 'https://images.unsplash.com/photo-1418985991508-e47386d96a71?auto=format&fit=crop&w=400&q=80' },
+    ]
+  },
+  {
+    id: 22,
+    titleEn: 'Unit 22: Gravity and Motion',
+    titleAr: 'الوحدة الثانية والعشرون: الجاذبية والحركة',
+    descriptionEn: 'Physics basics for kids.',
+    descriptionAr: 'أساسيات الفيزياء للأطفال.',
+    color: 'bg-indigo-700',
+    lightColor: 'bg-indigo-50',
+    cards: [
+      { id: 'u22-1', en: 'Gravity', ar: 'جاذبية', img: 'https://images.unsplash.com/photo-1454789548928-9efd52dc4031?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u22-2', en: 'Magnet', ar: 'مغناطيس', img: 'https://images.unsplash.com/photo-1590486803833-ffc9171e63a7?auto=format&fit=crop&w=400&q=80' },
+    ]
+  },
+  {
+    id: 23,
+    titleEn: 'Unit 23: Human Body Systems',
+    titleAr: 'الوحدة الثالثة والعشرون: أجهزة جسم الإنسان',
+    descriptionEn: 'How our bodies work.',
+    descriptionAr: 'كيف تعمل أجسامنا.',
+    color: 'bg-red-700',
+    lightColor: 'bg-red-50',
+    cards: [
+      { id: 'u23-1', en: 'Skeleton', ar: 'هيكل عظمي', img: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u23-2', en: 'Heartbeat', ar: 'نبض القلب', img: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=400&q=80' },
+    ]
+  },
+  {
+    id: 24,
+    titleEn: 'Unit 24: Simple Machines',
+    titleAr: 'الوحدة الرابعة والعشرون: الآلات البسيطة',
+    descriptionEn: 'Lever, pulley, and wheel.',
+    descriptionAr: 'الرافعة والبكرة والعجلة.',
+    color: 'bg-yellow-600',
+    lightColor: 'bg-yellow-50',
+    cards: [
+      { id: 'u24-1', en: 'Pulley', ar: 'بكرة', img: 'https://images.unsplash.com/photo-1622329760012-9214777cd362?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u24-2', en: 'Lever', ar: 'رافعة', img: 'https://images.unsplash.com/photo-1622329760012-9214777cd362?auto=format&fit=crop&w=400&q=80' },
+    ]
+  },
+  {
+    id: 25,
+    titleEn: 'Unit 25: Ecology and Food Webs',
+    titleAr: 'الوحدة الخامسة والعشرون: البيئة والشبكات الغذائية',
+    descriptionEn: 'The balance of nature.',
+    descriptionAr: 'توازن الطبيعة.',
+    color: 'bg-emerald-700',
+    lightColor: 'bg-emerald-50',
+    cards: [
+      { id: 'u25-1', en: 'Producer', ar: 'منتج', img: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u25-2', en: 'Consumer', ar: 'مستهلك', img: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=400&q=80' },
+    ]
   }
 ];
 
@@ -357,7 +488,7 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
   const isRtl = lang === 'ar';
   const [selectedUnitId, setSelectedUnitId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState<'bank' | 'lessons'>('bank');
+  const [viewMode, setViewMode] = useState<'bank' | 'lessons' | 'reading'>('bank');
   const [activeLessonId, setActiveLessonId] = useState<number | null>(null);
   const [isTraining, setIsTraining] = useState(false);
   const [trainingIndex, setTrainingIndex] = useState(0);
@@ -385,10 +516,14 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
     window.speechSynthesis.speak(utterance);
   };
 
-  const filteredUnits = UNITS.filter(unit => 
-    unit.titleEn.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    unit.titleAr.includes(searchQuery)
-  );
+  const filteredUnits = UNITS.filter(unit => {
+    const matchesSearch = unit.titleEn.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         unit.titleAr.includes(searchQuery);
+    
+    if (viewMode === 'reading') return matchesSearch && unit.id >= 15;
+    if (viewMode === 'lessons') return matchesSearch && unit.id < 15;
+    return matchesSearch;
+  });
 
   return (
     <div className={`flex-1 p-6 md:p-12 overflow-y-auto ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -429,6 +564,13 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
                 >
                   <BookOpen size={18} />
                   {isRtl ? 'الدروس التفاعلية' : 'Lessons'}
+                </button>
+                <button 
+                  onClick={() => setViewMode('reading')}
+                  className={`flex-1 md:px-6 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 ${viewMode === 'reading' ? 'bg-white text-[#002147] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  <Sparkles size={18} />
+                  {isRtl ? 'المختبر القرائي' : 'Reading Lab'}
                 </button>
               </div>
 

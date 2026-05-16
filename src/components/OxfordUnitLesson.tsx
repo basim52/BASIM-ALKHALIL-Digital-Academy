@@ -534,6 +534,218 @@ const LESSON_DATA = {
          img: 'https://images.unsplash.com/photo-1511735111819-9a3f7709049c?auto=format&fit=crop&w=400&q=80'
        }
     ]
+  },
+  16: {
+    bigQuestion: "What are Earth’s resources?",
+    bigQuestionAr: "ما هي موارد الأرض؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Earth’s Precious Resources",
+      text: "Our Earth provides us with everything we need to live. These are called natural resources. Some resources, like sunlight, wind, and water, are renewable. This means they will never run out.\n\nHowever, other resources like oil, coal, and natural gas are non-renewable. Once we use them, they are gone forever. Many of our daily items are made from Earth’s resources. For example, metals come from rocks in the ground, and plastic is made from oil.\n\nIt is important to use these resources wisely. If we recycle paper and glass, we save trees and energy. Protecting Earth’s resources ensures a better future for everyone.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'natural gas', ar: 'غاز طبيعي', img: 'https://images.unsplash.com/photo-1518131359073-ad293c3f90ca?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'metals', ar: 'معادن', img: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'recycle', ar: 'إعادة تدوير', img: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      {
+        id: 1,
+        question: "What are renewable resources?",
+        options: ["Resources that run out", "Resources like sunlight and wind that never run out", "Resources used only in winter"],
+        correct: "Resources like sunlight and wind that never run out"
+      },
+      {
+         id: 2,
+         question: "Where do metals come from?",
+         options: ["From animals", "From trees", "From rocks in the ground"],
+         correct: "From rocks in the ground"
+      }
+    ],
+    quiz: [
+       { id: 1, question: "Plastics are made from ________.", options: ['oil', 'trees', 'wind'], correct: 'oil', img: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  17: {
+    bigQuestion: "How do living things grow?",
+    bigQuestionAr: "كيف تنمو الكائنات الحية؟",
+    isReadingLesson: true,
+    reading: {
+      title: "The Cycle of Life",
+      text: "Every living thing follows a life cycle. A life cycle shows how a living thing is born, grows, and dies. For example, a butterfly starts as a tiny egg. Then it hatches into a caterpillar. After eating a lot of leaves, it makes a chrysalis. Finally, a beautiful butterfly comes out!\n\nPlants also have life cycles. They start as seeds. With water and sunlight, the seed grows into a seedling and then a full plant. The plant makes new seeds, and the cycle starts again. Life cycles help keep the world full of life.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'butterfly', ar: 'فراشة', img: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'seedling', ar: 'شتلة', img: 'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "What is the first stage of a butterfly?", options: ["Caterpillar", "Egg", "Chrysalis"], correct: "Egg" }
+    ],
+    quiz: [
+       { id: 1, question: "Plants start their life cycle as ________.", options: ['flowers', 'seeds', 'fruits'], correct: 'seeds', img: 'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  18: {
+    bigQuestion: "What help us find our way?",
+    bigQuestionAr: "ما الذي يساعدنا في العثور على طريقنا؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Exploring with Maps",
+      text: "Maps and globes help us understand where we are in the world. A globe is a round model of the Earth. It shows continents and oceans. A map is a flat drawing of a place. Maps can show a small room or the whole world.\n\nMost maps have a compass rose. It shows directions: North, South, East, and West. Using a map and a compass, explorers can find their way across mountains and seas.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'continent', ar: 'قارة', img: 'https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'compass', ar: 'بوصلة', img: 'https://images.unsplash.com/photo-1511210113110-449e25ca528d?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "What is a globe?", options: ["A flat map", "A round model of the Earth", "A type of car"], correct: "A round model of the Earth" }
+    ],
+    quiz: [
+       { id: 1, question: "A ________ shows directions like North and South.", options: ['ruler', 'compass', 'clock'], correct: 'compass', img: 'https://images.unsplash.com/photo-1511210113110-449e25ca528d?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  19: {
+    bigQuestion: "Where does energy come from?",
+    bigQuestionAr: "من أين تأتي الطاقة؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Powering Our World",
+      text: "Energy is what makes things move and work. We get energy from many sources. Some energy is renewable, like solar power from the sun and wind power from wind turbines. These are clean sources that don’t hurt the Earth.\n\nEnergy is also stored in batteries for our gadgets. We use energy to light our homes, cook our food, and drive our cars. Scientists are always looking for better ways to make energy.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'wind turbine', ar: 'توربينات الرياح', img: 'https://images.unsplash.com/photo-1466611653911-954ffea1127b?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'battery', ar: 'بطارية', img: 'https://images.unsplash.com/photo-1548332441-ae9459ca833b?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "Which is a clean energy source?", options: ["Oil", "Coal", "Solar power"], correct: "Solar power" }
+    ],
+    quiz: [
+       { id: 1, question: "We store energy in a ________ for mobile phones.", options: ['box', 'battery', 'wire'], correct: 'battery', img: 'https://images.unsplash.com/photo-1548332441-ae9459ca833b?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  20: {
+    bigQuestion: "How do animals survive?",
+    bigQuestionAr: "كيف تنجو الحيوانات؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Built for Survival",
+      text: "Animals have special features that help them survive. This is called adaptation. For example, polar bears have thick white fur to stay warm in the Arctic. Camels have humps that store fat to help them live in the desert without much water.\n\nSome animals use camouflage to hide from enemies. They look like the trees or sand around them. Adaptations help animals stay safe and find food in their habitats.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'camouflage', ar: 'تمويه', img: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'polar bear', ar: 'دب قطبي', img: 'https://images.unsplash.com/photo-1589656966895-2f33e7653819?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "What is camouflage?", options: ["A loud sound", "Hiding by looking like your surroundings", "Running fast"], correct: "Hiding by looking like your surroundings" }
+    ],
+    quiz: [
+       { id: 1, question: "A ________ lives in the cold Arctic.", options: ['camel', 'polar bear', 'lion'], correct: 'polar bear', img: 'https://images.unsplash.com/photo-1589656966895-2f33e7653819?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  21: {
+    bigQuestion: "What are weather patterns?",
+    bigQuestionAr: "ما هي أنماط الطقس؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Wild Weather",
+      text: "Weather changes every day, but sometimes it becomes extreme. A tornado is a spinning wind that can be very powerful. A blizzard is a huge snowstorm with strong winds and very cold air.\n\nWeather experts use tools to predict these patterns. Knowing the weather helps people stay safe. In some places, it rains for months, while others are dry and sunny most of the year.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'tornado', ar: 'إعصار قمعي', img: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'blizzard', ar: 'عاصفة ثلجية', img: 'https://images.unsplash.com/photo-1418985991508-e47386d96a71?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "What is a blizzard?", options: ["A heatwave", "A strong snowstorm", "A light rain"], correct: "A strong snowstorm" }
+    ],
+    quiz: [
+       { id: 1, question: "A ________ is a powerful spinning wind.", options: ['cloud', 'tornado', 'rainbow'], correct: 'tornado', img: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  22: {
+    bigQuestion: "What makes things move?",
+    bigQuestionAr: "ما الذي يجعل الأشياء تتحرك؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Moving and Pulling",
+      text: "Why does an apple fall from a tree? It’s because of gravity. Gravity is an invisible force that pulls everything down to the Earth. Without gravity, we would float in the air!\n\nMagnets are another cool force. They can pull metal objects toward them. Pushing and pulling are how we move objects every day. Understanding motion helps us build cars, planes, and rockets.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'gravity', ar: 'جاذبية', img: 'https://images.unsplash.com/photo-1454789548928-9efd52dc4031?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'magnet', ar: 'مغناطيس', img: 'https://images.unsplash.com/photo-1590486803833-ffc9171e63a7?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "What does gravity do?", options: ["Pushes things away", "Pulls everything down to Earth", "Makes things hot"], correct: "Pulls everything down to Earth" }
+    ],
+    quiz: [
+       { id: 1, question: "A ________ can pull some metals.", options: ['magnet', 'paper', 'water'], correct: 'magnet', img: 'https://images.unsplash.com/photo-1590486803833-ffc9171e63a7?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  23: {
+    bigQuestion: "How does our body work?",
+    bigQuestionAr: "كيف يعمل جسمنا؟",
+    isReadingLesson: true,
+    reading: {
+      title: "The Human Machine",
+      text: "Our body is like a busy machine. Inside us, we have a skeleton made of many bones. It gives our body shape and protects our organs. Our heart beats to pump blood all over the body.\n\nOur brain is the control center. it tells us when to eat, sleep, and run. To keep our body machine working well, we need to eat healthy food and get plenty of exercise.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'skeleton', ar: 'هيكل عظمي', img: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'heartbeat', ar: 'نبض القلب', img: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "What does the skeleton do?", options: ["Pumps blood", "Gives shape and protects organs", "Thinks for us"], correct: "Gives shape and protects organs" }
+    ],
+    quiz: [
+       { id: 1, question: "The ________ pumps blood.", options: ['leg', 'heart', 'arm'], correct: 'heart', img: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  24: {
+    bigQuestion: "What are simple machines?",
+    bigQuestionAr: "ما هي الآلات البسيطة؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Making Work Easier",
+      text: "Simple machines help us do work with less effort. A lever can help us lift heavy weights. A pulley uses a wheel and a rope to pull things up. A wheel and axle help us move heavy objects across the ground.\n\nWe see simple machines everywhere. Scissors, slides, and bicycles all use simple machines. By combining them, we can build huge cranes and fast cars.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'pulley', ar: 'بكرة', img: 'https://images.unsplash.com/photo-1622329760012-9214777cd362?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'lever', ar: 'رافعة', img: 'https://images.unsplash.com/photo-1622329760012-9214777cd362?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "What does a pulley use?", options: ["A wheel and rope", "A motor", "A key"], correct: "A wheel and rope" }
+    ],
+    quiz: [
+       { id: 1, question: "A ________ helps lift things up.", options: ['door', 'pulley', 'carpet'], correct: 'pulley', img: 'https://images.unsplash.com/photo-1622329760012-9214777cd362?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  25: {
+    bigQuestion: "What is an ecosystem?",
+    bigQuestionAr: "ما هو النظام البيئي؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Nature’s Balance",
+      text: "An ecosystem is a community where living and non-living things work together. Plants are producers because they make their own food from sunlight. Animals are consumers because they eat plants or other animals.\n\nA food web shows how energy moves from one living thing to another. If one part of the ecosystem is hurt, the whole community is affected. We must protect our ecosystems to keep the world healthy.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'producer', ar: 'منتج', img: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'consumer', ar: 'مستهلك', img: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "What is a producer in nature?", options: ["An animal", "A plant", "A rock"], correct: "A plant" }
+    ],
+    quiz: [
+       { id: 1, question: "Animals are ________ because they eat food.", options: ['producers', 'consumers', 'seeds'], correct: 'consumers', img: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=400&q=80' }
+    ]
   }
 };
 
