@@ -334,6 +334,21 @@ const UNITS = [
       { id: 'u14-3', en: 'Water', ar: 'ماء', img: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=400&q=80' },
       { id: 'u14-4', en: 'Sleep', ar: 'نوم', img: 'https://images.unsplash.com/photo-1520206159889-623126a3375a?auto=format&fit=crop&w=400&q=80' },
     ]
+  },
+  {
+    id: 15,
+    titleEn: 'Unit 1: Harbin Ice and Snow Festival',
+    titleAr: 'الوحدة الأولى: مهرجان هاربين للجليد والثلج',
+    descriptionEn: 'Reading comprehension about the famous winter festival in China.',
+    descriptionAr: 'قراءة وفهم حول مهرجان الشتاء الشهير في الصين.',
+    color: 'bg-sky-500',
+    lightColor: 'bg-sky-50',
+    cards: [
+      { id: 'u15-1', en: 'Ice Sculpture', ar: 'منحوتة جليدية', img: 'https://images.unsplash.com/photo-1516901869830-360ec31c9641?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u15-2', en: 'Ice Lantern', ar: 'فانوس جليدي', img: 'https://images.unsplash.com/photo-1547481846-95f74577264a?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u15-3', en: 'Ice Hockey', ar: 'هوكي الجليد', img: 'https://images.unsplash.com/photo-1551323315-08e8b611867c?auto=format&fit=crop&w=400&q=80' },
+      { id: 'u15-4', en: 'Athletes', ar: 'رياضيون', img: 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=400&q=80' },
+    ]
   }
 ];
 

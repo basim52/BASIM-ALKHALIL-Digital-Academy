@@ -468,6 +468,72 @@ const LESSON_DATA = {
         img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=400&q=80'
       }
     ]
+  },
+  15: {
+    bigQuestion: "What happens at the Harbin Ice and Snow Festival?",
+    bigQuestionAr: "ماذا يحدث في مهرجان هاربين للجليد والثلج؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Harbin Ice and Snow Festival",
+      text: "Harbin is a town in northeast China. In winter, it is very cold. The average temperature in January is about -18°C. Some people call Harbin the 'Ice City'.\n\nDuring the Qing Dynasty, the people in Harbin made ice lanterns. The ice lanterns were very beautiful.\n\nYears later, the people of Harbin decided to have an ice and snow festival. Artists from all over the world go to Harbin to make the sculptures. First, the artists collect piles of ice from the countryside. Then they carve the ice into buildings, gardens, flowers, dragons, and other things.\n\nThere are a lot of exciting activities during the festival. There are team competitions in ice hockey and winter swimming. There are also skiing races. If you are interested, you can see people doing folk dances and singing folk songs. There are even weddings on the ice.\n\nThere is something for everyone at the festival. There are trade fairs for buying and selling things. People from all over the world can visit the ice sculptures, enjoy the fun activities, and learn about products made in Harbin.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'athletes', ar: 'رياضيون', img: 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'bands', ar: 'فرق موسيقية', img: 'https://images.unsplash.com/photo-1511735111819-9a3f7709049c?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'championship', ar: 'بطولة', img: 'https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=400&q=80' },
+      { id: 4, word: 'envelope', ar: 'ظرف', img: 'https://images.unsplash.com/photo-1595079676339-1534801ad6cf?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      {
+        id: 1,
+        question: "Why is Harbin a good place to have an ice festival?",
+        options: ["Because it's very hot", "Because it's very cold (-18°C)", "Because it has many markets"],
+        correct: "Because it's very cold (-18°C)"
+      },
+      {
+         id: 2,
+         question: "How do artists in Harbin make ice sculptures?",
+         options: ["They buy them from shops", "They collect ice from the countryside and carve it", "They use plastic"],
+         correct: "They collect ice from the countryside and carve it"
+      },
+      {
+         id: 3,
+         question: "What competitive sports can people do in Harbin?",
+         options: ["Football and Basketball", "Ice hockey, winter swimming, and skiing", "Chess and Cards"],
+         correct: "Ice hockey, winter swimming, and skiing"
+      }
+    ],
+    quiz: [
+       {
+         id: 1,
+         question: "For the Chinese New Year, children often get money in a red ________.",
+         options: ['envelope', 'basket', 'shop'],
+         correct: 'envelope',
+         img: 'https://images.unsplash.com/photo-1595079676339-1534801ad6cf?auto=format&fit=crop&w=400&q=80'
+       },
+       {
+         id: 2,
+         question: "It's exciting to watch the World Cup soccer ________.",
+         options: ['athletes', 'championship', 'bands'],
+         correct: 'championship',
+         img: 'https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=400&q=80'
+       },
+       {
+         id: 3,
+         question: "________ from all over the world compete in the Olympic Games.",
+         options: ['athletes', 'bands', 'vendors'],
+         correct: 'athletes',
+         img: 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=400&q=80'
+       },
+       {
+         id: 4,
+         question: "Sometimes people have ________ that play music at weddings.",
+         options: ['athletes', 'bands', 'scales'],
+         correct: 'bands',
+         img: 'https://images.unsplash.com/photo-1511735111819-9a3f7709049c?auto=format&fit=crop&w=400&q=80'
+       }
+    ]
   }
 };
 
@@ -476,10 +542,35 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
   const isRtl = lang === 'ar';
   const data = LESSON_DATA[unitId as keyof typeof LESSON_DATA];
 
-  const [step, setStep] = useState<'intro' | 'matching' | 'quiz' | 'finish'>('intro');
+  const [step, setStep] = useState<'intro' | 'reading' | 'matching' | 'quiz' | 'finish'>('intro');
   const [matchingStatus, setMatchingStatus] = useState<Record<number, boolean>>({});
+  const [compAnswers, setCompAnswers] = useState<Record<number, string | null>>({});
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string | null>>({});
   const [score, setScore] = useState(0);
+
+  const isReading = (data as any)?.isReadingLesson;
+
+  const handleStart = () => {
+    if (isReading) {
+      setStep('reading');
+    } else {
+      setStep('matching');
+    }
+  };
+
+  const handleCompQuiz = (id: number, opt: string) => {
+    setCompAnswers(prev => ({ ...prev, [id]: opt }));
+    const question = (data as any).comprehension.find((q: any) => q.id === id);
+    if (opt === question.correct) {
+      speak("Correct", "en-US");
+    } else {
+      speak("Check again", "en-US");
+    }
+
+    if (Object.keys(compAnswers).length + 1 === (data as any).comprehension.length) {
+       setTimeout(() => setStep('matching'), 1500);
+    }
+  };
 
   const speak = (text: string, voiceLang: string = 'en-US') => {
     window.speechSynthesis.cancel();
@@ -598,13 +689,95 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => setStep('matching')}
+                      onClick={handleStart}
                       className="w-full bg-[#002147] text-white py-6 rounded-2xl text-xl font-black shadow-xl shadow-blue-500/20 flex items-center justify-center gap-4 group"
                     >
                       {t.oxfordStart}
                       <PlayCircle size={28} className="translate-x-0 group-hover:translate-x-2 transition-transform" />
                     </motion.button>
                  </div>
+              </div>
+            </motion.div>
+          )}
+
+          {step === 'reading' && isReading && (
+            <motion.div
+              key="reading"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-8"
+            >
+              <div className="bg-white p-8 md:p-12 rounded-[3.5rem] border border-slate-200 shadow-2xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-8">
+                     <button 
+                       onClick={() => speak((data as any).reading.text)}
+                       className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all shadow-lg group"
+                       title="Listen to Reading"
+                     >
+                       <Volume2 className="group-hover:scale-110 transition-transform" size={28} />
+                     </button>
+                  </div>
+
+                  <span className="inline-block px-4 py-1 bg-sky-100 text-sky-600 rounded-full text-[12px] font-black uppercase tracking-widest mb-6">
+                    Reading Passage
+                  </span>
+                  
+                  <h2 className="text-4xl font-black text-[#002147] mb-8">{(data as any).reading.title}</h2>
+                  
+                  <div className="prose prose-slate max-w-none">
+                     {(data as any).reading.text.split('\n\n').map((para: string, idx: number) => (
+                       <p key={idx} className="text-xl leading-relaxed text-slate-600 font-medium mb-6">
+                         {para}
+                       </p>
+                     ))}
+                  </div>
+
+                  <div className="mt-12 p-6 bg-blue-50 rounded-2xl border border-blue-100 flex justify-between items-center">
+                     <p className="text-sm font-bold text-blue-700 italic">
+                       {isRtl ? 'استمع إلى النص بتركيز ثم أجب عن الأسئلة بالأسفل.' : 'Listen to the text carefully then answer the questions below.'}
+                     </p>
+                  </div>
+              </div>
+
+              <div className="space-y-8 mt-12 mb-12">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-2xl font-black text-[#002147] flex items-center gap-3">
+                      <CheckCircle2 className="text-emerald-500" />
+                      Comprehension Quiz
+                    </h3>
+                    <div className="bg-white px-4 py-1 rounded-lg border border-slate-200 font-black text-xs">
+                      {Object.keys(compAnswers).length} / {(data as any).comprehension.length}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-6">
+                    {(data as any).comprehension.map((q: any, idx: number) => (
+                      <div key={q.id} className="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl shadow-slate-100/50">
+                        <div className="flex items-start gap-4 mb-6">
+                            <span className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-black flex-shrink-0">{idx + 1}</span>
+                            <h4 className="text-xl font-bold text-[#002147]">{q.question}</h4>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
+                            {q.options.map((opt: string) => (
+                              <button
+                                  key={opt}
+                                  onClick={() => handleCompQuiz(q.id, opt)}
+                                  className={`py-4 px-6 rounded-2xl text-left rtl:text-right font-bold transition-all border-2 ${
+                                    compAnswers[q.id] === opt
+                                      ? opt === q.correct 
+                                        ? 'bg-emerald-50 border-emerald-500 text-emerald-700' 
+                                        : 'bg-rose-50 border-rose-500 text-rose-700'
+                                      : 'bg-slate-50 border-transparent hover:border-blue-500 text-slate-500'
+                                  }`}
+                              >
+                                  {opt}
+                              </button>
+                            ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
               </div>
             </motion.div>
           )}
