@@ -245,6 +245,11 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
                        <PlayCircle className="text-blue-500" />
                        {isRtl ? 'خطة الدرس' : 'Lesson Plan'}
                     </h3>
+                    <p className="text-sm font-medium text-slate-400 mb-6 leading-relaxed">
+                       {isRtl 
+                         ? 'بدلاً من التوصيل التقليدي بالخطوط، ستقوم بربط الكلمة بالصورة المناسبة لها من خلال النقر المباشر، مما يساعد على تثبيت المعنى عقلياً مع الصورة.' 
+                         : 'Instead of traditional line matching, you will link each word to its appropriate image by clicking directly, which helps fix the meaning mentally with the visual.'}
+                    </p>
                     <ul className="space-y-4 text-slate-500 font-bold">
                        <li className="flex items-center gap-3">
                           <CheckCircle2 className="text-emerald-500" size={18} />
