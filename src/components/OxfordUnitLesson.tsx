@@ -790,6 +790,276 @@ const LESSON_DATA = {
        { id: 2, question: "A ________ shows how energy moves.", options: ['food web', 'map', 'clock'], correct: 'food web', img: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=400&q=80' },
        { id: 3, question: "Plants make food from ________.", options: ['oil', 'sunlight', 'salt'], correct: 'sunlight', img: 'https://images.unsplash.com/photo-1534353436294-0dbd4bdac845?auto=format&fit=crop&w=400&q=80' }
     ]
+  },
+  26: {
+    bigQuestion: "Why do we play games?",
+    bigQuestionAr: "لماذا نلعب الألعاب؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Playing Footbag for Fun",
+      text: "I live in Colombia, in a small town near Medellín. My town is in the Andes Mountains, about 1,500 meters above sea level. Around my town, there are large plains, deep canyons, and wide valleys.\n\nWhat do I do for fun? I play footbag. A footbag is a soft bag filled with plastic beads. Today I'm playing footbag with my friends in the park. We're playing next to a lake.\n\nThere are different ways to play footbag. The most popular is called 'circle kicking.' We stand in a circle and take turns kicking the footbag. It's not easy because the footbag can only touch your body below the knee. You have to pass the footbag to the next person in the circle, but it can't touch the ground.\n\nFootbags aren't like balls. When they fall, they don't bounce. Some of the older kids play 'freestyle footbag.' That's really hard, and you have to learn to do tricks. For now, I enjoy playing footbag with my friends.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'boa constrictor', ar: 'أفعى الأصلة العاصرة', img: 'https://images.unsplash.com/photo-1549491763-715783339031?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'toss', ar: 'رمي بخفة', img: 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'landing', ar: 'هبوط', img: 'https://images.unsplash.com/photo-1436491865332-7a61a109c7f3?auto=format&fit=crop&w=400&q=80' },
+      { id: 4, word: 'balance', ar: 'توازن', img: 'https://images.unsplash.com/photo-1518843875459-f738682238a6?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      {
+        id: 1,
+        question: "What refers to the rules of circle kicking?",
+        options: ["You must use your hands", "You must use your body below the knee", "The bag can touch the ground"],
+        correct: "You must use your body below the knee"
+      },
+      {
+         id: 2,
+         question: "What is a footbag filled with?",
+         options: ["Air", "Feathers", "Plastic beads"],
+         correct: "Plastic beads"
+      },
+      {
+         id: 3,
+         question: "Where is the town in the story located?",
+         options: ["In the Sahara Desert", "In the Andes Mountains", "On a small island"],
+         correct: "In the Andes Mountains"
+      }
+    ],
+    quiz: [
+       {
+         id: 1,
+         question: "Footbags are exactly like balls.",
+         options: ['True', 'False'],
+         correct: 'False',
+         img: 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=400&q=80'
+       },
+       {
+         id: 2,
+         question: "When footbags fall, they ________.",
+         options: ['bounce high', 'don\'t bounce', 'explode'],
+         correct: 'don\'t bounce',
+         img: 'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=400&q=80'
+       },
+       {
+         id: 3,
+         question: "A ________ can keep steady and not fall over.",
+         options: ['balance', 'toss', 'landing'],
+         correct: 'balance',
+         img: 'https://images.unsplash.com/photo-1518843875459-f738682238a6?auto=format&fit=crop&w=400&q=80'
+       }
+    ]
+  },
+  27: {
+    bigQuestion: "What is beneath our feet?",
+    bigQuestionAr: "ماذا يوجد تحت أقدامنا؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Journey to Earth's Core",
+      text: "The Earth has different layers. The layer we live on is the crust. It is like the skin of an apple. Under the crust is the mantle, which is made of hot, solid rock. Deeper still is the core. The outer core is liquid metal, and the inner core is a solid ball of iron.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'crust', ar: 'قشرة', img: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bac4?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'mantle', ar: 'وشاح', img: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bac4?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'core', ar: 'لب/نواة', img: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bac4?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "What is the Earth's hottest layer?", options: ["The crust", "The core", "The ocean"], correct: "The core" },
+      { id: 2, question: "Which layer is like apple skin?", options: ["The crust", "The mantle", "The core"], correct: "The crust" }
+    ],
+    quiz: [
+       { id: 1, question: "The Earth's ________ is solid iron.", options: ['crust', 'inner core', 'ocean'], correct: 'inner core', img: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bac4?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  28: {
+    bigQuestion: "How did people trade in the past?",
+    bigQuestionAr: "كيف كان الناس يتاجرون في الماضي؟",
+    isReadingLesson: true,
+    reading: {
+      title: "The Silk Road",
+      text: "Long ago, traders traveled thousands of miles across mountains and deserts. This network of routes was called the Silk Road. Traders from China carried silk, tea, and porcelain to the West. They returned with gold, silver, and glass. The Silk Road helped share ideas and inventions between different cultures.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'merchant', ar: 'تاجر', img: 'https://images.unsplash.com/photo-1543083477-4f7f44aad226?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'route', ar: 'طريق', img: 'https://images.unsplash.com/photo-1461360228754-6e81c478df8b?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'invention', ar: 'اختراع', img: 'https://images.unsplash.com/photo-1532187875605-1ef6c237f1f1?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "What was the Silk Road?", options: ["A single road made of silk", "A network of trade routes", "A river"], correct: "A network of trade routes" }
+    ],
+    quiz: [
+       { id: 1, question: "The Silk Road helped share ________.", options: ['sand', 'ideas and inventions', 'nothing'], correct: 'ideas and inventions', img: 'https://images.unsplash.com/photo-1461360228754-6e81c478df8b?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  29: {
+    bigQuestion: "Why do animals move?",
+    bigQuestionAr: "لماذا تتحرك الحيوانات؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Animal Migration",
+      text: "Every year, millions of animals travel long distances. This is called migration. Birds fly south for the winter to find warm weather and food. Gray whales swim thousands of miles to reach warm waters. Migration is a dangerous journey, but it helps animals survive.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'migration', ar: 'هجرة', img: 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'journey', ar: 'رحلة', img: 'https://images.unsplash.com/photo-1436491865332-7a61a109c7f3?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'survive', ar: 'ينجو', img: 'https://images.unsplash.com/photo-1589656966895-2f33e7653819?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "Why do birds fly south?", options: ["To play", "To find warm weather and food", "To hide"], correct: "To find warm weather and food" }
+    ],
+    quiz: [
+       { id: 1, question: "The seasonal movement of animals is ________.", options: ['sleeping', 'migration', 'walking'], correct: 'migration', img: 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  30: {
+    bigQuestion: "How do humans build big things?",
+    bigQuestionAr: "كيف يبني البشر أشياء كبيرة؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Wonders of Engineering",
+      text: "Engineering is about using science to solve problems and build things. Modern wonders like the Burj Khalifa or the Panama Canal required thousands of workers and huge machines. Engineers must plan everything carefully so that the buildings are safe and strong.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'engineer', ar: 'مهندس', img: 'https://images.unsplash.com/photo-1541432901042-261ec9099837?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'plan', ar: 'خطة/يخطط', img: 'https://images.unsplash.com/photo-1541432901042-261ec9099837?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'structure', ar: 'هيكل/بناء', img: 'https://images.unsplash.com/photo-1541432901042-261ec9099837?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "What do engineers use science for?", options: ["To solve problems", "To paint", "To cook"], correct: "To solve problems" }
+    ],
+    quiz: [
+       { id: 1, question: "Building a skyscraper is a feat of ________.", options: ['art', 'engineering', 'nature'], correct: 'engineering', img: 'https://images.unsplash.com/photo-1541432901042-261ec9099837?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  31: {
+    bigQuestion: "How do we remember things?",
+    bigQuestionAr: "كيف نتذكر الأشياء؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Inside Your Brain",
+      text: "The human brain is amazing. It stores memories, controls our movements, and helps us think. Different parts of the brain have different jobs. One part helps us with balance, while another part handles our feelings and memory.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'memory', ar: 'ذاكرة', img: 'https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'neuron', ar: 'عصبون', img: 'https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'processing', ar: 'معالجة', img: 'https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "What is the control center of the body?", options: ["The heart", "The brain", "The hand"], correct: "The brain" }
+    ],
+    quiz: [
+       { id: 1, question: "Your brain is the ________ of your body.", options: ['engine', 'control center', 'window'], correct: 'control center', img: 'https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  32: {
+    bigQuestion: "What is clean power?",
+    bigQuestionAr: "ما هي الطاقة النظيفة؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Renewable Energy",
+      text: "Renewable energy comes from sources that never run out. Solar panels collect energy from the sun. Wind turbines catch the wind to make electricity. These sources are better for the environment than burning coal or oil.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'solar panel', ar: 'لوحة شمسية', img: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'turbine', ar: 'توربين', img: 'https://images.unsplash.com/photo-1466611653911-954ffea1127b?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'electricity', ar: 'كهرباء', img: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "Where does solar energy come from?", options: ["The moon", "The sun", "The wind"], correct: "The sun" }
+    ],
+    quiz: [
+       { id: 1, question: "Solar panels create ________.", options: ['water', 'electricity', 'sand'], correct: 'electricity', img: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  33: {
+    bigQuestion: "What did people believe long ago?",
+    bigQuestionAr: "ماذا كان الناس يؤمنون قديماً؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Mythology and Legends",
+      text: "In the past, people told stories called myths to explain nature. They had myths about why the sun rises or why it rains. These legends were full of gods, heroes, and magical creatures. Even today, these stories are famous in books and movies.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'myth', ar: 'أسطورة', img: 'https://images.unsplash.com/photo-1605649405073-fdedfb89131d?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'god', ar: 'إله', img: 'https://images.unsplash.com/photo-1534839187421-5a0a3821017b?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'hero', ar: 'بطل', img: 'https://images.unsplash.com/photo-1516567727245-ad8c68f3ec93?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "Why did people tell myths?", options: ["To explain nature", "To sell things", "To go to sleep"], correct: "To explain nature" }
+    ],
+    quiz: [
+       { id: 1, question: "A ________ is an ancient story about gods.", options: ['newspaper', 'myth', 'email'], correct: 'myth', img: 'https://images.unsplash.com/photo-1605649405073-fdedfb89131d?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  34: {
+    bigQuestion: "What is in the deep ocean?",
+    bigQuestionAr: "ماذا يوجد في أعماق المحيط؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Life in the Dark",
+      text: "Thousands of meters below the ocean surface, it is very dark and cold. Sunlight cannot reach the deep ocean. Still, strange creatures live there. Some fish have their own lights on their bodies to find food in the dark.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'abyss', ar: 'هاوية', img: 'https://images.unsplash.com/photo-1505118380757-91f5f45d8da8?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'bioluminescence', ar: 'توهج حيوي', img: 'https://images.unsplash.com/photo-1545671913-b89ac1b4ac10?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'pressure', ar: 'ضغط', img: 'https://images.unsplash.com/photo-1505118380757-91f5f45d8da8?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "Why is it dark in the deep ocean?", options: ["The water is blue", "Sunlight cannot reach it", "Because it's winter"], correct: "Sunlight cannot reach it" }
+    ],
+    quiz: [
+       { id: 1, question: "Some deep sea fish produce their own ________.", options: ['ice', 'light', 'sand'], correct: 'light', img: 'https://images.unsplash.com/photo-1545671913-b89ac1b4ac10?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  35: {
+    bigQuestion: "Are there other worlds?",
+    bigQuestionAr: "هل هناك عوالم أخرى؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Searching for Life",
+      text: "Astronomers use giant telescopes to look at distant planets. They want to know if there is life elsewhere in space. They look for planets that have water and the right temperature. One day, we might find a new home in the stars.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'astronomer', ar: 'عالم فلك', img: 'https://images.unsplash.com/photo-1543722530-d2c3201371e7?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'distant', ar: 'بعيد', img: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'habitable', ar: 'قابل للسكن', img: 'https://images.unsplash.com/photo-1614732414444-096e5f1122d5?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "What do astronomers look for?", options: ["Life in space", "Gold", "Fish"], correct: "Life in space" }
+    ],
+    quiz: [
+       { id: 1, question: "A ________ helps see distant planets.", options: ['mirror', 'telescope', 'window'], correct: 'telescope', img: 'https://images.unsplash.com/photo-1543722530-d2c3201371e7?auto=format&fit=crop&w=400&q=80' }
+    ]
+  },
+  36: {
+    bigQuestion: "How do we behave online?",
+    bigQuestionAr: "كيف نتصرف على الإنترنت؟",
+    isReadingLesson: true,
+    reading: {
+      title: "Digital Citizenship",
+      text: "The internet is a big community. Just like in real life, we must follow rules online. We should be kind to others, keep our secrets safe, and not share our personal information with strangers. Being a good digital citizen helps everyone have a great time online.",
+      audioSource: "reading"
+    },
+    vocab: [
+      { id: 1, word: 'privacy', ar: 'خصوصية', img: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=400&q=80' },
+      { id: 2, word: 'stranger', ar: 'غريب', img: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'safety', ar: 'سلامة', img: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=400&q=80' },
+    ],
+    comprehension: [
+      { id: 1, question: "What should you not share with strangers?", options: ["Personal information", "A hello", "A game"], correct: "Personal information" }
+    ],
+    quiz: [
+       { id: 1, question: "Being ________ to others online is important.", options: ['kind', 'angry', 'mean'], correct: 'kind', img: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=400&q=80' }
+    ]
   }
 };
 

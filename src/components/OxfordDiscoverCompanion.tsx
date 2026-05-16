@@ -483,6 +483,116 @@ const UNITS = [
     ]
   },
   {
+    id: 26,
+    titleEn: 'Unit 2: Playing Footbag for Fun',
+    titleAr: 'الوحدة 2: لعبة كرة الكيس للمتعة',
+    descriptionEn: 'Read about a unique mountain game from Colombia.',
+    descriptionAr: 'اقرأ عن لعبة جبلية فريدة من نوعها من كولومبيا.',
+    color: 'bg-orange-500',
+    lightColor: 'bg-orange-50',
+    cards: []
+  },
+  {
+    id: 27,
+    titleEn: 'Unit 3: Earth\'s Deep Secrets',
+    titleAr: 'الوحدة 3: أسرار الأرض العميقة',
+    descriptionEn: 'Discover what lies beneath the Earth\'s crust.',
+    descriptionAr: 'اكتشف ما يكمن تحت قشرة الأرض.',
+    color: 'bg-red-600',
+    lightColor: 'bg-red-50',
+    cards: []
+  },
+  {
+    id: 28,
+    titleEn: 'Unit 4: The Silk Road Journey',
+    titleAr: 'الوحدة 4: رحلة طريق الحرير',
+    descriptionEn: 'Travel back in time to ancient trade routes.',
+    descriptionAr: 'سافر عبر الزمن إلى طرق التجارة القديمة.',
+    color: 'bg-amber-600',
+    lightColor: 'bg-amber-50',
+    cards: []
+  },
+  {
+    id: 29,
+    titleEn: 'Unit 5: Animal Migration',
+    titleAr: 'الوحدة 5: هجرة الحيوانات',
+    descriptionEn: 'Why do animals travel thousands of miles?',
+    descriptionAr: 'لماذا تسافر الحيوانات آلاف الأميال؟',
+    color: 'bg-green-600',
+    lightColor: 'bg-green-50',
+    cards: []
+  },
+  {
+    id: 30,
+    titleEn: 'Unit 6: Modern Wonders',
+    titleAr: 'الوحدة 6: العجائب الحديثة',
+    descriptionEn: 'Explore the greatest engineering feats of our time.',
+    descriptionAr: 'استكشف أعظم الإنجازات الهندسية في عصرنا.',
+    color: 'bg-blue-600',
+    lightColor: 'bg-blue-50',
+    cards: []
+  },
+  {
+    id: 31,
+    titleEn: 'Unit 7: The Super Brain',
+    titleAr: 'الوحدة 7: الدماغ الخارق',
+    descriptionEn: 'How our mind processes information and memory.',
+    descriptionAr: 'كيف يعالج عقلنا المعلومات والذاكرة.',
+    color: 'bg-purple-600',
+    lightColor: 'bg-purple-50',
+    cards: []
+  },
+  {
+    id: 32,
+    titleEn: 'Unit 8: Renewable Power',
+    titleAr: 'الوحدة 8: الطاقة المتجددة',
+    descriptionEn: 'Harnessing the sun, wind, and water.',
+    descriptionAr: 'تسخير الشمس والرياح والماء.',
+    color: 'bg-cyan-600',
+    lightColor: 'bg-cyan-50',
+    cards: []
+  },
+  {
+    id: 33,
+    titleEn: 'Unit 9: Ancient Myths',
+    titleAr: 'الوحدة 9: الأساطير القديمة',
+    descriptionEn: 'Stories that explained the world to our ancestors.',
+    descriptionAr: 'القصص التي شرحت العالم لأجدادنا.',
+    color: 'bg-yellow-600',
+    lightColor: 'bg-yellow-50',
+    cards: []
+  },
+  {
+    id: 34,
+    titleEn: 'Unit 10: Deep Sea Wonders',
+    titleAr: 'الوحدة 10: عجائب أعماق البحار',
+    descriptionEn: 'Creatures that live in the dark ocean depths.',
+    descriptionAr: 'مخلوقات تعيش في أعماق المحيط المظلمة.',
+    color: 'bg-indigo-700',
+    lightColor: 'bg-indigo-50',
+    cards: []
+  },
+  {
+    id: 35,
+    titleEn: 'Unit 11: Space Frontiers',
+    titleAr: 'الوحدة 11: حدود الفضاء',
+    descriptionEn: 'Searching for life on other planets.',
+    descriptionAr: 'البحث عن حياة في كواكب أخرى.',
+    color: 'bg-slate-800',
+    lightColor: 'bg-slate-50',
+    cards: []
+  },
+  {
+    id: 36,
+    titleEn: 'Unit 12: Digital Citizens',
+    titleAr: 'الوحدة 12: المواطنون الرقميون',
+    descriptionEn: 'How to stay safe and kind on the internet.',
+    descriptionAr: 'كيف تبقى آمناً ولطيفاً على الإنترنت.',
+    color: 'bg-emerald-600',
+    lightColor: 'bg-emerald-50',
+    cards: []
+  },
+  {
     id: 101,
     titleEn: 'Unit 1: Word Study - Nouns and Verbs',
     titleAr: 'الوحدة 1: دراسة الكلمات - الأسماء والأفعال',
