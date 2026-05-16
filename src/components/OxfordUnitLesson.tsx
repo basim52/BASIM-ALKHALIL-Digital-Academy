@@ -546,7 +546,7 @@ const LESSON_DATA = {
       audioSource: "reading"
     },
     vocab: [
-      { id: 1, word: 'natural gas', ar: 'غاز طبيعي', img: 'https://images.unsplash.com/photo-1518131359073-ad293c3f90ca?auto=format&fit=crop&w=400&q=80' },
+      { id: 1, word: 'natural gas', ar: 'غاز طبيعي', img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80' },
       { id: 2, word: 'metals', ar: 'معادن', img: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80' },
       { id: 3, word: 'recycle', ar: 'إعادة تدوير', img: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=400&q=80' },
     ],
@@ -562,10 +562,18 @@ const LESSON_DATA = {
          question: "Where do metals come from?",
          options: ["From animals", "From trees", "From rocks in the ground"],
          correct: "From rocks in the ground"
+      },
+      {
+         id: 3,
+         question: "Why should we recycle paper and glass?",
+         options: ["To make them look pretty", "To save trees and energy", "Because we have too much"],
+         correct: "To save trees and energy"
       }
     ],
     quiz: [
-       { id: 1, question: "Plastics are made from ________.", options: ['oil', 'trees', 'wind'], correct: 'oil', img: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=400&q=80' }
+       { id: 1, question: "Plastics are made from ________.", options: ['oil', 'trees', 'wind'], correct: 'oil', img: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=400&q=80' },
+       { id: 2, word: "________ is a non-renewable resource.", options: ['Sunlight', 'Wind', 'Natural gas'], correct: 'Natural gas', img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80' },
+       { id: 3, word: "We save ________ when we recycle paper.", options: ['plastic', 'trees', 'oil'], correct: 'trees', img: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=400&q=80' }
     ]
   },
   17: {
@@ -580,12 +588,17 @@ const LESSON_DATA = {
     vocab: [
       { id: 1, word: 'butterfly', ar: 'فراشة', img: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80' },
       { id: 2, word: 'seedling', ar: 'شتلة', img: 'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'caterpillar', ar: 'يسروع', img: 'https://images.unsplash.com/photo-1552554720-6379512316e6?auto=format&fit=crop&w=400&q=80' },
     ],
     comprehension: [
-      { id: 1, question: "What is the first stage of a butterfly?", options: ["Caterpillar", "Egg", "Chrysalis"], correct: "Egg" }
+      { id: 1, question: "What is the first stage of a butterfly?", options: ["Caterpillar", "Egg", "Chrysalis"], correct: "Egg" },
+      { id: 2, question: "What does the caterpillar do before making a chrysalis?", options: ["It sleeps", "It eats a lot of leaves", "It flies"], correct: "It eats a lot of leaves" },
+      { id: 3, question: "How do plants start their life cycle?", options: ["As fruits", "As seeds", "As flowers"], correct: "As seeds" }
     ],
     quiz: [
-       { id: 1, question: "Plants start their life cycle as ________.", options: ['flowers', 'seeds', 'fruits'], correct: 'seeds', img: 'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=400&q=80' }
+       { id: 1, question: "Plants start their life cycle as ________.", options: ['flowers', 'seeds', 'fruits'], correct: 'seeds', img: 'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=400&q=80' },
+       { id: 2, question: "A ________ hatches from a butterfly egg.", options: ['seedling', 'caterpillar', 'chrysalis'], correct: 'caterpillar', img: 'https://images.unsplash.com/photo-1552554720-6379512316e6?auto=format&fit=crop&w=400&q=80' },
+       { id: 3, question: "Seeds need ________ and sunlight to grow.", options: ['oil', 'water', 'sand'], correct: 'water', img: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&fit=crop&w=400&q=80' }
     ]
   },
   18: {
@@ -600,12 +613,17 @@ const LESSON_DATA = {
     vocab: [
       { id: 1, word: 'continent', ar: 'قارة', img: 'https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=400&q=80' },
       { id: 2, word: 'compass', ar: 'بوصلة', img: 'https://images.unsplash.com/photo-1511210113110-449e25ca528d?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'globe', ar: 'مجسم الكرة الأرضية', img: 'https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=400&q=80' },
     ],
     comprehension: [
-      { id: 1, question: "What is a globe?", options: ["A flat map", "A round model of the Earth", "A type of car"], correct: "A round model of the Earth" }
+      { id: 1, question: "What is a globe?", options: ["A flat map", "A round model of the Earth", "A type of car"], correct: "A round model of the Earth" },
+      { id: 2, question: "What does a compass rose show?", options: ["Colors", "Directions", "Prices"], correct: "Directions" },
+      { id: 3, question: "Which directions are on a compass rose?", options: ["Hot and Cold", "North, South, East, West", "Fast and Slow"], correct: "North, South, East, West" }
     ],
     quiz: [
-       { id: 1, question: "A ________ shows directions like North and South.", options: ['ruler', 'compass', 'clock'], correct: 'compass', img: 'https://images.unsplash.com/photo-1511210113110-449e25ca528d?auto=format&fit=crop&w=400&q=80' }
+       { id: 1, question: "A ________ shows directions like North and South.", options: ['ruler', 'compass', 'clock'], correct: 'compass', img: 'https://images.unsplash.com/photo-1511210113110-449e25ca528d?auto=format&fit=crop&w=400&q=80' },
+       { id: 2, question: "A ________ is a flat drawing of a place.", options: ['globe', 'map', 'book'], correct: 'map', img: 'https://images.unsplash.com/photo-1461360228754-6e81c478df8b?auto=format&fit=crop&w=400&q=80' },
+       { id: 3, question: "A globe shows ________ and oceans.", options: ['trees', 'continents', 'houses'], correct: 'continents', img: 'https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=400&q=80' }
     ]
   },
   19: {
@@ -620,12 +638,17 @@ const LESSON_DATA = {
     vocab: [
       { id: 1, word: 'wind turbine', ar: 'توربينات الرياح', img: 'https://images.unsplash.com/photo-1466611653911-954ffea1127b?auto=format&fit=crop&w=400&q=80' },
       { id: 2, word: 'battery', ar: 'بطارية', img: 'https://images.unsplash.com/photo-1548332441-ae9459ca833b?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'solar power', ar: 'طاقة شمسية', img: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=400&q=80' },
     ],
     comprehension: [
-      { id: 1, question: "Which is a clean energy source?", options: ["Oil", "Coal", "Solar power"], correct: "Solar power" }
+      { id: 1, question: "Which is a clean energy source?", options: ["Oil", "Coal", "Solar power"], correct: "Solar power" },
+      { id: 2, question: "Where is energy stored for gadgets?", options: ["In boxes", "In batteries", "In pockets"], correct: "In batteries" },
+      { id: 3, question: "What does energy do?", options: ["Makes things stop", "Makes things move and work", "Makes things cold"], correct: "Makes things move and work" }
     ],
     quiz: [
-       { id: 1, question: "We store energy in a ________ for mobile phones.", options: ['box', 'battery', 'wire'], correct: 'battery', img: 'https://images.unsplash.com/photo-1548332441-ae9459ca833b?auto=format&fit=crop&w=400&q=80' }
+       { id: 1, question: "We store energy in a ________ for mobile phones.", options: ['box', 'battery', 'wire'], correct: 'battery', img: 'https://images.unsplash.com/photo-1548332441-ae9459ca833b?auto=format&fit=crop&w=400&q=80' },
+       { id: 2, question: "________ power comes from the sun.", options: ['Wind', 'Solar', 'Coal'], correct: 'Solar', img: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=400&q=80' },
+       { id: 3, question: "Wind ________ produce energy from wind.", options: ['turbines', 'cars', 'clocks'], correct: 'turbines', img: 'https://images.unsplash.com/photo-1466611653911-954ffea1127b?auto=format&fit=crop&w=400&q=80' }
     ]
   },
   20: {
@@ -640,12 +663,17 @@ const LESSON_DATA = {
     vocab: [
       { id: 1, word: 'camouflage', ar: 'تمويه', img: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=400&q=80' },
       { id: 2, word: 'polar bear', ar: 'دب قطبي', img: 'https://images.unsplash.com/photo-1589656966895-2f33e7653819?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'hump', ar: 'سنام', img: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=400&q=80' },
     ],
     comprehension: [
-      { id: 1, question: "What is camouflage?", options: ["A loud sound", "Hiding by looking like your surroundings", "Running fast"], correct: "Hiding by looking like your surroundings" }
+      { id: 1, question: "What is camouflage?", options: ["A loud sound", "Hiding by looking like your surroundings", "Running fast"], correct: "Hiding by looking like your surroundings" },
+      { id: 2, question: "Why do polar bears have thick white fur?", options: ["To stay cool", "To stay warm and hide in the snow", "To look scary"], correct: "To stay warm and hide in the snow" },
+      { id: 3, question: "What is adaptation?", options: ["Eating food", "Special features for survival", "Sleeping all day"], correct: "Special features for survival" }
     ],
     quiz: [
-       { id: 1, question: "A ________ lives in the cold Arctic.", options: ['camel', 'polar bear', 'lion'], correct: 'polar bear', img: 'https://images.unsplash.com/photo-1589656966895-2f33e7653819?auto=format&fit=crop&w=400&q=80' }
+       { id: 1, question: "A ________ lives in the cold Arctic.", options: ['camel', 'polar bear', 'lion'], correct: 'polar bear', img: 'https://images.unsplash.com/photo-1589656966895-2f33e7653819?auto=format&fit=crop&w=400&q=80' },
+       { id: 2, question: "Camels have ________ to store fat.", options: ['fur', 'humps', 'wings'], correct: 'humps', img: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=400&q=80' },
+       { id: 3, question: "Some animals use ________ to hide from enemies.", options: ['running', 'camouflage', 'singing'], correct: 'camouflage', img: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=400&q=80' }
     ]
   },
   21: {
@@ -660,12 +688,17 @@ const LESSON_DATA = {
     vocab: [
       { id: 1, word: 'tornado', ar: 'إعصار قمعي', img: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=400&q=80' },
       { id: 2, word: 'blizzard', ar: 'عاصفة ثلجية', img: 'https://images.unsplash.com/photo-1418985991508-e47386d96a71?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'prediction', ar: 'تنبؤ', img: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=400&q=80' },
     ],
     comprehension: [
-      { id: 1, question: "What is a blizzard?", options: ["A heatwave", "A strong snowstorm", "A light rain"], correct: "A strong snowstorm" }
+      { id: 1, question: "What is a blizzard?", options: ["A heatwave", "A strong snowstorm", "A light rain"], correct: "A strong snowstorm" },
+      { id: 2, question: "What do weather experts do?", options: ["Make weather", "Predict weather patterns", "Stop tornadoes"], correct: "Predict weather patterns" },
+      { id: 3, question: "What is a tornado?", options: ["Heavy rain", "Powerful spinning wind", "Falling snow"], correct: "Powerful spinning wind" }
     ],
     quiz: [
-       { id: 1, question: "A ________ is a powerful spinning wind.", options: ['cloud', 'tornado', 'rainbow'], correct: 'tornado', img: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=400&q=80' }
+       { id: 1, question: "A ________ is a powerful spinning wind.", options: ['cloud', 'tornado', 'rainbow'], correct: 'tornado', img: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=400&q=80' },
+       { id: 2, question: "A ________ has strong winds and huge snow.", options: ['blizzard', 'sun', 'rain'], correct: 'blizzard', img: 'https://images.unsplash.com/photo-1418985991508-e47386d96a71?auto=format&fit=crop&w=400&q=80' },
+       { id: 3, question: "Knowing the weather helps people stay ________.", options: ['wet', 'safe', 'lost'], correct: 'safe', img: 'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=400&q=80' }
     ]
   },
   22: {
@@ -680,12 +713,17 @@ const LESSON_DATA = {
     vocab: [
       { id: 1, word: 'gravity', ar: 'جاذبية', img: 'https://images.unsplash.com/photo-1454789548928-9efd52dc4031?auto=format&fit=crop&w=400&q=80' },
       { id: 2, word: 'magnet', ar: 'مغناطيس', img: 'https://images.unsplash.com/photo-1590486803833-ffc9171e63a7?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'force', ar: 'قوة', img: 'https://images.unsplash.com/photo-1454789548928-9efd52dc4031?auto=format&fit=crop&w=400&q=80' },
     ],
     comprehension: [
-      { id: 1, question: "What does gravity do?", options: ["Pushes things away", "Pulls everything down to Earth", "Makes things hot"], correct: "Pulls everything down to Earth" }
+      { id: 1, question: "What does gravity do?", options: ["Pushes things away", "Pulls everything down to Earth", "Makes things hot"], correct: "Pulls everything down to Earth" },
+      { id: 2, question: "What can magnets pull?", options: ["Water", "Metal objects", "Plastic"], correct: "Metal objects" },
+      { id: 3, question: "What would happen without gravity?", options: ["We would float", "We would run fast", "We would be heavy"], correct: "We would float" }
     ],
     quiz: [
-       { id: 1, question: "A ________ can pull some metals.", options: ['magnet', 'paper', 'water'], correct: 'magnet', img: 'https://images.unsplash.com/photo-1590486803833-ffc9171e63a7?auto=format&fit=crop&w=400&q=80' }
+       { id: 1, question: "A ________ can pull some metals.", options: ['magnet', 'paper', 'water'], correct: 'magnet', img: 'https://images.unsplash.com/photo-1590486803833-ffc9171e63a7?auto=format&fit=crop&w=400&q=80' },
+       { id: 2, question: "________ pulls apples down from trees.", options: ['Wind', 'Gravity', 'Sun'], correct: 'Gravity', img: 'https://images.unsplash.com/photo-1454789548928-9efd52dc4031?auto=format&fit=crop&w=400&q=80' },
+       { id: 3, question: "Pushing and ________ are how we move objects.", options: ['looking', 'pulling', 'sleeping'], correct: 'pulling', img: 'https://images.unsplash.com/photo-1518843875459-f738682238a6?auto=format&fit=crop&w=400&q=80' }
     ]
   },
   23: {
@@ -700,12 +738,17 @@ const LESSON_DATA = {
     vocab: [
       { id: 1, word: 'skeleton', ar: 'هيكل عظمي', img: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=80' },
       { id: 2, word: 'heartbeat', ar: 'نبض القلب', img: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'brain', ar: 'دماغ', img: 'https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&w=400&q=80' },
     ],
     comprehension: [
-      { id: 1, question: "What does the skeleton do?", options: ["Pumps blood", "Gives shape and protects organs", "Thinks for us"], correct: "Gives shape and protects organs" }
+      { id: 1, question: "What does the skeleton do?", options: ["Pumps blood", "Gives shape and protects organs", "Thinks for us"], correct: "Gives shape and protects organs" },
+      { id: 2, question: "Which organ is the control center?", options: ["Heart", "Brain", "Leg"], correct: "Brain" },
+      { id: 3, question: "Why does the heart beat?", options: ["To make sound", "To pump blood", "To protect bones"], correct: "To pump blood" }
     ],
     quiz: [
-       { id: 1, question: "The ________ pumps blood.", options: ['leg', 'heart', 'arm'], correct: 'heart', img: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=400&q=80' }
+       { id: 1, question: "The ________ pumps blood.", options: ['leg', 'heart', 'arm'], correct: 'heart', img: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=400&q=80' },
+       { id: 2, question: "Our ________ is the control center.", options: ['brain', 'skin', 'hair'], correct: 'brain', img: 'https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&w=400&q=80' },
+       { id: 3, question: "Bones make up our ________.", options: ['heart', 'skeleton', 'shoes'], correct: 'skeleton', img: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=80' }
     ]
   },
   24: {
@@ -720,12 +763,17 @@ const LESSON_DATA = {
     vocab: [
       { id: 1, word: 'pulley', ar: 'بكرة', img: 'https://images.unsplash.com/photo-1622329760012-9214777cd362?auto=format&fit=crop&w=400&q=80' },
       { id: 2, word: 'lever', ar: 'رافعة', img: 'https://images.unsplash.com/photo-1622329760012-9214777cd362?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'wheel', ar: 'عجلة', img: 'https://images.unsplash.com/photo-1622329760012-9214777cd362?auto=format&fit=crop&w=400&q=80' },
     ],
     comprehension: [
-      { id: 1, question: "What does a pulley use?", options: ["A wheel and rope", "A motor", "A key"], correct: "A wheel and rope" }
+      { id: 1, question: "What does a pulley use?", options: ["A wheel and rope", "A motor", "A key"], correct: "A wheel and rope" },
+      { id: 2, question: "How do simple machines help us?", options: ["They make us tired", "They help us do work with less effort", "They look cool"], correct: "They help us do work with less effort" },
+      { id: 3, question: "Which of these is a simple machine?", options: ["A lever", "A computer", "A tree"], correct: "A lever" }
     ],
     quiz: [
-       { id: 1, question: "A ________ helps lift things up.", options: ['door', 'pulley', 'carpet'], correct: 'pulley', img: 'https://images.unsplash.com/photo-1622329760012-9214777cd362?auto=format&fit=crop&w=400&q=80' }
+       { id: 1, question: "A ________ helps lift things up.", options: ['door', 'pulley', 'carpet'], correct: 'pulley', img: 'https://images.unsplash.com/photo-1622329760012-9214777cd362?auto=format&fit=crop&w=400&q=80' },
+       { id: 2, question: "We see simple machines in ________.", options: ['scissors', 'water', 'clouds'], correct: 'scissors', img: 'https://images.unsplash.com/photo-1549491763-715783339031?auto=format&fit=crop&w=400&q=80' },
+       { id: 3, question: "A ________ can help us lift heavy weights.", options: ['lever', 'pencil', 'shoe'], correct: 'lever', img: 'https://images.unsplash.com/photo-1622329760012-9214777cd362?auto=format&fit=crop&w=400&q=80' }
     ]
   },
   25: {
@@ -740,12 +788,17 @@ const LESSON_DATA = {
     vocab: [
       { id: 1, word: 'producer', ar: 'منتج', img: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=400&q=80' },
       { id: 2, word: 'consumer', ar: 'مستهلك', img: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=400&q=80' },
+      { id: 3, word: 'food web', ar: 'شبكة غذائية', img: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=400&q=80' },
     ],
     comprehension: [
-      { id: 1, question: "What is a producer in nature?", options: ["An animal", "A plant", "A rock"], correct: "A plant" }
+      { id: 1, question: "What is a producer in nature?", options: ["An animal", "A plant", "A rock"], correct: "A plant" },
+      { id: 2, question: "What is an ecosystem?", options: ["A type of car", "A community of living and non-living things", "A solo animal"], correct: "A community of living and non-living things" },
+      { id: 3, question: "Why are animals called consumers?", options: ["Because they make food", "Because they eat plants or other animals", "Because they sleep"], correct: "Because they eat plants or other animals" }
     ],
     quiz: [
-       { id: 1, question: "Animals are ________ because they eat food.", options: ['producers', 'consumers', 'seeds'], correct: 'consumers', img: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=400&q=80' }
+       { id: 1, question: "Animals are ________ because they eat food.", options: ['producers', 'consumers', 'seeds'], correct: 'consumers', img: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=400&q=80' },
+       { id: 2, question: "A ________ shows how energy moves.", options: ['food web', 'map', 'clock'], correct: 'food web', img: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=400&q=80' },
+       { id: 3, question: "Plants make food from ________.", options: ['oil', 'sunlight', 'salt'], correct: 'sunlight', img: 'https://images.unsplash.com/photo-1534353436294-0dbd4bdac845?auto=format&fit=crop&w=400&q=80' }
     ]
   }
 };
@@ -889,34 +942,61 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
                  <div className="bg-white p-8 rounded-[2rem] border border-slate-200 text-left rtl:text-right">
                     <h3 className="text-xl font-black text-[#002147] mb-4 flex items-center gap-3">
                        <PlayCircle className="text-blue-500" />
-                       {isRtl ? 'خطة الدرس' : 'Lesson Plan'}
+                       {isReading 
+                         ? (isRtl ? 'أهداف المختبر القرائي' : 'Reading Lab Goals')
+                         : (isRtl ? 'خطة الدرس' : 'Lesson Plan')}
                     </h3>
                     <div className="flex items-start gap-4 mb-6">
                        <p className="text-sm font-medium text-slate-400 leading-relaxed flex-1">
-                          {isRtl 
-                            ? 'بدلاً من التوصيل التقليدي بالخطوط، ستقوم بربط الكلمة بالصورة المناسبة لها من خلال النقر المباشر، مما يساعد على تثبيت المعنى عقلياً مع الصورة.' 
-                            : 'Instead of traditional line matching, you will link each word to its appropriate image by clicking directly, which helps fix the meaning mentally with the visual.'}
+                          {isReading
+                            ? (isRtl 
+                                ? 'في هذا المختبر الحصري، سنمر برحلة قرائية متكاملة: من قراءة النص بذكاء، استخراج المفردات المفتاحية، وصولاً إلى تحليل النص بعمق لضمان الفهم الشامل.'
+                                : 'In this exclusive lab, we will go through an integrated reading journey: from reading the text smartly, extracting key vocabulary, to deep text analysis for comprehensive understanding.')
+                            : (isRtl 
+                                ? 'بدلاً من التوصيل التقليدي بالخطوط، ستقوم بربط الكلمة بالصورة المناسبة لها من خلال النقر المباشر، مما يساعد على تثبيت المعنى عقلياً مع الصورة.' 
+                                : 'Instead of traditional line matching, you will link each word to its appropriate image by clicking directly, which helps fix the meaning mentally with the visual.')}
                        </p>
                        <button 
-                         onClick={() => speak(isRtl ? 'بدلاً من التوصيل التقليدي بالخطوط، ستقوم بربط الكلمة بالصورة المناسبة لها من خلال النقر المباشر، مما يساعد على تثبيت المعنى عقلياً مع الصورة.' : 'Instead of traditional line matching, you will link each word to its appropriate image by clicking directly, which helps fix the meaning mentally with the visual.', isRtl ? 'ar-SA' : 'en-US')}
+                         onClick={() => speak(isReading 
+                           ? (isRtl ? 'في هذا المختبر الحصري، سنمر برحلة قرائية متكاملة: من قراءة النص بذكاء، استخراج المفردات المفتاحية، وصولاً إلى تحليل النص بعمق لضمان الفهم الشامل.' : 'In this exclusive lab, we will go through an integrated reading journey: from reading the text smartly, extracting key vocabulary, to deep text analysis for comprehensive understanding.')
+                           : (isRtl ? 'بدلاً من التوصيل التقليدي بالخطوط، ستقوم بربط الكلمة بالصورة المناسبة لها من خلال النقر المباشر، مما يساعد على تثبيت المعنى عقلياً مع الصورة.' : 'Instead of traditional line matching, you will link each word to its appropriate image by clicking directly, which helps fix the meaning mentally with the visual.'), isRtl ? 'ar-SA' : 'en-US')}
                          className="p-2 bg-blue-50 text-blue-500 rounded-lg hover:bg-blue-100 transition-colors"
                        >
                          <Volume2 size={16} />
                        </button>
                     </div>
                     <ul className="space-y-4 text-slate-500 font-bold">
-                       <li className="flex items-center gap-3">
-                          <CheckCircle2 className="text-emerald-500" size={18} />
-                          {isRtl ? 'تعلم المفردات الأساسية' : 'Learn key vocabulary'}
-                       </li>
-                       <li className="flex items-center gap-3">
-                          <CheckCircle2 className="text-emerald-500" size={18} />
-                          {isRtl ? 'نشاط مطابقة الصور' : 'Matching activity'}
-                       </li>
-                       <li className="flex items-center gap-3">
-                          <CheckCircle2 className="text-emerald-500" size={18} />
-                          {isRtl ? 'اختيار الإجابة الصحيحة' : 'Circle the correct answer'}
-                       </li>
+                       {isReading ? (
+                         <>
+                          <li className="flex items-center gap-3">
+                              <CheckCircle2 className="text-sky-500" size={18} />
+                              {isRtl ? 'تحليل النص القرائي' : 'Reading Text Analysis'}
+                          </li>
+                          <li className="flex items-center gap-3">
+                              <CheckCircle2 className="text-sky-500" size={18} />
+                              {isRtl ? 'مختبر المفردات المفتاحية' : 'Key Vocabulary Lab'}
+                          </li>
+                          <li className="flex items-center gap-3">
+                              <CheckCircle2 className="text-sky-500" size={18} />
+                              {isRtl ? 'اختبار الفهم والاستيعاب' : 'Comprehension Mastery Quiz'}
+                          </li>
+                         </>
+                       ) : (
+                         <>
+                          <li className="flex items-center gap-3">
+                             <CheckCircle2 className="text-emerald-500" size={18} />
+                             {isRtl ? 'تعلم المفردات الأساسية' : 'Learn key vocabulary'}
+                          </li>
+                          <li className="flex items-center gap-3">
+                             <CheckCircle2 className="text-emerald-500" size={18} />
+                             {isRtl ? 'نشاط مطابقة الصور' : 'Matching activity'}
+                          </li>
+                          <li className="flex items-center gap-3">
+                             <CheckCircle2 className="text-emerald-500" size={18} />
+                             {isRtl ? 'اختيار الإجابة الصحيحة' : 'Circle the correct answer'}
+                          </li>
+                         </>
+                       )}
                     </ul>
                  </div>
                  <div className="flex flex-col justify-center items-center p-8">
@@ -1029,7 +1109,9 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
             >
               <div className="flex items-center justify-between mb-8">
                  <div>
-                    <h2 className="text-3xl font-black text-[#002147]">A. {t.oxfordMatchWords}</h2>
+                    <h2 className="text-3xl font-black text-[#002147]">
+                      {isReading ? (isRtl ? 'أ. مختبر المفردات' : 'A. Vocabulary Lab') : `A. ${t.oxfordMatchWords}`}
+                    </h2>
                     <p className="text-slate-400 font-bold">{isRtl ? 'انقر على الصورة الصحيحة للكلمة' : 'Click the correct image for each word'}</p>
                  </div>
                  <div className="bg-white px-5 py-2 rounded-xl border border-slate-200">
@@ -1100,7 +1182,9 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
                     <HelpCircle size={28} />
                  </div>
                  <div>
-                    <h2 className="text-3xl font-black text-[#002147]">B. {t.oxfordQuizTime}</h2>
+                    <h2 className="text-3xl font-black text-[#002147]">
+                      {isReading ? (isRtl ? 'ب. تحليل النص' : 'B. Text Analysis Lab') : `B. ${t.oxfordQuizTime}`}
+                    </h2>
                     <p className="text-slate-400 font-bold">{isRtl ? 'اختر الإجابة الصحيحة بناءً على الصورة' : 'Choose the correct answer based on the picture'}</p>
                  </div>
               </div>
