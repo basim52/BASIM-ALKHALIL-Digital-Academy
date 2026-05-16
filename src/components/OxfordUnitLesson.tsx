@@ -970,31 +970,54 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
                  <div className="bg-white p-8 rounded-[2rem] border border-slate-200 text-left rtl:text-right">
                     <h3 className="text-xl font-black text-[#002147] mb-4 flex items-center gap-3">
                        <PlayCircle className="text-blue-500" />
-                       {isReading 
-                         ? (isRtl ? 'أهداف المختبر القرائي' : 'Reading Lab Goals')
-                         : (isRtl ? 'خطة الدرس' : 'Lesson Plan')}
+                       {isLanguageLab 
+                         ? (isRtl ? 'أهداف مختبر اللغة' : 'Language Lab Goals')
+                         : isReading 
+                           ? (isRtl ? 'أهداف المختبر القرائي' : 'Reading Lab Goals')
+                           : (isRtl ? 'خطة الدرس' : 'Lesson Plan')}
                     </h3>
                     <div className="flex items-start gap-4 mb-6">
                        <p className="text-sm font-medium text-slate-400 leading-relaxed flex-1">
-                          {isReading
+                          {isLanguageLab
                             ? (isRtl 
-                                ? 'في هذا المختبر الحصري، سنمر برحلة قرائية متكاملة: من قراءة النص بذكاء، استخراج المفردات المفتاحية، وصولاً إلى تحليل النص بعمق لضمان الفهم الشامل.'
-                                : 'In this exclusive lab, we will go through an integrated reading journey: from reading the text smartly, extracting key vocabulary, to deep text analysis for comprehensive understanding.')
-                            : (isRtl 
-                                ? 'بدلاً من التوصيل التقليدي بالخطوط، ستقوم بربط الكلمة بالصورة المناسبة لها من خلال النقر المباشر، مما يساعد على تثبيت المعنى عقلياً مع الصورة.' 
-                                : 'Instead of traditional line matching, you will link each word to its appropriate image by clicking directly, which helps fix the meaning mentally with the visual.')}
+                                ? 'مرحباً بك في مختبر اللغة. هنا سنقوم بتحليل أسرار اللغة، من دراسة وظائف الكلمات كأفعال أو أسماء، وصولاً إلى إتقان القواعد المعقدة وبناء أساس قوي في التعبير اللغوي.'
+                                : 'Welcome to the Language Lab. Here we will analyze the secrets of language, from studying word functions as verbs or nouns, to mastering complex grammar and building a strong foundation in linguistic expression.')
+                            : isReading
+                              ? (isRtl 
+                                  ? 'في هذا المختبر الحصري، سنمر برحلة قرائية متكاملة: من قراءة النص بذكاء، استخراج المفردات المفتاحية، وصولاً إلى تحليل النص بعمق لضمان الفهم الشامل.'
+                                  : 'In this exclusive lab, we will go through an integrated reading journey: from reading the text smartly, extracting key vocabulary, to deep text analysis for comprehensive understanding.')
+                              : (isRtl 
+                                  ? 'بدلاً من التوصيل التقليدي بالخطوط، ستقوم بربط الكلمة بالصورة المناسبة لها من خلال النقر المباشر، مما يساعد على تثبيت المعنى عقلياً مع الصورة.' 
+                                  : 'Instead of traditional line matching, you will link each word to its appropriate image by clicking directly, which helps fix the meaning mentally with the visual.')}
                        </p>
                        <button 
-                         onClick={() => speak(isReading 
-                           ? (isRtl ? 'في هذا المختبر الحصري، سنمر برحلة قرائية متكاملة: من قراءة النص بذكاء، استخراج المفردات المفتاحية، وصولاً إلى تحليل النص بعمق لضمان الفهم الشامل.' : 'In this exclusive lab, we will go through an integrated reading journey: from reading the text smartly, extracting key vocabulary, to deep text analysis for comprehensive understanding.')
-                           : (isRtl ? 'بدلاً من التوصيل التقليدي بالخطوط، ستقوم بربط الكلمة بالصورة المناسبة لها من خلال النقر المباشر، مما يساعد على تثبيت المعنى عقلياً مع الصورة.' : 'Instead of traditional line matching, you will link each word to its appropriate image by clicking directly, which helps fix the meaning mentally with the visual.'), isRtl ? 'ar-SA' : 'en-US')}
+                         onClick={() => speak(isLanguageLab
+                           ? (isRtl ? 'مرحباً بك في مختبر اللغة. هنا سنقوم بتحليل أسرار اللغة، من دراسة وظائف الكلمات كأفعال أو أسماء، وصولاً إلى إتقان القواعد المعقدة وبناء أساس قوي في التعبير اللغوي.' : 'Welcome to the Language Lab. Here we will analyze the secrets of language, from studying word functions as verbs or nouns, to mastering complex grammar and building a strong foundation in linguistic expression.')
+                           : isReading 
+                             ? (isRtl ? 'في هذا المختبر الحصري، سنمر برحلة قرائية متكاملة: من قراءة النص بذكاء، استخراج المفردات المفتاحية، وصولاً إلى تحليل النص بعمق لضمان الفهم الشامل.' : 'In this exclusive lab, we will go through an integrated reading journey: from reading the text smartly, extracting key vocabulary, to deep text analysis for comprehensive understanding.')
+                             : (isRtl ? 'بدلاً من التوصيل التقليدي بالخطوط، ستقوم بربط الكلمة بالصورة المناسبة لها من خلال النقر المباشر، مما يساعد على تثبيت المعنى عقلياً مع الصورة.' : 'Instead of traditional line matching, you will link each word to its appropriate image by clicking directly, which helps fix the meaning mentally with the visual.'), isRtl ? 'ar-SA' : 'en-US')}
                          className="p-2 bg-blue-50 text-blue-500 rounded-lg hover:bg-blue-100 transition-colors"
                        >
                          <Volume2 size={16} />
                        </button>
                     </div>
                     <ul className="space-y-4 text-slate-500 font-bold">
-                       {isReading ? (
+                       {isLanguageLab ? (
+                         <>
+                          <li className="flex items-center gap-3">
+                              <CheckCircle2 className="text-indigo-500" size={18} />
+                              {isRtl ? 'دراسة المفاهيم اللغوية' : 'Language Concept Study'}
+                          </li>
+                          <li className="flex items-center gap-3">
+                              <CheckCircle2 className="text-indigo-500" size={18} />
+                              {isRtl ? 'أمثلة تطبيقية واقعية' : 'Real-world Examples'}
+                          </li>
+                          <li className="flex items-center gap-3">
+                              <CheckCircle2 className="text-indigo-500" size={18} />
+                              {isRtl ? 'تدريبات لغوية تفاعلية' : 'Interactive Drills'}
+                          </li>
+                         </>
+                       ) : isReading ? (
                          <>
                           <li className="flex items-center gap-3">
                               <CheckCircle2 className="text-sky-500" size={18} />
