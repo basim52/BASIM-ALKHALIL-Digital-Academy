@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations, Language } from '../lib/translations';
+import { OxfordUnitLesson } from './OxfordUnitLesson';
 import { 
   ArrowLeft, 
   Image as ImageIcon, 
@@ -9,7 +10,8 @@ import {
   ChevronRight,
   Sparkles,
   Layers,
-  BookOpen
+  BookOpen,
+  PlayCircle
 } from 'lucide-react';
 
 interface OxfordDiscoverCompanionProps {
@@ -85,8 +87,14 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
   const isRtl = lang === 'ar';
   const [selectedUnitId, setSelectedUnitId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<'bank' | 'lessons'>('bank');
+  const [activeLessonId, setActiveLessonId] = useState<number | null>(null);
 
   const selectedUnit = UNITS.find(u => u.id === selectedUnitId);
+
+  if (activeLessonId) {
+    return <OxfordUnitLesson lang={lang} unitId={activeLessonId} onBack={() => setActiveLessonId(null)} />;
+  }
 
   const speak = (text: string, voiceLang: string) => {
     window.speechSynthesis.cancel();
@@ -109,7 +117,7 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
         </button>
 
         <header className="mb-12">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <div className="bg-[#002147] p-3 rounded-2xl text-white shadow-lg">
@@ -119,20 +127,39 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
               </div>
               <p className="text-slate-400 font-medium text-lg max-w-2xl">
                 {isRtl 
-                  ? 'بنك الصور التعليمي المصاحب لمنهج Oxford Discover 3، يساعدك على ربط الكلمات بالصور بطريقة تفاعلية.' 
-                  : 'The visual companion for the Oxford Discover 3 curriculum, helping you link words with images interactively.'}
+                  ? 'بنك الصور التعليمي والدروس المصاحبة لمنهج Oxford Discover 3، يساعدك على التعلم بطريقة تفاعلية.' 
+                  : 'The visual companion and interactive lessons for the Oxford Discover 3 curriculum.'}
               </p>
             </div>
             
-            <div className="relative w-full md:w-80">
-              <input 
-                type="text"
-                placeholder={isRtl ? 'بحث في الوحدات...' : 'Search units...'}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 pl-12 text-sm focus:outline-none focus:border-[#002147] transition-all shadow-sm"
-              />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
+            <div className="flex flex-col gap-4 w-full md:w-auto">
+              <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
+                <button 
+                  onClick={() => setViewMode('bank')}
+                  className={`flex-1 md:px-6 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 ${viewMode === 'bank' ? 'bg-white text-[#002147] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  <ImageIcon size={18} />
+                  {isRtl ? 'بنك الصور' : 'Visual Bank'}
+                </button>
+                <button 
+                  onClick={() => setViewMode('lessons')}
+                  className={`flex-1 md:px-6 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 ${viewMode === 'lessons' ? 'bg-white text-[#002147] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  <BookOpen size={18} />
+                  {isRtl ? 'الدروس التفاعلية' : 'Lessons'}
+                </button>
+              </div>
+
+              <div className="relative w-full md:w-80">
+                <input 
+                  type="text"
+                  placeholder={isRtl ? 'بحث في الوحدات...' : 'Search units...'}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 pl-12 text-sm focus:outline-none focus:border-[#002147] transition-all shadow-sm"
+                />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
+              </div>
             </div>
           </div>
         </header>
@@ -140,7 +167,7 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
         <AnimatePresence mode="wait">
           {!selectedUnitId ? (
             <motion.div 
-              key="unit-list"
+              key={`${viewMode}-list`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -151,23 +178,38 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
                   key={unit.id}
                   whileHover={{ y: -5, scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
-                  onClick={() => setSelectedUnitId(unit.id)}
+                  onClick={() => {
+                    if (viewMode === 'lessons') {
+                      setActiveLessonId(unit.id);
+                    } else {
+                      setSelectedUnitId(unit.id);
+                    }
+                  }}
                   className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/50 flex items-center justify-between group transition-all text-left rtl:text-right"
                 >
                   <div className="flex items-center gap-8">
                     <div className={`w-20 h-20 ${unit.color} text-white rounded-3xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
-                      <BookOpen size={36} />
+                      {viewMode === 'lessons' ? <PlayCircle size={36} /> : <BookOpen size={36} />}
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-[#002147] mb-2">{isRtl ? unit.titleAr : unit.titleEn}</h3>
                       <p className="text-slate-400 text-sm font-medium">{isRtl ? unit.descriptionAr : unit.descriptionEn}</p>
                       <div className="mt-4 flex items-center gap-2">
-                        <div className="flex -space-x-2 rtl:space-x-reverse">
-                          {unit.cards.slice(0, 3).map((card, idx) => (
-                            <img key={card.id} src={card.img} alt="" className="w-8 h-8 rounded-full border-2 border-white object-cover" />
-                          ))}
-                        </div>
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">+{unit.cards.length} Images</span>
+                        {viewMode === 'bank' ? (
+                          <>
+                            <div className="flex -space-x-2 rtl:space-x-reverse">
+                              {unit.cards.slice(0, 3).map((card, idx) => (
+                                <img key={card.id} src={card.img} alt="" className="w-8 h-8 rounded-full border-2 border-white object-cover" />
+                              ))}
+                            </div>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">+{unit.cards.length} Images</span>
+                          </>
+                        ) : (
+                          <div className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full">
+                            <Sparkles size={12} className="text-blue-500" />
+                            <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{isRtl ? 'درس تفاعلي متوفر' : 'Interactive Lesson Available'}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
