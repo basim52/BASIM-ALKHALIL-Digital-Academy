@@ -796,7 +796,15 @@ const LESSON_DATA = {
 export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
-  const data = LESSON_DATA[unitId as keyof typeof LESSON_DATA];
+  const isLanguageLab = unitId >= 100;
+  const languageData = isLanguageLab ? LANGUAGE_LAB_DATA[unitId] : null;
+  const data = (LESSON_DATA as any)[unitId] || {
+    bigQuestion: languageData?.title || "",
+    bigQuestionAr: languageData?.titleAr || "",
+    vocab: [],
+    quiz: []
+  };
+  const isReading = (data as any)?.isReadingLesson;
 
   const [step, setStep] = useState<'intro' | 'reading' | 'matching' | 'quiz' | 'finish'>('intro');
   const [matchingStatus, setMatchingStatus] = useState<Record<number, boolean>>({});
@@ -804,11 +812,6 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string | null>>({});
   const [score, setScore] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
-
-  const isReading = (data as any)?.isReadingLesson;
-  const isLanguageLab = unitId >= 100;
-  const languageData = isLanguageLab ? LANGUAGE_LAB_DATA[unitId] : null;
-
   const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
   const [exerciseAnswers, setExerciseAnswers] = useState<Record<number, string>>({});
   const [userInput, setUserInput] = useState('');
@@ -869,6 +872,28 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
       if (Object.keys(matchingStatus).length + 1 === data.vocab.length) {
         setTimeout(() => setStep('quiz'), 1500);
       }
+    }
+  };
+
+  const handleQuiz = (questionId: number, option: string) => {
+    setQuizAnswers(prev => ({ ...prev, [questionId]: option }));
+    const question = data.quiz.find((q: any) => q.id === questionId);
+    if (option === question?.correct) {
+      setScore(prev => prev + 1);
+      speak("Correct!", "en-US");
+    } else {
+      speak("Try again", "en-US");
+    }
+
+    if (Object.keys(quizAnswers).length + 1 === data.quiz.length) {
+      setTimeout(() => {
+        setStep('finish');
+        confetti({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }, 1500);
     }
   };
 
