@@ -13,7 +13,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { UserProfile, CreditCost } from '../types';
+import { UserProfile, CreditCost, MASTER_ADMINS } from '../types';
 import { deductCredits } from '../lib/firebase';
 
 interface VideoLesson {
@@ -92,7 +92,7 @@ export const VideoLibrary = ({
     if (!enabled) return;
     if (selectedVideo?.id === video.id) return;
 
-    const isAdmin = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(profile.email?.toLowerCase() || '');
+    const isAdmin = MASTER_ADMINS.includes(profile.email?.toLowerCase() || '');
     const credits = (profile as any).credits || 0;
     
     if (!isAdmin && credits < CreditCost.VIDEO_LESSON) {

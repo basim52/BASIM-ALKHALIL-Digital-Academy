@@ -41,7 +41,7 @@ import {
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'motion/react';
-import { UserRole, CurriculumCategory, proficiencyLevel, UserProfile, ScheduleItem, ParentNote, LearningModule, Lesson, AppView, StudentProfile, CreditCost } from './types';
+import { UserRole, CurriculumCategory, proficiencyLevel, UserProfile, ScheduleItem, ParentNote, LearningModule, Lesson, AppView, StudentProfile, CreditCost, MASTER_ADMINS } from './types';
 import { MASTER_CURRICULUM } from './data/masterCurriculum';
 import { generateWhatsAppLink, NOTIFICATION_TEMPLATES } from './lib/whatsapp';
 import { ShareableNotification } from './components/ShareableNotification';
@@ -987,7 +987,7 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             >
                   <div className="relative z-10">
                 {/* Connection Tester for Admin */}
-                {['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(profile?.email?.toLowerCase() || '') && (
+                {MASTER_ADMINS.includes(profile?.email?.toLowerCase() || '') && (
                   <div className="absolute top-0 right-0 z-20">
                     <button 
                       onClick={async () => {
@@ -2414,7 +2414,7 @@ export default function App() {
     return () => settingsUnsubscribe();
   }, []);
 
-  const isAdmin = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(userProfile?.email?.toLowerCase() || '');
+  const isAdmin = MASTER_ADMINS.includes(userProfile?.email?.toLowerCase() || '');
 
   useEffect(() => {
     if (userProfile?.role === UserRole.STUDENT && !userProfile.studentCode && currentUser) {
@@ -2606,9 +2606,8 @@ export default function App() {
         try {
           // Special case for the master admin: ensure they have admin profile even if fetch fails
           const userEmail = (user.email || '').toLowerCase();
-          const masterAdmins = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'];
           
-          if (masterAdmins.includes(userEmail)) {
+          if (MASTER_ADMINS.includes(userEmail)) {
             const adminProfile: UserProfile = {
               uid: user.uid,
               email: user.email,
@@ -2654,9 +2653,8 @@ export default function App() {
           console.error("Auth profile fetch error:", error);
           // Only show fatal error if not the master admin (who has fallback)
           const userEmail = (user.email || '').toLowerCase();
-          const masterAdmins = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'];
           
-          if (!masterAdmins.includes(userEmail)) {
+          if (!MASTER_ADMINS.includes(userEmail)) {
             handleFirestoreError(error, OperationType.GET, `users/${user.uid}`);
           }
         } finally {
@@ -2710,16 +2708,16 @@ export default function App() {
 
   const handleStartAiChat = async () => {
     if (!userProfile) return;
-    const isAdmin = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(userProfile.email?.toLowerCase() || '');
+    const isAdminCheck = MASTER_ADMINS.includes(userProfile.email?.toLowerCase() || '');
     const currentCredits = (userProfile as any).credits || 0;
     
-    if (!isAdmin && currentCredits < CreditCost.AI_CONVERSATION) {
+    if (!isAdminCheck && currentCredits < CreditCost.AI_CONVERSATION) {
       alert(t.insufficientCredits);
       setView('credits');
       return;
     }
     try {
-      if (!isAdmin) {
+      if (!isAdminCheck) {
         await deductCredits(userProfile.uid, CreditCost.AI_CONVERSATION, `AI Conversation: 3-min Session`);
         setUserProfile({ ...userProfile, credits: currentCredits - CreditCost.AI_CONVERSATION } as UserProfile);
       }
@@ -2747,7 +2745,7 @@ export default function App() {
   const handleLessonComplete = async () => {
     if (!userProfile || !activeLesson) return;
     
-    const isAdmin = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(userProfile.email?.toLowerCase() || '');
+    const isAdminCheck = MASTER_ADMINS.includes(userProfile.email?.toLowerCase() || '');
     // Deduct Credit
     const cost = CreditCost.READING_LESSON;
     const currentCredits = (userProfile as any).credits || 0;
@@ -2755,10 +2753,10 @@ export default function App() {
     // Increment XP and points
     const xpToAdd = 50; 
     const updatedPoints = (userProfile as any).points + xpToAdd;
-    const updatedCredits = isAdmin ? currentCredits : Math.max(0, currentCredits - cost);
+    const updatedCredits = isAdminCheck ? currentCredits : Math.max(0, currentCredits - cost);
     
     try {
-      if (!isAdmin) {
+      if (!isAdminCheck) {
         await deductCredits(userProfile.uid, cost, `أكملت درس: ${activeLesson.title}`);
       }
 
@@ -2818,7 +2816,7 @@ export default function App() {
         lang={lang} 
         onSelectLesson={async (lesson, category, level) => { 
           if (!userProfile) return;
-          const isAdmin = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(userProfile.email?.toLowerCase() || '');
+          const isAdminCheck = MASTER_ADMINS.includes(userProfile.email?.toLowerCase() || '');
           
           if (category === CurriculumCategory.CONVERSATION) {
             handleStartAiChat();
@@ -2828,7 +2826,7 @@ export default function App() {
           const currentCredits = (userProfile as any).credits || 0;
           const cost = CreditCost.READING_LESSON;
           
-          if (!isAdmin && currentCredits < cost) {
+          if (!isAdminCheck && currentCredits < cost) {
             alert(t.insufficientCredits);
             setView('credits');
             return;
@@ -2878,7 +2876,7 @@ export default function App() {
       return (
         <Leaderboard 
           lang={lang} 
-          isAdmin={['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(userProfile?.email?.toLowerCase() || '')} 
+          isAdmin={MASTER_ADMINS.includes(userProfile?.email?.toLowerCase() || '')} 
         />
       );
     }

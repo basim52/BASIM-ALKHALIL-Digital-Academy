@@ -4,7 +4,7 @@ import path from "path";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { Modality } from "@google/genai";
+import { GoogleGenAI, Modality } from "@google/genai";
 import "dotenv/config";
 
 const logToFile = (msg: string) => console.log(`[Server] ${msg}`);

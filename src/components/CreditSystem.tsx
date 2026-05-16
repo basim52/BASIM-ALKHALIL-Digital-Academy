@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations, Language } from '../lib/translations';
-import { CREDIT_PACKAGES, CreditCost, GIFT_PACKAGE, CHILDHOOD_PACKAGES } from '../types';
+import { CREDIT_PACKAGES, CreditCost, GIFT_PACKAGE, CHILDHOOD_PACKAGES, MASTER_ADMINS } from '../types';
 import { 
   Wallet, 
   CreditCard, 
@@ -198,7 +198,7 @@ export const CreditSystem = ({ lang }: { lang: Language }) => {
     }
   };
 
-  const isAdmin = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com'].includes(auth.currentUser?.email?.toLowerCase() || '');
+  const isAdmin = MASTER_ADMINS.includes(auth.currentUser?.email?.toLowerCase() || '');
 
   return (
     <div className={`p-4 md:p-10 max-w-7xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
