@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Play, Pause, ChevronDown, Check, X, ArrowRight, Timer, Award, MessageCircle, BookOpen, PenTool, HelpCircle, Volume2 } from 'lucide-react';
+import { Play, Pause, ChevronDown, Check, X, ArrowRight, ArrowLeft, Timer, Award, MessageCircle, BookOpen, PenTool, HelpCircle, Volume2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Lesson } from '../types';
 
@@ -9,9 +9,10 @@ interface InteractiveLessonProps {
   lesson: Partial<Lesson>;
   isRtl: boolean;
   onFinish: (score?: number) => void;
+  onBack: () => void;
 }
 
-export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, isRtl, onFinish }) => {
+export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, isRtl, onFinish, onBack }) => {
   const [activeTab, setActiveTab] = useState<'warmup' | 'explanation' | 'exercises' | 'quiz'>('warmup');
   const [isPlayingId, setIsPlayingId] = useState<string | null>(null);
   const [playbackProgress, setPlaybackProgress] = useState(0);
@@ -122,6 +123,19 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
     <div className={`min-h-screen bg-cream text-ink font-sans selection:bg-amber-accent/20 ${isRtl ? 'rtl' : 'ltr'}`}>
       {/* Premium Header - Matching ReadingLesson Style */}
       <header className="bg-oxford-navy text-cream pt-10 pb-20 md:pt-16 md:pb-24 px-4 md:px-8 relative overflow-hidden">
+        {/* Back Button */}
+        <div className="max-w-5xl mx-auto mb-8 relative z-30">
+          <button 
+            onClick={onBack}
+            className="flex items-center gap-2 text-cream/60 hover:text-white transition-all group font-black text-xs uppercase tracking-widest"
+          >
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center group-hover:bg-amber-accent group-hover:text-white transition-all">
+              <ArrowLeft size={20} className={isRtl ? 'rotate-180' : ''} />
+            </div>
+            {isRtl ? 'الرجوع للقائمة' : 'Back to Curriculum'}
+          </button>
+        </div>
+
         <div className="absolute top-0 right-0 w-96 h-96 bg-amber-accent/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="flex flex-wrap gap-2 mb-6">

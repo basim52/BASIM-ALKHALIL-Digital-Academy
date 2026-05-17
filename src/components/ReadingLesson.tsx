@@ -11,10 +11,12 @@ import {
   CheckCircle2, 
   ChevronRight, 
   ChevronLeft,
+  ArrowLeft,
   X,
   Check,
   Star,
-  Trophy
+  Trophy,
+  Square
 } from 'lucide-react';
 import { Lesson } from '../types';
 
@@ -24,13 +26,14 @@ interface ReadingLessonProps {
   isRtl: boolean;
   category?: string;
   onFinish: (score?: number) => void;
+  onBack: () => void;
 }
 
 type TabType = 'warmup' | 'reading' | 'vocabulary' | 'comprehension';
 
-export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, category, onFinish }) => {
+export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, category, onFinish, onBack }) => {
   const [activeTab, setActiveTab] = useState<TabType>('warmup');
-  const [isPlaying, setIsPlaying] = useState<string | null>(null); // paragraph index or null
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
 
   const isExpression = category === 'expression' || lesson.id?.startsWith('e_');
   const categoryLabel = isExpression 
@@ -40,6 +43,7 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
   const readingTabLabel = isExpression
     ? (isRtl ? 'السيناريو / المهمة' : 'Scenario / Task')
     : (isRtl ? 'النص المقروء' : 'The Text');
+    
   const [score, setScore] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
@@ -48,36 +52,45 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
 
   const synthesis = typeof window !== 'undefined' ? window.speechSynthesis : null;
 
-  const stopSpeaking = () => {
-    if (synthesis) {
-      synthesis.cancel();
-      setIsPlaying(null);
-    }
-  };
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
 
-  const speak = (text: string, lang: 'en' | 'ar', id: string) => {
+  const speak = (text: string, voiceLang: 'en' | 'ar', id: string) => {
     if (!synthesis) return;
 
-    if (isPlaying === id) {
+    if (speakingId === id) {
       stopSpeaking();
       return;
     }
 
     stopSpeaking();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang === 'en' ? 'en-US' : 'ar-SA';
+    utterance.lang = voiceLang === 'en' ? 'en-US' : 'ar-SA';
     utterance.rate = 0.9;
     
+    utterance.onstart = () => {
+      setSpeakingId(id);
+    };
+
     utterance.onend = () => {
-      setIsPlaying(null);
+      setSpeakingId(null);
     };
 
     utterance.onerror = () => {
-      setIsPlaying(null);
+      setSpeakingId(null);
     };
 
-    setIsPlaying(id);
     synthesis.speak(utterance);
+  };
+
+  const stopSpeaking = () => {
+    if (synthesis) {
+      synthesis.cancel();
+      setSpeakingId(null);
+    }
   };
 
   useEffect(() => {
@@ -119,6 +132,19 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
     <div className={`min-h-screen bg-cream text-ink font-sans selection:bg-amber-accent/20 ${isRtl ? 'rtl' : 'ltr'}`}>
       {/* Header Section (Based on Image Styling) */}
       <header className="bg-oxford-navy text-cream pt-10 pb-20 md:pt-16 md:pb-24 px-4 md:px-8 relative overflow-hidden">
+        {/* Back Button */}
+        <div className="max-w-5xl mx-auto mb-8 relative z-30">
+          <button 
+            onClick={onBack}
+            className="flex items-center gap-2 text-cream/60 hover:text-white transition-all group font-black text-xs uppercase tracking-widest"
+          >
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center group-hover:bg-amber-accent group-hover:text-white transition-all">
+              <ArrowLeft size={20} className={isRtl ? 'rotate-180' : ''} />
+            </div>
+            {isRtl ? 'الرجوع للقائمة' : 'Back to Curriculum'}
+          </button>
+        </div>
+
         <div className="absolute top-0 right-0 w-96 h-96 bg-amber-accent/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="flex flex-wrap gap-2 mb-6">
@@ -140,9 +166,9 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
             <div className="flex gap-2">
               <button 
                 onClick={() => speak(isRtl ? lesson.titleAr || '' : lesson.title || '', isRtl ? 'ar' : 'en', 'title-audio')}
-                className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all ${isPlaying === 'title-audio' ? 'bg-amber-accent text-white scale-110 shadow-lg' : 'bg-white/10 text-cream hover:bg-amber-accent hover:scale-110'}`}
+                className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all ${speakingId === 'title-audio' ? 'bg-amber-accent text-white scale-110 shadow-lg' : 'bg-white/10 text-cream hover:bg-amber-accent hover:scale-110'}`}
               >
-                {isPlaying === 'title-audio' ? <Pause size={18} /> : <Volume2 size={18} />}
+                {speakingId === 'title-audio' ? <Pause size={18} /> : <Volume2 size={18} />}
               </button>
             </div>
           </div>
@@ -153,9 +179,9 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
             </p>
             <button 
               onClick={() => speak(isRtl ? lesson.warmup?.missionAr || '' : lesson.warmup?.mission || '', isRtl ? 'ar' : 'en', 'mission-audio')}
-              className={`mt-1 hover:text-amber-accent transition-colors ${isPlaying === 'mission-audio' ? 'text-amber-accent' : 'text-oxford-gold/40'}`}
+              className={`mt-1 hover:text-amber-accent transition-colors ${speakingId === 'mission-audio' ? 'text-amber-accent' : 'text-oxford-gold/40'}`}
             >
-              <Volume2 size={24} />
+              {speakingId === 'mission-audio' ? <Pause size={24} /> : <Volume2 size={24} />}
             </button>
           </div>
         </div>
@@ -219,10 +245,10 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
                     </p>
                     <button 
                       onClick={() => speak(isRtl ? (lesson.warmup?.missionAr || '') : (lesson.warmup?.mission || ''), isRtl ? 'ar' : 'en', 'warmup-text')}
-                      className="flex items-center gap-2 bg-oxford-navy text-white px-5 py-3 rounded-xl font-bold hover:bg-amber-accent transition-colors"
+                      className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-colors ${speakingId === 'warmup-text' ? 'bg-amber-accent text-white' : 'bg-oxford-navy text-white hover:bg-amber-accent'}`}
                     >
-                      {isPlaying === 'warmup-text' ? <Pause size={18} /> : <Volume2 size={18} />}
-                      {isRtl ? 'استمع للسؤال' : 'Listen to Question'}
+                      {speakingId === 'warmup-text' ? <Pause size={18} /> : <Volume2 size={18} />}
+                      {isRtl ? (speakingId === 'warmup-text' ? 'توقف' : 'استمع للسؤال') : (speakingId === 'warmup-text' ? 'Stop' : 'Listen to Question')}
                     </button>
                   </div>
 
@@ -238,9 +264,9 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
                             </div>
                             <button 
                               onClick={() => speak(obj, isRtl ? 'ar' : 'en', `objective-${i}`)}
-                              className={`p-2 rounded-lg transition-all ${isPlaying === `objective-${i}` ? 'bg-amber-accent text-white' : 'text-oxford-navy/20 hover:text-amber-accent hover:bg-amber-accent/10'}`}
+                              className={`p-2 rounded-lg transition-all ${speakingId === `objective-${i}` ? 'bg-amber-accent text-white scale-110 shadow-md' : 'text-oxford-navy/20 hover:text-amber-accent hover:bg-amber-accent/10'}`}
                             >
-                              <Volume2 size={16} />
+                              {speakingId === `objective-${i}` ? <Pause size={16} /> : <Volume2 size={16} />}
                             </button>
                           </li>
                         ))}
@@ -254,6 +280,38 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
                       </p>
                     </div>
                   </div>
+
+                  {lesson.vocabulary && lesson.vocabulary.length > 0 && (
+                    <div className="pt-10 border-t border-oxford-navy/5">
+                      <h3 className="text-lg font-black uppercase tracking-widest text-oxford-gold mb-6">{isRtl ? 'مفردات هامة للبدء' : 'Key Vocabulary to Begin'}</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {lesson.vocabulary.slice(0, 3).map((vocab, vIdx) => (
+                          <div key={`warmup-vocab-${vIdx}`} className="bg-white p-6 rounded-2xl border border-oxford-navy/5 shadow-sm flex items-center justify-between group hover:border-amber-accent transition-all">
+                             <div>
+                               <h4 className="font-black text-oxford-navy">{vocab.word}</h4>
+                               <p className="text-xs font-tajawal text-oxford-navy/50">{vocab.meaningAr}</p>
+                             </div>
+                             <div className="flex gap-2">
+                               {speakingId === `warmup-vocab-${vIdx}` && (
+                                 <button 
+                                   onClick={stopSpeaking}
+                                   className="w-8 h-8 rounded-lg bg-rose-500 text-white flex items-center justify-center transition-all shadow-lg"
+                                 >
+                                   <Square size={12} fill="currentColor" />
+                                 </button>
+                               )}
+                               <button 
+                                 onClick={() => speak(vocab.word, 'en', `warmup-vocab-${vIdx}`)}
+                                 className={`w-8 h-8 rounded-lg transition-all flex items-center justify-center ${speakingId === `warmup-vocab-${vIdx}` ? 'bg-amber-accent text-white scale-110 shadow-lg' : 'bg-oxford-navy/5 text-oxford-navy hover:bg-amber-accent hover:text-white'}`}
+                               >
+                                 {speakingId === `warmup-vocab-${vIdx}` ? <Pause size={14} /> : <Volume2 size={14} />}
+                               </button>
+                             </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
               )}
 
@@ -275,45 +333,76 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
                           : (isRtl ? 'اقرأ واستمع بدقة' : 'Read and listen carefully')}
                       </p>
                     </div>
-                    <div className="flex gap-2">
-                       <button 
-                         onClick={() => speak(lesson.readingText?.paragraphs.map(p => p.en).join(' ') || '', 'en', 'read-all-en')}
-                         className="flex items-center gap-2 bg-oxford-navy text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-accent transition-colors"
-                       >
-                         {isPlaying === 'read-all-en' ? <Pause size={14} /> : <Volume2 size={14} />}
-                         {isRtl ? 'استمع للنص كاملاً (EN)' : 'Play Full Audio (EN)'}
-                       </button>
-                    </div>
+            <div className="flex gap-2">
+               <button 
+                 onClick={() => {
+                   const textToSpeak = lesson.readingText?.paragraphs 
+                     ? lesson.readingText.paragraphs.map(p => p.en).join(' ') 
+                     : (lesson.content || '');
+                   speak(textToSpeak, 'en', 'read-all-en');
+                 }}
+                 className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${speakingId === 'read-all-en' ? 'bg-amber-accent text-white scale-105' : 'bg-oxford-navy text-white hover:bg-amber-accent'}`}
+               >
+                 {speakingId === 'read-all-en' ? <Pause size={14} /> : <Volume2 size={14} />}
+                 {isRtl ? 'استمع للنص كاملاً (EN)' : 'Play Full Audio (EN)'}
+               </button>
+               {speakingId && (
+                 <button 
+                   onClick={stopSpeaking}
+                   className="p-3 bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition-all font-black text-[10px] uppercase tracking-widest flex items-center gap-2"
+                 >
+                   <Square size={14} /> {isRtl ? 'توقف' : 'Stop'}
+                 </button>
+               )}
+            </div>
                   </div>
 
                   <div className="space-y-16">
                     {lesson.readingText?.paragraphs ? (
                       lesson.readingText.paragraphs.map((para, idx) => (
                         <div key={idx} className="group relative">
-                          <div className={`p-6 md:p-10 rounded-t-3xl border-2 transition-all ${isPlaying === `para-en-${idx}` ? 'bg-amber-accent/5 border-amber-accent' : 'bg-white border-oxford-navy/5'}`}>
+                          <div className={`p-6 md:p-10 rounded-t-3xl border-2 transition-all ${speakingId === `para-en-${idx}` ? 'bg-amber-accent/5 border-amber-accent' : 'bg-white border-oxford-navy/5'}`}>
                             <div className="flex justify-between items-start gap-4 mb-4 md:mb-6">
                               <span className="font-mono text-oxford-gold font-black bg-oxford-navy/5 px-3 py-1 rounded-lg text-xs md:text-sm">{(idx + 1).toString().padStart(2, '0')}</span>
-                              <button 
-                                onClick={() => speak(para.en, 'en', `para-en-${idx}`)}
-                                className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all ${isPlaying === `para-en-${idx}` ? 'bg-amber-accent text-white' : 'bg-oxford-navy text-white hover:bg-amber-accent hover:scale-110'}`}
-                              >
-                                {isPlaying === `para-en-${idx}` ? <Pause size={20} /> : <Volume2 size={20} />}
-                              </button>
+                              <div className="flex gap-2">
+                                {speakingId === `para-en-${idx}` && (
+                                  <button 
+                                    onClick={stopSpeaking}
+                                    className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-rose-500 text-white flex items-center justify-center transition-all shadow-lg"
+                                  >
+                                    <Square size={20} fill="currentColor" />
+                                  </button>
+                                )}
+                                <button 
+                                  onClick={() => speak(para.en, 'en', `para-en-${idx}`)}
+                                  className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all ${speakingId === `para-en-${idx}` ? 'bg-amber-accent text-white scale-110 shadow-lg' : 'bg-oxford-navy text-white hover:bg-amber-accent hover:scale-110'}`}
+                                >
+                                  {speakingId === `para-en-${idx}` ? <Pause size={20} /> : <Volume2 size={20} />}
+                                </button>
+                              </div>
                             </div>
                             <div className="prose prose-slate max-w-none prose-p:text-lg md:prose-p:text-2xl prose-p:leading-[1.8] prose-p:font-roboto prose-p:font-medium prose-p:text-oxford-navy prose-strong:text-[#C49E3A] prose-table:border prose-table:border-slate-200 prose-th:bg-slate-50 prose-th:p-4 prose-td:p-4 prose-td:border prose-td:border-slate-100 overflow-x-auto custom-markdown-content font-roboto">
                               <ReactMarkdown>{para.en}</ReactMarkdown>
                             </div>
                           </div>
 
-                          <div className={`p-6 md:p-10 rounded-b-3xl border-2 border-t-0 transition-all ${isPlaying === `para-ar-${idx}` ? 'bg-oxford-gold/5 border-oxford-gold' : 'bg-cream/20 border-oxford-navy/5'}`}>
-                            <div className="flex justify-start mb-4">
+                          <div className={`p-6 md:p-10 rounded-b-3xl border-2 border-t-0 transition-all ${speakingId === `para-ar-${idx}` ? 'bg-oxford-gold/5 border-oxford-gold' : 'bg-cream/20 border-oxford-navy/5'}`}>
+                            <div className="flex justify-start items-center gap-3 mb-4">
                               <button 
                                 onClick={() => speak(para.ar, 'ar', `para-ar-${idx}`)}
-                                className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-tajawal font-bold text-xs md:text-sm transition-all ${isPlaying === `para-ar-${idx}` ? 'bg-oxford-gold text-oxford-navy' : 'text-oxford-navy/40 hover:text-oxford-gold hover:bg-oxford-gold/10'}`}
+                                className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-tajawal font-bold text-xs md:text-sm transition-all ${speakingId === `para-ar-${idx}` ? 'bg-oxford-gold text-oxford-navy shadow-md scale-105' : 'text-oxford-navy/40 hover:text-oxford-gold hover:bg-oxford-gold/10'}`}
                               >
-                                {isPlaying === `para-ar-${idx}` ? <Pause size={14} /> : <Volume2 size={14} />}
+                                {speakingId === `para-ar-${idx}` ? <Pause size={14} /> : <Volume2 size={14} />}
                                 {isRtl ? 'استمع للترجمة' : 'Listen to Arabic'}
                               </button>
+                              {speakingId === `para-ar-${idx}` && (
+                                <button 
+                                  onClick={stopSpeaking}
+                                  className="p-1 px-2 bg-rose-500 text-white rounded-lg flex items-center gap-1 text-[10px] font-black uppercase transition-all shadow-md"
+                                >
+                                  <Square size={10} fill="currentColor" /> {isRtl ? 'توقف' : 'Stop'}
+                                </button>
+                              )}
                             </div>
                             <div className="prose prose-slate max-w-none prose-p:text-base md:prose-p:text-xl prose-p:leading-relaxed prose-p:font-tajawal prose-p:text-oxford-navy/60 overflow-x-auto text-right">
                               <ReactMarkdown>{para.ar}</ReactMarkdown>
@@ -349,17 +438,28 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
                     {lesson.vocabulary?.map((vocab, vIdx) => (
                       <div key={vIdx} className="bg-white border-2 border-oxford-navy/5 rounded-[2rem] p-8 hover:border-amber-accent transition-all group shadow-sm hover:shadow-xl">
-                        <div className="flex justify-between items-start mb-6">
-                           <div className="w-14 h-14 rounded-2xl bg-oxford-navy text-oxford-gold flex items-center justify-center group-hover:bg-amber-accent group-hover:text-white transition-all shadow-lg">
-                             <Layers size={28} />
-                           </div>
-                           <button 
-                             onClick={() => speak(vocab.word, 'en', `vocab-${vIdx}`)}
-                             className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isPlaying === `vocab-${vIdx}` ? 'bg-amber-accent text-white' : 'bg-oxford-navy/5 text-oxford-navy hover:bg-amber-accent hover:text-white'}`}
-                           >
-                             {isPlaying === `vocab-${vIdx}` ? <Pause size={18} /> : <Volume2 size={18} />}
-                           </button>
-                        </div>
+                         <div className="flex justify-between items-start mb-6">
+                            <div className="w-14 h-14 rounded-2xl bg-oxford-navy text-oxford-gold flex items-center justify-center group-hover:bg-amber-accent group-hover:text-white transition-all shadow-lg">
+                              <Layers size={28} />
+                            </div>
+                            <div className="flex gap-2">
+                              {speakingId === `vocab-${vIdx}` && (
+                                <button 
+                                  onClick={stopSpeaking}
+                                  className="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center transition-all shadow-lg"
+                                  title={isRtl ? 'توقف' : 'Stop'}
+                                >
+                                  <Square size={16} fill="currentColor" />
+                                </button>
+                              )}
+                              <button 
+                                onClick={() => speak(vocab.word, 'en', `vocab-${vIdx}`)}
+                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${speakingId === `vocab-${vIdx}` ? 'bg-amber-accent text-white scale-110 shadow-lg' : 'bg-oxford-navy/5 text-oxford-navy hover:bg-amber-accent hover:text-white'}`}
+                              >
+                                {speakingId === `vocab-${vIdx}` ? <Pause size={18} /> : <Volume2 size={18} />}
+                              </button>
+                            </div>
+                         </div>
 
                         <div className="space-y-4">
                            <div>
@@ -375,12 +475,23 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
                               <p className="text-lg font-medium text-oxford-navy/80 italic font-roboto leading-relaxed">
                                 "{vocab.example}"
                               </p>
-                              <button 
-                                onClick={() => speak(vocab.example, 'en', `vocab-ex-${vIdx}`)}
-                                className="absolute right-4 bottom-4 w-8 h-8 rounded-lg bg-oxford-navy/5 text-oxford-navy hover:bg-amber-accent hover:text-white flex items-center justify-center transition-all"
-                              >
-                                <Volume2 size={14} />
-                              </button>
+                              <div className="absolute right-4 bottom-4 flex gap-2">
+                                {speakingId === `vocab-ex-${vIdx}` && (
+                                  <button 
+                                    onClick={stopSpeaking}
+                                    className="w-8 h-8 rounded-lg bg-rose-500 text-white flex items-center justify-center transition-all shadow-lg"
+                                    title={isRtl ? 'توقف' : 'Stop'}
+                                  >
+                                    <Square size={14} fill="currentColor" />
+                                  </button>
+                                )}
+                                <button 
+                                  onClick={() => speak(vocab.example, 'en', `vocab-ex-${vIdx}`)}
+                                  className={`w-8 h-8 rounded-lg transition-all flex items-center justify-center ${speakingId === `vocab-ex-${vIdx}` ? 'bg-amber-accent text-white scale-110 shadow-lg' : 'bg-oxford-navy/5 text-oxford-navy hover:bg-amber-accent hover:text-white'}`}
+                                >
+                                  {speakingId === `vocab-ex-${vIdx}` ? <Pause size={14} /> : <Volume2 size={14} />}
+                                </button>
+                              </div>
                            </div>
                         </div>
                       </div>

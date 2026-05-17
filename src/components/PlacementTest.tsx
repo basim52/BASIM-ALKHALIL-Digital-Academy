@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight, CheckCircle2, Award, BookOpen } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle2, Award, BookOpen, ArrowLeft } from 'lucide-react';
 import { proficiencyLevel } from '../types';
 
 import { translations, Language } from '../lib/translations';
@@ -86,7 +86,7 @@ const QUESTIONS: Question[] = [
   }
 ];
 
-export const PlacementTest = ({ onComplete, lang }: { onComplete: (level: proficiencyLevel) => void, lang: Language }) => {
+export const PlacementTest = ({ onComplete, onBack, lang }: { onComplete: (level: proficiencyLevel) => void, onBack: () => void, lang: Language }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [currentStep, setCurrentStep] = useState(0);
@@ -157,6 +157,21 @@ export const PlacementTest = ({ onComplete, lang }: { onComplete: (level: profic
       
       <div className="max-w-2xl w-full bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/50 relative z-10">
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#002147] via-[#C49E3A] to-[#002147]" />
+        
+        {/* Back Button */}
+        {!isFinished && (
+          <div className="absolute top-6 left-6 z-20">
+            <button 
+              onClick={onBack}
+              className="flex items-center gap-2 text-slate-400 hover:text-[#002147] transition-all group"
+            >
+              <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-[#002147] group-hover:text-white transition-all shadow-sm">
+                <ArrowLeft size={16} className={isRtl ? 'rotate-180' : ''} />
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest">{isRtl ? 'رجوع' : 'Back'}</span>
+            </button>
+          </div>
+        )}
         
         <AnimatePresence mode="wait">
           {!isFinished ? (

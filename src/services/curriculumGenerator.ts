@@ -66,6 +66,8 @@ export async function generateLessonContent(
       warmup: data.warmup,
       content: data.content || "Lesson content loading...",
       contentAr: data.contentAr || "جاري تحميل محتوى الدرس...",
+      readingText: data.readingText,
+      vocabulary: data.vocabulary,
       imageryPrompt: data.imageryPrompt || topic,
       exercises: data.exercises,
       quiz: Array.isArray(data.quiz) ? data.quiz : (data.quiz ? [data.quiz] : []),

@@ -68,6 +68,10 @@ import { OxfordLesson } from './components/OxfordLesson';
 import { EarlyChildhoodHome } from './components/EarlyChildhood/EarlyChildhoodHome';
 import { OxfordDiscoverCompanion } from './components/OxfordDiscoverCompanion';
 import { ReadingCurriculumCompanion, ReadingLevel, ALL_READING_UNITS } from './components/ReadingCurriculumCompanion';
+import { GrammarCurriculumCompanion, GrammarLevel, ALL_GRAMMAR_UNITS } from './components/GrammarCurriculumCompanion';
+import { ConversationCurriculumCompanion, ConversationLevel, ALL_CONVERSATION_UNITS } from './components/ConversationCurriculumCompanion';
+import { WritingCurriculumCompanion, WritingLevel, ALL_WRITING_UNITS } from './components/WritingCurriculumCompanion';
+import { ExpressionCurriculumCompanion, ExpressionLevel, ALL_EXPRESSION_UNITS } from './components/ExpressionCurriculumCompanion';
 import { ModernCurriculumHome } from './components/ModernCurriculumHome';
 import { Wallet, Layers, Image as OxfordIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -2373,6 +2377,7 @@ const LessonPlayer = ({ lang, lesson, onBack, onComplete, category, level }: { l
         isRtl={isRtl} 
         category={fullLesson.id?.startsWith('e_') ? 'expression' : 'reading'}
         onFinish={(score) => onComplete()} 
+        onBack={onBack}
       />
     );
   }
@@ -2382,6 +2387,7 @@ const LessonPlayer = ({ lang, lesson, onBack, onComplete, category, level }: { l
       lesson={fullLesson} 
       isRtl={isRtl} 
       onFinish={(score) => onComplete()} 
+      onBack={onBack}
     />
   );
 };
@@ -2391,6 +2397,10 @@ export default function App() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [view, setView] = useState<AppView>('dashboard');
   const [selectedReadingLevel, setSelectedReadingLevel] = useState<ReadingLevel>('A1');
+  const [selectedGrammarLevel, setSelectedGrammarLevel] = useState<GrammarLevel>('A1');
+  const [selectedConversationLevel, setSelectedConversationLevel] = useState<ConversationLevel>('A1');
+  const [selectedWritingLevel, setSelectedWritingLevel] = useState<WritingLevel>('A1');
+  const [selectedExpressionLevel, setSelectedExpressionLevel] = useState<ExpressionLevel>('A1');
   const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState<Language>('ar');
   const [modules, setModules] = useState<LearningModule[]>([]);
@@ -2782,6 +2792,7 @@ export default function App() {
           profile={userProfile} 
           onUpdateProfile={(p) => setUserProfile(p as StudentProfile)} 
           onNavigate={setView} 
+          onBack={() => setView('dashboard')}
           enabled={videoLessonsEnabled || isAdmin}
         />
       );
@@ -2801,7 +2812,17 @@ export default function App() {
           lang={lang} 
           onBack={() => setView('dashboard')} 
           onNavigate={(targetView, level) => {
-            if (level) setSelectedReadingLevel(level);
+            if (targetView === 'reading-curriculum') {
+              if (level) setSelectedReadingLevel(level as ReadingLevel);
+            } else if (targetView === 'grammar-curriculum') {
+              if (level) setSelectedGrammarLevel(level as GrammarLevel);
+            } else if (targetView === 'conversation-curriculum') {
+              if (level) setSelectedConversationLevel(level as ConversationLevel);
+            } else if (targetView === 'writing-curriculum') {
+              if (level) setSelectedWritingLevel(level as WritingLevel);
+            } else if (targetView === 'expression-curriculum') {
+               if (level) setSelectedExpressionLevel(level as ExpressionLevel);
+            }
             setView(targetView);
           }} 
         />
@@ -2814,12 +2835,107 @@ export default function App() {
           lang={lang} 
           level={selectedReadingLevel}
           onBack={() => setView('modern-curriculum')} 
+            onStartLesson={(unitId) => {
+              const unit = units.find(u => u.id === unitId);
+              const lessonObj = {
+                id: unitId,
+                title: unit?.titleEn || 'New Lesson',
+                titleAr: unit?.titleAr || 'درس جديد',
+                content: unit?.readingTextEn,
+                contentAr: unit?.readingTextAr,
+                proficiencyLevel: selectedReadingLevel as any
+              } as Lesson;
+              setActiveLesson(lessonObj);
+              setView('lesson');
+            }}
+        />
+      );
+    }
+    if (view === 'grammar-curriculum') {
+      const units = ALL_GRAMMAR_UNITS[selectedGrammarLevel];
+      return (
+        <GrammarCurriculumCompanion 
+          lang={lang} 
+          level={selectedGrammarLevel}
+          onBack={() => setView('modern-curriculum')} 
           onStartLesson={(unitId) => {
             const unit = units.find(u => u.id === unitId);
             const lessonObj = {
               id: unitId,
               title: unit?.titleEn || 'New Lesson',
-              proficiencyLevel: selectedReadingLevel as any // Mapping level to proficiency or handling it dynamically
+              titleAr: unit?.titleAr || 'درس جديد',
+              content: unit?.explanationEn,
+              contentAr: unit?.explanationAr,
+              proficiencyLevel: selectedGrammarLevel as any
+            } as Lesson;
+            setActiveLesson(lessonObj);
+            setView('lesson');
+          }}
+        />
+      );
+    }
+    if (view === 'conversation-curriculum') {
+      const units = ALL_CONVERSATION_UNITS[selectedConversationLevel];
+      return (
+        <ConversationCurriculumCompanion 
+          lang={lang} 
+          level={selectedConversationLevel}
+          onBack={() => setView('modern-curriculum')} 
+          onStartLesson={(unitId) => {
+            const unit = units.find(u => u.id === unitId);
+            const lessonObj = {
+              id: unitId,
+              title: unit?.titleEn || 'New Lesson',
+              titleAr: unit?.titleAr || 'درس جديد',
+              content: unit?.contextEn,
+              contentAr: unit?.contextAr,
+              proficiencyLevel: selectedConversationLevel as any
+            } as Lesson;
+            setActiveLesson(lessonObj);
+            setView('lesson');
+          }}
+        />
+      );
+    }
+    if (view === 'writing-curriculum') {
+      const units = ALL_WRITING_UNITS[selectedWritingLevel];
+      return (
+        <WritingCurriculumCompanion 
+          lang={lang} 
+          level={selectedWritingLevel}
+          onBack={() => setView('modern-curriculum')} 
+          onStartLesson={(unitId) => {
+            const unit = units.find(u => u.id === unitId);
+            const lessonObj = {
+              id: unitId,
+              title: unit?.titleEn || 'New Lesson',
+              titleAr: unit?.titleAr || 'درس جديد',
+              content: unit?.conceptEn,
+              contentAr: unit?.conceptAr,
+              proficiencyLevel: selectedWritingLevel as any
+            } as Lesson;
+            setActiveLesson(lessonObj);
+            setView('lesson');
+          }}
+        />
+      );
+    }
+    if (view === 'expression-curriculum') {
+      const units = ALL_EXPRESSION_UNITS[selectedExpressionLevel];
+      return (
+        <ExpressionCurriculumCompanion 
+          lang={lang} 
+          level={selectedExpressionLevel}
+          onBack={() => setView('modern-curriculum')} 
+          onStartLesson={(unitId) => {
+            const unit = units.find(u => u.id === unitId);
+            const lessonObj = {
+              id: unitId,
+              title: unit?.titleEn || 'New Lesson',
+              titleAr: unit?.titleAr || 'درس جديد',
+              content: unit?.philosophyEn,
+              contentAr: unit?.philosophyAr,
+              proficiencyLevel: selectedExpressionLevel as any
             } as Lesson;
             setActiveLesson(lessonObj);
             setView('lesson');
@@ -2828,12 +2944,12 @@ export default function App() {
       );
     }
     if (view === 'story-library') {
-      return <StoryLibrary lang={lang} profile={userProfile} onUpdateProfile={(p) => setUserProfile(p as StudentProfile)} onNavigate={setView} />;
+      return <StoryLibrary lang={lang} profile={userProfile} onUpdateProfile={(p) => setUserProfile(p as StudentProfile)} onNavigate={setView} onBack={() => setView('dashboard')} />;
     }
 
     if (view === 'placement-test') {
       return (
-        <PlacementTest lang={lang} onComplete={async (level) => {
+        <PlacementTest lang={lang} onBack={() => setView('dashboard')} onComplete={async (level) => {
           try {
             await setDoc(doc(db, 'students', currentUser.uid), { level }, { merge: true });
             setView('dashboard');
@@ -2899,7 +3015,23 @@ export default function App() {
       return <LessonPlayer 
         lang={lang} 
         lesson={activeLesson} 
-        onBack={() => setView('curriculum')}
+        onBack={() => {
+          if (activeLesson.id?.startsWith('r_')) {
+            setView('reading-curriculum');
+          } else if (activeLesson.id?.startsWith('g_')) {
+            setView('grammar-curriculum');
+          } else if (activeLesson.id?.startsWith('c_')) {
+            setView('conversation-curriculum');
+          } else if (activeLesson.id?.startsWith('w_')) {
+            setView('writing-curriculum');
+          } else if (activeLesson.id?.startsWith('e_')) {
+            setView('expression-curriculum');
+          } else if (activeLesson.id?.startsWith('m_')) {
+             setView('modern-curriculum');
+          } else {
+            setView('curriculum');
+          }
+        }}
         onComplete={handleLessonComplete}
         category={cat}
         level={activeLesson.proficiencyLevel}

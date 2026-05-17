@@ -134,7 +134,7 @@ const STORIES: Story[] = [
   }
 ];
 
-export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { lang: Language, profile: UserProfile, onUpdateProfile: (p: UserProfile) => void, onNavigate: (v: any) => void }) => {
+export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBack }: { lang: Language, profile: UserProfile, onUpdateProfile: (p: UserProfile) => void, onNavigate: (v: any) => void, onBack: () => void }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
@@ -357,6 +357,13 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate }: { l
   return (
     <div className={`p-4 md:p-8 max-w-7xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <header className="mb-12">
+        <button 
+          onClick={onBack}
+          className="flex items-center gap-2 text-slate-400 hover:text-[#002147] transition-colors mb-4 font-bold"
+        >
+          <ArrowLeft size={20} className={isRtl ? 'rotate-180' : ''} />
+          {isRtl ? 'العودة للرئيسية' : 'Back to Dashboard'}
+        </button>
         <h2 className="text-3xl font-black text-[#002147]">{t.storyLibrary}</h2>
         <p className="text-slate-400 mt-1 font-medium">{isRtl ? 'طور مهارات القراءة والاستماع عبر مكتبة من القصص العالمية' : 'Develop reading and listening skills through a library of global stories'}</p>
       </header>

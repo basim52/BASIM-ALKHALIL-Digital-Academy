@@ -220,6 +220,12 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
     <div className={`min-h-screen bg-[#f8fafc] p-4 md:p-10 ${isRtl ? 'font-arabic' : 'font-sans'} relative overflow-x-hidden`} dir={isRtl ? 'rtl' : 'ltr'}>
       <header className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 mb-8 md:mb-16">
         <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-start">
+          <button 
+            onClick={onBack}
+            className="md:hidden self-start flex items-center gap-2 text-slate-400 hover:text-[#002147] transition-all group mb-2"
+          >
+            <ArrowLeft size={20} className={isRtl ? 'rotate-180' : ''} />
+          </button>
           <motion.div 
             whileHover={{ scale: 1.1, rotate: 5 }}
             className="w-16 md:w-24 h-16 md:h-24 bg-[#002147] text-white rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shadow-xl relative overflow-hidden"
@@ -238,7 +244,14 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <button 
+            onClick={onBack}
+            className="hidden md:flex items-center gap-2 px-5 py-3 rounded-2xl bg-white border-2 border-slate-100 text-[#002147] hover:border-[#002147]/20 transition-all shadow-sm mr-2"
+          >
+            <ArrowLeft size={18} className={isRtl ? 'rotate-180' : ''} />
+            <span className="font-black text-sm uppercase tracking-widest">{isRtl ? 'رجوع' : 'Back'}</span>
+          </button>
 
           <button 
             onClick={() => setShowStickerBook(true)}

@@ -14,6 +14,7 @@ import {
   Library,
   ArrowLeft,
   XCircle,
+  Pause,
   Lightbulb,
   CheckCircle2,
   Trophy,
@@ -21,6 +22,9 @@ import {
   Settings,
   Image as ImageIcon,
   Volume2,
+  VolumeX,
+  Square,
+  Quote,
   Plus as PlusIcon,
   Clock as ClockIcon
 } from 'lucide-react';
@@ -520,7 +524,15 @@ export const ReadingCurriculumCompanion = ({ lang, level = 'A1', onBack, onStart
   const [activeTab, setActiveTab] = useState<'visual' | 'lessons' | 'lab'>('lab');
   const [loadingLesson, setLoadingLesson] = useState<string | null>(null);
   const [activeLesson, setActiveLesson] = useState<{ title: string; step: number } | null>(null);
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const isRtl = lang === 'ar';
+
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
 
   useEffect(() => {
     if (loadingLesson) {
@@ -535,10 +547,43 @@ export const ReadingCurriculumCompanion = ({ lang, level = 'A1', onBack, onStart
 
   const units = ALL_READING_UNITS[level];
 
-  const handleSpeech = (text: string) => {
+  const handleSpeech = (text: string, voiceLang: string = 'en-US', id: string) => {
+    if (speakingId === id) {
+      handleStopSpeech();
+      return;
+    }
+
+    handleStopSpeech();
+    
+    if (!text) return;
+
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
+    utterance.lang = voiceLang;
+    utterance.rate = 0.9;
+    
+    utterance.onstart = () => {
+      setIsSpeaking(true);
+      setSpeakingId(id);
+    };
+    
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      setSpeakingId(null);
+    };
+    
+    utterance.onerror = (e) => {
+      console.error('Speech error:', e);
+      setIsSpeaking(false);
+      setSpeakingId(null);
+    };
+    
     window.speechSynthesis.speak(utterance);
+  };
+
+  const handleStopSpeech = () => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    setSpeakingId(null);
   };
 
   const levelInfoAr = {
@@ -708,12 +753,60 @@ export const ReadingCurriculumCompanion = ({ lang, level = 'A1', onBack, onStart
                 </div>
                 
                 <div className="w-full lg:w-96 space-y-6">
-                   <div className="bg-[#C49E3A] p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
-                      <Brain className="mb-6 opacity-80" size={32} />
+                    <div className="bg-[#C49E3A] p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
+                      <div className="flex justify-between items-start mb-6">
+                        <Brain className="opacity-80" size={32} />
+                        <div className="flex gap-2">
+                           <button 
+                             onClick={() => handleSpeech(selectedUnit.prepQuestionEn, 'en-US', 'mental-prep-en')}
+                             className={`p-2 rounded-lg transition-all flex items-center gap-1 ${speakingId === 'mental-prep-en' ? 'bg-white text-[#C49E3A] scale-110' : 'bg-white/20 hover:bg-white/40'}`}
+                             title={isRtl ? 'استماع (إنجليزي)' : 'Listen (EN)'}
+                           >
+                             {speakingId === 'mental-prep-en' ? <Square size={16} fill="currentColor" /> : <Volume2 size={16} />}
+                             <span className="text-[10px] font-bold">EN</span>
+                           </button>
+                           <button 
+                             onClick={() => handleSpeech(selectedUnit.prepQuestionAr, 'ar-SA', 'mental-prep-ar')}
+                             className={`p-2 rounded-lg transition-all flex items-center gap-1 ${speakingId === 'mental-prep-ar' ? 'bg-white text-[#C49E3A] scale-110' : 'bg-white/20 hover:bg-white/40'}`}
+                             title={isRtl ? 'استماع (عربي)' : 'Listen (AR)'}
+                           >
+                             {speakingId === 'mental-prep-ar' ? <Square size={16} fill="currentColor" /> : <Volume2 size={16} />}
+                             <span className="text-[10px] font-bold">AR</span>
+                           </button>
+                        </div>
+                      </div>
                       <p className="text-xs font-black uppercase tracking-widest opacity-80 mb-2">{isRtl ? 'التهيئة الذهنية' : 'Mental Preparation'}</p>
-                      <p className="text-sm font-bold leading-relaxed">
+                      <p className="text-sm font-bold leading-relaxed mb-6">
                          {isRtl ? selectedUnit.prepQuestionAr : selectedUnit.prepQuestionEn}
                       </p>
+                      
+                      <div className="space-y-3 pt-4 border-t border-white/20">
+                        <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-2">{isRtl ? 'مفردات هامة' : 'Key Vocabulary'}</p>
+                        {selectedUnit.cards.slice(0, 3).map((card) => (
+                          <div key={`prep-vocab-${card.id}`} className="flex items-center justify-between bg-white/10 p-3 rounded-xl hover:bg-white/20 transition-all">
+                            <div className="flex flex-col">
+                              <span className="text-xs font-black">{card.en}</span>
+                              <span className="text-[10px] opacity-60 font-medium">{card.ar}</span>
+                            </div>
+                            <div className="flex gap-1">
+                              {speakingId === `prep-card-${card.id}` && (
+                                <button 
+                                  onClick={handleStopSpeech}
+                                  className="w-8 h-8 rounded-lg bg-rose-500 text-white flex items-center justify-center transition-all shadow-lg"
+                                >
+                                  <Square size={14} fill="currentColor" />
+                                </button>
+                              )}
+                              <button 
+                                onClick={() => handleSpeech(card.en, 'en-US', `prep-card-${card.id}`)}
+                                className={`w-8 h-8 rounded-lg transition-all flex items-center justify-center ${speakingId === `prep-card-${card.id}` ? 'bg-[#002147] text-white scale-110' : 'bg-white/20 hover:bg-white/40'}`}
+                              >
+                                {speakingId === `prep-card-${card.id}` ? <Pause size={14} fill="currentColor" /> : <Volume2 size={14} />}
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                    </div>
                 </div>
               </div>
@@ -729,15 +822,34 @@ export const ReadingCurriculumCompanion = ({ lang, level = 'A1', onBack, onStart
                     >
                       <button 
                         onClick={() => setActiveLesson(null)}
-                        className="absolute top-8 right-8 text-white/40 hover:text-white transition-colors"
+                        className="absolute top-8 left-8 flex items-center gap-2 text-white/40 hover:text-white transition-colors group"
                       >
-                        <XCircle size={32} />
+                        <ArrowLeft className={isRtl ? 'rotate-180' : ''} />
+                        <span className="text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                          {isRtl ? 'رجوع' : 'Back'}
+                        </span>
                       </button>
 
                       <div className="max-w-3xl mx-auto w-full">
                         <AnimatePresence mode="wait">
                           {activeLesson.step === 1 && (
                             <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8 text-center">
+                              <div className="flex justify-center gap-4 mb-4">
+                                <button 
+                                  onClick={() => handleSpeech(selectedUnit.prepQuestionEn, 'en-US', 'internal-prep-en')}
+                                  className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all ${speakingId === 'internal-prep-en' ? 'bg-[#C49E3A] text-white scale-105 shadow-lg' : 'bg-white/10 hover:bg-white/20'}`}
+                                >
+                                  {speakingId === 'internal-prep-en' ? <Square size={18} fill="currentColor" /> : <Volume2 size={18} />}
+                                  <span className="text-xs font-bold uppercase">{isRtl ? 'توقف' : 'Listen EN'}</span>
+                                </button>
+                                <button 
+                                  onClick={() => handleSpeech(selectedUnit.prepQuestionAr, 'ar-SA', 'internal-prep-ar')}
+                                  className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all ${speakingId === 'internal-prep-ar' ? 'bg-[#C49E3A] text-white scale-105 shadow-lg' : 'bg-white/10 hover:bg-white/20'}`}
+                                >
+                                  {speakingId === 'internal-prep-ar' ? <Square size={18} fill="currentColor" /> : <Volume2 size={18} />}
+                                  <span className="text-xs font-bold uppercase">{isRtl ? 'توقف' : 'Listen AR'}</span>
+                                </button>
+                              </div>
                               <h3 className="text-4xl font-black">{isRtl ? 'التهيئة الذهنية' : 'Preparation'}</h3>
                               <p className="text-xl text-blue-100/70">{isRtl ? selectedUnit.prepQuestionAr : selectedUnit.prepQuestionEn}</p>
                               <button onClick={() => setActiveLesson({ ...activeLesson, step: 2 })} className="px-12 py-5 bg-[#C49E3A] text-white rounded-full font-black">
@@ -747,7 +859,25 @@ export const ReadingCurriculumCompanion = ({ lang, level = 'A1', onBack, onStart
                           )}
                           {activeLesson.step === 2 && (
                             <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
-                               <h3 className="text-xl font-black text-[#C49E3A]">{isRtl ? 'تحليل النص' : 'Text Analysis'}</h3>
+                               <div className="flex items-center justify-between">
+                                 <h3 className="text-xl font-black text-[#C49E3A]">{isRtl ? 'تحليل النص' : 'Text Analysis'}</h3>
+                                 <div className="flex gap-2">
+                                   <button 
+                                     onClick={() => handleSpeech(selectedUnit.readingTextEn, 'en-US', 'internal-text-en')}
+                                     className={`p-4 rounded-xl transition-all flex items-center gap-2 ${speakingId === 'internal-text-en' ? 'bg-[#C49E3A] text-white scale-105' : 'bg-white/10 hover:bg-white/20'}`}
+                                   >
+                                     {speakingId === 'internal-text-en' ? <Square size={20} fill="currentColor" /> : <Volume2 size={20} />}
+                                     <span className="text-[10px] font-black underline uppercase">EN</span>
+                                   </button>
+                                   <button 
+                                     onClick={() => handleSpeech(selectedUnit.readingTextAr, 'ar-SA', 'internal-text-ar')}
+                                     className={`p-4 rounded-xl transition-all flex items-center gap-2 ${speakingId === 'internal-text-ar' ? 'bg-[#C49E3A] text-white scale-105' : 'bg-white/10 hover:bg-white/20'}`}
+                                   >
+                                     {speakingId === 'internal-text-ar' ? <Square size={20} fill="currentColor" /> : <Volume2 size={20} />}
+                                     <span className="text-[10px] font-black underline uppercase">AR</span>
+                                   </button>
+                                 </div>
+                               </div>
                                <div className="bg-white p-8 rounded-[2.5rem] text-[#002147] shadow-inner max-h-[300px] overflow-y-auto">
                                   <ReactMarkdown>{isRtl ? selectedUnit.readingTextAr : selectedUnit.readingTextEn}</ReactMarkdown>
                                </div>
@@ -800,7 +930,31 @@ export const ReadingCurriculumCompanion = ({ lang, level = 'A1', onBack, onStart
                                 <div className="text-center">
                                    <h4 className="font-black text-[#002147]">{card.en}</h4>
                                    <p className="text-slate-400 font-bold text-sm tracking-wide">{card.ar}</p>
-                                   <button onClick={() => handleSpeech(card.en)} className="mt-2 text-slate-300 hover:text-[#002147] transition-colors"><Volume2 size={16} /></button>
+                                   <div className="flex items-center justify-center gap-3 mt-3">
+                                      <button 
+                                        onClick={() => handleSpeech(card.en, 'en-US', `card-en-${card.id}`)} 
+                                        className={`p-2 rounded-lg transition-all ${speakingId === `card-en-${card.id}` ? 'bg-[#002147] text-white shadow-lg' : 'text-slate-300 hover:text-[#002147] hover:bg-white'}`}
+                                        title={isRtl ? 'استماع إنجليزي' : 'Listen EN'}
+                                      >
+                                        {speakingId === `card-en-${card.id}` ? <Square size={16} fill="currentColor" /> : <Volume2 size={16} />}
+                                      </button>
+                                      <button 
+                                        onClick={() => handleSpeech(card.ar, 'ar-SA', `card-ar-${card.id}`)} 
+                                        className={`p-2 rounded-lg transition-all font-bold text-[10px] ${speakingId === `card-ar-${card.id}` ? 'bg-[#002147] text-white shadow-lg' : 'text-slate-300 hover:text-[#002147] hover:bg-white'}`}
+                                        title={isRtl ? 'استماع عربي' : 'Listen AR'}
+                                      >
+                                        {speakingId === `card-ar-${card.id}` ? <Square size={16} fill="currentColor" /> : 'AR'}
+                                      </button>
+                                       {speakingId && (
+                                         <button 
+                                           onClick={handleStopSpeech} 
+                                           className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+                                           title={isRtl ? 'توقف' : 'Stop'}
+                                         >
+                                           <Square size={16} />
+                                         </button>
+                                       )}
+                                   </div>
                                 </div>
                               </div>
                             ))}
@@ -832,14 +986,37 @@ export const ReadingCurriculumCompanion = ({ lang, level = 'A1', onBack, onStart
                         {activeTab === 'lab' && (
                           <motion.div key="lab" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center text-center py-10">
                             <h3 className="text-2xl font-black text-[#002147] mb-6">{isRtl ? 'النص التعليمي المعتمد' : 'Official Educational Passage'}</h3>
-                            <div className="max-w-2xl w-full p-8 bg-slate-50 border border-slate-200 rounded-[2.5rem] mb-6 shadow-inner italic">
-                               <p className="text-3xl font-serif text-[#002147] leading-relaxed">
-                                  "{isRtl ? selectedUnit.readingTextAr : selectedUnit.readingTextEn}"
+                            <div className="max-w-4xl w-full p-8 md:p-12 bg-slate-50 border border-slate-200 rounded-[3rem] mb-10 shadow-inner relative group">
+                               <div className="absolute top-6 right-6 opacity-10 group-hover:opacity-100 transition-opacity">
+                                  <Quote size={48} className="text-[#002147]" />
+                                </div>
+                               <p className="text-3xl md:text-5xl font-serif text-[#002147] leading-[1.6] md:leading-[1.8] font-medium">
+                                  {isRtl ? selectedUnit.readingTextAr : selectedUnit.readingTextEn}
                                </p>
                             </div>
-                            <button onClick={() => handleSpeech(selectedUnit.readingTextEn)} className="px-10 py-4 bg-[#002147] text-white rounded-full font-black text-sm flex items-center gap-2 hover:bg-[#C49E3A] transition-all">
-                               <Volume2 size={20} /> {isRtl ? 'استمع للنص (EN)' : 'Listen to Text'}
-                            </button>
+                            <div className="flex flex-wrap justify-center gap-4">
+                               <button 
+                                 onClick={() => handleSpeech(selectedUnit.readingTextEn, 'en-US', 'lab-en')} 
+                                 className={`px-12 py-6 rounded-full font-black text-sm flex items-center gap-3 transition-all ${speakingId === 'lab-en' ? 'bg-[#C49E3A] text-[#002147] scale-105 shadow-xl' : 'bg-[#002147] text-white hover:bg-[#002147]/90'}`}
+                               >
+                                  {speakingId === 'lab-en' ? <Square size={20} fill="currentColor" /> : <Volume2 size={20} />} 
+                                  {isRtl ? 'استماع (EN)' : 'Listen (EN)'}
+                               </button>
+                               <button 
+                                 onClick={() => handleSpeech(selectedUnit.readingTextAr, 'ar-SA', 'lab-ar')} 
+                                 className={`px-12 py-6 rounded-full font-black text-sm flex items-center gap-3 transition-all ${speakingId === 'lab-ar' ? 'bg-[#C49E3A] text-[#002147] scale-105 shadow-xl' : 'bg-slate-200 text-[#002147] hover:bg-slate-300'}`}
+                               >
+                                  {speakingId === 'lab-ar' ? <Square size={20} fill="currentColor" /> : <Volume2 size={20} />} 
+                                  {isRtl ? 'استماع (AR)' : 'Listen (AR)'}
+                               </button>
+                               <button 
+                                 onClick={handleStopSpeech} 
+                                 className={`px-8 py-6 rounded-full font-black text-sm flex items-center gap-3 shadow-lg transition-all ${speakingId ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-300 opacity-50 cursor-not-allowed'}`}
+                                 disabled={!speakingId}
+                               >
+                                  <Square size={20} /> {isRtl ? 'توقف' : 'Stop'}
+                               </button>
+                             </div>
                           </motion.div>
                         )}
                       </AnimatePresence>

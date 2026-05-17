@@ -222,6 +222,7 @@ async function startServer() {
         Level: ${level}
         
         Task: Create a deep, high-quality interactive lesson with specialized sections.
+        
         Output JSON STRICTLY following this schema:
         {
           "title": "Topic Title",
@@ -232,8 +233,16 @@ async function startServer() {
             "objectives": ["Obj 1", "Obj 2"],
             "objectivesAr": ["هدف 1", "هدف 2"]
           },
-          "content": "Detailed markdown content in English",
+          "content": "Detailed markdown overview in English",
           "contentAr": "محتوى مفصل بالعربية بتنسيق مارك داون",
+          "readingText": {
+            "paragraphs": [
+              { "en": "English paragraph text", "ar": "الترجمة العربية للفقرة" }
+            ]
+          },
+          "vocabulary": [
+            { "word": "Word", "phonetic": "fə-NET-ik", "meaningAr": "المعنى", "example": "Sentence example" }
+          ],
           "imageryPrompt": "DALL-E style prompt for lesson image",
           "exercises": [
             {
@@ -259,6 +268,7 @@ async function startServer() {
         }
         
         Ensure everything is in BOTH English and Professional Academic Arabic.
+        For the readingText, provide at least 2-3 substantial paragraphs.
       `;
 
       const result = await callAiWithRetry({
@@ -280,11 +290,35 @@ async function startServer() {
       }
       
       try {
-        const parsed = JSON.parse(cleanText);
+        const textToParse = cleanText;
+        let parsed;
+        try {
+          parsed = JSON.parse(textToParse);
+        } catch (e) {
+          // Robust extraction if standard parse fails
+          const arrayStart = textToParse.indexOf('[');
+          const objectStart = textToParse.indexOf('{');
+          const startIdx = (arrayStart !== -1 && (objectStart === -1 || arrayStart < objectStart)) ? arrayStart : objectStart;
+          
+          if (startIdx !== -1) {
+            const endChar = (textToParse[startIdx] === '[') ? ']' : '}';
+            const endIdx = textToParse.lastIndexOf(endChar);
+            if (endIdx > startIdx) {
+              parsed = JSON.parse(textToParse.substring(startIdx, endIdx + 1));
+            } else {
+              throw e;
+            }
+          } else {
+            throw e;
+          }
+        }
         res.json(parsed);
       } catch (parseErr: any) {
         logToFile(`JSON Parse Error: ${parseErr.message}`);
-        throw new Error(`Failed to parse AI response as JSON`);
+        res.status(500).json({ 
+          error: "Failed to parse AI response as JSON", 
+          raw: cleanText.substring(0, 500) 
+        });
       }
     } catch (error: any) {
       logToFile(`Lesson Generation Fatal Error: ${error.message}`);
