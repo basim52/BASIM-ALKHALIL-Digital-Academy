@@ -81,7 +81,7 @@ export enum CreditCost {
 
 export const MASTER_ADMINS = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com', 'aboodalkhaleel73@gmail.com', 'ab3256792@gmail.com'];
 
-export type AppView = 'dashboard' | 'placement-test' | 'curriculum' | 'lesson' | 'progress' | 'leaderboard' | 'chat' | 'admin' | 'ai-chat' | 'video-library' | 'story-library' | 'credits' | 'early-childhood' | 'oxford-discover';
+export type AppView = 'dashboard' | 'placement-test' | 'curriculum' | 'lesson' | 'progress' | 'leaderboard' | 'chat' | 'admin' | 'ai-chat' | 'video-library' | 'story-library' | 'credits' | 'early-childhood' | 'oxford-discover' | 'reading-curriculum' | 'modern-curriculum';
 
 export interface WhatsAppNotification {
   id: string;

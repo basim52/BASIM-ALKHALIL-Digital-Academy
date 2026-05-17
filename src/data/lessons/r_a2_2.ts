@@ -72,6 +72,38 @@ Workplace posters often use **Imperatives** (orders).
       ]
     }
   ],
+  readingText: {
+    paragraphs: [
+      {
+        en: 'In a modern workplace, digital **etiquette** is essential. When sending a message, always include a clear **subject** line. This helps the **recipient** understand the purpose of your email immediately.',
+        ar: 'في بيئة العمل الحديثة، **الإتيكيت** الرقمي أمر أساسي. عند إرسال رسالة، قم دائماً بتضمين سطر **موضوع** واضح. هذا يساعد **المستلم** على فهم غرض بريدك الإلكتروني فوراً.'
+      },
+      {
+        en: 'If you have additional files, mention that they are **attached**. For urgent tasks, some people use **ASAP**, which means "As Soon As Possible". However, being polite is always the most effective strategy.',
+        ar: 'إذا كان لديك ملفات إضافية، اذكر أنها **مرفقة**. بالنسبة للمهام العاجلة، يستخدم البعض **ASAP**، والتي تعني "في أسرع وقت ممكن". ومع ذلك، فإن التحلي بالأدب هو دائماً الاستراتيجية الأكثر فعالية.'
+      }
+    ]
+  },
+  vocabulary: [
+    {
+      word: 'Etiquette',
+      phonetic: 'ˈetɪket',
+      meaningAr: 'إتيكيت / آداب السلوك',
+      example: 'Digital etiquette is important for professional success.'
+    },
+    {
+      word: 'Recipient',
+      phonetic: 'rɪˈsɪpiənt',
+      meaningAr: 'مستلم / متلقي',
+      example: 'The recipient of the email was very impressed.'
+    },
+    {
+      word: 'Attached',
+      phonetic: 'əˈtætʃt',
+      meaningAr: 'مرفق / ملحق',
+      example: 'Please find the report attached to this message.'
+    }
+  ],
   quiz: [
     {
       question: "What does 'Attached' mean in an email?",

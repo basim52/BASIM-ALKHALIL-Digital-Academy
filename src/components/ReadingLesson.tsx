@@ -212,13 +212,13 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
                     </div>
                   </div>
 
-                  <div className="bg-cream/50 rounded-3xl p-8 border-l-8 border-oxford-gold hover:translate-y-[-4px] transition-transform shadow-sm">
+                    <div className="bg-cream/50 rounded-3xl p-8 border-l-8 border-oxford-gold hover:translate-y-[-4px] transition-transform shadow-sm">
                     <p className="text-xl md:text-2xl leading-relaxed text-oxford-navy font-medium italic mb-6">
                       {isRtl ? 'فكر في هذا الأمر: ' : 'Think about it: '}
-                      {isRtl ? 'كم مرة تقرأ باللغة الإنجليزية في يومك المعتاد؟ هل تلاحظ كيف ترتبط الكلمات ببعضها البعض؟' : 'How often do you read in English in your typical day? Do you notice how words connect to each other?'}
+                      {isRtl ? (lesson.warmup?.missionAr || 'نشط عقلك للبدء في هذا الدرس.') : (lesson.warmup?.mission || 'Activate your mind to start this lesson.')}
                     </p>
                     <button 
-                      onClick={() => speak(isRtl ? 'فكر في هذا الأمر: كم مرة تقرأ باللغة الإنجليزية في يومك المعتاد؟ هل تلاحظ كيف ترتبط الكلمات ببعضها البعض؟' : 'Think about it: How often do you read in English in your typical day? Do you notice how words connect to each other?', isRtl ? 'ar' : 'en', 'warmup-text')}
+                      onClick={() => speak(isRtl ? (lesson.warmup?.missionAr || '') : (lesson.warmup?.mission || ''), isRtl ? 'ar' : 'en', 'warmup-text')}
                       className="flex items-center gap-2 bg-oxford-navy text-white px-5 py-3 rounded-xl font-bold hover:bg-amber-accent transition-colors"
                     >
                       {isPlaying === 'warmup-text' ? <Pause size={18} /> : <Volume2 size={18} />}
@@ -287,27 +287,26 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
                   </div>
 
                   <div className="space-y-16">
-                    {lesson.readingText?.paragraphs.map((para, idx) => (
-                      <div key={idx} className="group relative">
-                        {/* English Part */}
-                        <div className={`p-6 md:p-10 rounded-t-3xl border-2 transition-all ${isPlaying === `para-en-${idx}` ? 'bg-amber-accent/5 border-amber-accent' : 'bg-white border-oxford-navy/5'}`}>
-                          <div className="flex justify-between items-start gap-4 mb-4 md:mb-6">
-                            <span className="font-mono text-oxford-gold font-black bg-oxford-navy/5 px-3 py-1 rounded-lg text-xs md:text-sm">{(idx + 1).toString().padStart(2, '0')}</span>
-                            <button 
-                              onClick={() => speak(para.en, 'en', `para-en-${idx}`)}
-                              className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all ${isPlaying === `para-en-${idx}` ? 'bg-amber-accent text-white' : 'bg-oxford-navy text-white hover:bg-amber-accent hover:scale-110'}`}
-                            >
-                              {isPlaying === `para-en-${idx}` ? <Pause size={20} /> : <Volume2 size={20} />}
-                            </button>
+                    {lesson.readingText?.paragraphs ? (
+                      lesson.readingText.paragraphs.map((para, idx) => (
+                        <div key={idx} className="group relative">
+                          <div className={`p-6 md:p-10 rounded-t-3xl border-2 transition-all ${isPlaying === `para-en-${idx}` ? 'bg-amber-accent/5 border-amber-accent' : 'bg-white border-oxford-navy/5'}`}>
+                            <div className="flex justify-between items-start gap-4 mb-4 md:mb-6">
+                              <span className="font-mono text-oxford-gold font-black bg-oxford-navy/5 px-3 py-1 rounded-lg text-xs md:text-sm">{(idx + 1).toString().padStart(2, '0')}</span>
+                              <button 
+                                onClick={() => speak(para.en, 'en', `para-en-${idx}`)}
+                                className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all ${isPlaying === `para-en-${idx}` ? 'bg-amber-accent text-white' : 'bg-oxford-navy text-white hover:bg-amber-accent hover:scale-110'}`}
+                              >
+                                {isPlaying === `para-en-${idx}` ? <Pause size={20} /> : <Volume2 size={20} />}
+                              </button>
+                            </div>
+                            <div className="prose prose-slate max-w-none prose-p:text-lg md:prose-p:text-2xl prose-p:leading-[1.8] prose-p:font-roboto prose-p:font-medium prose-p:text-oxford-navy prose-strong:text-[#C49E3A] prose-table:border prose-table:border-slate-200 prose-th:bg-slate-50 prose-th:p-4 prose-td:p-4 prose-td:border prose-td:border-slate-100 overflow-x-auto custom-markdown-content font-roboto">
+                              <ReactMarkdown>{para.en}</ReactMarkdown>
+                            </div>
                           </div>
-                          <div className="prose prose-slate max-w-none prose-p:text-lg md:prose-p:text-2xl prose-p:leading-[1.8] prose-p:font-roboto prose-p:font-medium prose-p:text-oxford-navy prose-strong:text-[#C49E3A] prose-table:border prose-table:border-slate-200 prose-th:bg-slate-50 prose-th:p-4 prose-td:p-4 prose-td:border prose-td:border-slate-100 overflow-x-auto custom-markdown-content font-roboto">
-                            <ReactMarkdown>{para.en}</ReactMarkdown>
-                          </div>
-                        </div>
 
-                        {/* Arabic Translation (Subtle) */}
-                        <div className={`p-6 md:p-10 rounded-b-3xl border-2 border-t-0 transition-all ${isPlaying === `para-ar-${idx}` ? 'bg-oxford-gold/5 border-oxford-gold' : 'bg-cream/20 border-oxford-navy/5'}`}>
-                           <div className="flex justify-start mb-4">
+                          <div className={`p-6 md:p-10 rounded-b-3xl border-2 border-t-0 transition-all ${isPlaying === `para-ar-${idx}` ? 'bg-oxford-gold/5 border-oxford-gold' : 'bg-cream/20 border-oxford-navy/5'}`}>
+                            <div className="flex justify-start mb-4">
                               <button 
                                 onClick={() => speak(para.ar, 'ar', `para-ar-${idx}`)}
                                 className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-tajawal font-bold text-xs md:text-sm transition-all ${isPlaying === `para-ar-${idx}` ? 'bg-oxford-gold text-oxford-navy' : 'text-oxford-navy/40 hover:text-oxford-gold hover:bg-oxford-gold/10'}`}
@@ -315,13 +314,20 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
                                 {isPlaying === `para-ar-${idx}` ? <Pause size={14} /> : <Volume2 size={14} />}
                                 {isRtl ? 'استمع للترجمة' : 'Listen to Arabic'}
                               </button>
-                           </div>
-                           <div className="prose prose-slate max-w-none prose-p:text-base md:prose-p:text-xl prose-p:leading-relaxed prose-p:font-tajawal prose-p:text-oxford-navy/60 overflow-x-auto text-right">
-                             <ReactMarkdown>{para.ar}</ReactMarkdown>
-                           </div>
+                            </div>
+                            <div className="prose prose-slate max-w-none prose-p:text-base md:prose-p:text-xl prose-p:leading-relaxed prose-p:font-tajawal prose-p:text-oxford-navy/60 overflow-x-auto text-right">
+                              <ReactMarkdown>{para.ar}</ReactMarkdown>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="bg-white p-8 md:p-12 rounded-3xl border border-oxford-navy/5 shadow-sm">
+                        <div className="prose prose-slate max-w-none prose-p:text-lg md:prose-p:text-2xl prose-p:leading-[1.8] prose-p:font-roboto prose-p:font-medium text-oxford-navy">
+                          <ReactMarkdown>{isRtl ? (lesson.contentAr || '') : (lesson.content || '')}</ReactMarkdown>
                         </div>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </motion.div>
               )}

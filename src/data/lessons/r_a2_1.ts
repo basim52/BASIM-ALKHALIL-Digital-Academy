@@ -77,6 +77,38 @@ When reading A2 texts, look for the connector to understand the logic.
       ]
     }
   ],
+  readingText: {
+    paragraphs: [
+      {
+        en: 'In our daily lives, we often use connectors like **and**, **but**, and **because** to build smarter sentences. "I like tea **and** coffee" is simple, but "I like tea **but** I don\'t like sugar" shows contrast.',
+        ar: 'في حياتنا اليومية، غالباً ما نستخدم الروابط مثل **and** و **but** و **because** لبناء جمل أكثر ذكاءً. "I like tea **and** coffee" جملة بسيطة، لكن "I like tea **but** I don\'t like sugar" تظهر التناقض.'
+      },
+      {
+        en: 'The connector **because** is vital for explaining reasons. For example: "I am studying English **because** it is important for my career." Using these words helps you transition from basic to intermediate reading.',
+        ar: 'الرابط **because** حيوي لشرح الأسباب. على سبيل المثال: "أنا أدرس الإنجليزية **لأنها** مهمة لمستقبلي المهني". استخدام هذه الكلمات يساعدك على الانتقال من القراءة الأساسية إلى المتوسطة.'
+      }
+    ]
+  },
+  vocabulary: [
+    {
+      word: 'Connector',
+      phonetic: 'kəˈnektər',
+      meaningAr: 'رابط / أداة عطف',
+      example: 'A connector joins two ideas together.'
+    },
+    {
+      word: 'Contrast',
+      phonetic: 'ˈkɒntrɑːst',
+      meaningAr: 'تناقض / تباين',
+      example: 'Use "but" to show a contrast between phrases.'
+    },
+    {
+      word: 'Vital',
+      phonetic: 'ˈvaɪtl',
+      meaningAr: 'حيوي / ضروري جداً',
+      example: 'Grammar is vital for clear communication.'
+    }
+  ],
   quiz: [
     {
       question: "Which word joins two similar ideas?",

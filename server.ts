@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
@@ -5,7 +6,6 @@ import { createServer } from "http";
 import { WebSocketServer } from "ws";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleGenAI, Modality } from "@google/genai";
-import "dotenv/config";
 
 const logToFile = (msg: string) => console.log(`[Server] ${msg}`);
 
@@ -15,16 +15,42 @@ async function startServer() {
   const wss = new WebSocketServer({ noServer: true });
   const PORT = 3000;
 
-  const API_KEY = (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "").trim();
+  const getApiKey = () => {
+    const key = (
+      process.env.GEMINI_API_KEY || 
+      process.env.GOOGLE_API_KEY || 
+      process.env.VITE_GEMINI_API_KEY || 
+      process.env.AI_STUDIO_API_KEY ||
+      ""
+    ).trim();
+    return key;
+  };
+
+  let API_KEY = getApiKey();
+  
+  // Diagnostic logging
+  logToFile(`Environment check: GEMINI_API_KEY=${!!process.env.GEMINI_API_KEY}, GOOGLE_API_KEY=${!!process.env.GOOGLE_API_KEY}, NODE_ENV=${process.env.NODE_ENV}`);
   
   if (!API_KEY) {
-    logToFile("CRITICAL: GEMINI_API_KEY is not set in the environment variables!");
+    logToFile("CRITICAL: No API Key found in environment variables!");
   } else {
-    logToFile(`API Key detected (length: ${API_KEY.length}): ${API_KEY.substring(0, 4)}...${API_KEY.substring(API_KEY.length - 4)}`);
+    logToFile(`API Key identified (using ${process.env.GEMINI_API_KEY ? 'GEMINI_API_KEY' : 'fallback'}). Length: ${API_KEY.length}`);
   }
 
-  const ai = new GoogleGenerativeAI(API_KEY);
-  const aiLive = new GoogleGenAI({ apiKey: API_KEY });
+  let ai: GoogleGenerativeAI;
+  let aiLive: GoogleGenAI;
+
+  const initAI = () => {
+    const key = getApiKey();
+    if (key) {
+      ai = new GoogleGenerativeAI(key);
+      aiLive = new GoogleGenAI({ apiKey: key });
+      return true;
+    }
+    return false;
+  };
+
+  initAI();
 
   // Robust AI caller with retry and fallback
   async function callAiWithRetry(options: any, maxRetries = 2) {
@@ -32,6 +58,10 @@ async function startServer() {
     const PRIMARY_MODEL = "gemini-1.5-flash"; 
 
     for (let i = 0; i <= maxRetries; i++) {
+      if (!ai && !initAI()) {
+        throw new Error("Gemini API key is not configured on the server.");
+      }
+      
       try {
         let modelToUse = PRIMARY_MODEL;
         if (i === 1) modelToUse = "gemini-1.5-flash-002";
@@ -88,6 +118,13 @@ async function startServer() {
   });
 
   // API Routes
+  app.get("/api/debug/env", (req, res) => {
+    const keys = Object.keys(process.env).filter(k => 
+      k.includes('API') || k.includes('KEY') || k.includes('GOOGLE') || k.includes('GEMINI')
+    );
+    res.json({ keys, nodeEnv: process.env.NODE_ENV });
+  });
+
   app.get("/api/health", (req, res) => {
     res.json({ 
       status: "ok", 
@@ -128,9 +165,9 @@ async function startServer() {
         return res.status(400).json({ error: "Missing prompt" });
       }
 
-      if (!process.env.GEMINI_API_KEY) {
-        logToFile("Error: GEMINI_API_KEY not set");
-        return res.status(500).json({ error: "Gemini API key is missing on server" });
+      if (!initAI()) {
+        logToFile("Error: GEMINI_API_KEY / GOOGLE_API_KEY not set");
+        return res.status(500).json({ error: "Gemini API key is missing on the server." });
       }
 
       const promptText = `
@@ -170,6 +207,11 @@ async function startServer() {
     try {
       const { category, level, topic } = req.body;
       if (!topic) return res.status(400).json({ error: "Missing topic" });
+
+      if (!initAI()) {
+        logToFile("Error: GEMINI_API_KEY / GOOGLE_API_KEY not set");
+        return res.status(500).json({ error: "Gemini API key is missing on the server. Please check your account settings." });
+      }
 
       const promptText = `
         SYSTEM: Generate educational content in JSON matching the requested structure.
@@ -458,12 +500,12 @@ async function startServer() {
             const modelToUse = "gemini-3.1-flash-live-preview"; 
             logToFile(`Initializing Gemini Live session: ${modelToUse}`);
 
-            if (!process.env.GEMINI_API_KEY) {
-              logToFile("ERROR: GEMINI_API_KEY missing");
-              clientWs.send(JSON.stringify({ error: "Server API key configuration error." }));
-              isConnecting = false;
-              return;
-            }
+      if (!initAI()) {
+        logToFile("ERROR: GEMINI_API_KEY missing");
+        clientWs.send(JSON.stringify({ error: "Server API key configuration error." }));
+        isConnecting = false;
+        return;
+      }
 
             try {
               const contextText = msg.context || `General tutoring at Basim Alkhalil Academy.`;

@@ -71,6 +71,38 @@ Narratives often use the **Simple Past** (-ed verbs).
       ]
     }
   ],
+  readingText: {
+    paragraphs: [
+      {
+        en: 'To understand a story or a manual, you must follow the **sequence** of events. **First**, identify the starting point. **Next**, look for connectors like "then" or "after that" to follow the logical flow.',
+        ar: 'لفهم قصة أو كتيب تعليمات، يجب عليك اتباع **تسلسل** الأحداث. **أولاً**، حدد نقطة البداية. **تالياً**، ابحث عن الروابط مثل "then" أو "after that" لاتباع التدفق المنطقي.'
+      },
+      {
+        en: 'In a daily **routine**, the order is vital. If you miss a step, the whole process might fail. **Finally**, always check the conclusion to ensure you have reached the desired result successfully.',
+        ar: 'في **الروتين** اليومي، الترتيب حيوي. إذا فاتتك خطوة، قد تفشل العملية بأكملها. **أخيراً**، تحقق دائماً من الخاتمة للتأكد من وصولك إلى النتيجة المرجوة بنجاح.'
+      }
+    ]
+  },
+  vocabulary: [
+    {
+      word: 'Sequence',
+      phonetic: 'ˈsiːkwəns',
+      meaningAr: 'تسلسل / تعاقب',
+      example: 'The sequence of events was very easy to follow.'
+    },
+    {
+      word: 'Routine',
+      phonetic: 'ruːˈtiːn',
+      meaningAr: 'روتين / عمل رتيب',
+      example: 'My morning routine includes reading the news.'
+    },
+    {
+      word: 'Finally',
+      phonetic: 'ˈfaɪnəli',
+      meaningAr: 'أخيراً / في النهاية',
+      example: 'Finally, the traveler reached the mountain peak.'
+    }
+  ],
   quiz: [
     {
       question: "Which word indicates the start of a story?",

@@ -68,6 +68,38 @@ Important phrases in "Terms and Conditions":
       ]
     }
   ],
+  readingText: {
+    paragraphs: [
+      {
+        en: 'Understanding a business **receipt** is a key skill for daily life. Always check the **quantity** (QTY) to ensure you received the correct number of items. The **grand total** shows the final amount you must pay including tax.',
+        ar: 'فهم **إيصال** العمل مهارة أساسية في الحياة اليومية. تحقق دائماً من **الكمية** (QTY) للتأكد من استلامك للعدد الصحيح من الأصناف. يظهر **المجموع الإجمالي** المبلغ النهائي الذي يجب عليك دفعه شاملاً الضريبة.'
+      },
+      {
+        en: 'If you are not satisfied with a product, you can often request a **refund**. Make sure to read the commerce policy carefully, as most shops require the original document within a specific time limit for any return.',
+        ar: 'إذا لم تكن راضياً عن منتج ما، يمكنك غالباً طلب **استرداد أموال** (refund). تأكد من قراءة سياسة التجارة بعناية، حيث تطلب معظم المتاجر المستند الأصلي خلال حد زمني معين لأي عملية إرجاع.'
+      }
+    ]
+  },
+  vocabulary: [
+    {
+      word: 'Receipt',
+      phonetic: 'rɪˈsiːt',
+      meaningAr: 'إيصال / فاتورة',
+      example: 'Please keep your receipt for the warranty.'
+    },
+    {
+      word: 'Quantity',
+      phonetic: 'ˈkwɒntəti',
+      meaningAr: 'كمية / عدد',
+      example: 'The quantity of items was incorrect on the bill.'
+    },
+    {
+      word: 'Refund',
+      phonetic: 'ˈriːfʌnd',
+      meaningAr: 'استرداد (مالي)',
+      example: 'I asked for a full refund because the box was empty.'
+    }
+  ],
   quiz: [
     {
       question: "What does 'QTY' stand for?",

@@ -67,6 +67,8 @@ import { CreditSystem } from './components/CreditSystem';
 import { OxfordLesson } from './components/OxfordLesson';
 import { EarlyChildhoodHome } from './components/EarlyChildhood/EarlyChildhoodHome';
 import { OxfordDiscoverCompanion } from './components/OxfordDiscoverCompanion';
+import { ReadingCurriculumCompanion, ReadingLevel, ALL_READING_UNITS } from './components/ReadingCurriculumCompanion';
+import { ModernCurriculumHome } from './components/ModernCurriculumHome';
 import { Wallet, Layers, Image as OxfordIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { familyConstellationsLesson } from './data/lessons/r_a1_4';
@@ -2388,6 +2390,7 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [view, setView] = useState<AppView>('dashboard');
+  const [selectedReadingLevel, setSelectedReadingLevel] = useState<ReadingLevel>('A1');
   const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState<Language>('ar');
   const [modules, setModules] = useState<LearningModule[]>([]);
@@ -2792,6 +2795,38 @@ export default function App() {
     if (view === 'oxford-discover') {
       return <OxfordDiscoverCompanion lang={lang} onBack={() => setView('dashboard')} />;
     }
+    if (view === 'modern-curriculum') {
+      return (
+        <ModernCurriculumHome 
+          lang={lang} 
+          onBack={() => setView('dashboard')} 
+          onNavigate={(targetView, level) => {
+            if (level) setSelectedReadingLevel(level);
+            setView(targetView);
+          }} 
+        />
+      );
+    }
+    if (view === 'reading-curriculum') {
+      const units = ALL_READING_UNITS[selectedReadingLevel];
+      return (
+        <ReadingCurriculumCompanion 
+          lang={lang} 
+          level={selectedReadingLevel}
+          onBack={() => setView('modern-curriculum')} 
+          onStartLesson={(unitId) => {
+            const unit = units.find(u => u.id === unitId);
+            const lessonObj = {
+              id: unitId,
+              title: unit?.titleEn || 'New Lesson',
+              proficiencyLevel: selectedReadingLevel as any // Mapping level to proficiency or handling it dynamically
+            } as Lesson;
+            setActiveLesson(lessonObj);
+            setView('lesson');
+          }}
+        />
+      );
+    }
     if (view === 'story-library') {
       return <StoryLibrary lang={lang} profile={userProfile} onUpdateProfile={(p) => setUserProfile(p as StudentProfile)} onNavigate={setView} />;
     }
@@ -2958,6 +2993,7 @@ export default function App() {
                     { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
                     { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
                     { id: 'oxford-discover', label: t.oxfordCompanion, icon: Layers },
+                    { id: 'modern-curriculum', label: lang === 'ar' ? 'المناهج الدراسية المطورة' : 'Modernized Curriculums', icon: Sparkles },
                     { id: 'early-childhood', label: t.earlyChildhood, icon: Baby },
                     { id: 'story-library', label: t.storyLibrary, icon: BookOpen },
                     { id: 'curriculum', label: t.curriculum, icon: BookOpen },
@@ -3023,13 +3059,14 @@ export default function App() {
                     { id: 'credits', icon: Wallet },
                     { id: 'admin', icon: ShieldAlert, show: isAdmin },
                     { id: 'early-childhood', icon: Baby },
+                    { id: 'oxford-discover', icon: OxfordIcon },
                     { id: 'video-library', icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
                     { id: 'story-library', icon: BookOpen },
                   ],
                   [
                     { id: 'curriculum', icon: BookOpen },
                     { id: 'ai-chat', icon: Mic2 },
-                    { id: 'oxford-discover', icon: OxfordIcon },
+                    { id: 'modern-curriculum', icon: Sparkles },
                     { id: 'leaderboard', icon: Trophy },
                     { id: 'progress', icon: BarChart3 },
                     { id: 'logout', icon: LogOut, action: handleLogout },

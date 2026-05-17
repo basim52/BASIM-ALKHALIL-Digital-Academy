@@ -69,6 +69,38 @@ When reading a form, match the "WH" word to the required data:
       ]
     }
   ],
+  readingText: {
+    paragraphs: [
+      {
+        en: 'When you fill out a digital form, you might see an **asterisk** (*) next to some questions. This symbol indicates that the information is **required**. You must answer these before you can submit the form successfully.',
+        ar: 'عندما تقوم بتعبئة نموذج رقمي، قد ترى علامة **النجمة** (*) بجانب بعض الأسئلة. يشير هذا الرمز إلى أن المعلومة **مطلوبة**. يجب عليك الإجابة عليها قبل أن تتمكن من إرسال النموذج بنجاح.'
+      },
+      {
+        en: 'A good survey uses **direct** questions to find out "Who", "Where", and "When". By understanding these patterns, you can navigate any **questionnaire** with confidence, whether it is for work or travel.',
+        ar: 'الاستبيان الجيد يستخدم أسئلة **مباشرة** لمعرفة "من" و"أين" و"متى". من خلال فهم هذه الأنماط، يمكنك التعامل مع أي **استبيان** بثقة، سواء كان للعمل أو للسفر.'
+      }
+    ]
+  },
+  vocabulary: [
+    {
+      word: 'Asterisk',
+      phonetic: 'ˈæstərɪsk',
+      meaningAr: 'علامة النجمة (*)',
+      example: 'The asterisk shows that the field is mandatory.'
+    },
+    {
+      word: 'Required',
+      phonetic: 'rɪˈkwaɪərd',
+      meaningAr: 'مطلوب / إلزامي',
+      example: 'Name and email are required fields in the form.'
+    },
+    {
+      word: 'Questionnaire',
+      phonetic: 'ˌkwestʃəˈner',
+      meaningAr: 'استبيان / استقصاء',
+      example: 'Please complete this questionnaire after the session.'
+    }
+  ],
   quiz: [
     {
       question: "In a digital form, what does a '*' next to a question mean?",
