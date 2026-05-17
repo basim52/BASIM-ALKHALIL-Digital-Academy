@@ -92,6 +92,13 @@ service cloud.firestore {
       allow write: if isSignedIn();
     }
 
+    match /studyPlans/{planId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
     // Credit System
     match /vouchers/{code} {
       allow read: if isSignedIn();

@@ -22,6 +22,7 @@ import {
 interface OxfordDiscoverCompanionProps {
   lang: Language;
   onBack: () => void;
+  initialUnitId?: number | null;
 }
 
 const PronunciationTrainer = ({ word, onResult }: { word: string, onResult: (success: boolean) => void }) => {
@@ -125,7 +126,7 @@ const PronunciationTrainer = ({ word, onResult }: { word: string, onResult: (suc
   );
 };
 
-const UNITS = [
+export const OXFORD_UNITS = [
   {
     id: 1,
     titleEn: 'Unit 1: The World Around Us',
@@ -814,10 +815,16 @@ const UNITS = [
   }
 ];
 
-export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanionProps) => {
+export const OxfordDiscoverCompanion = ({ lang, onBack, initialUnitId }: OxfordDiscoverCompanionProps) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [selectedUnitId, setSelectedUnitId] = useState<number | null>(null);
+
+  React.useEffect(() => {
+    if (initialUnitId) {
+      setSelectedUnitId(initialUnitId);
+    }
+  }, [initialUnitId]);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'bank' | 'lessons' | 'reading' | 'language'>('bank');
   const [activeLessonId, setActiveLessonId] = useState<number | null>(null);
@@ -825,7 +832,7 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
   const [trainingIndex, setTrainingIndex] = useState(0);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
 
-  const selectedUnit = UNITS.find(u => u.id === selectedUnitId);
+  const selectedUnit = OXFORD_UNITS.find(u => u.id === selectedUnitId);
 
   React.useEffect(() => {
     return () => {
@@ -862,7 +869,7 @@ export const OxfordDiscoverCompanion = ({ lang, onBack }: OxfordDiscoverCompanio
     window.speechSynthesis.speak(utterance);
   };
 
-  const filteredUnits = UNITS.filter(unit => {
+  const filteredUnits = OXFORD_UNITS.filter(unit => {
     const matchesSearch = unit.titleEn.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          unit.titleAr.includes(searchQuery);
     

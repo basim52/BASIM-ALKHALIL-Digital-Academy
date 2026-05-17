@@ -81,7 +81,7 @@ export enum CreditCost {
 
 export const MASTER_ADMINS = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com', 'aboodalkhaleel73@gmail.com', 'ab3256792@gmail.com'];
 
-export type AppView = 'dashboard' | 'placement-test' | 'curriculum' | 'lesson' | 'progress' | 'leaderboard' | 'chat' | 'admin' | 'ai-chat' | 'video-library' | 'story-library' | 'credits' | 'early-childhood' | 'oxford-discover' | 'reading-curriculum' | 'grammar-curriculum' | 'conversation-curriculum' | 'writing-curriculum' | 'expression-curriculum' | 'modern-curriculum';
+export type AppView = 'dashboard' | 'placement-test' | 'curriculum' | 'lesson' | 'progress' | 'leaderboard' | 'chat' | 'admin' | 'ai-chat' | 'video-library' | 'story-library' | 'credits' | 'early-childhood' | 'oxford-discover' | 'reading-curriculum' | 'grammar-curriculum' | 'conversation-curriculum' | 'writing-curriculum' | 'expression-curriculum' | 'modern-curriculum' | 'academic-planner' | 'academic-results' | 'academic-analytics';
 
 export interface WhatsAppNotification {
   id: string;
@@ -222,4 +222,16 @@ export interface AIConversationSession {
     suggestions: string[];
   };
   date: any;
+}
+
+export interface StudyPlan {
+  id?: string;
+  userId: string;
+  studentName: string;
+  createdAt: any;
+  startDate: string;
+  preferredTime: string;
+  selectedDays: number[];
+  selectedCategories: string[];
+  planItems: any[];
 }

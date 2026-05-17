@@ -519,8 +519,31 @@ export const ALL_READING_UNITS: Record<ReadingLevel, ReadingUnit[]> = {
   ]
 };
 
-export const ReadingCurriculumCompanion = ({ lang, level = 'A1', onBack, onStartLesson }: { lang: 'en' | 'ar', level?: ReadingLevel, onBack: () => void, onStartLesson: (unitId: string) => void }) => {
+export const ReadingCurriculumCompanion = ({ 
+  lang, 
+  level = 'A1', 
+  onBack, 
+  onStartLesson,
+  initialUnitId
+}: { 
+  lang: 'en' | 'ar', 
+  level?: ReadingLevel, 
+  onBack: () => void, 
+  onStartLesson: (unitId: string) => void,
+  initialUnitId?: string | null
+}) => {
   const [selectedUnit, setSelectedUnit] = useState<ReadingUnit | null>(null);
+
+  // Auto-select unit if initialUnitId is provided
+  useEffect(() => {
+    if (initialUnitId) {
+      const unit = ALL_READING_UNITS[level].find(u => u.id === initialUnitId);
+      if (unit) {
+        setSelectedUnit(unit);
+        setActiveTab('lessons'); // Switch to lessons tab when auto-starting
+      }
+    }
+  }, [initialUnitId, level]);
   const [activeTab, setActiveTab] = useState<'visual' | 'lessons' | 'lab'>('lab');
   const [loadingLesson, setLoadingLesson] = useState<string | null>(null);
   const [activeLesson, setActiveLesson] = useState<{ title: string; step: number } | null>(null);

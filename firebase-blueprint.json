@@ -64,6 +64,23 @@
       "properties": {
         "unlockedIds": { "type": "array" }
       }
+    },
+    "StudyPlan": {
+      "title": "Study Plan",
+      "description": "A generated and saved study plan for a student",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "startDate": { "type": "string" },
+        "preferredTime": { "type": "string" },
+        "selectedDays": { "type": "array" },
+        "selectedCategories": { "type": "array" },
+        "planItems": { "type": "array" }
+      },
+      "required": ["id", "userId", "planItems"]
     }
   },
   "firestore": {
@@ -122,6 +139,10 @@
     "/users/{userId}/earlyChildhood/stickers": {
       "schema": "Stickers",
       "description": "Early childhood stickers collection"
+    },
+    "/studyPlans/{planId}": {
+      "schema": "StudyPlan",
+      "description": "Saved study plans for students"
     }
   }
 }

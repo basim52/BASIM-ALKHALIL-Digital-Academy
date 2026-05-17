@@ -282,8 +282,31 @@ export const ALL_GRAMMAR_UNITS: Record<GrammarLevel, GrammarUnit[]> = {
   ]
 };
 
-export const GrammarCurriculumCompanion = ({ lang, level = 'A1', onBack, onStartLesson }: { lang: 'en' | 'ar', level?: GrammarLevel, onBack: () => void, onStartLesson: (unitId: string) => void }) => {
+export const GrammarCurriculumCompanion = ({ 
+  lang, 
+  level = 'A1', 
+  onBack, 
+  onStartLesson,
+  initialUnitId 
+}: { 
+  lang: 'en' | 'ar', 
+  level?: GrammarLevel, 
+  onBack: () => void, 
+  onStartLesson: (unitId: string) => void,
+  initialUnitId?: string | null
+}) => {
   const [selectedUnit, setSelectedUnit] = useState<GrammarUnit | null>(null);
+
+  // Auto-select unit if initialUnitId is provided
+  useEffect(() => {
+    if (initialUnitId) {
+      const unit = ALL_GRAMMAR_UNITS[level].find(u => u.id === initialUnitId);
+      if (unit) {
+        setSelectedUnit(unit);
+        setActiveTab('examples'); // Switch to examples tab when auto-starting
+      }
+    }
+  }, [initialUnitId, level]);
   const [activeTab, setActiveTab] = useState<'rules' | 'examples' | 'lab'>('lab');
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);

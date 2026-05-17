@@ -12,6 +12,7 @@ import {
   Settings, 
   LayoutDashboard, 
   GraduationCap,
+  Brain,
   MessageSquare,
   Trophy,
   Calendar,
@@ -66,6 +67,9 @@ import { ReadingLesson } from './components/ReadingLesson';
 import { CreditSystem } from './components/CreditSystem';
 import { OxfordLesson } from './components/OxfordLesson';
 import { EarlyChildhoodHome } from './components/EarlyChildhood/EarlyChildhoodHome';
+import { StudyPlanner } from './components/Academic/StudyPlanner';
+import { ResultsChart } from './components/Academic/ResultsChart';
+import { SmartAnalytics } from './components/Academic/SmartAnalytics';
 import { OxfordDiscoverCompanion } from './components/OxfordDiscoverCompanion';
 import { ReadingCurriculumCompanion, ReadingLevel, ALL_READING_UNITS } from './components/ReadingCurriculumCompanion';
 import { GrammarCurriculumCompanion, GrammarLevel, ALL_GRAMMAR_UNITS } from './components/GrammarCurriculumCompanion';
@@ -832,7 +836,7 @@ const AIParentNotes = ({ profile, studentId, lang }: { profile: UserProfile, stu
 };
 
 // StudentDashboard internal component
-const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCurriculum }: { lang: Language, profile: UserProfile, onStartConversation: () => void, onStartChat: () => void, onOpenCurriculum: () => void }) => {
+const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCurriculum, onNavigate }: { lang: Language, profile: UserProfile, onStartConversation: () => void, onStartChat: () => void, onOpenCurriculum: () => void, onNavigate: (view: AppView) => void }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [recommendation, setRecommendation] = useState<string | null>(null);
@@ -886,7 +890,7 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             </h1>
             <div className="flex flex-wrap items-center gap-3">
               <p className="text-slate-400 font-medium text-sm md:text-lg">
-                {lang === 'ar' ? 'استمر بمسار المناهج الرقمية الخاص بك' : 'Continue your digital curriculum path'}
+                {lang === 'ar' ? 'أهلاً بك في أكاديمية باسم الخليل' : 'Welcome to Basim Alkhalil Academy'}
               </p>
               <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl shadow-lg">
                 <Sparkles size={14} className="text-[#C49E3A] animate-pulse" />
@@ -943,7 +947,7 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
           <section className="lg:col-span-2 bg-white rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-12 border border-slate-200 shadow-sm relative overflow-hidden">
             <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 md:mb-10 gap-4 ${isRtl ? 'sm:flex-row-reverse' : ''}`}>
               <h3 className="text-2xl font-black text-[#002147] flex items-center gap-3">
-                <BookOpen className="text-blue-600" />
+                <LayoutDashboard size={24} className="text-blue-600" />
                 {t.learningProgress}
               </h3>
               <button 
@@ -987,6 +991,28 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
           </section>
 
           <section className="grid grid-cols-1 gap-10">
+            {/* Academic Hub Card */}
+            <motion.div 
+               whileHover={{ scale: 1.01 }}
+               onClick={() => onNavigate('academic-planner')}
+               className="bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden group shadow-xl shadow-indigo-200 border-b-8 border-indigo-900 cursor-pointer"
+            >
+              <div className="relative z-10">
+                <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-md">
+                   <Brain className="text-white" />
+                </div>
+                <h3 className="text-2xl font-black mb-2">{t.academicHub}</h3>
+                <p className="text-indigo-100 text-sm mb-6 leading-relaxed max-w-sm">
+                  {isRtl ? 'نظم دراستك، تتبع نتائجك، واستخرج تقارير تحليلية ذكية مدعومة بالذكاء الاصطناعي.' : 'Organize your studies, track results, and generate smart AI-powered analytical reports.'}
+                </p>
+                <div className="flex items-center gap-3 font-black text-[10px] uppercase tracking-widest text-indigo-300">
+                   <Sparkles size={14} className="animate-pulse" />
+                   AI Academic Control Center
+                </div>
+              </div>
+              <Brain size={160} className="absolute -bottom-10 -right-10 text-white/5 group-hover:scale-110 transition-transform hidden md:block" />
+            </motion.div>
+
             <motion.div 
               whileHover={{ scale: 1.02 }}
               className="bg-[#002147] text-white rounded-[2.5rem] p-10 relative overflow-hidden group shadow-xl shadow-blue-900/10 border-b-8 border-[#C49E3A]"
@@ -2410,6 +2436,7 @@ export default function App() {
   const [loadingCurriculum, setLoadingCurriculum] = useState(false);
   const [activeNotification, setActiveNotification] = useState<any>(null);
   const [activeStudentId, setActiveStudentId] = useState<string | null>(null);
+  const [autoStartUnitId, setAutoStartUnitId] = useState<string | null>(null);
 
   const t = translations[lang];
   const isRtl = lang === 'ar';
@@ -2803,8 +2830,51 @@ export default function App() {
     if (view === 'early-childhood') {
       return <EarlyChildhoodHome lang={lang} profile={userProfile as StudentProfile} onBack={() => setView('dashboard')} />;
     }
+    if (view === 'academic-planner') {
+      return (
+        <StudyPlanner 
+          lang={lang} 
+          userProfile={userProfile}
+          onBack={() => setView('dashboard')} 
+          onNavigateToResults={() => setView('academic-results')}
+          onNavigateToLesson={(courseId, level, unitId) => {
+            if (courseId === 'reading') {
+              setSelectedReadingLevel(level as ReadingLevel);
+              setAutoStartUnitId(unitId);
+              setView('reading-curriculum');
+            } else if (courseId === 'grammar') {
+              setSelectedGrammarLevel(level as GrammarLevel);
+              setAutoStartUnitId(unitId);
+              setView('grammar-curriculum');
+            } else if (courseId === 'writing') {
+              setSelectedWritingLevel(level as WritingLevel);
+              setAutoStartUnitId(unitId);
+              setView('writing-curriculum');
+            } else if (courseId === 'oxford') {
+              setAutoStartUnitId(unitId);
+              setView('oxford-discover');
+            }
+          }}
+        />
+      );
+    }
+    if (view === 'academic-results') {
+      return <ResultsChart lang={lang} onBack={() => setView('academic-planner')} onNavigateToAnalytics={() => setView('academic-analytics')} />;
+    }
+    if (view === 'academic-analytics') {
+      return <SmartAnalytics lang={lang} onBack={() => setView('academic-results')} />;
+    }
     if (view === 'oxford-discover') {
-      return <OxfordDiscoverCompanion lang={lang} onBack={() => setView('dashboard')} />;
+      return (
+        <OxfordDiscoverCompanion 
+          lang={lang} 
+          onBack={() => {
+            setAutoStartUnitId(null);
+            setView('dashboard');
+          }} 
+          initialUnitId={autoStartUnitId ? parseInt(autoStartUnitId) : null}
+        />
+      );
     }
     if (view === 'modern-curriculum') {
       return (
@@ -2834,8 +2904,13 @@ export default function App() {
         <ReadingCurriculumCompanion 
           lang={lang} 
           level={selectedReadingLevel}
-          onBack={() => setView('modern-curriculum')} 
+          initialUnitId={autoStartUnitId}
+          onBack={() => {
+            setAutoStartUnitId(null);
+            setView('modern-curriculum');
+          }} 
             onStartLesson={(unitId) => {
+              setAutoStartUnitId(null);
               const unit = units.find(u => u.id === unitId);
               const lessonObj = {
                 id: unitId,
@@ -2857,8 +2932,13 @@ export default function App() {
         <GrammarCurriculumCompanion 
           lang={lang} 
           level={selectedGrammarLevel}
-          onBack={() => setView('modern-curriculum')} 
+          initialUnitId={autoStartUnitId}
+          onBack={() => {
+            setAutoStartUnitId(null);
+            setView('modern-curriculum');
+          }} 
           onStartLesson={(unitId) => {
+            setAutoStartUnitId(null);
             const unit = units.find(u => u.id === unitId);
             const lessonObj = {
               id: unitId,
@@ -2903,8 +2983,13 @@ export default function App() {
         <WritingCurriculumCompanion 
           lang={lang} 
           level={selectedWritingLevel}
-          onBack={() => setView('modern-curriculum')} 
+          initialUnitId={autoStartUnitId}
+          onBack={() => {
+            setAutoStartUnitId(null);
+            setView('modern-curriculum');
+          }} 
           onStartLesson={(unitId) => {
+            setAutoStartUnitId(null);
             const unit = units.find(u => u.id === unitId);
             const lessonObj = {
               id: unitId,
@@ -3065,6 +3150,7 @@ export default function App() {
             profile={userProfile} 
             onOpenCurriculum={() => setView('curriculum')} 
             onStartChat={() => setView('chat')}
+            onNavigate={setView}
           />
         );
       case UserRole.PARENT:
@@ -3191,6 +3277,7 @@ export default function App() {
                     { id: 'credits', icon: Wallet },
                     { id: 'admin', icon: ShieldAlert, show: isAdmin },
                     { id: 'early-childhood', icon: Baby },
+                    { id: 'academic-planner', icon: Brain },
                     { id: 'oxford-discover', icon: OxfordIcon },
                     { id: 'video-library', icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
                     { id: 'story-library', icon: BookOpen },

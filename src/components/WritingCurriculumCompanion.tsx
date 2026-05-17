@@ -304,8 +304,30 @@ export const ALL_WRITING_UNITS: Record<WritingLevel, WritingUnit[]> = {
   ]
 };
 
-export const WritingCurriculumCompanion = ({ lang, level = 'A1', onBack, onStartLesson }: { lang: 'en' | 'ar', level?: WritingLevel, onBack: () => void, onStartLesson: (unitId: string) => void }) => {
+export const WritingCurriculumCompanion = ({ 
+  lang, 
+  level = 'A1', 
+  onBack, 
+  onStartLesson,
+  initialUnitId
+}: { 
+  lang: 'en' | 'ar', 
+  level?: WritingLevel, 
+  onBack: () => void, 
+  onStartLesson: (unitId: string) => void,
+  initialUnitId?: string | null
+}) => {
   const [selectedUnit, setSelectedUnit] = useState<WritingUnit | null>(null);
+
+  useEffect(() => {
+    if (initialUnitId) {
+      const unit = ALL_WRITING_UNITS[level].find(u => u.id === initialUnitId);
+      if (unit) {
+        setSelectedUnit(unit);
+        setActiveTab('rules');
+      }
+    }
+  }, [initialUnitId, level]);
   const [activeTab, setActiveTab] = useState<'rules' | 'vocabulary' | 'lab'>('lab');
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
