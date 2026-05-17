@@ -96,37 +96,55 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [coveredUnitIds, setCoveredUnitIds] = useState<Set<string>>(new Set());
   const [loadPreviousLoading, setLoadPreviousLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'create' | 'history'>('create');
+  const [savedPlans, setSavedPlans] = useState<StudyPlan[]>([]);
+  const [selectedSavedPlan, setSelectedSavedPlan] = useState<StudyPlan | null>(null);
+  const [studentName, setStudentName] = useState('');
+
+  const fetchSavedPlans = async () => {
+    if (!userProfile) return;
+    setLoadPreviousLoading(true);
+    try {
+      const q = query(collection(db, 'studyPlans'), where('userId', '==', userProfile.uid));
+      const querySnapshot = await getDocs(q);
+      const plans: StudyPlan[] = [];
+      const covered = new Set<string>();
+      
+      querySnapshot.forEach((doc) => {
+        const plan = { id: doc.id, ...doc.data() } as StudyPlan;
+        plans.push(plan);
+        if (plan.planItems) {
+          plan.planItems.forEach((item: any) => {
+            const key = `${item.courseId}:${item.level}:${item.unitId}`;
+            covered.add(key);
+          });
+        }
+      });
+      
+      setSavedPlans(plans.sort((a, b) => {
+        const dateA = a.createdAt?.seconds || 0;
+        const dateB = b.createdAt?.seconds || 0;
+        return dateB - dateA;
+      }));
+      setCoveredUnitIds(covered);
+    } catch (error) {
+      console.error('Error fetching previous plans:', error);
+    } finally {
+      setLoadPreviousLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPreviousPlans = async () => {
-      if (!userProfile) return;
-      setLoadPreviousLoading(true);
-      try {
-        const q = query(collection(db, 'studyPlans'), where('userId', '==', userProfile.uid));
-        const querySnapshot = await getDocs(q);
-        const covered = new Set<string>();
-        
-        querySnapshot.forEach((doc) => {
-          const plan = doc.data() as StudyPlan;
-          if (plan.planItems) {
-            plan.planItems.forEach((item: any) => {
-              // Create a unique key for the unit: courseId:level:unitId
-              const key = `${item.courseId}:${item.level}:${item.unitId}`;
-              covered.add(key);
-            });
-          }
-        });
-        
-        setCoveredUnitIds(covered);
-      } catch (error) {
-        console.error('Error fetching previous plans:', error);
-      } finally {
-        setLoadPreviousLoading(false);
-      }
-    };
-
-    fetchPreviousPlans();
+    fetchSavedPlans();
+    if (userProfile && !studentName) {
+      setStudentName(userProfile.displayName || '');
+    }
   }, [userProfile]);
+
+  const handleSelectSavedPlan = (plan: StudyPlan) => {
+    setSelectedSavedPlan(plan);
+    setGeneratedPlan(plan.planItems);
+  };
 
   const toggleCategory = (id: string) => {
     setSelectedCategories(prev => 
@@ -294,11 +312,16 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
       return;
     }
 
+    if (!studentName.trim()) {
+      alert(isRtl ? 'يرجى إدخال اسم الطالب' : 'Please enter student name');
+      return;
+    }
+
     setIsSaving(true);
     try {
       const planData: StudyPlan = {
         userId: userProfile.uid,
-        studentName: userProfile.displayName || 'Student',
+        studentName: studentName.trim(),
         createdAt: serverTimestamp(),
         startDate,
         preferredTime,
@@ -309,6 +332,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
 
       await addDoc(collection(db, 'studyPlans'), planData);
       setSaveSuccess(true);
+      fetchSavedPlans();
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, 'studyPlans');
@@ -319,167 +343,246 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
 
   return (
     <div className={`p-4 md:p-8 max-w-7xl mx-auto ${isRtl ? 'rtl' : 'ltr'}`}>
-      <div className="flex items-center justify-between mb-10">
-        <button 
-          onClick={onBack}
-          className="flex items-center gap-2 text-slate-500 hover:text-[#002147] transition-colors"
-        >
-          <ArrowLeft size={20} className={isRtl ? 'rotate-180' : ''} />
-          <span className="font-bold">{isRtl ? 'رجوع للرئيسية' : 'Back to Dashboard'}</span>
-        </button>
-        <div className="text-center">
-            <h2 className="text-3xl font-black text-[#002147] flex items-center gap-3 justify-center mb-1">
-            <Brain className="text-blue-600" />
-            {t.academicPlanner}
-            </h2>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Powered by AI Study Engine</p>
+      <div className="flex flex-col items-center mb-10">
+        <div className="flex items-center justify-between w-full mb-6">
+          <button 
+            onClick={onBack}
+            className="flex items-center gap-2 text-slate-500 hover:text-[#002147] transition-colors"
+          >
+            <ArrowLeft size={20} className={isRtl ? 'rotate-180' : ''} />
+            <span className="font-bold">{isRtl ? 'رجوع للرئيسية' : 'Back to Dashboard'}</span>
+          </button>
+          <div className="text-center">
+              <h2 className="text-3xl font-black text-[#002147] flex items-center gap-3 justify-center mb-1">
+              <Brain className="text-blue-600" />
+              {t.academicPlanner}
+              </h2>
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Powered by AI Study Engine</p>
+          </div>
+          <div className="w-10 md:block" />
         </div>
-        <div className="w-10 opacity-0 md:block" />
+
+        <div className="bg-slate-100 p-1.5 rounded-[2rem] flex items-center gap-1">
+          <button 
+            onClick={() => {
+              setActiveTab('create');
+              setSelectedSavedPlan(null);
+              setGeneratedPlan(null);
+            }}
+            className={`px-8 py-3 rounded-[1.5rem] text-sm font-black transition-all ${
+              activeTab === 'create' 
+                ? 'bg-white text-blue-600 shadow-md' 
+                : 'text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            {isRtl ? 'توليد خطة جديدة' : 'Create New Plan'}
+          </button>
+          <button 
+            onClick={() => setActiveTab('history')}
+            className={`px-8 py-3 rounded-[1.5rem] text-sm font-black transition-all ${
+              activeTab === 'history' 
+                ? 'bg-white text-blue-600 shadow-md' 
+                : 'text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            {isRtl ? 'الخطط المحفوظة' : 'Saved Plans'}
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Sidebar Controls */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50/50 rounded-bl-[3rem] -z-10 group-hover:scale-110 transition-transform" />
-            
-            <h3 className="font-black text-[#002147] mb-6 flex items-center gap-2 text-lg">
-              <Layout size={20} className="text-blue-500" />
-              {isRtl ? 'تخصيص الخطة' : 'Customize Plan'}
-            </h3>
-            
-            <div className="space-y-8">
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
-                  {isRtl ? 'المناهج المختارة' : 'Selected Curriculums'}
-                </label>
-                <div className="grid grid-cols-1 gap-4">
-                  {AVAILABLE_CATEGORIES.map(category => (
-                    <button
-                      key={category.id}
-                      onClick={() => toggleCategory(category.id)}
-                      className={`flex flex-col p-6 rounded-3xl border-2 transition-all text-right ${
-                        selectedCategories.includes(category.id) 
-                          ? 'border-blue-600 bg-blue-50' 
-                          : 'border-slate-100 bg-slate-50 hover:border-slate-200'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between w-full mb-3">
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${selectedCategories.includes(category.id) ? 'bg-blue-600 text-white' : 'bg-white text-slate-400 border border-slate-100 shadow-sm'}`}>
-                          <category.icon size={20} />
-                        </div>
-                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                          selectedCategories.includes(category.id) ? 'bg-blue-600 border-blue-600' : 'border-slate-200 bg-white'
-                        }`}>
-                          {selectedCategories.includes(category.id) && <CheckCircle2 size={14} className="text-white" />}
-                        </div>
-                      </div>
-                      <span className={`text-base font-black mb-1 ${selectedCategories.includes(category.id) ? 'text-blue-600' : 'text-[#002147]'}`}>
-                        {isRtl ? category.labelAr : category.labelEn}
-                      </span>
-                      <span className="text-[10px] font-bold text-slate-400">
-                        {isRtl ? category.descAr : category.descEn}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
-                  {isRtl ? 'أيام الدراسة المختارة' : 'Selected Study Days'}
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'].map((day, idx) => {
-                    const dayLabelsEn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                    const isSelected = selectedDays.includes(idx);
-                    return (
+          {activeTab === 'create' ? (
+            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50/50 rounded-bl-[3rem] -z-10 group-hover:scale-110 transition-transform" />
+              
+              <h3 className="font-black text-[#002147] mb-6 flex items-center gap-2 text-lg">
+                <Layout size={20} className="text-blue-500" />
+                {isRtl ? 'تخصيص الخطة' : 'Customize Plan'}
+              </h3>
+              
+              <div className="space-y-8">
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
+                    {isRtl ? 'المناهج المختارة' : 'Selected Curriculums'}
+                  </label>
+                  <div className="grid grid-cols-1 gap-4">
+                    {AVAILABLE_CATEGORIES.map(category => (
                       <button
-                        key={idx}
-                        onClick={() => toggleDay(idx)}
-                        className={`flex-1 min-w-[60px] py-3 rounded-xl border-2 font-black text-xs transition-all ${
-                          isSelected 
-                            ? 'border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-100' 
-                            : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200'
+                        key={category.id}
+                        onClick={() => toggleCategory(category.id)}
+                        className={`flex flex-col p-6 rounded-3xl border-2 transition-all text-right ${
+                          selectedCategories.includes(category.id) 
+                            ? 'border-blue-600 bg-blue-50' 
+                            : 'border-slate-100 bg-slate-50 hover:border-slate-200'
                         }`}
                       >
-                        {isRtl ? day : dayLabelsEn[idx]}
+                        <div className="flex items-center justify-between w-full mb-3">
+                          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${selectedCategories.includes(category.id) ? 'bg-blue-600 text-white' : 'bg-white text-slate-400 border border-slate-100 shadow-sm'}`}>
+                            <category.icon size={20} />
+                          </div>
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                            selectedCategories.includes(category.id) ? 'bg-blue-600 border-blue-600' : 'border-slate-200 bg-white'
+                          }`}>
+                            {selectedCategories.includes(category.id) && <CheckCircle2 size={14} className="text-white" />}
+                          </div>
+                        </div>
+                        <span className={`text-base font-black mb-1 ${selectedCategories.includes(category.id) ? 'text-blue-600' : 'text-[#002147]'}`}>
+                          {isRtl ? category.labelAr : category.labelEn}
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-400">
+                          {isRtl ? category.descAr : category.descEn}
+                        </span>
                       </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-                <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
-                    {isRtl ? 'تاريخ البدء' : 'Start Date'}
-                  </label>
-                  <div className="relative">
-                    <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                    <input 
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 pl-11 text-sm font-black text-[#002147] focus:ring-2 focus:ring-blue-600 outline-none transition-all"
-                    />
+                    ))}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
-                    {isRtl ? 'وقت الدراسة المفضل' : 'Preferred Study Time'}
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
+                    {isRtl ? 'أيام الدراسة المختارة' : 'Selected Study Days'}
                   </label>
-                  <div className="relative">
-                    <Clock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                    <input 
-                      type="time"
-                      value={preferredTime}
-                      onChange={(e) => setPreferredTime(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 pl-11 text-sm font-black text-[#002147] focus:ring-2 focus:ring-blue-600 outline-none transition-all"
-                    />
+                  <div className="flex flex-wrap gap-2">
+                    {['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'].map((day, idx) => {
+                      const dayLabelsEn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                      const isSelected = selectedDays.includes(idx);
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => toggleDay(idx)}
+                          className={`flex-1 min-w-[60px] py-3 rounded-xl border-2 font-black text-xs transition-all ${
+                            isSelected 
+                              ? 'border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-100' 
+                              : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200'
+                          }`}
+                        >
+                          {isRtl ? day : dayLabelsEn[idx]}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
-              </div>
 
-              <div className="p-5 bg-blue-50 rounded-[2rem] border border-blue-100 mb-2">
-                <div className="flex items-center gap-2 text-blue-600 font-black text-xs mb-1 uppercase tracking-widest">
-                  <CheckCircle2 size={14} />
-                  {isRtl ? 'الدروس المنجزة' : 'Covered Lessons'}
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                      {isRtl ? 'تاريخ البدء' : 'Start Date'}
+                    </label>
+                    <div className="relative">
+                      <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      <input 
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 pl-11 text-sm font-black text-[#002147] focus:ring-2 focus:ring-blue-600 outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                      {isRtl ? 'وقت الدراسة المفضل' : 'Preferred Study Time'}
+                    </label>
+                    <div className="relative">
+                      <Clock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      <input 
+                        type="time"
+                        value={preferredTime}
+                        onChange={(e) => setPreferredTime(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 pl-11 text-sm font-black text-[#002147] focus:ring-2 focus:ring-blue-600 outline-none transition-all"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <p className="text-[10px] text-blue-700/60 font-bold leading-relaxed">
-                  {isRtl 
-                    ? `تم التعرف على ${coveredUnitIds.size} درساً سابقاً. لن يتم تكرارها في خطتك الجديدة.` 
-                    : `Identified ${coveredUnitIds.size} previously studied lessons. They will not be repeated.`}
-                </p>
-              </div>
 
-              <div className="p-5 bg-amber-50 rounded-[2rem] border border-amber-100">
-                <div className="flex items-center gap-2 text-amber-600 font-black text-xs mb-1 uppercase tracking-widest">
-                  <Clock size={14} />
-                  {t.plannerDuration}
+                <div className="p-5 bg-blue-50 rounded-[2rem] border border-blue-100 mb-2">
+                  <div className="flex items-center gap-2 text-blue-600 font-black text-xs mb-1 uppercase tracking-widest">
+                    <CheckCircle2 size={14} />
+                    {isRtl ? 'الدروس المنجزة' : 'Covered Lessons'}
+                  </div>
+                  <p className="text-[10px] text-blue-700/60 font-bold leading-relaxed">
+                    {isRtl 
+                      ? `تم التعرف على ${coveredUnitIds.size} درساً سابقاً. لن يتم تكرارها في خطتك الجديدة.` 
+                      : `Identified ${coveredUnitIds.size} previously studied lessons. They will not be repeated.`}
+                  </p>
                 </div>
-                <p className="text-[10px] text-amber-700/60 font-bold leading-relaxed">
-                  {isRtl ? 'سيقوم الذكاء الاصطناعي بتوزيع الوحدات الدراسية من المناهج المختارة بشكل متوازن خلال 3 أشهر.' : 'AI will distribute units from selected curriculums evenly throughout your 3-month term.'}
-                </p>
-              </div>
 
-              <button 
-                onClick={generatePlan}
-                disabled={isGenerating}
-                className="w-full bg-[#002147] text-white py-5 rounded-[2rem] font-black flex items-center justify-center gap-3 hover:bg-blue-900 transition-all shadow-xl shadow-blue-100 disabled:opacity-50 active:scale-95"
-              >
-                {isGenerating ? (
-                  <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                <div className="p-5 bg-amber-50 rounded-[2rem] border border-amber-100">
+                  <div className="flex items-center gap-2 text-amber-600 font-black text-xs mb-1 uppercase tracking-widest">
+                    <Clock size={14} />
+                    {t.plannerDuration}
+                  </div>
+                  <p className="text-[10px] text-amber-700/60 font-bold leading-relaxed">
+                    {isRtl ? 'سيقوم الذكاء الاصطناعي بتوزيع الوحدات الدراسية من المناهج المختارة بشكل متوازن خلال 3 أشهر.' : 'AI will distribute units from selected curriculums evenly throughout your 3-month term.'}
+                  </p>
+                </div>
+
+                <button 
+                  onClick={generatePlan}
+                  disabled={isGenerating}
+                  className="w-full bg-[#002147] text-white py-5 rounded-[2rem] font-black flex items-center justify-center gap-3 hover:bg-blue-900 transition-all shadow-xl shadow-blue-100 disabled:opacity-50 active:scale-95"
+                >
+                  {isGenerating ? (
+                    <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                      <Sparkles size={20} />
+                    </motion.div>
+                  ) : (
                     <Sparkles size={20} />
-                  </motion.div>
-                ) : (
-                  <Sparkles size={20} />
-                )}
-                {t.generatePlanner}
-              </button>
+                  )}
+                  {t.generatePlanner}
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
+                <h3 className="font-black text-[#002147] mb-6 flex items-center gap-2 text-lg">
+                  <CalendarDays size={20} className="text-blue-500" />
+                  {isRtl ? 'سجل الخطط' : 'Plans History'}
+                </h3>
+                
+                <div className="space-y-3">
+                  {loadPreviousLoading ? (
+                    <div className="flex flex-col items-center justify-center py-10">
+                       <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}>
+                          <Sparkles size={24} className="text-blue-200" />
+                       </motion.div>
+                    </div>
+                  ) : savedPlans.length === 0 ? (
+                    <div className="text-center py-10">
+                       <p className="text-xs font-black text-slate-300 uppercase tracking-widest">
+                         {isRtl ? 'لا يوجد خطط محفوظة بعد' : 'No saved plans yet'}
+                       </p>
+                    </div>
+                  ) : (
+                    savedPlans.map(plan => (
+                      <button
+                        key={plan.id}
+                        onClick={() => handleSelectSavedPlan(plan)}
+                        className={`w-full text-right p-4 rounded-3xl border-2 transition-all flex flex-col gap-1 ${
+                          selectedSavedPlan?.id === plan.id 
+                            ? 'border-blue-600 bg-blue-50' 
+                            : 'border-slate-50 bg-slate-50/50 hover:border-slate-100'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                           <span className="text-sm font-black text-[#002147]">{plan.studentName}</span>
+                           <span className="text-[10px] font-black text-blue-600 opacity-60">
+                             {plan.createdAt?.toDate ? plan.createdAt.toDate().toLocaleDateString(isRtl ? 'ar-EG' : 'en-US') : ''}
+                           </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                           <Calendar size={12} className="text-slate-400" />
+                           <span className="text-[10px] font-bold text-slate-400">
+                             {isRtl ? 'بدأ في: ' : 'Started: '} {plan.startDate}
+                           </span>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+            </div>
+          )}
         </div>
 
         {/* Main Content Area */}
@@ -587,31 +690,46 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                         </p>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={handleSavePlan}
-                      disabled={isSaving || saveSuccess}
-                      className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-xs font-black transition-all ${
-                        saveSuccess 
-                          ? 'bg-emerald-500 text-white' 
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
-                      } disabled:opacity-50`}
-                    >
-                       {isSaving ? (
-                         <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
-                           <Sparkles size={16} />
-                         </motion.div>
-                       ) : saveSuccess ? (
-                         <CheckCircle2 size={16} />
-                       ) : (
-                         <Save size={16} />
-                       )}
-                       {saveSuccess ? (isRtl ? 'تم الحفظ بنجاح' : 'Saved Successfully') : (isRtl ? 'حفظ الخطة باسم الطالب' : 'Save Plan to Student')}
-                    </button>
-                    <button className="flex items-center gap-2 px-6 py-3 bg-[#002147] text-white rounded-2xl text-xs font-black hover:bg-blue-900 transition-all">
-                       <BarChart2 size={16} />
-                       {isRtl ? 'المعدلات التعليمية' : 'Learning Avg'}
-                    </button>
+                  <div className="flex flex-col md:flex-row items-center gap-4">
+                    <div className="relative w-full md:w-64">
+                      <Layout size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      <input 
+                        type="text"
+                        value={studentName}
+                        onChange={(e) => setStudentName(e.target.value)}
+                        placeholder={isRtl ? 'اسم الطالب (مثال: عبود)' : 'Student Name (e.g. Abboud)'}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 pl-11 text-xs font-black text-[#002147] focus:ring-2 focus:ring-blue-600 outline-none transition-all"
+                      />
+                    </div>
+                    <div className="flex gap-2 w-full md:w-auto">
+                      <button 
+                        onClick={handleSavePlan}
+                        disabled={isSaving || saveSuccess}
+                        className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-2xl text-xs font-black transition-all ${
+                          saveSuccess 
+                            ? 'bg-emerald-500 text-white' 
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        } disabled:opacity-50 min-w-[180px]`}
+                      >
+                         {isSaving ? (
+                           <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                             <Sparkles size={16} />
+                           </motion.div>
+                         ) : saveSuccess ? (
+                           <CheckCircle2 size={16} />
+                         ) : (
+                           <Save size={16} />
+                         )}
+                         {saveSuccess ? (isRtl ? 'تم الحفظ بنجاح' : 'Saved Successfully') : (isRtl ? 'حفظ الخطة' : 'Save Plan')}
+                      </button>
+                      <button 
+                        onClick={onNavigateToResults}
+                        className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-[#002147] text-white rounded-2xl text-xs font-black hover:bg-blue-900 transition-all h-full"
+                      >
+                        <BarChart2 size={16} />
+                        {isRtl ? 'المعدلات التعليمية' : 'Learning Avg'}
+                      </button>
+                    </div>
                   </div>
                 </div>
                 
