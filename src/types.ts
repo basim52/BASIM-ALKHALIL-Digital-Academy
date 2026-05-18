@@ -29,7 +29,6 @@ export interface UserProfile {
   studentCode?: string;
   phoneNumber?: string;
   lastSeen?: number;
-  credits?: number; // Credit balance
   points?: number;
   level?: proficiencyLevel;
   // Childhood Minutes System
@@ -38,15 +37,6 @@ export interface UserProfile {
   lastMinutesResetDate?: string; // YYYY-MM-DD
   childhoodSubscriptionType?: 'bronze' | 'silver' | 'gold' | null;
   subscriptionExpiryDate?: any;
-}
-
-export interface CreditTransaction {
-  id: string;
-  userId: string;
-  amount: number; // Positive for purchase, negative for usage
-  type: 'purchase' | 'consumption' | 'childhood_subscription';
-  description: string;
-  timestamp: any;
 }
 
 export interface SubscriptionPackage {
@@ -72,18 +62,9 @@ export const CHILDHOOD_PACKAGES = [
   { id: 'gold_monthly', priceSAR: 70, dailyMinutes: 30, durationDays: 30, label: 'ذهبية شهرية - 30 دقيقة يومياً' },
 ];
 
-export const GIFT_PACKAGE = { id: 'gift', priceSAR: 0, credits: 2, label: 'باقة الهدية - 2 درس مجاناً' };
-
-export enum CreditCost {
-  READING_LESSON = 1,
-  AI_CONVERSATION = 3,
-  VIDEO_LESSON = 5,
-  AUDIO_STORY = 2
-}
-
 export const MASTER_ADMINS = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com', 'aboodalkhaleel73@gmail.com', 'ab3256792@gmail.com'];
 
-export type AppView = 'dashboard' | 'placement-test' | 'curriculum' | 'lesson' | 'progress' | 'leaderboard' | 'chat' | 'admin' | 'ai-chat' | 'video-library' | 'story-library' | 'credits' | 'early-childhood' | 'oxford-discover' | 'reading-curriculum' | 'grammar-curriculum' | 'conversation-curriculum' | 'writing-curriculum' | 'expression-curriculum' | 'modern-curriculum' | 'academic-planner' | 'academic-results' | 'academic-analytics';
+export type AppView = 'dashboard' | 'placement-test' | 'curriculum' | 'lesson' | 'progress' | 'leaderboard' | 'chat' | 'admin' | 'ai-chat' | 'video-library' | 'story-library' | 'early-childhood' | 'oxford-discover' | 'reading-curriculum' | 'grammar-curriculum' | 'conversation-curriculum' | 'writing-curriculum' | 'expression-curriculum' | 'modern-curriculum' | 'academic-planner' | 'academic-results' | 'academic-analytics';
 
 export interface WhatsAppNotification {
   id: string;

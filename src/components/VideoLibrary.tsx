@@ -14,8 +14,8 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { UserProfile, CreditCost, MASTER_ADMINS } from '../types';
-import { deductCredits, auth } from '../lib/firebase';
+import { UserProfile, MASTER_ADMINS } from '../types';
+import { auth } from '../lib/firebase';
 
 interface VideoLesson {
   id: string;
@@ -89,33 +89,11 @@ export const VideoLibrary = ({
   const [quizStarted, setQuizStarted] = useState(false);
   const [userAnswers, setUserAnswers] = useState<number[]>([]);
   const [quizFinished, setQuizFinished] = useState(false);
-  const [deducting, setDeducting] = useState(false);
 
   const handleSelectVideo = async (video: VideoLesson) => {
     if (!enabled) return;
     if (selectedVideo?.id === video.id) return;
-
-    const isAdmin = MASTER_ADMINS.includes((profile.email || auth.currentUser?.email || '').toLowerCase());
-    const credits = (profile as any).credits || 0;
-    
-    if (!isAdmin && credits < CreditCost.VIDEO_LESSON) {
-      alert(t.insufficientCredits);
-      onNavigate('credits');
-      return;
-    }
-
-    setDeducting(true);
-    try {
-      if (!isAdmin) {
-        await deductCredits(profile.uid, CreditCost.VIDEO_LESSON, `Video Lesson: ${video.titleEn}`);
-        onUpdateProfile({ ...profile, credits: credits - CreditCost.VIDEO_LESSON } as UserProfile);
-      }
-      setSelectedVideo(video);
-    } catch (err) {
-      console.error("Video deduction error:", err);
-    } finally {
-      setDeducting(false);
-    }
+    setSelectedVideo(video);
   };
 
   const generateQuiz = async (video: VideoLesson) => {
@@ -310,11 +288,6 @@ export const VideoLibrary = ({
                    </span>
                 </div>
               </div>
-            )}
-            {deducting && (
-                <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-20 flex items-center justify-center">
-                  <div className="w-8 h-8 border-4 border-[#002147] border-t-transparent rounded-full animate-spin" />
-                </div>
             )}
             <div className="aspect-[4/3] relative overflow-hidden bg-slate-100 flex items-center justify-center text-slate-300">
               <ImageIcon size={48} className="absolute opacity-20" />

@@ -9,12 +9,14 @@ import {
   ArrowRight,
   BrainCircuit,
   Bell,
-  Ticket,
+  ShieldCheck,
   Plus,
   Hash,
   LayoutDashboard,
   CheckCircle,
-  Download
+  Download,
+  Trash2,
+  ShieldAlert
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { 
@@ -29,10 +31,12 @@ import {
   doc,
   getDoc,
   setDoc,
+  deleteDoc,
   orderBy
 } from 'firebase/firestore';
 import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
-import { UserRole, MASTER_ADMINS } from '../types';
+import { UserRole, MASTER_ADMINS, UserProfile } from '../types';
+import { updateDoc } from 'firebase/firestore';
 import ReactMarkdown from 'react-markdown';
 
 export const AdminDashboard = ({ lang }: { lang: Language }) => {
@@ -95,13 +99,34 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
     }
   };
   
-  // Voucher State
-  const [voucherCredits, setVoucherCredits] = useState(12);
-  const [generating, setGenerating] = useState(false);
-  const [recentVouchers, setRecentVouchers] = useState<any[]>([]);
-  
   // Settings State
   const [videoLessonsEnabled, setVideoLessonsEnabled] = useState(true);
+
+  const handleDeleteStudent = async (studentId: string, studentName: string) => {
+    if (!confirm(isRtl ? `هل أنت متأكد من حذف الطالب ${studentName} نهائياً؟` : `Are you sure you want to permanently delete student ${studentName}?`)) return;
+    
+    try {
+      await deleteDoc(doc(db, 'users', studentId));
+      setAllStudents(prev => prev.filter(s => s.id !== studentId));
+      alert(isRtl ? 'تم حذف الطالب بنجاح' : 'Student deleted successfully');
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert(isRtl ? 'خطأ في الحذف' : 'Error deleting student');
+    }
+  };
+
+  const handlePromoteToAdmin = async (studentId: string, name: string) => {
+    if (!confirm(isRtl ? `هل أنت متأكد من منح صلاحيات الآدمن لـ ${name}؟` : `Are you sure you want to grant Admin privileges to ${name}?`)) return;
+    try {
+      await updateDoc(doc(db, 'users', studentId), {
+        role: UserRole.ADMIN
+      });
+      alert(isRtl ? "تمت الترقية بنجاح!" : "Promotion successful!");
+    } catch (err) {
+      console.error("Promotion error:", err);
+      alert(isRtl ? "فشل في الترقية" : "Promotion failed");
+    }
+  };
 
   useEffect(() => {
     if (!db || !auth.currentUser) return;
@@ -114,7 +139,6 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
     const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
     
     let studentsUnsubscribe = () => {};
-    let vouchersUnsubscribe = () => {};
     let settingsUnsubscribe = () => {};
 
     try {
@@ -127,16 +151,6 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
         },
         (error) => {
           handleFirestoreError(error, OperationType.GET, 'users');
-        }
-      );
-
-      vouchersUnsubscribe = onSnapshot(
-        query(collection(db, 'vouchers'), orderBy('createdAt', 'desc'), limit(10)),
-        (snapshot) => {
-          setRecentVouchers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        },
-        (error) => {
-          handleFirestoreError(error, OperationType.GET, 'vouchers');
         }
       );
 
@@ -157,7 +171,6 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
 
     return () => {
       studentsUnsubscribe();
-      vouchersUnsubscribe();
       settingsUnsubscribe();
     };
   }, []);
@@ -441,14 +454,49 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
           </section>
 
           <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-full -mr-16 -mt-16 opacity-50" />
+             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 opacity-50" />
              <h3 className="text-xl font-black text-[#002147] mb-6 flex items-center gap-3 relative">
-               <Ticket className="text-amber-500" />
-               {isRtl ? 'إدارة قسائم الشحن' : 'Voucher Management'}
+               <ShieldCheck className="text-indigo-500" />
+               {isRtl ? 'إدارة جميع الطلاب' : 'All Students Management'}
              </h3>
              
-             <div className="space-y-4 relative z-10">
-               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+             <div className="space-y-4 relative z-10 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar no-scrollbar">
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 REPLACED">
+                {allStudents.map((student) => (
+                  <div key={`all-${student.id}`} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 group">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-100 overflow-hidden shadow-sm">
+                          <img src={student.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${student.displayName}`} alt="" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm text-[#002147]">{student.displayName}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{student.email}</p>
+                        </div>
+                      </div>
+                      <span className="text-[9px] bg-indigo-50 text-indigo-600 px-2 py-1 rounded-md font-black uppercase tracking-tighter">Student</span>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                    <button 
+                      onClick={() => handlePromoteToAdmin(student.id, student.displayName)}
+                      className="flex-1 bg-white border border-indigo-100 text-indigo-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center gap-2"
+                    >
+                      <ShieldAlert size={14} />
+                      {isRtl ? 'مسؤول' : 'Admin'}
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteStudent(student.id, student.displayName)}
+                      className="p-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all border border-red-100"
+                      title={isRtl ? 'حذف الطالب' : 'Delete Student'}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                    </div>
+                  </div>
+                ))}
+                {/* HIDING OLD CONTENT */}
+                <div className="hidden">
                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{isRtl ? 'عدد دروس القسيمة' : 'Credits Per Voucher'}</label>
                  <div className="flex gap-2">
                    {[2, 12, 35, 80].map(val => (
@@ -494,7 +542,8 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                   </div>
                </div>
              </div>
-          </section>
+          </div>
+       </section>
 
           <section className="bg-gradient-to-br from-[#002147] to-[#003366] rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden">
              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16" />

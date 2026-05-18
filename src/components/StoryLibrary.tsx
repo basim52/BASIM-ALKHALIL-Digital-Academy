@@ -15,8 +15,8 @@ import {
   AlertCircle,
   Image as ImageIcon
 } from 'lucide-react';
-import { UserProfile, CreditCost, MASTER_ADMINS } from '../types';
-import { deductCredits, auth } from '../lib/firebase';
+import { UserProfile, MASTER_ADMINS } from '../types';
+import { auth } from '../lib/firebase';
 
 interface Story {
   id: string;
@@ -140,7 +140,6 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [wordData, setWordData] = useState<{ word: string; translation: string; pronunciation: string } | null>(null);
   const [loadingWord, setLoadingWord] = useState(false);
-  const [deducting, setDeducting] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -152,28 +151,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
 
   const handleSelectStory = async (story: Story) => {
     if (selectedStory?.id === story.id) return;
-    
-    const isWhitelisted = MASTER_ADMINS.includes((profile.email || auth.currentUser?.email || '').toLowerCase());
-    const credits = (profile as any).credits || 0;
-    
-    if (!isWhitelisted && credits < CreditCost.AUDIO_STORY) {
-      alert(t.insufficientCredits);
-      onNavigate('credits');
-      return;
-    }
-
-    setDeducting(true);
-    try {
-      if (!isWhitelisted) {
-        await deductCredits(profile.uid, CreditCost.AUDIO_STORY, `Audio Story: ${story.titleEn}`);
-        onUpdateProfile({ ...profile, credits: credits - CreditCost.AUDIO_STORY } as UserProfile);
-      }
-      setSelectedStory(story);
-    } catch (err) {
-      console.error("Story deduction error:", err);
-    } finally {
-      setDeducting(false);
-    }
+    setSelectedStory(story);
   };
 
   const handleWordClick = async (word: string) => {
@@ -376,11 +354,6 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
             onClick={() => handleSelectStory(story)}
             className="bg-white rounded-[2.5rem] overflow-hidden border border-slate-200 shadow-sm group cursor-pointer relative"
           >
-            {deducting && (
-              <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-20 flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-[#002147] border-t-transparent rounded-full animate-spin" />
-              </div>
-            )}
             <div className="h-48 relative overflow-hidden bg-slate-100 flex items-center justify-center text-slate-300">
                <ImageIcon size={48} className="absolute opacity-20" />
                <img 

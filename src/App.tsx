@@ -43,13 +43,13 @@ import {
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'motion/react';
-import { UserRole, CurriculumCategory, proficiencyLevel, UserProfile, ScheduleItem, ParentNote, LearningModule, Lesson, AppView, StudentProfile, CreditCost, MASTER_ADMINS } from './types';
+import { UserRole, CurriculumCategory, proficiencyLevel, UserProfile, ScheduleItem, ParentNote, LearningModule, Lesson, AppView, StudentProfile, MASTER_ADMINS } from './types';
 import { MASTER_CURRICULUM } from './data/masterCurriculum';
 import { generateWhatsAppLink, NOTIFICATION_TEMPLATES } from './lib/whatsapp';
 import { ShareableNotification } from './components/ShareableNotification';
 import { AIConversation } from './components/AIConversation';
 import { PlacementTest } from './components/PlacementTest';
-import { auth, googleProvider, db, handleFirestoreError, OperationType, testConnection, deductCredits } from './lib/firebase';
+import { auth, googleProvider, db, handleFirestoreError, OperationType, testConnection } from './lib/firebase';
 import { onAuthStateChanged, signInWithPopup, signOut, User } from 'firebase/auth';
 import { doc, getDoc, setDoc, addDoc, serverTimestamp, collection, query, where, onSnapshot, deleteDoc, orderBy, getDocs, updateDoc, limit, writeBatch } from 'firebase/firestore';
 import { translations, Language } from './lib/translations';
@@ -65,7 +65,6 @@ import { StoryLibrary } from './components/StoryLibrary';
 import { ParentAIInsights } from './components/ParentAIInsights';
 import { ProgressRoadmap } from './components/ProgressRoadmap';
 import { ReadingLesson } from './components/ReadingLesson';
-import { CreditSystem } from './components/CreditSystem';
 import { OxfordLesson } from './components/OxfordLesson';
 import { EarlyChildhoodHome } from './components/EarlyChildhood/EarlyChildhoodHome';
 import { StudyPlanner } from './components/Academic/StudyPlanner';
@@ -78,7 +77,7 @@ import { ConversationCurriculumCompanion, ConversationLevel, ALL_CONVERSATION_UN
 import { WritingCurriculumCompanion, WritingLevel, ALL_WRITING_UNITS } from './components/WritingCurriculumCompanion';
 import { ExpressionCurriculumCompanion, ExpressionLevel, ALL_EXPRESSION_UNITS } from './components/ExpressionCurriculumCompanion';
 import { ModernCurriculumHome } from './components/ModernCurriculumHome';
-import { Wallet, Layers, Image as OxfordIcon } from 'lucide-react';
+import { Layers, Image as OxfordIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { familyConstellationsLesson } from './data/lessons/r_a1_4';
 import { everydayInteractionLesson } from './data/lessons/r_a1_5';
@@ -3071,23 +3070,7 @@ export default function App() {
 
   const handleStartAiChat = async () => {
     if (!userProfile) return;
-    const isAdminCheck = MASTER_ADMINS.includes((userProfile.email || currentUser?.email || '').toLowerCase());
-    const currentCredits = (userProfile as any).credits || 0;
-    
-    if (!isAdminCheck && currentCredits < CreditCost.AI_CONVERSATION) {
-      alert(t.insufficientCredits);
-      setView('credits');
-      return;
-    }
-    try {
-      if (!isAdminCheck) {
-        await deductCredits(userProfile.uid, CreditCost.AI_CONVERSATION, `AI Conversation: 3-min Session`);
-        setUserProfile({ ...userProfile, credits: currentCredits - CreditCost.AI_CONVERSATION } as UserProfile);
-      }
-      setView('ai-chat');
-    } catch (err) {
-      console.error("AI Deduction error:", err);
-    }
+    setView('ai-chat');
   };
 
   if (renderError) {
@@ -3128,21 +3111,11 @@ export default function App() {
   const handleLessonComplete = async (score?: number) => {
     if (!userProfile || !activeLesson) return;
     
-    const isAdminCheck = MASTER_ADMINS.includes((userProfile.email || currentUser?.email || '').toLowerCase());
-    // Deduct Credit
-    const cost = CreditCost.READING_LESSON;
-    const currentCredits = (userProfile as any).credits || 0;
-
     // Increment XP and points
     const xpToAdd = 50; 
     const updatedPoints = (userProfile as any).points + xpToAdd;
-    const updatedCredits = isAdminCheck ? currentCredits : Math.max(0, currentCredits - cost);
     
     try {
-      if (!isAdminCheck) {
-        await deductCredits(userProfile.uid, cost, `أكملت درس: ${activeLesson.title}`);
-      }
-
       // Save Lesson Result
       if (score !== undefined) {
         await addDoc(collection(db, 'lessonResults'), {
@@ -3156,7 +3129,7 @@ export default function App() {
         });
       }
 
-      setUserProfile({ ...userProfile, points: updatedPoints, credits: updatedCredits } as UserProfile);
+      setUserProfile({ ...userProfile, points: updatedPoints } as UserProfile);
       setView('curriculum');
       alert(`${t.xpEarned}: +${xpToAdd}`);
     } catch (err) {
@@ -3180,9 +3153,6 @@ export default function App() {
           enabled={videoLessonsEnabled || isAdmin}
         />
       );
-    }
-    if (view === 'credits') {
-      return <CreditSystem lang={lang} />;
     }
     if (view === 'early-childhood') {
       return <EarlyChildhoodHome lang={lang} profile={userProfile as StudentProfile} onBack={() => setView('dashboard')} />;
@@ -3434,19 +3404,9 @@ export default function App() {
         lang={lang} 
         onSelectLesson={async (lesson, category, level) => { 
           if (!userProfile) return;
-          const isAdminCheck = MASTER_ADMINS.includes((userProfile.email || currentUser?.email || '').toLowerCase());
           
           if (category === CurriculumCategory.CONVERSATION) {
             handleStartAiChat();
-            return;
-          }
-          
-          const currentCredits = (userProfile as any).credits || 0;
-          const cost = CreditCost.READING_LESSON;
-          
-          if (!isAdminCheck && currentCredits < cost) {
-            alert(t.insufficientCredits);
-            setView('credits');
             return;
           }
 
@@ -3599,7 +3559,6 @@ export default function App() {
                   {[
                     { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
                     { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
-                    { id: 'credits', label: t.credits, icon: Wallet },
                     { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
                     { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
                     { id: 'oxford-discover', label: t.oxfordCompanion, icon: Layers },
@@ -3666,7 +3625,6 @@ export default function App() {
                 {[
                   [
                     { id: 'dashboard', icon: LayoutDashboard },
-                    { id: 'credits', icon: Wallet },
                     { id: 'admin', icon: ShieldAlert, show: isAdmin },
                     { id: 'early-childhood', icon: Baby },
                     { id: 'academic-planner', icon: Sparkles },

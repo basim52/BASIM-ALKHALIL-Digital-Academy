@@ -19,6 +19,14 @@ service cloud.firestore {
       return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+    // New helper to check if current user is a linked parent of the student
+    function isParentOf(studentId) {
+      return isSignedIn() && (
+        request.auth.uid in get(/databases/$(database)/documents/users/$(studentId)).data.linkedParentIds ||
+        request.auth.uid in get(/databases/$(database)/documents/users/$(studentId)).data.parentIds
+      );
+    }
+
     function isValidId(id) {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
@@ -108,14 +116,14 @@ service cloud.firestore {
     }
 
     match /studyPlans/{planId} {
-      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || request.auth.uid in resource.data.parentIds || isAdmin());
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || request.auth.uid in resource.data.parentIds || isParentOf(resource.data.userId) || isAdmin());
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid && isValidStudyPlan(request.resource.data);
       allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin()) && isValidStudyPlan(request.resource.data);
       allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
     }
 
     match /lessonResults/{resultId} {
-      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || request.auth.uid in resource.data.parentIds || isAdmin());
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || request.auth.uid in resource.data.parentIds || isParentOf(resource.data.userId) || isAdmin());
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid && isValidLessonResult(request.resource.data);
       allow update, delete: if isAdmin();
     }
