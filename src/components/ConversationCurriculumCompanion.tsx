@@ -205,8 +205,31 @@ export const ALL_CONVERSATION_UNITS: Record<ConversationLevel, ConversationUnit[
   ]
 };
 
-export const ConversationCurriculumCompanion = ({ lang, level = 'A1', onBack, onStartLesson }: { lang: 'en' | 'ar', level?: ConversationLevel, onBack: () => void, onStartLesson: (unitId: string) => void }) => {
+export const ConversationCurriculumCompanion = ({ 
+  lang, 
+  level = 'A1', 
+  onBack, 
+  onStartLesson,
+  initialUnitId
+}: { 
+  lang: 'en' | 'ar', 
+  level?: ConversationLevel, 
+  onBack: () => void, 
+  onStartLesson: (unitId: string) => void,
+  initialUnitId?: string | null
+}) => {
   const [selectedUnit, setSelectedUnit] = useState<ConversationUnit | null>(null);
+
+  // Auto-select unit if initialUnitId is provided
+  useEffect(() => {
+    if (initialUnitId) {
+      const unit = ALL_CONVERSATION_UNITS[level].find(u => u.id === initialUnitId);
+      if (unit) {
+        setSelectedUnit(unit);
+        setActiveTab('phrases'); // Switch to phrases tab when auto-starting
+      }
+    }
+  }, [initialUnitId, level]);
   const [activeTab, setActiveTab] = useState<'context' | 'phrases' | 'lab'>('lab');
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);

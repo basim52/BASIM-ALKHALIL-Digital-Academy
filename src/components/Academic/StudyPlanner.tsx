@@ -21,12 +21,16 @@ import {
   Save,
   Filter,
   Download,
-  Share2
+  Share2,
+  MessageSquare,
+  Palette
 } from 'lucide-react';
 import { translations, Language } from '../../lib/translations';
 import { ALL_READING_UNITS } from '../ReadingCurriculumCompanion';
 import { ALL_GRAMMAR_UNITS } from '../GrammarCurriculumCompanion';
 import { ALL_WRITING_UNITS } from '../WritingCurriculumCompanion';
+import { ALL_CONVERSATION_UNITS } from '../ConversationCurriculumCompanion';
+import { ALL_EXPRESSION_UNITS } from '../ExpressionCurriculumCompanion';
 import { OXFORD_UNITS } from '../OxfordDiscoverCompanion';
 import { db, handleFirestoreError, OperationType } from '../../lib/firebase';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, updateDoc, deleteDoc, doc } from 'firebase/firestore';
@@ -43,7 +47,7 @@ const AVAILABLE_CATEGORIES = [
     icon: Sparkles, 
     color: 'text-indigo-600', 
     bg: 'bg-indigo-50',
-    subCourses: ['reading', 'grammar', 'writing']
+    subCourses: ['reading', 'grammar', 'writing', 'conversation', 'expression']
   },
   { 
     id: 'oxford', 
@@ -98,6 +102,13 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
   const [isSaving, setIsSaving] = useState(false);
   const [generatedPlan, setGeneratedPlan] = useState<PlanItem[] | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [lessonResults, setLessonResults] = useState<any[]>([]);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
   const [coveredUnitIds, setCoveredUnitIds] = useState<Set<string>>(new Set());
   const [loadPreviousLoading, setLoadPreviousLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'create' | 'history'>('create');
@@ -109,39 +120,39 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
   const tableRef = React.useRef<HTMLDivElement>(null);
 
   const handleExportImage = async () => {
-    if (!tableRef.current) return;
+    if (!generatedPlan || generatedPlan.length === 0) return;
     setIsExporting(true);
+    
+    // We will export in chunks of 18 lessons per page to ensure 5-6 pages for a 90-day plan
+    const ITEMS_PER_PAGE = 18;
+    const totalPages = Math.ceil(generatedPlan.length / ITEMS_PER_PAGE);
+
     try {
-      // Extended delay to ensure all assets are fully painted
+      // Extended delay for initial paint stability
       await new Promise(resolve => setTimeout(resolve, 800));
-      
-      const element = tableRef.current;
-      const rect = element.getBoundingClientRect();
-      // Force professional landscape rectangular width
-      const exportWidth = Math.max(rect.width, 1400); 
-      
-      const dataUrl = await toPng(element, {
-        quality: 1.0,
-        pixelRatio: 2.5, // High resolution for clear text
-        backgroundColor: '#ffffff',
-        style: {
-          borderRadius: '0px',
-          padding: '60px',
-          margin: '0',
-          width: `${exportWidth}px`,
-          height: 'auto', // Allow it to be rectangular based on content
-          display: 'flex',
-          flexDirection: 'column',
+
+      for (let page = 0; page < totalPages; page++) {
+        const element = document.getElementById(`expert-export-page-${page}`);
+        if (!element) continue;
+
+        // Take a small pause between pages to prevent browser overload
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        const dataUrl = await toPng(element, {
+          quality: 1.0,
+          pixelRatio: 2, // Standard high quality
           backgroundColor: '#ffffff',
-        },
-        filter: (node) => {
-          const exclusionClasses = ['export-exclude'];
-          return !exclusionClasses.some(cls => (node as HTMLElement).classList?.contains?.(cls));
-        }
-      });
-      
-      const fileName = `Academy_Plan_${studentName.replace(/\s+/g, '_') || 'Student'}_${new Date().toLocaleDateString()}.png`;
-      saveAs(dataUrl, fileName);
+          cacheBust: true,
+          style: {
+            transform: 'none',
+            margin: '0',
+            width: '1200px'
+          }
+        });
+        
+        const fileName = `Academy_Plan_${studentName.replace(/\s+/g, '_') || 'Student'}_Page_${page + 1}.png`;
+        saveAs(dataUrl, fileName);
+      }
     } catch (error) {
       console.error('Expert Export Error:', error);
       alert(isRtl ? 'حدث خطأ في النظام الخبير للتصدير - جرب تحديث الصفحة' : 'Expert System Error: Image export failed. Please refresh.');
@@ -188,6 +199,14 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
         return dateB - dateA;
       }));
       setCoveredUnitIds(covered);
+
+      // Also fetch lesson results
+      const resultsQ = query(collection(db, 'lessonResults'), where('userId', '==', userProfile.uid));
+      const resultsSnapshot = await getDocs(resultsQ);
+      const results: any[] = [];
+      resultsSnapshot.forEach(doc => results.push({ id: doc.id, ...doc.data() }));
+      setLessonResults(results);
+
     } catch (error) {
       console.error('Error fetching previous plans:', error);
     } finally {
@@ -335,7 +354,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
     let currentDate = new Date(startDate);
     
     // We want to generate roughly 12 weeks of content (3 months)
-    const weeksToGenerate = 12;
+    const weeksToGenerate = 13;
     
     for (let w = 1; w <= weeksToGenerate; w++) {
       const monthNum = Math.ceil(w / 4);
@@ -411,6 +430,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
         // Update existing
         await updateDoc(doc(db, 'studyPlans', selectedSavedPlan.id), {
           ...planData,
+          parentIds: (userProfile as any).linkedParentIds || [],
           updatedAt: serverTimestamp()
         });
       } else {
@@ -418,14 +438,16 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
         const newPlan = {
           ...planData,
           userId: userProfile.uid,
+          parentIds: (userProfile as any).linkedParentIds || [],
           createdAt: serverTimestamp(),
         };
         await addDoc(collection(db, 'studyPlans'), newPlan);
       }
       
       setSaveSuccess(true);
-      fetchSavedPlans();
+      showToast(isRtl ? 'تم حفظ الخطة بنجاح في قاعدة البيانات' : 'Plan saved successfully to database');
       setTimeout(() => setSaveSuccess(false), 3000);
+      fetchSavedPlans();
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, 'studyPlans');
     } finally {
@@ -461,29 +483,148 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
     const lastItem = generatedPlan[generatedPlan.length - 1];
     let nextDate = new Date();
     if (lastItem && lastItem.dateLabel) {
-      // Very basic date parsing - in a real app we'd store raw Date objects
       nextDate = new Date();
       nextDate.setDate(nextDate.getDate() + 1);
     }
 
     const newItem: PlanItem = {
       id: `manual-${Date.now()}`,
-      month: lastItem ? lastItem.month : 1,
-      week: lastItem ? lastItem.week : 1,
-      day: isRtl ? 'إضافي' : 'Extra',
+      month: lesson.month || (lastItem ? lastItem.month : 1),
+      week: lesson.week || (lastItem ? lastItem.week : 1),
+      day: lesson.day || (isRtl ? 'إضافي' : 'Extra'),
       courseId: lesson.courseId,
       courseLabel: lesson.label,
       topic: lesson.topic,
       duration: '45 min',
       level: lesson.level,
       unitId: lesson.unitId,
-      dateLabel: nextDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
-      timeLabel: preferredTime
+      dateLabel: lesson.dateLabel || nextDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
+      timeLabel: lesson.timeLabel || preferredTime
     };
 
-    setGeneratedPlan(prev => prev ? [...prev, newItem] : [newItem]);
+    // Improved insertion logic: insert after the day we clicked on
+    if (addContext) {
+      const dayItems = generatedPlan.filter(item => 
+        item.day === addContext.day && 
+        item.week === addContext.week && 
+        item.month === addContext.month
+      );
+      
+      if (dayItems.length > 0) {
+        const lastIndex = generatedPlan.lastIndexOf(dayItems[dayItems.length - 1]);
+        const newPlan = [...generatedPlan];
+        newPlan.splice(lastIndex + 1, 0, newItem);
+        setGeneratedPlan(newPlan);
+      } else {
+        setGeneratedPlan(prev => prev ? [...prev, newItem] : [newItem]);
+      }
+    } else {
+      setGeneratedPlan(prev => prev ? [...prev, newItem] : [newItem]);
+    }
+
+    showToast(isRtl ? 'تم إضافة الدرس بنجاح للجدول' : 'Lesson added successfully to table');
+    setAddContext(null);
     setShowAddLessonModal(false);
   };
+
+  const [addContext, setAddContext] = useState<{ day: string; week: number; month: number; dateLabel?: string } | null>(null);
+
+  const openAddContext = (day: string, week: number, month: number, dateLabel?: string) => {
+    setAddContext({ day, week, month, dateLabel });
+    setShowAddLessonModal(true);
+  };
+
+  const [modalSearch, setModalSearch] = useState('');
+  const [modalCategory, setModalCategory] = useState<string>('all');
+  const [modalLevel, setModalLevel] = useState<string>('all');
+
+  const getAllAvailableLessons = () => {
+    const lessons: any[] = [];
+    
+    // Flatten all units from all curriculums across all levels
+    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
+    
+    levels.forEach(lvl => {
+      if (ALL_READING_UNITS[lvl]) {
+        ALL_READING_UNITS[lvl].forEach(u => {
+          lessons.push({ ...u, courseId: 'reading', label: isRtl ? 'القراءة' : 'Reading', topic: isRtl ? u.titleAr : u.titleEn, unitId: String(u.id), level: lvl });
+        });
+      }
+      if (ALL_GRAMMAR_UNITS[lvl]) {
+        ALL_GRAMMAR_UNITS[lvl].forEach(u => {
+          lessons.push({ ...u, courseId: 'grammar', label: isRtl ? 'القواعد' : 'Grammar', topic: isRtl ? u.titleAr : u.titleEn, unitId: String(u.id), level: lvl });
+        });
+      }
+      if (ALL_WRITING_UNITS[lvl]) {
+        ALL_WRITING_UNITS[lvl].forEach(u => {
+          lessons.push({ ...u, courseId: 'writing', label: isRtl ? 'الكتابة' : 'Writing', topic: isRtl ? u.titleAr : u.titleEn, unitId: String(u.id), level: lvl });
+        });
+      }
+      if ((ALL_CONVERSATION_UNITS as any)[lvl]) {
+        (ALL_CONVERSATION_UNITS as any)[lvl].forEach((u: any) => {
+          lessons.push({ ...u, courseId: 'conversation', label: isRtl ? 'المحادثة' : 'Conversation', topic: isRtl ? u.titleAr : u.titleEn, unitId: String(u.id), level: lvl });
+        });
+      }
+      if ((ALL_EXPRESSION_UNITS as any)[lvl]) {
+        (ALL_EXPRESSION_UNITS as any)[lvl].forEach((u: any) => {
+          lessons.push({ ...u, courseId: 'expression', label: isRtl ? 'التعبير' : 'Expression', topic: isRtl ? u.titleAr : u.titleEn, unitId: String(u.id), level: lvl });
+        });
+      }
+    });
+
+    OXFORD_UNITS.forEach(u => {
+      lessons.push({ ...u, courseId: 'oxford', label: 'Oxford', topic: isRtl ? u.titleAr : u.titleEn, unitId: String(u.id), level: 'General' });
+    });
+
+    // Filter out existing ones that are ALREADY in the generated plan
+    // Using a composite key for robust checking
+    const existingKeys = new Set(
+      (generatedPlan || []).map(i => `${i.courseId}:${i.level}:${String(i.unitId)}`.toLowerCase())
+    );
+    
+    return lessons.filter(l => {
+      const key = `${l.courseId}:${l.level}:${String(l.unitId)}`.toLowerCase();
+      if (existingKeys.has(key)) return false;
+      
+      const searchStr = modalSearch.toLowerCase();
+      const matchesSearch = !modalSearch || 
+                           l.topic.toLowerCase().includes(searchStr) || 
+                           l.label.toLowerCase().includes(searchStr);
+      
+      const matchesCategory = modalCategory === 'all' || l.courseId === modalCategory;
+      const matchesLevel = modalLevel === 'all' || l.level === modalLevel;
+      
+      return matchesSearch && matchesCategory && matchesLevel;
+    });
+  };
+
+  const availableLessons = getAllAvailableLessons();
+
+  const getLessonResult = (item: PlanItem) => {
+    return lessonResults.find(r => r.lessonId === item.unitId);
+  };
+
+  const getAchievementData = () => {
+    if (!generatedPlan) return null;
+    const completed = generatedPlan.filter(item => getLessonResult(item));
+    const total = generatedPlan.length;
+    const avgScore = completed.length > 0 
+      ? completed.reduce((acc, curr) => {
+          const res = getLessonResult(curr);
+          return acc + (res?.score || 0);
+        }, 0) / completed.length
+      : 0;
+    
+    return {
+      completedCount: completed.length,
+      totalCount: total,
+      percentage: total > 0 ? (completed.length / total) * 100 : 0,
+      averageScore: avgScore,
+      completedLessons: completed
+    };
+  };
+
+  const achievement = getAchievementData();
 
   return (
     <div className={`p-4 md:p-8 max-w-7xl mx-auto ${isRtl ? 'rtl' : 'ltr'}`}>
@@ -819,7 +960,8 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
               <div className="flex flex-wrap gap-4">
                  {[
                     { label: isRtl ? 'إجمالي الدروس' : 'Total Lessons', value: generatedPlan?.length, color: 'text-blue-600', bg: 'bg-blue-50' },
-                    { label: isRtl ? 'معدل التركيز' : 'Focus Level', value: 'Elite', color: 'text-amber-600', bg: 'bg-amber-50' },
+                    { label: isRtl ? 'الدروس المنجزة' : 'Completed', value: achievement?.completedCount, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                    { label: isRtl ? 'نسبة الإنجاز' : 'Completion %', value: `${Math.round(achievement?.percentage || 0)}%`, color: 'text-amber-600', bg: 'bg-amber-50' },
                     { label: isRtl ? 'المدة' : 'Duration', value: '3 Months', color: 'text-rose-600', bg: 'bg-rose-50' },
                  ].map((stat, i) => (
                     <div key={i} className={`${stat.bg} ${stat.color} px-6 py-4 rounded-[2rem] flex-1 min-w-[150px] shadow-sm flex flex-col items-center justify-center border-b-4 border-current/20`}>
@@ -828,6 +970,94 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                     </div>
                  ))}
               </div>
+
+              {/* Achievement Report Section */}
+              {achievement && achievement.completedCount > 0 && (
+                <div className="bg-gradient-to-br from-[#002147] to-blue-900 rounded-[3rem] p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
+                  
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                    <div className="flex-1 text-center md:text-right">
+                      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-[10px] font-black uppercase tracking-[0.2em] mb-6">
+                        <Sparkles size={14} />
+                        {isRtl ? 'تقرير إنجاز الطالب - خاص بولي الأمر' : 'Parent Achievement Report'}
+                      </div>
+                      <h3 className="text-3xl md:text-5xl font-serif font-black mb-4">
+                        {isRtl ? `فخورون بتقدم ${studentName}!` : `Proud of ${studentName}'s Progress!`}
+                      </h3>
+                      <p className="text-blue-100/70 font-medium text-lg max-w-2xl leading-relaxed mb-8">
+                        {isRtl 
+                          ? `لقد أتم طفلك ${achievement.completedCount} درساً بنجاح من أصل ${achievement.totalCount}. معدل الدرجات في الاختبارات هو ${achievement.averageScore.toFixed(1)} من نقاط الدرس.`
+                          : `Your child has successfully completed ${achievement.completedCount} out of ${achievement.totalCount} lessons. The average test score is ${achievement.averageScore.toFixed(1)} points.`}
+                      </p>
+                      
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div className="bg-white/5 border border-white/10 p-4 rounded-3xl backdrop-blur-sm">
+                          <CheckCircle2 className="text-emerald-400 mb-2" size={24} />
+                          <div className="text-2xl font-black">{achievement.completedCount}</div>
+                          <div className="text-[10px] font-bold text-blue-200/50 uppercase">{isRtl ? 'درس مكتمل' : 'Lessons Done'}</div>
+                        </div>
+                        <div className="bg-white/5 border border-white/10 p-4 rounded-3xl backdrop-blur-sm">
+                          <BarChart2 className="text-amber-400 mb-2" size={24} />
+                          <div className="text-2xl font-black">{Math.round(achievement.percentage)}%</div>
+                          <div className="text-[10px] font-bold text-blue-200/50 uppercase">{isRtl ? 'نسبة الإنجاز' : 'Completion'}</div>
+                        </div>
+                        <div className="bg-white/5 border border-white/10 p-4 rounded-3xl backdrop-blur-sm">
+                          <Brain className="text-indigo-400 mb-2" size={24} />
+                          <div className="text-2xl font-black">{achievement.averageScore.toFixed(1)}</div>
+                          <div className="text-[10px] font-bold text-blue-200/50 uppercase">{isRtl ? 'متوسط الاختبار' : 'Avg Quiz Score'}</div>
+                        </div>
+                        <div className="bg-white/5 border border-white/10 p-4 rounded-3xl backdrop-blur-sm">
+                          <Palette className="text-rose-400 mb-2" size={24} />
+                          <div className="text-2xl font-black">Elite</div>
+                          <div className="text-[10px] font-bold text-blue-200/50 uppercase">{isRtl ? 'رتبة التعلم' : 'Learning Rank'}</div>
+                        </div>
+                      </div>
+
+                      {/* Recent Completed Lessons List */}
+                      <div className="mt-8 bg-white/5 rounded-[2rem] p-6 border border-white/10 text-right">
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200/60 mb-4">{isRtl ? 'آخر الدروس المكتملة والمذاكرة' : 'Recent Lessons Studied'}</h4>
+                        <div className="flex flex-wrap gap-2 justify-end">
+                          {achievement.completedLessons.slice(-6).reverse().map(item => {
+                            const res = getLessonResult(item);
+                            return (
+                              <div key={item.id} className="bg-white/10 px-4 py-2 rounded-xl text-[10px] font-black flex items-center gap-2 border border-white/5">
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                                <span className="opacity-80">{item.topic}</span>
+                                <span className="text-blue-300 ml-1">({res?.score}/{res?.total})</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="w-48 h-48 md:w-64 md:h-64 relative flex items-center justify-center">
+                      <svg className="w-full h-full -rotate-90">
+                        <circle
+                          cx="50%"
+                          cy="50%"
+                          r="45%"
+                          className="fill-none stroke-white/5 stroke-[8]"
+                        />
+                        <motion.circle
+                          cx="50%"
+                          cy="50%"
+                          r="45%"
+                          className="fill-none stroke-blue-500 stroke-[12] transition-all duration-1000 ease-out"
+                          strokeDasharray="283"
+                          strokeDashoffset={283 - (283 * achievement.percentage) / 100}
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <div className="absolute flex flex-col items-center">
+                        <span className="text-4xl md:text-5xl font-black">{Math.round(achievement.percentage)}%</span>
+                        <span className="text-[10px] font-bold text-blue-200/50 uppercase tracking-widest">{isRtl ? 'تم' : 'Done'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Interactive Schedule Table */}
               <div className="bg-white rounded-[3rem] border border-slate-200 shadow-sm overflow-hidden">
@@ -1020,11 +1250,38 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                                   <p className="text-xl font-black text-[#002147] group-hover:text-blue-600 transition-colors leading-tight">
                                     {item.topic}
                                   </p>
+                                  {(() => {
+                                    const result = getLessonResult(item);
+                                    if (result) {
+                                      return (
+                                        <div className="flex items-center gap-2 mt-2">
+                                          <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100 flex items-center gap-1.5 shadow-sm">
+                                            <CheckCircle2 size={12} />
+                                            {isRtl ? 'تم الإنجاز بنجاح' : 'Successfully Completed'}
+                                          </span>
+                                          <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100 shadow-sm">
+                                            {isRtl ? 'الدرجة:' : 'Score:'} {result.score}/{result.total}
+                                          </span>
+                                        </div>
+                                      );
+                                    }
+                                    return null;
+                                  })()}
                                 </div>
                               </div>
                             </td>
                             <td className="p-8 rounded-r-3xl border-y border-r border-slate-100 group-hover:border-blue-200 transition-colors text-right relative">
-                               <div className="flex items-center justify-end gap-4 transform transition-all export-exclude">
+                               <div className="flex items-center justify-end gap-3 transform transition-all export-exclude">
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openAddContext(item.day, item.week, item.month, item.dateLabel);
+                                    }}
+                                    className="w-10 h-10 flex items-center justify-center bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all shadow-sm border border-blue-100"
+                                    title={isRtl ? 'إضافة مادة لهذا اليوم' : 'Add subject to this day'}
+                                  >
+                                    <Plus size={20} />
+                                  </button>
                                   <button 
                                     onClick={(e) => {
                                       e.stopPropagation();
@@ -1034,8 +1291,8 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                                   >
                                     <Trash2 size={20} />
                                   </button>
-                                  <div className="w-12 h-12 bg-slate-50 text-slate-300 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-200 transition-all">
-                                     <ChevronRight size={24} className={isRtl ? 'rotate-180' : ''} />
+                                  <div className="w-10 h-10 bg-slate-50 text-slate-300 rounded-xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-200 transition-all">
+                                     <ChevronRight size={20} className={isRtl ? 'rotate-180' : ''} />
                                   </div>
                                </div>
                             </td>
@@ -1095,6 +1352,183 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
           )}
         </div>
       </div>
+
+      {/* Hidden Export Pages Container */}
+      <div className="fixed top-[-9999px] left-[-9999px] pointer-events-none">
+        {generatedPlan && Array.from({ length: Math.ceil(generatedPlan.length / 18) }).map((_, pageIdx) => {
+          const ITEMS_PER_PAGE = 18;
+          const start = pageIdx * ITEMS_PER_PAGE;
+          const end = start + ITEMS_PER_PAGE;
+          const chunk = generatedPlan.slice(start, end);
+          
+          return (
+            <div 
+              key={pageIdx}
+              id={`expert-export-page-${pageIdx}`}
+              className="bg-white p-12 overflow-hidden"
+              style={{ width: '1200px' }}
+            >
+              {/* Expert Export Header */}
+              <div className="mb-10 p-12 bg-[#002147] rounded-[3rem] text-white relative overflow-hidden border-b-[8px] border-amber-400">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+                
+                <div className="relative z-10 flex items-center justify-between gap-10">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-4 mb-6">
+                       <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
+                         <Sparkles className="text-amber-400" size={32} />
+                       </div>
+                       <div>
+                          <h2 className="text-2xl font-black tracking-tight text-white/90">
+                            {isRtl ? 'أكاديمية باسم آل خليل الرقمية' : 'Basim Al Khalil Digital Academy'}
+                          </h2>
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className="w-2 h-2 bg-emerald-400 rounded-full" />
+                            <span className="text-[10px] font-black text-blue-200 uppercase tracking-widest">
+                              {isRtl ? 'نظام التعلم الذكي المعتمد' : 'Certified Smart Learning System'}
+                            </span>
+                          </div>
+                       </div>
+                    </div>
+                    <div className="mt-8">
+                      <span className="text-amber-400 text-[10px] font-black uppercase tracking-[0.3em] mb-2 block">
+                        {isRtl ? 'خطة التفوق العلمي - صفحة ' : 'Academic Excellence Roadmap - Page '} {pageIdx + 1}
+                      </span>
+                      <h1 className="text-5xl font-black text-white leading-tight">
+                        {studentName || (isRtl ? 'اسم الطالب' : 'Student Name')}
+                      </h1>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 bg-white/5 p-8 rounded-[2.5rem] border border-white/5 min-w-[320px]">
+                    <div className="space-y-1">
+                       <span className="text-[9px] font-black text-blue-300/60 uppercase">{isRtl ? 'إنجاز الدروس' : 'Curriculum Load'}</span>
+                       <div className="text-2xl font-black">{generatedPlan.length} {isRtl ? 'وحدات' : 'Units'}</div>
+                    </div>
+                    <div className="space-y-1 border-r border-white/10 pr-6">
+                       <span className="text-[9px] font-black text-blue-300/60 uppercase">{isRtl ? 'الجدول الزمني' : 'Timeline'}</span>
+                       <div className="text-2xl font-black">90 {isRtl ? 'يوم' : 'Days'}</div>
+                    </div>
+                    <div className="space-y-1">
+                       <span className="text-[9px] font-black text-blue-300/60 uppercase">{isRtl ? 'مستوى التركيز' : 'Focus Intensity'}</span>
+                       <div className="text-2xl font-black text-emerald-400">Elite 100%</div>
+                    </div>
+                    <div className="space-y-1 border-r border-white/10 pr-6">
+                       <span className="text-[9px] font-black text-blue-300/60 uppercase">{isRtl ? 'البرنامج' : 'Program'}</span>
+                       <div className="text-2xl font-black text-amber-400">Pro-Active</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-2">
+                <table className="w-full border-separate border-spacing-y-4">
+                  <thead>
+                    <tr className="text-[#002147]/40">
+                      <th className={`px-6 text-[11px] font-black uppercase tracking-[0.2em] pb-4 ${isRtl ? 'text-right' : 'text-left'}`}>
+                        {isRtl ? 'التصنيف والموعد' : 'Timeline & Schedule'}
+                      </th>
+                      <th className={`px-6 text-[11px] font-black uppercase tracking-[0.2em] pb-4 ${isRtl ? 'text-right' : 'text-left'}`}>
+                        {isRtl ? 'المادة والوحدة الدراسية' : 'Curriculum Subject'}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {chunk.map((item, idx) => (
+                      <tr 
+                        key={item.id} 
+                        className={`transition-all ${idx % 2 === 0 ? 'bg-slate-50/50' : 'bg-white'} rounded-3xl`}
+                      >
+                        <td className="p-8 rounded-l-3xl border-y border-l border-slate-100">
+                          <div className="flex flex-col gap-2">
+                             <div className="flex items-center gap-2">
+                                <span className="bg-[#002147] text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase shadow-sm">
+                                  {isRtl ? 'أسبوع' : 'Week'} {item.week}
+                                </span>
+                                {item.dateLabel && (
+                                   <span className="text-[10px] font-black text-blue-600 border border-blue-100 bg-blue-50 px-2.5 py-0.5 rounded-lg">
+                                      {item.dateLabel}
+                                   </span>
+                                )}
+                             </div>
+                             <div className="flex items-center gap-3 mt-1">
+                                <span className="text-base font-black text-[#002147]">
+                                   {item.day}
+                                </span>
+                                {item.timeLabel && (
+                                   <div className="flex items-center gap-1.5 text-slate-400">
+                                      <div className="w-1 h-1 rounded-full bg-slate-300" />
+                                      <span className="text-xs font-black">{item.timeLabel}</span>
+                                   </div>
+                                )}
+                             </div>
+                          </div>
+                        </td>
+                        <td className="p-8 rounded-r-3xl border-y border-r border-slate-100">
+                          <div className="flex items-center gap-6">
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg ${
+                              item.courseId === 'reading' ? 'bg-emerald-600 text-white shadow-emerald-100' : 
+                              item.courseId === 'grammar' ? 'bg-blue-600 text-white shadow-blue-100' : 
+                              'bg-indigo-600 text-white shadow-indigo-100'
+                            }`}>
+                              {item.courseId === 'reading' ? <BookOpen size={24} /> : <Sparkles size={24} />}
+                            </div>
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-3">
+                                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.courseLabel}</span>
+                                 <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                 <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{item.duration}</span>
+                              </div>
+                              <p className="text-xl font-black text-[#002147] leading-tight">
+                                {item.topic}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Footer Info for Expert Branding */}
+              <div className="mt-12 flex items-center justify-between border-t border-slate-100 pt-8 opacity-40">
+                 <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white">
+                       <Sparkles size={16} />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[#002147]">Al Khalil Academy AI Engine</span>
+                 </div>
+                 <span className="text-[9px] font-black text-slate-400">EXPERT ACADEMIC REPORT • 2026</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-3 border-2 ${
+              toast.type === 'success' 
+                ? 'bg-white border-emerald-100 text-emerald-600' 
+                : 'bg-white border-rose-100 text-rose-600'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${
+              toast.type === 'success' ? 'bg-emerald-50' : 'bg-rose-50'
+            }`}>
+              {toast.type === 'success' ? <CheckCircle2 size={24} /> : <Sparkles size={24} className="rotate-45" />}
+            </div>
+            <p className="font-black text-sm whitespace-nowrap">{toast.message}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Add Lesson Modal */}
       <AnimatePresence>
         {showAddLessonModal && (
@@ -1113,38 +1547,109 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
               className="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl relative z-10 overflow-hidden flex flex-col max-h-[80vh]"
             >
               <div className="p-8 border-b border-slate-100 flex items-center justify-between">
-                <h3 className="text-xl font-black text-[#002147]">
-                  {isRtl ? 'إضافة مادة أو درس' : 'Add Subject or Lesson'}
-                </h3>
+                <div>
+                   <h3 className="text-xl font-black text-[#002147]">
+                     {isRtl ? 'إضافة مادة أو درس' : 'Add Subject or Lesson'}
+                   </h3>
+                   {addContext && (
+                     <p className="text-xs font-bold text-blue-600 mt-1">
+                        {isRtl ? `إضافة إلى: ${addContext.day} - ${addContext.dateLabel}` : `Adding to: ${addContext.day} - ${addContext.dateLabel}`}
+                     </p>
+                   )}
+                </div>
                 <button onClick={() => setShowAddLessonModal(false)} className="text-slate-400 hover:text-rose-500">
                   <Plus className="rotate-45" size={24} />
                 </button>
               </div>
               
               <div className="p-8 overflow-y-auto space-y-6">
-                <div>
+                <div className="space-y-4">
+                  <div className="flex flex-col md:flex-row gap-3">
+                    <input 
+                      type="text"
+                      placeholder={isRtl ? 'بحث عن درس...' : 'Search for a lesson...'}
+                      value={modalSearch}
+                      onChange={(e) => setModalSearch(e.target.value)}
+                      className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm font-black outline-none focus:ring-2 focus:ring-blue-600 transition-all"
+                    />
+                    <select 
+                      value={modalCategory}
+                      onChange={(e) => setModalCategory(e.target.value)}
+                      className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm font-black outline-none focus:ring-2 focus:ring-blue-600 transition-all"
+                    >
+                      <option value="all">{isRtl ? 'كل المواد' : 'All Subjects'}</option>
+                      <option value="reading">{isRtl ? 'القراءة' : 'Reading'}</option>
+                      <option value="grammar">{isRtl ? 'القواعد' : 'Grammar'}</option>
+                      <option value="writing">{isRtl ? 'الكتابة' : 'Writing'}</option>
+                      <option value="conversation">{isRtl ? 'المحادثة' : 'Conversation'}</option>
+                      <option value="expression">{isRtl ? 'التعبير' : 'Expression'}</option>
+                      <option value="oxford">Oxford</option>
+                    </select>
+                    <select 
+                      value={modalLevel}
+                      onChange={(e) => setModalLevel(e.target.value)}
+                      className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm font-black outline-none focus:ring-2 focus:ring-blue-600 transition-all"
+                    >
+                      <option value="all">{isRtl ? 'كل المستويات' : 'All Levels'}</option>
+                      <option value="A1">A1</option>
+                      <option value="A2">A2</option>
+                      <option value="B1">B1</option>
+                      <option value="B2">B2</option>
+                      <option value="C1">C1</option>
+                      <option value="C2">C2</option>
+                      <option value="General">General</option>
+                    </select>
+                  </div>
+
                   <label className="text-[10px] font-black text-slate-400 uppercase mb-3 block">
-                    {isRtl ? 'اختر مادة من المناهج المتاحة' : 'Choose Lesson from Curriculums'}
+                    {isRtl ? `الدروس المتاحة (${availableLessons.length})` : `Available Lessons (${availableLessons.length})`}
                   </label>
+                  
                   <div className="grid grid-cols-1 gap-3">
-                    {[
-                      ...ALL_READING_UNITS['A1'].map(u => ({ courseId: 'reading', label: isRtl ? 'القراءة' : 'Reading', topic: isRtl ? u.titleAr : u.titleEn, unitId: u.id, level: 'A1' })),
-                      ...ALL_GRAMMAR_UNITS['A1'].map(u => ({ courseId: 'grammar', label: isRtl ? 'القواعد' : 'Grammar', topic: isRtl ? u.titleAr : u.titleEn, unitId: u.id, level: 'A1' })),
-                      ...ALL_WRITING_UNITS['A1'].map(u => ({ courseId: 'writing', label: isRtl ? 'الكتابة' : 'Writing', topic: isRtl ? u.titleAr : u.titleEn, unitId: u.id, level: 'A1' })),
-                      ...OXFORD_UNITS.slice(0, 10).map(u => ({ courseId: 'oxford', label: 'Oxford', topic: isRtl ? u.titleAr : u.titleEn, unitId: String(u.id), level: 'General' }))
-                    ].map((lesson, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => handleAddLesson(lesson)}
-                        className="w-full text-right flex items-center justify-between p-4 bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 rounded-2xl transition-all"
-                      >
-                        <div>
-                          <span className="text-[10px] font-black text-blue-600 block mb-1 uppercase opacity-60">{lesson.label}</span>
-                          <span className="text-sm font-black text-[#002147]">{lesson.topic}</span>
-                        </div>
-                        <Plus size={16} className="text-blue-600" />
-                      </button>
-                    ))}
+                    {availableLessons.length > 0 ? (
+                      availableLessons.slice(0, 50).map((lesson, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleAddLesson({ ...lesson, ...addContext })}
+                          className="w-full text-right flex items-center justify-between p-4 bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 rounded-2xl transition-all group"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white ${
+                              lesson.courseId === 'reading' ? 'bg-emerald-600' : 
+                              lesson.courseId === 'grammar' ? 'bg-blue-600' : 
+                              lesson.courseId === 'writing' ? 'bg-indigo-600' : 
+                              lesson.courseId === 'conversation' ? 'bg-rose-600' :
+                              lesson.courseId === 'expression' ? 'bg-purple-600' :
+                              'bg-amber-500'
+                            }`}>
+                              {lesson.courseId === 'reading' ? <BookOpen size={18} /> : 
+                               lesson.courseId === 'conversation' ? <MessageSquare size={18} /> :
+                               lesson.courseId === 'expression' ? <Palette size={18} /> :
+                               <Sparkles size={18} />}
+                            </div>
+                            <div className="text-right">
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">{lesson.label}</span>
+                                <span className="text-[9px] font-black text-slate-400 border border-slate-200 px-1 rounded uppercase">{lesson.level}</span>
+                              </div>
+                              <span className="text-sm font-black text-[#002147] group-hover:text-blue-600 transition-colors">{lesson.topic}</span>
+                            </div>
+                          </div>
+                          <Plus size={16} className="text-blue-600 group-hover:scale-125 transition-transform" />
+                        </button>
+                      ))
+                    ) : (
+                      <div className="py-10 text-center">
+                        <p className="text-xs font-black text-slate-300 uppercase">
+                          {isRtl ? 'لا توجد دروس تطابق بحثك' : 'No lessons found matching your filters'}
+                        </p>
+                      </div>
+                    )}
+                    {availableLessons.length > 50 && (
+                       <p className="text-[10px] text-center text-slate-400 font-bold">
+                         {isRtl ? 'أظهرنا أول 50 نتيجة، جرب تقليل البحث' : 'Showing first 50 results, try filtering to find more'}
+                       </p>
+                    )}
                   </div>
                 </div>
               </div>

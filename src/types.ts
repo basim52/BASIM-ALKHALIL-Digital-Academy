@@ -30,6 +30,8 @@ export interface UserProfile {
   phoneNumber?: string;
   lastSeen?: number;
   credits?: number; // Credit balance
+  points?: number;
+  level?: proficiencyLevel;
   // Childhood Minutes System
   dailyMinutesLimit?: number;
   remainingMinutesToday?: number;

@@ -37,7 +37,6 @@ export const translations = {
     // Parent Dashboard
     parentPortal: 'بوابة ولي الأمر',
     trackProgress: 'متابعة الأداء التعليمي والنمو اللغوي لأبنائك',
-    studentName: 'سيف الدين أحمد',
     registeredStudent: 'طالب مسجل',
     attendance: 'نسبة الحضور',
     gradeAverage: 'معدل الدرجات',
@@ -300,7 +299,6 @@ export const translations = {
     // Parent Dashboard
     parentPortal: 'Parent Portal',
     trackProgress: "Track your children's educational performance and language growth",
-    studentName: 'Saifuddin Ahmed',
     registeredStudent: 'Registered Student',
     attendance: 'Attendance',
     gradeAverage: 'Grade Average',

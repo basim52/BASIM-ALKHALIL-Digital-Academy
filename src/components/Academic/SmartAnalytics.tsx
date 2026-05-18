@@ -31,19 +31,30 @@ import html2canvas from 'html2canvas';
 interface SmartAnalyticsProps {
   lang: Language;
   onBack: () => void;
+  planItems?: any[] | null;
+  studentName?: string;
 }
 
-export const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({ lang: initialLang, onBack }) => {
+export const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({ 
+  lang: initialLang, 
+  onBack, 
+  planItems,
+  studentName: propStudentName 
+}) => {
   const [currentLang, setCurrentLang] = useState<Language>(initialLang);
   const t = translations[currentLang];
   const isRtl = currentLang === 'ar';
   const reportRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
 
+  const studentName = propStudentName || (isRtl ? 'الطالب' : 'Student');
+  const totalLessons = planItems?.length || 0;
+  const level = planItems?.[0]?.level || 'A1';
+
   const progressData = [
-    { name: t.month1, score: 65 },
-    { name: t.month2, score: 78 },
-    { name: t.month3, score: 92 },
+    { name: t.month1, score: totalLessons > 0 ? 65 : 0 },
+    { name: t.month2, score: totalLessons > 0 ? 78 : 0 },
+    { name: t.month3, score: totalLessons > 0 ? 92 : 0 },
   ];
 
   const toggleLanguage = () => {
@@ -133,15 +144,15 @@ export const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({ lang: initialLan
                 </div>
                 <div>
                    <h1 className="text-2xl font-black text-[#002147] tracking-tight leading-tight uppercase">
-                    {currentLang === 'ar' ? 'أكاديمية باسم الخليل' : 'Basim Alkhalil Academy'}
+                    {studentName}
                   </h1>
                   <p className="text-xs font-black text-blue-600 uppercase tracking-widest">
-                    {currentLang === 'ar' ? 'تقرير التحليل الشامل' : 'Comprehensive Analysis Report'}
+                    {currentLang === 'ar' ? `تقرير التحليل الشامل - المستوى ${level}` : `Comprehensive Analysis Report - Level ${level}`}
                   </p>
                 </div>
               </div>
               <p className="text-slate-500 font-bold max-w-md">
-                {currentLang === 'ar' ? 'تحليل ذكي لمستوى التقدم الأكاديمي والمهارات اللغوية المكتسبة خلال الفصل الدراسي.' : 'Smart analysis of academic progress and language skills acquired during the term.'}
+                {currentLang === 'ar' ? `تحليل ذكي لمستوى التقدم الأكاديمي لـ ${studentName} والمهارات اللغوية المكتسبة.` : `Smart analysis of academic progress for ${studentName} and language skills acquired.`}
               </p>
             </div>
             
@@ -157,9 +168,9 @@ export const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({ lang: initialLan
           {/* KPIs */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { label: t.studentAverage, value: '92.4%', sub: '+4% vs prev', icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
-              { label: t.participationRate, value: '88%', sub: 'Level 4 Active', icon: Zap, color: 'text-amber-500', bg: 'bg-amber-50' },
-              { label: currentLang === 'ar' ? 'مستوى الإنجاز' : 'Milestone Score', value: '4.8/5', sub: 'Excellent Standing', icon: Target, color: 'text-rose-500', bg: 'bg-rose-50' },
+              { label: t.studentAverage, value: totalLessons > 0 ? '92.4%' : '0%', sub: totalLessons > 0 ? '+4% vs prev' : 'Initial Phase', icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
+              { label: t.participationRate, value: totalLessons > 0 ? '88%' : '0%', sub: `Level ${level} Active`, icon: Zap, color: 'text-amber-500', bg: 'bg-amber-50' },
+              { label: currentLang === 'ar' ? 'التزام بالخطة' : 'Plan Commitment', value: totalLessons > 0 ? `${totalLessons} Units` : '0 Units', sub: 'Calculated from AI Planner', icon: Target, color: 'text-rose-500', bg: 'bg-rose-50' },
             ].map((kpi, i) => (
               <motion.div 
                 key={i}

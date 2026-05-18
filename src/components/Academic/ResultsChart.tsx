@@ -29,38 +29,112 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { translations, Language } from '../../lib/translations';
+import { db } from '../../lib/firebase';
+import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 
 interface ResultsChartProps {
   lang: Language;
   onBack: () => void;
   onNavigateToAnalytics: () => void;
+  planItems?: any[] | null;
+  studentName?: string;
+  studentId?: string;
+  isAdmin?: boolean;
 }
 
-export const ResultsChart: React.FC<ResultsChartProps> = ({ lang, onBack, onNavigateToAnalytics }) => {
+export const ResultsChart: React.FC<ResultsChartProps> = ({ 
+  lang, 
+  onBack, 
+  onNavigateToAnalytics,
+  planItems,
+  studentName,
+  studentId,
+  isAdmin
+}) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
+  const [loading, setLoading] = React.useState(true);
+  const [results, setResults] = React.useState<any[]>([]);
+  const [allStudents, setAllStudents] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        if (isAdmin) {
+          // Fetch all students and their aggregated results
+          const studentsSnap = await getDocs(query(collection(db, 'users'), where('role', '==', 'student'), limit(20)));
+          const studentsList = studentsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setAllStudents(studentsList);
+
+          // Fetch recent results globally for some stats if needed
+          const resultsSnap = await getDocs(query(collection(db, 'lessonResults'), orderBy('timestamp', 'desc'), limit(50)));
+          setResults(resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        } else if (studentId) {
+          // Fetch results for specific student
+          const q = query(collection(db, 'lessonResults'), where('userId', '==', studentId), orderBy('timestamp', 'desc'));
+          const snap = await getDocs(q);
+          setResults(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        }
+      } catch (err) {
+        console.error("Error fetching results data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [studentId, isAdmin]);
+
+  const totalLessons = planItems?.length || 0;
+  
+  // Calculate category averages
+  const getCategoryAvg = (categoryId: string) => {
+    const catResults = results.filter(r => {
+      // Try to find if this result belongs to a course
+      // This is a bit tricky without a direct mapping, but we can try to match lesson names or IDs if we had them
+      // For now, let's assume lessonResults might eventually have a courseId. 
+      // If not, we'll use fallback or filter by lessonId prefixes if they exist.
+      return r.courseId === categoryId || r.lessonId?.startsWith(categoryId);
+    });
+    if (catResults.length === 0) return 0;
+    const total = catResults.reduce((acc, r) => acc + (r.score || 0), 0);
+    const possible = catResults.reduce((acc, r) => acc + (r.total || 10), 0);
+    return Math.round((total / possible) * 100);
+  };
 
   const gradeData = [
-    { subject: isRtl ? 'الأكسفورد' : 'Oxford', score: 85, avg: 72 },
-    { subject: isRtl ? 'القواعد' : 'Grammar', score: 92, avg: 68 },
-    { subject: isRtl ? 'القراءة' : 'Reading', score: 78, avg: 75 },
-    { subject: isRtl ? 'المحادثة' : 'Conv.', score: 88, avg: 70 },
-    { subject: isRtl ? 'الكتابة' : 'Writing', score: 95, avg: 65 },
+    { subject: isRtl ? 'الأكسفورد' : 'Oxford', score: getCategoryAvg('oxford'), avg: 72 },
+    { subject: isRtl ? 'القواعد' : 'Grammar', score: getCategoryAvg('grammar'), avg: 68 },
+    { subject: isRtl ? 'القراءة' : 'Reading', score: getCategoryAvg('reading'), avg: 75 },
+    { subject: isRtl ? 'المحادثة' : 'Conv.', score: getCategoryAvg('conversation'), avg: 70 },
+    { subject: isRtl ? 'الكتابة' : 'Writing', score: getCategoryAvg('writing'), avg: 65 },
   ];
 
   const participationData = [
-    { name: isRtl ? 'منهجية' : 'Curric.', value: 65, color: '#2563eb' },
-    { name: isRtl ? 'لامنهجية' : 'Extra', value: 35, color: '#fbbf24' },
+    { name: isRtl ? 'منهجية' : 'Curric.', value: results.length > 0 ? 80 : 0, color: '#2563eb' },
+    { name: isRtl ? 'لامنهجية' : 'Extra', value: results.length > 0 ? 20 : 0, color: '#fbbf24' },
   ];
 
-  const COLORS = ['#2563eb', '#fbbf24', '#10b981', '#f43f5e'];
-
-  const studentsResults = [
-    { id: '1', name: isRtl ? 'سيف الدين أحمد' : 'Saifuddin Ahmed', level: 'B1', grade: '92%', status: 'Excellent' },
-    { id: '2', name: isRtl ? 'مريم علي' : 'Maryam Ali', level: 'A2', grade: '88%', status: 'Excellent' },
-    { id: '3', name: isRtl ? 'عبدالله خالد' : 'Abdullah Khalid', level: 'B2', grade: '75%', status: 'Good' },
-    { id: '4', name: isRtl ? 'نورة فيصل' : 'Noura Faisal', level: 'C1', grade: '96%', status: 'Outstanding' },
-  ];
+  const studentsResults = isAdmin ? allStudents.map(s => {
+    const studentResults = results.filter(r => r.userId === s.id);
+    const total = studentResults.reduce((acc, r) => acc + (r.score || 0), 0);
+    const possible = studentResults.reduce((acc, r) => acc + (r.total || 0), 0);
+    const avg = possible > 0 ? Math.round((total / possible) * 100) : 0;
+    
+    return {
+      id: s.id,
+      name: s.displayName || 'Unnamed Student',
+      level: s.level || 'A1',
+      grade: `${avg}%`,
+      status: avg > 85 ? 'Excellent' : avg > 70 ? 'Good' : avg > 0 ? 'Improving' : 'Pending'
+    };
+  }) : results.map(r => ({
+    id: r.id,
+    name: r.lessonTitle || r.lessonId,
+    level: r.timestamp?.toDate ? r.timestamp.toDate().toLocaleDateString() : '---',
+    grade: `${Math.round((r.score / r.total) * 100)}%`,
+    status: r.score === r.total ? 'Mastered' : 'Completed'
+  }));
 
   return (
     <div className={`p-4 md:p-8 max-w-7xl mx-auto ${isRtl ? 'rtl' : 'ltr'}`}>
@@ -154,7 +228,9 @@ export const ResultsChart: React.FC<ResultsChartProps> = ({ lang, onBack, onNavi
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none pb-8">
                   <div className="text-center">
-                    <p className="text-2xl font-black text-[#002147]">85%</p>
+                    <p className="text-2xl font-black text-[#002147]">
+                      {results.length > 0 ? (Math.round(results.reduce((acc, r) => acc + (r.score / r.total), 0) / results.length * 100)) : '0'}%
+                    </p>
                     <p className="text-[10px] text-slate-400 font-bold uppercase">{isRtl ? 'الإجمالي' : 'Total'}</p>
                   </div>
                 </div>
@@ -167,59 +243,69 @@ export const ResultsChart: React.FC<ResultsChartProps> = ({ lang, onBack, onNavi
             <div className="p-8 border-b border-slate-100 flex items-center justify-between">
               <h3 className="font-black text-[#002147] text-xl flex items-center gap-3">
                 <Users className="text-blue-600" />
-                {isRtl ? 'نتائج الطلاب والدرجات' : 'Student Grades & Results'}
+                {isAdmin ? (isRtl ? 'إحصائيات الطلاب الجدد' : 'Recent Student Stats') : (isRtl ? 'تفاصيل دروسك المكتملة' : 'Completed Lessons Detail')}
               </h3>
               <button className="text-blue-600 font-bold text-sm hover:underline">
                 {isRtl ? 'تصدير الكل' : 'Export All'}
               </button>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-slate-50/50 text-left">
-                    <th className={`p-6 text-xs font-black text-slate-400 uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'}`}>
-                      {isRtl ? 'الطالب' : 'Student'}
-                    </th>
-                    <th className={`p-6 text-xs font-black text-slate-400 uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'}`}>
-                      {isRtl ? 'المستوى' : 'Level'}
-                    </th>
-                    <th className={`p-6 text-xs font-black text-slate-400 uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'}`}>
-                      {isRtl ? 'المعدل' : 'Grade'}
-                    </th>
-                    <th className={`p-6 text-xs font-black text-slate-400 uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'}`}>
-                      {isRtl ? 'الحالة' : 'Status'}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {studentsResults.map((student) => (
-                    <tr key={student.id} className="hover:bg-slate-50/30 transition-colors">
-                      <td className="p-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center font-bold text-[#002147]">
-                            {student.name.charAt(0)}
-                          </div>
-                          <span className="font-black text-[#002147]">{student.name}</span>
-                        </div>
-                      </td>
-                      <td className="p-6">
-                        <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-black">
-                          {student.level}
-                        </span>
-                      </td>
-                      <td className="p-6">
-                        <span className="font-bold text-slate-800">{student.grade}</span>
-                      </td>
-                      <td className="p-6">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 size={16} className="text-emerald-500" />
-                          <span className="text-sm font-bold text-slate-500">{student.status}</span>
-                        </div>
-                      </td>
+            <div className="overflow-x-auto min-h-[300px]">
+              {loading ? (
+                <div className="flex items-center justify-center p-20">
+                  <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : studentsResults.length > 0 ? (
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-slate-50/50 text-left">
+                      <th className={`p-6 text-xs font-black text-slate-400 uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'}`}>
+                        {isAdmin ? (isRtl ? 'الطالب' : 'Student') : (isRtl ? 'الدرس' : 'Lesson')}
+                      </th>
+                      <th className={`p-6 text-xs font-black text-slate-400 uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'}`}>
+                        {isAdmin ? (isRtl ? 'المستوى' : 'Level') : (isRtl ? 'التاريخ' : 'Date')}
+                      </th>
+                      <th className={`p-6 text-xs font-black text-slate-400 uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'}`}>
+                        {isRtl ? 'المعدل' : 'Grade'}
+                      </th>
+                      <th className={`p-6 text-xs font-black text-slate-400 uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'}`}>
+                        {isRtl ? 'الحالة' : 'Status'}
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {studentsResults.map((student) => (
+                      <tr key={student.id} className="hover:bg-slate-50/30 transition-colors">
+                        <td className="p-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center font-bold text-[#002147]">
+                              {student.name.charAt(0)}
+                            </div>
+                            <span className="font-black text-[#002147]">{student.name}</span>
+                          </div>
+                        </td>
+                        <td className="p-6">
+                          <span className={`px-3 py-1 ${isAdmin ? 'bg-blue-50 text-blue-600' : 'text-slate-500'} rounded-full text-xs font-black`}>
+                            {student.level}
+                          </span>
+                        </td>
+                        <td className="p-6">
+                          <span className="font-bold text-slate-800">{student.grade}</span>
+                        </td>
+                        <td className="p-6">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 size={16} className="text-emerald-500" />
+                            <span className="text-sm font-bold text-slate-500">{student.status}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="p-20 text-center text-slate-400 italic">
+                  {isRtl ? 'لا توجد بيانات نتائج متاحة حالياً' : 'No results data available currently'}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -234,7 +320,9 @@ export const ResultsChart: React.FC<ResultsChartProps> = ({ lang, onBack, onNavi
               <p className="text-blue-200 font-bold text-sm mb-1 uppercase tracking-widest">
                 {isRtl ? 'معدل الأكاديمية' : 'Academy Average'}
               </p>
-              <h4 className="text-4xl font-black mb-2">91.4%</h4>
+              <h4 className="text-4xl font-black mb-2">
+                {results.length > 0 ? (Math.round(results.reduce((acc, r) => acc + (r.score / r.total), 0) / results.length * 100)) : '0'}%
+              </h4>
               <div className="flex items-center gap-2 text-emerald-400 text-sm font-bold">
                 <Activity size={14} />
                 +2.4% {isRtl ? 'مقارنة بالشهر الماضي' : 'vs last month'}
@@ -253,10 +341,10 @@ export const ResultsChart: React.FC<ResultsChartProps> = ({ lang, onBack, onNavi
             </h3>
             <div className="space-y-6">
               {[
-                { label: isRtl ? 'القواعد' : 'Grammar', value: 92, color: 'bg-emerald-500' },
-                { label: isRtl ? 'المحادثة' : 'Conversation', value: 88, color: 'bg-blue-500' },
-                { label: isRtl ? 'القراءة' : 'Reading', value: 78, color: 'bg-amber-500' },
-                { label: isRtl ? 'الكتابة' : 'Writing', value: 95, color: 'bg-purple-500' },
+                { label: isRtl ? 'القواعد' : 'Grammar', value: getCategoryAvg('grammar'), color: 'bg-emerald-500' },
+                { label: isRtl ? 'المحادثة' : 'Conversation', value: getCategoryAvg('conversation'), color: 'bg-blue-500' },
+                { label: isRtl ? 'القراءة' : 'Reading', value: getCategoryAvg('reading'), color: 'bg-amber-500' },
+                { label: isRtl ? 'الكتابة' : 'Writing', value: getCategoryAvg('writing'), color: 'bg-purple-500' },
               ].map((item, i) => (
                 <div key={i}>
                   <div className="flex justify-between items-center mb-2">

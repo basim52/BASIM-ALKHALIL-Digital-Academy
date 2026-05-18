@@ -1404,34 +1404,51 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
   const [error, setError] = useState('');
   const [linking, setLinking] = useState(false);
   const [showAddStudent, setShowAddStudent] = useState(false);
+  
   const [currentPlan, setCurrentPlan] = useState<any>(null);
+  const [currentPlanResults, setCurrentPlanResults] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchPlan = async () => {
+    const fetchStudentSpecificData = async () => {
+      if (selectedStudentIndex === null || !linkedStudents[selectedStudentIndex]) return;
+      
+      const student = linkedStudents[selectedStudentIndex];
+      const studentId = student.uid;
+      
       try {
-        let q;
-        if (profile.role === UserRole.ADMIN) {
-          q = query(collection(db, 'studyPlans'), orderBy('createdAt', 'desc'), limit(1));
-        } else {
-          q = query(
-            collection(db, 'studyPlans'),
-            where('userId', '==', profile.uid),
-            orderBy('createdAt', 'desc'),
-            limit(1)
-          );
-        }
-        const snap = await getDocs(q);
+        // Fetch Study Plan
+        const plansQ = query(
+          collection(db, 'studyPlans'), 
+          where('userId', '==', studentId),
+          orderBy('createdAt', 'desc'),
+          limit(1)
+        );
+        const snap = await getDocs(plansQ);
         if (!snap.empty) {
           const docPlan = snap.docs[0];
-          const data = docPlan.data() as Record<string, any>;
-          setCurrentPlan({ id: docPlan.id, ...data });
+          setCurrentPlan({ id: docPlan.id, ...docPlan.data() });
+        } else {
+          setCurrentPlan(null);
         }
+
+        // Fetch Results
+        const resultsQ = query(
+          collection(db, 'lessonResults'), 
+          where('userId', '==', studentId),
+          orderBy('timestamp', 'desc'),
+          limit(20)
+        );
+        const resultsSnapshot = await getDocs(resultsQ);
+        const results: any[] = [];
+        resultsSnapshot.forEach(doc => results.push({ id: doc.id, ...doc.data() }));
+        setCurrentPlanResults(results);
       } catch (e) {
-        console.error("Error fetching plan for dashboard:", e);
+        console.error("Error fetching student data for parent:", e);
       }
     };
-    fetchPlan();
-  }, [profile.uid, profile.role]);
+
+    fetchStudentSpecificData();
+  }, [selectedStudentIndex, linkedStudents]);
 
   const getTodayLesson = () => {
     if (!currentPlan || !currentPlan.planItems || currentPlan.planItems.length === 0) return { topic: 'N/A' };
@@ -1550,6 +1567,15 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
           linkedStudentIds: nextIds,
           linkedStudentId: nextIds[0] // Backward compatibility
         }, { merge: true });
+
+        // Add parent to student's record for security rules optimization
+        const sDocData = sDoc.data() || {};
+        const sParentIds = sDocData.linkedParentIds || [];
+        if (!sParentIds.includes(profile.uid)) {
+          await updateDoc(doc(db, 'users', studentId), {
+            linkedParentIds: [...sParentIds, profile.uid]
+          });
+        }
         
         const sMeta = await getDoc(doc(db, 'students', studentId));
         const newStudent = { 
@@ -1868,23 +1894,38 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
-        {[
-          { label: t.attendance, value: '98%', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: t.gradeAverage, value: currentStudent.level || 'A-', icon: GraduationCap, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: t.completedAssignments, value: '12/15', icon: CheckCircle2, color: 'text-purple-600', bg: 'bg-purple-50' },
-          { label: t.speakingHours, value: currentStudent.points > 0 ? (currentStudent.points / 10).toFixed(1) : '1.2', icon: Mic2, color: 'text-[#C49E3A]', bg: 'bg-orange-50' },
-        ].map((stat, i) => (
-          <div key={`stat-card-overview-${currentStudent.uid}-${i}`} className={`bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex items-center gap-6 ${isRtl ? 'flex-row-reverse' : ''} relative overflow-hidden group`}>
-            <div className={`${stat.bg} ${stat.color || ''} p-4 rounded-2xl shrink-0 group-hover:scale-110 transition-transform`}>
-              <stat.icon size={28} />
+        {(() => {
+          const totalAssignments = currentPlan?.plan?.length || 0;
+          const completedAssignments = currentPlan?.plan?.filter((item: any) => 
+            currentPlanResults.some(r => r.lessonId === item.unitId)
+          ).length || 0;
+          
+          const totalEarned = currentPlanResults.reduce((acc, r) => acc + (r.score || 0), 0);
+          const totalPossible = currentPlanResults.reduce((acc, r) => acc + (r.total || 0), 0);
+          const avgScore = totalPossible > 0 ? (totalEarned / totalPossible) * 100 : 0;
+          const scoreLabel = avgScore >= 90 ? 'A+' : avgScore >= 80 ? 'A' : avgScore >= 70 ? 'B' : avgScore > 0 ? 'C' : 'N/A';
+
+          // Derived attendance (e.g. % of lessons completed vs total in plan)
+          const attendanceVal = totalAssignments > 0 ? Math.min(100, Math.round((completedAssignments / totalAssignments) * 100)) : 0;
+
+          return [
+            { label: t.attendance, value: attendanceVal > 0 ? `${attendanceVal}%` : '---', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+            { label: t.gradeAverage, value: scoreLabel, icon: GraduationCap, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            { label: t.completedAssignments, value: `${completedAssignments}/${totalAssignments}`, icon: CheckCircle2, color: 'text-purple-600', bg: 'bg-purple-50' },
+            { label: t.speakingHours, value: currentStudent.points > 0 ? (currentStudent.points / 10).toFixed(1) : '0.0', icon: Mic2, color: 'text-[#C49E3A]', bg: 'bg-orange-50' },
+          ].map((stat, i) => (
+            <div key={`stat-card-overview-${currentStudent.uid}-${i}`} className={`bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex items-center gap-6 ${isRtl ? 'flex-row-reverse' : ''} relative overflow-hidden group`}>
+              <div className={`${stat.bg} ${stat.color || ''} p-4 rounded-2xl shrink-0 group-hover:scale-110 transition-transform`}>
+                <stat.icon size={28} />
+              </div>
+              <div className={`flex-1 ${isRtl ? 'text-right' : 'text-left'}`}>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">{stat.label}</p>
+                <p className="text-2xl font-black text-[#002147]">{stat.value}</p>
+              </div>
+              <div className={`absolute top-0 bottom-0 ${isRtl ? 'left-0' : 'right-0'} w-1 ${(stat.color || '').replace('text', 'bg')}`} />
             </div>
-            <div className={`flex-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">{stat.label}</p>
-              <p className="text-2xl font-black text-[#002147]">{stat.value}</p>
-            </div>
-            <div className={`absolute top-0 bottom-0 ${isRtl ? 'left-0' : 'right-0'} w-1 ${(stat.color || '').replace('text', 'bg')}`} />
-          </div>
-        ))}
+          ));
+        })()}
       </div>
 
       <div className="mb-10">
@@ -1913,21 +1954,46 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
             <span className="text-[10px] font-bold text-blue-600 px-3 py-1 bg-blue-50 rounded-full tracking-widest uppercase">Performance Index</span>
           </div>
           <div className={`h-64 flex items-end gap-5 px-4 overflow-hidden ${lang === 'ar' ? 'flex-row-reverse' : ''}`} dir="ltr">
-            {[45, 60, 55, 75, 85, 92].map((h, i) => (
-              <div key={`progress-bar-${i}`} className="flex-1 flex flex-col items-center gap-3">
-                <div className="w-full bg-slate-50 rounded-t-xl relative group h-full flex items-end">
-                  <motion.div 
-                    initial={{ height: 0 }}
-                    animate={{ height: `${h}%` }}
-                    className="w-full bg-[#002147] rounded-t-xl group-hover:bg-[#C49E3A] transition-all relative"
-                  >
-                    <div className="absolute top-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white/30 rounded-full" />
-                  </motion.div>
-                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[#002147] text-white text-[10px] py-1.5 px-3 rounded-full font-bold opacity-0 group-hover:opacity-100 transition-all shadow-lg whitespace-nowrap">%{h} Success</div>
+            {(() => {
+              // Calculate real monthly progress from currentPlanResults
+              const months = [5, 4, 3, 2, 1, 0]; // Last 6 months
+              const monthlyStats = months.map(m => {
+                const targetDate = new Date();
+                targetDate.setMonth(targetDate.getMonth() - m);
+                const monthName = targetDate.toLocaleString('en-US', { month: 'short' });
+                const monthAr = targetDate.toLocaleString('ar-EG', { month: 'short' });
+                
+                const resultsInMonth = currentPlanResults.filter(r => {
+                  if (!r.timestamp) return false;
+                  const d = r.timestamp.toDate ? r.timestamp.toDate() : new Date(r.timestamp);
+                  return d.getMonth() === targetDate.getMonth() && d.getFullYear() === targetDate.getFullYear();
+                });
+                
+                const totalInMonth = resultsInMonth.reduce((acc, r) => acc + (r.score || 0), 0);
+                const possibleInMonth = resultsInMonth.reduce((acc, r) => acc + (r.total || 0), 0);
+                const avg = possibleInMonth > 0 ? Math.round((totalInMonth / possibleInMonth) * 100) : 0;
+                
+                return { name: lang === 'ar' ? monthAr : monthName, value: avg };
+              });
+
+              return monthlyStats.map((stat, i) => (
+                <div key={`progress-bar-${i}`} className="flex-1 flex flex-col items-center gap-3 h-full justify-end">
+                  <div className="w-full bg-slate-50 rounded-t-xl relative group h-full flex items-end">
+                    <motion.div 
+                      initial={{ height: 0 }}
+                      animate={{ height: `${Math.max(5, stat.value)}%` }}
+                      className={`w-full ${stat.value > 0 ? 'bg-[#002147]' : 'bg-slate-200'} rounded-t-xl group-hover:bg-[#C49E3A] transition-all relative`}
+                    >
+                      <div className="absolute top-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white/30 rounded-full" />
+                    </motion.div>
+                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[#002147] text-white text-[10px] py-1.5 px-3 rounded-full font-bold opacity-0 group-hover:opacity-100 transition-all shadow-lg whitespace-nowrap">
+                      {stat.value > 0 ? `%${stat.value} ${isRtl ? 'نجاح' : 'Success'}` : (isRtl ? 'لا بيانات' : 'No Data')}
+                    </div>
+                  </div>
+                  <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest whitespace-nowrap">{stat.name}</span>
                 </div>
-                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest whitespace-nowrap">{lang === 'ar' ? 'شهر' : 'MONTH'} {i+1}</span>
-              </div>
-            ))}
+              ));
+            })()}
           </div>
         </section>
 
@@ -1937,21 +2003,35 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
              <span className={`flex-1 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>{lang === 'ar' ? `نشاط ${currentStudent.displayName} الأخير` : `Recent activity of ${currentStudent.displayName}`}</span>
           </h3>
           <div className={`space-y-8 ${lang === 'ar' ? 'text-right' : 'text-left'} flex-1`}>
-            {[
-              { id: 'act-1', textAr: 'أكمل اختبار تحديد المستوى وحصل على نتيجة ' + (currentStudent.level || 'B1'), textEn: 'Completed placement test and reached result ' + (currentStudent.level || 'B1'), timeAr: 'منذ ساعتين', timeEn: '2 hours ago', icon: CheckCircle2, iconColor: 'text-emerald-500' },
-              { id: 'act-2', textAr: 'تحدث مع "شريك المحادثة" لمدة 15 دقيقة (موضوع: الهوايات)', textEn: 'Talked with AI Partner for 15 minutes (Topic: Hobbies)', timeAr: 'صباح اليوم', timeEn: 'This morning', icon: Mic2, iconColor: 'text-blue-500' },
-              { id: 'act-3', textAr: 'تم تصحيح واجب "مقال الرحلات" - الدرجة 9/10', textEn: 'Graded Essay "Trips" - Score 9/10', timeAr: 'أمس', timeEn: 'Yesterday', icon: BookOpen, iconColor: 'text-[#C49E3A]' },
-            ].map((activity) => (
-              <div key={activity.id} className={`flex gap-5 ${lang === 'ar' ? 'flex-row-reverse' : ''} group`}>
-                <div className={`mt-1 ${activity.iconColor} shrink-0 p-3 bg-slate-50 rounded-2xl group-hover:scale-110 transition-transform`}>
-                  <activity.icon size={22} />
+            {currentPlanResults.length > 0 ? (
+              currentPlanResults.slice(0, 5).map((activity) => {
+                const activityDate = activity.timestamp?.toDate ? activity.timestamp.toDate() : new Date(activity.timestamp);
+                const timeStr = activityDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric' });
+                
+                return (
+                  <div key={activity.id} className={`flex gap-5 ${lang === 'ar' ? 'flex-row-reverse' : ''} group`}>
+                    <div className="mt-1 text-emerald-500 shrink-0 p-3 bg-slate-50 rounded-2xl group-hover:scale-110 transition-transform">
+                      <CheckCircle2 size={22} />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <p className="text-sm text-[#002147] font-bold leading-relaxed">
+                        {isRtl 
+                          ? `أتم درس "${activity.lessonTitle}" بنتيجة ${activity.score}/${activity.total}` 
+                          : `Completed "${activity.lessonTitle}" - Score ${activity.score}/${activity.total}`}
+                      </p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{timeStr}</p>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="flex flex-col items-center justify-center p-12 text-slate-400 italic text-sm">
+                <div className="bg-slate-50 p-4 rounded-full mb-4">
+                  <LayoutDashboard size={40} className="opacity-20" />
                 </div>
-                <div className="flex-1 space-y-1">
-                  <p className="text-sm text-[#002147] font-bold leading-relaxed">{lang === 'ar' ? activity.textAr : activity.textEn}</p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{lang === 'ar' ? activity.timeAr : activity.timeEn}</p>
-                </div>
+                {isRtl ? 'لا يوجد نشاط مسجل مؤخراً' : 'No recent activity recorded'}
               </div>
-            ))}
+            )}
           </div>
           <button 
             className="w-full mt-10 p-4 border border-dashed border-slate-200 rounded-xl text-[10px] font-mono text-slate-400 break-all select-all text-center"
@@ -2373,7 +2453,7 @@ const CurriculumBrowser = ({ lang, onSelectLesson, onBack, studentId, profile, s
 };
 
 
-const LessonPlayer = ({ lang, lesson, onBack, onComplete, category, level }: { lang: Language, lesson: Lesson, onBack: () => void, onComplete: () => void, category?: CurriculumCategory, level?: proficiencyLevel }) => {
+const LessonPlayer = ({ lang, lesson, onBack, onComplete, category, level }: { lang: Language, lesson: Lesson, onBack: () => void, onComplete: (score?: number) => void, category?: CurriculumCategory, level?: proficiencyLevel }) => {
   const isRtl = lang === 'ar';
   const [fullLesson, setFullLesson] = useState<Lesson | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -2600,7 +2680,7 @@ const LessonPlayer = ({ lang, lesson, onBack, onComplete, category, level }: { l
         lesson={fullLesson} 
         isRtl={isRtl} 
         category={fullLesson.id?.startsWith('e_') ? 'expression' : 'reading'}
-        onFinish={(score) => onComplete()} 
+        onFinish={(score) => onComplete(score)} 
         onBack={onBack}
       />
     );
@@ -2610,7 +2690,7 @@ const LessonPlayer = ({ lang, lesson, onBack, onComplete, category, level }: { l
     <InteractiveLesson 
       lesson={fullLesson} 
       isRtl={isRtl} 
-      onFinish={(score) => onComplete()} 
+      onFinish={(score) => onComplete(score)} 
       onBack={onBack}
     />
   );
@@ -2640,6 +2720,52 @@ export default function App() {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [videoLessonsEnabled, setVideoLessonsEnabled] = useState(true);
+  const [globalPlan, setGlobalPlan] = useState<any>(null);
+
+  const isAdmin = MASTER_ADMINS.includes((userProfile?.email || currentUser?.email || '').toLowerCase());
+
+  useEffect(() => {
+    if (!currentUser || !userProfile) return;
+
+    const fetchPlan = async () => {
+      try {
+        let q;
+        if (isAdmin) {
+          q = query(collection(db, 'studyPlans'), orderBy('createdAt', 'desc'), limit(1));
+        } else {
+          q = query(
+            collection(db, 'studyPlans'),
+            where('userId', '==', currentUser.uid),
+            orderBy('createdAt', 'desc'),
+            limit(1)
+          );
+        }
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const docPlan = snap.docs[0];
+          const data = docPlan.data() as Record<string, any>;
+          setGlobalPlan({ id: docPlan.id, ...data });
+        }
+      } catch (e) {
+        console.error("Error fetching global plan:", e);
+      }
+    };
+    fetchPlan();
+  }, [currentUser, userProfile?.uid, isAdmin]);
+
+  useEffect(() => {
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      const reason = event.reason;
+      if (reason?.message?.includes('unavailable') || reason?.code === 'unavailable' || reason?.message?.includes('Cloud Firestore backend')) {
+        setRenderError(lang === 'ar' ? 
+          'عذراً، يوجد خلل في الاتصال بقاعدة البيانات حالياً. جرب تحديث الصفحة أو تأكد من جودة الاتصال بالإنترنت.' : 
+          'Database connection error. This could be due to a poor internet connection or a temporary server issue. Please refresh or check your signal.'
+        );
+      }
+    };
+    window.addEventListener('unhandledrejection', handleRejection);
+    return () => window.removeEventListener('unhandledrejection', handleRejection);
+  }, [lang]);
 
   useEffect(() => {
     // Global Settings Listener
@@ -2652,8 +2778,6 @@ export default function App() {
     });
     return () => settingsUnsubscribe();
   }, []);
-
-  const isAdmin = MASTER_ADMINS.includes((userProfile?.email || currentUser?.email || '').toLowerCase());
 
   useEffect(() => {
     if (userProfile?.role === UserRole.STUDENT && !userProfile.studentCode && currentUser) {
@@ -3001,7 +3125,7 @@ export default function App() {
 
   if (!userProfile) return <RoleSelector lang={lang} onSelect={handleRoleSelect} />;
 
-  const handleLessonComplete = async () => {
+  const handleLessonComplete = async (score?: number) => {
     if (!userProfile || !activeLesson) return;
     
     const isAdminCheck = MASTER_ADMINS.includes((userProfile.email || currentUser?.email || '').toLowerCase());
@@ -3017,6 +3141,19 @@ export default function App() {
     try {
       if (!isAdminCheck) {
         await deductCredits(userProfile.uid, cost, `أكملت درس: ${activeLesson.title}`);
+      }
+
+      // Save Lesson Result
+      if (score !== undefined) {
+        await addDoc(collection(db, 'lessonResults'), {
+          userId: userProfile.uid,
+          parentIds: (userProfile as any).linkedParentIds || [],
+          lessonId: activeLesson.id,
+          lessonTitle: activeLesson.title || '',
+          score: score,
+          total: activeLesson.quiz?.length || 0,
+          timestamp: serverTimestamp()
+        });
       }
 
       setUserProfile({ ...userProfile, points: updatedPoints, credits: updatedCredits } as UserProfile);
@@ -3079,10 +3216,27 @@ export default function App() {
       );
     }
     if (view === 'academic-results') {
-      return <ResultsChart lang={lang} onBack={() => setView('academic-planner')} onNavigateToAnalytics={() => setView('academic-analytics')} />;
+      return (
+        <ResultsChart 
+          lang={lang} 
+          onBack={() => setView('academic-planner')} 
+          onNavigateToAnalytics={() => setView('academic-analytics')} 
+          planItems={globalPlan?.planItems}
+          studentName={globalPlan?.studentName || userProfile?.displayName}
+          studentId={userProfile?.uid}
+          isAdmin={isAdmin}
+        />
+      );
     }
     if (view === 'academic-analytics') {
-      return <SmartAnalytics lang={lang} onBack={() => setView('academic-results')} />;
+      return (
+        <SmartAnalytics 
+          lang={lang} 
+          onBack={() => setView('academic-results')} 
+          planItems={globalPlan?.planItems}
+          studentName={globalPlan?.studentName || userProfile?.displayName}
+        />
+      );
     }
     if (view === 'oxford-discover') {
       return (
@@ -3180,8 +3334,13 @@ export default function App() {
         <ConversationCurriculumCompanion 
           lang={lang} 
           level={selectedConversationLevel}
-          onBack={() => setView('modern-curriculum')} 
+          initialUnitId={autoStartUnitId}
+          onBack={() => {
+            setAutoStartUnitId(null);
+            setView('modern-curriculum');
+          }} 
           onStartLesson={(unitId) => {
+            setAutoStartUnitId(null);
             const unit = units.find(u => u.id === unitId);
             const lessonObj = {
               id: unitId,
@@ -3344,7 +3503,14 @@ export default function App() {
     }
 
     if (view === 'progress') {
-      return <StudentStats lang={lang} />;
+      return (
+        <StudentStats 
+          lang={lang} 
+          userId={userProfile.uid} 
+          points={userProfile.points} 
+          level={userProfile.level}
+        />
+      );
     }
     
     if (view === 'leaderboard') {

@@ -509,7 +509,16 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                 <div className="h-px bg-white/10" />
                 <div>
                   <p className="text-blue-200 text-[10px] font-black uppercase tracking-[0.2em] mb-1">{t.averageLevel}</p>
-                  <h4 className="text-4xl font-black">B1+</h4>
+                  <h4 className="text-4xl font-black">
+                    {allStudents.length > 0 
+                      ? (() => {
+                          const levels = allStudents.map(s => s.level || 'A1');
+                          const levelValues: Record<string, number> = { 'A1': 1, 'A2': 2, 'B1': 3, 'B2': 4, 'C1': 5, 'C2': 6 };
+                          const avgValue = Math.round(levels.reduce((acc, l) => acc + (levelValues[l] || 1), 0) / levels.length);
+                          return Object.keys(levelValues).find(key => levelValues[key] === avgValue) || 'A1';
+                        })()
+                      : '---'}
+                  </h4>
                 </div>
              </div>
           </section>

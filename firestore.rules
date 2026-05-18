@@ -92,11 +92,32 @@ service cloud.firestore {
       allow write: if isSignedIn();
     }
 
+    function isValidStudyPlan(data) {
+      return data.userId is string && 
+             data.studentName is string && 
+             data.planItems is list &&
+             data.parentIds is list;
+    }
+
+    function isValidLessonResult(data) {
+      return data.userId is string && 
+             data.lessonId is string && 
+             data.score is number && 
+             data.total is number &&
+             data.parentIds is list;
+    }
+
     match /studyPlans/{planId} {
-      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || request.auth.uid in resource.data.parentIds || isAdmin());
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid && isValidStudyPlan(request.resource.data);
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin()) && isValidStudyPlan(request.resource.data);
       allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    match /lessonResults/{resultId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || request.auth.uid in resource.data.parentIds || isAdmin());
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid && isValidLessonResult(request.resource.data);
+      allow update, delete: if isAdmin();
     }
 
     // Credit System

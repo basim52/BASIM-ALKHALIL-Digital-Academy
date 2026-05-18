@@ -1,21 +1,76 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { translations, Language } from '../lib/translations';
 import { Trophy, Clock, BookCheck, TrendingUp } from 'lucide-react';
+import { db } from '../lib/firebase';
+import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 
-const data = [
-  { name: 'Mon', xp: 400 },
-  { name: 'Tue', xp: 300 },
-  { name: 'Wed', xp: 600 },
-  { name: 'Thu', xp: 800 },
-  { name: 'Fri', xp: 500 },
-  { name: 'Sat', xp: 900 },
-  { name: 'Sun', xp: 700 },
-];
+interface StudentStatsProps {
+  lang: Language;
+  userId: string;
+  points?: number;
+  level?: string;
+}
 
-export const StudentStats = ({ lang }: { lang: Language }) => {
+export const StudentStats = ({ lang, userId, points, level }: StudentStatsProps) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
+  const [loading, setLoading] = useState(true);
+  const [weeklyData, setWeeklyData] = useState<any[]>([]);
+  const [stats, setStats] = useState({
+    learningHrs: 0,
+    modulesCompleted: 0,
+    totalModules: 12
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setLoading(true);
+      try {
+        const q = query(
+          collection(db, 'lessonResults'),
+          where('userId', '==', userId),
+          orderBy('timestamp', 'desc'),
+          limit(20)
+        );
+        const snap = await getDocs(q);
+        const results = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Map to days of week for chart
+        const days = isRtl ? ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const chartData = days.map(name => ({ name, xp: 0 }));
+        
+        results.forEach((r: any) => {
+          if (r.timestamp?.toDate) {
+            const date = r.timestamp.toDate();
+            const dayIdx = date.getDay();
+            chartData[dayIdx].xp += (r.score || 0);
+          }
+        });
+
+        setWeeklyData(chartData);
+        setStats({
+          learningHrs: Math.round((results.length * 45) / 60), // Assume 45 mins per lesson roughly
+          modulesCompleted: results.length,
+          totalModules: 24 // Example target
+        });
+      } catch (err) {
+        console.error("Error fetching student stats:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) fetchStats();
+  }, [userId, isRtl]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-20">
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8" dir={isRtl ? 'rtl' : 'ltr'}>
@@ -31,7 +86,7 @@ export const StudentStats = ({ lang }: { lang: Language }) => {
           </div>
           <div>
             <span className="block text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">{t.learningHrs}</span>
-            <span className="text-2xl font-black text-[#002147]">12.5</span>
+            <span className="text-2xl font-black text-[#002147]">{stats.learningHrs}</span>
           </div>
         </div>
 
@@ -41,7 +96,7 @@ export const StudentStats = ({ lang }: { lang: Language }) => {
           </div>
           <div>
             <span className="block text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">{t.modulesCompleted}</span>
-            <span className="text-2xl font-black text-[#002147]">4 <span className="text-xs text-slate-400">/ 12</span></span>
+            <span className="text-2xl font-black text-[#002147]">{stats.modulesCompleted} <span className="text-xs text-slate-400">/ {stats.totalModules}</span></span>
           </div>
         </div>
 
@@ -51,7 +106,7 @@ export const StudentStats = ({ lang }: { lang: Language }) => {
           </div>
           <div>
             <span className="block text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">{t.totalXp}</span>
-            <span className="text-2xl font-black text-[#002147]">1,240</span>
+            <span className="text-2xl font-black text-[#002147]">{(points || 0).toLocaleString()}</span>
           </div>
         </div>
       </div>
@@ -72,7 +127,7 @@ export const StudentStats = ({ lang }: { lang: Language }) => {
 
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data}>
+            <AreaChart data={weeklyData}>
               <defs>
                 <linearGradient id="colorXp" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1}/>
