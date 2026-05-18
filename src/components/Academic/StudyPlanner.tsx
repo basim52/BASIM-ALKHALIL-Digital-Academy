@@ -112,19 +112,27 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
     if (!tableRef.current) return;
     setIsExporting(true);
     try {
-      // Small delay to ensure any hover states/transitions are settled
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Extended delay to ensure all assets are fully painted
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      const dataUrl = await toPng(tableRef.current, {
+      const element = tableRef.current;
+      const rect = element.getBoundingClientRect();
+      // Force professional landscape rectangular width
+      const exportWidth = Math.max(rect.width, 1400); 
+      
+      const dataUrl = await toPng(element, {
         quality: 1.0,
-        pixelRatio: 4, // Higher quality for extreme clarity
+        pixelRatio: 2.5, // High resolution for clear text
         backgroundColor: '#ffffff',
         style: {
           borderRadius: '0px',
-          padding: '40px',
-          width: '1200px', // Force a wider width during export to balance proportions
+          padding: '60px',
+          margin: '0',
+          width: `${exportWidth}px`,
+          height: 'auto', // Allow it to be rectangular based on content
           display: 'flex',
           flexDirection: 'column',
+          backgroundColor: '#ffffff',
         },
         filter: (node) => {
           const exclusionClasses = ['export-exclude'];
@@ -132,11 +140,11 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
         }
       });
       
-      const fileName = `StudyPlan_${studentName.replace(/\s+/g, '_') || 'Student'}_${new Date().toLocaleDateString()}.png`;
+      const fileName = `Academy_Plan_${studentName.replace(/\s+/g, '_') || 'Student'}_${new Date().toLocaleDateString()}.png`;
       saveAs(dataUrl, fileName);
     } catch (error) {
-      console.error('Error exporting image:', error);
-      alert(isRtl ? 'حدث خطأ أثناء تصدير الصورة' : 'Error exporting image');
+      console.error('Expert Export Error:', error);
+      alert(isRtl ? 'حدث خطأ في النظام الخبير للتصدير - جرب تحديث الصفحة' : 'Expert System Error: Image export failed. Please refresh.');
     } finally {
       setIsExporting(false);
     }
@@ -894,148 +902,159 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                   </div>
                 </div>
                 
-                <div ref={tableRef} className="overflow-x-auto min-h-[500px] bg-white p-4 md:p-8 rounded-[3rem]">
-                  {/* Export Header */}
-                  <div className="mb-10 p-10 bg-gradient-to-br from-[#002147] to-blue-900 rounded-[2.5rem] text-white relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-                    <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
-                      <div>
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center">
-                            <Sparkles className="text-blue-300" size={24} />
-                          </div>
-                          <h2 className="text-2xl font-black tracking-tight">
-                            {isRtl ? 'أكاديمية باسم آل خليل الرقمية' : 'Basim Al Khalil Digital Academy'}
-                          </h2>
+                <div ref={tableRef} className="overflow-x-auto min-h-[500px] bg-white p-4 md:p-8 rounded-[3rem] border border-slate-100">
+                  {/* Expert Export Header */}
+                  <div className="mb-10 p-12 bg-[#002147] rounded-[3rem] text-white relative overflow-hidden border-b-[8px] border-amber-400">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+                    
+                    <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-10">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-4 mb-6">
+                           <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
+                             <Sparkles className="text-amber-400" size={32} />
+                           </div>
+                           <div>
+                              <h2 className="text-2xl font-black tracking-tight text-white/90">
+                                {isRtl ? 'أكاديمية باسم آل خليل الرقمية' : 'Basim Al Khalil Digital Academy'}
+                              </h2>
+                              <div className="flex items-center gap-2 mt-1">
+                                <div className="w-2 h-2 bg-emerald-400 rounded-full" />
+                                <span className="text-[10px] font-black text-blue-200 uppercase tracking-widest">
+                                  {isRtl ? 'نظام التعلم الذكي المعتمد' : 'Certified Smart Learning System'}
+                                </span>
+                              </div>
+                           </div>
                         </div>
-                        <div className="space-y-1">
-                          <span className="text-blue-200 text-xs font-black uppercase tracking-[0.2em]">
-                            {isRtl ? 'خطة الدراسة الذكية' : 'Smart Learning Journey'}
+                        <div className="mt-8">
+                          <span className="text-amber-400 text-[10px] font-black uppercase tracking-[0.3em] mb-2 block">
+                            {isRtl ? 'خطة التفوق العلمي' : 'Academic Excellence Roadmap'}
                           </span>
-                          <h1 className="text-4xl font-black text-white">
+                          <h1 className="text-5xl font-black text-white leading-tight">
                             {studentName || (isRtl ? 'اسم الطالب' : 'Student Name')}
                           </h1>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white/10 backdrop-blur-md p-6 rounded-[2rem] border border-white/10">
-                        <div className="flex flex-col">
-                          <span className="text-[10px] font-black text-blue-200 uppercase mb-1">{isRtl ? 'إجمالي الدروس' : 'Total Lessons'}</span>
-                          <span className="text-xl font-black">{generatedPlan?.length || 0}</span>
+                      <div className="grid grid-cols-2 gap-4 bg-white/5 p-8 rounded-[2.5rem] border border-white/5 min-w-[320px]">
+                        <div className="space-y-1">
+                           <span className="text-[9px] font-black text-blue-300/60 uppercase">{isRtl ? 'إنجاز الدروس' : 'Curriculum Load'}</span>
+                           <div className="text-2xl font-black">{generatedPlan?.length || 0} {isRtl ? 'وحدات' : 'Units'}</div>
                         </div>
-                        <div className="flex flex-col border-r border-white/10 pr-4">
-                          <span className="text-[10px] font-black text-blue-200 uppercase mb-1">{isRtl ? 'مدة الخطة' : 'Duration'}</span>
-                          <span className="text-xl font-black">90 {isRtl ? 'يوم' : 'Days'}</span>
+                        <div className="space-y-1 border-r border-white/10 pr-6">
+                           <span className="text-[9px] font-black text-blue-300/60 uppercase">{isRtl ? 'الجدول الزمني' : 'Timeline'}</span>
+                           <div className="text-2xl font-black">90 {isRtl ? 'يوم' : 'Days'}</div>
                         </div>
-                        <div className="flex flex-col border-r border-white/10 pr-4">
-                          <span className="text-[10px] font-black text-blue-200 uppercase mb-1">{isRtl ? 'معدل التركيز' : 'Focus Rate'}</span>
-                          <span className="text-xl font-black">98%</span>
+                        <div className="space-y-1">
+                           <span className="text-[9px] font-black text-blue-300/60 uppercase">{isRtl ? 'مستوى التركيز' : 'Focus Intensity'}</span>
+                           <div className="text-2xl font-black text-emerald-400">Elite 100%</div>
                         </div>
-                        <div className="flex flex-col border-l border-white/10 pl-4">
-                          <span className="text-[10px] font-black text-blue-200 uppercase mb-1">{isRtl ? 'الحالة' : 'Status'}</span>
-                          <div className="flex items-center gap-2">
-                             <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                             <span className="text-sm font-black text-emerald-400">{isRtl ? 'نشط' : 'Active'}</span>
-                          </div>
+                        <div className="space-y-1 border-r border-white/10 pr-6">
+                           <span className="text-[9px] font-black text-blue-300/60 uppercase">{isRtl ? 'البرنامج' : 'Program'}</span>
+                           <div className="text-2xl font-black text-amber-400">Pro-Active</div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-slate-50/50 text-left">
-                        <th className={`p-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ${isRtl ? 'text-right' : 'text-left'}`}>
-                          {isRtl ? 'التصنيف الزمني' : 'Timeline'}
-                        </th>
-                        <th className={`p-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ${isRtl ? 'text-right' : 'text-left'}`}>
-                          {isRtl ? 'المحتوى' : 'Curriculum Content'}
-                        </th>
-                        <th className="p-6"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                      {generatedPlan?.map((item) => (
-                        <tr 
-                          key={item.id} 
-                          onClick={() => onNavigateToLesson(item.courseId, item.level, item.unitId)}
-                          className="hover:bg-blue-50/30 transition-all group cursor-pointer"
-                        >
-                          <td className="p-6 w-56">
-                            <div className="flex flex-col gap-1">
-                               <div className="flex items-center gap-2">
-                                  <span className="bg-white border border-slate-100 text-[#002147] px-3 py-1 rounded-full text-[10px] font-black shadow-sm inline-block w-fit">
-                                    Month {item.month} • Week {item.week}
-                                  </span>
-                                  {item.dateLabel && (
-                                     <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
-                                        {item.dateLabel}
-                                     </span>
-                                  )}
-                               </div>
-                               <div className="flex items-center gap-2 mt-1">
-                                  <span className="text-sm font-black text-slate-400 uppercase tracking-widest">
-                                     {item.day}
-                                  </span>
-                                  {item.timeLabel && (
-                                     <span className="text-[10px] font-bold text-slate-300">
-                                        at {item.timeLabel}
-                                     </span>
-                                  )}
-                               </div>
-                            </div>
-                          </td>
-                          <td className="p-6">
-                            <div className="flex items-start gap-4">
-                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner shrink-0 ${
-                                item.courseId === 'reading' ? 'bg-emerald-50 text-emerald-600' : 
-                                item.courseId === 'grammar' ? 'bg-blue-50 text-blue-600' : 
-                                'bg-purple-50 text-purple-600'
-                              }`}>
-                                {item.courseId === 'reading' ? <BookOpen size={20} /> : <Sparkles size={20} />}
+                  <div className="px-2">
+                    <table className="w-full border-separate border-spacing-y-4">
+                      <thead>
+                        <tr className="text-[#002147]/40">
+                          <th className={`px-6 text-[11px] font-black uppercase tracking-[0.2em] pb-4 ${isRtl ? 'text-right' : 'text-left'}`}>
+                            {isRtl ? 'التصنيف والموعد' : 'Timeline & Schedule'}
+                          </th>
+                          <th className={`px-6 text-[11px] font-black uppercase tracking-[0.2em] pb-4 ${isRtl ? 'text-right' : 'text-left'}`}>
+                            {isRtl ? 'المادة والوحدة الدراسية' : 'Curriculum Subject'}
+                          </th>
+                          <th className="px-6 pb-4"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {generatedPlan?.map((item, idx) => (
+                          <tr 
+                            key={item.id} 
+                            onClick={() => onNavigateToLesson(item.courseId, item.level, item.unitId)}
+                            className={`group cursor-pointer transition-all ${idx % 2 === 0 ? 'bg-slate-50/50' : 'bg-white'} rounded-3xl`}
+                          >
+                            <td className="p-8 rounded-l-3xl border-y border-l border-slate-100 group-hover:border-blue-200 transition-colors">
+                              <div className="flex flex-col gap-2">
+                                 <div className="flex items-center gap-2">
+                                    <span className="bg-[#002147] text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase shadow-sm">
+                                      {isRtl ? 'أسبوع' : 'Week'} {item.week}
+                                    </span>
+                                    {item.dateLabel && (
+                                       <span className="text-[10px] font-black text-blue-600 border border-blue-100 bg-blue-50 px-2.5 py-0.5 rounded-lg">
+                                          {item.dateLabel}
+                                       </span>
+                                    )}
+                                 </div>
+                                 <div className="flex items-center gap-3 mt-1">
+                                    <span className="text-base font-black text-[#002147]">
+                                       {item.day}
+                                    </span>
+                                    {item.timeLabel && (
+                                       <div className="flex items-center gap-1.5 text-slate-400">
+                                          <div className="w-1 h-1 rounded-full bg-slate-300" />
+                                          <span className="text-xs font-black">{item.timeLabel}</span>
+                                       </div>
+                                    )}
+                                 </div>
                               </div>
-                              <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.courseLabel}</span>
-                                   <div className="w-1 h-1 rounded-full bg-slate-300" />
-                                   <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Duration: {item.duration}</span>
+                            </td>
+                            <td className="p-8 border-y border-slate-100 group-hover:border-blue-200 transition-colors">
+                              <div className="flex items-center gap-6">
+                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 ${
+                                  item.courseId === 'reading' ? 'bg-emerald-600 text-white shadow-emerald-100' : 
+                                  item.courseId === 'grammar' ? 'bg-blue-600 text-white shadow-blue-100' : 
+                                  'bg-indigo-600 text-white shadow-indigo-100'
+                                }`}>
+                                  {item.courseId === 'reading' ? <BookOpen size={24} /> : <Sparkles size={24} />}
                                 </div>
-                                <p className="text-lg font-black text-[#002147] group-hover:text-blue-600 transition-colors leading-tight">{item.topic}</p>
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-3">
+                                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.courseLabel}</span>
+                                     <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                     <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{item.duration}</span>
+                                  </div>
+                                  <p className="text-xl font-black text-[#002147] group-hover:text-blue-600 transition-colors leading-tight">
+                                    {item.topic}
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                          <td className="p-6 text-right">
-                             <div className="flex items-center justify-end gap-3 translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all export-exclude">
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteLesson(item.id);
-                                  }}
-                                  className="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
-                                >
-                                  <Trash2 size={18} />
-                                </button>
-                                <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Go to Classroom</span>
-                                <div className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
-                                   <ChevronRight size={18} className={isRtl ? 'rotate-180' : ''} />
-                                </div>
-                             </div>
+                            </td>
+                            <td className="p-8 rounded-r-3xl border-y border-r border-slate-100 group-hover:border-blue-200 transition-colors text-right relative">
+                               <div className="flex items-center justify-end gap-4 transform transition-all export-exclude">
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteLesson(item.id);
+                                    }}
+                                    className="w-10 h-10 flex items-center justify-center text-rose-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+                                  >
+                                    <Trash2 size={20} />
+                                  </button>
+                                  <div className="w-12 h-12 bg-slate-50 text-slate-300 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-200 transition-all">
+                                     <ChevronRight size={24} className={isRtl ? 'rotate-180' : ''} />
+                                  </div>
+                               </div>
+                            </td>
+                          </tr>
+                        ))}
+                        <tr className="export-exclude">
+                          <td colSpan={3} className="p-4">
+                            <button 
+                              onClick={() => setShowAddLessonModal(true)}
+                              className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl flex items-center justify-center gap-2 text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-all font-black text-xs uppercase"
+                            >
+                              <Plus size={16} />
+                              {isRtl ? 'إضافة درس يدوي' : 'Add Lesson Manually'}
+                            </button>
                           </td>
                         </tr>
-                      ))}
-                      <tr className="export-exclude">
-                        <td colSpan={3} className="p-4">
-                          <button 
-                            onClick={() => setShowAddLessonModal(true)}
-                            className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl flex items-center justify-center gap-2 text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-all font-black text-xs uppercase"
-                          >
-                            <Plus size={16} />
-                            {isRtl ? 'إضافة درس يدوي' : 'Add Lesson Manually'}
-                          </button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
 

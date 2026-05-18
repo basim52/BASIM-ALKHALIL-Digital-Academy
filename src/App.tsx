@@ -702,11 +702,10 @@ const AIParentNotes = ({ profile, studentId, lang }: { profile: UserProfile, stu
         })
       });
       
+      const data = await resp.json().catch(() => ({}));
       if (!resp.ok) {
-        const errorData = await resp.json().catch(() => ({}));
-        throw new Error(errorData.error || `Server error: ${resp.status}`);
+        throw new Error(data.error || `Server error: ${resp.status}`);
       }
-      const data = await resp.json();
       const aiResponse = data.text || (lang === 'ar' ? "سأقوم بمراجعة هذا الأمر شخصياً." : "I will look into this personally.");
 
       const noteId = Math.random().toString(36).substr(2, 9);
@@ -874,7 +873,7 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
   }, [profile.uid, profile.role]);
 
   const getTodayLesson = () => {
-    if (!currentPlan || !currentPlan.planItems) return null;
+    if (!currentPlan || !currentPlan.planItems || currentPlan.planItems.length === 0) return { topic: 'N/A' };
     const today = new Date().toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' });
     return currentPlan.planItems.find((item: any) => item.dateLabel === today) || currentPlan.planItems[0];
   };
@@ -1435,7 +1434,7 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
   }, [profile.uid, profile.role]);
 
   const getTodayLesson = () => {
-    if (!currentPlan || !currentPlan.planItems) return null;
+    if (!currentPlan || !currentPlan.planItems || currentPlan.planItems.length === 0) return { topic: 'N/A' };
     const today = new Date().toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' });
     return currentPlan.planItems.find((item: any) => item.dateLabel === today) || currentPlan.planItems[0];
   };
@@ -1626,11 +1625,10 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
         })
       });
 
+      const data = await resp.json().catch(() => ({}));
       if (!resp.ok) {
-        const errorData = await resp.json().catch(() => ({}));
-        throw new Error(errorData.error || `Server error: ${resp.status}`);
+        throw new Error(data.error || `Server error: ${resp.status}`);
       }
-      const data = await resp.json();
       setSmartReport(data.text || (lang === 'ar' ? "عذراً، تعذر توليد التقرير حالياً." : "Sorry, report generation failed."));
     } catch (err: any) {
       console.error("AI Report Error:", err);
@@ -2628,6 +2626,7 @@ export default function App() {
   const [selectedWritingLevel, setSelectedWritingLevel] = useState<WritingLevel>('A1');
   const [selectedExpressionLevel, setSelectedExpressionLevel] = useState<ExpressionLevel>('A1');
   const [loading, setLoading] = useState(true);
+  const [renderError, setRenderError] = useState<string | null>(null);
   const [lang, setLang] = useState<Language>('ar');
   const [modules, setModules] = useState<LearningModule[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
@@ -2967,6 +2966,26 @@ export default function App() {
     }
   };
 
+  if (renderError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-8 text-center bg-slate-50">
+        <div className="max-w-md bg-white p-8 rounded-3xl shadow-xl border border-rose-100">
+          <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <Sparkles size={32} />
+          </div>
+          <h2 className="text-2xl font-black text-[#002147] mb-4">Something went wrong</h2>
+          <p className="text-slate-500 mb-8">{renderError}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-[#002147] text-white px-8 py-4 rounded-2xl font-black"
+          >
+            Refresh App
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -3009,7 +3028,8 @@ export default function App() {
   };
 
   const renderContent = () => {
-    if (view === 'admin' && isAdmin) {
+    try {
+      if (view === 'admin' && isAdmin) {
       return <AdminDashboard lang={lang} />;
     }
     if (view === 'video-library') {
@@ -3358,6 +3378,11 @@ export default function App() {
         return <ParentDashboard lang={lang} profile={userProfile} onStudentSelect={setActiveStudentId} onNavigate={setView} />;
       default:
         return <div className="p-20 text-center text-slate-400">{t.loadingText}</div>;
+    }
+    } catch (e: any) {
+      console.error("Render Error:", e);
+      setRenderError(e.message || "Unknown error during rendering");
+      return null;
     }
   };
 
