@@ -105,19 +105,31 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
     if (!userProfile) return;
     setLoadPreviousLoading(true);
     try {
-      const q = query(collection(db, 'studyPlans'), where('userId', '==', userProfile.uid));
+      const UserRole = { ADMIN: 'admin', STUDENT: 'student', PARENT: 'parent' };
+      const isAdmin = (userProfile as any).role === UserRole.ADMIN;
+      
+      let q;
+      if (isAdmin) {
+        q = query(collection(db, 'studyPlans'));
+      } else {
+        q = query(collection(db, 'studyPlans'), where('userId', '==', userProfile.uid));
+      }
+
       const querySnapshot = await getDocs(q);
       const plans: StudyPlan[] = [];
       const covered = new Set<string>();
       
       querySnapshot.forEach((doc) => {
-        const plan = { id: doc.id, ...doc.data() } as StudyPlan;
-        plans.push(plan);
-        if (plan.planItems) {
-          plan.planItems.forEach((item: any) => {
-            const key = `${item.courseId}:${item.level}:${item.unitId}`;
-            covered.add(key);
-          });
+        const data = doc.data() as Record<string, any>;
+        if (data) {
+          const plan = { id: doc.id, ...data } as StudyPlan;
+          plans.push(plan);
+          if (plan.planItems) {
+            plan.planItems.forEach((item: any) => {
+              const key = `${item.courseId}:${item.level}:${item.unitId}`;
+              covered.add(key);
+            });
+          }
         }
       });
       
@@ -135,11 +147,24 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
   };
 
   useEffect(() => {
-    fetchSavedPlans();
-    if (userProfile && !studentName) {
-      setStudentName(userProfile.displayName || '');
-    }
+    const initPlanner = async () => {
+      await fetchSavedPlans();
+      if (userProfile && !studentName) {
+        setStudentName(userProfile.displayName || '');
+      }
+    };
+    initPlanner();
   }, [userProfile]);
+
+  // Handle auto-loading the latest plan if we just switched to history or on initial load
+  useEffect(() => {
+    if (savedPlans.length > 0 && !generatedPlan && !isGenerating && activeTab === 'create') {
+      // If we have plans but we are on create tab with no plan, maybe switch to history?
+      // Actually, if they just opened the planner and have content, show it.
+      setActiveTab('history');
+      handleSelectSavedPlan(savedPlans[0]);
+    }
+  }, [savedPlans]);
 
   const handleSelectSavedPlan = (plan: StudyPlan) => {
     setSelectedSavedPlan(plan);

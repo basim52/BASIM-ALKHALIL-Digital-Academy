@@ -16,6 +16,7 @@ import {
   MessageSquare,
   Trophy,
   Calendar,
+  CalendarDays,
   ChevronRight,
   Play,
   CheckCircle2,
@@ -843,6 +844,40 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
   const [loadingRec, setLoadingRec] = useState(false);
   const [homeworks, setHomeworks] = useState<any[]>([]);
   const [selectedHomework, setSelectedHomework] = useState<any | null>(null);
+  const [currentPlan, setCurrentPlan] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchPlan = async () => {
+      try {
+        let q;
+        if (profile.role === UserRole.ADMIN) {
+          q = query(collection(db, 'studyPlans'), orderBy('createdAt', 'desc'), limit(1));
+        } else {
+          q = query(
+            collection(db, 'studyPlans'),
+            where('userId', '==', profile.uid),
+            orderBy('createdAt', 'desc'),
+            limit(1)
+          );
+        }
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          setCurrentPlan(snap.docs[0].data());
+        }
+      } catch (e) {
+        console.error("Error fetching plan for dashboard:", e);
+      }
+    };
+    fetchPlan();
+  }, [profile.uid, profile.role]);
+
+  const getTodayLesson = () => {
+    if (!currentPlan || !currentPlan.planItems) return null;
+    const today = new Date().toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' });
+    return currentPlan.planItems.find((item: any) => item.dateLabel === today) || currentPlan.planItems[0];
+  };
+
+  const todayLesson = getTodayLesson();
 
   useEffect(() => {
     const getRec = async () => {
@@ -938,6 +973,52 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             <div className="flex-1">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-1 opacity-60">{isRtl ? 'توصية الذكاء الاصطناعي اليوم' : 'AI DAILY RECOMMENDATION'}</p>
               <p className="font-bold text-sm md:text-base leading-relaxed">"{recommendation}"</p>
+            </div>
+          </motion.div>
+        )}
+
+        {currentPlan && todayLesson && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-10 p-8 bg-white rounded-[2.5rem] border-2 border-blue-600/10 shadow-xl shadow-blue-100/20 relative overflow-hidden group"
+          >
+            <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform">
+               <Brain size={120} />
+            </div>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+              <div className="flex items-center gap-6">
+                <div className="w-20 h-20 bg-blue-600 text-white rounded-[2rem] flex items-center justify-center shadow-lg shadow-blue-200">
+                  <CalendarDays size={36} />
+                </div>
+                <div className={isRtl ? 'text-right' : 'text-left'}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-widest">{isRtl ? 'خطتك الدراسية الحالية' : 'Active Study Plan'}</span>
+                    <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                  </div>
+                  <h3 className="text-2xl font-black text-[#002147] mb-1">
+                    {isRtl ? `خطة ${currentPlan.studentName}` : `${currentPlan.studentName}'s Plan`}
+                  </h3>
+                  <p className="text-slate-400 font-bold text-sm">
+                    {isRtl ? 'الدرس التالي (اليوم): ' : 'Next Lesson (Today): '} 
+                    <span className="text-blue-600">{todayLesson.topic}</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 w-full md:w-auto">
+                <div className="hidden lg:flex flex-col items-center px-6 py-3 border-r border-slate-100 pr-10">
+                   <span className="text-[10px] font-black text-slate-300 uppercase mb-1">{isRtl ? 'الوقت المفضل' : 'Preferred Time'}</span>
+                   <span className="text-lg font-black text-[#002147]">{currentPlan.preferredTime}</span>
+                </div>
+                <button 
+                  onClick={() => onNavigate('academic-planner')}
+                  className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-[#002147] text-white px-8 py-5 rounded-[2rem] font-black hover:bg-blue-600 transition-all shadow-xl shadow-blue-900/10"
+                >
+                  {isRtl ? 'متابعة الخطة' : 'Follow Plan'}
+                  <ChevronRight size={20} className={isRtl ? 'rotate-180' : ''} />
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
@@ -1294,7 +1375,7 @@ const RoleSelector = ({ onSelect, lang }: { onSelect: (role: UserRole) => void, 
   );
 };
 
-const ParentDashboard = ({ lang, profile, onStudentSelect }: { lang: Language, profile: UserProfile, onStudentSelect?: (id: string) => void }) => {
+const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang: Language, profile: UserProfile, onStudentSelect?: (id: string) => void, onNavigate?: (view: AppView) => void }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [studentIdInput, setStudentIdInput] = useState('');
@@ -1304,6 +1385,40 @@ const ParentDashboard = ({ lang, profile, onStudentSelect }: { lang: Language, p
   const [error, setError] = useState('');
   const [linking, setLinking] = useState(false);
   const [showAddStudent, setShowAddStudent] = useState(false);
+  const [currentPlan, setCurrentPlan] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchPlan = async () => {
+      try {
+        let q;
+        if (profile.role === UserRole.ADMIN) {
+          q = query(collection(db, 'studyPlans'), orderBy('createdAt', 'desc'), limit(1));
+        } else {
+          q = query(
+            collection(db, 'studyPlans'),
+            where('userId', '==', profile.uid),
+            orderBy('createdAt', 'desc'),
+            limit(1)
+          );
+        }
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          setCurrentPlan(snap.docs[0].data());
+        }
+      } catch (e) {
+        console.error("Error fetching plan for dashboard:", e);
+      }
+    };
+    fetchPlan();
+  }, [profile.uid, profile.role]);
+
+  const getTodayLesson = () => {
+    if (!currentPlan || !currentPlan.planItems) return null;
+    const today = new Date().toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' });
+    return currentPlan.planItems.find((item: any) => item.dateLabel === today) || currentPlan.planItems[0];
+  };
+
+  const todayLesson = getTodayLesson();
 
   useEffect(() => {
     if (selectedStudentIndex !== null && linkedStudents[selectedStudentIndex] && onStudentSelect) {
@@ -1605,6 +1720,51 @@ const ParentDashboard = ({ lang, profile, onStudentSelect }: { lang: Language, p
 
   return (
     <div className={`p-4 md:p-8 max-w-7xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+      {currentPlan && todayLesson && (
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-10 p-8 bg-white rounded-[2.5rem] border-2 border-blue-600/10 shadow-xl shadow-blue-100/20 relative overflow-hidden group"
+        >
+          <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform">
+             <Brain size={120} />
+          </div>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+            <div className="flex items-center gap-6">
+              <div className="w-20 h-20 bg-blue-600 text-white rounded-[2rem] flex items-center justify-center shadow-lg shadow-blue-200">
+                <CalendarDays size={36} />
+              </div>
+              <div className={isRtl ? 'text-right' : 'text-left'}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-widest">{isRtl ? 'خطتك الدراسية الحالية' : 'Active Study Plan'}</span>
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                </div>
+                <h3 className="text-2xl font-black text-[#002147] mb-1">
+                  {isRtl ? `خطة ${currentPlan.studentName}` : `${currentPlan.studentName}'s Plan`}
+                </h3>
+                <p className="text-slate-400 font-bold text-sm">
+                  {isRtl ? 'الدرس التالي (اليوم): ' : 'Next Lesson (Today): '} 
+                  <span className="text-blue-600">{todayLesson.topic}</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 w-full md:w-auto">
+              <div className="hidden lg:flex flex-col items-center px-6 py-3 border-r border-slate-100 pr-10">
+                 <span className="text-[10px] font-black text-slate-300 uppercase mb-1">{isRtl ? 'الوقت المفضل' : 'Preferred Time'}</span>
+                 <span className="text-lg font-black text-[#002147]">{currentPlan.preferredTime}</span>
+              </div>
+              <button 
+                onClick={() => onNavigate && onNavigate('academic-planner')}
+                className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-[#002147] text-white px-8 py-5 rounded-[2rem] font-black hover:bg-blue-600 transition-all shadow-xl shadow-blue-900/10"
+              >
+                {isRtl ? 'متابعة الخطة' : 'Follow Plan'}
+                <ChevronRight size={20} className={isRtl ? 'rotate-180' : ''} />
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
       <header className={`mb-8 md:mb-12 border-b border-slate-200 pb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 ${isRtl ? 'text-right' : 'text-left'}`}>
         <div>
           <h2 className="text-2xl md:text-3xl font-bold text-[#002147]">{t.parentPortal}</h2>
@@ -3155,7 +3315,7 @@ export default function App() {
         );
       case UserRole.PARENT:
       case UserRole.ADMIN:
-        return <ParentDashboard lang={lang} profile={userProfile} onStudentSelect={setActiveStudentId} />;
+        return <ParentDashboard lang={lang} profile={userProfile} onStudentSelect={setActiveStudentId} onNavigate={setView} />;
       default:
         return <div className="p-20 text-center text-slate-400">{t.loadingText}</div>;
     }
@@ -3207,6 +3367,7 @@ export default function App() {
                 <nav className="flex-1 space-y-2 overflow-y-auto no-scrollbar">
                   {[
                     { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
+                    { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
                     { id: 'credits', label: t.credits, icon: Wallet },
                     { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
                     { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
@@ -3277,7 +3438,7 @@ export default function App() {
                     { id: 'credits', icon: Wallet },
                     { id: 'admin', icon: ShieldAlert, show: isAdmin },
                     { id: 'early-childhood', icon: Baby },
-                    { id: 'academic-planner', icon: Brain },
+                    { id: 'academic-planner', icon: Sparkles },
                     { id: 'oxford-discover', icon: OxfordIcon },
                     { id: 'video-library', icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
                     { id: 'story-library', icon: BookOpen },
