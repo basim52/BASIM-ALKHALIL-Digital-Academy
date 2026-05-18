@@ -862,7 +862,9 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
         }
         const snap = await getDocs(q);
         if (!snap.empty) {
-          setCurrentPlan(snap.docs[0].data());
+          const docPlan = snap.docs[0];
+          const data = docPlan.data() as Record<string, any>;
+          setCurrentPlan({ id: docPlan.id, ...data });
         }
       } catch (e) {
         console.error("Error fetching plan for dashboard:", e);
@@ -878,6 +880,17 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
   };
 
   const todayLesson = getTodayLesson();
+
+  const handleDeletePlanDashboard = async () => {
+    if (!currentPlan?.id) return;
+    if (!window.confirm(isRtl ? 'هل أنت متأكد من حذف هذه الخطة؟' : 'Are you sure you want to delete this plan?')) return;
+    try {
+      await deleteDoc(doc(db, 'studyPlans', currentPlan.id));
+      setCurrentPlan(null);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   useEffect(() => {
     const getRec = async () => {
@@ -1007,6 +1020,13 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
               </div>
 
               <div className="flex items-center gap-4 w-full md:w-auto">
+                <button 
+                  onClick={handleDeletePlanDashboard}
+                  className="hidden lg:flex items-center justify-center p-4 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-[1.5rem] transition-all border border-rose-100"
+                  title={isRtl ? 'حذف الخطة' : 'Delete Plan'}
+                >
+                  <Trash2 size={24} />
+                </button>
                 <div className="hidden lg:flex flex-col items-center px-6 py-3 border-r border-slate-100 pr-10">
                    <span className="text-[10px] font-black text-slate-300 uppercase mb-1">{isRtl ? 'الوقت المفضل' : 'Preferred Time'}</span>
                    <span className="text-lg font-black text-[#002147]">{currentPlan.preferredTime}</span>
@@ -1403,7 +1423,9 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
         }
         const snap = await getDocs(q);
         if (!snap.empty) {
-          setCurrentPlan(snap.docs[0].data());
+          const docPlan = snap.docs[0];
+          const data = docPlan.data() as Record<string, any>;
+          setCurrentPlan({ id: docPlan.id, ...data });
         }
       } catch (e) {
         console.error("Error fetching plan for dashboard:", e);
@@ -1419,6 +1441,17 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
   };
 
   const todayLesson = getTodayLesson();
+
+  const handleDeletePlanDashboard = async () => {
+    if (!currentPlan?.id) return;
+    if (!window.confirm(isRtl ? 'هل أنت متأكد من حذف هذه الخطة؟' : 'Are you sure you want to delete this plan?')) return;
+    try {
+      await deleteDoc(doc(db, 'studyPlans', currentPlan.id));
+      setCurrentPlan(null);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   useEffect(() => {
     if (selectedStudentIndex !== null && linkedStudents[selectedStudentIndex] && onStudentSelect) {
@@ -1750,6 +1783,13 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
             </div>
 
             <div className="flex items-center gap-4 w-full md:w-auto">
+              <button 
+                onClick={handleDeletePlanDashboard}
+                className="hidden lg:flex items-center justify-center p-4 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-[1.5rem] transition-all border border-rose-100"
+                title={isRtl ? 'حذف الخطة' : 'Delete Plan'}
+              >
+                <Trash2 size={24} />
+              </button>
               <div className="hidden lg:flex flex-col items-center px-6 py-3 border-r border-slate-100 pr-10">
                  <span className="text-[10px] font-black text-slate-300 uppercase mb-1">{isRtl ? 'الوقت المفضل' : 'Preferred Time'}</span>
                  <span className="text-lg font-black text-[#002147]">{currentPlan.preferredTime}</span>

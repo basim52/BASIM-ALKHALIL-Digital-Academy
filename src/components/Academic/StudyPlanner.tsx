@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { toPng } from 'html-to-image';
+import { saveAs } from 'file-saver';
 import { 
   Calendar, 
   BookOpen, 
@@ -17,7 +19,9 @@ import {
   Trash,
   Check,
   Save,
-  Filter
+  Filter,
+  Download,
+  Share2
 } from 'lucide-react';
 import { translations, Language } from '../../lib/translations';
 import { ALL_READING_UNITS } from '../ReadingCurriculumCompanion';
@@ -101,6 +105,42 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
   const [selectedSavedPlan, setSelectedSavedPlan] = useState<StudyPlan | null>(null);
   const [studentName, setStudentName] = useState('');
   const [showAddLessonModal, setShowAddLessonModal] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const tableRef = React.useRef<HTMLDivElement>(null);
+
+  const handleExportImage = async () => {
+    if (!tableRef.current) return;
+    setIsExporting(true);
+    try {
+      // Small delay to ensure any hover states/transitions are settled
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      const dataUrl = await toPng(tableRef.current, {
+        quality: 1.0,
+        pixelRatio: 4, // Higher quality for extreme clarity
+        backgroundColor: '#ffffff',
+        style: {
+          borderRadius: '0px',
+          padding: '40px',
+          width: '1200px', // Force a wider width during export to balance proportions
+          display: 'flex',
+          flexDirection: 'column',
+        },
+        filter: (node) => {
+          const exclusionClasses = ['export-exclude'];
+          return !exclusionClasses.some(cls => (node as HTMLElement).classList?.contains?.(cls));
+        }
+      });
+      
+      const fileName = `StudyPlan_${studentName.replace(/\s+/g, '_') || 'Student'}_${new Date().toLocaleDateString()}.png`;
+      saveAs(dataUrl, fileName);
+    } catch (error) {
+      console.error('Error exporting image:', error);
+      alert(isRtl ? 'حدث خطأ أثناء تصدير الصورة' : 'Error exporting image');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const fetchSavedPlans = async () => {
     if (!userProfile) return;
@@ -652,36 +692,39 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                     </div>
                   ) : (
                     savedPlans.map(plan => (
-                      <button
-                        key={plan.id}
-                        onClick={() => handleSelectSavedPlan(plan)}
-                        className={`w-full text-right p-4 rounded-3xl border-2 transition-all flex flex-col gap-1 group/plan ${
-                          selectedSavedPlan?.id === plan.id 
-                            ? 'border-blue-600 bg-blue-50' 
-                            : 'border-slate-50 bg-slate-50/50 hover:border-slate-100'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                           <span className="text-sm font-black text-[#002147]">{plan.studentName}</span>
-                           <div className="flex items-center gap-1">
+                      <div key={plan.id} className="flex items-center gap-2 group/plan">
+                        <button
+                          onClick={() => handleSelectSavedPlan(plan)}
+                          className={`flex-1 text-right p-4 rounded-3xl border-2 transition-all flex flex-col gap-1 ${
+                            selectedSavedPlan?.id === plan.id 
+                              ? 'border-blue-600 bg-blue-50' 
+                              : 'border-slate-50 bg-slate-50/50 hover:border-slate-100'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                             <span className="text-sm font-black text-[#002147]">{plan.studentName}</span>
                              <span className="text-[10px] font-black text-blue-600 opacity-60">
                                {plan.createdAt?.toDate ? plan.createdAt.toDate().toLocaleDateString(isRtl ? 'ar-EG' : 'en-US') : ''}
                              </span>
-                             <button 
-                               onClick={(e) => handleDeletePlan(plan.id!, e)}
-                               className="p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all opacity-0 group-hover/plan:opacity-100"
-                             >
-                               <Trash2 size={12} />
-                             </button>
-                           </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                           <Calendar size={12} className="text-slate-400" />
-                           <span className="text-[10px] font-bold text-slate-400">
-                             {isRtl ? 'بدأ في: ' : 'Started: '} {plan.startDate}
-                           </span>
-                        </div>
-                      </button>
+                          </div>
+                          <div className="flex items-center gap-2">
+                             <Calendar size={12} className="text-slate-400" />
+                             <span className="text-[10px] font-bold text-slate-400">
+                               {isRtl ? 'بدأ في: ' : 'Started: '} {plan.startDate}
+                             </span>
+                          </div>
+                        </button>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeletePlan(plan.id!, e);
+                          }}
+                          className="p-3 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-2xl transition-all shadow-sm border border-rose-100 bg-white group-hover/plan:scale-105 active:scale-95"
+                          title={isRtl ? 'حذف الخطة' : 'Delete Plan'}
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     ))
                   )}
                 </div>
@@ -833,11 +876,72 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                         <BarChart2 size={16} />
                         {isRtl ? 'المعدلات التعليمية' : 'Learning Avg'}
                       </button>
+                      <button 
+                        onClick={handleExportImage}
+                        disabled={isExporting || !generatedPlan}
+                        className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-2xl text-xs font-black hover:bg-emerald-700 transition-all h-full disabled:opacity-50"
+                      >
+                        {isExporting ? (
+                          <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}>
+                            <Download size={16} />
+                          </motion.div>
+                        ) : (
+                          <Share2 size={16} />
+                        )}
+                        {isRtl ? 'تصدير للواتساب' : 'WhatsApp Export'}
+                      </button>
                     </div>
                   </div>
                 </div>
                 
-                <div className="overflow-x-auto min-h-[500px]">
+                <div ref={tableRef} className="overflow-x-auto min-h-[500px] bg-white p-4 md:p-8 rounded-[3rem]">
+                  {/* Export Header */}
+                  <div className="mb-10 p-10 bg-gradient-to-br from-[#002147] to-blue-900 rounded-[2.5rem] text-white relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+                    <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
+                      <div>
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center">
+                            <Sparkles className="text-blue-300" size={24} />
+                          </div>
+                          <h2 className="text-2xl font-black tracking-tight">
+                            {isRtl ? 'أكاديمية باسم آل خليل الرقمية' : 'Basim Al Khalil Digital Academy'}
+                          </h2>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-blue-200 text-xs font-black uppercase tracking-[0.2em]">
+                            {isRtl ? 'خطة الدراسة الذكية' : 'Smart Learning Journey'}
+                          </span>
+                          <h1 className="text-4xl font-black text-white">
+                            {studentName || (isRtl ? 'اسم الطالب' : 'Student Name')}
+                          </h1>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white/10 backdrop-blur-md p-6 rounded-[2rem] border border-white/10">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-black text-blue-200 uppercase mb-1">{isRtl ? 'إجمالي الدروس' : 'Total Lessons'}</span>
+                          <span className="text-xl font-black">{generatedPlan?.length || 0}</span>
+                        </div>
+                        <div className="flex flex-col border-r border-white/10 pr-4">
+                          <span className="text-[10px] font-black text-blue-200 uppercase mb-1">{isRtl ? 'مدة الخطة' : 'Duration'}</span>
+                          <span className="text-xl font-black">90 {isRtl ? 'يوم' : 'Days'}</span>
+                        </div>
+                        <div className="flex flex-col border-r border-white/10 pr-4">
+                          <span className="text-[10px] font-black text-blue-200 uppercase mb-1">{isRtl ? 'معدل التركيز' : 'Focus Rate'}</span>
+                          <span className="text-xl font-black">98%</span>
+                        </div>
+                        <div className="flex flex-col border-l border-white/10 pl-4">
+                          <span className="text-[10px] font-black text-blue-200 uppercase mb-1">{isRtl ? 'الحالة' : 'Status'}</span>
+                          <div className="flex items-center gap-2">
+                             <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                             <span className="text-sm font-black text-emerald-400">{isRtl ? 'نشط' : 'Active'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <table className="w-full">
                     <thead>
                       <tr className="bg-slate-50/50 text-left">
@@ -901,7 +1005,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                             </div>
                           </td>
                           <td className="p-6 text-right">
-                             <div className="flex items-center justify-end gap-3 translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+                             <div className="flex items-center justify-end gap-3 translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all export-exclude">
                                 <button 
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -919,7 +1023,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                           </td>
                         </tr>
                       ))}
-                      <tr>
+                      <tr className="export-exclude">
                         <td colSpan={3} className="p-4">
                           <button 
                             onClick={() => setShowAddLessonModal(true)}
