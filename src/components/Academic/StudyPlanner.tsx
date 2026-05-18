@@ -25,7 +25,7 @@ import { ALL_GRAMMAR_UNITS } from '../GrammarCurriculumCompanion';
 import { ALL_WRITING_UNITS } from '../WritingCurriculumCompanion';
 import { OXFORD_UNITS } from '../OxfordDiscoverCompanion';
 import { db, handleFirestoreError, OperationType } from '../../lib/firebase';
-import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { UserProfile, StudyPlan } from '../../types';
 
 // Mapping curriculums for the selection UI
@@ -100,6 +100,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
   const [savedPlans, setSavedPlans] = useState<StudyPlan[]>([]);
   const [selectedSavedPlan, setSelectedSavedPlan] = useState<StudyPlan | null>(null);
   const [studentName, setStudentName] = useState('');
+  const [showAddLessonModal, setShowAddLessonModal] = useState(false);
 
   const fetchSavedPlans = async () => {
     if (!userProfile) return;
@@ -169,6 +170,11 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
   const handleSelectSavedPlan = (plan: StudyPlan) => {
     setSelectedSavedPlan(plan);
     setGeneratedPlan(plan.planItems);
+    if (plan.studentName) setStudentName(plan.studentName);
+    if (plan.startDate) setStartDate(plan.startDate);
+    if (plan.preferredTime) setPreferredTime(plan.preferredTime);
+    if (plan.selectedDays) setSelectedDays(plan.selectedDays);
+    if (plan.selectedCategories) setSelectedCategories(plan.selectedCategories);
   };
 
   const toggleCategory = (id: string) => {
@@ -344,10 +350,8 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
 
     setIsSaving(true);
     try {
-      const planData: StudyPlan = {
-        userId: userProfile.uid,
+      const planData: any = {
         studentName: studentName.trim(),
-        createdAt: serverTimestamp(),
         startDate,
         preferredTime,
         selectedDays,
@@ -355,15 +359,82 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
         planItems: generatedPlan
       };
 
-      await addDoc(collection(db, 'studyPlans'), planData);
+      if (selectedSavedPlan && selectedSavedPlan.id) {
+        // Update existing
+        await updateDoc(doc(db, 'studyPlans', selectedSavedPlan.id), {
+          ...planData,
+          updatedAt: serverTimestamp()
+        });
+      } else {
+        // Create new
+        const newPlan = {
+          ...planData,
+          userId: userProfile.uid,
+          createdAt: serverTimestamp(),
+        };
+        await addDoc(collection(db, 'studyPlans'), newPlan);
+      }
+      
       setSaveSuccess(true);
       fetchSavedPlans();
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'studyPlans');
+      handleFirestoreError(error, OperationType.UPDATE, 'studyPlans');
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleDeletePlan = async (planId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!window.confirm(isRtl ? 'هل أنت متأكد من حذف هذه الخطة؟' : 'Are you sure you want to delete this plan?')) return;
+    
+    try {
+      await deleteDoc(doc(db, 'studyPlans', planId));
+      if (selectedSavedPlan?.id === planId) {
+        setSelectedSavedPlan(null);
+        setGeneratedPlan(null);
+      }
+      fetchSavedPlans();
+    } catch (error) {
+      console.error('Error deleting plan:', error);
+    }
+  };
+
+  const handleDeleteLesson = (lessonId: string) => {
+    if (!generatedPlan) return;
+    setGeneratedPlan(prev => prev ? prev.filter(item => item.id !== lessonId) : null);
+  };
+
+  const handleAddLesson = (lesson: any) => {
+    if (!generatedPlan) return;
+    
+    // Find last date to increment
+    const lastItem = generatedPlan[generatedPlan.length - 1];
+    let nextDate = new Date();
+    if (lastItem && lastItem.dateLabel) {
+      // Very basic date parsing - in a real app we'd store raw Date objects
+      nextDate = new Date();
+      nextDate.setDate(nextDate.getDate() + 1);
+    }
+
+    const newItem: PlanItem = {
+      id: `manual-${Date.now()}`,
+      month: lastItem ? lastItem.month : 1,
+      week: lastItem ? lastItem.week : 1,
+      day: isRtl ? 'إضافي' : 'Extra',
+      courseId: lesson.courseId,
+      courseLabel: lesson.label,
+      topic: lesson.topic,
+      duration: '45 min',
+      level: lesson.level,
+      unitId: lesson.unitId,
+      dateLabel: nextDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
+      timeLabel: preferredTime
+    };
+
+    setGeneratedPlan(prev => prev ? [...prev, newItem] : [newItem]);
+    setShowAddLessonModal(false);
   };
 
   return (
@@ -584,7 +655,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                       <button
                         key={plan.id}
                         onClick={() => handleSelectSavedPlan(plan)}
-                        className={`w-full text-right p-4 rounded-3xl border-2 transition-all flex flex-col gap-1 ${
+                        className={`w-full text-right p-4 rounded-3xl border-2 transition-all flex flex-col gap-1 group/plan ${
                           selectedSavedPlan?.id === plan.id 
                             ? 'border-blue-600 bg-blue-50' 
                             : 'border-slate-50 bg-slate-50/50 hover:border-slate-100'
@@ -592,9 +663,17 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                       >
                         <div className="flex items-center justify-between">
                            <span className="text-sm font-black text-[#002147]">{plan.studentName}</span>
-                           <span className="text-[10px] font-black text-blue-600 opacity-60">
-                             {plan.createdAt?.toDate ? plan.createdAt.toDate().toLocaleDateString(isRtl ? 'ar-EG' : 'en-US') : ''}
-                           </span>
+                           <div className="flex items-center gap-1">
+                             <span className="text-[10px] font-black text-blue-600 opacity-60">
+                               {plan.createdAt?.toDate ? plan.createdAt.toDate().toLocaleDateString(isRtl ? 'ar-EG' : 'en-US') : ''}
+                             </span>
+                             <button 
+                               onClick={(e) => handleDeletePlan(plan.id!, e)}
+                               className="p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all opacity-0 group-hover/plan:opacity-100"
+                             >
+                               <Trash2 size={12} />
+                             </button>
+                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                            <Calendar size={12} className="text-slate-400" />
@@ -823,6 +902,15 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                           </td>
                           <td className="p-6 text-right">
                              <div className="flex items-center justify-end gap-3 translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteLesson(item.id);
+                                  }}
+                                  className="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
                                 <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Go to Classroom</span>
                                 <div className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
                                    <ChevronRight size={18} className={isRtl ? 'rotate-180' : ''} />
@@ -831,6 +919,17 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                           </td>
                         </tr>
                       ))}
+                      <tr>
+                        <td colSpan={3} className="p-4">
+                          <button 
+                            onClick={() => setShowAddLessonModal(true)}
+                            className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl flex items-center justify-center gap-2 text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-all font-black text-xs uppercase"
+                          >
+                            <Plus size={16} />
+                            {isRtl ? 'إضافة درس يدوي' : 'Add Lesson Manually'}
+                          </button>
+                        </td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>
@@ -873,6 +972,63 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
           )}
         </div>
       </div>
+      {/* Add Lesson Modal */}
+      <AnimatePresence>
+        {showAddLessonModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowAddLessonModal(false)}
+              className="absolute inset-0 bg-[#002147]/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl relative z-10 overflow-hidden flex flex-col max-h-[80vh]"
+            >
+              <div className="p-8 border-b border-slate-100 flex items-center justify-between">
+                <h3 className="text-xl font-black text-[#002147]">
+                  {isRtl ? 'إضافة مادة أو درس' : 'Add Subject or Lesson'}
+                </h3>
+                <button onClick={() => setShowAddLessonModal(false)} className="text-slate-400 hover:text-rose-500">
+                  <Plus className="rotate-45" size={24} />
+                </button>
+              </div>
+              
+              <div className="p-8 overflow-y-auto space-y-6">
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase mb-3 block">
+                    {isRtl ? 'اختر مادة من المناهج المتاحة' : 'Choose Lesson from Curriculums'}
+                  </label>
+                  <div className="grid grid-cols-1 gap-3">
+                    {[
+                      ...ALL_READING_UNITS['A1'].map(u => ({ courseId: 'reading', label: isRtl ? 'القراءة' : 'Reading', topic: isRtl ? u.titleAr : u.titleEn, unitId: u.id, level: 'A1' })),
+                      ...ALL_GRAMMAR_UNITS['A1'].map(u => ({ courseId: 'grammar', label: isRtl ? 'القواعد' : 'Grammar', topic: isRtl ? u.titleAr : u.titleEn, unitId: u.id, level: 'A1' })),
+                      ...ALL_WRITING_UNITS['A1'].map(u => ({ courseId: 'writing', label: isRtl ? 'الكتابة' : 'Writing', topic: isRtl ? u.titleAr : u.titleEn, unitId: u.id, level: 'A1' })),
+                      ...OXFORD_UNITS.slice(0, 10).map(u => ({ courseId: 'oxford', label: 'Oxford', topic: isRtl ? u.titleAr : u.titleEn, unitId: String(u.id), level: 'General' }))
+                    ].map((lesson, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleAddLesson(lesson)}
+                        className="w-full text-right flex items-center justify-between p-4 bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 rounded-2xl transition-all"
+                      >
+                        <div>
+                          <span className="text-[10px] font-black text-blue-600 block mb-1 uppercase opacity-60">{lesson.label}</span>
+                          <span className="text-sm font-black text-[#002147]">{lesson.topic}</span>
+                        </div>
+                        <Plus size={16} className="text-blue-600" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
