@@ -369,24 +369,42 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
         const dayIdx = currentDate.getDay();
         
         if (selectedDays.includes(dayIdx)) {
-          const lesson = finalLessons[lessonPtr % finalLessons.length];
-          
+          // Add first lesson of the day
+          const lesson1 = finalLessons[lessonPtr % finalLessons.length];
           mockPlan.push({
-            id: `plan-w${w}-d${i}`,
+            id: `plan-w${w}-d${i}-s1`,
             month: monthNum,
             week: weekInMonth,
             day: isRtl ? daysAr[dayIdx] : daysEn[dayIdx],
-            courseId: lesson.courseId,
-            courseLabel: lesson.label,
-            topic: lesson.topic,
+            courseId: lesson1.courseId,
+            courseLabel: lesson1.label,
+            topic: lesson1.topic,
             duration: '45 min',
-            level: lesson.level,
-            unitId: lesson.unitId,
+            level: lesson1.level,
+            unitId: lesson1.unitId,
             dateLabel: currentDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
             timeLabel: preferredTime
           });
-          
           lessonPtr++;
+
+          // Add second lesson of the day
+          const lesson2 = finalLessons[lessonPtr % finalLessons.length];
+          mockPlan.push({
+            id: `plan-w${w}-d${i}-s2`,
+            month: monthNum,
+            week: weekInMonth,
+            day: isRtl ? daysAr[dayIdx] : daysEn[dayIdx],
+            courseId: lesson2.courseId,
+            courseLabel: lesson2.label,
+            topic: lesson2.topic,
+            duration: '45 min',
+            level: lesson2.level,
+            unitId: lesson2.unitId,
+            dateLabel: currentDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
+            timeLabel: preferredTime
+          });
+          lessonPtr++;
+          
           studyDaysInThisWeek++;
         }
         
@@ -1187,117 +1205,138 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                     </div>
                   </div>
 
-                  <div className="px-2">
-                    <table className="w-full border-separate border-spacing-y-4">
-                      <thead>
-                        <tr className="text-[#002147]/40">
-                          <th className={`px-6 text-[11px] font-black uppercase tracking-[0.2em] pb-4 ${isRtl ? 'text-right' : 'text-left'}`}>
-                            {isRtl ? 'التصنيف والموعد' : 'Timeline & Schedule'}
-                          </th>
-                          <th className={`px-6 text-[11px] font-black uppercase tracking-[0.2em] pb-4 ${isRtl ? 'text-right' : 'text-left'}`}>
-                            {isRtl ? 'المادة والوحدة الدراسية' : 'Curriculum Subject'}
-                          </th>
-                          <th className="px-6 pb-4"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {generatedPlan?.map((item, idx) => (
-                          <tr 
-                            key={item.id} 
+      <div className="px-2">
+        <table className="w-full border-separate border-spacing-y-4">
+          <thead>
+            <tr className="text-[#002147]/40">
+              <th className={`px-6 text-[11px] font-black uppercase tracking-[0.2em] pb-4 ${isRtl ? 'text-right' : 'text-left'}`}>
+                {isRtl ? 'التصنيف والموعد' : 'Timeline & Schedule'}
+              </th>
+              <th className={`px-6 text-[11px] font-black uppercase tracking-[0.2em] pb-4 ${isRtl ? 'text-right' : 'text-left'}`}>
+                {isRtl ? 'المواد والوحدات الدراسية' : 'Curriculum Subjects'}
+              </th>
+              <th className="px-6 pb-4"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {(() => {
+              // Group plan items by day
+              const groupedItems: { [key: string]: PlanItem[] } = {};
+              generatedPlan?.forEach(item => {
+                const dayKey = `${item.month}-${item.week}-${item.day}-${item.dateLabel}`;
+                if (!groupedItems[dayKey]) groupedItems[dayKey] = [];
+                groupedItems[dayKey].push(item);
+              });
+
+              return Object.entries(groupedItems).map(([dayKey, items], idx) => {
+                const firstItem = items[0];
+                return (
+                  <tr 
+                    key={dayKey} 
+                    className={`group transition-all ${idx % 2 === 0 ? 'bg-slate-50/50' : 'bg-white'} rounded-3xl`}
+                  >
+                    <td className="p-8 rounded-l-3xl border-y border-l border-slate-100 group-hover:border-blue-200 transition-colors align-top">
+                      <div className="flex flex-col gap-2">
+                         <div className="flex items-center gap-2">
+                            <span className="bg-[#002147] text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase shadow-sm">
+                              {isRtl ? 'أسبوع' : 'Week'} {firstItem.week}
+                            </span>
+                            {firstItem.dateLabel && (
+                               <span className="text-[10px] font-black text-blue-600 border border-blue-100 bg-blue-50 px-2.5 py-0.5 rounded-lg">
+                                  {firstItem.dateLabel}
+                               </span>
+                            )}
+                         </div>
+                         <div className="flex items-center gap-3 mt-1">
+                            <span className="text-base font-black text-[#002147]">
+                               {firstItem.day}
+                            </span>
+                            {firstItem.timeLabel && (
+                               <div className="flex items-center gap-1.5 text-slate-400">
+                                  <div className="w-1 h-1 rounded-full bg-slate-300" />
+                                  <span className="text-xs font-black">{firstItem.timeLabel}</span>
+                               </div>
+                            )}
+                         </div>
+                      </div>
+                    </td>
+                    <td className="p-8 border-y border-slate-100 group-hover:border-blue-200 transition-colors">
+                      <div className="flex flex-wrap gap-6">
+                        {items.map((item) => (
+                          <div 
+                            key={item.id}
                             onClick={() => onNavigateToLesson(item.courseId, item.level, item.unitId)}
-                            className={`group cursor-pointer transition-all ${idx % 2 === 0 ? 'bg-slate-50/50' : 'bg-white'} rounded-3xl`}
+                            className="flex-1 min-w-[300px] flex items-center gap-6 p-4 rounded-2xl border border-transparent hover:border-blue-200 hover:bg-blue-50/30 transition-all group/item cursor-pointer"
                           >
-                            <td className="p-8 rounded-l-3xl border-y border-l border-slate-100 group-hover:border-blue-200 transition-colors">
-                              <div className="flex flex-col gap-2">
-                                 <div className="flex items-center gap-2">
-                                    <span className="bg-[#002147] text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase shadow-sm">
-                                      {isRtl ? 'أسبوع' : 'Week'} {item.week}
-                                    </span>
-                                    {item.dateLabel && (
-                                       <span className="text-[10px] font-black text-blue-600 border border-blue-100 bg-blue-50 px-2.5 py-0.5 rounded-lg">
-                                          {item.dateLabel}
-                                       </span>
-                                    )}
-                                 </div>
-                                 <div className="flex items-center gap-3 mt-1">
-                                    <span className="text-base font-black text-[#002147]">
-                                       {item.day}
-                                    </span>
-                                    {item.timeLabel && (
-                                       <div className="flex items-center gap-1.5 text-slate-400">
-                                          <div className="w-1 h-1 rounded-full bg-slate-300" />
-                                          <span className="text-xs font-black">{item.timeLabel}</span>
-                                       </div>
-                                    )}
-                                 </div>
-                              </div>
-                            </td>
-                            <td className="p-8 border-y border-slate-100 group-hover:border-blue-200 transition-colors">
-                              <div className="flex items-center gap-6">
-                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 ${
-                                  item.courseId === 'reading' ? 'bg-emerald-600 text-white shadow-emerald-100' : 
-                                  item.courseId === 'grammar' ? 'bg-blue-600 text-white shadow-blue-100' : 
-                                  'bg-indigo-600 text-white shadow-indigo-100'
-                                }`}>
-                                  {item.courseId === 'reading' ? <BookOpen size={24} /> : <Sparkles size={24} />}
-                                </div>
-                                <div className="space-y-1">
-                                  <div className="flex items-center gap-3">
-                                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.courseLabel}</span>
-                                     <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                                     <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{item.duration}</span>
-                                  </div>
-                                  <p className="text-xl font-black text-[#002147] group-hover:text-blue-600 transition-colors leading-tight">
-                                    {item.topic}
-                                  </p>
-                                  {(() => {
-                                    const result = getLessonResult(item);
-                                    if (result) {
-                                      return (
-                                        <div className="flex items-center gap-2 mt-2">
-                                          <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100 flex items-center gap-1.5 shadow-sm">
-                                            <CheckCircle2 size={12} />
-                                            {isRtl ? 'تم الإنجاز بنجاح' : 'Successfully Completed'}
-                                          </span>
-                                          <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100 shadow-sm">
-                                            {isRtl ? 'الدرجة:' : 'Score:'} {result.score}/{result.total}
-                                          </span>
-                                        </div>
-                                      );
-                                    }
-                                    return null;
-                                  })()}
-                                </div>
-                              </div>
-                            </td>
-                            <td className="p-8 rounded-r-3xl border-y border-r border-slate-100 group-hover:border-blue-200 transition-colors text-right relative">
-                               <div className="flex items-center justify-end gap-3 transform transition-all export-exclude">
-                                  <button 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      openAddContext(item.day, item.week, item.month, item.dateLabel);
-                                    }}
-                                    className="w-10 h-10 flex items-center justify-center bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all shadow-sm border border-blue-100"
-                                    title={isRtl ? 'إضافة مادة لهذا اليوم' : 'Add subject to this day'}
-                                  >
-                                    <Plus size={20} />
-                                  </button>
-                                  <button 
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover/item:scale-110 ${
+                              item.courseId === 'reading' ? 'bg-emerald-600 text-white shadow-emerald-100' : 
+                              item.courseId === 'grammar' ? 'bg-blue-600 text-white shadow-blue-100' : 
+                              'bg-indigo-600 text-white shadow-indigo-100'
+                            }`}>
+                              {item.courseId === 'reading' ? <BookOpen size={24} /> : <Sparkles size={24} />}
+                            </div>
+                            <div className="space-y-1 flex-1">
+                              <div className="flex items-center gap-2">
+                                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.courseLabel}</span>
+                                 <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                 <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{item.duration}</span>
+                                 <button 
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       handleDeleteLesson(item.id);
                                     }}
-                                    className="w-10 h-10 flex items-center justify-center text-rose-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+                                    className="ml-auto p-1.5 text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover/item:opacity-100"
                                   >
-                                    <Trash2 size={20} />
+                                    <Trash2 size={14} />
                                   </button>
-                                  <div className="w-10 h-10 bg-slate-50 text-slate-300 rounded-xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-200 transition-all">
-                                     <ChevronRight size={20} className={isRtl ? 'rotate-180' : ''} />
-                                  </div>
-                               </div>
-                            </td>
-                          </tr>
+                              </div>
+                              <p className="text-lg font-black text-[#002147] group-hover/item:text-blue-600 transition-colors leading-tight">
+                                {item.topic}
+                              </p>
+                              {(() => {
+                                const result = getLessonResult(item);
+                                if (result) {
+                                  return (
+                                    <div className="flex items-center gap-2 mt-2">
+                                      <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100 flex items-center gap-1 shadow-sm">
+                                        <CheckCircle2 size={10} />
+                                        {isRtl ? 'تم' : 'Done'}
+                                      </span>
+                                      <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100 shadow-sm">
+                                        {result.score}/{result.total}
+                                      </span>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              })()}
+                            </div>
+                          </div>
                         ))}
+                      </div>
+                    </td>
+                    <td className="p-8 rounded-r-3xl border-y border-r border-slate-100 group-hover:border-blue-200 transition-colors text-right relative align-top">
+                       <div className="flex items-center justify-end gap-3 transform transition-all export-exclude">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openAddContext(firstItem.day, firstItem.week, firstItem.month, firstItem.dateLabel);
+                            }}
+                            className="w-10 h-10 flex items-center justify-center bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all shadow-sm border border-blue-100"
+                            title={isRtl ? 'إضافة مادة لهذا اليوم' : 'Add subject to this day'}
+                          >
+                            <Plus size={20} />
+                          </button>
+                          <div className="w-10 h-10 bg-slate-50 text-slate-300 rounded-xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-200 transition-all">
+                             <ChevronRight size={20} className={isRtl ? 'rotate-180' : ''} />
+                          </div>
+                       </div>
+                    </td>
+                  </tr>
+                );
+              });
+            })()}
+
                         <tr className="export-exclude">
                           <td colSpan={3} className="p-4">
                             <button 
@@ -1430,64 +1469,80 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                         {isRtl ? 'التصنيف والموعد' : 'Timeline & Schedule'}
                       </th>
                       <th className={`px-6 text-[11px] font-black uppercase tracking-[0.2em] pb-4 ${isRtl ? 'text-right' : 'text-left'}`}>
-                        {isRtl ? 'المادة والوحدة الدراسية' : 'Curriculum Subject'}
+                        {isRtl ? 'المواد والوحدات الدراسية' : 'Curriculum Subjects'}
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {chunk.map((item, idx) => (
-                      <tr 
-                        key={item.id} 
-                        className={`transition-all ${idx % 2 === 0 ? 'bg-slate-50/50' : 'bg-white'} rounded-3xl`}
-                      >
-                        <td className="p-8 rounded-l-3xl border-y border-l border-slate-100">
-                          <div className="flex flex-col gap-2">
-                             <div className="flex items-center gap-2">
-                                <span className="bg-[#002147] text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase shadow-sm">
-                                  {isRtl ? 'أسبوع' : 'Week'} {item.week}
-                                </span>
-                                {item.dateLabel && (
-                                   <span className="text-[10px] font-black text-blue-600 border border-blue-100 bg-blue-50 px-2.5 py-0.5 rounded-lg">
-                                      {item.dateLabel}
-                                   </span>
-                                )}
-                             </div>
-                             <div className="flex items-center gap-3 mt-1">
-                                <span className="text-base font-black text-[#002147]">
-                                   {item.day}
-                                </span>
-                                {item.timeLabel && (
-                                   <div className="flex items-center gap-1.5 text-slate-400">
-                                      <div className="w-1 h-1 rounded-full bg-slate-300" />
-                                      <span className="text-xs font-black">{item.timeLabel}</span>
-                                   </div>
-                                )}
-                             </div>
-                          </div>
-                        </td>
-                        <td className="p-8 rounded-r-3xl border-y border-r border-slate-100">
-                          <div className="flex items-center gap-6">
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg ${
-                              item.courseId === 'reading' ? 'bg-emerald-600 text-white shadow-emerald-100' : 
-                              item.courseId === 'grammar' ? 'bg-blue-600 text-white shadow-blue-100' : 
-                              'bg-indigo-600 text-white shadow-indigo-100'
-                            }`}>
-                              {item.courseId === 'reading' ? <BookOpen size={24} /> : <Sparkles size={24} />}
-                            </div>
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-3">
-                                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.courseLabel}</span>
-                                 <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                                 <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{item.duration}</span>
+                    {(() => {
+                      const groupedChunk: { [key: string]: PlanItem[] } = {};
+                      chunk.forEach(item => {
+                        const dayKey = `${item.month}-${item.week}-${item.day}-${item.dateLabel}`;
+                        if (!groupedChunk[dayKey]) groupedChunk[dayKey] = [];
+                        groupedChunk[dayKey].push(item);
+                      });
+
+                      return Object.entries(groupedChunk).map(([dayKey, items], idx) => {
+                        const firstItem = items[0];
+                        return (
+                          <tr 
+                            key={dayKey} 
+                            className={`transition-all ${idx % 2 === 0 ? 'bg-slate-50/50' : 'bg-white'} rounded-3xl`}
+                          >
+                            <td className="p-8 rounded-l-3xl border-y border-l border-slate-100 align-top">
+                              <div className="flex flex-col gap-2">
+                                 <div className="flex items-center gap-2">
+                                    <span className="bg-[#002147] text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase shadow-sm">
+                                      {isRtl ? 'أسبوع' : 'Week'} {firstItem.week}
+                                    </span>
+                                    {firstItem.dateLabel && (
+                                       <span className="text-[10px] font-black text-blue-600 border border-blue-100 bg-blue-50 px-2.5 py-0.5 rounded-lg">
+                                          {firstItem.dateLabel}
+                                       </span>
+                                    )}
+                                 </div>
+                                 <div className="flex items-center gap-3 mt-1">
+                                    <span className="text-base font-black text-[#002147]">
+                                       {firstItem.day}
+                                    </span>
+                                    {firstItem.timeLabel && (
+                                       <div className="flex items-center gap-1.5 text-slate-400">
+                                          <div className="w-1 h-1 rounded-full bg-slate-300" />
+                                          <span className="text-xs font-black">{firstItem.timeLabel}</span>
+                                       </div>
+                                    )}
+                                 </div>
                               </div>
-                              <p className="text-xl font-black text-[#002147] leading-tight">
-                                {item.topic}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                            </td>
+                            <td className="p-8 rounded-r-3xl border-y border-r border-slate-100">
+                              <div className="flex flex-wrap gap-6">
+                                {items.map((item) => (
+                                  <div key={item.id} className="flex-1 min-w-[250px] flex items-center gap-6 p-4 rounded-2xl border border-slate-50 bg-white/50">
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg ${
+                                      item.courseId === 'reading' ? 'bg-emerald-600 text-white shadow-emerald-100' : 
+                                      item.courseId === 'grammar' ? 'bg-blue-600 text-white shadow-blue-100' : 
+                                      'bg-indigo-600 text-white shadow-indigo-100'
+                                    }`}>
+                                      {item.courseId === 'reading' ? <BookOpen size={24} /> : <Sparkles size={24} />}
+                                    </div>
+                                    <div className="space-y-1">
+                                      <div className="flex items-center gap-3">
+                                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.courseLabel}</span>
+                                         <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                         <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{item.duration}</span>
+                                      </div>
+                                      <p className="text-xl font-black text-[#002147] leading-tight">
+                                        {item.topic}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      });
+                    })()}
                   </tbody>
                 </table>
               </div>

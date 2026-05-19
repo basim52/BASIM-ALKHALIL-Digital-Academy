@@ -288,6 +288,25 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
   const [designingCurriculum, setDesigningCurriculum] = useState(false);
   const [designSubject, setDesignSubject] = useState('');
   const [curriculumDesign, setCurriculumDesign] = useState<any>(null);
+  
+  // Voucher and Credit System State
+  const [voucherCredits, setVoucherCredits] = useState(2);
+  const [generating, setGenerating] = useState(false);
+  const [recentVouchers, setRecentVouchers] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!db || !auth.currentUser) return;
+    
+    // Fetch recent vouchers
+    const vouchersUnsubscribe = onSnapshot(
+      query(collection(db, 'vouchers'), orderBy('createdAt', 'desc'), limit(10)),
+      (snapshot) => {
+        setRecentVouchers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      }
+    );
+
+    return () => vouchersUnsubscribe();
+  }, []);
 
   const handleDesignCurriculum = async () => {
     if (!designSubject.trim()) return;
