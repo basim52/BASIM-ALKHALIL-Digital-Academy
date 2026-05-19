@@ -62,36 +62,36 @@ const DAILY_QUESTS = [
 
 const CURRICULUM_LEVELS = [
   {
-    id: 'foundation',
-    name: 'الأساسيات الأولى',
-    nameEn: 'The Foundation',
-    description: 'الألوان والأرقام والأشكال',
-    descriptionEn: 'Colors, Numbers & Shapes',
-    courseIds: ['colors', 'numbers', 'shapes']
+    id: 'level1',
+    name: 'المستوى الأساسي: أصوات الحروف (A-F)',
+    nameEn: 'Basic: Letter Sounds (A-F)',
+    description: 'الوحدات 1 و 2 من عالم الصوتيات',
+    descriptionEn: 'Units 1 & 2 of Phonics World',
+    courseIds: ['letters', 'pronunciation']
   },
   {
-    id: 'discovery',
-    name: 'اكتشاف العالم',
-    nameEn: 'World Discovery',
-    description: 'الكلمات الأولى والحيوانات',
-    descriptionEn: 'First Words & Animals',
+    id: 'level2',
+    name: 'المستوى المتوسط: الحروف (G-L)',
+    nameEn: 'Intermediate: Letters (G-L)',
+    description: 'اكتشاف الكلمات الأولى والحيوانات',
+    descriptionEn: 'Discover first words and animals',
     courseIds: ['first-words', 'animals']
   },
   {
-    id: 'expression',
-    name: 'التعبير الإبداعي',
-    nameEn: 'Creative Expression',
-    description: 'الحروف والمختبر الفني',
-    descriptionEn: 'Letters & Drawing Lab',
-    courseIds: ['letters', 'creative-lab']
+    id: 'foundation',
+    name: 'المهارات الحياتية: الأرقام والألوان',
+    nameEn: 'Life Skills: Numbers & Colors',
+    description: 'الألوان والأرقام والأشكال الأساسية',
+    descriptionEn: 'Basic Colors, Numbers & Shapes',
+    courseIds: ['colors', 'numbers', 'shapes']
   },
   {
-    id: 'communication',
-    name: 'التواصل المتقدم',
-    nameEn: 'Advanced Communication',
-    description: 'النطق والقصص السحرية',
-    descriptionEn: 'Pronunciation & Magic Stories',
-    courseIds: ['pronunciation']
+    id: 'expression',
+    name: 'المختبر الإبداعي والقصص',
+    nameEn: 'Creative Lab & Stories',
+    description: 'الرسم والقصص السحرية المتقدمة',
+    descriptionEn: 'Advanced drawing and magic stories',
+    courseIds: ['creative-lab']
   }
 ];
 

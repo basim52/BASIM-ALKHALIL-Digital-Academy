@@ -5,6 +5,7 @@ import {
   ArrowLeft, 
   Volume2, 
   PartyPopper,
+  BookOpen,
   Cat,
   Dog,
   Fish,
@@ -37,65 +38,164 @@ interface LetterOption {
   letter: string;
   word: string;
   wordAr: string;
+  nickname: string;
+  nicknameAr: string;
+  keywords: string[];
+  keywordsAr: string[];
   icon?: any;
   emoji?: string;
   color: string;
   shadowColor: string;
+  storyWords?: string[];
 }
 
 const LETTER_GROUPS = [
   {
     id: 1,
-    title: 'Level 1: A-G',
-    titleAr: 'المستوى الأول: أ-ج',
+    title: 'Foundation 1: Aa Bb Cc',
+    titleAr: 'الوحدة الأولى: أ ب ج',
+    story: {
+      title: 'The Hungry Friends',
+      panels: [
+        { text: 'An alligator!', emoji: '🐊🍎' },
+        { text: 'A bear!', emoji: '🐻🐊' },
+        { text: 'A banana!', emoji: '🍌🐻' },
+        { text: 'It is a cat!', emoji: '🐱🎩' }
+      ]
+    },
     letters: [
-      { letter: 'A', word: 'Apple', wordAr: 'تفاحة', emoji: '🍎', color: '#ef4444', shadowColor: 'rgba(239, 68, 68, 0.4)' },
-      { letter: 'B', word: 'Ball', wordAr: 'كرة', emoji: '⚽', color: '#3b82f6', shadowColor: 'rgba(59, 130, 246, 0.4)' },
-      { letter: 'C', word: 'Cat', wordAr: 'قطة', icon: Cat, color: '#f59e0b', shadowColor: 'rgba(245, 158, 11, 0.4)' },
-      { letter: 'D', word: 'Dog', wordAr: 'كلب', icon: Dog, color: '#92400e', shadowColor: 'rgba(146, 64, 14, 0.4)' },
-      { letter: 'E', word: 'Egg', wordAr: 'بيضة', emoji: '🥚', color: '#facc15', shadowColor: 'rgba(250, 204, 21, 0.4)' },
-      { letter: 'F', word: 'Fish', wordAr: 'سمكة', icon: Fish, color: '#06b6d4', shadowColor: 'rgba(6, 182, 212, 0.4)' },
-      { letter: 'G', word: 'Grapes', wordAr: 'عنب', emoji: '🍇', color: '#a855f7', shadowColor: 'rgba(168, 85, 247, 0.4)' },
+      { 
+        letter: 'A', word: 'Apple', wordAr: 'تفاحة', 
+        nickname: 'Angry Apple', nicknameAr: 'التفاحة الغاضبة',
+        keywords: ['Apple', 'Ax', 'Ant', 'Alligator'], 
+        keywordsAr: ['تفاحة', 'فأس', 'نملة', 'تمساح'],
+        emoji: '🍎', color: '#ef4444', shadowColor: 'rgba(239, 68, 68, 0.4)' 
+      },
+      { 
+        letter: 'B', word: 'Bear', wordAr: 'دب', 
+        nickname: 'Big Bear', nicknameAr: 'الدب الكبير',
+        keywords: ['Bear', 'Bird', 'Bed', 'Banana'], 
+        keywordsAr: ['دب', 'عصفور', 'سرير', 'موزة'],
+        emoji: '🐻', color: '#3b82f6', shadowColor: 'rgba(59, 130, 246, 0.4)' 
+      },
+      { 
+        letter: 'C', word: 'Cat', wordAr: 'قطة', 
+        nickname: 'Cool Cat', nicknameAr: 'القط الذكي',
+        keywords: ['Cat', 'Cup', 'Car', 'Computer'], 
+        keywordsAr: ['قطة', 'كوب', 'سيارة', 'حاسوب'],
+        icon: Cat, color: '#f59e0b', shadowColor: 'rgba(245, 158, 11, 0.4)' 
+      },
     ]
   },
   {
     id: 2,
-    title: 'Level 2: H-N',
-    titleAr: 'المستوى الثاني: ح-ن',
+    title: 'Foundation 2: Dd Ee Ff',
+    titleAr: 'الوحدة الثانية: د هـ ف',
+    story: {
+      title: 'In the Garden',
+      panels: [
+        { text: 'I see an egg.', emoji: '🥚🌱' },
+        { text: 'I have a fan.', emoji: '🪭💨' },
+        { text: 'It is a desk.', emoji: ' desks' },
+        { text: 'It is an elephant!', emoji: '🐘✨' }
+      ]
+    },
     letters: [
-      { letter: 'H', word: 'Hat', wordAr: 'قبعة', emoji: '🎩', color: '#8b5cf6', shadowColor: 'rgba(139, 92, 246, 0.4)' },
-      { letter: 'I', word: 'Ice Cream', wordAr: 'آيس كريم', emoji: '🍦', color: '#ec4899', shadowColor: 'rgba(236, 72, 153, 0.4)' },
-      { letter: 'J', word: 'Juice', wordAr: 'عصير', emoji: '🧃', color: '#f97316', shadowColor: 'rgba(249, 115, 22, 0.4)' },
-      { letter: 'K', word: 'Kite', wordAr: 'طائرة ورقية', emoji: '🪁', color: '#38bdf8', shadowColor: 'rgba(56, 189, 248, 0.4)' },
-      { letter: 'L', word: 'Lion', wordAr: 'أسد', emoji: '🦁', color: '#ea580c', shadowColor: 'rgba(234, 88, 12, 0.4)' },
-      { letter: 'M', word: 'Moon', wordAr: 'قمر', icon: Moon, color: '#475569', shadowColor: 'rgba(71, 85, 105, 0.4)' },
-      { letter: 'N', word: 'Nest', wordAr: 'عش', emoji: '🪺', color: '#16a34a', shadowColor: 'rgba(22, 163, 74, 0.4)' },
+      { 
+        letter: 'D', word: 'Dog', wordAr: 'كلب', 
+        nickname: 'Dizzy Dog', nicknameAr: 'الكلب الدوار',
+        keywords: ['Dog', 'Desk', 'Doll', 'Duck'], 
+        keywordsAr: ['كلب', 'مكتب', 'دمية', 'بطة'],
+        icon: Dog, color: '#92400e', shadowColor: 'rgba(146, 64, 14, 0.4)' 
+      },
+      { 
+        letter: 'E', word: 'Egg', wordAr: 'بيضة', 
+        nickname: 'Energetic Egg', nicknameAr: 'البيضة النشيطة',
+        keywords: ['Egg', 'Elbow', 'Envelope', 'Elephant'], 
+        keywordsAr: ['بيضة', 'كوع', 'ظرف', 'فيل'],
+        emoji: '🥚', color: '#facc15', shadowColor: 'rgba(250, 204, 21, 0.4)' 
+      },
+      { 
+        letter: 'F', word: 'Fish', wordAr: 'سمكة', 
+        nickname: 'Funny Fish', nicknameAr: 'السمكة المضحكة',
+        keywords: ['Fish', 'Fan', 'Farm', 'Fork'], 
+        keywordsAr: ['سمكة', 'مروحة', 'مزرعة', 'شوكة'],
+        icon: Fish, color: '#06b6d4', shadowColor: 'rgba(6, 182, 212, 0.4)' 
+      },
     ]
   },
   {
     id: 3,
-    title: 'Level 3: O-U',
-    titleAr: 'المستوى الثالث: و-ي',
+    title: 'Foundation 3: Gg Hh Ii',
+    titleAr: 'الوحدة الثالثة: ج هـ ي',
+    story: {
+      title: 'Interesting Sights',
+      panels: [
+        { text: 'I see an insect!', emoji: '🐜🌿' },
+        { text: 'This is a horse.', emoji: '🐎🏠' },
+        { text: 'I want a hot dog.', emoji: '🌭😋' },
+        { text: 'I want my bear!', emoji: '🧸😭' }
+      ]
+    },
     letters: [
-      { letter: 'O', word: 'Orange', wordAr: 'برتقال', emoji: '🍊', color: '#fb923c', shadowColor: 'rgba(251, 146, 60, 0.4)' },
-      { letter: 'P', word: 'Pen', wordAr: 'قلم', emoji: '🖊️', color: '#64748b', shadowColor: 'rgba(100, 116, 139, 0.4)' },
-      { letter: 'Q', word: 'Queen', wordAr: 'ملكة', emoji: '👸', color: '#db2777', shadowColor: 'rgba(219, 39, 119, 0.4)' },
-      { letter: 'R', word: 'Rabbit', wordAr: 'أرنب', icon: Rabbit, color: '#94a3b8', shadowColor: 'rgba(148, 163, 184, 0.4)' },
-      { letter: 'S', word: 'Sun', wordAr: 'شمس', icon: Sun, color: '#facc15', shadowColor: 'rgba(250, 204, 21, 0.4)' },
-      { letter: 'T', word: 'Tiger', wordAr: 'نمر', emoji: '🐯', color: '#ea580c', shadowColor: 'rgba(234, 88, 12, 0.4)' },
-      { letter: 'U', word: 'Umbrella', wordAr: 'مظلة', icon: Umbrella, color: '#6366f1', shadowColor: 'rgba(99, 102, 241, 0.4)' },
+      { 
+        letter: 'G', word: 'Gorilla', wordAr: 'الغوريلا', 
+        nickname: 'Good Gorilla', nicknameAr: 'الغوريلا الطيبة',
+        keywords: ['Gorilla', 'Goat', 'Gift', 'Girl'], 
+        keywordsAr: ['غوريلا', 'ماعز', 'هدية', 'بنت'],
+        emoji: '🦍', color: '#10b981', shadowColor: 'rgba(16, 185, 129, 0.4)' 
+      },
+      { 
+        letter: 'H', word: 'Horse', wordAr: 'حصان', 
+        nickname: 'Happy Horse', nicknameAr: 'الحصان السعيد',
+        keywords: ['Horse', 'Hat', 'House', 'Hot dog'], 
+        keywordsAr: ['حصان', 'قبعة', 'بيت', 'نقانق'],
+        emoji: '🐎', color: '#f59e0b', shadowColor: 'rgba(245, 158, 11, 0.4)' 
+      },
+      { 
+        letter: 'I', word: 'Insect', wordAr: 'حشرة', 
+        nickname: 'Interesting Insect', nicknameAr: 'الحشرة المدهشة',
+        keywords: ['Insect', 'Ink', 'Igloo', 'Iguana'], 
+        keywordsAr: ['حشرة', 'حبر', 'كوخ جليدي', 'إغوانا'],
+        emoji: '🐜', color: '#a855f7', shadowColor: 'rgba(168, 85, 247, 0.4)' 
+      },
     ]
   },
   {
     id: 4,
-    title: 'Level 4: V-Z',
-    titleAr: 'المستوى الرابع: المتمكن',
+    title: 'Foundation 4: Jj Kk Ll',
+    titleAr: 'الوحدة الرابعة: ج ك ل',
+    story: {
+      title: 'The Sky Full of Fun',
+      panels: [
+        { text: 'That is a kite.', emoji: '🪁☁️' },
+        { text: 'That is a jet.', emoji: '✈️🚀' },
+        { text: 'I like the lemon.', emoji: '🍋😋' },
+        { text: 'I like the lion!', emoji: '🦁✨' }
+      ]
+    },
     letters: [
-      { letter: 'V', word: 'Van', wordAr: 'شاحنة', icon: Car, color: '#dc2626', shadowColor: 'rgba(220, 38, 38, 0.4)' },
-      { letter: 'W', word: 'Whale', wordAr: 'حوت', emoji: '🐋', color: '#0ea5e9', shadowColor: 'rgba(14, 165, 233, 0.4)' },
-      { letter: 'X', word: 'Xylophone', wordAr: 'إكسيلوفون', icon: Music, color: '#a855f7', shadowColor: 'rgba(168, 85, 247, 0.4)' },
-      { letter: 'Y', word: 'Yo-yo', wordAr: 'يويو', emoji: '🪀', color: '#ec4899', shadowColor: 'rgba(236, 72, 153, 0.4)' },
-      { letter: 'Z', word: 'Zebra', wordAr: 'حمار وحشي', emoji: '🦓', color: '#111827', shadowColor: 'rgba(17, 24, 39, 0.4)' },
+      { 
+        letter: 'J', word: 'Jet', wordAr: 'طائرة نفاثة', 
+        nickname: 'Jumbo Jet', nicknameAr: 'الطائرة العملاقة',
+        keywords: ['Jet', 'Jam', 'Juice', 'Jacket'], 
+        keywordsAr: ['طائرة', 'مربى', 'عصير', 'سترة'],
+        emoji: '✈️', color: '#0ea5e9', shadowColor: 'rgba(14, 165, 233, 0.4)' 
+      },
+      { 
+        letter: 'K', word: 'Kangaroo', wordAr: 'كنغر', 
+        nickname: 'Kicking Kangaroo', nicknameAr: 'الكنغر القفاز',
+        keywords: ['Kangaroo', 'Key', 'King', 'Kite'], 
+        keywordsAr: ['كنغر', 'مفتاح', 'ملك', 'طائرة ورقية'],
+        emoji: '🦘', color: '#f97316', shadowColor: 'rgba(249, 115, 22, 0.4)' 
+      },
+      { 
+        letter: 'L', word: 'Lion', wordAr: 'أسد', 
+        nickname: 'Lazy Lion', nicknameAr: 'الأسد الكسول',
+        keywords: ['Lion', 'Lamp', 'Leaf', 'Lemon'], 
+        keywordsAr: ['أسد', 'مصباح', 'ورقة شجر', 'ليمون'],
+        emoji: '🦁', color: '#ea580c', shadowColor: 'rgba(234, 88, 12, 0.4)' 
+      },
     ]
   }
 ];
@@ -105,6 +205,7 @@ export const LettersLesson = ({ lang, onBack, onComplete }: { lang: Language, on
   const isRtl = lang === 'ar';
   const [activeLevel, setActiveLevel] = useState(1);
   const [activeLetter, setActiveLetter] = useState<LetterOption | null>(null);
+  const [viewingStory, setViewingStory] = useState(false);
   const [showExcellent, setShowExcellent] = useState(false);
   const [gameMode, setGameMode] = useState(false);
   const [targetLetter, setTargetLetter] = useState<LetterOption | null>(null);
@@ -275,6 +376,7 @@ export const LettersLesson = ({ lang, onBack, onComplete }: { lang: Language, on
                onClick={() => {
                  setActiveLevel(group.id);
                  setActiveLetter(null);
+                 setViewingStory(false);
                  speak(group.title);
                }}
                className={`px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase tracking-widest transition-all ${
@@ -286,41 +388,102 @@ export const LettersLesson = ({ lang, onBack, onComplete }: { lang: Language, on
                {isRtl ? group.titleAr : group.title}
              </button>
            ))}
+           {currentGroup.story && (
+             <button
+               onClick={() => {
+                 setViewingStory(true);
+                 setActiveLetter(null);
+                 speak(isRtl ? 'لنقرأ قصة معاً!' : "Let's read a story together!");
+               }}
+               className={`px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase tracking-widest transition-all ${
+                 viewingStory 
+                 ? 'bg-amber-400 text-[#002147] shadow-xl scale-105' 
+                 : 'bg-white text-amber-500 hover:bg-amber-50 border border-amber-100'
+               }`}
+             >
+               <div className="flex items-center gap-2">
+                 <BookOpen size={16} />
+                 {isRtl ? 'القصة' : 'STORY'}
+               </div>
+             </button>
+           )}
         </div>
       )}
 
-      <motion.div 
-        key={activeLevel}
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className={`grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-6 w-full max-w-6xl z-10 px-2 ${gameMode ? 'mt-8' : ''}`}
-      >
-        {currentGroup.letters.map((item) => (
-          <motion.button
-            key={item.letter}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => handleLetterClick(item)}
-            className={`aspect-square bg-white rounded-[1.75rem] md:rounded-[2.5rem] shadow-md flex flex-col items-center justify-center gap-1 md:gap-2 relative group overflow-hidden border-4 transition-all ${
-              activeLetter?.letter === item.letter ? 'border-slate-200' : 'border-slate-50'
-            }`}
-          >
-            <span 
-              className="text-4xl md:text-6xl font-black transition-transform group-activeList:scale-110"
-              style={{ color: item.color }}
+      {viewingStory && currentGroup.story && (
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6 z-10 px-4"
+        >
+           {currentGroup.story.panels.map((panel, pIdx) => (
+             <motion.button
+               key={pIdx}
+               initial={{ opacity: 0, scale: 0.9 }}
+               animate={{ opacity: 1, scale: 1 }}
+               transition={{ delay: pIdx * 0.1 }}
+               onClick={() => speak(panel.text)}
+               className="bg-white p-6 rounded-[2.5rem] shadow-xl border-4 border-slate-50 flex flex-col items-center gap-6 hover:scale-105 transition-all text-center group"
+             >
+                <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center font-black text-slate-400">
+                  {pIdx + 1}
+                </div>
+                <div className="text-8xl md:text-9xl group-hover:animate-bounce">
+                  {panel.emoji}
+                </div>
+                <div className="bg-slate-50 p-6 rounded-3xl w-full">
+                  <p className="text-xl md:text-3xl font-black text-[#002147] tracking-tight">{panel.text}</p>
+                </div>
+             </motion.button>
+           ))}
+           <div className="md:col-span-2 flex justify-center mt-8">
+              <button
+                onClick={() => {
+                  setViewingStory(false);
+                  setActiveLetter(null);
+                }}
+                className="px-12 py-4 bg-slate-200 text-[#002147] rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest"
+              >
+                {isRtl ? 'العودة للحروف' : 'BACK TO LETTERS'}
+              </button>
+           </div>
+        </motion.div>
+      )}
+
+      {!viewingStory && (
+        <motion.div 
+          key={activeLevel}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className={`grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-6 w-full max-w-6xl z-10 px-2 ${gameMode ? 'mt-8' : ''}`}
+        >
+          {currentGroup.letters.map((item) => (
+            <motion.button
+              key={item.letter}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => handleLetterClick(item)}
+              className={`aspect-square bg-white rounded-[1.75rem] md:rounded-[2.5rem] shadow-md flex flex-col items-center justify-center gap-1 md:gap-2 relative group overflow-hidden border-4 transition-all ${
+                activeLetter?.letter === item.letter ? 'border-slate-200' : 'border-slate-50'
+              }`}
             >
-              {item.letter}
-            </span>
-            <div className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-xl bg-slate-50/80 border border-slate-100 shadow-inner">
-               {item.icon ? (
-                 <item.icon className="w-5 h-5 md:w-7 md:h-7" style={{ color: item.color }} />
-               ) : (
-                 <span className="text-xl md:text-2xl">{item.emoji}</span>
-               )}
-            </div>
-          </motion.button>
-        ))}
-      </motion.div>
+              <span 
+                className="text-4xl md:text-6xl font-black transition-transform group-activeList:scale-110"
+                style={{ color: item.color }}
+              >
+                {item.letter}
+              </span>
+              <div className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-xl bg-slate-50/80 border border-slate-100 shadow-inner">
+                 {item.icon ? (
+                   <item.icon className="w-5 h-5 md:w-7 md:h-7" style={{ color: item.color }} />
+                 ) : (
+                   <span className="text-xl md:text-2xl">{item.emoji}</span>
+                 )}
+              </div>
+            </motion.button>
+          ))}
+        </motion.div>
+      )}
 
       <AnimatePresence>
         {activeLetter && !gameMode && (
@@ -328,27 +491,63 @@ export const LettersLesson = ({ lang, onBack, onComplete }: { lang: Language, on
             initial={{ scale: 0.8, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.8, opacity: 0 }}
-            className="mt-10 mb-20 text-center z-10 max-w-sm w-full mx-auto px-4"
+            className="mt-6 mb-20 text-center z-10 max-w-4xl w-full mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8"
           >
-             <div 
-               className="w-32 h-32 md:w-56 md:h-56 rounded-[2.5rem] md:rounded-[3.5rem] flex items-center justify-center text-white shadow-2xl mx-auto border-4 md:border-8 border-white relative"
-               style={{ backgroundColor: activeLetter.color }}
-             >
-                <span className="text-7xl md:text-[14rem] font-black leading-none">{activeLetter.letter}</span>
-                <div className="absolute -bottom-4 -right-4 md:-bottom-6 md:-right-6 w-14 h-14 md:w-20 md:h-20 bg-white rounded-2xl md:rounded-3xl shadow-xl flex items-center justify-center border-2 md:border-4 border-slate-50">
-                   {activeLetter.icon ? (
-                     <activeLetter.icon className="w-8 h-8 md:w-10 md:h-10" style={{ color: activeLetter.color }} />
-                   ) : (
-                     <span className="text-2xl md:text-4xl">{activeLetter.emoji}</span>
-                   )}
+             <div className="flex flex-col items-center">
+                <div 
+                  className="w-32 h-32 md:w-56 md:h-56 rounded-[2.5rem] md:rounded-[3.5rem] flex items-center justify-center text-white shadow-2xl border-4 md:border-8 border-white relative"
+                  style={{ backgroundColor: activeLetter.color }}
+                >
+                    <span className="text-7xl md:text-[14rem] font-black">{activeLetter.letter}</span>
+                </div>
+                <div className="mt-6 md:mt-8 bg-white/90 backdrop-blur-md p-5 md:p-8 rounded-3xl md:rounded-[2.5rem] shadow-xl border border-white/50 w-full overflow-hidden relative">
+                    <div className="absolute top-0 right-0 p-2 opacity-5 pointer-events-none">
+                       <span className="text-9xl font-black">{activeLetter.letter}</span>
+                    </div>
+
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">{isRtl ? 'صديق الصوتيات' : 'PHONICS FRIEND'}</p>
+                    <h2 className="text-xl md:text-4xl font-black text-[#002147] mb-2 leading-tight">
+                      {isRtl ? activeLetter.nicknameAr : activeLetter.nickname}
+                    </h2>
+
+                    <div className="flex items-center justify-center gap-3 bg-slate-50 py-3 rounded-2xl mb-4">
+                      <span className="text-2xl md:text-3xl">{activeLetter.emoji}</span>
+                      <p className="text-lg md:text-2xl font-black text-[#002147]">{activeLetter.letter} for {activeLetter.word}</p>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-2">
+                      <p className="text-base md:text-xl font-bold text-slate-400">{isRtl ? activeLetter.wordAr : ''}</p>
+                    </div>
                 </div>
              </div>
-             <div className="mt-6 md:mt-8 bg-white/90 backdrop-blur-md p-5 md:p-8 rounded-3xl md:rounded-[2.5rem] shadow-xl border border-white/50">
-                <p className="text-xl md:text-5xl font-black text-[#002147] tracking-tight">{activeLetter.letter} for {activeLetter.word}</p>
-                <div className="flex items-center justify-center gap-2 mt-1">
-                   <p className="text-base md:text-2xl font-bold text-slate-400">{isRtl ? activeLetter.wordAr : ''}</p>
-                   <span className="text-xl md:text-2xl">{activeLetter.emoji}</span>
+
+             <div className="bg-white/80 backdrop-blur-lg p-6 md:p-10 rounded-[3rem] border-2 border-white/50 shadow-2xl">
+                <h3 className="text-xs md:text-sm font-black text-slate-400 uppercase tracking-widest mb-6">{isRtl ? 'كلمات الصوتيات' : 'PHONICS KEYWORDS'}</h3>
+                <div className="grid grid-cols-2 gap-4">
+                   {activeLetter.keywords.map((kw, idx) => (
+                     <motion.button
+                       key={kw}
+                       whileHover={{ scale: 1.05 }}
+                       whileTap={{ scale: 0.95 }}
+                       onClick={() => speak(kw)}
+                       className="bg-white p-4 rounded-2xl md:rounded-3xl border-2 border-slate-50 shadow-sm flex flex-col items-center gap-2 group hover:border-[#002147]/10 transition-all"
+                     >
+                        <div className="text-2xl md:text-4xl group-hover:scale-125 transition-transform">
+                          {idx === 0 ? activeLetter.emoji : '✨'}
+                        </div>
+                        <span className="font-black text-[#002147] text-sm md:text-lg">{kw}</span>
+                        <span className="text-[10px] md:text-xs font-bold text-slate-400">{isRtl ? activeLetter.keywordsAr[idx] : ''}</span>
+                     </motion.button>
+                   ))}
                 </div>
+
+                <button
+                  onClick={() => speak(`This is the sound of ${activeLetter.letter}. ${activeLetter.letter}... ${activeLetter.letter}... ${activeLetter.word}!`)}
+                  className="w-full mt-6 py-4 bg-[#002147] text-white rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+                >
+                  <Volume2 size={20} />
+                  {isRtl ? 'استمع للنطق' : 'LISTEN TO SOUND'}
+                </button>
              </div>
           </motion.div>
         )}
