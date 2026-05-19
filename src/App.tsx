@@ -70,6 +70,7 @@ import { EarlyChildhoodHome } from './components/EarlyChildhood/EarlyChildhoodHo
 import { StudyPlanner } from './components/Academic/StudyPlanner';
 import { ResultsChart } from './components/Academic/ResultsChart';
 import { SmartAnalytics } from './components/Academic/SmartAnalytics';
+import { BiWeeklyTest } from './components/Academic/BiWeeklyTest';
 import { OxfordDiscoverCompanion } from './components/OxfordDiscoverCompanion';
 import { ReadingCurriculumCompanion, ReadingLevel, ALL_READING_UNITS } from './components/ReadingCurriculumCompanion';
 import { GrammarCurriculumCompanion, GrammarLevel, ALL_GRAMMAR_UNITS } from './components/GrammarCurriculumCompanion';
@@ -2704,6 +2705,8 @@ export default function App() {
   const [selectedConversationLevel, setSelectedConversationLevel] = useState<ConversationLevel>('A1');
   const [selectedWritingLevel, setSelectedWritingLevel] = useState<WritingLevel>('A1');
   const [selectedExpressionLevel, setSelectedExpressionLevel] = useState<ExpressionLevel>('A1');
+  const [selectedTestLevel, setSelectedTestLevel] = useState<string>('A1');
+  const [selectedTestUnitId, setSelectedTestUnitId] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [renderError, setRenderError] = useState<string | null>(null);
   const [lang, setLang] = useState<Language>('ar');
@@ -3188,6 +3191,10 @@ export default function App() {
             } else if (courseId === 'oxford') {
               setAutoStartUnitId(unitId);
               setView('oxford-discover');
+            } else if (courseId === 'test') {
+              setSelectedTestLevel(level);
+              setSelectedTestUnitId(unitId);
+              setView('bi-weekly-test');
             }
           }}
         />
@@ -3404,6 +3411,26 @@ export default function App() {
 
     if (view === 'ai-chat') {
       return <AIConversation lang={lang} onBack={() => setView('dashboard')} />;
+    }
+
+    if (view === 'bi-weekly-test') {
+      return (
+        <BiWeeklyTest
+          lang={lang}
+          level={selectedTestLevel}
+          unitId={selectedTestUnitId}
+          testTitle={lang === 'ar' ? 'الاختبار الدوري الشامل' : 'Bi-Weekly Comprehensive Test'}
+          userProfile={userProfile}
+          onBack={() => setView('academic-planner')}
+          onComplete={(score, total) => {
+            if (userProfile) {
+              const updatedPoints = (userProfile.points || 0) + 100;
+              setUserProfile({ ...userProfile, points: updatedPoints } as UserProfile);
+            }
+            setView('academic-planner');
+          }}
+        />
+      );
     }
 
     // Shared Views for Students and Admins
