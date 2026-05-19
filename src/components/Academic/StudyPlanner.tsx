@@ -82,6 +82,8 @@ interface PlanItem {
   unitId: string;
   dateLabel?: string;
   timeLabel?: string;
+  isTest?: boolean;
+  scheduledAt?: string;
 }
 
 export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfile | null }> = ({ 
@@ -396,15 +398,20 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
       const monthNum = Math.ceil(w / 4);
       const weekInMonth = ((w - 1) % 4) + 1;
       
-      // For each week, we find the days the student wants to study
-      // and skip those they don't.
-      
+      let lastStudyDateThisWeek: Date | null = null;
       let studyDaysInThisWeek = 0;
+      
       // Loop through 7 days of the week
       for (let i = 0; i < 7; i++) {
         const dayIdx = currentDate.getDay();
         
         if (selectedDays.includes(dayIdx)) {
+          lastStudyDateThisWeek = new Date(currentDate);
+          
+          const scheduledAt = new Date(currentDate);
+          const [h, m] = preferredTime.split(':').map(Number);
+          scheduledAt.setHours(h, m, 0, 0);
+
           // Add first lesson of the day
           if (lessonPtr < finalLessons.length) {
             const lesson1 = finalLessons[lessonPtr];
@@ -420,7 +427,8 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
               level: lesson1.level,
               unitId: lesson1.unitId,
               dateLabel: currentDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
-              timeLabel: preferredTime
+              timeLabel: preferredTime,
+              scheduledAt: scheduledAt.toISOString()
             });
             lessonPtr++;
           }
@@ -428,19 +436,23 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
           // Add second lesson of the day
           if (lessonPtr < finalLessons.length) {
             const lesson2 = finalLessons[lessonPtr];
+            const secondScheduledAt = new Date(scheduledAt);
+            secondScheduledAt.setHours(secondScheduledAt.getHours() + 1); // Offset second lesson
+            
             mockPlan.push({
               id: `plan-w${w}-d${i}-s2`,
               month: monthNum,
               week: weekInMonth,
               day: isRtl ? daysAr[dayIdx] : daysEn[dayIdx],
               courseId: lesson2.courseId,
-              courseLabel: lesson2.label,
+              courseLabel: lesson2.label, // Fixed from lesson1.label
               topic: lesson2.topic,
               duration: '45 min',
               level: lesson2.level,
               unitId: lesson2.unitId,
               dateLabel: currentDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
-              timeLabel: preferredTime
+              timeLabel: `${String(secondScheduledAt.getHours()).padStart(2, '0')}:${String(secondScheduledAt.getMinutes()).padStart(2, '0')}`,
+              scheduledAt: secondScheduledAt.toISOString()
             });
             lessonPtr++;
           }
@@ -449,6 +461,31 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
         }
         
         currentDate.setDate(currentDate.getDate() + 1);
+      }
+
+      // Add bi-weekly test at the end of every 2nd week
+      if (w % 2 === 0 && lastStudyDateThisWeek) {
+        const testDate = new Date(lastStudyDateThisWeek);
+        const testScheduledAt = new Date(testDate);
+        const [h, m] = preferredTime.split(':').map(Number);
+        testScheduledAt.setHours(h + 2, m, 0, 0); // Scheduled after the normal lessons
+
+        mockPlan.push({
+          id: `test-w${w}`,
+          month: monthNum,
+          week: weekInMonth,
+          day: isRtl ? daysAr[testDate.getDay()] : daysEn[testDate.getDay()],
+          courseId: 'test',
+          courseLabel: isRtl ? 'اختبار' : 'Assessment',
+          topic: isRtl ? `اختبار المراجعة الشامل (الأسبوع ${w-1}-${w})` : `Comprehensive Review Test (Week ${w-1}-${w})`,
+          duration: '60 min',
+          level: activeLevel,
+          unitId: `test-${w}`,
+          dateLabel: testDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
+          timeLabel: `${String(testScheduledAt.getHours()).padStart(2, '0')}:${String(testScheduledAt.getMinutes()).padStart(2, '0')}`,
+          scheduledAt: testScheduledAt.toISOString(),
+          isTest: true
+        });
       }
     }
     
@@ -1303,62 +1340,104 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                     </td>
                     <td className="p-8 border-y border-slate-100 group-hover:border-blue-200 transition-colors">
                       <div className="flex flex-wrap gap-6">
-                        {items.map((item) => (
-                          <div 
-                            key={item.id}
-                            onClick={() => onNavigateToLesson(item.courseId, item.level, item.unitId)}
-                            className="flex-1 min-w-[300px] flex items-center gap-6 p-4 rounded-2xl border border-transparent hover:border-blue-200 hover:bg-blue-50/30 transition-all group/item cursor-pointer"
-                          >
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover/item:scale-110 ${
-                              item.courseId === 'reading' ? 'bg-emerald-600 text-white shadow-emerald-100' : 
-                              item.courseId === 'grammar' ? 'bg-blue-600 text-white shadow-blue-100' : 
-                              item.courseId === 'oxford' ? 'bg-amber-500 text-white shadow-amber-100' : 
-                              item.courseId === 'conversation' ? 'bg-indigo-500 text-white shadow-indigo-100' :
-                              item.courseId === 'writing' ? 'bg-rose-500 text-white shadow-rose-100' :
-                              'bg-indigo-600 text-white shadow-indigo-100'
-                            }`}>
-                              {item.courseId === 'reading' ? <BookOpen size={24} /> : 
-                               item.courseId === 'oxford' ? <BookOpen size={24} /> : 
-                               <Sparkles size={24} />}
-                            </div>
-                            <div className="space-y-1 flex-1">
-                              <div className="flex items-center gap-2">
-                                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.courseLabel}</span>
-                                 <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                                 <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{item.duration}</span>
-                                 <button 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleDeleteLesson(item.id);
-                                    }}
-                                    className="ml-auto p-1.5 text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover/item:opacity-100"
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                              </div>
-                              <p className="text-lg font-black text-[#002147] group-hover/item:text-blue-600 transition-colors leading-tight">
-                                {item.topic}
-                              </p>
-                              {(() => {
-                                const result = getLessonResult(item);
-                                if (result) {
-                                  return (
+                          {items.map((item) => {
+                            const isTest = item.isTest;
+                            const now = new Date();
+                            const scheduledAt = item.scheduledAt ? new Date(item.scheduledAt) : null;
+                            
+                            // Test lock logic: open 20 minutes before schedule
+                            const openTime = scheduledAt ? new Date(scheduledAt.getTime() - 20 * 60000) : null;
+                            const isLocked = isTest && openTime && now < openTime;
+                            
+                            const handleClick = () => {
+                              if (isLocked) {
+                                alert(isRtl 
+                                  ? `${translations[lang].testOpensIn}`
+                                  : `${translations[lang].testOpensIn}`);
+                                return;
+                              }
+                              onNavigateToLesson(item.courseId, item.level, item.unitId);
+                            };
+
+                            return (
+                              <div 
+                                key={item.id}
+                                onClick={handleClick}
+                                className={`flex-1 min-w-[300px] flex items-center gap-6 p-4 rounded-2xl border transition-all group/item cursor-pointer ${
+                                  isLocked 
+                                    ? 'bg-slate-50 border-slate-200 opacity-60 grayscale cursor-not-allowed' 
+                                    : 'border-transparent hover:border-blue-200 hover:bg-blue-50/30'
+                                }`}
+                              >
+                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover/item:scale-110 ${
+                                  isTest ? 'bg-indigo-700 text-white shadow-indigo-200' :
+                                  item.courseId === 'reading' ? 'bg-emerald-600 text-white shadow-emerald-100' : 
+                                  item.courseId === 'grammar' ? 'bg-blue-600 text-white shadow-blue-100' : 
+                                  item.courseId === 'oxford' ? 'bg-amber-500 text-white shadow-amber-100' : 
+                                  item.courseId === 'conversation' ? 'bg-indigo-500 text-white shadow-indigo-100' :
+                                  item.courseId === 'writing' ? 'bg-rose-500 text-white shadow-rose-100' :
+                                  'bg-indigo-600 text-white shadow-indigo-100'
+                                }`}>
+                                  {isTest ? <CheckCircle2 size={24} /> :
+                                   item.courseId === 'reading' ? <BookOpen size={24} /> : 
+                                   item.courseId === 'oxford' ? <BookOpen size={24} /> : 
+                                   <Sparkles size={24} />}
+                                </div>
+                                <div className="space-y-1 flex-1">
+                                  <div className="flex items-center gap-2">
+                                     <span className={`${isTest ? 'text-indigo-600 font-black' : 'text-slate-400'} text-[10px] uppercase tracking-widest`}>
+                                       {isTest ? translations[lang].biWeeklyTest : item.courseLabel}
+                                     </span>
+                                     <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                     <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{item.duration}</span>
+                                     {!isTest && (
+                                       <button 
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteLesson(item.id);
+                                          }}
+                                          className="ml-auto p-1.5 text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover/item:opacity-100"
+                                        >
+                                          <Trash2 size={14} />
+                                        </button>
+                                     )}
+                                  </div>
+                                  <p className={`text-lg font-black leading-tight transition-colors ${
+                                    isLocked ? 'text-slate-400' : 'text-[#002147] group-hover/item:text-blue-600'
+                                  }`}>
+                                    {item.topic}
+                                  </p>
+                                  
+                                  {isLocked && openTime && (
                                     <div className="flex items-center gap-2 mt-2">
-                                      <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100 flex items-center gap-1 shadow-sm">
-                                        <CheckCircle2 size={10} />
-                                        {isRtl ? 'تم' : 'Done'}
-                                      </span>
-                                      <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100 shadow-sm">
-                                        {result.score}/{result.total}
+                                      <Clock size={12} className="text-amber-500" />
+                                      <span className="text-[10px] font-black text-amber-600">
+                                        {translations[lang].testOpensAt} {openTime.toLocaleTimeString(isRtl ? 'ar-EG' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
                                       </span>
                                     </div>
-                                  );
-                                }
-                                return null;
-                              })()}
-                            </div>
-                          </div>
-                        ))}
+                                  )}
+
+                                  {(() => {
+                                    const result = getLessonResult(item);
+                                    if (result) {
+                                      return (
+                                        <div className="flex items-center gap-2 mt-2">
+                                          <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100 flex items-center gap-1 shadow-sm">
+                                            <CheckCircle2 size={10} />
+                                            {isRtl ? 'تم' : 'Done'}
+                                          </span>
+                                          <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100 shadow-sm">
+                                            {result.score}/{result.total}
+                                          </span>
+                                        </div>
+                                      );
+                                    }
+                                    return null;
+                                  })()}
+                                </div>
+                              </div>
+                            );
+                          })}
                       </div>
                     </td>
                     <td className="p-8 rounded-r-3xl border-y border-r border-slate-100 group-hover:border-blue-200 transition-colors text-right relative align-top">

@@ -197,6 +197,168 @@ const LETTER_GROUPS = [
         emoji: '🦁', color: '#ea580c', shadowColor: 'rgba(234, 88, 12, 0.4)' 
       },
     ]
+  },
+  {
+    id: 5,
+    title: 'Foundation 5: Mm Nn Oo',
+    titleAr: 'الوحدة الخامسة: م ن و',
+    story: {
+      title: 'The Hungry Friends',
+      panels: [
+        { text: 'I like the money.', emoji: '💰🐒' },
+        { text: 'I like the nut.', emoji: '🌰🐒' },
+        { text: 'No, it is my nut!', emoji: '🐿️🙅' },
+        { text: 'I see the ostrich.', emoji: '🪶🐦' }
+      ]
+    },
+    letters: [
+      { 
+        letter: 'M', word: 'Monkey', wordAr: 'قرد', 
+        nickname: 'Merry Monkey', nicknameAr: 'القرد المرح',
+        keywords: ['Monkey', 'Milk', 'Money', 'Mouse'], 
+        keywordsAr: ['قرد', 'حليب', 'مال', 'فأر'],
+        emoji: '🐒', color: '#7c2d12', shadowColor: 'rgba(124, 45, 18, 0.4)' 
+      },
+      { 
+        letter: 'N', word: 'Nut', wordAr: 'بندقية', 
+        nickname: 'Noisy Nut', nicknameAr: 'البندقة المزعجة',
+        keywords: ['Nut', 'Net', 'Nest', 'Nose'], 
+        keywordsAr: ['بندقة', 'شبكة', 'عش', 'أنف'],
+        emoji: '🌰', color: '#16a34a', shadowColor: 'rgba(22, 163, 74, 0.4)' 
+      },
+      { 
+        letter: 'O', word: 'Octopus', wordAr: 'أخطبوط', 
+        nickname: 'Orange Octopus', nicknameAr: 'الأخطبوط البرتقالي',
+        keywords: ['Octopus', 'Ox', 'Olive', 'Ostrich'], 
+        keywordsAr: ['أخطبوط', 'ثور', 'زيتون', 'نعامة'],
+        emoji: '🐙', color: '#f97316', shadowColor: 'rgba(249, 115, 22, 0.4)' 
+      },
+    ]
+  },
+  {
+    id: 6,
+    title: 'Foundation 6: Pp Qq Rr',
+    titleAr: 'الوحدة السادسة: ب ك ر',
+    story: {
+      title: 'In the Castle',
+      panels: [
+        { text: 'I am the queen.', emoji: '👸🏰' },
+        { text: 'I want a rose.', emoji: '🌹👸' },
+        { text: 'That is a big robot.', emoji: '🤖✨' },
+        { text: 'I like my panda!', emoji: '🐼❤️' }
+      ]
+    },
+    letters: [
+      { 
+        letter: 'P', word: 'Peach', wordAr: 'خوخ', 
+        nickname: 'Pink Peach', nicknameAr: 'الخوخة الوردية',
+        keywords: ['Peach', 'Pen', 'Panda', 'Pineapple'], 
+        keywordsAr: ['خوخة', 'قلم', 'باندا', 'أناناس'],
+        emoji: '🍑', color: '#ec4899', shadowColor: 'rgba(236, 72, 153, 0.4)' 
+      },
+      { 
+        letter: 'Q', word: 'Queen', wordAr: 'ملكة', 
+        nickname: 'Quiet Queen', nicknameAr: 'الملكة الهادئة',
+        keywords: ['Queen', 'Quiz', 'Quilt', 'Question'], 
+        keywordsAr: ['ملكة', 'اختبار', 'لحاف', 'سؤال'],
+        emoji: '👸', color: '#9333ea', shadowColor: 'rgba(147, 51, 234, 0.4)' 
+      },
+      { 
+        letter: 'R', word: 'Rabbit', wordAr: 'أرنب', 
+        nickname: 'Racing Rabbit', nicknameAr: 'الأرنب المتسابق',
+        keywords: ['Rabbit', 'Rose', 'Rice', 'Robot'], 
+        keywordsAr: ['أرنب', 'وردة', 'أرز', 'روبوت'],
+        emoji: '🐰', color: '#ef4444', shadowColor: 'rgba(239, 68, 68, 0.4)' 
+      },
+    ]
+  },
+  {
+    id: 7,
+    title: 'Foundation 7: Ss Tt Uu Vv',
+    titleAr: 'الوحدة السابعة: س ت أ ف',
+    story: {
+      title: 'Park Fun',
+      panels: [
+        { text: 'The sun is up!', emoji: '☀️☁️' },
+        { text: 'Hi! This is my teacher.', emoji: '👨‍🏫👋' },
+        { text: 'Do you have a cat?', emoji: '🐱❓' },
+        { text: 'It is a small tiger!', emoji: '🐯✨' }
+      ]
+    },
+    letters: [
+      { 
+        letter: 'S', word: 'Seal', wordAr: 'فقمة', 
+        nickname: 'Super Seal', nicknameAr: 'الفقمة الخارقة',
+        keywords: ['Seal', 'Sun', 'Soap', 'Socks'], 
+        keywordsAr: ['فقمة', 'شمس', 'صابون', 'جوارب'],
+        emoji: '🦭', color: '#0ea5e9', shadowColor: 'rgba(14, 165, 233, 0.4)' 
+      },
+      { 
+        letter: 'T', word: 'Turtle', wordAr: 'سلحفاة', 
+        nickname: 'Tall Turtle', nicknameAr: 'السلحفاة الطويلة',
+        keywords: ['Turtle', 'Tent', 'Tiger', 'Teacher'], 
+        keywordsAr: ['سلحفاة', 'خيمة', 'نمر', 'معلم'],
+        emoji: '🐢', color: '#16a34a', shadowColor: 'rgba(22, 163, 74, 0.4)' 
+      },
+      { 
+        letter: 'U', word: 'Umbrella', wordAr: 'مظلة', 
+        nickname: 'Unhappy Umbrella', nicknameAr: 'المظلة الحزينة',
+        keywords: ['Umbrella', 'Up', 'Uncle', 'Umpire'], 
+        keywordsAr: ['مظلة', 'أعلى', 'خال', 'حكم'],
+        emoji: '☂️', color: '#8b5cf6', shadowColor: 'rgba(139, 92, 246, 0.4)' 
+      },
+      { 
+        letter: 'V', word: 'Van', wordAr: 'شاحنة', 
+        nickname: 'Violet Van', nicknameAr: 'الشاحنة البنفسجية',
+        keywords: ['Van', 'Vet', 'Vest', 'Violin'], 
+        keywordsAr: ['شاحنة', 'طبيب بيطري', 'سترة', 'كمان'],
+        emoji: '🚐', color: '#6366f1', shadowColor: 'rgba(99, 102, 241, 0.4)' 
+      },
+    ]
+  },
+  {
+    id: 8,
+    title: 'Foundation 8: Ww Xx Yy Zz',
+    titleAr: 'الوحدة الثامنة: و ك ي ز',
+    story: {
+      title: 'Our World',
+      panels: [
+        { text: 'That fox has a box.', emoji: '🦊📦' },
+        { text: 'That wolf has a watch.', emoji: '🐺⌚' },
+        { text: 'What do you have?', emoji: '❓🤨' },
+        { text: 'I have an umbrella!', emoji: '☂️🌈' }
+      ]
+    },
+    letters: [
+      { 
+        letter: 'W', word: 'Wolf', wordAr: 'ذئب', 
+        nickname: 'Wise Wolf', nicknameAr: 'الذئب الحكيم',
+        keywords: ['Wolf', 'Web', 'Water', 'Watch'], 
+        keywordsAr: ['ذئب', 'شبكة', 'ماء', 'ساعة'],
+        emoji: '🐺', color: '#4b5563', shadowColor: 'rgba(75, 85, 99, 0.4)' 
+      },
+      { 
+        letter: 'X', word: 'Fox', wordAr: 'ثعلب', 
+        nickname: 'Fox in a box', nicknameAr: 'ثعلب في صندوق',
+        keywords: ['Fox', 'Box', 'Six', 'Wax'], 
+        keywordsAr: ['ثعلب', 'صندوق', 'ستة', 'شمع'],
+        emoji: '🦊', color: '#f97316', shadowColor: 'rgba(249, 115, 22, 0.4)' 
+      },
+      { 
+        letter: 'Y', word: 'Yo-yo', wordAr: 'يويو', 
+        nickname: 'Yellow Yo-yo', nicknameAr: 'اليويو الأصفر',
+        keywords: ['Yo-yo', 'Yak', 'Yogurt', 'Yacht'], 
+        keywordsAr: ['يويو', 'ياك', 'زبادي', 'يخت'],
+        emoji: '🪀', color: '#facc15', shadowColor: 'rgba(250, 204, 21, 0.4)' 
+      },
+      { 
+        letter: 'Z', word: 'Zebra', wordAr: 'حمار وحشي', 
+        nickname: 'Zigzag Zipper', nicknameAr: 'سحاب متعرج',
+        keywords: ['Zebra', 'Zero', 'Zoo', 'Zipper'], 
+        keywordsAr: ['حمار وحشي', 'صفر', 'حديقة حيوان', 'سحاب'],
+        emoji: '🦓', color: '#111827', shadowColor: 'rgba(17, 24, 39, 0.4)' 
+      },
+    ]
   }
 ];
 

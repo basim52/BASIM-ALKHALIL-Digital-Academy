@@ -36,6 +36,7 @@ import { StickerBook } from './StickerBook';
 import { InteractionTimer } from './InteractionTimer';
 import { ChildProgressRadar } from './ChildProgressRadar';
 import { DrawingLab } from './DrawingLab';
+import { PhonicsReview } from './PhonicsReview';
 import { ParentAIInsights } from '../ParentAIInsights';
 
 import { StudentProfile, CHILDHOOD_PACKAGES } from '../../types';
@@ -52,6 +53,7 @@ const KID_COURSES = [
   { id: 'animals', nameKey: 'animals', icon: Dog, color: 'bg-emerald-500', shadow: 'shadow-emerald-900/20', unlocked: true },
   { id: 'shapes', nameKey: 'shapes', icon: Shapes, color: 'bg-orange-500', shadow: 'shadow-orange-900/20', unlocked: true },
   { id: 'letters', nameKey: 'letters', icon: Type, color: 'bg-purple-500', shadow: 'shadow-purple-900/20', unlocked: true },
+  { id: 'phonics-review', nameKey: 'review', icon: Trophy, color: 'bg-yellow-400', shadow: 'shadow-yellow-900/20', unlocked: true },
 ];
 
 const DAILY_QUESTS = [
@@ -63,35 +65,51 @@ const DAILY_QUESTS = [
 const CURRICULUM_LEVELS = [
   {
     id: 'level1',
-    name: 'المستوى الأساسي: أصوات الحروف (A-F)',
-    nameEn: 'Basic: Letter Sounds (A-F)',
-    description: 'الوحدات 1 و 2 من عالم الصوتيات',
-    descriptionEn: 'Units 1 & 2 of Phonics World',
+    name: 'المستوى الأول: أصوات البداية (A-F)',
+    nameEn: 'Level 1: First Sounds (A-F)',
+    description: 'الوحدات 1 و 2: الحروف الأولى وأصدقاء الصوتيات',
+    descriptionEn: 'Units 1 & 2: First Letters & Phonics Friends',
     courseIds: ['letters', 'pronunciation']
   },
   {
     id: 'level2',
-    name: 'المستوى المتوسط: الحروف (G-L)',
-    nameEn: 'Intermediate: Letters (G-L)',
-    description: 'اكتشاف الكلمات الأولى والحيوانات',
-    descriptionEn: 'Discover first words and animals',
+    name: 'المستوى الثاني: توسيع المفردات (G-L)',
+    nameEn: 'Level 2: Expanding Words (G-L)',
+    description: 'الوحدات 3 و 4: اكتشاف العالم والحيوانات',
+    descriptionEn: 'Units 3 & 4: World Discovery & Animals',
     courseIds: ['first-words', 'animals']
   },
   {
+    id: 'level3',
+    name: 'المستوى الثالث: الصوتيات المتقدمة (M-R)',
+    nameEn: 'Level 3: Advanced Phonics (M-R)',
+    description: 'الوحدات 5 و 6: الروبوتات والملكات والأصدقاء المرحون',
+    descriptionEn: 'Units 5 & 6: Robots, Queens & Fun Friends',
+    courseIds: ['creative-lab']
+  },
+  {
+    id: 'level4',
+    name: 'المستوى الرابع: إتقان الأبجدية (S-Z)',
+    nameEn: 'Level 4: Alphabet Mastery (S-Z)',
+    description: 'الوحدات 7 و 8: إكمال رحلة الصوتيات بنجاح',
+    descriptionEn: 'Units 7 & 8: Completing the Phonics Journey',
+    courseIds: ['pronunciation']
+  },
+  {
     id: 'foundation',
-    name: 'المهارات الحياتية: الأرقام والألوان',
-    nameEn: 'Life Skills: Numbers & Colors',
+    name: 'أساسيات الحياة والرياضيات',
+    nameEn: 'Life Skills & Math',
     description: 'الألوان والأرقام والأشكال الأساسية',
     descriptionEn: 'Basic Colors, Numbers & Shapes',
     courseIds: ['colors', 'numbers', 'shapes']
   },
   {
-    id: 'expression',
-    name: 'المختبر الإبداعي والقصص',
-    nameEn: 'Creative Lab & Stories',
-    description: 'الرسم والقصص السحرية المتقدمة',
-    descriptionEn: 'Advanced drawing and magic stories',
-    courseIds: ['creative-lab']
+    id: 'review',
+    name: 'اختبار بطل الصوتيات',
+    nameEn: 'Phonics Champ Review',
+    description: 'اختبر مهاراتك في تمييز الكلمات',
+    descriptionEn: 'Test your word recognition skills',
+    courseIds: ['phonics-review']
   }
 ];
 
@@ -378,6 +396,8 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
       content = <DrawingLab isRtl={isRtl} onBack={handleLessonEnd} onComplete={(s, t) => saveProgress('creative-lab', s, t)} />;
     } else if (activeLesson === 'magic-story') {
       content = <MagicStoryMode lang={lang} onBack={handleLessonEnd} context={recentLearnings.join(', ')} />;
+    } else if (activeLesson === 'phonics-review') {
+      content = <PhonicsReview lang={lang} onBack={handleLessonEnd} />;
     }
 
     return (
