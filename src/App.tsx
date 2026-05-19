@@ -3003,9 +3003,17 @@ export default function App() {
             const userDoc = await getDoc(doc(db, 'users', user.uid));
             if (userDoc.exists()) {
               const profileData = userDoc.data() as UserProfile;
-              setUserProfile(profileData);
-              if (profileData.role === UserRole.STUDENT) {
-                setActiveStudentId(profileData.uid);
+              // Automatically demote if they were admins but are no longer in MASTER_ADMINS
+              if (profileData.role === UserRole.ADMIN) {
+                await updateDoc(doc(db, 'users', user.uid), { role: UserRole.STUDENT });
+                const demotedProfile = { ...profileData, role: UserRole.STUDENT };
+                setUserProfile(demotedProfile);
+                setActiveStudentId(demotedProfile.uid);
+              } else {
+                setUserProfile(profileData);
+                if (profileData.role === UserRole.STUDENT) {
+                  setActiveStudentId(profileData.uid);
+                }
               }
             } else {
               // RoleSelector will handle new non-admin users

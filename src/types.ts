@@ -62,7 +62,7 @@ export const CHILDHOOD_PACKAGES = [
   { id: 'gold_monthly', priceSAR: 70, dailyMinutes: 30, durationDays: 30, label: 'ذهبية شهرية - 30 دقيقة يومياً' },
 ];
 
-export const MASTER_ADMINS = ['basim5252@gmail.com', 'aboodalkhalil73@gmail.com', 'aboodalkhaleel73@gmail.com', 'ab3256792@gmail.com'];
+export const MASTER_ADMINS = ['basim5252@gmail.com'];
 
 export type AppView = 'dashboard' | 'placement-test' | 'curriculum' | 'lesson' | 'progress' | 'leaderboard' | 'chat' | 'admin' | 'ai-chat' | 'video-library' | 'story-library' | 'early-childhood' | 'oxford-discover' | 'reading-curriculum' | 'grammar-curriculum' | 'conversation-curriculum' | 'writing-curriculum' | 'expression-curriculum' | 'modern-curriculum' | 'academic-planner' | 'academic-results' | 'academic-analytics';
 
