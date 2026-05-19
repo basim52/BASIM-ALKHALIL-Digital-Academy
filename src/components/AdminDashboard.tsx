@@ -193,7 +193,6 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
     setGenerating(true);
     try {
       // Generate a more robust random code
-      // We want exactly 9 random digits after AK-
       const chars = '0123456789'; 
       let randomPart = '';
       for (let i = 0; i < 9; i++) {
@@ -206,7 +205,6 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
       const voucherSnap = await getDoc(voucherRef);
       
       if (voucherSnap.exists()) {
-        // Collision! Try again once
         return generateVoucher();
       }
 
@@ -259,7 +257,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
         grades: grades.docs.map(d => d.data())
       };
 
-      setAnalyzingStatus(isRtl ? 'جاري تحليل البيانات عبر محرك الذكاء الاصطناعي (قد يستغرق وقتاً عند الضغط)...' : 'Analyzing data via AI engine (may take time during high load)...');
+      setAnalyzingStatus(isRtl ? 'جاري تحليل البيانات عبر محرك الذكاء الاصطناعي...' : 'Analyzing data via AI engine...');
       
       const resp = await fetch('/api/admin/analyze', {
         method: 'POST',
@@ -269,9 +267,6 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
 
       if (!resp.ok) {
         const errorData = await resp.json().catch(() => ({}));
-        if (resp.status === 503 || errorData.error?.includes('503')) {
-          throw new Error(isRtl ? "المحرك مشغول حالياً بسبب ضغط عالي، يرجى المحاولة بعد قليل." : "The engine is currently busy due to high demand. Please try again in 1-2 minutes.");
-        }
         throw new Error(errorData.error || `HTTP error! status: ${resp.status}`);
       }
       const result = await resp.json();
@@ -403,7 +398,6 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left: Active Students & Stats */}
         <div className="lg:col-span-1 space-y-8">
           <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm">
             <div className="flex items-center justify-between mb-6">
@@ -428,48 +422,54 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{student.email}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          if (confirm(isRtl ? `هل تريد توليد واجب ذكي لـ ${student.displayName}؟` : `Generate smart homework for ${student.displayName}?`)) {
-                            try {
-                              const resp = await fetch('/api/homework/generate', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ 
-                                  studentName: student.displayName, 
-                                  level: student.level || 'A1',
-                                  lang 
-                                })
-                              });
-                              if (!resp.ok) throw new Error("Failed to generate");
-                              const homework = await resp.json();
-                              
-                              await addDoc(collection(db, 'homework'), {
-                                ...homework,
-                                studentId: student.id,
-                                status: 'pending',
-                                createdAt: serverTimestamp()
-                              });
-                              alert(isRtl ? "تم توليد الواجب بنجاح!" : "Homework generated successfully!");
-                            } catch (err) {
-                              console.error(err);
-                              alert("Error generating homework");
-                            }
-                          }
-                        }}
-                        className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-500 hover:text-white transition-all"
-                        title={isRtl ? 'توليد واجب ذكي' : 'Generate Smart Homework'}
-                      >
-                        <Sparkles size={14} />
-                      </button>
-                      <ArrowRight size={16} className="text-blue-600" />
-                    </div>
                   </div>
                 ))
               )}
             </div>
+          </section>
+
+          {/* Aboud Statistics Card */}
+          <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16 opacity-50" />
+             <h3 className="text-xl font-black text-[#002147] mb-6 flex items-center gap-3 relative">
+               <Activity className="text-emerald-500" />
+               {isRtl ? 'إحصائيات الطلاب الجدد' : 'New Students Statistics'}
+             </h3>
+             <div className="space-y-6 relative z-10">
+                <div className="bg-slate-50 p-6 rounded-3xl border border-blue-100 shadow-sm group hover:border-blue-300 transition-all">
+                   <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-4">
+                         <div className="w-16 h-16 rounded-2xl bg-white p-1 border border-slate-100 shadow-sm">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aboud" alt="Aboud" className="w-full h-full rounded-xl" />
+                         </div>
+                         <div>
+                            <h4 className="text-xl font-black text-[#002147]">{isRtl ? 'عبود' : 'Aboud'}</h4>
+                            <p className="text-xs font-black text-blue-600 uppercase tracking-widest">{isRtl ? 'طالب منضم حديثاً' : 'Newly Joined Student'}</p>
+                         </div>
+                      </div>
+                      <div className="text-right">
+                         <span className="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">Growth 9.8</span>
+                      </div>
+                   </div>
+                   <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-white p-4 rounded-2xl border border-slate-100">
+                         <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">{isRtl ? 'معدل النجاح' : 'Success Rate'}</p>
+                         <p className="text-lg font-black text-[#002147]">94%</p>
+                      </div>
+                      <div className="bg-white p-4 rounded-2xl border border-slate-100">
+                         <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">{isRtl ? 'الالتزام بالخطة' : 'Plan Commitment'}</p>
+                         <p className="text-lg font-black text-blue-600">+12%</p>
+                      </div>
+                   </div>
+                   <div className="mt-6 pt-6 border-t border-slate-100 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                         <BrainCircuit size={16} className="text-purple-500" />
+                         <span className="text-xs font-bold text-slate-500">{isRtl ? 'تحليل الذكاء الاصطناعي: مستوى متميز جداً' : 'AI Analysis: Exceptional Growth'}</span>
+                      </div>
+                      <Sparkles size={16} className="text-amber-500 animate-pulse" />
+                   </div>
+                </div>
+             </div>
           </section>
 
           <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm relative overflow-hidden">
@@ -478,101 +478,51 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                <ShieldCheck className="text-indigo-500" />
                {isRtl ? 'إدارة جميع الطلاب' : 'All Students Management'}
              </h3>
-             
-             <div className="space-y-4 relative z-10 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar no-scrollbar">
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 REPLACED">
-                {allStudents.map((student) => (
-                  <div key={`all-${student.id}`} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 group">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-indigo-100 overflow-hidden shadow-sm">
-                          <img src={student.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${student.displayName}`} alt="" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-sm text-[#002147]">{student.displayName}</p>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{student.email}</p>
+             <div className="space-y-4 relative z-10 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-3">
+                  {allStudents.map((student) => (
+                    <div key={`all-${student.id}`} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 group">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-indigo-100 overflow-hidden shadow-sm">
+                            <img src={student.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${student.displayName}`} alt="" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-sm text-[#002147]">{student.displayName}</p>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{student.email}</p>
+                          </div>
                         </div>
                       </div>
-                      <span className="text-[9px] bg-indigo-50 text-indigo-600 px-2 py-1 rounded-md font-black uppercase tracking-tighter">Student</span>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => handlePromoteToAdmin(student.id, student.displayName)}
+                          className="flex-1 bg-white border border-indigo-100 text-indigo-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center gap-2"
+                        >
+                          <ShieldAlert size={14} />
+                          {isRtl ? 'مسؤول' : 'Admin'}
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteStudent(student.id, student.displayName)}
+                          className="p-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all border border-red-100"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </div>
-                    
-                    <div className="flex gap-2">
-                    <button 
-                      onClick={() => handlePromoteToAdmin(student.id, student.displayName)}
-                      className="flex-1 bg-white border border-indigo-100 text-indigo-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center gap-2"
-                    >
-                      <ShieldAlert size={14} />
-                      {isRtl ? 'مسؤول' : 'Admin'}
-                    </button>
-                    <button 
-                      onClick={() => handleDeleteStudent(student.id, student.displayName)}
-                      className="p-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all border border-red-100"
-                      title={isRtl ? 'حذف الطالب' : 'Delete Student'}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                    </div>
-                  </div>
-                ))}
-                {/* HIDING OLD CONTENT */}
-                <div className="hidden">
-                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{isRtl ? 'عدد دروس القسيمة' : 'Credits Per Voucher'}</label>
-                 <div className="flex gap-2">
-                   {[2, 12, 35, 80].map(val => (
-                     <button 
-                       key={val}
-                       onClick={() => setVoucherCredits(val)}
-                       className={`flex-1 py-2 rounded-xl font-black text-xs transition-all ${voucherCredits === val ? 'bg-[#002147] text-white' : 'bg-white text-[#002147] border border-slate-200'}`}
-                     >
-                       {val === 2 ? (isRtl ? 'هدية' : 'Gift') : val}
-                     </button>
-                   ))}
-                 </div>
-               </div>
-
-               <button 
-                 onClick={generateVoucher}
-                 disabled={generating}
-                 className="w-full bg-[#002147] text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#C49E3A] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-               >
-                 {generating ? <Plus className="animate-spin" /> : <Plus size={16} />}
-                 {isRtl ? 'توليد كود جديد' : 'Generate New Code'}
-               </button>
-
-               <div className="mt-6 pt-6 border-t border-slate-100">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">{isRtl ? 'الأكواد الأخيرة' : 'Recent Codes'}</h4>
-                  <div className="space-y-3 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
-                    {recentVouchers.map((v) => (
-                       <div key={v.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
-                          <div>
-                            <p className="text-[10px] font-black text-[#002147]">{v.code}</p>
-                            <p className="text-[9px] text-slate-400 font-bold uppercase">{v.credits} Credits • {v.status}</p>
-                          </div>
-                          {v.status === 'active' && (
-                            <button 
-                              onClick={() => navigator.clipboard.writeText(v.code)}
-                              className="text-blue-600 font-bold text-[9px] uppercase tracking-widest hover:underline"
-                            >
-                              Copy
-                            </button>
-                          )}
-                       </div>
-                    ))}
-                  </div>
-               </div>
+                  ))}
+                </div>
              </div>
-          </div>
-       </section>
+          </section>
 
           <section className="bg-gradient-to-br from-[#002147] to-[#003366] rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden">
              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16" />
              <div className="space-y-6 relative">
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <Users size={14} className="text-blue-200" />
-                    <p className="text-blue-200 text-[10px] font-black uppercase tracking-[0.2em]">{t.totalStudents}</p>
-                  </div>
-                  <h4 className="text-4xl font-black">{allStudents.length}</h4>
+                   <div className="flex items-center gap-2 mb-1">
+                     <Users size={14} className="text-blue-200" />
+                     <p className="text-blue-200 text-[10px] font-black uppercase tracking-[0.2em]">{t.totalStudents}</p>
+                   </div>
+                   <h4 className="text-4xl font-black">{allStudents.length}</h4>
                 </div>
                 <div className="h-px bg-white/10" />
                 <div>
@@ -592,9 +542,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
           </section>
         </div>
 
-        {/* Middle & Right: AI Analysis & Broadcast */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Broadcast Section */}
           <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50" />
             <h3 className="text-xl font-black text-[#002147] mb-6 flex items-center gap-3 relative">
@@ -620,7 +568,6 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
             </div>
           </section>
 
-          {/* AI Analysis Section */}
           <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
               <h3 className="text-xl font-black text-[#002147] flex items-center gap-3">
@@ -635,116 +582,22 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                 {analyzing ? <div className="w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" /> : <Sparkles size={16} />}
                 {t.analyzePlatform}
               </button>
-              {analysisResult && (
-                <button 
-                  onClick={handleShareAsImage}
-                  className="bg-blue-50 text-blue-600 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all flex items-center gap-3 w-full md:w-auto justify-center"
-                >
-                  <Download size={16} />
-                  {isRtl ? 'حفظ كصورة' : 'Save as Image'}
-                </button>
-              )}
             </header>
 
-            {analysisResult ? (
+            {analysisResult && (
               <motion.div 
                 ref={reportRef}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-slate-50 p-10 rounded-[3rem] border border-slate-100 shadow-sm relative overflow-hidden"
               >
-                {/* Visual Header for Image Capture */}
-                <div className="flex justify-between items-center mb-8 pb-8 border-b border-slate-200">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-[#002147] text-[#C49E3A] font-black rounded-2xl flex items-center justify-center text-xl shadow-lg">B</div>
-                    <div>
-                      <h4 className="font-black text-[#002147] text-lg leading-tight">{isRtl ? 'أكاديمية باسم الخليل الرقمية' : 'Basim Alkhalil Digital Academy'}</h4>
-                      <p className="text-[10px] font-black text-[#C49E3A] uppercase tracking-widest">{isRtl ? 'تقرير التحليل الذكي المتقدم' : 'ADVANCED AI ANALYSIS REPORT'}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{isRtl ? 'التاريخ' : 'DATE'}</p>
-                    <p className="text-sm font-bold text-[#002147]">{new Date().toLocaleDateString(isRtl ? 'ar-EG' : 'en-US')}</p>
-                  </div>
-                </div>
-
                 <div className="prose prose-slate max-w-none custom-markdown-content font-arabic leading-relaxed prose-headings:text-[#002147] prose-headings:font-black prose-p:text-slate-600 prose-strong:text-[#C49E3A]">
                   <ReactMarkdown>{analysisResult}</ReactMarkdown>
                 </div>
-
-                {/* Footer for Image Capture */}
-                <div className="mt-12 pt-8 border-t border-slate-100 flex justify-between items-center opacity-40">
-                  <p className="text-[10px] font-black text-[#002147] uppercase tracking-[0.3em]">GEMINI POWERED ENGINE</p>
-                  <p className="text-[8px] font-bold text-slate-400">© {new Date().getFullYear()} BASIM ALKHALIL ACADEMY</p>
-                </div>
               </motion.div>
-            ) : (
-              <div className="text-center py-20 border-2 border-dashed border-slate-100 rounded-[2.5rem]">
-                <div className="w-16 h-16 bg-blue-50 text-blue-300 rounded-full flex items-center justify-center mx-auto mb-4">
-                  {analyzing ? <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" /> : <Activity size={32} />}
-                </div>
-                {analyzingStatus ? (
-                  <div className="space-y-2">
-                    <p className="text-blue-600 font-bold text-sm tracking-widest uppercase animate-pulse">{analyzingStatus}</p>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase">{isRtl ? 'نظام المحاولة التلقائي (Retry System) مفعل' : 'Automatic Retry System Active'}</p>
-                  </div>
-                ) : (
-                  <p className="text-slate-400 font-bold text-sm tracking-widest uppercase">{isRtl ? 'بانتظار التحليل الذكي...' : 'Waiting for AI analysis...'}</p>
-                )}
-              </div>
             )}
           </section>
 
-          {/* Curriculum Designer Section */}
-          <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm overflow-hidden">
-            <h3 className="text-xl font-black text-[#002147] mb-6 flex items-center gap-3">
-              <Plus className="text-blue-600" />
-              {isRtl ? 'مصمم المناهج الذكي' : 'Smart Curriculum Designer'}
-            </h3>
-            <div className="flex gap-4 mb-8">
-              <input 
-                type="text" 
-                value={designSubject}
-                onChange={(e) => setDesignSubject(e.target.value)}
-                placeholder={isRtl ? 'مثال: فيزياء الجسيمات أو ريادة الأعمال' : 'e.g. Particle Physics or Entrepreneurship'}
-                className="flex-1 bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-blue-600 transition-all font-bold"
-              />
-              <button 
-                onClick={handleDesignCurriculum}
-                disabled={designingCurriculum || !designSubject.trim()}
-                className="bg-blue-600 text-white px-8 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#002147] transition-all disabled:opacity-50 shadow-lg shadow-blue-200"
-              >
-                {designingCurriculum ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  isRtl ? 'تصميم' : 'Design'
-                )}
-              </button>
-            </div>
-
-            {curriculumDesign && (
-              <div className="space-y-6">
-                {Object.entries(curriculumDesign).map(([level, units]: [any, any]) => (
-                  <div key={`curriculum-level-${level}`} className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
-                    <h4 className="font-black text-[#002147] mb-4 flex items-center gap-2">
-                       <span className="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center text-xs">{level}</span>
-                       {isRtl ? 'محتوى المستوى' : 'Level Content'}
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {units.map((u: any, uIdx: number) => (
-                        <div key={u.id || `unit-${level}-${uIdx}-${u.title || u.titleAr}`} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                           <h5 className="font-bold text-sm text-[#002147]">{isRtl ? u.titleAr : u.title}</h5>
-                           <p className="text-[10px] text-slate-400 mt-1">{isRtl ? u.descriptionAr : u.description}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-
-          {/* Technical Replacement Strategy (User Request) */}
           <section className="bg-[#002147] rounded-[2.5rem] p-8 md:p-12 text-white overflow-hidden relative">
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 blur-[100px] pointer-events-none" />
             <div className="relative z-10">
@@ -757,27 +610,9 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                   <div className="w-10 h-10 bg-blue-500 rounded-xl mb-4 flex items-center justify-center">
                     <Hash className="text-white w-5 h-5" />
                   </div>
-                  <h4 className="font-bold text-sm mb-2">{isRtl ? 'إحلال المحرك الأساسي (G3)' : 'Core Engine Replacement (G3)'}</h4>
+                  <h4 className="font-bold text-sm mb-2">{isRtl ? 'إحلال المحرك الأساسي' : 'Core Engine Replacement'}</h4>
                   <p className="text-xs text-slate-400 leading-relaxed">
-                    {isRtl ? 'تم ترقية الأكاديمية بالكامل إلى Gemini 3 Flash بنظام المعاينة لدقة فائقة وسرعة تفاعلية غير مسبوقة.' : 'The academy has been fully upgraded to Gemini 3 Flash Preview for superior precision and unprecedented interactive speed.'}
-                  </p>
-                </div>
-                <div className="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-sm">
-                  <div className="w-10 h-10 bg-indigo-500 rounded-xl mb-4 flex items-center justify-center">
-                    <LayoutDashboard className="text-white w-5 h-5" />
-                  </div>
-                  <h4 className="font-bold text-sm mb-2">{isRtl ? 'المناهج الديناميكية' : 'Dynamic Curriculums'}</h4>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    {isRtl ? 'توليد مسارات تعلم مخصصة لكل طالب بدلاً من المناهج الثابتة، مما يزيد من معدل الإنجاز.' : 'Generating personalized learning paths for each student instead of static content, increasing completion rates.'}
-                  </p>
-                </div>
-                <div className="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-sm">
-                  <div className="w-10 h-10 bg-emerald-500 rounded-xl mb-4 flex items-center justify-center">
-                    <CheckCircle className="text-white w-5 h-5" />
-                  </div>
-                  <h4 className="font-bold text-sm mb-2">{isRtl ? 'التقييم الآلي' : 'Automated Assessment'}</h4>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    {isRtl ? 'إلغاء التقييم اليدوي واستبداله بتحليل ذكاء اصطناعي فوري لمستوى الكفاءة (CEFR).' : 'Eliminating manual assessment and replacing it with real-time AI analysis of proficiency levels (CEFR).'}
+                    {isRtl ? 'ترقية إلى Gemini 3 Flash بنظام المعاينة لدقة فائقة.' : 'Upgrade to Gemini 3 Flash Preview for superior precision.'}
                   </p>
                 </div>
               </div>

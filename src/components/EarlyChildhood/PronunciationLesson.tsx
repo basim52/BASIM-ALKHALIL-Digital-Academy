@@ -484,7 +484,7 @@ export const PronunciationLesson = ({ lang, onBack, onComplete }: { lang: Langua
                 </div>
               </div>
               <div className="flex gap-2">
-                {[1, 2, 3, 4, 5].map(i => <Star key={i} fill="#fbbf24" className="text-yellow-400 w-8 h-8 md:w-10 md:h-10" />)}
+                {[1, 2, 3, 4, 5].map(i => <Star key={`pronounce-star-${currentWord.id}-${i}`} fill="#fbbf24" className="text-yellow-400 w-8 h-8 md:w-10 md:h-10" />)}
               </div>
               <button 
                 onClick={resetGame}

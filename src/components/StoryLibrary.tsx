@@ -13,7 +13,12 @@ import {
   Square,
   Heart,
   AlertCircle,
-  Image as ImageIcon
+  ImageIcon,
+  Mic,
+  CheckCircle2,
+  AlertTriangle,
+  RefreshCcw,
+  RotateCcw
 } from 'lucide-react';
 import { UserProfile, MASTER_ADMINS } from '../types';
 import { auth } from '../lib/firebase';
@@ -131,6 +136,22 @@ const STORIES: Story[] = [
     level: 'C2',
     image: 'https://images.unsplash.com/photo-1611974717482-48216694665a?auto=format&fit=crop&w=800&q=80',
     content: 'The contemporary global economic landscape is characterized by increasing volatility and the rise of decentralized financial systems. Traditional monetary policies are being challenged by the emergence of digital currencies and cross-border trade complexities. Structural shifts in labor markets, driven by automation, necessitate comprehensive policy reforms. Sustaining equitable growth requires a balanced approach between innovation and social safety nets.'
+  },
+  {
+    id: '14',
+    titleEn: 'The Golden Treasure',
+    titleAr: 'الكنز الذهبي',
+    level: 'A1',
+    image: 'https://images.unsplash.com/photo-1594462364741-94993cb3310f?auto=format&fit=crop&w=400&q=80',
+    content: 'Deep in the heart of the forest, a group of friends found an old wooden box. Inside the box, there were gold coins and beautiful jewelry. They decided to give the treasure to the village museum. Everyone celebrated the discovery of the golden treasure.'
+  },
+  {
+    id: '15',
+    titleEn: 'The Magic of Space',
+    titleAr: 'سحر الفضاء',
+    level: 'B2',
+    image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=400&q=80',
+    content: 'The universe is vast and full of mysteries. Black holes can swallow entire stars, while nebulas create new ones in a dance of light and dust. Exploring the galaxy helps scientists understand how the Earth was formed millions of years ago. It is a journey that requires courage and curiosity.'
   }
 ];
 
@@ -142,12 +163,125 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
   const [loadingWord, setLoadingWord] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  
+  // Reading Test State
+  const [isTestMode, setIsTestMode] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedText, setRecordedText] = useState("");
+  const [recognition, setRecognition] = useState<any>(null);
+  const [testResult, setTestResult] = useState<{ score: number; mistakes: string[] } | null>(null);
+  const [recordingPaused, setRecordingPaused] = useState(false);
 
   React.useEffect(() => {
+    // Initialize speech recognition
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const rec = new SpeechRecognition();
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.lang = 'en-US';
+
+      rec.onresult = (event: any) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+        setRecordedText(prev => prev + ' ' + finalTranscript);
+      };
+
+      rec.onerror = (event: any) => {
+        console.error("Speech recognition error", event.error);
+        setIsRecording(false);
+      };
+
+      rec.onend = () => {
+        if (isRecording && !recordingPaused) {
+          try {
+            rec.start();
+          } catch (e) {}
+        }
+      };
+
+      setRecognition(rec);
+    }
+
     return () => {
       window.speechSynthesis.cancel();
+      if (recognition) recognition.stop();
     };
   }, []);
+
+  const handleStartTest = () => {
+    setIsTestMode(true);
+    setRecordedText("");
+    setTestResult(null);
+    stopSpeak();
+  };
+
+  const toggleRecording = () => {
+    if (!recognition) {
+       alert(isRtl ? 'عذراً، متصفحك لا يدعم التعرف على الكلام.' : 'Sorry, your browser does not support speech recognition.');
+       return;
+    }
+
+    if (isRecording) {
+      recognition.stop();
+      setIsRecording(false);
+      setRecordingPaused(false);
+      calculateScore();
+    } else {
+      setRecordedText("");
+      recognition.start();
+      setIsRecording(true);
+      setRecordingPaused(false);
+    }
+  };
+
+  const pauseRecording = () => {
+    if (recognition && isRecording) {
+      recognition.stop();
+      setRecordingPaused(true);
+      setIsRecording(false);
+    }
+  };
+
+  const resumeRecording = () => {
+    if (recognition && recordingPaused) {
+      recognition.start();
+      setRecordingPaused(false);
+      setIsRecording(true);
+    }
+  };
+
+  const calculateScore = () => {
+    if (!selectedStory) return;
+    
+    // Simple comparison logic
+    const originalWords = selectedStory.content.toLowerCase().replace(/[.,!?;:]/g, '').split(/\s+/);
+    const spokenWords = recordedText.toLowerCase().replace(/[.,!?;:]/g, '').split(/\s+/);
+    
+    let correctCount = 0;
+    const mistakes: string[] = [];
+    
+    const spokenSet = new Set(spokenWords);
+    
+    originalWords.forEach(word => {
+      if (spokenSet.has(word)) {
+        correctCount++;
+      } else {
+        mistakes.push(word);
+      }
+    });
+
+    const score = Math.round((correctCount / originalWords.length) * 100);
+    setTestResult({ score, mistakes });
+  };
 
   const handleSelectStory = async (story: Story) => {
     if (selectedStory?.id === story.id) return;
@@ -231,6 +365,8 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
           onClick={() => {
             stopSpeak();
             setSelectedStory(null);
+            setIsTestMode(false);
+            setTestResult(null);
           }}
           className="flex items-center gap-2 text-slate-400 hover:text-[#002147] transition-colors mb-8 font-bold"
         >
@@ -238,54 +374,198 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
           {isRtl ? 'العودة للمكتبة' : 'Back to Library'}
         </button>
 
-        <div className="bg-white rounded-[3rem] p-10 md:p-16 border border-slate-200 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32 -z-0" />
-          
-          <header className="mb-12 text-center relative z-10">
-            <span className="bg-blue-100 text-blue-600 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-4 inline-block">{selectedStory.level}</span>
-            <h2 className="text-4xl font-black text-[#002147] mb-4">{isRtl ? selectedStory.titleAr : selectedStory.titleEn}</h2>
-            <div className="flex items-center justify-center gap-4 text-slate-400 font-bold text-xs uppercase tracking-widest">
-               <span className="flex items-center gap-2"><BookOpen size={14} /> {selectedStory.content.split(' ').length} words</span>
-               <span className="w-1 h-1 bg-slate-200 rounded-full" />
-               <span className="text-blue-500">{t.clickWordHint}</span>
-            </div>
-          </header>
+        {isTestMode ? (
+          <div className="bg-white rounded-[3rem] p-10 md:p-16 border border-slate-200 shadow-sm relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32 -z-0" />
+             
+             <header className="mb-12 text-center relative z-10">
+                <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+                   <Mic size={40} className={isRecording ? 'animate-pulse' : ''} />
+                </div>
+                <h2 className="text-3xl font-black text-[#002147] mb-2">{isRtl ? 'اختبار مهارة القراءة' : 'Reading Fluency Test'}</h2>
+                <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">{isRtl ? 'قم بقراءة النص بوضوح للميكروفون' : 'Read the text clearly into your microphone'}</p>
+             </header>
 
-          <div className="relative z-10">
-            <div className={`text-xl md:text-2xl font-serif leading-[2.5] text-slate-700 select-text ${isRtl ? 'text-right' : 'text-left'}`}>
-              {selectedStory.content.split(' ').map((word, idx) => (
-                <span 
-                  key={idx}
-                  onClick={() => handleWordClick(word)}
-                  className="px-1.5 py-0.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition-colors border border-transparent hover:border-blue-100 inline-block"
+             <div className="bg-slate-50 rounded-3xl p-8 mb-8 border border-slate-100 relative z-10">
+                <p className="text-xl md:text-2xl font-serif leading-relaxed text-slate-700 italic">
+                   {selectedStory.content.split(' ').map((word, idx) => {
+                     const clean = word.toLowerCase().replace(/[.,!?;:]/g, '');
+                     const isWrong = testResult?.mistakes.includes(clean);
+                     const isCorrect = testResult && !isWrong;
+                     
+                     return (
+                       <span 
+                         key={idx} 
+                         className={`mx-1 ${isWrong ? 'text-red-500 line-through' : isCorrect ? 'text-emerald-600 font-bold' : ''}`}
+                       >
+                         {word}{' '}
+                       </span>
+                     );
+                   })}
+                </p>
+             </div>
+
+             {testResult ? (
+                <motion.div 
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="bg-[#002147] text-white p-8 rounded-[2rem] text-center mb-8 relative z-10 shadow-2xl"
                 >
-                  {word}{' '}
-                </span>
-              ))}
+                   <div className="flex items-center justify-center gap-6 mb-6">
+                      <div className="w-24 h-24 rounded-full border-4 border-blue-400 flex flex-col items-center justify-center bg-white/5">
+                         <span className="text-3xl font-black">{testResult.score}%</span>
+                         <span className="text-[10px] font-black uppercase">{isRtl ? 'النتيجة' : 'SCORE'}</span>
+                      </div>
+                      <div className="text-left">
+                         <p className="text-xl font-black mb-1">{testResult.score > 80 ? (isRtl ? 'أداء ممتاز!' : 'Excellent Performance!') : (isRtl ? 'أداء جيد، حاول مجدداً' : 'Good job, keep practicing!')}</p>
+                         <p className="text-blue-200 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                            <RefreshCcw size={14} /> 
+                            {isRtl ? `لديك ${testResult.mistakes.length} أخطاء نطق` : `You had ${testResult.mistakes.length} pronunciation mistakes`}
+                         </p>
+                      </div>
+                   </div>
+                   <button 
+                     onClick={() => {
+                       setTestResult(null);
+                       setRecordedText("");
+                     }}
+                     className="bg-[#C49E3A] text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform"
+                   >
+                     {isRtl ? 'إعادة الاختبار' : 'Retake Test'}
+                   </button>
+                </motion.div>
+             ) : (
+                <div className="flex flex-col items-center gap-6 relative z-10">
+                   <div className="flex items-center gap-4">
+                      {isRecording ? (
+                         <>
+                           <button 
+                             onClick={pauseRecording}
+                             className="w-16 h-16 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-100 transition-colors shadow-sm"
+                             title={isRtl ? 'توقف مؤقت' : 'Pause'}
+                           >
+                             <Pause size={24} />
+                           </button>
+                           <button 
+                             onClick={toggleRecording}
+                             className="w-24 h-24 rounded-full bg-red-500 text-white flex items-center justify-center shadow-2xl shadow-red-200 hover:scale-110 transition-transform pulse-animation"
+                           >
+                             <Square size={32} fill="currentColor" />
+                           </button>
+                         </>
+                      ) : recordingPaused ? (
+                        <>
+                           <button 
+                             onClick={resumeRecording}
+                             className="w-24 h-24 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-2xl shadow-emerald-200 hover:scale-110 transition-transform"
+                           >
+                             <Play size={32} fill="currentColor" />
+                           </button>
+                           <button 
+                             onClick={() => {
+                               setRecordedText("");
+                               setRecordingPaused(false);
+                               calculateScore();
+                             }}
+                             className="w-16 h-16 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-100 transition-colors shadow-sm"
+                           >
+                             <CheckCircle2 size={24} />
+                           </button>
+                        </>
+                      ) : (
+                        <button 
+                          onClick={toggleRecording}
+                          className="px-12 py-6 rounded-[2rem] bg-blue-600 text-white font-black text-lg uppercase tracking-widest flex items-center gap-4 shadow-2xl shadow-blue-200 hover:bg-blue-700 transition-all group"
+                        >
+                          <Mic size={32} />
+                          {isRtl ? 'ابدأ القراءة الآن' : 'Start Reading Now'}
+                        </button>
+                      )}
+                   </div>
+                   
+                   {isRecording && (
+                     <motion.div 
+                       initial={{ opacity: 0 }}
+                       animate={{ opacity: [0.5, 1, 0.5] }}
+                       transition={{ repeat: Infinity, duration: 1.5 }}
+                       className="text-red-500 font-black text-sm uppercase tracking-[0.2em] flex items-center gap-2"
+                     >
+                        <div className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                        {isRtl ? 'جاري الاستماع...' : 'Listening...'}
+                     </motion.div>
+                   )}
+                </div>
+             )}
+
+             <button 
+               onClick={() => {
+                 setIsTestMode(false);
+                 setRecordedText("");
+                 setTestResult(null);
+               }}
+               className="mt-12 text-slate-400 hover:text-slate-600 font-bold text-xs uppercase tracking-widest block mx-auto py-4 underline underline-offset-4"
+             >
+                {isRtl ? 'الخروج من وضع الاختبار' : 'Exit Test Mode'}
+             </button>
+          </div>
+        ) : (
+          <div className="bg-white rounded-[3rem] p-10 md:p-16 border border-slate-200 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32 -z-0" />
+            
+            <header className="mb-12 text-center relative z-10">
+              <span className="bg-blue-100 text-blue-600 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-4 inline-block">{selectedStory.level}</span>
+              <h2 className="text-4xl font-black text-[#002147] mb-4">{isRtl ? selectedStory.titleAr : selectedStory.titleEn}</h2>
+              <div className="flex items-center justify-center gap-4 text-slate-400 font-bold text-xs uppercase tracking-widest">
+                 <span className="flex items-center gap-2"><BookOpen size={14} /> {selectedStory.content.split(' ').length} words</span>
+                 <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                 <span className="text-blue-500">{t.clickWordHint}</span>
+              </div>
+            </header>
+
+            <div className="relative z-10">
+              <div className={`text-xl md:text-2xl font-serif leading-[2.5] text-slate-700 select-text ${isRtl ? 'text-right' : 'text-left'}`}>
+                {selectedStory.content.split(' ').map((word, idx) => (
+                  <span 
+                    key={idx}
+                    onClick={() => handleWordClick(word)}
+                    className="px-1.5 py-0.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition-colors border border-transparent hover:border-blue-100 inline-block"
+                  >
+                    {word}{' '}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-4 mt-12">
+              <button 
+                onClick={() => toggleSpeak(selectedStory.content)}
+                className={`bg-[#002147] text-white px-8 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest flex items-center gap-4 hover:bg-[#C49E3A] transition-all shadow-xl shadow-blue-100 ${isPaused || !isSpeaking ? 'bg-[#002147]' : 'bg-emerald-600'}`}
+              >
+                {isSpeaking && !isPaused ? <Pause size={24} /> : <Play size={24} />}
+                {isSpeaking && !isPaused 
+                  ? (isRtl ? 'إيقاف مؤقت' : 'Pause Audio') 
+                  : (isPaused ? (isRtl ? 'استكمال' : 'Resume Story') : (isRtl ? 'استمع للقصة' : 'Listen to Story'))}
+              </button>
+
+              <button 
+                onClick={handleStartTest}
+                className="bg-[#C49E3A] text-white px-8 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest flex items-center gap-4 hover:bg-[#002147] transition-all shadow-xl shadow-amber-100"
+              >
+                <Mic size={24} />
+                {isRtl ? 'اختبار القراءة' : 'Reading Test'}
+              </button>
+
+              {isSpeaking && (
+                <button 
+                  onClick={stopSpeak}
+                  className="w-16 h-16 rounded-[2rem] bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-lg"
+                >
+                  <Square size={24} fill="currentColor" />
+                </button>
+              )}
             </div>
           </div>
-
-          <div className="flex items-center justify-center gap-4 mt-12">
-            <button 
-              onClick={() => toggleSpeak(selectedStory.content)}
-              className={`bg-[#002147] text-white px-8 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest flex items-center gap-4 hover:bg-[#C49E3A] transition-all shadow-xl shadow-blue-100 ${isPaused || !isSpeaking ? 'bg-[#002147]' : 'bg-emerald-600'}`}
-            >
-              {isSpeaking && !isPaused ? <Pause size={24} /> : <Play size={24} />}
-              {isSpeaking && !isPaused 
-                ? (isRtl ? 'إيقاف مؤقت' : 'Pause Audio') 
-                : (isPaused ? (isRtl ? 'استكمال' : 'Resume Story') : (isRtl ? 'استمع للقصة' : 'Listen to Story'))}
-            </button>
-
-            {isSpeaking && (
-              <button 
-                onClick={stopSpeak}
-                className="w-16 h-16 rounded-[1.5rem] bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-lg"
-              >
-                <Square size={24} fill="currentColor" />
-              </button>
-            )}
-          </div>
-        </div>
+        )}
 
         {/* Word Detail Popup */}
         <AnimatePresence>

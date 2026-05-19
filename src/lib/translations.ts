@@ -202,6 +202,7 @@ export const translations = {
     micErrorTitle: 'خطأ في الميكروفون',
     micNotSupported: 'المتصفح لا يدعم خاصية التعرف على الصوت.',
     micNotFound: 'لم نجد ميكروفون متصل. يرجى التأكد من توصيل الميكروفون.',
+    creativeLab: 'مختبر الإبداع',
     // Oxford Curriculum
     oxfordMethod: 'منهج أكسفورد المعتمد',
     prepTab: 'تهيئة',
@@ -442,6 +443,7 @@ export const translations = {
     micErrorTitle: 'Microphone Error',
     micNotSupported: 'Your browser does not support speech recognition.',
     micNotFound: 'No microphone found. Please check your connection.',
+    creativeLab: 'Creative Lab',
     // Oxford Curriculum
     oxfordMethod: 'Certified Oxford Method',
     prepTab: 'Intro',

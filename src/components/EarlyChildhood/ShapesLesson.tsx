@@ -296,7 +296,7 @@ export const ShapesLesson = ({ lang, onBack, onComplete }: { lang: Language, onB
               {streak > 1 && (
                 <div className="flex gap-1 mt-2">
                   {Array.from({ length: Math.min(streak, 3) }).map((_, i) => (
-                    <Trophy key={i} className="text-yellow-400 w-8 h-8 md:w-10 md:h-10" />
+                    <Trophy key={`shape-trophy-${shape.id}-${i}`} className="text-yellow-400 w-8 h-8 md:w-10 md:h-10" />
                   ))}
                 </div>
               )}

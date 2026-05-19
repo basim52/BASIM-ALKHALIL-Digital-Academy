@@ -279,7 +279,7 @@ export const NumbersLesson = ({ lang, onBack, onComplete }: { lang: Language, on
           <AnimatePresence mode="popLayout">
             {Array.from({ length: activeNumber.value }).map((_, i) => (
               <motion.div
-                key={`${activeNumber.value}-${i}`}
+                key={`number-item-${activeNumber.value}-${i}`}
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: 'spring', damping: 15, delay: i * 0.02 }}

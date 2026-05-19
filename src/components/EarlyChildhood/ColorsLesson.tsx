@@ -265,7 +265,7 @@ export const ColorsLesson = ({ lang, onBack, onComplete }: { lang: Language, onB
               {gameMode && streak > 1 && (
                 <div className="flex gap-1">
                   {Array.from({ length: Math.min(streak, 5) }).map((_, i) => (
-                    <Star key={i} fill="#fbbf24" className="text-yellow-400 w-8 h-8" />
+                    <Star key={`color-star-${color.name}-${i}`} fill="#fbbf24" className="text-yellow-400 w-8 h-8" />
                   ))}
                 </div>
               )}

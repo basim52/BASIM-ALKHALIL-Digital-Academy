@@ -406,40 +406,44 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
         
         if (selectedDays.includes(dayIdx)) {
           // Add first lesson of the day
-          const lesson1 = finalLessons[lessonPtr % finalLessons.length];
-          mockPlan.push({
-            id: `plan-w${w}-d${i}-s1`,
-            month: monthNum,
-            week: weekInMonth,
-            day: isRtl ? daysAr[dayIdx] : daysEn[dayIdx],
-            courseId: lesson1.courseId,
-            courseLabel: lesson1.label,
-            topic: lesson1.topic,
-            duration: '45 min',
-            level: lesson1.level,
-            unitId: lesson1.unitId,
-            dateLabel: currentDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
-            timeLabel: preferredTime
-          });
-          lessonPtr++;
+          if (lessonPtr < finalLessons.length) {
+            const lesson1 = finalLessons[lessonPtr];
+            mockPlan.push({
+              id: `plan-w${w}-d${i}-s1`,
+              month: monthNum,
+              week: weekInMonth,
+              day: isRtl ? daysAr[dayIdx] : daysEn[dayIdx],
+              courseId: lesson1.courseId,
+              courseLabel: lesson1.label,
+              topic: lesson1.topic,
+              duration: '45 min',
+              level: lesson1.level,
+              unitId: lesson1.unitId,
+              dateLabel: currentDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
+              timeLabel: preferredTime
+            });
+            lessonPtr++;
+          }
 
           // Add second lesson of the day
-          const lesson2 = finalLessons[lessonPtr % finalLessons.length];
-          mockPlan.push({
-            id: `plan-w${w}-d${i}-s2`,
-            month: monthNum,
-            week: weekInMonth,
-            day: isRtl ? daysAr[dayIdx] : daysEn[dayIdx],
-            courseId: lesson2.courseId,
-            courseLabel: lesson2.label,
-            topic: lesson2.topic,
-            duration: '45 min',
-            level: lesson2.level,
-            unitId: lesson2.unitId,
-            dateLabel: currentDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
-            timeLabel: preferredTime
-          });
-          lessonPtr++;
+          if (lessonPtr < finalLessons.length) {
+            const lesson2 = finalLessons[lessonPtr];
+            mockPlan.push({
+              id: `plan-w${w}-d${i}-s2`,
+              month: monthNum,
+              week: weekInMonth,
+              day: isRtl ? daysAr[dayIdx] : daysEn[dayIdx],
+              courseId: lesson2.courseId,
+              courseLabel: lesson2.label,
+              topic: lesson2.topic,
+              duration: '45 min',
+              level: lesson2.level,
+              unitId: lesson2.unitId,
+              dateLabel: currentDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
+              timeLabel: preferredTime
+            });
+            lessonPtr++;
+          }
           
           studyDaysInThisWeek++;
         }

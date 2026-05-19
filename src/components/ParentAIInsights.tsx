@@ -149,7 +149,7 @@ export const ParentAIInsights = ({ lang, studentName, studentLevel }: ParentAIIn
                      initial={{ opacity: 0, x: isRtl ? 20 : -20 }}
                      animate={{ opacity: 1, x: 0 }}
                      transition={{ delay: idx * 0.1 }}
-                     key={`insight-step-${idx}-${step.substring(0, 10)}`} 
+                     key={`insight-step-${studentName}-${idx}`} 
                      className="flex items-start gap-4"
                     >
                      <div className="w-8 h-8 rounded-full bg-[#C49E3A] text-[#002147] flex items-center justify-center font-black text-xs shrink-0 shadow-lg">

@@ -16,11 +16,26 @@ async function startServer() {
   const PORT = 3000;
 
   const getApiKey = () => {
+    // Priority: GEMINI_API_KEY -> GOOGLE_API_KEY -> API_KEY -> VITE_GEMINI_API_KEY -> AI_STUDIO_API_KEY
+    const gemini = process.env.GEMINI_API_KEY;
+    const google = process.env.GOOGLE_API_KEY;
+    const apiKey = process.env.API_KEY;
+    const viteGemini = process.env.VITE_GEMINI_API_KEY;
+    const studio = process.env.AI_STUDIO_API_KEY;
+
+    if (gemini) logToFile(`Picked GEMINI_API_KEY (Prefix: ${gemini.substring(0, 4)}...)`);
+    else if (google) logToFile(`Picked GOOGLE_API_KEY (Prefix: ${google.substring(0, 4)}...)`);
+    else if (apiKey) logToFile(`Picked API_KEY (Prefix: ${apiKey.substring(0, 4)}...)`);
+    else if (viteGemini) logToFile(`Picked VITE_GEMINI_API_KEY (Prefix: ${viteGemini.substring(0, 4)}...)`);
+    else if (studio) logToFile(`Picked AI_STUDIO_API_KEY (Prefix: ${studio.substring(0, 4)}...)`);
+    else logToFile("CRITICAL: NO API KEY DETECTED IN ENVIRONMENT");
+
     const key = (
-      process.env.GEMINI_API_KEY || 
-      process.env.GOOGLE_API_KEY || 
-      process.env.VITE_GEMINI_API_KEY || 
-      process.env.AI_STUDIO_API_KEY ||
+      gemini || 
+      google || 
+      apiKey ||
+      viteGemini || 
+      studio ||
       ""
     ).trim();
     return key;
@@ -28,23 +43,27 @@ async function startServer() {
 
   let API_KEY = getApiKey();
   
-  // Diagnostic logging
-  logToFile(`Environment check: GEMINI_API_KEY=${!!process.env.GEMINI_API_KEY}, GOOGLE_API_KEY=${!!process.env.GOOGLE_API_KEY}, NODE_ENV=${process.env.NODE_ENV}`);
+  // Diagnostic logging - safely identify available keys
+  const availableKeys = Object.keys(process.env).filter(k => k.includes("API_KEY") || k.includes("GOOGLE") || k.includes("GEMINI"));
+  logToFile(`Environment initialized. Available key names: ${availableKeys.join(", ") || "none"}`);
+  logToFile(`Active Key Status: ${API_KEY ? `PRESENT (Length: ${API_KEY.length})` : "MISSING"}`);
   
   if (!API_KEY) {
-    logToFile("CRITICAL: No API Key found in environment variables!");
-  } else {
-    logToFile(`API Key identified (using ${process.env.GEMINI_API_KEY ? 'GEMINI_API_KEY' : 'fallback'}). Length: ${API_KEY.length}`);
+    logToFile("WARNING: No Gemini API Key found. AI features will fail. Please set GEMINI_API_KEY in the environment.");
   }
 
-  let ai: GoogleGenerativeAI;
-  let aiLive: GoogleGenAI;
+  let ai: GoogleGenerativeAI | null = null;
+  let aiLive: GoogleGenAI | null = null;
 
   const initAI = () => {
     const key = getApiKey();
     if (key) {
-      ai = new GoogleGenerativeAI(key);
-      aiLive = new GoogleGenAI({ apiKey: key });
+      if (!ai || key !== API_KEY) {
+        ai = new GoogleGenerativeAI(key);
+        aiLive = new GoogleGenAI({ apiKey: key });
+        API_KEY = key;
+        logToFile("AI Clients (Re)Initialized successfully.");
+      }
       return true;
     }
     return false;
@@ -58,9 +77,10 @@ async function startServer() {
     const PRIMARY_MODEL = "gemini-1.5-flash"; 
 
     for (let i = 0; i <= maxRetries; i++) {
-      if (!ai && !initAI()) {
-        throw new Error("Gemini API key is not configured on the server.");
-      }
+        // Ensure AI is initialized before each attempt
+        if (!initAI() || !ai) {
+           throw new Error("Gemini API key is not configured on the server. Please ensure GEMINI_API_KEY is set in the environment.");
+        }
       
       try {
         let modelToUse = PRIMARY_MODEL;
@@ -126,9 +146,11 @@ async function startServer() {
   });
 
   app.get("/api/health", (req, res) => {
+    const key = getApiKey();
     res.json({ 
       status: "ok", 
-      geminiKeySet: !!process.env.GEMINI_API_KEY,
+      geminiKeySet: !!key,
+      keyPrefix: key ? `${key.substring(0, 4)}...` : 'none',
       nodeEnv: process.env.NODE_ENV || 'undefined',
       time: new Date().toISOString()
     });
@@ -363,16 +385,32 @@ async function startServer() {
     }
   });
 
-  // Story generation endpoint
+  // Story generation endpoint (Interactive)
   app.post("/api/generate/story", async (req, res) => {
     logToFile(`START /api/generate/story - Body: ${JSON.stringify(req.body)}`);
     try {
-      const { theme, context, lang } = req.body;
-      const promptText = `You are a professional children's storyteller. Write a very short, fun story for a 3-5 year old.
-      THEME: ${theme}. CONTEXT: ${context || 'None'}. 
-      Use 3 simple paragraphs separated by '|'. Provide 3 matching emojis separated by ','.
-      Format: Title: [Title]\nStory: [P1] | [P2] | [P3]\nEmojis: [E1], [E2], [E3]
-      Language: ${lang === 'ar' ? 'Arabic' : 'English'}`;
+      const { theme, context, history = [], choice, lang } = req.body;
+      
+      let promptText = "";
+      
+      if (history.length === 0) {
+        // Initializing story
+        promptText = `You are a professional children's storyteller. Write the BEGINNING of a fun, short interactive story for a 3-5 year old.
+        THEME: ${theme}. CONTEXT: ${context || 'None'}. 
+        Format: Title: [Story Title]\nStory: [One engaging paragraph]\nEmojis: [3 emojis]\nChoices: [Choice 1], [Choice 2]
+        The choices should be simple actions the child can take.
+        Language: ${lang === 'ar' ? 'Arabic' : 'English'}`;
+      } else {
+        // Continuing story
+        promptText = `Continue the interactive story for a child.
+        THEME: ${theme}.
+        STORY SO FAR: ${history.join(" ")}
+        CHILD'S CHOICE: ${choice}
+        
+        Task: Write the NEXT paragraph. If it's the end of the adventure, say so naturally.
+        Format: Story: [The next paragraph]\nEmojis: [3 relevant emojis]\nChoices: [Choice 1], [Choice 2] (or [THE END] if finished)
+        Language: ${lang === 'ar' ? 'Arabic' : 'English'}`;
+      }
 
       const result = await callAiWithRetry({
         contents: [{ role: 'user', parts: [{ text: promptText }] }]

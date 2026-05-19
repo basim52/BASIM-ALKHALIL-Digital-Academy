@@ -20,8 +20,10 @@ import {
   Star,
   BrainCircuit,
   ArrowLeft,
-  X
+  X,
+  CheckCircle
 } from 'lucide-react';
+import { Mascot } from './Mascot';
 import { ColorsLesson } from './ColorsLesson';
 import { NumbersLesson } from './NumbersLesson';
 import { AnimalsLesson } from './AnimalsLesson';
@@ -32,6 +34,9 @@ import { PronunciationLesson } from './PronunciationLesson';
 import { MagicStoryMode } from './MagicStoryMode';
 import { StickerBook } from './StickerBook';
 import { InteractionTimer } from './InteractionTimer';
+import { ChildProgressRadar } from './ChildProgressRadar';
+import { DrawingLab } from './DrawingLab';
+import { ParentAIInsights } from '../ParentAIInsights';
 
 import { StudentProfile, CHILDHOOD_PACKAGES } from '../../types';
 import { db, resetDailyMinutes, updateRemainingMinutes } from '../../lib/firebase';
@@ -40,6 +45,7 @@ import { handleFirestoreError, OperationType } from '../../lib/firestoreUtils';
 
 const KID_COURSES = [
   { id: 'first-words', nameKey: 'firstWords', icon: Sparkles, color: 'bg-yellow-400', shadow: 'shadow-yellow-900/20', unlocked: true },
+  { id: 'creative-lab', nameKey: 'creativeLab', icon: Palette, color: 'bg-pink-500', shadow: 'shadow-pink-900/20', unlocked: true },
   { id: 'pronunciation', nameKey: 'pronunciation', icon: Mic, color: 'bg-indigo-500', shadow: 'shadow-indigo-900/20', unlocked: true },
   { id: 'colors', nameKey: 'colors', icon: Palette, color: 'bg-rose-500', shadow: 'shadow-rose-900/20', unlocked: true },
   { id: 'numbers', nameKey: 'numbers', icon: Hash, color: 'bg-blue-500', shadow: 'shadow-blue-900/20', unlocked: true },
@@ -48,15 +54,164 @@ const KID_COURSES = [
   { id: 'letters', nameKey: 'letters', icon: Type, color: 'bg-purple-500', shadow: 'shadow-purple-900/20', unlocked: true },
 ];
 
+const DAILY_QUESTS = [
+  { id: 'words', icon: Sparkles, color: 'text-amber-500', bg: 'bg-amber-50', border: 'border-amber-100' },
+  { id: 'colors', icon: Palette, color: 'text-rose-500', bg: 'bg-rose-50', border: 'border-rose-100' },
+  { id: 'stories', icon: BrainCircuit, color: 'text-indigo-500', bg: 'bg-indigo-50', border: 'border-indigo-100' },
+];
+
+const CURRICULUM_LEVELS = [
+  {
+    id: 'foundation',
+    name: 'الأساسيات الأولى',
+    nameEn: 'The Foundation',
+    description: 'الألوان والأرقام والأشكال',
+    descriptionEn: 'Colors, Numbers & Shapes',
+    courseIds: ['colors', 'numbers', 'shapes']
+  },
+  {
+    id: 'discovery',
+    name: 'اكتشاف العالم',
+    nameEn: 'World Discovery',
+    description: 'الكلمات الأولى والحيوانات',
+    descriptionEn: 'First Words & Animals',
+    courseIds: ['first-words', 'animals']
+  },
+  {
+    id: 'expression',
+    name: 'التعبير الإبداعي',
+    nameEn: 'Creative Expression',
+    description: 'الحروف والمختبر الفني',
+    descriptionEn: 'Letters & Drawing Lab',
+    courseIds: ['letters', 'creative-lab']
+  },
+  {
+    id: 'communication',
+    name: 'التواصل المتقدم',
+    nameEn: 'Advanced Communication',
+    description: 'النطق والقصص السحرية',
+    descriptionEn: 'Pronunciation & Magic Stories',
+    courseIds: ['pronunciation']
+  }
+];
+
 export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, profile?: StudentProfile | null, onBack: () => void }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [activeLesson, setActiveLesson] = useState<string | null>(null);
   const [showProgress, setShowProgress] = useState(false);
   const [showStickerBook, setShowStickerBook] = useState(false);
+  const [showParentCorner, setShowParentCorner] = useState(false);
+  const [showShop, setShowShop] = useState(false);
   const [recentLearnings, setRecentLearnings] = useState<string[]>([]);
   const [mood, setMood] = useState<string | null>(null);
   const [timeIsUp, setTimeIsUp] = useState(false);
+  const [mascotMood, setMascotMood] = useState<'happy' | 'thinking' | 'celebrating' | 'idle'>('happy');
+  const [mascotMessage, setMascotMessage] = useState<string | undefined>(undefined);
+  const [isMascotFetching, setIsMascotFetching] = useState(false);
+  const [currentCostume, setCurrentCostume] = useState<string | undefined>(undefined);
+  const [unlockedCostumes, setUnlockedCostumes] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (profile?.uid) {
+      const fetchMascotData = async () => {
+        try {
+          const mascotRef = doc(db, 'users', profile.uid, 'earlyChildhood', 'mascot');
+          const snap = await getDoc(mascotRef);
+          if (snap.exists()) {
+            setCurrentCostume(snap.data().currentCostume);
+            setUnlockedCostumes(snap.data().unlockedCostumes || []);
+          }
+        } catch (err) {
+          console.error("Mascot data fetch failed", err);
+        }
+      };
+      fetchMascotData();
+    }
+  }, [profile?.uid]);
+
+  const SHOP_ITEMS = [
+    { id: 'hero_cape', name: 'Hero Cape', nameAr: 'عباءة البطل', price: 1000, icon: '🦸' },
+    { id: 'smart_glasses', name: 'Smart Glasses', nameAr: 'نظارات ذكية', price: 500, icon: '👓' },
+    { id: 'party_hat', name: 'Party Hat', nameAr: 'قبعة احتفال', price: 200, icon: '🥳' },
+    { id: 'crown', name: 'King Crown', nameAr: 'تاج ملكي', price: 2000, icon: '👑' },
+    { id: 'artist_beret', name: 'Artist Beret', nameAr: 'قبعة فنان', price: 300, icon: '👨‍🎨' },
+    { id: 'explorer_hat', name: 'Explorer Hat', nameAr: 'قبعة مستكشف', price: 400, icon: '🤠' },
+  ];
+
+  const handleBuyCostume = async (costumeId: string, price: number) => {
+    if (!profile?.uid || (profile.points || 0) < price) return;
+
+    try {
+      const mascotRef = doc(db, 'users', profile.uid, 'earlyChildhood', 'mascot');
+      const newUnlocked = [...new Set([...unlockedCostumes, costumeId])];
+      
+      await setDoc(mascotRef, {
+        currentCostume: costumeId,
+        unlockedCostumes: newUnlocked
+      }, { merge: true });
+
+      const studentRef = doc(db, 'users', profile.uid);
+      await updateDoc(studentRef, {
+        points: increment(-price)
+      });
+
+      setCurrentCostume(costumeId);
+      setUnlockedCostumes(newUnlocked);
+      setMascotMood('celebrating');
+      setMascotMessage(isRtl ? 'يا للروعة! شكراً لك على هذا المظهر الجديد!' : 'Wow! Thank you for this new look!');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSelectCostume = async (costumeId: string) => {
+     if (!profile?.uid) return;
+     const mascotRef = doc(db, 'users', profile.uid, 'earlyChildhood', 'mascot');
+     await updateDoc(mascotRef, { currentCostume: costumeId });
+     setCurrentCostume(costumeId);
+  };
+
+  const handleMascotGreet = async () => {
+    if (isMascotFetching) return;
+    setIsMascotFetching(true);
+    setMascotMood('thinking');
+    
+    try {
+      const resp = await fetch('/api/lesson/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: isRtl ? 'اعطني رسالة تشجيعية قصيرة جداً لطفل عمره 5 سنوات في أكاديمية تعلم (جملة واحدة)' : 'Give a very short encouraging message for a 5-year-old child in a learning academy (one sentence)',
+          context: `Parent Profile: ${profile?.displayName}, Words Learned: ${stats.wordsLearned}, Level: ${stats.levelsCompleted}`
+        })
+      });
+      const data = await resp.json();
+      setMascotMessage(data.text);
+      setMascotMood('happy');
+    } catch (err) {
+      setMascotMessage(isRtl ? 'أنت بطل!' : 'You are a hero!');
+      setMascotMood('happy');
+    } finally {
+      setIsMascotFetching(false);
+      // Clear message after 8 seconds
+      setTimeout(() => setMascotMessage(undefined), 8000);
+    }
+  };
+
+  useEffect(() => {
+    // Initial welcome message
+    const timer = setTimeout(() => {
+      setMascotMessage(isRtl ? 'مرحباً بك يا بطل! أنا الأسد باسل، هل أنت مستعد للتعلم؟' : 'Welcome Champ! I am Basil the Lion, ready to learn?');
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const quests = [
+    { title: isRtl ? 'تعلم 3 كلمات' : 'Learn 3 Words', progress: 2, total: 3, id: 'words' },
+    { title: isRtl ? 'اكتشف لوناً جديداً' : 'Discover a Color', progress: 1, total: 1, id: 'colors' },
+    { title: isRtl ? 'استمع لقصة' : 'Listen to a Story', progress: 0, total: 1, id: 'stories' },
+  ];
 
   const moods = [
     { id: 'happy', emoji: '😊', label: isRtl ? 'سعيد' : 'Happy', color: 'bg-yellow-400' },
@@ -71,6 +226,16 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
     pronunciationScore: profile?.points || 0,
     levelsCompleted: profile?.points ? Math.floor(profile.points / 100) : 0,
     dailyStreak: 5
+  };
+
+  const [newSticker, setNewSticker] = useState<any>(null);
+
+  const mockProgressData = {
+    vocabulary: 85,
+    logic: 60,
+    creativity: profile?.points ? (profile.points % 100) : 92,
+    phonics: 75,
+    consistency: 95
   };
 
   const saveProgress = async (lessonId: string, score: number, total: number) => {
@@ -93,24 +258,31 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
 
       // Logic to unlock a random sticker if score is high
       if (score / total >= 0.8) {
+        setMascotMood('celebrating');
+        setMascotMessage(isRtl ? 'يا لك من مذهل! لقد حصلت على ملصق جديد!' : 'You are amazing! You earned a new sticker!');
+        
         const stickersRef = doc(db, 'users', profile.uid, 'earlyChildhood', 'stickers');
         try {
           const snap = await getDoc(stickersRef);
           let unlockedIds = snap.exists() ? snap.data().unlockedIds || [] : [];
           
-          const lessonStickers: Record<string, string> = {
-            'animals': 'lion',
-            'colors': 'rainbow',
-            'numbers': 'star_gold',
-            'first-words': 'apple',
-            'letters': 'robot',
-            'shapes': 'crown'
+          const lessonStickers: Record<string, any> = {
+            'animals': { id: 'lion', emoji: '🦁' },
+            'colors': { id: 'rainbow', emoji: '🌈' },
+            'numbers': { id: 'star_gold', emoji: '⭐' },
+            'first-words': { id: 'apple', emoji: '🍎' },
+            'letters': { id: 'robot', emoji: '🤖' },
+            'shapes': { id: 'crown', emoji: '👑' }
           };
 
-          const targetSticker = lessonStickers[lessonId];
-          if (targetSticker && !unlockedIds.includes(targetSticker)) {
-            unlockedIds.push(targetSticker);
+          const stickerData = lessonStickers[lessonId];
+          if (stickerData && !unlockedIds.includes(stickerData.id)) {
+            unlockedIds.push(stickerData.id);
             await setDoc(stickersRef, { unlockedIds }, { merge: true });
+            
+            // Trigger UI celebrate
+            setNewSticker(stickerData);
+            setTimeout(() => setNewSticker(null), 5000);
           }
         } catch (error) {
           console.error("Error saving stickers:", error);
@@ -118,7 +290,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
       }
 
       // Also update student profile points
-      const studentRef = doc(db, 'student_profiles', profile.uid);
+      const studentRef = doc(db, 'users', profile.uid);
       await updateDoc(studentRef, {
         points: increment(score * 10)
       });
@@ -202,6 +374,8 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
       content = <ShapesLesson lang={lang} onBack={handleLessonEnd} onComplete={(s, t) => saveProgress('shapes', s, t)} />;
     } else if (activeLesson === 'letters') {
       content = <LettersLesson lang={lang} onBack={handleLessonEnd} onComplete={(s, t) => saveProgress('letters', s, t)} />;
+    } else if (activeLesson === 'creative-lab') {
+      content = <DrawingLab isRtl={isRtl} onBack={handleLessonEnd} onComplete={(s, t) => saveProgress('creative-lab', s, t)} />;
     } else if (activeLesson === 'magic-story') {
       content = <MagicStoryMode lang={lang} onBack={handleLessonEnd} context={recentLearnings.join(', ')} />;
     }
@@ -218,6 +392,147 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
 
   return (
     <div className={`min-h-screen bg-[#f8fafc] p-4 md:p-10 ${isRtl ? 'font-arabic' : 'font-sans'} relative overflow-x-hidden`} dir={isRtl ? 'rtl' : 'ltr'}>
+      <AnimatePresence>
+        {showShop && (
+           <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[150] flex items-center justify-center p-4 md:p-8 bg-black/60 backdrop-blur-md"
+           >
+              <motion.div 
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                className="bg-white w-full max-w-4xl rounded-[3rem] shadow-2xl relative flex flex-col overflow-hidden"
+              >
+                  <header className="p-8 bg-[#002147] text-white flex items-center justify-between">
+                     <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
+                           <Layout size={28} />
+                        </div>
+                        <div>
+                           <h2 className="text-2xl font-black">{isRtl ? 'خزانة ملابس باسل' : "Basil's Wardrobe"}</h2>
+                           <p className="text-blue-200 font-bold uppercase tracking-widest text-[10px]">{isRtl ? 'استخدم نقاطك للأناقة' : 'STYLE UP WITH YOUR POINTS'}</p>
+                        </div>
+                     </div>
+                     <div className="flex items-center gap-4">
+                        <div className="bg-white/10 px-6 py-2 rounded-full border border-white/20 flex items-center gap-2">
+                           <Star className="text-yellow-400" />
+                           <span className="font-black text-xl">{profile?.points || 0}</span>
+                        </div>
+                        <button onClick={() => setShowShop(false)} className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                           <X />
+                        </button>
+                     </div>
+                  </header>
+
+                  <div className="p-8 grid grid-cols-2 md:grid-cols-3 gap-6">
+                     {SHOP_ITEMS.map((item) => {
+                       const isUnlocked = unlockedCostumes.includes(item.id);
+                       const isCurrent = currentCostume === item.id;
+                       const canAfford = (profile?.points || 0) >= item.price;
+
+                       return (
+                         <div key={item.id} className={`p-6 rounded-[2.5rem] border-4 flex flex-col items-center gap-4 transition-all ${isCurrent ? 'border-amber-400 bg-amber-50' : 'border-slate-50 bg-slate-50'}`}>
+                            <div className="text-6xl mb-2">{item.icon}</div>
+                            <h4 className="font-black text-[#002147]">{isRtl ? item.nameAr : item.name}</h4>
+                            
+                            {isUnlocked ? (
+                              <button 
+                                onClick={() => handleSelectCostume(item.id)}
+                                className={`w-full py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${isCurrent ? 'bg-amber-400 text-white' : 'bg-[#002147] text-white hover:scale-105'}`}
+                              >
+                                {isCurrent ? (isRtl ? 'مرتدي' : 'WEARING') : (isRtl ? 'ارتداء' : 'WEAR')}
+                              </button>
+                            ) : (
+                              <button 
+                                onClick={() => handleBuyCostume(item.id, item.price)}
+                                disabled={!canAfford}
+                                className={`w-full py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${canAfford ? 'bg-emerald-500 text-white hover:scale-105' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                              >
+                                <Star size={14} />
+                                {item.price}
+                              </button>
+                            )}
+                         </div>
+                       );
+                     })}
+                  </div>
+              </motion.div>
+           </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Daily Quests Sidebar (Phase 1) */}
+      <div className="fixed top-32 right-8 hidden lg:block w-72 space-y-4 z-40">
+        <div className="bg-white/80 backdrop-blur-md p-6 rounded-[2.5rem] border border-white shadow-xl">
+           <h3 className="text-lg font-black text-[#002147] mb-4 flex items-center gap-2">
+             <Trophy className="text-yellow-500" size={20} />
+             {isRtl ? 'مهمات اليوم' : 'Daily Quests'}
+           </h3>
+           <div className="space-y-4">
+             {quests.map((q, qIdx) => {
+               const questInfo = DAILY_QUESTS.find(dq => dq.id === q.id);
+               const isDone = q.progress >= q.total;
+               return (
+                 <div key={`d-quest-${q.id}-${qIdx}`} className={`p-4 rounded-3xl border transition-all ${isDone ? 'bg-emerald-50 border-emerald-100 opacity-60' : `${questInfo?.bg} ${questInfo?.border}`}`}>
+                   <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                         {questInfo && <questInfo.icon size={14} className={isDone ? 'text-emerald-500' : questInfo.color} />}
+                         <span className="text-[10px] font-black uppercase tracking-wider text-[#002147]">{q.title}</span>
+                      </div>
+                      {isDone && <CheckCircle size={14} className="text-emerald-500" />}
+                   </div>
+                   <div className="h-2 bg-black/5 rounded-full overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${(q.progress / q.total) * 100}%` }}
+                        className={`h-full ${isDone ? 'bg-emerald-500' : (questInfo?.color.replace('text-', 'bg-') || 'bg-blue-500')}`}
+                      />
+                   </div>
+                 </div>
+               );
+             })}
+           </div>
+        </div>
+
+        {/* Mascot Mini-Preview in Sidebar */}
+        <div className="bg-[#002147] p-6 rounded-[2.5rem] text-white overflow-hidden relative group">
+           <div className="relative z-10">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 mb-2">{isRtl ? 'نصيحة الأسد باسل' : "BASIL'S TIP"}</p>
+              <p className="text-xs font-bold leading-relaxed">
+                {isRtl ? 'هل تعلم أن اللون الأحمر هو لون القوة والنشاط؟ جرب مغامرة الألوان!' : 'Did you know red is the color of energy? Try the Colors adventure!'}
+              </p>
+           </div>
+           <div className="absolute -bottom-4 -right-4 opacity-20 group-hover:scale-110 transition-transform text-6xl">🦁</div>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {newSticker && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-emerald-500/20 backdrop-blur-md"
+          >
+            <div className="bg-white p-12 rounded-[5rem] text-center shadow-2xl relative overflow-hidden">
+               <motion.div 
+                 animate={{ rotate: 360 }}
+                 transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
+                 className="absolute inset-0 bg-gradient-to-br from-amber-400/10 to-emerald-400/10"
+               />
+               <div className="text-9xl mb-8 relative z-10">🎊 {newSticker.emoji} 🎊</div>
+               <h3 className="text-4xl font-black text-[#002147] mb-2 relative z-10">
+                 {isRtl ? 'ملصق جديد!' : 'New Sticker!'}
+               </h3>
+               <p className="text-emerald-500 font-bold uppercase tracking-widest relative z-10">
+                 {isRtl ? 'لقد فتحت جائزة مذهلة' : 'You unlocked an amazing reward'}
+               </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <header className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 mb-8 md:mb-16">
         <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-start">
           <button 
@@ -269,12 +584,85 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
             <Trophy size={18} />
             <span className="font-black text-[10px] md:text-sm uppercase tracking-widest">{isRtl ? 'إنجازاتي' : 'My Trophies'}</span>
           </button>
+
+          <button 
+            onClick={() => setShowParentCorner(true)}
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#002147] text-white border-2 border-[#002147] hover:bg-[#002147]/90 transition-all shadow-lg"
+          >
+            <TrendingUp size={18} />
+            <span className="font-black text-[10px] md:text-sm uppercase tracking-widest">{isRtl ? 'ركن الوالدين' : 'Parent'}</span>
+          </button>
         </div>
       </header>
 
       <AnimatePresence>
         {showStickerBook && (
           <StickerBook isRtl={isRtl} onClose={() => setShowStickerBook(false)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showParentCorner && (
+           <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[150] flex items-center justify-center p-4 md:p-8 bg-black/60 backdrop-blur-md"
+           >
+              <motion.div 
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                className="bg-slate-50 w-full max-w-6xl h-[90vh] rounded-[3rem] shadow-2xl relative flex flex-col overflow-hidden"
+              >
+                 <header className="p-8 bg-white border-b border-slate-100 flex items-center justify-between shrink-0">
+                    <div className="flex items-center gap-4">
+                       <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white">
+                          <TrendingUp size={28} />
+                       </div>
+                       <div>
+                          <h2 className="text-2xl font-black text-[#002147]">{isRtl ? 'ركن الوالدين' : 'Parent Corner'}</h2>
+                          <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">{isRtl ? 'تحليل الأداء والمتابعة الذكية' : 'PERFORMANCE ANALYSIS & SMART MONITORING'}</p>
+                       </div>
+                    </div>
+                    <button 
+                      onClick={() => setShowParentCorner(false)}
+                      className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors"
+                    >
+                      <X size={24} />
+                    </button>
+                 </header>
+
+                 <div className="flex-1 overflow-y-auto p-6 md:p-12 space-y-12 no-scrollbar">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                       <div className="lg:col-span-6">
+                          <ChildProgressRadar data={mockProgressData} isRtl={isRtl} />
+                       </div>
+                       <div className="lg:col-span-6 space-y-8">
+                          <ParentAIInsights lang={lang} studentName={profile?.displayName || 'Child'} studentLevel="Early Foundation" />
+                          <div className="bg-white p-8 rounded-[3rem] border-4 border-slate-50 shadow-xl">
+                             <h4 className="text-xl font-black text-[#002147] mb-4 flex items-center gap-2">
+                                <Star className="text-yellow-500" size={20} />
+                                {isRtl ? 'أبرز الإنجازات' : 'Top Achievements'}
+                             </h4>
+                             <div className="space-y-4">
+                                {recentLearnings.length > 0 ? recentLearnings.map((l, i) => (
+                                  <div key={`recent-${l}-${i}`} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                     <span className="font-bold text-[#002147]">{l}</span>
+                                     <div className="text-emerald-500 flex items-center gap-1">
+                                        <CheckCircle size={14} />
+                                        <span className="text-[10px] font-black uppercase">{isRtl ? 'مكتمل' : 'MASTERED'}</span>
+                                     </div>
+                                  </div>
+                                )) : (
+                                  <p className="text-slate-400 text-sm italic">{isRtl ? 'لم يبدأ التعلم بعد' : 'Learning adventure just started'}</p>
+                                )}
+                             </div>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+              </motion.div>
+           </motion.div>
         )}
       </AnimatePresence>
 
@@ -385,7 +773,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
                <div className="flex -space-x-4 items-center">
                  {['🐶', '🍎', '🌈', '🚀', '🐙'].map((e, i) => (
                    <motion.div 
-                    key={i} 
+                    key={`hero-emoji-${e}-${i}`} 
                     animate={{ y: [0, -5, 0] }}
                     transition={{ duration: 2, delay: i * 0.2, repeat: Infinity }}
                     className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-xl md:text-2xl border-4 border-white/10 shadow-lg"
@@ -437,42 +825,104 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
         </motion.div>
       )}
 
-      <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8 pb-20">
-        {KID_COURSES.map((course) => (
-          <motion.button
-            key={course.id}
-            whileHover={course.unlocked ? { y: -8, scale: 1.02 } : {}}
-            whileTap={course.unlocked ? { scale: 0.95 } : {}}
-            onClick={() => course.unlocked && setActiveLesson(course.id)}
-            className={`relative bg-white rounded-2xl md:rounded-[3rem] p-4 md:p-10 text-center border-2 transition-all flex flex-col items-center group overflow-hidden ${
-              course.unlocked 
-              ? `border-slate-50 hover:border-[#002147]/10 ${course.shadow} shadow-sm` 
-              : 'border-slate-100 opacity-60 grayscale'
-            }`}
-          >
-            {!course.unlocked && (
-              <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
-                <div className="w-10 h-10 md:w-16 md:h-16 bg-[#002147] text-white rounded-xl md:rounded-2xl flex items-center justify-center shadow-xl">
-                  <Lock size={18} className="md:w-7 md:h-7" />
-                </div>
+      <div className="max-w-4xl mx-auto flex flex-col gap-16 pb-32">
+        {CURRICULUM_LEVELS.map((level, lvlIdx) => (
+          <div key={level.id} className="space-y-8">
+            <div className={`flex flex-col ${isRtl ? 'items-end text-right' : 'items-start text-left'} px-6 md:px-0`}>
+              <div className="flex items-center gap-3 mb-2">
+                <span className="w-8 h-8 bg-[#002147] text-white rounded-lg flex items-center justify-center font-black text-sm">
+                  {lvlIdx + 1}
+                </span>
+                <h2 className="text-xl md:text-3xl font-black text-[#002147] uppercase tracking-tight">
+                  {isRtl ? level.name : level.nameEn}
+                </h2>
               </div>
-            )}
-
-            <div className={`w-16 md:w-32 h-16 md:h-32 ${course.color} text-white rounded-2xl md:rounded-[2.5rem] flex items-center justify-center mb-4 md:mb-8 shadow-xl transition-transform group-hover:rotate-12 group-hover:scale-110`}>
-              <course.icon className="w-8 h-8 md:w-14 md:h-14" strokeWidth={2.5} />
+              <p className="text-slate-400 font-bold text-xs md:text-sm uppercase tracking-widest pl-11">
+                {isRtl ? level.description : level.descriptionEn}
+              </p>
             </div>
 
-            <h3 className="text-base md:text-3xl font-black text-[#002147] leading-tight mb-1 md:mb-2 line-clamp-1">{(t as any)[course.nameKey]}</h3>
-            
-            <div className="flex items-center gap-1 text-slate-400 font-bold uppercase tracking-widest text-[8px] md:text-xs mt-1">
-              <span>{course.unlocked ? (isRtl ? 'ابدأ اللعب' : 'Start Playing') : (isRtl ? 'فتح بـ 10' : 'Unlock for 10')}</span>
-              <ChevronRight size={10} className={`md:w-4 md:h-4 ${isRtl ? 'rotate-180' : ''}`} />
-            </div>
+            <div className="space-y-12">
+              {level.courseIds.map((courseId, courseIdx) => {
+                const course = KID_COURSES.find(c => c.id === courseId);
+                if (!course) return null;
+                const totalIndex = lvlIdx * 10 + courseIdx;
+                const isEven = totalIndex % 2 === 0;
 
-            <div className={`absolute -bottom-8 -right-8 w-16 h-16 md:w-32 md:h-32 ${course.color} opacity-5 rounded-full`} />
-          </motion.button>
+                return (
+                  <motion.div
+                    key={`roadmap-course-${course.id}-${lvlIdx}-${courseIdx}`}
+                    initial={{ opacity: 0, x: isEven ? -50 : 50 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    className={`flex w-full ${isEven ? 'justify-start' : 'justify-end'} relative`}
+                  >
+                    {/* Path Connector Visual */}
+                    {courseIdx < level.courseIds.length - 1 && (
+                      <div className={`absolute top-full h-12 w-1 border-dashed border-2 border-slate-200 left-1/2 -translate-x-1/2 -z-10`} />
+                    )}
+
+                    <motion.button
+                      whileHover={course.unlocked ? { y: -8, scale: 1.05, rotate: isEven ? -2 : 2 } : {}}
+                      whileTap={course.unlocked ? { scale: 0.95 } : {}}
+                      onClick={() => course.unlocked && setActiveLesson(course.id)}
+                      className={`relative bg-white rounded-3xl md:rounded-[4rem] p-8 md:p-12 text-center border-2 transition-all flex flex-col md:flex-row items-center gap-8 group overflow-hidden max-w-2xl w-full shadow-lg ${
+                        course.unlocked 
+                        ? `border-slate-50 hover:border-[#002147]/10 ${course.shadow}` 
+                        : 'border-slate-100 opacity-60 grayscale'
+                      }`}
+                    >
+                      {!course.unlocked && (
+                        <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                          <div className="w-16 h-16 bg-[#002147] text-white rounded-2xl flex items-center justify-center shadow-xl">
+                            <Lock size={24} />
+                          </div>
+                        </div>
+                      )}
+
+                      <div className={`w-24 md:w-40 h-24 md:h-40 ${course.color} text-white rounded-[2rem] md:rounded-[3rem] flex items-center justify-center shadow-2xl transition-transform group-hover:rotate-12 group-hover:scale-110 shrink-0`}>
+                        <course.icon className="w-12 h-12 md:w-20 md:h-20" strokeWidth={2.5} />
+                      </div>
+
+                      <div className="text-start flex-1">
+                         <h3 className="text-2xl md:text-5xl font-black text-[#002147] leading-tight mb-2">{(t as any)[course.nameKey]}</h3>
+                         <div className="flex items-center gap-2 text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm">
+                           <div className={`w-2 h-2 rounded-full ${course.unlocked ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                           <span>{course.unlocked ? (isRtl ? 'جاهز للمغامرة' : 'Adventure Ready') : (isRtl ? 'محتوى مغلق' : 'Locked Content')}</span>
+                         </div>
+                         
+                         <div className="mt-6 flex items-center gap-4">
+                            <div className="bg-slate-50 px-4 py-2 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                               {isRtl ? '5 دقائق' : '5 MINS'}
+                            </div>
+                            <div className="text-[#002147] font-black text-sm flex items-center gap-1 group-hover:translate-x-2 transition-transform">
+                               {isRtl ? 'ابدأ الاستكشاف' : 'Start Explore'}
+                               <ChevronRight size={16} strokeWidth={3} className={isRtl ? 'rotate-180' : ''} />
+                            </div>
+                         </div>
+                      </div>
+
+                      <div className={`absolute -bottom-10 -right-10 w-40 h-40 ${course.color} opacity-5 rounded-full`} />
+                    </motion.button>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
         ))}
       </div>
+
+      {/* Interactive Mascot (Phase 1 & 2) */}
+      <Mascot 
+        mood={mascotMood} 
+        isRtl={isRtl} 
+        message={mascotMessage} 
+        accessory={currentCostume}
+        onClick={() => {
+          if (!mascotMessage) setShowShop(true);
+          else handleMascotGreet();
+        }} 
+      />
 
       {/* Decorative background mascot */}
       <div className="fixed bottom-0 right-[-5%] w-64 md:w-[400px] pointer-events-none opacity-[0.03] -z-10 select-none grayscale">
