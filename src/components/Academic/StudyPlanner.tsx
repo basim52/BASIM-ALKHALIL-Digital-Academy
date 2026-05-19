@@ -94,7 +94,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
   const t = translations[lang];
   const isRtl = lang === 'ar';
   
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(['advanced']);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(['advanced', 'oxford']);
   const [selectedDays, setSelectedDays] = useState<number[]>([0, 1, 2, 3, 4]); // Default Sun-Thu
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [preferredTime, setPreferredTime] = useState('16:00');
@@ -177,19 +177,12 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
 
       const querySnapshot = await getDocs(q);
       const plans: StudyPlan[] = [];
-      const covered = new Set<string>();
       
       querySnapshot.forEach((doc) => {
         const data = doc.data() as Record<string, any>;
         if (data) {
           const plan = { id: doc.id, ...data } as StudyPlan;
           plans.push(plan);
-          if (plan.planItems) {
-            plan.planItems.forEach((item: any) => {
-              const key = `${item.courseId}:${item.level}:${item.unitId}`;
-              covered.add(key);
-            });
-          }
         }
       });
       
@@ -198,14 +191,22 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
         const dateB = b.createdAt?.seconds || 0;
         return dateB - dateA;
       }));
-      setCoveredUnitIds(covered);
 
-      // Also fetch lesson results
+      // Fetch lesson results and populate truly covered (completed) units
       const resultsQ = query(collection(db, 'lessonResults'), where('userId', '==', userProfile.uid));
       const resultsSnapshot = await getDocs(resultsQ);
       const results: any[] = [];
-      resultsSnapshot.forEach(doc => results.push({ id: doc.id, ...doc.data() }));
+      const covered = new Set<string>();
+      
+      resultsSnapshot.forEach(doc => {
+        const data = doc.data();
+        results.push({ id: doc.id, ...data });
+        const key = `${data.courseId}:${data.level}:${data.lessonId}`;
+        covered.add(key);
+      });
+      
       setLessonResults(results);
+      setCoveredUnitIds(covered);
 
     } catch (error) {
       console.error('Error fetching previous plans:', error);
@@ -278,12 +279,13 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
 
     const activeLevel = 'A1';
     
-    const allAvailableLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
+    const advancedLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
+    const oxfordLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
     
     if (selectedCategories.includes('advanced')) {
        // Reading
        ALL_READING_UNITS[activeLevel].forEach(u => {
-         allAvailableLessons.push({ 
+         advancedLessons.push({ 
            courseId: 'reading', 
            label: isRtl ? 'القراءة المتطورة' : 'Elite Reading', 
            topic: isRtl ? u.titleAr : u.titleEn,
@@ -293,7 +295,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
        });
        // Grammar
        ALL_GRAMMAR_UNITS[activeLevel].forEach(u => {
-         allAvailableLessons.push({ 
+         advancedLessons.push({ 
            courseId: 'grammar', 
            label: isRtl ? 'القواعد المتطورة' : 'Advanced Grammar', 
            topic: isRtl ? u.titleAr : u.titleEn,
@@ -303,7 +305,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
        });
        // Writing
        ALL_WRITING_UNITS[activeLevel].forEach(u => {
-        allAvailableLessons.push({ 
+        advancedLessons.push({ 
           courseId: 'writing', 
           label: isRtl ? 'الكتابة المتطورة' : 'Advanced Writing', 
           topic: isRtl ? u.titleAr : u.titleEn,
@@ -311,11 +313,35 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
           level: activeLevel
         });
       });
+      // Conversation
+      if ((ALL_CONVERSATION_UNITS as any)[activeLevel]) {
+        (ALL_CONVERSATION_UNITS as any)[activeLevel].forEach((u: any) => {
+          advancedLessons.push({ 
+            courseId: 'conversation', 
+            label: isRtl ? 'المحادثة المتطورة' : 'Advanced Conversation', 
+            topic: isRtl ? u.titleAr : u.titleEn,
+            unitId: u.id,
+            level: activeLevel
+          });
+        });
+      }
+      // Expression
+      if ((ALL_EXPRESSION_UNITS as any)[activeLevel]) {
+        (ALL_EXPRESSION_UNITS as any)[activeLevel].forEach((u: any) => {
+          advancedLessons.push({ 
+            courseId: 'expression', 
+            label: isRtl ? 'التعبير المطور' : 'Enhanced Expression', 
+            topic: isRtl ? u.titleAr : u.titleEn,
+            unitId: u.id,
+            level: activeLevel
+          });
+        });
+      }
     }
     
     if (selectedCategories.includes('oxford')) {
        OXFORD_UNITS.forEach(u => {
-         allAvailableLessons.push({ 
+         oxfordLessons.push({ 
            courseId: 'oxford', 
            label: isRtl ? 'أكسفورد المصور' : 'Oxford Discover', 
            topic: isRtl ? u.titleAr : u.titleEn,
@@ -323,6 +349,16 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
            level: 'General'
          });
        });
+    }
+
+    // Interleave lessons to create a true mix
+    const allAvailableLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
+    const maxLength = Math.max(advancedLessons.length, oxfordLessons.length);
+    
+    for (let i = 0; i < maxLength; i++) {
+       // Alternate Oxford and Advanced
+       if (i < oxfordLessons.length) allAvailableLessons.push(oxfordLessons[i]);
+       if (i < advancedLessons.length) allAvailableLessons.push(advancedLessons[i]);
     }
 
     // Filter out already studied lessons
@@ -418,7 +454,9 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
         : 'All available lessons have been completed. some lessons were reused to fill the plan.');
     }
     
-    setGeneratedPlan(mockPlan);
+    // Preserve manual lessons if they exist in the current view
+    const manualLessons = (generatedPlan || []).filter(item => item.id.startsWith('manual-'));
+    setGeneratedPlan([...mockPlan, ...manualLessons]);
     setIsGenerating(false);
   };
 
@@ -669,8 +707,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
           <button 
             onClick={() => {
               setActiveTab('create');
-              setSelectedSavedPlan(null);
-              setGeneratedPlan(null);
+              // Don't clear current plan state so they don't lose their view
             }}
             className={`px-8 py-3 rounded-[1.5rem] text-sm font-black transition-all ${
               activeTab === 'create' 
@@ -1271,9 +1308,14 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover/item:scale-110 ${
                               item.courseId === 'reading' ? 'bg-emerald-600 text-white shadow-emerald-100' : 
                               item.courseId === 'grammar' ? 'bg-blue-600 text-white shadow-blue-100' : 
+                              item.courseId === 'oxford' ? 'bg-amber-500 text-white shadow-amber-100' : 
+                              item.courseId === 'conversation' ? 'bg-indigo-500 text-white shadow-indigo-100' :
+                              item.courseId === 'writing' ? 'bg-rose-500 text-white shadow-rose-100' :
                               'bg-indigo-600 text-white shadow-indigo-100'
                             }`}>
-                              {item.courseId === 'reading' ? <BookOpen size={24} /> : <Sparkles size={24} />}
+                              {item.courseId === 'reading' ? <BookOpen size={24} /> : 
+                               item.courseId === 'oxford' ? <BookOpen size={24} /> : 
+                               <Sparkles size={24} />}
                             </div>
                             <div className="space-y-1 flex-1">
                               <div className="flex items-center gap-2">
@@ -1521,9 +1563,14 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg ${
                                       item.courseId === 'reading' ? 'bg-emerald-600 text-white shadow-emerald-100' : 
                                       item.courseId === 'grammar' ? 'bg-blue-600 text-white shadow-blue-100' : 
+                                      item.courseId === 'oxford' ? 'bg-amber-500 text-white shadow-amber-100' : 
+                                      item.courseId === 'conversation' ? 'bg-indigo-500 text-white shadow-indigo-100' :
+                                      item.courseId === 'writing' ? 'bg-rose-500 text-white shadow-rose-100' :
                                       'bg-indigo-600 text-white shadow-indigo-100'
                                     }`}>
-                                      {item.courseId === 'reading' ? <BookOpen size={24} /> : <Sparkles size={24} />}
+                                      {item.courseId === 'reading' ? <BookOpen size={24} /> : 
+                                       item.courseId === 'oxford' ? <BookOpen size={24} /> : 
+                                       <Sparkles size={24} />}
                                     </div>
                                     <div className="space-y-1">
                                       <div className="flex items-center gap-3">
