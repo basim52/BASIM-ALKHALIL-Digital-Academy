@@ -117,6 +117,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
   const [savedPlans, setSavedPlans] = useState<StudyPlan[]>([]);
   const [selectedSavedPlan, setSelectedSavedPlan] = useState<StudyPlan | null>(null);
   const [studentName, setStudentName] = useState('');
+  const [bypassTestLock, setBypassTestLock] = useState(true);
   const [showAddLessonModal, setShowAddLessonModal] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const tableRef = React.useRef<HTMLDivElement>(null);
@@ -1182,6 +1183,24 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                         className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 pl-11 text-xs font-black text-[#002147] focus:ring-2 focus:ring-blue-600 outline-none transition-all"
                       />
                     </div>
+                    {/* Test lock control switch */}
+                    <button
+                      onClick={() => setBypassTestLock(!bypassTestLock)}
+                      className={`flex items-center gap-2 px-4 py-3.5 rounded-2xl text-xs font-black transition-all border ${
+                        bypassTestLock
+                          ? 'bg-amber-50 text-amber-700 border-amber-200'
+                          : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      <div className={`w-4 h-4 rounded-md flex items-center justify-center border-2 transition-all ${
+                        bypassTestLock ? 'bg-amber-500 border-amber-500 text-white' : 'bg-transparent border-slate-300'
+                      }`}>
+                        {bypassTestLock && <span className="text-[10px] leading-none">✓</span>}
+                      </div>
+                      <span>
+                        {isRtl ? 'إتاحة جميع الاختبارات للتجربة' : 'Bypass Test Locking (Demo/Control)'}
+                      </span>
+                    </button>
                     <div className="flex gap-2 w-full md:w-auto">
                       <button 
                         onClick={handleSavePlan}
@@ -1347,7 +1366,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                             
                             // Test lock logic: open 20 minutes before schedule
                             const openTime = scheduledAt ? new Date(scheduledAt.getTime() - 20 * 60000) : null;
-                            const isLocked = isTest && openTime && now < openTime;
+                            const isLocked = isTest && openTime && now < openTime && !bypassTestLock;
                             
                             const handleClick = () => {
                               if (isLocked) {
