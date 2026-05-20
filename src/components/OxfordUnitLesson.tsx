@@ -4,11 +4,14 @@ import { translations, Language } from '../lib/translations';
 import { Sparkles, HelpCircle, PlayCircle, Square, Image as ImageIcon, BookOpen, Layers, MessageSquare, ChevronRight, Speaker, ArrowLeft, Volume2, CheckCircle2, XCircle, Trophy } from 'lucide-react';
 import { LANGUAGE_LAB_DATA } from '../data/languageLabData';
 import confetti from 'canvas-confetti';
+import { db } from '../lib/firebase';
+import { collection, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 
 interface OxfordUnitLessonProps {
   lang: Language;
   unitId: number;
   onBack: () => void;
+  userProfile?: any;
 }
 
 const LESSON_DATA = {
@@ -1063,7 +1066,7 @@ const LESSON_DATA = {
   }
 };
 
-export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps) => {
+export const OxfordUnitLesson = ({ lang, unitId, onBack, userProfile }: OxfordUnitLessonProps) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const isLanguageLab = unitId >= 100;
@@ -1085,6 +1088,34 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
   const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
   const [exerciseAnswers, setExerciseAnswers] = useState<Record<number, string>>({});
   const [userInput, setUserInput] = useState('');
+
+  const submitResult = async (finalScore: number) => {
+    if (!userProfile) return;
+    try {
+      const totalQuestions = isLanguageLab ? (languageData?.exercises?.length || 0) : (data?.quiz?.length || 0);
+      const title = isLanguageLab ? (languageData?.title || "") : (data?.bigQuestion || "");
+      
+      // Save Lesson Result
+      await addDoc(collection(db, 'lessonResults'), {
+        userId: userProfile.uid,
+        parentIds: userProfile.linkedParentIds || [],
+        lessonId: String(unitId), // maps to item.unitId in planner
+        lessonTitle: title || '',
+        score: finalScore,
+        total: totalQuestions,
+        timestamp: serverTimestamp()
+      });
+
+      // Add points
+      const extraPoints = 100;
+      const userRef = doc(db, 'users', userProfile.uid);
+      await updateDoc(userRef, {
+        points: (userProfile.points || 0) + extraPoints
+      });
+    } catch (e) {
+      console.error("Error saving Oxford unit result:", e);
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -1148,7 +1179,9 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
   const handleQuiz = (questionId: number, option: string) => {
     setQuizAnswers(prev => ({ ...prev, [questionId]: option }));
     const question = data.quiz.find((q: any) => q.id === questionId);
+    let finalScore = score;
     if (option === question?.correct) {
+      finalScore += 1;
       setScore(prev => prev + 1);
       speak("Correct!", "en-US");
     } else {
@@ -1158,6 +1191,7 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
     if (Object.keys(quizAnswers).length + 1 === data.quiz.length) {
       setTimeout(() => {
         setStep('finish');
+        submitResult(finalScore);
         confetti({
           particleCount: 150,
           spread: 70,
@@ -1172,7 +1206,9 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
     const exercise = languageData.exercises[currentExerciseIdx];
     setExerciseAnswers(prev => ({ ...prev, [exercise.id]: answer }));
     
+    let finalScore = score;
     if (answer.toLowerCase().trim() === exercise.correct.toLowerCase().trim()) {
+      finalScore += 1;
       setScore(prev => prev + 1);
       speak("Correct!", "en-US");
     } else {
@@ -1185,6 +1221,7 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack }: OxfordUnitLessonProps
         setUserInput('');
       } else {
         setStep('finish');
+        submitResult(finalScore);
         confetti({
           particleCount: 150,
           spread: 70,

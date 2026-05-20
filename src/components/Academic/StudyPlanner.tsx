@@ -204,7 +204,31 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
       resultsSnapshot.forEach(doc => {
         const data = doc.data();
         results.push({ id: doc.id, ...data });
-        const key = `${data.courseId}:${data.level}:${data.lessonId}`;
+        
+        let courseId = data.courseId;
+        if (!courseId) {
+          if (data.lessonId?.startsWith('r_')) courseId = 'reading';
+          else if (data.lessonId?.startsWith('g_')) courseId = 'grammar';
+          else if (data.lessonId?.startsWith('c_')) courseId = 'conversation';
+          else if (data.lessonId?.startsWith('w_')) courseId = 'writing';
+          else if (data.lessonId?.startsWith('e_')) courseId = 'expression';
+          else if (!isNaN(Number(data.lessonId)) || data.lessonId?.startsWith('oxford')) courseId = 'oxford';
+        }
+        
+        let level = data.level;
+        if (!level) {
+          if (courseId === 'oxford') {
+            level = 'General';
+          } else if (data.lessonId) {
+            const parts = data.lessonId.split('_');
+            if (parts.length > 1) {
+              level = parts[1].toUpperCase();
+            }
+          }
+        }
+        if (!level) level = 'A1';
+
+        const key = `${courseId}:${level}:${data.lessonId}`;
         covered.add(key);
       });
       

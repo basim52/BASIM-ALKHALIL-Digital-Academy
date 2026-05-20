@@ -329,6 +329,8 @@ export const BiWeeklyTest: React.FC<BiWeeklyTestProps> = ({
             userId: userProfile.uid,
             parentIds: (userProfile as any).linkedParentIds || [],
             lessonId: unitId,
+            courseId: 'test',
+            level: level || 'General',
             lessonTitle: testTitle,
             score: finalScore,
             total: totalQuestions,

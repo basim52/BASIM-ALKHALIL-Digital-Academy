@@ -3129,10 +3129,28 @@ export default function App() {
     try {
       // Save Lesson Result
       if (score !== undefined) {
+        let courseId = 'reading';
+        if (activeLesson.id?.startsWith('r_')) courseId = 'reading';
+        else if (activeLesson.id?.startsWith('g_')) courseId = 'grammar';
+        else if (activeLesson.id?.startsWith('c_')) courseId = 'conversation';
+        else if (activeLesson.id?.startsWith('w_')) courseId = 'writing';
+        else if (activeLesson.id?.startsWith('e_')) courseId = 'expression';
+
+        let level: string = activeLesson.proficiencyLevel || '';
+        if (!level && activeLesson.id) {
+          const parts = activeLesson.id.split('_');
+          if (parts.length > 1) {
+            level = parts[1].toUpperCase();
+          }
+        }
+        if (!level) level = 'A1';
+
         await addDoc(collection(db, 'lessonResults'), {
           userId: userProfile.uid,
           parentIds: (userProfile as any).linkedParentIds || [],
           lessonId: activeLesson.id,
+          courseId: courseId,
+          level: level,
           lessonTitle: activeLesson.title || '',
           score: score,
           total: activeLesson.quiz?.length || 0,
@@ -3227,6 +3245,7 @@ export default function App() {
       return (
         <OxfordDiscoverCompanion 
           lang={lang} 
+          userProfile={userProfile}
           onBack={() => {
             setAutoStartUnitId(null);
             setView('dashboard');

@@ -90,11 +90,18 @@ export const ResultsChart: React.FC<ResultsChartProps> = ({
   // Calculate category averages
   const getCategoryAvg = (categoryId: string) => {
     const catResults = results.filter(r => {
-      // Try to find if this result belongs to a course
-      // This is a bit tricky without a direct mapping, but we can try to match lesson names or IDs if we had them
-      // For now, let's assume lessonResults might eventually have a courseId. 
-      // If not, we'll use fallback or filter by lessonId prefixes if they exist.
-      return r.courseId === categoryId || r.lessonId?.startsWith(categoryId);
+      if (r.courseId === categoryId) return true;
+      if (r.lessonId?.startsWith(categoryId)) return true;
+      
+      // Fallback matching logic for legacy data or simple IDs
+      if (categoryId === 'reading' && r.lessonId?.startsWith('r_')) return true;
+      if (categoryId === 'grammar' && r.lessonId?.startsWith('g_')) return true;
+      if (categoryId === 'writing' && r.lessonId?.startsWith('w_')) return true;
+      if (categoryId === 'conversation' && r.lessonId?.startsWith('c_')) return true;
+      if (categoryId === 'expression' && r.lessonId?.startsWith('e_')) return true;
+      if (categoryId === 'oxford' && (!isNaN(Number(r.lessonId)) || r.lessonId?.startsWith('oxford') || r.courseId === 'oxford')) return true;
+
+      return false;
     });
     if (catResults.length === 0) return 0;
     const total = catResults.reduce((acc, r) => acc + (r.score || 0), 0);

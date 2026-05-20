@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations, Language } from '../lib/translations';
 import { OxfordUnitLesson } from './OxfordUnitLesson';
+import { db } from '../lib/firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { 
   ArrowLeft, 
   Image as ImageIcon, 
@@ -16,13 +18,15 @@ import {
   RotateCcw,
   Check,
   X,
-  Square
+  Square,
+  CheckCircle2
 } from 'lucide-react';
 
 interface OxfordDiscoverCompanionProps {
   lang: Language;
   onBack: () => void;
   initialUnitId?: number | null;
+  userProfile?: any;
 }
 
 const PronunciationTrainer = ({ word, onResult }: { word: string, onResult: (success: boolean) => void }) => {
@@ -815,16 +819,40 @@ export const OXFORD_UNITS = [
   }
 ];
 
-export const OxfordDiscoverCompanion = ({ lang, onBack, initialUnitId }: OxfordDiscoverCompanionProps) => {
+export const OxfordDiscoverCompanion = ({ lang, onBack, initialUnitId, userProfile }: OxfordDiscoverCompanionProps) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [selectedUnitId, setSelectedUnitId] = useState<number | null>(null);
+  const [userResults, setUserResults] = useState<any[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (initialUnitId) {
       setSelectedUnitId(initialUnitId);
     }
   }, [initialUnitId]);
+
+  useEffect(() => {
+    if (userProfile?.uid) {
+      const fetchResults = async () => {
+        try {
+          const q = query(
+            collection(db, 'lessonResults'),
+            where('userId', '==', userProfile.uid)
+          );
+          const snap = await getDocs(q);
+          const results: any[] = [];
+          snap.forEach(doc => {
+            results.push(doc.data());
+          });
+          setUserResults(results);
+        } catch (e) {
+          console.error("Error fetching lesson results in Oxford companion:", e);
+        }
+      };
+      fetchResults();
+    }
+  }, [userProfile, selectedUnitId]);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'bank' | 'lessons' | 'reading' | 'language'>('bank');
   const [activeLessonId, setActiveLessonId] = useState<number | null>(null);
@@ -834,7 +862,7 @@ export const OxfordDiscoverCompanion = ({ lang, onBack, initialUnitId }: OxfordD
 
   const selectedUnit = OXFORD_UNITS.find(u => u.id === selectedUnitId);
 
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       window.speechSynthesis.cancel();
     };
@@ -851,7 +879,36 @@ export const OxfordDiscoverCompanion = ({ lang, onBack, initialUnitId }: OxfordD
   };
 
   if (activeLessonId) {
-    return <OxfordUnitLesson lang={lang} unitId={activeLessonId} onBack={() => setActiveLessonId(null)} />;
+    return (
+      <OxfordUnitLesson 
+        lang={lang} 
+        unitId={activeLessonId} 
+        onBack={() => {
+          setActiveLessonId(null);
+          // Refetch results when returning from lesson
+          if (userProfile?.uid) {
+            const fetchResults = async () => {
+              try {
+                const q = query(
+                  collection(db, 'lessonResults'),
+                  where('userId', '==', userProfile.uid)
+                );
+                const snap = await getDocs(q);
+                const results: any[] = [];
+                snap.forEach(doc => {
+                  results.push(doc.data());
+                });
+                setUserResults(results);
+              } catch (e) {
+                console.error(e);
+              }
+            };
+            fetchResults();
+          }
+        }} 
+        userProfile={userProfile} 
+      />
+    );
   }
 
   const speak = (text: string, voiceLang: string, id: string) => {
@@ -991,7 +1048,7 @@ export const OxfordDiscoverCompanion = ({ lang, onBack, initialUnitId }: OxfordD
                     <div>
                       <h3 className="text-xl font-bold text-[#002147] mb-2">{isRtl ? unit.titleAr : unit.titleEn}</h3>
                       <p className="text-slate-400 text-sm font-medium">{isRtl ? unit.descriptionAr : unit.descriptionEn}</p>
-                      <div className="mt-4 flex items-center gap-2">
+                      <div className="mt-4 flex flex-wrap items-center gap-2">
                         {viewMode === 'bank' ? (
                           <>
                             <div className="flex -space-x-2 rtl:space-x-reverse">
@@ -1002,10 +1059,24 @@ export const OxfordDiscoverCompanion = ({ lang, onBack, initialUnitId }: OxfordD
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">+{unit.cards.length} Images</span>
                           </>
                         ) : (
-                          <div className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full">
-                            <Sparkles size={12} className="text-blue-500" />
-                            <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{isRtl ? 'درس تفاعلي متوفر' : 'Interactive Lesson Available'}</span>
-                          </div>
+                          <>
+                            <div className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full">
+                              <Sparkles size={12} className="text-blue-500" />
+                              <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{isRtl ? 'درس تفاعلي متوفر' : 'Interactive Lesson Available'}</span>
+                            </div>
+                            {(() => {
+                              const res = userResults.find(r => r.lessonId === String(unit.id));
+                              if (res) {
+                                return (
+                                  <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1 rounded-full shadow-sm text-[10px] font-bold">
+                                    <CheckCircle2 size={12} />
+                                    <span>{isRtl ? `تم (${res.score}/${res.total})` : `Completed (${res.score}/${res.total})`}</span>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            })()}
+                          </>
                         )}
                       </div>
                     </div>
