@@ -6,6 +6,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 import { onAuthStateChanged, signInWithPopup, signOut, User } from 'firebase/auth';
 import { translations, Language } from '../lib/translations';
+import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
 
 interface Message {
   role: 'user' | 'ai';
@@ -38,21 +39,32 @@ export const AIConversation = ({ onBack, lang }: { onBack: () => void, lang: Lan
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
+  const activePlaybackRef = useRef<{ stop: () => void } | null>(null);
+
+  const stopSpeaking = () => {
+    cancelAllSpeech();
+    if (activePlaybackRef.current) {
+      activePlaybackRef.current.stop();
+      activePlaybackRef.current = null;
+    }
+    setIsSpeaking(false);
+  };
+
   // Initialize Speech Recognition
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = 'en-US';
 
       recognitionRef.current.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setInputText(transcript);
-        setIsRecording(false);
-        // Automatically send after voice recognition
-        handleSendMessage(transcript);
+        let completeTranscript = '';
+        for (let i = 0; i < event.results.length; ++i) {
+          completeTranscript += event.results[i][0].transcript;
+        }
+        setInputText(completeTranscript);
       };
 
       recognitionRef.current.onerror = (event: any) => {
@@ -69,23 +81,27 @@ export const AIConversation = ({ onBack, lang }: { onBack: () => void, lang: Lan
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
+      cancelAllSpeech();
     };
   }, []);
 
-  const speak = (text: string) => {
-    // Cancel any ongoing speech
-    window.speechSynthesis.cancel();
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-    
-    window.speechSynthesis.speak(utterance);
+  const speak = async (text: string) => {
+    stopSpeaking();
+    setIsSpeaking(true);
+    const player = await speakAcademyText(
+      text,
+      'en',
+      () => setIsSpeaking(true),
+      () => setIsSpeaking(false)
+    );
+    activePlaybackRef.current = player;
   };
 
   const toggleRecording = () => {
+    if (isSpeaking) {
+      stopSpeaking();
+      return;
+    }
     if (isRecording) {
       recognitionRef.current?.stop();
     } else {
@@ -249,6 +265,21 @@ export const AIConversation = ({ onBack, lang }: { onBack: () => void, lang: Lan
 
           {/* Input Area */}
           <div className="p-6 md:p-8 bg-white border-t border-slate-100 shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.05)] relative z-10">
+            {isSpeaking && (
+              <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-[#002147] text-[#C49E3A] px-5 py-2 rounded-full flex items-center gap-3 text-xs font-black uppercase tracking-wider border-2 border-[#C49E3A] shadow-2xl z-30">
+                <span className="w-2.5 h-2.5 bg-[#C49E3A] rounded-full animate-pulse shrink-0" />
+                <span>{isRtl ? 'الذكاء يتحدث الآن... انقر لإيقاف الصوت' : 'AI Partner is talking... Click to mute'}</span>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    stopSpeaking();
+                  }}
+                  className="bg-red-600 text-white px-3 py-1 rounded-full text-[10px] font-black hover:bg-red-700 transition-colors uppercase tracking-widest cursor-pointer ml-2"
+                >
+                  {isRtl ? 'إيقاف' : 'Mute'}
+                </button>
+              </div>
+            )}
             <div className="max-w-4xl mx-auto flex gap-6 items-center">
               <button 
                 onClick={toggleRecording}
