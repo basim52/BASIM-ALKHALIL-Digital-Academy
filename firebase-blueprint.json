@@ -143,6 +143,14 @@
     "/studyPlans/{planId}": {
       "schema": "StudyPlan",
       "description": "Saved study plans for students"
+    },
+    "/homework/{homeworkId}": {
+      "schema": "object",
+      "description": "Smart personalized student homework tasks"
+    },
+    "/grades/{gradeId}": {
+      "schema": "object",
+      "description": "Student grades tracking"
     }
   }
 }

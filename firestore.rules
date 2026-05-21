@@ -90,6 +90,17 @@ service cloud.firestore {
       allow write: if isSignedIn();
     }
 
+    // Homework & Grades
+    match /homework/{homeworkId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    match /grades/{gradeId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
     // Progress & History
     match /user_progress/{progressId} {
       allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
