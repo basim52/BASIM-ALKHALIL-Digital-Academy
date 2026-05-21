@@ -903,15 +903,1569 @@ Over-focusing on one pillar while starving another creates toxic vulnerabilities
   },
   {
     id: 'rich_dad',
-    titleAr: 'الأب الغني والأب الفقير',
-    titleEn: 'Rich Dad Poor Dad',
+    titleAr: 'كتاب الأب الغني والأب الفقير للوعي المالي',
+    titleEn: 'Rich Dad Poor Dad - Financial Independence',
     authorAr: 'روبرت كيوساكي',
     authorEn: 'Robert Kiyosaki',
     coverImage: 'https://images.unsplash.com/photo-1592496431122-2349e0fbc666?auto=format&fit=crop&w=400&q=80',
-    descriptionAr: 'مسار مصغر لتفكيك الثقافة المالية العائلية، وتكبير الأصول لتخالف عقلية الديون.',
-    descriptionEn: 'The global standard on financial literacy, assets generation, and wealth habits.',
-    isLocked: true,
-    chapters: []
+    descriptionAr: 'منظومة تفاعلية تفكك أسرار الوعي المالي الجريء، وتشرح مصفوفة بناء الأصول، والتحرر التام من فخ سباق الفئران.',
+    descriptionEn: 'The global masterpiece on financial literacy, distinguishing assets from liabilities, and mastering cashflow.',
+    isLocked: false,
+    chapters: [
+      {
+        id: 'rd_ch1',
+        chapterNum: 1,
+        titleAr: 'الفصل الأول: فخ سباق الفئران وقانون التدفق المالي الفريد',
+        titleEn: 'Chapter 1: The Rat Race & the Law of Cashflow',
+        descriptionAr: 'كيف تكسر أغلال الروتين العقير لتجعل المال خادماً مطيعاً لك، وفهم الفرق بين الأصول الحقيقية والالتزامات.',
+        descriptionEn: 'Breaking free from the daily grind, making money work for you, and learning the master difference between assets and liabilities.',
+        lessons: [
+          {
+            id: 'rd_ch1_l1',
+            idNum: 1,
+            titleAr: '1. قصة الأبوين: الصراع الفكري بين الوظيفة الآمنة والاستثمار الجريء',
+            titleEn: '1. Tale of Two Fathers: Security vs. Financial Growth',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `مرحباً بك يا صديقي في المسار المالي الملحمي الرائد لكتاب روبرت كيوساكي الشهير: **الأب الغني والأب الفقير!**
+
+**لماذا هذه التجربة بالغة الأهمية؟**
+يحكي روبرت قصة طفولته بين أقرانه ومقارنته لنمطين من التوجيه:
+- **أبوه الحقيقي (الأب الفقير):** رجل متعلم تعليماً أكاديمياً رفيعاً، يحمل شهادة دكتوراه، لكنه يعيش دائماً تحت وطأة الأوراق الحسابية والديون، متبنياً شعار: "ادرس بجد لتجد شركة ممتازة توظفك وتمنحك الأمان الوظيفي".
+- **أب صديقه مايك (الأب الغني):** لم يكمل تعليمه الثانوي، لكنه صانع ثروة عظيم بالخبرة والممارسة، يتبنى شعار: "تعلم الوعي المالي المفتوح لتملك الشركات وتبسط سيطرتك الاستثمارية".
+
+**ماذا ستستفيد من هذا الدرس الجوهري؟**
+الدرس الأول يبدأ بـ **تغيير القناعات الذهنية والتحيزات الفطرية** تجاه المال. بدلاً من الخوف من المخاطر أو تبجيل الوظيفة وحيدة التدفق، ستتعلم كيف تشيد لنفسك عقلية شجاعة تطمح للحرية والإنبات المالي من بوابته الحقيقية.`,
+            contentEn: `Welcome, scholar, to Robert Kiyosaki's financial masterpiece: **Rich Dad Poor Dad!**
+
+**Why is this experience foundational?**
+Robert details his childhood under two distinct mentors:
+- **His Real Father (Poor Dad):** Highly educated PhD scholar, yet perpetually strained by bills and financial liabilities, holding the creed: "Study hard to find a safe corporate job."
+- **His Best Friend's Father (Rich Dad):** High school dropout, yet an exceptional self-made wealth architect, holding the creed: "Master Financial IQ to build assets and run enterprises."
+
+**What is your takeaway?**
+Mental shift is your baseline. Instead of running from risk or elevating solitary job dependency, adopt a robust mindset focused on lifelong independence.`
+          },
+          {
+            id: 'rd_ch1_l2',
+            idNum: 2,
+            titleAr: '2. درس الأثرياء: كسر أغلال فخ الوظيفة واستعباد الرواتب الكسولة',
+            titleEn: '2. The Core Rule: Making Money Work for You',
+            duration: '3m',
+            type: 'core',
+            contentAr: `في هذا الدرس نتناول العقيدة الأهم للأثرياء: **"الأثرياء لا يعملون من أجل كسب المال؛ بل يجعلون المال يعمل لصالحهم"**.
+
+**ماذا يعني ذلك على أرض الواقع؟**
+معظم البشر يعيشون في دائرة مغلقة مدمرة مدفوعة بعاطفتين مدمرتين: **الخوف والطمع**.
+1. **الخوف:** يدفعهم للنهوض فجراً والركض خلف راتب شهري ضئيل لتسليم فواتير الكهرباء وتأجير العقار.
+2. **الطمع (الرغبة):** يدفعهم لزيادة الإنفاق الاستهلاكي بمجرد زيادة الراتب، فيشترون كماليات وسيارات جديدة بالتقسيط الممتد.
+
+يسمي كيوساكي هذه المتاهة الروتينية الخانقة بـ **سباق الفئران (Rat Race)**. الطريقة الوحيدة للخروج منها هي التصلب العقلي والتعرف الفني على كيفية استغلال الطاقة المالية لبناء استثمارات تدر أرباحاً ذاتية دون تدخل مباشر من وقتك اليومي.`,
+            contentEn: `In this lesson, we dissect the premier wealthy axiom: **"The rich do not work for money; they compel money to work for them."**
+
+**What is the practical setup?**
+Most humans are imprisoned in a vicious cycle governed by two emotions: **Fear and Greed**.
+- **Fear:** Pushes them to run for a safe payroll to cover short-term bills.
+- **Greed (Desire):** Coaxes them to expand luxury spending as soon as their salary climbs, locking them into debt.
+
+Kiyosaki terms this repetitive, dry workflow **The Rat Race**. Breakout demands learning to decouple your time from earnings by establishing active investments.`
+          },
+          {
+            id: 'rd_ch1_l3',
+            idNum: 3,
+            titleAr: '3. قاعدة الأصول والالتزامات: شفرة الفروقات الفنية التي تغفلها البنوك',
+            titleEn: '3. The Master Key: Asset vs. Liability',
+            duration: '3m',
+            type: 'core',
+            contentAr: `يقف كارسون وكيوساكي معاً لتعريف القاعدة الذهبية الكبرى والأبرز للثراء: **"يجب أن تتعلم الفرق بين الأصول والالتزامات، وتشتري الأصول فقط"**.
+
+**التبسيط العبقري للمفاهيم والمصطلحات:**
+- **الأصل (Asset):** هو أي شيء يضع المال **في جيبك** بصفة مستمرة وتلقائية (كالأسهم، العقارات المؤجرة، الملكية الفكرية، وصكوك الأرباح الموزعة).
+- **الالتزام (Liability):** هو أي شيء يسحب المال **من جيبك** باستمرار (كالسيارات الفخمة بالتقسيط، القروض الاستهلاكية، وبطاقات الائتمان الربوية).
+
+**المغالطة الكبرى لمالكي المنازل:**
+يعتبر كيوساكي أن منزلك الشخصي ليس أصلاً بل هو **التزام صريح!** لأنه يستنزف مالك في صيانة دورية، ضرائب ممتلكات، وأقساط بنكية تعود بالفائدة الكبرى للمقرضين بدلاً منك، طالما أنه لا يدر عليك تدفقاً نقدياً داخلاً بصفة دورية ناتجة عن الإيجار المباشر.`,
+            contentEn: `In this Lesson, we deconstruct the core definition of assets and liabilities:
+
+**The ultra-clean breakdown:**
+- **Asset:** Anything that places cash **into your pocket** (rents, equities, royalties, stable businesses).
+- **Liability:** Anything that extracts cash **out of your pocket** (luxuries, retail loans, credit card balances).
+
+**The Great Home Fallacy:**
+Kiyosaki notes that your private residential home is **not an asset—it is a liability**, as it repeatedly drains your cash through repairs, property taxes, and mortgage payments, adding zero rent returns.`
+          },
+          {
+            id: 'rd_ch1_l4',
+            idNum: 4,
+            titleAr: '4. محطة العبور: مراجعة هيكلية التدفق المالي وقانون الأبوين المتباين',
+            titleEn: '4. Review Node: Synthesizing the Cashflow Map',
+            duration: '3m',
+            type: 'review',
+            contentAr: `لقد أنجزت قفزة معرفية فائقة في تأسيس ركائز الإدارة والتحرر المالي! دعنا نلخص أضلع العبور الذهبية:
+
+1. **القناعات الحاكمة (الأبوين):** الوعي بأن الشهادات الأكاديمية العالية لا تكفي لصناعة الكفاءة المالية بل هي مجرد تدريب للوظيفة، بينما الوعي بالمال هو صانع المجد والكرنفالية والثراء.
+2. **سباق الفئران (فخ الراتب):** تجنب قاطرة الخوف والطمع التي تستعبدك للوظيفة، والسير بهيكلية منهجية لكسر روتين التقيد الدائم بالدائرة الضيقة.
+3. **الأصول ضد الالتزامات:** الادخار المركز والاستثمار المتأني في قنوات تضع الفوائد في جيبك، ومناهضة التسلح بالديون المزيفة لغرض الاستعراض البائس أمام الآخرين.`,
+            contentEn: `You have finalized the primary coordinates for financial freedom! Let us synthesize the cornerstone concepts:
+
+1. **Mindset Models (Two dads):** Academic certificates train you for labor, but financial intelligence generates real compounding asset assets.
+2. **The Rat Race (The Payroll Trap):** Suppress the twin drivers of fear and greed to avoid lifelong dependency.
+3. **Assets vs. Liabilities:** Aggregate real income generators like stocks, copyright licenses, and commercial units instead of buying lifestyle debt.`
+          },
+          {
+            id: 'rd_ch1_l5',
+            idNum: 5,
+            titleAr: '5. دليل السلوك للتجرد من سباق الفئران واختبار معايير الذكاء المالي الخاص بك',
+            titleEn: '5. Practical Tips: Overcoming the Rat Race Trap Today',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك ثلاث نصائح إرشادية وتطبيقات عملية لتوطين المبادئ الثلاثة اليوم:
+
+- **تدريب موازنة الجيب الشفافة:** اكتب ميزانيتك الشخصية فوراً بنموذج منعم بالحرص؛ واقسمها بوضوح تام لخانتي الأصول والالتزامات. أوقف فوراً أي اشتراكات أو التزامات جانبية تافهة تستنزف النقد دون عائد رصيد حقيقي.
+- **تنمية بنك التأسيس الأول (أولاً):** خذ عهداً صارماً بأن تدفع لنفسك أولاً بمجرد حصولك على نقد (Pay Yourself First)، واستبعد من ١٠٪ إلى ٢٠٪ للاستثمار المأمون قبل دفع أي فواتير أخرى.
+- **تفعيل الصناديق الاستثمارية الصغيرة:** استعمل تطبيقات الادخار التلقائي لشراء أصول مصغرة تنمو بانتظام كخطوات تمكينية أولية للعبور الآمن.
+- تقدم الآن ونافس بكل اقتدار واجتز **الفصل الأول** لتقتنص نقاط الجدارة المعرفية الوفيرة!`,
+            contentEn: `Here are three pragmatic techniques to cement internal financial sovereignty today:
+
+- **The Asset Audit:** Document your finances in a simple sheet separating assets from liabilities. Instantly terminate minor recurring lifestyle flows that yield zero value.
+- **Pay Yourself First:** Dedicate 10% to 20% of your earnings to investment coffers BEFORE paying corporate bills. Forces your system into resourcefulness.
+- **Micro-Asset Accumulation:** Utilize digital automated fractional purchases to start training your asset-acquisition habits.
+- Proceed to the **Chapter 1 Gatekeeping Quiz** to secure your persistent mastery and progression!`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "ما الذي يقصده روبرت كيوساكي بمصطلح 'سباق الفئران' (Rat Race)؟",
+            questionEn: "What is the core meaning of Kiyosaki's 'Rat Race' concept?",
+            optionsAr: [
+              "المنافسة الشرسة بين الرياضيين والعدائين بالمهرجانات العالمية.",
+              "الحلقة المفرغة حيث يركض الموظف خلف الراتب مكرهاً، بدافع الخوف من الفواتير والطمع بالكماليات، فيهدر عمره بالتبعية الوظيفية.",
+              "إستراتيجية تجارية تهدف لترقية كفاءة الموظفين ببيئة العمل المشتركة."
+            ],
+            optionsEn: [
+              "The high-friction sports competition of athletes across international arenas.",
+              "A vicious cycle of earning a payroll and expanding consumption, driven by fear of bills and greed for luxuries, keeping one trapped in job dependency.",
+              "A corporate methodology utilized to expand team collaboration inside open-space environments."
+            ],
+            correctIndex: 1,
+            explanationAr: "سباق الفئران هو العبودية اللطيفة لخانة الراتب مع زيادة النفقات بزيادة الدخل، والذي يزول فقط بالاستثمار الواعي لإنبات الأصول الدائمة.",
+            explanationEn: "The Rat Race locks users into jobs. Breaking free demands allocating earnings to self-sustaining investment channels."
+          },
+          {
+            questionAr: "وفقاً للكتاب، كيف يتم تصنيف المسكن الشخصي الحقيقي الخاص بك؟",
+            questionEn: "How is your private residential home classified according to Rich Dad?",
+            optionsAr: [
+              "هو التزام واضح لأنه يستنزف مال صاحبه في ضرائب وصيانة وأقساط مستمرة دون أي تدفق نقد داخل لجيبه.",
+              "هو دائمًا أصل عظيم بمجرد شراء الأثاث الداخلي الخاص به.",
+              "هو أصل استثماري آمن تضمن البنوك تثبيته بسعر فائدة صفري مدى الحياة."
+            ],
+            optionsEn: [
+              "It is a clear liability because it constantly drains funds for maintenance, utility fees, and interest with zero cash infusing back.",
+              "It represents a massive primary asset as soon as you furnish the bedrooms inside it.",
+              "It is a riskless investment guaranteed by retail banks to trade at absolute zero tax."
+            ],
+            correctIndex: 0,
+            explanationAr: "المسكن الخاص لا يعطيك مالاً؛ بل يأخذ من نقدك المتداول، لذا فهو محاسبياً يندرج تحت الالتزامات حتى يدر عائداً استئجارياً نظيفاً يفوق كلفة صيانته.",
+            explanationEn: "Your private home triggers recurring outflows. It registers as a liability unless it yields net tenant rentals exceeding operations."
+          },
+          {
+            questionAr: "ما هو الفارق الجوهري الفاصل بين 'الأصل' (Asset) و 'الالتزام' (Liability)؟",
+            questionEn: "What represents the absolute boundary between an Asset and a Liability?",
+            optionsAr: [
+              "الأول يحوز شكلاً جميلاً وباهراً بينما الثاني يتلف بسرعة بسبب الزمن.",
+              "الأصل يضع المال في جيبك بشكل متكرر وتلقائي، بينما الالتزام يسحب المال باستمرار من جيبك.",
+              "الأصل يمثله العمل الحكومي والالتزام يمثله الشغل الخاص المتقلب."
+            ],
+            optionsEn: [
+              "The former has aesthetic styling while the latter degrades rapidly due to natural environment factors.",
+              "The asset continuously places cash into your pocket, whereas the liability constantly takes cash out of your pocket.",
+              "The asset is represented strictly by public contracts and the liability represents volatile startup tasks."
+            ],
+            correctIndex: 1,
+            explanationAr: "جوهر اللعبة المالية يكمن في تغذية مربع الأصول (كالأسهم، الملكيات الفكرية، ممتلكات الإيجار) وتقليص الالتزامات لتفادي تدفق السقوط الدائم للديون.",
+            explanationEn: "Understanding flow is the secret of financial sovereignty: buy income-generating assets, and starve luxury liabilities."
+          }
+        ]
+      },
+      {
+        id: 'rd_ch2',
+        chapterNum: 2,
+        titleAr: 'الفصل الثاني: اعتنِ بعملك الخاص وأسرار الضرائب وقوة الشركات الحصينة',
+        titleEn: 'Chapter 2: Managing Your Own Business, Taxes & Corporate Power',
+        descriptionAr: 'منظومة حماية أصولك، الفرق بين الوظيفة والعمل الحقيقي، وبناء الدرع المؤسسي لمناهضة نزيف الضرائب المتكرر.',
+        descriptionEn: 'Protecting your assets, distinction between job vs. business, and utilizing legal corporate vehicles to shield your wealth.',
+        lessons: [
+          {
+            id: 'rd_ch2_l1',
+            idNum: 1,
+            titleAr: '1. اعتنِ بعملك الخاص: التفرقة الحاسمة بين وظيفتك الحالية ومشروعك المستقبلي',
+            titleEn: '1. Mind Your Own Business: Job vs. Asset Column',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `مرحباً بك في الفصل الثاني التمكيني للتنمية المالية الفذة! دعنا نغوص في الدرس الثالث الأثير لروبرت كيوساكي: **"اعتنِ بعملك الخاص (Mind Your Own Business)"**.
+
+**ماذا يقصد بالعمل الخاص هنا؟**
+هناك خلط فادح يقع فيه البشر: يظنون أن وظيفتهم هي عملهم الخاص. الموظف في البنك أو بشركة سيارات يبني ثروة مالك البنك، أو مالك الشركة طوال عمره، بينما مربع أصوله هو خالٍ تماماً ولا يحوز قنوات إيجاد مستقلة.
+
+**الإستراتيجية الكيوساكية البديعة:**
+حافظ على وظيفتك الحالية لتغطية نفقاتك المعيشية وسداد الالتزامات الأساسية، لكن ابدأ فوراً ببناء وتشييد **مربع أصولك الخاص** في أوقات فراغك. اشترِ أسهم شركات واعدة، أسس أصولاً فكرية، واجعل مربع الأصول هو مشروعك الفعلي الحقيقي والفريد الذي ينمو بصمت وارتفاع ساحق.`,
+            contentEn: `Welcome to the second module focusing on tactical asset safety! Here, we deconstruct Robert's advice: **"Mind Your Own Business."**
+
+**What is the core distinction?**
+Most confuse their job with their business. A banker or auto assembly technician builds the bank owner's or automotive factory owner's wealth, leaving their own asset column dry and empty.
+
+**The Golden Formula:**
+Keep your day job to stabilize current living requirements, but aggressively initiate a parallel **asset column** in your silent hours. Direct those allocations toward equities, real estate, or IP licenses, rendering it your genuine business.`
+          },
+          {
+            id: 'rd_ch2_l2',
+            idNum: 2,
+            titleAr: '2. تاريخ الضرائب وقوة الشركات: كيف يستعمل الأثرياء القانون لحماية ثرواتهم',
+            titleEn: '2. Taxes & Corporations: The Secret Armor of the Rich',
+            duration: '3m',
+            type: 'core',
+            contentAr: `يتطرق هذا الدرس لتاريخ فرض الضرائب وكيف تحولت إلى سلاح يبتلع نفقات العمال والطبقة الوسطى بينما يتملص منها الأثرياء باستعمال القانون: **قوة الشركات (Power of Corporations)**.
+
+**المصيدة التاريخية للضرائب:**
+تأسست الضرائب عبر إقناع الجماهير بفلسفة: "خذوا من الأثرياء لتطوير الخدمات العامة". لكن الفئات الأكثر ثراءً استعملوا ذكاءهم المالي لتأسيس هياكل قانونية وقائية هي **الشركة المغلقة (Corporation)**.
+
+**سر التباين الضريبي الصارخ:**
+- **الموظف والأب الفقير:** يحصل على الراتب ← تقتطع الحكومة الضرائب أولاً ← ينفق ما تبقى من فضلات ماله.
+- **الشركة والأب الغني:** تحصل الشركة على العائد المالي ← تنفق وتستثمر الأرباح وتغطي التكاليف أولاً ← تدفع الضرائب على ما تبقى فقط من هوامش بسيطة!`,
+            contentEn: `In this lesson, we study the history of taxation and why the employee gets heavily taxed while the wealthy utilize **The Power of Corporations**.
+
+**The Historical Taxation Trap:**
+Tax laws were popularized by telling progressives: "Let us tax the ultra-rich for public systems." However, the rich responded with superior legal instruments—specifically, **Corporations**.
+
+**The stark legal contrast of money flow:**
+- **The Employee (Poor Dad):** Earns salary → Governments tax first → Spends what microscopic funds remain.
+- **The Corporation (Rich Dad):** Receives revenue → Reinvests and spends on absolute operational costs first → Pays minimal taxes strictly on leftover margins!`
+          },
+          {
+            id: 'rd_ch2_l3',
+            idNum: 3,
+            titleAr: '3. أجنحة الذكاء المالي الرباعي (Financial IQ): ترقية كفاءتك المهنية والصناعية',
+            titleEn: '3. The Four Quadrants of Financial IQ',
+            duration: '3m',
+            type: 'core',
+            contentAr: `الذكاء المالي الحقيقي ليس صدفة؛ بل يتكون من تضافر وتآزر أربعة مساقات معرفية كبرى يجب عليك ترقيتها باستمرار:
+
+1. **المحاسبة (Accounting):** القدرة على قراءة كشوف الأرباح والخسائر والميزانيات العمومية ومعرفة مكامن الخلل والصيانة بالشركات.
+2. **الاستثمار (Investing):** علم توجيه وصياغة الأموال لتوليد نقد مضاعف بصبر ومخاطرة محسوبة وحصافة فنية.
+3. **فهم الأسواق (Understanding Markets):** دراسة العرض والطلب والتحيزات السلوكية للجماهير، واقتناص الفرص قبل تعاظم السعر.
+4. **القانون (Law):** الاستفادة الكاملة من المزايا الضريبية وحماية الأصول الفردية والمؤسسية من بطش المعتدين والمصادرات القانونية الجائرة.`,
+            contentEn: `Sustained asset growth is not random; it requires the synergy of four core cognitive dimensions:
+
+1. **Accounting:** The tactical proficiency to read and diagnose P&L reports, balance sheets, and cashflow directories.
+2. **Investing:** The science of deploying capital to generate passive cash with calculated risks and high strategic leverage.
+3. **Understanding Markets:** Comprehending regular supply-demand kinetics, and capturing value before mass hype takes over.
+4. **Law:** Utilizing legal shields, corporate formats, and tax incentives to safeguard capital from litigation and decay.`
+          },
+          {
+            id: 'rd_ch2_l4',
+            idNum: 4,
+            titleAr: '4. محطة العبور: تثبيت التمييز بين الوظيفة وهيكلية الحماية المؤسسية للشركات',
+            titleEn: '4. Review Node: Synthesizing Corporate Power & IQ Mastery',
+            duration: '3m',
+            type: 'review',
+            contentAr: `مبارك عليك اجتياز هذا المفرق الحركي الهام الحاضن لاستقرار أصولك! دعنا نلخص أهم أفكار الدرس:
+
+1. **تنمية مربع الأصول الفوري:** لا تعتمد على الوظيفة كمصدر مجدك الوحيد بضمان أمان زائف؛ بل ابنِ ورش عمل هادئة لادخار الأصول الحقيقية بصمت مخلص.
+2. **الامتياز القضائي والضريبي للشركات:** تسييس الشركة المغلقة لتكون كياناً قانونياً ينفق أولاً ويدفع الضرائب ثانياً بكل تآزر وثبات.
+3. **مكعب الذكاء المالي:** الربط الحاسم للمحاسبة والاستثمار وفهم الأسواق والقانون لتصبح راداراً كاسحاً يستشعر الكنوز المالية.`,
+            contentEn: `You have successfully conquered the complex blueprint of corporate leverage and financial IQ! Let us synthesize the cornerstone concepts:
+
+1. **Direct Focus into Assets:** Retain your day job, but treat your personal asset column as your most vital development engine.
+2. **Tax & Corporate Inversion:** Leverage limited liability structures to invest pre-tax earnings and defer tax obligations legally.
+3. **Financial IQ Matrix:** Master the intersections of accounting, investment, market dynamics, and corporate law.`
+          },
+          {
+            id: 'rd_ch2_l5',
+            idNum: 5,
+            titleAr: '5. تلميحات وصيغ تطبيقات عملية لاستكشاف دروع الضرائب وتأسيس الشركة الأولى',
+            titleEn: '5. Practical Tips: Launching your Corporate Leverage Journey',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك ثلاث نصائح عملانية فخمة وشهية لتجديد نشاطك المعرفي المالي اليوم:
+
+- **تدريب الإقرار الجوهري:** ابدأ بالتفرقة بين ممتلكاتك الشرفية. تواصل مع محاسب قانوني ناصح واسأله: "ما هو الهيكل الأكثر أماناً لحماية أصلي المهني أو العقاري اليوم؟"
+- **تطبيق الإنفاق الذكي وقاعدة أولاً:** ضع كافة نفقات عملك وتطوير مهاراتك والكتب من داخل موازنتك الاستثمارية كخصومات ضريبية لتوسيع مسار ادخاراتك الروتينية.
+- **تأسيس معمل القراءة والميزانيات:** اقرأ ميزانيات الشركات العملاقة لفك رموز التلاعب بالأوراق لترقية حاسة الفهم والتحاليل الفنية لديك.
+- تقدم الآن ونافس بكل شجاعة واجتز **الفصل الثاني** لتقتنص نقاط الجدارة والتميز لوعيك المالي المتقد!`,
+            contentEn: `Here are three dynamic techniques to activate asset protection and corporate systems:
+
+- **The Corporate Feasibility:** Consult a local certified accountant about the most efficient legal structure (LLC, S-Corp) to start housing your digital portfolios.
+- **Pre-Tax Spending Optimization:** Structure qualified professional growth expenses, educational books, and devices so they register as pre-tax outlays.
+- **Financial Statement Literacy:** Download and examine quarterly balance sheets of public blue-chip corporations to practice identifying structural assets.
+- Sit for the **Chapter 2 Gatekeeping Exam** to confirm your mental clarity and access Chapter 3!`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "بم ينصح روبرت كيوساكي الأفراد بخصوص التفرقة بين 'وظيفتك الحالية' و 'عملك الخاص'؟",
+            questionEn: "How does Robert Kiyosaki differentiate a job from your own genuine business?",
+            optionsAr: [
+              "بتقليل المجهود بالوظيفة لغرض إهدار طاقة صاحب العمل تعويضاً عن قلة الراتب.",
+              "بالمحافظة على الوظيفة نهاراً لتأمين المتطلبات والالتزامات الحيوية، مع بناء وتنمية مربع الأصول الخاص بك بمثابة عملك الخاص الدائم.",
+              "بترك الوظيفة فوراً والجلوس بالمنزل انتظاراً لفرصة استثمارية خالية من أي ركود مالي."
+            ],
+            optionsEn: [
+              "By exerting minimal effort at your job to consume the employer's energy in exchange for a low salary.",
+              "By retaining your day job to cover immediate requirements while aggressively building and nurturing your personal asset column as your real business.",
+              "By resigning instantly and waiting at home for zero-risk, high-payout investment options."
+            ],
+            correctIndex: 1,
+            explanationAr: "الوظيفة هي التي تمنحك الأمان الروتيني المؤقت لدفع الفواتير، بينما عملك الخاص يتركز في بناء الأصول التي تدر وتدفق نقد لثروتك المستحقة.",
+            explanationEn: "Your day job supplies temporary resources; your business focuses purely on purchasing real assets that accumulate equity."
+          },
+          {
+            questionAr: "لماذا يستعمل الأثرياء قوة 'الشركات' (Corporations) في إدارة وتوجيه النفقات المتداولة؟",
+            questionEn: "Why do wealthy entrepreneurs utilize 'Corporations' to manage their funds?",
+            optionsAr: [
+              "حتى تتسنى لهم سرقة أموال البنوك والتستر تحت أسماء كيانات خفية وغير ملموسة.",
+              "لأن الشركة المغلقة تمنحهم ميزة قانونية كبرى: الحصول على الإيراد ← الإنفاق على الاستثمار والمصاريف أولاً ← دفع الضرائب على المتبقي فقط.",
+              "للتخلي التام عن الأصدقاء والنجاة بالمال دون دفع أي رواتب للعمال."
+            ],
+            optionsEn: [
+              "To perform illicit acts and hide identity behind shell entities to bypass international safety standards.",
+              "Because corporations offer a powerful legal format: Receive revenue → Deduct investments and expenses first → Pay taxes strictly on leftovers.",
+              "To abandon peers and keep capital entirely static without distributing payroll."
+            ],
+            correctIndex: 1,
+            explanationAr: "الامتياز الضريبي الهائل للشركات يمنع اقتطاع الضرائب المباشرة من منبع الأرباح، مما يسمح بإعادة استثمار عوائد المال قبل تفتيتها بالضريبة.",
+            explanationEn: "Corporations allow deduction of valid business outlays before calculating income tax, offering immense compounding leverage."
+          },
+          {
+            questionAr: "ما هي الأضلع الأربعة الأساسية المكونة لهيكلية 'الذكاء المالي الشامل' (Financial IQ)؟",
+            questionEn: "What are the four pillars of comprehensive Financial IQ defined by Robert Kiyosaki?",
+            optionsAr: [
+              "المحاسبة كالقراءة العقيمة، الاستثمار الرياضي، المبيعات اللفظية، والصبر الطويل الصامت.",
+              "المحاسبة (تسييس Mيزانيات)، الاستثمار (توليد المال)، فهم مجريات الأسواق (العرض والطلب)، والقانون (الحصانة الضريبية والوقاية).",
+              "تجنب الرياضيات، الاعتماد الكامل على كفاءة البنوك، الالتزام بالعمل المكتبي، وتجنب الضرائب بطرق خارجة عن المألوف."
+            ],
+            optionsEn: [
+              "Passive bookkeeping, high-risk sports speculation, verbal marketing, and prolonged quiet patience.",
+              "Accounting (financial literacy), Investing (money-making strategies), Understanding Markets (supply & demand dynamics), and Law (tax & legal shields).",
+              "Avoiding mathematics entirely, relying blindly on commercial banks, strict office routine adherence, and dodging tax through illicit actions."
+            ],
+            correctIndex: 1,
+            explanationAr: "الذكاء المالي هو مزيج متآزر ومترافق من الكفاءة الحسابية، والمعرفة الرياضية للاستثمار، والوعي السلوكي بالأسواق، والحصانة القانونية السامقة.",
+            explanationEn: "Financial IQ is a cohesive integration of accounting mechanics, investing logic, market dynamics, and corporate law rules."
+          }
+        ]
+      },
+      {
+        id: 'rd_ch3',
+        chapterNum: 3,
+        titleAr: 'الفصل الثالث: قهر عوائق الوهن ومصفوفة التدفق المالي الرباعية والتحرر الشامل',
+        titleEn: 'Chapter 3: Overcoming Stagnation, the Cashflow Quadrant (ESBI) & Freedom',
+        descriptionAr: 'هيكلة الصمود والمواجهة، تطهير معوقات حركة الاستثمار، وتحليل النموذج الرباعي ESBI لتنصيب مسار حريتك المالية المستدامة.',
+        descriptionEn: 'Building intellectual stamina, neutralizing fear and laziness, analyzing the ESBI Quadrant, and designing your ultimate route to financial freedom.',
+        lessons: [
+          {
+            id: 'rd_ch3_l1',
+            idNum: 1,
+            titleAr: '1. قهر معوقات الصمود الخمسة: الخوف والسخرية والكسل والعادات السيئة والكبر الخفي',
+            titleEn: '1. Overcoming the 5 Obstacles: Defeating Fear and Laziness',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `مرحباً بك يا صديقي بالمسار المعرفي والمحور الختامي الرائع لكتاب "الأب الغني والأب الفقير"! لنتنبه لأكبر خصوم التغيير المالي: **معوقات الصمود الخمسة**.
+
+**ما هي هذه المعوقات الجاثمة؟**
+الوعي المالي وقراءة الميزانيات لا ينفعان دون علاج صلب لهذه العثرات الخمسة:
+1. **الخوف:** الخوف من خسارة المال مشلل للحركة؛ الترياق هو التظاهر بالثقة، والمباشرة باستثمارات صغيرة متأثرين بمنطق الأثرياء الذين يحولون الخسارة إلى دافع نصر رصين.
+2. **السخرية (الشك):** التشكيك بأعمالك وتطوير أصولك من قبل أصدقائك؛ تذكر أن المشككين ممرضون لعقولهم ويهدمون فاعليتك بصخبهم.
+3. **الكسل:** المتمثل في **التظاهر بالانشغال بالوظيفة** لتفادي اتخاذ قرارات مصيرية لعملك الخاص؛ ترياقه هو جرعة صغيرة من **الطموح الصادق وسؤال النفس: ما الذي يمكنني تحقيقه؟**
+4. **العادات السيئة:** كدفع التكاليف واستنزاف المال قبل تغذية أصلك؛ كسر التشتت وابدأ بالدفع لنفسك أولاً.
+5. **الكبرياء اللدود:** ادعاء الوعي التام والتغطية على غبائك المعرفي بنوع من التعالي؛ ترياقه البسيط هو الصدق والتواضع والتثقيف المستدام.`,
+            contentEn: `Welcome, scholar, to the final masterclass chapter of Rich Dad's legacy! Let us study the five emotional and structural obstacles:
+
+1. **Fear:** The anxiety of losing funds freezes action. Wealth creators treat failure as a lesson, not a death blow.
+2. **Cynicism:** Disparaging peers and self-doubt. Ignore the constant skepticism of the crowd.
+3. **Laziness:** Masked as **perpetual busywork** to avoid taking charge of your assets. Cure it with constructive ambition: "How can I afford it?"
+4. **Bad Habits:** Depleting resource coffers. Substitute these with the discipline of paying your asset column first.
+5. **Arrogance:** Concealing ignorance behind a mask of pride. Neutralize it by continuous study of Great Works.`
+          },
+          {
+            id: 'rd_ch3_l2',
+            idNum: 2,
+            titleAr: '2. خطوات الوعي والانبثاق العشر لتشغيل وتدريب إدارتك المالية بنظام',
+            titleEn: '2. Ten Steps to Financial IQ Activation',
+            duration: '3m',
+            type: 'core',
+            contentAr: `بناء الصدارة وحيازة ثروتك الواعدة يحتاج لتحفيز عشرة بروتوكولات سلوكية يومية صاغها كيوساكي ليصنع شعلتك:
+
+1. **صياغة رغبة عارمة تفوق روتين المعيشة (العاطفة المتقدة):** اكتب قائمة بـ "أشيائي التي لا أريدها" و "أشيائي التي أرغب بها بصدق" لتغذية إرادتك وعزيمتك.
+2. **قوة الاختيار اليومي (استغلال الدقائق):** كيف تنفق دقائق وقتك المتداول؛ استثمرها في الثقافات المالية، ومطالعة مسارات المحترفين بدلاً من التسكع الرقمي الضحل ونقاش الأحقاد التافهة.
+3. **انتقاء أصدقائك بحصافة بالغة (قانون التآزر الفكري):** لتتفاعل وتجالس عقولاً مبدعة تتحدث بلغة الأصول والاستثمار، مبتعداً عن قعيدي السبات والوهن والتشاؤم الهدام.
+4. **شحذ المنشار والتعلم السريع المتواصل (تطوير الأدوات):** دراسة صيغ ونماذج استثمارية جديدة، والمحافظة على ذهنك متيقظاً يطلب المعارف بنشاط لا يفتر وعزيمة حديدية لا تلين.`,
+            contentEn: `Sustaining your momentum relies on Robert's activation codes to wake your dormant genius:
+
+1. **Find a Purpose Greater Than Reality:** Compose a clear matrix of what you aggressive refuse (poverty) and what you deeply desire (independence).
+2. **Establish the Daily Sovereign Choice:** Dedicate your precious standard hours to studying diagnostic tools instead of shallow digital noise.
+3. **Select Peers Wisely:** Align your social circle with creative, abundance-based minds that regularly talk about compounding pipelines.
+4. **Sharpen the Blade:** Continually investigate modern investment models of growth to preserve extreme analytical awareness.`
+          },
+          {
+            id: 'rd_ch3_l3',
+            idNum: 3,
+            titleAr: '3. ليكن عملك الفعلي لغرض التعلم مدى الحياة لا للتكسب الضيق',
+            titleEn: '3. Work to Learn: Compounding Specialized Skills',
+            duration: '3m',
+            type: 'core',
+            contentAr: `يقف روبرت كيوساكي بسترة القيادة ليعلن مبدأه التاريخي: **"اعمل لكي تتعلم، لا لكي تجمع المال فقط"**.
+
+**ما تفتقده الأكاديميات الكسولة:**
+توفر المدارس العامة والخاصة تدريباً تقنياً ضيقاً لتصبح موظفاً بارعاً يسلم رصيد عمره لشكر الآخرين، فيتعلم الطب والمهندسون إدارة مهنهم لكن يغيب عن وعيهم تماماً شفرة إدارة العمل وإجراء التحالفات الملتزمة بالثقة والمهارة الفنية.
+
+**شفرة المهارات الكاشفة:**
+لتبسط نفوذك المهني وترفع مخرجاتك، تحتاج لاكتساب وترصيع المهارات الثلاثة الأسمى:
+1. **إدارة التدفق النقدي (Cashflow Management):** معرفة قنوات دخول وخروج النقد بكل حصافة وموازنة.
+2. **إدارة وتوجيه الكيان والنظم (Systems):** كيفية قيادة الفريق وتفويض المهام وتسييس الهياكل لتتحرك الماكينة بنجاح آلي.
+3. **إدارة وقيادة الجماهير والناس (People):** التواصل الباهر الذكي والقدرة على البيع والتسويق والتفاوض اللبق وبناء الوفاق التام.`,
+            contentEn: `In this lesson, we study Robert's critical directive: **"Work to Learn, Not to Earn."**
+
+**The systemic academic blindness:**
+Universities train you to obtain highly specialized skills. Thus, physicians and engineers learn to operate tools but completely ignore how to run systems and organize joint ventures with deep integrity.
+
+**The Three Management Capabilities:**
+To ensure your workplace success and capture real market space, develop:
+- **Cashflow Management:** Orchestrating inflows and outflows with total accuracy.
+- **Systems Management:** Organizing structures and delegating operations so the engine runs automatically.
+- **People Management:** Superior sales, soft communication, and leading peer collaboration.`
+          },
+          {
+            id: 'rd_ch3_l4',
+            idNum: 4,
+            titleAr: '4. محطة العبور: نموذج مصفوفة التدفق المالي الرباعية (ESBI) ودستور التحرر المالي الشامل',
+            titleEn: '4. Review Node: Synthesizing the Cashflow Quadrant (ESBI)',
+            duration: '3m',
+            type: 'review',
+            contentAr: `مبارك مبروك! لقد تكللت مسيرتك التنموية بتمام استيعاب المسار الملحمي لكتاب "الأب الغني والأب الفقير"! لنتأمل خلاصة رحلتنا التحررية ومصفوفة التدفق المالي الرباعية الشهيرة (Cashflow Quadrant):
+
+- **E (Employee - الموظف):** يبيع وقته من أجل راتب؛ هدفه الأمان المؤقت، وضرائبه في الأعلى حدة.
+- **S (Self-Employed - صاحب المهنة الحرة):** هو الآلة الحقيقية بنطاق عمله (كالأطباء، المحامين)؛ إذا غاب غاب النقد والإنتاج.
+- **B (Business Owner - صاحب المشروع):** يملك الهيكل والنماذج والوفاق الجماهيري؛ الناس تعمل لصالحه والنظام يتحرك تلقائياً بمهارة فائقة.
+- **I (Investor - المستثمر):** المال يعمل لصالحه؛ يراقب ويزيد الأصول ويحصد الأرباح بكرنفالية شجاعة وعزيمة لا تفتر.
+
+طريق الفتوحات الحقيقية تبدأ بعبورك السلس والشجاع من مربعي اليسار (E, S) نحو وفاق مربعي اليمين (B, I) مستعيناً بالذكاء المالي والصبر والصمود اليقين!`,
+            contentEn: `Congratulations! You have finalized the complete "Rich Dad Poor Dad" masterclass path! Let us synthesize the ultimate Cashflow Quadrant (ESBI) blueprint:
+
+- **E (Employee):** Trades precious time for a salary; values security above all, and carries the heaviest tax burden.
+- **S (Self-Employed):** Owns a job but is himself the main component (doctors, private lawyers); if they stop, revenue halts.
+- **B (Business Owner):** Owns complex corporate systems; leverages other people's efforts to move the business automatic.
+- **I (Investor):** Compels money to work for them, compiling dividends and scaling up capital with complete peace.
+
+Sovereignty belongs to crossing securely from the Left Side (E, S) to the Right Side (B, I) of the Cashflow Quadrant using superior financial intelligence!`
+          },
+          {
+            id: 'rd_ch3_l5',
+            idNum: 5,
+            titleAr: '5. ممارسات المعيشة الفعالة وتكريس رصيد الإحراز المعرفي المالي الشامل مدى الحياة',
+            titleEn: '5. Practical Tips: Cementing your Lifelong Abundance Blueprint',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك ثلاث نصائح إرشادية وتدريبات عملية لتنشيط ركائز النجاح والفعالية الختامية اليوم:
+
+- **تدريب الإقرار الرباعي (ESBI):** صنف علامتك وسلوكك اليومي بصدق تام: "ما هي نسبة التدفق القادم لجيبي من مربع المستثمر ومربع صاحب العمل؟" ضع خطة عشرية لترقية النسبة.
+- **رصيف الصمود ضد السخرية:** عندما يتهكم الآخرون على سكتك الاستثمارية، تذكر عهد ورش العمل ومربع الأصول الهادئ الموثق في عقلك؛ واصمت شجاعاً وتكلم بالمخرجات الساطعة والأصول المتنامية.
+- ترفق يا صديقي وثبت شراع علمك وجرب بقوة واجتز **التقييم الشامل الختامي** لإصدار وتثبيت **شهادة إتمام المسار ومطابقة المقاييس الكبرى للثقافة المالية 🎓!**`,
+            contentEn: `Here are three pragmatic formulas to anchor your lifelong continuous financial upgrade path today:
+
+- **The ESBI Diagnostic:** Review your current income structure and ask: "What percentage originates from the B and I quadrants?" Plan progressive steps to rebalance.
+- **Skeptic Buffer:** When peer pressure calls your progressive plans foolish, quietly focus on refining your asset column and speak only through net outcomes.
+- Take a deep, proud breath, and sit for the **Chapter 3 final evaluation** to officially generate your **Continuous Financial Achievement Certificate 🎓!**`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "ما الذي تجسده مصفوفة التدفق المالي الرباعية (Cashflow Quadrant) التي صاغها كيوساكي؟",
+            questionEn: "What is the primary taxonomy of the ESBI Cashflow Quadrant?",
+            optionsAr: [
+              "نموذج يوضح تقسيمات الطبقة الاجتماعية بناءً على التعليم الأكاديمي والشهادات.",
+              "رؤية هندسية تحدد مصادر النقد لأربع فئات: الموظف (E)، المستقل (S)، صاحب المشروع (B)، والمستثمر (I)، وترشدك للانتقال لليمين.",
+              "طريقة ميكانيكية لترتيب مبيعات السيارات بالمؤسسات الإنتاجية الفارهة."
+            ],
+            optionsEn: [
+              "A social status model that classifies individuals solely based on academic titles and test scores.",
+              "A clean schematic partitioning income paths into Employee (E), Self-Employed (S), Business Owner (B), and Investor (I), guiding your transit to the right.",
+              "A mechanical cataloging method utilized to map logistics networks inside heavy industries."
+            ],
+            correctIndex: 1,
+            explanationAr: "مصفوفة ESBI ترشدك للتحرر المالي عبر نقل سلوكك وادخاراتك من بيع الوقت (E, S) إلى تشغيل النظم والمال ليصنعا لك عائداً ذاتياً نامياً (B, I).",
+            explanationEn: "The ESBI Quadrant helps you shift from trading hours for survival (E, S) to utilizing automated networks and capital (B, I)."
+          },
+          {
+            questionAr: "بم ينصح الكتاب بخصوص تسييس شعار ليكون العمل للتعلم لا للمال؟",
+            questionEn: "Why does Robert Kiyosaki claim individuals should 'Work to Learn, Not to Earn'?",
+            optionsAr: [
+              "لأن جمع المال نشاط ضار بالبيئة يتنافى مع مبادئ المسؤولية الفردية الكونية.",
+              "لأن التكسب الضيق دون ادخار مهارات كبرى كإدارة التدفق وإدارات الناس يبقيك رهينة الصدمات عند غياب الرواتب الكسولة.",
+              "حتى يتعود الموظف العمل بلا أجر لخدمة مصالح الشركات دون معارضة فنية."
+            ],
+            optionsEn: [
+              "Because gathering funds is historically detrimental to ecological settings, clashing with cosmic values.",
+              "Because laboring strictly for cash without mastering core capabilities like cashflow, systems, and people management leaves you vulnerable.",
+              "So that employees get accustomed to executing duties for free to protect corporate profit margins from labor debates."
+            ],
+            correctIndex: 1,
+            explanationAr: "العبرة في تداول وترصيع المهارات المتكاملة (كالتسويق، القيادة والمبيعات) لتكون مستعداً لقيادة وإطلاق مشروعك المالي الخاص بجودة وسهولة.",
+            explanationEn: "Mastering cross-functional skills (sales, bookkeeping, leadership) builds the toolbox required to direct complex corporate vehicles."
+          },
+          {
+            questionAr: "كيف يعالج كيوساكي عائق 'الكسل' (Laziness) الذي يمنع تطور الوعي المالي؟",
+            questionEn: "How does Robert Kiyosaki diagnose and cure 'Laziness' in financial development?",
+            optionsAr: [
+              "عبر التظاهر الدائم بالانشغال بالوظيفة الروتينية للتهرب من القرارات الصعبة والتغلب على الهم بالسبات الطويل.",
+              "عبر إيقاظ طموح صادق وسؤال النفس: 'كيف يمكنني شراء أو تحقيق ذلك؟' مما ينشط الدماغ لصناعة مسارات الوعي المبتكر.",
+              "برفض المبادرة وقبول الفقر بمثابة مسار روحي زاهد لا يقبل الرفاه المعرفي."
+            ],
+            optionsEn: [
+              "By masking it as intense workplace busywork, escaping hard strategic questions by remaining comfortably occupied.",
+              "By igniting a tiny dose of healthy greed to trigger the mental query: 'How can I afford it?' which forces the brain to discover options.",
+              "By rejecting initiative altogether and accepting extreme constraints as an honorable path unrelated to professional growth."
+            ],
+            correctIndex: 1,
+            explanationAr: "الكسل الخفي هو الهروب من المبادرات والقرارات السامقة بذريعة الانشغال بالعمل المعتاد، وسؤاله العلاجي هو محرك الدماغ لصنع معجزة الثراء المفقودة.",
+            explanationEn: "Passive procrastination often hides inside workplace routines. Asking active diagnostic questions ignites creativity."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'you_can',
+    titleAr: 'كتاب أنت تستطيع للتطبيقات التنموية والنجاح',
+    titleEn: 'You Can - Principles of Supreme Achievement',
+    authorAr: 'جورج ماثيو أدامز',
+    authorEn: 'George Matthew Adams',
+    coverImage: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=400&q=80',
+    descriptionAr: 'منظومة حافزة لربط العزيمة الفردية، وتفعيل الرغبة الصلبة، وتنظيم بوصلة العمل والإيجابية اليومية والتعلم المستديم.',
+    descriptionEn: 'A powerful collection of brief, inspiring talks on self-belief, individual initiative, and mental fortitude.',
+    isLocked: false,
+    chapters: [
+      {
+        id: 'yc_ch1',
+        chapterNum: 1,
+        titleAr: 'الفصل الأول: معتقد اليقين - المبادرة وقوة الإرادة والشغل المنظم',
+        titleEn: 'Chapter 1: The Creed of Self-Belief - Private Focus & Will',
+        descriptionAr: 'كيف تؤسس ثقة فولاذية بالذات، وتصنع إرادتك لتكون مديراً عاماً ومحورياً لحياتك بجدية ونظام.',
+        descriptionEn: 'Erecting robust self-belief, taking control of your faculties as a General Manager, and organizing daily efforts.',
+        lessons: [
+          {
+            id: 'yc_ch1_l1',
+            idNum: 1,
+            titleAr: '1. أنت تستطيع: تحرير المارد الكامن ورصيد الثقة الذاتية',
+            titleEn: '1. You Can! Unlocking your Potential and Self-Belief',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `مرحباً بك يا صديقي في مسار التمكين المعرفي الثالث لكتاب جورج ماثيو أدامز الملحمي: **أنت تستطيع!**
+
+**لماذا هذا المفهوم مهم؟**
+الاعتقاد الجوهري لـ "أنت تستطيع" هو أنك قادر تماماً على تشكيل وصنع أي شيء ينبت بذاره داخلك. النجاح يبدأ بقرار مخلص بأن البذور الإبداعية التي وضعها الخالق في داخلك مهيأة للنمو والارتفاع الساحق، طالما اقترنت بأهداف عالية وإرادة حديدية لا تلين. 
+
+**ماذا ستستفيد من هذا الدرس**
+تذكر أنك وحدك المسؤول عن تحديد القمة التي تصبو إليها. تجاهل السخرية والتهكمات الجانبية للذين يحيطون بك؛ لأن رصيدك الحقيقي يتراكم من الإيجابية اليومية والتركيز الشجاع على مساق عملك الخاص والفريد.`,
+            contentEn: `Welcome, scholar, to George Matthew Adams' empowering classic: **You Can!**
+
+**Why is this concept important?**
+The foundational premise of "You Can" is that you can make of yourself anything the germ of which lives within you. Ultimate achievement starts with a decision that internal potentials are destined for growth when paired with high aims and iron will.
+
+**What is your takeaway?**
+You determine the exact height to which you shall climb. Disregard criticism, sneers, and secondary noise. Your value compounding relies entirely on your own positive momentum and undivided attention on your target.`
+          },
+          {
+            id: 'yc_ch1_l2',
+            idNum: 2,
+            titleAr: '2. المدير العام: تولي المسؤولية والسيطرة الكاملة على قراراتك',
+            titleEn: '2. The General Manager: Taking Full Responsibility of your Life',
+            duration: '3m',
+            type: 'core',
+            contentAr: `يتطرق الكاتب في هذا الدرس البديع لـ **مبدأ القيادة الذاتية الفطنة**: "أنت المدير العام لكيانك الخاص". 
+
+**ماذا يعني ذلك لك؟**
+البشر لم يولدوا ومعهم كتيب تعليمات جاهز؛ بل وُهبوا القدرة على قيادة وإدارة أنفسهم بشكل مستمر ومفعم باليقين. إذا سمحت لمخاوفك وعواطفك وصداقاتك العشوائية الهابطة بأن تدير دفتك، فإنك تتنازل عن منصب "المدير العام" وتصبح أجيراً لدى ظروفك.
+
+**التطبيق العملي الفوري:**
+اعقد فوراً اجتماعاً داخلياً مع قواك العقلية ومواهبك وقيمك الكبرى. اتخذ قرارات حاسمة، وأغلق الأبواب بجرأة أمام التشتت، واجلس على رأس الطاولة لتوجيه وبناء نجاحك بنفسك وبكل احترام للذات.`,
+            contentEn: `In this Lesson, we deconstruct **the Principle of Self-Management**: "You are your own General Manager."
+
+**What does this represent?**
+Humans were not born with a pre-written instructions manual; they were created to run themselves. If you allow random fears, anxieties, or environment dependencies to dictate your path, you abdicate your executive throne.
+
+**Pragmatic takeaway:**
+Call a sharp meeting of your intellectual faculties and core values. Sit at the head of the table, lock out distractions, make decisive values-aligned plans, and aggressively run your operations with high self-trust.`
+          },
+          {
+            id: 'yc_ch1_l3',
+            idNum: 3,
+            titleAr: '3. بساطة المنهجية والنظام: تحويل الطاقة اليومية لقوة كاسحة',
+            titleEn: '3. Power of System: Organizing Energy for High Output',
+            duration: '3m',
+            type: 'core',
+            contentAr: `النظام والمنهجية هما قنوات العبور التي تتدفق من خلالها طاقتك بفعالية فائقة وبلا أدنى تشتيت. 
+
+**قوة التنظيم البنائي:**
+دون نظام، حتى المهام الأكثر ضخامة وقوة ستنهار أمام العشوائية والفوضى. التفكير المنظم وتخطيط الغايات في المساء قبل النوم يمنحك انطلاقة استباقية ممتازة لخوض يومك بلياقة عالية ونشاط وقاد.
+
+**التطبيق العملي الفوري:**
+الالتزام بـ "طقس المنهجية": تنظيم المهام اليومية، تبسيط المخرجات، وبناء المربع الثاني بصلابة ليتحول العمل من عبء ثقيل إلى متعة إنجاز فخمة ومتلاحقة.`,
+            contentEn: `System and organization represent the pipelines through which your energy flows with absolute maximum efficiency.
+
+**The power of systematic action:**
+Without system, even the most stupendous tasks crumble into messy blocks. Planning your target outline the night before gives you an excellent tactical headstart, starting your day with sharp focus.
+
+**Pragmatic takeaway:**
+Form the habit of executing even minor daily duties through proper system. Convert erratic actions into deliberate, structured blocks to make work elegant and rewarding.`
+          },
+          {
+            id: 'yc_ch1_l4',
+            idNum: 4,
+            titleAr: '4. محطة العبور: مراجعة ركائز معتقد الثقة والمسؤولية المنهجية',
+            titleEn: '4. Review Node: Foundations of Private Trust and Control',
+            duration: '3m',
+            type: 'review',
+            contentAr: `لقد قطعت شوطاً تنموياً خنفشارياً في تفكيك المبادئ الأولى للمعيشة الشجاعة! دعنا نلخص ركائز العبور الأساسية:
+
+1. **اليقين بالذات (أنت تستطيع):** الإيمان برصيد إمكانياتك الكامنة، وتحديد سمت أهدافك العالية دون الاكتراث للتثبيط والضجيج الخارجي.
+2. **القيادة الذاتية (المدير العام):** تولي زمام قيادة ذاتك بمسؤولية كاملة، واعتبار المبادئ الصادقة هي البوصلة الحاكمة لأعمالك.
+3. **العيش المنهجي البسيط (النظام):** تحويل المهام اليومية لنقاط حركية منظمة لتقليص جهد الهدر ومضاعفة إنتاجيتك الواعية.`,
+            contentEn: `You have completed the private baseline for self-belief and structured action! Let us synthesize the cornerstone concepts:
+
+1. **Absolute Self-trust (You Can!):** Believe in your inner potential, targeting high aims and ignoring external skepticism.
+2. **Take Executive Command (General Manager):** Assume total responsibility for your mind and actions, keeping principles as your core guide.
+3. **Structured Daily Operations (System):** Design simple, repeatable frameworks to direct erratic motions into productive goals.`
+          },
+          {
+            id: 'yc_ch1_l5',
+            idNum: 5,
+            titleAr: '5. دليل السلوك للتجرد من بذور الشك والتسويف والتردد',
+            titleEn: '5. Practical Tips: Banishing Self-Doubt and Hesitation',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك ثلاث نصائح إرشادية وتطبيقات عملية لتوطين المبادئ الثلاثة اليوم:
+
+- **تدريب الإقرار الفردي:** اسأل نفسك يومياً: "لو كنت المدير العام الفعلي لحياتي اليوم، هل هذا السلوك يقود لتطوير أصولي المهنية أم تبديدها؟" تراجع فوراً وصحح اتجاهك.
+- **خطة الأهم العشري (10 Items):** اكتب قبل النوم قائمة بأهم عشرة ممارسات تود إنجازها في الصباح الباكر، ونفذها بنظام وبلا أدنى تسويف.
+- **الوضوح التام (الصراحة):** تواصل بصراحة وشفافية بالغة مع زملائك، وعزز رصيد ثقتك بقراراتك الشجاعة المتفقة مع مبادئك الأخلاقية.
+- تقدم الآن ونافس بكل شموخ واجتز **الفصل الأول** لتقتنص نقاط الجدارة المعرفية!`,
+            contentEn: `Here are three pragmatic techniques to cement internal self-belief:
+
+- **The Executive Audit:** Ask yourself daily: "If I were the literal General Manager of my career today, does this behavior develop my assets or waste them?" Correct your course immediately.
+- **The Top 10 Blueprint:** Each evening, outline the 10 most crucial, values-aligned tasks to accomplish the next morning, and execute them with system.
+- **Extreme Openness (Frankness):** Communicate with deep clarity and transparency, maintaining absolute integrity in your covenants.
+- Proceed to the **Chapter 1 Gatekeeping Quiz** to secure your continuous progression!`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "ما الذي تعنيه فلسفة الكاتب في أنك 'المدير العام' (General Manager) لذاتك؟",
+            questionEn: "What are the core implications of assuming the role of your own 'General Manager'?",
+            optionsAr: [
+              "الانتظار حتى تسنح الفرصة تلقائياً للتحكم في شؤون الآخرين التجارية.",
+              "تولي المسؤولية التامة عن قيادة وإدارة عقلك ومواهبك وتوجيهها الواعي نحو الأهداف السامية دون لوم للظروف.",
+              "تجنب القرارات الصعبة لإبعاد التوتر والضغط النفسي."
+            ],
+            optionsEn: [
+              "Waiting passively for opportunities to manage other people's commercial projects.",
+              "Assuming absolute personal responsibility for directing your own intellect, talents, and focus toward worthy ambitions.",
+              "Avoiding difficult choices to prevent psychological tension."
+            ],
+            correctIndex: 1,
+            explanationAr: "أنت المدير العام الحصري لطاقتك وقوتك، والتنازل عن هذا الدور يعني السماح للفوضى العشوائية والظروف الخارجية بصياغة مستقبلك بالنيابة عنك.",
+            explanationEn: "You are the exclusive leader of your life. Abdicating this role means handing over your potential to external forces."
+          },
+          {
+            questionAr: "كيف يعمل 'النظام' (System) على تعزيز فاعلية الإنسان وفقاً لأدامز؟",
+            questionEn: "How does implementing 'System' enhance human effectiveness according to George Matthew Adams?",
+            optionsAr: [
+              "يعمل على هيكلة وتبسيط المخرجات والأعمال اليومية، مما يمنع الفوضى ويوجه الطاقة المضاعفة لتحقيق غاياتك بعبور سلس.",
+              "يسهم في زيادة التعقيد والتأخير في تسليم الأعمال والمهام.",
+              "هو ترف مهني هامشي يسلب الفرد حريته وعفويته بالتنفيذ."
+            ],
+            optionsEn: [
+              "It structures, simplifies, and channels daily outputs, replacing chaos with streamlined energy pointing towards high goals.",
+              "It introduces unnecessary complexity and administrative delays into basic task executions.",
+              "It is an optional luxury that restricts individual freedom and spontaneous inspiration."
+            ],
+            correctIndex: 0,
+            explanationAr: "دون تنظيم واعد ومنهجية واضحة، تفقد الأعمال الضخمة بوصلتها وتتبدد الطاقة، بينما النظام يحول Sلوكيات المعقدة لخطوات سهلة العبور.",
+            explanationEn: "Without simple, purposeful system, energy degrades. Structured planning converts complicated duties into highly rewarding tracks."
+          },
+          {
+            questionAr: "كيف تتأسس العادة الذهنية لبرنامج 'أنت تستطيع' (You Can) على أرض الواقع؟",
+            questionEn: "How is the core mindset of 'You Can!' established in your daily operations?",
+            optionsAr: [
+              "عبر انتظار رضا الجميع، ومطابقة آراء المحيطين بك كلياً لتفادي النقد.",
+              "عبر صياغة أهداف وغايات طموحة، وبناء إرادة صلبة ترتبط بالعمل الواعد مع تجاهل تثبيط وسخرية المرجفين.",
+              "عبر تأجيل الأعمال الهامة للغد تفادياً للإرهاق ومحافظة على الطاقة."
+            ],
+            optionsEn: [
+              "By seeking constant external validation and complying with everyone's opinions to prevent technical debates.",
+              "By formulating high aims, building an iron will linked to daily task execution, and completely disregarding skeptic comments.",
+              "By postponing major duties for tomorrow to protect immediate biological comfort."
+            ],
+            correctIndex: 1,
+            explanationAr: "الإيمان بقدرتك وصهر ثقتك بمبادئك وأعمالك هو نقطة الانطلاق لتجاوز وتخطي تثبيط المتشككين وقهر عقبات الركود.",
+            explanationEn: "Unshakable self-belief and commitment to your purpose form the armor needed to overcome local resistance and passive habits."
+          }
+        ]
+      },
+      {
+        id: 'yc_ch2',
+        chapterNum: 2,
+        titleAr: 'الفصل الثاني: هدم الركود - تسييس العادات ومطاردة سموم القلق والحسد',
+        titleEn: 'Chapter 2: Dissolving Ruts, Habits Modification, & Eradicating Friction',
+        descriptionAr: 'كيف تكسر قوالب الركود، وتسيس ماكينة العادات الصامتة، وتطهر كيانك المعرفي من سموم القلق والغيرة المقيدة.',
+        descriptionEn: 'Breaking out of ruts, optimizing the machinery of habit, and banishing worry and envy.',
+        lessons: [
+          {
+            id: 'yc_ch2_l1',
+            idNum: 1,
+            titleAr: '1. تفادي الركود وكسر قالب التقليد الأعمى (الركود والتقليد)',
+            titleEn: '1. Dissolving Ruts and Bypassing the Imitation Pattern',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `يتطرق أدامز في هذا الدرس لخصم لدود وخطير للفعالية والتطور: **الوقوع في قوالب الركود (Ruts)**.
+
+**ما هي هذه المعضلة؟**
+الركود هو حالة من السكون والبلادة العقلية حيث يستمر المرء في تكرار نفس السلوكيات الروتينية العقيمة بلا تفكير أو تحسين واعد. الأسوأ من ذلك هو الوقوع في **قالب الركود والتقليد الأعمى** (Imitation Rut)، حيث يتنازل عن أفكاره وإبداعه الأصيل لينسخ أعمال الآخرين، فيتحول إلى نسخة مكررة باهتة فاقدة للهوية والبريق.
+
+**ماذا ستستفيد من هذا الدرس**
+الناجحون قد يقعون في قوالب الركود أحياناً، ولكنهم سرعان ما يتنبهون ويثورون بوعي شجاع للخروج الفوري منها. حافظ على عينيك مفتوحتين وعقلك مستيقظاً، وانفض غبار العادية لتظل خالقاً ومبصراً لفرص الصدارة الفريدة.`,
+            contentEn: `In this lesson, Adams dissects a dangerous obstacle to development: **The Trap of Ruts**.
+
+**What is this vulnerability?**
+A rut is a state of mental stagnation where an individual continuously repeats non-productive habits without intent or improvement. Worse is the **Imitation Rut**, where you abdicate your original creative path to copy others, becoming a blunt duplicate devoid of unique value.
+
+**What is your takeaway?**
+Effective minds hit ruts occasionally, but they proactively identify them and break out immediately. Keep your eyes open, your brain awake, and bypass passive duplication to protect your creative supremacy.`
+          },
+          {
+            id: 'yc_ch2_l2',
+            idNum: 2,
+            titleAr: '2. ماكينة العادات الصامتة: منشئ الرفعة أو مدمر الطموح',
+            titleEn: '2. The Silent Habit Engine: Creator of Efficacy or Devastator of Ambition',
+            duration: '3m',
+            type: 'core',
+            contentAr: `العادات هي الماكينة الصامتة التي تبني أو تهدم مستقبلك المعرفي والمهني دون أن تشعر. 
+
+**قانون تعاظم العادات المتكررة:**
+القرارات البسيطة الخاطئة المتكررة يومياً تصيغ سكة السقوط والخسارة المحققة، بينما التحسينات اليومية البسيطة والادخارات الإيجابية الدائمة تبني تدريجياً ثروة هائلة من الكفاءة والصدارة المعرفية. العادة تتأسس بخط عريض يتراكم بالتكرار ليصبح مساراً راسخاً بالدماغ ومحركاً تلقائياً للأفعال الصادقة.
+
+**قاعدة العادات الذهبية:**
+لا تدع العادات السيئة (كالتسويف، تضييع الفواتير، الغيبة، تشتت الانتباه) تسيس عرش تفكيرك. قم بتعطيلها فوراً، وغرس عادات حميدة (كالقراءة، التنظيم، الامتنان) لتزاحمها وتستبدلها بالكلية بمرونة فائقة وصبر متقد.`,
+            contentEn: `Habits represent the silent mechanics that shape your structural destination without you even noticing.
+
+**The compounding law of daily actions:**
+Minor negative deviations repeated consistently establish trails of decay and failure, whereas tiny daily improvements and mental savings compound into massive towers of intellectual proficiency. A habit starts as a thin thread, but regular repetition solidifies it into a permanent highway inside the brain.
+
+**The Golden Covenant:**
+Do not allow destructive habits (procrastination, idle gossip, digital distraction) to rule your executive throne. Break them immediately, and cultivate constructive patterns to conquer and replace them.`
+          },
+          {
+            id: 'yc_ch2_l3',
+            idNum: 3,
+            titleAr: '3. تطهير النفس من سموم القلق والحسد والغيرة المقيدة',
+            titleEn: '3. Banish Worry & Envy: Eradicating Emotional Friction',
+            duration: '3m',
+            type: 'core',
+            contentAr: `القلق والحسد هما طاقة هدر نفسية مدمرة، تستهلك مخزون إرادتك، وتكبح تماماً حركتك وتمنع عنك التطور.
+
+**سموم القلق والهم الفلسفي:**
+كوفي وأدامز يتفقان على أن القلق سم زعاف يعض في أعصابك وقواك العقلية دون أن يملك تغييراً للنتائج. الترياق الحقيقي للقلق والهم هو **العمل الدؤوب الخلاق والابتسامة ومواجهة الصعاب** برضا ويقين تام.
+
+**سموم الحسد والغيرة المرة (السرقة الذاتية):**
+الغيرة والحسد لنجاح الآخرين هما بمثابة **سرقة صريحة لروحك وإمكانياتك** (Self-Robbery). عندما تنفق طاقتك الذهنية في مراقبة نجاحات زملائك ومحاولة تفسير حظهم، تبدد مخزون فاعليتك الذي كان حرياً به أن يصنع تميزك الخاص. عش بعقلية وفرة واشعر بالامتنان والبهجة لنجاح الآخرين ليتضاعف رصيد إنتاجك وسعادتك!`,
+            contentEn: `Worry and envy represent destructive emotional waste. They consume your will-power resources and restrict your core focus.
+
+**The toxicity of constant worry:**
+Adams defines worry as plain poison that corrodes your mental health and stamina. The ultimate antidote to anxiety is **gritty creative action, optimistic smiles, and tackling challenges** with positive composure.
+
+**The toxicity of envy (Self-Robbery):**
+Envy of peers' success is a direct form of **Self-Robbery**. When you squander your intellectual focus monitoring others' achievements, you deplete your own development engine. Foster an abundance mindset, celebrate others' wins, and channel that positive energy into carving your own path!`
+          },
+          {
+            id: 'yc_ch2_l4',
+            idNum: 4,
+            titleAr: '4. محطة العبور: تثبيت التحرر من الركود والتحصين من منغصات الهم',
+            titleEn: '4. Review Node: Synthesizing Habit Mastery & Mental Freedom',
+            duration: '3m',
+            type: 'review',
+            contentAr: `مبارك عليك اجتياز هذا المحور الانتقالي الحاسم لتمكين سلامك الداخلي وتوجيه بوصلتك! دعنا نلخص أهم أفكار الدرس:
+
+1. **مكافحة الركود والتقليد:** تجنب حالة السبات والتبليد اليومي، وارفض أن تكون نسخة منسوخة من مسارات الآخرين.
+2. **سيادة العادات البناءة:** العادات هي من صلب صناعة مستقبلك ومكاسبك؛ احرص على ترويضها لتكون مسارات خادمة لأهدافك.
+3. **التجرد من الحسد والقلق:** تطهير عقيدتك وتفكيرك الفني من هدر الغيرة والهم عبر استبدالها بالامتنان وعقلية الوفرة والعمل الفوري الواعد.`,
+            contentEn: `You have successfully conquered the complex framework of habit optimization and mental freedom! Let us synthesize the cornerstone concepts:
+
+1. **Neutralizing Ruts:** Suppress programmatic routines and refuse to step into passive imitation paths.
+2. **Habit Engine Optimization:** Cultivate positive daily actions, recognizing that small, repeatable threads eventually form unbreakable cables.
+3. **Banish Emotional Waste:** Eradicate worry and envy. Replace them with work, optimism, and an Abundance Mindset.`
+          },
+          {
+            id: 'yc_ch2_l5',
+            idNum: 5,
+            titleAr: '5. تلميحات وصيغ تطبيقات عملية لكسر قيود الخوف والوهن الكسول',
+            titleEn: '5. Practical Tips: Overcoming Fear and Breaking Stagnation',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك ثلاث نصائح وتدريبات عملية لتنشيط رصيد الفصل الثاني اليوم:
+
+- **تدريب التنوع الإيجابي:** غير طريقتك وبسط بيئتك ونوع مهامك اليومية بانتظام لتتجنب الوقوع في رتابة السبات وركود التكرار.
+- **تطبيق قطع العادات السلبي:** حدد عادة سلبية خطيرة (كالتأخير عن المواعيد، أو الانغماس بالهاتف صباحاً) وقرر تعطيلها فوراً لمدة أسبوع كامل واستبدالها بنشاط يبعث على البهجة والتثقيف.
+- **تمرين حصانة الطاقة:** عند سماعك لنجاح باهر لزميل في العمل، بادر فوراً بتهنئته بطلب صادق من أعماق قلبك، ودون تلك التهنئة كإيداع إيجابي في بنكك العاطفي لتفعيل عقلية الوفرة اليومية.
+- تقدم الآن بثقة واقرأ بقلب متفتح واجتز **اختبار المعايرة والاعتماد** للفصل الثاني بكل اقتدار!`,
+            contentEn: `Here are three dynamic techniques to activate mental freedom and combat passive habits:
+
+- **The Variety Challenge:** Add constructive modifications to your routines, changing formats and pacing to shield your mind from cognitive fatigue.
+- **Habit Decoupling Track:** Isolate one negative behavior (like morning screen scrolling) and swap it with a 10-minute book review or physical rest.
+- **The Celebrate Protocol:** Upon witnessing a peer's victory, proactively congratulate them. This builds trust deposits and forces your subconscious into Abundance Thinking.
+- Sit for the **Chapter 2 Gatekeeping Exam** to confirm your mental clarity and open the road to continuous progress!`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "ما الذي يقصد به الكاتب بتجنب قالب 'الركود والتقليد' (Imitation Rut)؟",
+            questionEn: "What does Adams caution against regarding the concept of the 'Imitation Rut'?",
+            optionsAr: [
+              "الحفاظ على خصوصية الأعمال وعدم كشفها للمنافسين التجاريين.",
+              "الوقوع في سبات التكرار العقيم مع نسخ أعمال ومسارات الآخرين والتهاون عن صياغة إبداعك وأصالتك الذاتية.",
+              "الالتزام الكامل بالعمل الجماعي دون معارضة فنية."
+            ],
+            optionsEn: [
+              "Keeping all current business achievements hidden from commercial rivals.",
+              "Falling into mindless repetition while duplicating others' products, thus surrendering your own distinct identity and creative voice.",
+              "Adhering to strict team directives without any creative debate to preserve safe operations."
+            ],
+            correctIndex: 1,
+            explanationAr: "التقليد الأعمى يسرق أصالتك ويحرمك من إطلاق قدراتك الكامنة، والتحسن ينبع من صناعة إبداعك الأصيل كحطاب يشحذ سكين إرادته كل يوم.",
+            explanationEn: "Duplicating others restricts your baseline. Real growth stems from original effort and refining your unique assets."
+          },
+          {
+            questionAr: "كيف يتم استبدال العادات السلبية وفقاً للقواعد الاجتماعية والذهنية لأدامز؟",
+            questionEn: "How should constructive habits replace negative ones according to the text?",
+            optionsAr: [
+              "عبر تجنب العمل من الأساس وتقليل الاحتكاك مع الزملاء لتجنب الأخطاء.",
+              "عبر وعي دائم بالقرارات وتحديد خيوط الأفعال البسيطة المتكررة، وكسر السيئ منها فوراً وغرس عادات ممتعة معززة للأهداف والنظام.",
+              "عبر انتظار الظروف الخارجية المناسبة لتعديل السلوك."
+            ],
+            optionsEn: [
+              "By avoiding difficult duties altogether to prevent mistakes.",
+              "By active awareness of small repeating actions, instantly breaking negative routines, and substituting them with progressive steps.",
+              "By waiting passively for favorable external circumstances to modify behavior."
+            ],
+            correctIndex: 1,
+            explanationAr: "العادات هي مسامير البناء لفاعلية الكيان؛ كسر الساقط منها وغرس الحسن يمحو بالتدريج أثر الهدر وقنوات الفوضى العشوائية الكسولة.",
+            explanationEn: "Your behaviors are the structural nails of your potential. Removing errors and inserting progressive actions clears all procedural leakages."
+          },
+          {
+            questionAr: "لماذا يمثل 'الحسد' و 'الغيرة' نوعاً صريحاً من السلب والسرقة الذاتية (Self-Robbery)؟",
+            questionEn: "Why is 'Envy' defined as a form of literal Self-Robbery?",
+            optionsAr: [
+              "لأنه يستنزف طاقاتك في مراقبة وتحليل نجاحات الآخرين بدلاً من توجيهها لصناعة وصياغة تميزك الخاص وفرص صدارتك.",
+              "لأنه يؤدي لسرقة مادية صريحة وعمليات قرصنة فكرية ملموسة.",
+              "لأنه يعقد العلاقة التجارية مع الشركاء ويزيد الضرائب المالية."
+            ],
+            optionsEn: [
+              "Because it consumes your cognitive bandwidth on monitoring peers instead of directing that focus on developing your own assets.",
+              "Because it translates into literal fiscal theft or physical copyright piracy.",
+              "Because it complicates commercial tax filings and business relationships."
+            ],
+            correctIndex: 0,
+            explanationAr: "بدلاً من إضاعة الوقت الثمين والقدرة الشجاعة في الندم على حظ الآخرين، صب جهودك لادخار المهارات وصناعة سبل نصرك الفردي والجماعي بمتعة بائنة.",
+            explanationEn: "Wasting raw intellectual bandwidth on measuring others' pie slices leaves your own targets unwatered and dry."
+          }
+        ]
+      },
+      {
+        id: 'yc_ch3',
+        chapterNum: 3,
+        titleAr: 'الفصل الثالث: قوة العمل وعقد الإصرار والتعلم المستمر مدى الحياة',
+        titleEn: 'Chapter 3: Private Grit, Absolute Action (Do!), & Lifelong Continuous Education',
+        descriptionAr: 'قوة وفلسفة الإنجاز الفوري (افعل!)، وصنيعة الصلابة والعمود الفقري المتين، وشحذ أدوات المعرفة بالتعلم مدى الحياة.',
+        descriptionEn: 'The supreme strategy of immediate execution, building structural backbone, and pursuing continuous education.',
+        lessons: [
+          {
+            id: 'yc_ch3_l1',
+            idNum: 1,
+            titleAr: '1. فخ التسويف والبهجة الكبرى للعمل والإنجاز الفوري (افعل!)',
+            titleEn: '1. Do! Bypassing Procrastination and the Joy of Immediate Action',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `مرحباً بك يا صديقي في الفصل الملحمي الأخير من رحلتنا التمكينية لكتاب أدامز البليغ! لنغوص في لب الفعالية: **قوة العمل الفوري (افعل! / Do!)**.
+
+**فكرة الكاتب الأثيرة:**
+"الفاعل هو الحفار والمنمي والمهندس الباني؛ الفاعل هو صاحب التحريك وهو الفائز الصادق بالنهاية." الأفكار اللامعة والخطط الرائعة دون عمل تظل مجرد أحلام ميتة فوق الرفوف. التسويف وتأجيل العمل لغد طالما تملك إمكانيات ممارسته اليوم هو مقبرة التطور والتنمية الفردية. 
+
+**التطبيق العملي الفوري:**
+انطلق فوراً ونفذ المهمة الحالية الصعبة. لا تترد، ولا تنتظر الظروف الخارقة لتشرق؛ بل ابدأ بالثقاب البسيط وعقم التسويف بقوة الحركة والمباشرة والتمام بكل بهجة وكرنفالية.`,
+            contentEn: `Welcome, scholar, to the final epic module of George Matthew Adams' masterpiece! Let us deconstruct the ultimate catalyst: **Immediate Action (Do!)**.
+
+**The author's absolute stance:**
+"The Doer is the builder, the digger, and the true winner." Brilliant schematic blueprints without execution remain cold, dead papers in folders. Postponing until tomorrow what can be accomplished today acts as the graveyard of lifelong growth.
+
+**Pragmatic takeaway:**
+Launch immediately into your most complex task. Do not delay, and do not wait for ideal conditions. Kindle your own fire, bypass hesitation, and establish absolute momentum right now.`
+          },
+          {
+            id: 'yc_ch3_l2',
+            idNum: 2,
+            titleAr: '2. صنيعة العمود الفقري والصلابة ومواجهة عثرات الطريق شجاعاً',
+            titleEn: '2. Building Backbone: Mental Durability to Stand Alone',
+            duration: '3m',
+            type: 'core',
+            contentAr: `يتطرق الكاتب في هذا الدرس لمبدأ التصلب والوفاء للقيم الكبرى ويعرّفه بـ **قوة العمود الفقري (Backbone)**.
+
+**تفوق الصلابة على الوعي الفردي الممتاز:**
+العقل البهيج والذكاء الخارق والخيال الفسيح دون عمود فقري متين لا يملكون نفعاً حقيقياً في معارك المعيشة اليومية. العمود الفقري هو الإرادة الفولاذية والقدرة على **الوقوف والعمل مفرداً** بكل صلابة وثبات؛ متبنياً قراراتك الشجاعة ومتحصناً ضد الضغوط والانهيارات النفسية المانعة من الفوز والتطور.
+
+**مفهوم الصلابة المهنية:**
+الاستبقاء والالتزام بتمام الواجب وإنهاء المعارك المنهجية التي بدأتها حتى الختام بمهارة واقتدار، لدرجة تزيح عن مسارك كلياً غبار قوالب الرخاوة والركود والبلادة العقيمة.`,
+            contentEn: `In this lesson, we study Adams' core concept of inner strength: **Backbone**.
+
+**Why Backbone out-indices Intellect:**
+A brilliant brain, dynamic dreams, and creative ideas without a sturdy Backbone serve no practical purpose on the corporate battlefield. Backbone is the iron willingness to **stand alone**, defending your decisions and executing them with quiet grit against all resistance.
+
+**Pragmatic takeaway:**
+Commit fully to finishing what you begin. Reject the culture of ragged edges and halfway completions. Stand tall, execute, and eliminate all traces of passivity from your record.`
+          },
+          {
+            id: 'yc_ch3_l3',
+            idNum: 3,
+            titleAr: '3. ركائز الصدارة والمعرفة والتعلم المستمر مدى الحياة',
+            titleEn: '3. Seek True Knowledge: Continuous Lifelong Learning',
+            duration: '3m',
+            type: 'core',
+            contentAr: `التعلم الدائم هو المحرك الحقيقي لتوسيع رصيد مهاراتك وصيانة كيانك المعرفي من تبلد السنين والتقادم.
+
+**علم القيادة وريادة الكيان:**
+"الريادة والصدارة تؤول حصرياً لمن يبحث ويعرف بصدق." لا تمضِ في يومك دون أن تكتسب معلومة جديدة أو تتأمل معنى فلسفياً قيماً، أو تراجع رصيد معارفك لترقيتها تدريجياً. القراءة الواعية المنهجية هي مفتاح توسيع قنوات التآزر العقلي واليقين الحركي.
+
+**التطبيق التمكيني الفوري:**
+اجعل التعلم حبل وريدك اليومي؛ اقرأ العروض والروائع، طالع مذكرات الناجحين العظماء، التزم بشحذ عقلك لتظل منشاراً حاداً وصقراً واعداً مبهراً بوعيه وحصافة منطقه الرشيد.`,
+            contentEn: `Active, continuous education represents the ultimate generator of skill compounding and shields your intellect from decay.
+
+**To Learn is to Lead:**
+"Leadership comes solely to those who proactively know." Do not allow a single day to pass without studying a complex meaning, reviewing an asset model, or updating your technical knowledge. Reading continues to represent your ultimate leverage.
+
+**Pragmatic takeaway:**
+Embed continuous education inside your morning blocks. Read historical digests, audit Great Works, and maintain a sharp blade of intellect to sustain dynamic influence.`
+          },
+          {
+            id: 'yc_ch3_l4',
+            idNum: 4,
+            titleAr: '4. محطة العبور: تلخيص الفصول الختامية وميثاق التحسن والسيطرة الدائمة',
+            titleEn: '4. Review Node: Synthesizing Extreme Action, Backbone & Learning',
+            duration: '3m',
+            type: 'review',
+            contentAr: `مبارك مبروك! لقد أتممت ببراعة المساق المعرفي الثالث الفخم والملحمي لكتاب "أنت تستطيع"! دعنا نلخص ركائز الإنجاز الأخير:
+
+1. **صخب العمل الفوري (افعل!):** نبذ التسويف والبهجة العارمة للتحرك لتمام الواجبات بكل فاعلية حركية فورية.
+2. **العمود الفقري المتين (الصلابة):** بناء الصمود وتنمية مهارة الوقوف والعمل وحيداً بثبات ضد صخب المشتتات والانهزامية القعيدة.
+3. **التحسين المعرفي المستمر (التعلم):** الوفاء لشحذ عقلك وعصر معلوماتك لترقية دفتك القيادية وإفادة مجتمعك ونفسك باستمرار.`,
+            contentEn: `Congratulations! You have completed the final, masterclass chapter of "You Can"! Let us synthesize the ultimate private and team metrics:
+
+1. **Immediate Execution (Do!):** Completely bypass procrastination, launching immediately with focus to finish outstanding tasks.
+2. **Solid Backbone:** Cultivate robust mental durability, learning to stand alone and implement core choices without fear of skepticism.
+3. **Lifelong Growth:** Commit to constant intellectual upgrades, study Great Works, and expand your diagnostic capabilities.`
+          },
+          {
+            id: 'yc_ch3_l5',
+            idNum: 5,
+            titleAr: '5. ممارسات المعيشة الفعالة وتكريس رصيد الإحراز المعرفي الشامل',
+            titleEn: '5. Practical Tips: Launching your Lifelong Mastery Cycle',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك ثلاث نصائح إرشادية وتدريبات عملية لتنشيط ركائز النجاح والفعالية الختامية اليوم:
+
+- **عهد إنهاء المسائل:** التزم تمام التزام بعدم ترك أي عمل تبدأ به ناقصاً أو بحواف مهترئة؛ بل أنهه بجودة متكاملة وبلا أدنى تنازل.
+- **تطبيق الـ ٢٠ دقيقة للقراءة:** خصص فترات تداول ثابتة وهامة للقراءة والتنمية المعرفية الرصينة بجدولك اليومي لشحذ منطق عقلك وصيانة لمعانه.
+- ترفق يا صديقي وثبت شراع علمك وجرب بقوة واجتز **التقييم الشامل الختامي** لإصدار وتثبيت **شهادة إتمام المسار ومطابقة المقاييس 🎓!**`,
+            contentEn: `Here are three pragmatic formulas to anchor your lifelong continuous improvement path today:
+
+- **The Completion Covenant:** Vow to banish ragged edges. Treat each task you start as an absolute contract that must be completed with flawless quality.
+- **The 20-Minute Sharp Focus:** Secure 20 silent minutes inside your morning routine dedicated purely to studying technical digests or diagnostic books.
+- Take a deep, proud breath, and sit for the **Chapter 3 final evaluation** to officially generate your **Continuous Achievement PDF Certificate 🎓!**`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "ما الذي تجسده فلسفة 'العمود الفقري' (Backbone) مقارنة بذكاء العقل والخيال البهيج؟",
+            questionEn: "What is the primary relationship between 'Backbone' and intellect according to Adams?",
+            optionsAr: [
+              "أن الذكاء والخيال كافيان تماماً لصناعة وصياغة الإنجاز دون الحاجة لقوة العزيمة الصلبة.",
+              "أن العقل الخارق والخيال دون عمود فقري حديدي لا نفع لهما، لأن العمود الفقري هو الإرادة الشجاعة للوقوف منفرداً أمام الصعاب لإكمال المهام.",
+              "أن العمود الفقري سمة جسدية رياضية لا تعني صلب عمل العادات الذهنية."
+            ],
+            optionsEn: [
+              "That a brilliant intellect and creativity are completely sufficient on their own to secure success without willpower.",
+              "That high intellect without a strong Backbone is sterile, because Backbone supplies the courage to stand alone and implement ideas.",
+              "That backbone represents a physical athletic metric unrelated to the core mechanics of mental efficacy."
+            ],
+            correctIndex: 1,
+            explanationAr: "الأفكار والخيال هما بذور التصميم، لكن العمود الفقري هو الجذع القوي الذي يحمل البناء ويواجه العواصف والصعاب ليحفظ الإنجاز ساطعاً.",
+            explanationEn: "Imagination constructs the blueprint, but Backbone provides the moral courage to implement and stabilize those plans over your routine."
+          },
+          {
+            questionAr: "كيف يؤثر تأجيل الأعمال وتأخير التنفيذ لغد (التسويف) على فاعلية الإنسان التمكينية؟",
+            questionEn: "How does procrastination affect systemic human effectiveness over time?",
+            optionsAr: [
+              "يعمل على تركيز الطاقة وإعادة تجميع القوى الذهنية والجسدية بشكل أفضل للغد.",
+              "يمثل فخاً قاتلاً يهدر طاقتك، ويستنزف إرادتك، ويعزز الفوضى العشوائية الكسولة ليكون مقبرة لرقيك المهني والتطويري.",
+              "يسهم في زيادة سعادتك وتثبيت صداقتك ومواكبتك مع الظروف المفاجئة."
+            ],
+            optionsEn: [
+              "It focuses energy and restructures your mental and biological power for better execution tomorrow.",
+              "It acts as a fatal trap that leaks your potential, depletes your will-power, and expands passivity to destroy lifelong progression.",
+              "It advances your workplace happiness and synchronizes your timing with unexpected emergencies."
+            ],
+            correctIndex: 1,
+            explanationAr: "التنزيل العملي الفوري للأفكار (افعل!) هو المحرك الحقيقي للفعالية والصدارة، والتحسن ينبع بالكامل من صدم وإجهاز التسويف بقوة المسير.",
+            explanationEn: "Immediate action represents the crown habit of doers. Delaying targets only breeds passivity and structural bottlenecks."
+          },
+          {
+            questionAr: "بأي مبدأ أخلاقي وتنموي يرتبط 'التعلم المستمر مدى الحياة' في مدرسة أدامز لليقين؟",
+            questionEn: "How is 'Continuous Lifelong Learning' linked to personal leadership in George Matthew Adams' model?",
+            optionsAr: [
+              "هو استثمار إجباري يمنع التسلية والترفيه ويقيد حركتك لتكون حبيس الكتب كلياً.",
+              "هو الوقود الحقيقي لتوسيع قنوات القدرات المعرفية والمهنية الفنية، فالصدارة والريادة مآلها الدائم لمن يبحث ويقرأ ويعرف باستمرار.",
+              "هو نشاط إضافي اختياري لا تأثير له على مواكبتك ومكاسبك المهنية الحركية المعاصرة."
+            ],
+            optionsEn: [
+              "It represents a forced chore that restricts your lifestyle and imprisons your mind inside dry papers.",
+              "It is the driving force of capacity expansion, since leading and structural influence belong exclusively to those who continuously learn.",
+              "It is a secondary optional pursuit that has zero impact on your career status or modern commercial earnings."
+            ],
+            correctIndex: 1,
+            explanationAr: "شحذ عقلك بانتظام بالمعرفة الراقية ومطالعة العروض وسير العباقرة يبقيك متيقظاً، ويمنح منطق حديثك الرشيد وفكرك الفني حصافة وعقولاً ممتازة.",
+            explanationEn: "Upgrading your diagnostic resources via study keeps your mind alert and prepares your system for high-value leadership."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'power_of_now',
+    titleAr: 'كتاب قوة الآن: الدليل إلى التنوير الروحي',
+    titleEn: 'The Power of Now - Spiritual Enlightenment',
+    authorAr: 'إيكهارت تول',
+    authorEn: 'Eckhart Tolle',
+    coverImage: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=400&q=80',
+    descriptionAr: 'منظومة روحية متكاملة تفكك سيطرة الأفكار التوترية وجسد ألم الماضي، لتقودك إلى عمق الحاضر وقوة السكون الإلهي.',
+    descriptionEn: 'The world-famous guide to spiritual enlightenment, dissolving the illusion of time, and reclaiming the immense power of Present Presence.',
+    isLocked: false,
+    chapters: [
+      {
+        id: 'pn_ch1',
+        chapterNum: 1,
+        titleAr: 'الفصل الأول: أنت لست عقلك والعائق الأعظم للتنوير',
+        titleEn: 'Chapter 1: You Are Not Your Mind & The Enemy of Awakening',
+        descriptionAr: 'تحليل شفرة التماهي الفكري، تذويب تطفل الأفكار والعيش كالمراقب الواعي بعيداً عن ألاعيب الأنا المتكبرة.',
+        descriptionEn: 'Deconstructing mental identification, dissolving the continuous chatter, and stepping into the watcher persona beyond the ego identity.',
+        lessons: [
+          {
+            id: 'pn_ch1_l1',
+            idNum: 1,
+            titleAr: '1. وهم العقل الحاكم: كسر الارتباط الحصري بالهوية الفكرية والأفكار الصاخبة',
+            titleEn: '1. Illusion of Mind: Breaking Free from the Thinking Machine',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `مرحباً بك يا صديقي في المسار التنويري الرائد لكتاب إيكهارت تول الخالد: **قوة الآن!**
+
+**لماذا هذه التجربة بالغة الروحانية؟**
+يتحرك إيكهارت تول من تجربة شخصية خارقة كادت تقوده للانتحار مسببة له يدفاً من الانهيار النفسي الكامل، حتى أفاق فجأة مستيقظاً على وعي روحي شامل مفاده: "أنا لا أستطيع العيش مع نفسي بعد الآن، فهل أنا اثنان؟"
+- **العقل المضطرب (الأنا):** الكيان المزيف الذي يعيش بنزاع دائم مع الواقع ويمطر عقلك بآلاف الأفكار المترددة.
+- **الشاهد الحاضر (الوعي):** مركز الثقل الحقيقي والساكن داخلك الذي يتأمل الأمور برزانة وهدوء كلي.
+
+**ماذا ستستفيد من هذا الدرس الجوهري؟**
+السر الأول يبدأ بـ **مراقبة المفكر** بداخلنا دون إصدار أحكام. بدلاً من الاستسلام لقطار القلق، ستجلس كشاهد صامت يتنبه لمرور الأفكار كالسحب العابرة لتلامس البعد السادن اللانهائي في جوهرك الحقيقي.`,
+            contentEn: `Welcome, seeker, to the transcendent masterclass of Eckhart Tolle's timeless guide: **The Power of Now!**
+
+**Why is this spiritual path so vital?**
+Eckhart Tolle writes from a profound personal awakening that rescued him from severe chronic depression, where he suddenly questioned the dialog within: "Am I one or am I two?"
+- **The Chatterbox (Ego):** The artificial persona constantly rebelling against reality and saturating your skull with anxious noise.
+- **The Silent Watcher (Consciousness):** Your authentic, non-judgmental anchor of presence that observes your thoughts from absolute stillness.
+
+**What is your takeaway?**
+Awakening starts with **observing the thinker**. Instead of sliding into panic, take your seat as the neutral observer, watching transient concerns pass like dry clouds.`
+          },
+          {
+            id: 'pn_ch1_l2',
+            idNum: 2,
+            titleAr: '2. العائق الأعظم للتنوير: كيف يقيدنا العقل بروتين المخاوف وصراعات المستقبل',
+            titleEn: '2. The Greatest Obstacle: Deconstructing the Egoic Trap',
+            duration: '3m',
+            type: 'core',
+            contentAr: `في هذا الدرس الفريد، نتناول آلية العقل في الهرب المستمر من الواقع: **"إن العقل لا يستشعر الأمان طالما أن الحاضر ساكن؛ لذا يستعبدنا بالماضي والمستقبل"**.
+
+**كيف يسجننا العقل الصاخب؟**
+تحت شعار "تحليل المخاطر"، ينبش عقل الأنا دفاتر الماضي بحثاً عن الندم واللوم، ويسقطها مجدداً على المستقبل رعباً وفزعاً، لتدور في حلقة غامضة مهدِرة للنقد والوقت والذكاء.
+
+**ترياق إيكهارت تول الحاسم:**
+إن التنوير ليس وضع حال تظاهر خارق كالعجائب؛ بل هو ببساطة **استرجاع اتصالك بجوهر وجودك الساكن** في لحظة الحاضر النظيفة. اسحب تركيزك من الأهداف البعيدة وسلط وهج وعيك كاملاً على الدقيقة التي تلجها الآن.`,
+            contentEn: `In this lesson, we analyze how the mind flees the absolute: **"The egoic mind cannot tolerate the stillness of the present; it demands the drama of past and future."**
+
+**How does this thinking trap work?**
+Under the pretense of "caution," the ego digs up past regrets and projects them as future anxiety, trapping you in a phantom cage.
+
+**Eckhart's definitive cure:**
+Enlightenment is not a magical superpower or a theatrical show; it is simply **reclaiming your union with Being** in the current moment. Pivot your energy from distant mental plans and flood your immediate location with total attention.`
+          },
+          {
+            id: 'pn_ch1_l3',
+            idNum: 3,
+            titleAr: '3. العاطفة رد فعل الجسد: مواجهة المشاعر المكثفة وإحالتها لصمت الحضور الدائم',
+            titleEn: '3. Emotion & the Body: Transmuting Energy into Stillness',
+            duration: '3m',
+            type: 'core',
+            contentAr: `يتكامل وعينا الحركي الروحي بفهم القاعدة الثالثة الكبرى للتحرر: **"العاطفة هي تمثيل الجسد لردود فعل العقل المتوترة"**.
+
+**العلاقة الجدلية بين الفكرة والمشاعر:**
+حين يفرز العقل فكرة تهديد وهمية، يترجمها الجسد لانقباض عضلي وخوف بالصدر. تصبح المشاعر بمثابة مرآة مادية للأفكار غير الواعية.
+
+**كيف نتعامل بذكاء مع تلاطم عواطفنا؟**
+بدلاً من محو المشاعر أو الهرب منها التهويدي، قف وصوب انتباهك مباشرة ونظف قلبك، وتنفس بعمق مستشعراً طاقة العاطفة ذاتها بداخل جسدك دون وضع مسميات فكرية (غضب، حزن). هذا الحضور الدقيق يشير إلى **بوابة الاستسلام** ويمتص الشظايا التدميرية ويذيبها في وعاء الحصافة المعرفية الشاملة.`,
+            contentEn: `Our spiritual integration deepens by generalizing Tolle's third guide for liberation: **"Emotion is the body's physical mirror of mental activity."**
+
+**The feedback loop between thoughts and feelings:**
+When the mind generates a threat scenario, the biology translates it into physical tension. Feelings become a corporeal reflection of unconscious thoughts.
+
+**How do we interact with emotional turbulence?**
+Do not suppress or escape. Direct your search inward, feel the raw sensory baseline of the emotion within (without labeling it as 'anger' or 'grief'), and anchor your breathing. This conscious touch acts as the gateway to acceptance, dissolving systemic anxiety.`
+          },
+          {
+            id: 'pn_ch1_l4',
+            idNum: 4,
+            titleAr: '4. محطة العبور: مراجعة دفتك المعرفية وتوطيد الحضور الساكن وبطلان ألاعيب وهم الأنا',
+            titleEn: '4. Review Node: Synthesizing Presence & De-identifying from the Ego',
+            duration: '3m',
+            type: 'review',
+            contentAr: `تهانينا يا صديقي بتمام المحور الأول الفذ لتعزيز حصانتك الروحية! لنستجمع الآن أضلع التحرر الثلاثة الكبرى:
+
+1. **مراقبة المفكر:** الوعي والاعتزاز بأنك لست الآلة المفكرة بل أنت الفضاء الشاهد الذي يعلو أصوات الأفكار المزعجة بوقار.
+2. **سحق سباق الأنا للوراء والأمام:** مناهضة قاطرة الزمن النفسي والتعلق الزائف بالذكريات والخطط على حساب وعيش مفرزات الحاضر.
+3. **مراقبة عواطف الجسد:** قراءة المجهود العواطفي والقبول اللامشروط للمشاعر دون الغرق بالدراما اللفظية السلبية الطاحنة.`,
+            contentEn: `You have successfully unlocked the primary blueprints for deep inner sanctuary! Let us synthesize the cornerstone concepts:
+
+1. **Observe the thinker:** Realize you are not the thinking voice; you are the spacious field of awareness behind the constant words.
+2. **Refuse ego migrations:** Actively resist the mind's escape into yesterday and tomorrow, prioritizing current tasks.
+3. **Welcome bodily emotions:** Audit physical sensations neutrally, bypassing verbal drama and maintaining calm.`
+          },
+          {
+            id: 'pn_ch1_l5',
+            idNum: 5,
+            titleAr: '5. دليل التمارين الحياتية للحضور الفوي وقياس معايير وعيك وصمودك الروحي والعملي',
+            titleEn: '5. Practical Tips: Awakening Intimate Presence in Your Routine',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك ثلاث صيغ عملانية وتلميحات يومية لتفعيل الحضور الساكن والبهجة الحالية اليوم:
+
+- **تطبيق فواصل التنفس الثلاثة:** ثلاث مرات بجدولك المزدحم، قف تماماً عن أي مجهود وركز وهج انتباهك على زفيرك وشهيقك ودخول النقاء بوعي دقيق لجسدك الداخلي.
+- **تأمل غسيل الأيدي والوجبات:** حول أي نشاط روتيني (كالمشي، تناول الطعام، غسل الوجه) إلى تجربة تنويرية عبر الانغماس الكامل بلمس الأشياء وسماع صب المياه ومضغ التغذية بحس مرهف لا تشوبه أفكار معطلة.
+- تقدم الآن وعزز صدارتك الروحية واجتز **التقييم الشامل للفصل الأول** لتقتنص نقاط الكفاءة المستحقة!`,
+            contentEn: `Here are three pragmatic formulas to inject the stillness of presence into your daily operations starting now:
+
+- **The Conscious Breath Stop:** Three times inside your daily routine, pause all logical tasks, focus your attention on your breath, and feel the silent energy of the inner body.
+- **The Ritualization of Mundane Tasks:** Upgrade common actions (like eating or washing) into portals of enlightenment by immersing your senses fully in the touch, scent, and sound of the moment.
+- Sit for the **Chapter 1 Evaluation** to secure your persistent mastery and advance further!`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "كيف يمكنك بذكاء كسر سيطرة وهم الأنا والأفكار الصاخبة وفقاً للفصل الأول؟",
+            questionEn: "How do you break the iron grip of the ego and mental chatter according to Chapter 1?",
+            optionsAr: [
+              "بالصراخ بصوت مرتفع لتسديد الضربات والشتائم للأفكار المزعجة حتى تغادر تماماً.",
+              "بتقمص شخصية المراقب والشاهد الصامت للأفكار بوقار، دون محاربتها أو إصدار أحكام روتينية عليها.",
+              "بزيادة شرب القهوة والتفكير بعمق بكافة صراعات الأصدقاء وتكبير الديون لتعجيز العقل."
+            ],
+            optionsEn: [
+              "By shouting back at your passing thoughts to scare the inner dialogue away.",
+              "By adopting the persona of the silent witness, observing passing concerns neutrally without fighting or labeling them.",
+              "By stimulating panic through overthinking material struggles to paralyze structural mind-hacks."
+            ],
+            correctIndex: 1,
+            explanationAr: "مراقبة المفكر بهدوء تسحب الوقود والنقد عن الأفكار التشتتية الحاكمة لتذيبها وتسلب نفوذ الأنا بكل هدوء وثبات.",
+            explanationEn: "Neutral observation starves thoughts of identification energy, causing the ego's control mechanisms to gently collapse."
+          },
+          {
+            questionAr: "ما هي الصلة الجوهرية والصيغة الحيوية المميزة لعواطف المشاعر بجسدك؟",
+            questionEn: "What represents the fundamental relationship between emotions and your body?",
+            optionsAr: [
+              "المشاعر هي مجرد غدد هرمونية ليس للعقل أو القلق المتراكم أي صلة بصناعتها مطلقا.",
+              "المشاعر هي تمثيل وانعكاس مادي مباشر لردود فعل العقل وأفكاره غير الواعية بداخل جسد الإنسان.",
+              "المشاعر هي ذكاء خارق تضمنه المدارس بحرص للتخلص من العبء المادي والوظيفة."
+            ],
+            optionsEn: [
+              "Emotions are simple standalone biological metrics completely unrelated to continuous cognitive worry.",
+              "Emotions represent the body's direct physical mirror and reflection of mental activity and unconscious thoughts.",
+              "Emotions are complex structures taught by modern schools to ease fiscal strain."
+            ],
+            correctIndex: 1,
+            explanationAr: "العواطف تعكس الفكرة؛ فالفكرة المقلقة تخلق خوفاً ملموساً بعضلات الجسد، ومراقبتها كطاقة حسية دون تسميات فكرية تذيب الألم فوراً.",
+            explanationEn: "Emotion mirrors thought; an anxious worry generates contraction. Neutral sensing resolves the underlying stress loop."
+          },
+          {
+            questionAr: "ما هو جوهر مفهوم 'التنوير الروحي' الحقيقي عند إيكهارت تول؟",
+            questionEn: "What is Eckhart Tolle's core definition of true 'Spiritual Enlightenment'?",
+            optionsAr: [
+              "هو حيازة إمكانيات خارقة كالمشي فوق الماء والقدرة على الطيران بالمهرجانات العالمية.",
+              "هو ببساطة تذويب التشتت واسترجاع اتصالك بجوهر وجودك الساكن والأبدي في لحظة الحاضر النظيفة.",
+              "هو اعتزال كامل الحياة البشرية وتجنب التفاعل مع الأسواق والعمل بصفة نهائية ومطلقة."
+            ],
+            optionsEn: [
+              "It is acquiring supernatural abilities like flying across cities or defying physical laws under stage lights.",
+              "It is simply dissolving the mental haze and reclaiming your union with your deep, eternal Being in the Present.",
+              "It is abandoning human society altogether and avoiding work or communication permanently."
+            ],
+            correctIndex: 1,
+            explanationAr: "التنوير هو استقراء السكون الداخلي وصيانة اتصالك بنبع الكينونة السائد خلف سحابة الأفكار التوترية الصاخبة.",
+            explanationEn: "Enlightenment is the peaceful realization of your state of Being, untouched by the continuous storms of the thinking mind."
+          }
+        ]
+      },
+      {
+        id: 'pn_ch2',
+        chapterNum: 2,
+        titleAr: 'الفصل الثاني: الوعي هو مخرج الألم ولا تخلق أظفار العذاب بالحاضر',
+        titleEn: 'Chapter 2: Consciousness is the Way Out of Pain & Stopping suffering',
+        descriptionAr: 'آليات إذابة جسد الألم الموروث، تطهير المعاناة النفسية الفورية، وقهر وهم الزمن السيكولوجي بمحاربة الهجرات الفكرية للماضي كلياً.',
+        descriptionEn: 'Techniques of dissolving the inherited pain-body, terminating active suffering, and eliminating psychological time projections.',
+        lessons: [
+          {
+            id: 'pn_ch2_l1',
+            idNum: 1,
+            titleAr: '1. مأساة المعاناة الفورية: التصلب العقلي والتحيز اللامشروط للحظة الآنية لمنع العذاب',
+            titleEn: '1. Stop Creating Suffering Now: Complete Alignment with Reality',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `مرحباً بك في المحور الثاني التأسيسي لتمام نضارتك وعلو وعيك! نتأمل اليوم الدرس الأبرز للتحرر: **"لا تخلق مزيداً من الألم في الحاضر"**.
+
+**من أين تنشأ المعاملة المعيشية اليوم؟**
+المعاناة النفسية تبدأ بفكرة رفض للموجود ومقاومة الواقع. حين يرفض عقلك الخسارة المادية، أو يتشنج من فواتير مباغتة، فإنه يبني دراما ممتلئة بالمعاناة توازي الكارثة ذاتها مئة مرة وتفتت نقدك وقواك الذهنية.
+
+**الحل الكيوساكي والروحي الفذ:**
+اقبل اللحظة كما هي أولاً (Accept current reality first). قبولك للحدث كشاهد صامد يعزل عن قلبك رد الفعل الغاصب، ويمنح تفكيرك الفني ونظامك القيادي برودة الأعصاب والمناعة اللازمة لاتخاذ قرارات كاسحة ونافذة بلا تنازل أو غرق بالنواح والندم البائس.`,
+            contentEn: `Welcome to the second module focusing on tactical emotional immunity! Today, we deconstruct Eckhart's major directive: **"Create no more pain in the present."**
+
+**Where does suffering come from?**
+Passive suffering originates from resisting reality. When the mind rejects an unexpected change, it spins a drama of victimhood that multiplies the actual problem a hundredfold.
+
+**The executive solution:**
+Accept the current moment as it is first. Accepting the starting reality insulates your system from rage, giving your analytical mind the cool clarity needed to execute clean solutions.`
+          },
+          {
+            id: 'pn_ch2_l2',
+            idNum: 2,
+            titleAr: '2. جسد الألم (Pain-Body): كيفية مواجهة الكيان المظلم الممتص لطاقاتك وإذابته بالوعي الساكن',
+            titleEn: '2. The Pain-Body: Dissolving the Shadow Self with Pure Awareness',
+            duration: '3m',
+            type: 'core',
+            contentAr: `يتكامل رصيدك المهاري بفهم هذا المفهوم الخارق: **جسد الألم (Pain-Body)**.
+
+**ما هو جسد الألم بداخلنا؟**
+هو تجمع وتراكم لكافة الآلام النفسية والكسور العاطفية التي مررنا بها بطفولتنا ولم نتخلص منها. يعيش هذا الظل الساكن كطفيلي يتغذى على طاقتنا، ويستيقظ فجأة ليثير عاصفة من الحزن الشديد أو الغضب المباغت رغبة منه في تغذية ذاته بمزيد من النكد والصراخ مع الآخرين.
+
+**شفرة إذابة جسد الألم المارد:**
+الحل ليس بمقاومته أو كتمه الهدام؛ بل بإنزال **وهج الملاحظة الواعية** عليه فور يقظته. حين تشعر بفيضان الغضب يغلي بداخلك، قف كحارس ناصح، وتنفس رصيناً، واستشعر طاقته بوعي سليم دون إعطائه وقوداً من الأفكار الصامتة المشتعلة بالندم. هذا يحرمه من فرصة السيطرة ويحوله تدريجياً لوعي ساكن ونظيف.`,
+            contentEn: `Our structural emotional safety deepens by understanding Tolle's critical concept: **The Pain-Body**.
+
+**What represents the Pain-Body within us?**
+It is a cumulative field of unresolved emotional wounds and disappointments carried from the past. It dwells as a semi-autonomous parasite feeding on your energy pool, waking up periodically to trigger sudden melancholy or rage to feed on drama.
+
+**Deactivating the phantom self:**
+Do not suppress it. Flood it with **pure presence** the moment it stirs. When you feel a tide of anxiety rising, stand as the conscious witness, feel the localized energy, and starve the urge to overthink. This strips the pain-body of control.`
+          },
+          {
+            id: 'pn_ch2_l3',
+            idNum: 3,
+            titleAr: '3. وهم الزمن السيكولوجي: تفكيك أغلال ماضيك الزائف لتوسيع مسار بناء الأصول والفاعلية',
+            titleEn: '3. Breaking Psychological Time: Maximizing Output via the Present',
+            duration: '3m',
+            type: 'core',
+            contentAr: `هناك تمييز فني حاسم بين نوعين من الزمن يجب عليك إدراكه لترقية بصيرتك الاستثمارية وتسييس مجهودك:
+
+1. **الزمن العادي (Clock Time):** الزمن التنظيمي الفني لجدولة المواعيد والتداول وإنجاز الواجبات، وهو صحي وبناء لصناعة صدارتك المهنية والعملية اليومية بانتظام.
+2. **الزمن النفسي (Psychological Time):** التماهي الكسول والتحيز الدائم للعيش بذكريات الندم بالماضي أو قلق طموحات المستقبل الخادعة، مما يسلب فاعلية تركيزك اليوم.
+
+**التحرر الشامل:**
+استعمل الزمن العادي بكل كفاءة لتوجيه عملك وتدريب مهاراتك اليوم، لكن اقطع فوراً قاطرة الزمن النفسي التي تسرق وهج لمعان عقلك وتهدر جهود التطوير بجدولك الشفاف مستعبدة إياك للأوهام الكاذبة.`,
+            contentEn: `Eckhart defines a strategic boundary between two forms of time. Grasping this optimizes your performance and preserves your focus:
+
+1. **Clock Time:** Practical temporal metrics used to schedule project delivery, draft balance sheets, and audit systems. Crucial for career efficiency.
+2. **Psychological Time:** Unconscious migration into yesterday's regrets or tomorrow's fantasies, which drains constructive focus.
+
+**Sovereign execution:**
+Utilize clock time to govern your tasks, but instantly disconnect the flow of psychological time that robs your mind of operational clarity and halts progression.`
+          },
+          {
+            id: 'pn_ch2_l4',
+            idNum: 4,
+            titleAr: '4. محطة العبور: تثبيت آليات موازنة المشاعر والتخلص السلس من كيد جسد الألم والزمن النفسي',
+            titleEn: '4. Review Node: Integrating Pain-Body Dissolution & Clock Time Mastery',
+            duration: '3m',
+            type: 'review',
+            contentAr: `مبارك عليك اجتياز هذا المفرق المعرفي الهام لتطهير قنوات حريتك ووعيك الروحي! نلخص أهم أضلع العبور الثابتة:
+
+1. **قهر توليد المعاناة اليوم:** الوعي بأن الرفض والقاومة للواقع كعجلة غضب مفرغة يضاعفان حجم الخلل المالي أو الإداري مراراً دون عائد.
+2. **تشتيت وقود جسد الألم:** تسليط مصباح الحضور الصامت عليه بمجرد الاستثارة لتعجيز سطوته وتذويبه في بحر الروتين الواعي.
+3. **توطيد الزمن العادي:** جدولة أعمالك وتدريب مهاراتك المانحة للامتياز بانتظام، مع قطع تيار الأطماع والقلق الوهني للمستقبل الزائف.`,
+            contentEn: `You have successfully mastered the complex mechanics of emotional immunity and temporal alignment! Let us synthesize the cornerstone concepts:
+
+1. **Terminate suffering generation:** Realize that resisting current challenges strictly worsens the friction. Align with the situation to plan actions.
+2. **Dissolve the Pain-Body:** Ignite the light of non-reactive observation to dissolve historical emotional traps.
+3. **Optimize Clock Time:** Drive career execution step-by-step, while cutting psychological time that leaks your attention.`
+          },
+          {
+            id: 'pn_ch2_l5',
+            idNum: 5,
+            titleAr: '5. تلميحات وصيغ وتطبيقات عملية لاختراق جسد الألم وتثبيت رصيف الحضور الدائم بذكاء',
+            titleEn: '5. Practical Tips: Safeguarding Your Present State Today',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك ثلاث نصائح عملانية فخمة وشهية لتجديد صفاء وقدرة موازنتك ووعيك المعيشي اليوم:
+
+- **تدريب رادارية جسد الألم:** صنف مشاعرك فوراً عند نقاش حاد عائلي أو مهني: "هل ردي نابع من الحدث الحالي أم من تراكم آلام الماضي؟" استنشق الصمت وتأمل بوقار وافصل بحصافة.
+- **تطبيق العودة لقماشة التنفس الستار:** عند استشعار قلق مالي أو مهني وهمي للمستقبل، اترك مكعب الأوراق لثوانٍ واغمر جسدك المادي بحضور دافئ واقهر ثنائية الخوف.
+- تقدم الآن ونافس بكل جدارة واجتز **التقييم الشامل الختامي للفصل الثاني** لتستحوذ على أعلى نقاط الكفاءة بجدارة!`,
+            contentEn: `Here are three dynamic techniques to cultivate emotional and situational sovereignty today:
+
+- **The Trigger Diagnostic:** Notice your internal responses during workplace friction: "Am I responding to Chapter 1 reality, or is my pain-body speaking?" Breathe and distance yourself.
+- **The Immediate Body Grab:** When future-based anxiety begins to distract you, stop your computer mouse, and focus all perception on the internal space of your limbs.
+- Sit for the **Chapter 2 Exam** to prove your structural upgrade and unlock Chapter 3!`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "ما هو تصنيف وتوصيف 'جسد الألم' (Pain-Body) بداخل موازنات طبائع البشر؟",
+            questionEn: "What is Tolle's description of our internal 'Pain-Body'?",
+            optionsAr: [
+              "هو هيكلية جسدية رياضية تطور معدلات العضلات بمجرد حمل المتاعب والمقاييس والمال.",
+              "هو حقل تجمع وتراكم لآلام وجراح الماضي يعيش كطفيل مظلم بداخلنا ويتغذى على دراما النكد والصراع.",
+              "هو معمل وقائي تضمنه البنوك لصناعة حصانة مالية تحميك من نفوذ الخسارة الاستثمارية."
+            ],
+            optionsEn: [
+              "It represents a physical muscular framework that expands capacity as you lift material burdens.",
+              "It is an accumulated field of unresolved historical wounds, living inside as a semi-autonomous shadow that feeds on drama.",
+              "It refers to a protective banking buffer aimed at securing currency reserves from inflation."
+            ],
+            correctIndex: 1,
+            explanationAr: "إذابة جسد الألم تتأتى بالامتناع التام عن التماهي الفكري معه، والعودة الفورية للحظة الحاضر النظيفة كشاهد صامت يسحب وقود الندم.",
+            explanationEn: "Neutral observation cuts the supply flow. By observing the pain-body without identifying, you dissolve its grip."
+          },
+          {
+            questionAr: "ما هو الفاصل الذهبي والتحيز الحصيف الصانع للفروق بين 'الزمن العادي' و 'الزمن النفسي'؟",
+            questionEn: "What is the strategic boundary between 'Clock Time' and 'Psychological Time'?",
+            optionsAr: [
+              "الزمن العادي هو الشغل المؤقت بينما السيكولوجي يسفر عن ترقية منصبك بالعمل الحكومي لتدريب مهاراتك.",
+              "الزمن العادي فني لجدولة الأهداف والتدريب وصناعة الصدارة والريادة، بينما النفسي هجرات عشوائية عقيمة تحجزك بالندم والتوهم وقلق المستقبل.",
+              "لا يوجد أي فرق بينهما فكلاهما مصادر وهمية تستخدمها الشركات الكبرى لغرض استعباد مجهود الموظف."
+            ],
+            optionsEn: [
+              "Clock time refers to part-time tasks, while psychological time guarantees long-term public job promotions.",
+              "Clock time is a practical tool to organize tasks, while psychological time is an exhausting migration into regrets of yesterday or worries of tomorrow.",
+              "There is no distinction, as both represent arbitrary constructs utilized by conglomerates to exploit output."
+            ],
+            correctIndex: 1,
+            explanationAr: "تسييس وقتك باستعمال الزمن العادي لخدمة الأهداف وتطوير الأصول، مع الاستئصال الصارم للزمن النفسي هو ذروة النجاح والذكاء المالي والعملي الواعد.",
+            explanationEn: "Use Clock Time to drive functional tasks, and sever Psychological Time to protect your operational sanity."
+          },
+          {
+            questionAr: "كيف يؤثر رفض ومقاومة مجريات الواقع الراهنة على الإنسان من منظور الفصل الثاني؟",
+            questionEn: "How does resisting the reality of the present moment affect human efficiency?",
+            optionsAr: [
+              "يمنح رصيدك وقواك الاستثمارية دافعاً كبيراً للتفاوض وتسييس البنوك بذكاء.",
+              "ينتج المعاناة النفسية المفرغة والدراما التشتتية التي تستهلك لمعان عقلك وتهدر طاقاتك ونقدك دون أي مردود صيانة حقيقي للواقع.",
+              "يسهم في حماية ممتلكاتك الشرفية ويقلل نفقات وضرائب الشركات كلياً."
+            ],
+            optionsEn: [
+              "It provides your financial operations with powerful leverage to negotiate better interest rates with local banks.",
+              "It produces active psychological suffering and dramatic drama that drains mental focus and stops career productivity.",
+              "It safeguards your private property and directly decreases corporate income tax."
+            ],
+            correctIndex: 1,
+            explanationAr: "القبول اللامشروط للواقع الحالي أولاً يسكن ثورة الغضب السلبي بقلبك، ويمنح عقلك وهج الرزانة والنور لاتخاذ قرارات كاسحة تنمي أصولك.",
+            explanationEn: "Accepting current challenges stabilizes your nervous system, granting you the quiet resolve to implement constructive answers."
+          }
+        ]
+      },
+      {
+        id: 'pn_ch3',
+        chapterNum: 3,
+        titleAr: 'الفصل الثالث: التحرك بعمق في اللحظة الآنية وتذويب وهم المستقبل السيكولوجي',
+        titleEn: 'Chapter 3: Moving Deeply into the Now & Transcending Future Projections',
+        descriptionAr: 'منظومة الاستسلام الروحي الفعال كقوة إعجازية قاهرة، تذويب هوس القلق التخطيطي، والوصول الفني للبعد الكائن خلف ثنائيات العقل المتلاطمة.',
+        descriptionEn: 'The masterclass of active surrender, dissolving compulsive planning anxiety, and accessing the spacious dimension beyond mental polarities.',
+        lessons: [
+          {
+            id: 'pn_ch3_l1',
+            idNum: 1,
+            titleAr: '1. التجاوز الفذ للزمن: كيف ندخل الأبعاد العميقة للآن لتطهير قلق التخطيط للمستحيل',
+            titleEn: '1. Transcending Time Projections: Accessing Inner Silence Today',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `مرحباً بك يا صديقي في الفصل الثالث التمكيني والملحمي الختامي لقوة السكون والوعي السامق! دعنا نغوص في شفرتها الكبرى: **"التحرك بعمق في اللحظة الآنية (Moving deeply into the Now)"**.
+
+**مكمن ألاعيب المستقبل الروتينية:**
+يقنعنا العقل دائماً بأن: "الحرية والسعادة المطلقة ستأتي في المستقبل حين تحوز وظيفة جديدة، أو تنهي أقساط العقار". يسمي إيكهارت هذا بـ **مستقبل زمن الأمان الزائف**.
+- **المستقبل السيكولوجي:** وهم يستعبدك لتضحية بنقاوة يومك وصحة جسدك من أجل وهم وهمي لا تملكه أبداً.
+- **الحاضر الأكتع (الآن):** هو ملكيتك وصك سيادتك الوحيد؛ فيه تخلق الوفاق وتؤسس التحالفات وتولد الأصول الواعدة بحيوية بالغة.
+
+**الهدف الجوهري:**
+تعلم كيف تسحب كامل طاقتك من سيناريوهات المستقبل لتقر استقرارك الكلي في مهام ساعتك الجارية بنية مخلصة وهمة عالية تصنع الفروق الساطعة.`,
+            contentEn: `Welcome to the final, masterpiece chapter of presence and transcendental focus! Let us learn the primary guide: **"Moving deeply into the Now."**
+
+**The structural future illusion:**
+The mind perpetually whispers: "Freedom belongs to the future when you pay off your loans or start your enterprise." Tolle labels this **The Psychological Future Trap**.
+- **The Psychological Future:** A projection that tricks you into sacrificing your current health for phantom configurations.
+- **The Alive Present (Now):** Your single actual asset. In it you form strategic alliances and build wealth with absolute vigor.
+
+**Your foundational task:**
+Withdraw attention from speculative future scenarios. Anchor your entire potential inside your current hour with continuous accuracy and supreme resolve.`
+          },
+          {
+            id: 'pn_ch3_l2',
+            idNum: 2,
+            titleAr: '2. الاستسلام الروحي الفعال (Surrender): القوة الإعجازية التي تسخر طاقات الكون لصالحك',
+            titleEn: '2. Active Surrender: The Supreme Channel of Non-Resistance',
+            duration: '3m',
+            type: 'core',
+            contentAr: `يتطرق هذا الدرس لمفهوم يجهله الكسالى ويساء فهمه كثيراً: **الاستسلام الروحي الفعال (Surrender)**.
+
+**ما ليس من الاستسلام مطلقاً:**
+الاستسلام ليس خنوعاً بائساً، أو رضىً كسولاً بوضع خانق أو خسارة متداولة؛ بل هو نقيض ذلك تماماً:
+- **الخنوع الكسول:** البقاء بوضع مزرٍ ومعاملة مهينة وتوزيع طاقة الشكاوى اللفظية الهدامة.
+- **الاستسلام الفعال (الحركي):** القبول الداخلي المطلق للشكل الحالي للمسألة بلا مقاومة عواطفية ← قطع دراما الرفض ← استخدام وهج التفكير القيادي النقي لاتخاذ فعل حركي كاسح يغير الوضع، أو المغادرة السليمة للكيان فوراً.
+
+الاستسلام الفعال يعطيك قوة الكون الحاضرة الساكنة لتتحرك بكل رزانة وتتفوق دون إنهاك أعصابك في صراع موازين القوى التافهة.`,
+            contentEn: `In this lesson, we study a profound concept frequently misunderstood by the passive: **Active Surrender**.
+
+**What Surrender is absolutely NOT:**
+Passivity, victimization, or lazy resignation to systemic abuse. It is the energetic polar opposite:
+- **Lazy Resignation:** tolerating toxic workplaces while venting negative dialogue constantly.
+- **Active Surrender:** Accepting the localized reality without internal friction -> halting emotional panic -> deploying your clean strategic resources to either change the setup with decisive action or walk away instantly.
+
+Active Surrender connects you with the spacious field of Being, allowing you to execute targets with absolute momentum without burning raw biological energy.`
+          },
+          {
+            id: 'pn_ch3_l3',
+            idNum: 3,
+            titleAr: '3. الوعي كشاهد ناصح: قهر جنون الأفكار المكررة وصيانة اتصالك بنبع الكينونة السائد',
+            titleEn: '3. The Spacious Watcher: Accessing Unmanifested Being',
+            duration: '3m',
+            type: 'core',
+            contentAr: `الذكاء والتحسن المستدام مآله الدائم لصيانة اتصالك بـ **نبع الكينونة السائد خلف الأشكال (Unmanifested Being)**.
+
+**العيش كفضاء شاهد:**
+حين تزدحم فصول التداول وتقارير المؤسسة، لا تجعل عقلك يتورط في الدراما السلوكية المضطربة للأقران؛ بل انسحب لثوانٍ واشهد سكون الفراغ بقلبك الداخلي.
+
+**الأبعاد الثلاثية للذكاء الروحي الشامل:**
+1. **الصمت (Silence):** الإنصات لعمق السكون السائد واستنشاق لمعان الفضاء كبوابة دخول للبعد الإلهي الرقيب.
+2. **الفضاء (Space):** إدراك أن الفضاء الخالي بالكون ليس عدماً، بل هو الحاضن الحقيقي الوديع اللانهائي، تماماً كصمتك بداخل صخب العمل.
+3. **الاستسلام (Surrender):** إخضاع رغبة الأنا المستمرة بالصراخ وإبراز الوجود الاستهلاكي لنقاء السكون المهيب المانح للسيطرة.`,
+            contentEn: `Career intelligence and lifelong expansion depend on maintaining connection with the **Spacious Source behind all forms (The Unmanifested)**.
+
+**Living as the witnessing space:**
+When P&L stress and peer drama begin to crowd your workplace, do not merge with the tension. Step back mentally, anchor your system, and observe the wide space of stillness around your environment.
+
+**The three keys of operational spiritual IQ:**
+1. **Silence:** Tuning into the stillness between external sounds as a portal of focus.
+2. **Space:** Realizing that empty space is actually the peaceful baseline that permits physical forms to exist.
+3. **Surrender:** Subordinating the ego's thirst to boast or dominate, to align with quiet, unshakeable dignity.`
+          },
+          {
+            id: 'pn_ch3_l4',
+            idNum: 4,
+            titleAr: '4. محطة العبور: تلخيص الفصول الختامية وميثاق السكون وحصاد التنوير والتحرر المالي والروحي',
+            titleEn: '4. Review Node: Synthesizing Surrender, Presence & Lifelong Abundance',
+            duration: '3m',
+            type: 'review',
+            contentAr: `مبارك مبروك! لقد تكللت مسيرتك التنموية بتمام استيعاب المسار الملحمي والروحي الفذ لكتاب "قوة الآن"! نجمع اليوم أضلع التحسن الروحي الختامي الكبرى:
+
+1. **العيش في عمق الآن:** رفض زمن الأوهام السيكولوجية للمستقبل، وتوجيه النقد الذهني لتشغيل مربع أصولك الحالي بكل كفاءة وسرور.
+2. **قوة الاستسلام الحركي:** القبول اللامشروط للحاضر لامتصاص العواصف وتسييس النظم وتحريك الماكينة الإدارية والمالية بدقة سامقة.
+3. **الاتصال بنبع الكينونة:** تطهير لمعان عقلك وصيانة ثباتك القيادي مستعيناً بالصمت والفضاء والنزاهة الداخلية.`,
+            contentEn: `You have successfully conquered the complex blueprint of Tolle's timeless teaching! Let us synthesize the ultimate private and team metrics:
+
+1. **Live in the depths of Now:** Sever psychological future delusions, channeling your complete executive capacity to expand your current asset portfolios.
+2. **Harness Active Surrender:** Welcome current reality neutrally to neutralize crisis friction and optimize organizational pipelines.
+3. **Reclaim Union with Being:** Maintain clean awareness, drive operations with unshakeable calm, and enjoy perpetual peace.`
+          },
+          {
+            id: 'pn_ch3_l5',
+            idNum: 5,
+            titleAr: '5. ممارسات المعيشة الفعالة وتكريس رصيد الإحراز المعرفي الروحي الشامل مدى الحياة',
+            titleEn: '5. Practical Tips: Launching Your Lifelong Awareness Cycle Today',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك ثلاث نصائح إرشادية وتدريبات عملية لتنشيط نجاحك الساكن والبهجة الحالية بانتظام:
+
+- **تدريب ميزانية التدفق الروحي:** قيم نسبة تدفق وعيك اليومي: "ما هي الساعات التي انقضت بتنازل وأحزان الماضي أو قلق المستقبل؟" عدل السكتة والمسار بعهد الفترات الساكنة.
+- **تطبيق الاستسلام الحركي الفوري:** واجه أي تعثر مهني أو مالي: اقبل النتيجة فوراً بصمت ← اوقف اللوم الجانبي الضيق ← اتخذ عملاً واثقاً كاسحاً يغير الكيان تماماً.
+- ترفق يا صديقي وثبت شراع علمك وجرب بقوة واجتز **التقييم الشامل الختامي** لإصدار وتثبيت **شهادة إتمام المسار ومطابقة المقاييس 🎓!**`,
+            contentEn: `Here are three pragmatic formulas to anchor your lifelong continuous spiritual and career upgrade path today:
+
+- **The Awareness Audit:** Document your internal state during the day: "How many hours did I waste on psychological regrets or future anxiety?" Re-anchor via quiet blocks.
+- **Immediate Active Surrender:** Handle any career setback: Accept results peacefully first -> terminate blame -> deploy clean, targeted action to change the system.
+- Take a deep, proud breath, and sit for the **Chapter 3 final evaluation** to officially generate your **Continuous Spiritual & Career Achievement Certificate 🎓!**`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "ما هو التفسير والصيغة الحقيقية لمبدأ 'الاستسلام الروحي الفعال' (Surrender) عند إيكهارت تول؟",
+            questionEn: "What is the authentic application of 'Active Surrender' according to Chapter 3?",
+            optionsAr: [
+              "هو الخنوع التام للظلم المالي وتوزيع طاقة الشكاوى ومجالسة الكسالى السلبيين.",
+              "هو القبول القلبي المطلق للواقع الحالي كوجود دون مقاومة عواطفية واهية، ثم تحريك التفكير النقي لاتخاذ فعل حركي يغير الوضع بدقة.",
+              "هو بيع كافة الممتلكات الشخصية والشركات المغلقة والجلوس منفرداً بلا عمل."
+            ],
+            optionsEn: [
+              "It is submissive resignation to career stagnation while constantly venting complaints with passive peers.",
+              "It is the absolute inner acceptance of the current situation as it is, followed by deploying clean strategic action to resolve the challenge.",
+              "It refers to liquidating all corporate assets and residential properties to sit permanently idle."
+            ],
+            correctIndex: 1,
+            explanationAr: "الاستسلام الفعال يعطيك قوة السلام والوعي الساكن بقلبك، مما يمنح حركتك ونشاطك دقة ساحقة وقدرة استثنائية على صناعة صدارتك الكونية.",
+            explanationEn: "Surrender dissolves the friction first, giving your logical resources the unhampered power to execute clean answers."
+          },
+          {
+            questionAr: "لماذا يحذر الكاتب بشدة من فخ 'المستقبل السيكولوجي' وموجات التوهم بالزمن؟",
+            questionEn: "Why does the author warn against the trap of 'Psychological Future'?",
+            optionsAr: [
+              "لأن التخطيط العملي الفني الروتيني للمواعيد هو نشاط مدمر للبنوك ومحفز للضرائب.",
+              "لأن العقل يوهمنا بأن السلام والامتياز قادم بجعلنا نضحي ببهجة وصحة حاضرنا من أجل غد وهمي لا نملكه، مما يسلب فاعليتك ويجمد أصولك.",
+              "لأن المستقبل هو سمة خارقة تضمنها الشركات الكبرى لزيادة ثقة الموظف."
+            ],
+            optionsEn: [
+              "Because standard clock time scheduling represents an administrative workflow that increases corporate taxes.",
+              "Because it tricks you into sacrificing your current health and joy for a phantom tomorrow, robbing your system of real operational productivity.",
+              "Because the future represent a mechanical guarantee provided by conglomerates to raise labor confidence."
+            ],
+            correctIndex: 1,
+            explanationAr: "الحاضر (الآن) هو دفتك وكيانك الوحيد الذي يحوز صناعة الأصول، وسحب طاقتك من المستقبل وتركيزها باليوم هو قمة الامتياز والصدارة واليقين.",
+            explanationEn: "The present moment is your single active asset. Directing your raw potential into the Now scales up your operational productivity."
+          },
+          {
+            questionAr: "كيف تسهم ركائز 'الصمت' و 'الفضاء' بداخل مدرسة الحضور والذكاء الروحي الدائم؟",
+            questionEn: "How do Silence and Space support spiritual and career intelligence in Tolle's model?",
+            optionsAr: [
+              "هما مصطلحات خالية المضمون لا نفع لها سوى تقييد العمل المكتبي وصرف انتباهك كلياً.",
+              "تمهد بوابات ممتازة للدخول إلى بعد الكينونة السائد خلف الأشكال والأقنعة، لإخضاع قلق الأنا وتطهير الروتين واسترجاع لمعان وإبداع فكرك.",
+              "تمنح ضرائب ونفقات الشركات المغلقة ثباتاً بنسبة صفر فائدة في البنوك العالمية."
+            ],
+            optionsEn: [
+              "They are theoretical, content-free values that serve only to restrict office activity and divert clean attention.",
+              "They represent powerful portals to access the stillness of Being, helping override egoic panic, clear daily stress, and unleash creative solutions.",
+              "They guarantee corporate tax rates are lowered to absolute zero within central global banking nodes."
+            ],
+            correctIndex: 1,
+            explanationAr: "استرجاع صلاتك بنبع الكينونة الساكن بالاستفادة من الصمت والفضاء الروحي يبسط سيطرتك المهنية ويجعل حركتك نافذة وقواك متآزرة بنشاط صامد.",
+            explanationEn: "Sustaining connection with Stillness via silent intervals elevates your career resilience, giving you unshakeable calm."
+          }
+        ]
+      }
+    ]
   }
 ];
 
@@ -934,7 +2488,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
 
   // Firestore status tracking
   const [userResults, setUserResults] = useState<any[]>([]);
-  const [unlockedChapters, setUnlockedChapters] = useState<Set<string>>(new Set(['sa_ch1', '7h_ch1']));
+  const [unlockedChapters, setUnlockedChapters] = useState<Set<string>>(new Set(['sa_ch1', '7h_ch1', 'yc_ch1', 'rd_ch1', 'pn_ch1']));
   
   // PDF Text Converter states
   const [activeTab, setActiveTab] = useState<'browse' | 'converter'>('browse');
@@ -1491,7 +3045,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
           );
           const snap = await getDocs(q);
           const results: any[] = [];
-          const unlocked = new Set<string>(['sa_ch1', '7h_ch1']);
+          const unlocked = new Set<string>(['sa_ch1', '7h_ch1', 'yc_ch1', 'rd_ch1', 'pn_ch1']);
           snap.forEach(doc => {
             const data = doc.data();
             results.push(data);
@@ -1506,6 +3060,24 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
               }
               if (data.lessonId === '7h_ch2' && data.score >= 2) {
                 unlocked.add('7h_ch3');
+              }
+              if (data.lessonId === 'yc_ch1' && data.score >= 2) {
+                unlocked.add('yc_ch2');
+              }
+              if (data.lessonId === 'yc_ch2' && data.score >= 2) {
+                unlocked.add('yc_ch3');
+              }
+              if (data.lessonId === 'rd_ch1' && data.score >= 2) {
+                unlocked.add('rd_ch2');
+              }
+              if (data.lessonId === 'rd_ch2' && data.score >= 2) {
+                unlocked.add('rd_ch3');
+              }
+              if (data.lessonId === 'pn_ch1' && data.score >= 2) {
+                unlocked.add('pn_ch2');
+              }
+              if (data.lessonId === 'pn_ch2' && data.score >= 2) {
+                unlocked.add('pn_ch3');
               }
             }
           });
@@ -1603,6 +3175,12 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
             if (activeChapter.id === 'sa_ch1') updated.add('sa_ch2');
             if (activeChapter.id === '7h_ch1') updated.add('7h_ch2');
             if (activeChapter.id === '7h_ch2') updated.add('7h_ch3');
+            if (activeChapter.id === 'yc_ch1') updated.add('yc_ch2');
+            if (activeChapter.id === 'yc_ch2') updated.add('yc_ch3');
+            if (activeChapter.id === 'rd_ch1') updated.add('rd_ch2');
+            if (activeChapter.id === 'rd_ch2') updated.add('rd_ch3');
+            if (activeChapter.id === 'pn_ch1') updated.add('pn_ch2');
+            if (activeChapter.id === 'pn_ch2') updated.add('pn_ch3');
             return updated;
           });
 
