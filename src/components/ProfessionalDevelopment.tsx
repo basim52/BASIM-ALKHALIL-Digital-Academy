@@ -455,6 +455,265 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
   const [isConverting, setIsConverting] = useState<boolean>(false);
   const [conversionStep, setConversionStep] = useState<string>('');
 
+  // Reader & Scannability customization
+  const [fontSize, setFontSize] = useState<'normal' | 'medium' | 'large' | 'xl'>('normal');
+  const [scannableMode, setScannableMode] = useState<boolean>(true);
+  const [studyViewMode, setStudyViewMode] = useState<'lesson' | 'mindmap'>('lesson');
+  const [activeSeconds, setActiveSeconds] = useState<number>(0);
+
+  // Active learning chronometer
+  useEffect(() => {
+    let interval: any = null;
+    if (activeLesson && !showQuiz) {
+      setActiveSeconds(0);
+      interval = setInterval(() => {
+        setActiveSeconds(prev => prev + 1);
+      }, 1000);
+    } else {
+      setActiveSeconds(0);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [activeLesson?.id, showQuiz]);
+
+  const formatSeconds = (totalSecs: number) => {
+    const mins = Math.floor(totalSecs / 60);
+    const secs = totalSecs % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const parseBoldText = (text: string) => {
+    const parts = text.split(/\*\*([^*]+)\*\*/g);
+    return parts.map((part, i) => {
+      if (i % 2 === 1) {
+        return <strong key={i} className="text-[#b48e56] font-black">{part}</strong>;
+      }
+      return part;
+    });
+  };
+
+  const renderScannableContent = (content: string) => {
+    const lines = content.split('\n\n');
+    return (
+      <div className="space-y-4">
+        {lines.map((line, idx) => {
+          const trimmed = line.trim();
+          if (!trimmed) return null;
+
+          // Check for bold points or chapter highlights
+          if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
+            const listContent = trimmed.replace(/^[\s-*]+/, '');
+            return (
+              <div key={idx} className="flex gap-2 items-start py-2 px-4 bg-[#b48e56]/5 border-l-2 border-[#b48e56] rounded-r-lg my-2">
+                <span className="text-[#b48e56] font-extrabold mt-1">•</span>
+                <span className="font-serif leading-relaxed text-[#1a1a1a]">
+                  {parseBoldText(listContent)}
+                </span>
+              </div>
+            );
+          }
+
+          if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
+            const inner = trimmed.substring(2, trimmed.length - 2);
+            return (
+              <h4 key={idx} className="text-base md:text-lg font-extrabold text-[#b48e56] mt-4 mb-2 tracking-tight">
+                {inner}
+              </h4>
+            );
+          }
+
+          // Speed reading mode: bold beginning words for rapid scanning (Foveal/Bionic Scanning)
+          if (scannableMode) {
+            const words = trimmed.split(' ');
+            if (words.length > 4) {
+              const boldCount = Math.min(Math.ceil(words.length * 0.35), 5);
+              const boldPart = words.slice(0, boldCount).join(' ');
+              const regularPart = words.slice(boldCount).join(' ');
+              return (
+                <p key={idx} className="leading-relaxed font-serif text-[#1e2229]">
+                  <strong className="text-slate-900 font-extrabold font-sans inline">{boldPart} </strong>
+                  <span className="opacity-90">{regularPart}</span>
+                </p>
+              );
+            }
+          }
+
+          return (
+            <p key={idx} className="leading-relaxed font-serif text-[#1e2229]">
+              {parseBoldText(trimmed)}
+            </p>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderTreeViewInfographic = () => {
+    if (!activeChapter) return null;
+
+    return (
+      <div className="bg-white border border-[#e8e5df] p-6 md:p-10 rounded-3xl shadow-sm relative overflow-hidden text-right">
+        {/* Decorative ambient background shape */}
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#b48e56]/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl" />
+
+        <div className="text-center mb-10 border-b border-[#f2ece2] pb-6">
+          <span className="text-[10px] tracking-widest text-[#b48e56] uppercase font-bold py-1 px-3.5 bg-[#f5f1e8] rounded-full inline-block">
+            {isRtl ? 'الهيكل التشجيري البصري' : 'Visual Mapping Hierarchy'}
+          </span>
+          <h3 className="text-2xl font-extrabold text-[#111] mt-2 mb-1">
+            {isRtl ? 'مخطط التدرج الفطن وإعادة التركيب' : 'Deconstructed Content Roadmap'}
+          </h3>
+          <p className="text-slate-400 text-xs font-serif mt-1">
+            {isRtl 
+              ? 'اضغط على أي درس للتفاعل معه فوراً، ومتابعة عداد الوقت والكبسولة المعرفية.' 
+              : 'Interact directly with any node to study its content, view parameters, or review details.'}
+          </p>
+        </div>
+
+        {/* Tree Connection Path */}
+        <div className="relative pr-4 md:pr-10 border-r-2 border-dashed border-[#b48e56]/30 mr-4 md:mr-12 space-y-8 py-4 text-right">
+          
+          {activeChapter.lessons.map((lesson, idx) => {
+            const isActive = activeLesson?.id === lesson.id && !showQuiz;
+            const iconStyle = isActive 
+              ? 'bg-[#b48e56] text-white ring-4 ring-[#b48e56]/20' 
+              : 'bg-[#faf8f5] text-[#b48e56] border-2 border-[#b48e56]/30 hover:border-[#b48e56]';
+            
+            const cleanContent = isRtl ? lesson.contentAr : lesson.contentEn;
+            let capsuleText = "";
+            if (isRtl) {
+              if (cleanContent.includes('**ماذا ستستفيد من هذا الدرس**')) {
+                capsuleText = cleanContent.split('**ماذا ستستفيد من هذا الدرس**')[1]?.split('\n')[2] || "";
+              } else if (cleanContent.includes('**كيف تتغلب على هذا الوهم؟**')) {
+                capsuleText = cleanContent.split('**كيف تتغلب على هذا الوهم؟**')[1]?.split('\n')[2] || "";
+              } else if (cleanContent.includes('**كيف تلغي هذه الحلقة؟**')) {
+                capsuleText = cleanContent.split('**كيف تلغي هذه الحلقة؟**')[1]?.split('\n')[2] || "";
+              } else if (cleanContent.includes('**ماذا يعني ذلك لك؟**')) {
+                capsuleText = cleanContent.split('**ماذا يعني ذلك لك**')[1]?.split('\n')[2] || "";
+              } else if (cleanContent.includes('1. **')) {
+                capsuleText = cleanContent.split('\n').filter(l => l.includes('**')).slice(1, 3).join(' ');
+              }
+              if (!capsuleText && cleanContent.split('\n')[2]) {
+                capsuleText = cleanContent.split('\n')[2];
+              }
+            } else {
+              if (cleanContent.includes('**What is your takeaway?**')) {
+                capsuleText = cleanContent.split('**What is your takeaway?**')[1]?.split('\n')[2] || "";
+              } else if (cleanContent.includes('**What does this mean for you?**')) {
+                capsuleText = cleanContent.split('**What does this mean for you?**')[1]?.split('\n')[2] || "";
+              } else if (cleanContent.includes('**How do you disarm this loop?**')) {
+                capsuleText = cleanContent.split('**How do you disarm this loop?**')[1]?.split('\n')[2] || "";
+              }
+              if (!capsuleText && cleanContent.split('\n')[2]) {
+                capsuleText = cleanContent.split('\n')[2];
+              }
+            }
+
+            if (capsuleText.length > 220) {
+              capsuleText = capsuleText.substring(0, 220) + "...";
+            }
+            if (!capsuleText) {
+              capsuleText = isRtl ? 'تمتع بالمرونة والقراءة الذاتية الموجهة لهذا الجزء المنهجي.' : 'Self-guided developmental milestone for active consolidation.';
+            }
+
+            return (
+              <div key={lesson.id} className="relative group text-right">
+                {/* Connector Branch Node Circle */}
+                <div className={`absolute -right-[27px] md:-right-[51px] top-6 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${iconStyle} shadow-sm z-10`}>
+                  <span className="text-xs font-black">{idx + 1}</span>
+                </div>
+
+                {/* Lesson Info Bento Card */}
+                <div 
+                  onClick={() => {
+                    setActiveLesson(lesson);
+                    setLessonIndex(idx);
+                    setShowQuiz(false);
+                    setStudyViewMode('lesson');
+                  }}
+                  className={`bg-white border rounded-2xl p-5 md:p-6 transition-all duration-300 hover:shadow-md cursor-pointer text-right flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${isActive ? 'border-[#b48e56] bg-[#b48e56]/[0.02] shadow-sm' : 'border-[#e8e5df] hover:border-slate-300'}`}
+                >
+                  <div className="flex-1 space-y-2 text-right">
+                    <div className="flex items-center gap-2 flex-wrap justify-start">
+                      <span className="text-[10px] tracking-wider text-[#b48e56] uppercase font-bold py-0.5 px-2.5 bg-[#f5f1e8] rounded-full inline-block leading-none">
+                        {lesson.type === 'intro' ? (isRtl ? 'تمهيد' : 'Orientation') : 
+                         lesson.type === 'review' ? (isRtl ? 'مراجعة' : 'Review Node') : 
+                         lesson.type === 'tips' ? (isRtl ? 'دليل إرشادي' : 'Tips Node') : (isRtl ? 'جوهر المفهوم' : 'Core Concept')}
+                      </span>
+                      
+                      <span className="flex items-center gap-1.5 text-slate-400 text-xs font-medium">
+                        <Clock size={12} />
+                        <span>{isRtl ? `تستغرق ${lesson.duration}` : `${lesson.duration} Read`}</span>
+                      </span>
+                    </div>
+
+                    <h4 className="font-bold text-slate-800 text-base md:text-lg transition-colors group-hover:text-[#b48e56]">
+                      {isRtl ? lesson.titleAr : lesson.titleEn}
+                    </h4>
+
+                    {/* Capsule Box (الكبسولة المعرفية للتثبيت) */}
+                    <div className="bg-[#faf9f6] border border-slate-100 rounded-xl p-3 text-slate-600 text-xs font-serif leading-relaxed italic border-r-4 border-r-[#b48e56] my-2 text-right">
+                      <span className="font-bold font-sans text-[#b48e56] block not-italic mb-1 text-right">
+                        {isRtl ? 'الكبسولة التثبيتية 💡' : 'Core Nugget 💡'}
+                      </span>
+                      {capsuleText}
+                    </div>
+                  </div>
+
+                  <div className="text-xs font-black text-[#b48e56] flex items-center gap-1 shrink-0 self-end md:self-center">
+                    <span>{isRtl ? 'افتح لقراءة مطولة' : 'Read Full Node'}</span>
+                    <ArrowRight size={14} className="rtl:rotate-180" />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Gatekeeper Node on Tree */}
+          <div className="relative group text-right">
+            <div className="absolute -right-[27px] md:-right-[51px] top-6 w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-white shadow-sm z-10 ring-4 ring-amber-500/20">
+              <Trophy size={16} />
+            </div>
+
+            <div 
+              onClick={() => {
+                setShowQuiz(true);
+                setCurrentQuizIndex(0);
+                setSelectedOptionIndex(null);
+                setIsAnswered(false);
+                setQuizScore(0);
+                setQuizFinished(false);
+              }}
+              className="bg-amber-500/5 border border-amber-200 rounded-2xl p-5 md:p-6 transition-all duration-300 hover:shadow-md cursor-pointer text-right flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-amber-400"
+            >
+              <div className="flex-1 space-y-1 text-right">
+                <span className="text-[10px] tracking-wider text-amber-600 uppercase font-black py-0.5 px-2.5 bg-amber-500/10 rounded-full inline-block leading-none">
+                  {isRtl ? 'تقييم الجودة والتأهيل' : 'Gatekeeper Exam'}
+                </span>
+                <h4 className="font-bold text-slate-800 text-base md:text-lg">
+                  {isRtl ? 'بوابة التحقق ونظام عبور الفصل' : 'Consolidated Chapter Gate Quiz'}
+                </h4>
+                <p className="text-slate-400 text-xs font-serif">
+                  {isRtl 
+                    ? 'اختبار حاسم مكون من أسئلة متدرجة لتقييم استيعابك للمفاهيم واكتساب الـ XP.' 
+                    : 'Pass with score >= 70% to unlock subsequent units and lock in your score rewards.'}
+                </p>
+              </div>
+
+              <div className="text-xs font-black text-amber-600 flex items-center gap-1 shrink-0 self-end md:self-center">
+                <span>{isRtl ? 'باشر الاختبار الصارم' : 'Launch Examination'}</span>
+                <ArrowRight size={14} className="rtl:rotate-180" />
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    );
+  };
+
   // Local storage cache or fetch profile completed marks from database
   useEffect(() => {
     if (userProfile?.uid) {
@@ -1054,65 +1313,144 @@ It confirms that successful modern learners prioritize dynamic continuous action
                         </div>
                       </div>
 
+                      {/* Interactive View Mode Selector */}
+                      {!showQuiz && (
+                        <div className="flex bg-[#eae6df] p-1 rounded-2xl border border-[#dedad3] justify-center items-center max-w-md mx-auto w-full gap-1">
+                          <button 
+                            onClick={() => setStudyViewMode('lesson')}
+                            className={`flex-1 py-2 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${studyViewMode === 'lesson' ? 'bg-[#b48e56] text-white shadow-sm' : 'text-slate-600 hover:text-[#b48e56]'}`}
+                          >
+                            <BookOpen size={14} />
+                            <span>{isRtl ? '📖 الدرس التفاعلي وقراءة سريعة' : '📖 Interactive Lesson'}</span>
+                          </button>
+                          <button 
+                            onClick={() => setStudyViewMode('mindmap')}
+                            className={`flex-1 py-2 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${studyViewMode === 'mindmap' ? 'bg-[#b48e56] text-white shadow-sm' : 'text-slate-600 hover:text-[#b48e56]'}`}
+                          >
+                            <FileText size={14} />
+                            <span>{isRtl ? '📊 المخطط الهيكلي والإنفوجرافيك' : '📊 Visual Infographic'}</span>
+                          </button>
+                        </div>
+                      )}
+
                       {/* Study Area Canvas */}
                       <AnimatePresence mode="wait">
                         {!showQuiz && activeLesson ? (
-                          <motion.div 
-                            key={activeLesson.id}
-                            initial={{ opacity: 0, x: isRtl ? 15 : -15 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: isRtl ? -15 : 15 }}
-                            className="bg-white border border-[#e8e5df] p-6 md:p-10 rounded-3xl shadow-sm text-left relative"
-                          >
-                            <span className="text-[10px] tracking-widest text-[#b48e56] uppercase font-bold py-0.5 px-3.5 bg-[#f5f1e8] rounded-full inline-block leading-loose">
-                              {activeLesson.type === 'intro' ? (isRtl ? 'تمهيد وتأسيس' : 'Orientation') : 
-                               activeLesson.type === 'review' ? (isRtl ? 'مراجعة وتثبيت' : 'Review Node') : 
-                               activeLesson.type === 'tips' ? (isRtl ? 'دليل إرشادي' : 'Tips Node') : (isRtl ? 'جوهر المفهوم' : 'Core Concept')}
-                            </span>
+                          studyViewMode === 'mindmap' ? (
+                            <motion.div
+                              key="mindmap-canvas"
+                              initial={{ opacity: 0, y: 15 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -15 }}
+                            >
+                              {renderTreeViewInfographic()}
+                            </motion.div>
+                          ) : (
+                            <motion.div 
+                              key={activeLesson.id}
+                              initial={{ opacity: 0, x: isRtl ? 15 : -15 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: isRtl ? -15 : 15 }}
+                              className="bg-white border border-[#e8e5df] p-6 md:p-10 rounded-3xl shadow-sm text-right relative"
+                            >
+                              <div className="flex justify-between items-start flex-wrap gap-4 mb-4 border-b border-[#f2ece2] pb-4">
+                                <div>
+                                  <span className="text-[10px] tracking-widest text-[#b48e56] uppercase font-bold py-0.5 px-3.5 bg-[#f5f1e8] rounded-full inline-block leading-loose">
+                                    {activeLesson.type === 'intro' ? (isRtl ? 'تمهيد وتأسيس' : 'Orientation') : 
+                                     activeLesson.type === 'review' ? (isRtl ? 'مراجعة وتثبيت' : 'Review Node') : 
+                                     activeLesson.type === 'tips' ? (isRtl ? 'دليل إرشادي' : 'Tips Node') : (isRtl ? 'جوهر المفهوم' : 'Core Concept')}
+                                  </span>
 
-                            <h3 className="text-2xl font-extrabold text-[#111] tracking-tight mb-6 mt-3 leading-tight border-b border-[#f2ece2] pb-4">
-                              {isRtl ? activeLesson.titleAr : activeLesson.titleEn}
-                            </h3>
+                                  <h3 className="text-2xl font-extrabold text-[#111] tracking-tight mt-3 mb-1 leading-tight text-right">
+                                    {isRtl ? activeLesson.titleAr : activeLesson.titleEn}
+                                  </h3>
+                                </div>
 
-                            {/* Audio Speaker Integration */}
-                            <div className="absolute top-6 right-6 flex gap-2">
-                              <button 
-                                onClick={() => speakText(isRtl ? activeLesson.contentAr : activeLesson.contentEn)}
-                                className="bg-[#b48e56]/10 text-[#b48e56] hover:bg-[#b48e56]/20 transition-all px-3 py-1.5 rounded-full text-xs font-black flex items-center gap-1 shadow-sm"
-                              >
-                                <PlayCircle size={14} />
-                                <span>{isRtl ? 'استمع صوتياً' : 'Listen Now'}</span>
-                              </button>
-                            </div>
+                                {/* Active Chronometer Timer */}
+                                <div className="flex items-center gap-2 text-[#b48e56] bg-[#b48e56]/5 py-1.5 px-3.5 rounded-xl border border-[#b48e56]/15 font-sans">
+                                  <span className="relative flex h-20 w-2 shrink-0 items-center justify-center">
+                                    <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                  </span>
+                                  <span className="text-xs font-black font-mono">
+                                    {isRtl ? `مدة القراءة: ${formatSeconds(activeSeconds)}` : `Reading: ${formatSeconds(activeSeconds)}`}
+                                  </span>
+                                </div>
+                              </div>
 
-                            <div className="text-slate-700 font-serif leading-relaxed text-base md:text-lg whitespace-pre-line space-y-4 prose max-w-none">
-                              {isRtl ? activeLesson.contentAr : activeLesson.contentEn}
-                            </div>
+                              {/* Interactive Reading Controls Row */}
+                              <div className="flex flex-wrap items-center justify-between gap-4 bg-[#faf9f6] border border-[#f2ece2] p-4 rounded-2xl mb-6 text-right">
+                                <p className="text-xs text-slate-400 font-serif">
+                                  {isRtl ? 'تخصيص العرض والتحكم الفطن للقراءة السريعة والأوديو:' : 'Customize font multiplier or bionic speed-reading scan:'}
+                                </p>
 
-                            {/* Lessons Navigators */}
-                            <div className="mt-10 pt-6 border-t border-[#f2ece2] flex justify-between items-center gap-4">
-                              <button 
-                                disabled={lessonIndex === 0}
-                                onClick={() => handleLessonNavigation(lessonIndex - 1)}
-                                className={`text-slate-500 hover:text-slate-800 flex items-center gap-2 text-xs font-bold py-2 ${lessonIndex === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
-                              >
-                                <ArrowLeft size={16} />
-                                <span>{isRtl ? 'الدرس السابق' : 'Previous'}</span>
-                              </button>
+                                <div className="flex items-center gap-3 flex-wrap">
+                                  {/* Audio speaker */}
+                                  <button 
+                                    onClick={() => speakText(isRtl ? activeLesson.contentAr : activeLesson.contentEn)}
+                                    className="bg-[#b48e56]/10 text-[#b48e56] hover:bg-[#b48e56]/20 transition-all px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-sm"
+                                  >
+                                    <PlayCircle size={14} />
+                                    <span>{isRtl ? 'استمع صوتياً' : 'Listen Now'}</span>
+                                  </button>
 
-                              <button 
-                                onClick={() => handleLessonNavigation(lessonIndex + 1)}
-                                className="bg-[#b48e56] hover:bg-[#a17e4b] text-white transition-all py-2.5 px-6 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-sm"
-                              >
-                                <span>
-                                  {lessonIndex + 1 === activeChapter.lessons.length 
-                                    ? (isRtl ? 'انتقل لاختبار البوابة' : 'Verify Chapter (Quiz)') 
-                                    : (isRtl ? 'الدرس التالي' : 'Next Lesson')}
-                                </span>
-                                <ArrowRight size={14} className="rtl:rotate-180" />
-                              </button>
-                            </div>
-                          </motion.div>
+                                  {/* Scannable mode indicator */}
+                                  <button 
+                                    onClick={() => setScannableMode(!scannableMode)}
+                                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all border flex items-center gap-1.5 ${scannableMode ? 'bg-[#b48e56] text-white border-[#b48e56]' : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-200'}`}
+                                  >
+                                    <span>⚡ {isRtl ? 'وضع القراءة السلسة' : 'Foveal Scan'}</span>
+                                  </button>
+
+                                  {/* Font multiplier tabs */}
+                                  <div className="flex gap-1 bg-slate-100 p-1 rounded-xl items-center border border-slate-300 font-sans">
+                                    {(['normal', 'medium', 'large', 'xl'] as const).map((sz) => (
+                                      <button 
+                                        key={sz}
+                                        onClick={() => setFontSize(sz)}
+                                        className={`px-2 py-1 rounded-lg text-xs font-black uppercase transition-all ${fontSize === sz ? 'bg-white text-[#b48e56] shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                                      >
+                                        {sz === 'normal' ? 'S' : sz === 'medium' ? 'M' : sz === 'large' ? 'L' : 'XL'}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Lesson Content viewport */}
+                              <div className={`${
+                                fontSize === 'normal' ? 'text-base md:text-lg' : 
+                                fontSize === 'medium' ? 'text-lg md:text-xl' : 
+                                fontSize === 'large' ? 'text-xl md:text-2xl' : 'text-2xl md:text-3xl'
+                              } text-slate-700 leading-relaxed font-serif whitespace-pre-line space-y-4 prose max-w-none text-right`}>
+                                {renderScannableContent(isRtl ? activeLesson.contentAr : activeLesson.contentEn)}
+                              </div>
+
+                              {/* Lessons Navigators */}
+                              <div className="mt-10 pt-6 border-t border-[#f2ece2] flex justify-between items-center gap-4">
+                                <button 
+                                  disabled={lessonIndex === 0}
+                                  onClick={() => handleLessonNavigation(lessonIndex - 1)}
+                                  className={`text-slate-500 hover:text-slate-800 flex items-center gap-2 text-xs font-bold py-2 ${lessonIndex === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                >
+                                  <ArrowLeft size={16} />
+                                  <span>{isRtl ? 'الدرس السابق' : 'Previous'}</span>
+                                </button>
+
+                                <button 
+                                  onClick={() => handleLessonNavigation(lessonIndex + 1)}
+                                  className="bg-[#b48e56] hover:bg-[#a17e4b] text-white transition-all py-2.5 px-6 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-sm"
+                                >
+                                  <span>
+                                    {lessonIndex + 1 === activeChapter.lessons.length 
+                                      ? (isRtl ? 'انتقل لاختبار البوابة' : 'Verify Chapter (Quiz)') 
+                                      : (isRtl ? 'الدرس التالي' : 'Next Lesson')}
+                                  </span>
+                                  <ArrowRight size={14} className="rtl:rotate-180" />
+                                </button>
+                              </div>
+                            </motion.div>
+                          )
                         ) : (
                           
                           /* Gatekeeping Quiz Mode */
