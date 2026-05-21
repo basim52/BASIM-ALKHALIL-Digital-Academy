@@ -78,6 +78,7 @@ import { ConversationCurriculumCompanion, ConversationLevel, ALL_CONVERSATION_UN
 import { WritingCurriculumCompanion, WritingLevel, ALL_WRITING_UNITS } from './components/WritingCurriculumCompanion';
 import { ExpressionCurriculumCompanion, ExpressionLevel, ALL_EXPRESSION_UNITS } from './components/ExpressionCurriculumCompanion';
 import { ModernCurriculumHome } from './components/ModernCurriculumHome';
+import { ProfessionalDevelopment } from './components/ProfessionalDevelopment';
 import { Layers, Image as OxfordIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { familyConstellationsLesson } from './data/lessons/r_a1_4';
@@ -3254,6 +3255,15 @@ export default function App() {
         />
       );
     }
+    if (view === 'professional-development') {
+      return (
+        <ProfessionalDevelopment 
+          lang={lang} 
+          userProfile={userProfile}
+          onBack={() => setView('dashboard')} 
+        />
+      );
+    }
     if (view === 'modern-curriculum') {
       return (
         <ModernCurriculumHome 
@@ -3617,6 +3627,7 @@ export default function App() {
                     { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
                     { id: 'oxford-discover', label: t.oxfordCompanion, icon: Layers },
                     { id: 'modern-curriculum', label: lang === 'ar' ? 'المناهج الدراسية المطورة' : 'Modernized Curriculums', icon: Sparkles },
+                    { id: 'professional-development', label: lang === 'ar' ? 'دورات تطويرية' : 'Developmental Courses', icon: GraduationCap },
                     { id: 'early-childhood', label: t.earlyChildhood, icon: Baby },
                     { id: 'story-library', label: t.storyLibrary, icon: BookOpen },
                     { id: 'curriculum', label: t.curriculum, icon: BookOpen },
@@ -3690,6 +3701,7 @@ export default function App() {
                     { id: 'curriculum', icon: BookOpen },
                     { id: 'ai-chat', icon: Mic2 },
                     { id: 'modern-curriculum', icon: Sparkles },
+                    { id: 'professional-development', icon: GraduationCap },
                     { id: 'leaderboard', icon: Trophy },
                     { id: 'progress', icon: BarChart3 },
                     { id: 'logout', icon: LogOut, action: handleLogout },
