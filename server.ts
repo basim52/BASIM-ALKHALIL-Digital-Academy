@@ -432,71 +432,40 @@ async function startServer() {
     if (pathname === '/ws/live' || pathname === '/ws/live/') {
       logToFile('Handshaking /ws/live - Matches!');
       wss.handleUpgrade(request, socket, head, (ws) => {
-        logToFile('Upgrade completed successfully');
-        wss.emit('connection', ws, request);
-      });
-    } else {
-      logToFile(`Ignored upgrade for ${pathname} - No match.`);
-      // We don't destroy socket here to allow other potential upgrade handlers (like Vite) to run
-    }
-  });
-
-  app.use(express.json());
-
-  // High-fidelity Audio synthesis utilizing 'gemini-3.1-flash-tts-preview'
-  app.post("/api/tts", async (req, res) => {
-    logToFile(`START /api/tts`);
-    try {
-      const { text, lang = 'en' } = req.body;
-      if (!text) {
-        logToFile("[Warning] Missing text in TTS request body");
-        return res.status(400).json({ error: "Missing text" });
-      }
-
-      if (!initAI() || !aiLive) {
-        logToFile("[Info] AI client is in simulated mode for TTS (using offline browser fallback)");
-        return res.json({ audio: "", simulated: true });
-      }
-
-      // Voice: Kore is outstanding for academic English, Zephyr is warm and fits Arabic narration beautifully
-      const voiceName = lang === 'ar' ? 'Zephyr' : 'Kore';
-      
-      const promptText = lang === 'ar' 
-        ? `اقرأ هذا النص التعليمي بنبرة واضحة ومخارج حروف متقنة: ${text}`
-        : `Say cheerfully with clear pedagogical emphasis and academic pacing: ${text}`;
-
-      logToFile(`Requesting Gemini TTS. Voice: ${voiceName}, Language: ${lang}, Length: ${text.length}`);
-
-      const response = await aiLive.models.generateContent({
-        model: "gemini-3.1-flash-tts-preview",
-        contents: [{ parts: [{ text: promptText }] }],
-        config: {
-          responseModalities: [Modality.AUDIO],
-          speechConfig: {
-            voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: voiceName },
-            },
-          },
-        },
-      });
-
-      const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-      if (!base64Audio) {
-        logToFile("[Warning] Gemini TTS did not yield inline audio data bytes");
-        return res.json({ audio: "", simulated: true });
-      }
-
-      logToFile("SUCCESS: Gemini TTS sound data generated successfully");
-      res.json({ audio: base64Audio });
-    } catch (error: any) {
-      logToFile(`[Info] TTS Fallback triggered: ${error.message}`);
-      res.json({ audio: "", simulated: true });
-    }
-  });
-
-  // Regular Chat Endpoint for Lessons
+        logToFile('  // Regular Chat Endpoint for Lessons
   app.post("/api/lesson/chat", async (req, res) => {
-    logToFile(`START /api/lesson/chat - Body key  // New endpoint for generating lesson content
+    logToFile(`START /api/lesson/chat`);
+    try {
+      const { prompt, context } = req.body;
+      if (!prompt) return res.status(400).json({ error: "Missing prompt" });
+      
+      if (!initAI() || !aiLive) {
+        logToFile("[Info] Using Simulated Lesson Chat fallback due to missing api key in environment");
+        return res.json({ text: `This is a simulated response to your question: "${prompt}". Consistent daily practice boosts retention!` });
+      }
+
+      const promptText = `
+        SYSTEM: You are a helpful teaching assistant for Basim Alkhalil Digital Academy.
+        
+        CONTEXT:
+        ${context}
+        
+        USER QUESTION:
+        ${prompt}
+      `;
+
+      const result = await callAiWithRetry({
+        contents: [{ role: 'user', parts: [{ text: promptText }] }]
+      });
+
+      res.json({ text: result.text || "" });
+    } catch (error: any) {
+      logToFile(`Lesson Chat Error: ${error.message}`);
+      res.status(500).json({ error: error.message || "Failed to generate" });
+    }
+  });
+
+  // New endpoint for generating lesson content
   app.post("/api/lesson/generate", async (req, res) => {
     logToFile(`START /api/lesson/generate - Body keys: ${Object.keys(req.body || {})}`);
     try {
@@ -582,6 +551,106 @@ async function startServer() {
           "title": "Topic Title",
           "titleAr": "العنوان بالعربية",
           "warmup": {
+            "title": "Warmup",
+            "mission": "Mission statement",
+            "missionAr": "بيان المهمة",
+            "objectives": ["Obj 1", "Obj 2"],
+            "objectivesAr": ["هدف 1", "هدف 2"]
+          },
+          "content": "Detailed markdown overview in English",
+          "contentAr": "محتوى مفصل بالعربية بتنسيق مارك داون",
+          "readingText": {
+            "paragraphs": [
+              { "en": "English paragraph text", "ar": "الترجمة العربية للفقرة" }
+            ]
+          },
+          "vocabulary": [
+            { "word": "Word", "phonetic": "fə-NET-ik", "meaningAr": "المعنى", "example": "Sentence example" }
+          ],
+          "imageryPrompt": "DALL-E style prompt for lesson image",
+          "exercises": [
+            {
+              "type": "fill",
+              "instruction": "Complete the sentences choosing structural terms",
+              "instructionAr": "أكمل الجمل التالية باختيار المصطلح المناسب",
+              "items": [
+                { "text": "Consistency and regular practice is the ___ to English fluency.", "textAr": "الاستمرارية والتدريب المستمر هما ___ للطلاقة الإنجليزية.", "answer": "key" }
+              ]
+            }
+          ],
+          "quiz": [
+            {
+              "question": "Quiz question text",
+              "questionAr": "السؤال بالعربية",
+              "options": ["Opt 1", "Opt 2"],
+              "optionsAr": ["خيار 1", "خيار 2"],
+              "correctIndex": 0,
+              "explanation": "Exp English",
+              "explanationAr": "التفسير بالعربية"
+            }
+          ]
+        }
+      `;
+
+      const result = await callAiWithRetry({
+        contents: [{ role: 'user', parts: [{ text: promptText }] }],
+        config: {
+          responseMimeType: "application/json"
+        }
+      });
+
+      if (!result || !result.text) throw new Error("Empty response from AI");
+      
+      let cleanText = result.text.trim();
+      if (cleanText.startsWith("```")) {
+        cleanText = cleanText.replace(/^```json\n?/, "").replace(/\n?```$/, "");
+      }
+      res.json(JSON.parse(cleanText));
+    } catch (error: any) {
+      logToFile(`Lesson Generate Error: ${error.message}`);
+      res.status(500).json({ error: error.message || "Failed to generate lesson content" });
+    }
+  });
+
+  // AI Language Partner Endpoint
+  app.post("/api/ai-partner/chat", async (req, res) => {
+    logToFile(`START /api/ai-partner/chat - Body keys: ${Object.keys(req.body || {})}`);
+    try {
+      const { prompt, history = [] } = req.body;
+      if (!prompt) return res.status(400).json({ error: "Missing prompt" });
+
+      const cleanPrompt = (prompt || "").toString().trim().toLowerCase();
+      
+      const arGreetings = ["مرحبا", "مرحباً", "أهلاً", "اهلا", "السلام عليكم", "سلام"];
+      const enGreetings = ["hello", "hi", "hey", "greetings", "good morning", "good afternoon", "good evening"];
+
+      if (arGreetings.includes(cleanPrompt)) {
+        return res.json({ text: "مرحباً بك! أنا شريكك الذكي في أكاديمية باسم الخليل. كيف يمكنني مساعدتك في التدرب اليوم؟" });
+      }�ة"],
+              correctIndex: 1,
+              explanation: "Regular active conversational loops naturally automate the brain's recall parameters.",
+              explanationAr: "الحوارات التفاعلية واليومية المنتظمة تسهم في بناء النماذج الذهنية التلقائية للغة دون جهد."
+            }
+          ]
+        };
+        return res.json(simulatedLesson);
+      }
+
+      const promptText = `
+        SYSTEM: Generate educational content in JSON matching the requested structure.
+        
+        USER REQUEST:
+        Topic: "${topic}".
+        Category: ${category}
+        Level: ${level}
+        
+        Task: Create a deep, high-quality interactive lesson with specialized sections.
+        
+        Output JSON STRICTLY following this schema:
+        {
+          "title": "Topic Title",
+          "titleAr": "العنوان بالعربية",
+          "warmup": {
             "mission": "Mission statement",
             "missionAr": "بيان المهمة",
             "objectives": ["Obj 1", "Obj 2"],
@@ -618,68 +687,7 @@ async function startServer() {
         },
         vocabulary: [
           { word: "Structure", phonetic: "STRUK-cher", meaningAr: "هيكل / بناء لغوي", example: "Having a solid grammar structure makes your English sound highly professional." },
-          { word: "Consistency", phonetic: "kən-SIS-tən-see", meaningAr: "ثبات واستمرارية", example: "Consistency in learning active units yields outstanding results." }
-        ],
-        imageryPrompt: "A scenic sunrise over Oxford campus library, realistic style, warm daylight.",
-        exercises: [
-          {
-            type: "fill",
-            instruction: "Complete the sentences choosing structural terms",
-            instructionAr: "أكمل الجمل التالية باختيار المصطلح المناسب",
-            items: [
-              { text: "Consistency and regular practice is the ___ to English fluency.", textAr: "الاستمرارية والتدريب المستمر هما ___ للطلاقة الإنجليزية.", answer: "key" }
-            ]
-          }
-        ],
-        quiz: [
-          {
-            question: "What is essential for natural language recall and fluency?",
-            questionAr: "ما هو العنصر الأساسي لترسيخ الكلمات والطلاقة اللغوية الطبيعية؟",
-            options: ["Vigorous cramming", "Consistent daily dialogue practice", "Ignoring grammar rules", "Relying on direct translations"],
-            optionsAr: ["الحفظ المكثف دفعة واحدة", "الممارسة اليومية والحديث المستمر", "تجاهل القواعد اللغوية", "الاعتماد على الترجمة الحرفية"],
-            correctIndex: 1,
-            explanation: "Regular active conversational loops naturally automate the brain's recall parameters.",
-            explanationAr: "الحوارات التفاعلية واليومية المنتظمة تسهم في بناء النماذج الذهنية التلقائية للغة دون جهد."
-          }
-        ]
-      };
-      return res.json(simulatedLesson);
-    }
-  });
-
-  // AI Language Partner Endpoint
-  app.post("/api/ai-partner/chat", async (req, res) => {
-    logToFile(`START /api/ai-partner/chat - Body keys: ${Object.keys(req.body || {})}`);
-    try {
-      const { prompt, history = [] } = req.body;
-      
-      const cleanPrompt = (prompt || "").trim().toLowerCase().replace(/[?,.!؟]/g, "");
-      const arGreetings = ["مرحبا", "مرحباً", "اهلا", "أهلا", "سلام", "السلام عليكم", "هلا", "هاي", "أهلاً", "صباح الخير", "مساء الخير"];
-      const enGreetings = ["hi", "hello", "hey", "gday", "good morning", "good evening", "howdy", "hola"];
-      
-      // Instant near-zero latency response for simple greetings to keep it extremely fast
-      if (arGreetings.includes(cleanPrompt)) {
-        return res.json({ text: "مرحباً بك! أنا شريكك الذكي في أكاديمية باسم الخليل. كيف يمكنني مساعدتك في التدرب اليوم؟" });
-      }
-      if (enGreetings.includes(cleanPrompt)) {
-        return res.json({ text: "Hello there! Welcome to Basim Alkhalil Academy. How can I help you practice your English speaking today?" });
-      }
-
-      const clientPrompt = (prompt || "").toString();
-
-      if (!initAI() || !aiLive) {
-        logToFile("[Info] Using Simulated Language Partner fallback due to missing api key in environment");
-        const isAnalysisRequest = clientPrompt.includes("feedback") || clientPrompt.includes("performance") || clientPrompt.includes("Analysis");
-        
-        let replyText = "";
-        if (isAnalysisRequest) {
-          replyText = `Great effort so far! Your conversational responses show very precise command over sentence grammar. Let's keep talking to improve further.\n\n[FEEDBACK] { "fluency": 82, "grammar": 90, "vocabulary": 80, "suggestions": ["Try using more complex transition words like furthermore, consequently.", "Your pronunciation rhythm is sound, keep up the regular speaking practice.", "Pay attention to correct preposition choices in academic writing."] }`;
-        } else {
-          replyText = getSmartFallbackResponse(clientPrompt, history);
-        }
-        return res.json({ text: replyText });
-      } {
-        return res.json({ text: "مرحباً بك! أنا شريكك الذكي في أكاديمية باسم الخليل. كيف يمكنني مساعدتك في التدرب اليوم؟" });
+          { word: "Consistency", phonetic: "kən-SIS-tən-see", meaningAr: "ثبات واستمرارية", example: "Consiste      }�رحباً بك! أنا شريكك الذكي في أكاديمية باسم الخليل. كيف يمكنني مساعدتك في التدرب اليوم؟" });
       }
       if (enGreetings.includes(cleanPrompt)) {
         return res.json({ text: "Hello there! Welcome to Basim Alkhalil Academy. How can I help you practice your English speaking today?" });

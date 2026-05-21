@@ -636,130 +636,15 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
             results.push(data);
             if (data.lessonId) {
               unlocked.add(data.lessonId);
-              // Unlock subsequent chapters if previous is completed
-              // Subtle Art
-              if (data.lessonId === 'sa_ch1' && data.score >= 2) {
-                unlocked.add('sa_ch2');
-              }
-              if (data.lessonId === 'sa_ch2' && data.score >= 2) {
-                unlocked.add('sa_ch3');
-              }
-              if (data.lessonId === 'sa_ch3' && data.score >= 2) {
-                unlocked.add('sa_ch4');
-              }
-              if (data.lessonId === 'sa_ch4' && data.score >= 2) {
-                unlocked.add('sa_ch5');
-              }
-              // 7 Habits
-              if (data.lessonId === '7h_ch1' && data.score >= 2) {
-                unlocked.add('7h_ch2');
-              }
-              if (data.lessonId === '7h_ch2' && data.score >= 2) {
-                unlocked.add('7h_ch3');
-              }
-              if (data.lessonId === '7h_ch3' && data.score >= 2) {
-                unlocked.add('7h_ch4');
-              }
-              if (data.lessonId === '7h_ch4' && data.score >= 2) {
-                unlocked.add('7h_ch5');
-              }
-              // You Can
-              if (data.lessonId === 'ycw_ch1' && data.score >= 2) {
-                unlocked.add('ycw_ch2');
-              }
-              if (data.lessonId === 'ycw_ch2' && data.score >= 2) {
-                unlocked.add('ycw_ch3');
-              }
-              if (data.lessonId === 'ycw_ch3' && data.score >= 2) {
-                unlocked.add('ycw_ch4');
-              }
-              if (data.lessonId === 'ycw_ch4' && data.score >= 2) {
-                unlocked.add('ycw_ch5');
-              }
-              if (data.lessonId === 'ycw_ch5' && data.score >= 2) {
-                unlocked.add('ycw_ch6');
-              }
-              if (data.lessonId === 'ycw_ch6' && data.score >= 2) {
-                unlocked.add('ycw_ch7');
-              }
-              if (data.lessonId === 'ycw_ch7' && data.score >= 2) {
-                unlocked.add('ycw_ch8');
-              }
-              if (data.lessonId === 'ycw_ch8' && data.score >= 2) {
-                unlocked.add('ycw_ch9');
-              }
-              if (data.lessonId === 'ycw_ch9' && data.score >= 2) {
-                unlocked.add('ycw_ch10');
-              }
-              // Rich Dad
-              if (data.lessonId === 'rd_ch1' && data.score >= 2) {
-                unlocked.add('rd_ch2');
-              }
-              if (data.lessonId === 'rd_ch2' && data.score >= 2) {
-                unlocked.add('rd_ch3');
-              }
-              if (data.lessonId === 'rd_ch3' && data.score >= 2) {
-                unlocked.add('rd_ch4');
-              }
-              if (data.lessonId === 'rd_ch4' && data.score >= 2) {
-                unlocked.add('rd_ch5');
-              }
-              // Power of Now
-              if (data.lessonId === 'pon_ch1' && data.score >= 2) {
-                unlocked.add('pon_ch2');
-              }
-              if (data.lessonId === 'pon_ch2' && data.score >= 2) {
-                unlocked.add('pon_ch3');
-              }
-              if (data.lessonId === 'pon_ch3' && data.score >= 2) {
-                unlocked.add('pon_ch4');
-              }
-              if (data.lessonId === 'pon_ch4' && data.score >= 2) {
-                unlocked.add('pon_ch5');
-              }
-              if (data.lessonId === 'pon_ch5' && data.score >= 2) {
-                unlocked.add('pon_ch6');
-              }
-              if (data.lessonId === 'pon_ch6' && data.score >= 2) {
-                unlocked.add('pon_ch7');
-              }
-              if (data.lessonId === 'pon_ch7' && data.score >= 2) {
-                unlocked.add('pon_ch8');
-              }
-              if (data.lessonId === 'pon_ch8' && data.score >= 2) {
-                unlocked.add('pon_ch9');
-              }
-              if (data.lessonId === 'pon_ch9' && data.score >= 2) {
-                unlocked.add('pon_ch10');
-              }
-              // Letting Go
-              if (data.lessonId === 'lg_ch1' && data.score >= 1) {
-                unlocked.add('lg_ch2');
-              }
-              if (data.lessonId === 'lg_ch2' && data.score >= 1) {
-                unlocked.add('lg_ch3');
-              }
-              if (data.lessonId === 'lg_ch3' && data.score >= 1) {
-                unlocked.add('lg_ch4');
-              }
-              if (data.lessonId === 'lg_ch4' && data.score >= 1) {
-                unlocked.add('lg_ch5');
-              }
-              if (data.lessonId === 'lg_ch5' && data.score >= 1) {
-                unlocked.add('lg_ch6');
-              }
-              if (data.lessonId === 'lg_ch6' && data.score >= 1) {
-                unlocked.add('lg_ch7');
-              }
-              if (data.lessonId === 'lg_ch7' && data.score >= 1) {
-                unlocked.add('lg_ch8');
-              }
-              if (data.lessonId === 'lg_ch8' && data.score >= 1) {
-                unlocked.add('lg_ch9');
-              }
-              if (data.lessonId === 'lg_ch9' && data.score >= 1) {
-                unlocked.add('lg_ch10');
-              }
+              // Dynamic Unlock for all courses and chapters: 
+              // Since lesson results are only saved to DB when passed, if the user has a record,
+              // it implies completion/passing. Thus, we safely unlock the subsequent chapter.
+              PRELOADED_COURSES.forEach(course => {
+                const chIndex = course.chapters.findIndex(ch => ch.id === data.lessonId);
+                if (chIndex !== -1 && chIndex + 1 < course.chapters.length) {
+                  unlocked.add(course.chapters[chIndex + 1].id);
+                }
+              });
             }
           });
           setUserResults(results);
@@ -865,57 +750,16 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
             points: (userProfile.points || 0) + extraPoints
           });
 
-          // Add to unlocked chapters set
+          // Add to unlocked chapters set dynamically
           setUnlockedChapters(prev => {
             const updated = new Set(prev);
             updated.add(activeChapter.id);
-            // Subtle Art
-            if (activeChapter.id === 'sa_ch1') updated.add('sa_ch2');
-            if (activeChapter.id === 'sa_ch2') updated.add('sa_ch3');
-            if (activeChapter.id === 'sa_ch3') updated.add('sa_ch4');
-            if (activeChapter.id === 'sa_ch4') updated.add('sa_ch5');
-            // 7 Habits
-            if (activeChapter.id === '7h_ch1') updated.add('7h_ch2');
-            if (activeChapter.id === '7h_ch2') updated.add('7h_ch3');
-            if (activeChapter.id === '7h_ch3') updated.add('7h_ch4');
-            if (activeChapter.id === '7h_ch4') updated.add('7h_ch5');
-            // You Can
-            if (activeChapter.id === 'ycw_ch1') updated.add('ycw_ch2');
-            if (activeChapter.id === 'ycw_ch2') updated.add('ycw_ch3');
-            if (activeChapter.id === 'ycw_ch3') updated.add('ycw_ch4');
-            if (activeChapter.id === 'ycw_ch4') updated.add('ycw_ch5');
-            if (activeChapter.id === 'ycw_ch5') updated.add('ycw_ch6');
-            if (activeChapter.id === 'ycw_ch6') updated.add('ycw_ch7');
-            if (activeChapter.id === 'ycw_ch7') updated.add('ycw_ch8');
-            if (activeChapter.id === 'ycw_ch8') updated.add('ycw_ch9');
-            if (activeChapter.id === 'ycw_ch9') updated.add('ycw_ch10');
-            // Rich Dad
-            if (activeChapter.id === 'rd_ch1') updated.add('rd_ch2');
-            if (activeChapter.id === 'rd_ch2') updated.add('rd_ch3');
-            if (activeChapter.id === 'rd_ch3') updated.add('rd_ch4');
-            if (activeChapter.id === 'rd_ch4') updated.add('rd_ch5');
-            // Power of Now
-            if (activeChapter.id === 'pon_ch1') {
-              updated.add('pon_ch2');
-            }
-            if (activeChapter.id === 'pon_ch2') updated.add('pon_ch3');
-            if (activeChapter.id === 'pon_ch3') updated.add('pon_ch4');
-            if (activeChapter.id === 'pon_ch4') updated.add('pon_ch5');
-            if (activeChapter.id === 'pon_ch5') updated.add('pon_ch6');
-            if (activeChapter.id === 'pon_ch6') updated.add('pon_ch7');
-            if (activeChapter.id === 'pon_ch7') updated.add('pon_ch8');
-            if (activeChapter.id === 'pon_ch8') updated.add('pon_ch9');
-            if (activeChapter.id === 'pon_ch9') updated.add('pon_ch10');
-            // Letting Go
-            if (activeChapter.id === 'lg_ch1') updated.add('lg_ch2');
-            if (activeChapter.id === 'lg_ch2') updated.add('lg_ch3');
-            if (activeChapter.id === 'lg_ch3') updated.add('lg_ch4');
-            if (activeChapter.id === 'lg_ch4') updated.add('lg_ch5');
-            if (activeChapter.id === 'lg_ch5') updated.add('lg_ch6');
-            if (activeChapter.id === 'lg_ch6') updated.add('lg_ch7');
-            if (activeChapter.id === 'lg_ch7') updated.add('lg_ch8');
-            if (activeChapter.id === 'lg_ch8') updated.add('lg_ch9');
-            if (activeChapter.id === 'lg_ch9') updated.add('lg_ch10');
+            PRELOADED_COURSES.forEach(course => {
+              const chIndex = course.chapters.findIndex(ch => ch.id === activeChapter.id);
+              if (chIndex !== -1 && chIndex + 1 < course.chapters.length) {
+                updated.add(course.chapters[chIndex + 1].id);
+              }
+            });
             return updated;
           });
 
