@@ -5,6 +5,7 @@ import { youCanWinCourse } from './youCanWin';
 import { powerOfNowCourse } from './powerOfNow';
 import { lettingGoCourse } from './lettingGo';
 import { thinkingFastSlowCourse } from './thinkingFastSlow';
+import { atomicHabitsCourse } from './atomicHabits';
 import { BookCourse } from './types';
 
 export * from './types';
@@ -15,6 +16,7 @@ export * from './youCanWin';
 export * from './powerOfNow';
 export * from './lettingGo';
 export * from './thinkingFastSlow';
+export * from './atomicHabits';
 
 export const COURSES: BookCourse[] = [
   subtleArtCourse,
@@ -23,7 +25,8 @@ export const COURSES: BookCourse[] = [
   youCanWinCourse,
   powerOfNowCourse,
   lettingGoCourse,
-  thinkingFastSlowCourse
+  thinkingFastSlowCourse,
+  atomicHabitsCourse
 ];
 
 export const PRELOADED_COURSES = COURSES;

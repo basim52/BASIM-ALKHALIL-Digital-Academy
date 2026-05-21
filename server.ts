@@ -58,9 +58,16 @@ async function startServer() {
   const initAI = () => {
     const key = getApiKey();
     if (key) {
-      if (!ai || key !== API_KEY) {
+      if (!aiLive || key !== API_KEY) {
         ai = new GoogleGenerativeAI(key);
-        aiLive = new GoogleGenAI({ apiKey: key });
+        aiLive = new GoogleGenAI({ 
+          apiKey: key,
+          httpOptions: {
+            headers: {
+              'User-Agent': 'aistudio-build',
+            }
+          }
+        });
         API_KEY = key;
         logToFile("AI Clients (Re)Initialized successfully.");
       }
@@ -71,39 +78,40 @@ async function startServer() {
 
   initAI();
 
-  // Robust AI caller with retry and fallback
+  // Robust AI caller with retry and fallback using modern `@google/genai` and "gemini-3.5-flash"
   async function callAiWithRetry(options: any, maxRetries = 2) {
     let lastError: any;
-    const PRIMARY_MODEL = "gemini-1.5-flash"; 
+    const PRIMARY_MODEL = "gemini-3.5-flash"; 
 
     for (let i = 0; i <= maxRetries; i++) {
-        // Ensure AI is initialized before each attempt
-        if (!initAI() || !ai) {
-           throw new Error("Gemini API key is not configured on the server. Please ensure GEMINI_API_KEY is set in the environment.");
-        }
+      // Ensure AI is fully initialized before each run
+      if (!initAI() || !aiLive) {
+        throw new Error("Gemini API key is not configured on the server. Please ensure GEMINI_API_KEY is set in the environment.");
+      }
       
       try {
         let modelToUse = PRIMARY_MODEL;
-        if (i === 1) modelToUse = "gemini-1.5-flash-002";
-        if (i === 2) modelToUse = "gemini-1.5-flash-8b";
+        // Keep using gemini-3.5-flash as it is highly stable and advanced
+        if (i === 1) modelToUse = "gemini-3.5-flash";
+        if (i === 2) modelToUse = "gemini-3.5-flash";
         
         logToFile(`AI Call Attempt ${i+1}/${maxRetries+1} using ${modelToUse} (API Key Status: ${!!API_KEY})`);
       
-      const { contents, config } = options;
-      
-      const model = ai.getGenerativeModel({ model: modelToUse });
-      const result = await model.generateContent({
-        contents: contents,
-        generationConfig: config
-      });
-      
-      const response = await result.response;
-      const text = response.text();
-      
-      if (!text) {
-        logToFile(`AI Response check: No text found in result from ${modelToUse}`);
-      }
-      return { text };
+        const { contents, config } = options;
+        
+        // Execute modern content generation
+        const response = await aiLive.models.generateContent({
+          model: modelToUse,
+          contents: contents,
+          config: config
+        });
+        
+        const text = response.text || "";
+        
+        if (!text) {
+          logToFile(`AI Response check: No text found in result from ${modelToUse}`);
+        }
+        return { text };
       } catch (error: any) {
         lastError = error;
         logToFile(`AI Error on ${i}: ${error.message}`);
@@ -176,6 +184,57 @@ async function startServer() {
   });
 
   app.use(express.json());
+
+  // High-fidelity Audio synthesis utilizing 'gemini-3.1-flash-tts-preview'
+  app.post("/api/tts", async (req, res) => {
+    logToFile(`START /api/tts`);
+    try {
+      const { text, lang = 'en' } = req.body;
+      if (!text) {
+        logToFile("Error: Missing text in TTS request body");
+        return res.status(400).json({ error: "Missing text" });
+      }
+
+      if (!initAI() || !aiLive) {
+        logToFile("Error: AI client is not configured for TTS");
+        return res.status(500).json({ error: "Gemini API key is missing on the server." });
+      }
+
+      // Voice: Kore is outstanding for academic English, Zephyr is warm and fits Arabic narration beautifully
+      const voiceName = lang === 'ar' ? 'Zephyr' : 'Kore';
+      
+      const promptText = lang === 'ar' 
+        ? `اقرأ هذا النص التعليمي بنبرة واضحة ومخارج حروف متقنة: ${text}`
+        : `Say cheerfully with clear pedagogical emphasis and academic pacing: ${text}`;
+
+      logToFile(`Requesting Gemini TTS. Voice: ${voiceName}, Language: ${lang}, Length: ${text.length}`);
+
+      const response = await aiLive.models.generateContent({
+        model: "gemini-3.1-flash-tts-preview",
+        contents: [{ parts: [{ text: promptText }] }],
+        config: {
+          responseModalities: [Modality.AUDIO],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: voiceName },
+            },
+          },
+        },
+      });
+
+      const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+      if (!base64Audio) {
+        logToFile("Error: Gemini TTS did not yield inline audio data bytes");
+        return res.status(500).json({ error: "The TTS model did not return any sound data." });
+      }
+
+      logToFile("SUCCESS: Gemini TTS sound data generated successfully");
+      res.json({ audio: base64Audio });
+    } catch (error: any) {
+      logToFile(`TTS Error: ${error.message}`);
+      res.status(500).json({ error: error.message || "Failed to generate TTS audio stream." });
+    }
+  });
 
   // Regular Chat Endpoint for Lessons
   app.post("/api/lesson/chat", async (req, res) => {

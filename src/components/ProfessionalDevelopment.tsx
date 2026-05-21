@@ -32,6 +32,7 @@ import {
   BookCourse, 
   PRELOADED_COURSES 
 } from '../data/courses';
+import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
 
 interface ProfessionalDevelopmentProps {
   lang: 'en' | 'ar';
@@ -58,7 +59,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
 
   // Firestore status tracking
   const [userResults, setUserResults] = useState<any[]>([]);
-  const [unlockedChapters, setUnlockedChapters] = useState<Set<string>>(new Set(['sa_ch1', '7h_ch1', 'yc_ch1', 'rd_ch1', 'pn_ch1', 'lg_ch1']));
+  const [unlockedChapters, setUnlockedChapters] = useState<Set<string>>(new Set(['sa_ch1', '7h_ch1', 'ycw_ch1', 'rd_ch1', 'pon_ch1', 'lg_ch1', 'tfs_ch1', 'ah_ch1']));
   
   // PDF Text Converter states
   const [activeTab, setActiveTab] = useState<'browse' | 'converter'>('browse');
@@ -629,7 +630,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
           );
           const snap = await getDocs(q);
           const results: any[] = [];
-          const unlocked = new Set<string>(['sa_ch1', '7h_ch1', 'yc_ch1', 'rd_ch1', 'pn_ch1', 'lg_ch1']);
+          const unlocked = new Set<string>(['sa_ch1', '7h_ch1', 'ycw_ch1', 'rd_ch1', 'pon_ch1', 'lg_ch1', 'tfs_ch1', 'ah_ch1']);
           snap.forEach(doc => {
             const data = doc.data();
             results.push(data);
@@ -663,17 +664,32 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
                 unlocked.add('7h_ch5');
               }
               // You Can
-              if (data.lessonId === 'yc_ch1' && data.score >= 2) {
-                unlocked.add('yc_ch2');
+              if (data.lessonId === 'ycw_ch1' && data.score >= 2) {
+                unlocked.add('ycw_ch2');
               }
-              if (data.lessonId === 'yc_ch2' && data.score >= 2) {
-                unlocked.add('yc_ch3');
+              if (data.lessonId === 'ycw_ch2' && data.score >= 2) {
+                unlocked.add('ycw_ch3');
               }
-              if (data.lessonId === 'yc_ch3' && data.score >= 2) {
-                unlocked.add('yc_ch4');
+              if (data.lessonId === 'ycw_ch3' && data.score >= 2) {
+                unlocked.add('ycw_ch4');
               }
-              if (data.lessonId === 'yc_ch4' && data.score >= 2) {
-                unlocked.add('yc_ch5');
+              if (data.lessonId === 'ycw_ch4' && data.score >= 2) {
+                unlocked.add('ycw_ch5');
+              }
+              if (data.lessonId === 'ycw_ch5' && data.score >= 2) {
+                unlocked.add('ycw_ch6');
+              }
+              if (data.lessonId === 'ycw_ch6' && data.score >= 2) {
+                unlocked.add('ycw_ch7');
+              }
+              if (data.lessonId === 'ycw_ch7' && data.score >= 2) {
+                unlocked.add('ycw_ch8');
+              }
+              if (data.lessonId === 'ycw_ch8' && data.score >= 2) {
+                unlocked.add('ycw_ch9');
+              }
+              if (data.lessonId === 'ycw_ch9' && data.score >= 2) {
+                unlocked.add('ycw_ch10');
               }
               // Rich Dad
               if (data.lessonId === 'rd_ch1' && data.score >= 2) {
@@ -689,17 +705,32 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
                 unlocked.add('rd_ch5');
               }
               // Power of Now
-              if (data.lessonId === 'pn_ch1' && data.score >= 2) {
-                unlocked.add('pn_ch2');
+              if (data.lessonId === 'pon_ch1' && data.score >= 2) {
+                unlocked.add('pon_ch2');
               }
-              if (data.lessonId === 'pn_ch2' && data.score >= 2) {
-                unlocked.add('pn_ch3');
+              if (data.lessonId === 'pon_ch2' && data.score >= 2) {
+                unlocked.add('pon_ch3');
               }
-              if (data.lessonId === 'pn_ch3' && data.score >= 2) {
-                unlocked.add('pn_ch4');
+              if (data.lessonId === 'pon_ch3' && data.score >= 2) {
+                unlocked.add('pon_ch4');
               }
-              if (data.lessonId === 'pn_ch4' && data.score >= 2) {
-                unlocked.add('pn_ch5');
+              if (data.lessonId === 'pon_ch4' && data.score >= 2) {
+                unlocked.add('pon_ch5');
+              }
+              if (data.lessonId === 'pon_ch5' && data.score >= 2) {
+                unlocked.add('pon_ch6');
+              }
+              if (data.lessonId === 'pon_ch6' && data.score >= 2) {
+                unlocked.add('pon_ch7');
+              }
+              if (data.lessonId === 'pon_ch7' && data.score >= 2) {
+                unlocked.add('pon_ch8');
+              }
+              if (data.lessonId === 'pon_ch8' && data.score >= 2) {
+                unlocked.add('pon_ch9');
+              }
+              if (data.lessonId === 'pon_ch9' && data.score >= 2) {
+                unlocked.add('pon_ch10');
               }
               // Letting Go
               if (data.lessonId === 'lg_ch1' && data.score >= 1) {
@@ -741,15 +772,13 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
     }
   }, [userProfile, selectedBook, activeChapter]);
 
-  const speakText = (text: string) => {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = isRtl ? 'ar-SA' : 'en-US';
-    window.speechSynthesis.speak(utterance);
+  const speakText = async (text: string) => {
+    cancelAllSpeech();
+    await speakAcademyText(text, isRtl ? 'ar' : 'en');
   };
 
   const stopSpeaking = () => {
-    window.speechSynthesis.cancel();
+    cancelAllSpeech();
   };
 
   const handleLessonNavigation = (index: number) => {
@@ -851,22 +880,32 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
             if (activeChapter.id === '7h_ch3') updated.add('7h_ch4');
             if (activeChapter.id === '7h_ch4') updated.add('7h_ch5');
             // You Can
-            if (activeChapter.id === 'yc_ch1') updated.add('yc_ch2');
-            if (activeChapter.id === 'yc_ch2') updated.add('yc_ch3');
-            if (activeChapter.id === 'yc_ch3') updated.add('yc_ch4');
-            if (activeChapter.id === 'yc_ch4') updated.add('yc_ch5');
+            if (activeChapter.id === 'ycw_ch1') updated.add('ycw_ch2');
+            if (activeChapter.id === 'ycw_ch2') updated.add('ycw_ch3');
+            if (activeChapter.id === 'ycw_ch3') updated.add('ycw_ch4');
+            if (activeChapter.id === 'ycw_ch4') updated.add('ycw_ch5');
+            if (activeChapter.id === 'ycw_ch5') updated.add('ycw_ch6');
+            if (activeChapter.id === 'ycw_ch6') updated.add('ycw_ch7');
+            if (activeChapter.id === 'ycw_ch7') updated.add('ycw_ch8');
+            if (activeChapter.id === 'ycw_ch8') updated.add('ycw_ch9');
+            if (activeChapter.id === 'ycw_ch9') updated.add('ycw_ch10');
             // Rich Dad
             if (activeChapter.id === 'rd_ch1') updated.add('rd_ch2');
             if (activeChapter.id === 'rd_ch2') updated.add('rd_ch3');
             if (activeChapter.id === 'rd_ch3') updated.add('rd_ch4');
             if (activeChapter.id === 'rd_ch4') updated.add('rd_ch5');
             // Power of Now
-            if (activeChapter.id === 'pn_ch1') {
-              updated.add('pn_ch2');
+            if (activeChapter.id === 'pon_ch1') {
+              updated.add('pon_ch2');
             }
-            if (activeChapter.id === 'pn_ch2') updated.add('pn_ch3');
-            if (activeChapter.id === 'pn_ch3') updated.add('pn_ch4');
-            if (activeChapter.id === 'pn_ch4') updated.add('pn_ch5');
+            if (activeChapter.id === 'pon_ch2') updated.add('pon_ch3');
+            if (activeChapter.id === 'pon_ch3') updated.add('pon_ch4');
+            if (activeChapter.id === 'pon_ch4') updated.add('pon_ch5');
+            if (activeChapter.id === 'pon_ch5') updated.add('pon_ch6');
+            if (activeChapter.id === 'pon_ch6') updated.add('pon_ch7');
+            if (activeChapter.id === 'pon_ch7') updated.add('pon_ch8');
+            if (activeChapter.id === 'pon_ch8') updated.add('pon_ch9');
+            if (activeChapter.id === 'pon_ch9') updated.add('pon_ch10');
             // Letting Go
             if (activeChapter.id === 'lg_ch1') updated.add('lg_ch2');
             if (activeChapter.id === 'lg_ch2') updated.add('lg_ch3');

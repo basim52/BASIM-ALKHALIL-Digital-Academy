@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Play, Pause, ChevronDown, Check, X, ArrowRight, ArrowLeft, Timer, Award, MessageCircle, BookOpen, PenTool, HelpCircle, Volume2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Lesson } from '../types';
+import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
 
 
 interface InteractiveLessonProps {
@@ -18,43 +19,28 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
   const [playbackProgress, setPlaybackProgress] = useState(0);
   const [score, setScore] = useState(0);
 
-  const synthesis = typeof window !== 'undefined' ? window.speechSynthesis : null;
-
   const stopSpeaking = () => {
-    if (synthesis) {
-      synthesis.cancel();
-      setIsPlayingId(null);
-    }
+    cancelAllSpeech();
+    setIsPlayingId(null);
   };
 
-  const speak = (text: string, lang: 'en' | 'ar', id: string) => {
-    if (!synthesis) return;
-
+  const speak = async (text: string, lang: 'en' | 'ar', id: string) => {
     if (isPlayingId === id) {
       stopSpeaking();
       return;
     }
 
-    stopSpeaking();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang === 'en' ? 'en-US' : 'ar-SA';
-    utterance.rate = 0.9;
-    
-    utterance.onend = () => {
-      setIsPlayingId(null);
-    };
-
-    utterance.onerror = (event) => {
-      console.error("Speech Error:", event);
-      setIsPlayingId(null);
-    };
-
     setIsPlayingId(id);
-    synthesis.speak(utterance);
+    await speakAcademyText(
+      text,
+      lang,
+      () => setIsPlayingId(id),
+      () => setIsPlayingId(null)
+    );
   };
 
   useEffect(() => {
-    return () => window.speechSynthesis.cancel();
+    return () => cancelAllSpeech();
   }, []);
   const [quizFinished, setQuizFinished] = useState(false);
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
@@ -71,16 +57,6 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
     { id: 'exercises', label: isRtl ? 'تمارين' : 'Exercises', icon: <PenTool size={18} /> },
     { id: 'quiz', label: isRtl ? 'اختبار' : 'Quiz', icon: <HelpCircle size={18} /> },
   ];
-
-  const togglePause = () => {
-    if (!synthesis) return;
-    if (synthesis.paused) {
-      synthesis.resume();
-      setIsPlayingId(isPlayingId); // Keep ID
-    } else {
-      synthesis.pause();
-    }
-  };
 
   const handleNextQuiz = () => {
     if (lesson.quiz && currentQuizIndex < lesson.quiz.length - 1) {

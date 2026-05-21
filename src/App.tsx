@@ -3634,7 +3634,6 @@ export default function App() {
                     { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
                     { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
                     { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
-                    { id: 'gemini-developer-hub', label: lang === 'ar' ? 'بوابة وجسور Gemini' : 'Gemini Developer Portal', icon: Brain, show: isAdmin },
                     { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
                     { id: 'oxford-discover', label: t.oxfordCompanion, icon: Layers },
                     { id: 'modern-curriculum', label: lang === 'ar' ? 'المناهج الدراسية المطورة' : 'Modernized Curriculums', icon: Sparkles },
@@ -3702,7 +3701,6 @@ export default function App() {
                   [
                     { id: 'dashboard', icon: LayoutDashboard },
                     { id: 'admin', icon: ShieldAlert, show: isAdmin },
-                    { id: 'gemini-developer-hub', icon: Brain, show: isAdmin },
                     { id: 'early-childhood', icon: Baby },
                     { id: 'academic-planner', icon: Sparkles },
                     { id: 'oxford-discover', icon: OxfordIcon },

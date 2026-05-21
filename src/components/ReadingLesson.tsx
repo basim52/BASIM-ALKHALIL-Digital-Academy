@@ -19,6 +19,7 @@ import {
   Square
 } from 'lucide-react';
 import { Lesson } from '../types';
+import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
 
 
 interface ReadingLessonProps {
@@ -50,54 +51,31 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastQuizResult, setLastQuizResult] = useState<{ correct: boolean, explanation: string } | null>(null);
 
-  const synthesis = typeof window !== 'undefined' ? window.speechSynthesis : null;
-
   useEffect(() => {
     return () => {
-      window.speechSynthesis.cancel();
+      cancelAllSpeech();
     };
   }, []);
 
-  const speak = (text: string, voiceLang: 'en' | 'ar', id: string) => {
-    if (!synthesis) return;
+  const stopSpeaking = () => {
+    cancelAllSpeech();
+    setSpeakingId(null);
+  };
 
+  const speak = async (text: string, voiceLang: 'en' | 'ar', id: string) => {
     if (speakingId === id) {
       stopSpeaking();
       return;
     }
 
-    stopSpeaking();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = voiceLang === 'en' ? 'en-US' : 'ar-SA';
-    utterance.rate = 0.9;
-    
-    utterance.onstart = () => {
-      setSpeakingId(id);
-    };
-
-    utterance.onend = () => {
-      setSpeakingId(null);
-    };
-
-    utterance.onerror = () => {
-      setSpeakingId(null);
-    };
-
-    synthesis.speak(utterance);
+    setSpeakingId(id);
+    await speakAcademyText(
+      text,
+      voiceLang,
+      () => setSpeakingId(id),
+      () => setSpeakingId(null)
+    );
   };
-
-  const stopSpeaking = () => {
-    if (synthesis) {
-      synthesis.cancel();
-      setSpeakingId(null);
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      if (synthesis) synthesis.cancel();
-    };
-  }, [synthesis]);
 
   const tabs = [
     { id: 'warmup', label: isRtl ? 'التهيئة' : 'Warm-Up', icon: <Lightbulb size={20} /> },
