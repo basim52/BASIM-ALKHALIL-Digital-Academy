@@ -398,6 +398,272 @@ A stellar fitness level requires waking up at dawn to execute exhausting trainin
             explanationEn: "Dreaming of success requires being prepared to put in the corresponding gritty effort. It establishes a fully realistic framework for action."
           }
         ]
+      },
+      {
+        id: 'sa_ch3',
+        chapterNum: 3,
+        titleAr: 'الفصل الثالث: وهم الاستثنائية (أنت لست مميزاً)',
+        titleEn: 'Chapter 3: You Are Not Special (The Fallacy of Exceptionalism)',
+        descriptionAr: 'تفكيك ثقافة تقدير الذات المنتفخة وقبول فكرة أن معظم حياتنا تقع في حيز عادي ومبسط.',
+        descriptionEn: 'Deconstructing hyper-inflated self-esteem and embracing the beauty of being ordinary.',
+        lessons: [
+          {
+            id: 'sa_ch3_l1',
+            idNum: 1,
+            titleAr: '1. بطل الرواية المزيف: فخ الشعور بالاستحقاق المفرط',
+            titleEn: '1. The Entitlement Trap: Feeling Deserved without Performing',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `في طفرة التنمية في أواخر القرن الماضي، نشأت فكرة خاطئة مبادؤها: "يجب أن يشعر الجميع بأنهم استثنائيون ومختلفون ليكونوا سعداء". 
+            
+لقد أنتج هذا جيلاً كاملاً يعتقد في قرارة نفسه بأنه يستحق النجاح الساحق والامتيازات دون بذل عمل شاق حقيقي.
+
+**ما هو فخ الاستحقاق اللاشعوري؟**
+هو عندما تعتقد بأن مشاكلك فريدة من نوعها وبالتالي تستحق معاملة خاصة من العالم، وهو ما يسلبك العزيمة والتحسين الفعلي ويرميك في عزلة الشكوى العقيمة.`,
+            contentEn: `In the self-esteem craze of the late 20th century, a dangerous doctrine was born: "Everyone is special and born to rule."
+
+This created a generation believing they are inherently entitled to grand benefits and continuous applause without having to put in the gritty effort.
+
+**What is Entitlement?**
+The subconscious conviction that your problems are more profound than anyone else's, which justifies special treatment. This delusion saps your drive for actual self-improvement.`
+          },
+          {
+            id: 'sa_ch3_l2',
+            idNum: 2,
+            titleAr: '2. منحنى بيل والتوزيع الطبيعي: الحياة تقع في المنتصف دائماً',
+            titleEn: '2. The Bell Curve of Reality: Most of life is beautifully mediocre',
+            duration: '3m',
+            type: 'core',
+            contentAr: `تأمل التوزيع الطبيعي أو منحنى بيل (Bell Curve) لإحصائيات البشر:
+            
+بينما يوجد قلة بارعة في قمة الهرم وأخرى تعاني في أسفله، تقع الأغلبية الساحقة من تجاربنا وحياتنا اليومية في **الوسط العادي البسيط**.
+
+**سحر قبول العادية:**
+أن تقبل فكرة أنك لست عبقرياً دائماً أو بطلاً سينمائياً ليس معناه الاستسلام للكسل؛ بل هو تحرير مطلق لضغط التوقعات غير الواقعية البائسة والبدء الفعلي بالتحسن التدريجي والهادئ كإنسان حقيقي.`,
+            contentEn: `Let's look at the Bell Curve of human capability. While there are extreme outliers at the top and bottom, the vast bulk of our hours and achievements fall into the warm, standard middle.
+
+**The power of being ordinary:**
+Accepting that you are not constantly brilliant or destined for cinematic fame is not lazy submission; it is a liberating detachment from extreme pressure. It permits you to grow step-by-step without shame.`
+          },
+          {
+            id: 'sa_ch3_l3',
+            idNum: 3,
+            titleAr: '3. مهارات البساطة: تقدير الإنجازات الصغيرة وتجنب صخب الشهرة',
+            titleEn: '3. Standard Tips: Celebrating Small Accomplishments',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك هذه الارشادات العملية من الفصل الثالث:
+            
+- **تمتع بالأنشطة العادية:** قدر لذة شرب كوب قهوة دافئ، تنمية مهارة بسيطة، أو قضاء وقت مع العائلة، دون الهلع من عدم تصدرك قائمة الأكثر ثراءً.
+- **قيم دوافعك اللاشعورية:** اسأل نفسك باستمرار: هل أقوم بهذا العمل لأنني أحبه حقاً وأطمح لتفعيل قيم كبرى، أم لمجرد الحصول على مديح فارغ وإشباع غروري؟`,
+            contentEn: `Pragmatic tools to ground your perspective today:
+            
+- **Value mundane behaviors:** Reclaim the simple pleasures—enjoying a nice coffee, reading a classic book, or speaking to a loved one—without feeling guilty for not trending on social media.
+- **Audit your intent:** Ask yourself: Am I building this project out of genuine care and values, or am I merely chasing applause and validation to feed a fragile ego?`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "ما هو الخلل البنيوي الرئيسي الذي تسببه عقيدة الاستحقاق المفرط؟",
+            questionEn: "What is the primary vulnerability caused by the entitlement trap?",
+            optionsAr: [
+              "تجعل الفرد محفزاً للعمل المتواصل فجر كل يوم.",
+              "تسلب الفرد الحافز وتحبسه في دوامة لوم الآخرين والمطالبة بمعاملة تفضيلية بلا عمل.",
+              "تؤدي لانخفاض مؤشرات التضخم بالأسواق الاستثمارية."
+            ],
+            optionsEn: [
+              "It keeps people highly motivated to wake up at dawn and execute tasks.",
+              "It drains the drive to improve, trapping the individual in complaints and expecting special treatment without paying the dues.",
+              "It directly decreases overall inflation across consumer markets."
+            ],
+            correctIndex: 1,
+            explanationAr: "الشعور المزيف بالاستحقاق يمنع صاحبه من رؤية أخطائه الحقيقية وبالتالي يجمد مسار نموه واستقلاله.",
+            explanationEn: "Entitlement prevents you from addressing your actual development gaps, blocking both active learning and career progression."
+          },
+          {
+            questionAr: "كيف يفيدنا قبول حقيقة أن معظم مفاصل حياتنا تقع في حيز التوزيع العادي؟",
+            questionEn: "How does accepting that most of life resides in the mediocre middle help us?",
+            optionsAr: [
+              "يجعلنا نشعر بالإحباط الشديد ونفقد كافة الطموحات الحيوية.",
+              "يحررنا من صخب التوقعات الزائفة والإرهاق النفسي لنبني مهاراتنا بصدق وتقدم حقيقي.",
+              "يسهم في زيادة ديون البنوك وسرعة استهلاك الممتلكات الشخصية."
+            ],
+            optionsEn: [
+              "It triggers intense depression and causes immediate abandonment of career targets.",
+              "It liberates us from the anxiety of forced perfection, letting us develop our actual skills with clean focus.",
+              "It drives up retail debt and accelerates the wearing out of private items."
+            ],
+            correctIndex: 1,
+            explanationAr: "التحرر من هوس الاستثنائية هو نقطة الانطلاق الفعلي لبناء التميز الحقيقي بسلام روحي ورزانة عقلية.",
+            explanationEn: "Detoxifying from the desperate craving to be unique allows you to focus quiet, real energy on incremental skill growth."
+          }
+        ]
+      },
+      {
+        id: 'sa_ch4',
+        chapterNum: 4,
+        titleAr: 'الفصل الرابع: دافع الألم (قيمة المعاناة والمقاييس السامقة)',
+        titleEn: 'Chapter 4: The Value of Suffering & Choosing Better Metrics',
+        descriptionAr: 'اختيار القيم النبيلة وتأسيس معايير تفوقك الشخصية بدلاً من المقاييس السطحية المدمرة للذات.',
+        descriptionEn: 'How to structure your values, adopting healthy standards of success instead of toxic external metrics.',
+        lessons: [
+          {
+            id: 'sa_ch4_l1',
+            idNum: 1,
+            titleAr: '1. لغز المقياس الزائف: هل تقيس حياتك بالسيارة أم بالقيمة؟',
+            titleEn: '1. Metric Deconstruction: How Do You Score Your Life?',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `المشكلة ليست دائماً في حدوث المصاعب، بل تكمن في **المقياس** الذي تستخدمه لتقييم نجاحك وسعادتك.
+
+تأمل سيرة الموسيقار "ديف مستاين" الذي طُرد من فرقة ميتاليكا قبل شهرة الفرقة الشهيرة. أسس مستاين فرقة جديدة وباع ملايين الأقراص؛ لكنه ظل يقارن نفسه بميتاليكا ويشعر بالفشل والخيبة طوال حياته لأن مقياس نجاحه المعتمد كان "أن أكون أكثر مبيعاً من ميتاليكا".
+
+**طبيعة المقاييس المدمرة:**
+عندما تربط سعادتك بأرقام حسابات الآخرين أو مظاهرهم، فإنك تبيد استقرارك الروحي والمهني بالكامل.`,
+            contentEn: `Problems are inevitable, but the **metrics** you utilize to evaluate those problems determine your mental well-being.
+
+Consider David Mustaine, who was kicked out of Metallica right before they became global legends. Mustaine founded Megadeth, sold millions of albums, yet felt like a certified failure because his metric was: "Be more successful than Metallica."
+
+**The trap of exterior metrics:**
+When your metrics are external and beyond your direct control, you guarantee constant anxiety and chronic dissatisfaction.`
+          },
+          {
+            id: 'sa_ch4_l2',
+            idNum: 2,
+            titleAr: '2. مقاييس خائبة ومقاييس بطلة: تفصيل القيم البنائية والهدامة',
+            titleEn: '2. Toxic vs. Healthy Metrics: Structuring Inward Values',
+            duration: '3m',
+            type: 'core',
+            contentAr: `يقسم مانسون المقاييس والقيم الحياتية إلى قسمين حاسمين:
+            
+1. **المقاييس السيئة (الهدامة):** قيم خارجية، غير خاضعة لسيطرتك، سطحية وغير نافعة (مثل المظاهر التفاخرية، السعي للذة اللحظية، الرغبة بالسيطرة وشعبية الوشاة).
+2. **المقاييس الحسنة (البنائية):** قيم داخلية، خاضعة لسيطرتك بالكامل، وتخدم تحسن المجتمع (مثل الصدق المطلق، الابتكار، صيانة النفس، مساعدة الآخرين، التسامح والتواضع).
+
+العادات المالية والمهنية الصامدة تتغذى دائماً وتنمو في كنف المقاييس الداخلية الرصينة التي تحميك من طقس الظروف المتقلّب.`,
+            contentEn: `Manson distinguishes between supportive and self-defeating standards:
+
+1. **Poor Metrics (Toxic):** External, socially-driven, fragile, and beyond your immediate influence (e.g., constant praise, flashy lifestyles, dominance over others).
+2. **Good Metrics (Pragmatic):** Internal, controllable, values-driven, and supportive of growth (e.g., radical honesty, learning from struggles, creative service).
+
+Long-range financial and occupational health derives exclusively from adopting these inward metrics.`
+          },
+          {
+            id: 'sa_ch4_l3',
+            idNum: 3,
+            titleAr: '3. تحديث البوصلة: كيفية صياغة وتحديث مقاييس نجاحك اليومية',
+            titleEn: '3. Standard Tips: Recalibrating Your Standards of Living',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك هذه الممارسات الذاتية لتطوير مقاييسك:
+            
+- **هندسة التخلي:** اكتب ثلاثة أشياء صاخبة كدت تهدر طاقتك من أجلها بالأمس، وأعلن صراحة تنازلك الفطن عنها لتفسح المجال لقضية حركية كبرى.
+- **تأكيد السيادة الداخلية:** في المرة القادمة التي تراودك فيها خيبة عدم حصولك على مديح، استبدل المقياس فوراً بمبدأ: "هل قمت بعملي اليوم بأعلى كفاءة وأمانة ممكنة؟"، فذاك وحده ملك يديك.`,
+            contentEn: `Actionable habits to upgrade your metrics starting now:
+            
+- **The Decoupling list:** Document three stressful occurrences from yesterday that are beyond your control, and consciously decline to worry about them.
+- **Inward validation shift:** When you feel left out or unappreciated, refocus on your core standard: "Did I execute my duties today with immaculate integrity and focus?"`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "لماذا شعر ديف مستاين بالخيبة على الرغم من نجاحه الموسيقي والمالي الهائل؟",
+            questionEn: "Why did David Mustaine feel like a failure despite Megadeth’s massive success?",
+            optionsAr: [
+              "لأنه لم يتمكن من كسب أي أموال من حفلاته وعاش فقيراً.",
+              "لأنه اعتمد مقياس نجاح خارجي تدميري يرتكز على ضرورة التفوق على فرقة ميتاليكا.",
+              "بسبب خلافاته المستمرة مع عائلته وأصدقائه الأكاديميين."
+            ],
+            optionsEn: [
+              "Because Megadeth never generated any income and he lived in poverty.",
+              "Because he chose a toxic, external metric focused on outperforming Metallica, ignoring his own success.",
+              "Due to persistent friction with his academic family members."
+            ],
+            correctIndex: 1,
+            explanationAr: "تغيير وتثبيت مقياس التقييم المعرفي والذاتي يغير نبرة مشاعرك بالكامل تجاه الإنجازات المحسوسة.",
+            explanationEn: "Your metrics dictate your perception. Selecting uncontrollable external comparisons produces chronic unhappiness."
+          }
+        ]
+      },
+      {
+        id: 'sa_ch5',
+        chapterNum: 5,
+        titleAr: 'الفصل الخامس: السيادة والمسؤولية المطلقة ومكتسب النهاية',
+        titleEn: 'Chapter 5: Raw Responsibility & Embracing Death',
+        descriptionAr: 'تولي المسؤولية الكاملة عن استجابتك وتوجيه العقل نحو الصدق الكوني ومواجهة حقيقة النهاية.',
+        descriptionEn: 'Taking absolute ownership of your choices and finding clarity through mortality reflection.',
+        lessons: [
+          {
+            id: 'sa_ch5_l1',
+            idNum: 1,
+            titleAr: '1. قانون ملكية المشاكل: الفارق بين الخطأ والمسؤولية',
+            titleEn: '1. Fault vs. Responsibility: Taking Command of Your Life',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `قد لا تكون مخطئاً في حدوث المأساة أو تعرضك للخسارة، ولكنك **مسؤول مسؤولية تامة وكاملة** عن كيفية استجابتك وتعاملك معها.
+
+**الفصل الحاسق بين المفاهيم:**
+- **الخطأ (Fault):** يرتبط بالماضي وبالفعل الذي أدى لحدوث الأزمة (مثلاً شخص تسبب بحادث لسيارتك).
+- **المسؤولية (Responsibility):** ترتبط باللحظة الحالية وبالقرارات والخطوات التي ستتخذها لتجاوز الموقف وتعديل مسارك المالي والمهني.
+
+عندما تتوقف عن لعب دور الضحية وتبسط سيطرة المسؤولية، تملك زمام المبادرة والقدرة الفطرية على التطوير المستقل.`,
+            contentEn: `You may not be at fault for the tragedy that touches your path, but you are **entirely responsible** for how you choose to process and react to it.
+
+**The critical boundary:**
+- **Fault:** Belongs to the past and names who caused the issue (e.g., someone breaking your equipment).
+- **Responsibility:** Belongs to the present moment and defines your actions to resolve the damage and steer your career.
+
+When you step out of victimhood and claim ownership, you unlock your real power to progress.`
+          },
+          {
+            id: 'sa_ch5_l2',
+            idNum: 2,
+            titleAr: '2. مفارقة الموت السكيني: تذكار الفناء كعدسة ذهبية لتنقية الزيف',
+            titleEn: '2. The Mortality Mirror: Death as the Canvas of Vital Priorities',
+            duration: '3m',
+            type: 'core',
+            contentAr: `يبسط مانسون الفصل الأخير بعبارة إيقاظ جليلة: **"الموت هو المقياس الوحيد الذي تعود به كل المقاييس والهموم التافهة لمكانها العادي البسيط"**.
+
+عند مواجهة وعيك بحقيقة فنائنا المضمون عاجلاً أم آجلاً، تذوب تلقائياً صور القلق المفرط وخوف الاستعراض التفاخر، ويسيل تيار الأفكار لينقى ويرسو فقط على رصيف القيم الحقيقية والعطاء البديع الذي تود تركه خلفك للأجيال والوطن.`,
+            contentEn: `Manson grounds the finale with an unshakeable wake-up call: **"Mortality is the single prism that exposes the profound triviality of our phantom worries."**
+
+In the cold light of your guaranteed physical end, superficial status anxieties and ego disputes instantly evaporate. What remains are the core values, pure growth, and the beautiful academic legacy you aim to leave behind.`
+          },
+          {
+            id: 'sa_ch5_l3',
+            idNum: 3,
+            titleAr: '3. تثبيت السيادة المعرفية: تمرين المسؤولية ومراجعة الدستور',
+            titleEn: '3. Standard Tips: Embedding Radical Ownership Daily',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك هذه التطبيقات لامتلاك السيادة الختامية:
+            
+- **تحويل الشكوى إلى خطة عمل:** اكتب شكوى واحدة تكررها يومياً، وتحمل فوراً مسؤولية إيجاد حل مستقل ومباشر لها دون انتظار الآخرين.
+- **تقييم الفناء (Memento Mori):** تأمل لمدة دقيقتين كل صباح حقيقة أن أوقاتنا معدودة ومحدودة للغاية، لتركز جهدك وعلمك بالكامل في صلب الأصول السامقة والتحسين الفطن.`,
+            contentEn: `Actionable steps to embed extreme ownership into your days:
+            
+- **Victimhood Detox:** Select one recurring complaint in your schedule, and outline three direct steps you will take to resolve it yourself without waiting for others.
+- **The Finite Scope Check (Memento Mori):** Realize every morning that your schedule is limited. This clarity suppresses distraction and drives you to focus strictly on real educational assets.`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "ما هو الفارق الجوهري الفاصل بين الخطأ والمسؤولية في معالجة العقبات؟",
+            questionEn: "What represents the absolute boundary between Fault and Responsibility?",
+            optionsAr: [
+              "الخطأ يمثله الضرائب والمسؤولية يمثلها صك البنوك المالية.",
+              "الخطأ يبحث فيمن تسبب بالأزمة بالماضي، بينما المسؤولية تبسط سيادتها لتحدد رد فعلك وإجراءك الحركي الحالي لتجاوزها.",
+              "الخطأ اختيار فردي بينما المسؤولية عقد حكومي موجه."
+            ],
+            optionsEn: [
+              "Fault is defined by corporate tax codes, while responsibility refers to banking bonds.",
+              "Fault points to who triggered the issue in the past, while Responsibility dictates your present actions and logical steps to move beyond it.",
+              "Fault is a personal choice while responsibility represents a state contract."
+            ],
+            correctIndex: 1,
+            explanationAr: "توطيد المسؤولية المطلقة يمنحك المفاتيح الحركية لإدارة أعمالك والاستثمار في نفسك بدلاً من تبديد عمرك في لوم البيئة.",
+            explanationEn: "Claiming complete responsibility equips you with the autonomy and persistence required to shape your financial and personal path."
+          }
+        ]
       }
     ]
   },
@@ -896,6 +1162,186 @@ Over-focusing on one pillar while starving another creates toxic vulnerabilities
             correctIndex: 0,
             explanationAr: "تعتبر العادة السابعة هي الإطار الداعم والمغذي لكل تفوق مهني وشخصي، والضمان المطلق لتحقيق الرؤية والفاعلية الشاملة باستمرار.",
             explanationEn: "Habit 7 acts as the master-key feedback loop that protects, hydrates, and improves the other elements for continuous lifelong progression."
+          }
+        ]
+      },
+      {
+        id: '7h_ch4',
+        chapterNum: 4,
+        titleAr: 'الفصل الرابع: بنك العلاقات الإيداعي والعاطفي ورصيد التعاون الثنائي',
+        titleEn: 'Chapter 4: The Emotional Bank Account & Synergy Matrix',
+        descriptionAr: 'منظومة الذكاء الاجتماعي وبناء رصيد الثقة مع الآخرين من خلال الإيداعات المتكررة.',
+        descriptionEn: 'The social intelligence matrix, building deep trust using positive relational transactions.',
+        lessons: [
+          {
+            id: '7h_ch4_l1',
+            idNum: 1,
+            titleAr: '1. رصيد المشاعر والتعامل: حساب الائتمان العاطفي الثنائي',
+            titleEn: '1. Emotional Bank Account: Trust as a Transactional Reserve',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `رصيد بنك العلاقات العاطفي (Emotional Bank Account) هو مجاز يصف حجم الثقة الكامن داخل أي علاقة إنسانية في حياتك.
+
+**كيف يعمل هذا الحساب البنكي؟**
+تماماً كالحساب المالي في البنك، يمكنك إجراء نوعين من السلوكيات:
+- **الإيداعات (Deposits):** تفكك التوتر وترفع مخزون الثقة (مثل الصدق المعرفي، الإيفاء بالوعود، الاعتذار بصدق، والإنصات العميق للآخر).
+- **السحوبات (Withdrawals):** تبدد الثقة وتنكث حبل التعاون الفلسفي المشترك (مثل اللوم المستمر، الكذب، خلف الوعود، إفشاء السر، والتظاهر بالاهتمام).
+
+عندما يكون رصيد حسابك عاطفياً وفيراً، يتخطى الطرفان سوء الفهم البسيط بسلام، أما إذا شح الرصيد وجف، تشتعل الأزمات من أتفه الأسباب.`,
+            contentEn: `The Emotional Bank Account is a powerful metaphor describing the amount of trust built up in any key human relationship.
+
+**How does this account cooperate?**
+Just like a financial account, you make transactions:
+- **Deposits (Trust Building):** Actions like radical honesty, keeping commitments, deep active listening, and sincere apology when wrong.
+- **Withdrawals (Trust Draining):** Behaviors like constant blame, breaking promises, ignoring needs, and displaying hidden arrogance.
+
+When the relational balance is high, communication is effortless. If the balance dry outs, minor disputes trigger explosive crises.`
+          },
+          {
+            id: '7h_ch4_l2',
+            idNum: 2,
+            titleAr: '2. تفصيل الإيداعات الستة الكبرى: الدستور الذهبي لتثبيت العلاقات',
+            titleEn: '2. The Six Major Deposits of Relational Trust',
+            duration: '3m',
+            type: 'core',
+            contentAr: `يحدد ستيفن كوفي ستة إيداعات حاسمة ترفع رصيد الثقة وتضمن نجاحك الجماعي:
+            
+1. **فهم الآخر (Understanding):** مفتاح السحر لربط الرؤى، أن تبذل وقتاً لتفهم ما يهمه بحق.
+2. **الالتفات للصغائر (Little Things):** الكلمات اللطيفة البسيطة، المصافحة الحارة، والاهتمام العفوي بالتفاصيل.
+3. **الوفاء بالوعد (Promises):** الالتزام الحاسم بما أعلنت، فالخلف ينسف حساب كامل الثقة.
+4. **توضيح التوقعات (Clarifying Expectations):** تحديد مهامك وأهداف الفريق بوضوح من البدء لتجنب الصراع اللاحق.
+5. **إظهار الأمانة الشخصية (Personal Integrity):** الدفاع عن الغائبين والصدق التام يضمن ولاء الحاضرين.
+6. **الاعتذار المخلص (Apologizing):** قول "أنا مخطئ" بشجاعة لترميم السحوبات العشوائية المتهورة.`,
+            contentEn: `Covey outlines six essential deposits that solidify joint performance and secure team loyalty:
+
+1. **Understand the Individual:** Spending conscious time to see issues from their precise perspective.
+2. **Attend to Little Things:** Tiny acts of kindness, warm greetings, and recalling personal milestones.
+3. **Keep Commitments:** Reliability is your cornerstone; a single broken oath destroys years of trust.
+4. **Clarify Expectations:** Defining roles, limits, and team objectives upfront prevents toxic misunderstandings.
+5. **Show Personal Integrity:** Defending those who are absent constructs immense trust with those present.
+6. **Apologize Sincerely when Borrowing:** Admitting errors promptly to fix reckless emotional withdrawals.`
+          },
+          {
+            id: '7h_ch4_l3',
+            idNum: 3,
+            titleAr: '3. دليل تسييس الثقة: ممارسات عملية لزيادة إيداعاتك اليومية بكفاءة',
+            titleEn: '3. Standard Tips: DevelopingRelational Capital Daily',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك هذه التطبيقات لزيادة ثروتك من رصيد العلاقات اليوم:
+            
+- **تطبيق الفهم الصامت:** في المرة القادمة التي تخوض فيها نقاشاً، انصت بنسبة ١٠٠٪ لمدة ثلاث دقائق متتالية دون التفكير بصد ردود دفاعية.
+- **إيداع عشوائي مقصود:** اسعد زميلاً أو فرداً من عائلتك برسالة محبة بسيطة دون أي مصلحة مسبقة لتنمي الرصيد المشترك.`,
+            contentEn: `Actionable habits to nurture relational resources starting today:
+            
+- **Active Listening Practice:** In your next business conversation, listen for three full minutes without designing your rebuttal. Focus on understanding.
+- **The Relational Spark:** Send a warm, unsolicited thank-you note or text to a colleague or family member to cultivate your joint emotional reserve.`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "ما الذي يقصده ستيفن كوفي برصيد بنك العلاقات العاطفي؟",
+            questionEn: "What is Stephen Covey’s definition of the Emotional Bank Account?",
+            optionsAr: [
+              "تمثيله للقروض المالية التي تضمنها البنوك التجارية للأشخاص بفوائد عالية.",
+              "مستوى الثقة والأمان المتراكم في أي علاقة إنسانية بناءً على سلوكياتك السابقة.",
+              "عدد الأصدقاء الأكاديميين المتابعين لك على وسائل التواصل الاجتماعي."
+            ],
+            optionsEn: [
+              "The credit limit guaranteed by retail banks to highly successful startups.",
+              "The level of trust and emotional safety built up in any human connection based on your relational history.",
+              "The pure count of academic followers you accumulated across virtual platforms."
+            ],
+            correctIndex: 1,
+            explanationAr: "إثراء هذا الحساب بالصدق والوفاء يحمي العلاقات من سوء الفهم الجانبي ويقوي تماسك العمل الإداري.",
+            explanationEn: "Sustaining a rich balance protects your alliances against temporary friction, boosting functional cooperation."
+          }
+        ]
+      },
+      {
+        id: '7h_ch5',
+        chapterNum: 5,
+        titleAr: 'الفصل الخامس: العادة الثامنة (من الفعالية إلى العظمة ودستور الصدارة الكونية)',
+        titleEn: 'Chapter 5: The 8th Habit - From Effectiveness to Greatness',
+        descriptionAr: 'الانتقال بالفعالية الشخصية للتأثير الساحق وإيجاد صوتك الفريد، ومساعدة الآخرين على اكتشاف أصواتهم الخاصة.',
+        descriptionEn: 'Shifting from basic effectiveness to ultimate greatness, finding your distinct voice, and guiding others to discover theirs.',
+        lessons: [
+          {
+            id: '7h_ch5_l1',
+            idNum: 1,
+            titleAr: '1. حدود الفعالية ضد العظمة: مبررات ظهور العادة الثامنة',
+            titleEn: '1. Beyond Effectiveness: The Call of the 8th Habit',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `أن تكون "فعالاً" كإنسان في القرن الحالي هو مجرد متطلب دخول للسباق؛ ولكن لتصنع فارقاً مهيباً وتترك أثراً خالداً، يجب أن تعبر لـ **العظمة (Greatness)**.
+
+العادة الثامنة تتلخص في ركيزتين:
+1. **أوجد صوتك الفريد (Find your Voice):** اكتشاف تقاطع مواهبك الكبرى مع شغفك الداخلي، واحتياجات العالم، ورنين ضميرك.
+2. **ألهم الآخرين ليجدوا أصواتهم (Inspire others to find theirs):** صناعة بيئة قيادية تمكّن فريقك وأقرانك ليتألقوا ويختبروا قوتهم وسرهم الأكاديمي الصامد الحقيقي.`,
+            contentEn: `Being merely "effective" is the baseline fee for accessing modern fields; to build an unshakeable legacy, you must step into **Greatness**.
+
+The 8th Habit is defined by two absolute pillars:
+- **Find Your Voice:** Locating the intersection of your unique talent, deep passion, conscience, and the pressing needs of the market.
+- **Inspire Others to Find Theirs:** Providing a leadership space that enables your peers to shine and manifest their full capability.`
+          },
+          {
+            id: '7h_ch5_l2',
+            idNum: 2,
+            titleAr: '2. شفرة الصوت الداخلي الأربعة: ترقية قواك العقلية والروحية للتفوق الساحق',
+            titleEn: '2. The Four Parts of Human Voice: Talent, Passion, Need & Conscience',
+            duration: '3m',
+            type: 'core',
+            contentAr: `صوتك الفريد ليس ترنماً فارغاً بل هو ناتج تضافر أربعة أبعاد جوهرية في بناء شخصيتك:
+            
+1. **الموهبة (Talent):** ما تتقن فعله وتتعلمه بسرعة مذهلة تفوق متوسط الأقران.
+2. **الشغف (Passion):** الوقود الداخلي المالي والذهني الحماسي الذي يحركك بلا ملل.
+3. **الحاجة (Need):** احتياج السوق أو البيئة أو منصتك والشركات لعلمك وتطبيقاتك.
+4. **الضمير (Conscience):** صوت المبادئ الكونية والأخلاق الفصحى بقلبك التي ترشدك لخدمة مجتمعك ووطنك.
+
+التطوير الأكاديمي الصامد يتأسس بحرص على نقطة التقاء هذه المنظومة البهية بداخل فكرك العريض.`,
+            contentEn: `Your unique voice materializes at the precise fusion of four essential vectors of human intelligence:
+
+- **Talent (Spiritual & Mind):** What you naturally excel at and develop with effortless speed.
+- **Passion (Heart):** The internal flame that supplies continuous energy to execute tasks.
+- **Need (Physical):** What the marketplace, institution, or academic field is ready to reward.
+- **Conscience (Universal Integrity):** The quiet sense of absolute right and wrong that aligns you with service.
+
+Academics and leaders construct their long-term victories upon this four-fold intersection.`
+          },
+          {
+            id: '7h_ch5_l3',
+            idNum: 3,
+            titleAr: '3. ممارسات الصوت والعظمة: تفعيل القيادة وصياغة الرسومات الكونية',
+            titleEn: '3. Standard Tips: Activating Your Voice Today',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك هذه التطبيقات لتعانق العظمة اليوم:
+            
+- **رسم تقاطع الصوت:** ارسم دائرة تضافر الأبعاد الأربعة وصغ بياناً مختصراً لصوتك الحالي ورسالتك الباذخة للتميز.
+- **تمكين الغير:** خصص مجهوداً موجهاً لتشجيع زميل خجول في العمل أو طالب ذكي؛ اذكر نقاط عبقريته التي يغفل عنها وألهمه ليقود العمل الشجاع.`,
+            contentEn: `How to implement the 8th Habit into your routine:
+            
+- **Map Your Voice:** Sketch your personal intersection of Talent, Passion, Need, and Conscience. Write a short statement summarizing your unique zone of greatness.
+- **Empower Someone Else:** Proactively highlight the unique talents of a junior colleague or student. Guide them to take lead on a key task.`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "ما هو الجوهر الثنائي الكاسق للعادة الثامنة في فكر ستيفن كوفي؟",
+            questionEn: "What are the two absolute pillars of Covey’s 8th Habit?",
+            optionsAr: [
+              "زيادة ساعات الاستراحة وتحسين نفقات وضرائب البنوك.",
+              "أن تجد وتكتشف صوتك الفريد الذاتي، وتلهم الآخرين ليجدوا ويكتشفوا أصواتهم الفريدة الخاصة.",
+              "العيش في عزلة تامة والامتناع عن مخاطبة الأقران بساحة التداول."
+            ],
+            optionsEn: [
+              "Inreasing relaxation blocks and minimizing international banking fees.",
+              "Finding your own unique voice, and inspiring others to discover and express theirs.",
+              "Residing in complete isolation and refusing to speak with peers."
+            ],
+            correctIndex: 1,
+            explanationAr: "العظمة الحقيقية والنهائية تكمن في مضاعفة التأثير ونشر العلم والقيادة التمكينية لتصنع فارقاً حياً في مجتمعك.",
+            explanationEn: "True leadership and legacy lie in multiplying your impact, teaching others, and enabling cooperative success."
           }
         ]
       }
@@ -1430,6 +1876,180 @@ Sovereignty belongs to crossing securely from the Left Side (E, S) to the Right 
             explanationEn: "Passive procrastination often hides inside workplace routines. Asking active diagnostic questions ignites creativity."
           }
         ]
+      },
+      {
+        id: 'rd_ch4',
+        chapterNum: 4,
+        titleAr: 'الفصل الرابع: قهر معوقات الصمود الخمسة وتطهير العقلية الاستثمارية',
+        titleEn: 'Chapter 4: Conquering the Five Major Financial Obstacles',
+        descriptionAr: 'تحليل وتذويب الخوف، الشكوك والتهكم، الكسل الخفي، العادات السلبية الكسولة، والغرور الذي يبيد الأصول المادية.',
+        descriptionEn: 'Deconstructing fear, cynicism, hidden laziness, toxic spending habits, and active arrogance.',
+        lessons: [
+          {
+            id: 'rd_ch4_l1',
+            idNum: 1,
+            titleAr: '1. حاجز الخوف والشكوك: كيف تتصرف عندما تعصف بك الخسائر؟',
+            titleEn: '1. Overcoming Fear of Loss: Shifting Your Focus to Compound Assets',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `الخوف من خسارة المال شيء طبيعي جداً؛ حتى روبرت كيوساكي يؤكد أنه لم يلتقِ بمستثمر غني واحد لم يخسر مالاً قط خلال مسيرته.
+
+**الفرق الفني الحاسم:**
+- **الأغنياء:** لا يبيدهم الخوف من الخسارة بل يحفزهم ويتعلمون منه (مثل شعار تكساس: "افتخر بالهزائم وتذكر ألم الهزيمة كوقود للنصر القادم").
+- **الفقراء (مالياً):** يشلّهم الخوف من الغباء أو الخسارة، فيتجنبون ركوب موجات الاستثمار والمبادرة ويبحثون حصراً عن سجون الأمان الوظيفي.
+
+**How to conquer fear?**
+ابدأ مبكراً واستعمل قوة الفائدة المركبة لبناء أصول مصغرة تنمو وتتعلم من خلال تداولاتها المتعددة بكفاءة.`,
+            contentEn: `The fear of losing capital is natural. Every self-made high-net-worth individual has experienced losses.
+
+**The distinguishing response:**
+- **The Wealthy:** Learn from losses and let defeat serve as rocket fuel (e.g., the Texas adage "Remember the Alamo" -> honoring losses as inspiration to play harder).
+- **The Safe-Players:** Are paralyzed by fear, which prompts them to avoid opportunities and cling permanently to static payroll structures.
+
+**Defeating financial fear:**
+Begin as early as possible. Let the power of compound interest work on micro-assets while you expand your tactical understanding.`
+          },
+          {
+            id: 'rd_ch4_l2',
+            idNum: 2,
+            titleAr: '2. الكسل الذهني والغرور المدمر: كيفية التغلب على فخ تزييف الصدارة',
+            titleEn: '2. Confronting Subtle Laziness and Arrogance',
+            duration: '3m',
+            type: 'core',
+            contentAr: `الكسل لا يأتي دائماً بالجلوس كسولاً بلا عمل؛ بل يأتي غالباً **بالانشغال المفرط بالوظيفة اليومية الروتينية** للهرب من التفكير المالي الصعب والتخطيط لتأسيس مشروعك الخاص.
+
+**تطهير الغرور:**
+يحدد كيوساكي الغرور بمثابة: **"الجهل متنكراً برداء الكبر"**. فعندما يجهل شخص مفهوماً مالياً، يحاول إخفاء ضعفه بالسخرية أو الاستعراض المالي التافه.
+
+لعلاج هذه الآفات، التزم بمطاردة الحقائق والتسلح بالتواضع المستمر والتعلم الأكاديمي الصامت لتنمي فكرك وأصولك بانتظام.`,
+            contentEn: `Laziness frequently manifests as being completely "busy" with routine workplace tasks, utilizing extreme busywork as a subconscious escape from strategic thinking.
+
+**Deconstructing Arrogance:**
+Kiyosaki claims: **"Arrogance is ego plus ignorance."** When a professional is ignorant about a specific financial parameter, they try to mask and defend it with sarcasm or dismissive pride.
+
+To cure these weaknesses, commit to lifelong study, embrace the quiet feedback of raw data, and seek structured education.`
+          },
+          {
+            id: 'rd_ch4_l3',
+            idNum: 3,
+            titleAr: '3. مهارات المواجهة: صيغ عملية لتسجيل الفواتير وتقليص الديون',
+            titleEn: '3. Standard Tips: Practical Tools for Financial Self-Defense',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك خطة العمل لمجابهة المعوقات واستعادة السيادة:
+            
+- **ادفع لنفسك أولاً (Pay Yourself First):** خصص نسبة محددة للاستثمار قبل تسديد أي التزام استهلاكي، فذاك يجبر عقلك على ابتكار طرق تزيد بها دخلك بمرونة بالغة.
+- **استئصال السلبية والشكوك:** تجنب مجالس الشاكين المتهكمين في الصباح، وتسلح بالقوة والدروس الإحصائية المعتمدة والموجودة بداخل كتب الوعي المالي.`,
+            contentEn: `Actionable steps to eliminate blocks and claim complete mastery starting today:
+            
+- **The Self-First Priority:** Dedicate a specific 10% fractional transfer to your investment accounts before you clear bills. It forces your logical resources to discover secondary income streams.
+- **The Negativity Shield:** Avoid morning coffees with cynical, passive colleagues. Instead, read detailed statistical books and real financial case studies.`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "كيف يتم تعريف 'الكسل الخفي' بقرارات وعقلية الاستثمار المعاصرة؟",
+            questionEn: "What is Robert Kiyosaki’s diagnosis of hidden financial laziness?",
+            optionsAr: [
+              "النوم لفترات طويلة والجلوس بلا حركة طوال اليوم.",
+              "الهروب من التفكير الاستراتيجي وتخطيط الأصول عبر شغل نفسك المفرط بالوظيفة الروتينية المعتادة.",
+              "القيام بمطاردة المبيعات وتأسيس الشركات بشكل متواصل ومتسارع."
+            ],
+            optionsEn: [
+              "Sleeping for excessive hours and sitting permanently immobile during weekends.",
+              "Escaping critical financial thinking and asset planning by keeping oneself excessively busy with comfortable office routines.",
+              "Executing continuous startup creation and building businesses rapidly."
+            ],
+            correctIndex: 1,
+            explanationAr: "الكسل الخفي هو الهروب من المبادرات والقرارات السامقة بذريعة الانشغال بالعمل المعتاد، وسؤاله العلاجي هو محرك الدماغ لصنع معجزة الثراء المفقودة.",
+            explanationEn: "Passive procrastination often hides inside workplace routines. Asking active diagnostic questions ignites creativity."
+          }
+        ]
+      },
+      {
+        id: 'rd_ch5',
+        chapterNum: 5,
+        titleAr: 'الفصل الخامس: ذكاء ريادة الأعمال وصك الأصول وصنع المعجزات بمشروعك الخاص',
+        titleEn: 'Chapter 5: Enterprise Intelligence & Structuring Your Wealth Systems',
+        descriptionAr: 'منظومة تأسيس الشركات، قوانين التداول، والذكاء المالي الرباعي لتحويل المعارف المهنية لثروة مستديمة صامدة.',
+        descriptionEn: 'The business creation blueprint, trading rules, and combining the four pieces of Financial IQ to scale assets.',
+        lessons: [
+          {
+            id: 'rd_ch5_l1',
+            idNum: 1,
+            titleAr: '1. ذكاء ريادة الأعمال الرباعي: ترقية كفاءتك المهنية والصناعية',
+            titleEn: '1. The Four Pieces of Financial IQ: Accounting, Strategy, Markets & Law',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `يتكون مفهوم الذكاء المالي الشامل (Financial IQ) من أربعة معارف علمية وتطويرية متكاملة إذا تضافرت معاً تحقق الثراء والصدارة الكبرى:
+
+1. **المحاسبة (Accounting):** القدرة على قراءة البيانات المالية ودفاتر الموازنة، وتحديد خانة الأصول بيقين مبرهن.
+2. **الاستثمار (Investing):** علم توجيه وصياغة خطط نمو النقد، وجعل المال يتوالد ذاتياً دون بذل مجهودك البدني المستمر.
+3. **فهم الأسواق (Markets):** معرفة تفاصيل العرض والطلب المالي، والتناغم السلوكي الموجه للمستهلكين.
+4. **القانون والضرائب (Law):** فهم الدرع القانوني للمؤسسات والشركات لتسييس اللوائح وحماية أرباحك الشرعية تماماً من النزيف.`,
+            contentEn: `True Financial IQ represents the powerful integration of four distinct fields of expertise:
+
+- **Accounting (Financial Literacy):** The vital skill of analyzing balance sheets, income flows, and distinguishing assets.
+- **Investing (Strategy):** The science of deploying capital to generate passive dividends and compound wealth.
+- **Understanding Markets:** Analyzing the forces of supply and demand, and grasping customer psychology and macro trends.
+- **Law & Taxes:** Utilizing legal corporate envelopes and regulatory structures to protect your income from unnecessary tax drain.`
+          },
+          {
+            id: 'rd_ch5_l2',
+            idNum: 2,
+            titleAr: '2. هندسة الشركات والتدفق النقدي: كيف يملك الأثرياء كل شيء ولا يملكون شيئاً؟',
+            titleEn: '2. The Legal Fortress: Corporate Wealth Architecture',
+            duration: '3m',
+            type: 'core',
+            contentAr: `يقف كارسون وكيوساكي معاً لتفكيك سر عظيم للأثرياء: **"الشركات هي أعظم درع حماية اخترعته البشرية"**.
+
+- **الموظفون والمدراء:** يجنون المال ← يُخصم منهم الضرائب أولاً عشوائياً ← ينفقون ما تبقى من فتات الراتب.
+- **الشركات المغلقة والمؤسسات:** تجني المال ← تنفق وتستثمر الأرباح بالماكينة المهنية وتقتطع نفقات الصيانة والأصول ← ثم تدفع الضرائب على ما تبقى فقط من الأرباح الموزعة.
+
+هذا التحيز والاستغلال الذكي للقوانين واللوائح يمنحك سرعة فائقة جداً في الادخار وتكثيف رصيد أصولك بمرور السنين.`,
+            contentEn: `Kiyosaki demystifies are crucial asset-protection structure: **"The Corporation is the most efficient wealth shield ever invented."**
+
+- **Employees:** Earn money -> Are automatically taxed first -> Spend the remaining cash to survive.
+- **Corporations:** Earn money -> Spend on valid operational expenses, assets, and development -> Pay tax only on the remainder.
+
+Leveraging legal corporate vehicles accelerates your compound growth rate, expanding your asset column year over year.`
+          },
+          {
+            id: 'rd_ch5_l3',
+            idNum: 3,
+            titleAr: '3. ممارسات ومكاسب ريادة الأعمال: تسييس الأنظمة وتأسيس الدرع الأول',
+            titleEn: '3. Standard Tips: Initiating Your Business Structure Today',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك هذه الارشادات لتبدأ رحلتك نحو الريادة والتحرر المالي الحقيقي اليوم:
+            
+- **تأسيس شركة مهنية مصغرة:** جرب تأسيس كيان قانوني خاص بك لتتعلم من خلال الممارسة قوانين المحاسبة والضرائب وقواعد تسييس اللوائح.
+- **تنشيط الذكاء المحاسبي:** خصص ساعة أسبوعياً لقراءة تقارير موازنات شركات وبنوك معروفة في السوق؛ فالممارسة والاعتياد هما أصل الريادة والامتياز المالي الشامل.`,
+            contentEn: `Practical roadmap to develop your corporate toolbox today:
+            
+- **Start a legal entity:** Establish a micro-business vehicle to learn bookkeeping, legal tax optimization, and operational laws in absolute safety.
+- **Accounting Practice:** Dedicate 1 hours every weekend to review the balance sheets of listed companies. Practice turns complex spreadsheets into simple maps of success.`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "كيف تختلف الدورة المالية للشركات والمؤسسات عن الدورة المالية للموظفين والأفراد؟",
+            questionEn: "How does the core tax/financial loop of a Corporation differ from that of an Individual?",
+            optionsAr: [
+              "الشركات لا تدفع أي شكل من أشكال الضرائب أو الرسوم بالدولة.",
+              "الموظف يدفع الضرائب أولاً من المنبع وينفق ما تبقى، بينما الشركة تنفق أولاً على أعمالها وأصولها ثم تدفع الضرائب على المتبقي.",
+              "الشركة تدفع مبالغ مضاعفة بمجرد شراء الكراسات والملفات المكتبية."
+            ],
+            optionsEn: [
+              "Corporations are entirely exempt from all forms of state taxes, tariffs, and bookkeeping fees.",
+              "Individuals earn, pay taxes, and spend. Corporations earn, spend on operations and asset growth, and pay taxes only on what is left.",
+              "Corporations are penalized with double tax rates as soon as they purchase standard printing items."
+            ],
+            correctIndex: 1,
+            explanationAr: "تسييس واستخدام الدرع القانوني للمؤسسات يحمي عوائد أصولك ويضاعف سرعتك في تنمية المكن الاستماري والتمكين المالي.",
+            explanationEn: "Using a corporate shell is crucial to protect your income from tax drain and accelerate capital compounding."
+          }
+        ]
       }
     ]
   },
@@ -1940,6 +2560,180 @@ Embed continuous education inside your morning blocks. Read historical digests, 
             correctIndex: 1,
             explanationAr: "شحذ عقلك بانتظام بالمعرفة الراقية ومطالعة العروض وسير العباقرة يبقيك متيقظاً، ويمنح منطق حديثك الرشيد وفكرك الفني حصافة وعقولاً ممتازة.",
             explanationEn: "Upgrading your diagnostic resources via study keeps your mind alert and prepares your system for high-value leadership."
+          }
+        ]
+      },
+      {
+        id: 'yc_ch4',
+        chapterNum: 4,
+        titleAr: 'الفصل الرابع: إدارة الوقت والتركيز المنظم (قوة التركيز الحاسم)',
+        titleEn: 'Chapter 4: Time Leverage, Execution Systems & Ultimate Focus',
+        descriptionAr: 'منظومة تفويض المهام وتسييس جدولك اليومي، تحرير النفس من تشتيت المزعجات، وتكريس الطاقة التنموية.',
+        descriptionEn: 'The art of distraction elimination, prioritizing highly systemic execution, and deploying your focus budget.',
+        lessons: [
+          {
+            id: 'yc_ch4_l1',
+            idNum: 1,
+            titleAr: '1. شرف اللحظة والجدولة: كيف تنظم نتاجك اليومي بذكاء؟',
+            titleEn: '1. The Dignity of Time: Systemic Focus Over Multitasking Distraction',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `الوقت هو الأثر والعملة الوحيدة المتساوية بين جميع البشر بالتساوي طوال اليوم.
+
+**الفرق بين الفئات:**
+- **العاديون:** يتركون أوقاتهم نهباً للصدفة، فيسمحون للإشعارات التافهة والاجتماعات العقيمة بتوجيه مسار يومهم.
+- **التطويريون:** يعطون وقتهم شرف القيادة والجدولة، فيبسطون سيطرتهم على الساعة الأولى من اليوم (الصباح الباكر) لبناء الصدارة والتحسن الذاتي.
+
+**معجزة التركيز الأحادي:**
+عندما تركز طاقتك بالكامل في مهمة واحدة حتى تنهيها تماماً بجودة متكاملة، فإنك تضاعف كفاءتك مئات المرات بسلام وراحة روائية مبدعة.`,
+            contentEn: `Time is the single entirely equal resource distributed generously to every human being at dawn.
+
+**The functional distinction:**
+- **The Trivial-Focusers:** Relinquish their hours to whims, allowing digital buzzes and superficial meetings to direct their direction.
+- **The Systemic-Achievers:** Commit to blocking their peak hours, dominating their mornings to expand cognitive capital and build value.
+
+**The power of Single-Tasking:**
+When you direct your undivided potential to a single target until it is meticulously finalized, your delivery speed scales up while preventing emotional exhaust.`
+          },
+          {
+            id: 'yc_ch4_l2',
+            idNum: 2,
+            titleAr: '2. قواعد الاستبعاد: حماية طاقتك اليومية وهزيمة تشتت الانتباه',
+            titleEn: '2. The Discipline of Exclusion: Banishing the Noise',
+            duration: '3m',
+            type: 'core',
+            contentAr: `الإتقان والابتكار لا ينشآن من كثرة ما تفعله، بل من **سعة ما ترفض القيام به**.
+
+**دستور الاستبعاد الذكي:**
+عليك أن تقول "لا" شجاعة وصريحة لكل المقاطعات، العلاقات السامة، وتراكم الواجهات الكسولة في يومك. ضع حداً للواجبات الاجتماعية الزائفة التي تسلبك فترات ريادتك وبناء مهاراتك.
+
+تسييس يومك بالحدود الفصحى الحاكمة يرفع من منسوب ثقة الأقران بدقتك وأمانتك الحركية والمهنية بمرور الشهور.`,
+            contentEn: `Supreme efficiency is not born of doing everything; it flourishes through the **deliberate capacity to say No to the non-essential**.
+
+**The exclusion paradigm:**
+Boldly eliminate notifications, trivial talk, toxic gossip, and digital clutter. Draw clear boundaries against superficial social activities that consume your prime hours.
+
+Drawing robust limits around your attention commands deep respect from peers and preserves your energetic capacity.`
+          },
+          {
+            id: 'yc_ch4_l3',
+            idNum: 3,
+            titleAr: '3. ممارسات الصمت والتفريغ: تفرغ العقل لابتكار الحلول',
+            titleEn: '3. Standard Tips: Crafting Your Daily Strategic Quarantine',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك هذه التطبيقات لتوطيد قوتك وبسط قيادتك الزمنية اليوم:
+            
+- **تطبيق الساعة الذهبية المعزولة:** خصص ساعة كاملة لا غير في الصباح دون هاتف أو رقميات، واقضها في التخطيط، القراءة بوقار، أو الكتابة المنتظمة لرسالتك الشخصية.
+- **قانون التفويض أو الحذف:** تأمل جدول أعمالك اليومي واحذف فوراً مهمتين جانبيتين تافهتين لا تخدمان أولوياتك الأكاديمية أو المادية الكبرى.`,
+            contentEn: `Actionable steps to rule your attention starting today:
+            
+- **The Sanctuary Hour:** Spend your initial morning hour completely offline. Utilize this time to write down actions, read classic, or plan your goals.
+- **The Omission Test:** Analyze your task list and immediately prune or delegate two secondary, time-consuming activities that yield zero real value.`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "ما هو الشرط الفني الجوهري لحصد 'معجزة التركيز الأحادي' بيومك؟",
+            questionEn: "What is the absolute requirement to trigger single-tasking excellence?",
+            optionsAr: [
+              "القيام بمهام متعددة معاً بهوس لتنجز كل الأشغال دفعة واحدة.",
+              "حبس كامل طاقتك وتركيزك في مهمة واحدة محددة حتى تنهيها تماماً بجودة باذخة، مع إيقاف كافة الرقميات والمقاطعات.",
+              "مراجعة حسابات البنوك وضرائب الشركات طوال النهار."
+            ],
+            optionsEn: [
+              "Executing multiple complex assignments simultaneously to clear clutter rapidly.",
+              "Anchoring your full potential on one target until it is meticulously finalized, blocking all digital interruptions.",
+              "Checking banking updates and corporate taxes continuously."
+            ],
+            correctIndex: 1,
+            explanationAr: "توجيه الجهد الأحادي يصون كفاءتك العقلية ويحميك من تبديد المجهود وتشتيت الانتباه وعثرات الأوراق الجانبية.",
+            explanationEn: "Concentrated attention protects your cognitive resources, yielding high performance and solid results."
+          }
+        ]
+      },
+      {
+        id: 'yc_ch5',
+        chapterNum: 5,
+        titleAr: 'الفصل الخامس: روح المثابرة والصمود الذهني (قوة مواصلة المسير حتى النهاية)',
+        titleEn: 'Chapter 5: Unyielding Persistence & Constant Focus',
+        descriptionAr: 'ركائز عدم الاستسلام، بناء التصلب العقلي الشجاع لمجابهة نبرات الفشل المؤقت والإصرار الصامد.',
+        descriptionEn: 'The psychological mechanics of non-surrender, building unshakeable grit, and learning to convert feedback into triumph.',
+        lessons: [
+          {
+            id: 'yc_ch5_l1',
+            idNum: 1,
+            titleAr: '1. شفرة الإصرار الصامد: لماذا ينسحب العاديون قبل النصر بخطوة؟',
+            titleEn: '1. The Blueprint of Grit: Shifting from Temporary Defeat to Triumph',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `معظم الناس يملكون أفكاراً ممتازة في البداية، ويبدأون مشاريعهم بحماس جارف وصخب شديد. لكن عندما تظهر العقبة الأولى، أو يتأخر المردود المتوقع، ينسحبون بهدوء عائدين لمناطق راحتهم الكسولة.
+
+**سر الصدارة الحركية الحقيقية:**
+الفرق بين العظمة والتبعية ليس الذكاء الموروث؛ بل هو **روح المثابرة (Persistence)** والقدرة المطلقة على تلقي الضربات والنهوض مجدداً لمواصلة العمل بثقة ويقين مبرهن.
+
+علم التنمية والتحسن يعلمنا أن كل هزيمة مؤقتة ليست سوى درس فني يحمل في طياته بذور النصر والتحول العقلي.`,
+            contentEn: `Most individuals harbor excellent ideas and launch their projects with high enthusiasm. But at the first sign of friction or when returns are delayed, they quietly retreat to their comfortable zones.
+
+**The secret of actual command:**
+The chasm between excellence and mediocrity is not raw intelligence; it is **Persistence**—the absolute capacity to absorb setbacks, adapt, and proceed with unshakeable conviction.
+
+Every failure is merely raw operational feedback. It contains the precise lessons needed to calibrate your strategy.`
+          },
+          {
+            id: 'yc_ch5_l2',
+            idNum: 2,
+            titleAr: '2. بناء قماشة الصبر والتحمل: صيانة عقلك من وهن الشك الكسول',
+            titleEn: '2. Fortitude Against Doubt: Securing Rational Focus',
+            duration: '3m',
+            type: 'core',
+            contentAr: `الشك هو العدو الحقيقي الكامن للتطوير والأثر. عندما تتأخر المخرجات، يبدأ عقلك في إطلاق إشارات تثبيط وتخويف: "أنت لست مؤهلاً، المشروع متهور، توقف فوراً ووفر طاقتك".
+
+**كيف تحصن قماش فكرك؟**
+تسلح بيقين مبني على الإحصائيات والمعرفة الصامتة والعمل الشاق المنظم. المثابرة هي رياضة عقلية تتطلب ترويض الخوف وإجبار النفس على التحرك الفعال والمنتظم كل صباح، متجاهلاً أصوات المرجفين بالخارج.
+
+الأصول المستديمة الصامدة تنبت كلياً في كنف رعاية هذا الصمود واليقين.`,
+            contentEn: `Doubt is the ultimate silent assassin of creative potential. When outcomes are slow to manifest, your system whispers: "You are not qualified, this is risky, pull back immediately."
+
+**Fortifying your resolve:**
+Equip your view with robust statistical data, clean knowledge, and highly methodical labor. Endurance is a mental discipline. It requires calming your thoughts and taking action every single morning.
+
+Unshakeable institutions are built exclusively in the nurturing climate of sustained, quiet persistence.`
+          },
+          {
+            id: 'yc_ch5_l3',
+            idNum: 3,
+            titleAr: '3. ممارسات ومواثيق المثابرة: تمرين البكاء والانطلاق بنظام صامد',
+            titleEn: '3. Standard Tips: Embedding Perseverance Patterns Daily',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك هذه التطبيقات لتختبر وتصقل مثابرتك اليوم:
+            
+- **تطبيق عهد العشرين يوماً الصارم:** اختر مهارة أو أداة تطويرية صعبة، والزم نفسك بالتدرب الصامت والتعلم عليها يومياً لمدة عشرين يوماً متواصلة دون إطلاق أي لوم أو رغبة بالانسحاب.
+- **كتابة السطر الواحد:** في أوقات الهم والضباب الإداري، اكتب سطراً واحداً يصف خطتك المباشرة للغد لتضمن إبقاء الماكينة وتدفق الفاعلية مستمراً.`,
+            contentEn: `Actionable habits to nurture your willpower patterns today:
+            
+- **The 20-Day Crucible:** Select a single challenging skill. Promise to practice and study it daily for twenty consecutive days without allowing excuses or expecting instant applause.
+- **The One-Line Directive:** During times of heavy cognitive noise, write down exactly one line defining your primary action for tomorrow. It keeps the wheel of progress turning.`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "ما هو الفاصل الذهبي الحقيقي الفاصل بين العظمة والتبعية في عادات الفاعلية؟",
+            questionEn: "What represents the absolute boundary between Greatness and mediocrity in Adams' view?",
+            optionsAr: [
+              "الحصول على دعم مالي مطلق وتعديل القروض بالبنوك العالمية.",
+              "روح المثابرة ومواصلة العمل الشاق بصلابة متناهية وإصرار صامد أمام الهزائم المؤقتة.",
+              "تجنب المبادرات المفتوحة واتباع التوجيهات الروتينية دون تفكير."
+            ],
+            optionsEn: [
+              "Securing limitless corporate capital and restructuring interest rates.",
+              "Persistence—the capacity to execute goals with immense grit and carry on despite setbacks.",
+              "Avoiding startup initiatives and adhering to routine guidelines without independent thinking."
+            ],
+            correctIndex: 1,
+            explanationAr: "المثابرة الحديدية الصامدة هي الرابط الفعلي والمحرك الذي يحول المعارف الهشة لنتائج عملية وقوى مادية سامقة تخدم الصدارة.",
+            explanationEn: "Iron persistence turns theoretical concepts into palpable, self-sustaining results that secure your success."
           }
         ]
       }
@@ -2464,6 +3258,180 @@ When P&L stress and peer drama begin to crowd your workplace, do not merge with 
             explanationEn: "Sustaining connection with Stillness via silent intervals elevates your career resilience, giving you unshakeable calm."
           }
         ]
+      },
+      {
+        id: 'pn_ch4',
+        chapterNum: 4,
+        titleAr: 'الفصل الرابع: تفكيك صخب الأنا والتسليم الواعي (الانعتاق والحرية المطلقة)',
+        titleEn: 'Chapter 4: Surrendering Your Ego & The Grace of Non-Resistance',
+        descriptionAr: 'قوة الاستسلام الواعي للحدث، تذويب ممانعة الأنا، وتلقي الأحداث بصمت الكينونة والحرية الروحية الراقية للعمل السليم.',
+        descriptionEn: 'The profound power of conscious surrender, dissolving egoic resistance, and greeting life events with centered clarity.',
+        lessons: [
+          {
+            id: 'pn_ch4_l1',
+            idNum: 1,
+            titleAr: '1. شفرة جلاء ممانعة النفس: الكيفية العميقة لسلام الروح الدائم',
+            titleEn: '1. Dissolving Resistance: Shifting from Egoic Pain to Pure Freedom',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `ممانعة الواقع ومقاومة اللحظة الآنية هي المصدر والجذر الأول لكل ألم نفسي أو تشتيت إداري ومهني.
+
+**التسليم الواعي (Surrender):**
+ليس التسليم انسحاباً سلبياً أو تقبلاً للهزيمة والكسل؛ بل هو **التصالح الذكي الشجاع مع الواقع كما هو في اللحظة** أولاً، مما يمنحك الطاقة الكلية والوضوح المعرفي لتتصرف بفاعلية وقوة مذهلة لحل المشاكل دون تبديد طاقتك في الصراخ الغاضب.
+
+**لماذا تقاوم الأنا الحدث؟**
+لأن الأنا تعتقد بأن المقاومة والاعتراض العنيف يمكّنها من السيطرة والحماية؛ بينما الحقيقة أنها تجعلك في غاية الوهن النفسي وتطيل عمر الأزمة.`,
+            contentEn: `Resisting the reality of the present moment is the ultimate source of all subjective pain and corporate friction.
+
+**What is Conscious Surrender?**
+It is not passive yielding or lazy submission; it is **unconditional acceptance of what is, right now**. This alignment supplies you with the maximum focus and clarity required to act decisively and solve crises.
+
+**Why does the Ego resist?**
+Your egoic system falsely believes that verbal resistance is a powerful armor; in reality, rejection weakens your resolve and prolongs the struggle.`
+          },
+          {
+            id: 'pn_ch4_l2',
+            idNum: 2,
+            titleAr: '2. تفكيك الأنا المتهكمة: صيانة عقلك من فخاخ التباكي على الأمس والتوتر',
+            titleEn: '2. Overriding Egoic Patterns: Dislodging Worry from Inside',
+            duration: '3m',
+            type: 'core',
+            contentAr: `يتغذى كيان الأنا (Ego) بالكامل على الأمس والمستقبل، ويشعر بالتهديد العميق إذا تركز حضورك في الآن وساد الهدوء التام بذهنك.
+
+**الممارسات الفعالة لتطهير الأنا:**
+عندما تكتشف أنك محبوس في نقاش عقيم أو لوم مفرط، تنفس بعمق وكن الشاهد الهادئ على أفكارك وجسد الآلام بداخلك. رصدك ومراقبتك للأنا يسلبها تملكك وتثبيت سيادتها الزائفة، ليرتد تيار ذكائك ويفيض إبداعاً وحكمة من روح كينونتك الأصلية.
+
+صيانة أفكارك وتحصين منطقها بالأمانة يعود بك مباشرة لرصيف السلام الصامد والصحوة الكونية الفصحى.`,
+            contentEn: `Your ego feeds on the static past and the phantom future. It is threatened when your attention is focused strictly in the present moment.
+
+**Overcoming Egoic Traps:**
+When you catch yourself in circular arguments or excessive complaints, take a deep breath. Become the quiet witness of your thinking. Observing the ego strips it of its control over your behavior, allowing your original intelligence to flow with pristine clarity.
+
+Guarding your thoughts from circular disputes anchors you directly on the solid shores of unshakeable calm.`
+          },
+          {
+            id: 'pn_ch4_l3',
+            idNum: 3,
+            titleAr: '3. ممارسات التسليم اليومي: كيف تحول الأزمات إلى سلام مستمر صامد',
+            titleEn: '3. Standard Tips: Embedding Surrender into Daily Labor',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك هذه التطبيقات لامتلاك فضيلة التسليم الواعي اليوم:
+            
+- **تطبيق 'هذا ما هو عليه':** عند وقوع عقبة أو مشقة إستراتيجية اليوم، كرر مع نفسك بسلام: "هذا ما هو عليه، لا يمكنني تغيير الماضي. ماذا سأفعل الآن؟"، فتلك الكلمات توقف نزيف التوتر فوراً.
+- **تأمل المراقبة الصامتة:** في اجتماع مشحون بالأصوات، اغمض عينيك لثانية، ركز على نبض قلبك الشهم، وانظر للتفكير كمسار عابر لا يملك سيادتك أو استقلالك الإنساني المميز.`,
+            contentEn: `Practical steps to integrate conscious surrender today:
+            
+- **The Reality-Acceptor Check:** When facing an unexpected strategic hurdle, repeat internally: "This is what is. I decline to waste potential fighting the past. What is my logical action Now?"
+- **The Quiet Observer:** During loud discussions, keep your posture relaxed. Observe the surrounding words as passing waves. Keep your system anchored to inward stillness.`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "ما هو الجوهر العملي الحركي لمفهوم 'التسليم الواعي' لدى إيكهارت تول؟",
+            questionEn: "What is the functional definition of Conscious Surrender in Tolle’s work?",
+            optionsAr: [
+              "التقاعس عن العمل والاستسلام التام للفقر مع قبول هزيمتك الإدارية والمهنية دون مبادرة.",
+              "القبول اللامشروط والذكي للواقع الحالي كما هو بلا مقاومة تدميرية عشوائية، مما يوفر كامل تركيزك وصفاء عقلك لتتصرف بفاعلية وقوة لحل الأمر.",
+              "الانسحاب من الأسواق العالمية والتوقف عن قراءة الموازنات والدفاتر المالية بالكلية."
+            ],
+            optionsEn: [
+              "Passive inaction and giving up on career goals, accepting failure without any initiative.",
+              "Unconditional, intelligent acceptance of the present moment as it is, which preserves your focus and clarity to act effectively and solve the issue.",
+              "Withdrawing completely from global markets and refusing to read financial balance sheets."
+            ],
+            correctIndex: 1,
+            explanationAr: "التسليم الواعي يمنحك السيادة والوضوح العقلي المطلق لتتصرف دون تشتيت، بينما الممانعة العقيمة تبدد طاقتك النفسية وتهدر فرص النجاح.",
+            explanationEn: "Conscious surrender arms you with unshakeable calm to act with clarity, whereas emotional resistance drains your energy."
+          }
+        ]
+      },
+      {
+        id: 'pn_ch5',
+        chapterNum: 5,
+        titleAr: 'الفصل الخامس: بوابات الجسد الداخلي والسكينة الكبرى (صيانة الحضور الدائم)',
+        titleEn: 'Chapter 5: The Portal of the Inner Body & Unshakeable Stillness',
+        descriptionAr: 'الاتصال الدائم بالطاقة الحيوية للجسد الداخلي، ترسيخ الحضور بساحة العمل، وتطهير النفس من ضغوط المستقبل الوهمي.',
+        descriptionEn: 'Sustaining connection with the life force of your inner body, anchoring high presence at work, and cultivating deep serenity.',
+        lessons: [
+          {
+            id: 'pn_ch5_l1',
+            idNum: 1,
+            titleAr: '1. لغز الجسد الداخلي الحي: بوابتك الدائمة نحو الكينونة الكبرى',
+            titleEn: '1. Accessing the Inner Body: Your Anchor of Complete Presence',
+            duration: '4m',
+            type: 'intro',
+            contentAr: `الجسد المادي الذي تراه في المرآة هو مجرد طلاء وقشرة خارجية؛ أما تحتها فيقع **الجسد الداخلي غير المرئي (Inner Body)**، وهو بوابة حية تتصل مباشرة بمحيط الكينونة الواسع الهادئ.
+
+**فائدة الاتصال بالجسد الداخلي:**
+عندما تشعر بالطاقة الكامنة بداخل أطرافك وجسدك أثناء حركتك اليومية، يهدأ عقلك تلقائياً ويتوقف تيار الأفكار الهائم المتوتر. تكتسب درع أمان نفسي متين يبقيك آمناً وصامداً أمام كل المنغصات والضغوط المهنية المعاصرة.
+
+**الحضور المكثف هو السحر:**
+هو ما يميز الأكاديمي الحقيقي والقائد الموثوق الذي يتألق فكره ويحوز هيبة الصدارة واليقين لمسيرة مملكته بسلام.`,
+            contentEn: `The physical shell you observe in the mirror is merely an outer layer. Beneath lies the invisible **Inner Body**—a vibrant canvas of raw life force connecting you directly to Stillness.
+
+**The functional impact:**
+By tuning into the subtle energy inside your body as you move through your routine, your circular thoughts naturally subside. You build a psychological shield that protects your focus against external stresses.
+
+**Intense Presence at work:**
+This presence distinguishes authentic leaders. It infuses their decision-making with composure and unshakeable clarity.`
+          },
+          {
+            id: 'pn_ch5_l2',
+            idNum: 2,
+            titleAr: '2. غمر الجسد بالوعي المطلق: كيف تفصل دماغك وصحتك عن الضغط والتوتر؟',
+            titleEn: '2. Flooding the System with Pure Awareness: Anchoring Stillness',
+            duration: '3m',
+            type: 'core',
+            contentAr: `يقسم تول وبكار كيف أن غمر أوجاع وتفاصيل الجسد بالوعي والسكينة هو العلاج الأول المتين لمجابهة نبرات الفشل المؤقت والتوتر:
+            
+- **تمرين الحضور الخامل:** قبل النوم أو في بداية يومك، وجه كامل وعيك وتفكيرك للشعور بحيوية يديك وقدميك وصدرك من الداخل؛ اشعر بتيار الحياة يسير بانتظام وبراعة باذخة.
+- **تطهير الروح الدائم:** هذا الاتصال الصادق يجدد طاقة خلاياك الذهنية ومناعتك الجسدية، ويرشد دوافغك ويمنحك وقار الحكماء الحقيقيين لتدير فكرك وأعمالك وأصولك بامتياز.
+
+الدرع الواقي للأصول والوفرة المعرفية يبنى في كنف هذا الحضور والوعي.`,
+            contentEn: `Tolle clarifies that flooding your physical container with pure awareness is a vital defense against anxiety and strain:
+
+- **The Awareness Scan:** Before sleep or as you start your work, direct your focus to the energy in your hands, feet, and core. Feel the current of life directly.
+- **The Cellular Recharge:** This connection recharges your cognitive battery, sharpens your resilience, and equips you with quiet authority to direct your professional goals and assets.
+
+Your psychological shield and focus are built upon this profound foundation.`
+          },
+          {
+            id: 'pn_ch5_l3',
+            idNum: 3,
+            titleAr: '3. ممارسات واسترجاع الحضور الصامد: تطبيقات عملية للاتصال السري التام',
+            titleEn: '3. Standard Tips: Sustaining Your Inner Connection Today',
+            duration: '3m',
+            type: 'tips',
+            contentAr: `إليك هذه التطبيقات لتثبت في أعماق حضورك اليوم:
+            
+- **الأنفاس الثلاثة الواعية:** خذ ثلاثة أنفاس عميقة واعية مركزة بالكامل على هويتك وحركة بطنك وصدرك بانتظام كل ساعة، لتمنع تشتيت الانتباه وعقد الأوراق الخائبة الجانبية.
+- **حبس الوعي بالجسم:** مارس أعمالك وكتاباتك اليومية مع الاحتفاظ بنسبة ١٠٪ من وعيك العميق متصلاً بالإحساس بحيوية وتدفق الكينونة بداخل جسمك وصدرك لتنعم بصفاء العارفين الكوني الصالح المبرهن.`,
+            contentEn: `Practical daily rituals to secure your presence:
+            
+- **The Three-Breath Check:** Take three conscious, deep breaths every hour—focus strictly on the expansion and contraction of your core. This suppresses cognitive drift and clears peripheral noise.
+- **The 10% Anchor Rule:** Execute your daily typing and coding assignments while keeping 10% of your energy anchored inside your physical form. This simple tether keeps you perfectly centered and alert.`
+          }
+        ],
+        quiz: [
+          {
+            questionAr: "كيف يفيدنا تمرين الاتصال بالجسد الداخلي وسكينة الروح في تسييس ضغوط الوظيفة اليومية؟",
+            questionEn: "How does connecting with the Inner Body support us in navigating workplace challenges?",
+            optionsAr: [
+              "يؤدي لتخدير الفرد وتعطيله عن أداء أعماله والهروب من دفع نفقات البنوك.",
+              "يهدئ العصف الذهني المتوتر عشوائياً، يوفر درع أمان قوي جداً يطرد تشتيت الانتباه ويمنحك هدوءاً وثباتاً ممتازاً لاتخاذ أصوب القرارات بذكاء.",
+              "يجعلك تعادي زملاءك الأكاديميين للحصول على تلميع تفاخري زائف لمظاهرك بالعمل."
+            ],
+            optionsEn: [
+              "It drugs your drive, causing you to evade daily responsibilities and skip essential financial payments.",
+              "It quietens hyper-reactive thoughts, creating a psychological shield that filters out distraction and secures composure for perfect decision-making.",
+              "It prompts you to challenge academic peers to gather superficial praise or climb false social tiers at work."
+            ],
+            correctIndex: 1,
+            explanationAr: "الاتصال بالجسد الحي الداخلي يربطك بمصدر الكينونة الساكنة التي تذوب تحتها كل هموم الشهرة والركض والتوهمات التافهة المعاصرة.",
+            explanationEn: "Inner-body awareness anchors you to the stillness of Being, neutralizing status anxieties and chronic future-oriented worries."
+          }
+        ]
       }
     ]
   }
@@ -2795,7 +3763,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
       score,
       total,
       dateStr: dateFormatted,
-      serial: `AFAQ-PD-${score >= total ? 'AMB' : 'ALN'}-${hash}`
+      serial: `BKDA-PD-${score >= total ? 'AMB' : 'ALN'}-${hash}`
     });
     setShowCertificate(true);
     
@@ -2805,6 +3773,20 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
       spread: 80,
       origin: { y: 0.5 }
     });
+  };
+
+  const getBookOverallScores = (book: any) => {
+    let score = 0;
+    let total = 0;
+    book.chapters.forEach((ch: any) => {
+      const r = userResults.find((res: any) => res.lessonId === ch.id);
+      if (r) {
+        score += r.score || 0;
+        total += r.total || 0;
+      }
+    });
+    if (total === 0) total = book.chapters.length * 3; // safe fallback
+    return { score, total };
   };
 
   const renderCertificateModal = () => {
@@ -2864,11 +3846,11 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
                 {/* Certificate Details list */}
                 <div className="mt-6 border-t border-slate-100 pt-4 space-y-2.5 text-xs text-slate-600 font-serif text-right">
                   <div className="flex justify-between flex-row-reverse">
-                    <span className="font-bold">{isRtl ? 'الكتاب والمسار:' : 'Course:'}</span>
-                    <span className="text-[#b48e56] font-sans font-black">{certificateData.courseTitle}</span>
+                    <span className="font-bold">{isRtl ? 'الدورة المعتمدة:' : 'Approved Course:'}</span>
+                    <span className="text-[#002147] font-sans font-black">{certificateData.courseTitle}</span>
                   </div>
                   <div className="flex justify-between flex-row-reverse">
-                    <span className="font-bold">{isRtl ? 'الفصل والوحدة:' : 'Chapter:'}</span>
+                    <span className="font-bold">{isRtl ? 'المستوى ومعيار التقييم:' : 'Level & Standard:'}</span>
                     <span className="text-slate-800 font-semibold">{certificateData.chapterTitle}</span>
                   </div>
                   <div className="flex justify-between flex-row-reverse">
@@ -2907,38 +3889,38 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
             {/* Right side Elegant printable certificate layout */}
             <div className="flex-1 bg-[#fdfbf7] border-4 border-double border-[#b48e56]/65 p-6 md:p-10 rounded-2xl relative overflow-hidden select-none flex flex-col justify-between aspect-[1.414/1] text-center shadow-inner print:border-none print:bg-white print:p-8 print:w-full">
               {/* Decorative classical background border corners */}
-              <div className="absolute top-2 right-2 w-16 h-16 border-t-2 border-r-2 border-[#b48e56]/50 rounded-tr-md print:hidden" />
-              <div className="absolute top-2 left-2 w-16 h-16 border-t-2 border-l-2 border-[#b48e56]/50 rounded-tl-md print:hidden" />
-              <div className="absolute bottom-2 right-2 w-16 h-16 border-b-2 border-r-2 border-[#b48e56]/50 rounded-br-md print:hidden" />
-              <div className="absolute bottom-2 left-2 w-16 h-16 border-b-2 border-l-2 border-[#b48e56]/50 rounded-tl-md print:hidden" />
+              <div className="absolute top-2 right-2 w-16 h-16 border-t-2 border-r-2 border-[#b48e56]/55 rounded-tr-md print:hidden" />
+              <div className="absolute top-2 left-2 w-16 h-16 border-t-2 border-l-2 border-[#b48e56]/55 rounded-tl-md print:hidden" />
+              <div className="absolute bottom-2 right-2 w-16 h-16 border-b-2 border-r-2 border-[#b48e56]/55 rounded-br-md print:hidden" />
+              <div className="absolute bottom-2 left-2 w-16 h-16 border-b-2 border-l-2 border-[#b48e56]/55 rounded-tl-md print:hidden" />
 
               {/* Decorative Subtle Background Crest */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#b48e56]/[0.015] rounded-full flex items-center justify-center border border-dashed border-[#b48e56]/5 select-none pointer-events-none" />
 
-              {/* Certificate Header Branding */}
-              <div className="flex justify-between items-center border-b border-[#f3eee5] pb-4 mb-4 select-none relative z-10 flex-row-reverse">
+              {/* Certificate Header Branding - Beautiful Blue Banner */}
+              <div className="bg-[#002147] text-white -mx-6 md:-mx-10 -mt-6 md:-mt-10 px-6 md:px-10 py-5 mb-5 select-none relative z-10 flex justify-between items-center flex-row-reverse border-b-4 border-[#b48e56] rounded-t-xl">
                 <div className="text-right">
-                  <span className="font-extrabold text-[#b48e56] text-sm md:text-base leading-none block font-sans">
-                    {isRtl ? 'أكاديمية آفاق للتطوير والتمكين الأكاديمي' : 'AFAQ Continuous Development Academy'}
+                  <span className="font-extrabold text-white text-sm md:text-base leading-none block font-sans">
+                    {isRtl ? 'أكاديمية باسم آل خليل الرقمية' : 'Basim Al Khalil Digital Academy'}
                   </span>
-                  <span className="text-[9px] md:text-[10px] text-slate-400 font-serif font-semibold mt-1 block">
-                    {isRtl ? 'إدارة التطوير المستمر والبحث المنهجي والتحقق المعرفي' : 'Continuous Education & High Quality Standards Board'}
+                  <span className="text-[9px] md:text-[10px] text-amber-400 font-semibold mt-1 block">
+                    {isRtl ? 'الهيئة العالمية للجودة وتدقيق معايير النخبة المهنية' : 'International Board of Quality & Professional Elite Standards'}
                   </span>
                 </div>
 
                 {/* Academy logo container */}
-                <div className="w-12 h-12 rounded-full border-2 border-[#b48e56] flex items-center justify-center bg-[#b48e56]/5">
-                  <GraduationCap className="text-[#b48e56]" size={24} />
+                <div className="w-12 h-12 rounded-full border-2 border-amber-400 flex items-center justify-center bg-white/10 shrink-0">
+                  <GraduationCap className="text-amber-400" size={24} />
                 </div>
               </div>
 
               {/* Main certificate wording */}
               <div className="my-auto space-y-4 md:space-y-6 relative z-10">
                 <div>
-                  <span className="text-[10px] font-black tracking-widest text-[#b48e56] uppercase py-1 px-3.5 bg-[#f5f1e8] rounded-full inline-block mb-1 border border-[#b48e56]/15 font-sans">
-                    {isRtl ? 'شهادة إتمام معتمدة لبرنامج التطوير المهني' : 'Certified Lifelong Achievement Certificate'}
+                  <span className="text-[10px] font-black tracking-widest text-[#002147] uppercase py-1 px-3.5 bg-blue-50 rounded-full inline-block mb-1 border border-[#002147]/15 font-sans">
+                    {isRtl ? 'شهادة إكمال واعتماد المسار المهني الرقمي' : 'Certified Digital Professional Path Achievement'}
                   </span>
-                  <h2 className="text-2xl md:text-3.5xl font-black text-slate-800 tracking-tight leading-snug font-sans">
+                  <h2 className="text-2xl md:text-3.5xl font-black text-[#002147] tracking-tight leading-snug font-sans">
                     {isRtl ? 'شهادة إتمام ومطابقة معايير جودة المعرفة' : 'Certificate of Completion & Intellectual Mastery'}
                   </h2>
                 </div>
@@ -2951,34 +3933,34 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
 
                 {/* Trainee Name dynamic input block */}
                 <div className="py-2 mb-2">
-                  <h1 className="text-2xl md:text-4xl font-extrabold text-[#111] bg-gradient-to-r from-slate-900 via-[#b48e56] to-slate-900 bg-clip-text text-transparent px-4 font-sans tracking-tight">
+                  <h1 className="text-2xl md:text-4xl font-extrabold text-[#111] bg-gradient-to-r from-slate-900 via-[#002147] to-[#002147] bg-clip-text text-transparent px-4 font-sans tracking-tight">
                     {certificateName || (isRtl ? 'اسم المتدرب المتميز' : 'Distinguished Trainee Name')}
                   </h1>
-                  <div className="w-40 md:w-60 h-[1.5px] bg-[#b48e56]/40 mx-auto mt-2 relative">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-[#b48e56] rotate-45" />
+                  <div className="w-40 md:w-60 h-[1.5px] bg-[#002147]/40 mx-auto mt-2 relative">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-[#002147] rotate-45" />
                   </div>
                 </div>
 
                 <p className="text-xs md:text-sm text-slate-500 font-serif leading-relaxed max-w-2xl mx-auto">
                   {isRtl ? (
                     <>
-                      قد اجتاز بنجاح الدورة التنموية المصغرة المصنفة والتقييم المعرفي المكثف لمستخلص:
+                      قد اجتاز بنجاح واكتملت له كافة المتطلبات المعرفية المحددة لـ:
                       <br />
-                      <strong className="text-[#b48e56] text-sm md:text-base font-black px-1.5 inline-block my-1 font-sans">
-                        «{certificateData.courseTitle} - {certificateData.chapterTitle}»
+                      <strong className="text-[#002147] text-base md:text-lg font-black px-2 inline-block my-1 font-sans">
+                        إتمام دورة «{certificateData.courseTitle}»
                       </strong>
                       <br />
-                      بتقدير عام <span className="font-extrabold text-amber-600">{gradeStr}</span> ونسبة دقة بلغت {percentage}%.
+                      بتقدير عام <span className="font-extrabold text-emerald-600">{gradeStr}</span> ونسبة كفاءة بلغت {percentage}%.
                     </>
                   ) : (
                     <>
-                      has successfully completed the developmental deconstruction and passed the rigorous chapter validation for:
+                      has successfully completed all micro-learning checkpoints and passed the rigorous assessment for:
                       <br />
-                      <strong className="text-[#b48e56] text-sm md:text-base font-black px-1.5 inline-block my-1 font-sans">
-                        "{certificateData.courseTitle} - {certificateData.chapterTitle}"
+                      <strong className="text-[#002147] text-base md:text-lg font-black px-2 inline-block my-1 font-sans">
+                        Completion of the course: "{certificateData.courseTitle}"
                       </strong>
                       <br />
-                      attaining a final grade of <span className="font-extrabold text-amber-600">{gradeStr}</span> and representing thorough cognitive mastery.
+                      attaining a final grade of <span className="font-extrabold text-emerald-600">{gradeStr}</span> and representing full intellectual mastery.
                     </>
                   )}
                 </p>
@@ -2988,25 +3970,25 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
               <div className="border-t border-[#f3eee5] pt-4 mt-6 flex justify-between items-end text-right flex-row-reverse">
                 {/* Signatures 1 */}
                 <div className="text-right space-y-1 z-10">
-                  <span className="text-[10px] text-slate-400 block font-serif font-semibold">{isRtl ? 'العميد الأكاديمي لشؤون التنمية:' : 'Academic Dean of Quality:'}</span>
-                  <p className="font-serif italic text-slate-800 font-bold text-xs">{isRtl ? 'د. يوسف الأتاسي' : 'Dr. Joseph Atassi'}</p>
+                  <span className="text-[10px] text-slate-400 block font-serif font-semibold">{isRtl ? 'رئيس الأكاديمية والعميد:' : 'Academy President & Dean:'}</span>
+                  <p className="font-serif italic text-slate-800 font-bold text-xs">{isRtl ? 'د. باسم آل خليل' : 'Dr. Basim Al Khalil'}</p>
                   <div className="w-24 h-5 border-b border-dashed border-slate-300 relative inline-block">
-                    <span className="font-mono text-[9px] text-slate-300 absolute left-4 bottom-0 select-none">Atassi@Afaq</span>
+                    <span className="font-mono text-[9px] text-slate-300 absolute left-4 bottom-0 select-none">Basim@KhalilAcademy</span>
                   </div>
                 </div>
 
-                {/* Gold Seal stamp inside certificate */}
+                {/* Blue & Gold Seal stamp inside certificate */}
                 <div className="flex flex-col items-center justify-center relative shrink-0 z-20">
-                  <div className="absolute w-14 h-14 bg-amber-500 rounded-full opacity-10 filter blur-sm print:hidden" />
-                  <div className="w-16 h-16 rounded-full border-4 border-double border-[#b48e56] bg-[#fcf9f2] flex flex-col items-center justify-center p-1.5 shadow-sm relative">
-                    <div className="text-[8px] font-black uppercase text-[#b48e56] font-sans tracking-wide scale-90 select-none text-center leading-none">
-                      {isRtl ? 'آفاق معتمد' : 'AFAQ VAL'}
-                      <span className="block text-[#111] font-bold text-[6px]">{percentage}% OK</span>
+                  <div className="absolute w-14 h-14 bg-blue-500/10 rounded-full opacity-10 filter blur-sm print:hidden" />
+                  <div className="w-16 h-16 rounded-full border-4 border-double border-[#002147] bg-[#fcf9f2] flex flex-col items-center justify-center p-1.5 shadow-sm relative">
+                    <div className="text-[7px] font-black uppercase text-[#002147] font-sans tracking-wide scale-95 select-none text-center leading-none">
+                      {isRtl ? 'معتمد رقمياً' : 'BKDA VAL'}
+                      <span className="block text-emerald-600 font-bold text-[6px] mt-0.5">{percentage}% OK</span>
                     </div>
-                    <Trophy className="text-[#b48e56] mt-0.5" size={16} />
+                    <Trophy className="text-[#b48e56] mt-0.5" size={14} />
                   </div>
-                  <span className="text-[8px] font-black text-[#b48e56] tracking-widest mt-1 uppercase font-mono block select-none">
-                    {isRtl ? 'مستند معتمد' : 'Academy Seal'}
+                  <span className="text-[8px] font-black text-[#002147] tracking-widest mt-1 uppercase font-mono block select-none">
+                    {isRtl ? 'ختم الأكاديمية' : 'Academy Seal'}
                   </span>
                 </div>
 
@@ -3015,7 +3997,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
                   <span className="text-[10px] text-slate-400 block font-serif font-semibold">{isRtl ? 'رئيس هيئة الاعتماد الفني:' : 'Chairman of Accreditation:'}</span>
                   <p className="font-serif italic text-slate-800 font-bold text-xs">{isRtl ? 'أ.د. عبد الهادي الصايغ' : 'Prof. Abdul-Hadi Al-Saigh'}</p>
                   <div className="w-24 h-5 border-b border-dashed border-slate-300 relative inline-block">
-                    <span className="font-mono text-[9px] text-slate-300 absolute right-4 bottom-0 select-none font-sans">SAIGH-APPROVED</span>
+                    <span className="font-mono text-[9px] text-slate-300 absolute right-4 bottom-0 select-none font-sans">BKDA-APPROVED</span>
                   </div>
                 </div>
               </div>
@@ -3023,7 +4005,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
               {/* Serial Number & Security Bottomline */}
               <div className="pt-2 flex justify-between items-center text-[8px] font-mono font-bold text-slate-400 border-t border-slate-100 flex-row-reverse select-none">
                 <span>ID: {certificateData.serial}</span>
-                <span>{isRtl ? 'بوابة التحقق الفطنة ومكافحة التزوير الأكاديمي' : 'AFAQ Cognitive Integrity Control Protocol'}</span>
+                <span>{isRtl ? 'بوابة التحقق الفطنة ومكافحة التزوير الأكاديمي' : 'BKDA Cognitive Integrity Control Protocol'}</span>
                 <span>{certificateData.dateStr}</span>
               </div>
             </div>
@@ -3052,32 +4034,70 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
             if (data.lessonId) {
               unlocked.add(data.lessonId);
               // Unlock subsequent chapters if previous is completed
+              // Subtle Art
               if (data.lessonId === 'sa_ch1' && data.score >= 2) {
                 unlocked.add('sa_ch2');
               }
+              if (data.lessonId === 'sa_ch2' && data.score >= 2) {
+                unlocked.add('sa_ch3');
+              }
+              if (data.lessonId === 'sa_ch3' && data.score >= 2) {
+                unlocked.add('sa_ch4');
+              }
+              if (data.lessonId === 'sa_ch4' && data.score >= 2) {
+                unlocked.add('sa_ch5');
+              }
+              // 7 Habits
               if (data.lessonId === '7h_ch1' && data.score >= 2) {
                 unlocked.add('7h_ch2');
               }
               if (data.lessonId === '7h_ch2' && data.score >= 2) {
                 unlocked.add('7h_ch3');
               }
+              if (data.lessonId === '7h_ch3' && data.score >= 2) {
+                unlocked.add('7h_ch4');
+              }
+              if (data.lessonId === '7h_ch4' && data.score >= 2) {
+                unlocked.add('7h_ch5');
+              }
+              // You Can
               if (data.lessonId === 'yc_ch1' && data.score >= 2) {
                 unlocked.add('yc_ch2');
               }
               if (data.lessonId === 'yc_ch2' && data.score >= 2) {
                 unlocked.add('yc_ch3');
               }
+              if (data.lessonId === 'yc_ch3' && data.score >= 2) {
+                unlocked.add('yc_ch4');
+              }
+              if (data.lessonId === 'yc_ch4' && data.score >= 2) {
+                unlocked.add('yc_ch5');
+              }
+              // Rich Dad
               if (data.lessonId === 'rd_ch1' && data.score >= 2) {
                 unlocked.add('rd_ch2');
               }
               if (data.lessonId === 'rd_ch2' && data.score >= 2) {
                 unlocked.add('rd_ch3');
               }
+              if (data.lessonId === 'rd_ch3' && data.score >= 2) {
+                unlocked.add('rd_ch4');
+              }
+              if (data.lessonId === 'rd_ch4' && data.score >= 2) {
+                unlocked.add('rd_ch5');
+              }
+              // Power of Now
               if (data.lessonId === 'pn_ch1' && data.score >= 2) {
                 unlocked.add('pn_ch2');
               }
               if (data.lessonId === 'pn_ch2' && data.score >= 2) {
                 unlocked.add('pn_ch3');
+              }
+              if (data.lessonId === 'pn_ch3' && data.score >= 2) {
+                unlocked.add('pn_ch4');
+              }
+              if (data.lessonId === 'pn_ch4' && data.score >= 2) {
+                unlocked.add('pn_ch5');
               }
             }
           });
@@ -3161,6 +4181,24 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
             timestamp: serverTimestamp()
           });
 
+          // Instantly update userResults locally for direct reactive UI state
+          setUserResults(prev => {
+            const index = prev.findIndex(r => r.lessonId === activeChapter.id);
+            if (index > -1) {
+              const updated = [...prev];
+              updated[index] = { ...updated[index], score: quizScore, total: totalQuestions };
+              return updated;
+            }
+            return [...prev, {
+              userId: userProfile.uid,
+              lessonId: activeChapter.id,
+              courseId: 'professional-development',
+              lessonTitle: isRtl ? activeChapter.titleAr : activeChapter.titleEn,
+              score: quizScore,
+              total: totalQuestions
+            }];
+          });
+
           // Reward 150 Points/XP
           const extraPoints = 150;
           const userRef = doc(db, 'users', userProfile.uid);
@@ -3172,15 +4210,33 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
           setUnlockedChapters(prev => {
             const updated = new Set(prev);
             updated.add(activeChapter.id);
+            // Subtle Art
             if (activeChapter.id === 'sa_ch1') updated.add('sa_ch2');
+            if (activeChapter.id === 'sa_ch2') updated.add('sa_ch3');
+            if (activeChapter.id === 'sa_ch3') updated.add('sa_ch4');
+            if (activeChapter.id === 'sa_ch4') updated.add('sa_ch5');
+            // 7 Habits
             if (activeChapter.id === '7h_ch1') updated.add('7h_ch2');
             if (activeChapter.id === '7h_ch2') updated.add('7h_ch3');
+            if (activeChapter.id === '7h_ch3') updated.add('7h_ch4');
+            if (activeChapter.id === '7h_ch4') updated.add('7h_ch5');
+            // You Can
             if (activeChapter.id === 'yc_ch1') updated.add('yc_ch2');
             if (activeChapter.id === 'yc_ch2') updated.add('yc_ch3');
+            if (activeChapter.id === 'yc_ch3') updated.add('yc_ch4');
+            if (activeChapter.id === 'yc_ch4') updated.add('yc_ch5');
+            // Rich Dad
             if (activeChapter.id === 'rd_ch1') updated.add('rd_ch2');
             if (activeChapter.id === 'rd_ch2') updated.add('rd_ch3');
-            if (activeChapter.id === 'pn_ch1') updated.add('pn_ch2');
+            if (activeChapter.id === 'rd_ch3') updated.add('rd_ch4');
+            if (activeChapter.id === 'rd_ch4') updated.add('rd_ch5');
+            // Power of Now
+            if (activeChapter.id === 'pn_ch1') {
+              updated.add('pn_ch2');
+            }
             if (activeChapter.id === 'pn_ch2') updated.add('pn_ch3');
+            if (activeChapter.id === 'pn_ch3') updated.add('pn_ch4');
+            if (activeChapter.id === 'pn_ch4') updated.add('pn_ch5');
             return updated;
           });
 
@@ -3442,7 +4498,7 @@ It confirms that successful modern learners prioritize dynamic continuous action
                   {/* Books grid */}
                   <div className="grid md:grid-cols-3 gap-6">
                     {PRELOADED_COURSES.map(course => {
-                      const isComplete = userResults.some(r => r.lessonId === 'sa_ch1' && r.score >= 2) && course.id === 'subtle_art';
+                      const isComplete = course.chapters.length > 0 && course.chapters.every(ch => userResults.some(r => r.lessonId === ch.id && r.score >= 2));
                       return (
                         <div 
                           key={course.id}
@@ -3558,6 +4614,49 @@ It confirms that successful modern learners prioritize dynamic continuous action
                   {/* Chapters List */}
                   {!activeChapter ? (
                     <div>
+                      {/* Comprehensive Course completion Certificate Banner */}
+                      {selectedBook && selectedBook.chapters.every(ch => userResults.some(r => r.lessonId === ch.id)) && (
+                        <div className="bg-gradient-to-r from-[#002147] to-[#112d4e] text-white rounded-3xl p-6 md:p-8 shadow-xl border-2 border-amber-400 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden text-right leading-relaxed">
+                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-white/[0.02] rounded-full pointer-events-none" />
+                          
+                          <div className="flex items-center gap-5 flex-row-reverse z-10 w-full md:w-auto">
+                            <div className="w-16 h-16 rounded-2xl bg-amber-400/25 flex items-center justify-center text-amber-400 shrink-0">
+                              <Trophy size={36} />
+                            </div>
+                            <div>
+                              <span className="text-amber-400 text-xs font-extrabold uppercase tracking-widest block mb-1">
+                                {isRtl ? 'تهانينا الحارة! إنجاز أكاديمي متميز' : 'Congratulations! Academic Excellence'}
+                              </span>
+                              <h3 className="text-xl md:text-2xl font-black text-white leading-tight">
+                                {isRtl ? `استحقاق شهادة إتمام دورة «${selectedBook.titleAr}»` : `You earned the certification for completing "${selectedBook.titleEn}"`}
+                              </h3>
+                              <p className="text-slate-300 text-xs font-serif mt-1 max-w-xl">
+                                {isRtl 
+                                  ? 'لقد اجتزت بنجاح كافة اختبارات الفصول بتقدير ممتاز. شهادتك المعتمدة صادرة وموثقة مباشرة من أكاديمية باسم آل خليل الرقمية.' 
+                                  : 'You have passed all chapter audits with high standing. Your credential is authenticated and ready.'}
+                              </p>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const { score, total } = getBookOverallScores(selectedBook);
+                              triggerCertificate(
+                                isRtl ? selectedBook.titleAr : selectedBook.titleEn,
+                                isRtl ? 'إكمال المسار الأكاديمي كاملاً' : 'Full Course Path Completed',
+                                score,
+                                total
+                              );
+                            }}
+                            className="bg-amber-400 hover:bg-amber-500 text-[#002147] font-black px-6 py-4 rounded-2xl text-sm flex items-center justify-center gap-2 transition-all shrink-0 cursor-pointer shadow-lg w-full md:w-auto hover:scale-105 z-10"
+                          >
+                            <Award size={18} />
+                            <span>{isRtl ? 'إصدار شهادة الإتمام الفورية 🎓' : 'Issue Dynamic Course Certificate 🎓'}</span>
+                          </button>
+                        </div>
+                      )}
+
                       <h3 className="text-xl font-extrabold mb-4 text-[#111] pb-2 border-b border-[#ece8e1]">
                         {isRtl ? 'الفصول والمسارات المتاحة للتلخيص والمناقشة' : 'Available Pathways'}
                       </h3>
@@ -3601,23 +4700,8 @@ It confirms that successful modern learners prioritize dynamic continuous action
                                   <div className="flex items-center gap-2 flex-wrap justify-end">
                                     <div className="flex items-center gap-1 bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1.5 rounded-full text-xs font-black">
                                       <CheckCircle2 size={14} />
-                                      <span>{isRtl ? `تمت البوابة (${matchingResult.score}/${matchingResult.total})` : `Completed (${matchingResult.score}/${matchingResult.total})`}</span>
+                                      <span>{isRtl ? `تم اجتياز مخرجات الفصل (${matchingResult.score}/${matchingResult.total})` : `Module Mastered (${matchingResult.score}/${matchingResult.total})`}</span>
                                     </div>
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        triggerCertificate(
-                                          isRtl ? selectedBook.titleAr : selectedBook.titleEn,
-                                          isRtl ? chapter.titleAr : chapter.titleEn,
-                                          matchingResult.score,
-                                          matchingResult.total
-                                        );
-                                      }}
-                                      className="flex items-center gap-1 bg-amber-500 hover:bg-amber-600 text-slate-950 px-3 py-1.5 rounded-full text-xs font-black transition-all shadow-sm border border-amber-400 cursor-pointer"
-                                    >
-                                      <Award size={13} />
-                                      <span>{isRtl ? 'استعراض الشهادة 🏅' : 'Certificate 🏅'}</span>
-                                    </button>
                                   </div>
                                 ) : isUnlocked ? (
                                   <span className="text-xs font-black uppercase text-[#b48e56]">{isRtl ? 'ابدأ المسار' : 'Start Path'}</span>
@@ -3947,18 +5031,37 @@ It confirms that successful modern learners prioritize dynamic continuous action
                                   </button>
                                   
                                   {quizScore >= Math.ceil(activeChapter.quiz.length * 0.7) && (
-                                    <button 
-                                      onClick={() => triggerCertificate(
-                                        isRtl ? selectedBook.titleAr : selectedBook.titleEn,
-                                        isRtl ? activeChapter.titleAr : activeChapter.titleEn,
-                                        quizScore,
-                                        activeChapter.quiz.length
+                                    <>
+                                      {selectedBook && selectedBook.chapters.every(ch => ch.id === activeChapter.id || userResults.some(r => r.lessonId === ch.id)) ? (
+                                        <button 
+                                          onClick={() => {
+                                            const { score, total } = getBookOverallScores(selectedBook);
+                                            triggerCertificate(
+                                              isRtl ? selectedBook.titleAr : selectedBook.titleEn,
+                                              isRtl ? 'إكمال المسار الأكاديمي كاملاً' : 'Full Course Path Completed',
+                                              score,
+                                              total
+                                            );
+                                          }}
+                                          className="bg-gradient-to-r from-[#002147] to-[#112d4e] border-2 border-amber-400 hover:brightness-110 text-white font-black transition-all py-3 px-6 rounded-xl text-xs flex items-center gap-2 block shadow-lg shadow-amber-500/15 cursor-pointer"
+                                        >
+                                          <Trophy size={15} className="text-amber-400" />
+                                          <span>{isRtl ? 'إصدار شهادة الدورة كاملة 🎓' : 'Issue Full Course Certificate 🎓'}</span>
+                                        </button>
+                                      ) : (
+                                        <button 
+                                          onClick={() => {
+                                            setShowQuiz(false);
+                                            setActiveChapter(null);
+                                            setActiveLesson(null);
+                                          }}
+                                          className="bg-emerald-500 hover:bg-emerald-600 text-white font-black transition-all py-3 px-6 rounded-xl text-xs flex items-center gap-2 block shadow-md cursor-pointer"
+                                        >
+                                          <CheckCircle2 size={15} />
+                                          <span>{isRtl ? 'تم العبور بنجاح! تابع الفصول المتبقية 🚀' : 'Passed! Complete remaining modules 🚀'}</span>
+                                        </button>
                                       )}
-                                      className="bg-gradient-to-r from-amber-500 to-[#b48e56] hover:brightness-110 text-slate-900 font-black transition-all py-3 px-6 rounded-xl text-xs flex items-center gap-2 block shadow-lg shadow-amber-500/15 cursor-pointer"
-                                    >
-                                      <Award size={15} />
-                                      <span>{isRtl ? 'أصدر شهادة الإتمام الفورية 🎓' : 'Issue Dynamic Certificate 🎓'}</span>
-                                    </button>
+                                    </>
                                   )}
 
                                   {quizScore < Math.ceil(activeChapter.quiz.length * 0.7) && (
