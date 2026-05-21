@@ -64,7 +64,7 @@ export const CHILDHOOD_PACKAGES = [
 
 export const MASTER_ADMINS = ['basim5252@gmail.com'];
 
-export type AppView = 'dashboard' | 'placement-test' | 'curriculum' | 'lesson' | 'progress' | 'leaderboard' | 'chat' | 'admin' | 'ai-chat' | 'video-library' | 'story-library' | 'early-childhood' | 'oxford-discover' | 'reading-curriculum' | 'grammar-curriculum' | 'conversation-curriculum' | 'writing-curriculum' | 'expression-curriculum' | 'modern-curriculum' | 'academic-planner' | 'academic-results' | 'academic-analytics' | 'bi-weekly-test' | 'professional-development';
+export type AppView = 'dashboard' | 'placement-test' | 'curriculum' | 'lesson' | 'progress' | 'leaderboard' | 'chat' | 'admin' | 'ai-chat' | 'video-library' | 'story-library' | 'early-childhood' | 'oxford-discover' | 'reading-curriculum' | 'grammar-curriculum' | 'conversation-curriculum' | 'writing-curriculum' | 'expression-curriculum' | 'modern-curriculum' | 'academic-planner' | 'academic-results' | 'academic-analytics' | 'bi-weekly-test' | 'professional-development' | 'gemini-developer-hub';
 
 export interface WhatsAppNotification {
   id: string;

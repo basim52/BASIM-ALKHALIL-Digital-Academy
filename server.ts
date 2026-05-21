@@ -5,7 +5,7 @@ import path from "path";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { GoogleGenAI, Modality } from "@google/genai";
+import { GoogleGenAI, Modality, Type } from "@google/genai";
 
 const logToFile = (msg: string) => console.log(`[Server] ${msg}`);
 
@@ -439,6 +439,239 @@ async function startServer() {
     } catch (error: any) {
       logToFile(`Analysis Error: ${error.message}`);
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Interactive Gemini Developer Sandbox Endpoint
+  app.post("/api/gemini/developer-sandbox", async (req, res) => {
+    logToFile(`START /api/gemini/developer-sandbox - TaskType: ${req.body.taskType}`);
+    try {
+      const { prompt, taskType = 'function-calling' } = req.body;
+      
+      if (!prompt) {
+        return res.status(400).json({ error: "Missing prompt parameter." });
+      }
+
+      if (!initAI() || !aiLive) {
+        return res.status(500).json({ error: "Gemini API key is not configured on the server." });
+      }
+
+      if (taskType === 'function-calling') {
+        const checkInventoryTool = {
+          name: "check_inventory",
+          description: "Check the remaining stock, price, and level suitability of academic books in the school database.",
+          parameters: {
+            type: Type.OBJECT,
+            properties: {
+              bookName: {
+                type: Type.STRING,
+                description: "The name of the book, e.g. 'Oxford Discover 1' or 'Grammar Galaxy A1' or 'Writing Essentials B2'."
+              }
+            },
+            required: ["bookName"]
+          }
+        };
+
+        const getStudentProfileTool = {
+          name: "get_student_profile",
+          description: "Get academic profile, overall score, proficiency level, and leaderboard points for a registered student.",
+          parameters: {
+            type: Type.OBJECT,
+            properties: {
+              studentName: {
+                type: Type.STRING,
+                description: "The name of the student, e.g. 'Ahmad' or 'Sarah' or 'Faisal'."
+              }
+            },
+            required: ["studentName"]
+          }
+        };
+
+        const toolsDefinition = [checkInventoryTool, getStudentProfileTool];
+        logToFile("Calling Gemini with function calling tools...");
+
+        // Initial call to Gemini to see if it generates a tool call
+        const response1 = await aiLive.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: prompt,
+          config: {
+            systemInstruction: "You are a logistics and student-records assistant at Basim Alkhalil Academic Platform. Always use available tools if the user is asking about stock/prices of books, or student details. Answer in Arabic if the user asks in Arabic.",
+            tools: [{ functionDeclarations: toolsDefinition }]
+          }
+        });
+
+        const functionCalls = response1.functionCalls;
+        
+        if (functionCalls && functionCalls.length > 0) {
+          const call = functionCalls[0];
+          const callName = call.name;
+          const callArgs = call.args as any;
+          logToFile(`Gemini requested FunctionCall: ${callName} with arguments: ${JSON.stringify(callArgs)}`);
+
+          // Executing local mock DB
+          let localDBResult: any = {};
+          if (callName === "check_inventory") {
+            const targetBook = (callArgs.bookName || "").toLowerCase();
+            if (targetBook.includes("oxford") || targetBook.includes("discover")) {
+              localDBResult = { bookName: "Oxford Discover 1", stockRemaining: 45, unitPriceSAR: 120, status: "IN_STOCK", suitableLevels: ["A1", "A2"] };
+            } else if (targetBook.includes("grammar") || targetBook.includes("galaxy")) {
+              localDBResult = { bookName: "Grammar Galaxy A1", stockRemaining: 0, unitPriceSAR: 85, status: "OUT_OF_STOCK", suitableLevels: ["A1"] };
+            } else if (targetBook.includes("writing") || targetBook.includes("essentials")) {
+              localDBResult = { bookName: "Writing Essentials B2", stockRemaining: 12, unitPriceSAR: 150, status: "IN_STOCK", suitableLevels: ["B1", "B2"] };
+            } else {
+              localDBResult = { bookName: callArgs.bookName, status: "UNKNOWN", message: "Book category not found in inventory. Stock level is zero." };
+            }
+          } else if (callName === "get_student_profile") {
+            const name = (callArgs.studentName || "").toLowerCase();
+            if (name.includes("ahmad") || name.includes("احمد")) {
+              localDBResult = { studentName: "Ahmad", level: "A2", scoreAverage: "88%", badgePoints: 15, outstandingFees: 0, status: "ACTIVE" };
+            } else if (name.includes("sarah") || name.includes("سارة")) {
+              localDBResult = { studentName: "Sarah", level: "B1", scoreAverage: "94%", badgePoints: 42, outstandingFees: 0, status: "ACTIVE" };
+            } else if (name.includes("faisal") || name.includes("فيصل")) {
+              localDBResult = { studentName: "Faisal", level: "A1", scoreAverage: "75%", badgePoints: 5, outstandingFees: 120, status: "PENDING_FEE" };
+            } else {
+              localDBResult = { studentName: callArgs.studentName, status: "NOT_FOUND", info: "No student records mapped to this search query." };
+            }
+          }
+
+          logToFile(`Executing DB Tool. Output: ${JSON.stringify(localDBResult)}`);
+
+          // Send back the output to Gemini to get the final answer
+          const previousContent = response1.candidates?.[0]?.content;
+          const toolResponseContent = {
+            role: "user",
+            parts: [{
+              functionResponse: {
+                name: callName,
+                response: localDBResult
+              }
+            }]
+          };
+
+          const response2 = await aiLive.models.generateContent({
+            model: "gemini-3.5-flash",
+            contents: [
+              { role: "user", parts: [{ text: prompt }] },
+              previousContent,
+              toolResponseContent
+            ],
+            config: {
+              tools: [{ functionDeclarations: toolsDefinition }]
+            }
+          });
+
+          return res.json({
+            taskType,
+            hasFunctionCall: true,
+            functionCall: {
+              name: callName,
+              args: callArgs
+            },
+            localDatabaseOutput: localDBResult,
+            finalResponseText: response2.text,
+            toolsDefinition,
+            logs: [
+              { status: "info", message: "استقبل الخادم المطالبة وتهيأ لتمرير الأدوات للنموذج." },
+              { status: "success", message: "استحضر نموذج Gemini دالة Tool Call لتنفيذ الاستعلام.", payload: { name: callName, args: callArgs } },
+              { status: "executing", message: "تم تسييل الاستعلام افتراضياً من قاعدة بيانات الأكاديمية.", payload: localDBResult },
+              { status: "finalizing", message: "أتم نموذج Gemini دمج التغذية الراجعة وصاغ الرد النهائي بنجاح." }
+            ]
+          });
+        } else {
+          // No function Call generated
+          return res.json({
+            taskType,
+            hasFunctionCall: false,
+            finalResponseText: response1.text,
+            toolsDefinition,
+            logs: [
+              { status: "info", message: "استقبل الخادم المطالبة ومرر تعريفات الدوال للنموذج." },
+              { status: "warning", message: "أجاب النموذج بشكل مباشر دون استدعاء أي دالة نظراً لعدم تطابق السؤال مع صلاحيات الأدوات الموفرة." }
+            ]
+          });
+        }
+      } 
+      
+      else if (taskType === 'code-execution') {
+        logToFile("Calling Gemini with code execution tool...");
+        
+        const response = await aiLive.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: prompt,
+          config: {
+            systemInstruction: "You are a scientific data analyst. You possess a built-in Python sandbox environment. When asked to calculate, process statistics, or check math sequences, write and execute python code natively to get the actual results.",
+            tools: [{ codeExecution: {} }]
+          }
+        });
+
+        // Parse parts for code execution signals
+        const parts = response.candidates?.[0]?.content?.parts || [];
+        
+        let pythonCode = "";
+        let executionStdout = "";
+        let explanation = response.text || "";
+        let hasCodeExecution = false;
+
+        for (const part of parts) {
+          if ((part as any).executableCode) {
+            hasCodeExecution = true;
+            pythonCode = (part as any).executableCode.code || "";
+          }
+          if ((part as any).codeExecutionResult) {
+            executionStdout = (part as any).codeExecutionResult.output || "";
+          }
+        }
+
+        return res.json({
+          taskType,
+          hasCodeExecution,
+          pythonCode,
+          executionStdout,
+          finalResponseText: explanation,
+          logs: [
+            { status: "info", message: "تم تفعيل وكيل البيانات والتحاليل الذكي (Data Analyst Agent)." },
+            hasCodeExecution 
+              ? { status: "success", message: "قام وكيل الأبحاث بكتابة كود Python وتشغيله حياً بالـ Sandbox لتسوية الحسابات الرياضية.", payload: { pythonCode } }
+              : { status: "warning", message: "لم تتبلور حاجة لتشغيل الكود لتبسيط المطالبة. تمت المعالجة البديهية عفوياً." },
+            executionStdout ? { status: "executing", message: "استرجاع مخرجات كونسول التشغيل النهائي من بايثون.", payload: executionStdout } : null
+          ].filter(Boolean)
+        });
+      }
+
+      else if (taskType === 'document-processing') {
+        // Document analysis prompt grounded by custom systemic context
+        const standardAcademicContext = `
+          [مستند مبرهن ومستنبط: دليل سياسات الأكاديمية والمقاعد للأعوام 2026/2027]
+          - الحد الأعلى لطلاب الصف التفاعلي الواحد في المناهج المطورة هو 8 طلاب فقط لضمان الجودة.
+          - تبدأ الأكاديمية دورس القراءة (Reading) أيام الأحد والثلاثاء لمستويات A1-A2، وأيام الإثنين والخميس لمستويات B1-B2.
+          - يعفى الطالب سارة أو أحمد من رسوم حيازة الكتب إن فاق تقييمهما العام 90% بالدائرة.
+          - نظام الكبسولة المعرفية بالأكاديمية مدعوم بوكلاء Antigravity للتلخيص السريع وتسهيل المذاكرة.
+          - الرسوم الإدارية للتسجيل بالمستوى الواحد هي 350 ريال سعودي غير قابلة للاستعادة مطلقاً.
+        `;
+
+        const response = await aiLive.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: `دليل سياسات الأكاديمية والمستند المرجعي:\n${standardAcademicContext}\n\nسؤال المستخدم:\n${prompt}`,
+          config: {
+            systemInstruction: "You are an advanced Document Intelligence Agent. Read the provided academic policy document carefully and extract precise grounded answers. Always output citations or references from the text. Respond in Arabic."
+          }
+        });
+
+        return res.json({
+          taskType,
+          groundedContextUsed: standardAcademicContext,
+          finalResponseText: response.text,
+          logs: [
+            { status: "info", message: "تم تسييل محرك قراءة الملفات وتحميل وثيقة السياسات واللوائح." },
+            { status: "success", message: "تمت صياغة مطابقة Grounded Prompting الفعالة والتحقق من موثوقية النقولات." }
+          ]
+        });
+      }
+
+      res.status(400).json({ error: "Unsupported task type." });
+    } catch (error: any) {
+      logToFile(`Developer Sandbox Error: ${error.message}`);
+      res.status(500).json({ error: error.message || "Failed to execute developer playground simulation" });
     }
   });
 

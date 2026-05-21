@@ -79,6 +79,7 @@ import { WritingCurriculumCompanion, WritingLevel, ALL_WRITING_UNITS } from './c
 import { ExpressionCurriculumCompanion, ExpressionLevel, ALL_EXPRESSION_UNITS } from './components/ExpressionCurriculumCompanion';
 import { ModernCurriculumHome } from './components/ModernCurriculumHome';
 import { ProfessionalDevelopment } from './components/ProfessionalDevelopment';
+import { GeminiDeveloperHub } from './components/GeminiDeveloperHub';
 import { Layers, Image as OxfordIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { familyConstellationsLesson } from './data/lessons/r_a1_4';
@@ -3264,6 +3265,15 @@ export default function App() {
         />
       );
     }
+    if (view === 'gemini-developer-hub') {
+      return (
+        <GeminiDeveloperHub 
+          lang={lang} 
+          userProfile={userProfile}
+          onBack={() => setView('dashboard')} 
+        />
+      );
+    }
     if (view === 'modern-curriculum') {
       return (
         <ModernCurriculumHome 
@@ -3624,6 +3634,7 @@ export default function App() {
                     { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
                     { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
                     { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
+                    { id: 'gemini-developer-hub', label: lang === 'ar' ? 'بوابة وجسور Gemini' : 'Gemini Developer Portal', icon: Brain, show: isAdmin },
                     { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
                     { id: 'oxford-discover', label: t.oxfordCompanion, icon: Layers },
                     { id: 'modern-curriculum', label: lang === 'ar' ? 'المناهج الدراسية المطورة' : 'Modernized Curriculums', icon: Sparkles },
@@ -3691,6 +3702,7 @@ export default function App() {
                   [
                     { id: 'dashboard', icon: LayoutDashboard },
                     { id: 'admin', icon: ShieldAlert, show: isAdmin },
+                    { id: 'gemini-developer-hub', icon: Brain, show: isAdmin },
                     { id: 'early-childhood', icon: Baby },
                     { id: 'academic-planner', icon: Sparkles },
                     { id: 'oxford-discover', icon: OxfordIcon },
