@@ -645,6 +645,12 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
                   unlocked.add(course.chapters[chIndex + 1].id);
                 }
               });
+              if (selectedBook) {
+                const chIndex = selectedBook.chapters.findIndex(ch => ch.id === data.lessonId);
+                if (chIndex !== -1 && chIndex + 1 < selectedBook.chapters.length) {
+                  unlocked.add(selectedBook.chapters[chIndex + 1].id);
+                }
+              }
             }
           });
           setUserResults(results);
@@ -655,7 +661,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
       };
       fetchResults();
     }
-  }, [userProfile, selectedBook, activeChapter]);
+  }, [userProfile?.uid]);
 
   const speakText = async (text: string) => {
     cancelAllSpeech();
@@ -710,66 +716,82 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
       
       // Save result and award XP if user passed (scored at least 70%)
       const isPassed = quizScore >= Math.ceil(totalQuestions * 0.7);
-      if (isPassed && userProfile?.uid) {
-        try {
-          // Add document to Firestore
-          await addDoc(collection(db, 'lessonResults'), {
-            userId: userProfile.uid,
-            parentIds: userProfile.linkedParentIds || [],
+      if (isPassed) {
+        // 1. Instantly update userResults locally for direct reactive UI state
+        setUserResults(prev => {
+          const index = prev.findIndex(r => r.lessonId === activeChapter.id);
+          if (index > -1) {
+            const updated = [...prev];
+            updated[index] = { ...updated[index], score: quizScore, total: totalQuestions };
+            return updated;
+          }
+          return [...prev, {
+            userId: userProfile?.uid || 'guest',
             lessonId: activeChapter.id,
             courseId: 'professional-development',
-            level: 'General',
             lessonTitle: isRtl ? activeChapter.titleAr : activeChapter.titleEn,
             score: quizScore,
-            total: totalQuestions,
-            timestamp: serverTimestamp()
-          });
+            total: totalQuestions
+          }];
+        });
 
-          // Instantly update userResults locally for direct reactive UI state
-          setUserResults(prev => {
-            const index = prev.findIndex(r => r.lessonId === activeChapter.id);
-            if (index > -1) {
-              const updated = [...prev];
-              updated[index] = { ...updated[index], score: quizScore, total: totalQuestions };
-              return updated;
+        // 2. Add to unlocked chapters set dynamically
+        setUnlockedChapters(prev => {
+          const updated = new Set(prev);
+          updated.add(activeChapter.id);
+          
+          // Unlock next chapter in selected book
+          if (selectedBook) {
+            const chIndex = selectedBook.chapters.findIndex(ch => ch.id === activeChapter.id);
+            if (chIndex !== -1 && chIndex + 1 < selectedBook.chapters.length) {
+              updated.add(selectedBook.chapters[chIndex + 1].id);
             }
-            return [...prev, {
-              userId: userProfile.uid,
-              lessonId: activeChapter.id,
-              courseId: 'professional-development',
-              lessonTitle: isRtl ? activeChapter.titleAr : activeChapter.titleEn,
-              score: quizScore,
-              total: totalQuestions
-            }];
+          }
+          
+          // Also fallback across all preloaded courses
+          PRELOADED_COURSES.forEach(course => {
+            const chIndex = course.chapters.findIndex(ch => ch.id === activeChapter.id);
+            if (chIndex !== -1 && chIndex + 1 < course.chapters.length) {
+              updated.add(course.chapters[chIndex + 1].id);
+            }
           });
+          return updated;
+        });
 
-          // Reward 150 Points/XP
-          const extraPoints = 150;
-          const userRef = doc(db, 'users', userProfile.uid);
-          await updateDoc(userRef, {
-            points: (userProfile.points || 0) + extraPoints
-          });
+        // 3. Play confetti celebration
+        confetti({
+          particleCount: 200,
+          spread: 90,
+          origin: { y: 0.6 }
+        });
 
-          // Add to unlocked chapters set dynamically
-          setUnlockedChapters(prev => {
-            const updated = new Set(prev);
-            updated.add(activeChapter.id);
-            PRELOADED_COURSES.forEach(course => {
-              const chIndex = course.chapters.findIndex(ch => ch.id === activeChapter.id);
-              if (chIndex !== -1 && chIndex + 1 < course.chapters.length) {
-                updated.add(course.chapters[chIndex + 1].id);
-              }
-            });
-            return updated;
-          });
+        // 4. Update Firebase DB and user profile XP points asynchronously in the background if logged in
+        if (userProfile?.uid) {
+          (async () => {
+            try {
+              // Add document to Firestore
+              await addDoc(collection(db, 'lessonResults'), {
+                userId: userProfile.uid,
+                parentIds: userProfile.linkedParentIds || [],
+                lessonId: activeChapter.id,
+                courseId: 'professional-development',
+                level: 'General',
+                lessonTitle: isRtl ? activeChapter.titleAr : activeChapter.titleEn,
+                score: quizScore,
+                total: totalQuestions,
+                timestamp: serverTimestamp()
+              });
 
-          confetti({
-            particleCount: 200,
-            spread: 90,
-            origin: { y: 0.6 }
-          });
-        } catch (e) {
-          console.error("Error updating score in Firebase:", e);
+              // Reward 150 Points/XP
+              const extraPoints = 150;
+              const userRef = doc(db, 'users', userProfile.uid);
+              await updateDoc(userRef, {
+                points: (userProfile.points || 0) + extraPoints
+              });
+            } catch (firestoreError) {
+              console.error("Error updating score in Firebase (background):", firestoreError);
+            }
+          })();
         }
       }
     }

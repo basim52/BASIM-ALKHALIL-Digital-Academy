@@ -432,7 +432,14 @@ async function startServer() {
     if (pathname === '/ws/live' || pathname === '/ws/live/') {
       logToFile('Handshaking /ws/live - Matches!');
       wss.handleUpgrade(request, socket, head, (ws) => {
-        logToFile('  // Regular Chat Endpoint for Lessons
+        wss.emit('connection', ws, request);
+      });
+    } else {
+      socket.destroy();
+    }
+  });
+
+  // Regular Chat Endpoint for Lessons
   app.post("/api/lesson/chat", async (req, res) => {
     logToFile(`START /api/lesson/chat`);
     try {
@@ -528,65 +535,59 @@ async function startServer() {
               options: ["Vigorous cramming", "Consistent daily dialogue practice", "Ignoring grammar rules", "Relying on direct translations"],
               optionsAr: ["الحفظ المكثف دفعة واحدة", "الممارسة اليومية والحديث المستمر", "تجاهل القواعد اللغوية", "الاعتماد على الترجمة الحرفية"],
               correctIndex: 1,
-              explanation: "Regular active conversational loops naturally automate the brain's recall parameters.",
-              explanationAr: "الحوارات التفاعلية واليومية المنتظمة تسهم في بناء النماذج الذهنية التلقائية للغة دون جهد."
+              explanation: "Regular active conversational practice triggers rapid synapses in brain centers.",
+              explanationAr: "العبرة في تملك اللغة والطلاقة الطبيعية تكمن في الممارسة المستمرة."
             }
           ]
         };
-        return res.json(simulatedLesson);
+        return res.json({ lesson: simulatedLesson });
       }
 
       const promptText = `
-        SYSTEM: Generate educational content in JSON matching the requested structure.
-        
-        USER REQUEST:
-        Topic: "${topic}".
-        Category: ${category}
-        Level: ${level}
-        
-        Task: Create a deep, high-quality interactive lesson with specialized sections.
-        
-        Output JSON STRICTLY following this schema:
+        You are an expert Oxford curriculum designer at Basim Alkhalil Digital Academy.
+        Generate a fully structured English lesson under the category "${category || 'General English'}" and level "${level || 'Intermediate'}" for the topic "${topic}".
+        Return raw JSON conforming EXACTLY to the structure:
         {
-          "title": "Topic Title",
-          "titleAr": "العنوان بالعربية",
+          "title": "...",
+          "titleAr": "...",
           "warmup": {
-            "title": "Warmup",
-            "mission": "Mission statement",
-            "missionAr": "بيان المهمة",
-            "objectives": ["Obj 1", "Obj 2"],
-            "objectivesAr": ["هدف 1", "هدف 2"]
+            "mission": "...",
+            "missionAr": "...",
+            "objectives": ["...", "..."],
+            "objectivesAr": ["...", "..."]
           },
-          "content": "Detailed markdown overview in English",
-          "contentAr": "محتوى مفصل بالعربية بتنسيق مارك داون",
+          "content": "...",
+          "contentAr": "...",
           "readingText": {
             "paragraphs": [
-              { "en": "English paragraph text", "ar": "الترجمة العربية للفقرة" }
+              { "en": "...", "ar": "..." },
+              { "en": "...", "ar": "..." }
             ]
           },
           "vocabulary": [
-            { "word": "Word", "phonetic": "fə-NET-ik", "meaningAr": "المعنى", "example": "Sentence example" }
+            { "word": "...", "phonetic": "...", "meaningAr": "...", "example": "..." },
+            { "word": "...", "phonetic": "...", "meaningAr": "...", "example": "..." }
           ],
-          "imageryPrompt": "DALL-E style prompt for lesson image",
+          "imageryPrompt": "...",
           "exercises": [
             {
               "type": "fill",
-              "instruction": "Complete the sentences choosing structural terms",
-              "instructionAr": "أكمل الجمل التالية باختيار المصطلح المناسب",
+              "instruction": "...",
+              "instructionAr": "...",
               "items": [
-                { "text": "Consistency and regular practice is the ___ to English fluency.", "textAr": "الاستمرارية والتدريب المستمر هما ___ للطلاقة الإنجليزية.", "answer": "key" }
+                { "text": "...", "textAr": "...", "answer": "..." }
               ]
             }
           ],
           "quiz": [
             {
-              "question": "Quiz question text",
-              "questionAr": "السؤال بالعربية",
-              "options": ["Opt 1", "Opt 2"],
-              "optionsAr": ["خيار 1", "خيار 2"],
-              "correctIndex": 0,
-              "explanation": "Exp English",
-              "explanationAr": "التفسير بالعربية"
+              "question": "...",
+              "questionAr": "...",
+              "options": ["...", "...", "...", "..."],
+              "optionsAr": ["...", "...", "...", "..."],
+              "correctIndex": 1,
+              "explanation": "...",
+              "explanationAr": "..."
             }
           ]
         }
@@ -594,21 +595,14 @@ async function startServer() {
 
       const result = await callAiWithRetry({
         contents: [{ role: 'user', parts: [{ text: promptText }] }],
-        config: {
-          responseMimeType: "application/json"
-        }
+        generationConfig: { responseMimeType: "application/json" }
       });
 
-      if (!result || !result.text) throw new Error("Empty response from AI");
-      
-      let cleanText = result.text.trim();
-      if (cleanText.startsWith("```")) {
-        cleanText = cleanText.replace(/^```json\n?/, "").replace(/\n?```$/, "");
-      }
-      res.json(JSON.parse(cleanText));
+      const lessonJson = JSON.parse(result.text || "{}");
+      res.json({ lesson: lessonJson });
     } catch (error: any) {
       logToFile(`Lesson Generate Error: ${error.message}`);
-      res.status(500).json({ error: error.message || "Failed to generate lesson content" });
+      res.status(500).json({ error: error.message || "Failed to generate lesson" });
     }
   });
 
@@ -626,68 +620,6 @@ async function startServer() {
 
       if (arGreetings.includes(cleanPrompt)) {
         return res.json({ text: "مرحباً بك! أنا شريكك الذكي في أكاديمية باسم الخليل. كيف يمكنني مساعدتك في التدرب اليوم؟" });
-      }�ة"],
-              correctIndex: 1,
-              explanation: "Regular active conversational loops naturally automate the brain's recall parameters.",
-              explanationAr: "الحوارات التفاعلية واليومية المنتظمة تسهم في بناء النماذج الذهنية التلقائية للغة دون جهد."
-            }
-          ]
-        };
-        return res.json(simulatedLesson);
-      }
-
-      const promptText = `
-        SYSTEM: Generate educational content in JSON matching the requested structure.
-        
-        USER REQUEST:
-        Topic: "${topic}".
-        Category: ${category}
-        Level: ${level}
-        
-        Task: Create a deep, high-quality interactive lesson with specialized sections.
-        
-        Output JSON STRICTLY following this schema:
-        {
-          "title": "Topic Title",
-          "titleAr": "العنوان بالعربية",
-          "warmup": {
-            "mission": "Mission statement",
-            "missionAr": "بيان المهمة",
-            "objectives": ["Obj 1", "Obj 2"],
-            "objectivesAr": ["هدف 1", "هدف 2"]
-          },
-          "content": "Detailed markdown overview in English",
-          "contentAr": "محتوى مفصل بالعربية بتنسيق مارك داون",
-          "readingText": {
-            "paragraphs": [
-              { "en": "English paragraph text", "ar": "الترجمة العربية للفقرة" }
-            ]
-          },
-          "vocabulary": [
-            { "word": "Word", "phonetic": "fə-NET-ik", "meaningAr": "المعنى", "example": "Sentence example" }
-          ],
-          "imageryPrompt": "DALL-E style prompt for lesson image",
-          "exercises": [
-            {
-              "type": "fill",
-              "instruction": "Complete the sentences choosing structural terms",
-              "instructionAr": "أكمل الجمل التالية باختيار المصطلح المناسب",
-              "items": [
-                { "text": "Consistency and regular practice is the ___ to English fluency.", "textAr": "الاستم        readingText: {
-          paragraphs: [
-            {
-              en: "Reading aloud and listening to academic text can drastically boost your structural recall. Pay attention to how prepositions tie verbs and nouns seamlessly.",
-              ar: "القراءة بصوت عالٍ والاستماع للنصوص الأكاديمية يساعدان على ترسيخ التراكيب اللغوية. انتبه لكيفية ربط حروف الجر بين الأفعال والأسماء بسلاسة."
-            },
-            {
-              en: "Consistency is key. Engaging in brief daily dialogue loops establishes automatic neural templates for complex speech patterns.",
-              ar: "الاستمرارية هي سر النجاح. ممارسة المحادثات اليومية القصيرة تسهم في بناء قوالب لغوية تلقائية للتعبير عن الأفكار المعقدة."
-            }
-          ]
-        },
-        vocabulary: [
-          { word: "Structure", phonetic: "STRUK-cher", meaningAr: "هيكل / بناء لغوي", example: "Having a solid grammar structure makes your English sound highly professional." },
-          { word: "Consistency", phonetic: "kən-SIS-tən-see", meaningAr: "ثبات واستمرارية", example: "Consiste      }�رحباً بك! أنا شريكك الذكي في أكاديمية باسم الخليل. كيف يمكنني مساعدتك في التدرب اليوم؟" });
       }
       if (enGreetings.includes(cleanPrompt)) {
         return res.json({ text: "Hello there! Welcome to Basim Alkhalil Academy. How can I help you practice your English speaking today?" });
@@ -700,46 +632,11 @@ async function startServer() {
         const isAnalysisRequest = clientPrompt.includes("feedback") || clientPrompt.includes("performance") || clientPrompt.includes("Analysis");
         
         let replyText = "";
+        const historyArr = Array.isArray(history) ? history : [];
         if (isAnalysisRequest) {
           replyText = `Great effort so far! Your conversational responses show very precise command over sentence grammar. Let's keep talking to improve further.\n\n[FEEDBACK] { "fluency": 82, "grammar": 90, "vocabulary": 80, "suggestions": ["Try using more complex transition words like furthermore, consequently.", "Your pronunciation rhythm is sound, keep up the regular speaking practice.", "Pay attention to correct preposition choices in academic writing."] }`;
         } else {
           replyText = getSmartFallbackResponse(clientPrompt, history);
-        }
-        return res.json({ text: replyText });
-      }�للسان وزيادة الثقة. ما هو الموضوع المفضل لديك لنتحدث عنه الآن؟";
-            } else {
-              const index = historyArr.length % arResponses.length;
-              replyText = arResponses[index];
-            }
-          } else {
-            if (clientPrompt.includes("language") || clientPrompt.includes("master") || clientPrompt.includes("learn")) {
-              const index = historyArr.length % 3;
-              const options = [
-                "Mastering a language comes down to consistent active use. Which aspect would you like to level up today?",
-                "Indeed! Step by step practice makes sentence formulation effortless. Let's keep exploring new phrasing modes.",
-                "A magnificent goal! Learning actively builds custom structural maps in the mind for continuous high fluency."
-              ];
-              replyText = options[index];
-            } else if (clientPrompt.includes("grammar") || clientPrompt.includes("rules") || clientPrompt.includes("tense")) {
-              const index = historyArr.length % 2;
-              const options = [
-                "Grammar rules are the architectural blueprints of English. Regular chats help automate these pathways.",
-                "Are you focusing on specific active patterns like perfect tenses, or do you prefer free conversation today?"
-              ];
-              replyText = options[index];
-            } else if (clientPrompt.includes("difficult") || clientPrompt.includes("hard") || clientPrompt.includes("struggle")) {
-              replyText = "Don't worry, every champion started somewhere. Breaking rules into active patterns makes them very approachable!";
-            } else if (clientPrompt.includes("easy") || clientPrompt.includes("simple")) {
-              replyText = "That's brilliant! When concepts feel easy, it signifies wonderful retention progress. Let's step up the complexity!";
-            } else if (clientPrompt.includes("thank") || clientPrompt.includes("thanks")) {
-              replyText = "You are most welcome! I'm absolutely delighted to support your Oxford learning journey.";
-            } else if (clientPrompt.includes("speak") || clientPrompt.includes("talk") || clientPrompt.includes("chat") || clientPrompt.includes("conversation")) {
-              replyText = "Conversational practice is our ultimate superpower for fluency. Tell me about your goals or a topic you love!";
-            } else {
-              const index = historyArr.length % enResponses.length;
-              replyText = enResponses[index];
-            }
-          }
         }
         return res.json({ text: replyText });
       }
@@ -813,7 +710,7 @@ async function startServer() {
             const options = [
               "إتقان اللغة يحتاج إلى ممارسة يومية مستمرة وبناء تراكيب جمل سليمة. ما هي الجوانب التي ترغب في تطويرها الآن؟",
               "رائع! بالممارسة والخطوات المدروسة في الأكاديمية، ستتمكن من التعبير بطلاقة وثقة تامة.",
-              "اللغة كنز يفتح لك آفاقاً واسعة. دعنا نواصل التدريب اليومي مع قواعد أوكسفورد لترسيخ المفاف الفردية والطلاقة."
+              "اللغة كنز يفتح لك آفاقاً واسعة. دعنا نواصل التدريب اليومي مع قواعد أوكسفورد لترسيخ المفردات الفردية والطلاقة."
             ];
             replyText = options[index];
           } else if (clientPrompt.includes("قواعد") || clientPrompt.includes("قاعده") || clientPrompt.includes("جرامر") || clientPrompt.includes("النحو")) {
