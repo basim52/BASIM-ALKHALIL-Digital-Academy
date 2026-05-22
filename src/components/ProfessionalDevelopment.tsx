@@ -103,7 +103,8 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
   const [pdfAssistantQuery, setPdfAssistantQuery] = useState<string>('');
   const [pdfAssistantLog, setPdfAssistantLog] = useState<{role: 'user' | 'assistant', text: string}[]>([]);
   const [isPdfAssistantSending, setIsPdfAssistantSending] = useState<boolean>(false);
-  const [uploadedPdfFile, setUploadedPdfFile] = useState<{name: string, size: string, text?: string} | null>(null);
+  const [uploadedPdfFile, setUploadedPdfFile] = useState<{name: string, size: string, text?: string, url?: string} | null>(null);
+  const [pdfCenterViewMode, setPdfCenterViewMode] = useState<'text' | 'original'>('original');
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [pdfSidebarTab, setPdfSidebarTab] = useState<'chapters' | 'search' | 'bookmarks' | 'upload'>('chapters');
 
@@ -986,6 +987,8 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
       return;
     }
 
+    const fileUrl = URL.createObjectURL(file);
+
     setUploadProgress(10);
     const interval = setInterval(() => {
       setUploadProgress(prev => {
@@ -1001,6 +1004,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
       setUploadedPdfFile({
         name: file.name,
         size: (file.size / (1024 * 1024)).toFixed(2) + " MB",
+        url: fileUrl,
         text: isRtl 
           ? `[متن ملف PDF المرفوع: ${file.name}]
           لقد قمت بنجاح باستيراد هذا الكتاب إلى الأكاديمية الرقمية الفطنة.
@@ -1017,10 +1021,11 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
           2. Emphasizes self-responsibility and building solid covenants.
           3. Guidebook for active balance and long-term triumph.`
       });
-      setPdfTotalPages(8);
+      setPdfCenterViewMode('original');
+      setPdfTotalPages(1);
       setPdfCurrentPage(1);
-      setPdfSidebarTab('chapters');
-      speakText(isRtl ? "تم استيراد وتحليل كتابك بصيغة بي دي اف بنجاح مذهل!" : "Your PDF book has been successfully imported!");
+      setPdfSidebarTab('upload');
+      speakText(isRtl ? "تم استيراد وتحميل كتابك بصيغة بي دي اف بنجاح مذهل! تم تفعيل القارئ الكامل ذو العرض التفاعلي." : "Your PDF book has been successfully imported! Interactive view activated.");
     }, 1600);
   };
 
@@ -1708,39 +1713,68 @@ It confirms that successful modern learners prioritize dynamic continuous action
           </div>
 
           {/* CENTER PANEL: The document sheet sheet */}
-          <div className="flex-1 p-6 md:p-8 overflow-y-auto flex justify-center items-start h-full">
-            <div 
-              className={`w-full max-w-2xl px-8 md:px-12 py-10 md:py-14 rounded-2xl shadow-xl border ${themeStyles} leading-relaxed transition-all relative overflow-hidden text-right select-text`}
-              style={{ fontSize: `${pdfZoom}%` }}
-            >
-              {/* PDF Corner Ribbons */}
-              <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-[#b48e56]/15 pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-[#b48e56]/15 pointer-events-none" />
-
-              {/* PDF Header running elements */}
-              <div className="border-b border-dashed border-[#b48e56]/15 pb-2 mb-6 flex justify-between items-center text-[10px] font-mono font-black select-none pointer-events-none opacity-50 flex-row-reverse">
-                <span>{isRtl ? "أكاديمية المعرفة الفطنة والريادة" : "Basim Alkhalil Digital Academy"}</span>
-                <span>{uploadedPdfFile ? "مستند بي دي اف خاص" : `«${isRtl ? selectedBook.titleAr : selectedBook.titleEn}»`}</span>
-                <span>Page {pdfCurrentPage}</span>
+          <div className="flex-1 p-6 md:p-8 overflow-y-auto flex flex-col items-center justify-start h-full">
+            {uploadedPdfFile && (
+              <div className="flex bg-slate-200/80 backdrop-blur-sm p-1 rounded-xl mb-4 shrink-0 font-bold text-xs ring-1 ring-black/5 gap-1 shadow-sm">
+                <button
+                  onClick={() => setPdfCenterViewMode('original')}
+                  className={`px-4 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${pdfCenterViewMode === 'original' ? 'bg-[#1e2229] text-white shadow-sm font-black' : 'text-slate-600 hover:text-slate-900'}`}
+                >
+                  <span>📄</span>
+                  <span>{isRtl ? 'عرض كتابك كاملاً (PDF الأصلي)' : 'View Original PDF Book'}</span>
+                </button>
+                <button
+                  onClick={() => setPdfCenterViewMode('text')}
+                  className={`px-4 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${pdfCenterViewMode === 'text' ? 'bg-[#1e2229] text-white shadow-sm font-black' : 'text-slate-600 hover:text-slate-900'}`}
+                >
+                  <span>🧠</span>
+                  <span>{isRtl ? 'ملخص وتحليل المساعد الذكي' : 'AI Analysis & Insights'}</span>
+                </button>
               </div>
+            )}
 
-              {/* Content heading in sheets */}
-              <h3 className="text-xl md:text-2xl font-black text-slate-900 border-b border-[#b48e56]/10 pb-3 mb-6 font-sans">
-                {uploadedPdfFile ? "المتن المستخلص من كتاب بي دي اف المرفوع" : activePageDetails.title}
-              </h3>
-
-              {/* Main paragraph contents */}
-              <div className="text-sm md:text-base whitespace-pre-line space-y-4 font-serif relative">
-                {highlightSearchText(uploadedPdfFile?.text || activePageDetails.content, pdfSearchQuery)}
+            {uploadedPdfFile && pdfCenterViewMode === 'original' && uploadedPdfFile.url ? (
+              <div className="w-full h-full min-h-[58vh] bg-white rounded-2xl overflow-hidden shadow-2xl border border-slate-300 relative flex flex-col">
+                <iframe
+                  src={`${uploadedPdfFile.url}#toolbar=1`}
+                  className="w-full h-full min-h-[58vh] flex-1 border-0"
+                  title="PDF Document Viewer"
+                />
               </div>
+            ) : (
+              <div 
+                className={`w-full max-w-2xl px-8 md:px-12 py-10 md:py-14 rounded-2xl shadow-xl border ${themeStyles} leading-relaxed transition-all relative overflow-hidden text-right select-text`}
+                style={{ fontSize: `${pdfZoom}%` }}
+              >
+                {/* PDF Corner Ribbons */}
+                <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-[#b48e56]/15 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-[#b48e56]/15 pointer-events-none" />
 
-              {/* PDF Sheet bottom running line */}
-              <div className="border-t border-[#b48e56]/15 mt-10 pt-4 flex justify-between items-center text-[9px] font-black select-none pointer-events-none opacity-40 flex-row-reverse">
-                <span>© {isRtl ? "حقوق الترجمة والدراسة ميسرة" : "Academic Study copy"}</span>
-                <span>{isRtl ? "مكتبة التطوير والإنتاج" : "Professional Development"}</span>
-                <span>{pdfCurrentPage} / {pdfTotalPages}</span>
+                {/* PDF Header running elements */}
+                <div className="border-b border-dashed border-[#b48e56]/15 pb-2 mb-6 flex justify-between items-center text-[10px] font-mono font-black select-none pointer-events-none opacity-50 flex-row-reverse">
+                  <span>{isRtl ? "أكاديمية المعرفة الفطنة والريادة" : "Basim Alkhalil Digital Academy"}</span>
+                  <span>{uploadedPdfFile ? "مستند بي دي اف خاص" : `«${isRtl ? selectedBook.titleAr : selectedBook.titleEn}»`}</span>
+                  <span>Page {pdfCurrentPage}</span>
+                </div>
+
+                {/* Content heading in sheets */}
+                <h3 className="text-xl md:text-2xl font-black text-slate-900 border-b border-[#b48e56]/10 pb-3 mb-6 font-sans">
+                  {uploadedPdfFile ? "المتن المستخلص من كتاب بي دي اف المرفوع" : activePageDetails.title}
+                </h3>
+
+                {/* Main paragraph contents */}
+                <div className="text-sm md:text-base whitespace-pre-line space-y-4 font-serif relative">
+                  {highlightSearchText(uploadedPdfFile?.text || activePageDetails.content, pdfSearchQuery)}
+                </div>
+
+                {/* PDF Sheet bottom running line */}
+                <div className="border-t border-[#b48e56]/15 mt-10 pt-4 flex justify-between items-center text-[9px] font-black select-none pointer-events-none opacity-40 flex-row-reverse">
+                  <span>© {isRtl ? "حقوق الترجمة والدراسة ميسرة" : "Academic Study copy"}</span>
+                  <span>{isRtl ? "مكتبة التطوير والإنتاج" : "Professional Development"}</span>
+                  <span>{pdfCurrentPage} / {pdfTotalPages}</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* RIGHT/LEFT SIDECAR: AI Scholar Assistant Panel (مساعد الذكاء الاصطناعي للمتن والـ PDF) */}
