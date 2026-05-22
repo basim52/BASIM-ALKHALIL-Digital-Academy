@@ -500,6 +500,104 @@ export const youCanWinCourse: BookCourse = {
           explanationEn: "Fortifying your character and designing systems with pure intent yields a standard of excellence that leaves an everlasting impact on society."
         }
       ]
+    },
+    {
+      id: 'ycw_ch11',
+      chapterNum: 11,
+      titleAr: 'الفصل الحادي عشر: مهارات العلاقات الإنسانية - بناء الثقة المتبادلة والتعاون المثمر بوقار',
+      titleEn: 'Chapter 11: Interpersonal Skills - Cultivating Mutual Trust & Symbiotic Collaborations',
+      descriptionAr: 'قواعد نسج العلاقات المهنية والشخصية المتينة القائمة على الود والاحترام المتبادل وقيم الصدق والشهامة.',
+      descriptionEn: 'The core foundations of building powerful personal and professional alliances rooted in respect, integrity, and proactive empathy.',
+      lessons: [
+        {
+          id: 'ycw_ch11_l1',
+          idNum: 1,
+          titleAr: '1. ركائز بناء العلاقات الإيجابية: الوفاء بالأمانة والود الخالص للشركاء',
+          titleEn: '1. Pillars of Positive Alliances: Mutual Creditability and Genuine Human Interest',
+          duration: '4m',
+          type: 'core',
+          contentAr: `لا يمكن تحقيق نجاح عظيم ومستدام بمعزل عن الآخرين. العلاقات الإنسانية والمهنية القوية بالشركات تُبنى على مخزن هائل من الثقة والأمانة المتبادلة والاهتمام الصادق بتميز زملائك. احرص على أداء حقوق شركائك وثنائية المنافع، فكل جسر ثقة تبنيه اليوم هو رافعة قوية ترتقي بها غداً لقمم النجاح والتميز بوقار تام.`,
+          contentEn: `No great and sustainable success can be achieved in completely isolated voids. Robust personal and professional partnerships are constructed on a reservoir of trust, shared values, and objective support. Treating peers with supreme honor guarantees mutual progress.`
+        },
+        {
+          id: 'ycw_ch11_l2',
+          idNum: 2,
+          titleAr: '2. فضيلة التعاطف والإعلاء من شأن الآخرين: كيف تكسب العقول والقلوب بنبل؟',
+          titleEn: '2. The Discipline of Empathy: Actively Validating Others with Sincerity and Poise',
+          duration: '3m',
+          type: 'tips',
+          contentAr: `التعاطف (Empathy) هو قدرتك على رؤية العالم بنظارة الطرف الآخر وفهم طموحاته ومخاوفه بكامل الصدق. القائد المحنك يستمع ويحفز زملاءه دون نفاق أو تفخيم زائف؛ بل يسعى بضميره لمساندتهم ورفع تقديرهم لذواتهم، مما يولد تكاتفاً هائلاً وثقة تامة تجعل بيئة العمل واحة ملهمة للبذل والتفوق.`,
+          contentEn: `Empathy is your strategic capacity to observe and understand environments from another person's perspective. Great managers guide and inspire their coworkers without resorting to cheap flattery; instead, they elevate self-esteem and build highly collaborative team dynamics.`
+        }
+      ],
+      quiz: [
+        {
+          questionAr: "كيف تساهم مهارات العلاقات الإنسانية والتعاطف في تسريع التقدم الشخصي والمؤسسي؟",
+          questionEn: "How do robust interpersonal skills and active empathy accelerate collective and personal achievements?",
+          optionsAr: [
+            "عبر استنزاف جهود الفريق في صراعات سياسية ونفاق باهت.",
+            "بتأسيس روابط من الثقة والأمانة المتبادلة وإعلاء روح التعاون، مما يزيل الحواجز ويوحد القوى لصنع قيمة خارقة للشركات.",
+            "بتشجيع الكسل الفردي والانسحاب من ساحة التدريبات المهنية."
+          ],
+          optionsEn: [
+            "By consuming organizational energy in passive-aggressive political disputes.",
+            "By cementing bridges of secure trust, integrity, and mutual support, unlocking synergistic channels that produce peerless marketplace outcomes.",
+            "By promoting lethargy and avoiding hard milestones."
+          ],
+          correctIndex: 1,
+          explanationAr: "بناء العلاقات الحية القائمة على الصدق والاحترام يرسخ نبل حضورك ويجعل نجاحك مبروكاً وتصاعدياً تدعمه كل الأطراف المحيطة بهدوء ووقار.",
+          explanationEn: "Fostering partnerships based on ethics and shared goals establishes your legacy as an inclusive leader whose growth benefits the entire ecosystem."
+        }
+      ]
+    },
+    {
+      id: 'ycw_ch12',
+      chapterNum: 12,
+      titleAr: 'الفصل الثاني عشر: صياغة الأهداف الفعالة وخطة العمل - تحويل الرؤية إلى نتائج تطبيقية مبهرة',
+      titleEn: 'Chapter 12: Goal Setting & Execution Planning - Transforming Ideation into Tangible Accomplishments',
+      descriptionAr: 'علم هندسة الأهداف وصياغة خطط حركية فولاذية تحقق طموحاتك وتحميك من متاهات المماطلة والتشتت المعرفي.',
+      descriptionEn: 'The structured methodology of goal-setting, designing rigorous daily action structures, and maintaining persistent focus to defeat procrastination.',
+      lessons: [
+        {
+          id: 'ycw_ch12_l1',
+          idNum: 1,
+          titleAr: '1. بوصلة الأهداف الذكية والكبيرة: صياغة خارطة الطريق للحرية بوضوح صلد',
+          titleEn: '1. Mapping Out Clear Objectives: The Anatomy of High-Impact Goal Structuring',
+          duration: '3m',
+          type: 'core',
+          contentAr: `الأمنيات بلا خطة هي محض أوهام تتبخر مع شروق شمس العقبات. لتصل للقمم، يجب عليك صياغة أهداف محددة ومقيسة بوضوح صلد، مربوطة ببرنامج زمني ومنشقة من قيمك وشغفك الداخلي. احرص على تدوين أهدافك في دفاتر خاصة وجعلها مرئية لعينيك دائماً؛ فهذه البوصلة تحمي انتباهك من الضياع في مستنقع المغريات اليومية التافهة.`,
+          contentEn: `Wishes without concrete frameworks are mere illusions that vanish under pressure. To excel, you must design specific, measurable, time-bound targets aligned with your moral code. Documenting your goals locks in visual attention and shields your focus from secondary noise.`
+        },
+        {
+          id: 'ycw_ch12_l2',
+          idNum: 2,
+          titleAr: '2. خطة العمل والانضباط الحديدي: كيف تدير عرق المحاولة والجهد بانتظام خارق؟',
+          titleEn: '2. The Action Blueprint: Maintaining Rigorous Persistence Until Accomplishment',
+          duration: '4m',
+          type: 'tips',
+          contentAr: `تحقيق الأهداف الكبرى يعتمد بالدرجة الأولى على انضباطك الحديدي بتنفيذ الخطة اليومية، حتى عندما تفقد الحماس اللحظي أو يتسلل الملل لروحك. المحترف الشهم يمارس جهوده وخطواته بصمت وصبر وقور، واثقاً من طاقة التراكم المستدام ومتجاوزاً كبوات الفشل والتعثر المؤقت برأس شامخ وإصرار يفتت الحجر.`,
+          contentEn: `Ultimate goal accomplishment relies upon systematic daily discipline, continuing actions even when transient motivation wanes. High-caliber builders operate with silence, immense faith, and persistent patience, knowing that cumulative effort is invincible.`
+        }
+      ],
+      quiz: [
+        {
+          questionAr: "ما هو الفارق الجوهري والعملي بين الأماني الخاوية والأهداف المخططة بذكاء وانضباط حديدي؟",
+          questionEn: "What is the primary practical difference between hollow wishes and structured, disciplined goals?",
+          optionsAr: [
+            "الأماني تكون ممتلئة بالصخب دون جهد، بينما الأهداف تعتمد على خطة مكتوبة صلبة وانضباط حركي يومي بصمت وصبر وقور.",
+            "لا يوجد أي فرق حقيقي فكلاهما يدفع للكسل والتسويف الدائم.",
+            "الأهداف تجعل الفرد ثرياً بغتة دون الحاجة لتعلم محاسبة أو هندسة أو قيادة."
+          ],
+          optionsEn: [
+            "Wishes are loaded with conversational noise without labor, whereas disciplined goals rely on a defined written strategy coupled with quiet daily grind and patience.",
+            "There is no difference as they both inevitably lead to procrastination and systemic inertia.",
+            "Goals yield instant unearned fortune without any requirements for finance, engineering, or leadership skills."
+          ],
+          correctIndex: 0,
+          explanationAr: "تحويل الأمنيات إلى أهداف مكتوبة وخطة عمل مفعمة بالانضباط والجهد اليومي هو سر انتصار الأبطال بجميع الفصول بسلام ونبل.",
+          explanationEn: "Translating ambiguous dreams into written blueprints and daily habits is the ultimate catalyst for elite accomplishments and personal honor."
+        }
+      ]
     }
   ]
 };

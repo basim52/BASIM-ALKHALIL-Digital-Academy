@@ -600,6 +600,104 @@ export const atomicHabitsCourse: BookCourse = {
           explanationEn: "True mastery equals automatic habits combined with deliberate practice, ensuring continuous calibration over time."
         }
       ]
+    },
+    {
+      id: 'ah_ch11',
+      chapterNum: 11,
+      titleAr: 'الفصل الحادي عشر: قانون المقاومة الأدنى - هندسة الخيارات وتهيؤ البيئة المحيطة',
+      titleEn: 'Chapter 11: The Law of Least Friction - Choice Architecture & Environmental Priming',
+      descriptionAr: 'تطبيق علوم التصميم البيئي لتسهيل طوع العادات الإيجابية بمقاومة تقارب الصفر وجعل السلبية صعبة للغاية.',
+      descriptionEn: 'Structuring physical spaces and interface flows so that positive habits become paths of least resistance, while bad ones require maximum friction.',
+      lessons: [
+        {
+          id: 'ah_ch11_l1',
+          idNum: 1,
+          titleAr: '1. هندسة الخيارات: كيف توجهك البيئة الفيزيائية دون قرار واعٍ منك؟',
+          titleEn: '1. Choice Architecture: Setting Up Cue Dominance in Your Space',
+          duration: '3m',
+          type: 'core',
+          contentAr: `يتصور الناس أن قراراتهم تنبع من داخلهم، لكن معظم العادات تتشكل بناءً على الإشارات الأبرز في البيئة المحيطة. إذا كنت ترغب في شرب المزيد من الماء، ضع زجاجات ممتلئة في كل زاوية من غرفتك. وإذا كنت ترغب في ممارسة الرياضة، جهز ملابسك وحذائك بجانب الفراش ليلاً لتقليل مجهود القرار صباحاً.`,
+          contentEn: `We falsely assume our decisions arise from pure willpower. In reality, modern humans behave according to context clues and layout prompts. If you want to drink more water, scatter full jars in your line of sight. Environmental optimization reduces starting friction.`
+        },
+        {
+          id: 'ah_ch11_l2',
+          idNum: 2,
+          titleAr: '2. إعادة هندسة الاحتكاك: زيادة العقبات أمام العادات التي تود الخلاص منها',
+          titleEn: '2. Friction Manipulation: Hardening Obstacles for Destructive Routines',
+          duration: '4m',
+          type: 'core',
+          contentAr: `تريد التقليل من تصفح الشبكات الهدامة أثناء المذاكرة والعمل؟ ضع هاتفك في غرفة أخرى كلياً، أو امنح كلمة مرور برامج الترفيه لصديقك. بزيادة عدد الخطوات اللازمة لممارسة العادة السلبية، يمكنك بسهولة كسرها واستعادة السيطرة الحرة على وقتك وتركيزك.`,
+          contentEn: `To drop a toxic habit, increase the friction to execute it. If you browse social networks during deep work, leave your device in a separate room. By adding minor steps of physical labor, you reclaim focus from passive distractions.`
+        }
+      ],
+      quiz: [
+        {
+          questionAr: "ما هو جوهر مفهوم 'هندسة الخيار والبديل' (Choice Architecture) للتأثير في السلوك البشري؟",
+          questionEn: "What is the core premise of Choice Architecture in behavior modification?",
+          optionsAr: [
+            "ألا نهتم مطلقاً بتفاصيل البيئة أو شكل المكتب وغرف الدراسة.",
+            "إعادة ترتيب الفضاء الخارجي والبيئي المحيط لزيادة فاعلية العادات المفيدة وتقليص المجهود اللازم للبدء فيها كلياً.",
+            "جعل كل شيء معقداً وصعباً كطريقة وحيدة لإثبات قوة الإرادة الباطنية."
+          ],
+          optionsEn: [
+            "That physical layouts have zero outcome on unconscious behavior.",
+            "Re-organizing your physical environment to prime positive triggers while minimizing starting effort.",
+            "Making everything complex to test and prove your raw willpower capacity."
+          ],
+          correctIndex: 1,
+          explanationAr: "السياق والبيئة المحيطة هما الصانع المتكتم لمعظم عاداتنا اليومية، لذا غير بيئتك لتغيير مصيرك.",
+          explanationEn: "Your surrounding context is the architect of unconscious habits. Design your room to make failure friction-heavy."
+        }
+      ]
+    },
+    {
+      id: 'ah_ch12',
+      chapterNum: 12,
+      titleAr: 'الفصل الثاني عشر: قاعدة المعتدل الذهبي (The Goldilocks Rule) - كيف تحافظ على دوافعك في الحياة والعمل؟',
+      titleEn: 'Chapter 12: The Goldilocks Rule - Sustaining Peak Motivation & Defeating Boredom',
+      descriptionAr: 'البؤرة المثيرة للأداء وتفادي الملل القاتل عبر العمل عند أطراف طاقتك الكامنة بليونة وحافز علمي مرموق.',
+      descriptionEn: 'Managing long-term drive by balancing task difficulty, ensuring challenges are neither too hard to break you nor too easy to bore you.',
+      lessons: [
+        {
+          id: 'ah_ch12_l1',
+          idNum: 1,
+          titleAr: '1. قاعدة المعتدل الذهبي: تحديات ملائمة بدقة لا تنهك العقل ولا تقتله بالرتابة',
+          titleEn: '1. The Just-Right Zone: Finding the Peak Inherent Inflow',
+          duration: '3m',
+          type: 'core',
+          contentAr: `يصل الإنسان لذروة التحفيز العصبي والذهني عندما يعمل على مهام تقع "عند حافة قدراته الحالية تماماً"؛ أي ليست بالغة السهولة فتسبب الملل المطبق، وليست بالغة الصعوبة الخارقة فتسبب الذعر والانسحاب السلوكي. كنس القاعدة الذهبية يقترح ممارسة تمارين تزيد بنسبة 4% فقط عن مستواك الحالي لضمان عيش حالة التدفق الحركي الابتكاري التام.`,
+          contentEn: `Peak human motivation occurs when working on tasks that sit exactly on the edge of current ability: not too easy to breed complacency, and not too difficult to trigger despair. Targeted challenges keep neuronal flows dynamic.`
+        },
+        {
+          id: 'ah_ch12_l2',
+          idNum: 2,
+          titleAr: '2. قهر وحل مشكلة الملل: العادات النبيلة والمحترفون الحقيقيون بالصناعة',
+          titleEn: '2. The Professional Standard: Falling in Love with Boredom to Build Mastery',
+          duration: '3m',
+          type: 'tips',
+          contentAr: `المشكلة الكبرى في طريق الاتقان ليست الفشل، بل هي "الملل والرتابة المصاحبة للتكرار". يلتزم المحترق ببرنامجه اليومي وتدريباته حتى عندما تكون ثقيلة ومملة، بينما ينسحب الهواة ويبحثون باستمرار عن مشتتات أو برامج جديدة طوال الوقت. العظمة تكمن في قدرتك على مواصلة المسير بصحة وصمت وقرار وقور.`,
+          contentEn: `The peak threat to lifelong mastery is not failure; it is boredom. True elite performers stick to their drills even when the freshness wears off and routine set in. Amateurs drift. Mastery is loving the process.`
+        }
+      ],
+      quiz: [
+        {
+          questionAr: "كيف يمكنك معالجة وحل فخ الملل المستدام أثناء السير نحو طموحاتك المعرفية الممتدة؟",
+          questionEn: "How do you conquer the threat of boredom on the long road to professional mastery?",
+          optionsAr: [
+            "بالبحث الفوري واليومي عن ترفيه ومشتتات جديدة لتبديد الضجر.",
+            "بالتحول والتحلي بعقلية المحترف الذي ينفذ المهام المخططة مع ضبط التحدي بنسبة 4% وصناعة معاهدة حب مع الروتين والصمت.",
+            "بإلغاء أهدافك بالكلية ومواصلة النوم والانسحاب الكلي من الحلبة الاكاديمية."
+          ],
+          optionsEn: [
+            "By seeking instant digital novelties whenever routine sets in.",
+            "By adopting a professional standard that executes plans with 4% difficulty tweaks, while learning to tolerate and love the rhythmic routine.",
+            "By dropping all long-term academic targets and resting indefinitely."
+          ],
+          correctIndex: 1,
+          explanationAr: "الحفاظ على الصمود في وجه التكرار هو الفارق اللوني النبيل الذي يصنع عبقرية الكفاءة المبرزة بالأسواق.",
+          explanationEn: "Embracing monotonous consistency builds the automatic pathways that solidify superior elite status."
+        }
+      ]
     }
   ]
 };

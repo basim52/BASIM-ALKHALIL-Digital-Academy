@@ -500,6 +500,104 @@ export const thinkingFastSlowCourse: BookCourse = {
           explanationEn: "Memory is an editor, not a recorder. It cuts long durations into highly condensed clips of peaking highs, lows, and closing moments."
         }
       ]
+    },
+    {
+      id: 'tfs_ch11',
+      chapterNum: 11,
+      titleAr: 'الفصل الحادي عشر: وهم الفهم والتشخيص - تفكيك الثقة المعرفية المفرطة ومطبات الإدراك المتأخر',
+      titleEn: 'Chapter 11: The Illusion of Understanding & Predictive Overconfidence: Dismantling Ego Certainty',
+      descriptionAr: 'تحليل أثر انحياز الإدراك المتأخر وتفشيع الثقة الزائدة بصلاحية التوقعات واستشراف المستقبل بالشركة.',
+      descriptionEn: 'Deconstructing hindsight bias, the illusion of explanatory narratives, and the cognitive overconfidence that clouds executive vision.',
+      lessons: [
+        {
+          id: 'tfs_ch11_l1',
+          idNum: 1,
+          titleAr: '1. انحياز الإدراك المتأخر (Hindsight Bias): وهم فهم مجريات التاريخ والأحداث المهنية',
+          titleEn: '1. The Hindsight Illusion: Why We Falsely Believe We Knew the Future All Along',
+          duration: '4m',
+          type: 'core',
+          contentAr: `يميل الدماغ البشري بعد وقوع الحدث إلى تعديل وتحديث ذاكرته تلقائياً ليقول: "لقد كنت أعلم بالتأكيد أن هذا سينهار/سينجح!". هذا الانحياز يدمر القدرة على التقييم المنصف لقرارات الماضي، حيث يحيل الفشل كغباء واضح والنجاح كبدهية سهلة، متجاهلاً دور العشوائية المطلقة والمخاطر التي كانت تكتنف العملية الإدارية بالكامل.`,
+          contentEn: `Once an event transpires, the human brain adjusts its historical records, declaring: 'I knew it would happen!' This Hindsight Bias distorts objective evaluations of earlier executive choices, branding bad outcomes as obvious mistakes and successes as inevitable certainties, ignores the play of randomness.`
+        },
+        {
+          id: 'tfs_ch11_l2',
+          idNum: 2,
+          titleAr: '2. وهم الصلاحية التوقعية: ثقة الخبراء المستهلكة وفخاخ التنبؤات العشوائية بالأسواق',
+          titleEn: '2. The Illusion of Validity: Why Subjective Confidence is Not an Indicator of Accuracy',
+          duration: '3m',
+          type: 'tips',
+          contentAr: `ثقة الخبير الشخصية في رأية ليست دليلاً علمياً على دقته المعرفية؛ بل هي ناتجة عن "سهولة تدفق الحكاية وتناغمها في عقله (System 1 Complexity)". الأسواق بالغة التعقيد لا تخضع للتوقعات الشخصية البسيطة. اعترف بجهود العشوائية، تخلد بالتواضع المعرفي، واعتمد دائماً على الصيغ الرياضية وقوائم التدقيق الإحصائية بدلاً من الحدس المترهل لتقود بوقار تام.`,
+          contentEn: `Subjective confidence is not a valid marker of accuracy; rather, it indicates the ease with which System 1 constructed a neat, harmonious story. Complex, volatile environments defy simplistic human forecasts. Adopt epistemic humility and defer to statistical algorithms over intuitive hubris.`
+        }
+      ],
+      quiz: [
+        {
+          questionAr: "لماذا يحذر دانيال كانمان من الاعتماد على الثقة الذاتية المرتفعة للخبراء في اتخاذ القرارات الاستراتيجية بالشركات؟",
+          questionEn: "Why does Kahneman caution against relying on subjective expert confidence for long-term strategic decisions?",
+          optionsAr: [
+            "لأن الخبراء يمتلكون دائماً نظاماً ذكياً يفوق قدرات الحاسبات الآلية بالبنوك كلياً.",
+            "لأن الثقة الذاتية تعكس سهولة صياغة القصة في النظام ١ (System 1) وليست مؤشراً حقيقياً على دقة استشراف الغيبيات بالأسواق المعقدة.",
+            "لأنها تمنع المطورين من الاسترخاء والنوم الهادئ طوال فترات العمل."
+          ],
+          optionsEn: [
+            "Because experts possess cognitive capabilities that completely transcend electronic databases.",
+            "Because subjective confidence only points to how smoothly System 1 assembled the explanation, rather than being an empirical marker of actual predictive accuracy in chaotic systems.",
+            "Because high confidence deprives specialists of continuous rest cycles and healthy sleep patterns."
+          ],
+          correctIndex: 1,
+          explanationAr: "سهولة صياغة سردية متسقة بالدماغ تولد شعوراً مبكراً زائفاً بالأمان واليقين، فانتبه وصنف الدفاتر والبيانات بوقار وحذر.",
+          explanationEn: "Coherence within System 1 generates an illusion of truth. Guard your strategic choices using structural and statistical audits."
+        }
+      ]
+    },
+    {
+      id: 'tfs_ch12',
+      chapterNum: 12,
+      titleAr: 'الفصل الثاني عشر: تأثيرات التأطير وهندسة الخيارات - حوسبة الذكاء العملي وصناعة القرارات النبيلة بسلام',
+      titleEn: 'Chapter 12: Framing Effects & Choice Architecture - Driving Rational Decisions Under Uncertainty',
+      descriptionAr: 'كيف تلاعب صياغات الكلمات بخيارات العقل وكيفية بناء نظافة عقلية (Cognitive Hygiene) لتأمين الصدارة بوقار وتوازن.',
+      descriptionEn: 'How semantic packaging tricks your analytical brain, and how to construct rigorous cognitive hygiene structures to safeguard critical choices.',
+      lessons: [
+        {
+          id: 'tfs_ch12_l1',
+          idNum: 1,
+          titleAr: '1. تأثيرات التأطير (Framing Effects): حين تغير القوالب اللفظية تفضيلاتك دون وعي',
+          titleEn: '1. The Power of Framing: How Presentation Alters Human Preferences Symmetrically',
+          duration: '3m',
+          type: 'core',
+          contentAr: `الصياغات اللفظية المختلفة لنفس المضمون تؤثر بشكل لا يمكن إنكاره على خياراتنا التلقائية. فقولنا: "الدواء يحقق نسبة شفاء قدرها 90%" يبعث الأمل ويوجه لشرائه فوراً، بينما قولنا: "الدواء يحمل خطورة وفاة بنسبة 10%" يثير ذعر جهازك العصبي ويحرضك على رفضه كلياً! إدراك أثر التأطير يحميك من الوقوع كضحية لحيل التسويق والسياسة.`,
+          contentEn: `Different phrasings of identical data produce dramatically divergent decisions. Highlighting 'a 90% survival rate' triggers intuitive optimism, while focusing on 'a 10% mortality rate' triggers neurological dread. Mastery means seeing through semantic packaging.`
+        },
+        {
+          id: 'tfs_ch12_l2',
+          idNum: 2,
+          titleAr: '2. بروتوكول النظافة المعرفية (Cognitive Hygiene): قواعد صيانة وتدقيق الذكاء بساحة العمل',
+          titleEn: '2. Cognitive Hygiene Checklist: Forcing System 2 Audits to Secure Rational Command',
+          duration: '4m',
+          type: 'tips',
+          contentAr: `لمجابهة الانحيازات المتجذرة في نظامنا الإدراكي؛ احرص على تطبيق بروتوكول "النظافة المعرفية" بجميع استراحاتك اليومية. أسس قوائم تدقيق واضحة (Checklists)، واطلب النصح المنهكي البارد من الزملاء الشامخين، وافرض على عقلك تأخيراً واثقاً قبل القرارات الكبرى لتسمح للنظام ٢ المتزن (System 2) بمراجعة معطيات نظام البديهة والأهواء بوقار وشرف.`,
+          contentEn: `To mitigate built-in neurological fallibility, introduce a permanent 'Cognitive Hygiene' framework in your life. Use explicit diagnostic checklists, invite negative feedback from trusted and analytical peers, and consciously delay major corporate actions to give System 2 space to review intuitive suggestions. Go forward with uncompromised clarity!`
+        }
+      ],
+      quiz: [
+        {
+          questionAr: "كيف تساهم آلية 'التأخر الواعي والمنهجي' للقرارات الكبرى في رفع كفاءة ذكائك وسلامة قراراتك بالعمل؟",
+          questionEn: "How does the strategic delay of key decisions elevate system rationality in high-stress work?",
+          optionsAr: [
+            "تؤدي إلى تجميد نشاط الشركة بالكامل وخسارة الأرباح لصالح المنافسين.",
+            "تمنح النظام ٢ (System 2) الهادئ والتحليلي الفرصة المطلوبة للتدقيق وتعديل أحكام وانحيازات نظام البديهة العاطفية المترهلة بوقار وسلام.",
+            "يجلب الكسل والإهدار الكامل لفاعلية المربع الثاني بالأكاديمية."
+          ],
+          optionsEn: [
+            "It freezes company productivity entirely, shifting market share directly to fast-moving competitors.",
+            "It carves out the exact window required for the slow, analytical System 2 to audit, cross-reference, and override System 1 biases.",
+            "It drives collective laziness and destroys high-impact schedules."
+          ],
+          correctIndex: 1,
+          explanationAr: "إرساء السكينة والتفكر المنهجي الهادئ يبعدك تماماً عن مزالق الاندفاع ويؤسس لصدارتك القيادية والأكاديمية الفذة بوقار ونبل ومعرفة.",
+          explanationEn: "Slowing down allows System 2 to review the emotional and framed options, ensuring unyielding precision and massive long-term success."
+        }
+      ]
     }
   ]
 };

@@ -500,6 +500,104 @@ export const richDadCourse: BookCourse = {
           explanationEn: "Prioritizing your asset allocation builds structural resilience, pushing you to create solutions instead of consuming your future legacy."
         }
       ]
+    },
+    {
+      id: 'rd_ch11',
+      chapterNum: 11,
+      titleAr: 'الفصل الحادي عشر: لغز مربع التدفقات النقدية (The Cashflow Quadrant) وصعود أصحاب الأعمال والمستثمرين',
+      titleEn: 'Chapter 11: The Cashflow Quadrant - Transitioning to the B and I Sectors',
+      descriptionAr: 'تفكيك الجوانب الأربعة لتدفقات كسب المال في المجتمع واستراتيجية العبور الآمن والمبرهن نحو صرح الحرية المطلقة.',
+      descriptionEn: 'Deconstructing Robert Kiyosaki’s famous four quadrants: Employee, Self-Employed, Business Owner, and Investor, and planning your shift.',
+      lessons: [
+        {
+          id: 'rd_ch11_l1',
+          idNum: 1,
+          titleAr: '1. الجوانب الأربعة لتدفق المال: فهم الفروق الفكرية والتشغيلية العميقة',
+          titleEn: '1. The Four Quadrants Explained: Security vs. Genuine Financial Freedom',
+          duration: '4m',
+          type: 'core',
+          contentAr: `ينقسم كاسبو المال في المجتمع إلى أربعة أقسام: الموظف (E) الذي يبحث عن الأمان المؤقت ويقايض وقته بالمال، وصاحب العمل المستقل (S) الذي يمتلك وظيفة ويرهق عضلاته، وصاحب المشاريع الكبرى (B) الذي يمتلك نظاماً وأفراداً يعملون لصالحه، والمستثمر (I) الذي يجعل المال يعمل لأجله بانتظام. الانتقال من الجانب الأيسر (E, S) إلى الجانب الأيمن (B, I) هو مفتاح عيش حياة الاستقلال المالي والوفرة.`,
+          contentEn: `People earn cash through four distinct quadrants: E (Employee) values job security; S (Self-Employed) owns a job but is bound by time; B (Business Owner) owns the system and hires leaders; and I (Investor) lets money work for them. Freedom lives on the right side (B & I).`
+        },
+        {
+          id: 'rd_ch11_l2',
+          idNum: 2,
+          titleAr: '2. العبور المرن لبناء الأنظمة والأصول: كيف تصنع نظاماً يعمل نيابة عنك بذكاء؟',
+          titleEn: '2. Designing and Controlling Systems: The Transition from Self-Employed to Business Owner',
+          duration: '3m',
+          type: 'core',
+          contentAr: `لتتحول إلى الجانب الأيمن، يجب عليك التوقف عن أداء المهام بنفسك والبدء في بناء "أنظمة تكرارية قابلة للتفويض والنمو المستقل". القائد البارع يستعين بأشخاص ذوي كفاءة وذكاء مالي مرتفع ليديروا عجلات العمل بالنيابة عنه، بينما يتفرغ هو لصيانة وتوسيع عمود الأصول وشراء أوعية الاستثمار المربحة.`,
+          contentEn: `Transitioning to a business owner (B) requires replacing yourself with a scalable system. Instead of micro-managing operations, secure talented, financially literate specialists to run the processes efficiently, freeing you to seek fresh investment horizons.`
+        }
+      ],
+      quiz: [
+        {
+          questionAr: "ما هو الفرق الاستراتيجي الجوهري بين صاحب العمل المستقل (S) وصاحب المشاريع الكبرى (B) في المربع؟",
+          questionEn: "What is the primary difference between a Self-Employed (S) specialist and a Business Owner (B)?",
+          optionsAr: [
+            "أن صاحب العمل المستقل يمتلك الملايين من المساعدين دون جهد.",
+            "أن صاحب العمل المستقل (S) يمثل هو المحرك الوحيد للعمل وإذا غاب يتوقف الدخل، بينما صاحب المشاريع (B) يمتلك نظاماً مستقلاً وقيادات مرنة تجني الدخل في عيابه.",
+            "لا يوجد أي فرق حقيقي فكلاهما يدفع الكثير من الديون العبثية."
+          ],
+          optionsEn: [
+            "S-owners have millions of helpers supporting them without any active operations.",
+            "The S-owner IS the system and if they stop working, income halts; whereas the B-owner creates an autonomous system run by skilled leaders that earns revenue in their absence.",
+            "There is no difference as they both acquire consumer liabilities blindly."
+          ],
+          correctIndex: 1,
+          explanationAr: "امتلاك الأنظمة والأفراد والقدرة على التفويض العلمي هو حجر أساس رصيف الثراء وصدارة الأعمال بالكامل.",
+          explanationEn: "Leveraging systems instead of manual sweat decouples your earning potential from limited temporal hours, leading to scalable wealth."
+        }
+      ]
+    },
+    {
+      id: 'rd_ch12',
+      chapterNum: 12,
+      titleAr: 'الفصل الثاني عشر: تجاوز العقبات الروحية والسلوكية - الفوز على الخوف، والتشكيك، والكسل، والكبرياء لعيش بوقار',
+      titleEn: 'Chapter 12: Conquering the Five Obstacles - Fear, Cynicism, Laziness, Bad Habits, and Greed',
+      descriptionAr: 'حلحلة وتفكيك الحواجز النفسية التي تمنع المتعلمين الأكثر ذكاءً علمياً ومحاسبياً من صعود مدار حرية الغد بسلام.',
+      descriptionEn: 'Deconstructing the emotional blockers that halt highly intelligent people from achieving practical abundance.',
+      lessons: [
+        {
+          id: 'rd_ch12_l1',
+          idNum: 1,
+          titleAr: '1. لجام المخاوف والتشكيك الجاف (Cynicism): تحييد أصوات الفشل الهدامة',
+          titleEn: '1. Neutralizing Fear and Cynicism: How to Silently Move Beyond Haters and Doubts',
+          duration: '4m',
+          type: 'core',
+          contentAr: `الجميع يخشى خسارة المال، لكن الغني والفقير يختلفان تماماً في "طريقة إدارتك ومعالجتك لتلك الخشية". التشكيك والتشاؤم المستمر من المحيطين بك بأن الفكرة لن تنجح أو أن السوق سينهار هو فخ هدم للهمم. قم بتحييد تلك الأصوات المرجفة، وصب كامل تركيزك الذهني على التحليل الواقعي والحقائق الصلبة لبناء سفينة تقدمك بوقار تام وصمت شجاع.`,
+          contentEn: `Fear of losing money is natural, but what separates developers of wealth from seekers of safety is how they address that fear. Cynicism from classmates or relatives predicting immediate failure is a motivation vacuum. Mute these pessimistic forecasts and focus purely on objective market metrics.`
+        },
+        {
+          id: 'rd_ch12_l2',
+          idNum: 2,
+          titleAr: '2. قهر الكسل الذكي والتكبر المعرفي: العادات اليومية الصحيحة لاستقرار السكينة والحرية',
+          titleEn: '2. Overcoming Laziness, Arrogance, and Bad Habits: Raising Financial Efficacy',
+          duration: '3m',
+          type: 'tips',
+          contentAr: `الكسل المالي يختبئ غلباً خلف واجهة الانشغال المفرط بأمور تافهة والتهرب من بناء المحاسة والأصول. وأما الكبرياء المالي والغرور فهو فخ خطير يحاول إخفاء جهلك بحقائق الاستثمار. كن متواضعاً وشجاعاً لتستمع للمعلمين الصادقين، وكرس عادات مالية وقورة تدفع لنقاط أصولك الصاعدة بشكل مستدام ومبرهن علمياً.`,
+          contentEn: `Financial laziness often disguises itself as being busy with secondary administrative chores to avoid the discomfort of mapping real assets. Arrogance attempts to cover ignorance. Stay genuinely humble, ask experts for support, and program values that systematically fuel your long-term success with absolute peace.`
+        }
+      ],
+      quiz: [
+        {
+          questionAr: "كيف يعالج الأثرياء والناجحون مالياً مشاعر الخوف الطبيعي من خسارة رأس المال؟",
+          questionEn: "How do rich individuals address the natural fear of losing capital?",
+          optionsAr: [
+            "بالهروب من الاستثمار نهائياً وإيداع المدخرات تحت الفراش.",
+            "بقبول المخاوف كحقيقة شجاعة وإدارتها بحكمة وتفكيك الخسارة لفرص وسيطرة تعليمية صلبة بدلاً من الاستسلام لها ذعراً.",
+            "بالاعتماد التام على المضاربة العشوائية دون دراسة الأصول أو الدفاتر."
+          ],
+          optionsEn: [
+            "By locking cash under the floorboards and ignoring financial markets forever.",
+            "By acknowledging fear as a natural metric, and active managing it, turning failures into educational breakthroughs rather than bowing to panic.",
+            "By participating in random gambling schemes devoid of accounting sheets."
+          ],
+          correctIndex: 1,
+          explanationAr: "إدارة المخاطر بعقل هادئ محاسبي تفصلك كلياً عن دركات الحيرة والعجز وتؤهلك للفوز والصدارة المحكمة بوقار ونبل.",
+          explanationEn: "Managing risks systematically clears the blockages of fear, transitioning you from a passive consumer to an active asset architect."
+        }
+      ]
     }
   ]
 };

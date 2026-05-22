@@ -500,6 +500,104 @@ export const powerOfNowCourse: BookCourse = {
           explanationEn: "Anchoring your identity on silent, conscious presence allows your biological intelligence to manifest work of uncompromised caliber."
         }
       ]
+    },
+    {
+      id: 'pon_ch11',
+      chapterNum: 11,
+      titleAr: 'الفصل الحادي عشر: الجسد الداخلي - العبور العميق نحو الكينونة والحياة غير المتجلية',
+      titleEn: 'Chapter 11: The Inner Body - Journeying Deep into the Source of Unmanifest Life',
+      descriptionAr: 'الاتصال الشاعري بحيوية جسدك الداخلي لتجذير الوعي الحاضر وتفادي فخاخ العقل التحليلي المتعب الحاقد.',
+      descriptionEn: 'Feeling the live energy inside the physical body to anchor yourself in pristine, continuous awareness and bypass mental fatigue.',
+      lessons: [
+        {
+          id: 'pon_ch11_l1',
+          idNum: 1,
+          titleAr: '1. الوعي بالجسد الداخلي: المفتاح الخفي لصرف الانتباه عن التفكير المفرط',
+          titleEn: '1. Living from Within: Feeling the Subtle Vibration of the Inner Body',
+          duration: '3m',
+          type: 'core',
+          contentAr: `الجسد المادي الخارجي هو مجرد قشرة زائلة، لكن تحته تتدفق طاقة حية خارقة هادئة نسميها **الجسد الداخلي** (The Inner Body). عندما يشتد عليك طوفان التفكير المفرط أو ضغوطات العمل الأكاديمي، وجه وعيك وانتباهك فوراً إلى داخل ذراعيك ورجليك وصدرك واشعر بالاهتزاز الخفيف اللطيف؛ هذا الحضور الحسي يوقف العقل فوراً ويثبتك بنواة السكينة.`,
+          contentEn: `Your outer shell is temporary, but underneath runs a subtle stream of unmanifest life: the Inner Body. When stressful thoughts or complex assignments overwhelm you, withdraw your attention from the mind and place it deep inside your arms, legs, and chest. Tuning into this energy stops mental chatter instantly.`
+        },
+        {
+          id: 'pon_ch11_l2',
+          idNum: 2,
+          titleAr: '2. المناعة العاطفية الفائقة: كيف يحميك الاتصال الباطني من ذبذبات الآخرين السلبية؟',
+          titleEn: '2. The Fortress of Presence: Building Emotional Immunity Through Inner Presence',
+          duration: '4m',
+          type: 'tips',
+          contentAr: `الاتصال الدائم بالجسد الداخلي يخلق حولك درعاً طاهراً من المناعة النفسية. لن تعود مشاعرك لعبة في أيدي أحداث العمل أو تعليقات الزملاء؛ فحضورك المكثف والواعي داخل خلايا جسدك يحيد السلبية الخارجية كلياً ويجعل قراراتك تنبع من سكينة صلبة وبوقار مرموق.`,
+          contentEn: `Permanently dwelling within your inner body shapes an invisible energy shield. External corporate stress or negative opinions can no longer penetrate or shake your emotional core. You remain absolute, and your professional steps carry immense poise.`
+        }
+      ],
+      quiz: [
+        {
+          questionAr: "كيف يساعد الاتصال بالجسد الباطني والداخلي في القضاء على القلق وإجهاد العمل المفرط؟",
+          questionEn: "How does body awareness eliminate daily performance anxiety and cognitive burnout?",
+          optionsAr: [
+            "عبر زيادة التفكير في المستقبل وتوقع سيناريوهات الفشل الكارثية.",
+            "بسحب طاقة الانتباه من غابات العقل والتفكير المفرط، وتوزيعها بانتظام داخل خلايا جسدنا الحي لتحقيق السكينة الفورية والصفاء.",
+            "بالهروب للاستنشاق الاصطناعي وإهدار الساعات في الألعاب الرقمية."
+          ],
+          optionsEn: [
+            "By pushing the mind to plan future disasters or track old losses.",
+            "By pulling your attention allocation from the analytical brain and scattering it throughout the somatic tissue, shutting down the anxiety loop instantly.",
+            "By wasting hours on virtual noise or avoiding professional development."
+          ],
+          correctIndex: 1,
+          explanationAr: "توجيه بوصلة الوعي للجسد الداخلي يبعث في أرجائك السكينة ويفسح لك فرصة للتفكير الإبداعي الباهر بمحبة وفخر.",
+          explanationEn: "Dwelling in your inner body quietens the nervous system, enabling your brain to execute and process actions with pure executive clarity."
+        }
+      ]
+    },
+    {
+      id: 'pon_ch12',
+      chapterNum: 12,
+      titleAr: 'الفصل الثاني عشر: ما وراء السعادة والشقاء - استرداد السلام المطلق وقانون اللامقاومة الكوني لعيش بوقار',
+      titleEn: 'Chapter 12: Beyond Happiness and Unhappiness - Accessing Absolute Peace through Non-Resistance',
+      descriptionAr: 'قوة الاستسلام والقبول المطلق للحاضر وتجاوز فخاخ الثنائية (سعيد/شقي) للوصول للسلام الصامد.',
+      descriptionEn: 'Acquiring an unshakeable inner calm by surrendering to what is, transcending conditional feelings of bliss and despair.',
+      lessons: [
+        {
+          id: 'pon_ch12_l1',
+          idNum: 1,
+          titleAr: '1. وهم الثنائيات المتقلبة: لماذا تتوقف جودة سلامنا الداخلي عن عتق الآخرين؟',
+          titleEn: '1. Transcending Conditional Happiness: Accessing the Deep Undercurrent of Peace',
+          duration: '3m',
+          type: 'core',
+          contentAr: `السعادة والشقاء هما وجهان لعملة واحدة تتأثر بتقلبات الأحداث والمال والصداقات بالشركة. لكن **السلام الداخلي العميق** (Deep Peace) يقع في مستوى أبعد؛ إنه يتواجد هناك طوال الوقت حتى في عاصفة الأزمات. لا تطلب من العالم الخارجي أن يجعلك سعيداً، بل تواصل مع فضاء كينونتك وعقود سلامك ليبقى وقارك راسخاً كلياً.`,
+          contentEn: `Happiness and distress are temporal states driven by changeable parameters like market conditions or social standing. Deep Peace, however, is an unconditional undercurrent that exists independent of situations. Demanding that the world satisfy your desires is a trap; true liberty is resting in the unshakeable self.`
+        },
+        {
+          id: 'pon_ch12_l2',
+          idNum: 2,
+          titleAr: '2. قانون اللامقاومة والاستسلام النبيل (Surrender): كيف يفتح القبول أبواب الحلول الخارقة؟',
+          titleEn: '2. The Strategy of Non-Resistance: Surrendering to the Present to Ignite Real Solutions',
+          duration: '4m',
+          type: 'tips',
+          contentAr: `الاستسلام أو اللامقاومة (Surrender) ليس ضعفاً أو خضوعاً ذليلاً؛ بل هو "القبول البديع والأمين لواقع اللحظة الحالية كما هي دون شروط مسبقة". عندما تتوقف خلايا دماغك عن الغضب والتباكي والاعتراض العبثي على ما حدث، يمكننا توجيه كامل القوة الفائقة لحل المشكلة وصناعة قنوات خروج رشيقة وصدارة واثقة بوقار وحكمة.`,
+          contentEn: `Surrender is not passive defeat; it is the radical acceptance of the reality of this step. When your mind ceases its exhausting emotional resistance to what has occurred, your focus returns, allowing your analytical power to devise solid, stress-free solutions.`
+        }
+      ],
+      quiz: [
+        {
+          questionAr: "ما المغزى الجوهري من مفهوم 'الاستسلام الإيجابي واللامقاومة' (Surrender) في مسيرة الريادة الشخصية؟",
+          questionEn: "What is the strategic value of positive Surrender within your personal and academic path?",
+          optionsAr: [
+            "الاستسلام للكسل وإهمال الواجبات وتجنب ممارسة الرياضة وعقود الأصول.",
+            "القبول التام لحقائق الواقع الحالي دون تشنج واعتراض خاوٍ، ومن ثم الانتقال بثبات وذكاء للعمل وصناعة الخيارت والصدارة بسلام.",
+            "ملازمة الشك والتباكي عند حدوث تقلبات في منصة أو مشاريع الشركة."
+          ],
+          optionsEn: [
+            "Giving up on your assignments, avoiding training, and abandoning your financial plans.",
+            "Fully accepting the reality of the present moment first, saving vital energy to act intelligently and create robust, value-based solutions.",
+            "Remaining in constant self-pity or whining when external team policies undergo updates."
+          ],
+          correctIndex: 1,
+          explanationAr: "قبول الحاضر كما يحضر يفجر طاقات السكينة بداخلك ويمنحك قدرة خارقة على الفعل وبسط النفوذ وتسييس أصول الفوز بنبل وشرف.",
+          explanationEn: "Surrendering to 'what is' stops your energetic leakage, aligning your actions with reality to produce maximum impact and authority."
+        }
+      ]
     }
   ]
 };

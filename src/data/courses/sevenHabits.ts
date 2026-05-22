@@ -500,6 +500,104 @@ export const sevenHabitsCourse: BookCourse = {
           explanationEn: "This final stage builds exceptional, principle-centered leaders who foster self-sufficient teams, unlocking true creative breakthroughs."
         }
       ]
+    },
+    {
+      id: '7h_ch11',
+      chapterNum: 11,
+      titleAr: 'الفصل الحادي عشر: القيادة المرتكزة على المبادئ والمحاذاة الشاملة',
+      titleEn: 'Chapter 11: Principle-Centered Leadership & Universal Alignment',
+      descriptionAr: 'ترسيخ مرجعية المبادئ لإنتاج علاقات عمل بالغة القوة والقابلية للتطوير والنجاح المستدام والمثمر.',
+      descriptionEn: 'Fostering deep, trust-based, and principle-centered leadership paradigms to align individual goals with collective execution.',
+      lessons: [
+        {
+          id: '7h_ch11_l1',
+          idNum: 1,
+          titleAr: '1. ركائز القيادة المتمحورة حول المبادئ: العيش بالمرجعية والنزاهة العميقة',
+          titleEn: '1. Pillars of Principle-Centered Leadership: Living with Integrity and Vision',
+          duration: '4m',
+          type: 'core',
+          contentAr: `القيادة الحقيقية تبدأ من إرساء المبادئ الكونية الخالدة كمرجعية ثابتة في جميع قراراتك المهنية والشخصية. النزاهة والعدل وتكافؤ الفرص والصبر هي أساس النجاح البشري والمهني على المدى الطويل، فالعلاقات والصداقات الخاوية من المبادئ لا تلبث أن تنهار تحت رياح الأزمات القاسية.`,
+          contentEn: `True leadership flourishes by adhering to immutable universal principles like integrity, fairness, patience, and honor. Relationships or environments devoid of principle-centered foundations inevitably collapse during stressful times.`
+        },
+        {
+          id: '7h_ch11_l2',
+          idNum: 2,
+          titleAr: '2. صياغة الميثاق المشترك ومحاذاة الأفراد خلف الأهداف العظيمة والملهمة',
+          titleEn: '2. Mission Alignment: Orchestrating Actions Around Shared Ultimate Visions',
+          duration: '3m',
+          type: 'core',
+          contentAr: `لتحقيق القيادة المرتكبة الشاملة بالشركات تطلعات هائلة، يجب على القائد صياغة ميثاق رسالة جماعي يعكس تطلعات الجميع ويحقق فوزاً مشتركاً للشركة وللأفراد. هذا الميثاق يضمن تسيير الحركة وتناغم الزملاء بنقاء ودون تضاد عاطفي.`,
+          contentEn: `To execute unified breakthroughs, organizations must construct draft missions that accurately embody collective parameters. When individual goals align with noble corporate targets, collaboration runs fluidly.`
+        }
+      ],
+      quiz: [
+        {
+          questionAr: "كيف تساهم القيادة القائمة على المبادئ في تجاوز الصراعات المهنية وإلهام الأفرقة؟",
+          questionEn: "How does principle-centered leadership resolve organizational friction and inspire team synergy?",
+          optionsAr: [
+            "بالاعتماد على السيطرة والسلطوية وفرض الرأي الأوحد.",
+            "بتأسيس مرجعية مبادئ واضحة ومشتركة من العدل والنزاهة والتمكين، لتحفيز الفوز والتعاون المشترك بروح موحدة.",
+            "بتجاهل المشكلات كلياً والركون للراحة المؤقتة والخيار الأسهل."
+          ],
+          optionsEn: [
+            "By relying on coercive power and maintaining authoritative decisions.",
+            "By embedding a common baseline of universal values like justice, deep integrity, and professional trust, guiding people toward collective, uncompromised success.",
+            "By ignoring challenges and choosing temporary surface compromises."
+          ],
+          correctIndex: 1,
+          explanationAr: "إرساء النبل في تمكين الكفاءات يولد صوتاً أكاديمياً ومهنياً وقوراً بالمنصات والأسواق بالكامل.",
+          explanationEn: "Adhering to values removes political posturing inside team frameworks, making long-term growth self-governed."
+        }
+      ]
+    },
+    {
+      id: '7h_ch12',
+      chapterNum: 12,
+      titleAr: 'الفصل الثاني عشر: قوة التكاتف الكلي والتجدد الشامل في المؤسسات والأفراد',
+      titleEn: 'Chapter 12: Super-Synergetic Performance, Renewal, and Continuous Expansion',
+      descriptionAr: 'منتهى التكامل وصقل الأدوات لضمان مستويات فاعلية إنتاجية وروحية واثقة وخارقة للمألوف.',
+      descriptionEn: 'Harnessing the maximum potential of creative cooperation alongside regular systematic updates of your physical, mental, and spiritual states.',
+      lessons: [
+        {
+          id: '7h_ch12_l1',
+          idNum: 1,
+          titleAr: '1. التدفق المتكاتف والابتكار التعاوني: استنبات عقول الوفاق بالعمل',
+          titleEn: '1. Micro-Synergy & Co-Creation: Unleashing the Collective Brainpower',
+          duration: '4m',
+          type: 'core',
+          contentAr: `التكاتف السوبر والتآزر (Synergy) ليس مجرد مهارة بسيطة؛ إنه التقدير الكلي والاحترام لمطامح الاختلاف وخبرات المحيطين بك. عندما تجتمع القلوب والعقول المبدعة لابتكار بديل ثالث يتجاوز وجهات النظر الضيقة، يمكننا تحقيق قفزات عاطفية وإنتاجية هائلة غير مسبوقة بالأسواق.`,
+          contentEn: `Synergy is the dynamic celebration of creative differences. By combining diverse experiences with non-rivalrous partnerships, team members formulate a third alternative that transcends single biases.`
+        },
+        {
+          id: '7h_ch12_l2',
+          idNum: 2,
+          titleAr: '2. صقل الميزان وشحذ السيف بانتظام: الأبعاد الأربعة للصيانة الذاتية والروحية',
+          titleEn: '2. Sharpening the Saw (Continuous Renewal): The 4 Dimensions of Lifelong Health',
+          duration: '3m',
+          type: 'tips',
+          contentAr: `لا تدع انشغالك بقطع الأشجار يمنعك من التوقف لشحذ منشارك بانتظام. شحذ المنشار وحوسبة التجديد (Sharpen the Saw) تغطي أربعة صروح جوهرية: الجسد (عبر ممارسة الرياضة والغذاء والمحافظة على اللياقة)، والروح (عبر التأمل والعبادة وإرساء القيم والهدوء الباطني)، والعقل (عبر القراءة الحرة والدراسة المتواصلة)، والعاطفة (عبر الاتصال والتواصل الإيجابي الداعم مع المحيطين ونشر السلام بوقار تام).`,
+          contentEn: `Continuous growth demands stopping periodically to sharpen your professional tools. Systematic renewal occurs across four core dimensions: Physical (nutrition and exercise), Spiritual (peace and deep introspection), Mental (study and reading), and Social/Emotional (healthy, value-based relationships).`
+        }
+      ],
+      quiz: [
+        {
+          questionAr: "ما المغزى الجوهري من مفهوم 'شحذ المنشار' أو استراتيجية التجديد الدوري المستدام للأفراد؟",
+          questionEn: "What is the ultimate strategic takeaway of 'Sharpening the Saw' for human development?",
+          optionsAr: [
+            "تجنب الدراسة طوال العام وتأجيل الأهداف والعمل لليوم الأخير.",
+            "الاستثمار المستمر والشامل في تجديد ذاتك وصيانتها روحياً وعقلياً وجسدياً وعاطفياً لتحقيق العطاء والنمو الخالد.",
+            "تطوير عادات مظهرية فقط دون الالتفات لصدق النوايا أو عمق الممارسة الرياضية."
+          ],
+          optionsEn: [
+            "Avoiding professional development until the last possible moment.",
+            "Investing consistently in updating and maintaining your Physical, Mental, Spiritual, and Social assets to lock in peak capacity and results over time.",
+            "Honing superficial cosmetic habits while ignoring internal character or physical excellence."
+          ],
+          correctIndex: 1,
+          explanationAr: "تجديد الأبعاد الأربعة بانتظام يرفع من طاقتك الحيوية ومستوى الإنتاجية بجميع قطاعات حياتك الواثقة بسلام.",
+          explanationEn: "Periodic updates prevent burnout while raising your core operational threshold so you can navigate life's complexities successfully."
+        }
+      ]
     }
   ]
 };

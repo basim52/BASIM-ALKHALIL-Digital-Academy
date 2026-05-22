@@ -504,6 +504,104 @@ It occurs because contemporary culture programs us to believe that negative emot
           explanationEn: "Ditching the obsession with external validation leaves your mind clean to execute targets with absolute dedication, clarity, and deep personal authority."
         }
       ]
+    },
+    {
+      id: 'sa_ch11',
+      chapterNum: 11,
+      titleAr: 'الفصل الحادي عشر: قوة الرفض - العثور على الحرية الحقيقية من خلال الالتزام العميق',
+      titleEn: 'Chapter 11: The Value of Saying NO - Finding Freedom Through Radical Commitment',
+      descriptionAr: 'لماذا السعي وراء كل الخيارات والفرص السطحية يسلبك التركيز، بينما يمنحك الرفض الواعي والالتزام عمق الإنجاز السعيد.',
+      descriptionEn: 'Why chasing endless alternatives makes life shallow, and how declining distractions brings immense significance to your professional focus.',
+      lessons: [
+        {
+          id: 'sa_ch11_l1',
+          idNum: 1,
+          titleAr: '1. الرفض كحرية حقيقية: أهمية تسييج حياتك بالحدود الصحية والرفض الأنيق',
+          titleEn: '1. The Liberty of Denial: Embracing Limits Over Endlessly Shallow Options',
+          duration: '3m',
+          type: 'core',
+          contentAr: `لكي تمنح قيمة حقيقية لشيء ما في حياتك، يجب عليك بالضرورة **أن ترفض ما سواه**. ثقافة الاستهلاك الحديث تضغط عليك لتقبل وتجرب كل عرض وكل فرصة، مما يجعلك مشتتاً وخاوي الوفاض. الرفض الأنيق يحررك من فخ القلق، ويجعل نعمك القادمة بالغة الصدق والقوة والفاعلية.`,
+          contentEn: `To value anything genuinely, you must reject everything else. Modern branding lures you to try every trend, making you unstable and shallow. Rejecting non-essentials clarifies your path, giving your ultimate choices immense spiritual and functional gravity.`
+        },
+        {
+          id: 'sa_ch11_l2',
+          idNum: 2,
+          titleAr: '2. الالتزام العميق: رونق البقاء والوقار عندما تنضج العهود والمشاريع',
+          titleEn: '2. Infinite Commitment: Discovering Joy in Consistent, Patient Partnerships',
+          duration: '4m',
+          type: 'tips',
+          contentAr: `يتصور الهواة أن السعادة تكمن في قفزات التغيير المستمرة، لكن الفوز والصدارة الحقيقية تولد فقط في أراضي **الالتزام الطويل والعميق**. عندما تلتزم بمكان عمل، أو بموضوع دراسي، أو بعلاقة إنسانية واثقة، فإنك تبطن عقلك بالدقة والمهارة وتستمر في حل مشكلات أعمق تطور من كيانك بتبجيم ووقار هائلين.`,
+          contentEn: `Amateurs mistake flighty novelty for freedom. True success resides in deep, prolonged commitment. Committing to a specific science, a long-term business model, or a trusted alliance trains your focus to resolve complex internal challenges, unlocking incredible career authority.`
+        }
+      ],
+      quiz: [
+        {
+          questionAr: "كيف يحقق الالتزام والرفض الواعي للمشتتات (Saying NO) تحرراً حقيقياً للأفراد؟",
+          questionEn: "How does radical commitment and consciously saying NO liberate your life?",
+          optionsAr: [
+            "عبر زيادة الديون والتهرب من المسؤوليات الأكاديمية تماماً.",
+            "بالتخلص من هوس المقارنة والخيارات السطحية، والتركيز المطلق على صيانة المشاريع والقيم النبيلة وتوسيع أثرها بوقار وشرف.",
+            "برفض كل سبل التعاون والعيش في عزلة تامة وجحود مفرط."
+          ],
+          optionsEn: [
+            "By accumulating liabilities and walking away from professional deadlines completely.",
+            "By eliminating the stress of FOMO and shallow alternatives, channeling all your mental energy to sustain valuable targets and grow them with honor.",
+            "By refusing to cooperate with anyone style and accepting rigid isolation."
+          ],
+          correctIndex: 1,
+          explanationAr: "اختيار مرجعيات وقيم محدودة والالتزام بعقودها يعود على الفرد بصيت ريادي مرموق ويعمر أوقاته بالبركة والتنمية.",
+          explanationEn: "Filtering out minor alternatives creates space to master complex tasks, translating to lasting professional dominance."
+        }
+      ]
+    },
+    {
+      id: 'sa_ch12',
+      chapterNum: 12,
+      titleAr: 'الفصل الثاني عشر: لقاء الفناء وجهاً لوجه - اختيار الأثر والتركة التي تخلد من بعدك بكرامة صلبة',
+      titleEn: 'Chapter 12: The Reality of Mortality - Choosing the Legacy That Outlives You',
+      descriptionAr: 'مواجهة حقيقة الموت كأداة فلسفية ووجودية كفيلة لتصفير تفاهة السطحيات وبناء ناصية النوايا الصالحة الصادقة.',
+      descriptionEn: 'Using the awareness of your brief human lifespan as the ultimate compass to filter superficial worries, building an unshakeable legacy.',
+      lessons: [
+        {
+          id: 'sa_ch12_l1',
+          idNum: 1,
+          titleAr: '1. بوصلة الفناء الوجودية: كيف يدير وعيك بنهايتك بوصلة اهتماماتك اليومية؟',
+          titleEn: '1. The Mortality Compass: Dismantling Ego Tribulations to Uncover Real Purpose',
+          duration: '3m',
+          type: 'core',
+          contentAr: `عندما تدرك يقيناً في قرارة نفسك أن أيامك على هذا الكوكب معدودة ومحدودة للغاية، يتبخر هوس الكبرياء والغرور والقلق فجأة. تصبح مشكلات العمل التافهة أو كلمات المنتقدين بلا وزن حقيقي؛ حقيقة الموت الوجودية تعزز حضورك في اللحظة الراهنة وتدفعك للسعي الحثيث وبذل عرق جهودك في القضايا ذات المعنى الأسمى والأنبل بصدق تام.`,
+          contentEn: `When you absorb the reality of your finite lifespan, pretenses and trivial fears instantly dissolve. Social criticisms and administrative squabbles lose their sting. The awareness of death serves as a strategic compass, pushing you to invest your days in noble efforts with clarity.`
+        },
+        {
+          id: 'sa_ch12_l2',
+          idNum: 2,
+          titleAr: '2. صياغة التركة الطاهرة: ترك عهد صالح يتجاوز مجرد عيشك الفردي بوقار وحب',
+          titleEn: '2. Building Your True Legacy: Shaping Professional Contribution Over Selfish Concerns',
+          duration: '4m',
+          type: 'tips',
+          contentAr: `التركة الطاهرة والأثر الحقيقي (Legacy) ليس مجرد ادخار للمال الزائف؛ القائد الحكيم هو من يصيغ في حياته مشاريع عملية، كفاءات متمكنة، وقنوات علمية تنشر السلام والمعرفة وتدوم طاقات نفعها للمجتمع طويلاً بعد رحيله. التزم بالنبالة، أسس الشرف في عقود عاداتك، واجعل حياتك بطاقة تهنئة فريدة للكون.`,
+          contentEn: `An authentic legacy is not selfish hoarding; it is professional and human contribution. True leaders design actionable networks, empower coworkers, and generate knowledge frameworks that sustain the community long after they depart. Build your legacy on honor and profound peace.`
+        }
+      ],
+      quiz: [
+        {
+          questionAr: "كيف تساهم حقيقة الوعي الوجودي بالموت في إعادة هندسة وترتيب أولويات الأحرار؟",
+          questionEn: "How does the existential awareness of mortality redefine a wise person’s priorities?",
+          optionsAr: [
+            "تدعوهم للكسل المطلق وتجنب ممارسة الرياضة والتهرب من المسؤوليات.",
+            "تبدد هموم السطحيات التافهة والغرور الخاوي، وتركز بوصلة وجودهم على الإسهام النبيل والتمكين وبناء التركة الصالحة بوقار تام.",
+            "تجعلهم يبحثون عن صفقات سريعة استهلاكية زائفة وممتلكات مظهرية."
+          ],
+          optionsEn: [
+            "It drives them to overall laziness, avoiding training or taking on responsibilities.",
+            "It strips away trivial anxieties and ego-driven behaviors, locking their target on values, community empowerment, and building a meaningful legacy.",
+            "It pushes them to seek superficial deals and consume luxury items endlessly."
+          ],
+          correctIndex: 1,
+          explanationAr: "مواجهة فنائنا تخرس زعيق المظاهر السلبية وتمهد القنوات لعطاء وصدارة أكاديمية حرة تخلد بكل محبة ووقار.",
+          explanationEn: "Embracing mortality clears the field of trivial clutter, guiding you to allocate your energy toward tasks of supreme value."
+        }
+      ]
     }
   ]
 };

@@ -806,6 +806,104 @@ Observe the non-healthy mechanics of releasing feelings:
           explanationEn: "Aligning your biology with deep resilience, securing uncompromised creative authority and profound professional influence."
         }
       ]
+    },
+    {
+      id: 'lg_ch11',
+      chapterNum: 11,
+      titleAr: 'الفصل الحادي عشر: تحويل العلاقات والروابط الإنسانية - من التملك والتعلق إلى التمكين والنبل المتبادل',
+      titleEn: 'Chapter 11: Transforming Relationships - Releasing Attachment & Embracing Radical Support',
+      descriptionAr: 'قالت فك رموز التعلق والاضطرابات العاطفية في بيئات العمل والشراكة وكيفية الانتقال لساحة التقدير والتآزر الطاهر.',
+      descriptionEn: 'The psychology of expectations and professional attachments, and how surrendering control transforms working relationships into fountains of synergy.',
+      lessons: [
+        {
+          id: 'lg_ch11_l1',
+          idNum: 1,
+          titleAr: '1. لجام التعلق والتملك: تحرير الرغبة في السيطرة وتغيير الآخرين',
+          titleEn: '1. The Trap of Possession: Releasing the Need to Control or Reform Others',
+          duration: '4m',
+          type: 'core',
+          contentAr: `يتولد أعظم قدر من العذاب في العلاقات الإنسانية والشراكات المهنية من "التعلق المرضي والرغبة في السيطرة وتعديل وتغيير سلوكيات الآخرين". عندما تطلق العنان للسماح برحيل تلك الرغبة العنيفة وتقبل الزملاء والشركاء كما هم بكافة جوانبهم، تتبخر مشاعر الضغينة والغضب وتفسح المجال لتعاون مبدع وثقة مهنية فائقة تعود بالخير العميم للجميع.`,
+          contentEn: `The peak of emotional friction within corporate alliances arises from attachments and the exhausting desire to manipulate or reconstruct other personalities. Surrendering your need to manage others liberates your attention, creating fertile ground for authentic collaboration and trust.`
+        },
+        {
+          id: 'lg_ch11_l2',
+          idNum: 2,
+          titleAr: '2. التعاطف المطلق والوفاق الطاهر: كيف تقرن الحدود القوية بالسلام والمحبة؟',
+          titleEn: '2. Dynamic Interstellar Support: Pairing Resolute Boundaries with Poise and Honor',
+          duration: '3m',
+          type: 'tips',
+          contentAr: `السماح بالرحيل لا يعني الوهن أو قبول الظلم والضياع؛ بل يمكنك دائماً وبكل نبل وضع حدود معاملاتية بالغة الدقة والقوة في العمل ولكن بقلب محب وصافٍ خالٍ من الحقد والغضب والتوتر العاطفي. هذا المستودع من التوازن يمنع استنزاف جهازك العصبي ويضمن اتخاذ قراراتك بروح السكينة والشرف والوقار الصامت.`,
+          contentEn: `Surrender is not passive victimhood. True character enables you to enforce strong, clear boundary lines in your company while maintaining a mind fully decoupled from malice and anger. This pristine emotional neutrality preserves your physiological energy and highlights your authority.`
+        }
+      ],
+      quiz: [
+        {
+          questionAr: "كيف يؤثر تطبيق آلية 'السماح بالرحيل' للتعلق ورغبة السيطرة على العلاقات وصحة بيئة العمل؟",
+          questionEn: "How does releasing your attachment and core need to control others impact professional relationships?",
+          optionsAr: [
+            "يؤدي للخصومة الدائمة ومقاطعة الزملاء وتأخير تسليم الأكواد والمنتجات.",
+            "يبدد التشنج ومشاعر الضغينة والتوتر الغاضب، مما يرسي مناخاً طاهراً من الثقة والقبول والتعاون النبيل المتبادل بوقار وصدارة.",
+            "يجعل الجميع يمارسون الكسل ويتوقفون عن متابعة الميزانية بالكامل."
+          ],
+          optionsEn: [
+            "It generates endless personal vendettas and delays the shipment of project codebases.",
+            "It neutralizes core interpersonal friction and active resentments, replacing them with trust, absolute acceptance, and synergistic partnership in workspace environments.",
+            "It dictates that all coworkers adopt total laziness and suspend corporate budget analysis."
+          ],
+          correctIndex: 1,
+          explanationAr: "إطلاق مشاعر السيطرة يحميك من صراعات الأنا المجهدة ويؤهلك للصدارة والوفاق كمنارة إدارية ونفسية ملهمة بساحات النجاح.",
+          explanationEn: "Relinquishing control over peers protects you from draining ego matches, securing your reputation as an advanced, highly integrated leader."
+        }
+      ]
+    },
+    {
+      id: 'lg_ch12',
+      chapterNum: 12,
+      titleAr: 'الفصل الثاني عشر: الكيمياء المهنية والذاتية الخارقة للتحرر - التدفق المعرفي وصناعة المعجزات بسلام داخلي بوقار',
+      titleEn: 'Chapter 12: Spiritual & Strategic Transcendence - The Practical Alchemy of Living in Pure Flow',
+      descriptionAr: 'تحقيق أعلى مستويات كفاءة الإنجاز والتراكم المعرفي عبر التناغم المطلق مع الكينونة وتحرير عقد التوقعات السلبية بوقار تام وشرف.',
+      descriptionEn: 'Achieving peak productivity, business clarity, and creative breakthroughs by alignment with the Unmanifest and freeing yourself from mental expectations.',
+      lessons: [
+        {
+          id: 'lg_ch12_l1',
+          idNum: 1,
+          titleAr: '1. تحرير التوقعات والاعتصام بالبداهة والذكاء الكوني: التدفق كأداة تشغيلية فريدة',
+          titleEn: '1. Dropping Expectations: Transitioning from Anxious Forcing to Dynamic Creative Flow',
+          duration: '4m',
+          type: 'core',
+          contentAr: `أكبر معوق للابتكار بساحة العمل هو التخوف الدائم والتعلق بالنتائج والتوقعات المكبلة. عندما تقوم بالسماح ببرحيل تلك الآمال اللحظية المشوبة بالذعر وتركز بكل ذرة من كينونتك على الاتقان والصدق الفعلي في عملك، تتدفق إليك الأفكار الابتكارية النادرة وتتحطم كل قيود المحدوديات، لتقترن أصولك بصدارة باذخة ونجاح دائم مبروك ونبل متجذر بضميرك.`,
+          contentEn: `The peak bottleneck to advanced creativity is corporate attachment to short-term numbers and expectations. By surrendering the fear of outcome and focusing purely on the absolute craftsmanship of your craft, brilliant solutions manifest effortlessly.`
+        },
+        {
+          id: 'lg_ch12_l2',
+          idNum: 2,
+          titleAr: '2. الرياضة اليومية للتحرر في ختام السفر: بروتوكول الصيانة الروحية المستدامة',
+          titleEn: '2. The Perpetual Re-centering: Protocol of Continuous Daily Decompression',
+          duration: '3m',
+          type: 'tips',
+          contentAr: `في منتهى كفاحنا الفلسفي المبارك للتطوير الذاتي؛ احمِ عقلك وروحك بممارسة التحرير المستمر والتطهير للرواسب العاطفية بانتظام. لا تكبت غضباً، ولا تكتم كبرياءً زائراً؛ بل اسمح لكل سحابة أن تمر، حافظ على وقارك الشهم وصيت كرامتك الشامخ، وكن سفيراً حياً للسلام والمعرفة ومحبة الخير لجميع البريات. تقدم الآن مستبشراً؛ فأنت حقاً وصدقاً مستعد دائماً للسيادة والوفاق!`,
+          contentEn: `As you conclude this transcendent curriculum, commit to consistent daily decompression of any negative remnants. Repress nothing; allow all mental storms to pass. Cultivate unyielding character and profound personal authority, serving as a beacon of wisdom and serene contribution. Step forward with uncompromised faith and claim your success!`
+        }
+      ],
+      quiz: [
+        {
+          questionAr: "ما هو المنتهى المعرفي والروحي المبارك لتطبيق عقود 'السماح بالرحيل' بشكل شامل ومستدام في حياتك؟",
+          questionEn: "What is the ultimate, life-altering outcome of applying continuous daily surrender in your journey?",
+          optionsAr: [
+            "الوقوع في دركات العجز والانسحاب التام من دراسات الإدارة والحسابات الصالحة.",
+            "الوصول للسيادة العاطفية والمعرفية التامة وعيش حالة التدفق وتحقيق صروح الأصول الموفورة والأعمال بنبل وشرف ووقار طاهر وبأعلى كفاءة وسلام.",
+            "تراكم الديون وتجنب دفع الحقوق وتضييع الصلوات والمواعيد بالأكاديمية."
+          ],
+          optionsEn: [
+            "Sliding into helplessness and completely halting study in finance and structured management.",
+            "Attaining complete emotional sovereignty, experiencing absolute functional flow, and building durable commercial assets with unyielding ethics, peace, and ultimate distinction.",
+            "Accumulating debt, violating client contracts, and missing project delivery milestones."
+          ],
+          correctIndex: 1,
+          explanationAr: "تطهير وعاء الروح باستمرار يفجر كوامن الإبداع واليقين ويزين حضورك بصيغة ريادية فريدة ونبيلة يرجى خيرها دوماً بوقار وسلام.",
+          explanationEn: "Purifying your inner container unlocks your ultimate creative intelligence, framing your brand as a noble and powerful leader of eternal value."
+        }
+      ]
     }
   ]
 };
