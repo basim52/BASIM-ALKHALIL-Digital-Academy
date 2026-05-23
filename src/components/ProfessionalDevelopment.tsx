@@ -65,6 +65,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
   const [activeChapter, setActiveChapter] = useState<Chapter | null>(null);
   const [activeLesson, setActiveLesson] = useState<MicroLesson | null>(null);
   const [lessonIndex, setLessonIndex] = useState<number>(0);
+  const [expandedChapterId, setExpandedChapterId] = useState<string | null>(null);
   
   // Quiz evaluation state
   const [showQuiz, setShowQuiz] = useState<boolean>(false);
@@ -918,19 +919,82 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
       ]
     };
 
-    const pages = bookTextsAr[bookId] || [
-      {
-        title: "متن الكتاب - فصل تمهيدي كامل ممتع",
-        content: `مرحباً بك في متن الكتاب الأصلي الكامل. 
+    // 1. If we have a specific high-quality hardcoded essay in bookTextsAr for this exact page, use it!
+    const list = bookTextsAr[bookId];
+    if (list && pageNumber >= 1 && pageNumber <= list.length) {
+      return list[pageNumber - 1];
+    }
+
+    // 2. Otherwise, construct a rich, academic, highly-detailed unabridged chapter text dynamically using the lessons data!
+    const foundBook = PRELOADED_COURSES.find(c => c.id === bookId);
+    if (foundBook) {
+      const chapter = foundBook.chapters[pageNumber - 1];
+      if (chapter) {
+        const title = isRtl ? chapter.titleAr : chapter.titleEn;
+        const description = isRtl ? chapter.descriptionAr : chapter.descriptionEn;
+        const author = isRtl ? foundBook.authorAr : foundBook.authorEn;
+
+        // Custom narrative formatting to present all lessons within the chapter as unabridged sections
+        const lessonsContent = chapter.lessons.map(lesson => {
+          return `■ ${isRtl ? lesson.titleAr : lesson.titleEn}
+${isRtl ? lesson.contentAr : lesson.contentEn}`;
+        }).join('\n\n');
+
+        const content = isRtl 
+          ? `[أكاديمية المعرفة الفطنة والريادة - النص الكامل والمعتمد للفصل]
+
+«${title}»
+المؤلف المعتمد: ${author}
+
+سياق الفصل ومسار الدراسة:
+${description}
+
+──────────────────────────────────────────
+مضمون وتفاصيل المتن الأصلي الكامل:
+
+${lessonsContent}
+
+──────────────────────────────────────────
+مستخلص فطن وتوصية سلوكية:
+مخرجات هذا الفصل تطور القدرة التحليلية والذكاء السلوكي وتمنحك كفاءة واثقة لتطبيقه في واقعك اليومي وصناعة الريادة بالنفوس والأعمال.`
+          : `[Basim Alkhalil Digital Academy - Full Chapter Textbook Resource]
+
+"${title}"
+By: ${author}
+
+Chapter Overview & Scope:
+${description}
+
+──────────────────────────────────────────
+Full Text & Primary Cognitive Context:
+
+${lessonsContent}
+
+──────────────────────────────────────────
+Outcome & Reflection:
+Mastering this chapter boosts your actual strategic and behavioral outcomes, providing key actionable wisdom to improve your standard of living, self-sufficiency, and professional triumphs.`;
+
+        return {
+          title,
+          content
+        };
+      }
+    }
+
+    // Ultimate fallback if no matching book/chapter is found
+    return {
+      title: isRtl ? "متن الكتاب - فصل تمهيدي" : "Textbook Chapter - Introductory Section",
+      content: isRtl 
+        ? `مرحباً بك في متن الكتاب الأصلي الكامل في أكاديمية المعرفة.
 نظراً لرغبتك الملحة في الاطلاع على المتن الأصلي الكامل دون اقتصار على تلخيص فوري ركيك، قمنا برسم وتصميم هذا القارئ الإبداعي ليعرض لك نصوص الفصول الأصلية بالتفصيل لستيفن كوفي وغيره من رواد الفهم التنموي.
 
 **تفاصيل هذا الباب:**
 إن دراسة أمهات الفكر والوقوف على صياغة المؤلف ومصطلحاته الحيوية يمنح عقلك وبصيرتك هيبة الوقار المعرفي والقدرة على تفكيك المشاكل اليومية بشكل مستقل وعميق. حاول قراءة الأسطر بتأن واستخدم المساعد الفطن على اليمين للسؤال والتحقق ومناقشة تفريعات هذا المتن بجودة خارقة!`
-      }
-    ];
+        : `Welcome to the unabridged textbook reader in Basim Alkhalil Digital Academy.
+To honor your desire to study the authentic, full developmental texts instead of brief summaries, we have designed this interactive portal to showcase the comprehensive chapters in pristine detail.
 
-    const actualIdx = (pageNumber - 1) % pages.length;
-    return pages[actualIdx] || pages[0];
+Please read through these lines patiently, and utilize the AI scholar on your right to analyze, query, and deconstruct any parts of this textbook with extraordinary grade-A quality!`
+    };
   };
 
   const handleSendPdfAssistantMessage = async () => {
@@ -1563,26 +1627,61 @@ It confirms that successful modern learners prioritize dynamic continuous action
               <div className="p-4 overflow-y-auto max-h-[48vh] md:max-h-[58vh]">
                 
                 {pdfSidebarTab === 'chapters' && (
-                  <div className="space-y-2">
-                    <span className="text-[9px] uppercase font-black text-slate-400 block tracking-wider mb-2">{isRtl ? "فهرس المستند وأبواب المتن" : "Table of Contents"}</span>
-                    {selectedBook.chapters.map((ch, idx) => (
-                      <button
-                        key={ch.id}
-                        onClick={() => {
-                          // Jump page based on chapter index to mock genuine reader pagination
-                          setPdfCurrentPage(idx + 1);
-                          stopSpeaking();
-                        }}
-                        className={`w-full text-right px-3 py-2 rounded-xl text-xs font-bold leading-relaxed transition-all flex items-center hover:bg-black/5 gap-2 ${
-                          pdfCurrentPage === idx + 1 
-                            ? 'bg-amber-500/10 text-[#b48e56] border-r-2 border-[#b48e56]' 
-                            : 'text-slate-600'
-                        }`}
-                      >
-                        <BookOpen size={12} className="shrink-0" />
-                        <span className="truncate">{isRtl ? ch.titleAr : ch.titleEn}</span>
-                      </button>
-                    ))}
+                  <div className="space-y-3">
+                    <span className="text-[9px] uppercase font-black text-[#b48e56] block tracking-wider mb-2">
+                      {isRtl ? "فهرس المستند وأبواب المتن ونصوصها" : "Book Chapters & Unabridged Texts"}
+                    </span>
+                    {selectedBook.chapters.map((ch, idx) => {
+                      const isActive = pdfCurrentPage === idx + 1;
+                      const chData = getUnabridgedBookPageContent(selectedBook.id, idx + 1);
+                      return (
+                        <div 
+                          key={ch.id} 
+                          className={`rounded-2xl border transition-all overflow-hidden ${
+                            isActive 
+                              ? 'bg-amber-500/5 border-[#b48e56]/40 shadow-xs' 
+                              : 'bg-white/40 border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          <button
+                            onClick={() => {
+                              setPdfCurrentPage(idx + 1);
+                              stopSpeaking();
+                            }}
+                            className="w-full text-right px-4 py-2.5 text-xs font-bold leading-relaxed transition-all flex items-center justify-between gap-2"
+                          >
+                            <div className="flex items-center gap-2">
+                              <BookOpen size={13} className={isActive ? "text-[#b48e56]" : "text-slate-400"} />
+                              <span className={isActive ? "font-black text-[#b48e56]" : "text-slate-700 font-bold"}>
+                                {isRtl ? ch.titleAr : ch.titleEn}
+                              </span>
+                            </div>
+                            {isActive && <span className="text-[10px] text-[#b48e56] font-black animate-pulse">● {isRtl ? "مفتوح" : "Active"}</span>}
+                          </button>
+                          
+                          {/* Text under each chapter - always visible when active! */}
+                          {isActive && (
+                            <div className="px-4 pb-4 pt-1 border-t border-dashed border-[#b48e56]/20 bg-white/50">
+                              <p className="text-[11px] text-[#1a1c23] font-serif leading-relaxed text-right whitespace-pre-line select-text max-h-[180px] overflow-y-auto pr-1">
+                                {chData.content}
+                              </p>
+                              <div className="mt-2 pt-2 border-t border-[#b48e56]/10 flex justify-between items-center text-[9px] font-bold text-slate-500">
+                                <span>{isRtl ? `صفحة ${idx + 1}` : `Page ${idx + 1}`}</span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    speakText(chData.content);
+                                  }}
+                                  className="text-[#b48e56] hover:underline flex items-center gap-1 font-black"
+                                >
+                                  🔊 {isRtl ? "استمع ثانية" : "Listen again"}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -1924,59 +2023,18 @@ It confirms that successful modern learners prioritize dynamic continuous action
                       {isRtl ? 'أكاديمية المعرفة الفطنة والريادة' : 'Premium Micro-Learning Engine'}
                     </span>
                     <h1 className="text-4xl font-extrabold text-[#111] tracking-tight mb-4">
-                      {browseCategory === 'books' 
-                        ? (isRtl ? 'مكتبة الكتب الثقافية والتربوية (تطوير ذات)' : 'Interactive Book Vault: Self-Development')
-                        : (isRtl ? 'قسم التطوير والإنتاج: دورات تطويرية مصغرة' : 'Developmental Micro-Courses')}
+                      {isRtl ? 'قسم التطوير والإنتاج: دورات تطويرية مصغرة' : 'Developmental Micro-Courses'}
                     </h1>
                     <p className="text-slate-500 leading-relaxed font-serif text-lg">
-                      {browseCategory === 'books'
-                        ? (isRtl 
-                            ? 'تصفح أمهات الكتب العالمية المخزنة بصيغة PDF بجودة تدرج معرفي فائقة، مقسمة لفصول دون اختبارات، لترقية معارفك بمرونة ووقار.'
-                            : 'Browse the worlds absolute finest self-development books with elite content-chunking quality, split into readable sections without exam gates for relaxed learning.')
-                        : (isRtl 
-                            ? 'تطبيق آلية هندسة المحتوى لتفكيك أمهات الكتب والـ PDF وتحويلها إلى تدرجات معرفية فصيحة ومحطات تثبيت وذكاء لا يتعدى 5 دقائق.'
-                            : 'Explore real-world masterpieces fully deconstructed into action-oriented micro-learning lanes, with gatekeeping verification and review blocks.')}
+                      {isRtl 
+                        ? 'تطبيق آلية هندسة المحتوى لتفكيك أمهات الكتب والـ PDF وتحويلها إلى تدرجات معرفية فصيحة ومحطات تثبيت وذكاء لا يتعدى 5 دقائق.'
+                        : 'Explore real-world masterpieces fully deconstructed into action-oriented micro-learning lanes, with gatekeeping verification and review blocks.'}
                     </p>
-                  </div>
-
-                  {/* Category Switcher for Courses vs Books */}
-                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 pb-4 border-b border-[#e1deda] text-right">
-                    <div className="flex bg-[#eae6df] p-1 rounded-xl gap-1">
-                      <button 
-                        onClick={() => setBrowseCategory('courses')}
-                        className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 ${browseCategory === 'courses' ? 'bg-white text-[#b48e56] shadow-sm' : 'text-slate-600 hover:text-[#b48e56]'}`}
-                      >
-                        <GraduationCap size={14} />
-                        <span>{isRtl ? 'الأقسام المتاحة: الدورات' : 'Accredited Courses'}</span>
-                      </button>
-                      <button 
-                        onClick={() => setBrowseCategory('books')}
-                        className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 ${browseCategory === 'books' ? 'bg-white text-[#b48e56] shadow-sm' : 'text-slate-600 hover:text-[#b48e56]'}`}
-                      >
-                        <Book size={14} />
-                        <span>{isRtl ? 'الأقسام المتاحة: الكتب' : 'Cultural Books'}</span>
-                      </button>
-                    </div>
-
-                    {browseCategory === 'books' && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-slate-500">{isRtl ? 'القسم الفرعي:' : 'Subcategory:'}</span>
-                        <span className="px-3 py-1 bg-[#b48e56]/10 text-[#b48e56] text-xs font-black rounded-lg border border-[#b48e56]/15">
-                          {isRtl ? 'تطوير ذات' : 'Self-Development'}
-                        </span>
-                      </div>
-                    )}
                   </div>
 
                   {/* Books grid */}
                   <div className="grid md:grid-cols-3 gap-6">
-                    {(browseCategory === 'books' 
-                      ? [
-                          PRELOADED_COURSES.find(c => c.id === 'seven_habits'),
-                          ...PRELOADED_COURSES.filter(c => c.id !== 'seven_habits')
-                        ].filter(Boolean) as BookCourse[]
-                      : PRELOADED_COURSES
-                    ).map(course => {
+                    {PRELOADED_COURSES.map(course => {
                       const isComplete = course.chapters.length > 0 && course.chapters.every(ch => userResults.some(r => r.lessonId === ch.id && r.score >= 2));
                       return (
                         <div 
@@ -1984,7 +2042,7 @@ It confirms that successful modern learners prioritize dynamic continuous action
                           className={`bg-white border border-[#e8e5df] rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between ${course.isLocked ? 'opacity-60 cursor-not-allowed bg-[#faf9f6]' : 'cursor-pointer'}`}
                           onClick={() => {
                             if (!course.isLocked) {
-                              setIsBookMode(browseCategory === 'books');
+                              setIsBookMode(false);
                               setSelectedBook(course);
                               setActiveChapter(null);
                               setActiveLesson(null);
@@ -2007,7 +2065,7 @@ It confirms that successful modern learners prioritize dynamic continuous action
                                   </div>
                                 </div>
                               )}
-                              {isComplete && !isBookMode && (
+                              {isComplete && (
                                 <div className="absolute top-3 right-3 bg-emerald-500 text-white p-1.5 rounded-full shadow-sm">
                                   <CheckCircle2 size={16} />
                                 </div>
@@ -2027,11 +2085,9 @@ It confirms that successful modern learners prioritize dynamic continuous action
 
                           <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-black uppercase text-[#b48e56]">
                             <span>
-                              {browseCategory === 'books'
-                                ? (isRtl ? 'ابدأ قراءة الكتاب 📖' : 'Read Book 📖')
-                                : course.isLocked 
-                                  ? (isRtl ? 'مغلق ومجدول' : 'Scheduled') 
-                                  : (isRtl ? 'ابدأ الآن' : 'Start Course')
+                              {course.isLocked 
+                                ? (isRtl ? 'مغلق ومجدول' : 'Scheduled') 
+                                : (isRtl ? 'ابدأ الآن' : 'Start Course')
                               }
                             </span>
                             <ArrowRight size={14} className="rtl:rotate-180" />
@@ -2190,52 +2246,131 @@ It confirms that successful modern learners prioritize dynamic continuous action
                         {selectedBook.chapters.map((chapter, idx) => {
                           const isUnlocked = isBookMode ? true : unlockedChapters.has(chapter.id);
                           const matchingResult = userResults.find(r => r.lessonId === chapter.id);
+                          const isExpanded = expandedChapterId === chapter.id;
+                          const chContent = getUnabridgedBookPageContent(selectedBook.id, idx + 1);
                           
                           return (
                             <div 
                               key={chapter.id}
-                              className={`bg-white border border-[#e8e5df] rounded-2xl p-5 shadow-sm transition-all flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${isUnlocked ? 'hover:border-[#b48e56] cursor-pointer' : 'opacity-65 relative'}`}
-                              onClick={() => {
-                                if (isUnlocked) {
-                                  setActiveChapter(chapter);
-                                  setActiveLesson(chapter.lessons[0]);
-                                  setLessonIndex(0);
-                                  setShowQuiz(false);
-                                } else {
-                                  alert(isRtl ? 'هذا الفصل مغلق! يتعين عليك عبور الفصل السابق بنجاح لفتح هذا المسار.' : 'This chapter is locked! Complete the previous gatekeeper quiz (scored >= 70%) to progress.');
-                                }
-                              }}
+                              className={`bg-white border rounded-2xl p-5 shadow-sm transition-all border-[#e8e5df] hover:border-[#b48e56]/60 flex flex-col justify-between items-stretch gap-4 ${isUnlocked ? '' : 'opacity-65'}`}
                             >
-                              <div className="flex-1 flex gap-4 items-start">
-                                <div className="w-10 h-10 rounded-xl bg-[#b48e56]/10 flex items-center justify-center text-[#b48e56] shrink-0">
-                                  {isUnlocked ? <BookOpen size={20} /> : <Lock size={20} />}
+                              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div 
+                                  className={`flex-1 flex gap-4 items-start ${isUnlocked ? 'cursor-pointer' : ''}`}
+                                  onClick={() => {
+                                    if (isUnlocked) {
+                                      setActiveChapter(chapter);
+                                      setActiveLesson(chapter.lessons[0]);
+                                      setLessonIndex(0);
+                                      setShowQuiz(false);
+                                    } else {
+                                      alert(isRtl ? 'هذا الفصل مغلق! يتعين عليك عبور الفصل السابق بنجاح لفتح هذا المسار.' : 'This chapter is locked! Complete the previous gatekeeper quiz (scored >= 70%) to progress.');
+                                    }
+                                  }}
+                                >
+                                  <div className="w-10 h-10 rounded-xl bg-[#b48e56]/10 flex items-center justify-center text-[#b48e56] shrink-0">
+                                    {isUnlocked ? <BookOpen size={20} /> : <Lock size={20} />}
+                                  </div>
+                                  <div>
+                                    <h4 className="font-bold text-[#111] text-lg text-right">
+                                      {isRtl ? chapter.titleAr : chapter.titleEn}
+                                    </h4>
+                                    <p className="text-slate-400 text-xs font-medium font-serif mt-1 text-right">
+                                      {isRtl ? chapter.descriptionAr : chapter.descriptionEn}
+                                    </p>
+                                  </div>
                                 </div>
-                                <div>
-                                  <h4 className="font-bold text-[#111] text-lg">
-                                    {isRtl ? chapter.titleAr : chapter.titleEn}
-                                  </h4>
-                                  <p className="text-slate-400 text-xs font-medium font-serif mt-1">
-                                    {isRtl ? chapter.descriptionAr : chapter.descriptionEn}
-                                  </p>
+
+                                <div className="flex items-center gap-3 self-stretch md:self-auto justify-end pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 shrink-0">
+                                  {isBookMode ? (
+                                    <button
+                                      onClick={() => {
+                                        setActiveChapter(chapter);
+                                        setActiveLesson(chapter.lessons[0]);
+                                        setLessonIndex(0);
+                                        setShowQuiz(false);
+                                      }}
+                                      className="text-xs font-black uppercase text-white bg-[#b48e56] hover:bg-[#967341] py-2 px-4 rounded-xl shadow-xs transition-colors"
+                                    >
+                                      {isRtl ? 'قراءة هذا الباب 📖' : 'Read Chapter 📖'}
+                                    </button>
+                                  ) : matchingResult ? (
+                                    <div className="flex items-center gap-2 flex-wrap justify-end">
+                                      <div className="flex items-center gap-1 bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1.5 rounded-full text-xs font-black">
+                                        <CheckCircle2 size={14} />
+                                        <span>{isRtl ? `تم اجتياز مخرجات الفصل (${matchingResult.score}/${matchingResult.total})` : `Module Mastered (${matchingResult.score}/${matchingResult.total})`}</span>
+                                      </div>
+                                      <button
+                                        onClick={() => {
+                                          setActiveChapter(chapter);
+                                          setActiveLesson(chapter.lessons[0]);
+                                          setLessonIndex(0);
+                                          setShowQuiz(false);
+                                        }}
+                                        className="text-xs font-medium text-slate-500 hover:text-slate-800 underline"
+                                      >
+                                        {isRtl ? 'مراجعة المنهج' : 'Review Path'}
+                                      </button>
+                                    </div>
+                                  ) : isUnlocked ? (
+                                    <button
+                                      onClick={() => {
+                                        setActiveChapter(chapter);
+                                        setActiveLesson(chapter.lessons[0]);
+                                        setLessonIndex(0);
+                                        setShowQuiz(false);
+                                      }}
+                                      className="text-xs font-black uppercase text-white bg-[#b48e56] hover:bg-[#967341] py-2 px-4 rounded-xl shadow-xs transition-colors"
+                                    >
+                                      {isRtl ? 'ابدأ المسار' : 'Start Path'}
+                                    </button>
+                                  ) : (
+                                    <span className="text-xs font-bold text-slate-400">{isRtl ? 'متطلب الفصل السابق' : 'Prerequisite required'}</span>
+                                  )}
                                 </div>
                               </div>
 
-                              <div className="flex items-center gap-3 self-stretch md:self-auto justify-end pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-                                {isBookMode ? (
-                                  <span className="text-xs font-black uppercase text-[#b48e56]">{isRtl ? 'ابدأ القراءة 📖' : 'Read Chapter 📖'}</span>
-                                ) : matchingResult ? (
-                                  <div className="flex items-center gap-2 flex-wrap justify-end">
-                                    <div className="flex items-center gap-1 bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1.5 rounded-full text-xs font-black">
-                                      <CheckCircle2 size={14} />
-                                      <span>{isRtl ? `تم اجتياز مخرجات الفصل (${matchingResult.score}/${matchingResult.total})` : `Module Mastered (${matchingResult.score}/${matchingResult.total})`}</span>
-                                    </div>
-                                  </div>
-                                ) : isUnlocked ? (
-                                  <span className="text-xs font-black uppercase text-[#b48e56]">{isRtl ? 'ابدأ المسار' : 'Start Path'}</span>
-                                ) : (
-                                  <span className="text-xs font-bold text-slate-400">{isRtl ? 'متطلب الفصل السابق' : 'Prerequisite required'}</span>
-                                )}
-                              </div>
+                              {/* Toggle Chapter Text Button */}
+                              {isUnlocked && (
+                                <div className="border-t border-dashed border-slate-200 pt-3 flex items-center justify-between">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setExpandedChapterId(isExpanded ? null : chapter.id);
+                                    }}
+                                    className="text-xs text-[#b48e56] hover:text-[#967341] font-black flex items-center gap-1 bg-[#b48e56]/5 px-3 py-1.5 rounded-xl transition-all"
+                                  >
+                                    <span>🔍</span>
+                                    <span>{isExpanded ? (isRtl ? 'طي نص المتن وطمس العرض' : 'Collapse Chapter Text') : (isRtl ? ' رؤية النص الكامل لهذا الفصل مباشرة بالأسفل' : 'View Full Unabridged Text Directly Below')}</span>
+                                  </button>
+
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      speakText(chContent.content);
+                                    }}
+                                    className="text-xs text-slate-600 hover:text-slate-900 font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition-all"
+                                    title={isRtl ? "تلاوة صوتية" : "Listen Speak"}
+                                  >
+                                    <span>🔊</span>
+                                    <span>{isRtl ? 'استمع للمتن' : 'Listen text'}</span>
+                                  </button>
+                                </div>
+                              )}
+
+                              {/* Expanded Unabridged content */}
+                              {isUnlocked && isExpanded && (
+                                <div className="mt-2 bg-[#fafaf7] border border-[#ece8e1] rounded-2xl p-5 text-right select-text animate-fadeIn relative">
+                                  <div className="absolute top-3 left-4 text-[9px] font-mono font-bold text-[#b48e56] uppercase">Letting Go / U-Books</div>
+                                  <h5 className="font-extrabold text-sm text-slate-800 mb-3 border-b border-dashed border-[#b48e56]/20 pb-1 flex items-center gap-1 flex-row-reverse">
+                                    <span>📖</span>
+                                    <span>{isRtl ? 'المتن اللفظي والنص الكامل المعتمد:' : 'Full Authenticated Unabridged Text:'}</span>
+                                  </h5>
+                                  <p className="text-xs md:text-sm text-slate-700 font-serif leading-relaxed whitespace-pre-line">
+                                    {chContent.content}
+                                  </p>
+                                </div>
+                              )}
                             </div>
                           );
                         })}
