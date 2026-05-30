@@ -76,7 +76,7 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+  const audioChunksRef = useRef<Blob[]>([]);
   const [hasRecorded, setHasRecorded] = useState<boolean>(false);
   const [recordingDuration, setRecordingDuration] = useState<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -113,25 +113,45 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
   // Recording Logic
   const startRecording = async () => {
     try {
-      setAudioChunks([]);
+      audioChunksRef.current = [];
       setAudioUrl(null);
+      setHasRecorded(false);
+      
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const recorder = new MediaRecorder(stream);
       
       recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          setAudioChunks(prev => [...prev, e.data]);
+        if (e.data && e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
         }
       };
 
       recorder.onstop = () => {
+        // Stop all tracks in the stream
         stream.getTracks().forEach(track => track.stop());
+        
+        let mimeType = 'audio/webm';
+        if (typeof MediaRecorder !== 'undefined' && !MediaRecorder.isTypeSupported('audio/webm')) {
+          if (MediaRecorder.isTypeSupported('audio/mp4')) {
+            mimeType = 'audio/mp4';
+          } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
+            mimeType = 'audio/ogg';
+          } else if (MediaRecorder.isTypeSupported('audio/wav')) {
+            mimeType = 'audio/wav';
+          }
+        }
+        
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        const url = URL.createObjectURL(audioBlob);
+        setAudioUrl(url);
+        setHasRecorded(true);
+        setIsRecording(false);
+        handleSpeechText("Excellent pronunciation logic!", "en");
       };
 
       recorder.start();
       setMediaRecorder(recorder);
       setIsRecording(true);
-      setHasRecorded(false);
     } catch (err) {
       console.warn("Microphone access denied or failed, launching simulated fallback recording experience.", err);
       setIsRecording(true);
@@ -142,14 +162,6 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
 
   const stopRecording = () => {
     if (mediaRecorder && isRecording) {
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        const url = URL.createObjectURL(audioBlob);
-        setAudioUrl(url);
-        setHasRecorded(true);
-        setIsRecording(false);
-        handleSpeechText("Excellent pronunciation logic!", "en");
-      };
       mediaRecorder.stop();
     } else if (isRecording) {
       setIsRecording(false);
