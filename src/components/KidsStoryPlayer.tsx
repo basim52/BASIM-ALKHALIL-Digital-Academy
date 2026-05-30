@@ -17,7 +17,9 @@ import {
   Trophy,
   Plane,
   RotateCcw,
-  Square
+  Square,
+  Play,
+  Pause
 } from 'lucide-react';
 import { KidStory } from '../data/kidsStories';
 import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
@@ -42,6 +44,8 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
   const [currentStage, setCurrentStage] = useState<number>(1);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [activeSpeechLine, setActiveSpeechLine] = useState<number | null>(null);
+  const [isPlayingFullDialogue, setIsPlayingFullDialogue] = useState<boolean>(false);
+  const isPlayingRef = useRef<boolean>(false);
   
   // Speaking/Recording states
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -52,12 +56,63 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
   const [duration, setDuration] = useState<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Dynamic translated speakers mapping with custom emojis
+  const getSpeakerLabel = (speaker: string, isRtl: boolean) => {
+    if (speaker === 'Noor') return isRtl ? 'نور 👩' : 'Noor 👩';
+    
+    const translations: Record<string, { ar: string, en: string }> = {
+      'Officer': { ar: 'الضابط 👮', en: 'Officer 👮' },
+      'Security Officer': { ar: 'ضابط الأمن 👮', en: 'Security Officer 👮' },
+      'Driver': { ar: 'السائق 🚌', en: 'Driver 🚌' },
+      'Bus Driver': { ar: 'سائق الحافلة 🚌', en: 'Bus Driver 🚌' },
+      'Machine': { ar: 'الآلة 🤖', en: 'Machine 🤖' },
+      'Ticket Machine': { ar: 'آلة التذاكر 🤖', en: 'Ticket Machine 🤖' },
+      'Ticket Machine (voice)': { ar: 'آلة التذاكر 🤖', en: 'Ticket Machine 🤖' },
+      'Ticket Machine Voice': { ar: 'آلة التذاكر 🤖', en: 'Ticket Machine 🤖' },
+      'Guard': { ar: 'الحارس 👮', en: 'Guard 👮' },
+      'Museum Guard': { ar: 'حارس المتحف 👮', en: 'Museum Guard 👮' },
+      'Shopkeeper': { ar: 'البائع 👨‍💼', en: 'Shopkeeper 👨‍💼' },
+      'Assistant': { ar: 'المساعد 💁‍♂️', en: 'Assistant 💁‍♂️' },
+      'Shop Assistant': { ar: 'مساعد المتجر 💁‍♂️', en: 'Shop Assistant 💁‍♂️' },
+      'Guide': { ar: 'المرشد 🗺️', en: 'Guide 🗺️' },
+      'Tour Guide': { ar: 'المرشد السياحي 🗺️', en: 'Tour Guide 🗺️' },
+      'Pharmacist': { ar: 'الصيدلاني 👨‍⚕️', en: 'Pharmacist 👨‍⚕️' },
+      'Clerk': { ar: 'الموظف 👨‍💼', en: 'Clerk 👨‍💼' },
+      'Post Office Clerk': { ar: 'موظف البريد 👨‍💼', en: 'Post Office Clerk 👨‍💼' },
+      'Emma': { ar: 'إيما 👧', en: 'Emma 👧' },
+      'Owner': { ar: 'صاحب المحل 👨‍💼', en: 'Owner 👨‍💼' },
+      'Pet Shop Owner': { ar: 'صاحب محل الأليفة 👨‍💼', en: 'Pet Shop Owner 👨‍💼' },
+      'Mrs. Smith': { ar: 'السيدة سميث 👵', en: 'Mrs. Smith 👵' },
+      'Host Mum (Mrs. Smith)': { ar: 'المضيفة السيدة سميث 👵', en: 'Mrs. Smith 👵' },
+      'Firefighter': { ar: 'الإطفائي 👨‍🚒', en: 'Firefighter 👨‍🚒' },
+      'Agent': { ar: 'الموظف 👨‍💼', en: 'Agent 👨‍💼' },
+      'Check-in Agent': { ar: 'موظف المطار 👨‍💼', en: 'Check-in Agent 👨‍💼' },
+      'Mother': { ar: 'الأم 👩', en: 'Mother 👩' },
+      'Noor\'s Mother': { ar: 'أُم نور 👩', en: 'Mother 👩' }
+    };
+
+    const key = speaker.trim();
+    if (translations[key]) {
+      return isRtl ? translations[key].ar : translations[key].en;
+    }
+    return speaker;
+  };
+
   useEffect(() => {
     return () => {
+      isPlayingRef.current = false;
       cancelAllSpeech();
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    // Stop autoplay when stage changes
+    isPlayingRef.current = false;
+    setIsPlayingFullDialogue(false);
+    setActiveSpeechLine(null);
+    cancelAllSpeech();
+  }, [currentStage]);
 
   useEffect(() => {
     if (isRecording) {
@@ -70,7 +125,45 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
     }
   }, [isRecording]);
 
+  const startFullDialogueReading = async () => {
+    if (isPlayingFullDialogue) {
+      isPlayingRef.current = false;
+      setIsPlayingFullDialogue(false);
+      setActiveSpeechLine(null);
+      cancelAllSpeech();
+      return;
+    }
+
+    cancelAllSpeech();
+    isPlayingRef.current = true;
+    setIsPlayingFullDialogue(true);
+
+    const dialogueLines = story.sections.story_dialogue.lines;
+    for (let i = 0; i < dialogueLines.length; i++) {
+      if (!isPlayingRef.current) break;
+
+      setActiveSpeechLine(i);
+      
+      await new Promise<void>((resolve) => {
+        speakAcademyText(dialogueLines[i].english, 'en', () => {}, () => {
+          resolve();
+        });
+      });
+      
+      if (isPlayingRef.current) {
+        await new Promise<void>((resolve) => setTimeout(resolve, 800));
+      }
+    }
+
+    setIsPlayingFullDialogue(false);
+    setActiveSpeechLine(null);
+  };
+
   const playTTS = async (text: string, voiceLang: 'en' | 'ar' = 'en', index?: number) => {
+    if (isPlayingFullDialogue) {
+      isPlayingRef.current = false;
+      setIsPlayingFullDialogue(false);
+    }
     if (index !== undefined) {
       setActiveSpeechLine(index);
     }
@@ -259,63 +352,108 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
               className="h-full flex flex-col justify-between"
             >
 
-              {/* Stage 1: Dialogue stream */}
-              {currentStage === 1 && (
-                <div className="space-y-6">
-                  <div className="flex flex-col md:flex-row-reverse gap-4 items-center border-b border-slate-100 pb-4">
-                    <img 
-                      src="https://images.unsplash.com/photo-1548625361-155deee223d5?auto=format&fit=crop&w=300&q=80" 
-                      alt="Big Ben London Adventure"
-                      referrerPolicy="no-referrer"
-                      className="w-24 h-20 object-cover rounded-2xl border border-amber-200 shadow-xs shrink-0"
-                    />
-                    <div className="text-right flex-1">
-                      <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 justify-end">
-                        <MessageSquare className="text-amber-500 hover:scale-115 transition-transform" />
-                        <span>{isRtl ? 'حوار المحطة: استمع واقرأ بصوتك الفخم!' : 'The Station Dialogue: Tap & Practice!'}</span>
-                      </h2>
-                      <p className="text-xs text-amber-600 font-bold mt-1">{story.sections.story_dialogue.instructions_ar}</p>
-                    </div>
-                  </div>
+               {/* Stage 1: Dialogue stream */}
+               {currentStage === 1 && (
+                 <div className="space-y-6">
+                   <div className="flex flex-col md:flex-row-reverse gap-4 items-center border-b border-slate-100 pb-4">
+                     <img 
+                       src="https://images.unsplash.com/photo-1548625361-155deee223d5?auto=format&fit=crop&w=300&q=80" 
+                       alt="Big Ben London Adventure"
+                       referrerPolicy="no-referrer"
+                       className="w-24 h-20 object-cover rounded-2xl border border-amber-200 shadow-xs shrink-0"
+                     />
+                     <div className="text-right flex-1">
+                       <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 justify-end">
+                         <MessageSquare className="text-amber-500 hover:scale-115 transition-transform" />
+                         <span>{isRtl ? 'حوار المحطة: استمع واقرأ بصوتك الفخم!' : 'The Station Dialogue: Tap & Practice!'}</span>
+                       </h2>
+                       <p className="text-xs text-amber-600 font-bold mt-1">{story.sections.story_dialogue.instructions_ar}</p>
+                     </div>
+                   </div>
 
-                  <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                    {story.sections.story_dialogue.lines.map((ln, idx) => {
-                      const isNoor = ln.speaker === 'Noor';
-                      const isLineActive = activeSpeechLine === idx;
-                      
-                      return (
-                        <div 
-                          key={`ln-${idx}`}
-                          onClick={() => playTTS(ln.english, 'en', idx)}
-                          className={`p-4 md:p-5 rounded-2xl border transition-all cursor-pointer relative group flex flex-col items-end text-right ${
-                            isNoor 
-                              ? 'bg-amber-50/50 border-amber-200/60 hover:bg-amber-50 mr-8' 
-                              : 'bg-indigo-50/40 border-indigo-100 hover:bg-indigo-50 ml-8'
-                          } ${isLineActive ? 'ring-2 ring-amber-500 bg-amber-50 shadow-md' : 'shadow-xs'}`}
-                        >
-                          <div className={`absolute top-3 ${isNoor ? 'left-4' : 'left-4'} opacity-40 group-hover:opacity-100 transition-opacity`}>
-                            <Volume2 size={16} className="text-slate-400 group-hover:text-amber-500" />
-                          </div>
+                   {/* Autoplay sequential reader row */}
+                   <div className={`flex ${isRtl ? 'justify-start flex-row-reverse' : 'justify-start'} items-center gap-2 bg-amber-50/40 p-3 rounded-[1.5rem] border border-amber-100`}>
+                     <button
+                       onClick={startFullDialogueReading}
+                       className={`flex items-center gap-2 px-4 py-2 rounded-xl font-black text-[11px] transition-all shadow-xs border cursor-pointer hover:scale-102 active:scale-98 ${
+                         isPlayingFullDialogue 
+                           ? 'bg-rose-50 text-rose-600 border-rose-200 animate-pulse' 
+                           : 'bg-amber-500 hover:bg-amber-600 text-white border-amber-600 shadow-sm'
+                       }`}
+                     >
+                       {isPlayingFullDialogue ? (
+                         <>
+                           <Pause size={12} className="animate-pulse" />
+                           <span>{isRtl ? 'إيقاف الاستماع التلقائي ⏹️' : 'Stop Autoplay Reader ⏹️'}</span>
+                         </>
+                       ) : (
+                         <>
+                           <Play size={11} fill="currentColor" />
+                           <span>{isRtl ? 'استمع إلى الحوار كاملاً بالإنجليزية 🔊' : 'Read Full Dialogue in English 🔊'}</span>
+                         </>
+                       )}
+                     </button>
+                     <p className={`text-[10px] text-slate-500 font-bold ${isRtl ? 'text-right' : 'text-left'} flex-1`}>
+                       {isRtl ? 'يمكنك الاستماع إلى الحادثة بالكامل بصوت بشري راقٍ أو تفعيل الكلمات مفرداً !' : 'Listen to the entire conversation sequentially or tap individual cards!'}
+                     </p>
+                   </div>
 
-                          <div className="flex items-center gap-2 mb-2 flex-row-reverse">
-                            <span className={`w-2.5 h-2.5 rounded-full ${isNoor ? 'bg-amber-500' : 'bg-indigo-500'}`} />
-                            <span className="font-extrabold text-[#002147] text-xs uppercase tracking-wider">
-                              {ln.speaker === 'Noor' ? (isRtl ? 'نور 👩' : 'Noor 👩') : (isRtl ? 'ضابط الأمن 👮' : 'Security Officer 👮')}
-                            </span>
-                          </div>
+                   <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                     {story.sections.story_dialogue.lines.map((ln, idx) => {
+                       const isNoor = ln.speaker === 'Noor';
+                       const isLineActive = activeSpeechLine === idx;
+                       
+                       return (
+                         <div 
+                           key={`ln-${idx}`}
+                           onClick={() => playTTS(ln.english, 'en', idx)}
+                           className={`p-4 md:p-5 rounded-2xl border transition-all cursor-pointer relative group flex flex-col items-end text-right ${
+                             isNoor 
+                               ? 'bg-amber-50/50 border-amber-200/60 hover:bg-amber-50 mr-8 md:mr-12' 
+                               : 'bg-[#f8fafc]/90 border-slate-200 hover:bg-slate-50 ml-8 md:ml-12'
+                           } ${isLineActive ? 'ring-2 ring-amber-500 bg-amber-50 shadow-md border-amber-300' : 'shadow-xs'}`}
+                         >
+                           <div className={`absolute top-3 ${isNoor ? 'left-4' : 'left-4'} opacity-40 group-hover:opacity-100 transition-opacity`}>
+                             <Volume2 size={16} className="text-slate-400 group-hover:text-amber-500" />
+                           </div>
 
-                          <p className="font-mono font-black text-[#002147] text-sm md:text-base mb-1 direction-ltr text-center w-full">
-                            {ln.english}
-                          </p>
-                          <p className="text-slate-500 text-xs font-semibold leading-relaxed">
-                            {ln.arabic}
-                          </p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+                           <div className="flex items-center gap-2 mb-2 flex-row-reverse">
+                             <span className={`w-2.5 h-2.5 rounded-full ${isNoor ? 'bg-amber-500' : 'bg-slate-500'}`} />
+                             <span className="font-extrabold text-[#002147] text-xs uppercase tracking-wider">
+                               {getSpeakerLabel(ln.speaker, isRtl)}
+                             </span>
+                           </div>
+
+                           <p className="font-mono font-black text-[#002147] text-sm md:text-base mb-1 direction-ltr text-center w-full">
+                             {ln.english}
+                           </p>
+                           
+                           {/* Beautiful segmented listen row */}
+                           <div className="w-full flex justify-between items-center mt-3 pt-2.5 border-t border-dashed border-slate-200/80 flex-row">
+                             <button 
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 playTTS(ln.english, 'en', idx);
+                               }}
+                               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[9.5px] font-black transition-all cursor-pointer shadow-xs active:scale-95 ${
+                                 isLineActive
+                                   ? 'bg-amber-500 text-white border-amber-500'
+                                   : 'bg-white hover:bg-amber-50 text-amber-600 border-amber-200 hover:border-amber-400'
+                               }`}
+                             >
+                               <Volume2 size={11} className={isLineActive ? 'animate-bounce' : ''} />
+                               <span>{isRtl ? 'قراءة العبارة 🔊' : 'Speak Text 🔊'}</span>
+                             </button>
+                             <p className="text-slate-600 text-xs font-semibold leading-relaxed text-right flex-1 select-none pr-3">
+                               {ln.arabic}
+                             </p>
+                           </div>
+                         </div>
+                       );
+                     })}
+                   </div>
+                 </div>
+               )}
 
               {/* Stage 2: Mini Dictionary Table */}
               {currentStage === 2 && (

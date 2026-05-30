@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   BookOpen, 
+  BookMarked,
   Mic2, 
   BarChart3, 
   Users, 
@@ -996,52 +997,7 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
           </motion.div>
         )}
 
-        {/* Adults Daily Dose Quick Panel Card */}
-        <motion.div 
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-10 p-8 rounded-[2.5rem] border border-[#b48e56]/30 bg-gradient-to-br from-[#fdfbf7] to-[#f9f5eb] shadow-md shadow-[#b48e56]/5 relative overflow-hidden group flex flex-col md:flex-row justify-between items-center gap-6"
-        >
-          <div className="absolute top-0 right-0 w-32 h-32 opacity-10 group-hover:scale-110 transition-transform">
-            <img 
-              src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80" 
-              alt="Dose Background Decor"
-              referrerPolicy="no-referrer"
-              className="w-full h-full object-cover rounded-full filter grayscale sepia"
-            />
-          </div>
-          <div className="flex items-center gap-4 md:gap-5 relative z-10 w-full flex-row items-center md:items-start">
-            <img 
-              src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80" 
-              alt="Adults Daily Dose"
-              referrerPolicy="no-referrer"
-              className="w-12 h-12 md:w-16 md:h-16 rounded-2xl object-cover shrink-0 border-2 border-[#b48e56]/30 shadow-md transform group-hover:rotate-3 transition-transform"
-            />
-            <div className={`${isRtl ? 'text-right' : 'text-left'} flex-1`}>
-              <div className={`flex items-center gap-2 mb-1.5 flex-wrap ${isRtl ? 'justify-start' : 'justify-start'}`}>
-                <span className="px-3 py-0.5 bg-[#b48e56] text-white text-[9px] font-black rounded-md uppercase tracking-wider">
-                  {isRtl ? 'الجرعة اليومية للكبار' : 'ADULTS DAILY DOSE'}
-                </span>
-                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[9px] font-black rounded-md border border-emerald-100">
-                  {isRtl ? 'أنا متحمس مش أنا مثير!' : 'A2-B1 Level'}
-                </span>
-                <span className="w-1.5 h-1.5 bg-[#b48e56] rounded-full animate-ping" />
-              </div>
-              <h3 className="text-lg md:text-xl font-black text-slate-900 mb-1">
-                {isRtl ? 'الدرس النشط: أنا متحمس مش أنا مثير! (مقارنة بـ -ed و -ing)' : 'Active Lesson: I am excited vs I am exciting!'}
-              </h3>
-              <p className="text-slate-500 font-medium text-xs">
-                {isRtl ? 'صحّح خطأ المقابلات الشائع واكتسب مهارة تفرقة تامة بخطوة تفاعلية مدتها خمس دقائق.' : 'Deconstruct common interactive grammar errors in under five gold minutes.'}
-              </p>
-            </div>
-          </div>
-          <button 
-            onClick={() => onNavigate('adults-daily-dose')}
-            className="w-full md:w-auto bg-[#002147] hover:bg-[#b48e56] text-white text-xs font-black px-6 py-3.5 rounded-2xl shadow-md transition-all shrink-0 cursor-pointer text-center relative z-10 whitespace-nowrap"
-          >
-            {isRtl ? 'ابدأ الجرعة اليومية ⚡' : 'Start Daily Dose ⚡'}
-          </button>
-        </motion.div>
+
 
         {/* Kids Interactive Story Dashboard Quick Card */}
         <motion.div 
@@ -1067,7 +1023,7 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             <div className={`${isRtl ? 'text-right' : 'text-left'} flex-1`}>
               <div className={`flex items-center gap-2 mb-1.5 flex-wrap ${isRtl ? 'justify-start' : 'justify-start'}`}>
                 <span className="px-3 py-0.5 bg-amber-500 text-white text-[9px] font-black rounded-md uppercase tracking-wider">
-                  {isRtl ? 'مغامرات الأطفال التفاعلية 👶' : 'KIDS INTERACTIVE STORY 👶'}
+                  {isRtl ? 'قصص تعليمية 📚' : 'KIDS EDUCATIONAL STORIES 📚'}
                 </span>
                 <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[9px] font-black rounded-md border border-amber-100">
                   {isRtl ? 'سلسلة مغامرات لندن' : 'London Adventures'}
@@ -1143,161 +1099,125 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
           </motion.div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-12">
-          {/* Journey Section */}
-          <section className="lg:col-span-2 bg-white rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-12 border border-slate-200 shadow-sm relative overflow-hidden">
-            <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 md:mb-10 gap-4 ${isRtl ? 'sm:flex-row-reverse' : ''}`}>
-              <h3 className="text-2xl font-black text-[#002147] flex items-center gap-3">
-                <LayoutDashboard size={24} className="text-blue-600" />
-                {t.learningProgress}
-              </h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10">
+          {/* Academic Hub Card */}
+          <motion.div 
+             whileHover={{ scale: 1.01 }}
+             onClick={() => onNavigate('academic-planner')}
+             className="bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden group shadow-xl shadow-indigo-200 border-b-8 border-indigo-900 cursor-pointer"
+          >
+            <div className="relative z-10">
+              <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-md">
+                 <Brain className="text-white" />
+              </div>
+              <h3 className="text-2xl font-black mb-2">{t.academicHub}</h3>
+              <p className="text-indigo-100 text-sm mb-6 leading-relaxed max-w-sm">
+                {isRtl ? 'نظم دراستك، تتبع نتائجك، واستخرج تقارير تحليلية ذكية مدعومة بالذكاء الاصطناعي.' : 'Organize your studies, track results, and generate smart AI-powered analytical reports.'}
+              </p>
+              <div className="flex items-center gap-3 font-black text-[10px] uppercase tracking-widest text-indigo-300">
+                 <Sparkles size={14} className="animate-pulse" />
+                 AI Academic Control Center
+              </div>
+            </div>
+            <Brain size={160} className="absolute -bottom-10 -right-10 text-white/5 group-hover:scale-110 transition-transform hidden md:block" />
+          </motion.div>
+
+          {/* AI Partner Card */}
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            className="bg-[#002147] text-white rounded-[2.5rem] p-10 relative overflow-hidden group shadow-xl shadow-blue-900/10 border-b-8 border-[#C49E3A]"
+          >
+            <div className="relative z-10">
+              {/* Connection Tester for Admin */}
+              {MASTER_ADMINS.includes((profile?.email || auth.currentUser?.email || '').toLowerCase()) && (
+                <div className="absolute top-0 right-0 z-20">
+                  <button 
+                    onClick={async () => {
+                      try {
+                        const resp = await fetch('/api/health');
+                        const data = await resp.json();
+                        alert(`Connection OK: ${JSON.stringify(data)}`);
+                      } catch (e: any) {
+                        alert(`Connection FAILED: ${e.message}`);
+                      }
+                    }}
+                    className="text-[8px] bg-white/10 px-3 py-1 rounded-full hover:bg-white/20 whitespace-nowrap"
+                  >
+                    🧪 Test Conn
+                  </button>
+                </div>
+              )}
+              <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-md">
+                <Mic2 className="text-white" />
+              </div>
+              <h3 className={`text-xl font-bold mb-2 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>{t.aiPartner}</h3>
+              <p className={`text-blue-100 text-sm mb-8 ${lang === 'ar' ? 'text-right' : 'text-left'} leading-relaxed`}>
+                {lang === 'ar' ? 'تدرب على النطق الصحيح في مواقف يومية مع شريكك الآلي المدعوم بـ AI.' : 'Practice correct pronunciation in daily situations with your AI-powered partner.'}
+              </p>
               <button 
-                onClick={onOpenCurriculum}
-                className="text-blue-600 font-bold text-sm md:text-base hover:underline"
+                onClick={onStartConversation}
+                className={`bg-white text-[#002147] px-8 py-3.5 rounded-2xl font-bold flex items-center gap-2 hover:bg-[#C49E3A] hover:text-white transition-all ${lang === 'ar' ? 'mr-auto' : 'ml-auto'} shadow-xl`}
               >
-                {lang === 'ar' ? 'عرض جميع المناهج' : 'Browse All Modules'}
+                <Sparkles size={18} />
+                {lang === 'ar' ? 'ابدأ التجربة' : 'Start Trial'}
               </button>
             </div>
-            
-            <div className="space-y-6">
-                {MASTER_CURRICULUM[CurriculumCategory.READING][(profile as any).level || proficiencyLevel.A1].slice(0, 3).map((unit: any, i: number) => (
-                <div key={`unit-reading-${i}-${unit.id || unit.title || ''}`} className={`p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6 transition-all ${i === 0 ? 'border-blue-600 bg-blue-50/30' : 'border-slate-100'}`}>
-                  <div className="flex items-center gap-6">
-                    <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center font-bold text-xl md:text-2xl shrink-0 ${
-                      i === 0 ? 'bg-[#002147] text-white shadow-xl shadow-blue-200' : 'bg-slate-50 text-slate-300'
-                    }`}>
-                      {i + 1}
-                    </div>
-                    <div className={isRtl ? 'text-right' : 'text-left'}>
-                      <h4 className={`font-bold text-base md:text-lg ${i > 0 ? 'text-slate-400' : 'text-[#002147]'}`}>
-                        {isRtl ? unit.titleAr : unit.title}
-                      </h4>
-                      <p className="text-xs md:text-sm text-slate-500 font-medium line-clamp-1">
-                        {isRtl ? unit.descriptionAr : unit.description}
+            <Mic2 size={160} className="absolute -bottom-10 -left-10 text-white/5 group-hover:scale-110 transition-transform hidden md:block" />
+          </motion.div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-12">
+          {/* Smart Schedule Section */}
+          <div className="lg:col-span-2">
+            <ScheduleManager studentId={profile.uid} studentName={profile.displayName || ''} lang={lang} canEdit={true} />
+          </div>
+
+          {/* Homework and Tasks Section */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative h-full flex flex-col justify-between">
+              <div>
+                <h3 className="font-bold text-[#002147] mb-6 flex items-center gap-3">
+                  <Calendar className="text-[#C49E3A]" />
+                  {lang === 'ar' ? 'المهام والواجبات الذكية' : 'Smart Tasks & Homework'}
+                </h3>
+                <div className={`space-y-4 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
+                  {homeworks.length === 0 ? (
+                    <div className="py-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                      <p className="text-slate-400 text-xs font-medium">
+                        {isRtl ? 'لا يوجد واجبات حالياً' : 'No homework assigned yet'}
                       </p>
                     </div>
-                  </div>
-                  {i === 0 && (
-                    <button 
-                      onClick={onOpenCurriculum}
-                      className="w-full md:w-auto bg-blue-600 text-white px-8 py-4 rounded-xl md:rounded-2xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all"
-                    >
-                      <Play size={16} fill="currentColor" />
-                      {t.currentLesson}
-                    </button>
+                  ) : (
+                    homeworks.map((hw, hIdx) => (
+                      <motion.div 
+                        key={hw.id || `hw-item-${hIdx}`}
+                        whileHover={{ scale: 1.02 }}
+                        onClick={() => setSelectedHomework(hw)}
+                        className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
+                          hw.status === 'completed' 
+                            ? 'bg-emerald-50/50 border-emerald-100' 
+                            : 'bg-indigo-50/50 border-indigo-100'
+                        } ${lang === 'ar' ? 'flex-row-reverse text-right' : 'text-left'}`}
+                      >
+                        <div className={`p-2 rounded-xl ${
+                          hw.status === 'completed' ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-100 text-indigo-600'
+                        }`}>
+                          {hw.status === 'completed' ? <CheckCircle2 size={20} /> : <Sparkles size={20} />}
+                        </div>
+                        <div className="flex-1">
+                          <p className={`font-bold text-sm ${
+                            hw.status === 'completed' ? 'text-emerald-800' : 'text-indigo-800'
+                          }`}>{isRtl ? hw.titleAr : hw.title}</p>
+                          <p className={`text-[10px] font-bold uppercase tracking-wider ${
+                            hw.status === 'completed' ? 'text-emerald-600/80' : 'text-indigo-600/80'
+                          }`}>
+                            {hw.status === 'completed' ? (isRtl ? 'تم الإنجاز' : 'COMPLETED') : (isRtl ? 'بانتظار الحل' : 'PENDING')}
+                          </p>
+                        </div>
+                      </motion.div>
+                    ))
                   )}
                 </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="grid grid-cols-1 gap-10">
-            {/* Academic Hub Card */}
-            <motion.div 
-               whileHover={{ scale: 1.01 }}
-               onClick={() => onNavigate('academic-planner')}
-               className="bg-gradient-to-br from-indigo-600 to-blue-700 text-white rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden group shadow-xl shadow-indigo-200 border-b-8 border-indigo-900 cursor-pointer"
-            >
-              <div className="relative z-10">
-                <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-md">
-                   <Brain className="text-white" />
-                </div>
-                <h3 className="text-2xl font-black mb-2">{t.academicHub}</h3>
-                <p className="text-indigo-100 text-sm mb-6 leading-relaxed max-w-sm">
-                  {isRtl ? 'نظم دراستك، تتبع نتائجك، واستخرج تقارير تحليلية ذكية مدعومة بالذكاء الاصطناعي.' : 'Organize your studies, track results, and generate smart AI-powered analytical reports.'}
-                </p>
-                <div className="flex items-center gap-3 font-black text-[10px] uppercase tracking-widest text-indigo-300">
-                   <Sparkles size={14} className="animate-pulse" />
-                   AI Academic Control Center
-                </div>
-              </div>
-              <Brain size={160} className="absolute -bottom-10 -right-10 text-white/5 group-hover:scale-110 transition-transform hidden md:block" />
-            </motion.div>
-
-            <motion.div 
-              whileHover={{ scale: 1.02 }}
-              className="bg-[#002147] text-white rounded-[2.5rem] p-10 relative overflow-hidden group shadow-xl shadow-blue-900/10 border-b-8 border-[#C49E3A]"
-            >
-                  <div className="relative z-10">
-                {/* Connection Tester for Admin */}
-                {MASTER_ADMINS.includes((profile?.email || auth.currentUser?.email || '').toLowerCase()) && (
-                  <div className="absolute top-0 right-0 z-20">
-                    <button 
-                      onClick={async () => {
-                        try {
-                          const resp = await fetch('/api/health');
-                          const data = await resp.json();
-                          alert(`Connection OK: ${JSON.stringify(data)}`);
-                        } catch (e: any) {
-                          alert(`Connection FAILED: ${e.message}`);
-                        }
-                      }}
-                      className="text-[8px] bg-white/10 px-3 py-1 rounded-full hover:bg-white/20 whitespace-nowrap"
-                    >
-                      🧪 Test Conn
-                    </button>
-                  </div>
-                )}
-                <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-md">
-                  <Mic2 className="text-white" />
-                </div>
-                <h3 className={`text-xl font-bold mb-2 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>{t.aiPartner}</h3>
-                <p className={`text-blue-100 text-sm mb-8 ${lang === 'ar' ? 'text-right' : 'text-left'} leading-relaxed`}>
-                  {lang === 'ar' ? 'تدرب على النطق الصحيح في مواقف يومية مع شريكك الآلي المدعوم بـ AI.' : 'Practice correct pronunciation in daily situations with your AI-powered partner.'}
-                </p>
-                <button 
-                  onClick={onStartConversation}
-                  className={`bg-white text-[#002147] px-8 py-3.5 rounded-2xl font-bold flex items-center gap-2 hover:bg-[#C49E3A] hover:text-white transition-all ${lang === 'ar' ? 'mr-auto' : 'ml-auto'} shadow-xl`}
-                >
-                  <Sparkles size={18} />
-                  {lang === 'ar' ? 'ابدأ التجربة' : 'Start Trial'}
-                </button>
-              </div>
-              <Mic2 size={160} className="absolute -bottom-10 -left-10 text-white/5 group-hover:scale-110 transition-transform hidden md:block" />
-            </motion.div>
-
-            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative">
-              <h3 className="font-bold text-[#002147] mb-6 flex items-center gap-3">
-                <Calendar className="text-[#C49E3A]" />
-                {lang === 'ar' ? 'المهام والواجبات الذكية' : 'Smart Tasks & Homework'}
-              </h3>
-              <div className={`space-y-4 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
-                {homeworks.length === 0 ? (
-                  <div className="py-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                    <p className="text-slate-400 text-xs font-medium">
-                      {isRtl ? 'لا يوجد واجبات حالياً' : 'No homework assigned yet'}
-                    </p>
-                  </div>
-                ) : (
-                  homeworks.map((hw, hIdx) => (
-                    <motion.div 
-                      key={hw.id || `hw-item-${hIdx}`}
-                      whileHover={{ scale: 1.02 }}
-                      onClick={() => setSelectedHomework(hw)}
-                      className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
-                        hw.status === 'completed' 
-                          ? 'bg-emerald-50/50 border-emerald-100' 
-                          : 'bg-indigo-50/50 border-indigo-100'
-                      } ${lang === 'ar' ? 'flex-row-reverse text-right' : 'text-left'}`}
-                    >
-                      <div className={`p-2 rounded-xl ${
-                        hw.status === 'completed' ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-100 text-indigo-600'
-                      }`}>
-                        {hw.status === 'completed' ? <CheckCircle2 size={20} /> : <Sparkles size={20} />}
-                      </div>
-                      <div className="flex-1">
-                        <p className={`font-bold text-sm ${
-                          hw.status === 'completed' ? 'text-emerald-800' : 'text-indigo-800'
-                        }`}>{isRtl ? hw.titleAr : hw.title}</p>
-                        <p className={`text-[10px] font-bold uppercase tracking-wider ${
-                          hw.status === 'completed' ? 'text-emerald-600/80' : 'text-indigo-600/80'
-                        }`}>
-                          {hw.status === 'completed' ? (isRtl ? 'تم الإنجاز' : 'COMPLETED') : (isRtl ? 'بانتظار الحل' : 'PENDING')}
-                        </p>
-                      </div>
-                    </motion.div>
-                  ))
-                )}
               </div>
 
               {/* Homework Detail Modal */}
@@ -1308,7 +1228,7 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
                       initial={{ scale: 0.9, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0.9, opacity: 0 }}
-                      className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden"
+                      className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden text-right"
                       dir={isRtl ? 'rtl' : 'ltr'}
                     >
                       <div className="bg-[#002147] p-8 text-white flex justify-between items-start">
@@ -1383,9 +1303,7 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
                 )}
               </AnimatePresence>
             </div>
-
-            <ScheduleManager studentId={profile.uid} studentName={profile.displayName || ''} lang={lang} canEdit={true} />
-          </section>
+          </div>
         </div>
 
         {/* Sidebar */}
@@ -1870,6 +1788,67 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
             </p>
           </div>
         </motion.div>
+
+        {/* New Interactive Labs / Sections block */}
+        <div className="mt-12 animate-fade-in text-right">
+          <div className={`flex items-center gap-2 mb-6 ${isRtl ? 'justify-start flex-row-reverse' : 'justify-start'}`}>
+            <div className="w-2.5 h-6 bg-[#C49E3A] rounded-full" />
+            <h3 className="text-xl font-black text-[#002147]">
+              {isRtl ? 'البرامج التفاعلية المضافة حديثاً 🚀' : 'Newly Added Interactive Features 🚀'}
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6">
+            {/* Kids Interactive Story Dashboard Quick Card */}
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-6 rounded-[2.5rem] border border-amber-500/30 bg-gradient-to-br from-[#fffcf5] to-[#fbf7eb] shadow-md shadow-amber-500/5 relative overflow-hidden group flex flex-col justify-between min-h-[180px]"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 opacity-10 group-hover:scale-110 transition-transform">
+                <img 
+                  src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=400&q=80" 
+                  alt="Kids Background Decor"
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover rounded-full"
+                />
+              </div>
+              <div className="flex gap-4 relative z-10 w-full flex-row items-center">
+                <img 
+                  src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=400&q=80" 
+                  alt="Kids Interactive Story"
+                  referrerPolicy="no-referrer"
+                  className="w-12 h-12 md:w-16 md:h-16 rounded-2xl object-cover shrink-0 border-2 border-amber-500/30 shadow-md transform group-hover:-rotate-3 transition-transform"
+                />
+                <div className={`${isRtl ? 'text-right' : 'text-left'} flex-1`}>
+                  <div className={`flex items-center gap-2 mb-1.5 flex-wrap ${isRtl ? 'justify-start' : 'justify-start'}`}>
+                    <span className="px-3 py-0.5 bg-amber-500 text-white text-[9px] font-black rounded-md uppercase tracking-wider">
+                      {isRtl ? 'قصص تعليمية 📚' : 'KIDS EDUCATIONAL STORIES 📚'}
+                    </span>
+                    <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[9px] font-black rounded-md border border-amber-100">
+                      {isRtl ? 'سلسلة مغامرات لندن' : 'London Adventures'}
+                    </span>
+                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping" />
+                  </div>
+                  <h3 className="text-base md:text-lg font-black text-slate-900 mb-1">
+                    {isRtl ? 'القصة التفاعلية: نور تصل لـ لندن ✈️' : 'Noor Arrives in London ✈️'}
+                  </h3>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center justify-between gap-4 relative z-10">
+                <p className="text-slate-500 font-medium text-xs leading-relaxed max-w-[70%] text-right">
+                  {isRtl ? 'تصفح مغامرات نور التفاعلية مع قواميس ناطقة وتحديات تقمص الأصوات.' : 'Follow Noor at London Airport with speaking challenge cards and audio acting!'}
+                </p>
+                <button 
+                  onClick={() => onNavigate && onNavigate('kids-story-player')}
+                  className="bg-amber-500 hover:bg-[#c49e3a] text-white text-[11px] font-black px-4 py-3 rounded-xl shadow-sm transition-all cursor-pointer whitespace-nowrap"
+                >
+                  {isRtl ? 'ابدأ العرض ✨' : 'Start Kids Play ✨'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -1887,55 +1866,7 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Adults Daily Dose Quick Panel Card */}
-          <motion.div 
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-6 rounded-[2.5rem] border border-[#b48e56]/30 bg-gradient-to-br from-[#fdfbf7] to-[#f9f5eb] shadow-md shadow-[#b48e56]/5 relative overflow-hidden group flex flex-col justify-between min-h-[180px]"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 opacity-10 group-hover:scale-110 transition-transform">
-              <img 
-                src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80" 
-                alt="Dose Background Decor"
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover rounded-full filter grayscale sepia"
-              />
-            </div>
-            <div className="flex gap-4 relative z-10 w-full flex-row items-center">
-              <img 
-                src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80" 
-                alt="Adults Daily Dose"
-                referrerPolicy="no-referrer"
-                className="w-12 h-12 md:w-16 md:h-16 rounded-2xl object-cover shrink-0 border-2 border-[#b48e56]/30 shadow-md transform group-hover:rotate-3 transition-transform"
-              />
-              <div className={`${isRtl ? 'text-right' : 'text-left'} flex-1`}>
-                <div className={`flex items-center gap-2 mb-1.5 flex-wrap ${isRtl ? 'justify-start' : 'justify-start'}`}>
-                  <span className="px-3 py-0.5 bg-[#b48e56] text-white text-[9px] font-black rounded-md uppercase tracking-wider">
-                    {isRtl ? 'الجرعة اليومية للكبار' : 'ADULTS DAILY DOSE'}
-                  </span>
-                  <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[9px] font-black rounded-md border border-emerald-100">
-                    {isRtl ? 'أنا متحمس مش أنا مثير!' : 'A2-B1 Level'}
-                  </span>
-                </div>
-                <h3 className="text-base md:text-lg font-black text-slate-900 mb-1">
-                  {isRtl ? 'الدرس التفاعلي: مقارنة -ed و -ing' : 'Active Lesson: I am excited vs exciting!'}
-                </h3>
-              </div>
-            </div>
-            <div className="mt-4 flex items-center justify-between gap-4 relative z-10">
-              <p className="text-slate-500 font-medium text-xs leading-relaxed max-w-[70%] text-right">
-                {isRtl ? 'صحّح خطأ المقابلات الشائع واكتسب مهارة تفرقة تامة بخطوة تفاعلية.' : 'Deconstruct common interactive grammar errors in five gold minutes.'}
-              </p>
-              <button 
-                onClick={() => onNavigate && onNavigate('adults-daily-dose')}
-                className="bg-[#002147] hover:bg-[#b48e56] text-white text-[11px] font-black px-4 py-3 rounded-xl shadow-sm transition-all cursor-pointer whitespace-nowrap"
-              >
-                {isRtl ? 'ابدأ العرض ⚡' : 'Start Lesson ⚡'}
-              </button>
-            </div>
-          </motion.div>
-
+        <div className="grid grid-cols-1 gap-6 font-arabic">
           {/* Kids Interactive Story Dashboard Quick Card */}
           <motion.div 
             initial={{ opacity: 0, y: 15 }}
@@ -1960,7 +1891,7 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
               <div className={`${isRtl ? 'text-right' : 'text-left'} flex-1`}>
                 <div className={`flex items-center gap-2 mb-1.5 flex-wrap ${isRtl ? 'justify-start' : 'justify-start'}`}>
                   <span className="px-3 py-0.5 bg-amber-500 text-white text-[9px] font-black rounded-md uppercase tracking-wider">
-                    {isRtl ? 'مغامرات الأطفال التفاعلية 👶' : 'KIDS INTERACTIVE STORY 👶'}
+                    {isRtl ? 'قصص تعليمية 📚' : 'KIDS EDUCATIONAL STORIES 📚'}
                   </span>
                   <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[9px] font-black rounded-md border border-amber-100">
                     {isRtl ? 'سلسلة مغامرات لندن' : 'London Adventures'}
@@ -2927,6 +2858,27 @@ export default function App() {
   const [activeNotification, setActiveNotification] = useState<any>(null);
   const [activeStudentId, setActiveStudentId] = useState<string | null>(null);
   const [autoStartUnitId, setAutoStartUnitId] = useState<string | null>(null);
+  const [selectedKidsStoryIndex, setSelectedKidsStoryIndex] = useState<number | null>(null);
+  const [selectedDailyDoseIndex, setSelectedDailyDoseIndex] = useState<number | null>(null);
+  const [activeStudentProfile, setActiveStudentProfile] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    if (!activeStudentId) {
+      setActiveStudentProfile(null);
+      return;
+    }
+    const fetchStudentProfile = async () => {
+      try {
+        const studentDoc = await getDoc(doc(db, 'users', activeStudentId));
+        if (studentDoc.exists()) {
+          setActiveStudentProfile({ uid: activeStudentId, ...studentDoc.data() } as UserProfile);
+        }
+      } catch (err) {
+        console.error("Error fetching active student profile:", err);
+      }
+    };
+    fetchStudentProfile();
+  }, [activeStudentId]);
 
   const t = translations[lang];
   const isRtl = lang === 'ar';
@@ -2944,9 +2896,10 @@ export default function App() {
         if (isAdmin) {
           q = query(collection(db, 'studyPlans'), orderBy('createdAt', 'desc'), limit(1));
         } else {
+          const targetId = (userProfile.role === 'parent' && activeStudentId) ? activeStudentId : currentUser.uid;
           q = query(
             collection(db, 'studyPlans'),
-            where('userId', '==', currentUser.uid),
+            where('userId', '==', targetId),
             orderBy('createdAt', 'desc'),
             limit(1)
           );
@@ -2956,13 +2909,15 @@ export default function App() {
           const docPlan = snap.docs[0];
           const data = docPlan.data() as Record<string, any>;
           setGlobalPlan({ id: docPlan.id, ...data });
+        } else {
+          setGlobalPlan(null);
         }
       } catch (e) {
         console.error("Error fetching global plan:", e);
       }
     };
     fetchPlan();
-  }, [currentUser, userProfile?.uid, isAdmin]);
+  }, [currentUser, userProfile?.uid, isAdmin, activeStudentId]);
 
   useEffect(() => {
     const handleRejection = (event: PromiseRejectionEvent) => {
@@ -3396,10 +3351,13 @@ export default function App() {
       return <EarlyChildhoodHome lang={lang} profile={userProfile as StudentProfile} onBack={() => setView('dashboard')} />;
     }
     if (view === 'academic-planner') {
+      const plannerProfile = (userProfile?.role === 'parent' || userProfile?.role === 'admin') && activeStudentProfile 
+        ? activeStudentProfile 
+        : userProfile;
       return (
         <StudyPlanner 
           lang={lang} 
-          userProfile={userProfile}
+          userProfile={plannerProfile}
           onBack={() => setView('dashboard')} 
           onNavigateToResults={() => setView('academic-results')}
           onNavigateToLesson={(courseId, level, unitId) => {
@@ -3428,25 +3386,36 @@ export default function App() {
       );
     }
     if (view === 'academic-results') {
+      const currentStudentName = (userProfile?.role === 'parent' || userProfile?.role === 'admin') && activeStudentProfile 
+        ? activeStudentProfile.displayName 
+        : (userProfile?.displayName || '');
+      const currentStudentId = (userProfile?.role === 'parent' || userProfile?.role === 'admin') && activeStudentId 
+        ? activeStudentId 
+        : (userProfile?.uid || '');
+
       return (
         <ResultsChart 
           lang={lang} 
           onBack={() => setView('academic-planner')} 
           onNavigateToAnalytics={() => setView('academic-analytics')} 
           planItems={globalPlan?.planItems}
-          studentName={globalPlan?.studentName || userProfile?.displayName}
-          studentId={userProfile?.uid}
+          studentName={globalPlan?.studentName || currentStudentName}
+          studentId={currentStudentId}
           isAdmin={isAdmin}
         />
       );
     }
     if (view === 'academic-analytics') {
+      const currentStudentName = (userProfile?.role === 'parent' || userProfile?.role === 'admin') && activeStudentProfile 
+        ? activeStudentProfile.displayName 
+        : (userProfile?.displayName || '');
+
       return (
         <SmartAnalytics 
           lang={lang} 
           onBack={() => setView('academic-results')} 
           planItems={globalPlan?.planItems}
-          studentName={globalPlan?.studentName || userProfile?.displayName}
+          studentName={globalPlan?.studentName || currentStudentName}
         />
       );
     }
@@ -3473,11 +3442,127 @@ export default function App() {
       );
     }
     if (view === 'adults-daily-dose') {
+      if (selectedDailyDoseIndex === null) {
+        return (
+          <div className="min-h-screen bg-[#fdfbf7] py-8 px-4 md:px-8 max-w-7xl mx-auto">
+            {/* Header */}
+            <div className={`flex flex-col md:flex-row justify-between items-center gap-4 mb-8 pb-6 border-b border-[#b48e56]/20 ${isRtl ? 'md:flex-row-reverse text-right' : 'text-left'}`}>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-[#b48e56] rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-md shadow-[#b48e56]/20">
+                  <Zap size={24} className="text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-black text-[#002147]">
+                    {isRtl ? 'الجرعة اليومية ⚡' : 'Daily Dose ⚡'}
+                  </h1>
+                  <p className="text-xs text-[#b48e56] font-bold tracking-widest uppercase mt-0.5">
+                    {isRtl ? 'شذرات لغوية وتصحيح تفاعلي للأخطاء الشائعة بكفاءة' : 'Bite-sized high-impact interactions to deconstruct errors'}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setView('dashboard')}
+                className={`flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-[#002147] rounded-xl font-black text-xs transition-all shadow-xs cursor-pointer ${isRtl ? 'flex-row-reverse' : ''}`}
+              >
+                <span>{isRtl ? 'العودة للرئيسية ↩️' : 'Back to Dashboard ↩️'}</span>
+              </button>
+            </div>
+
+            {/* Introductory Banner */}
+            <div className={`p-6 bg-gradient-to-r from-[#b48e56] to-[#002147] rounded-[2rem] text-white shadow-lg mb-8 relative overflow-hidden ${isRtl ? 'text-right' : 'text-left'}`}>
+              <div className="relative z-10 max-w-3xl">
+                <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
+                  {isRtl ? 'مستواك الذكي (A2-B1)' : 'Smart Level (A2-B1)'}
+                </span>
+                <h2 className="text-xl md:text-2xl font-black mt-3">
+                  {isRtl ? 'تصحيح تفاعلي فائق التأثير في 5 دقائق!' : 'Interactive micro-learning for fast error correction!'}
+                </h2>
+                <p className="text-xs text-white/90 font-semibold mt-2 leading-relaxed">
+                  {isRtl 
+                    ? 'اكتشف الفرق الحقيقي والتعابير الأكاديمية الدقيقة عبر نماذج تفاعلية ممتعة وتحديات التسجيل الصوتي المتكاملة.' 
+                    : 'Unpack the exact structures and nuances of conversational English with voice recorder analysis in just minutes.'}
+                </p>
+              </div>
+              <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-y-4">
+                <Zap size={180} />
+              </div>
+            </div>
+
+            {/* Lessons Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {ADULTS_DAILY_DOSES.map((lesson, idx) => {
+                const isFirst = idx === 0;
+                return (
+                  <motion.div
+                    key={lesson.lesson_id}
+                    whileHover={{ scale: 1.02 }}
+                    onClick={() => setSelectedDailyDoseIndex(idx)}
+                    className="bg-white border border-[#b48e56]/15 rounded-[2rem] p-5 shadow-xs hover:shadow-md transition-all cursor-pointer relative group flex flex-col justify-between"
+                  >
+                    <div>
+                      {/* Badge Row */}
+                      <div className={`flex justify-between items-center mb-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                        <div className="flex items-center gap-1.5 flex-row-reverse">
+                          <span className="bg-[#b48e56] text-white font-black text-[10px] px-3 py-1 rounded-full uppercase">
+                            {isRtl ? `الدرس ${idx + 1}` : `Lesson ${idx + 1}`}
+                          </span>
+                          {isFirst && (
+                            <span className="bg-emerald-500 text-white font-black text-[9px] px-2 py-0.5 rounded-md uppercase">
+                              {isRtl ? 'نشط/الأول' : 'Active'}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[#b48e56] font-extrabold text-[10px] flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#b48e56] animate-pulse" />
+                          {lesson.level} • {lesson.duration_minutes} {isRtl ? 'دقائق' : 'mins'}
+                        </span>
+                      </div>
+
+                      {/* Content Titles */}
+                      <div className={`${isRtl ? 'text-right' : 'text-left'} space-y-1 mb-4`}>
+                        <h3 className="text-base font-black text-[#002147] group-hover:text-[#b48e56] transition-colors leading-tight font-arabic">
+                          {isRtl ? lesson.title_ar : lesson.title_en}
+                        </h3>
+                        <p className="text-xs text-slate-400 font-bold tracking-wide">
+                          {isRtl ? lesson.title_en : lesson.title_ar}
+                        </p>
+                      </div>
+
+                      {/* Details Segment */}
+                      <div className={`bg-slate-50 border border-slate-100/80 rounded-2xl p-3 text-[11px] ${isRtl ? 'text-right' : 'text-left'}`}>
+                        <p className="text-slate-500 font-medium">
+                          {isRtl 
+                            ? (idx === 0 
+                              ? 'صّحح خطأ المقابلات الشائع واكتسب مهارة تفرقة تامة بخطوة تفاعلية مدتها خمس دقائق.'
+                              : 'يرتكب الكثير خطأً باستعمال During عندما يريدون قول "لمدة". لنحدد قواعد استخدامها بدقة والمهارة الفصيحة.')
+                            : (idx === 0
+                              ? 'Deconstruct common interactive grammar errors in under five gold minutes.'
+                              : 'Discover when to use for, since, or during in conversation to sound fluent and highly articulate.')}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Play Button Row */}
+                    <div className={`flex justify-end pt-4 mt-4 border-t border-dashed border-slate-100 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                      <span className="flex items-center gap-2 px-4 py-2 bg-amber-50 font-black text-[10.5px] text-[#b48e56] rounded-xl group-hover:bg-[#b48e56] group-hover:text-white transition-all shadow-xs">
+                        {isRtl ? 'ابدأ الدرس اللغوي 🧪' : 'Start Lesson 🧪'}
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      }
+
+      const activeLessonData = ADULTS_DAILY_DOSES[selectedDailyDoseIndex];
       return (
         <AdultsDailyDose 
           lang={lang}
-          lesson={ADULTS_DAILY_DOSES[0]} 
-          onBack={() => setView('dashboard')}
+          lesson={activeLessonData} 
+          onBack={() => setSelectedDailyDoseIndex(null)}
           onComplete={async (score) => {
             if (userProfile && currentUser) {
               const currentPoints = (userProfile as any).points || 0;
@@ -3489,10 +3574,10 @@ export default function App() {
                 await addDoc(collection(db, 'lessonResults'), {
                   userId: currentUser.uid,
                   parentIds: (userProfile as any).linkedParentIds || [],
-                  lessonId: 'adults_daily_001',
+                  lessonId: activeLessonData.lesson_id,
                   courseId: 'adults_daily_dose',
-                  level: 'A2-B1',
-                  lessonTitle: 'I am excited vs I am exciting',
+                  level: activeLessonData.level,
+                  lessonTitle: activeLessonData.title_en,
                   score: 10,
                   total: 10,
                   timestamp: serverTimestamp()
@@ -3505,18 +3590,136 @@ export default function App() {
                 console.error("Error updating points for Daily Dose:", e);
               }
             }
-            setView('dashboard');
+            setSelectedDailyDoseIndex(null);
             alert(lang === 'ar' ? 'تهانينا الحارة! حصدت +100 من نقاط القوة الأكاديمية بنجاح.' : 'Congratulations! Earned +100 XP standard premium score successfully.');
           }}
         />
       );
     }
     if (view === 'kids-story-player') {
+      if (selectedKidsStoryIndex === null) {
+        return (
+          <div className="min-h-screen bg-[#fdfbf7] py-8 px-4 md:px-8 max-w-7xl mx-auto">
+            {/* Header */}
+            <div className={`flex flex-col md:flex-row justify-between items-center gap-4 mb-8 pb-6 border-b border-[#b48e56]/20 ${isRtl ? 'md:flex-row-reverse text-right' : 'text-left'}`}>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-md shadow-amber-500/20">
+                  <BookOpen size={24} />
+                </div>
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-black text-[#002147]">
+                    {isRtl ? 'قصص تعليمية: مغامرات نور 🌍✨' : "Educational Stories: Noor's Adventures 🌍✨"}
+                  </h1>
+                  <p className="text-xs text-[#b48e56] font-bold tracking-widest uppercase mt-0.5">
+                    {isRtl ? 'قصص وحوارات تفاعلية مشوقة للأطفال في لندن' : 'Interactive stories and roleplay for kids in London'}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setView('dashboard')}
+                className={`flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-[#002147] rounded-xl font-black text-xs transition-all shadow-xs cursor-pointer ${isRtl ? 'flex-row-reverse' : ''}`}
+              >
+                <span>{isRtl ? 'العودة للرئيسية ↩️' : 'Back to Dashboard ↩️'}</span>
+              </button>
+            </div>
+
+            {/* Introductory Banner */}
+            <div className={`p-6 bg-gradient-to-r from-amber-500 to-amber-600 rounded-[2rem] text-white shadow-lg mb-8 relative overflow-hidden ${isRtl ? 'text-right' : 'text-left'}`}>
+              <div className="relative z-10 max-w-3xl">
+                <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
+                  {isRtl ? 'سلسلة مغامرات شيقة (21 حلقة)' : 'Story Adventures Series (21 Episodes)'}
+                </span>
+                <h2 className="text-xl md:text-2xl font-black mt-3">
+                  {isRtl ? 'انضم إلى نور في رحلتها الاستكشافية في ربوع لندن!' : 'Follow Noor’s journey step-by-step through London!'}
+                </h2>
+                <p className="text-xs text-white/90 font-semibold mt-2 leading-relaxed">
+                  {isRtl 
+                    ? 'تعلم الإنجليزية بالتحدث التفاعلي وتعبئة الفراغات وممارسة النطق السليم وسماع الحوارات المترجمة كاملة مع مدقق الصوت الذكي!' 
+                    : 'Practice speaking, read matching dialogue with translation, finish quizzes, and earn academic experience points dynamically with human voice readers.'}
+                </p>
+              </div>
+              <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-y-4">
+                <BookOpen size={180} />
+              </div>
+            </div>
+
+            {/* Episodes Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {KIDS_STORIES.map((story, idx) => {
+                return (
+                  <motion.div
+                    key={story.lesson_id}
+                    whileHover={{ scale: 1.02 }}
+                    onClick={() => setSelectedKidsStoryIndex(idx)}
+                    className="bg-white border border-[#b48e56]/15 rounded-[2rem] p-5 shadow-xs hover:shadow-md transition-all cursor-pointer relative group flex flex-col justify-between"
+                  >
+                    <div>
+                      {/* Badge Row */}
+                      <div className={`flex justify-between items-center mb-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                        <span className="bg-[#002147] text-white font-black text-[10px] px-3 py-1 rounded-full uppercase">
+                          {isRtl ? `الحلقة ${story.episode}` : `Episode ${story.episode}`}
+                        </span>
+                        <span className="text-[#b48e56] font-extrabold text-[10px] flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                          {story.level} • {story.duration_minutes} {isRtl ? 'دقيقة' : 'mins'}
+                        </span>
+                      </div>
+
+                      {/* Content Titles */}
+                      <div className={`${isRtl ? 'text-right' : 'text-left'} space-y-1 mb-4`}>
+                        <h3 className="text-base font-black text-[#002147] group-hover:text-amber-600 transition-colors leading-tight">
+                          {isRtl ? story.title_ar : story.title_en}
+                        </h3>
+                        <p className="text-xs text-slate-400 font-bold tracking-wide">
+                          {isRtl ? story.title_en : story.title_ar}
+                        </p>
+                      </div>
+
+                      {/* Details Segment */}
+                      <div className={`bg-slate-50 border border-slate-100/80 rounded-2xl p-3 space-y-2 mb-4 text-[11px] ${isRtl ? 'text-right' : 'text-left'}`}>
+                        <div className={`flex items-center gap-1.5 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                          <span className="text-slate-400">📍</span>
+                          <span className="font-extrabold text-slate-600">
+                            {isRtl ? 'الموقع:' : 'Location:'}
+                          </span>
+                          <span className="text-slate-500 font-semibold">{story.location}</span>
+                        </div>
+                        <div className={`flex items-center gap-1.5 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                          <span className="text-slate-400">👥</span>
+                          <span className="font-extrabold text-slate-600">
+                            {isRtl ? 'الشخصيات:' : 'Characters:'}
+                          </span>
+                          <span className="text-slate-500 font-semibold text-ellipsis overflow-hidden whitespace-nowrap max-w-[200px]">
+                            {story.characters.join(', ')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Play Button Row */}
+                    <div className={`flex justify-end pt-2 border-t border-dashed border-slate-100 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                      <span className="flex items-center gap-2 px-4 py-2 bg-amber-50 font-black text-[10.5px] text-amber-600 rounded-xl group-hover:bg-amber-500 group-hover:text-white transition-all shadow-xs">
+                        {isRtl ? 'شغّل الحلقة التفاعلية ⚡' : 'Start Episode ⚡'}
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      }
+
+      // If story index is selected, render standard player
+      const activeStory = KIDS_STORIES[selectedKidsStoryIndex];
       return (
         <KidsStoryPlayer 
           lang={lang}
-          story={KIDS_STORIES[0]}
-          onBack={() => setView('dashboard')}
+          story={activeStory}
+          onBack={() => {
+            setSelectedKidsStoryIndex(null);
+          }}
           onComplete={async (xpPoints) => {
             if (userProfile && currentUser) {
               const currentPoints = (userProfile as any).points || 0;
@@ -3528,10 +3731,10 @@ export default function App() {
                 await addDoc(collection(db, 'lessonResults'), {
                   userId: currentUser.uid,
                   parentIds: (userProfile as any).linkedParentIds || [],
-                  lessonId: KIDS_STORIES[0].lesson_id,
-                  courseId: KIDS_STORIES[0].category,
-                  level: KIDS_STORIES[0].level,
-                  lessonTitle: KIDS_STORIES[0].title_en,
+                  lessonId: activeStory.lesson_id,
+                  courseId: activeStory.category,
+                  level: activeStory.level,
+                  lessonTitle: activeStory.title_en,
                   score: xpPoints,
                   total: xpPoints,
                   timestamp: serverTimestamp()
@@ -3544,8 +3747,8 @@ export default function App() {
                 console.error("Error updating points for Kids Story:", e);
               }
             }
-            setView('dashboard');
-            alert(lang === 'ar' ? 'رائع جداً! لقد نجحت في إكمال القصة التفاعلية وحصدت وسام البطولة ونقاط XP!' : 'Bravissimo! You completed the interactive adventure and obtained the Hero Trophy!');
+            setSelectedKidsStoryIndex(null);
+            alert(lang === 'ar' ? `رائع جداً! لقد نجحت في إكمال القصة التفاعلية وحصدت وسام البطولة ونقاط XP! حصلت على ${xpPoints} نقطة XP` : `Bravissimo! You completed the interactive adventure and obtained the Hero Trophy! Earned ${xpPoints} XP.`);
           }}
         />
       );
@@ -3821,7 +4024,7 @@ export default function App() {
       />;
     }
 
-    if (view === 'progress') {
+    if (view === 'progress' && userProfile) {
       return (
         <StudentStats 
           lang={lang} 
@@ -3841,7 +4044,7 @@ export default function App() {
       );
     }
 
-    if (view === 'chat') {
+    if (view === 'chat' && userProfile) {
       return <PeerChat lang={lang} profile={userProfile} />;
     }
 
@@ -3884,17 +4087,44 @@ export default function App() {
           {view !== 'placement-test' && (
             <>
               {/* Mobile Top Header */}
-              <header className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-slate-100 z-50 px-4 py-4 flex justify-between items-center shadow-sm">
-                <div className="flex items-center gap-3">
+              <header className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-slate-100 z-50 px-4 py-2.5 flex justify-between items-center shadow-sm">
+                <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-[#002147] rounded-lg flex items-center justify-center text-white font-black text-sm">B</div>
                   <div className="leading-tight">
-                    <h2 className="text-xs font-black text-[#002147]">{t.academyName}</h2>
-                    <p className="text-[8px] text-[#C49E3A] font-bold uppercase tracking-widest">{t.academySubName}</p>
+                    <h2 className="text-[10px] font-black text-[#002147] leading-none mb-0.5">{t.academyName}</h2>
+                    <p className="text-[7px] text-[#C49E3A] font-bold uppercase tracking-widest leading-none">{t.academySubName}</p>
                   </div>
                 </div>
+
+                {/* Quick Access Pills for Newly Added Sections */}
+                <div className="flex items-center gap-1.5">
+                  <button 
+                    onClick={() => setView('adults-daily-dose')}
+                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-[9px] font-black transition-all cursor-pointer ${
+                      view === 'adults-daily-dose' 
+                        ? 'bg-[#002147] text-white border-[#002147]' 
+                        : 'bg-[#fdfbf7] text-[#b48e56] border-[#b48e56]/30 hover:bg-[#b48e56]/5'
+                    }`}
+                  >
+                    <Zap size={9} className={view === 'adults-daily-dose' ? '' : 'animate-pulse'} />
+                    <span>{isRtl ? 'الجرعة اليومية ⚡' : 'Daily Dose ⚡'}</span>
+                  </button>
+                  <button 
+                    onClick={() => setView('kids-story-player')}
+                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-[9px] font-black transition-all cursor-pointer ${
+                      view === 'kids-story-player' 
+                        ? 'bg-amber-500 text-white border-amber-500' 
+                        : 'bg-[#fffcf5] text-amber-600 border-amber-500/30 hover:bg-amber-500/5'
+                    }`}
+                  >
+                    <BookOpen size={9} />
+                    <span>{isRtl ? 'قصص تعليمية 📚' : 'Educational Stories 📚'}</span>
+                  </button>
+                </div>
+
                 <button 
                   onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-                  className="bg-slate-50 p-2 rounded-lg border border-slate-100 text-[#002147] font-black text-[10px]"
+                  className="bg-slate-50 p-2 rounded-lg border border-slate-100 text-[#002147] font-black text-[9px]"
                 >
                   {t.languageToggle}
                 </button>
@@ -3917,8 +4147,8 @@ export default function App() {
                 <nav className="flex-1 space-y-2 overflow-y-auto no-scrollbar">
                   {[
                     { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
-                    { id: 'adults-daily-dose', label: lang === 'ar' ? 'الجرعة اليومية للكبار ⚡' : 'Adults Daily Dose ⚡', icon: Zap },
-                    { id: 'kids-story-player', label: lang === 'ar' ? 'مغامرات الأطفال التفاعلية 👶' : 'Kids Story Player 👶', icon: Baby },
+                    { id: 'adults-daily-dose', label: lang === 'ar' ? 'الجرعة اليومية ⚡' : 'Daily Dose ⚡', icon: Zap },
+                    { id: 'kids-story-player', label: lang === 'ar' ? 'قصص تعليمية 📚' : 'Educational Stories 📚', icon: BookOpen },
                     { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
                     { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
                     { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
@@ -3926,8 +4156,7 @@ export default function App() {
                     { id: 'modern-curriculum', label: lang === 'ar' ? 'المناهج الدراسية المطورة' : 'Modernized Curriculums', icon: Sparkles },
                     { id: 'professional-development', label: lang === 'ar' ? 'دورات تطويرية' : 'Developmental Courses', icon: GraduationCap },
                     { id: 'early-childhood', label: t.earlyChildhood, icon: Baby },
-                    { id: 'story-library', label: t.storyLibrary, icon: BookOpen },
-                    { id: 'curriculum', label: t.curriculum, icon: BookOpen },
+                    { id: 'story-library', label: t.storyLibrary, icon: BookMarked },
                     { id: 'ai-chat', label: t.aiPartner, icon: Mic2 },
                     { id: 'progress', label: t.performance, icon: BarChart3 },
                     { id: 'leaderboard', label: t.leaderboard, icon: Trophy },
@@ -3992,10 +4221,10 @@ export default function App() {
                     { id: 'academic-planner', icon: Sparkles },
                     { id: 'oxford-discover', icon: OxfordIcon },
                     { id: 'video-library', icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
-                    { id: 'story-library', icon: BookOpen },
+                    { id: 'kids-story-player', icon: BookOpen },
+                    { id: 'story-library', icon: BookMarked },
                   ],
                   [
-                    { id: 'curriculum', icon: BookOpen },
                     { id: 'ai-chat', icon: Mic2 },
                     { id: 'modern-curriculum', icon: Sparkles },
                     { id: 'professional-development', icon: GraduationCap },
