@@ -1100,6 +1100,7 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack, userProfile }: OxfordUn
         userId: userProfile.uid,
         parentIds: userProfile.linkedParentIds || [],
         lessonId: String(unitId), // maps to item.unitId in planner
+        courseId: 'oxford', // Added courseId so Oxford results are tracked correctly
         lessonTitle: title || '',
         score: finalScore,
         total: totalQuestions,

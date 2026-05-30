@@ -1245,7 +1245,9 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                               <div key={item.id} className="bg-white/10 px-4 py-2 rounded-xl text-[10px] font-black flex items-center gap-2 border border-white/5">
                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                                 <span className="opacity-80">{item.topic}</span>
-                                <span className="text-blue-300 ml-1">({res?.score}/{res?.total})</span>
+                                <span className="text-blue-300 ml-1" dir="ltr">
+                                  ({res?.total > 0 ? `${res.score}/${res.total}` : `${res?.score || 0}`})
+                                </span>
                               </div>
                             );
                           })}
@@ -1575,8 +1577,8 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                                             <CheckCircle2 size={10} />
                                             {isRtl ? 'تم' : 'Done'}
                                           </span>
-                                          <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100 shadow-sm">
-                                            {result.score}/{result.total}
+                                          <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100 shadow-sm" dir="ltr">
+                                            {result.total > 0 ? `${result.score}/${result.total}` : `${result.score || 0}`}
                                           </span>
                                         </div>
                                       );

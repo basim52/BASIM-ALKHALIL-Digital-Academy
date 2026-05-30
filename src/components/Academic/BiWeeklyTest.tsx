@@ -524,7 +524,7 @@ export const BiWeeklyTest: React.FC<BiWeeklyTestProps> = ({
                     {isRtl ? 'المعدل والتقييم' : 'GRADE'}
                   </span>
                   <span className="text-xl font-black text-emerald-600">
-                    {Math.round((score / questions.length) * 100)}%
+                    {questions.length > 0 ? Math.round((score / questions.length) * 100) : 0}%
                   </span>
                 </div>
                 <div className="w-[1px] bg-slate-200" />

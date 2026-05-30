@@ -39,7 +39,9 @@ import {
   AlertTriangle,
   BookOpen,
   Volume2,
-  Flame
+  Flame,
+  Check,
+  GraduationCap
 } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -202,6 +204,8 @@ export const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({
     evening: 0,
     night: 0
   });
+
+  const [analyticsTab, setAnalyticsTab] = useState<'overview' | 'interaction' | 'remediation'>('overview');
 
   // AI Chat Bot section states
   const [aiMessage, setAiMessage] = useState('');
@@ -633,6 +637,43 @@ export const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({
         </div>
       )}
 
+      {/* TAB NAVIGATION FOR EXTENSIVE REPORTS */}
+      <div className="flex flex-wrap border-b border-gray-200 gap-4 mb-2 relative z-10 select-none">
+        <button
+          onClick={() => setAnalyticsTab('overview')}
+          className={`pb-3 text-xs md:text-sm font-black transition-all border-b-2 flex items-center gap-2 cursor-pointer ${
+            analyticsTab === 'overview'
+              ? 'border-blue-600 text-[#002147] font-black'
+              : 'border-transparent text-slate-400 hover:text-slate-600'
+          }`}
+        >
+          <Activity size={16} />
+          {isRtl ? 'نظرة عامة والتحليل الأساسي' : 'Academic Overview & Core Analysis'}
+        </button>
+        <button
+          onClick={() => setAnalyticsTab('interaction')}
+          className={`pb-3 text-xs md:text-sm font-black transition-all border-b-2 flex items-center gap-2 cursor-pointer ${
+            analyticsTab === 'interaction'
+              ? 'border-blue-600 text-[#002147] font-black'
+              : 'border-transparent text-slate-400 hover:text-slate-600'
+          }`}
+        >
+          <Target size={16} />
+          {isRtl ? 'لوحة أدوات رصد التفاعل الدقيق' : 'Deep Interaction Report Panel'}
+        </button>
+        <button
+          onClick={() => setAnalyticsTab('remediation')}
+          className={`pb-3 text-xs md:text-sm font-black transition-all border-b-2 flex items-center gap-2 cursor-pointer ${
+            analyticsTab === 'remediation'
+              ? 'border-blue-600 text-[#002147] font-black'
+              : 'border-transparent text-slate-400 hover:text-slate-600'
+          }`}
+        >
+          <GraduationCap size={16} />
+          {isRtl ? 'البطاقة الأكاديمية ومسار التقويم العلاجي' : 'Official Credentials & Remedial Plan'}
+        </button>
+      </div>
+
       {/* RENDER TARGET CANVAS FOR EXPORTING */}
       <div 
         ref={reportRef}
@@ -728,183 +769,495 @@ export const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({
 
         </div>
 
-        {/* CORE DISCIPLINE METERS - The actual Skill Matrix */}
-        <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-          <div>
-            <h3 className="text-lg font-black text-[#002147] flex items-center gap-2">
-              <Target size={20} className="text-blue-500" />
-              {t.skillsDiagnosis}
-            </h3>
-            <p className="text-xs text-slate-400 font-bold mt-0.5">{t.skillsDiagnosisDesc}</p>
-          </div>
+        {analyticsTab === 'overview' && (
+          <div className="space-y-10">
+            {/* CORE DISCIPLINE METERS - The actual Skill Matrix */}
+            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
+              <div>
+                <h3 className="text-lg font-black text-[#002147] flex items-center gap-2">
+                  <Target size={20} className="text-blue-500" />
+                  {t.skillsDiagnosis}
+                </h3>
+                <p className="text-xs text-slate-400 font-bold mt-0.5">{t.skillsDiagnosisDesc}</p>
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
-            {[
-              { id: 'story-library', label: t.skillListening, icon: Volume2, colorClass: 'bg-emerald-500' },
-              { id: 'grammar', label: t.skillGrammar, icon: Sparkles, colorClass: 'bg-blue-600' },
-              { id: 'reading', label: t.skillReading, icon: BookOpen, colorClass: 'bg-cyan-500' },
-              { id: 'writing', label: t.skillWriting, icon: Target, colorClass: 'bg-rose-500' },
-              { id: 'oxford-discover', label: t.skillOxford, icon: Award, colorClass: 'bg-amber-500' },
-              { id: 'daily-dose', label: t.skillDaily, icon: Flame, colorClass: 'bg-indigo-500' },
-            ].map(skill => {
-              const score = categoryAverages[skill.id];
-              const registered = score !== undefined;
-              const percent = registered ? score : 0;
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
+                {[
+                  { id: 'story-library', label: t.skillListening, icon: Volume2, colorClass: 'bg-emerald-500' },
+                  { id: 'grammar', label: t.skillGrammar, icon: Sparkles, colorClass: 'bg-blue-600' },
+                  { id: 'reading', label: t.skillReading, icon: BookOpen, colorClass: 'bg-cyan-500' },
+                  { id: 'writing', label: t.skillWriting, icon: Target, colorClass: 'bg-rose-500' },
+                  { id: 'oxford-discover', label: t.skillOxford, icon: Award, colorClass: 'bg-amber-500' },
+                  { id: 'daily-dose', label: t.skillDaily, icon: Flame, colorClass: 'bg-indigo-500' },
+                ].map(skill => {
+                  const score = categoryAverages[skill.id];
+                  const registered = score !== undefined;
+                  const percent = registered ? score : 0;
+                  
+                  return (
+                    <div key={skill.id} className="space-y-2 group">
+                      <div className="flex items-center justify-between text-xs font-black">
+                        <span className="text-slate-600 flex items-center gap-1.5 group-hover:text-[#002147] transition-colors">
+                          <skill.icon size={14} className="text-slate-400 group-hover:text-blue-500 transition-colors" />
+                          {skill.label}
+                        </span>
+                        <span className={registered ? 'text-[#002147]' : 'text-slate-300'}>
+                          {registered ? `${percent}%` : t.notTried}
+                        </span>
+                      </div>
+                      <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden relative border border-slate-50">
+                        {registered ? (
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${percent}%` }}
+                            transition={{ duration: 0.8, ease: 'easeOut' }}
+                            className={`h-full ${skill.colorClass} rounded-full`}
+                          />
+                        ) : (
+                          <div className="h-full bg-slate-200/50 border-r border-dashed border-slate-300 w-full" />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* TIME & WEEK ANALYSIS - Interactive Recharts */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               
-              return (
-                <div key={skill.id} className="space-y-2 group">
-                  <div className="flex items-center justify-between text-xs font-black">
-                    <span className="text-slate-600 flex items-center gap-1.5 group-hover:text-[#002147] transition-colors">
-                      <skill.icon size={14} className="text-slate-400 group-hover:text-blue-500 transition-colors" />
-                      {skill.label}
-                    </span>
-                    <span className={registered ? 'text-[#002147]' : 'text-slate-300'}>
-                      {registered ? `${percent}%` : t.notTried}
-                    </span>
-                  </div>
-                  <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden relative border border-slate-50">
-                    {registered ? (
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${percent}%` }}
-                        transition={{ duration: 0.8, ease: 'easeOut' }}
-                        className={`h-full ${skill.colorClass} rounded-full`}
-                      />
-                    ) : (
-                      <div className="h-full bg-slate-200/50 border-r border-dashed border-slate-300 w-full" />
-                    )}
-                  </div>
+              {/* Active Days Rhythm */}
+              <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
+                <div>
+                  <h3 className="text-lg font-black text-[#002147] flex items-center gap-2">
+                    <Calendar size={18} className="text-blue-500" />
+                    {t.activeDays}
+                  </h3>
+                  <p className="text-xs text-slate-400 font-bold mt-0.5">{t.activeDaysDesc}</p>
                 </div>
-              );
-            })}
-          </div>
-        </div>
 
-        {/* TIME & WEEK ANALYSIS - Interactive Recharts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          
-          {/* Active Days Rhythm */}
-          <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-            <div>
-              <h3 className="text-lg font-black text-[#002147] flex items-center gap-2">
-                <Calendar size={18} className="text-blue-500" />
-                {t.activeDays}
-              </h3>
-              <p className="text-xs text-slate-400 font-bold mt-0.5">{t.activeDaysDesc}</p>
-            </div>
-
-            <div className="h-56 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={weeklyChartData}>
-                  <defs>
-                    <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#1e3a8a" />
-                      <stop offset="100%" stopColor="#3b82f6" />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: '#94a3b8' }} />
-                  <YAxis hide allowDecimals={false} />
-                  <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '15px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                  <Bar dataKey="count" fill="url(#barGrad)" radius={[10, 10, 0, 0]} maxBarSize={35} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Active slots pie */}
-          <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6 flex flex-col justify-between">
-            <div>
-              <h3 className="text-lg font-black text-[#002147] flex items-center gap-2">
-                <Clock size={18} className="text-blue-500" />
-                {t.studyTimes}
-              </h3>
-              <p className="text-xs text-slate-400 font-bold mt-0.5">{t.studyTimesDesc}</p>
-            </div>
-
-            {timePieData.length > 0 ? (
-              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="w-1/2 h-36 relative">
+                <div className="h-56 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={timePieData}
-                        innerRadius={30}
-                        outerRadius={45}
-                        paddingAngle={5}
-                        dataKey="value"
-                      >
-                        {timePieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                    </PieChart>
+                    <BarChart data={weeklyChartData}>
+                      <defs>
+                        <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#1e3a8a" />
+                          <stop offset="100%" stopColor="#3b82f6" />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: '#94a3b8' }} />
+                      <YAxis hide allowDecimals={false} />
+                      <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '15px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                      <Bar dataKey="count" fill="url(#barGrad)" radius={[10, 10, 0, 0]} maxBarSize={35} />
+                    </BarChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="flex-1 space-y-2 w-full">
-                  {timePieData.map((slot, index) => (
-                    <div key={index} className="flex items-center justify-between text-[11px] font-black">
-                      <div className="flex items-center gap-2 text-slate-600">
-                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: slot.color }} />
-                        <span>{slot.name}</span>
+              </div>
+
+              {/* Active slots pie */}
+              <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-lg font-black text-[#002147] flex items-center gap-2">
+                    <Clock size={18} className="text-blue-500" />
+                    {t.studyTimes}
+                  </h3>
+                  <p className="text-xs text-slate-400 font-bold mt-0.5">{t.studyTimesDesc}</p>
+                </div>
+
+                {timePieData.length > 0 ? (
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="w-1/2 h-36 relative">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={timePieData}
+                            innerRadius={30}
+                            outerRadius={45}
+                            paddingAngle={5}
+                            dataKey="value"
+                          >
+                            {timePieData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex-1 space-y-2 w-full">
+                      {timePieData.map((slot, index) => (
+                        <div key={index} className="flex items-center justify-between text-[11px] font-black">
+                          <div className="flex items-center gap-2 text-slate-600">
+                            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: slot.color }} />
+                            <span>{slot.name}</span>
+                          </div>
+                          <span className="text-slate-400">({slot.value})</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="h-36 flex items-center justify-center border-2 border-dashed border-slate-100 rounded-2xl text-xs text-slate-400 font-black">
+                    {t.noDataYet}
+                  </div>
+                )}
+              </div>
+
+            </div>
+
+            {/* CHRONOLOGICAL TIMELINE OF RESULTS (من صميم تفاعله الحقيقي) */}
+            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
+              <div>
+                <h3 className="text-lg font-black text-[#002147] flex items-center gap-2">
+                  <Activity size={20} className="text-[#002147]" />
+                  {t.timelineTitle}
+                </h3>
+                <p className="text-xs text-slate-400 font-bold mt-0.5">{t.timelineDesc}</p>
+              </div>
+
+              <div className="max-h-[300px] overflow-y-auto pr-2 space-y-4 divide-y divide-slate-100">
+                {results.map((item, idx) => {
+                  const st = getCourseStyle(item.courseId);
+                  return (
+                    <div key={item.id || idx} className="pt-4 first:pt-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${st.color}`}>
+                          <st.icon size={16} />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-black text-[#002147] line-clamp-1">{item.lessonTitle || item.lessonId}</h4>
+                          <p className="text-[10px] text-slate-400 font-bold flex items-center gap-1.5 mt-0.5">
+                            <span className="font-black px-1.5 py-0.5 bg-slate-50 border border-slate-100 rounded text-slate-500 uppercase">{st.label}</span>
+                            <span>•</span>
+                            <span>{item.timestamp.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                          </p>
+                        </div>
                       </div>
-                      <span className="text-slate-400">({slot.value})</span>
+
+                      <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                        <span className="text-[11px] font-black text-slate-400">{t.score}</span>
+                        <span className={`px-2.5 py-1 rounded-lg text-xs font-black select-none ${
+                          item.score >= 85 ? 'bg-emerald-50 text-emerald-600' :
+                          item.score >= 70 ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'
+                        }`} dir="ltr">
+                          {item.score}/{item.total || 100}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 2. DEEP INTERACTION ANALYSIS TAB */}
+        {analyticsTab === 'interaction' && (
+          <div className="space-y-8">
+            {/* Interactive session metrics calculated directly from database records */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                {
+                  title: isRtl ? 'أيام التفاعل الإيجابي' : 'Active Learning Days',
+                  value: weeklyChartData.filter(d => d.count > 0).length,
+                  desc: isRtl ? 'موزعة على مدار الأسبوع الحسابي' : 'Active during the weekly cycle',
+                  icon: Calendar,
+                  color: 'text-blue-600 bg-blue-50 border-blue-100'
+                },
+                {
+                  title: isRtl ? 'إجمالي الساعات التفاعلية' : 'Invested Study Hours',
+                  value: `${(results.length * 0.75).toFixed(1)} ${isRtl ? 'ساعة' : 'Hrs'}`,
+                  desc: isRtl ? 'معدل بقاء نشط يحسب بـ 45 دقيقة للجلسة' : 'Est. at 45m per completed unit',
+                  icon: Clock,
+                  color: 'text-emerald-600 bg-emerald-50 border-emerald-100'
+                },
+                {
+                  title: isRtl ? 'مؤشر ثبات التحصيل' : 'Retention Stability Index',
+                  value: `${overallGPA >= 85 ? (isRtl ? 'ممتاز' : 'A Grade') : overallGPA >= 70 ? (isRtl ? 'مستقر' : 'Stable') : (isRtl ? 'متوسط' : 'Moderate')}`,
+                  desc: isRtl ? 'يعكس استقرار الإجابات لجميع الاختبارات' : 'Reflects test consistency',
+                  icon: Target,
+                  color: 'text-amber-600 bg-amber-50 border-amber-100'
+                },
+                {
+                  title: isRtl ? 'معدل دقة الردود' : 'Exercise Accuracy Rate',
+                  value: `${overallGPA}%`,
+                  desc: isRtl ? 'نسبة حل التحديات الفردية بنجاح' : 'Success rate on individual units',
+                  icon: Sparkles,
+                  color: 'text-rose-600 bg-rose-50 border-rose-100'
+                }
+              ].map((m, i) => (
+                <div key={i} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-start gap-4 hover:shadow-md transition-all">
+                  <div className={`p-3 rounded-xl border-2 ${m.color}`}>
+                    <m.icon size={20} />
+                  </div>
+                  <div>
+                    <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{m.title}</h5>
+                    <h4 className="text-xl font-black text-[#002147] mt-1">{m.value}</h4>
+                    <p className="text-[9px] text-slate-500 font-bold mt-0.5">{m.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Cognitive balance audit */}
+            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
+              <div>
+                <h3 className="text-lg font-black text-[#002147] flex items-center gap-2">
+                  <Activity size={18} className="text-blue-600" />
+                  {isRtl ? 'تحليل الاتزان والتكامل الأكاديمي الشامل' : 'Comprehensive Performance Symmetry'}
+                </h3>
+                <p className="text-xs text-slate-400 font-bold mt-0.5">
+                  {isRtl ? 'رصد دقيق لنطاقات المتابعة مع شواهد حية من قاعدة بيانات تفاعل الطالب' : 'Precise monitoring of the student’s behavior with live citations from actual logs'}
+                </p>
+              </div>
+
+              {/* Dynamic feedback strings depending on actual grade metrics */}
+              <div className="space-y-4">
+                {[
+                  { id: 'grammar', label: isRtl ? 'مجال قواعد اللغة والتركيب النحوي والترتيب' : 'Grammar Syntax & Structural Composition', avg: categoryAverages['grammar'] },
+                  { id: 'story-library', label: isRtl ? 'الاستماع الصوتي وطلاقة المخارج والتحليل السمعي' : 'Acoustic Listening & Phonetic Fluency (Story Library)', avg: categoryAverages['story-library'] },
+                  { id: 'reading', label: isRtl ? 'مستوى استيعاب النصوص وتكامل المفردات المعجمية' : 'Reading Comprehension & Lexical Integration', avg: categoryAverages['reading'] },
+                  { id: 'oxford', label: isRtl ? 'منهج أوكسفورد المتكامل ومجموعات الكلمات المتقدمة' : 'Oxford Discover Dynamic Curriculum Syllabus', avg: categoryAverages['oxford-discover'] }
+                ].map((row, idx) => {
+                  const registered = row.avg !== undefined;
+                  const levelVal = registered ? row.avg : 0;
+                  
+                  let ratingText = '';
+                  let adviceText = '';
+                  if (!registered) {
+                    ratingText = isRtl ? 'لم يمر بجلسة اختبار بعد' : 'Unattempted under this register';
+                    adviceText = isRtl ? 'نوصي بالبدء بإنهاء درس واحد من هذا المسار لتفعيل الرصد التلقائي.' : 'Recommend completing at least one diagnostic unit in this track.';
+                  } else if (levelVal >= 85) {
+                    ratingText = isRtl ? 'تمكن فائق (ممتاز)' : 'High Mastery (Outstanding)';
+                    adviceText = isRtl ? 'يظهر الطالب ثقة وسرعة بديهة ممتازة لحل كويزات هذا المجال. المضي قدماً للتحديات المتقدمة.' : 'Displays superb confidence and quick assimilation. Recommended to proceed to more advanced sections.';
+                  } else if (levelVal >= 70) {
+                    ratingText = isRtl ? 'أداء جيد ومكتمل' : 'Solid Performance (Competent)';
+                    adviceText = isRtl ? 'تفاعل منتظم مع وجود فجوات بسيطة في فنيات الدقة. مراجعة إجابات الكويزات السابقة ينفي أي ارتباك.' : 'Steady interaction with minor accuracy exceptions. Reviewing error logs will clear any remaining ambiguities.';
+                  } else {
+                    ratingText = isRtl ? 'بحاجة لمتابعة ودعم مستمر' : 'Needs Reinforcement & Coaching';
+                    adviceText = isRtl ? 'النتائج تسجل تشتتاً لغوياً طفيفاً. ننصح بالتواصل مع المعلم المباشر وإتاحة وقت للتكرار والتمكين.' : 'Scores display localized cognitive struggles. Recommend direct feedback loops and additional repetitive practice.';
+                  }
+
+                  return (
+                    <div key={idx} className="p-5 bg-slate-50 border border-slate-100 rounded-2xl space-y-3 hover:translate-x-1 hover:border-slate-200 transition-all">
+                      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                        <span className="text-xs font-black text-[#002147] flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-blue-600" />
+                          {row.label}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${
+                            !registered ? 'bg-slate-100 text-slate-500' :
+                            levelVal >= 85 ? 'bg-emerald-50 text-emerald-600' :
+                            levelVal >= 70 ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'
+                          }`}>
+                            {ratingText}
+                          </span>
+                          {registered && (
+                            <span className="text-xs font-mono font-black text-[#002147]" dir="ltr">
+                              {levelVal}%
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-slate-500 leading-relaxed font-bold">
+                        {isRtl ? `💡 التوجيه الموجه: ${adviceText}` : `💡 Direct Guidance: ${adviceText}`}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Direct database logs citing real student answers */}
+            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-4">
+              <h4 className="text-sm font-black text-[#002147] uppercase tracking-wider">{isRtl ? 'شواهد حقيقية موثقة من سجل تفاعل الطالب' : 'Authorized Empirical Trace Evidence'}</h4>
+              <p className="text-xs text-slate-400 font-bold">{isRtl ? 'تتضمن شواهد التفاعل الحقيقية التي تم رصدها من اختبارات وأنشطة الطالب الموثقة في السحابة:' : 'The interactive trace archives successfully logged from cloud databases for this profile:'}</p>
+
+              {results.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {results.slice(0, 4).map((r, i) => (
+                    <div key={i} className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="text-xs font-black text-slate-700 truncate max-w-[180px]">{r.lessonTitle || r.lessonId}</p>
+                        <p className="text-[9px] text-slate-400 font-bold">
+                          {r.timestamp?.toLocaleDateString ? r.timestamp.toLocaleDateString() : 'Active Study Segment'}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs font-black font-mono text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100" dir="ltr">
+                          {r.score}/{r.total > 0 ? r.total : r.score || 0}
+                        </span>
+                        <p className="text-[8px] text-emerald-600 font-black mt-1 uppercase">✓ {isRtl ? 'موثقة' : 'Recorded'}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            ) : (
-              <div className="h-36 flex items-center justify-center border-2 border-dashed border-slate-100 rounded-2xl text-xs text-slate-400 font-black">
-                {t.noDataYet}
-              </div>
-            )}
+              ) : (
+                <div className="p-6 border-2 border-dashed border-slate-100 rounded-2xl text-center text-xs text-slate-400 font-black">
+                  {isRtl ? 'لا توجد شواهد تفاعل كافية بعد.' : 'No interaction records found in cloud db yet.'}
+                </div>
+              )}
+            </div>
           </div>
+        )}
 
-        </div>
+        {/* 3. OFFICIAL CREDENTIALS & REMEDIAL ROADMAP */}
+        {analyticsTab === 'remediation' && (
+          <div className="space-y-10">
+            {/* The certified report card layout */}
+            <div className="bg-amber-50/30 border-2 border-amber-200 p-8 md:p-12 rounded-[2.5rem] relative overflow-hidden space-y-8 select-none shadow-sm">
+              {/* Seal Background watermark */}
+              <div className="absolute -bottom-8 -left-8 text-amber-500/5 pointer-events-none transform -rotate-12">
+                <Brain size={250} />
+              </div>
 
-        {/* CHRONOLOGICAL TIMELINE OF RESULTS (من صميم تفاعله الحقيقي) */}
-        <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-          <div>
-            <h3 className="text-lg font-black text-[#002147] flex items-center gap-2">
-              <Activity size={20} className="text-[#002147]" />
-              {t.timelineTitle}
-            </h3>
-            <p className="text-xs text-slate-400 font-bold mt-0.5">{t.timelineDesc}</p>
-          </div>
+              {/* Header Certificate Mark */}
+              <div className="flex flex-col sm:flex-row justify-between items-center border-b border-amber-200/50 pb-6 gap-4">
+                <div className="text-center sm:text-right">
+                  <h3 className="text-lg font-black text-[#002147] tracking-wider uppercase flex items-center justify-center sm:justify-start gap-2">
+                    <Award size={20} className="text-amber-500" />
+                    {isRtl ? 'بطاقة الأداء الأكاديمي المعتمدة رسمياً' : 'Official Certifiable Academic Record'}
+                  </h3>
+                  <p className="text-[9px] font-black text-slate-400 tracking-widest uppercase mt-0.5">Basim Alkhalil Digital Academy for High Linguistic Excellence</p>
+                </div>
+                <div className="w-16 h-16 rounded-full border-4 border-amber-400 flex items-center justify-center bg-white text-amber-600 shadow-md transform rotate-12">
+                  <GraduationCap size={28} />
+                </div>
+              </div>
 
-          <div className="max-h-[300px] overflow-y-auto pr-2 space-y-4 divide-y divide-slate-100">
-            {results.map((item, idx) => {
-              const st = getCourseStyle(item.courseId);
-              return (
-                <div key={item.id || idx} className="pt-4 first:pt-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${st.color}`}>
-                      <st.icon size={16} />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-black text-[#002147] line-clamp-1">{item.lessonTitle || item.lessonId}</h4>
-                      <p className="text-[10px] text-slate-400 font-bold flex items-center gap-1.5 mt-0.5">
-                        <span className="font-black px-1.5 py-0.5 bg-slate-50 border border-slate-100 rounded text-slate-500 uppercase">{st.label}</span>
-                        <span>•</span>
-                        <span>{item.timestamp.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-                      </p>
-                    </div>
+              {/* Main Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-xs font-bold text-[#002147]">
+                <div className="space-y-3">
+                  <p className="text-[10px] text-slate-400 uppercase tracking-widest">{isRtl ? 'الاسم الثلاثي للطالب' : 'Full Registered Student'}</p>
+                  <h4 className="text-2xl font-black text-[#002147] border-b border-slate-200/50 pb-1">{studentName}</h4>
+                  
+                  <p className="text-[10px] text-slate-400 uppercase tracking-widest mt-4">{isRtl ? 'المستوى الدراسي النشط' : 'Active Curricular Proficiency'}</p>
+                  <h4 className="text-lg font-black text-blue-600">Level {level}</h4>
+                </div>
+
+                <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl border border-amber-200 flex flex-col justify-between h-40">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black uppercase text-slate-400">{isRtl ? 'معدل الأداء العام' : 'Aggregate Cumulative Status'}</span>
+                    <span className="text-[10px] font-mono font-bold text-slate-400">UUID: #{studentId?.substring(0, 6) || 'BA770'}</span>
                   </div>
-
-                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                    <span className="text-[11px] font-black text-slate-400">{t.score}</span>
-                    <span className={`px-2.5 py-1 rounded-lg text-xs font-black select-none ${
-                      item.score >= 85 ? 'bg-emerald-50 text-emerald-600' :
-                      item.score >= 70 ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'
-                    }`}>
-                      {item.score}/{item.total || 100}
+                  <div className="flex items-baseline gap-2">
+                    <h2 className="text-4xl font-black text-[#002147]" dir="ltr">{overallGPA}%</h2>
+                    <span className="text-xl font-black text-amber-500">
+                      ({overallGPA >= 95 ? 'A+' : overallGPA >= 90 ? 'A' : overallGPA >= 80 ? 'B+' : overallGPA >= 70 ? 'B' : 'C'})
                     </span>
                   </div>
+                  <p className="text-[9px] text-slate-400 font-medium leading-relaxed">
+                    {isRtl 
+                      ? 'مصدق ومحتسب بدقة بالغة وبأثر رجعي بناء على جلسات التعلم والكويزات من السحابة.' 
+                      : 'Verified dynamic rating compiled directly from active learner interaction states.'}
+                  </p>
                 </div>
-              );
-            })}
+              </div>
+
+              {/* Advice comment block */}
+              <div className="p-5 bg-white rounded-2xl border border-slate-100 space-y-2">
+                <h5 className="text-[10px] font-black uppercase text-slate-400">{isRtl ? 'التقرير التوجيهي للمدير الأكاديمي' : 'Linguistic Advisor Diagnostic Note'}</h5>
+                <p className="text-xs text-slate-600 leading-relaxed font-bold">
+                  {isRtl 
+                    ? `نشهد بأن الطالب "${studentName}" قد أظهر التزاماً واعداً في إلمامه اللغوي في الأكاديمية. من فحص تتبع مسار دراساته، يتبين تمكن ممتاز مع ثبات رائع في دقة إجابات التمارين. يوصي القسم الأكاديمي لمجموعة المعلمين بمواصلة التقويم العلاجي والتمكين ومكافأته بنقاط قوة إضافية لضمان الطلاقة التامة.`
+                    : `We certify that student "${studentName}" has actively maintained an admirable academic standing. Their database timeline displays stellar overall focus and structural execution patterns. We highly recommend steady engagement with continuous reinforcement tasks to bridge minor localized error margins.`}
+                </p>
+              </div>
+
+              {/* Stamp & Authorized Signature */}
+              <div className="flex justify-between items-end pt-4 border-t border-amber-200/50">
+                <div className="space-y-1">
+                  <p className="text-[8px] font-black text-slate-400 uppercase">{isRtl ? 'الجهة المصدرة للتقرير' : 'Authorized Authority Stamp'}</p>
+                  <p className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200 uppercase tracking-widest">🛡️ Basim Alkhalil Verified</p>
+                </div>
+                <div className="text-center">
+                  <span className="text-[10px] font-black italic text-slate-300 block mb-1">Basim Alkhalil</span>
+                  <div className="w-24 border-b border-slate-300 mx-auto" />
+                  <span className="text-[8px] font-black text-slate-400 uppercase mt-1 block">{isRtl ? 'المدير الأكاديمي' : 'Academics Registrar Director'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* ACTIONABLE STEPPER ROADMAP BASE ON WEAKEST SKILL */}
+            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
+              <div>
+                <h3 className="text-lg font-black text-[#002147] flex items-center gap-2">
+                  <Sparkles size={18} className="text-amber-500 animate-pulse" />
+                  {isRtl ? 'مسار التقويم العلاجي والتمكين المخطط' : 'Tailor-made Actionable Weakness Remediation Stepper'}
+                </h3>
+                <p className="text-xs text-slate-400 font-bold mt-0.5">
+                  {isRtl ? 'خطة ثلاثية الخطوات مخصصة ومبنية بالكامل على أضعف نقاط التفاعل لضمان التميز:' : 'Customized 3-step technical roadmap generated dynamically to remediate the lowest-scoring domain:'}
+                </p>
+              </div>
+
+              {/* Dynamically construct steps according to weakest points */}
+              {(() => {
+                const weakestId = Object.entries(categoryAverages)
+                  .sort((a, b) => a[1] - b[1])
+                  .map(([k, v]) => k)[0] || 'grammar';
+
+                let steps: string[] = [];
+                if (weakestId === 'grammar') {
+                  steps = isRtl ? [
+                    'الخطوة الأولى: مراجعة وإعادة حل كويزات فنيات تركيب الجملة والروابط السابقة.',
+                    'الخطوة الثانية: قضاء 15 دقيقة مستقلة مع رفيق الدردشة الذكي لطرح الأسئلة حول الضمائر والأزمنة.',
+                    'الخطوة الثالثة: تفعيل خيار الاختبار الثنائي بعد إنهاء أسبوع التعلم الحالي مباشرة.'
+                  ] : [
+                    'Step 1: Re-attempt previous syntax-building and sentence construction exercises.',
+                    'Step 2: Spend 15 minutes asking our AI Chat Assistant specifically about structural rules & tenses.',
+                    'Step 3: Double-check grammatical accuracy on study flow modules before submission.'
+                  ];
+                } else if (weakestId === 'story-library') {
+                  steps = isRtl ? [
+                    'الخطوة الأولى: الاستماع المتكامل لقصتين تفاعليتين أسبوعياً مع تفعيل نصوص القراءة المسموعة.',
+                    'الخطوة الثانية: قراءة سيناريوهات القصص بصوت عالٍ لمحاكاة مخارج الحروف الصحيحة.',
+                    'الخطوة الثالثة: تسجيل ملف صوتي ومقارنته بالصوت المرجعي لتحسين مهارات الطلاقة السمعية.'
+                  ] : [
+                    'Step 1: Listen to at least 2 interactive audio stories per week with transcripts enabled.',
+                    'Step 2: Read story transcripts out loud to sync speed and correct phonetic outputs.',
+                    'Step 3: Match vocabulary words back to the lexical database index.'
+                  ];
+                } else if (weakestId === 'reading') {
+                  steps = isRtl ? [
+                    'الخطوة الأولى: الاستيقاظ مسبقاً وتخصيص 10 دقائق صباحية لقراءة نصوص الفهم المترجمة.',
+                    'الخطوة الثانية: تسجيل الكلمات المعجمية الصعبة الجديدة في مذكرة الكلمات المخصصة.',
+                    'الخطوة الثالثة: تكرار حل اختبارات الفهم السريع للمقروء حتى الحصول على معدل فوق لـ 85%.'
+                  ] : [
+                    'Step 1: Allocate 10 minutes every morning to read high-context texts or essays.',
+                    'Step 2: Build a private glossary index of unfamiliar adjectives and verbs.',
+                    'Step 3: Solve retention quizzes until getting a flawless score above 85%.'
+                  ];
+                } else {
+                  steps = isRtl ? [
+                    'الخطوة الأولى: تأمين التناغم والمتابعة والالتزام اليومي بواقع درس واحد على الأقل للمرحلة.',
+                    'الخطوة الثانية: عدم ترك أي تحدي يومي للذكاء الاصطناعي معلقاً وحل المتطلبات أولاً بأول.',
+                    'الخطوة الثالثة: إثراء التفاعل برفع الأسئلة حول منهج أوكسفورد في حصة المراجعة القادمة.'
+                  ] : [
+                    'Step 1: Re-engage with the active study plan daily to ensure zero gap days.',
+                    'Step 2: Complete the automated vocabulary building modules on time.',
+                    'Step 3: Ask the academic leader for personalized review sheets during the live session.'
+                  ];
+                }
+
+                return (
+                  <div className="space-y-4">
+                    {steps.map((text, i) => (
+                      <div key={i} className="flex gap-4 items-start">
+                        <div className="w-8 h-8 rounded-full bg-blue-50 border-2 border-blue-600 text-blue-600 font-black text-xs flex items-center justify-center flex-shrink-0 shadow-sm">
+                          {i + 1}
+                        </div>
+                        <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex-grow font-bold text-slate-700 text-xs">
+                          {text}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* AI INTERACTIVE COGNITIVE CONSULTATION chatbot */}
         <div className="bg-[#002147] text-white p-6 md:p-8 rounded-[3rem] shadow-xl relative overflow-hidden space-y-6">

@@ -139,8 +139,8 @@ export const ResultsChart: React.FC<ResultsChartProps> = ({
     id: r.id,
     name: r.lessonTitle || r.lessonId,
     level: r.timestamp?.toDate ? r.timestamp.toDate().toLocaleDateString() : '---',
-    grade: `${Math.round((r.score / r.total) * 100)}%`,
-    status: r.score === r.total ? 'Mastered' : 'Completed'
+    grade: r.total > 0 ? `${Math.round((r.score / r.total) * 100)}%` : `${r.score || 0} pts`,
+    status: r.total > 0 && r.score === r.total ? 'Mastered' : 'Completed'
   }));
 
   return (
@@ -236,7 +236,7 @@ export const ResultsChart: React.FC<ResultsChartProps> = ({
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none pb-8">
                   <div className="text-center">
                     <p className="text-2xl font-black text-[#002147]">
-                      {results.length > 0 ? (Math.round(results.reduce((acc, r) => acc + (r.score / r.total), 0) / results.length * 100)) : '0'}%
+                      {results.length > 0 ? (Math.round(results.reduce((acc, r) => acc + (r.total > 0 ? (r.score / r.total) : 1), 0) / results.length * 100)) : '0'}%
                     </p>
                     <p className="text-[10px] text-slate-400 font-bold uppercase">{isRtl ? 'الإجمالي' : 'Total'}</p>
                   </div>
@@ -328,7 +328,7 @@ export const ResultsChart: React.FC<ResultsChartProps> = ({
                 {isRtl ? 'معدل الأكاديمية' : 'Academy Average'}
               </p>
               <h4 className="text-4xl font-black mb-2">
-                {results.length > 0 ? (Math.round(results.reduce((acc, r) => acc + (r.score / r.total), 0) / results.length * 100)) : '0'}%
+                {results.length > 0 ? (Math.round(results.reduce((acc, r) => acc + (r.total > 0 ? (r.score / r.total) : 1), 0) / results.length * 100)) : '0'}%
               </h4>
               <div className="flex items-center gap-2 text-emerald-400 text-sm font-bold">
                 <Activity size={14} />
