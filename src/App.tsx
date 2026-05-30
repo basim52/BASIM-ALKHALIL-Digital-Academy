@@ -3611,6 +3611,9 @@ export default function App() {
       const currentStudentName = (userProfile?.role === 'parent' || userProfile?.role === 'admin') && activeStudentProfile 
         ? activeStudentProfile.displayName 
         : (userProfile?.displayName || '');
+      const currentStudentId = (userProfile?.role === 'parent' || userProfile?.role === 'admin') && activeStudentId 
+        ? activeStudentId 
+        : (userProfile?.uid || '');
 
       return (
         <SmartAnalytics 
@@ -3618,6 +3621,7 @@ export default function App() {
           onBack={() => setView('academic-results')} 
           planItems={globalPlan?.planItems}
           studentName={globalPlan?.studentName || currentStudentName}
+          studentId={currentStudentId}
         />
       );
     }
