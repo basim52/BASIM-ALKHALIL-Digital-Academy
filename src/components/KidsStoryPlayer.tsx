@@ -51,7 +51,7 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+  const audioChunksRef = useRef<Blob[]>([]);
   const [recordSuccess, setRecordSuccess] = useState<boolean>(false);
   const [duration, setDuration] = useState<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -174,7 +174,7 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
 
   const handleStartRecord = async () => {
     try {
-      setAudioChunks([]);
+      audioChunksRef.current = [];
       setAudioUrl(null);
       setRecordSuccess(false);
       
@@ -182,13 +182,33 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
       const recorder = new MediaRecorder(stream);
       
       recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          setAudioChunks(prev => [...prev, e.data]);
+        if (e.data && e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
         }
       };
 
       recorder.onstop = () => {
+        // Stop all tracks in the stream
         stream.getTracks().forEach(track => track.stop());
+        
+        let mimeType = 'audio/webm';
+        if (typeof MediaRecorder !== 'undefined' && !MediaRecorder.isTypeSupported('audio/webm')) {
+          if (MediaRecorder.isTypeSupported('audio/mp4')) {
+            mimeType = 'audio/mp4';
+          } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
+            mimeType = 'audio/ogg';
+          } else if (MediaRecorder.isTypeSupported('audio/wav')) {
+            mimeType = 'audio/wav';
+          }
+        }
+        
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        const url = URL.createObjectURL(audioBlob);
+        setAudioUrl(url);
+        setIsRecording(false);
+        setRecordSuccess(true);
+        triggerSuccessConfetti();
+        playTTS("Exceptional job acting as Noor!", "en");
       };
 
       recorder.start();
@@ -203,15 +223,6 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
 
   const handleStopRecord = () => {
     if (mediaRecorder && isRecording) {
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        const url = URL.createObjectURL(audioBlob);
-        setAudioUrl(url);
-        setIsRecording(false);
-        setRecordSuccess(true);
-        triggerSuccessConfetti();
-        playTTS("Exceptional job acting as Noor!", "en");
-      };
       mediaRecorder.stop();
     } else if (isRecording) {
       // simulated finish
