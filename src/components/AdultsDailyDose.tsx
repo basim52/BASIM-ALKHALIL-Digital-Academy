@@ -266,9 +266,17 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
                     </button>
                   </div>
 
-                  <p className="text-base md:text-lg text-slate-700 font-serif leading-relaxed whitespace-pre-line text-right">
-                    {lesson.sections.intro.content_ar}
-                  </p>
+                  <div className="flex flex-col md:flex-row-reverse gap-6 items-center">
+                    <img 
+                      src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=400&q=80"
+                      alt="Calming Academic Study"
+                      referrerPolicy="no-referrer"
+                      className="w-full md:w-56 h-40 md:h-48 object-cover rounded-2xl border-2 border-[#b48e56]/15 shadow-md shrink-0"
+                    />
+                    <p className="text-base md:text-lg text-slate-700 font-serif leading-relaxed whitespace-pre-line text-right flex-1">
+                      {lesson.sections.intro.content_ar}
+                    </p>
+                  </div>
 
                   <div className="bg-[#b48e56]/5 border border-[#b48e56]/20 p-6 rounded-2xl text-right">
                     <p className="text-xs font-black uppercase text-[#b48e56] mb-3 tracking-wider flex items-center gap-1.5 justify-end">

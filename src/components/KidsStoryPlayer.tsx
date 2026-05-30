@@ -170,9 +170,12 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
         {/* Immersive Theme Kid Header */}
         <header className="flex justify-between items-center bg-white border-2 border-[#e1deda] px-6 py-4 rounded-[2rem] shadow-sm mb-8 flex-row-reverse">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center font-black text-2xl shadow-inner">
-              ✈️
-            </div>
+            <img 
+              src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=150&q=80" 
+              alt="Kids London Story Icon"
+              referrerPolicy="no-referrer"
+              className="w-12 h-12 bg-amber-100 rounded-2xl object-cover border-2 border-amber-200/50 shadow-sm shrink-0"
+            />
             <div>
               <span className="text-[10px] uppercase font-black tracking-widest text-amber-600 block">
                 {story.series} • {isRtl ? `الحلقة ${story.episode}` : `Episode ${story.episode}`}
@@ -259,12 +262,20 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
               {/* Stage 1: Dialogue stream */}
               {currentStage === 1 && (
                 <div className="space-y-6">
-                  <div className="border-b border-slate-100 pb-4 text-right">
-                     <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 justify-end">
-                       <MessageSquare className="text-amber-500" />
-                       <span>{isRtl ? 'حوار المحطة: استمع واقرأ بصوتك الفخم!' : 'The Station Dialogue: Tap & Practice!'}</span>
-                     </h2>
-                     <p className="text-xs text-amber-600 font-bold mt-1">{story.sections.story_dialogue.instructions_ar}</p>
+                  <div className="flex flex-col md:flex-row-reverse gap-4 items-center border-b border-slate-100 pb-4">
+                    <img 
+                      src="https://images.unsplash.com/photo-1548625361-155deee223d5?auto=format&fit=crop&w=300&q=80" 
+                      alt="Big Ben London Adventure"
+                      referrerPolicy="no-referrer"
+                      className="w-24 h-20 object-cover rounded-2xl border border-amber-200 shadow-xs shrink-0"
+                    />
+                    <div className="text-right flex-1">
+                      <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 justify-end">
+                        <MessageSquare className="text-amber-500 hover:scale-115 transition-transform" />
+                        <span>{isRtl ? 'حوار المحطة: استمع واقرأ بصوتك الفخم!' : 'The Station Dialogue: Tap & Practice!'}</span>
+                      </h2>
+                      <p className="text-xs text-amber-600 font-bold mt-1">{story.sections.story_dialogue.instructions_ar}</p>
+                    </div>
                   </div>
 
                   <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
@@ -309,12 +320,20 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
               {/* Stage 2: Mini Dictionary Table */}
               {currentStage === 2 && (
                 <div className="space-y-6">
-                  <div className="border-b border-slate-100 pb-4 text-right">
-                     <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 justify-end">
-                       <BookOpen className="text-amber-500" />
-                       <span>{isRtl ? 'قاموس نور للكلمات الذهبية السريعة:' : 'Noor\'s Golden Mini-Dictionary:'}</span>
-                     </h2>
-                     <p className="text-xs text-amber-600 font-bold mt-1">{story.sections.mini_dictionary.instructions_ar}</p>
+                  <div className="flex flex-col md:flex-row-reverse gap-4 items-center border-b border-slate-100 pb-4">
+                    <img 
+                      src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=300&q=80" 
+                      alt="Golden Dictionary Book"
+                      referrerPolicy="no-referrer"
+                      className="w-24 h-20 object-cover rounded-2xl border border-amber-200 shadow-xs shrink-0"
+                    />
+                    <div className="text-right flex-1">
+                      <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 justify-end">
+                        <BookOpen className="text-amber-500 hover:scale-115 transition-transform" />
+                        <span>{isRtl ? 'قاموس نور للكلمات الذهبية السريعة:' : 'Noor\'s Golden Mini-Dictionary:'}</span>
+                      </h2>
+                      <p className="text-xs text-amber-600 font-bold mt-1">{story.sections.mini_dictionary.instructions_ar}</p>
+                    </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4">
@@ -349,12 +368,20 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
               {/* Stage 3: Fill section */}
               {currentStage === 3 && (
                 <div className="space-y-6">
-                  <div className="border-b border-slate-100 pb-4 text-right">
-                     <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 justify-end">
-                       <BadgeHelp className="text-amber-500" />
-                       <span>{isRtl ? 'لغز المطار: أكمل الفراغات!' : 'The Airport Puzzle: Word Drop!'}</span>
-                     </h2>
-                     <p className="text-xs text-amber-600 font-bold mt-1">{story.sections.practice.instructions_ar}</p>
+                  <div className="flex flex-col md:flex-row-reverse gap-4 items-center border-b border-slate-100 pb-4">
+                    <img 
+                      src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=300&q=80" 
+                      alt="Airport Puzzle Journey"
+                      referrerPolicy="no-referrer"
+                      className="w-24 h-20 object-cover rounded-2xl border border-amber-200 shadow-xs shrink-0"
+                    />
+                    <div className="text-right flex-1">
+                      <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 justify-end">
+                        <BadgeHelp className="text-amber-500 hover:scale-115 transition-transform" />
+                        <span>{isRtl ? 'لغز المطار: أكمل الفراغات!' : 'The Airport Puzzle: Word Drop!'}</span>
+                      </h2>
+                      <p className="text-xs text-amber-600 font-bold mt-1">{story.sections.practice.instructions_ar}</p>
+                    </div>
                   </div>
 
                   <div className="space-y-6">
@@ -444,12 +471,20 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
               {/* Stage 4: Speaking challenge acting as Noor */}
               {currentStage === 4 && (
                 <div className="space-y-6">
-                  <div className="border-b border-slate-100 pb-4 text-right">
-                     <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 justify-end">
-                       <Mic className="text-amber-500" />
-                       <span>{isRtl ? 'تحدي تقمص الشخصية: تكلم مثل نور!' : 'Character Voice Gym: Speak like Noor!'}</span>
-                     </h2>
-                     <p className="text-xs text-amber-600 font-bold mt-1">{story.sections.acting_challenge.instructions_ar}</p>
+                  <div className="flex flex-col md:flex-row-reverse gap-4 items-center border-b border-slate-100 pb-4">
+                    <img 
+                      src="https://images.unsplash.com/photo-1472457897821-70d3819a0e24?auto=format&fit=crop&w=300&q=80" 
+                      alt="Voice acting microphone"
+                      referrerPolicy="no-referrer"
+                      className="w-24 h-20 object-cover rounded-2xl border border-amber-200 shadow-xs shrink-0"
+                    />
+                    <div className="text-right flex-1">
+                      <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 justify-end">
+                        <Mic className="text-amber-500 hover:scale-115 transition-transform" />
+                        <span>{isRtl ? 'تحدي تقمص الشخصية: تكلم مثل نور!' : 'Character Voice Gym: Speak like Noor!'}</span>
+                      </h2>
+                      <p className="text-xs text-amber-600 font-bold mt-1">{story.sections.acting_challenge.instructions_ar}</p>
+                    </div>
                   </div>
 
                   <div className="bg-amber-50/20 border-2 border-dashed border-[#e1deda] p-6 md:p-8 rounded-[2rem] text-center space-y-4">

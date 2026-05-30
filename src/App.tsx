@@ -1002,13 +1002,21 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
           animate={{ opacity: 1, y: 0 }}
           className="mb-10 p-8 rounded-[2.5rem] border border-[#b48e56]/30 bg-gradient-to-br from-[#fdfbf7] to-[#f9f5eb] shadow-md shadow-[#b48e56]/5 relative overflow-hidden group flex flex-col md:flex-row justify-between items-center gap-6"
         >
-          <div className="absolute top-0 right-0 p-8 opacity-[0.04] group-hover:scale-110 transition-transform">
-            <Zap size={100} className="text-[#b48e56]" />
+          <div className="absolute top-0 right-0 w-32 h-32 opacity-10 group-hover:scale-110 transition-transform">
+            <img 
+              src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80" 
+              alt="Dose Background Decor"
+              referrerPolicy="no-referrer"
+              className="w-full h-full object-cover rounded-full filter grayscale sepia"
+            />
           </div>
-          <div className="flex items-center gap-5 relative z-10 w-full">
-            <div className="w-14 h-14 bg-[#b48e56]/10 text-[#b48e56] rounded-2xl flex items-center justify-center shrink-0 border border-[#b48e56]/20 shadow-xs">
-              <Zap size={24} className="animate-pulse" />
-            </div>
+          <div className="flex items-center gap-4 md:gap-5 relative z-10 w-full flex-row items-center md:items-start">
+            <img 
+              src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80" 
+              alt="Adults Daily Dose"
+              referrerPolicy="no-referrer"
+              className="w-12 h-12 md:w-16 md:h-16 rounded-2xl object-cover shrink-0 border-2 border-[#b48e56]/30 shadow-md transform group-hover:rotate-3 transition-transform"
+            />
             <div className={`${isRtl ? 'text-right' : 'text-left'} flex-1`}>
               <div className={`flex items-center gap-2 mb-1.5 flex-wrap ${isRtl ? 'justify-start' : 'justify-start'}`}>
                 <span className="px-3 py-0.5 bg-[#b48e56] text-white text-[9px] font-black rounded-md uppercase tracking-wider">
@@ -1041,13 +1049,21 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
           animate={{ opacity: 1, y: 0 }}
           className="mb-10 p-8 rounded-[2.5rem] border border-amber-500/30 bg-gradient-to-br from-[#fffcf5] to-[#fbf7eb] shadow-md shadow-amber-500/5 relative overflow-hidden group flex flex-col md:flex-row justify-between items-center gap-6"
         >
-          <div className="absolute top-0 right-0 p-8 opacity-[0.04] group-hover:scale-110 transition-transform">
-            <BookOpen size={100} className="text-amber-500" />
+          <div className="absolute top-0 right-0 w-32 h-32 opacity-10 group-hover:scale-110 transition-transform">
+            <img 
+              src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=400&q=80" 
+              alt="Kids Background Decor"
+              referrerPolicy="no-referrer"
+              className="w-full h-full object-cover rounded-full"
+            />
           </div>
-          <div className="flex items-center gap-5 relative z-10 w-full">
-            <div className="w-14 h-14 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center shrink-0 border border-amber-500/20 shadow-xs">
-              <BookOpen size={24} className="text-amber-500 animate-pulse" />
-            </div>
+          <div className="flex items-center gap-4 md:gap-5 relative z-10 w-full flex-row items-center md:items-start">
+            <img 
+              src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=400&q=80" 
+              alt="Kids Interactive Story"
+              referrerPolicy="no-referrer"
+              className="w-12 h-12 md:w-16 md:h-16 rounded-2xl object-cover shrink-0 border-2 border-amber-500/30 shadow-md transform group-hover:-rotate-3 transition-transform"
+            />
             <div className={`${isRtl ? 'text-right' : 'text-left'} flex-1`}>
               <div className={`flex items-center gap-2 mb-1.5 flex-wrap ${isRtl ? 'justify-start' : 'justify-start'}`}>
                 <span className="px-3 py-0.5 bg-amber-500 text-white text-[9px] font-black rounded-md uppercase tracking-wider">
