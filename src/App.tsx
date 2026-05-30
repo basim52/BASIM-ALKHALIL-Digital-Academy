@@ -1878,6 +1878,114 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
 
   return (
     <div className={`p-4 md:p-8 max-w-7xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+      {/* New Interactive Labs / Sections block */}
+      <div className="mb-10 animate-fade-in">
+        <div className={`flex items-center gap-2 mb-6 ${isRtl ? 'justify-start flex-row-reverse' : 'justify-start'}`}>
+          <div className="w-2.5 h-6 bg-[#C49E3A] rounded-full" />
+          <h3 className="text-xl font-black text-[#002147]">
+            {isRtl ? 'البرامج التفاعلية المضافة حديثاً 🚀' : 'Newly Added Interactive Features 🚀'}
+          </h3>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Adults Daily Dose Quick Panel Card */}
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-6 rounded-[2.5rem] border border-[#b48e56]/30 bg-gradient-to-br from-[#fdfbf7] to-[#f9f5eb] shadow-md shadow-[#b48e56]/5 relative overflow-hidden group flex flex-col justify-between min-h-[180px]"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 opacity-10 group-hover:scale-110 transition-transform">
+              <img 
+                src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80" 
+                alt="Dose Background Decor"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover rounded-full filter grayscale sepia"
+              />
+            </div>
+            <div className="flex gap-4 relative z-10 w-full flex-row items-center">
+              <img 
+                src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80" 
+                alt="Adults Daily Dose"
+                referrerPolicy="no-referrer"
+                className="w-12 h-12 md:w-16 md:h-16 rounded-2xl object-cover shrink-0 border-2 border-[#b48e56]/30 shadow-md transform group-hover:rotate-3 transition-transform"
+              />
+              <div className={`${isRtl ? 'text-right' : 'text-left'} flex-1`}>
+                <div className={`flex items-center gap-2 mb-1.5 flex-wrap ${isRtl ? 'justify-start' : 'justify-start'}`}>
+                  <span className="px-3 py-0.5 bg-[#b48e56] text-white text-[9px] font-black rounded-md uppercase tracking-wider">
+                    {isRtl ? 'الجرعة اليومية للكبار' : 'ADULTS DAILY DOSE'}
+                  </span>
+                  <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[9px] font-black rounded-md border border-emerald-100">
+                    {isRtl ? 'أنا متحمس مش أنا مثير!' : 'A2-B1 Level'}
+                  </span>
+                </div>
+                <h3 className="text-base md:text-lg font-black text-slate-900 mb-1">
+                  {isRtl ? 'الدرس التفاعلي: مقارنة -ed و -ing' : 'Active Lesson: I am excited vs exciting!'}
+                </h3>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center justify-between gap-4 relative z-10">
+              <p className="text-slate-500 font-medium text-xs leading-relaxed max-w-[70%] text-right">
+                {isRtl ? 'صحّح خطأ المقابلات الشائع واكتسب مهارة تفرقة تامة بخطوة تفاعلية.' : 'Deconstruct common interactive grammar errors in five gold minutes.'}
+              </p>
+              <button 
+                onClick={() => onNavigate && onNavigate('adults-daily-dose')}
+                className="bg-[#002147] hover:bg-[#b48e56] text-white text-[11px] font-black px-4 py-3 rounded-xl shadow-sm transition-all cursor-pointer whitespace-nowrap"
+              >
+                {isRtl ? 'ابدأ العرض ⚡' : 'Start Lesson ⚡'}
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Kids Interactive Story Dashboard Quick Card */}
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-6 rounded-[2.5rem] border border-amber-500/30 bg-gradient-to-br from-[#fffcf5] to-[#fbf7eb] shadow-md shadow-amber-500/5 relative overflow-hidden group flex flex-col justify-between min-h-[180px]"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 opacity-10 group-hover:scale-110 transition-transform">
+              <img 
+                src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=400&q=80" 
+                alt="Kids Background Decor"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover rounded-full"
+              />
+            </div>
+            <div className="flex gap-4 relative z-10 w-full flex-row items-center">
+              <img 
+                src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=400&q=80" 
+                alt="Kids Interactive Story"
+                referrerPolicy="no-referrer"
+                className="w-12 h-12 md:w-16 md:h-16 rounded-2xl object-cover shrink-0 border-2 border-amber-500/30 shadow-md transform group-hover:-rotate-3 transition-transform"
+              />
+              <div className={`${isRtl ? 'text-right' : 'text-left'} flex-1`}>
+                <div className={`flex items-center gap-2 mb-1.5 flex-wrap ${isRtl ? 'justify-start' : 'justify-start'}`}>
+                  <span className="px-3 py-0.5 bg-amber-500 text-white text-[9px] font-black rounded-md uppercase tracking-wider">
+                    {isRtl ? 'مغامرات الأطفال التفاعلية 👶' : 'KIDS INTERACTIVE STORY 👶'}
+                  </span>
+                  <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[9px] font-black rounded-md border border-amber-100">
+                    {isRtl ? 'سلسلة مغامرات لندن' : 'London Adventures'}
+                  </span>
+                </div>
+                <h3 className="text-base md:text-lg font-black text-slate-900 mb-1">
+                  {isRtl ? 'قصة تفاعلية: نور تصل لـ لندن ✈️' : 'Noor Arrives in London ✈️'}
+                </h3>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center justify-between gap-4 relative z-10">
+              <p className="text-slate-500 font-medium text-xs leading-relaxed max-w-[70%] text-right">
+                {isRtl ? 'تصفح مغامرات نور التفاعلية مع قواميس ناطقة وتحديات تقمص الأصوات.' : 'Follow Noor at London Airport with speaking challenge cards and audio acting!'}
+              </p>
+              <button 
+                onClick={() => onNavigate && onNavigate('kids-story-player')}
+                className="bg-amber-500 hover:bg-[#c49e3a] text-white text-[11px] font-black px-4 py-3 rounded-xl shadow-sm transition-all cursor-pointer whitespace-nowrap"
+              >
+                {isRtl ? 'ابدأ العرض ✨' : 'Start Kids Play ✨'}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
       {currentPlan && todayLesson && (
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -3809,6 +3917,8 @@ export default function App() {
                 <nav className="flex-1 space-y-2 overflow-y-auto no-scrollbar">
                   {[
                     { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
+                    { id: 'adults-daily-dose', label: lang === 'ar' ? 'الجرعة اليومية للكبار ⚡' : 'Adults Daily Dose ⚡', icon: Zap },
+                    { id: 'kids-story-player', label: lang === 'ar' ? 'مغامرات الأطفال التفاعلية 👶' : 'Kids Story Player 👶', icon: Baby },
                     { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
                     { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
                     { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
