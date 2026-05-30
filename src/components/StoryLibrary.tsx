@@ -27,12 +27,22 @@ interface Story {
   id: string;
   titleEn: string;
   titleAr: string;
-  content: string;
   level: string;
   image: string;
+  content: string;
+  isKidsStory?: boolean;
 }
 
 const STORIES: Story[] = [
+  {
+    id: 'kids_story_001',
+    titleEn: 'Noor Arrives in London',
+    titleAr: 'نور تصل إلى لندن',
+    level: 'A1',
+    image: 'https://images.unsplash.com/photo-1548625361-155deee223d5?auto=format&fit=crop&w=800&q=80',
+    content: 'Follow Noor as she lands at Heathrow Airport in London, meets a security officer, buys a ticket, and sets off on her very first interactive adventure!',
+    isKidsStory: true
+  },
   {
     id: '1',
     titleEn: 'The Little Hero',
@@ -284,6 +294,10 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
   };
 
   const handleSelectStory = async (story: Story) => {
+    if (story.isKidsStory) {
+      onNavigate('kids-story-player');
+      return;
+    }
     if (selectedStory?.id === story.id) return;
     setSelectedStory(story);
   };

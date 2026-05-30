@@ -39,7 +39,8 @@ import {
   Headset,
   ExternalLink,
   Smartphone,
-  Download
+  Download,
+  Zap
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'motion/react';
@@ -80,6 +81,10 @@ import { ExpressionCurriculumCompanion, ExpressionLevel, ALL_EXPRESSION_UNITS } 
 import { ModernCurriculumHome } from './components/ModernCurriculumHome';
 import { ProfessionalDevelopment } from './components/ProfessionalDevelopment';
 import { GeminiDeveloperHub } from './components/GeminiDeveloperHub';
+import { AdultsDailyDose } from './components/AdultsDailyDose';
+import { ADULTS_DAILY_DOSES } from './data/adultsDailyDose';
+import { KidsStoryPlayer } from './components/KidsStoryPlayer';
+import { KIDS_STORIES } from './data/kidsStories';
 import { Layers, Image as OxfordIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { familyConstellationsLesson } from './data/lessons/r_a1_4';
@@ -990,6 +995,84 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             </div>
           </motion.div>
         )}
+
+        {/* Adults Daily Dose Quick Panel Card */}
+        <motion.div 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-10 p-8 rounded-[2.5rem] border border-[#b48e56]/30 bg-gradient-to-br from-[#fdfbf7] to-[#f9f5eb] shadow-md shadow-[#b48e56]/5 relative overflow-hidden group flex flex-col md:flex-row justify-between items-center gap-6"
+        >
+          <div className="absolute top-0 right-0 p-8 opacity-[0.04] group-hover:scale-110 transition-transform">
+            <Zap size={100} className="text-[#b48e56]" />
+          </div>
+          <div className="flex items-center gap-5 relative z-10 w-full">
+            <div className="w-14 h-14 bg-[#b48e56]/10 text-[#b48e56] rounded-2xl flex items-center justify-center shrink-0 border border-[#b48e56]/20 shadow-xs">
+              <Zap size={24} className="animate-pulse" />
+            </div>
+            <div className={`${isRtl ? 'text-right' : 'text-left'} flex-1`}>
+              <div className={`flex items-center gap-2 mb-1.5 flex-wrap ${isRtl ? 'justify-start' : 'justify-start'}`}>
+                <span className="px-3 py-0.5 bg-[#b48e56] text-white text-[9px] font-black rounded-md uppercase tracking-wider">
+                  {isRtl ? 'الجرعة اليومية للكبار' : 'ADULTS DAILY DOSE'}
+                </span>
+                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[9px] font-black rounded-md border border-emerald-100">
+                  {isRtl ? 'أنا متحمس مش أنا مثير!' : 'A2-B1 Level'}
+                </span>
+                <span className="w-1.5 h-1.5 bg-[#b48e56] rounded-full animate-ping" />
+              </div>
+              <h3 className="text-lg md:text-xl font-black text-slate-900 mb-1">
+                {isRtl ? 'الدرس النشط: أنا متحمس مش أنا مثير! (مقارنة بـ -ed و -ing)' : 'Active Lesson: I am excited vs I am exciting!'}
+              </h3>
+              <p className="text-slate-500 font-medium text-xs">
+                {isRtl ? 'صحّح خطأ المقابلات الشائع واكتسب مهارة تفرقة تامة بخطوة تفاعلية مدتها خمس دقائق.' : 'Deconstruct common interactive grammar errors in under five gold minutes.'}
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={() => onNavigate('adults-daily-dose')}
+            className="w-full md:w-auto bg-[#002147] hover:bg-[#b48e56] text-white text-xs font-black px-6 py-3.5 rounded-2xl shadow-md transition-all shrink-0 cursor-pointer text-center relative z-10 whitespace-nowrap"
+          >
+            {isRtl ? 'ابدأ الجرعة اليومية ⚡' : 'Start Daily Dose ⚡'}
+          </button>
+        </motion.div>
+
+        {/* Kids Interactive Story Dashboard Quick Card */}
+        <motion.div 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-10 p-8 rounded-[2.5rem] border border-amber-500/30 bg-gradient-to-br from-[#fffcf5] to-[#fbf7eb] shadow-md shadow-amber-500/5 relative overflow-hidden group flex flex-col md:flex-row justify-between items-center gap-6"
+        >
+          <div className="absolute top-0 right-0 p-8 opacity-[0.04] group-hover:scale-110 transition-transform">
+            <BookOpen size={100} className="text-amber-500" />
+          </div>
+          <div className="flex items-center gap-5 relative z-10 w-full">
+            <div className="w-14 h-14 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center shrink-0 border border-amber-500/20 shadow-xs">
+              <BookOpen size={24} className="text-amber-500 animate-pulse" />
+            </div>
+            <div className={`${isRtl ? 'text-right' : 'text-left'} flex-1`}>
+              <div className={`flex items-center gap-2 mb-1.5 flex-wrap ${isRtl ? 'justify-start' : 'justify-start'}`}>
+                <span className="px-3 py-0.5 bg-amber-500 text-white text-[9px] font-black rounded-md uppercase tracking-wider">
+                  {isRtl ? 'مغامرات الأطفال التفاعلية 👶' : 'KIDS INTERACTIVE STORY 👶'}
+                </span>
+                <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[9px] font-black rounded-md border border-amber-100">
+                  {isRtl ? 'سلسلة مغامرات لندن' : 'London Adventures'}
+                </span>
+                <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping" />
+              </div>
+              <h3 className="text-lg md:text-xl font-black text-slate-900 mb-1">
+                {isRtl ? 'القصة التفاعلية: نور تصل إلى لندن ✈️' : 'Interactive Story: Noor Arrives in London ✈️'}
+              </h3>
+              <p className="text-slate-500 font-medium text-xs">
+                {isRtl ? 'رافق الطالب نور بمطار لندن هيثرو، وتتدرب على الحوار، القاموس الصغير، وتحدي تقليد الشخصيات بالصوت!' : 'Join Noor at Heathrow Airport! Features interactive bilingual play, dictionary quests, and phonic mic challenges!'}
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={() => onNavigate('kids-story-player')}
+            className="w-full md:w-auto bg-amber-500 hover:bg-[#c49e3a] text-white text-xs font-black px-6 py-3.5 rounded-2xl shadow-md transition-all shrink-0 cursor-pointer text-center relative z-10 whitespace-nowrap"
+          >
+            {isRtl ? 'ابدأ مغامرتى الآن ✨' : 'Start Kids Adventure ✨'}
+          </button>
+        </motion.div>
 
         {currentPlan && todayLesson && (
           <motion.div 
@@ -3262,6 +3345,84 @@ export default function App() {
           lang={lang} 
           userProfile={userProfile}
           onBack={() => setView('dashboard')} 
+        />
+      );
+    }
+    if (view === 'adults-daily-dose') {
+      return (
+        <AdultsDailyDose 
+          lang={lang}
+          lesson={ADULTS_DAILY_DOSES[0]} 
+          onBack={() => setView('dashboard')}
+          onComplete={async (score) => {
+            if (userProfile && currentUser) {
+              const currentPoints = (userProfile as any).points || 0;
+              const newPoints = currentPoints + 100;
+              try {
+                await updateDoc(doc(db, 'users', currentUser.uid), {
+                  points: newPoints
+                });
+                await addDoc(collection(db, 'lessonResults'), {
+                  userId: currentUser.uid,
+                  parentIds: (userProfile as any).linkedParentIds || [],
+                  lessonId: 'adults_daily_001',
+                  courseId: 'adults_daily_dose',
+                  level: 'A2-B1',
+                  lessonTitle: 'I am excited vs I am exciting',
+                  score: 10,
+                  total: 10,
+                  timestamp: serverTimestamp()
+                });
+                setUserProfile({
+                  ...userProfile,
+                  points: newPoints
+                } as any);
+              } catch (e) {
+                console.error("Error updating points for Daily Dose:", e);
+              }
+            }
+            setView('dashboard');
+            alert(lang === 'ar' ? 'تهانينا الحارة! حصدت +100 من نقاط القوة الأكاديمية بنجاح.' : 'Congratulations! Earned +100 XP standard premium score successfully.');
+          }}
+        />
+      );
+    }
+    if (view === 'kids-story-player') {
+      return (
+        <KidsStoryPlayer 
+          lang={lang}
+          story={KIDS_STORIES[0]}
+          onBack={() => setView('dashboard')}
+          onComplete={async (xpPoints) => {
+            if (userProfile && currentUser) {
+              const currentPoints = (userProfile as any).points || 0;
+              const newPoints = currentPoints + xpPoints;
+              try {
+                await updateDoc(doc(db, 'users', currentUser.uid), {
+                  points: newPoints
+                });
+                await addDoc(collection(db, 'lessonResults'), {
+                  userId: currentUser.uid,
+                  parentIds: (userProfile as any).linkedParentIds || [],
+                  lessonId: KIDS_STORIES[0].lesson_id,
+                  courseId: KIDS_STORIES[0].category,
+                  level: KIDS_STORIES[0].level,
+                  lessonTitle: KIDS_STORIES[0].title_en,
+                  score: xpPoints,
+                  total: xpPoints,
+                  timestamp: serverTimestamp()
+                });
+                setUserProfile({
+                  ...userProfile,
+                  points: newPoints
+                } as any);
+              } catch (e) {
+                console.error("Error updating points for Kids Story:", e);
+              }
+            }
+            setView('dashboard');
+            alert(lang === 'ar' ? 'رائع جداً! لقد نجحت في إكمال القصة التفاعلية وحصدت وسام البطولة ونقاط XP!' : 'Bravissimo! You completed the interactive adventure and obtained the Hero Trophy!');
+          }}
         />
       );
     }
