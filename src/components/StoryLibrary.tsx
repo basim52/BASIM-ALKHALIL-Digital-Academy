@@ -21,7 +21,8 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { UserProfile, MASTER_ADMINS } from '../types';
-import { auth } from '../lib/firebase';
+import { auth, db } from '../lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 interface Story {
   id: string;
@@ -33,7 +34,7 @@ interface Story {
   isKidsStory?: boolean;
 }
 
-const STORIES: Story[] = [
+export const STORIES: Story[] = [
   {
     id: 'kids_story_001',
     titleEn: 'Noor Arrives in London',
@@ -165,10 +166,25 @@ const STORIES: Story[] = [
   }
 ];
 
-export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBack }: { lang: Language, profile: UserProfile, onUpdateProfile: (p: UserProfile) => void, onNavigate: (v: any) => void, onBack: () => void }) => {
+export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBack, initialStoryId }: { lang: Language, profile: UserProfile, onUpdateProfile: (p: UserProfile) => void, onNavigate: (v: any) => void, onBack: () => void, initialStoryId?: string | null }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
-  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  
+  const [selectedStory, setSelectedStory] = useState<Story | null>(() => {
+    if (initialStoryId) {
+      return STORIES.find(s => s.id === initialStoryId) || null;
+    }
+    return null;
+  });
+
+  React.useEffect(() => {
+    if (initialStoryId) {
+      const found = STORIES.find(s => s.id === initialStoryId);
+      if (found) {
+        setSelectedStory(found);
+      }
+    }
+  }, [initialStoryId]);
   const [wordData, setWordData] = useState<{ word: string; translation: string; pronunciation: string } | null>(null);
   const [loadingWord, setLoadingWord] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -291,6 +307,23 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
 
     const score = Math.round((correctCount / originalWords.length) * 100);
     setTestResult({ score, mistakes });
+
+    // Save test result to Firestore for reports & analysis
+    if (profile && profile.uid) {
+      addDoc(collection(db, 'lessonResults'), {
+        userId: profile.uid,
+        parentIds: (profile as any).linkedParentIds || [],
+        lessonId: selectedStory.id,
+        courseId: 'story-library',
+        level: selectedStory.level,
+        lessonTitle: selectedStory.titleEn,
+        score: score,
+        total: 100,
+        timestamp: serverTimestamp()
+      }).catch(err => {
+        console.error("Error saving story reading test to Firestore:", err);
+      });
+    }
   };
 
   const handleSelectStory = async (story: Story) => {

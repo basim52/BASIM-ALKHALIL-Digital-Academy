@@ -217,4 +217,5 @@ export interface StudyPlan {
   selectedDays: number[];
   selectedCategories: string[];
   planItems: any[];
+  lessonsPerDay?: number;
 }

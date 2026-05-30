@@ -7,6 +7,9 @@ import {
   BookOpen, 
   Clock, 
   Sparkles, 
+  Volume2,
+  Flame,
+  Award,
   ChevronRight, 
   BarChart2, 
   Brain, 
@@ -32,6 +35,9 @@ import { ALL_WRITING_UNITS } from '../WritingCurriculumCompanion';
 import { ALL_CONVERSATION_UNITS } from '../ConversationCurriculumCompanion';
 import { ALL_EXPRESSION_UNITS } from '../ExpressionCurriculumCompanion';
 import { OXFORD_UNITS } from '../OxfordDiscoverCompanion';
+import { STORIES } from '../StoryLibrary';
+import { KIDS_STORIES } from '../../data/kidsStories';
+import { ADULTS_DAILY_DOSES } from '../../data/adultsDailyDose';
 import { db, handleFirestoreError, OperationType } from '../../lib/firebase';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { UserProfile, StudyPlan } from '../../types';
@@ -59,6 +65,39 @@ const AVAILABLE_CATEGORIES = [
     color: 'text-amber-600', 
     bg: 'bg-amber-50',
     subCourses: ['oxford']
+  },
+  { 
+    id: 'listening_stories', 
+    labelEn: 'Auditory Stories', 
+    labelAr: 'القصص المسموعة', 
+    descAr: 'قصص تفاعلية مسموعة تعزز الفهم والاستماع',
+    descEn: 'Interactive listening stories to improve auditory comprehension',
+    icon: Volume2, 
+    color: 'text-emerald-600', 
+    bg: 'bg-emerald-50',
+    subCourses: ['story-library']
+  },
+  { 
+    id: 'daily_dose', 
+    labelEn: 'Daily Dose', 
+    labelAr: 'الجرعة اليومية', 
+    descAr: 'دروس يومية ممتعة وسريعة للفهم البصري واللغوي',
+    descEn: 'Bite-sized daily lessons for high-impact visual reinforcement',
+    icon: Flame, 
+    color: 'text-rose-600', 
+    bg: 'bg-rose-50',
+    subCourses: ['adults_daily_dose']
+  },
+  { 
+    id: 'kids_stories', 
+    labelEn: 'Educational Stories', 
+    labelAr: 'قصص تعليمية', 
+    descAr: 'قصص تعليمية تفاعلية وقصيرة للأطفال واليافعين',
+    descEn: 'Interactive and educational narratives for younger learners',
+    icon: Award, 
+    color: 'text-cyan-600', 
+    bg: 'bg-cyan-50',
+    subCourses: ['kids_stories']
   },
 ];
 
@@ -98,6 +137,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
   
   const [selectedCategories, setSelectedCategories] = useState<string[]>(['advanced', 'oxford']);
   const [selectedDays, setSelectedDays] = useState<number[]>([0, 1, 2, 3, 4]); // Default Sun-Thu
+  const [lessonsPerDay, setLessonsPerDay] = useState<number>(2); // Default to 2 lessons per day
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [preferredTime, setPreferredTime] = useState('16:00');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -270,6 +310,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
     if (plan.preferredTime) setPreferredTime(plan.preferredTime);
     if (plan.selectedDays) setSelectedDays(plan.selectedDays);
     if (plan.selectedCategories) setSelectedCategories(plan.selectedCategories);
+    if (plan.lessonsPerDay) setLessonsPerDay(plan.lessonsPerDay);
   };
 
   const toggleCategory = (id: string) => {
@@ -308,6 +349,9 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
     
     const advancedLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
     const oxfordLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
+    const listeningStoryLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
+    const dailyDoseLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
+    const kidsStoryLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
     
     if (selectedCategories.includes('advanced')) {
        // Reading
@@ -378,14 +422,61 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
        });
     }
 
-    // Interleave lessons to create a true mix
+    if (selectedCategories.includes('listening_stories')) {
+      STORIES.forEach(s => {
+        listeningStoryLessons.push({
+          courseId: 'story-library',
+          label: isRtl ? 'القصص المسموعة' : 'Auditory Story',
+          topic: isRtl ? s.titleAr : s.titleEn,
+          unitId: s.id,
+          level: s.level
+        });
+      });
+    }
+
+    if (selectedCategories.includes('daily_dose')) {
+      ADULTS_DAILY_DOSES.forEach(d => {
+        dailyDoseLessons.push({
+          courseId: 'adults_daily_dose',
+          label: isRtl ? 'الجرعة اليومية' : 'Daily Dose',
+          topic: isRtl ? d.title_ar : d.title_en,
+          unitId: d.lesson_id,
+          level: d.level
+        });
+      });
+    }
+
+    if (selectedCategories.includes('kids_stories')) {
+      KIDS_STORIES.forEach(s => {
+        kidsStoryLessons.push({
+          courseId: 'kids_stories',
+          label: isRtl ? 'قصص تعليمية' : 'Educational Story',
+          topic: isRtl ? s.title_ar : s.title_en,
+          unitId: s.lesson_id,
+          level: s.level
+        });
+      });
+    }
+
+    // Interleave lessons from all enabled lists to create a perfect mix
     const allAvailableLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
-    const maxLength = Math.max(advancedLessons.length, oxfordLessons.length);
-    
-    for (let i = 0; i < maxLength; i++) {
-       // Alternate Oxford and Advanced
-       if (i < oxfordLessons.length) allAvailableLessons.push(oxfordLessons[i]);
-       if (i < advancedLessons.length) allAvailableLessons.push(advancedLessons[i]);
+    const enabledLists = [
+      advancedLessons,
+      oxfordLessons,
+      listeningStoryLessons,
+      dailyDoseLessons,
+      kidsStoryLessons
+    ].filter(list => list.length > 0);
+
+    if (enabledLists.length > 0) {
+      const maxLen = Math.max(...enabledLists.map(list => list.length));
+      for (let i = 0; i < maxLen; i++) {
+        for (const list of enabledLists) {
+          if (i < list.length) {
+            allAvailableLessons.push(list[i]);
+          }
+        }
+      }
     }
 
     // Filter out already studied lessons
@@ -437,49 +528,32 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
           const [h, m] = preferredTime.split(':').map(Number);
           scheduledAt.setHours(h, m, 0, 0);
 
-          // Add first lesson of the day
-          if (lessonPtr < finalLessons.length) {
-            const lesson1 = finalLessons[lessonPtr];
-            mockPlan.push({
-              id: `plan-w${w}-d${i}-s1`,
-              month: monthNum,
-              week: weekInMonth,
-              day: isRtl ? daysAr[dayIdx] : daysEn[dayIdx],
-              courseId: lesson1.courseId,
-              courseLabel: lesson1.label,
-              topic: lesson1.topic,
-              duration: '45 min',
-              level: lesson1.level,
-              unitId: lesson1.unitId,
-              dateLabel: currentDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
-              timeLabel: preferredTime,
-              scheduledAt: scheduledAt.toISOString()
-            });
-            lessonPtr++;
-          }
+          // Add up to lessonsPerDay lessons of the day
+          for (let s = 1; s <= lessonsPerDay; s++) {
+            if (lessonPtr < finalLessons.length) {
+              const currentLesson = finalLessons[lessonPtr];
+              const lessonScheduledAt = new Date(scheduledAt);
+              if (s > 1) {
+                lessonScheduledAt.setHours(lessonScheduledAt.getHours() + (s - 1)); // Offset consecutive lessons by 1 hour
+              }
 
-          // Add second lesson of the day
-          if (lessonPtr < finalLessons.length) {
-            const lesson2 = finalLessons[lessonPtr];
-            const secondScheduledAt = new Date(scheduledAt);
-            secondScheduledAt.setHours(secondScheduledAt.getHours() + 1); // Offset second lesson
-            
-            mockPlan.push({
-              id: `plan-w${w}-d${i}-s2`,
-              month: monthNum,
-              week: weekInMonth,
-              day: isRtl ? daysAr[dayIdx] : daysEn[dayIdx],
-              courseId: lesson2.courseId,
-              courseLabel: lesson2.label, // Fixed from lesson1.label
-              topic: lesson2.topic,
-              duration: '45 min',
-              level: lesson2.level,
-              unitId: lesson2.unitId,
-              dateLabel: currentDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
-              timeLabel: `${String(secondScheduledAt.getHours()).padStart(2, '0')}:${String(secondScheduledAt.getMinutes()).padStart(2, '0')}`,
-              scheduledAt: secondScheduledAt.toISOString()
-            });
-            lessonPtr++;
+              mockPlan.push({
+                id: `plan-w${w}-d${i}-s${s}`,
+                month: monthNum,
+                week: weekInMonth,
+                day: isRtl ? daysAr[dayIdx] : daysEn[dayIdx],
+                courseId: currentLesson.courseId,
+                courseLabel: currentLesson.label,
+                topic: currentLesson.topic,
+                duration: '45 min',
+                level: currentLesson.level,
+                unitId: currentLesson.unitId,
+                dateLabel: currentDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
+                timeLabel: `${String(lessonScheduledAt.getHours()).padStart(2, '0')}:${String(lessonScheduledAt.getMinutes()).padStart(2, '0')}`,
+                scheduledAt: lessonScheduledAt.toISOString()
+              });
+              lessonPtr++;
+            }
           }
           
           studyDaysInThisWeek++;
@@ -493,7 +567,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
         const testDate = new Date(lastStudyDateThisWeek);
         const testScheduledAt = new Date(testDate);
         const [h, m] = preferredTime.split(':').map(Number);
-        testScheduledAt.setHours(h + 2, m, 0, 0); // Scheduled after the normal lessons
+        testScheduledAt.setHours(h + lessonsPerDay, m, 0, 0); // Scheduled after the normal lessons
 
         mockPlan.push({
           id: `test-w${w}`,
@@ -545,6 +619,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
         preferredTime,
         selectedDays,
         selectedCategories,
+        lessonsPerDay,
         planItems: generatedPlan
       };
 
@@ -864,6 +939,31 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                           }`}
                         >
                           {isRtl ? day : dayLabelsEn[idx]}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
+                    {isRtl ? 'عدد الدروس في اليوم الواحد (العدد الأقصى 5)' : 'Lessons per Day (Max 5)'}
+                  </label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((num) => {
+                      const isSelected = lessonsPerDay === num;
+                      return (
+                        <button
+                          key={num}
+                          type="button"
+                          onClick={() => setLessonsPerDay(num)}
+                          className={`flex-1 py-3 rounded-xl border-2 font-black text-sm transition-all ${
+                            isSelected 
+                              ? 'border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-100' 
+                              : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200'
+                          }`}
+                        >
+                          {num}
                         </button>
                       );
                     })}
@@ -1417,6 +1517,9 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                                   item.courseId === 'reading' ? 'bg-emerald-600 text-white shadow-emerald-100' : 
                                   item.courseId === 'grammar' ? 'bg-blue-600 text-white shadow-blue-100' : 
                                   item.courseId === 'oxford' ? 'bg-amber-500 text-white shadow-amber-100' : 
+                                  item.courseId === 'story-library' ? 'bg-emerald-600 text-white shadow-emerald-100' :
+                                  item.courseId === 'adults_daily_dose' ? 'bg-rose-500 text-white shadow-rose-100' :
+                                  item.courseId === 'kids_stories' ? 'bg-cyan-600 text-white shadow-cyan-100' :
                                   item.courseId === 'conversation' ? 'bg-indigo-500 text-white shadow-indigo-100' :
                                   item.courseId === 'writing' ? 'bg-rose-500 text-white shadow-rose-100' :
                                   'bg-indigo-600 text-white shadow-indigo-100'
@@ -1424,6 +1527,9 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                                   {isTest ? <CheckCircle2 size={24} /> :
                                    item.courseId === 'reading' ? <BookOpen size={24} /> : 
                                    item.courseId === 'oxford' ? <BookOpen size={24} /> : 
+                                   item.courseId === 'story-library' ? <Volume2 size={24} /> :
+                                   item.courseId === 'adults_daily_dose' ? <Flame size={24} /> :
+                                   item.courseId === 'kids_stories' ? <Award size={24} /> :
                                    <Sparkles size={24} />}
                                 </div>
                                 <div className="space-y-1 flex-1">
@@ -1690,12 +1796,18 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                                       item.courseId === 'reading' ? 'bg-emerald-600 text-white shadow-emerald-100' : 
                                       item.courseId === 'grammar' ? 'bg-blue-600 text-white shadow-blue-100' : 
                                       item.courseId === 'oxford' ? 'bg-amber-500 text-white shadow-amber-100' : 
+                                      item.courseId === 'story-library' ? 'bg-emerald-600 text-white shadow-emerald-100' :
+                                      item.courseId === 'adults_daily_dose' ? 'bg-rose-500 text-white shadow-rose-100' :
+                                      item.courseId === 'kids_stories' ? 'bg-cyan-600 text-white shadow-cyan-100' :
                                       item.courseId === 'conversation' ? 'bg-indigo-500 text-white shadow-indigo-100' :
                                       item.courseId === 'writing' ? 'bg-rose-500 text-white shadow-rose-100' :
                                       'bg-indigo-600 text-white shadow-indigo-100'
                                     }`}>
                                       {item.courseId === 'reading' ? <BookOpen size={24} /> : 
                                        item.courseId === 'oxford' ? <BookOpen size={24} /> : 
+                                       item.courseId === 'story-library' ? <Volume2 size={24} /> :
+                                       item.courseId === 'adults_daily_dose' ? <Flame size={24} /> :
+                                       item.courseId === 'kids_stories' ? <Award size={24} /> :
                                        <Sparkles size={24} />}
                                     </div>
                                     <div className="space-y-1">
