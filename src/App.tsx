@@ -3531,14 +3531,10 @@ export default function App() {
 
                       {/* Details Segment */}
                       <div className={`bg-slate-50 border border-slate-100/80 rounded-2xl p-3 text-[11px] ${isRtl ? 'text-right' : 'text-left'}`}>
-                        <p className="text-slate-500 font-medium">
+                        <p className="text-slate-500 font-medium leading-relaxed">
                           {isRtl 
-                            ? (idx === 0 
-                              ? 'صّحح خطأ المقابلات الشائع واكتسب مهارة تفرقة تامة بخطوة تفاعلية مدتها خمس دقائق.'
-                              : 'يرتكب الكثير خطأً باستعمال During عندما يريدون قول "لمدة". لنحدد قواعد استخدامها بدقة والمهارة الفصيحة.')
-                            : (idx === 0
-                              ? 'Deconstruct common interactive grammar errors in under five gold minutes.'
-                              : 'Discover when to use for, since, or during in conversation to sound fluent and highly articulate.')}
+                            ? `تدريب عملي على: ${lesson.title_ar}. ${lesson.sections.mini_dictionary.instructions_ar}`
+                            : `Interactive bilingual lesson targeting: "${lesson.title_en}". Highlights, quizzes, and speaking challenges included.`}
                         </p>
                       </div>
                     </div>

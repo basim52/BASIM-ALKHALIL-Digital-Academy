@@ -21,9 +21,11 @@ import {
   Bookmark,
   Languages,
   Zap,
-  HelpCircle
+  HelpCircle,
+  MessageSquare,
+  VolumeX
 } from 'lucide-react';
-import { DailyDoseLesson, DailyDoseExample } from '../data/adultsDailyDose';
+import { DailyDoseLesson } from '../data/adultsDailyDose';
 import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
 
 interface AdultsDailyDoseProps {
@@ -42,33 +44,33 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
   const isRtl = lang === 'ar';
   const t = {
     step: isRtl ? 'المرحلة' : 'Step',
-    intro: isRtl ? 'المدخل اللغوي' : 'Introduction',
-    rule: isRtl ? 'القاعدة الأساسية' : 'The Core Rule',
+    intro: isRtl ? 'حوار تمثيلي تفاعلي' : 'Bilingual Dialogue',
+    rule: isRtl ? 'القاموس والمدلولات' : 'Mini Dictionary',
     practice: isRtl ? 'التدريب التفاعلي' : 'Practice Challenge',
-    speaking: isRtl ? 'تحدي المحادثة' : 'Speaking Mission',
-    closing: isRtl ? 'خاتمة وتأكيد' : 'Closing & Reward',
+    speaking: isRtl ? 'تحدي النطق الفصيح' : 'Speaking Mission',
+    closing: isRtl ? 'التشجيع والوسام' : 'Closing & Reward',
     next: isRtl ? 'التالي' : 'Next',
     back: isRtl ? 'السابق' : 'Back',
-    wrongUsage: isRtl ? 'الاستخدام الخاطئ الشائع ❌' : 'Common Incorrect Usage ❌',
-    rightUsage: isRtl ? 'الاستخدام السليم الفصيح ✅' : 'Correct Elite Usage ✅',
     recordButton: isRtl ? 'اضغط وسجل نطقك المعتمد' : 'Press to Record Your Speech',
     recording: isRtl ? 'جارٍ تسجيل صوتك بنقاء...' : 'Recording your voice...',
     stopRecord: isRtl ? 'إيقاف التسجيل واستماع' : 'Stop and Listen',
     playback: isRtl ? 'استمع لصوتك المسجل 🎧' : 'Listen to Your Recording 🎧',
     speechVerified: isRtl ? 'تم تحليل نطقك وقبول الجملة بنجاح باهر! 🌟' : 'Your pronunciation has been analyzed and verified successfully! 🌟',
-    claimReward: isRtl ? 'مستعد لغدٍ؟ احصد نقاط الجرعة المتميزة (+100 XP)' : 'Claim Your Premium Daily Double (+100 XP)',
+    claimReward: isRtl ? 'احصد نقاط الجرعة المتميزة (+100 XP)' : 'Claim Your Premium Daily Double (+100 XP)',
     listeningText: isRtl ? 'استمع للنطق الصحيح' : 'Listen to Correct Pronunciation',
     correctAnswer: isRtl ? 'أجبت بشكل سليم! عظيم جداً' : 'Correct option! Fantastic job',
     wrongAnswer: isRtl ? 'إجابة غير صحيحة، حاول مجدداً مع التأمل' : 'Incorrect choice, read carefully and try again',
+    importantWord: isRtl ? 'مهم جداً' : 'Crucial Key',
   };
 
-  const [currentStep, setCurrentStep] = useState<number>(1); // 1 = intro, 2 = explanation, 3 = practice, 4 = challenge, 5 = closing
+  const [currentStep, setCurrentStep] = useState<number>(1); // 1 = dialogue, 2 = mini-dictionary, 3 = practice, 4 = challenge, 5 = closing
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [checkedAnswers, setCheckedAnswers] = useState<Record<number, boolean>>({});
   const [practiceScore, setPracticeScore] = useState<number>(0);
   
   // Audio tts state
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  const [speakingLineIdx, setSpeakingLineIdx] = useState<number | null>(null);
   
   // Real voice recording states
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -98,10 +100,13 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
     }
   }, [isRecording]);
 
-  const handleSpeechText = async (text: string, currentLang: 'en' | 'ar' = 'en') => {
+  const handleSpeechText = async (text: string, currentLang: 'en' | 'ar' = 'en', idx: number | null = null) => {
+    cancelAllSpeech();
     setIsSpeaking(true);
+    if (idx !== null) setSpeakingLineIdx(idx);
     await speakAcademyText(text, currentLang, () => {}, () => {
       setIsSpeaking(false);
+      setSpeakingLineIdx(null);
     });
   };
 
@@ -120,7 +125,6 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
       };
 
       recorder.onstop = () => {
-        // Stop all tracks to release the microphone device
         stream.getTracks().forEach(track => track.stop());
       };
 
@@ -130,7 +134,6 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
       setHasRecorded(false);
     } catch (err) {
       console.warn("Microphone access denied or failed, launching simulated fallback recording experience.", err);
-      // Fallback fallback simulated recording
       setIsRecording(true);
       setRecordingDuration(0);
       setHasRecorded(false);
@@ -145,12 +148,10 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
         setAudioUrl(url);
         setHasRecorded(true);
         setIsRecording(false);
-        // play verification speech sound
         handleSpeechText("Excellent pronunciation logic!", "en");
       };
       mediaRecorder.stop();
     } else if (isRecording) {
-      // Simulated stopping
       setIsRecording(false);
       setHasRecorded(true);
       handleSpeechText("Excellent pronunciation logic!", "en");
@@ -239,7 +240,7 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
         </div>
 
         {/* Dynamic Card Container */}
-        <div className="min-h-[420px] bg-white border border-[#e2e8f0] rounded-[2rem] p-6 md:p-10 shadow-sm relative overflow-hidden mb-8">
+        <div className="min-h-[460px] bg-white border border-[#e2e8f0] rounded-[2rem] p-6 md:p-10 shadow-sm relative overflow-hidden mb-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={`dose-step-${currentStep}`}
@@ -249,140 +250,175 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
               className="h-full flex flex-col justify-between"
             >
               
-              {/* STEP 1: Conversational Intro */}
+              {/* STEP 1: Bilingual Dialogue Conversation */}
               {currentStep === 1 && (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-4 flex-row-reverse">
-                    <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 flex-row-reverse">
-                      <Sparkles className="text-[#b48e56]" />
-                      <span>{isRtl ? 'تخيل الموقف التالي:' : 'Imagine this scenario:'}</span>
-                    </h2>
-                    <button
-                      onClick={() => handleSpeechText(lesson.sections.intro.content_ar, 'ar')}
-                      className="text-xs bg-slate-50 hover:bg-[#b48e56]/10 text-slate-700 hover:text-[#b48e56] font-bold px-3 py-1.5 rounded-xl border border-slate-100 flex items-center gap-1 cursor-pointer transition-all"
-                    >
-                      <Volume2 size={14} />
-                      <span>{isRtl ? 'استمع ثانية' : 'Listen speech'}</span>
-                    </button>
-                  </div>
-
-                  <div className="flex flex-col md:flex-row-reverse gap-6 items-center">
-                    <img 
-                      src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=400&q=80"
-                      alt="Calming Academic Study"
-                      referrerPolicy="no-referrer"
-                      className="w-full md:w-56 h-40 md:h-48 object-cover rounded-2xl border-2 border-[#b48e56]/15 shadow-md shrink-0"
-                    />
-                    <p className="text-base md:text-lg text-slate-700 font-serif leading-relaxed whitespace-pre-line text-right flex-1">
-                      {lesson.sections.intro.content_ar}
-                    </p>
-                  </div>
-
-                  <div className="bg-[#b48e56]/5 border border-[#b48e56]/20 p-6 rounded-2xl text-right">
-                    <p className="text-xs font-black uppercase text-[#b48e56] mb-3 tracking-wider flex items-center gap-1.5 justify-end">
-                      <span>💡</span>
-                      <span>{isRtl? 'جوهر التفرقة اليوم:' : 'Linguistic difference overview:'}</span>
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-center mt-2">
-                      <div className="bg-white p-4 rounded-xl border border-rose-200">
-                        <span className="text-xs font-bold text-rose-500 uppercase block mb-1">ING Ending</span>
-                        <p className="font-extrabold text-[#002147] text-lg">Exciting</p>
-                        <p className="text-slate-500 text-xs mt-1 font-serif">{isRtl ? 'ممتع / يثير الآخرين' : 'Giving the feeling'}</p>
-                      </div>
-                      <div className="bg-white p-4 rounded-xl border border-emerald-200">
-                        <span className="text-xs font-bold text-emerald-500 uppercase block mb-1">ED Ending</span>
-                        <p className="font-extrabold text-[#002147] text-lg">Excited</p>
-                        <p className="text-slate-500 text-xs mt-1 font-serif">{isRtl ? 'متحمس / يشعر بالشعور' : 'Receiving the feeling'}</p>
-                      </div>
+                    <div>
+                      <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 flex-row-reverse">
+                        <MessageSquare className="text-[#b48e56]" />
+                        <span>{isRtl ? 'حوار تمثيلي تفاعلي:' : 'Bilingual Model Dialogue:'}</span>
+                      </h2>
+                      <p className="text-xs text-slate-400 font-bold mt-1">
+                        {lesson.sections.story_dialogue.instructions_ar}
+                      </p>
                     </div>
+                    {lesson.sections.story_dialogue.audio_button && (
+                      <button
+                        onClick={() => {
+                          const fullEnglishStory = lesson.sections.story_dialogue.lines
+                            .map(l => l.english)
+                            .join('. ');
+                          handleSpeechText(fullEnglishStory, 'en', 99);
+                        }}
+                        className={`text-xs bg-amber-500/10 hover:bg-amber-500/20 text-[#b48e56] font-extrabold px-3 py-1.5 rounded-xl flex items-center gap-2 cursor-pointer transition-all ${
+                          speakingLineIdx === 99 ? 'ring-2 ring-amber-500 animate-pulse' : ''
+                        }`}
+                      >
+                        <Volume2 size={14} />
+                        <span>{isRtl ? 'استمع للحوار كاملاً' : 'Listen Full Story'}</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Chat bubbles container */}
+                  <div className="space-y-4 max-h-[380px] overflow-y-auto pr-2 scrollbar-thin">
+                    {lesson.sections.story_dialogue.lines.map((line, idx) => {
+                      const isTeacher = line.speaker.toLowerCase().includes('teacher') || line.speaker.toLowerCase().includes('barista');
+                      const isSpeakingActive = speakingLineIdx === idx;
+                      
+                      return (
+                        <motion.div
+                          key={`line-${idx}`}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: idx * 0.1 }}
+                          onClick={() => handleSpeechText(line.english, 'en', idx)}
+                          className={`flex gap-3 group cursor-pointer transition-all max-w-[85%] ${
+                            isTeacher 
+                              ? 'mr-auto flex-row' 
+                              : 'ml-auto flex-row-reverse'
+                          }`}
+                        >
+                          {/* Speaker Avatar Icon indicator */}
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs shrink-0 select-none ${
+                            isTeacher 
+                              ? 'bg-[#002147] text-white shadow-xs' 
+                              : 'bg-amber-50 text-[#b48e56] border border-[#b48e56]/10'
+                          }`}>
+                            {line.speaker[0].toUpperCase()}
+                          </div>
+
+                          {/* Message Bubble Body */}
+                          <div className={`p-4 rounded-[1.75rem] relative shadow-xs transition-colors ${
+                            isTeacher 
+                              ? 'bg-slate-100 text-slate-800 rounded-tl-none group-hover:bg-slate-200/80' 
+                              : 'bg-amber-500/5 border border-amber-500/10 text-[#002147] rounded-tr-none group-hover:bg-[#b48e56]/10'
+                          } ${isSpeakingActive ? 'ring-2 ring-[#b48e56] bg-amber-500/10' : ''}`}>
+                            
+                            {/* Speaker name */}
+                            <span className="text-[10px] font-black uppercase text-slate-400 block mb-1 tracking-wider">
+                              {line.speaker}
+                            </span>
+
+                            {/* English main text */}
+                            <p className="font-mono text-[14px] md:text-base font-bold text-slate-900 leading-tight">
+                              {line.english}
+                            </p>
+
+                            {/* Arabic translation */}
+                            <p className="font-sans text-xs text-slate-500 font-bold mt-1.5 leading-relaxed">
+                              {line.arabic}
+                            </p>
+
+                            {/* Tiny hover helper speaker icon */}
+                            <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Volume2 size={12} className="text-[#b48e56]" />
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
 
-              {/* STEP 2: Core Rule & Comparison Table */}
+              {/* STEP 2: Vocabulary mini-dictionary */}
               {currentStep === 2 && (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-4 flex-row-reverse">
-                    <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 flex-row-reverse">
-                      <Languages className="text-[#b48e56]" />
-                      <span>{isRtl ? 'جدول الموازنة وقاعدة الحكم السليم:' : ' Luminous Grammar Anchor:'}</span>
-                    </h2>
-                    <button
-                      onClick={() => handleSpeechText(lesson.sections.explanation.content_ar, 'ar')}
-                      className="text-xs bg-slate-50 hover:bg-[#b48e56]/10 text-slate-700 hover:text-[#b48e56] font-bold px-3 py-1.5 rounded-xl border border-slate-100 flex items-center gap-1 cursor-pointer transition-all"
-                    >
-                      <Volume2 size={14} />
-                      <span>{isRtl ? 'استمع للقاعدة' : 'Listen'}</span>
-                    </button>
+                    <div>
+                      <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 flex-row-reverse">
+                        <Languages className="text-[#b48e56]" />
+                        <span>{isRtl ? 'القاموس المصغر لليوم:' : 'Mini Vocabulary Dictionary:'}</span>
+                      </h2>
+                      <p className="text-xs text-[#b48e56] font-bold mt-1">
+                        {lesson.sections.mini_dictionary.instructions_ar}
+                      </p>
+                    </div>
                   </div>
 
-                  <p className="text-base text-slate-700 font-serif leading-relaxed text-right md:-mt-2 bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100 font-bold">
-                    {lesson.sections.explanation.content_ar}
-                  </p>
-
-                  <div className="space-y-4">
-                    {lesson.sections.explanation.examples.map((ex, exIdx) => (
-                      <div key={`ex-${exIdx}`} className="border border-slate-100 rounded-2xl overflow-hidden shadow-xs">
-                        {/* Header of Compare */}
-                        <div className="bg-slate-50 px-4 py-2 text-[10px] font-black uppercase text-slate-400 border-b border-slate-100 tracking-wider text-right">
-                          {isRtl ? `مقارنة تمثيلية رقم ${exIdx + 1}` : `Model Comparison #${exIdx + 1}`}
-                        </div>
-
-                        {/* Dual Pane Grid */}
-                        <div className="grid md:grid-cols-2">
+                  {/* Vocabulary Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {lesson.sections.mini_dictionary.words.map((item, idx) => (
+                      <motion.div
+                        key={`word-${idx}`}
+                        whileHover={{ y: -3, scale: 1.01 }}
+                        onClick={() => handleSpeechText(item.word, 'en', idx)}
+                        className={`bg-white border rounded-2xl p-5 shadow-xs transition-all cursor-pointer relative group flex flex-col justify-between ${
+                          item.important 
+                            ? 'border-amber-500/30 bg-amber-500/[0.02] hover:bg-amber-500/5' 
+                            : 'border-slate-100 hover:border-slate-200'
+                        }`}
+                      >
+                        {/* Word Type Badges Header */}
+                        <div className="flex justify-between items-center mb-3">
+                          <button className="text-slate-400 group-hover:text-[#b48e56] transition-colors">
+                            <Volume2 size={16} />
+                          </button>
                           
-                          {/* Wrong usage panel */}
-                          <div className="p-5 bg-rose-50/30 border-l border-slate-100 flex flex-col justify-between text-right">
-                            <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest block mb-1">
-                              {t.wrongUsage}
+                          {item.important && (
+                            <span className="bg-amber-100 text-amber-800 font-extrabold text-[9px] px-2 py-0.5 rounded-md flex items-center gap-1">
+                              <span>★</span>
+                              <span>{t.importantWord}</span>
                             </span>
-                            <div className="flex items-center justify-between gap-2 flex-row-reverse my-2">
-                              <p className="font-mono font-bold text-[#002147] line-through decoration-rose-500/50 text-base">{ex.wrong}</p>
-                              <button 
-                                onClick={() => handleSpeechText(ex.wrong, 'en')}
-                                className="text-rose-400 hover:text-rose-600 p-1 rounded-lg hover:bg-rose-50"
-                                title="Speak"
-                              >
-                                <Volume2 size={14} />
-                              </button>
-                            </div>
-                            <p className="text-slate-400 text-xs font-serif font-bold italic translate-y-[-2px]">{ex.meaning_ar}</p>
-                          </div>
-
-                          {/* Right usage panel */}
-                          <div className="p-5 bg-emerald-50/30 flex flex-col justify-between text-right">
-                            <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest block mb-1">
-                              {t.rightUsage}
-                            </span>
-                            <div className="flex items-center justify-between gap-2 flex-row-reverse my-2">
-                              <p className="font-mono font-black text-emerald-800 text-base">{ex.right}</p>
-                              <button 
-                                onClick={() => handleSpeechText(ex.right, 'en')}
-                                className="text-emerald-500 hover:text-emerald-700 p-1 rounded-lg hover:bg-emerald-50"
-                                title="Speak"
-                              >
-                                <Volume2 size={14} />
-                              </button>
-                            </div>
-                            <p className="text-slate-600 text-xs font-serif font-bold italic">{ex.rightMeaningAr || ex.meaning_ar}</p>
-                          </div>
-
+                          )}
                         </div>
-                      </div>
+
+                        {/* Text values */}
+                        <div className="text-right">
+                          <h4 className="font-mono font-black text-slate-900 text-lg tracking-tight">
+                            {item.word}
+                          </h4>
+                          <p className="text-slate-500 text-xs font-bold leading-relaxed font-arabic mt-1">
+                            {item.meaning_ar}
+                          </p>
+                        </div>
+                      </motion.div>
                     ))}
+                  </div>
+
+                  <div className="bg-[#b48e56]/5 border border-[#b48e56]/15 rounded-2xl p-4 text-right">
+                    <p className="text-xs text-[#b48e56] font-bold leading-relaxed">
+                      {isRtl 
+                        ? '💡 اضغط على بطاقات الكلمات اللغوية لتثبيت النطق السليم بمخارج الحروف الصحيحة.' 
+                        : '💡 Press on any vocabulary card to speak its phonetic pronunciation perfectly.'}
+                    </p>
                   </div>
                 </div>
               )}
 
-              {/* STEP 3: Practice (Choose the Correct Word) */}
+              {/* STEP 3: Interactive Practice MCQ */}
               {currentStep === 3 && (
                 <div className="space-y-6">
-                  <div className="border-b border-slate-100 pb-4">
-                    <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 flex-row-reverse mb-1">
-                      <HelpCircle className="text-[#b48e56]" />
-                      <span>{isRtl ? 'اختبر ذكائك المعرفي الآن:' : ' Luminous Micro Test:'}</span>
-                    </h2>
-                    <p className="text-xs text-[#b48e56] font-bold">{lesson.sections.practice.instructions_ar}</p>
+                  <div className="border-b border-slate-100 pb-4 flex justify-between items-center flex-row-reverse">
+                    <div>
+                      <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 flex-row-reverse   mb-1">
+                        <HelpCircle className="text-[#b48e56]" />
+                        <span>{isRtl ? 'ثبّت مهاراتك بالتطبيق التفاعلي:' : 'Secure Your Interactive Vocabulary:'}</span>
+                      </h2>
+                      <p className="text-xs text-[#b48e56] font-bold">{lesson.sections.practice.instructions_ar}</p>
+                    </div>
                   </div>
 
                   <div className="space-y-6">
@@ -432,7 +468,7 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
                                 <button
                                   key={opt}
                                   onClick={() => selectAnswer(qIdx, opt)}
-                                  className={`px-5 py-2 rounded-xl text-xs font-mono font-black transition-all cursor-pointer ${
+                                  className={`px-5 py-2.5 rounded-xl text-xs font-mono font-black transition-all cursor-pointer ${
                                     isThisOptSelected
                                       ? (isCorrect ? 'bg-emerald-600 text-white shadow-md' : 'bg-rose-600 text-white shadow-md')
                                       : 'bg-white border border-slate-200 text-slate-700 hover:border-[#b48e56]/40 hover:bg-slate-50'
@@ -468,15 +504,15 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
                 </div>
               )}
 
-              {/* STEP 4: Speaking Challenge & Voice Recording */}
+              {/* STEP 4: Custom Speaking Challenge & Voice Recording */}
               {currentStep === 4 && (
                 <div className="space-y-6">
                   <div className="border-b border-slate-100 pb-4 text-right">
                     <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 justify-end mb-1">
                       <Mic2 className="text-[#b48e56]" />
-                      <span>{isRtl ? 'التدريب اللفظي واستقرار اللفظ:' : ' Luminous Phonic Challenge:'}</span>
+                      <span>{isRtl ? 'التدريب اللفظي واستقرار اللفظ:' : 'Phonic Performance Challenge:'}</span>
                     </h2>
-                    <p className="text-xs text-[#b48e56] font-bold">{lesson.sections.challenge.instructions_ar}</p>
+                    <p className="text-xs text-[#b48e56] font-bold">{lesson.sections.acting_challenge.instructions_ar}</p>
                   </div>
 
                   <div className="bg-slate-50 border border-slate-200 p-6 rounded-3xl text-center space-y-4 relative overflow-hidden">
@@ -484,14 +520,14 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
                     {/* The Target Sentence */}
                     <div className="p-4 bg-white border border-[#b48e56]/15 rounded-2xl max-w-sm mx-auto">
                       <span className="text-[9px] font-black text-[#b48e56] uppercase tracking-wider block mb-1">
-                        {isRtl ? 'اقرأ الجملة بطلقة وثقة:' : 'READ THIS SENTENCE LOUDLY:'}
+                        {isRtl ? 'اقرأ الجملة بطلاقة وثقة:' : 'READ THIS SENTENCE LOUDLY:'}
                       </span>
-                      <p className="font-mono font-black text-slate-800 text-lg md:text-xl">
-                        I am excited about my future!
+                      <p className="font-mono font-black text-[#002147] text-lg md:text-xl leading-tight">
+                        {lesson.sections.acting_challenge.sentence}
                       </p>
                       
                       <button
-                        onClick={() => handleSpeechText("I am excited about my future!", 'en')}
+                        onClick={() => handleSpeechText(lesson.sections.acting_challenge.sentence, 'en')}
                         className="mt-3 text-[10px] text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 mx-auto bg-blue-50 px-2.5 py-1 rounded-lg"
                       >
                         <Volume2 size={12} />
@@ -558,7 +594,7 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
                       {/* Fallback playback for simulated recording */}
                       {hasRecorded && !audioUrl && (
                         <button
-                          onClick={() => handleSpeechText("I am excited about my future!", 'en')}
+                          onClick={() => handleSpeechText(lesson.sections.acting_challenge.sentence, 'en')}
                           className="bg-emerald-50 text-emerald-700 border border-emerald-100 font-extrabold text-xs px-5 py-3 rounded-2xl flex items-center gap-1.5 hover:bg-emerald-100 transition-colors"
                         >
                           <span>🎧</span>
@@ -576,7 +612,7 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
                         <span className="text-xl">⭐</span>
                         <div className="flex-1">
                           <p className="font-bold text-xs">{t.speechVerified}</p>
-                          <p className="text-[10px] text-slate-500 font-mono mt-0.5">Confidence Level: 97% • Perfect Pronunciation Anchor</p>
+                          <p className="text-[10px] text-slate-500 font-mono mt-0.5">Confidence Level: 99% • Standard Accent Metric</p>
                         </div>
                       </motion.div>
                     )}
@@ -585,7 +621,7 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
                 </div>
               )}
 
-              {/* STEP 5: Closing & XP Claim */}
+              {/* STEP 5: Closing encouragement and reward claim */}
               {currentStep === 5 && (
                 <div className="space-y-6 flex flex-col justify-between h-full">
                   <div className="space-y-4">
@@ -603,9 +639,9 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
 
                     <div className="bg-[#fcfbf9] border border-[#f0ece3] p-6 rounded-[1.75rem] text-right shadow-xs relative">
                       <div className="absolute top-3 left-4 text-[9px] font-mono font-bold text-[#b48e56] uppercase">MEMO ANCHOR</div>
-                      <h4 className="font-extrabold text-slate-800 mb-2 mt-1">تذكير فطن أخير:</h4>
-                      <p className="text-sm text-slate-600 font-serif leading-relaxed font-bold whitespace-pre-line">
-                        {lesson.sections.closing.content_ar}
+                      <h4 className="font-extrabold text-slate-800 mb-2 mt-1">قاعدة وتأكيد فطن اليوم:</h4>
+                      <p className="text-sm text-slate-600 font-serif leading-relaxed font-bold whitespace-pre-line font-arabic">
+                        {lesson.sections.encouragement.content_ar}
                       </p>
                     </div>
                   </div>
