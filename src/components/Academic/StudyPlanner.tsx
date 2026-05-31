@@ -31,7 +31,8 @@ import {
   Music,
   Film,
   Key,
-  Users
+  Users,
+  Baby
 } from 'lucide-react';
 import { translations, Language } from '../../lib/translations';
 import { ALL_READING_UNITS } from '../ReadingCurriculumCompanion';
@@ -46,6 +47,17 @@ import { ADULTS_DAILY_DOSES } from '../../data/adultsDailyDose';
 import { db, handleFirestoreError, OperationType } from '../../lib/firebase';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { UserProfile, StudyPlan } from '../../types';
+import { 
+  PRONUNCIATION_LAB_DATA, 
+  ROLE_PLAY_CHALLENGES_DATA, 
+  VISUAL_DICTIONARY_DATA, 
+  ENGLISH_WITH_SONGS_DATA, 
+  CARTOON_SERIES_DATA, 
+  ESCAPE_ROOM_PUZZLES_DATA, 
+  FAMILY_GAMES_DATA, 
+  STORY_ART_PROMPTS_DATA, 
+  COOKING_CHALLENGES_DATA 
+} from '../../data/interactiveCurriculum';
 
 // Mapping curriculums for the selection UI
 const AVAILABLE_CATEGORIES = [
@@ -115,6 +127,17 @@ const AVAILABLE_CATEGORIES = [
     bg: 'bg-cyan-50',
     subCourses: ['kids_stories']
   },
+  { 
+    id: 'early_childhood', 
+    labelEn: 'Early Childhood Academy', 
+    labelAr: 'أكاديمية الطفولة المبكرة 👶', 
+    descAr: 'المفردات الأولى، الأرقام، الألوان، الأشكال، تلوين تفاعلي ونطق البراعم لسن 2-6 سنوات',
+    descEn: 'First words, numbers, colors, shapes, interactive coloring and baby pronunciation',
+    icon: Baby, 
+    color: 'text-pink-500', 
+    bg: 'bg-pink-50',
+    subCourses: ['early_childhood']
+  },
 ];
 
 interface StudyPlannerProps {
@@ -151,7 +174,8 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
   const t = translations[lang];
   const isRtl = lang === 'ar';
   
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(['advanced', 'oxford', 'interactive_learning']);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(['advanced', 'oxford', 'interactive_learning', 'early_childhood']);
+  const [difficultyLevel, setDifficultyLevel] = useState<'beginner' | 'intermediate' | 'advanced'>('intermediate');
   const [selectedDays, setSelectedDays] = useState<number[]>([0, 1, 2, 3, 4]); // Default Sun-Thu
   const [weeksToGenerate, setWeeksToGenerate] = useState<number>(13); // Default to 13 weeks (3 Months)
   const [lessonsPerDay, setLessonsPerDay] = useState<number>(2); // Default to 2 lessons per day
@@ -370,80 +394,191 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
     const daysAr = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
     const daysEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-    const activeLevel = 'A1';
+    const activeLevels: string[] = [];
+    if (difficultyLevel === 'beginner') {
+      activeLevels.push('A1');
+    } else if (difficultyLevel === 'intermediate') {
+      activeLevels.push('A2', 'B1');
+    } else {
+      activeLevels.push('B1', 'B2');
+    }
     
+    const earlyChildhoodLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
     const advancedLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
     const oxfordLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
     const listeningStoryLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
     const dailyDoseLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
     const kidsStoryLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
     
-    if (selectedCategories.includes('advanced')) {
-       // Reading
-       ALL_READING_UNITS[activeLevel].forEach(u => {
-         advancedLessons.push({ 
-           courseId: 'reading', 
-           label: isRtl ? 'القراءة المتطورة' : 'Elite Reading', 
-           topic: isRtl ? u.titleAr : u.titleEn,
-           unitId: u.id,
-           level: activeLevel
-         });
-       });
-       // Grammar
-       ALL_GRAMMAR_UNITS[activeLevel].forEach(u => {
-         advancedLessons.push({ 
-           courseId: 'grammar', 
-           label: isRtl ? 'القواعد المتطورة' : 'Advanced Grammar', 
-           topic: isRtl ? u.titleAr : u.titleEn,
-           unitId: u.id,
-           level: activeLevel
-         });
-       });
-       // Writing
-       ALL_WRITING_UNITS[activeLevel].forEach(u => {
-        advancedLessons.push({ 
-          courseId: 'writing', 
-          label: isRtl ? 'الكتابة المتطورة' : 'Advanced Writing', 
-          topic: isRtl ? u.titleAr : u.titleEn,
-          unitId: u.id,
-          level: activeLevel
-        });
+    // Generate Early Childhood Lessons
+    if (selectedCategories.includes('early_childhood')) {
+      const childhoodItems = [
+        {
+          courseId: 'early_childhood',
+          label: isRtl ? 'الكلمات الأولى 👶' : 'First Words 👶',
+          topic: isRtl ? 'الكلمات الأولى من حولنا بالصوت والصورة 👶' : 'Bilingual First Words & Audios 👶',
+          unitId: 'first-words',
+          level: 'Kid'
+        },
+        {
+          courseId: 'early_childhood',
+          label: isRtl ? 'الألوان الممتعة 🎨' : 'Fun Colors 🎨',
+          topic: isRtl ? 'تعلم الألوان وتراكيبها بالنطق السليم 🎨' : 'Fun Colors Identification and Games 🎨',
+          unitId: 'colors',
+          level: 'Kid'
+        },
+        {
+          courseId: 'early_childhood',
+          label: isRtl ? 'الأرقام المبكرة 🔢' : 'Early Numbers 🔢',
+          topic: isRtl ? 'عد الأرقام بالإنجليزية والتمارين التفاعلية 🔢' : 'Count numbers & complete fun questions 🔢',
+          unitId: 'numbers',
+          level: 'Kid'
+        },
+        {
+          courseId: 'early_childhood',
+          label: isRtl ? 'أصدقاء صوتيات الحروف 🔤' : 'Phonics Letters A-Z 🔤',
+          topic: isRtl ? 'شخصيات وصوتيات الحروف والقصص الكرتونية الحية 🔤' : 'Phonics Letter friends, characters & drawing 🔤',
+          unitId: 'letters',
+          level: 'Kid'
+        },
+        {
+          courseId: 'early_childhood',
+          label: isRtl ? 'عالم الحيوانات 🦁' : 'Animal Kingdom 🦁',
+          topic: isRtl ? 'أسماء وأصوات الحيوانات في المزرعة والغابة 🦁' : 'Animal names & phonetic calls 🦁',
+          unitId: 'animals',
+          level: 'Kid'
+        },
+        {
+          courseId: 'early_childhood',
+          label: isRtl ? 'الأشكال والأبعاد 📐' : 'Shapes & Dimensions 📐',
+          topic: isRtl ? 'التعرف على المربع والدائرة والنجوم وتلوينها 📐' : 'Master concrete shapes: circle, square & stars 📐',
+          unitId: 'shapes',
+          level: 'Kid'
+        },
+        {
+          courseId: 'early_childhood',
+          label: isRtl ? 'معمل النطق للبراعم 🎙️' : 'Mascot Pronunciation 🎙️',
+          topic: isRtl ? 'سجل صوتك مع تميمة الحظ الذكية لتصحيح النطق 🎙️' : 'Record & check word pronunciation with feedback 🎙️',
+          unitId: 'pronunciation',
+          level: 'Kid'
+        },
+        {
+          courseId: 'early_childhood',
+          label: isRtl ? 'المرسم الإبداعي 🖌️' : 'Creative Lab 🖌️',
+          topic: isRtl ? 'تلوين ورسم وربط الصوت بالصورة 🖌️' : 'Digital drawing board and acoustic matching 🖌️',
+          unitId: 'creative-lab',
+          level: 'Kid'
+        },
+        {
+          courseId: 'early_childhood',
+          label: isRtl ? 'تحدي بطل الصوتيات 🏆' : 'Phonics Champ Challenge 🏆',
+          topic: isRtl ? 'مراجعة وتطابق وحل ألغاز بطل الصوتيات التفاعلية 🏆' : 'Complete comprehensive review, sticker matching & win',
+          unitId: 'phonics-review',
+          level: 'Kid'
+        }
+      ];
+
+      childhoodItems.forEach(item => {
+        let isSuitable = false;
+        if (difficultyLevel === 'beginner') {
+          isSuitable = true;
+        } else if (difficultyLevel === 'intermediate') {
+          if (['letters', 'pronunciation', 'creative-lab', 'phonics-review', 'animals'].includes(item.unitId)) {
+            isSuitable = true;
+          }
+        } else {
+          if (['pronunciation', 'phonics-review'].includes(item.unitId)) {
+            isSuitable = true;
+          }
+        }
+
+        if (isSuitable) {
+          earlyChildhoodLessons.push(item);
+        }
       });
-      // Conversation
-      if ((ALL_CONVERSATION_UNITS as any)[activeLevel]) {
-        (ALL_CONVERSATION_UNITS as any)[activeLevel].forEach((u: any) => {
-          advancedLessons.push({ 
-            courseId: 'conversation', 
-            label: isRtl ? 'المحادثة المتطورة' : 'Advanced Conversation', 
-            topic: isRtl ? u.titleAr : u.titleEn,
-            unitId: u.id,
-            level: activeLevel
+    }
+
+    if (selectedCategories.includes('advanced')) {
+      activeLevels.forEach(lvl => {
+        // Reading
+        if (ALL_READING_UNITS[lvl as any]) {
+          ALL_READING_UNITS[lvl as any].forEach(u => {
+            advancedLessons.push({ 
+              courseId: 'reading', 
+              label: isRtl ? 'القراءة المتطورة ' + lvl : 'Elite Reading ' + lvl, 
+              topic: isRtl ? u.titleAr : u.titleEn,
+              unitId: u.id,
+              level: lvl
+            });
           });
-        });
-      }
-      // Expression
-      if ((ALL_EXPRESSION_UNITS as any)[activeLevel]) {
-        (ALL_EXPRESSION_UNITS as any)[activeLevel].forEach((u: any) => {
-          advancedLessons.push({ 
-            courseId: 'expression', 
-            label: isRtl ? 'التعبير المطور' : 'Enhanced Expression', 
-            topic: isRtl ? u.titleAr : u.titleEn,
-            unitId: u.id,
-            level: activeLevel
+        }
+        // Grammar
+        if (ALL_GRAMMAR_UNITS[lvl as any]) {
+          ALL_GRAMMAR_UNITS[lvl as any].forEach(u => {
+            advancedLessons.push({ 
+              courseId: 'grammar', 
+              label: isRtl ? 'القواعد المتطورة ' + lvl : 'Advanced Grammar ' + lvl, 
+              topic: isRtl ? u.titleAr : u.titleEn,
+              unitId: u.id,
+              level: lvl
+            });
           });
-        });
-      }
+        }
+        // Writing
+        if (ALL_WRITING_UNITS[lvl as any]) {
+          ALL_WRITING_UNITS[lvl as any].forEach(u => {
+           advancedLessons.push({ 
+             courseId: 'writing', 
+             label: isRtl ? 'الكتابة المتطورة ' + lvl : 'Advanced Writing ' + lvl, 
+             topic: isRtl ? u.titleAr : u.titleEn,
+             unitId: u.id,
+             level: lvl
+           });
+          });
+        }
+        // Conversation
+        if ((ALL_CONVERSATION_UNITS as any)[lvl]) {
+          (ALL_CONVERSATION_UNITS as any)[lvl].forEach((u: any) => {
+            advancedLessons.push({ 
+              courseId: 'conversation', 
+              label: isRtl ? 'المحادثة المتطورة ' + lvl : 'Advanced Conversation ' + lvl, 
+              topic: isRtl ? u.titleAr : u.titleEn,
+              unitId: u.id,
+              level: lvl
+            });
+          });
+        }
+        // Expression
+        if ((ALL_EXPRESSION_UNITS as any)[lvl]) {
+          (ALL_EXPRESSION_UNITS as any)[lvl].forEach((u: any) => {
+            advancedLessons.push({ 
+              courseId: 'expression', 
+              label: isRtl ? 'التعبير المطور ' + lvl : 'Enhanced Expression ' + lvl, 
+              topic: isRtl ? u.titleAr : u.titleEn,
+              unitId: u.id,
+              level: lvl
+            });
+          });
+        }
+      });
     }
     
     if (selectedCategories.includes('oxford')) {
-       OXFORD_UNITS.forEach(u => {
-         oxfordLessons.push({ 
-           courseId: 'oxford', 
-           label: isRtl ? 'أكسفورد المصور' : 'Oxford Discover', 
-           topic: isRtl ? u.titleAr : u.titleEn,
-           unitId: String(u.id),
-           level: 'General'
-         });
+       OXFORD_UNITS.forEach((u, index) => {
+         let isAppropriate = false;
+         if (difficultyLevel === 'beginner' && index < 6) isAppropriate = true;
+         else if (difficultyLevel === 'intermediate' && index >= 6 && index < 12) isAppropriate = true;
+         else if (difficultyLevel === 'advanced' && index >= 12) isAppropriate = true;
+         
+         if (isAppropriate) {
+           oxfordLessons.push({ 
+             courseId: 'oxford', 
+             label: isRtl ? 'أكسفورد المصور' : 'Oxford Discover', 
+             topic: isRtl ? u.titleAr : u.titleEn,
+             unitId: String(u.id),
+             level: difficultyLevel === 'beginner' ? 'Basic' : difficultyLevel === 'intermediate' ? 'Junior' : 'Advanced'
+           });
+         }
        });
     }
 
@@ -486,73 +621,89 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
     const interactiveLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
 
     if (selectedCategories.includes('interactive_learning')) {
-      const interactiveItems = [
-        {
+      // 1. English Songs
+      const songFilter = difficultyLevel === 'beginner' ? 'أطفال' : difficultyLevel === 'advanced' ? 'كبار' : null;
+      const songs = ENGLISH_WITH_SONGS_DATA.filter(s => !songFilter || s.level === songFilter);
+      songs.forEach(s => {
+        interactiveLessons.push({
           courseId: 'english_songs',
           label: isRtl ? 'الأغاني التفاعلية 🎵' : 'Interactive Songs 🎵',
-          topic: isRtl ? 'كاريوكي الأغاني الإنجليزية واستخراج المفردات 🎵' : 'English Karaoke Sing-Along 🎵',
-          unitId: 'english-songs',
-          level: 'A1 Play'
-        },
-        {
+          topic: isRtl ? `أغنية ممتعة: ${s.title} (${s.level})` : `Song Karaoke: ${s.title} (${s.level === 'أطفال' ? 'Kids' : 'Adults'})`,
+          unitId: s.id,
+          level: s.level === 'أطفال' ? 'Kids' : 'Adults'
+        });
+      });
+
+      // 2. Cartoon Series
+      CARTOON_SERIES_DATA.forEach(c => {
+        interactiveLessons.push({
           courseId: 'animated_storyboard',
           label: isRtl ? 'مشاهد لندن الكرتونية 🎬' : 'London Storyboards 🎬',
-          topic: isRtl ? 'لوحة مشاهد لندن والسيناريو والتمثيل الصوتي 🎬' : 'London Subway Noor Directorship 🎬',
-          unitId: 'animated-storyboard',
-          level: 'Junior Play'
-        },
-        {
+          topic: isRtl ? `حلقة كرتون: ${c.title_ar}` : `Episode: Noor's London Adventures`,
+          unitId: c.id,
+          level: 'Cartoon'
+        });
+      });
+
+      // 3. Escape Room
+      ESCAPE_ROOM_PUZZLES_DATA.forEach(p => {
+        interactiveLessons.push({
           courseId: 'escape_room',
           label: isRtl ? 'غرفة هروب القواعد 🔐' : 'Grammar Escape Room 🔐',
-          topic: isRtl ? 'فك شفرة بيغ بن وفك أقفال المضارع البسيط 🔐' : 'Present Simple Codes Tower Escape 🔐',
-          unitId: 'escape-room',
-          level: 'A1/A2 Logic'
-        },
-        {
+          topic: isRtl ? `أحجية ذكية: ${p.title_ar}` : `Puzzle Solving Adventure`,
+          unitId: p.id,
+          level: 'Logic Play'
+        });
+      });
+
+      // 4. Roleplay Challenges
+      ROLE_PLAY_CHALLENGES_DATA.forEach(r => {
+        interactiveLessons.push({
           courseId: 'roleplay_challenges',
-          label: isRtl ? 'حوارات تمثيلية 🎭' : 'Roleplay 🎭',
-          topic: isRtl ? 'حوار تمثيلي تفاعلي بالمطعم والفندق مسموع 🎭' : 'Interactive Restaurant & Hotel Speaking 🎭',
-          unitId: 'roleplay-challenges',
+          label: isRtl ? 'حوارات تمثيلية 🎭' : 'Roleplay Scenarios 🎭',
+          topic: isRtl ? `تحدي تفاعلي: ${r.title_ar} (${r.category})` : `Roleplay challenge: ${r.category} conversation`,
+          unitId: r.id,
           level: 'B1 Speaking'
-        },
-        {
+        });
+      });
+
+      // 5. Visual Dictionary
+      VISUAL_DICTIONARY_DATA.forEach(v => {
+        interactiveLessons.push({
           courseId: 'visual_dictionary',
           label: isRtl ? 'القاموس المصور 🎨' : 'Visual Dictionary 🎨',
-          topic: isRtl ? 'الألوان والتصنيفات والربط والقاموس المصور الذكي 🎨' : 'Dynamic Visual Glossary Challenge 🎨',
-          unitId: 'visual-dictionary',
+          topic: isRtl ? `مفردات بصرية: ${v.category_ar} (${v.words_count} كلمات)` : `Vocab Category: ${v.category_ar}`,
+          unitId: v.id,
           level: 'A1 Basics'
-        },
-        {
-          courseId: 'family_activities',
-          label: isRtl ? 'مسابقات العائلة بينغو 👨‍👩‍👧‍👦' : 'Family Play Bingo 👨‍👩‍👧‍👦',
-          topic: isRtl ? 'مسابقة بينغو الأوفلاين وطبخ بيتزا الوجه السعيد 🍕' : 'Offline Vocab Bingo & Happy Face Pizza 👨‍👩‍👧‍👦',
-          unitId: 'family-activities',
-          level: 'Co-op Play'
-        },
-        {
-          courseId: 'adults_daily_dose',
-          label: isRtl ? 'الجرعة اليومية للبالغين ⚡' : 'Adults Daily Dose ⚡',
-          topic: isRtl ? 'جرعة لغوية يومية مكثفة وسريعة للكبار ⚡' : 'Adults Fast Grammar & Pronunciation Dose ⚡',
-          unitId: 'adults-daily-dose',
-          level: 'Adult'
-        },
-        {
-          courseId: 'kids_stories',
-          label: isRtl ? 'القصص التعليمية المسموعة 📚' : 'Interactive Audio Stories 📚',
-          topic: isRtl ? 'القصص المسموعة وتنمية مفردات الأطفال 📚' : 'Bilingual Listening Storybook Adventure 📚',
-          unitId: 'kids-story-player',
-          level: 'Kids Play'
-        }
-      ];
+        });
+      });
 
-      interactiveItems.forEach(item => {
-        interactiveLessons.push(item);
+      // 6. Family Games / Cooking
+      FAMILY_GAMES_DATA.forEach(g => {
+        interactiveLessons.push({
+          courseId: 'family_activities',
+          label: isRtl ? 'مسابقات العائلة 👨‍👩‍👧‍👦' : 'Family Play 👨‍👩‍👧‍👦',
+          topic: isRtl ? `لعبة عائلية: ${g.title_ar}` : `Family Activity & Game`,
+          unitId: g.id,
+          level: 'Co-op Play'
+        });
+      });
+
+      COOKING_CHALLENGES_DATA.forEach(cook => {
+        interactiveLessons.push({
+          courseId: 'family_activities',
+          label: isRtl ? 'مطبخ العائلة بالإنجليزية 🍕' : 'Family Cooking 🍕',
+          topic: isRtl ? `وصفة طبخ وتحدث: ${cook.title_en}` : `Cooking recipe vocab: ${cook.title_en}`,
+          unitId: cook.id,
+          level: 'Cook & Play'
+        });
       });
     }
 
     // Interleave lessons from all enabled lists to create a perfect mix
     const allAvailableLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
     const enabledLists = [
+      earlyChildhoodLessons,
       advancedLessons,
       oxfordLessons,
       listeningStoryLessons,
@@ -669,7 +820,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
           courseLabel: isRtl ? 'اختبار' : 'Assessment',
           topic: isRtl ? `اختبار المراجعة الشامل (الأسبوع ${w-1}-${w})` : `Comprehensive Review Test (Week ${w-1}-${w})`,
           duration: '60 min',
-          level: activeLevel,
+          level: activeLevels[0] || 'A1',
           unitId: `test-${w}`,
           dateLabel: testDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
           timeLabel: `${String(testScheduledAt.getHours()).padStart(2, '0')}:${String(testScheduledAt.getMinutes()).padStart(2, '0')}`,
@@ -1031,6 +1182,40 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                           }`}
                         >
                           {isRtl ? day : dayLabelsEn[idx]}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                    {isRtl ? 'مستوى الصعوبة الدراسي (الخطة الذكية)' : 'Academic Difficulty Level (Smart AI)'}
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {[
+                      { value: 'beginner', labelAr: 'مبتدئ / براعم 👶', labelEn: 'Beginner / Kids', descAr: 'مناسب للأطفال والأساسيات والطفولة المبكرة', descEn: 'A1 Basics & Early Childhood' },
+                      { value: 'intermediate', labelAr: 'متوسط / يافعين 🚀', labelEn: 'Intermediate / Junior', descAr: 'منهج أكسفورد واليافعين والمتقدم البسيط', descEn: 'A2/B1 Oxford Mid & Junior Play' },
+                      { value: 'advanced', labelAr: 'متقدم / الكبار 🔥', labelEn: 'Advanced / Adults', descAr: 'القراءة والكتابة المتطورة والجرعة اليومية', descEn: 'B1/B2 Elite Reading & Adults' }
+                    ].map((levelItem) => {
+                      const isSelected = difficultyLevel === levelItem.value;
+                      return (
+                        <button
+                          key={levelItem.value}
+                          type="button"
+                          onClick={() => setDifficultyLevel(levelItem.value as any)}
+                          className={`flex flex-col items-center justify-center p-4 rounded-3xl border-2 transition-all cursor-pointer text-center ${
+                            isSelected 
+                              ? 'border-blue-600 bg-[#002147] text-white shadow-lg shadow-blue-100 scale-[1.02] font-black' 
+                              : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200'
+                          }`}
+                        >
+                          <span className="text-xs font-black mb-1">
+                            {isRtl ? levelItem.labelAr : levelItem.labelEn}
+                          </span>
+                          <span className={`text-[9px] font-bold text-center leading-relaxed ${isSelected ? 'text-blue-200' : 'text-slate-400'}`}>
+                            {isRtl ? levelItem.descAr : levelItem.descEn}
+                          </span>
                         </button>
                       );
                     })}
@@ -1665,6 +1850,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                                   item.courseId === 'roleplay_challenges' ? 'bg-indigo-600 text-white shadow-indigo-100' :
                                   item.courseId === 'visual_dictionary' ? 'bg-rose-500 text-white shadow-rose-100' :
                                   item.courseId === 'family_activities' ? 'bg-emerald-500 text-white shadow-emerald-100' :
+                                  item.courseId === 'early_childhood' ? 'bg-pink-500 text-white shadow-pink-100' :
                                   'bg-indigo-600 text-white shadow-indigo-100'
                                 }`}>
                                   {isTest ? <CheckCircle2 size={24} /> :
@@ -1679,6 +1865,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                                    item.courseId === 'roleplay_challenges' ? <Users size={24} /> :
                                    item.courseId === 'visual_dictionary' ? <Palette size={24} /> :
                                    item.courseId === 'family_activities' ? <Sparkles size={24} /> :
+                                   item.courseId === 'early_childhood' ? <Baby size={24} /> :
                                    <Sparkles size={24} />}
                                 </div>
                                 <div className="space-y-1 flex-1">
@@ -1948,6 +2135,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                                       item.courseId === 'story-library' ? 'bg-emerald-600 text-white shadow-emerald-100' :
                                       item.courseId === 'adults_daily_dose' ? 'bg-rose-500 text-white shadow-rose-100' :
                                       item.courseId === 'kids_stories' ? 'bg-cyan-600 text-white shadow-cyan-100' :
+                                      item.courseId === 'early_childhood' ? 'bg-pink-500 text-white shadow-pink-100' :
                                       item.courseId === 'conversation' ? 'bg-indigo-500 text-white shadow-indigo-100' :
                                       item.courseId === 'writing' ? 'bg-rose-500 text-white shadow-rose-100' :
                                       'bg-indigo-600 text-white shadow-indigo-100'
@@ -1957,6 +2145,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                                        item.courseId === 'story-library' ? <Volume2 size={24} /> :
                                        item.courseId === 'adults_daily_dose' ? <Flame size={24} /> :
                                        item.courseId === 'kids_stories' ? <Award size={24} /> :
+                                       item.courseId === 'early_childhood' ? <Baby size={24} /> :
                                        <Sparkles size={24} />}
                                     </div>
                                     <div className="space-y-1">

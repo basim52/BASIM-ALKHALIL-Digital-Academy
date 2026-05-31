@@ -161,6 +161,456 @@ const PRONUNCIATION_LESSONS: PronunciationLesson[] = [
       instructions_en: 'Ultimate check: Watch your tongue position transitions for Th and S in this challenge:',
       targetWords: ['they', 'think', 'this', 'thick', 'simple']
     }
+  },
+  {
+    id: 's_th',
+    title_ar: 'الفرق بين /s/ و /θ/ (sin vs thin)',
+    title_en: 'The Difference Between /s/ and /θ/',
+    sound1: '/s/',
+    sound2: '/θ/',
+    difficulty: 'B1',
+    explanation_ar: 'صوت /s/ يصدر ولسانك خلف أسنانك المغلقة بالكامل، فيصدر صفيراً حاداً مثل الأفعى (snake). أما صوت /θ/ فهو صوت الثاء الرقيق، ويصدر بوضع طرف اللسان بلطف تحت الأسنان العلوية.',
+    explanation_en: 'The sound /s/ uses teeth closed, vibrating air (a hiss). The /θ/ sound is the soft "th", with your tongue tip lightly touch the bottom edge of your upper teeth.',
+    tips_ar: [
+      'تخيل أن الـ S هو صفير أفعى، والـ TH هي همسة رقيقة جداً.',
+      'تدرب على التنقل بين "sin" و "thin" مستخدماً المرآة لتأكيد مكان اللسان.'
+    ],
+    minimalPairs: [
+      { word1: 'sing', word2: 'thing', meaning1_ar: 'يغني', meaning2_ar: 'شيء' },
+      { word1: 'sin', word2: 'thin', meaning1_ar: 'خطيئة', meaning2_ar: 'نحيف' },
+      { word1: 'sink', word2: 'think', meaning1_ar: 'يغرق / مغسلة', meaning2_ar: 'يفكر' }
+    ],
+    repeatSentences: [
+      { english: 'She sings a song about a lovely thing.', arabic: 'هي تغني أغنية عن شيء جميل.' },
+      { english: 'Don’t sink while you think of ideas.', arabic: 'لا تغرق بينما تفكر في الأفكار.' }
+    ],
+    recordingChallenge: {
+      sentence: 'Sam can sing about this thin thing.',
+      instructions_ar: 'انطق بوضوح تام مفرّقاً بين صوت الصاد/السين وصوت الثاء الرقيق:',
+      instructions_en: 'Differentiate clearly between the hiss /s/ and soft /θ/ in this challenge:',
+      targetWords: ['sing', 'thin', 'thing']
+    }
+  },
+  {
+    id: 'z_dh',
+    title_ar: 'الفرق بين /z/ و /ð/ (zoo vs the)',
+    title_en: 'The Difference Between /z/ and /ð/',
+    sound1: '/z/',
+    sound2: '/ð/',
+    difficulty: 'B2',
+    explanation_ar: 'صوت /z/ (الزاي) هو صوت جهري مع أسنان مطبقة تماماً (مثل صوت النحلة). أما صوت /ð/ (الذال) فيصدر بوضع لسانك تحت أسنانك العلوية مباشرة مع إخراج الهواء الجاري.',
+    explanation_en: 'The /z/ is a closed-mouth buzz. The /ð/ is the voiced "th" (like "the" or "then") where the tongue tip meets the teeth.',
+    tips_ar: [
+      'عند نطق /ð/ (الذال)، اشعر ببعض الهواء الدافئ يمر بجوار لسانك وهو يلامس أسنانك.'
+    ],
+    minimalPairs: [
+      { word1: 'breeze', word2: 'breathe', meaning1_ar: 'نسيم عليل', meaning2_ar: 'يتنفس' },
+      { word1: 'tease', word2: 'teethe', meaning1_ar: 'يمازح / يغايظ', meaning2_ar: 'يسنن (تظهر أسنان الطفل)' }
+    ],
+    repeatSentences: [
+      { english: 'Breathe the cool morning breeze outside.', arabic: 'تنفس النسيم العليل الخارج في الصباح الباكر.' }
+    ],
+    recordingChallenge: {
+      sentence: 'They went to the zoo with ease.',
+      instructions_ar: 'انطق مفرّقاً بين الزاي والذال بوضوح تام:',
+      instructions_en: 'Separate the buzzing /z/ and tongue-touching /ð/ perfectly:',
+      targetWords: ['they', 'zoo', 'ease']
+    }
+  },
+  {
+    id: 'ch_sh',
+    title_ar: 'الفرق بين /tʃ/ (chicken) و /ʃ/ (ship)',
+    title_en: 'The Difference Between /tʃ/ and /ʃ/',
+    sound1: '/tʃ/ (ch)',
+    sound2: '/ʃ/ (sh)',
+    difficulty: 'A2',
+    explanation_ar: 'صوت الـ Sh (/ʃ/) هو صوت مستمر ناعم مثل الطلب من شخص السكوت "ششش". أما صوت الـ Ch (/tʃ/) فهو صوت مقطوع يبدأ بصوت انفجاري كأنك تنطق "ت" ملتصقة بـ "ش" (تششش) مثل صوت القطار السريع.',
+    explanation_en: "The /ʃ/ ('sh') is a continuous soft sound. The /tʃ/ ('ch') is an explosive stop-sound, like adding 't' before 'sh' ('tsh').",
+    tips_ar: [
+      'انطق "sh" بشكل مستمر: shhhhh. لا يمكنك نطق "ch" بشكل مستمر!',
+      'تخيل صوت عطسة لطيفة لنطق "ch" وصوت السكوت لنطق "sh".'
+    ],
+    minimalPairs: [
+      { word1: 'chair', word2: 'share', meaning1_ar: 'كرسي', meaning2_ar: 'يشارك / سهم' },
+      { word1: 'cheap', word2: 'sheep', meaning1_ar: 'رخيص', meaning2_ar: 'خروف / أغنام' },
+      { word1: 'choose', word2: 'shoes', meaning1_ar: 'يختار', meaning2_ar: 'حذاء' }
+    ],
+    repeatSentences: [
+      { english: 'Please shoes a cheap chair to share.', arabic: 'من فضلك اختر كرسياً رخيصاً للمشاركة.' },
+      { english: 'She saw a little sheep near the chair.', arabic: 'رأت خروفاً صغيراً بالقرب من الكرسي.' }
+    ],
+    recordingChallenge: {
+      sentence: 'Choose the short sheep on the chair.',
+      instructions_ar: 'سجل صوتك مفرّقاً بين "تش" المقطوعة و "ش" المستمرة:',
+      instructions_en: 'Separate the explosive "ch" from continuous "sh" cleanly:',
+      targetWords: ['choose', 'short', 'sheep', 'chair']
+    }
+  },
+  {
+    id: 'j_zh',
+    title_ar: 'الفرق بين /dʒ/ (job) و /ʒ/ (measure)',
+    title_en: 'The Difference Between /dʒ/ and /ʒ/',
+    sound1: '/dʒ/ (j)',
+    sound2: '/ʒ/ (ge/s)',
+    difficulty: 'B2',
+    explanation_ar: 'صوت /dʒ/ (الجيم الفصحى المعطشة المعبر عنها بـ j) يبدأ بضغط كالـ "د" (دج). أما صوت /ʒ/ فهو جيم شامية ناعمة مستمرة مثل صوت الحصاد في الكلمات "measure" أو "pleasure".',
+    explanation_en: "The /dʒ/ ('j') starts with a soft 'd' stop. The /ʒ/ (like in \"leisure\") is a smooth continuous soft buzzing sound.",
+    tips_ar: [
+      'انطق James بالجيم المعطشة القوية (دجيم).'
+    ],
+    minimalPairs: [
+      { word1: 'badge', word2: 'beige', meaning1_ar: 'شارة', meaning2_ar: 'لون بيج' }
+    ],
+    repeatSentences: [
+      { english: 'It is a pleasure to get a new big job.', arabic: 'إنه لمن دواعي سروري الحصول على وظيفة جديدة كبيرة.' }
+    ],
+    recordingChallenge: {
+      sentence: 'Jack found pleasure in his new job.',
+      instructions_ar: 'انطق الجملة مفخّماً ومفرّقاً لنبرات الجيم الممتعة:',
+      instructions_en: 'Pronounce both the stop /dʒ/ and glide /ʒ/ smoothly:',
+      targetWords: ['jack', 'pleasure', 'job']
+    }
+  },
+  {
+    id: 'l_r',
+    title_ar: 'الفرق بين /l/ و /r/ (light vs right)',
+    title_en: 'The Difference Between /l/ and /r/',
+    sound1: '/l/',
+    sound2: '/r/',
+    difficulty: 'A1',
+    explanation_ar: 'صوت /l/ يلامس فيه طرف اللسان سقف الحلق وخلف الأسنان تماماً. أما عند نطق /r/ فاللسان ينحني للخلف قليلاً بدون أن يلمس سقف الحلق على الإطلاق في الإنجليزية!',
+    explanation_en: 'For /l/, the tongue tip touches the roof right behind teeth. For /r/, the tongue curls back but does NOT touch anything!',
+    tips_ar: [
+      'عند نطق /r/، اجعل شفتك مستديرة قليلاً كالتأهب، ولا تلمس لسانك بأي جزء علوي.'
+    ],
+    minimalPairs: [
+      { word1: 'light', word2: 'right', meaning1_ar: 'ضوء / خفيف', meaning2_ar: 'يمين / صحيح' },
+      { word1: 'lake', word2: 'rake', meaning1_ar: 'بحيرة', meaning2_ar: 'مجرشة زراعية' },
+      { word1: 'fly', word2: 'fry', meaning1_ar: 'يطير', meaning2_ar: 'يقلي' }
+    ],
+    repeatSentences: [
+      { english: 'Look at the bright red light on the right.', arabic: 'انظر إلى الضوء الأحمر الساطع على اليمين.' }
+    ],
+    recordingChallenge: {
+      sentence: 'The little rabbit skipped to the right lake.',
+      instructions_ar: 'ركز على تلامس اللسان في الـ L وعدم تلامسه في الـ R:',
+      instructions_en: 'Ensure tongue contact for L and curling space for R:',
+      targetWords: ['little', 'rabbit', 'right', 'lake']
+    }
+  },
+  {
+    id: 'a_e',
+    title_ar: 'الفرق بين /æ/ (cat) و /e/ (bed)',
+    title_en: 'The Difference Between /æ/ and /e/',
+    sound1: '/æ/',
+    sound2: '/e/',
+    difficulty: 'A2',
+    explanation_ar: 'حرف المد القصير /æ/ (مثل فتحة ممدودة في كلمة cat) ترتخي له شفتك وتنخفض ذقنك للأسفل بشكل ملموس. بينما صوت /e/ (مثل كلمة bed) هو صوت كسر خفيف جداً، مع ذقن شبه مغلقة وابتسامة خفيفة.',
+    explanation_en: 'With /æ/ (cat), open your mouth wide and pull down your chin. With /e/ (bed), the mouth is only slightly open, smiling.',
+    tips_ar: [
+      'انطق cat بفتح الفم كالتفاح؛ انطق bed بشفتين شبه هادئتين.'
+    ],
+    minimalPairs: [
+      { word1: 'man', word2: 'men', meaning1_ar: 'رجل', meaning2_ar: 'رجال' },
+      { word1: 'pan', word2: 'pen', meaning1_ar: 'مقلاة', meaning2_ar: 'قلم' },
+      { word1: 'sad', word2: 'said', meaning1_ar: 'حزين', meaning2_ar: 'قال' }
+    ],
+    repeatSentences: [
+      { english: 'The sad man forgot his black pen.', arabic: 'نسي الرجل الحزين قلمه الأسود.' }
+    ],
+    recordingChallenge: {
+      sentence: 'Ten men put the red pan under the bed.',
+      instructions_ar: 'سجل بوضوح مع التفريق بين الفتحة الممدودة والكسرة السريعة:',
+      instructions_en: 'Maintain clear distinction between flat /e/ and open /æ/:',
+      targetWords: ['ten', 'men', 'red', 'pan', 'bed']
+    }
+  },
+  {
+    id: 'i_ee',
+    title_ar: 'الفرق بين /ɪ/ (sit) و /iː/ (seat)',
+    title_en: 'The Difference Between /ɪ/ and /iː/',
+    sound1: '/ɪ/ (Short I)',
+    sound2: '/iː/ (Long EE)',
+    difficulty: 'A2',
+    explanation_ar: 'المقارنة الكلاسيكية! نطق /ɪ/ القصير (sit) هو كسر خاطف وسريع وليس مدّاً (مثل الكسرة العربية السريعة). أما /iː/ الطويل (seat) فهو ممدود بقوة وكأنك تبتسم ابتسامة عريضة (ياااا).',
+    explanation_en: 'Short /ɪ/ (sit) is brief and relaxed. Long /iː/ (seat) is stretched with a wide smile, sounding tense.',
+    tips_ar: [
+      'ابتسم بقوة عند نطق EE مثل cheese لتجعل الصوت ممدوداً وصحيحاً.'
+    ],
+    minimalPairs: [
+      { word1: 'ship', word2: 'sheep', meaning1_ar: 'سفينة', meaning2_ar: 'خروف / أغنام' },
+      { word1: 'sit', word2: 'seat', meaning1_ar: 'يجلس', meaning2_ar: 'مقعد' },
+      { word1: 'fit', word2: 'feet', meaning1_ar: 'لياقة / يناسب', meaning2_ar: 'قدمين' }
+    ],
+    repeatSentences: [
+      { english: 'Please sit on this comfortable blue seat.', arabic: 'من فضلك اجلس في هذا المقعد الأزرق المريح.' }
+    ],
+    recordingChallenge: {
+      sentence: 'This big ship is carrying white sheep.',
+      instructions_ar: 'انطق بوضوح تام الفارق الدقيق بين الكسرة السريعة والياء الممدودة:',
+      instructions_en: 'Show a clear length distinction between short /ɪ/ and long /iː/:',
+      targetWords: ['this', 'ship', 'carrying', 'sheep']
+    }
+  },
+  {
+    id: 'u_oo',
+    title_ar: 'الفرق بين /ʊ/ (book) و /uː/ (boot)',
+    title_en: 'The Difference Between /ʊ/ and /uː/',
+    sound1: '/ʊ/',
+    sound2: '/uː/',
+    difficulty: 'B1',
+    explanation_ar: 'الصوت /ʊ/ هو ضمة قصيرة خفيفة ومسترخية جداً (مثل كلمة book أو look) بدون ضم الشفتين بشكل كامل. بينما صوت /uː/ هو ضمة ممدودة تضيق معها الشفتان إلى الأمام وتتحرك (مثل كلمة boot أو blue).',
+    explanation_en: 'Short /ʊ/ (book) is relaxed and quick. Long /uː/ (boot) is tense with rounded forward lips.',
+    tips_ar: [
+      'لا تمد صوت book لتبدو بوووك، بل اجعلها سريعة مسترخية.'
+    ],
+    minimalPairs: [
+      { word1: 'pull', word2: 'pool', meaning1_ar: 'يسحب', meaning2_ar: 'مسبح' },
+      { word1: 'full', word2: 'fool', meaning1_ar: 'ممتلئ', meaning2_ar: 'أحمق / يخدع' }
+    ],
+    repeatSentences: [
+      { english: 'The pool is full of cool water.', arabic: 'المسبح مليء بالمياه الباردة المنعشة.' }
+    ],
+    recordingChallenge: {
+      sentence: 'He took a good look at the blue pool.',
+      instructions_ar: 'تأكد من قصر الضمة في took و good ومدها في blue و pool:',
+      instructions_en: 'Verify contrast between relaxed short OO and tensed rounded long OO:',
+      targetWords: ['took', 'good', 'look', 'blue', 'pool']
+    }
+  },
+  {
+    id: 'o_or',
+    title_ar: 'الفرق بين /ɒ/ (hot) و /ɔː/ (horse)',
+    title_en: 'The Difference Between /ɒ/ and /ɔː/',
+    sound1: '/ɒ/',
+    sound2: '/ɔː/',
+    difficulty: 'B2',
+    explanation_ar: 'الصوت القصير /ɒ/ (hot) ينطق بفم مفتوح مستدير لأسفل وبسرعة (باللهجة البريطانية). أما صوت /ɔː/ الطويل (horse / short/ door) فهو ممدود ومفخم ومستدير الشفتين بقوة للأمام.',
+    explanation_en: 'Short /ɒ/ (hot) is open and brief. Long /ɔː/ (horse) is tense, long, and heavily rounded.',
+    tips_ar: [
+      'عند نطق horse، ركز على تفخيم الصوت ومدّه.'
+    ],
+    minimalPairs: [
+      { word1: 'pot', word2: 'port', meaning1_ar: 'وعاء طهي', meaning2_ar: 'ميناء' },
+      { word1: 'shot', word2: 'short', meaning1_ar: 'طلقة / لقطة', meaning2_ar: 'قصير' }
+    ],
+    repeatSentences: [
+      { english: 'The short boy bought a hot pot in the port.', arabic: 'اشترى الصبي القصير وعاءً ساخناً في الميناء.' }
+    ],
+    recordingChallenge: {
+      sentence: 'He bought a short hot pot in the port.',
+      instructions_ar: 'سجل نطقك مع التمييز بين قصر المد وطوله في الحرف O:',
+      instructions_en: 'Differentiate between open short O and rounded long OR sounds:',
+      targetWords: ['bought', 'short', 'hot', 'pot', 'port']
+    }
+  },
+  {
+    id: 'u_ar',
+    title_ar: 'الفرق بين /ʌ/ (cup) و /ɑː/ (car)',
+    title_en: 'The Difference Between /ʌ/ and /ɑː/',
+    sound1: '/ʌ/',
+    sound2: '/ɑː/',
+    difficulty: 'A1',
+    explanation_ar: 'الصوت /ʌ/ (cup / mud) هو صوت مسترخي قصير جداً ويخرج من مؤخرة حلقك كأنك تتفاجأ بلطف (أ). أما صوت /ɑː/ (car / far) فهو صوت مفتوح طويل ومفخم ترجع فيه اللسان للخلف وتفتحه لأقصى حد.',
+    explanation_en: 'Short /ʌ/ (cup) is quick and central. Long /ɑː/ (car) is deep, back-voiced, and long.',
+    tips_ar: [
+      'تخيل أن الطبيب يطلب منك قول "آااه" لتنطق car، واجعل cup كأنها همزة مفاجئة قصيرة.'
+    ],
+    minimalPairs: [
+      { word1: 'cup', word2: 'carp', meaning1_ar: 'كوب / فنجان', meaning2_ar: 'سمك الشبوط' },
+      { word1: 'duck', word2: 'dark', meaning1_ar: 'بطة', meaning2_ar: 'مظلم' },
+      { word1: 'cat', word2: 'cart', meaning1_ar: 'قطة', meaning2_ar: 'عربة جر' }
+    ],
+    repeatSentences: [
+      { english: 'A friendly duck ran into the dark park.', arabic: 'ركضت بطة ودودة داخل الحديقة المظلمة.' }
+    ],
+    recordingChallenge: {
+      sentence: 'The dark car is parked near the big cup.',
+      instructions_ar: 'ميز بوجاهة بين صوت "آااه" الطويل وصوت "أ" القصير:',
+      instructions_en: 'Create a clear acoustic gap between short /ʌ/ and long back /ɑː/:',
+      targetWords: ['dark', 'car', 'parked', 'cup']
+    }
+  },
+  {
+    id: 'ay_i',
+    title_ar: 'الفرق بين /eɪ/ (day) و /aɪ/ (my)',
+    title_en: 'The Difference Between /eɪ/ and /aɪ/',
+    sound1: '/eɪ/',
+    sound2: '/aɪ/',
+    difficulty: 'A2',
+    explanation_ar: 'الصوت ثنائي الحركات (diphthong) الأول هو /eɪ/ (day / say) وينطق مثل حرف الياء اللين "أي". والصوت الثاني هو /aɪ/ (my / fly) وينطق كالألف الممدودة بالياء "آي" بفتح الفم بداية ثم تضييقه.',
+    explanation_en: "The /eɪ/ (day) glides from 'e' to 'i'. The /aɪ/ (my) glides from 'ah' to 'i' with a wider jaw opening at first.",
+    tips_ar: [
+       'افتح فمك بشكل واسع عند قول "my" ليكون الصوت ممتازاً.'
+    ],
+    minimalPairs: [
+      { word1: 'day', word2: 'die', meaning1_ar: 'يوم', meaning2_ar: 'يموت' },
+      { word1: 'say', word2: 'sigh', meaning1_ar: 'يقول', meaning2_ar: 'يتنهد' },
+      { word1: 'may', word2: 'my', meaning1_ar: 'ربما / مايو', meaning2_ar: 'ملكي الخاص' }
+    ],
+    repeatSentences: [
+      { english: 'My sister says that today is a beautiful day.', arabic: 'تقول أختي إن اليوم هو يوم جميل.' }
+    ],
+    recordingChallenge: {
+      sentence: 'My friends say they will visit today.',
+      instructions_ar: 'تحدي النطق: ميز بمهارة رنين الصوت "آي" والصوت "أي":',
+      instructions_en: 'Distinguish the wider /aɪ/ glide from the flatter /eɪ/ glide:',
+      targetWords: ['my', 'say', 'today']
+    }
+  },
+  {
+    id: 'ou_ow',
+    title_ar: 'الفرق بين /aʊ/ (how) و /əʊ/ (go)',
+    title_en: 'The Difference Between /aʊ/ and /əʊ/',
+    sound1: '/aʊ/',
+    sound2: '/əʊ/',
+    difficulty: 'B1',
+    explanation_ar: 'الصوت ثنائي الحركات /aʊ/ (how / cow) يبدأ بفتحة كبيرة جداً ثم يضيق (آوو). أما /əʊ/ (go / boat / slow) فيبدأ بصوت مسترخي وينتهي بضمة خفيفة ناعمة (أووو).',
+    explanation_en: 'Sound /aʊ/ (how) opens wide and glides up. Sound /əʊ/ (go) is the rounded relaxed O glide.',
+    tips_ar: [
+      'اجعل صوت go مستديراً وناعماً بدون تسرع.'
+    ],
+    minimalPairs: [
+      { word1: 'now', word2: 'no', meaning1_ar: 'الآن', meaning2_ar: 'لا' },
+      { word1: 'town', word2: 'tone', meaning1_ar: 'بلدة', meaning2_ar: 'نبرة صوت' }
+    ],
+    repeatSentences: [
+      { english: 'No, we cannot go to the old town now.', arabic: 'لا، لا يمكننا الذهاب للبلدة القديمة الآن.' }
+    ],
+    recordingChallenge: {
+      sentence: 'Go out of the historic old town now.',
+      instructions_ar: 'تدرّب على تمثيل نغمات الحروف الصوتية المزدوجة بذكاء وبدون قلق:',
+      instructions_en: 'Contrast the sharp /aʊ/ in "now" with the rounded /əʊ/ in "go/old":',
+      targetWords: ['go', 'out', 'old', 'town', 'now']
+    }
+  },
+  {
+    id: 'silent_letters',
+    title_ar: 'الحروف الصامتة k, w, g, b 🤫',
+    title_en: 'Silent letters (k, w, g, b) 🤫',
+    sound1: 'Silent',
+    sound2: 'Spelled Only',
+    difficulty: 'A2',
+    explanation_ar: 'في اللغة الإنجليزية، الكثير من الحروف تُكتب ولكنها لا تُلفظ على الإطلاق! مثل حرف K لو جاء وراءه n (knee / knife)، أو W لو جاء وراءه r (write / wrong)، أو B لو جاء بعد m (climb / comb).',
+    explanation_en: "Silent letters are written but completely unpronounced, e.g., 'k' before 'n' (knee), 'w' before 'r' (write), or 'b' after 'm' (climb).",
+    tips_ar: [
+      'لا تنطق الكاف أبداً في كلمة knock! هي تشبه knock تماماً تبدأ بـ N.',
+      'تجاهل نطق الباء تماماً في كلمة climb (توقف عند نطق الميم).'
+    ],
+    minimalPairs: [
+      { word1: 'knot', word2: 'not', meaning1_ar: 'عقدة حبل', meaning2_ar: 'أداة نفي' },
+      { word1: 'write', word2: 'rite', meaning1_ar: 'يكتب', meaning2_ar: 'طقس ديني' }
+    ],
+    repeatSentences: [
+      { english: 'I will write about the wrong knot.', arabic: 'سأكتب عن العقدة الخاطئة.' },
+      { english: 'He hurt his knee while attempting to climb.', arabic: 'آلم ركبته أثناء محاولة التسلق.' }
+    ],
+    recordingChallenge: {
+      sentence: 'I know who wrote the wrong response.',
+      instructions_ar: 'سجل صوتك بحذر متجاهلاً تماماً الحروف الصامتة K و W الكرتونية:',
+      instructions_en: 'Read without pronouncing any silent k or w: keep k and w completely quiet!',
+      targetWords: ['know', 'wrote', 'wrong']
+    }
+  },
+  {
+    id: 'ed_endings',
+    title_ar: 'نطق نهاية الكلمات -ed ⏳',
+    title_en: '-ed endings (t, d, id) ⏳',
+    sound1: 'Past Tense ed',
+    sound2: 'Three sounds',
+    difficulty: 'B1',
+    explanation_ar: 'نهاية الماضي البسيط -ed تنطق بثلاث طرق مختلفة حسب الحرف الأخير قبلها: إما "t" (مثل walked -> walk-t)، أو "d" (مثل played -> play-d)، أو "id" (مثل wanted -> want-id).',
+    explanation_en: '-ed has three pronunciations based on the preceding sound: /t/ after voiceless, /d/ after voiced, and /ɪd/ after t or d.',
+    tips_ar: [
+       'إذا انتهى الفعل بـ t أو d، عندها فقط تنطق المقطع الزائد "id" وتزيد عدد المقاطع اللفظية.'
+    ],
+    minimalPairs: [
+      { word1: 'walked', word2: 'wanted', meaning1_ar: 'مشى (تنتهي كأنها t)', meaning2_ar: 'أراد (تنتهي كأنها id)' }
+    ],
+    repeatSentences: [
+      { english: 'We played games and walked to school.', arabic: 'لعبنا الألعاب ومشينا إلى المدرسة.' }
+    ],
+    recordingChallenge: {
+      sentence: 'She wanted to look at what they played.',
+      instructions_ar: 'انطق الأفعال الماضية مفرّقاً بين نهاياتها بدقة احترافية:',
+      instructions_en: 'Accurately voice past endings as /ɪd/ (wanted), /t/ (looked), and /d/ (played):',
+      targetWords: ['wanted', 'look', 'played']
+    }
+  },
+  {
+    id: 's_es_endings',
+    title_ar: 'نطق نهاية الكلمات -s/-es 📦',
+    title_en: '-s/-es endings (s, z, iz) 📦',
+    sound1: 'Plural / Present s',
+    sound2: 'Three sounds',
+    difficulty: 'B1',
+    explanation_ar: 'تماماً مثل الماضي، فإن s أو es في نهاية الجمع أو الفعل للمفرد الغائب تلفظ بثلاث طرق: إما "s" (مثل cats)، أو "z" (مثل dogs)، أو "iz" (مثل boxes) التي تزيد مقطعاً لفظياً كاملاً.',
+    explanation_en: 'The suffix -s/es is spoken in three ways: /s/ after voiceless sounds, /z/ after voiced sounds, and /ɪz/ after sibilant sounds.',
+    tips_ar: [
+      'انطق كلمة boxes بمقطعين صوتيين (box-izz).'
+    ],
+    minimalPairs: [
+      { word1: 'cats', word2: 'dogs', meaning1_ar: 'قطط (تنتهي بـ s)', meaning2_ar: 'كلاب (تنتهي بـ z)' }
+    ],
+    repeatSentences: [
+      { english: 'The boy watches seven boxes of sweet grapes.', arabic: 'يشاهد الصبي سبعة صناديق من العنب الحلو.' }
+    ],
+    recordingChallenge: {
+      sentence: 'Sarah lives with two dogs and three cats.',
+      instructions_ar: 'سجل صوتك محاولاً ضبط نهاية نهايات الجموع بدقة ملموسة:',
+      instructions_en: 'Deliver correct s endings endings: /z/ (lives/dogs) and /s/ (cats):',
+      targetWords: ['lives', 'dogs', 'cats']
+    }
+  },
+  {
+    id: 'word_stress',
+    title_ar: 'النبرة في الكلمات (REcord vs reCORD) ⚡',
+    title_en: 'Word Stress (REcord vs reCORD) ⚡',
+    sound1: 'Noun stress',
+    sound2: 'Verb stress',
+    difficulty: 'B2',
+    explanation_ar: 'النبرة (Word Stress) هي الضغط على مقطع صوتي معين ليصبح أعلى وأطول. في الإنجليزية، نفس الكلمة تلفظ بشكل مختلف! لو كانت اسماً تنبأ بالنبرة في المقطع الأول (REcord)، ولو كانت فعلاً ننطقها بالنبرة في المقطع الثاني (reCORD) 🎬.',
+    explanation_en: 'Many multi-syllable English words change meaning via stress: nouns are typically stressed on the first syllable (REcord), while verbs are stressed on the second (reCORD).',
+    tips_ar: [
+      'في كلمة RE-cord (الاسم/السجل) ركز على المقطع الأول؛ في كلمة re-CORD (الفعل يسجل) ركز على المقطع الثاني.'
+    ],
+    minimalPairs: [
+      { word1: 'present', word2: 'present', meaning1_ar: 'الهدية الحالية (النبرة بالبداية)', meaning2_ar: 'يقدم عرضاً (النبرة بالنهاية)' }
+    ],
+    repeatSentences: [
+      { english: 'I will present a beautiful present to my manager.', arabic: 'سأقدم هدية جميلة لمديري.' }
+    ],
+    recordingChallenge: {
+      sentence: 'They want to record a world record.',
+      instructions_ar: 'سجل جملتك مراعياً النبرة الخاصة بالفعل ثم النبرة الخاصة بالاسم الممتع:',
+      instructions_en: 'Emphasize the verb re-CORD and then the noun RE-cord in your recording challenge:',
+      targetWords: ['record', 'world', 'record']
+    }
+  },
+  {
+    id: 'sentence_stress',
+    title_ar: 'النبرة في الجمل 🎙️',
+    title_en: 'Sentence Stress & Rhythm 🎙️',
+    sound1: 'Content Words',
+    sound2: 'Function Words',
+    difficulty: 'B2',
+    explanation_ar: 'في الجمل الإنجليزية، لا ننطق كل الكلمات بنفس القوة والاهتمام. ننبر (نشدد) فقط على "كلمات المحتوى" الهامة (الأسماء والأفعال والصفات)، ونخفف ونطمس "كلمات الوظيفة" (مثل أدوات الجر والتعريف والمساعدة) لسرعة انسيابية مذهلة.',
+    explanation_en: 'English is a stress-timed language. We emphasize content words (nouns, action verbs, adjectives) and slide over function words (pronouns, prepositions, auxiliary verbs).',
+    tips_ar: [
+      'اجعل الكلمات غير المهمة (like to, standard, is) سريعة ومختصرة جداً.'
+    ],
+    minimalPairs: [
+      { word1: 'he does', word2: 'she does', meaning1_ar: 'هو يفعل', meaning2_ar: 'هي تفعل' }
+    ],
+    repeatSentences: [
+      { english: 'The large black dog ran quickly into the dark forest.', arabic: 'ركض الكلب الأسود الكبير بسرعة في الغابة المظلمة.' }
+    ],
+    recordingChallenge: {
+      sentence: 'I bought a beautiful book from the local market.',
+      instructions_ar: 'سجل الجملة بالنبرة التعبيرية على الكلمات الأساسية (bought, beautiful, book, local, market):',
+      instructions_en: 'Apply proper stress timing on content words (bought, beautiful, book, market):',
+      targetWords: ['bought', 'beautiful', 'book', 'local', 'market']
+    }
   }
 ];
 

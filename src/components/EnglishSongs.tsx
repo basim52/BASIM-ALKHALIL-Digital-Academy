@@ -18,6 +18,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { UserProfile } from '../types';
+import { ENGLISH_WITH_SONGS_DATA } from '../data/interactiveCurriculum';
 
 interface EnglishSongsProps {
   lang: 'ar' | 'en';
@@ -52,55 +53,156 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Comprehension questions states
+  const [selectedSongId, setSelectedSongId] = useState<string>('song_001');
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizXPClaimed, setQuizXPClaimed] = useState(false);
 
-  // The song definition
-  const songData = {
-    title: "Twinkle Twinkle Little Star",
-    titleAr: "لمعي لمعي أيتها النجمة الصغيرة ✨",
-    lyrics: [
-      { en: "Twinkle, twinkle, little star,", ar: "لمعي، لمعي، أيتها النجمة الصغيرة،" },
-      { en: "How I wonder what you are!", ar: "كم أتساءل عن حقيقتكِ!" },
-      { en: "Up above the world so high,", ar: "عالياً فوق هذا العالم المرتفع،" },
-      { en: "Like a diamond in the sky.", ar: "مثل قطعت ألماس تلمع في السماء." },
-      { en: "Twinkle, twinkle, little star,", ar: "لمعي، لمعي، أيتها النجمة الصغيرة،" },
-      { en: "How I wonder what you are!", ar: "كم أتساءل عن حقيقتكِ!" }
-    ],
-    vocab: [
-      { word: "Twinkle", trigger: "twinkle", meaning: "تلمع / تومض", example: "Stars twinkle in the dark night.", emoji: "✨" },
-      { word: "Wonder", trigger: "wonder", meaning: "يتساءل / يتعجب", example: "I wonder where the birds sleep.", emoji: "💭" },
-      { word: "Above", trigger: "above", meaning: "فوق / في الأعلى", example: "The sky is blue above us.", emoji: "☁️" },
-      { word: "Diamond", trigger: "diamond", meaning: "ألماس / جوهرة", example: "Her ring shines like a diamond.", emoji: "💎" },
-      { word: "Sky", trigger: "sky", meaning: "السماء", example: "Birds are flying in the blue sky.", emoji: "🌌" }
-    ],
-    questions: [
-      {
-        id: 1,
-        question: "What shines high in the sky in this song?",
-        questionAr: "ما الذي يلمع عالياً في السماء في هذه الأغنية؟",
-        options: ["A little bird 🐦", "A little star ⭐", "A bright airplane ✈️"],
-        correctIndex: 1,
-        explanation: "The song says: 'Twinkle, twinkle, little star!'"
-      },
-      {
-        id: 2,
-        question: "What looks like a diamond in the sky?",
-        questionAr: "ما الذي يشبّهه الكاتب بقطعة الألماس في السماء؟",
-        options: ["The cloud ☁️", "The golden moon 🌙", "The twinkling star ⭐"],
-        correctIndex: 2,
-        explanation: "The lyric states: 'Like a diamond in the sky' describing the star."
-      },
-      {
-        id: 3,
-        question: "Where is the star shining?",
-        questionAr: "أين تلمع هذه النجمة الصغيرة؟",
-        options: ["Up above the world so high 🌍", "Under the deep blue ocean 🌊", "In the school garden 🏡"],
-        correctIndex: 0,
-        explanation: "The line says: 'Up above the world so high, like a diamond in the sky.'"
-      }
-    ]
+  // Dynamic song details generation based on selected ID
+  const getSongData = (id: string) => {
+    const meta = ENGLISH_WITH_SONGS_DATA.find(s => s.id === id) || ENGLISH_WITH_SONGS_DATA[0];
+    
+    if (id === 'song_001') {
+      return {
+        title: "Twinkle Twinkle Little Star",
+        titleAr: "لمعي لمعي أيتها النجمة الصغيرة ✨",
+        lyrics: [
+          { en: "Twinkle, twinkle, little star,", ar: "لمعي، لمعي، أيتها النجمة الصغيرة،" },
+          { en: "How I wonder what you are!", ar: "كم أتساءل عن حقيقتكِ!" },
+          { en: "Up above the world so high,", ar: "عالياً فوق هذا العالم المرتفع،" },
+          { en: "Like a diamond in the sky.", ar: "مثل قطعت ألماس تلمع في السماء." },
+          { en: "Twinkle, twinkle, little star,", ar: "لمعي، لمعي، أيتها النجمة الصغيرة،" },
+          { en: "How I wonder what you are!", ar: "كم أتساءل عن حقيقتكِ!" }
+        ],
+        vocab: [
+          { word: "Twinkle", trigger: "twinkle", meaning: "تلمع / تومض", example: "Stars twinkle in the dark night.", emoji: "✨" },
+          { word: "Wonder", trigger: "wonder", meaning: "يتساءل / يتعجب", example: "I wonder where the birds sleep.", emoji: "💭" },
+          { word: "Above", trigger: "above", meaning: "فوق / في الأعلى", example: "The sky is blue above us.", emoji: "☁️" },
+          { word: "Diamond", trigger: "diamond", meaning: "ألماس / جوهرة", example: "Her ring shines like a diamond.", emoji: "💎" },
+          { word: "Sky", trigger: "sky", meaning: "السماء", example: "Birds are flying in the blue sky.", emoji: "🌌" }
+        ],
+        questions: [
+          {
+            id: 1,
+            question: "What shines high in the sky in this song?",
+            questionAr: "ما الذي يلمع عالياً في السماء في هذه الأغنية؟",
+            options: ["A little bird 🐦", "A little star ⭐", "A bright airplane ✈️"],
+            correctIndex: 1,
+            explanation: "The song says: 'Twinkle, twinkle, little star!'"
+          },
+          {
+            id: 2,
+            question: "What looks like a diamond in the sky?",
+            questionAr: "ما الذي يشبّهه الكاتب بقطعة الألماس في السماء؟",
+            options: ["The cloud ☁️", "The golden moon 🌙", "The twinkling star ⭐"],
+            correctIndex: 2,
+            explanation: "The lyric states: 'Like a diamond in the sky' describing the star."
+          },
+          {
+            id: 3,
+            question: "Where is the star shining?",
+            questionAr: "أين تلمع هذه النجمة الصغيرة؟",
+            options: ["Up above the world so high 🌍", "Under the deep blue ocean 🌊", "In the school garden 🏡"],
+            correctIndex: 0,
+            explanation: "The line says: 'Up above the world so high, like a diamond in the sky.'"
+          }
+        ]
+      };
+    }
+
+    if (id === 'song_002') {
+      return {
+        title: "Old MacDonald Had a Farm",
+        titleAr: "مزرعة العم ماكدونالد السعيدة 🚜",
+        lyrics: [
+          { en: "Old MacDonald had a farm, E-I-E-I-O!", ar: "العم ماكدونالد كان لديه مزرعة!" },
+          { en: "And on his farm he had a cow, E-I-E-I-O!", ar: "وفي مزرعته كان لديه بقرة!" },
+          { en: "With a moo moo here, and a moo moo there,", ar: "مع صوت موو موو هنا، وموو موو هناك،" },
+          { en: "Here a moo, there a moo, everywhere a moo moo!", ar: "هنا موو، هناك موو، في كل مكان موو موو!" }
+        ],
+        vocab: [
+          { word: "Farm", trigger: "farm", meaning: "مزرعة", example: "Chickens run on the open farm.", emoji: "🚜" },
+          { word: "Cow", trigger: "cow", meaning: "بقرة", example: "The cow gives us fresh milk.", emoji: "🐮" },
+          { word: "Everywhere", trigger: "everywhere", meaning: "في كل مكان", example: "Flowers grow everywhere in spring.", emoji: "🌱" }
+        ],
+        questions: [
+          {
+            id: 1,
+            question: "Whose farm is mentioned in this song?",
+            questionAr: "مزرعة مَن المذكورة في هذه الأغنية؟",
+            options: ["Old MacDonald 🧑‍🌾", "Noor the Explorer 👧", "The Flying Captain 🧑‍✈️"],
+            correctIndex: 0,
+            explanation: "The song starts with: 'Old MacDonald had a farm.'"
+          },
+          {
+            id: 2,
+            question: "What animal sound does the cow make?",
+            questionAr: "ما هو صوت البقرة في هذه الأغنية؟",
+            options: ["Quack quack 🦆", "Meow meow 🐱", "Moo moo 🐮"],
+            correctIndex: 2,
+            explanation: "The cow makes the sound 'moo moo'."
+          }
+        ]
+      };
+    }
+
+    const isKids = meta.level === 'أطفال';
+    return {
+      title: meta.title,
+      titleAr: isRtl ? `${meta.title} (${meta.artist || 'كلاسيكي تفاعلي'}) ✨` : `${meta.title} by ${meta.artist || 'Traditional'} ✨`,
+      lyrics: [
+        { en: `We are listening to the beautiful song: ${meta.title}.`, ar: `نستمع الآن للأغنية الجميلة التفاعلية: ${meta.title}.` },
+        { en: `English songs are perfect for learning new words and rhythms!`, ar: `الأغاني الإنجليزية هي الطريقة الأفضل لتعلم كلمات ونغمات جديدة للجميع!` },
+        { en: `Let's practice singing it and recording our progress.`, ar: `دعونا نتدرب على ترنيمها وتسجيل نطقنا السليم لها لتعزيز تقدمنا.` }
+      ],
+      vocab: [
+        { word: "Melody", trigger: "melody", meaning: "النغمة / اللحن", example: "This song has a beautiful melody.", emoji: "🎵" },
+        { word: "Rhythm", trigger: "rhythm", meaning: "الإيقاع اللغوي", example: "Clap your hands to the song rhythm.", emoji: "👏" },
+        { word: "Singing", trigger: "singing", meaning: "الغناء والترنيم", example: "Singing makes learning English easier.", emoji: "🎤" }
+      ],
+      questions: [
+        {
+          id: 1,
+          question: `What is the correct title of this song?`,
+          questionAr: "ما هو العنوان الصحيح لهذه الأغنية؟",
+          options: [meta.title, "Other Old Melodies 🎻", "Noor's Adventure Song 🗺️"],
+          correctIndex: 0,
+          explanation: `The title is ${meta.title}.`
+        },
+        {
+          id: 2,
+          question: `Why do we sing along in our Language Lab?`,
+          questionAr: "لماذا نغني ونرنم في معمل اللغويات؟",
+          options: ["To master correct English rhythm and words 🎙️", "To go to sleep early 🛌", "To paint a canvas wall 🖌️"],
+          correctIndex: 0,
+          explanation: "Singing along helps build perfect vocabulary, accent, and linguistic intuition."
+        }
+      ]
+    };
+  };
+
+  const songData = getSongData(selectedSongId);
+
+  const handleSelectSong = (id: string) => {
+    // Clean up current playbacks
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    setIsPlaying(false);
+    setActivePlaybackLine(null);
+    if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+    
+    // Reset quiz
+    setUserAnswers({});
+    setQuizSubmitted(false);
+    setQuizXPClaimed(false);
+    
+    // Reset voice recording
+    setRecordedBlobUrl(null);
+    setRecordingSeconds(0);
+    setRecordingXPClaimed(false);
+    
+    setSelectedSongId(id);
   };
 
   // Text to Speech
@@ -304,6 +406,62 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
           >
             <span>{isRtl ? 'العودة للمنصة ↩️' : 'Back to Academy ↩️'}</span>
           </button>
+        </div>
+
+        {/* Song Selectors Pane */}
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 mb-6 space-y-4">
+          <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse text-right' : 'text-left'}`}>
+            <span className="text-xl">✨</span>
+            <h2 className="text-base font-black text-[#002147]">
+              {isRtl ? 'اختر أغنية للبدء في الغناء والترنيم والتحدث:' : 'Choose a Song to Start Singing, Practicing, and Learning:'}
+            </h2>
+          </div>
+          
+          <div className="space-y-3">
+            {/* Kids category */}
+            <div>
+              <p className={`text-[10px] uppercase font-black tracking-wider text-blue-600 mb-1.5 ${isRtl ? 'text-right' : 'text-left'}`}>
+                {isRtl ? '👧 أغاني مسلية للأطفال (المستوى الأساسي)' : '👧 Fun Kids Songs (Elementary)'}
+              </p>
+              <div className="flex flex-wrap gap-2 justify-start">
+                {ENGLISH_WITH_SONGS_DATA.filter(s => s.level === 'أطفال').map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => handleSelectSong(s.id)}
+                    className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer border ${
+                      selectedSongId === s.id
+                        ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/10 scale-95'
+                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    🎵 {s.title}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Adults category */}
+            <div className="pt-2 border-t border-slate-100">
+              <p className={`text-[10px] uppercase font-black tracking-wider text-emerald-600 mb-1.5 ${isRtl ? 'text-right' : 'text-left'}`}>
+                {isRtl ? '🧑‍💼 أغاني متطورة للكبار واليافعين' : '🧑‍💼 Elite Songs for Adults & Juniors'}
+              </p>
+              <div className="flex flex-wrap gap-2 justify-start">
+                {ENGLISH_WITH_SONGS_DATA.filter(s => s.level === 'كبار').map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => handleSelectSong(s.id)}
+                    className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer border ${
+                      selectedSongId === s.id
+                        ? 'bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-500/10 scale-95'
+                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    🎶 {s.title} <span className="opacity-75 text-[10px] font-normal">({s.artist})</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Outer Bento Grid */}

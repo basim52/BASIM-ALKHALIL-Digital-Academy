@@ -3127,6 +3127,7 @@ export default function App() {
   const [selectedDailyDoseIndex, setSelectedDailyDoseIndex] = useState<number | null>(null);
   const [initialStoryId, setInitialStoryId] = useState<string | null>(null);
   const [activeStudentProfile, setActiveStudentProfile] = useState<UserProfile | null>(null);
+  const [earlyChildhoodInitialLesson, setEarlyChildhoodInitialLesson] = useState<string | null>(null);
 
   useEffect(() => {
     if (!activeStudentId) {
@@ -3689,7 +3690,17 @@ export default function App() {
       );
     }
     if (view === 'early-childhood') {
-      return <EarlyChildhoodHome lang={lang} profile={userProfile as StudentProfile} onBack={() => setView('dashboard')} />;
+      return (
+        <EarlyChildhoodHome 
+          lang={lang} 
+          profile={userProfile as StudentProfile} 
+          initialActiveLesson={earlyChildhoodInitialLesson || undefined}
+          onBack={() => {
+            setEarlyChildhoodInitialLesson(null);
+            setView('academic-planner');
+          }} 
+        />
+      );
     }
     if (view === 'academic-planner') {
       const plannerProfile = (userProfile?.role === 'parent' || userProfile?.role === 'admin') && activeStudentProfile 
@@ -3740,6 +3751,9 @@ export default function App() {
               const idx = KIDS_STORIES.findIndex(s => s.lesson_id === unitId || s.lesson_id === 'kids-story-player');
               setSelectedKidsStoryIndex(idx !== -1 ? idx : 0);
               setView('kids-story-player');
+            } else if (courseId === 'early_childhood') {
+              setEarlyChildhoodInitialLesson(unitId);
+              setView('early-childhood');
             } else if (courseId === 'test') {
               setSelectedTestLevel(level);
               setSelectedTestUnitId(unitId);

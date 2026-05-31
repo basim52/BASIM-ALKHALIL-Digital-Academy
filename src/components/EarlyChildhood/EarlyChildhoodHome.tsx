@@ -113,10 +113,10 @@ const CURRICULUM_LEVELS = [
   }
 ];
 
-export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, profile?: StudentProfile | null, onBack: () => void }) => {
+export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson = null }: { lang: Language, profile?: StudentProfile | null, onBack: () => void, initialActiveLesson?: string | null }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
-  const [activeLesson, setActiveLesson] = useState<string | null>(null);
+  const [activeLesson, setActiveLesson] = useState<string | null>(initialActiveLesson);
   const [showProgress, setShowProgress] = useState(false);
   const [showStickerBook, setShowStickerBook] = useState(false);
   const [showParentCorner, setShowParentCorner] = useState(false);
@@ -129,6 +129,12 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack }: { lang: Language, 
   const [isMascotFetching, setIsMascotFetching] = useState(false);
   const [currentCostume, setCurrentCostume] = useState<string | undefined>(undefined);
   const [unlockedCostumes, setUnlockedCostumes] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (initialActiveLesson) {
+      setActiveLesson(initialActiveLesson);
+    }
+  }, [initialActiveLesson]);
 
   useEffect(() => {
     if (profile?.uid) {
