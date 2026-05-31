@@ -17,6 +17,7 @@ import {
   Film,
   Key,
   Brain,
+  Gamepad2,
   MessageSquare,
   Trophy,
   Calendar,
@@ -98,6 +99,7 @@ import { EnglishSongs } from './components/EnglishSongs';
 import { AnimatedStoryboard } from './components/AnimatedStoryboard';
 import { EscapeRoomGrammar } from './components/EscapeRoomGrammar';
 import { FamilyActivities } from './components/FamilyActivities';
+import { InteractiveLearningHub } from './components/InteractiveLearningHub';
 import { Layers, Image as OxfordIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { familyConstellationsLesson } from './data/lessons/r_a1_4';
@@ -1178,118 +1180,70 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
           </button>
         </motion.div>
 
-        {/* New Mind-blowing Interactive Workouts & Game Rooms */}
-        <div className="mb-10">
-          <div className={`mb-6 ${isRtl ? 'text-right' : 'text-left'}`}>
-            <span className="text-xs font-black text-[#C49E3A] uppercase tracking-widest block mb-1">
-              {isRtl ? 'ألعاب وأقسام تفاعلية إبداعية جديدة ⚡' : 'NEW CREATIVE INTERACTIVE ACTIVITIES ⚡'}
-            </span>
-            <h2 className="text-2xl font-black text-[#002147]">
-              {isRtl ? 'الأقسام الممتعة الجديدة 🏆' : 'New Fun Adventure Hubs 🏆'}
-            </h2>
-            <p className="text-slate-400 font-bold text-xs mt-0.5">
-              {isRtl ? 'اكتشف الألعاب، الأغاني التفاعلية، والتمثيل الصوتي لتبسيط اللغة الإنجليزية وعيش المغامرة مجاناً!' : 'Explore custom games, sing-along tracks, simulated cartoons, and offline family activities!'}
-            </p>
+        {/* Unified Interactive Learning Hub Hub-Launcher */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          whileHover={{ scale: 1.01, y: -2 }}
+          onClick={() => onNavigate('interactive-learning')}
+          className="mb-10 p-6 md:p-8 bg-gradient-to-br from-[#002147] to-[#1e3a5f] rounded-[2.5rem] border-2 border-[#C49E3A]/40 text-white relative overflow-hidden group shadow-xl hover:shadow-2xl cursor-pointer transition-all"
+        >
+          {/* Subtle backgrounds */}
+          <div className="absolute top-0 right-0 w-80 h-80 bg-[#C49E3A]/10 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-700 pointer-events-none" />
+          <div className="absolute -bottom-10 left-10 w-60 h-60 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
+            <div className={`space-y-3 ${isRtl ? 'text-right' : 'text-left'}`}>
+              <div className="flex items-center gap-2 flex-wrap justify-center md:justify-start">
+                <span className="bg-amber-500 text-[#002147] px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider">
+                  {isRtl ? 'قسم مخصص جديد ⚡' : 'NEW DEDICATED HUB ⚡'}
+                </span>
+                <span className="bg-white/10 text-white/90 px-3 py-1 rounded-xl text-[10px] font-bold">
+                  {isRtl ? '4 ألعاب قوية مدمجة' : '4 Immersive Game Modes'}
+                </span>
+              </div>
+              
+              <h2 className="text-2xl md:text-3xl font-black tracking-tight">
+                {isRtl ? 'بوابة التعليم التفاعلي ⚡' : 'Interactive Learning Hub ⚡'}
+              </h2>
+              
+              <p className="text-slate-300 font-bold text-xs max-w-2xl leading-relaxed">
+                {isRtl 
+                  ? 'اجمع نقاط القوة ونمّ مهارات الاستماع والتمثيل النحوية عبر ألعاب كسر الأقفال، كاريوكي الأغاني، ومصمم السيناريوهات، ومسابقات العائلة!'
+                  : 'Unlock language prowess with present-simple escape riddles, lyric karaoke, camera directorships & off-screen sibling Bingo cards!'}
+              </p>
+
+              {/* Mini thumbnails of the games */}
+              <div className={`flex gap-3 flex-wrap pt-2 justify-center md:justify-start`}>
+                <span className="bg-white/5 border border-white/10 px-2.5 py-1.5 rounded-lg text-[10px] font-black flex items-center gap-1.5">
+                  <span>🎵</span>
+                  <span>{isRtl ? 'الأغاني' : 'Songs'}</span>
+                </span>
+                <span className="bg-white/5 border border-white/10 px-2.5 py-1.5 rounded-lg text-[10px] font-black flex items-center gap-1.5">
+                  <span>🎬</span>
+                  <span>{isRtl ? 'السيناريو' : 'Storyboards'}</span>
+                </span>
+                <span className="bg-white/5 border border-white/10 px-2.5 py-1.5 rounded-lg text-[10px] font-black flex items-center gap-1.5">
+                  <span>🔐</span>
+                  <span>{isRtl ? 'غرفة الهروب' : 'Escape Room'}</span>
+                </span>
+                <span className="bg-white/5 border border-white/10 px-2.5 py-1.5 rounded-lg text-[10px] font-black flex items-center gap-1.5">
+                  <span>👨‍👩‍👧‍👦</span>
+                  <span>{isRtl ? 'العائلة وطبيخ بينغو' : 'Family Play'}</span>
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center justify-center gap-2 shrink-0 group-hover:scale-105 transition-transform">
+              <div className="w-16 h-16 bg-[#C49E3A] text-[#002147] rounded-[2rem] flex items-center justify-center shadow-lg animate-pulse">
+                <Gamepad2 size={32} />
+              </div>
+              <span className="bg-white text-[#002147] text-[10px] font-black px-4 py-2 rounded-xl shadow-md border border-[#C49E3A] text-center">
+                {isRtl ? 'افتح بوابة المتعة 🎪' : 'Enter Game Room 🎪'}
+              </span>
+            </div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Song Workout */}
-            <motion.div
-              whileHover={{ scale: 1.03, y: -4 }}
-              onClick={() => onNavigate('english-songs')}
-              className="bg-white border border-[#b48e56]/15 rounded-[2rem] p-5 shadow-xs hover:shadow-md transition-all cursor-pointer relative group flex flex-col justify-between overflow-hidden"
-            >
-              <div className="absolute -top-6 -right-6 w-20 h-20 bg-amber-500/5 rounded-full group-hover:scale-110 transition-transform" />
-              <div>
-                <div className="w-10 h-10 bg-amber-100/80 text-amber-700 rounded-xl flex items-center justify-center mb-3">
-                  <Music size={20} className="animate-pulse" />
-                </div>
-                <h3 className={`text-base font-black text-[#002147] mb-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-                  {isRtl ? 'الإنجليزية عبر الأغاني 🎵' : 'English with Songs 🎵'}
-                </h3>
-                <p className={`text-slate-400 font-bold text-[11px] leading-relaxed ${isRtl ? 'text-right' : 'text-left'}`}>
-                  {isRtl ? 'أشرطة غنائية تفاعلية تفاعلية مع كلمات متحركة وملء الفراغات والجوائز!' : 'Sing-along classic tracks with dynamic lyrics highlighting, word guessing, and XP medals.'}
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-slate-55 flex justify-between items-center text-[10px] font-black text-amber-600">
-                <span>{isRtl ? 'مستوى A1 - أطفال' : 'A1 Kids Track'}</span>
-                <span className="bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100">{isRtl ? 'ابدأ الاستماع ⚡' : 'Karaoke Lab ⚡'}</span>
-              </div>
-            </motion.div>
-
-            {/* Stories Storyboard */}
-            <motion.div
-              whileHover={{ scale: 1.03, y: -4 }}
-              onClick={() => onNavigate('animated-storyboard')}
-              className="bg-white border border-[#b48e56]/15 rounded-[2rem] p-5 shadow-xs hover:shadow-md transition-all cursor-pointer relative group flex flex-col justify-between overflow-hidden"
-            >
-              <div className="absolute -top-6 -right-6 w-20 h-20 bg-teal-500/5 rounded-full group-hover:scale-110 transition-transform" />
-              <div>
-                <div className="w-10 h-10 bg-teal-100/80 text-teal-700 rounded-xl flex items-center justify-center mb-3">
-                  <Film size={20} />
-                </div>
-                <h3 className={`text-base font-black text-[#002147] mb-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-                  {isRtl ? 'لوحة مشاهد لندن 🎬' : 'London Storyboards 🎬'}
-                </h3>
-                <p className={`text-slate-400 font-bold text-[11px] leading-relaxed ${isRtl ? 'text-right' : 'text-left'}`}>
-                  {isRtl ? 'حول قصص مغامرات "نور" إلى مشاهد كرتونية مسجلة مسموعة تصف حركة الكاميرا!' : 'Convert storyboards to audio scene sequences with director notes & interactive narration.'}
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-slate-55 flex justify-between items-center text-[10px] font-black text-teal-600">
-                <span>{isRtl ? 'مستوى مبتدئ' : 'Storyboard Mode'}</span>
-                <span className="bg-teal-50 px-2 py-0.5 rounded-md border border-teal-100">{isRtl ? 'شاهد المشاهد 🎬' : 'Scene Player 🎬'}</span>
-              </div>
-            </motion.div>
-
-            {/* Escape Room */}
-            <motion.div
-              whileHover={{ scale: 1.03, y: -4 }}
-              onClick={() => onNavigate('escape-room')}
-              className="bg-white border border-[#b48e56]/15 rounded-[2rem] p-5 shadow-xs hover:shadow-md transition-all cursor-pointer relative group flex flex-col justify-between overflow-hidden"
-            >
-              <div className="absolute -top-6 -right-6 w-20 h-20 bg-purple-500/5 rounded-full group-hover:scale-110 transition-transform" />
-              <div>
-                <div className="w-10 h-10 bg-purple-100/80 text-purple-700 rounded-xl flex items-center justify-center mb-3">
-                  <Key size={18} />
-                </div>
-                <h3 className={`text-base font-black text-[#002147] mb-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-                  {isRtl ? 'غرفة هروب القواعد 🔐' : 'Grammar Escape Room 🔐'}
-                </h3>
-                <p className={`text-slate-400 font-bold text-[11px] leading-relaxed ${isRtl ? 'text-right' : 'text-left'}`}>
-                  {isRtl ? 'احسب وفك الشفرات النحوية للمضارع البسيط لتفتح أقفال برج لندن العتيق!' : 'Riddle present simple agreements to break heavy locks and escape the Big Ben tower!'}
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-slate-55 flex justify-between items-center text-[10px] font-black text-purple-600">
-                <span>{isRtl ? 'ألعاب قواعد' : 'Present Simple Game'}</span>
-                <span className="bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100">{isRtl ? 'افتح الأقفال 🔑' : 'Crack Codes 🔑'}</span>
-              </div>
-            </motion.div>
-
-            {/* Family Hub */}
-            <motion.div
-              whileHover={{ scale: 1.03, y: -4 }}
-              onClick={() => onNavigate('family-activities')}
-              className="bg-white border border-[#b48e56]/15 rounded-[2rem] p-5 shadow-xs hover:shadow-md transition-all cursor-pointer relative group flex flex-col justify-between overflow-hidden"
-            >
-              <div className="absolute -top-6 -right-6 w-20 h-20 bg-emerald-500/5 rounded-full group-hover:scale-110 transition-transform" />
-              <div>
-                <div className="w-10 h-10 bg-emerald-100/80 text-emerald-700 rounded-xl flex items-center justify-center mb-3">
-                  <Users size={18} />
-                </div>
-                <h3 className={`text-base font-black text-[#002147] mb-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-                  {isRtl ? 'بينغو وطبيخ العائلة 👨‍👩‍👧‍👦' : 'Family Game & Cooking 👨‍👩‍👧‍👦'}
-                </h3>
-                <p className={`text-slate-400 font-bold text-[11px] leading-relaxed ${isRtl ? 'text-right' : 'text-left'}`}>
-                  {isRtl ? 'مسابقات بينغو كلمات بطاقات الأوفلاين، ودروس طبخ ممتعة لصنع وجبات عائلية!' : 'Engage siblings with vocabulary Bingo calling or make happy-face pizzas offline.'}
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-slate-55 flex justify-between items-center text-[10px] font-black text-emerald-600">
-                <span>{isRtl ? 'أنشطة عائلية' : 'Co-op Family Play'}</span>
-                <span className="bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">{isRtl ? 'العب الآن 👨‍👩‍👧‍👦' : 'Start Co-op 👨‍👩‍👧‍👦'}</span>
-              </div>
-            </motion.div>
-          </div>
-        </div>
+        </motion.div>
 
         {currentPlan && todayLesson && (
           <motion.div 
@@ -3864,10 +3818,10 @@ export default function App() {
               </div>
 
               <button
-                onClick={() => setView('dashboard')}
+                onClick={() => setView('interactive-learning')}
                 className={`flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-[#002147] rounded-xl font-black text-xs transition-all shadow-xs cursor-pointer ${isRtl ? 'flex-row-reverse' : ''}`}
               >
-                <span>{isRtl ? 'العودة للرئيسية ↩️' : 'Back to Dashboard ↩️'}</span>
+                <span>{isRtl ? 'العودة لتعليم تفاعلي ↩️' : 'Back to Interactive Play ↩️'}</span>
               </button>
             </div>
 
@@ -4028,7 +3982,7 @@ export default function App() {
         <RolePlayChallenges
           lang={lang}
           userProfile={userProfile}
-          onBack={() => setView('dashboard')}
+          onBack={() => setView('interactive-learning')}
           onXPAdded={async (xp) => {
             if (userProfile && currentUser) {
               const currentPoints = (userProfile as any).points || 0;
@@ -4057,7 +4011,7 @@ export default function App() {
         <VisualDictionary
           lang={lang}
           userProfile={userProfile}
-          onBack={() => setView('dashboard')}
+          onBack={() => setView('interactive-learning')}
           onXPAdded={async (xp) => {
             if (userProfile && currentUser) {
               const currentPoints = (userProfile as any).points || 0;
@@ -4081,12 +4035,22 @@ export default function App() {
         />
       );
     }
+    if (view === 'interactive-learning') {
+      return (
+        <InteractiveLearningHub
+          lang={lang}
+          userProfile={userProfile}
+          onNavigate={(target) => setView(target)}
+          onBack={() => setView('dashboard')}
+        />
+      );
+    }
     if (view === 'english-songs') {
       return (
         <EnglishSongs
           lang={lang}
           userProfile={userProfile}
-          onBack={() => setView('dashboard')}
+          onBack={() => setView('interactive-learning')}
           onXPAdded={async (xp) => {
             if (userProfile && currentUser) {
               const currentPoints = (userProfile as any).points || 0;
@@ -4115,7 +4079,7 @@ export default function App() {
         <AnimatedStoryboard
           lang={lang}
           userProfile={userProfile}
-          onBack={() => setView('dashboard')}
+          onBack={() => setView('interactive-learning')}
           onXPAdded={async (xp) => {
             if (userProfile && currentUser) {
               const currentPoints = (userProfile as any).points || 0;
@@ -4144,7 +4108,7 @@ export default function App() {
         <EscapeRoomGrammar
           lang={lang}
           userProfile={userProfile}
-          onBack={() => setView('dashboard')}
+          onBack={() => setView('interactive-learning')}
           onXPAdded={async (xp) => {
             if (userProfile && currentUser) {
               const currentPoints = (userProfile as any).points || 0;
@@ -4173,7 +4137,7 @@ export default function App() {
         <FamilyActivities
           lang={lang}
           userProfile={userProfile}
-          onBack={() => setView('dashboard')}
+          onBack={() => setView('interactive-learning')}
           onXPAdded={async (xp) => {
             if (userProfile && currentUser) {
               const currentPoints = (userProfile as any).points || 0;
@@ -4218,10 +4182,10 @@ export default function App() {
               </div>
 
               <button
-                onClick={() => setView('dashboard')}
+                onClick={() => setView('interactive-learning')}
                 className={`flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-[#002147] rounded-xl font-black text-xs transition-all shadow-xs cursor-pointer ${isRtl ? 'flex-row-reverse' : ''}`}
               >
-                <span>{isRtl ? 'العودة للرئيسية ↩️' : 'Back to Dashboard ↩️'}</span>
+                <span>{isRtl ? 'العودة لتعليم تفاعلي ↩️' : 'Back to Interactive Play ↩️'}</span>
               </button>
             </div>
 
@@ -4698,48 +4662,15 @@ export default function App() {
                 {/* Quick Access Pills for Newly Added Sections */}
                 <div className="flex items-center gap-1.5">
                   <button 
-                    onClick={() => setView('adults-daily-dose')}
-                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-[9px] font-black transition-all cursor-pointer ${
-                      view === 'adults-daily-dose' 
-                        ? 'bg-[#002147] text-white border-[#002147]' 
-                        : 'bg-[#fdfbf7] text-[#b48e56] border-[#b48e56]/30 hover:bg-[#b48e56]/5'
+                    onClick={() => setView('interactive-learning')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[10px] font-black transition-all cursor-pointer ${
+                      view === 'interactive-learning' 
+                        ? 'bg-[#002147] text-white border-[#002147] shadow-sm' 
+                        : 'bg-amber-500/10 text-amber-700 border-amber-500/30 hover:bg-amber-500/20'
                     }`}
                   >
-                    <Zap size={9} className={view === 'adults-daily-dose' ? '' : 'animate-pulse'} />
-                    <span>{isRtl ? 'الجرعة اليومية ⚡' : 'Daily Dose ⚡'}</span>
-                  </button>
-                  <button 
-                    onClick={() => setView('kids-story-player')}
-                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-[9px] font-black transition-all cursor-pointer ${
-                      view === 'kids-story-player' 
-                        ? 'bg-amber-500 text-white border-amber-500' 
-                        : 'bg-[#fffcf5] text-amber-600 border-amber-500/30 hover:bg-amber-500/5'
-                    }`}
-                  >
-                    <BookOpen size={9} />
-                    <span>{isRtl ? 'قصص تعليمية 📚' : 'Educational Stories 📚'}</span>
-                  </button>
-                  <button 
-                    onClick={() => setView('roleplay-challenges')}
-                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-[9px] font-black transition-all cursor-pointer ${
-                      view === 'roleplay-challenges' 
-                        ? 'bg-emerald-600 text-white border-emerald-600' 
-                        : 'bg-[#f0fdf4] text-emerald-700 border-emerald-500/30 hover:bg-emerald-650/5'
-                    }`}
-                  >
-                    <Users size={9} />
-                    <span>{isRtl ? 'حوارات 🎭' : 'Roleplay 🎭'}</span>
-                  </button>
-                  <button 
-                    onClick={() => setView('visual-dictionary')}
-                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-[9px] font-black transition-all cursor-pointer ${
-                      view === 'visual-dictionary' 
-                        ? 'bg-[#C49E3A] text-[#002147] border-[#C49E3A]' 
-                        : 'bg-white text-slate-705 border-slate-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    <BookOpen size={9} />
-                    <span>{isRtl ? 'قاموس 🎨' : 'Dictionary 🎨'}</span>
+                    <Gamepad2 size={12} className="animate-pulse" />
+                    <span>{isRtl ? 'تعليم تفاعلي ⚡' : 'Interactive Play ⚡'}</span>
                   </button>
                 </div>
 
@@ -4768,15 +4699,8 @@ export default function App() {
                 <nav className="flex-1 space-y-2 overflow-y-auto no-scrollbar">
                   {[
                     { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
-                    { id: 'adults-daily-dose', label: lang === 'ar' ? 'الجرعة اليومية ⚡' : 'Daily Dose ⚡', icon: Zap },
-                    { id: 'kids-story-player', label: lang === 'ar' ? 'قصص تعليمية 📚' : 'Educational Stories 📚', icon: BookOpen },
                     { id: 'pronunciation-lab', label: lang === 'ar' ? 'معمل النطق 🎙️' : 'Pronunciation Lab 🎙️', icon: Mic },
-                    { id: 'roleplay-challenges', label: lang === 'ar' ? 'حوارات تمثيلية 🎭' : 'Role-Play Challenges 🎭', icon: Users },
-                    { id: 'visual-dictionary', label: lang === 'ar' ? 'القاموس المصور 🎨' : 'Visual Dictionary 🎨', icon: BookOpen },
-                    { id: 'english-songs', label: lang === 'ar' ? 'الإنجليزية عبر الأغاني 🎵' : 'English with Songs 🎵', icon: Music },
-                    { id: 'animated-storyboard', label: lang === 'ar' ? 'الرسوم المصورة 🎬' : 'Animated Storyboards 🎬', icon: Film },
-                    { id: 'escape-room', label: lang === 'ar' ? 'غرفة الهروب 🔐' : 'Grammar Escape Room 🔐', icon: Key },
-                    { id: 'family-activities', label: lang === 'ar' ? 'بينغو وطبيخ العائلة 👨‍👩‍👧‍👦' : 'Family Game & Cooking 👨‍👩‍👧‍👦', icon: Users },
+                    { id: 'interactive-learning', label: lang === 'ar' ? 'تعليم تفاعلي ⚡' : 'Interactive Learning ⚡', icon: Gamepad2 },
                     { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
                     { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
                     { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
@@ -4849,9 +4773,8 @@ export default function App() {
                     { id: 'academic-planner', icon: Sparkles },
                     { id: 'oxford-discover', icon: OxfordIcon },
                     { id: 'video-library', icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
-                    { id: 'kids-story-player', icon: BookOpen },
+                    { id: 'interactive-learning', icon: Gamepad2 },
                     { id: 'pronunciation-lab', icon: Mic },
-                    { id: 'roleplay-challenges', icon: Users },
                     { id: 'story-library', icon: BookMarked },
                   ],
                   [
