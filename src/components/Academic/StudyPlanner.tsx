@@ -26,7 +26,12 @@ import {
   Download,
   Share2,
   MessageSquare,
-  Palette
+  Palette,
+  Gamepad2,
+  Music,
+  Film,
+  Key,
+  Users
 } from 'lucide-react';
 import { translations, Language } from '../../lib/translations';
 import { ALL_READING_UNITS } from '../ReadingCurriculumCompanion';
@@ -65,6 +70,17 @@ const AVAILABLE_CATEGORIES = [
     color: 'text-amber-600', 
     bg: 'bg-amber-50',
     subCourses: ['oxford']
+  },
+  { 
+    id: 'interactive_learning', 
+    labelEn: 'Interactive Play', 
+    labelAr: 'التعليم التفاعلي ⚡', 
+    descAr: 'الألعاب والقصص والحوارات والقاموس المصور وغرفة الهروب والبيتزا العائلية بذكاء',
+    descEn: 'High-engagement games, karaoke, role-play challenges, and family rooms',
+    icon: Gamepad2, 
+    color: 'text-amber-600', 
+    bg: 'bg-amber-50',
+    subCourses: ['english_songs', 'animated_storyboard', 'escape_room', 'roleplay_challenges', 'visual_dictionary', 'family_activities', 'adults_daily_dose', 'kids_stories']
   },
   { 
     id: 'listening_stories', 
@@ -135,7 +151,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
   const t = translations[lang];
   const isRtl = lang === 'ar';
   
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(['advanced', 'oxford']);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(['advanced', 'oxford', 'interactive_learning']);
   const [selectedDays, setSelectedDays] = useState<number[]>([0, 1, 2, 3, 4]); // Default Sun-Thu
   const [weeksToGenerate, setWeeksToGenerate] = useState<number>(13); // Default to 13 weeks (3 Months)
   const [lessonsPerDay, setLessonsPerDay] = useState<number>(2); // Default to 2 lessons per day
@@ -467,6 +483,73 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
       });
     }
 
+    const interactiveLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
+
+    if (selectedCategories.includes('interactive_learning')) {
+      const interactiveItems = [
+        {
+          courseId: 'english_songs',
+          label: isRtl ? 'الأغاني التفاعلية 🎵' : 'Interactive Songs 🎵',
+          topic: isRtl ? 'كاريوكي الأغاني الإنجليزية واستخراج المفردات 🎵' : 'English Karaoke Sing-Along 🎵',
+          unitId: 'english-songs',
+          level: 'A1 Play'
+        },
+        {
+          courseId: 'animated_storyboard',
+          label: isRtl ? 'مشاهد لندن الكرتونية 🎬' : 'London Storyboards 🎬',
+          topic: isRtl ? 'لوحة مشاهد لندن والسيناريو والتمثيل الصوتي 🎬' : 'London Subway Noor Directorship 🎬',
+          unitId: 'animated-storyboard',
+          level: 'Junior Play'
+        },
+        {
+          courseId: 'escape_room',
+          label: isRtl ? 'غرفة هروب القواعد 🔐' : 'Grammar Escape Room 🔐',
+          topic: isRtl ? 'فك شفرة بيغ بن وفك أقفال المضارع البسيط 🔐' : 'Present Simple Codes Tower Escape 🔐',
+          unitId: 'escape-room',
+          level: 'A1/A2 Logic'
+        },
+        {
+          courseId: 'roleplay_challenges',
+          label: isRtl ? 'حوارات تمثيلية 🎭' : 'Roleplay 🎭',
+          topic: isRtl ? 'حوار تمثيلي تفاعلي بالمطعم والفندق مسموع 🎭' : 'Interactive Restaurant & Hotel Speaking 🎭',
+          unitId: 'roleplay-challenges',
+          level: 'B1 Speaking'
+        },
+        {
+          courseId: 'visual_dictionary',
+          label: isRtl ? 'القاموس المصور 🎨' : 'Visual Dictionary 🎨',
+          topic: isRtl ? 'الألوان والتصنيفات والربط والقاموس المصور الذكي 🎨' : 'Dynamic Visual Glossary Challenge 🎨',
+          unitId: 'visual-dictionary',
+          level: 'A1 Basics'
+        },
+        {
+          courseId: 'family_activities',
+          label: isRtl ? 'مسابقات العائلة بينغو 👨‍👩‍👧‍👦' : 'Family Play Bingo 👨‍👩‍👧‍👦',
+          topic: isRtl ? 'مسابقة بينغو الأوفلاين وطبخ بيتزا الوجه السعيد 🍕' : 'Offline Vocab Bingo & Happy Face Pizza 👨‍👩‍👧‍👦',
+          unitId: 'family-activities',
+          level: 'Co-op Play'
+        },
+        {
+          courseId: 'adults_daily_dose',
+          label: isRtl ? 'الجرعة اليومية للبالغين ⚡' : 'Adults Daily Dose ⚡',
+          topic: isRtl ? 'جرعة لغوية يومية مكثفة وسريعة للكبار ⚡' : 'Adults Fast Grammar & Pronunciation Dose ⚡',
+          unitId: 'adults-daily-dose',
+          level: 'Adult'
+        },
+        {
+          courseId: 'kids_stories',
+          label: isRtl ? 'القصص التعليمية المسموعة 📚' : 'Interactive Audio Stories 📚',
+          topic: isRtl ? 'القصص المسموعة وتنمية مفردات الأطفال 📚' : 'Bilingual Listening Storybook Adventure 📚',
+          unitId: 'kids-story-player',
+          level: 'Kids Play'
+        }
+      ];
+
+      interactiveItems.forEach(item => {
+        interactiveLessons.push(item);
+      });
+    }
+
     // Interleave lessons from all enabled lists to create a perfect mix
     const allAvailableLessons: { courseId: string; label: string; topic: string; unitId: string; level: string }[] = [];
     const enabledLists = [
@@ -474,7 +557,8 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
       oxfordLessons,
       listeningStoryLessons,
       dailyDoseLessons,
-      kidsStoryLessons
+      kidsStoryLessons,
+      interactiveLessons
     ].filter(list => list.length > 0);
 
     if (enabledLists.length > 0) {
@@ -1575,6 +1659,12 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                                   item.courseId === 'kids_stories' ? 'bg-cyan-600 text-white shadow-cyan-100' :
                                   item.courseId === 'conversation' ? 'bg-indigo-500 text-white shadow-indigo-100' :
                                   item.courseId === 'writing' ? 'bg-rose-500 text-white shadow-rose-100' :
+                                  item.courseId === 'english_songs' ? 'bg-blue-500 text-white shadow-blue-100' :
+                                  item.courseId === 'animated_storyboard' ? 'bg-teal-500 text-white shadow-teal-100' :
+                                  item.courseId === 'escape_room' ? 'bg-purple-500 text-white shadow-purple-100' :
+                                  item.courseId === 'roleplay_challenges' ? 'bg-indigo-600 text-white shadow-indigo-100' :
+                                  item.courseId === 'visual_dictionary' ? 'bg-rose-500 text-white shadow-rose-100' :
+                                  item.courseId === 'family_activities' ? 'bg-emerald-500 text-white shadow-emerald-100' :
                                   'bg-indigo-600 text-white shadow-indigo-100'
                                 }`}>
                                   {isTest ? <CheckCircle2 size={24} /> :
@@ -1583,6 +1673,12 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                                    item.courseId === 'story-library' ? <Volume2 size={24} /> :
                                    item.courseId === 'adults_daily_dose' ? <Flame size={24} /> :
                                    item.courseId === 'kids_stories' ? <Award size={24} /> :
+                                   item.courseId === 'english_songs' ? <Music size={24} /> :
+                                   item.courseId === 'animated_storyboard' ? <Film size={24} /> :
+                                   item.courseId === 'escape_room' ? <Key size={24} /> :
+                                   item.courseId === 'roleplay_challenges' ? <Users size={24} /> :
+                                   item.courseId === 'visual_dictionary' ? <Palette size={24} /> :
+                                   item.courseId === 'family_activities' ? <Sparkles size={24} /> :
                                    <Sparkles size={24} />}
                                 </div>
                                 <div className="space-y-1 flex-1">

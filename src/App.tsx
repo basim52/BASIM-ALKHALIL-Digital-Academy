@@ -3720,12 +3720,24 @@ export default function App() {
             } else if (courseId === 'story-library') {
               setInitialStoryId(unitId);
               setView('story-library');
-            } else if (courseId === 'adults_daily_dose') {
-              const idx = ADULTS_DAILY_DOSES.findIndex(d => d.lesson_id === unitId);
+            } else if (courseId === 'english_songs' || courseId === 'english-songs') {
+              setView('english-songs');
+            } else if (courseId === 'animated_storyboard' || courseId === 'animated-storyboard') {
+              setView('animated-storyboard');
+            } else if (courseId === 'escape_room' || courseId === 'escape-room') {
+              setView('escape-room');
+            } else if (courseId === 'roleplay_challenges' || courseId === 'roleplay-challenges') {
+              setView('roleplay-challenges');
+            } else if (courseId === 'visual_dictionary' || courseId === 'visual-dictionary') {
+              setView('visual-dictionary');
+            } else if (courseId === 'family_activities' || courseId === 'family-activities') {
+              setView('family-activities');
+            } else if (courseId === 'adults_daily_dose' || courseId === 'adults-daily-dose') {
+              const idx = ADULTS_DAILY_DOSES.findIndex(d => d.lesson_id === unitId || d.lesson_id === 'adults-daily-dose');
               setSelectedDailyDoseIndex(idx !== -1 ? idx : 0);
               setView('adults-daily-dose');
-            } else if (courseId === 'kids_stories') {
-              const idx = KIDS_STORIES.findIndex(s => s.lesson_id === unitId);
+            } else if (courseId === 'kids_stories' || courseId === 'kids-story-player') {
+              const idx = KIDS_STORIES.findIndex(s => s.lesson_id === unitId || s.lesson_id === 'kids-story-player');
               setSelectedKidsStoryIndex(idx !== -1 ? idx : 0);
               setView('kids-story-player');
             } else if (courseId === 'test') {
