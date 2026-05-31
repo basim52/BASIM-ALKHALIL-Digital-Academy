@@ -1,3 +1,5 @@
+import { KIDS_STORIES_EXTRA } from './kidsStories_extra';
+
 export interface KidStoryLine {
   speaker: string;
   english: string;
@@ -57,7 +59,7 @@ export interface KidStory {
   };
 }
 
-export const KIDS_STORIES: KidStory[] = [
+const BASE_KIDS_STORIES: KidStory[] = [
   {
     "lesson_id": "kids_story_001",
     "title_ar": "نور تصل إلى لندن",
@@ -1348,3 +1350,5 @@ export const KIDS_STORIES: KidStory[] = [
     }
   }
 ];
+
+export const KIDS_STORIES: KidStory[] = [...BASE_KIDS_STORIES, ...KIDS_STORIES_EXTRA];

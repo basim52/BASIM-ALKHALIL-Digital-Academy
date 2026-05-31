@@ -1,3 +1,5 @@
+import { ADULTS_DAILY_DOSES_EXTRA } from './adultsDailyDose_extra';
+
 export interface BilingualDialogueLine {
   speaker: string;
   english: string;
@@ -53,7 +55,7 @@ export interface DailyDoseLesson {
   };
 }
 
-export const ADULTS_DAILY_DOSES: DailyDoseLesson[] = [
+const BASE_ADULTS_DAILY_DOSES: DailyDoseLesson[] = [
   {
     "lesson_id": "daily_001",
     "title_ar": "أنا متحمس مش أنا مثير!",
@@ -496,3 +498,5 @@ export const ADULTS_DAILY_DOSES: DailyDoseLesson[] = [
     }
   }
 ];
+
+export const ADULTS_DAILY_DOSES: DailyDoseLesson[] = [...BASE_ADULTS_DAILY_DOSES, ...ADULTS_DAILY_DOSES_EXTRA];
