@@ -13,6 +13,9 @@ import {
   Settings, 
   LayoutDashboard, 
   GraduationCap,
+  Music,
+  Film,
+  Key,
   Brain,
   MessageSquare,
   Trophy,
@@ -41,7 +44,8 @@ import {
   ExternalLink,
   Smartphone,
   Download,
-  Zap
+  Zap,
+  Mic
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'motion/react';
@@ -87,6 +91,13 @@ import { AdultsDailyDose } from './components/AdultsDailyDose';
 import { ADULTS_DAILY_DOSES } from './data/adultsDailyDose';
 import { KidsStoryPlayer } from './components/KidsStoryPlayer';
 import { KIDS_STORIES } from './data/kidsStories';
+import { PronunciationLab } from './components/PronunciationLab';
+import { RolePlayChallenges } from './components/RolePlayChallenges';
+import { VisualDictionary } from './components/VisualDictionary';
+import { EnglishSongs } from './components/EnglishSongs';
+import { AnimatedStoryboard } from './components/AnimatedStoryboard';
+import { EscapeRoomGrammar } from './components/EscapeRoomGrammar';
+import { FamilyActivities } from './components/FamilyActivities';
 import { Layers, Image as OxfordIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { familyConstellationsLesson } from './data/lessons/r_a1_4';
@@ -1166,6 +1177,119 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             {isRtl ? 'ابدأ مغامرتى الآن ✨' : 'Start Kids Adventure ✨'}
           </button>
         </motion.div>
+
+        {/* New Mind-blowing Interactive Workouts & Game Rooms */}
+        <div className="mb-10">
+          <div className={`mb-6 ${isRtl ? 'text-right' : 'text-left'}`}>
+            <span className="text-xs font-black text-[#C49E3A] uppercase tracking-widest block mb-1">
+              {isRtl ? 'ألعاب وأقسام تفاعلية إبداعية جديدة ⚡' : 'NEW CREATIVE INTERACTIVE ACTIVITIES ⚡'}
+            </span>
+            <h2 className="text-2xl font-black text-[#002147]">
+              {isRtl ? 'الأقسام الممتعة الجديدة 🏆' : 'New Fun Adventure Hubs 🏆'}
+            </h2>
+            <p className="text-slate-400 font-bold text-xs mt-0.5">
+              {isRtl ? 'اكتشف الألعاب، الأغاني التفاعلية، والتمثيل الصوتي لتبسيط اللغة الإنجليزية وعيش المغامرة مجاناً!' : 'Explore custom games, sing-along tracks, simulated cartoons, and offline family activities!'}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Song Workout */}
+            <motion.div
+              whileHover={{ scale: 1.03, y: -4 }}
+              onClick={() => onNavigate('english-songs')}
+              className="bg-white border border-[#b48e56]/15 rounded-[2rem] p-5 shadow-xs hover:shadow-md transition-all cursor-pointer relative group flex flex-col justify-between overflow-hidden"
+            >
+              <div className="absolute -top-6 -right-6 w-20 h-20 bg-amber-500/5 rounded-full group-hover:scale-110 transition-transform" />
+              <div>
+                <div className="w-10 h-10 bg-amber-100/80 text-amber-700 rounded-xl flex items-center justify-center mb-3">
+                  <Music size={20} className="animate-pulse" />
+                </div>
+                <h3 className={`text-base font-black text-[#002147] mb-1 ${isRtl ? 'text-right' : 'text-left'}`}>
+                  {isRtl ? 'الإنجليزية عبر الأغاني 🎵' : 'English with Songs 🎵'}
+                </h3>
+                <p className={`text-slate-400 font-bold text-[11px] leading-relaxed ${isRtl ? 'text-right' : 'text-left'}`}>
+                  {isRtl ? 'أشرطة غنائية تفاعلية تفاعلية مع كلمات متحركة وملء الفراغات والجوائز!' : 'Sing-along classic tracks with dynamic lyrics highlighting, word guessing, and XP medals.'}
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-55 flex justify-between items-center text-[10px] font-black text-amber-600">
+                <span>{isRtl ? 'مستوى A1 - أطفال' : 'A1 Kids Track'}</span>
+                <span className="bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100">{isRtl ? 'ابدأ الاستماع ⚡' : 'Karaoke Lab ⚡'}</span>
+              </div>
+            </motion.div>
+
+            {/* Stories Storyboard */}
+            <motion.div
+              whileHover={{ scale: 1.03, y: -4 }}
+              onClick={() => onNavigate('animated-storyboard')}
+              className="bg-white border border-[#b48e56]/15 rounded-[2rem] p-5 shadow-xs hover:shadow-md transition-all cursor-pointer relative group flex flex-col justify-between overflow-hidden"
+            >
+              <div className="absolute -top-6 -right-6 w-20 h-20 bg-teal-500/5 rounded-full group-hover:scale-110 transition-transform" />
+              <div>
+                <div className="w-10 h-10 bg-teal-100/80 text-teal-700 rounded-xl flex items-center justify-center mb-3">
+                  <Film size={20} />
+                </div>
+                <h3 className={`text-base font-black text-[#002147] mb-1 ${isRtl ? 'text-right' : 'text-left'}`}>
+                  {isRtl ? 'لوحة مشاهد لندن 🎬' : 'London Storyboards 🎬'}
+                </h3>
+                <p className={`text-slate-400 font-bold text-[11px] leading-relaxed ${isRtl ? 'text-right' : 'text-left'}`}>
+                  {isRtl ? 'حول قصص مغامرات "نور" إلى مشاهد كرتونية مسجلة مسموعة تصف حركة الكاميرا!' : 'Convert storyboards to audio scene sequences with director notes & interactive narration.'}
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-55 flex justify-between items-center text-[10px] font-black text-teal-600">
+                <span>{isRtl ? 'مستوى مبتدئ' : 'Storyboard Mode'}</span>
+                <span className="bg-teal-50 px-2 py-0.5 rounded-md border border-teal-100">{isRtl ? 'شاهد المشاهد 🎬' : 'Scene Player 🎬'}</span>
+              </div>
+            </motion.div>
+
+            {/* Escape Room */}
+            <motion.div
+              whileHover={{ scale: 1.03, y: -4 }}
+              onClick={() => onNavigate('escape-room')}
+              className="bg-white border border-[#b48e56]/15 rounded-[2rem] p-5 shadow-xs hover:shadow-md transition-all cursor-pointer relative group flex flex-col justify-between overflow-hidden"
+            >
+              <div className="absolute -top-6 -right-6 w-20 h-20 bg-purple-500/5 rounded-full group-hover:scale-110 transition-transform" />
+              <div>
+                <div className="w-10 h-10 bg-purple-100/80 text-purple-700 rounded-xl flex items-center justify-center mb-3">
+                  <Key size={18} />
+                </div>
+                <h3 className={`text-base font-black text-[#002147] mb-1 ${isRtl ? 'text-right' : 'text-left'}`}>
+                  {isRtl ? 'غرفة هروب القواعد 🔐' : 'Grammar Escape Room 🔐'}
+                </h3>
+                <p className={`text-slate-400 font-bold text-[11px] leading-relaxed ${isRtl ? 'text-right' : 'text-left'}`}>
+                  {isRtl ? 'احسب وفك الشفرات النحوية للمضارع البسيط لتفتح أقفال برج لندن العتيق!' : 'Riddle present simple agreements to break heavy locks and escape the Big Ben tower!'}
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-55 flex justify-between items-center text-[10px] font-black text-purple-600">
+                <span>{isRtl ? 'ألعاب قواعد' : 'Present Simple Game'}</span>
+                <span className="bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100">{isRtl ? 'افتح الأقفال 🔑' : 'Crack Codes 🔑'}</span>
+              </div>
+            </motion.div>
+
+            {/* Family Hub */}
+            <motion.div
+              whileHover={{ scale: 1.03, y: -4 }}
+              onClick={() => onNavigate('family-activities')}
+              className="bg-white border border-[#b48e56]/15 rounded-[2rem] p-5 shadow-xs hover:shadow-md transition-all cursor-pointer relative group flex flex-col justify-between overflow-hidden"
+            >
+              <div className="absolute -top-6 -right-6 w-20 h-20 bg-emerald-500/5 rounded-full group-hover:scale-110 transition-transform" />
+              <div>
+                <div className="w-10 h-10 bg-emerald-100/80 text-emerald-700 rounded-xl flex items-center justify-center mb-3">
+                  <Users size={18} />
+                </div>
+                <h3 className={`text-base font-black text-[#002147] mb-1 ${isRtl ? 'text-right' : 'text-left'}`}>
+                  {isRtl ? 'بينغو وطبيخ العائلة 👨‍👩‍👧‍👦' : 'Family Game & Cooking 👨‍👩‍👧‍👦'}
+                </h3>
+                <p className={`text-slate-400 font-bold text-[11px] leading-relaxed ${isRtl ? 'text-right' : 'text-left'}`}>
+                  {isRtl ? 'مسابقات بينغو كلمات بطاقات الأوفلاين، ودروس طبخ ممتعة لصنع وجبات عائلية!' : 'Engage siblings with vocabulary Bingo calling or make happy-face pizzas offline.'}
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-55 flex justify-between items-center text-[10px] font-black text-emerald-600">
+                <span>{isRtl ? 'أنشطة عائلية' : 'Co-op Family Play'}</span>
+                <span className="bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">{isRtl ? 'العب الآن 👨‍👩‍👧‍👦' : 'Start Co-op 👨‍👩‍👧‍👦'}</span>
+              </div>
+            </motion.div>
+          </div>
+        </div>
 
         {currentPlan && todayLesson && (
           <motion.div 
@@ -3870,6 +3994,209 @@ export default function App() {
         />
       );
     }
+    if (view === 'pronunciation-lab') {
+      return (
+        <PronunciationLab
+          lang={lang}
+          userProfile={userProfile}
+          onBack={() => setView('dashboard')}
+          onXPAdded={async (xp) => {
+            if (userProfile && currentUser) {
+              const currentPoints = (userProfile as any).points || 0;
+              const newPoints = currentPoints + xp;
+              try {
+                if (!currentUser.uid.startsWith('sim_')) {
+                  await updateDoc(doc(db, 'users', currentUser.uid), {
+                    points: newPoints
+                  });
+                }
+                setUserProfile({
+                  ...userProfile,
+                  points: newPoints
+                } as any);
+                alert(lang === 'ar' ? `رائع! حصلت على +${xp} نقطة تفوق في معمل النطق! 🎉` : `Awesome! You got +${xp} XP in the Pronunciation Lab! 🎉`);
+              } catch (e) {
+                console.error("Error updating points for Pronunciation Lab:", e);
+              }
+            }
+          }}
+        />
+      );
+    }
+    if (view === 'roleplay-challenges') {
+      return (
+        <RolePlayChallenges
+          lang={lang}
+          userProfile={userProfile}
+          onBack={() => setView('dashboard')}
+          onXPAdded={async (xp) => {
+            if (userProfile && currentUser) {
+              const currentPoints = (userProfile as any).points || 0;
+              const newPoints = currentPoints + xp;
+              try {
+                if (!currentUser.uid.startsWith('sim_')) {
+                  await updateDoc(doc(db, 'users', currentUser.uid), {
+                    points: newPoints
+                  });
+                }
+                setUserProfile({
+                  ...userProfile,
+                  points: newPoints
+                } as any);
+                alert(lang === 'ar' ? `ممتاز! حصلت على +${xp} نقطة تفوق في تحدي الحوار التمثيلي! 🎉` : `Excellent! You earned +${xp} XP in the Role-Play Challenge! 🎉`);
+              } catch (e) {
+                console.error("Error updating points for Role Play Challenges:", e);
+              }
+            }
+          }}
+        />
+      );
+    }
+    if (view === 'visual-dictionary') {
+      return (
+        <VisualDictionary
+          lang={lang}
+          userProfile={userProfile}
+          onBack={() => setView('dashboard')}
+          onXPAdded={async (xp) => {
+            if (userProfile && currentUser) {
+              const currentPoints = (userProfile as any).points || 0;
+              const newPoints = currentPoints + xp;
+              try {
+                if (!currentUser.uid.startsWith('sim_')) {
+                  await updateDoc(doc(db, 'users', currentUser.uid), {
+                    points: newPoints
+                  });
+                }
+                setUserProfile({
+                  ...userProfile,
+                  points: newPoints
+                } as any);
+                alert(lang === 'ar' ? `رائع! حصلت على +${xp} نقطة تفوق في الغاز الكلمات! 🎉` : `Awesome! You earned +${xp} XP in the vocabulary challenge! 🎉`);
+              } catch (e) {
+                console.error("Error updating points for Visual Dictionary:", e);
+              }
+            }
+          }}
+        />
+      );
+    }
+    if (view === 'english-songs') {
+      return (
+        <EnglishSongs
+          lang={lang}
+          userProfile={userProfile}
+          onBack={() => setView('dashboard')}
+          onXPAdded={async (xp) => {
+            if (userProfile && currentUser) {
+              const currentPoints = (userProfile as any).points || 0;
+              const newPoints = currentPoints + xp;
+              try {
+                if (!currentUser.uid.startsWith('sim_')) {
+                  await updateDoc(doc(db, 'users', currentUser.uid), {
+                    points: newPoints
+                  });
+                }
+                setUserProfile({
+                  ...userProfile,
+                  points: newPoints
+                } as any);
+                alert(lang === 'ar' ? `ممتاز! حصلت على +${xp} نقطة تفوق في نشاط الأغنية! 🎉` : `Excellent! You earned +${xp} XP in the English with Songs workout! 🎉`);
+              } catch (e) {
+                console.error("Error updating points for English with Songs:", e);
+              }
+            }
+          }}
+        />
+      );
+    }
+    if (view === 'animated-storyboard') {
+      return (
+        <AnimatedStoryboard
+          lang={lang}
+          userProfile={userProfile}
+          onBack={() => setView('dashboard')}
+          onXPAdded={async (xp) => {
+            if (userProfile && currentUser) {
+              const currentPoints = (userProfile as any).points || 0;
+              const newPoints = currentPoints + xp;
+              try {
+                if (!currentUser.uid.startsWith('sim_')) {
+                  await updateDoc(doc(db, 'users', currentUser.uid), {
+                    points: newPoints
+                  });
+                }
+                setUserProfile({
+                  ...userProfile,
+                  points: newPoints
+                } as any);
+                alert(lang === 'ar' ? `رائع! حصلت على +${xp} نقطة تفوق في مسرح قصة لندن! 🎉` : `Splendid! You earned +${xp} XP inside the London Storyboard Theater! 🎉`);
+              } catch (e) {
+                console.error("Error updating points for Animated Storyboard:", e);
+              }
+            }
+          }}
+        />
+      );
+    }
+    if (view === 'escape-room') {
+      return (
+        <EscapeRoomGrammar
+          lang={lang}
+          userProfile={userProfile}
+          onBack={() => setView('dashboard')}
+          onXPAdded={async (xp) => {
+            if (userProfile && currentUser) {
+              const currentPoints = (userProfile as any).points || 0;
+              const newPoints = currentPoints + xp;
+              try {
+                if (!currentUser.uid.startsWith('sim_')) {
+                  await updateDoc(doc(db, 'users', currentUser.uid), {
+                    points: newPoints
+                  });
+                }
+                setUserProfile({
+                  ...userProfile,
+                  points: newPoints
+                } as any);
+                alert(lang === 'ar' ? `هروب عبقري! عثرت على المفاتيح ونلت +${xp} نقطة تفوق! 🎉` : `Amazing Escape! You solved the code and earned +${xp} XP! 🎉`);
+              } catch (e) {
+                console.error("Error updating points for Escape Room:", e);
+              }
+            }
+          }}
+        />
+      );
+    }
+    if (view === 'family-activities') {
+      return (
+        <FamilyActivities
+          lang={lang}
+          userProfile={userProfile}
+          onBack={() => setView('dashboard')}
+          onXPAdded={async (xp) => {
+            if (userProfile && currentUser) {
+              const currentPoints = (userProfile as any).points || 0;
+              const newPoints = currentPoints + xp;
+              try {
+                if (!currentUser.uid.startsWith('sim_')) {
+                  await updateDoc(doc(db, 'users', currentUser.uid), {
+                    points: newPoints
+                  });
+                }
+                setUserProfile({
+                  ...userProfile,
+                  points: newPoints
+                } as any);
+                alert(lang === 'ar' ? `رائع جداً! نال فريق العائلة +${xp} نقطة تفوق تعاونية! 🎉` : `Fabulous! The entire family gained +${xp} XP together! 🎉`);
+              } catch (e) {
+                console.error("Error updating points for Family Activities:", e);
+              }
+            }
+          }}
+        />
+      );
+    }
     if (view === 'kids-story-player') {
       if (selectedKidsStoryIndex === null) {
         return (
@@ -4272,9 +4599,10 @@ export default function App() {
                   activeLesson.id?.startsWith('g_') ? CurriculumCategory.GRAMMAR : 
                   CurriculumCategory.GRAMMAR;
       
-      return <LessonPlayer 
-        lang={lang} 
+      return <InteractiveLesson 
         lesson={activeLesson} 
+        isRtl={isRtl}
+        onFinish={handleLessonComplete}
         onBack={() => {
           if (activeLesson.id?.startsWith('r_')) {
             setView('reading-curriculum');
@@ -4292,9 +4620,6 @@ export default function App() {
             setView('curriculum');
           }
         }}
-        onComplete={handleLessonComplete}
-        category={cat}
-        level={activeLesson.proficiencyLevel}
       />;
     }
 
@@ -4394,6 +4719,28 @@ export default function App() {
                     <BookOpen size={9} />
                     <span>{isRtl ? 'قصص تعليمية 📚' : 'Educational Stories 📚'}</span>
                   </button>
+                  <button 
+                    onClick={() => setView('roleplay-challenges')}
+                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-[9px] font-black transition-all cursor-pointer ${
+                      view === 'roleplay-challenges' 
+                        ? 'bg-emerald-600 text-white border-emerald-600' 
+                        : 'bg-[#f0fdf4] text-emerald-700 border-emerald-500/30 hover:bg-emerald-650/5'
+                    }`}
+                  >
+                    <Users size={9} />
+                    <span>{isRtl ? 'حوارات 🎭' : 'Roleplay 🎭'}</span>
+                  </button>
+                  <button 
+                    onClick={() => setView('visual-dictionary')}
+                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-[9px] font-black transition-all cursor-pointer ${
+                      view === 'visual-dictionary' 
+                        ? 'bg-[#C49E3A] text-[#002147] border-[#C49E3A]' 
+                        : 'bg-white text-slate-705 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <BookOpen size={9} />
+                    <span>{isRtl ? 'قاموس 🎨' : 'Dictionary 🎨'}</span>
+                  </button>
                 </div>
 
                 <button 
@@ -4423,6 +4770,13 @@ export default function App() {
                     { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
                     { id: 'adults-daily-dose', label: lang === 'ar' ? 'الجرعة اليومية ⚡' : 'Daily Dose ⚡', icon: Zap },
                     { id: 'kids-story-player', label: lang === 'ar' ? 'قصص تعليمية 📚' : 'Educational Stories 📚', icon: BookOpen },
+                    { id: 'pronunciation-lab', label: lang === 'ar' ? 'معمل النطق 🎙️' : 'Pronunciation Lab 🎙️', icon: Mic },
+                    { id: 'roleplay-challenges', label: lang === 'ar' ? 'حوارات تمثيلية 🎭' : 'Role-Play Challenges 🎭', icon: Users },
+                    { id: 'visual-dictionary', label: lang === 'ar' ? 'القاموس المصور 🎨' : 'Visual Dictionary 🎨', icon: BookOpen },
+                    { id: 'english-songs', label: lang === 'ar' ? 'الإنجليزية عبر الأغاني 🎵' : 'English with Songs 🎵', icon: Music },
+                    { id: 'animated-storyboard', label: lang === 'ar' ? 'الرسوم المصورة 🎬' : 'Animated Storyboards 🎬', icon: Film },
+                    { id: 'escape-room', label: lang === 'ar' ? 'غرفة الهروب 🔐' : 'Grammar Escape Room 🔐', icon: Key },
+                    { id: 'family-activities', label: lang === 'ar' ? 'بينغو وطبيخ العائلة 👨‍👩‍👧‍👦' : 'Family Game & Cooking 👨‍👩‍👧‍👦', icon: Users },
                     { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
                     { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
                     { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
@@ -4496,6 +4850,8 @@ export default function App() {
                     { id: 'oxford-discover', icon: OxfordIcon },
                     { id: 'video-library', icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
                     { id: 'kids-story-player', icon: BookOpen },
+                    { id: 'pronunciation-lab', icon: Mic },
+                    { id: 'roleplay-challenges', icon: Users },
                     { id: 'story-library', icon: BookMarked },
                   ],
                   [
