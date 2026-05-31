@@ -137,6 +137,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
   
   const [selectedCategories, setSelectedCategories] = useState<string[]>(['advanced', 'oxford']);
   const [selectedDays, setSelectedDays] = useState<number[]>([0, 1, 2, 3, 4]); // Default Sun-Thu
+  const [weeksToGenerate, setWeeksToGenerate] = useState<number>(13); // Default to 13 weeks (3 Months)
   const [lessonsPerDay, setLessonsPerDay] = useState<number>(2); // Default to 2 lessons per day
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [preferredTime, setPreferredTime] = useState('16:00');
@@ -311,6 +312,14 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
     if (plan.selectedDays) setSelectedDays(plan.selectedDays);
     if (plan.selectedCategories) setSelectedCategories(plan.selectedCategories);
     if (plan.lessonsPerDay) setLessonsPerDay(plan.lessonsPerDay);
+    if ((plan as any).weeksToGenerate) {
+      setWeeksToGenerate((plan as any).weeksToGenerate);
+    } else if (plan.planItems && plan.planItems.length > 0) {
+      const maxWeek = Math.max(...plan.planItems.map(item => item.week), 0);
+      if (maxWeek > 8) setWeeksToGenerate(13);
+      else if (maxWeek > 4) setWeeksToGenerate(8);
+      else if (maxWeek > 0) setWeeksToGenerate(4);
+    }
   };
 
   const toggleCategory = (id: string) => {
@@ -507,9 +516,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
     let lessonPtr = 0;
     let currentDate = new Date(startDate);
     
-    // We want to generate roughly 12 weeks of content (3 months)
-    const weeksToGenerate = 13;
-    
+    // Generates content according to selected weeksToGenerate state
     for (let w = 1; w <= weeksToGenerate; w++) {
       const monthNum = Math.ceil(w / 4);
       const weekInMonth = ((w - 1) % 4) + 1;
@@ -620,6 +627,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
         selectedDays,
         selectedCategories,
         lessonsPerDay,
+        weeksToGenerate,
         planItems: generatedPlan
       };
 
@@ -970,6 +978,35 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                   </div>
                 </div>
 
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
+                    {isRtl ? 'المدة الزمنية للخطة الدراسية' : 'Study Plan Duration'}
+                  </label>
+                  <div className="flex gap-3">
+                    {[
+                      { value: 4, labelAr: 'شهر واحد', labelEn: '1 Month' },
+                      { value: 8, labelAr: 'شهرين', labelEn: '2 Months' },
+                      { value: 13, labelAr: '3 أشهر', labelEn: '3 Months' }
+                    ].map((opt) => {
+                      const isSelected = weeksToGenerate === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setWeeksToGenerate(opt.value)}
+                          className={`flex-1 py-3 px-1 rounded-xl border-2 font-black text-[11px] transition-all whitespace-nowrap ${
+                            isSelected 
+                              ? 'border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-100' 
+                              : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200'
+                          }`}
+                        >
+                          {isRtl ? opt.labelAr : opt.labelEn}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                   <div>
                     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
@@ -1020,7 +1057,12 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                     {t.plannerDuration}
                   </div>
                   <p className="text-[10px] text-amber-700/60 font-bold leading-relaxed">
-                    {isRtl ? 'سيقوم الذكاء الاصطناعي بتوزيع الوحدات الدراسية من المناهج المختارة بشكل متوازن خلال 3 أشهر.' : 'AI will distribute units from selected curriculums evenly throughout your 3-month term.'}
+                    {weeksToGenerate === 4 
+                      ? (isRtl ? 'سيقوم الذكاء الاصطناعي بتوزيع الوحدات الدراسية بشكل متوازن خلال شهر واحد.' : 'AI will distribute units evenly throughout your 1-month term.')
+                      : weeksToGenerate === 8
+                      ? (isRtl ? 'سيقوم الذكاء الاصطناعي بتوزيع الوحدات الدراسية بشكل متوازن خلال شهرين.' : 'AI will distribute units evenly throughout your 2-month term.')
+                      : (isRtl ? 'سيقوم الذكاء الاصطناعي بتوزيع الوحدات الدراسية بشكل متوازن خلال 3 أشهر.' : 'AI will distribute units evenly throughout your 3-month term.')
+                    }
                   </p>
                 </div>
 
@@ -1183,7 +1225,16 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
                     { label: isRtl ? 'إجمالي الدروس' : 'Total Lessons', value: generatedPlan?.length, color: 'text-blue-600', bg: 'bg-blue-50' },
                     { label: isRtl ? 'الدروس المنجزة' : 'Completed', value: achievement?.completedCount, color: 'text-emerald-600', bg: 'bg-emerald-50' },
                     { label: isRtl ? 'نسبة الإنجاز' : 'Completion %', value: `${Math.round(achievement?.percentage || 0)}%`, color: 'text-amber-600', bg: 'bg-amber-50' },
-                    { label: isRtl ? 'المدة' : 'Duration', value: '3 Months', color: 'text-rose-600', bg: 'bg-rose-50' },
+                    { 
+                      label: isRtl ? 'المدة' : 'Duration', 
+                      value: weeksToGenerate === 4 
+                        ? (isRtl ? 'شهر' : '1 Month') 
+                        : weeksToGenerate === 8 
+                        ? (isRtl ? 'شهرين' : '2 Months') 
+                        : (isRtl ? '3 أشهر' : '3 Months'), 
+                      color: 'text-rose-600', 
+                      bg: 'bg-rose-50' 
+                    },
                  ].map((stat, i) => (
                     <div key={i} className={`${stat.bg} ${stat.color} px-6 py-4 rounded-[2rem] flex-1 min-w-[150px] shadow-sm flex flex-col items-center justify-center border-b-4 border-current/20`}>
                        <span className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">{stat.label}</span>

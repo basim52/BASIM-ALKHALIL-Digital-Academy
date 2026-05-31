@@ -1617,8 +1617,15 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
 
   useEffect(() => {
     const fetchStudentsData = async () => {
-      const userDoc = await getDoc(doc(db, 'users', profile.uid));
-      const userData = userDoc.data() as any;
+      let userData: any = {};
+      try {
+        const userDoc = await getDoc(doc(db, 'users', profile.uid));
+        if (userDoc.exists()) {
+          userData = userDoc.data() as any;
+        }
+      } catch (e) {
+        console.error("Error reading user doc:", e);
+      }
       
       const studentIds: string[] = [];
       if (userData?.linkedStudentIds && Array.isArray(userData.linkedStudentIds)) {
@@ -1628,8 +1635,9 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
         studentIds.push(userData.linkedStudentId);
       }
 
+      const students: any[] = [];
       if (studentIds.length > 0) {
-        const students = await Promise.all(studentIds.map(async (id) => {
+        const fetched = await Promise.all(studentIds.map(async (id) => {
           try {
             const sDoc = await getDoc(doc(db, 'users', id));
             const sMeta = await getDoc(doc(db, 'students', id));
@@ -1647,17 +1655,29 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
           }
           return null;
         }));
-        
-        const validStudents = students.filter(s => s !== null);
-        setLinkedStudents(validStudents);
-        if (validStudents.length > 0) {
-          setSelectedStudentIndex(0);
-        }
+        students.push(...fetched.filter(s => s !== null));
       }
+
+      // Always prepend the parent/admin themselves as a student study profile
+      const selfStudent = {
+        uid: profile.uid,
+        displayName: isRtl 
+          ? `${profile.displayName || 'ولي الأمر / الأدمن'} (ملفي الدراسي الشخصي)` 
+          : `${profile.displayName || 'Parent/Admin'} (My Personal Study Profile)`,
+        role: profile.role,
+        avatarUrl: profile.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.displayName || 'BK'}`,
+        points: profile.points || userData?.points || 0,
+        level: profile.level || userData?.level || 'A1',
+        isSelf: true
+      };
+
+      const allStudentsInList = [selfStudent, ...students];
+      setLinkedStudents(allStudentsInList);
+      setSelectedStudentIndex(0);
       setLoading(false);
     };
     fetchStudentsData();
-  }, [profile.uid]);
+  }, [profile.uid, isRtl]);
 
   const handleLink = async () => {
     let inputId = studentIdInput.trim();
@@ -1740,6 +1760,10 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
   };
 
   const handleDelete = async (id: string, index: number) => {
+    if (linkedStudents[index]?.isSelf) {
+      alert(isRtl ? 'لا يمكن حذف ملفك الدراسي الشخصي.' : 'You cannot delete your personal study profile.');
+      return;
+    }
     if (!confirm(t.confirmDeleteStudent)) return;
     
     try {
@@ -2090,6 +2114,43 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
           </div>
         </motion.div>
       )}
+
+      {!currentPlan && (
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-10 p-8 bg-gradient-to-br from-[#002147] to-[#1e3a8a] text-white rounded-[2.5rem] border-2 border-[#C49E3A]/30 shadow-xl relative overflow-hidden group"
+        >
+          <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
+             <Brain size={120} />
+          </div>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+            <div className={`flex items-center gap-6 ${isRtl ? 'flex-row-reverse text-right' : 'text-left'}`}>
+              <div className="w-16 h-16 bg-[#C49E3A] text-white rounded-2xl flex items-center justify-center shadow-lg">
+                <BookMarked size={28} />
+              </div>
+              <div className={isRtl ? 'text-right' : 'text-left'}>
+                <h3 className="text-xl font-black mb-1">
+                  {isRtl ? 'لا توجد خطة دراسية نشطة حالياً' : 'No Active Study Plan Yet'}
+                </h3>
+                <p className="text-white/80 font-medium text-xs leading-relaxed max-w-xl">
+                  {isRtl 
+                    ? `ابدأ رحلتك الدراسية الفريدة الآن! صمم جدولاً مرناً يتوافق مع اهتماماتك الشخصية والتزاماتك اليومية.`
+                    : `Get started on your learning journey! Design a flexible schedule customized to your goals and pace.`}
+                </p>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => onNavigate && onNavigate('academic-planner')}
+              className="flex items-center justify-center gap-3 bg-[#C49E3A] hover:bg-white hover:text-[#002147] text-white px-8 py-4 rounded-2xl font-black transition-all shadow-lg text-sm shrink-0"
+            >
+              {isRtl ? 'صمم خطتك الدراسية الشخصية ✨' : 'Design My Study Plan ✨'}
+              <ChevronRight size={18} className={isRtl ? 'rotate-180' : ''} />
+            </button>
+          </div>
+        </motion.div>
+      )}
       <header className={`mb-8 md:mb-12 border-b border-slate-200 pb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 ${isRtl ? 'text-right' : 'text-left'}`}>
         <div>
           <h2 className="text-2xl md:text-3xl font-bold text-[#002147]">{t.parentPortal}</h2>
@@ -2122,7 +2183,12 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
                 >
                   <img src={student.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${student.displayName}`} alt={student.displayName} className="w-full h-full object-cover" />
                 </button>
-                {selectedStudentIndex === idx && (
+                {student.isSelf && (
+                  <span className="absolute -top-1 -left-1 bg-amber-500 text-white p-1 rounded-full shadow-md z-30" title={isRtl ? 'حسابي الدراسي' : 'My Study Profile'}>
+                    <Sparkles size={10} className="animate-pulse" />
+                  </span>
+                )}
+                {selectedStudentIndex === idx && !student.isSelf && (
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
@@ -3030,10 +3096,10 @@ export default function App() {
       }
       try {
         let q;
-        if (isAdmin) {
+        if (isAdmin && !activeStudentId) {
           q = query(collection(db, 'studyPlans'), orderBy('createdAt', 'desc'), limit(1));
         } else {
-          const targetId = (userProfile.role === 'parent' && activeStudentId) ? activeStudentId : currentUser.uid;
+          const targetId = activeStudentId || currentUser.uid;
           q = query(
             collection(db, 'studyPlans'),
             where('userId', '==', targetId),
@@ -3479,9 +3545,15 @@ export default function App() {
     
     // Increment XP and points
     const xpToAdd = 50; 
-    const updatedPoints = (userProfile as any).points + xpToAdd;
+    const currentPoints = typeof (userProfile as any).points === 'number' && !isNaN((userProfile as any).points) ? (userProfile as any).points : 0;
+    const updatedPoints = currentPoints + xpToAdd;
     
     try {
+      if (currentUser && !currentUser.uid.startsWith('sim_')) {
+        await updateDoc(doc(db, 'users', currentUser.uid), {
+          points: updatedPoints
+        });
+      }
       // Save Lesson Result
       if (score !== undefined) {
         let courseId = 'reading';
