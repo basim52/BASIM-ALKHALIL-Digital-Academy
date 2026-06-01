@@ -41,6 +41,7 @@ import { ALL_WRITING_UNITS } from '../WritingCurriculumCompanion';
 import { ALL_CONVERSATION_UNITS } from '../ConversationCurriculumCompanion';
 import { ALL_EXPRESSION_UNITS } from '../ExpressionCurriculumCompanion';
 import { OXFORD_UNITS } from '../OxfordDiscoverCompanion';
+import { OXFORD_LESSONS } from '../../data/oxfordLessonsData';
 import { STORIES } from '../StoryLibrary';
 import { KIDS_STORIES } from '../../data/kidsStories';
 import { ADULTS_DAILY_DOSES } from '../../data/adultsDailyDose';
@@ -566,9 +567,17 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
     if (selectedCategories.includes('oxford')) {
        OXFORD_UNITS.forEach((u, index) => {
          let isAppropriate = false;
-         if (difficultyLevel === 'beginner' && index < 6) isAppropriate = true;
-         else if (difficultyLevel === 'intermediate' && index >= 6 && index < 12) isAppropriate = true;
-         else if (difficultyLevel === 'advanced' && index >= 12) isAppropriate = true;
+         const lesson = OXFORD_LESSONS.find(l => l.id === u.id);
+         if (lesson) {
+           const cat = lesson.category;
+           if (difficultyLevel === 'beginner' && (cat === 'phonics_heroes' || cat === 'oxford_reading_adventures')) {
+             isAppropriate = true;
+           } else if (difficultyLevel === 'intermediate' && (cat === 'clil_discover' || cat === 'values_stories')) {
+             isAppropriate = true;
+           } else if (difficultyLevel === 'advanced' && (cat === 'project_time' || cat === 'grammar_friends' || cat === 'everyday_english')) {
+             isAppropriate = true;
+           }
+         }
          
          if (isAppropriate) {
            oxfordLessons.push({ 

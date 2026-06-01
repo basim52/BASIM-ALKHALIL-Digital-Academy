@@ -6,10 +6,11 @@ import { LANGUAGE_LAB_DATA } from '../data/languageLabData';
 import confetti from 'canvas-confetti';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
+import { OXFORD_LESSONS } from '../data/oxfordLessonsData';
 
 interface OxfordUnitLessonProps {
   lang: Language;
-  unitId: number;
+  unitId: string;
   onBack: () => void;
   userProfile?: any;
 }
@@ -1069,17 +1070,19 @@ const LESSON_DATA = {
 export const OxfordUnitLesson = ({ lang, unitId, onBack, userProfile }: OxfordUnitLessonProps) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
-  const isLanguageLab = unitId >= 100;
-  const languageData = isLanguageLab ? LANGUAGE_LAB_DATA[unitId] : null;
-  const data = (LESSON_DATA as any)[unitId] || {
-    bigQuestion: languageData?.title || "",
-    bigQuestionAr: languageData?.titleAr || "",
+  const isLanguageLab = false;
+  const languageData = null;
+  const data = OXFORD_LESSONS.find(lesson => lesson.id === unitId) || {
+    bigQuestion: "",
+    bigQuestionAr: "",
     vocab: [],
-    quiz: []
+    quiz: [],
+    isReadingLesson: false
   };
-  const isReading = (data as any)?.isReadingLesson;
+  const isReading = data?.isReadingLesson;
+  const isGrammar = (data as any)?.category === 'grammar_friends';
 
-  const [step, setStep] = useState<'intro' | 'reading' | 'matching' | 'quiz' | 'finish'>('intro');
+  const [step, setStep] = useState<'intro' | 'reading' | 'matching' | 'quiz' | 'finish' | 'grammar_dialogue'>('intro');
   const [matchingStatus, setMatchingStatus] = useState<Record<number, boolean>>({});
   const [compAnswers, setCompAnswers] = useState<Record<number, string | null>>({});
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string | null>>({});
@@ -1129,6 +1132,8 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack, userProfile }: OxfordUn
       setStep('languageLab' as any);
     } else if (isReading) {
       setStep('reading');
+    } else if (isGrammar) {
+      setStep('grammar_dialogue');
     } else {
       setStep('matching');
     }
@@ -1369,6 +1374,90 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack, userProfile }: OxfordUn
                       <PlayCircle size={28} className="translate-x-0 group-hover:translate-x-2 transition-transform" />
                     </motion.button>
                  </div>
+              </div>
+            </motion.div>
+          )}
+
+          {step === 'grammar_dialogue' && (
+            <motion.div
+              key="grammar_dialogue"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              className="space-y-8"
+            >
+              <div className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-2xl relative overflow-hidden">
+                <span className="px-4 py-1 bg-[#C49E3A] rounded-full text-[12px] font-black uppercase tracking-widest mb-4 inline-block text-white">
+                  {isRtl ? 'حوار القواعد والقصة' : 'Grammar Dialogue & Story'}
+                </span>
+                <h2 className="text-3xl font-black text-[#002147] mb-6">
+                  {data.bigQuestion}
+                </h2>
+                
+                {/* Dialogue Area */}
+                <div className="space-y-6 mb-8 max-h-[500px] overflow-y-auto pr-2">
+                  {(data as any).dialogue?.map((line: any, idx: number) => {
+                    const isMona = line.speaker === "Mona";
+                    return (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.2 }}
+                        className={`flex gap-4 items-start ${isMona ? 'flex-row' : 'flex-row-reverse'}`}
+                      >
+                        {/* Avatar */}
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-white shadow-lg text-lg flex-shrink-0 ${
+                          isMona ? 'bg-rose-500' : 'bg-amber-500'
+                        }`}>
+                          {line.speaker[0]}
+                        </div>
+                        {/* Speech Bubble */}
+                        <div className={`p-6 rounded-3xl max-w-[80%] flex flex-col gap-2 relative shadow-md ${
+                          isMona 
+                            ? 'bg-rose-50 border border-rose-100 text-slate-800 rounded-tl-none' 
+                            : 'bg-amber-50/70 border border-amber-100 text-slate-800 rounded-tr-none'
+                        }`}>
+                          <span className="text-xs font-black uppercase text-slate-400">
+                             {line.speaker}
+                          </span>
+                          <p className="text-lg font-black text-[#002147] leading-relaxed">
+                            {line.english}
+                          </p>
+                          <p className="text-sm font-bold text-slate-500 border-t border-dashed border-slate-200/60 pt-2">
+                            {line.arabic}
+                          </p>
+                          <button
+                            onClick={() => speak(line.english, 'en-US')}
+                            className={`absolute top-4 ${isRtl ? 'left-4' : 'right-4'} p-2 bg-white text-slate-400 hover:text-indigo-600 rounded-xl transition-all shadow-sm border border-slate-100`}
+                          >
+                            <Volume2 size={16} />
+                          </button>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+
+                {/* Instructions */}
+                <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100 mb-8 flex justify-between items-center gap-4">
+                  <p className="text-sm font-bold text-amber-800">
+                    {isRtl ? 'استمع للحوار وتدرب على النطق بالضغط على أيقونات الصوت، ثم انتقل لتمارين التدريب للتحقق من فهمك!' : 'Listen to the dialogue, practice pronunciation by clicking the audio icons, then proceed to the training exercises to check your understanding!'}
+                  </p>
+                </div>
+
+                {/* Confirm/Next Button */}
+                <div className="flex justify-end">
+                   <motion.button
+                     whileHover={{ scale: 1.05 }}
+                     whileTap={{ scale: 0.95 }}
+                     onClick={() => setStep('quiz')}
+                     className="bg-[#002147] text-white py-4 px-10 rounded-2xl text-lg font-black shadow-xl hover:bg-slate-800 transition-colors flex items-center gap-3"
+                   >
+                     {isRtl ? 'بدء التمارين' : 'Start Practice'}
+                     <ChevronRight size={22} className={isRtl ? 'rotate-180' : ''} />
+                   </motion.button>
+                </div>
               </div>
             </motion.div>
           )}
@@ -1681,28 +1770,38 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack, userProfile }: OxfordUn
                  </div>
                  <div>
                     <h2 className="text-3xl font-black text-[#002147]">
-                      {isReading ? (isRtl ? 'ب. تحليل النص' : 'B. Text Analysis Lab') : `B. ${t.oxfordQuizTime}`}
+                      {isGrammar 
+                        ? (isRtl ? 'تمارين التدريب' : 'Practice Exercises')
+                        : isReading 
+                          ? (isRtl ? 'ب. تحليل النص' : 'B. Text Analysis Lab') 
+                          : `B. ${t.oxfordQuizTime}`}
                     </h2>
-                    <p className="text-slate-400 font-bold">{isRtl ? 'اختر الإجابة الصحيحة بناءً على الصورة' : 'Choose the correct answer based on the picture'}</p>
+                    <p className="text-slate-400 font-bold">
+                      {isGrammar 
+                        ? ((data as any).practice?.instructions_ar || (isRtl ? 'اختر الإجابة الصحيحة' : 'Choose the correct answer'))
+                        : (isRtl ? 'اختر الإجابة الصحيحة بناءً على الصورة' : 'Choose the correct answer based on the picture')}
+                    </p>
                  </div>
               </div>
 
               <div className="space-y-12">
                 {data.quiz.map((q, idx) => (
                   <div key={q.id} className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-xl shadow-slate-100/50">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                      <div className="aspect-[4/3] rounded-3xl overflow-hidden shadow-inner bg-slate-100 flex items-center justify-center">
-                        <ImageIcon size={64} className="absolute text-slate-200" />
-                        <img 
-                          src={q.img} 
-                          alt="Question" 
-                          referrerPolicy="no-referrer"
-                          className="w-full h-full object-cover relative z-10"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.opacity = '0';
-                          }}
-                        />
-                      </div>
+                    <div className={isGrammar ? "space-y-6" : "grid grid-cols-1 md:grid-cols-2 gap-10"}>
+                      {!isGrammar && (
+                        <div className="aspect-[4/3] rounded-3xl overflow-hidden shadow-inner bg-slate-100 flex items-center justify-center">
+                          <ImageIcon size={64} className="absolute text-slate-200" />
+                          <img 
+                            src={q.img} 
+                            alt="Question" 
+                            referrerPolicy="no-referrer"
+                            className="w-full h-full object-cover relative z-10"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.opacity = '0';
+                            }}
+                          />
+                        </div>
+                      )}
                       <div>
                         <div className="flex items-center gap-3 mb-6">
                            <span className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-black">{idx + 1}</span>

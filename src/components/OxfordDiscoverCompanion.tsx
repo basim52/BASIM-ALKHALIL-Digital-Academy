@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations, Language } from '../lib/translations';
 import { OxfordUnitLesson } from './OxfordUnitLesson';
+import { OXFORD_LESSONS } from '../data/oxfordLessonsData';
 import { db } from '../lib/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { 
@@ -19,13 +20,16 @@ import {
   Check,
   X,
   Square,
-  CheckCircle2
+  CheckCircle2,
+  Trophy,
+  GraduationCap,
+  MessageSquare
 } from 'lucide-react';
 
 interface OxfordDiscoverCompanionProps {
   lang: Language;
   onBack: () => void;
-  initialUnitId?: number | null;
+  initialUnitId?: string | number | null;
   userProfile?: any;
 }
 
@@ -80,7 +84,7 @@ const PronunciationTrainer = ({ word, onResult }: { word: string, onResult: (suc
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 py-8 px-12 bg-white rounded-3xl shadow-2xl border border-slate-100">
+    <div className="flex flex-col items-center gap-4 py-8 px-12 bg-white rounded-3xl shadow-2xl border border-slate-100 animate-fade-in">
       <div className="text-center mb-4">
         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Practice Word</span>
         <h3 className="text-4xl font-black text-[#002147] tracking-tight uppercase">{word}</h3>
@@ -130,704 +134,31 @@ const PronunciationTrainer = ({ word, onResult }: { word: string, onResult: (suc
   );
 };
 
-export const OXFORD_UNITS = [
-  {
-    id: 1,
-    titleEn: 'Unit 1: The World Around Us',
-    titleAr: 'الوحدة الأولى: العالم من حولنا',
-    descriptionEn: 'Explore nature, weather, and basic elements.',
-    descriptionAr: 'استكشف الطبيعة والطقس والعناصر الأساسية.',
-    color: 'bg-emerald-500',
-    lightColor: 'bg-emerald-50',
-    cards: [
-      { id: 'u1-1', en: 'Mountain', ar: 'جبل', img: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u1-2', en: 'River', ar: 'نهر', img: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u1-3', en: 'Forest', ar: 'غابة', img: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u1-4', en: 'Cloud', ar: 'سحابة', img: 'https://images.unsplash.com/photo-1501630834273-4b5604d2ee31?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 2,
-    titleEn: 'Unit 2: Family and Friends',
-    titleAr: 'الوحدة الثانية: العائلة والأصدقاء',
-    descriptionEn: 'Common interactions and family members.',
-    descriptionAr: 'التفاعلات الشائعة وأفراد العائلة.',
-    color: 'bg-blue-500',
-    lightColor: 'bg-blue-50',
-    cards: [
-      { id: 'u2-1', en: 'Grandmother', ar: 'جدة', img: 'https://images.unsplash.com/photo-1552554720-6379512316e6?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u2-2', en: 'Baby', ar: 'طفل رضيع', img: 'https://images.unsplash.com/photo-1519689689253-ab9750242f77?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u2-3', en: 'Neighbors', ar: 'جيران', img: 'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u2-4', en: 'Friends', ar: 'أصدقاء', img: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 3,
-    titleEn: 'Unit 3: Market Day',
-    titleAr: 'الوحدة الثالثة: يوم في السوق',
-    descriptionEn: 'Buying and selling items at the local market.',
-    descriptionAr: 'بيع شراء الأشياء في السوق المحلي.',
-    color: 'bg-amber-500',
-    lightColor: 'bg-amber-50',
-    cards: [
-      { id: 'u3-1', en: 'Market', ar: 'سوق', img: 'https://images.unsplash.com/photo-1533900298318-6b8da08a523e?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u3-2', en: 'Apples', ar: 'تفاح', img: 'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u3-3', en: 'Vendor', ar: 'بائع', img: 'https://images.unsplash.com/photo-1543083477-4f7f44aad226?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u3-4', en: 'Coins', ar: 'عملات', img: 'https://images.unsplash.com/photo-1534030347209-467a5b0ad3e6?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 4,
-    titleEn: 'Unit 4: Ancient History',
-    titleAr: 'الوحدة الرابعة: التاريخ القديم',
-    descriptionEn: 'Discovering temples and historical sites.',
-    descriptionAr: 'اكتشاف المعابد والمواقع التاريخية.',
-    color: 'bg-stone-500',
-    lightColor: 'bg-stone-50',
-    cards: [
-      { id: 'u4-1', en: 'Temple', ar: 'معبد', img: 'https://images.unsplash.com/photo-1541432901042-261ec9099837?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u4-2', en: 'Pyramid', ar: 'هرم', img: 'https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u4-3', en: 'Statue', ar: 'تمثال', img: 'https://images.unsplash.com/photo-1534839187421-5a0a3821017b?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u4-4', en: 'Ancient Ruins', ar: 'أطلال قديمة', img: 'https://images.unsplash.com/photo-1508919892451-4b8495bc441d?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 5,
-    titleEn: 'Unit 5: Animal Homes',
-    titleAr: 'الوحدة الخامسة: بيوت الحيوانات',
-    descriptionEn: 'Where do animals live?',
-    descriptionAr: 'أين تعيش الحيوانات؟',
-    color: 'bg-green-600',
-    lightColor: 'bg-green-50',
-    cards: [
-      { id: 'u5-1', en: 'Nest', ar: 'عش', img: 'https://images.unsplash.com/photo-1549491763-715783339031?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u5-2', en: 'Cave', ar: 'كهف', img: 'https://images.unsplash.com/photo-1578891086254-20510103738e?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u5-3', en: 'Burrow', ar: 'جحر', img: 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u5-4', en: 'Hive', ar: 'خلية', img: 'https://images.unsplash.com/photo-1473973266408-ed4e27abdd47?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 6,
-    titleEn: 'Unit 6: Protecting Our Earth',
-    titleAr: 'الوحدة السادسة: حماية كوكبنا',
-    descriptionEn: 'How can we help the environment?',
-    descriptionAr: 'كيف يمكننا مساعدة البيئة؟',
-    color: 'bg-teal-500',
-    lightColor: 'bg-teal-50',
-    cards: [
-      { id: 'u6-1', en: 'Recycle', ar: 'إعادة تدوير', img: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u6-2', en: 'Plant', ar: 'نبتة', img: 'https://images.unsplash.com/photo-1416870230247-d0613a53047a?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u6-3', en: 'Solar Power', ar: 'طاقة شمسية', img: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u6-4', en: 'Ocean', ar: 'محيط', img: 'https://images.unsplash.com/photo-1505118380757-91f5f45d8da8?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 7,
-    titleEn: 'Unit 7: Real Life Heroes',
-    titleAr: 'الوحدة السابعة: أبطال من الواقع',
-    descriptionEn: 'People who make a difference.',
-    descriptionAr: 'أشخاص يحدثون فرقاً.',
-    color: 'bg-red-500',
-    lightColor: 'bg-red-50',
-    cards: [
-      { id: 'u7-1', en: 'Firefighter', ar: 'رجل إطفاء', img: 'https://images.unsplash.com/photo-1516567727245-ad8c68f3ec93?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u7-2', en: 'Doctor', ar: 'طبيب', img: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u7-3', en: 'Scientist', ar: 'عالم', img: 'https://images.unsplash.com/photo-1532187875605-1ef6c237f1f1?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u7-4', en: 'Volunteer', ar: 'متطوع', img: 'https://images.unsplash.com/photo-1559027615-cd99c59630d6?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 8,
-    titleEn: 'Unit 8: Delicious Food',
-    titleAr: 'الوحدة الثامنة: طعام لذيذ',
-    descriptionEn: 'Learning about different cuisines.',
-    descriptionAr: 'التعرف على المطابخ المختلفة.',
-    color: 'bg-orange-500',
-    lightColor: 'bg-orange-50',
-    cards: [
-      { id: 'u8-1', en: 'Ingredients', ar: 'مكونات', img: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u8-2', en: 'Recipe', ar: 'وصفة', img: 'https://images.unsplash.com/photo-1466632346940-bf69ff716dba?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u8-3', en: 'Healthy', ar: 'صحي', img: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u8-4', en: 'Spices', ar: 'توابل', img: 'https://images.unsplash.com/photo-1532336414038-cf19250c5757?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 9,
-    titleEn: 'Unit 9: Fast Transportation',
-    titleAr: 'الوحدة التاسعة: وسائل النقل السريعة',
-    descriptionEn: 'How we move from place to place.',
-    descriptionAr: 'كيف ننتقل من مكان لآخر.',
-    color: 'bg-indigo-500',
-    lightColor: 'bg-indigo-50',
-    cards: [
-      { id: 'u9-1', en: 'Airplane', ar: 'طائرة', img: 'https://images.unsplash.com/photo-1436491865332-7a61a109c7f3?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u9-2', en: 'Train', ar: 'قطار', img: 'https://images.unsplash.com/photo-1474487548417-781f2f4817bd?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u9-3', en: 'Ship', ar: 'سفينة', img: 'https://images.unsplash.com/photo-1494412519320-aa613dfb7738?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u9-4', en: 'Bicycle', ar: 'دراجة هوائية', img: 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 10,
-    titleEn: 'Unit 10: Outer Space',
-    titleAr: 'الوحدة العاشرة: الفضاء الخارجي',
-    descriptionEn: 'Planets, stars, and galaxies.',
-    descriptionAr: 'الكواكب والنجوم والمجرات.',
-    color: 'bg-purple-600',
-    lightColor: 'bg-purple-50',
-    cards: [
-      { id: 'u10-1', en: 'Planet', ar: 'كوكب', img: 'https://images.unsplash.com/photo-1614732414444-096e5f1122d5?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u10-2', en: 'Astronaut', ar: 'رائد فضاء', img: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u10-3', en: 'Rocket', ar: 'صاروخ', img: 'https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u10-4', en: 'Stars', ar: 'نجوم', img: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 11,
-    titleEn: 'Unit 11: Modern Technology',
-    titleAr: 'الوحدة الحادية عشرة: التكنولوجيا الحديثة',
-    descriptionEn: 'Inventions that changed the world.',
-    descriptionAr: 'اختراعات غيرت العالم.',
-    color: 'bg-slate-700',
-    lightColor: 'bg-slate-50',
-    cards: [
-      { id: 'u11-1', en: 'Computer', ar: 'حاسوب', img: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u11-2', en: 'Robot', ar: 'روبوت', img: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u11-3', en: 'Smartphone', ar: 'هاتف ذكي', img: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u11-4', en: 'Internet', ar: 'إنترنت', img: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 12,
-    titleEn: 'Unit 12: The World of Art',
-    titleAr: 'الوحدة الثانية عشرة: عالم الفن',
-    descriptionEn: 'Expressing feelings through art.',
-    descriptionAr: 'التعبير عن المشاعر من خلال الفن.',
-    color: 'bg-pink-500',
-    lightColor: 'bg-pink-50',
-    cards: [
-      { id: 'u12-1', en: 'Painting', ar: 'لوحة فنية', img: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u12-2', en: 'Sculpture', ar: 'منحوتة', img: 'https://images.unsplash.com/photo-1554181067-56006e3bb42d?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u12-3', en: 'Colors', ar: 'ألوان', img: 'https://images.unsplash.com/photo-1525909002-1b05e0c869d8?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u12-4', en: 'Museum', ar: 'متحف', img: 'https://images.unsplash.com/photo-1518998053502-53ec8a29b7ee?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 13,
-    titleEn: 'Unit 13: Under the Sea',
-    titleAr: 'الوحدة الثالثة عشرة: تحت البحر',
-    descriptionEn: 'Discovering marine life.',
-    descriptionAr: 'اكتشاف الحياة البحرية.',
-    color: 'bg-cyan-600',
-    lightColor: 'bg-cyan-50',
-    cards: [
-      { id: 'u13-1', en: 'Dolphin', ar: 'دولفين', img: 'https://images.unsplash.com/photo-1570481662006-a3a1374699e8?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u13-2', en: 'Coral Reef', ar: 'شعاب مرجانية', img: 'https://images.unsplash.com/photo-1546026423-9d2116091386?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u13-3', en: 'Whale', ar: 'حوت', img: 'https://images.unsplash.com/photo-1568430462989-44163eb1752f?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u13-4', en: 'Shark', ar: 'قرش', img: 'https://images.unsplash.com/photo-1560273552-32957b46c33b?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 14,
-    titleEn: 'Unit 14: Stay Healthy',
-    titleAr: 'الوحدة الرابعة عشرة: ابقَ بصحة جيدة',
-    descriptionEn: 'Exercise and nutrition for a better life.',
-    descriptionAr: 'التمارين والتغذية لحياة أفضل.',
-    color: 'bg-lime-500',
-    lightColor: 'bg-lime-50',
-    cards: [
-      { id: 'u14-1', en: 'Exercise', ar: 'تمارين', img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u14-2', en: 'Vegetables', ar: 'خضروات', img: 'https://images.unsplash.com/photo-1518843875459-f738682238a6?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u14-3', en: 'Water', ar: 'ماء', img: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u14-4', en: 'Sleep', ar: 'نوم', img: 'https://images.unsplash.com/photo-1520206159889-623126a3375a?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 15,
-    titleEn: 'Unit 1: Harbin Ice and Snow Festival',
-    titleAr: 'الوحدة الأولى: مهرجان هاربين للجليد والثلج',
-    descriptionEn: 'Reading comprehension about the famous winter festival in China.',
-    descriptionAr: 'قراءة وفهم حول مهرجان الشتاء الشهير في الصين.',
-    color: 'bg-sky-500',
-    lightColor: 'bg-sky-50',
-    cards: [
-      { id: 'u15-1', en: 'Ice Sculpture', ar: 'منحوتة جليدية', img: 'https://images.unsplash.com/photo-1516901869830-360ec31c9641?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u15-2', en: 'Ice Lantern', ar: 'فانوس جليدي', img: 'https://images.unsplash.com/photo-1547481846-95f74577264a?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u15-3', en: 'Ice Hockey', ar: 'هوكي الجليد', img: 'https://images.unsplash.com/photo-1551323315-08e8b611867c?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u15-4', en: 'Athletes', ar: 'رياضيون', img: 'https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 16,
-    titleEn: 'Unit 16: Earth’s Resources',
-    titleAr: 'الوحدة السادسة عشرة: موارد الأرض',
-    descriptionEn: 'Discover natural materials we use daily.',
-    descriptionAr: 'اكتشف المواد الطبيعية التي نستخدمها يومياً.',
-    color: 'bg-green-700',
-    lightColor: 'bg-green-50',
-    cards: [
-      { id: 'u16-1', en: 'Natural Gas', ar: 'غاز طبيعي', img: 'https://images.unsplash.com/photo-1518131359073-ad293c3f90ca?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u16-2', en: 'Metals', ar: 'معادن', img: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u16-3', en: 'Water Cycle', ar: 'دورة المياه', img: 'https://images.unsplash.com/photo-1473116763249-2faaef81ccda?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 17,
-    titleEn: 'Unit 17: Life Cycles',
-    titleAr: 'الوحدة السابعة عشرة: دورات الحياة',
-    descriptionEn: 'How living things grow and change.',
-    descriptionAr: 'كيف تنمو الكائنات الحية وتتغير.',
-    color: 'bg-amber-600',
-    lightColor: 'bg-amber-50',
-    cards: [
-      { id: 'u17-1', en: 'Butterfly', ar: 'فراشة', img: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u17-2', en: 'Seedling', ar: 'شتلة', img: 'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 18,
-    titleEn: 'Unit 18: Maps and Globes',
-    titleAr: 'الوحدة الثامنة عشرة: الخرائط والكرات الأرضية',
-    descriptionEn: 'Reading and understanding geographical tools.',
-    descriptionAr: 'قراءة وفهم الأدوات الجغرافية.',
-    color: 'bg-blue-600',
-    lightColor: 'bg-blue-50',
-    cards: [
-      { id: 'u18-1', en: 'Continent', ar: 'قارة', img: 'https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u18-2', en: 'Compass', ar: 'بوصلة', img: 'https://images.unsplash.com/photo-1511210113110-449e25ca528d?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 19,
-    titleEn: 'Unit 19: Energy Sources',
-    titleAr: 'الوحدة التاسعة عشرة: مصادر الطاقة',
-    descriptionEn: 'Renewable and non-renewable energy.',
-    descriptionAr: 'الطاقة المتجددة وغير المتجددة.',
-    color: 'bg-orange-600',
-    lightColor: 'bg-orange-50',
-    cards: [
-      { id: 'u19-1', en: 'Wind Turbine', ar: 'توربينات الرياح', img: 'https://images.unsplash.com/photo-1466611653911-954ffea1127b?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u19-2', en: 'Battery', ar: 'بطارية', img: 'https://images.unsplash.com/photo-1548332441-ae9459ca833b?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 20,
-    titleEn: 'Unit 20: Animal Adaptation',
-    titleAr: 'الوحدة العشرون: تكيف الحيوانات',
-    descriptionEn: 'Surviving in harsh environments.',
-    descriptionAr: 'البقاء على قيد الحياة في البيئات القاسية.',
-    color: 'bg-rose-600',
-    lightColor: 'bg-rose-50',
-    cards: [
-      { id: 'u20-1', en: 'Camouflage', ar: 'تمويه', img: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u20-2', en: 'Polar Bear', ar: 'دب قطبي', img: 'https://images.unsplash.com/photo-1589656966895-2f33e7653819?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 21,
-    titleEn: 'Unit 21: Weather Patterns',
-    titleAr: 'الوحدة الواحدة والعشرون: أنماط الطقس',
-    descriptionEn: 'Predicting the weather.',
-    descriptionAr: 'التنبؤ بالطقس.',
-    color: 'bg-sky-600',
-    lightColor: 'bg-sky-50',
-    cards: [
-      { id: 'u21-1', en: 'Tornado', ar: 'إعصار قمعي', img: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u21-2', en: 'Blizzard', ar: 'عاصفة ثلجية', img: 'https://images.unsplash.com/photo-1418985991508-e47386d96a71?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 22,
-    titleEn: 'Unit 22: Gravity and Motion',
-    titleAr: 'الوحدة الثانية والعشرون: الجاذبية والحركة',
-    descriptionEn: 'Physics basics for kids.',
-    descriptionAr: 'أساسيات الفيزياء للأطفال.',
-    color: 'bg-indigo-700',
-    lightColor: 'bg-indigo-50',
-    cards: [
-      { id: 'u22-1', en: 'Gravity', ar: 'جاذبية', img: 'https://images.unsplash.com/photo-1454789548928-9efd52dc4031?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u22-2', en: 'Magnet', ar: 'مغناطيس', img: 'https://images.unsplash.com/photo-1590486803833-ffc9171e63a7?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 23,
-    titleEn: 'Unit 23: Human Body Systems',
-    titleAr: 'الوحدة الثالثة والعشرون: أجهزة جسم الإنسان',
-    descriptionEn: 'How our bodies work.',
-    descriptionAr: 'كيف تعمل أجسامنا.',
-    color: 'bg-red-700',
-    lightColor: 'bg-red-50',
-    cards: [
-      { id: 'u23-1', en: 'Skeleton', ar: 'هيكل عظمي', img: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u23-2', en: 'Heartbeat', ar: 'نبض القلب', img: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 24,
-    titleEn: 'Unit 24: Simple Machines',
-    titleAr: 'الوحدة الرابعة والعشرون: الآلات البسيطة',
-    descriptionEn: 'Lever, pulley, and wheel.',
-    descriptionAr: 'الرافعة والبكرة والعجلة.',
-    color: 'bg-yellow-600',
-    lightColor: 'bg-yellow-50',
-    cards: [
-      { id: 'u24-1', en: 'Pulley', ar: 'بكرة', img: 'https://images.unsplash.com/photo-1622329760012-9214777cd362?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u24-2', en: 'Lever', ar: 'رافعة', img: 'https://images.unsplash.com/photo-1622329760012-9214777cd362?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 25,
-    titleEn: 'Unit 25: Ecology and Food Webs',
-    titleAr: 'الوحدة الخامسة والعشرون: البيئة والشبكات الغذائية',
-    descriptionEn: 'The balance of nature.',
-    descriptionAr: 'توازن الطبيعة.',
-    color: 'bg-emerald-700',
-    lightColor: 'bg-emerald-50',
-    cards: [
-      { id: 'u25-1', en: 'Producer', ar: 'منتج', img: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=400&q=80' },
-      { id: 'u25-2', en: 'Consumer', ar: 'مستهلك', img: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=400&q=80' },
-    ]
-  },
-  {
-    id: 26,
-    titleEn: 'Unit 2: Playing Footbag for Fun',
-    titleAr: 'الوحدة 2: لعبة كرة الكيس للمتعة',
-    descriptionEn: 'Read about a unique mountain game from Colombia.',
-    descriptionAr: 'اقرأ عن لعبة جبلية فريدة من نوعها من كولومبيا.',
-    color: 'bg-orange-500',
-    lightColor: 'bg-orange-50',
-    cards: []
-  },
-  {
-    id: 27,
-    titleEn: 'Unit 3: Earth\'s Deep Secrets',
-    titleAr: 'الوحدة 3: أسرار الأرض العميقة',
-    descriptionEn: 'Discover what lies beneath the Earth\'s crust.',
-    descriptionAr: 'اكتشف ما يكمن تحت قشرة الأرض.',
-    color: 'bg-red-600',
-    lightColor: 'bg-red-50',
-    cards: []
-  },
-  {
-    id: 28,
-    titleEn: 'Unit 4: The Silk Road Journey',
-    titleAr: 'الوحدة 4: رحلة طريق الحرير',
-    descriptionEn: 'Travel back in time to ancient trade routes.',
-    descriptionAr: 'سافر عبر الزمن إلى طرق التجارة القديمة.',
-    color: 'bg-amber-600',
-    lightColor: 'bg-amber-50',
-    cards: []
-  },
-  {
-    id: 29,
-    titleEn: 'Unit 5: Animal Migration',
-    titleAr: 'الوحدة 5: هجرة الحيوانات',
-    descriptionEn: 'Why do animals travel thousands of miles?',
-    descriptionAr: 'لماذا تسافر الحيوانات آلاف الأميال؟',
-    color: 'bg-green-600',
-    lightColor: 'bg-green-50',
-    cards: []
-  },
-  {
-    id: 30,
-    titleEn: 'Unit 6: Modern Wonders',
-    titleAr: 'الوحدة 6: العجائب الحديثة',
-    descriptionEn: 'Explore the greatest engineering feats of our time.',
-    descriptionAr: 'استكشف أعظم الإنجازات الهندسية في عصرنا.',
-    color: 'bg-blue-600',
-    lightColor: 'bg-blue-50',
-    cards: []
-  },
-  {
-    id: 31,
-    titleEn: 'Unit 7: The Super Brain',
-    titleAr: 'الوحدة 7: الدماغ الخارق',
-    descriptionEn: 'How our mind processes information and memory.',
-    descriptionAr: 'كيف يعالج عقلنا المعلومات والذاكرة.',
-    color: 'bg-purple-600',
-    lightColor: 'bg-purple-50',
-    cards: []
-  },
-  {
-    id: 32,
-    titleEn: 'Unit 8: Renewable Power',
-    titleAr: 'الوحدة 8: الطاقة المتجددة',
-    descriptionEn: 'Harnessing the sun, wind, and water.',
-    descriptionAr: 'تسخير الشمس والرياح والماء.',
-    color: 'bg-cyan-600',
-    lightColor: 'bg-cyan-50',
-    cards: []
-  },
-  {
-    id: 33,
-    titleEn: 'Unit 9: Ancient Myths',
-    titleAr: 'الوحدة 9: الأساطير القديمة',
-    descriptionEn: 'Stories that explained the world to our ancestors.',
-    descriptionAr: 'القصص التي شرحت العالم لأجدادنا.',
-    color: 'bg-yellow-600',
-    lightColor: 'bg-yellow-50',
-    cards: []
-  },
-  {
-    id: 34,
-    titleEn: 'Unit 10: Deep Sea Wonders',
-    titleAr: 'الوحدة 10: عجائب أعماق البحار',
-    descriptionEn: 'Creatures that live in the dark ocean depths.',
-    descriptionAr: 'مخلوقات تعيش في أعماق المحيط المظلمة.',
-    color: 'bg-indigo-700',
-    lightColor: 'bg-indigo-50',
-    cards: []
-  },
-  {
-    id: 35,
-    titleEn: 'Unit 11: Space Frontiers',
-    titleAr: 'الوحدة 11: حدود الفضاء',
-    descriptionEn: 'Searching for life on other planets.',
-    descriptionAr: 'البحث عن حياة في كواكب أخرى.',
-    color: 'bg-slate-800',
-    lightColor: 'bg-slate-50',
-    cards: []
-  },
-  {
-    id: 36,
-    titleEn: 'Unit 12: Digital Citizens',
-    titleAr: 'الوحدة 12: المواطنون الرقميون',
-    descriptionEn: 'How to stay safe and kind on the internet.',
-    descriptionAr: 'كيف تبقى آمناً ولطيفاً على الإنترنت.',
-    color: 'bg-emerald-600',
-    lightColor: 'bg-emerald-50',
-    cards: []
-  },
-  {
-    id: 101,
-    titleEn: 'Unit 1: Word Study - Nouns and Verbs',
-    titleAr: 'الوحدة 1: دراسة الكلمات - الأسماء والأفعال',
-    descriptionEn: 'Learn how some words can be both nouns and verbs.',
-    descriptionAr: 'تعلم كيف يمكن لبعض الكلمات أن تكون اسماً وفعلاً في آن واحد.',
-    color: 'bg-indigo-600',
-    lightColor: 'bg-indigo-50',
-    cards: []
-  },
-  {
-    id: 102,
-    titleEn: 'Unit 1: Grammar - Adjectives with -ed and -ing',
-    titleAr: 'الوحدة 1: القواعد - الصفات المنتهية بـ -ed و -ing',
-    descriptionEn: 'Understand the difference between adjectives like bored and boring.',
-    descriptionAr: 'افهم الفرق بين الصفات مثل bored و boring.',
-    color: 'bg-pink-600',
-    lightColor: 'bg-pink-50',
-    cards: []
-  },
-  {
-    id: 103,
-    titleEn: 'Unit 2: Suffixes -ful and -less',
-    titleAr: 'الوحدة 2: اللاحقات -ful و -less',
-    descriptionEn: 'How suffixes change the meaning of words.',
-    descriptionAr: 'كيف تغير اللاحقات معنى الكلمات.',
-    color: 'bg-cyan-600',
-    lightColor: 'bg-cyan-50',
-    cards: []
-  },
-  {
-    id: 104,
-    titleEn: 'Unit 2: Prefixes un- and re-',
-    titleAr: 'الوحدة 2: البوادئ un- و re-',
-    descriptionEn: 'Using prefixes to create opposite or repeated actions.',
-    descriptionAr: 'استخدام البوادئ لإنشاء أفعال متضادة أو متكررة.',
-    color: 'bg-orange-600',
-    lightColor: 'bg-orange-50',
-    cards: []
-  },
-  {
-    id: 105,
-    titleEn: 'Unit 3: Compound Words',
-    titleAr: 'الوحدة 3: الكلمات المركبة',
-    descriptionEn: 'Combining two words to make a new one.',
-    descriptionAr: 'جمع كلمتين لتكوين كلمة جديدة.',
-    color: 'bg-green-600',
-    lightColor: 'bg-green-50',
-    cards: []
-  },
-  {
-    id: 106,
-    titleEn: 'Unit 3: Synonyms and Antonyms',
-    titleAr: 'الوحدة 3: المرادفات والمتضادات',
-    descriptionEn: 'Varying your vocabulary with similar and opposite words.',
-    descriptionAr: 'تغيير مفرداتك بكلمات متشابهة ومتضادة.',
-    color: 'bg-rose-600',
-    lightColor: 'bg-rose-50',
-    cards: []
-  },
-  {
-    id: 107,
-    titleEn: 'Unit 4: Comparative & Superlative',
-    titleAr: 'الوحدة 4: المقارنة والتفضيل',
-    descriptionEn: 'Comparing two things or finding the extreme.',
-    descriptionAr: 'مقارنة شيئين أو إيجاد الأفضل/الأسوأ.',
-    color: 'bg-blue-600',
-    lightColor: 'bg-blue-50',
-    cards: []
-  },
-  {
-    id: 108,
-    titleEn: 'Unit 4: Conjunctions (and, but, or)',
-    titleAr: 'الوحدة 4: أدوات الربط (و، لكن، أو)',
-    descriptionEn: 'Connecting ideas in a sentence.',
-    descriptionAr: 'ربط الأفكار في الجملة.',
-    color: 'bg-amber-600',
-    lightColor: 'bg-amber-50',
-    cards: []
-  },
-  {
-    id: 109,
-    titleEn: 'Unit 5: Prepositions of Place',
-    titleAr: 'الوحدة 5: حروف جر المكان',
-    descriptionEn: 'Describing where things are located.',
-    descriptionAr: 'وصف مكان وجود الأشياء.',
-    color: 'bg-emerald-600',
-    lightColor: 'bg-emerald-50',
-    cards: []
-  },
-  {
-    id: 110,
-    titleEn: 'Unit 5: Past Simple Tense',
-    titleAr: 'الوحدة 5: زمن الماضي البسيط',
-    descriptionEn: 'Talking about actions that happened in the past.',
-    descriptionAr: 'التحدث عن أفعال حدثت في الماضي.',
-    color: 'bg-violet-600',
-    lightColor: 'bg-violet-50',
-    cards: []
-  },
-  {
-    id: 111,
-    titleEn: 'Unit 6: Modal Verbs (Can, Must)',
-    titleAr: 'الوحدة 6: الأفعال الناقصة (يستطيع، يجب)',
-    descriptionEn: 'Expressing ability and necessity.',
-    descriptionAr: 'التعبير عن القدرة والضرورة.',
-    color: 'bg-teal-600',
-    lightColor: 'bg-teal-50',
-    cards: []
-  },
-  {
-    id: 112,
-    titleEn: 'Unit 2: The World Around Us & Sports',
-    titleAr: 'الوحدة 2: العالم من حولنا والرياضة',
-    descriptionEn: 'Learn words for nature and physical activities.',
-    descriptionAr: 'تعلم كلمات تصف الطبيعة والأنشطة البدنية.',
-    color: 'bg-amber-500',
-    lightColor: 'bg-amber-50',
-    cards: []
-  },
-  {
-    id: 113,
-    titleEn: 'Unit 3: Ancient Civilizations',
-    titleAr: 'الوحدة 3: الحضارات القديمة',
-    descriptionEn: 'Discover the vocabulary of history and archaeology.',
-    descriptionAr: 'اكتشف مفردات التاريخ وعلم الآثار.',
-    color: 'bg-orange-700',
-    lightColor: 'bg-orange-50',
-    cards: []
-  },
-  {
-    id: 114,
-    titleEn: 'Unit 4: Extreme Weather',
-    titleAr: 'الوحدة 4: الطقس القاسي',
-    descriptionEn: 'Words for storms, floods, and climate.',
-    descriptionAr: 'كلمات للعواصف والفيضانات والمناخ.',
-    color: 'bg-blue-800',
-    lightColor: 'bg-blue-50',
-    cards: []
-  },
-  {
-    id: 115,
-    titleEn: 'Unit 5: Health and Nutrition',
-    titleAr: 'الوحدة 5: الصحة والتغذية',
-    descriptionEn: 'Focus on healthy eating and body systems.',
-    descriptionAr: 'التركيز على الأكل الصحي وأجهزة الجسم.',
-    color: 'bg-red-500',
-    lightColor: 'bg-red-50',
-    cards: []
-  },
-  {
-    id: 116,
-    titleEn: 'Unit 6: Technology and Future',
-    titleAr: 'الوحدة 6: التكنولوجيا والمستقبل',
-    descriptionEn: 'Explore digital world concepts.',
-    descriptionAr: 'استكشف مفاهيم العالم الرقمي.',
-    color: 'bg-slate-700',
-    lightColor: 'bg-slate-50',
-    cards: []
-  },
-  {
-    id: 117,
-    titleEn: 'Unit 7: Ocean Life',
-    titleAr: 'الوحدة 7: حياة المحيطات',
-    descriptionEn: 'Discover creatures beneath the waves.',
-    descriptionAr: 'اكتشف الكائنات تحت الأمواج.',
-    color: 'bg-cyan-700',
-    lightColor: 'bg-cyan-50',
-    cards: []
-  },
-  {
-    id: 118,
-    titleEn: 'Unit 8: Space Frontiers',
-    titleAr: 'الوحدة 8: حدود الفضاء',
-    descriptionEn: 'Planets, stars, and space travel.',
-    descriptionAr: 'الكواكب والنجوم والسفر عبر الفضاء.',
-    color: 'bg-indigo-900',
-    lightColor: 'bg-indigo-50',
-    cards: []
-  },
-  {
-    id: 119,
-    titleEn: 'Unit 9: Ecosystems and Biomes',
-    titleAr: 'الوحدة 9: النظم البيئية والمناطق الأحيائية',
-    descriptionEn: 'Different habitats and how animals survive.',
-    descriptionAr: 'الموائل المختلفة وكيفية بقاء الحيوانات.',
-    color: 'bg-green-700',
-    lightColor: 'bg-green-50',
-    cards: []
-  },
-  {
-    id: 120,
-    titleEn: 'Unit 10: Art and Expression',
-    titleAr: 'الوحدة 10: الفن والتعبير',
-    descriptionEn: 'Vocabulary for painting, sculpture, and music.',
-    descriptionAr: 'مفردات الرسم والنحت والموسيقى.',
-    color: 'bg-purple-600',
-    lightColor: 'bg-purple-50',
-    cards: []
-  },
-  {
-    id: 121,
-    titleEn: 'Unit 11: Transport and Travel',
-    titleAr: 'الوحدة 11: النقل والسفر',
-    descriptionEn: 'How we move across the world.',
-    descriptionAr: 'كيف نتنقل عبر العالم.',
-    color: 'bg-sky-600',
-    lightColor: 'bg-sky-50',
-    cards: []
-  },
-  {
-    id: 122,
-    titleEn: 'Unit 12: Values and Communities',
-    titleAr: 'الوحدة 12: القيم والمجتمعات',
-    descriptionEn: 'Learning about rules, sharing, and kindness.',
-    descriptionAr: 'التعلم عن القواعد والمشاركة واللطف.',
-    color: 'bg-rose-500',
-    lightColor: 'bg-rose-50',
-    cards: []
-  }
-];
+export const OXFORD_UNITS = OXFORD_LESSONS.map(lesson => ({
+  id: lesson.id,
+  titleEn: lesson.titleEn,
+  titleAr: lesson.titleAr,
+  descriptionEn: lesson.descriptionEn,
+  descriptionAr: lesson.descriptionAr,
+  color: lesson.color,
+  lightColor: lesson.lightColor,
+  cards: lesson.vocab.map(v => ({
+    id: `v-${v.id}`,
+    en: v.word,
+    ar: v.ar,
+    img: v.img
+  }))
+}));
 
 export const OxfordDiscoverCompanion = ({ lang, onBack, initialUnitId, userProfile }: OxfordDiscoverCompanionProps) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
-  const [selectedUnitId, setSelectedUnitId] = useState<number | null>(null);
+  const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
   const [userResults, setUserResults] = useState<any[]>([]);
 
   useEffect(() => {
     if (initialUnitId) {
-      setSelectedUnitId(initialUnitId);
+      setSelectedUnitId(String(initialUnitId));
     }
   }, [initialUnitId]);
 
@@ -854,8 +185,16 @@ export const OxfordDiscoverCompanion = ({ lang, onBack, initialUnitId, userProfi
   }, [userProfile, selectedUnitId]);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState<'bank' | 'lessons' | 'reading' | 'language'>('bank');
-  const [activeLessonId, setActiveLessonId] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<
+    | 'phonics_heroes' 
+    | 'oxford_reading_adventures' 
+    | 'clil_discover' 
+    | 'values_stories' 
+    | 'project_time' 
+    | 'grammar_friends' 
+    | 'everyday_english'
+  >('phonics_heroes');
+  const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [isTraining, setIsTraining] = useState(false);
   const [trainingIndex, setTrainingIndex] = useState(0);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
@@ -885,7 +224,6 @@ export const OxfordDiscoverCompanion = ({ lang, onBack, initialUnitId, userProfi
         unitId={activeLessonId} 
         onBack={() => {
           setActiveLessonId(null);
-          // Refetch results when returning from lesson
           if (userProfile?.uid) {
             const fetchResults = async () => {
               try {
@@ -928,12 +266,12 @@ export const OxfordDiscoverCompanion = ({ lang, onBack, initialUnitId, userProfi
 
   const filteredUnits = OXFORD_UNITS.filter(unit => {
     const matchesSearch = unit.titleEn.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         unit.titleAr.includes(searchQuery);
+                          unit.titleAr.includes(searchQuery);
     
-    if (viewMode === 'language') return matchesSearch && unit.id >= 100;
-    if (viewMode === 'reading') return matchesSearch && unit.id >= 15 && unit.id < 100;
-    if (viewMode === 'lessons') return matchesSearch && unit.id < 15;
-    return matchesSearch && unit.id < 100;
+    const lessonData = OXFORD_LESSONS.find(l => l.id === unit.id);
+    if (!lessonData) return false;
+    
+    return matchesSearch && lessonData.category === viewMode;
   });
 
   return (
@@ -955,53 +293,38 @@ export const OxfordDiscoverCompanion = ({ lang, onBack, initialUnitId, userProfi
               </div>
               <p className="text-slate-400 font-medium text-lg max-w-2xl">
                 {isRtl 
-                  ? 'بنك الصور التعليمي والدروس المصاحبة لمنهج Oxford Discover 3، يساعدك على التعلم بطريقة تفاعلية.' 
-                  : 'The visual companion and interactive lessons for the Oxford Discover 3 curriculum.'}
+                  ? 'برنامج التعلّم الشامل من أكسفورد: تدريبات تفاعلية وقراءات متدرجة وصوتيات متميزة لبناء لغوي متين.' 
+                  : 'A comprehensive educational experience designed from the esteemed Oxford Curriculum.'}
               </p>
             </div>
             
             <div className="flex flex-col gap-4 w-full md:w-auto">
-              <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
-                <button 
-                  onClick={() => {
-                    setViewMode('bank');
-                    setSelectedUnitId(null);
-                  }}
-                  className={`flex-1 md:px-6 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 ${viewMode === 'bank' ? 'bg-white text-[#002147] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                  <ImageIcon size={18} />
-                  {isRtl ? 'بنك الصور' : 'Visual Bank'}
-                </button>
-                <button 
-                  onClick={() => {
-                    setViewMode('lessons');
-                    setSelectedUnitId(null);
-                  }}
-                  className={`flex-1 md:px-6 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 ${viewMode === 'lessons' ? 'bg-white text-[#002147] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                  <BookOpen size={18} />
-                  {isRtl ? 'الدروس التفاعلية' : 'Lessons'}
-                </button>
-                <button 
-                  onClick={() => {
-                    setViewMode('reading');
-                    setSelectedUnitId(null);
-                  }}
-                  className={`flex-1 md:px-6 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 ${viewMode === 'reading' ? 'bg-white text-[#002147] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                  <Sparkles size={18} />
-                  {isRtl ? 'المختبر القرائي' : 'Reading Lab'}
-                </button>
-                <button 
-                  onClick={() => {
-                    setViewMode('language');
-                    setSelectedUnitId(null);
-                  }}
-                  className={`flex-1 md:px-6 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 ${viewMode === 'language' ? 'bg-white text-[#002147] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                  <Layers size={18} />
-                  {isRtl ? 'مختبر اللغة' : 'Language Lab'}
-                </button>
+              <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200 overflow-x-auto gap-1 scrollbar-none w-full max-w-full">
+                {[
+                  { id: 'phonics_heroes', labelEn: 'Phonics Heroes', labelAr: 'أبطال الصوتيات', icon: Volume2 },
+                  { id: 'oxford_reading_adventures', labelEn: 'Reading Adventures', labelAr: 'مغامرات القراءة', icon: Sparkles },
+                  { id: 'clil_discover', labelEn: 'CLIL Discover', labelAr: 'اكتشف CLIL', icon: BookOpen },
+                  { id: 'values_stories', labelEn: 'Values Stories', labelAr: 'قصص القيم', icon: Layers },
+                  { id: 'project_time', labelEn: 'Project Time', labelAr: 'ساعة المشروع', icon: Trophy },
+                  { id: 'grammar_friends', labelEn: 'Grammar Friends', labelAr: 'أصدقاء القواعد', icon: GraduationCap },
+                  { id: 'everyday_english', labelEn: 'Everyday English', labelAr: 'الإنجليزية اليومية', icon: MessageSquare }
+                ].map((sec) => {
+                  const Icon = sec.icon;
+                  const isActive = viewMode === sec.id;
+                  return (
+                    <button 
+                      key={sec.id}
+                      onClick={() => {
+                        setViewMode(sec.id as any);
+                        setSelectedUnitId(null);
+                      }}
+                      className={`px-4 py-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 whitespace-nowrap ${isActive ? 'bg-[#002147] text-white shadow-md' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'}`}
+                    >
+                      <Icon size={14} />
+                      {isRtl ? sec.labelAr : sec.labelEn}
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="relative w-full md:w-80">
@@ -1033,51 +356,34 @@ export const OxfordDiscoverCompanion = ({ lang, onBack, initialUnitId, userProfi
                   whileHover={{ y: -5, scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
                   onClick={() => {
-                    if (viewMode === 'lessons' || viewMode === 'reading' || viewMode === 'language') {
-                      setActiveLessonId(unit.id);
-                    } else {
-                      setSelectedUnitId(unit.id);
-                    }
+                    setActiveLessonId(unit.id);
                   }}
                   className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/50 flex items-center justify-between group transition-all text-left rtl:text-right"
                 >
                   <div className="flex items-center gap-8">
                     <div className={`w-20 h-20 ${unit.color} text-white rounded-3xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
-                      {viewMode === 'lessons' ? <PlayCircle size={36} /> : <BookOpen size={36} />}
+                      <PlayCircle size={36} />
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-[#002147] mb-2">{isRtl ? unit.titleAr : unit.titleEn}</h3>
                       <p className="text-slate-400 text-sm font-medium">{isRtl ? unit.descriptionAr : unit.descriptionEn}</p>
                       <div className="mt-4 flex flex-wrap items-center gap-2">
-                        {viewMode === 'bank' ? (
-                          <>
-                            <div className="flex -space-x-2 rtl:space-x-reverse">
-                              {unit.cards.slice(0, 3).map((card, idx) => (
-                                <img key={card.id} src={card.img} alt="" referrerPolicy="no-referrer" className="w-8 h-8 rounded-full border-2 border-white object-cover bg-slate-100" />
-                              ))}
-                            </div>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">+{unit.cards.length} Images</span>
-                          </>
-                        ) : (
-                          <>
-                            <div className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full">
-                              <Sparkles size={12} className="text-blue-500" />
-                              <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{isRtl ? 'درس تفاعلي متوفر' : 'Interactive Lesson Available'}</span>
-                            </div>
-                            {(() => {
-                              const res = userResults.find(r => r.lessonId === String(unit.id));
-                              if (res) {
-                                return (
-                                  <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1 rounded-full shadow-sm text-[10px] font-bold">
-                                    <CheckCircle2 size={12} />
-                                    <span>{isRtl ? `تم (${res.score}/${res.total})` : `Completed (${res.score}/${res.total})`}</span>
-                                  </div>
-                                );
-                              }
-                              return null;
-                            })()}
-                          </>
-                        )}
+                        <div className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full">
+                          <Sparkles size={12} className="text-blue-500" />
+                          <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{isRtl ? 'درس تفاعلي متوفر' : 'Interactive Lesson Available'}</span>
+                        </div>
+                        {(() => {
+                          const res = userResults.find(r => r.lessonId === String(unit.id));
+                          if (res) {
+                            return (
+                              <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1 rounded-full shadow-sm text-[10px] font-bold">
+                                <CheckCircle2 size={12} />
+                                <span>{isRtl ? `تم (${res.score}/${res.total})` : `Completed (${res.score}/${res.total})`}</span>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
                       </div>
                     </div>
                   </div>
@@ -1187,7 +493,7 @@ export const OxfordDiscoverCompanion = ({ lang, onBack, initialUnitId, userProfi
                                >
                                   <Mic size={18} />
                                </button>
-                            </div>
+                             </div>
                           </div>
                           <div className="p-6 text-center">
                             <h4 className="text-lg font-black text-[#002147] mb-1 group-hover:text-blue-600 transition-colors uppercase tracking-tight">{card.en}</h4>

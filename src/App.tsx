@@ -3810,7 +3810,7 @@ export default function App() {
             setAutoStartUnitId(null);
             setView('dashboard');
           }} 
-          initialUnitId={autoStartUnitId ? parseInt(autoStartUnitId) : null}
+          initialUnitId={autoStartUnitId}
         />
       );
     }
