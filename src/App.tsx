@@ -1246,6 +1246,77 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
           </div>
         </motion.div>
 
+        {/* Oxford Series Companions Dual Launcher */}
+        <div className="mb-10">
+          <h3 className="text-lg font-black text-[#002147] mb-4 flex items-center gap-2">
+            <span>📚</span>
+            <span>{isRtl ? 'سلاسل مناهج أكسفورد المصورة | Oxford Illustrated Series' : 'Oxford Illustrated Series'}</span>
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Oxford Discover Card */}
+            <motion.div
+              whileHover={{ y: -4, scale: 1.01 }}
+              onClick={() => onNavigate('oxford-discover')}
+              className="p-6 bg-white rounded-[2.5rem] border-2 border-rose-500/10 shadow-lg hover:shadow-xl cursor-pointer transition-all flex flex-col justify-between relative overflow-hidden"
+            >
+              <div className="absolute right-[-15px] top-[-10px] w-24 h-24 bg-rose-500/5 rounded-full blur-xl pointer-events-none" />
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="bg-rose-500/10 text-rose-600 px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider">
+                    {isRtl ? 'منهج أكسفورد المطور' : 'Vibe & Core Series'}
+                  </span>
+                  <div className="w-10 h-10 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center">
+                    <Layers size={20} />
+                  </div>
+                </div>
+                <h4 className="text-xl font-black text-[#002147] mb-2 leading-none">
+                  {isRtl ? 'أوكسفورد المطور (Discover)' : 'Oxford Discover'}
+                </h4>
+                <p className="text-slate-400 font-bold text-xs leading-relaxed mb-6">
+                  {isRtl 
+                    ? 'المنهج التفاعلي الحديث مدعوماً ببطاقات الاستذكار الذكية، ألعاب التهجئة السريعة، وتدريبات النطق الدقيقة لكل وحدة.'
+                    : 'The modernized curriculum supported by interactive active recall flashcards, speed typing drills, and syllable audio trackers.'}
+                </p>
+              </div>
+              <div className="flex items-center justify-between border-t border-slate-50 pt-4 mt-auto">
+                <span className="text-[10px] font-black text-rose-600 uppercase tracking-widest">{isRtl ? 'افتح المنهج المطور 🧭' : 'Discover Units 🧭'}</span>
+                <span className="w-6 h-6 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-xs font-black">→</span>
+              </div>
+            </motion.div>
+
+            {/* Oxford Classic Card */}
+            <motion.div
+              whileHover={{ y: -4, scale: 1.01 }}
+              onClick={() => onNavigate('oxford-classic')}
+              className="p-6 bg-white rounded-[2.5rem] border-2 border-emerald-500/10 shadow-lg hover:shadow-xl cursor-pointer transition-all flex flex-col justify-between relative overflow-hidden"
+            >
+              <div className="absolute right-[-15px] top-[-10px] w-24 h-24 bg-emerald-500/5 rounded-full blur-xl pointer-events-none" />
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="bg-emerald-500/10 text-emerald-600 px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider">
+                    {isRtl ? 'منهج أكسفورد الكلاسيكي القديم' : 'Classic Curriculum'}
+                  </span>
+                  <div className="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center">
+                    <OxfordClassicIcon size={20} />
+                  </div>
+                </div>
+                <h4 className="text-xl font-black text-[#002147] mb-2 leading-none">
+                  {isRtl ? 'أوكسفورد الكلاسيكي المصور' : 'Classic Oxford Illustrated'}
+                </h4>
+                <p className="text-slate-400 font-bold text-xs leading-relaxed mb-6">
+                  {isRtl 
+                    ? 'منهج أكسفورد المصور الكلاسيكي والوحدة الثامنة "الطعام اللذيذ" مع ألعاب كسر الجليد ومطابقة الصور والمفردات.'
+                    : 'The prestigious classic curriculum containing Unit 8 "Delicious Food" and all original vocabulary games and matching tests.'}
+                </p>
+              </div>
+              <div className="flex items-center justify-between border-t border-slate-50 pt-4 mt-auto">
+                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">{isRtl ? 'افتح المنهج الكلاسيكي 📚' : 'Classic Units 📚'}</span>
+                <span className="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-black">→</span>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
         {currentPlan && todayLesson && (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -4830,8 +4901,8 @@ export default function App() {
                     { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
                     { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
                     { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
-                    { id: 'oxford-discover', label: t.oxfordCompanion, icon: Layers },
-                    { id: 'oxford-classic', label: lang === 'ar' ? 'أوكسفورد المصور القديم' : 'Classic Oxford Illustrated', icon: OxfordClassicIcon },
+                    { id: 'oxford-discover', label: lang === 'ar' ? 'أوكسفورد المطور 🌟' : 'Oxford Discover 🌟', icon: Layers },
+                    { id: 'oxford-classic', label: lang === 'ar' ? 'أوكسفورد الكلاسيكي 📚' : 'Classic Oxford 📚', icon: OxfordClassicIcon },
                     { id: 'modern-curriculum', label: lang === 'ar' ? 'المناهج الدراسية المطورة' : 'Modernized Curriculums', icon: Sparkles },
                     { id: 'professional-development', label: lang === 'ar' ? 'دورات تطويرية' : 'Developmental Courses', icon: GraduationCap },
                     { id: 'early-childhood', label: t.earlyChildhood, icon: Baby },
@@ -4895,23 +4966,20 @@ export default function App() {
                 {[
                   [
                     { id: 'dashboard', icon: LayoutDashboard },
-                    { id: 'admin', icon: ShieldAlert, show: isAdmin },
-                    { id: 'early-childhood', icon: Baby },
                     { id: 'academic-planner', icon: Sparkles },
                     { id: 'oxford-discover', icon: OxfordIcon },
                     { id: 'oxford-classic', icon: OxfordClassicIcon },
-                    { id: 'video-library', icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
-                    { id: 'interactive-learning', icon: Gamepad2 },
-                    { id: 'pronunciation-lab', icon: Mic },
-                    { id: 'story-library', icon: BookMarked },
+                    { id: 'modern-curriculum', icon: BookOpen },
+                    { id: 'early-childhood', icon: Baby },
                   ],
                   [
-                    { id: 'ai-chat', icon: Mic2 },
-                    { id: 'modern-curriculum', icon: Sparkles },
-                    { id: 'professional-development', icon: GraduationCap },
-                    { id: 'leaderboard', icon: Trophy },
+                    { id: 'interactive-learning', icon: Gamepad2 },
+                    { id: 'story-library', icon: BookMarked },
+                    { id: 'pronunciation-lab', icon: Mic },
+                    { id: 'video-library', icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
                     { id: 'progress', icon: BarChart3 },
-                    { id: 'logout', icon: LogOut, action: handleLogout },
+                    { id: 'ai-chat', icon: Mic2 },
+                    ...(isAdmin ? [{ id: 'admin', icon: ShieldAlert }] : []),
                   ]
                 ].map((row, rowIndex) => (
                   <div key={`mobile-nav-row-${rowIndex}`} className={`flex justify-around items-center w-full ${rowIndex === 1 ? 'border-t border-white/5 pt-1' : ''}`}>

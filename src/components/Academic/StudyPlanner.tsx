@@ -42,6 +42,7 @@ import { ALL_CONVERSATION_UNITS } from '../ConversationCurriculumCompanion';
 import { ALL_EXPRESSION_UNITS } from '../ExpressionCurriculumCompanion';
 import { OXFORD_UNITS } from '../OxfordDiscoverCompanion';
 import { OXFORD_LESSONS } from '../../data/oxfordLessonsData';
+import { OLD_OXFORD_LESSONS } from '../OxfordUnitLesson';
 import { STORIES } from '../StoryLibrary';
 import { KIDS_STORIES } from '../../data/kidsStories';
 import { ADULTS_DAILY_DOSES } from '../../data/adultsDailyDose';
@@ -1023,6 +1024,18 @@ export const StudyPlanner: React.FC<StudyPlannerProps & { userProfile: UserProfi
 
     OXFORD_UNITS.forEach(u => {
       lessons.push({ ...u, courseId: 'oxford', label: 'Oxford', topic: isRtl ? u.titleAr : u.titleEn, unitId: String(u.id), level: 'General' });
+    });
+
+    Object.keys(OLD_OXFORD_LESSONS).forEach(key => {
+      const u = OLD_OXFORD_LESSONS[key];
+      lessons.push({
+        id: `old_${key}`,
+        courseId: 'oxford',
+        label: isRtl ? 'أوكسفورد الكلاسيكي' : 'Classic Oxford',
+        topic: isRtl ? (u.bigQuestionAr || u.bigQuestion) : u.bigQuestion,
+        unitId: `old_${key}`,
+        level: 'General'
+      });
     });
 
     // Filter out existing ones that are ALREADY in the generated plan
