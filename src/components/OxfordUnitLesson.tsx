@@ -15,7 +15,7 @@ interface OxfordUnitLessonProps {
   userProfile?: any;
 }
 
-const LESSON_DATA = {
+export const OLD_OXFORD_LESSONS: Record<string, any> = {
   1: {
     bigQuestion: "How do people have fun?",
     bigQuestionAr: "كيف يستمتع الناس؟",
@@ -1072,7 +1072,9 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack, userProfile }: OxfordUn
   const isRtl = lang === 'ar';
   const isLanguageLab = false;
   const languageData = null;
-  const data = OXFORD_LESSONS.find(lesson => lesson.id === unitId) || {
+  const isOldUnit = String(unitId).startsWith('old_') || !isNaN(Number(unitId));
+  const normalizedId = String(unitId).startsWith('old_') ? String(unitId).replace('old_', '') : unitId;
+  const data = OXFORD_LESSONS.find(lesson => lesson.id === unitId) || OLD_OXFORD_LESSONS[normalizedId] || {
     bigQuestion: "",
     bigQuestionAr: "",
     vocab: [],

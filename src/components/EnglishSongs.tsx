@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Music, 
   Volume2, 
@@ -24,14 +24,16 @@ interface EnglishSongsProps {
   lang: 'ar' | 'en';
   userProfile: UserProfile | null;
   onBack: () => void;
-  onXPAdded?: (xp: number) => void;
+  onXPAdded?: (xp: number, details?: { lessonId: string; courseId: string; score: number; total: number; title: string, level?: string }) => void;
+  initialSongId?: string;
 }
 
 export const EnglishSongs: React.FC<EnglishSongsProps> = ({
   lang,
   userProfile,
   onBack,
-  onXPAdded
+  onXPAdded,
+  initialSongId
 }) => {
   const isRtl = lang === 'ar';
 
@@ -53,7 +55,7 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Comprehension questions states
-  const [selectedSongId, setSelectedSongId] = useState<string>('song_001');
+  const [selectedSongId, setSelectedSongId] = useState<string>(initialSongId || 'song_001');
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizXPClaimed, setQuizXPClaimed] = useState(false);
@@ -205,6 +207,12 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
     setSelectedSongId(id);
   };
 
+  useEffect(() => {
+    if (initialSongId) {
+      handleSelectSong(initialSongId);
+    }
+  }, [initialSongId]);
+
   // Text to Speech
   const speakText = (text: string, id: string) => {
     if ('speechSynthesis' in window) {
@@ -346,7 +354,18 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
   const claimRecordingXP = () => {
     if (recordingXPClaimed) return;
     setRecordingXPClaimed(true);
-    if (onXPAdded) onXPAdded(20);
+    if (onXPAdded) {
+      const currentSongMeta = ENGLISH_WITH_SONGS_DATA.find(s => s.id === selectedSongId) || ENGLISH_WITH_SONGS_DATA[0];
+      const songLevel = currentSongMeta.level === 'أطفال' ? 'Kids' : 'Adults';
+      onXPAdded(20, {
+        lessonId: String(selectedSongId),
+        courseId: 'english_songs',
+        score: 10,
+        total: 10,
+        title: songData.title,
+        level: songLevel
+      });
+    }
   };
 
   // Submits context quiz
@@ -367,7 +386,16 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
 
     const gainedXP = correctCount * 10;
     if (gainedXP > 0 && onXPAdded && !quizXPClaimed) {
-      onXPAdded(gainedXP);
+      const currentSongMeta = ENGLISH_WITH_SONGS_DATA.find(s => s.id === selectedSongId) || ENGLISH_WITH_SONGS_DATA[0];
+      const songLevel = currentSongMeta.level === 'أطفال' ? 'Kids' : 'Adults';
+      onXPAdded(gainedXP, {
+        lessonId: String(selectedSongId),
+        courseId: 'english_songs',
+        score: correctCount,
+        total: songData.questions.length,
+        title: songData.title,
+        level: songLevel
+      });
       setQuizXPClaimed(true);
     }
   };

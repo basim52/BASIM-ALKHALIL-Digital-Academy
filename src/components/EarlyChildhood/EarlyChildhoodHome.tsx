@@ -41,7 +41,7 @@ import { ParentAIInsights } from '../ParentAIInsights';
 
 import { StudentProfile, CHILDHOOD_PACKAGES } from '../../types';
 import { db, resetDailyMinutes, updateRemainingMinutes } from '../../lib/firebase';
-import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../../lib/firestoreUtils';
 
 const KID_COURSES = [
@@ -279,6 +279,19 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
         completed: true,
         updatedAt: new Date()
       }, { merge: true });
+
+      // Save to lessonResults so it reflects in StudyPlanner and smart plans
+      await addDoc(collection(db, 'lessonResults'), {
+        userId: profile.uid,
+        parentIds: (profile as any).linkedParentIds || [],
+        lessonId: lessonId,
+        courseId: 'early_childhood',
+        level: 'Kid',
+        lessonTitle: lessonTitle,
+        score: score,
+        total: total,
+        timestamp: serverTimestamp()
+      });
 
       // Logic to unlock a random sticker if score is high
       if (score / total >= 0.8) {

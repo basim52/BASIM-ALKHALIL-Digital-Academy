@@ -80,6 +80,7 @@ import { ResultsChart } from './components/Academic/ResultsChart';
 import { SmartAnalytics } from './components/Academic/SmartAnalytics';
 import { BiWeeklyTest } from './components/Academic/BiWeeklyTest';
 import { OxfordDiscoverCompanion } from './components/OxfordDiscoverCompanion';
+import { OxfordClassicCompanion } from './components/OxfordClassicCompanion';
 import { ReadingCurriculumCompanion, ReadingLevel, ALL_READING_UNITS } from './components/ReadingCurriculumCompanion';
 import { GrammarCurriculumCompanion, GrammarLevel, ALL_GRAMMAR_UNITS } from './components/GrammarCurriculumCompanion';
 import { ConversationCurriculumCompanion, ConversationLevel, ALL_CONVERSATION_UNITS } from './components/ConversationCurriculumCompanion';
@@ -100,7 +101,7 @@ import { AnimatedStoryboard } from './components/AnimatedStoryboard';
 import { EscapeRoomGrammar } from './components/EscapeRoomGrammar';
 import { FamilyActivities } from './components/FamilyActivities';
 import { InteractiveLearningHub } from './components/InteractiveLearningHub';
-import { Layers, Image as OxfordIcon } from 'lucide-react';
+import { Layers, Image as OxfordIcon, Library as OxfordClassicIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { familyConstellationsLesson } from './data/lessons/r_a1_4';
 import { everydayInteractionLesson } from './data/lessons/r_a1_5';
@@ -3128,6 +3129,7 @@ export default function App() {
   const [initialStoryId, setInitialStoryId] = useState<string | null>(null);
   const [activeStudentProfile, setActiveStudentProfile] = useState<UserProfile | null>(null);
   const [earlyChildhoodInitialLesson, setEarlyChildhoodInitialLesson] = useState<string | null>(null);
+  const [activeInteractiveUnitId, setActiveInteractiveUnitId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!activeStudentId) {
@@ -3727,21 +3729,28 @@ export default function App() {
               setView('writing-curriculum');
             } else if (courseId === 'oxford') {
               setAutoStartUnitId(unitId);
-              setView('oxford-discover');
+              const isOld = !isNaN(Number(unitId)) || String(unitId).startsWith('old_');
+              setView(isOld ? 'oxford-classic' : 'oxford-discover');
             } else if (courseId === 'story-library') {
               setInitialStoryId(unitId);
               setView('story-library');
             } else if (courseId === 'english_songs' || courseId === 'english-songs') {
+              setActiveInteractiveUnitId(unitId);
               setView('english-songs');
             } else if (courseId === 'animated_storyboard' || courseId === 'animated-storyboard') {
+              setActiveInteractiveUnitId(unitId);
               setView('animated-storyboard');
             } else if (courseId === 'escape_room' || courseId === 'escape-room') {
+              setActiveInteractiveUnitId(unitId);
               setView('escape-room');
             } else if (courseId === 'roleplay_challenges' || courseId === 'roleplay-challenges') {
+              setActiveInteractiveUnitId(unitId);
               setView('roleplay-challenges');
             } else if (courseId === 'visual_dictionary' || courseId === 'visual-dictionary') {
+              setActiveInteractiveUnitId(unitId);
               setView('visual-dictionary');
             } else if (courseId === 'family_activities' || courseId === 'family-activities') {
+              setActiveInteractiveUnitId(unitId);
               setView('family-activities');
             } else if (courseId === 'adults_daily_dose' || courseId === 'adults-daily-dose') {
               const idx = ADULTS_DAILY_DOSES.findIndex(d => d.lesson_id === unitId || d.lesson_id === 'adults-daily-dose');
@@ -3804,6 +3813,19 @@ export default function App() {
     if (view === 'oxford-discover') {
       return (
         <OxfordDiscoverCompanion 
+          lang={lang} 
+          userProfile={userProfile}
+          onBack={() => {
+            setAutoStartUnitId(null);
+            setView('dashboard');
+          }} 
+          initialUnitId={autoStartUnitId}
+        />
+      );
+    }
+    if (view === 'oxford-classic') {
+      return (
+        <OxfordClassicCompanion 
           lang={lang} 
           userProfile={userProfile}
           onBack={() => {
@@ -3989,6 +4011,17 @@ export default function App() {
                   await updateDoc(doc(db, 'users', currentUser.uid), {
                     points: newPoints
                   });
+                  await addDoc(collection(db, 'lessonResults'), {
+                    userId: currentUser.uid,
+                    parentIds: (userProfile as any).linkedParentIds || [],
+                    lessonId: 'pronunciation_lab_general',
+                    courseId: 'pronunciation_lab',
+                    level: 'Lab',
+                    lessonTitle: 'Pronunciation Lab Practice',
+                    score: 10,
+                    total: 10,
+                    timestamp: serverTimestamp()
+                  });
                 }
                 setUserProfile({
                   ...userProfile,
@@ -4017,6 +4050,17 @@ export default function App() {
                 if (!currentUser.uid.startsWith('sim_')) {
                   await updateDoc(doc(db, 'users', currentUser.uid), {
                     points: newPoints
+                  });
+                  await addDoc(collection(db, 'lessonResults'), {
+                    userId: currentUser.uid,
+                    parentIds: (userProfile as any).linkedParentIds || [],
+                    lessonId: activeInteractiveUnitId || 'role_001',
+                    courseId: 'roleplay_challenges',
+                    level: 'Dialogues',
+                    lessonTitle: 'Speaking Role Play',
+                    score: 10,
+                    total: 10,
+                    timestamp: serverTimestamp()
                   });
                 }
                 setUserProfile({
@@ -4047,6 +4091,17 @@ export default function App() {
                   await updateDoc(doc(db, 'users', currentUser.uid), {
                     points: newPoints
                   });
+                  await addDoc(collection(db, 'lessonResults'), {
+                    userId: currentUser.uid,
+                    parentIds: (userProfile as any).linkedParentIds || [],
+                    lessonId: activeInteractiveUnitId || 'vocab_001',
+                    courseId: 'visual_dictionary',
+                    level: 'Vocab List',
+                    lessonTitle: 'Visual Dictionary Challenge',
+                    score: 10,
+                    total: 10,
+                    timestamp: serverTimestamp()
+                  });
                 }
                 setUserProfile({
                   ...userProfile,
@@ -4076,8 +4131,9 @@ export default function App() {
         <EnglishSongs
           lang={lang}
           userProfile={userProfile}
+          initialSongId={activeInteractiveUnitId || undefined}
           onBack={() => setView('interactive-learning')}
-          onXPAdded={async (xp) => {
+          onXPAdded={async (xp, details) => {
             if (userProfile && currentUser) {
               const currentPoints = (userProfile as any).points || 0;
               const newPoints = currentPoints + xp;
@@ -4087,6 +4143,17 @@ export default function App() {
                     points: newPoints
                   });
                 }
+                await addDoc(collection(db, 'lessonResults'), {
+                  userId: currentUser.uid,
+                  parentIds: (userProfile as any).linkedParentIds || [],
+                  lessonId: details?.lessonId || activeInteractiveUnitId || 'song_001',
+                  courseId: 'english_songs',
+                  level: details?.level || 'Kids',
+                  lessonTitle: details?.title || 'English with Songs',
+                  score: details?.score || 10,
+                  total: details?.total || 10,
+                  timestamp: serverTimestamp()
+                });
                 setUserProfile({
                   ...userProfile,
                   points: newPoints
@@ -4116,6 +4183,17 @@ export default function App() {
                     points: newPoints
                   });
                 }
+                await addDoc(collection(db, 'lessonResults'), {
+                  userId: currentUser.uid,
+                  parentIds: (userProfile as any).linkedParentIds || [],
+                  lessonId: activeInteractiveUnitId || 'cartoon_001',
+                  courseId: 'animated_storyboard',
+                  level: 'Cartoon',
+                  lessonTitle: "Noor's London Adventures",
+                  score: 10,
+                  total: 10,
+                  timestamp: serverTimestamp()
+                });
                 setUserProfile({
                   ...userProfile,
                   points: newPoints
@@ -4145,6 +4223,17 @@ export default function App() {
                     points: newPoints
                   });
                 }
+                await addDoc(collection(db, 'lessonResults'), {
+                  userId: currentUser.uid,
+                  parentIds: (userProfile as any).linkedParentIds || [],
+                  lessonId: activeInteractiveUnitId || 'puz_001',
+                  courseId: 'escape_room',
+                  level: 'Logic Play',
+                  lessonTitle: 'Grammar Escape Room',
+                  score: 10,
+                  total: 10,
+                  timestamp: serverTimestamp()
+                });
                 setUserProfile({
                   ...userProfile,
                   points: newPoints
@@ -4174,6 +4263,17 @@ export default function App() {
                     points: newPoints
                   });
                 }
+                await addDoc(collection(db, 'lessonResults'), {
+                  userId: currentUser.uid,
+                  parentIds: (userProfile as any).linkedParentIds || [],
+                  lessonId: activeInteractiveUnitId || 'game_001',
+                  courseId: 'family_activities',
+                  level: 'Family Core',
+                  lessonTitle: 'Cooperative Family Challenge',
+                  score: 10,
+                  total: 10,
+                  timestamp: serverTimestamp()
+                });
                 setUserProfile({
                   ...userProfile,
                   points: newPoints
@@ -4731,6 +4831,7 @@ export default function App() {
                     { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
                     { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
                     { id: 'oxford-discover', label: t.oxfordCompanion, icon: Layers },
+                    { id: 'oxford-classic', label: lang === 'ar' ? 'أوكسفورد المصور القديم' : 'Classic Oxford Illustrated', icon: OxfordClassicIcon },
                     { id: 'modern-curriculum', label: lang === 'ar' ? 'المناهج الدراسية المطورة' : 'Modernized Curriculums', icon: Sparkles },
                     { id: 'professional-development', label: lang === 'ar' ? 'دورات تطويرية' : 'Developmental Courses', icon: GraduationCap },
                     { id: 'early-childhood', label: t.earlyChildhood, icon: Baby },
@@ -4798,6 +4899,7 @@ export default function App() {
                     { id: 'early-childhood', icon: Baby },
                     { id: 'academic-planner', icon: Sparkles },
                     { id: 'oxford-discover', icon: OxfordIcon },
+                    { id: 'oxford-classic', icon: OxfordClassicIcon },
                     { id: 'video-library', icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
                     { id: 'interactive-learning', icon: Gamepad2 },
                     { id: 'pronunciation-lab', icon: Mic },
