@@ -1710,6 +1710,7 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
   const [currentPlan, setCurrentPlan] = useState<any>(null);
   const [currentPlanResults, setCurrentPlanResults] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'plan' | 'advisor' | 'notifications'>('overview');
+  const [reportLanguage, setReportLanguage] = useState<'ar' | 'en' | 'bilingual'>('ar');
 
   useEffect(() => {
     const fetchStudentSpecificData = async () => {
@@ -1962,6 +1963,45 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
     if (!currentStudent) return;
     setGeneratingReport(true);
     try {
+      let promptText = "";
+      if (reportLanguage === 'ar') {
+        promptText = `As an education expert at "Basim Alkhalil Academy", analyze the student's performance and provide a detailed, encouraging, and highly professional academic report for the parent.
+The report MUST be written ENTIRELY in high-quality professional Arabic (اللغة العربية).
+Please format the report with the following structure:
+
+# 📊 التقرير الأكاديمي الذكي (Smart Academic Report)
+
+[Write the detailed analysis, student strengths, achievement landmarks, and clear areas for growth in high-quality professional Arabic here...]
+
+Always maintain an optimistic, encouraging, and highly academic tone. Use markdown formatting (bold, lists, headers) to make the sections easy to read.`;
+      } else if (reportLanguage === 'en') {
+        promptText = `As an education expert at "Basim Alkhalil Academy", analyze the student's performance and provide a detailed, encouraging, and highly professional academic report for the parent.
+The report MUST be written ENTIRELY in high-quality professional English.
+Please format the report with the following structure:
+
+# 📊 Smart Academic Report (التقرير الأكاديمي الذكي)
+
+[Write the detailed analysis, student strengths, achievement landmarks, and clear areas for growth in professional English here...]
+
+Always maintain an optimistic, encouraging, and highly academic tone. Use markdown formatting (bold, lists, headers) to make the sections easy to read.`;
+      } else {
+        promptText = `As an education expert at "Basim Alkhalil Academy", analyze the student's performance and provide a detailed, encouraging, and highly professional bilingual academic report for the parent.
+The report MUST contain BOTH Arabic and English sections.
+Please format the report with the following structure:
+
+# 📊 التقرير الأكاديمي الذكي / Smart Academic Report
+
+## 🇸🇦 القسم العربي (Arabic Section)
+[Write the detailed analysis, student strengths, and areas for growth in high-quality professional Arabic here...]
+
+---
+
+## 🇬🇧 English Section (القسم الإنجليزي)
+[Write the detailed analysis, student strengths, and areas for growth in professional English here...]
+
+Always maintain an optimistic, encouraging, and highly academic tone. Use markdown formatting (bold, lists, headers) to make both sections easy to read.`;
+      }
+
       const resp = await fetch('/api/admin/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1975,21 +2015,7 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
             completedAssignments: completedAssignments,
             totalAssignments: totalAssignments
           },
-          prompt: `As an education expert at "Basim Alkhalil Academy", analyze the student's performance and provide a detailed, encouraging, and highly professional bilingual academic report for the parent.
-The report MUST be written in BOTH Arabic and English.
-Please format the report with the following structure:
-
-# 📊 التقرير الأكاديمي الذكي / Smart Academic Report
-
-## 🇸🇦 القسم العربي (Arabic Section)
-[Write the detailed analysis, student strengths, and areas for growth in high-quality professional Arabic here...]
-
----
-
-## 🇬🇧 English Section (القسم الإنجليزي)
-[Write the detailed analysis, student strengths, and areas for growth in professional English here...]
-
-Always maintain an optimistic, encouraging, and highly academic tone. Use markdown formatting (bold, lists, headers) to make both sections easy to read.`
+          prompt: promptText
         })
       });
 
@@ -2479,7 +2505,7 @@ Always maintain an optimistic, encouraging, and highly academic tone. Use markdo
             className="space-y-8"
           >
             {/* Daily advisor guidance */}
-            <div className="bg-gradient-to-r from-teal-800 to-emerald-800 rounded-3xl p-6 text-white shadow-sm border-b-4 border-emerald-500 relative overflow-hidden flex flex-col md:flex-row md:items-center md:justify-between gap-6 font-sans">
+            <div className="bg-gradient-to-r from-teal-800 to-emerald-800 rounded-3xl p-6 text-white shadow-sm border-b-4 border-emerald-500 relative overflow-hidden flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 font-sans">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center shadow-inner shrink-0">
                   <Sparkles size={24} className="text-amber-300" />
@@ -2494,13 +2520,52 @@ Always maintain an optimistic, encouraging, and highly academic tone. Use markdo
                 </div>
               </div>
 
-              <button 
-                onClick={generateReport}
-                disabled={generatingReport}
-                className="bg-white hover:bg-[#C49E3A] hover:text-white px-5 py-3 rounded-xl text-xs font-black text-teal-850 transition-all hover:scale-105 active:scale-95 text-center whitespace-nowrap shadow shrink-0"
-              >
-                {isRtl ? 'توليد تقرير pdf/صورة مخصصة 📃' : 'Request Printable AI Report 📃'}
-              </button>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+                {/* Language Selector */}
+                <div className="bg-black/25 p-1 rounded-xl flex gap-1 border border-white/5">
+                  <button
+                    type="button"
+                    onClick={() => setReportLanguage('ar')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      reportLanguage === 'ar'
+                        ? 'bg-[#C49E3A] text-white shadow-md'
+                        : 'text-emerald-100 hover:bg-white/5'
+                    }`}
+                  >
+                    العربية 🇸🇦
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReportLanguage('en')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      reportLanguage === 'en'
+                        ? 'bg-[#C49E3A] text-white shadow-md'
+                        : 'text-emerald-100 hover:bg-white/5'
+                    }`}
+                  >
+                    English 🇬🇧
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReportLanguage('bilingual')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      reportLanguage === 'bilingual'
+                        ? 'bg-[#C49E3A] text-white shadow-md'
+                        : 'text-emerald-100 hover:bg-white/5'
+                    }`}
+                  >
+                    {isRtl ? 'كلاهما 🌐' : 'Both'}
+                  </button>
+                </div>
+
+                <button 
+                  onClick={generateReport}
+                  disabled={generatingReport}
+                  className="bg-white hover:bg-[#C49E3A] hover:text-white px-5 py-3 rounded-xl text-xs font-black text-teal-850 transition-all hover:scale-105 active:scale-95 text-center whitespace-nowrap shadow shrink-0"
+                >
+                  {isRtl ? 'توليد تقرير مخصص 📃' : 'Request AI Report 📃'}
+                </button>
+              </div>
             </div>
 
             {/* Parent AI Insights */}
@@ -2630,11 +2695,53 @@ Always maintain an optimistic, encouraging, and highly academic tone. Use markdo
             </p>
           </div>
           
-          <div className="flex flex-wrap items-center gap-3 self-stretch md:self-auto shrink-0 font-sans">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 self-stretch md:self-auto shrink-0 font-sans">
+            {/* Language Selector */}
+            <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[240px]">
+              <span className="text-[10px] font-black uppercase tracking-wider text-amber-200 block text-center sm:text-start mb-0.5">
+                {isRtl ? 'اختر لغة التقرير' : 'Report Language'}
+              </span>
+              <div className="bg-black/20 p-1 rounded-xl flex gap-1 border border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setReportLanguage('ar')}
+                  className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-black transition-all ${
+                    reportLanguage === 'ar'
+                      ? 'bg-[#C49E3A] text-white shadow-md scale-102'
+                      : 'text-blue-100 hover:bg-white/5'
+                  }`}
+                >
+                  العربية 🇸🇦
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReportLanguage('en')}
+                  className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-black transition-all ${
+                    reportLanguage === 'en'
+                      ? 'bg-[#C49E3A] text-white shadow-md scale-102'
+                      : 'text-blue-100 hover:bg-white/5'
+                  }`}
+                >
+                  English 🇬🇧
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReportLanguage('bilingual')}
+                  className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-black transition-all ${
+                    reportLanguage === 'bilingual'
+                      ? 'bg-[#C49E3A] text-white shadow-md scale-102'
+                      : 'text-blue-100 hover:bg-white/5'
+                  }`}
+                >
+                  {isRtl ? 'كلاهما 🌐' : 'Both'}
+                </button>
+              </div>
+            </div>
+
             <button 
               onClick={generateReport}
               disabled={generatingReport}
-              className="w-full md:w-auto bg-gradient-to-r from-[#C49E3A] to-[#b08e33] hover:from-white hover:to-white hover:text-[#002147] text-white px-6 py-4 rounded-xl font-black text-xs flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 disabled:opacity-50"
+              className="w-full sm:w-auto bg-gradient-to-r from-[#C49E3A] to-[#b08e33] hover:from-white hover:to-white hover:text-[#002147] text-white px-6 py-4 rounded-xl font-black text-xs flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 disabled:opacity-50 h-[48px] self-end sm:self-auto"
             >
               {generatingReport ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
