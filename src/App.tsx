@@ -1102,9 +1102,9 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
               <Sparkles className="text-amber-300 animate-pulse" />
             </div>
-            <div className="flex-1 text-right md:text-left">
+            <div className={`flex-1 ${isRtl ? 'text-right' : 'text-left'}`}>
               <p className="text-[9px] font-black uppercase tracking-[0.2em] mb-1 text-white/70">{isRtl ? 'مستشار الذكاء الاصطناعي اليوم 🤖' : 'AI DAILY COUNSELLOR ADVICE 🤖'}</p>
-              <p className="font-extrabold text-sm md:text-base leading-relaxed">"{recommendation}"</p>
+              <p className="font-extrabold text-sm md:text-base leading-relaxed break-words whitespace-pre-line">"{recommendation}"</p>
             </div>
           </motion.div>
         )}

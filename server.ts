@@ -920,11 +920,33 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
     try {
       const { data, prompt, useJson = false, reportLanguage = 'ar' } = req.body || {};
 
+      // If the prompt is specifically asking for a short, single-sentence recommendation, return a clean simulated one
+      const isShortSentenceRequest = prompt && (
+        prompt.toLowerCase().includes("1-sentence") || 
+        prompt.toLowerCase().includes("one-sentence") || 
+        prompt.toLowerCase().includes("1 sentence") || 
+        prompt.toLowerCase().includes("one sentence")
+      );
+
       if (!initAI() || !aiLive) {
         logToFile("[Info] Using Simulated Data Analysis fallback due to missing api key in environment");
         if (useJson) {
           return res.json({ text: JSON.stringify({ summary: `Excellent language usage with solid progression at level ${data?.level || 'A1'}.` }) });
         } else {
+          if (isShortSentenceRequest) {
+            const studentLevel = data?.level || 'A1';
+            let briefRec = "";
+            if (reportLanguage === 'ar') {
+              briefRec = studentLevel === "A1" || studentLevel === "A2"
+                ? "بناءً على نقاطك وتفاعلك الرائع، يوصي مستشارك بمواصلة التدرب اليومي عبر القاموس الكرسوني وأكاديمية أوكسفورد!"
+                : "أداء متميز وجاهزية ممتازة للانتقال إلى مناقشة الروايات والنقد الأدبي والمناظرات الطليقة مباشرة!";
+            } else {
+              briefRec = studentLevel === "A1" || studentLevel === "A2"
+                ? "Based on your points and progress, keep training daily using Oxford Discover and our visual cartoon system!"
+                : "Superb articulation skills! We recommend challenging yourself instantly with advanced literary debates.";
+            }
+            return res.json({ text: briefRec });
+          }
           return res.json({ text: getSimulatedReport(data, reportLanguage) });
         }
       }
