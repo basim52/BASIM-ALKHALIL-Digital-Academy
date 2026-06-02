@@ -36,7 +36,7 @@ export const ShareableNotification = ({ lang, studentName, message, lessonName, 
       style={{ 
         position: 'relative',
         overflow: 'hidden',
-        width: isReport ? '1100px' : '650px',
+        width: isReport ? '1350px' : '650px',
         padding: isReport ? '3.5rem' : '3rem',
         backgroundColor: '#ffffff',
         border: '12px solid #ecfdf5',
@@ -220,29 +220,61 @@ export const ShareableNotification = ({ lang, studentName, message, lessonName, 
                  style={{ 
                    fontSize: '1rem', 
                    fontWeight: 500, 
-                   lineHeight: 1.6, 
-                   color: '#475569',
+                   lineHeight: 1.7, 
+                   color: '#334155',
                    maxHeight: '100%',
-                   overflow: 'visible'
+                   overflow: 'visible',
+                   columnCount: 2,
+                   columnGap: '3.5rem',
+                   columnRule: '2px dashed #e2e8f0',
+                   direction: isRtl ? 'rtl' : 'ltr',
+                   textAlign: isRtl ? 'right' : 'left'
                  }}
                >
                  <ReactMarkdown 
                    components={{
-                     h1: ({children}) => <h1 style={{fontSize: '1.25rem', fontWeight: 900, color: '#002147', marginBottom: '1rem', marginTop: '1.5rem'}}>{children}</h1>,
-                     h2: ({children}) => <h2 style={{fontSize: '1.125rem', fontWeight: 800, color: '#002147', marginBottom: '0.75rem', marginTop: '1.25rem'}}>{children}</h2>,
-                     h3: ({children}) => <h3 style={{fontSize: '1rem', fontWeight: 800, color: '#002147', marginBottom: '0.5rem', marginTop: '1rem'}}>{children}</h3>,
+                     h1: ({children}) => (
+                       <h1 style={{
+                         fontSize: '1.5rem', 
+                         fontWeight: 900, 
+                         color: '#002147', 
+                         marginBottom: '1.5rem', 
+                         marginTop: '0px',
+                         textAlign: 'center',
+                         borderBottom: '2px solid #e2e8f0',
+                         paddingBottom: '0.75rem',
+                         columnSpan: 'all' as any,
+                         width: '100%'
+                       }}>
+                         {children}
+                       </h1>
+                     ),
+                     h2: ({children}) => (
+                       <h2 style={{
+                         fontSize: '1.15rem', 
+                         fontWeight: 900, 
+                         color: '#002147', 
+                         marginBottom: '0.75rem', 
+                         marginTop: '1.25rem',
+                         borderBottom: '1px solid #f1f5f9',
+                         paddingBottom: '0.25rem'
+                       }}>
+                         {children}
+                       </h2>
+                     ),
+                     h3: ({children}) => <h3 style={{fontSize: '1.05rem', fontWeight: 800, color: '#002147', marginBottom: '0.5rem', marginTop: '1rem'}}>{children}</h3>,
                      p: ({children}) => <p style={{marginBottom: '0.75rem'}}>{children}</p>,
                      ul: ({children}) => <ul style={{marginBottom: '1rem', paddingInlineStart: '1.25rem', listStyleType: 'disc'}}>{children}</ul>,
                      ol: ({children}) => <ol style={{marginBottom: '1rem', paddingInlineStart: '1.25rem', listStyleType: 'decimal'}}>{children}</ol>,
-                     li: ({children}) => <li style={{marginBottom: '0.25rem'}}>{children}</li>,
-                     strong: ({children}) => <strong style={{fontWeight: 900, color: '#1e293b'}}>{children}</strong>,
+                     li: ({children}) => <li style={{marginBottom: '0.4rem'}}>{children}</li>,
+                     strong: ({children}) => <strong style={{fontWeight: 900, color: '#b45309'}}>{children}</strong>,
                    }}
                  >
                    {reportMarkdown}
                  </ReactMarkdown>
                </div>
                <div style={{ 
-                 marginTop: '1.5rem', 
+                 marginTop: '2rem', 
                  padding: '1rem', 
                  backgroundColor: '#002147', 
                  color: '#ffffff', 

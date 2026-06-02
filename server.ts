@@ -856,9 +856,15 @@ async function startServer() {
         }
       }
 
+      // Build a strict language system instruction
+      let systemInstruction = "You are a professional educational consultant and data analyst at 'Basim Alkhalil Academy'. You must analyze student metrics and write an encouraging, scholarly, and beautifully formatted academic report. IMPORTANT: You must write the report ENTIRELY in the target language requested by the user prompt. If the prompt is in Arabic or asks for Arabic (اللغة العربية), you must write the response strictly in professional Arabic. If the prompt asks for English, write in English. If the prompt asks for both/bilingual, write both sections separately.";
+
       const result = await callAiWithRetry({
-        contents: [{ role: 'user', parts: [{ text: `Analyze this data: ${JSON.stringify(data)}\n\nPrompt: ${prompt}` }] }],
-        config: useJson ? { responseMimeType: "application/json" } : undefined
+        contents: [{ role: 'user', parts: [{ text: `Instruction and Format:\n${prompt}\n\nStudent Metrics to Analyze:\n${JSON.stringify(data)}` }] }],
+        config: {
+          systemInstruction: systemInstruction,
+          responseMimeType: useJson ? "application/json" : undefined
+        }
       });
       
       const text = result.text || "";
