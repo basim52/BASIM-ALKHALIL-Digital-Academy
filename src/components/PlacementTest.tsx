@@ -1028,12 +1028,12 @@ export const PlacementTest = ({
       <div style={{ position: 'absolute', left: '-9999px', top: '0', pointerEvents: 'none' }}>
         <div 
           id="placement-certified-report"
-          className="w-[850px] h-[1150px] bg-slate-950 text-white p-14 flex flex-col justify-between relative border-[12px] border-double border-[#C49E3A] font-sans overflow-hidden"
+          className="w-[850px] h-[1150px] bg-gradient-to-br from-[#FCFBF9] via-[#FAF9F5] to-[#F3F2EC] text-[#002147] p-14 flex flex-col justify-between relative border-[12px] border-double border-[#C49E3A] font-sans overflow-hidden"
           dir="rtl"
         >
           {/* Subtle backgrounds */}
-          <div className="absolute top-[-100px] right-[-100px] w-[500px] h-[550px] bg-blue-900/15 rounded-full blur-[90px] pointer-events-none" />
-          <div className="absolute bottom-[-100px] left-[-100px] w-[500px] h-[550px] bg-amber-500/5 rounded-full blur-[90px] pointer-events-none" />
+          <div className="absolute top-[-100px] right-[-100px] w-[500px] h-[550px] bg-amber-500/5 rounded-full blur-[90px] pointer-events-none" />
+          <div className="absolute bottom-[-100px] left-[-100px] w-[500px] h-[550px] bg-blue-500/5 rounded-full blur-[90px] pointer-events-none" />
 
           {/* Golden frame brackets */}
           <div className="absolute top-5 right-5 w-14 h-14 border-t-4 border-r-4 border-[#C49E3A]" />
@@ -1041,7 +1041,7 @@ export const PlacementTest = ({
           <div className="absolute bottom-5 right-5 w-14 h-14 border-b-4 border-r-4 border-[#C49E3A]" />
           <div className="absolute bottom-5 left-5 w-14 h-14 border-b-4 border-l-4 border-[#C49E3A]" />
 
-          <div className="flex flex-col items-center justify-between h-full bg-slate-900/40 backdrop-blur-lg p-6 border border-white/5 rounded-[2rem]">
+          <div className="flex flex-col items-center justify-between h-full bg-white/95 backdrop-blur-md p-6 border border-[#C49E3A]/20 rounded-[2rem] shadow-sm">
             {/* Header Brand */}
             <div className="text-center space-y-3 w-full">
               <div className="flex justify-center mb-3">
@@ -1050,10 +1050,10 @@ export const PlacementTest = ({
                   <div className="absolute inset-0 bg-white/5 rotate-45 translate-y-10" />
                 </div>
               </div>
-              <h1 className="text-3xl font-black tracking-tight text-[#C49E3A] font-arabic leading-none">
+              <h1 className="text-3xl font-black tracking-tight text-[#002147] font-arabic leading-none">
                 أكاديمية باسم الخليل لتعليم اللغات
               </h1>
-              <p className="text-sm font-sans text-slate-300 font-bold uppercase tracking-widest mt-1">
+              <p className="text-sm font-sans text-[#C49E3A] font-bold uppercase tracking-widest mt-1">
                 Basim Al-Khalil Academy for Languages
               </p>
               <div className="h-[2px] w-48 bg-gradient-to-r from-transparent via-[#C49E3A] to-transparent mx-auto mt-2" />
@@ -1061,64 +1061,64 @@ export const PlacementTest = ({
 
             {/* Document Verification Label */}
             <div className="text-center space-y-2">
-              <span className="text-[10px] font-black tracking-widest text-[#C49E3A] uppercase bg-[#C49E3A]/20 px-5 py-2 rounded-full border border-[#C49E3A]/30">
+              <span className="text-[10px] font-black tracking-widest text-[#8C6915] uppercase bg-[#C49E3A]/10 px-5 py-2 rounded-full border border-[#C49E3A]/20">
                 OFFICIAL REPORT & PLACEMENT CERTIFICATE
               </span>
-              <h2 className="text-2xl font-black text-white font-arabic mt-3">
+              <h2 className="text-2xl font-black text-[#002147] font-arabic mt-3">
                 شهادة إنجاز تقييم تحديد المستوى اللغوي الأكاديمي
               </h2>
-              <p className="text-xs text-slate-400 font-sans tracking-wide">
+              <p className="text-xs text-slate-500 font-sans tracking-wide">
                 Authorized Educational Placement Document Verification
               </p>
             </div>
 
             {/* Core recipient statement */}
             <div className="w-full text-center px-10 my-4 space-y-4">
-              <p className="text-md text-slate-300 font-arabic leading-relaxed">
+              <p className="text-md text-slate-650 font-arabic leading-relaxed">
                 بموجب أحكام الاختبار والتقييم الدوري المعتمد بالأكاديمية، تشهد لجنتنا التعليمية برأسة البروفيسور وأستاذ اللغات الجامعي بأن الطالب:
               </p>
               <div className="py-2 border-b-2 border-dashed border-[#C49E3A]/40 w-fit mx-auto px-16">
-                <span className="text-3xl font-extrabold text-white font-arabic">
+                <span className="text-3xl font-extrabold text-[#002147] font-arabic">
                   {userProfile?.displayName || 'طالب متميز'}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-mono tracking-wider">
+              <p className="text-xs text-slate-500 font-mono tracking-wider">
                 Student ID: {userProfile?.uid || 'ACS-982-PL'}
               </p>
-              <p className="text-xs text-slate-300 font-arabic leading-relaxed">
+              <p className="text-xs text-slate-600 font-arabic leading-relaxed">
                 قد أتم بكفاءة عالية كامل الأسئلة اللغوية النموذجية ومفردات النطق بنتيجة تفصيلية أكدت الاستعداد التام للمستوى الموضح أدناه:
               </p>
             </div>
 
             {/* Results score panel */}
             <div className="grid grid-cols-2 gap-8 w-full px-16 my-4">
-              <div className="bg-[#002147]/50 border border-[#C49E3A]/30 p-5 rounded-3xl text-center">
-                <span className="text-[10px] font-black text-[#C49E3A] uppercase tracking-widest block mb-1">
+              <div className="bg-[#002147]/5 border border-[#002147]/10 p-5 rounded-3xl text-center">
+                <span className="text-[10px] font-black text-[#002147]/60 uppercase tracking-widest block mb-1">
                   النتيجة الإجمالية / Score
                 </span>
-                <span className="text-4xl font-black text-white">{score} / 15</span>
+                <span className="text-4xl font-black text-[#002147]">{score} / 15</span>
               </div>
-              <div className="bg-gradient-to-br from-[#C49E3A]/2 w-full border border-[#C49E3A] p-5 rounded-3xl text-center">
-                <span className="text-[10px] font-black text-[#C49E3A] uppercase tracking-widest block mb-1">
+              <div className="bg-gradient-to-br from-[#C49E3A]/5 to-[#C49E3A]/10 w-full border border-[#C49E3A]/40 p-5 rounded-3xl text-center">
+                <span className="text-[10px] font-black text-[#8C6915] uppercase tracking-widest block mb-1">
                   المستوى الحائز عليه / Level
                 </span>
-                <span className="text-4xl font-black text-white">{determinedLevel}</span>
+                <span className="text-4xl font-black text-[#8C6915]">{determinedLevel}</span>
               </div>
             </div>
 
             {/* Dynamic Bilateral Placement Bullet Points */}
             <div className="w-full px-16 my-2 text-right">
-              <div className="bg-white/5 border border-white/10 p-5 rounded-2xl">
-                <span className="text-[10px] font-black text-[#C49E3A] uppercase tracking-wider block mb-3 text-center border-b border-white/5 pb-2">
+              <div className="bg-[#FCFBF7] border border-[#C49E3A]/20 p-5 rounded-2xl w-full">
+                <span className="text-[10px] font-black text-[#8C6915] uppercase tracking-wider block mb-3 text-center border-b border-slate-100 pb-2">
                   {getBilingualBulletPoints(determinedLevel, score).titleAr} | {getBilingualBulletPoints(determinedLevel, score).titleEn}
                 </span>
                 
                 <div className="grid grid-cols-2 gap-5 text-right font-sans" dir="rtl">
                   {/* Arabic block */}
-                  <div className="space-y-2 border-l border-white/10 pl-4 text-right">
-                    <span className="text-[9px] font-black text-slate-400 block mb-1">📌 تفاصيل التقييم اللغوي:</span>
+                  <div className="space-y-2 border-l border-slate-200/80 pl-4 text-right">
+                    <span className="text-[9px] font-black text-slate-500 block mb-1">📌 تفاصيل التقييم اللغوي:</span>
                     {getBilingualBulletPoints(determinedLevel, score).arabic.map((pt, idx) => (
-                      <p key={idx} className="text-[10px] leading-relaxed text-slate-300 flex items-start gap-1 justify-start flex-row-reverse text-right">
+                      <p key={idx} className="text-[10px] leading-relaxed text-slate-700 flex items-start gap-1 justify-start flex-row-reverse text-right">
                         <span className="text-[#C49E3A] shrink-0 font-bold">•</span>
                         <span>{pt}</span>
                       </p>
@@ -1127,9 +1127,9 @@ export const PlacementTest = ({
 
                   {/* English block */}
                   <div className="space-y-2 text-left" dir="ltr">
-                    <span className="text-[9px] font-black text-slate-400 block mb-1">📌 Academic Milestones:</span>
+                    <span className="text-[9px] font-black text-[#002147]/70 block mb-1">📌 Academic Milestones:</span>
                     {getBilingualBulletPoints(determinedLevel, score).english.map((pt, idx) => (
-                      <p key={idx} className="text-[10px] leading-relaxed text-slate-350 flex items-start gap-1">
+                      <p key={idx} className="text-[10px] leading-relaxed text-slate-700 flex items-start gap-1">
                         <span className="text-[#C49E3A] shrink-0 font-bold">•</span>
                         <span>{pt}</span>
                       </p>
@@ -1144,38 +1144,38 @@ export const PlacementTest = ({
               {/* Professor seal */}
               <div className="text-center space-y-2">
                 <p className="text-[9px] tracking-widest text-[#C49E3A] uppercase font-sans">FACULTY DIRECTORY</p>
-                <div className="h-10 w-28 border border-[#C49E3A]/30 bg-[#C49E3A]/5 rounded-xl flex items-center justify-center">
-                  <span className="font-serif italic text-xs text-slate-300">B. Al-Khalil</span>
+                <div className="h-10 w-28 border border-[#C49E3A]/20 bg-[#C49E3A]/5 rounded-xl flex items-center justify-center">
+                  <span className="font-serif italic text-xs text-[#002147]/90">B. Al-Khalil</span>
                 </div>
-                <p className="text-[8px] text-slate-400 font-arabic">أ. د. باسم الخليل</p>
+                <p className="text-[8px] text-slate-500 font-arabic">أ. د. باسم الخليل</p>
               </div>
 
               {/* Verified Circular stamp seal representing "ختم شيك" */}
               <div className="relative select-none rotate-2">
-                <div className="w-24 h-24 border-2 border-dashed border-[#C49E3A] rounded-full flex items-center justify-center p-1 relative bg-white/5 shadow-2xl">
-                  <div className="w-full h-full border border-double border-[#C49E3A] rounded-full flex flex-col items-center justify-center text-center p-1 text-[6px] font-black uppercase text-[#C49E3A] relative">
-                    <div className="absolute inset-1.5 border border-dotted border-[#C49E3A] rounded-full" />
+                <div className="w-24 h-24 border-2 border-dashed border-[#002147]/45 rounded-full flex items-center justify-center p-1 relative bg-[#FAF9F5]/70 shadow-sm">
+                  <div className="w-full h-full border border-double border-[#002147]/50 rounded-full flex flex-col items-center justify-center text-center p-1 text-[6px] font-black uppercase text-[#002147] relative">
+                    <div className="absolute inset-1.5 border border-dotted border-[#002147]/30 rounded-full" />
                     <span className="text-[5px] tracking-widest text-[#002147] font-bold">BASIM ACADEMY</span>
-                    <div className="w-8 h-8 rounded-full border border-[#C49E3A]/40 flex items-center justify-center bg-amber-500/10 z-10 my-0.5 relative">
+                    <div className="w-8 h-8 rounded-full border border-[#002147]/20 flex items-center justify-center bg-[#C49E3A]/10 z-10 my-0.5 relative">
                       <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-[#C49E3A]">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                       </svg>
-                      <div className="absolute bg-[#C49E3A] text-white font-black text-[4px] py-0.5 px-1 uppercase rounded tracking-widest rotate-[-15deg] whitespace-nowrap shadow">
+                      <div className="absolute bg-[#002147] text-white font-black text-[4px] py-0.5 px-1 uppercase rounded tracking-widest rotate-[-15deg] whitespace-nowrap shadow">
                         APPROVED
                       </div>
                     </div>
-                    <span className="text-[4px] tracking-widest text-slate-400">CERTIFIED SEAL</span>
+                    <span className="text-[4px] tracking-widest text-slate-500">CERTIFIED SEAL</span>
                   </div>
                 </div>
               </div>
 
               {/* Dates */}
               <div className="text-center space-y-2">
-                <p className="text-[9px] tracking-widest text-slate-400 uppercase font-sans">ISSUE DATE / التاريخ</p>
-                <div className="text-[10px] font-mono font-bold text-white bg-white/5 py-1.5 px-3 rounded-lg border border-white/10">
+                <p className="text-[9px] tracking-widest text-slate-500 uppercase font-sans">ISSUE DATE / التاريخ</p>
+                <div className="text-[10px] font-mono font-bold text-[#002147] bg-[#002147]/5 py-1.5 px-3 rounded-lg border border-[#002147]/10">
                   {new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </div>
-                <p className="text-[8px] text-slate-400">وثيقة إلكترونية رسمية</p>
+                <p className="text-[8px] text-slate-500">وثيقة إلكترونية رسمية</p>
               </div>
             </div>
           </div>
