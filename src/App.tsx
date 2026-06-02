@@ -1709,6 +1709,7 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
   
   const [currentPlan, setCurrentPlan] = useState<any>(null);
   const [currentPlanResults, setCurrentPlanResults] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'overview' | 'plan' | 'advisor' | 'notifications'>('overview');
 
   useEffect(() => {
     const fetchStudentSpecificData = async () => {
@@ -2042,6 +2043,17 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
 
   const currentStudent = selectedStudentIndex !== null ? linkedStudents[selectedStudentIndex] : null;
 
+  const totalAssignments = currentPlan?.plan?.length || 0;
+  const completedAssignments = currentPlan?.plan?.filter((item: any) => 
+    currentPlanResults.some(r => r.lessonId === item.unitId)
+  ).length || 0;
+  
+  const totalEarned = currentPlanResults.reduce((acc, r) => acc + (r.score || 0), 0);
+  const totalPossible = currentPlanResults.reduce((acc, r) => acc + (r.total || 0), 0);
+  const avgScore = totalPossible > 0 ? (totalEarned / totalPossible) * 100 : 0;
+  const scoreLabel = avgScore >= 90 ? 'A+' : avgScore >= 80 ? 'A' : avgScore >= 70 ? 'B' : avgScore > 0 ? 'C' : 'N/A';
+  const attendanceVal = totalAssignments > 0 ? Math.min(100, Math.round((completedAssignments / totalAssignments) * 100)) : 0;
+
   if (loading) return (
     <div className="p-20 text-center">
       <div className="w-12 h-12 bg-[#002147] rounded-2xl animate-spin mx-auto mb-4" />
@@ -2160,397 +2172,585 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
     );
   }
 
+  const renderActiveTabContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <motion.div
+            key="tab-overview"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            className="space-y-8"
+          >
+            {/* KPIs VISUAL CARDS GRID */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {[
+                { label: t.attendance, value: attendanceVal > 0 ? `${attendanceVal}%` : '---', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50/50', border: 'border-blue-100', text: isRtl ? 'نسبة حضور المحاضرات التفاعلية والدروس' : 'Language tutoring live workshop attendance' },
+                { label: t.gradeAverage, value: scoreLabel, icon: GraduationCap, color: 'text-emerald-600', bg: 'bg-emerald-50/50', border: 'border-emerald-100', text: isRtl ? 'متوسط نتائج وتقييم اختبارات الطالب' : 'Average quiz and assessment score letter' },
+                { label: t.completedAssignments, value: `${completedAssignments}/${totalAssignments}`, icon: CheckCircle2, color: 'text-purple-600', bg: 'bg-purple-50/50', border: 'border-purple-100', text: isRtl ? 'المهام والتمارين التعليمية المنجزة' : 'Assigned exercises & reading files completed' },
+                { label: t.speakingHours, value: currentStudent.points > 0 ? (currentStudent.points / 10).toFixed(1) : '0.0', icon: Mic2, color: 'text-[#C49E3A]', bg: 'bg-orange-50/50', border: 'border-orange-100', text: isRtl ? 'ساعات ممارسة المحادثات الصوتية' : 'Documented conversational mock test hours' },
+              ].map((stat, i) => (
+                <div key={`stat-premium-card-${i}`} className={`bg-white p-6 rounded-2xl shadow-sm border ${stat.border} flex flex-col justify-between gap-4 relative overflow-hidden group hover:shadow-md transition-all`}>
+                  <div className={`flex items-center justify-between ${isRtl ? 'flex-row-reverse' : ''}`}>
+                    <div className={`${stat.bg} ${stat.color} p-3 rounded-xl shrink-0 group-hover:scale-105 transition-transform`}>
+                      <stat.icon size={22} />
+                    </div>
+                    <span className="text-xs font-black text-slate-300">#{i+1}</span>
+                  </div>
+                  <div className={`${isRtl ? 'text-right' : 'text-left'}`}>
+                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">{stat.label}</p>
+                    <p className="text-3xl font-extrabold text-[#002147]">{stat.value}</p>
+                    <p className="text-[10px] text-slate-400 mt-2 font-medium leading-relaxed">{stat.text}</p>
+                  </div>
+                  <div className={`absolute top-0 bottom-0 ${isRtl ? 'left-0' : 'right-0'} w-1.5 ${stat.color.replace('text', 'bg')}`} />
+                </div>
+              ))}
+            </div>
+
+            {/* EUROPEAN LANG ROADMAP */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200/80">
+              <div className={`flex items-center gap-2 mb-6 ${isRtl ? 'justify-start flex-row-reverse' : 'justify-start'}`}>
+                <div className="w-2.5 h-6 bg-[#C49E3A] rounded-full" />
+                <h3 className="text-lg font-black text-[#002147]">
+                  {isRtl ? 'خارطة التقدم والمستويات للغات الأوروبية CEFR' : 'CEFR Language Proficiency & Level Roadmap'}
+                </h3>
+              </div>
+              <ProgressRoadmap 
+                lang={lang} 
+                currentLevel={currentStudent.level || 'A1'} 
+                studentName={currentStudent.displayName}
+              />
+            </div>
+
+            {/* CHARTS AND LISTS GROUP */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Visual Chart Card */}
+              <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200">
+                <div className={`flex justify-between items-center mb-8 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                  <div className={`${isRtl ? 'text-right' : 'text-left'}`}>
+                    <h4 className="font-black text-base text-[#002147]">{isRtl ? 'مؤشر التحليل والتطوير الشهري' : 'Monthly Performance Index'}</h4>
+                    <p className="text-[10px] text-slate-400 font-bold">{isRtl ? 'التطور والمستوى الشهري التراكمي' : 'Student performance metrics over recent months'}</p>
+                  </div>
+                  <span className="text-[9px] font-bold text-blue-600 px-3 py-1 bg-blue-50 rounded-lg tracking-widest uppercase">Performance Graph</span>
+                </div>
+
+                <div className={`h-64 flex items-end gap-5 px-4 overflow-hidden ${isRtl ? 'flex-row-reverse' : ''}`} dir="ltr">
+                  {(() => {
+                    const months = [5, 4, 3, 2, 1, 0];
+                    const monthlyStats = months.map(m => {
+                      const targetDate = new Date();
+                      targetDate.setMonth(targetDate.getMonth() - m);
+                      const monthName = targetDate.toLocaleString('en-US', { month: 'short' });
+                      const monthAr = targetDate.toLocaleString('ar-EG', { month: 'short' });
+                      
+                      const resultsInMonth = currentPlanResults.filter(r => {
+                        if (!r.timestamp) return false;
+                        const d = r.timestamp.toDate ? r.timestamp.toDate() : new Date(r.timestamp);
+                        return d.getMonth() === targetDate.getMonth() && d.getFullYear() === targetDate.getFullYear();
+                      });
+                      
+                      const totalInMonth = resultsInMonth.reduce((acc, r) => acc + (r.score || 0), 0);
+                      const possibleInMonth = resultsInMonth.reduce((acc, r) => acc + (r.total || 0), 0);
+                      const avg = possibleInMonth > 0 ? Math.round((totalInMonth / possibleInMonth) * 100) : 0;
+                      
+                      return { name: lang === 'ar' ? monthAr : monthName, value: avg };
+                    });
+
+                    return monthlyStats.map((stat, i) => (
+                      <div key={`progress-bar-premium-${i}`} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
+                        <div className="w-full bg-slate-50 border border-slate-100 rounded-t-xl relative h-full flex items-end">
+                          <motion.div 
+                            initial={{ height: 0 }}
+                            animate={{ height: `${Math.max(6, stat.value)}%` }}
+                            className={`w-full ${stat.value > 0 ? 'bg-[#002147] hover:bg-[#C49E3A]' : 'bg-slate-200'} rounded-t-xl transition-all relative`}
+                          />
+                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[#002147] text-white text-[10px] py-1.5 px-3 rounded-xl font-bold opacity-0 group-hover:opacity-100 transition-all shadow-lg whitespace-nowrap z-20">
+                            {stat.value > 0 ? `%${stat.value} ${isRtl ? 'نجاح' : 'SuccessRate'}` : (isRtl ? 'لا قياسات' : 'No Metrics')}
+                          </div>
+                        </div>
+                        <span className="text-[10px] text-slate-400 font-extrabold uppercase whitespace-nowrap">{stat.name}</span>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              </div>
+
+              {/* Recent Activities Feed */}
+              <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200 flex flex-col">
+                <div className={`flex justify-between items-center mb-8 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                  <div className={`${isRtl ? 'text-right' : 'text-left'}`}>
+                    <h4 className="font-black text-base text-[#002147]">{isRtl ? 'آخر الأنشطة والدروس المنجزة' : 'Recent Interactive Activities'}</h4>
+                    <p className="text-[10px] text-slate-400 font-bold">{isRtl ? 'متابعة حية للدروس المنتهية والنتائج' : 'Real-time timeline of completed modules'}</p>
+                  </div>
+                  <CheckCircle2 size={18} className="text-[#C49E3A]" />
+                </div>
+
+                <div className={`space-y-6 ${isRtl ? 'text-right' : 'text-left'} flex-1 overflow-y-auto max-h-[250px] pr-1`}>
+                  {currentPlanResults.length > 0 ? (
+                    currentPlanResults.slice(0, 10).map((activity) => {
+                      const activityDate = activity.timestamp?.toDate ? activity.timestamp.toDate() : new Date(activity.timestamp);
+                      const timeStr = activityDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric' });
+                      
+                      return (
+                        <div key={activity.id} className={`flex gap-4 ${isRtl ? 'flex-row-reverse' : ''} group p-3.5 hover:bg-slate-50 rounded-xl transition-colors`}>
+                          <div className="mt-1 text-emerald-500 shrink-0 p-2.5 bg-emerald-50 rounded-xl group-hover:scale-105 transition-transform">
+                            <CheckCircle2 size={18} />
+                          </div>
+                          <div className="flex-1 space-y-1 min-w-0">
+                            <p className="text-sm text-[#002147] font-black leading-relaxed truncate">
+                              {isRtl 
+                                ? `أكمل درس "${activity.lessonTitle}" وحصد ${activity.score}/${activity.total}` 
+                                : `Mastered "${activity.lessonTitle}" with score ${activity.score}/${activity.total}`}
+                            </p>
+                            <p className="text-[9px] text-slate-400 font-black uppercase tracking-wider">{timeStr}</p>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="flex flex-col items-center justify-center p-12 text-slate-400 italic text-xs h-full justify-items-center">
+                      <div className="bg-slate-50 p-4 rounded-full mb-3">
+                        <LayoutDashboard size={32} className="opacity-20" />
+                      </div>
+                      {isRtl ? 'لا توجد أنشطة مسجلة' : 'No recorded activity available to present'}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        );
+      case 'plan':
+        return (
+          <motion.div
+            key="tab-plan"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            className="space-y-8"
+          >
+            {/* Promo Live Stories Block */}
+            <div className="p-6 rounded-3xl border border-amber-500/30 bg-gradient-to-br from-[#fffdfa] to-[#faf6eb] shadow-sm relative overflow-hidden group flex flex-col md:flex-row md:items-center md:justify-between gap-6 font-sans">
+              <div className="flex items-start md:items-center gap-4">
+                <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center shrink-0 border border-amber-500/20">
+                  <BookOpen size={28} />
+                </div>
+                <div className={`${isRtl ? 'text-right' : 'text-left'}`}>
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <span className="px-2 py-0.5 bg-amber-500 text-white text-[9px] font-black rounded uppercase">
+                      {isRtl ? 'مغامرات لندن التفاعلية 📚' : 'OXFORD LONDON ADVENTURE 📚'}
+                    </span>
+                    <span className="px-1.5 py-0.5 bg-white text-amber-700 text-[9px] font-bold rounded border border-amber-200">
+                      {isRtl ? 'مسرح حواري ولعب أدوار' : 'Speaking Challenge'}
+                    </span>
+                  </div>
+                  <h4 className="text-base font-black text-slate-900 leading-snug">
+                    {isRtl ? 'سلسلة نور في لندن: تحديات تقمص الأدوار وممارسة المحادثة' : 'Noor Arrives in London: Speaking challenge cards and audio acting!'}
+                  </h4>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {isRtl ? 'نهج معتمد لتطبيق اللكنة الإنجليزية ومساعدة الطالب بالتسجيل الصوتي والتحفيظ.' : 'Experience London airport, practice pronunciations, and record dialogues live.'}
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => onNavigate && onNavigate('kids-story-player')}
+                className="bg-[#C49E3A] hover:bg-[#b08e33] whitespace-nowrap text-white text-xs font-black px-6 py-3.5 rounded-xl transition-all hover:scale-105 active:scale-95 text-center shrink-0 cursor-pointer"
+              >
+                {isRtl ? 'ابدأ العرض التفاعلي ✨' : 'Launch Kids Story ✨'}
+              </button>
+            </div>
+
+            {/* SYLLABUS CARD */}
+            {currentPlan && todayLesson ? (
+              <div className="p-8 bg-white rounded-3xl border border-slate-200/80 shadow-sm relative overflow-hidden group font-sans">
+                <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:scale-105 transition-transform">
+                   <Brain size={140} />
+                </div>
+                
+                <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6 relative z-10">
+                  <div className="flex items-center gap-5">
+                    <div className="w-16 h-16 bg-blue-500/10 text-[#002147] rounded-xl flex items-center justify-center shrink-0 border border-blue-500/20">
+                      <CalendarDays size={32} />
+                    </div>
+                    <div className={isRtl ? 'text-right' : 'text-left'}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="px-2.5 py-0.5 bg-blue-50 text-blue-700 rounded text-[9px] font-black uppercase tracking-wider border border-blue-100">
+                          {isRtl ? 'الجدول الزمني الدراسي المسجل' : 'ACTIVE STUDY PATH'}
+                        </span>
+                        <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                      </div>
+                      <h4 className="text-xl font-extrabold text-[#002147]">
+                        {isRtl ? `الخطة التعليمية النشطة: ${currentPlan.studentName}` : `${currentPlan.studentName}'s Custom Syllabus`}
+                      </h4>
+                      <p className="text-xs text-slate-400 font-bold mt-1.5 leading-relaxed">
+                        {isRtl ? 'الدرس القادم المجدول اليوم: ' : 'Next Lesson (Today): '} 
+                        <span className="text-blue-600 font-extrabold">{todayLesson.topic}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex flex-col items-center px-5 py-3 border border-slate-100 bg-slate-50/50 rounded-xl shrink-0 min-w-[120px]">
+                       <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{isRtl ? 'الوقت المفضل' : 'Preferred Slot'}</span>
+                       <span className="text-sm font-black text-[#002147]">{currentPlan.preferredTime || '---'}</span>
+                    </div>
+                    <button 
+                      onClick={() => onNavigate && onNavigate('academic-planner')}
+                      className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-[#002147] hover:bg-blue-600 text-white px-6 py-4 rounded-xl text-xs font-black transition-all shadow-md"
+                    >
+                      {isRtl ? 'تعديل / متابعة الخطة الذكية' : 'Edit Study Plan'}
+                      <ChevronRight size={16} className={isRtl ? 'rotate-180' : ''} />
+                    </button>
+                    <button 
+                      onClick={handleDeletePlanDashboard}
+                      className="p-3.5 bg-rose-50 text-rose-500 hover:text-white hover:bg-rose-500 border border-rose-100 rounded-xl transition-all"
+                      title={isRtl ? 'حذف الخطة' : 'Delete Plan'}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="p-8 bg-gradient-to-br from-[#002147] to-[#142e54] text-white rounded-3xl border border-[#C49E3A]/40 shadow-sm relative overflow-hidden group font-sans">
+                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-105 transition-transform">
+                   <Brain size={120} />
+                </div>
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+                  <div className={`flex items-center gap-5 ${isRtl ? 'flex-row-reverse text-right' : 'text-left'}`}>
+                    <div className="w-14 h-14 bg-[#C49E3A] text-white rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/10">
+                      <BookMarked size={26} />
+                    </div>
+                    <div className={isRtl ? 'text-right' : 'text-left'}>
+                      <h4 className="text-lg font-black">{isRtl ? 'لم يتم تصميم خطة دراسية نشطة حتى الآن' : 'No Academic Plan Prepared Yet'}</h4>
+                      <p className="text-xs text-white/80 font-medium leading-relaxed max-w-xl mt-1.5">
+                        {isRtl 
+                          ? 'صمم الآن جدولاً دراسياً مرناً يحدد الأيام والدروس المفضلة لمستوى طفلك لمواكبته تلقائياً مع الذكاء الاصطناعي.'
+                          : 'Set up a custom step-by-step curriculum aligning Oxford materials to fit your student\'s weekly schedules perfectly.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={() => onNavigate && onNavigate('academic-planner')}
+                    className="bg-[#C49E3A] hover:bg-white hover:text-[#002147] text-white px-6 py-4 rounded-xl text-xs font-black transition-all shadow-lg shrink-0 cursor-pointer"
+                  >
+                    {isRtl ? 'صمم خطتك الدراسية الشخصية ✨' : 'Design Study Plan ✨'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* SCHEDULE WEEKLY BOOKER */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200/80">
+              <div className={`flex items-center gap-2 mb-6 ${isRtl ? 'justify-start flex-row-reverse' : 'justify-start'}`}>
+                <div className="w-2.5 h-6 bg-[#C49E3A] rounded-full" />
+                <h3 className="text-lg font-black text-[#002147]">
+                  {isRtl ? 'تنظيم الحصص الأسبوعية المباشرة وحجز المواعيد' : 'Weekly Live Speaking Class Scheduler'}
+                </h3>
+              </div>
+              <ScheduleManager studentId={currentStudent.uid} studentName={currentStudent.displayName || ''} lang={lang} canEdit={true} />
+            </div>
+          </motion.div>
+        );
+      case 'advisor':
+        return (
+          <motion.div
+            key="tab-advisor"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            className="space-y-8"
+          >
+            {/* Daily advisor guidance */}
+            <div className="bg-gradient-to-r from-teal-800 to-emerald-800 rounded-3xl p-6 text-white shadow-sm border-b-4 border-emerald-500 relative overflow-hidden flex flex-col md:flex-row md:items-center md:justify-between gap-6 font-sans">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center shadow-inner shrink-0">
+                  <Sparkles size={24} className="text-amber-300" />
+                </div>
+                <div className={`${isRtl ? 'text-right' : 'text-left'}`}>
+                  <h4 className="font-extrabold text-sm">{isRtl ? 'المستشار الذكي للأكاديمية والتقارير المتقدمة' : 'Academy Parent AI Smart Counselor Workspace'}</h4>
+                  <p className="text-[11px] text-emerald-100 max-w-xl leading-relaxed mt-1">
+                    {isRtl 
+                      ? 'تواصل مباشرة مع المشرف التعليمي المعزز بالذكاء الاصطناعي لفهم التقييمات اللغوية وتقدم أطفالك.'
+                      : 'Explore live AI dialogue options to break down CEFR language assessments and ask custom progress questions.'}
+                  </p>
+                </div>
+              </div>
+
+              <button 
+                onClick={generateReport}
+                disabled={generatingReport}
+                className="bg-white hover:bg-[#C49E3A] hover:text-white px-5 py-3 rounded-xl text-xs font-black text-teal-850 transition-all hover:scale-105 active:scale-95 text-center whitespace-nowrap shadow shrink-0"
+              >
+                {isRtl ? 'توليد تقرير pdf/صورة مخصصة 📃' : 'Request Printable AI Report 📃'}
+              </button>
+            </div>
+
+            {/* Parent AI Insights */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200/80">
+              <div className={`flex items-center gap-2 mb-6 ${isRtl ? 'justify-start flex-row-reverse' : 'justify-start'}`}>
+                <div className="w-2.5 h-6 bg-[#C49E3A] rounded-full" />
+                <h3 className="text-lg font-black text-[#002147]">
+                  {isRtl ? 'التحليلات والمراجعة التلقائية لمستشار الأكاديمية' : 'AI Academic Director Observations & Review'}
+                </h3>
+              </div>
+              <ParentAIInsights 
+                lang={lang} 
+                studentName={currentStudent.displayName} 
+                studentLevel={currentStudent.level || 'A1'} 
+              />
+            </div>
+
+            {/* MESSENGER - AIParentNotes */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200">
+              <div className={`flex items-center gap-2 mb-6 ${isRtl ? 'justify-start flex-row-reverse' : 'justify-start'}`}>
+                <div className="w-2.5 h-6 bg-[#002147] rounded-full" />
+                <h3 className="text-lg font-black text-[#002147]">
+                  {isRtl ? 'الاستشارات المباشرة وتوصيات المشرف اللغوي' : 'Instant Q&A with Academic Director'}
+                </h3>
+              </div>
+              <AIParentNotes profile={profile} studentId={currentStudent.uid} lang={lang} />
+            </div>
+          </motion.div>
+        );
+      case 'notifications':
+        return (
+          <motion.div
+            key="tab-notifications"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            className="space-y-8"
+          >
+            {/* WhatsApp Notification Center */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200 text-sans">
+              <div className={`flex items-center gap-2 mb-6 ${isRtl ? 'justify-start flex-row-reverse' : 'justify-start'}`}>
+                <div className="w-2.5 h-6 bg-[#C49E3A] rounded-full" />
+                <h3 className="text-lg font-black text-[#002147]">
+                  {isRtl ? 'طلب تنبيهات وتقارير الواتساب بشكل فوري' : 'Academic WhatsApp Notifications Control'}
+                </h3>
+              </div>
+              <WhatsAppNotifications 
+                lang={lang}
+                studentId={currentStudent.uid}
+                studentName={currentStudent.displayName}
+                parentPhone={currentStudent.phoneNumber}
+                studentPhone={currentStudent.studentPhoneNumber}
+                onUpdatePhone={handleUpdatePhone}
+              />
+            </div>
+
+            {/* Security controls */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200/80 space-y-6">
+              <div className={`border-b border-slate-100 pb-4 ${isRtl ? 'text-right' : 'text-left'}`}>
+                <h4 className="text-sm font-black text-[#002147]">{isRtl ? 'روابط الدخول والتكامل الإدارية والملفات' : 'Security Settings & Folder Identifiers'}</h4>
+                <p className="text-xs text-slate-400 mt-1">{isRtl ? 'كود الدخول التعريفي الخاص بملف الطالب للدعم اللغوي' : 'Your children folder identifiers and unlinking workflows'}</p>
+              </div>
+
+              <div className={`flex flex-col sm:flex-row justify-between items-center bg-slate-50 border border-slate-200/60 rounded-2xl p-5 gap-4 ${isRtl ? 'sm:flex-row-reverse' : ''}`}>
+                <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
+                  <span className="text-[10px] font-black text-slate-400 block tracking-wider">STUDENT_FOLDER_ID</span>
+                  <strong className="text-sm font-mono text-slate-700 break-all select-all block">{currentStudent.uid}</strong>
+                </div>
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(currentStudent.uid);
+                    alert(isRtl ? 'تم نسخ رمز الدخول للطالب' : 'Copied student code successfully');
+                  }}
+                  className="w-full sm:w-auto bg-[#002147] text-white px-5 py-3 rounded-xl text-xs font-black hover:bg-blue-600 transition-colors"
+                >
+                  {isRtl ? 'نسخ كود الطالب' : 'Copy Student Code'}
+                </button>
+              </div>
+
+              {!currentStudent.isSelf && (
+                <div className={`p-4 bg-red-50 rounded-xl border border-red-100 flex items-center justify-between gap-4 flex-col sm:flex-row ${isRtl ? 'sm:flex-row-reverse' : ''}`}>
+                  <p className={`text-xs text-red-700 ${isRtl ? 'text-right' : 'text-left'} leading-relaxed max-w-md`}>
+                    {isRtl 
+                      ? 'في حال رغبتك بإلغاء ربط هذا الملف الدراسي التابع لطفلك من حسابك الإداري نهائياً، يرجى الضغط على زر إلغاء الربط.' 
+                      : 'If you want to unbind this student profile folder entirely from your parent credentials, execute the unbinding action.'}
+                  </p>
+                  <button 
+                    onClick={() => handleDelete(currentStudent.uid, selectedStudentIndex!)}
+                    className="w-full sm:w-auto text-xs bg-red-600 hover:bg-red-700 text-white font-black px-5 py-3.5 rounded-xl transition-all shadow shadow-red-600/10"
+                  >
+                    {isRtl ? 'إلغاء ربط الطالب نهائياً' : 'Unlink Student Folder'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        );
+      default:
+        return null;
+    }
+  };
+
   if (!currentStudent) return null;
 
   return (
-    <div className={`p-4 md:p-8 max-w-7xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* New Interactive Labs / Sections block */}
-      <div className="mb-10 animate-fade-in">
-        <div className={`flex items-center gap-2 mb-6 ${isRtl ? 'justify-start flex-row-reverse' : 'justify-start'}`}>
-          <div className="w-2.5 h-6 bg-[#C49E3A] rounded-full" />
-          <h3 className="text-xl font-black text-[#002147]">
-            {isRtl ? 'البرامج التفاعلية المضافة حديثاً 🚀' : 'Newly Added Interactive Features 🚀'}
-          </h3>
-        </div>
-
-        <div className="grid grid-cols-1 gap-6 font-arabic">
-          {/* Kids Interactive Story Dashboard Quick Card */}
-          <motion.div 
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-6 rounded-[2.5rem] border border-amber-500/30 bg-gradient-to-br from-[#fffcf5] to-[#fbf7eb] shadow-md shadow-amber-500/5 relative overflow-hidden group flex flex-col justify-between min-h-[180px]"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 opacity-10 group-hover:scale-110 transition-transform">
-              <img 
-                src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=400&q=80" 
-                alt="Kids Background Decor"
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover rounded-full"
-              />
-            </div>
-            <div className="flex gap-4 relative z-10 w-full flex-row items-center">
-              <img 
-                src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=400&q=80" 
-                alt="Kids Interactive Story"
-                referrerPolicy="no-referrer"
-                className="w-12 h-12 md:w-16 md:h-16 rounded-2xl object-cover shrink-0 border-2 border-amber-500/30 shadow-md transform group-hover:-rotate-3 transition-transform"
-              />
-              <div className={`${isRtl ? 'text-right' : 'text-left'} flex-1`}>
-                <div className={`flex items-center gap-2 mb-1.5 flex-wrap ${isRtl ? 'justify-start' : 'justify-start'}`}>
-                  <span className="px-3 py-0.5 bg-amber-500 text-white text-[9px] font-black rounded-md uppercase tracking-wider">
-                    {isRtl ? 'قصص تعليمية 📚' : 'KIDS EDUCATIONAL STORIES 📚'}
-                  </span>
-                  <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[9px] font-black rounded-md border border-amber-100">
-                    {isRtl ? 'سلسلة مغامرات لندن' : 'London Adventures'}
-                  </span>
-                </div>
-                <h3 className="text-base md:text-lg font-black text-slate-900 mb-1">
-                  {isRtl ? 'قصة تفاعلية: نور تصل لـ لندن ✈️' : 'Noor Arrives in London ✈️'}
-                </h3>
+    <div className={`p-4 md:p-8 max-w-7xl mx-auto w-full space-y-8 ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#f8fafc]`} dir={isRtl ? 'rtl' : 'ltr'}>
+      {/* 🏛️ ACADEMY PREMIUM BANNER HEADER */}
+      <div className="bg-gradient-to-r from-[#002147] via-[#003366] to-[#0a4d8c] rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-blue-900/15 relative overflow-hidden border-b-4 border-[#C49E3A]">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full blur-3xl pointer-events-none -mr-16 -mt-16" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#C49E3A]/5 rounded-full blur-3xl pointer-events-none -ml-16 -mb-16" />
+        
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="space-y-2">
+            <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
+              <div className="bg-[#C49E3A] text-white px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-md animate-pulse">
+                {isRtl ? 'بوابة أولياء الأمور والشركاء' : 'PARENT & COPARTNERS PORTAL'}
               </div>
+              <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping" />
             </div>
-            <div className="mt-4 flex items-center justify-between gap-4 relative z-10">
-              <p className="text-slate-500 font-medium text-xs leading-relaxed max-w-[70%] text-right">
-                {isRtl ? 'تصفح مغامرات نور التفاعلية مع قواميس ناطقة وتحديات تقمص الأصوات.' : 'Follow Noor at London Airport with speaking challenge cards and audio acting!'}
-              </p>
-              <button 
-                onClick={() => onNavigate && onNavigate('kids-story-player')}
-                className="bg-amber-500 hover:bg-[#c49e3a] text-white text-[11px] font-black px-4 py-3 rounded-xl shadow-sm transition-all cursor-pointer whitespace-nowrap"
-              >
-                {isRtl ? 'ابدأ العرض ✨' : 'Start Kids Play ✨'}
-              </button>
-            </div>
-          </motion.div>
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white mb-2 leading-tight">
+              {isRtl ? 'بوابة المتابعة الأكاديمية الذكية' : 'Smart Academic Companion Portal'}
+            </h1>
+            <p className="text-blue-100 font-medium text-xs md:text-sm max-w-2xl leading-relaxed opacity-95">
+              {isRtl 
+                ? 'تابع مسار تطور طفلك التعليمي بدقة، اطلع على تقارير الذكاء الاصطناعي الأسبوعية، وتحكم بجدول مواعيده مباشرة مع أكاديمية باسم الخليل.' 
+                : 'Monitor your child\'s vocabulary growth, review weekly AI evaluation journals, and schedule high-impact interactive speaking modules directly.'}
+            </p>
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-3 self-stretch md:self-auto shrink-0 font-sans">
+            <button 
+              onClick={generateReport}
+              disabled={generatingReport}
+              className="w-full md:w-auto bg-gradient-to-r from-[#C49E3A] to-[#b08e33] hover:from-white hover:to-white hover:text-[#002147] text-white px-6 py-4 rounded-xl font-black text-xs flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 disabled:opacity-50"
+            >
+              {generatingReport ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Sparkles size={18} className="text-amber-100" />
+              )}
+              {isRtl ? 'طلب التقرير الذكي التراكمي' : 'Generate Full AI Smart Report'}
+            </button>
+          </div>
         </div>
       </div>
 
-      {currentPlan && todayLesson && (
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-10 p-8 bg-white rounded-[2.5rem] border-2 border-blue-600/10 shadow-xl shadow-blue-100/20 relative overflow-hidden group"
-        >
-          <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform">
-             <Brain size={120} />
+      {/* 👥 REGISTERED STUDENTS PROFILE SWAPPER CARDS */}
+      <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200/80 space-y-6">
+        <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-4 ${isRtl ? 'text-right' : 'text-left'}`}>
+          <div>
+            <h3 className="text-lg font-black text-[#002147]">
+              {isRtl ? 'الملفات الدراسية المسجلة حالياً' : 'Registered Educational Study Profiles'}
+            </h3>
+            <p className="text-xs text-slate-400 font-medium italic mt-0.5">
+              {isRtl ? 'اختر ملف الطالب لعرض تحليلاته وخططه الحالية' : 'Select a student folder to access their tailored trackers and lessons'}
+            </p>
           </div>
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
-            <div className="flex items-center gap-6">
-              <div className="w-20 h-20 bg-blue-600 text-white rounded-[2rem] flex items-center justify-center shadow-lg shadow-blue-200">
-                <CalendarDays size={36} />
-              </div>
-              <div className={isRtl ? 'text-right' : 'text-left'}>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-widest">{isRtl ? 'خطتك الدراسية الحالية' : 'Active Study Plan'}</span>
-                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                </div>
-                <h3 className="text-2xl font-black text-[#002147] mb-1">
-                  {isRtl ? `خطة ${currentPlan.studentName}` : `${currentPlan.studentName}'s Plan`}
-                </h3>
-                <p className="text-slate-400 font-bold text-sm">
-                  {isRtl ? 'الدرس التالي (اليوم): ' : 'Next Lesson (Today): '} 
-                  <span className="text-blue-600">{todayLesson.topic}</span>
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 w-full md:w-auto">
-              <button 
-                onClick={handleDeletePlanDashboard}
-                className="hidden lg:flex items-center justify-center p-4 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-[1.5rem] transition-all border border-rose-100"
-                title={isRtl ? 'حذف الخطة' : 'Delete Plan'}
-              >
-                <Trash2 size={24} />
-              </button>
-              <div className="hidden lg:flex flex-col items-center px-6 py-3 border-r border-slate-100 pr-10">
-                 <span className="text-[10px] font-black text-slate-300 uppercase mb-1">{isRtl ? 'الوقت المفضل' : 'Preferred Time'}</span>
-                 <span className="text-lg font-black text-[#002147]">{currentPlan.preferredTime}</span>
-              </div>
-              <button 
-                onClick={() => onNavigate && onNavigate('academic-planner')}
-                className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-[#002147] text-white px-8 py-5 rounded-[2rem] font-black hover:bg-blue-600 transition-all shadow-xl shadow-blue-900/10"
-              >
-                {isRtl ? 'متابعة الخطة' : 'Follow Plan'}
-                <ChevronRight size={20} className={isRtl ? 'rotate-180' : ''} />
-              </button>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {!currentPlan && (
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-10 p-8 bg-gradient-to-br from-[#002147] to-[#1e3a8a] text-white rounded-[2.5rem] border-2 border-[#C49E3A]/30 shadow-xl relative overflow-hidden group"
-        >
-          <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
-             <Brain size={120} />
-          </div>
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
-            <div className={`flex items-center gap-6 ${isRtl ? 'flex-row-reverse text-right' : 'text-left'}`}>
-              <div className="w-16 h-16 bg-[#C49E3A] text-white rounded-2xl flex items-center justify-center shadow-lg">
-                <BookMarked size={28} />
-              </div>
-              <div className={isRtl ? 'text-right' : 'text-left'}>
-                <h3 className="text-xl font-black mb-1">
-                  {isRtl ? 'لا توجد خطة دراسية نشطة حالياً' : 'No Active Study Plan Yet'}
-                </h3>
-                <p className="text-white/80 font-medium text-xs leading-relaxed max-w-xl">
-                  {isRtl 
-                    ? `ابدأ رحلتك الدراسية الفريدة الآن! صمم جدولاً مرناً يتوافق مع اهتماماتك الشخصية والتزاماتك اليومية.`
-                    : `Get started on your learning journey! Design a flexible schedule customized to your goals and pace.`}
-                </p>
-              </div>
-            </div>
-
-            <button 
-              onClick={() => onNavigate && onNavigate('academic-planner')}
-              className="flex items-center justify-center gap-3 bg-[#C49E3A] hover:bg-white hover:text-[#002147] text-white px-8 py-4 rounded-2xl font-black transition-all shadow-lg text-sm shrink-0"
-            >
-              {isRtl ? 'صمم خطتك الدراسية الشخصية ✨' : 'Design My Study Plan ✨'}
-              <ChevronRight size={18} className={isRtl ? 'rotate-180' : ''} />
-            </button>
-          </div>
-        </motion.div>
-      )}
-      <header className={`mb-8 md:mb-12 border-b border-slate-200 pb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 ${isRtl ? 'text-right' : 'text-left'}`}>
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-[#002147]">{t.parentPortal}</h2>
-          <p className="text-slate-400 italic mt-2 text-sm md:text-base">{t.trackProgress}</p>
-        </div>
-        
-        <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
           <button 
-            onClick={generateReport}
-            disabled={generatingReport}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-3 hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50"
+            onClick={() => setShowAddStudent(true)}
+            className="text-xs bg-[#002147] hover:bg-[#C49E3A] text-white rounded-xl px-4 py-2.5 font-bold shadow-sm hover:shadow flex items-center gap-2 transition-all font-sans"
           >
-            {generatingReport ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Sparkles size={20} />
-            )}
-            {isRtl ? 'طلب تقرير ذكي' : 'Get AI Smart Report'}
+            <Plus size={16} />
+            {isRtl ? 'ربط ملف دراسي جديد' : 'Link Another Student'}
           </button>
-          <div className="flex -space-x-2 rtl:space-x-reverse items-center overflow-x-auto pb-2 md:pb-0 scrollbar-hide py-1 px-1">
-            {linkedStudents.map((student, idx) => (
-              <div key={`parent-student-${student.uid || idx}`} className="relative group flex-shrink-0">
-                <button
-                  onClick={() => setSelectedStudentIndex(idx)}
-                  className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl border-4 transition-all duration-300 overflow-hidden relative ${
-                    selectedStudentIndex === idx 
-                      ? 'border-[#C49E3A] scale-110 shadow-lg z-10' 
-                      : 'border-white hover:border-slate-200 z-0 opacity-60 hover:opacity-100'
-                  }`}
-                >
-                  <img src={student.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${student.displayName}`} alt={student.displayName} className="w-full h-full object-cover" />
-                </button>
-                {student.isSelf && (
-                  <span className="absolute -top-1 -left-1 bg-amber-500 text-white p-1 rounded-full shadow-md z-30" title={isRtl ? 'حسابي الدراسي' : 'My Study Profile'}>
-                    <Sparkles size={10} className="animate-pulse" />
-                  </span>
-                )}
-                {selectedStudentIndex === idx && !student.isSelf && (
+        </div>
+
+        {/* Profiles Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {linkedStudents.map((student, idx) => {
+            const isSelected = selectedStudentIndex === idx;
+            return (
+              <motion.div
+                key={`parent-student-card-${student.uid || idx}`}
+                whileHover={{ y: -3 }}
+                onClick={() => setSelectedStudentIndex(idx)}
+                className={`relative p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center gap-4 ${
+                  isSelected 
+                    ? 'border-[#002147] bg-blue-50/10 shadow-md ring-4 ring-blue-500/5' 
+                    : 'border-slate-100 hover:border-slate-200 bg-white hover:bg-slate-50/40'
+                }`}
+              >
+                <div className="relative shrink-0">
+                  <div className={`w-14 h-14 rounded-xl overflow-hidden bg-slate-50 border-2 ${isSelected ? 'border-[#C49E3A]' : 'border-slate-200'}`}>
+                    <img 
+                      src={student.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${student.displayName}`} 
+                      alt={student.displayName} 
+                      className="w-full h-full object-cover" 
+                    />
+                  </div>
+                  {student.isSelf && (
+                    <span className="absolute -top-1.5 -left-1.5 bg-amber-500 text-white p-1 rounded-full shadow z-10">
+                      <Sparkles size={8} className="animate-pulse" />
+                    </span>
+                  )}
+                </div>
+
+                <div className={`flex-1 min-w-0 ${isRtl ? 'text-right' : 'text-left'}`}>
+                  <h4 className="text-sm font-black text-[#002147] truncate block">{student.displayName}</h4>
+                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                    <span className="px-2 py-0.5 bg-[#002147]/5 text-[#002147] text-[9px] font-black rounded border border-[#002147]/10 uppercase">
+                      {student.level || 'A1'}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-extrabold flex items-center gap-1">
+                      ⭐ {student.points || 0} XP
+                    </span>
+                  </div>
+                </div>
+
+                {isSelected && !student.isSelf && (
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDelete(student.uid, idx);
                     }}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-20 hover:bg-red-600"
-                    title={t.deleteStudent}
+                    className="absolute top-3 right-3 bg-red-50 hover:bg-red-500 p-1.5 rounded-lg transition-all text-red-500"
+                    title={t.deleteStudent || 'Delete'}
                   >
-                    <Trash2 size={12} />
+                    <Trash2 size={13} />
                   </button>
                 )}
-                {/* Name Label on Hover */}
-                <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-[#002147] text-white text-[10px] py-1 px-2 rounded font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-30">
-                  {student.displayName}
-                </span>
-              </div>
-            ))}
-            <button 
-              onClick={() => setShowAddStudent(true)}
-              className="w-12 h-12 md:w-14 md:h-14 rounded-2xl border-2 border-dashed border-slate-300 text-slate-400 hover:text-blue-600 hover:border-blue-600 flex items-center justify-center transition-all flex-shrink-0 ml-4 group relative"
-              title={t.addAnotherStudent}
+
+                {/* Selected Pointer Symbol */}
+                {isSelected && (
+                  <div className="absolute bottom-3 right-3 w-2.5 h-2.5 bg-[#C49E3A] rounded-full shadow animate-pulse" />
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 🗂️ TAB SEGMENTED NAVIGATION */}
+      <div className="bg-slate-200/50 p-1.5 rounded-2xl flex flex-wrap gap-1 max-w-4xl mx-auto border border-slate-300/40">
+        {[
+          { id: 'overview', label: isRtl ? '📊 الأداء والمتابعة' : '📊 Performance & Analytics', icon: LayoutDashboard },
+          { id: 'plan', label: isRtl ? '📖 الخطط والجدول الدراسي' : '📖 Study Pathway & Class Scheduler', icon: CalendarDays },
+          { id: 'advisor', label: isRtl ? '🤖 المستشار والمساعد الذكي' : '🤖 AI Smart Advisor & Review', icon: Sparkles },
+          { id: 'notifications', label: isRtl ? '⚙️ إشعارات وتحكم بالواتساب' : '⚙️ WhatsApp Alerts & Config', icon: MessageSquare }
+        ].map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={`parent-nav-tab-${tab.id}`}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-black transition-all ${
+                isActive 
+                  ? 'bg-[#002147] text-white shadow-lg shadow-blue-900/10' 
+                  : 'text-slate-600 hover:text-[#002147] hover:bg-slate-300/30'
+              }`}
             >
-              <Plus size={24} />
-              <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] py-1 px-2 rounded font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-30">
-                {t.addAnotherStudent}
-              </span>
+              <tab.icon size={15} />
+              <span>{tab.label}</span>
             </button>
-          </div>
-        </div>
-      </header>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
-        {(() => {
-          const totalAssignments = currentPlan?.plan?.length || 0;
-          const completedAssignments = currentPlan?.plan?.filter((item: any) => 
-            currentPlanResults.some(r => r.lessonId === item.unitId)
-          ).length || 0;
-          
-          const totalEarned = currentPlanResults.reduce((acc, r) => acc + (r.score || 0), 0);
-          const totalPossible = currentPlanResults.reduce((acc, r) => acc + (r.total || 0), 0);
-          const avgScore = totalPossible > 0 ? (totalEarned / totalPossible) * 100 : 0;
-          const scoreLabel = avgScore >= 90 ? 'A+' : avgScore >= 80 ? 'A' : avgScore >= 70 ? 'B' : avgScore > 0 ? 'C' : 'N/A';
-
-          // Derived attendance (e.g. % of lessons completed vs total in plan)
-          const attendanceVal = totalAssignments > 0 ? Math.min(100, Math.round((completedAssignments / totalAssignments) * 100)) : 0;
-
-          return [
-            { label: t.attendance, value: attendanceVal > 0 ? `${attendanceVal}%` : '---', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-            { label: t.gradeAverage, value: scoreLabel, icon: GraduationCap, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-            { label: t.completedAssignments, value: `${completedAssignments}/${totalAssignments}`, icon: CheckCircle2, color: 'text-purple-600', bg: 'bg-purple-50' },
-            { label: t.speakingHours, value: currentStudent.points > 0 ? (currentStudent.points / 10).toFixed(1) : '0.0', icon: Mic2, color: 'text-[#C49E3A]', bg: 'bg-orange-50' },
-          ].map((stat, i) => (
-            <div key={`stat-card-overview-${currentStudent.uid}-${i}`} className={`bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex items-center gap-6 ${isRtl ? 'flex-row-reverse' : ''} relative overflow-hidden group`}>
-              <div className={`${stat.bg} ${stat.color || ''} p-4 rounded-2xl shrink-0 group-hover:scale-110 transition-transform`}>
-                <stat.icon size={28} />
-              </div>
-              <div className={`flex-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">{stat.label}</p>
-                <p className="text-2xl font-black text-[#002147]">{stat.value}</p>
-              </div>
-              <div className={`absolute top-0 bottom-0 ${isRtl ? 'left-0' : 'right-0'} w-1 ${(stat.color || '').replace('text', 'bg')}`} />
-            </div>
-          ));
-        })()}
+          )
+        })}
       </div>
 
-      <div className="mb-10">
-        <ProgressRoadmap 
-          lang={lang} 
-          currentLevel={currentStudent.level || 'A1'} 
-          studentName={currentStudent.displayName}
-        />
+      {/* 💼 TAB CONTENT PORTALS */}
+      <div className="space-y-8 animate-fade-in">
+        <AnimatePresence mode="wait">
+          {renderActiveTabContent()}
+        </AnimatePresence>
       </div>
 
-      <div className="mb-10">
-        <ParentAIInsights 
-          lang={lang} 
-          studentName={currentStudent.displayName} 
-          studentLevel={currentStudent.level || 'A1'} 
-        />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10">
-        <section className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200">
-          <div className={`flex justify-between items-center mb-10 ${lang === 'ar' ? 'flex-row-reverse' : ''} font-sans`}>
-            <h3 className={`text-xl font-bold text-[#002147] flex items-center gap-3 ${lang === 'ar' ? 'flex-row-reverse' : ''}`}>
-              <BarChart3 className="text-blue-600 shrink-0" />
-              <span className={`flex-1 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>{lang === 'ar' ? 'تحليل التطور الشهري' : 'Monthly Progress Analysis'}</span>
-            </h3>
-            <span className="text-[10px] font-bold text-blue-600 px-3 py-1 bg-blue-50 rounded-full tracking-widest uppercase">Performance Index</span>
-          </div>
-          <div className={`h-64 flex items-end gap-5 px-4 overflow-hidden ${lang === 'ar' ? 'flex-row-reverse' : ''}`} dir="ltr">
-            {(() => {
-              // Calculate real monthly progress from currentPlanResults
-              const months = [5, 4, 3, 2, 1, 0]; // Last 6 months
-              const monthlyStats = months.map(m => {
-                const targetDate = new Date();
-                targetDate.setMonth(targetDate.getMonth() - m);
-                const monthName = targetDate.toLocaleString('en-US', { month: 'short' });
-                const monthAr = targetDate.toLocaleString('ar-EG', { month: 'short' });
-                
-                const resultsInMonth = currentPlanResults.filter(r => {
-                  if (!r.timestamp) return false;
-                  const d = r.timestamp.toDate ? r.timestamp.toDate() : new Date(r.timestamp);
-                  return d.getMonth() === targetDate.getMonth() && d.getFullYear() === targetDate.getFullYear();
-                });
-                
-                const totalInMonth = resultsInMonth.reduce((acc, r) => acc + (r.score || 0), 0);
-                const possibleInMonth = resultsInMonth.reduce((acc, r) => acc + (r.total || 0), 0);
-                const avg = possibleInMonth > 0 ? Math.round((totalInMonth / possibleInMonth) * 100) : 0;
-                
-                return { name: lang === 'ar' ? monthAr : monthName, value: avg };
-              });
-
-              return monthlyStats.map((stat, i) => (
-                <div key={`progress-bar-${i}`} className="flex-1 flex flex-col items-center gap-3 h-full justify-end">
-                  <div className="w-full bg-slate-50 rounded-t-xl relative group h-full flex items-end">
-                    <motion.div 
-                      initial={{ height: 0 }}
-                      animate={{ height: `${Math.max(5, stat.value)}%` }}
-                      className={`w-full ${stat.value > 0 ? 'bg-[#002147]' : 'bg-slate-200'} rounded-t-xl group-hover:bg-[#C49E3A] transition-all relative`}
-                    >
-                      <div className="absolute top-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white/30 rounded-full" />
-                    </motion.div>
-                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[#002147] text-white text-[10px] py-1.5 px-3 rounded-full font-bold opacity-0 group-hover:opacity-100 transition-all shadow-lg whitespace-nowrap">
-                      {stat.value > 0 ? `%${stat.value} ${isRtl ? 'نجاح' : 'Success'}` : (isRtl ? 'لا بيانات' : 'No Data')}
-                    </div>
-                  </div>
-                  <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest whitespace-nowrap">{stat.name}</span>
-                </div>
-              ));
-            })()}
-          </div>
-        </section>
-
-        <section className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 flex flex-col">
-          <h3 className={`text-xl font-bold text-[#002147] mb-10 ${lang === 'ar' ? 'text-right' : 'text-left'} flex items-center gap-3 ${lang === 'ar' ? 'flex-row-reverse' : ''}`}>
-             <LayoutDashboard className="text-[#C49E3A]" />
-             <span className={`flex-1 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>{lang === 'ar' ? `نشاط ${currentStudent.displayName} الأخير` : `Recent activity of ${currentStudent.displayName}`}</span>
-          </h3>
-          <div className={`space-y-8 ${lang === 'ar' ? 'text-right' : 'text-left'} flex-1`}>
-            {currentPlanResults.length > 0 ? (
-              currentPlanResults.slice(0, 5).map((activity) => {
-                const activityDate = activity.timestamp?.toDate ? activity.timestamp.toDate() : new Date(activity.timestamp);
-                const timeStr = activityDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric' });
-                
-                return (
-                  <div key={activity.id} className={`flex gap-5 ${lang === 'ar' ? 'flex-row-reverse' : ''} group`}>
-                    <div className="mt-1 text-emerald-500 shrink-0 p-3 bg-slate-50 rounded-2xl group-hover:scale-110 transition-transform">
-                      <CheckCircle2 size={22} />
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <p className="text-sm text-[#002147] font-bold leading-relaxed">
-                        {isRtl 
-                          ? `أتم درس "${activity.lessonTitle}" بنتيجة ${activity.score}/${activity.total}` 
-                          : `Completed "${activity.lessonTitle}" - Score ${activity.score}/${activity.total}`}
-                      </p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{timeStr}</p>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="flex flex-col items-center justify-center p-12 text-slate-400 italic text-sm">
-                <div className="bg-slate-50 p-4 rounded-full mb-4">
-                  <LayoutDashboard size={40} className="opacity-20" />
-                </div>
-                {isRtl ? 'لا يوجد نشاط مسجل مؤخراً' : 'No recent activity recorded'}
-              </div>
-            )}
-          </div>
-          <button 
-            className="w-full mt-10 p-4 border border-dashed border-slate-200 rounded-xl text-[10px] font-mono text-slate-400 break-all select-all text-center"
-            title="Student Code"
-          >
-            {currentStudent.uid}
-          </button>
-        </section>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10">
-        <div className="lg:col-span-1">
-          <WhatsAppNotifications 
-            lang={lang}
-            studentId={currentStudent.uid}
-            studentName={currentStudent.displayName}
-            parentPhone={currentStudent.phoneNumber}
-            studentPhone={currentStudent.studentPhoneNumber}
-            onUpdatePhone={handleUpdatePhone}
-          />
-        </div>
-        <div className="lg:col-span-1">
-          <ScheduleManager studentId={currentStudent.uid} studentName={currentStudent.displayName || ''} lang={lang} canEdit={true} />
-        </div>
-      </div>
-      
-      <div className="mb-10">
-        <AIParentNotes profile={profile} studentId={currentStudent.uid} lang={lang} />
-      </div>
-
+      {/* 🧾 SHADOW EXPORT REPORT CONTAINER */}
       <div style={{ position: 'fixed', left: '-2000px', top: 0 }}>
         {smartReport && (
           <ShareableNotification
@@ -2563,9 +2763,10 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
         )}
       </div>
 
+      {/* 🖼️ MODAL FOR AI SMART REPORT REVIEW */}
       <AnimatePresence>
         {smartReport && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -2577,19 +2778,19 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-white w-full max-w-3xl max-h-[85vh] rounded-[2.5rem] shadow-2xl relative z-10 flex flex-col overflow-hidden"
+              className="bg-white w-full max-w-3xl max-h-[85vh] rounded-[2.5rem] shadow-2xl relative z-10 flex flex-col overflow-hidden border border-slate-200"
             >
               <header className="p-6 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-blue-100 text-[#002147] rounded-xl flex items-center justify-center shrink-0">
                     <Sparkles size={20} />
                   </div>
-                  <div>
+                  <div className={`${isRtl ? 'text-right' : 'text-left'}`}>
                     <h3 className="font-black text-lg md:text-xl text-[#002147]">
-                      {isRtl ? 'التقرير الذكي للأداء' : 'AI Performance Report'}
+                      {isRtl ? 'التقرير الأكاديمي الشامل والتقييم' : 'AI Performance Report Journal'}
                     </h3>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                      {isRtl ? 'توليد بواسطة الذكاء الاصطناعي' : 'Generated by AI'}
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-0.5">
+                      {isRtl ? 'تم توليده بمستشار الذكاء الاصطناعي للأكاديمية' : 'Generated by Basim AI Advisory Engine'}
                     </p>
                   </div>
                 </div>
@@ -2609,15 +2810,15 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
                 <button
                   onClick={handleExportReportImage}
                   disabled={exportingReport}
-                  className="bg-[#002147] text-white px-6 py-2 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-[#003366] transition-all disabled:opacity-50"
+                  className="w-full md:w-auto bg-[#002147] hover:bg-blue-600 text-white px-6 py-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50 font-sans"
                 >
                   {exportingReport ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Download size={14} />}
-                  {isRtl ? 'تحميل كصورة' : 'Download as Image'}
+                  {isRtl ? 'تحميل كتقرير صورة لمشاركته' : 'Download report as PNG'}
                 </button>
-                <p className="text-[10px] md:text-xs text-slate-400 font-medium max-w-sm">
+                <p className="text-[10px] text-slate-400 font-medium max-w-sm text-center md:text-right">
                   {isRtl 
-                    ? 'هذا التقرير تم إنشاؤه بناءً على البيانات المتوفرة حالياً، يرجى استخدامه كأداة استرشادية لتعزيز تجربة الطالب.' 
-                    : 'This report is generated based on current data, please use it as a guidance tool to enhance student experience.'}
+                    ? 'هذا التقرير تم تجميع بياناته تلقائياً بناءً على تقييم مهام الطالب، يرجى الاسترشاد به كمحرك تطويري.' 
+                    : 'This journal outlines cumulative levels dynamically based on CEFR indicators. Use for constructive home mentorship.'}
                 </p>
               </footer>
             </motion.div>
@@ -4699,14 +4900,23 @@ export default function App() {
 
     if (view === 'placement-test') {
       return (
-        <PlacementTest lang={lang} onBack={() => setView('dashboard')} onComplete={async (level) => {
-          try {
-            await setDoc(doc(db, 'students', currentUser.uid), { level }, { merge: true });
-            setView('dashboard');
-          } catch (error) {
-            handleFirestoreError(error, OperationType.UPDATE, `students/${currentUser.uid}`);
-          }
-        }} />
+        <PlacementTest 
+          lang={lang} 
+          onBack={() => setView('dashboard')} 
+          userProfile={userProfile}
+          setUserProfile={setUserProfile as any}
+          onComplete={async (level) => {
+            try {
+              await setDoc(doc(db, 'students', currentUser.uid), { level }, { merge: true });
+              if (userProfile) {
+                setUserProfile({ ...userProfile, level } as any);
+              }
+              setView('dashboard');
+            } catch (error) {
+              handleFirestoreError(error, OperationType.UPDATE, `students/${currentUser.uid}`);
+            }
+          }} 
+        />
       );
     }
 
