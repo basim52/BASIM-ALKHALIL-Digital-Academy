@@ -1965,41 +1965,50 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
     try {
       let promptText = "";
       if (reportLanguage === 'ar') {
-        promptText = `As an education expert at "Basim Alkhalil Academy", analyze the student's performance and provide a detailed, encouraging, and highly professional academic report for the parent.
-The report MUST be written ENTIRELY in high-quality professional Arabic (اللغة العربية).
-Please format the report with the following structure:
+        promptText = `بصفتك خبيراً وباحثاً تربوياً وأكاديمياً في "أكاديمية باسم الخليل"، قم بتحليل بيانات الطالب المرفقة وأصدر تقريراً أكاديمياً تفصيلياً، مشجعاً، واحترافياً للغاية بالكامل بالغة العربية المنسقة والمتقنة لمشاركتها مع ولي الأمر.
+يجب مراجعة أداء الطالب وصياغة نقاط قوته، وإنجازاته، وتوصيات لزيادة مستواه بدقة تامة.
 
-# 📊 التقرير الأكاديمي الذكي (Smart Academic Report)
+يرجى كتابة التقرير بالهيكل التالي بالضبط:
 
-[Write the detailed analysis, student strengths, achievement landmarks, and clear areas for growth in high-quality professional Arabic here...]
+# 📊 التقرير الأكاديمي الذكي للطالب (اسم الطالب: ${currentStudent.displayName})
 
-Always maintain an optimistic, encouraging, and highly academic tone. Use markdown formatting (bold, lists, headers) to make the sections easy to read.`;
+- **نظرة عامة على الأداء والتفاعل**: [هنا اكتب تحليلاً تربوياً تفصيلياً رائعاً لأداء الطالب الأكاديمي وتفاعله ونقاط القوة التي أظهرها خلال ممارسة اللغات ونسبة حضوره البالغة (${attendanceVal}%)...]
+- **أبرز الإنجازات والتقدم**: [اكتب هنا الأهداف والدرجات المتميزة والمكتسبة ومستوى الطالب اللغوي الحالي وهو (${currentStudent.level || 'A1'})...]
+- **توصيات وخطوات للتطوير المستقبلي**: [اكتب هنا نصائح عملية، وخطوات واضحة لولي الأمر ليساعد الطالب في ممارسة حديثه وتطوير طلاقته والاستمرار بتفوق...]
+
+ملاحظة هامة جداً: يجب أن يُكتب التقرير الأكاديمي هذا كاملاً باللغة العربية الفصحى فقط ولا يحتوي على أي فقرة أو تحليل باللغة الإنجليزية. حافظ على نبرة أكاديمية احترافية، متفائلة، ومشجعة. استخدم تنسيق Markdown (نقاط عريضة وقوائم وعناوين رئيسية وفرعية) لتسهيل قراءته وفهمه بسرعة.`;
       } else if (reportLanguage === 'en') {
-        promptText = `As an education expert at "Basim Alkhalil Academy", analyze the student's performance and provide a detailed, encouraging, and highly professional academic report for the parent.
-The report MUST be written ENTIRELY in high-quality professional English.
-Please format the report with the following structure:
+        promptText = `As an expert education consultant at "Basim Alkhalil Academy", analyze this student's data and write a detailed, highly encouraging, and professional academic report for the parent in English.
+The entire text of the report must be written in English.
 
-# 📊 Smart Academic Report (التقرير الأكاديمي الذكي)
+Format using this outline:
 
-[Write the detailed analysis, student strengths, achievement landmarks, and clear areas for growth in professional English here...]
+# 📊 Smart Academic Student Report (Student Name: ${currentStudent.displayName})
 
-Always maintain an optimistic, encouraging, and highly academic tone. Use markdown formatting (bold, lists, headers) to make the sections easy to read.`;
+- **Performance Analytics**: [Write a detailed, thorough performance evaluation in professional English. Mention attendance (${attendanceVal}%) and grading stats...]
+- **Milestone Accomplishments**: [Detail the language skills mastered, active participation goals, and level advancement (${currentStudent.level || 'A1'})...]
+- **Next Steps & Home Recommendations**: [Provide concrete strategies and actions the parent can take to support the student's language practice and speaking proficiency...]
+
+Keep the tone encouraging, intellectual, and professional. Use markdown formatting beautifully with bold lines and clear lists.`;
       } else {
-        promptText = `As an education expert at "Basim Alkhalil Academy", analyze the student's performance and provide a detailed, encouraging, and highly professional bilingual academic report for the parent.
-The report MUST contain BOTH Arabic and English sections.
-Please format the report with the following structure:
+        promptText = `بصفتك خبيراً تربوياً في "أكاديمية باسم الخليل"، قم بإعداد تقرير أكاديمي ثنائي اللغة (بالعربية والانجليزية معاً) لتحليل أداء الطالب.
+يجب أن يحتوي التقرير على قسمين كاملين ومنفصلين: القسم الأول باللغة العربية المشجعة والراقية بالكامل، والقسم الثاني باللغة الإنجليزية الاحترافية بالكامل.
 
-# 📊 التقرير الأكاديمي الذكي / Smart Academic Report
+يرجى صياغة التقرير بالهيكل التالي بالضبط:
 
-## 🇸🇦 القسم العربي (Arabic Section)
-[Write the detailed analysis, student strengths, and areas for growth in high-quality professional Arabic here...]
+# 📊 التقرير الأكاديمي الذكي / Bilingual Smart Report
+
+## 🇸🇦 القسم العربي اللغوي (Arabic Academic Analysis)
+- **ملخص الأداء والتحليل**: [اكتب هنا تحليلاً أكاديمياً مفصلاً وراقياً باللغة العربية الفصحى لأداء الطالب، وتفاعله، ومشاركته، وتفوقه في المهام ونسبة الحضور البالغة (${attendanceVal}%)...]
+- **النقاط القوية والتوصيات الأكاديمية**: [اكتب نقاط القوة والإنجازات ومستوى الطالب الحالي (${currentStudent.level || 'A1'}) ونصائح المتابعة المنزلية باللغة العربية...]
 
 ---
 
-## 🇬🇧 English Section (القسم الإنجليزي)
-[Write the detailed analysis, student strengths, and areas for growth in professional English here...]
+## 🇬🇧 English Academic Analysis (القسم الإنجليزي)
+- **Performance Overview**: [Write a detailed expert analysis in professional English regarding the student's learning journey, active participation, and grading metrics...]
+- **Key Strengths & Growth Pathways**: [Detail the specific concepts learned, language accomplishments, and practical home recommendation milestones inside clear professional English...]
 
-Always maintain an optimistic, encouraging, and highly academic tone. Use markdown formatting (bold, lists, headers) to make both sections easy to read.`;
+احرص على أن تكون النبرة أكاديمية، متفائلة ومحفزة في كلا القسمين، واستخدم تنسيق Markdown بشكل منظم وجميل ولا تدمج اللغتين في فقرة واحدة بل افصلهما تماماً كما في الهيكل.`;
       }
 
       const resp = await fetch('/api/admin/analyze', {

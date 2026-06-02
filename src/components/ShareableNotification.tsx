@@ -28,6 +28,7 @@ export const ShareableNotification = ({ lang, studentName, message, lessonName, 
   ];
 
   const currentIdx = levels.findIndex(l => l.id === roadmapLevel);
+  const isReport = type === 'report';
 
   return (
     <div 
@@ -35,8 +36,8 @@ export const ShareableNotification = ({ lang, studentName, message, lessonName, 
       style={{ 
         position: 'relative',
         overflow: 'hidden',
-        width: '600px',
-        padding: '3rem',
+        width: isReport ? '1100px' : '650px',
+        padding: isReport ? '3.5rem' : '3rem',
         backgroundColor: '#ffffff',
         border: '12px solid #ecfdf5',
         borderRadius: '3rem',
