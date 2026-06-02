@@ -87,6 +87,7 @@ import { ConversationCurriculumCompanion, ConversationLevel, ALL_CONVERSATION_UN
 import { WritingCurriculumCompanion, WritingLevel, ALL_WRITING_UNITS } from './components/WritingCurriculumCompanion';
 import { ExpressionCurriculumCompanion, ExpressionLevel, ALL_EXPRESSION_UNITS } from './components/ExpressionCurriculumCompanion';
 import { ModernCurriculumHome } from './components/ModernCurriculumHome';
+import { AiCurriculum } from './components/AiCurriculum';
 import { ProfessionalDevelopment } from './components/ProfessionalDevelopment';
 import { GeminiDeveloperHub } from './components/GeminiDeveloperHub';
 import { AdultsDailyDose } from './components/AdultsDailyDose';
@@ -4846,6 +4847,14 @@ export default function App() {
         />
       );
     }
+    if (view === 'ai-curriculum') {
+      return (
+        <AiCurriculum 
+          lang={lang} 
+          onBack={() => setView('dashboard')} 
+        />
+      );
+    }
     if (view === 'modern-curriculum') {
       return (
         <ModernCurriculumHome 
@@ -5240,6 +5249,7 @@ export default function App() {
                     { id: 'oxford-discover', label: lang === 'ar' ? 'أوكسفورد المطور 🌟' : 'Oxford Discover 🌟', icon: Layers },
                     { id: 'oxford-classic', label: lang === 'ar' ? 'أوكسفورد الكلاسيكي 📚' : 'Classic Oxford 📚', icon: OxfordClassicIcon },
                     { id: 'modern-curriculum', label: lang === 'ar' ? 'المناهج الدراسية المطورة' : 'Modernized Curriculums', icon: Sparkles },
+                    { id: 'ai-curriculum', label: lang === 'ar' ? 'منهج الذكاء الاصطناعي 🧠' : 'AI Curriculum 🧠', icon: Brain },
                     { id: 'professional-development', label: lang === 'ar' ? 'دورات تطويرية' : 'Developmental Courses', icon: GraduationCap },
                     { id: 'early-childhood', label: t.earlyChildhood, icon: Baby },
                     { id: 'story-library', label: t.storyLibrary, icon: BookMarked },
@@ -5306,6 +5316,7 @@ export default function App() {
                     { id: 'oxford-discover', icon: OxfordIcon },
                     { id: 'oxford-classic', icon: OxfordClassicIcon },
                     { id: 'modern-curriculum', icon: BookOpen },
+                    { id: 'ai-curriculum', icon: Brain },
                     { id: 'early-childhood', icon: Baby },
                   ],
                   [
