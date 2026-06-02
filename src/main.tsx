@@ -44,7 +44,7 @@ if (typeof window !== 'undefined') {
           };
         }
         
-        let val = Reflect.get(target, prop, receiver);
+        let val = Reflect.get(target, prop);
         if (typeof val === 'string' && val.includes('oklch')) {
           val = val.replace(/oklch\([^)]+\)/gi, (m) => {
             try {

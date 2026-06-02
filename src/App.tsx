@@ -1962,19 +1962,34 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
     if (!currentStudent) return;
     setGeneratingReport(true);
     try {
-      const promptLang = lang === 'ar' ? 'Arabic' : 'English';
       const resp = await fetch('/api/admin/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           data: { 
             studentName: currentStudent.displayName, 
-            level: currentStudent.level, 
-            points: currentStudent.points,
-            attendance: currentStudent.stats?.attendance || 0,
-            avgScore: currentStudent.stats?.avgScore || 0
+            level: currentStudent.level || 'A1', 
+            points: currentStudent.points || 0,
+            attendance: attendanceVal,
+            avgScore: Math.round(avgScore),
+            completedAssignments: completedAssignments,
+            totalAssignments: totalAssignments
           },
-          prompt: `As an education expert at "Basim Alkhalil Academy", analyze the student's performance and provide a detailed, encouraging, and highly professional academic report for the parent. Include specific strengths and clear areas for growth. The report MUST be written entirely in ${promptLang}. Always use a professional and optimistic tone. Use markdown formatting (bold, lists).`
+          prompt: `As an education expert at "Basim Alkhalil Academy", analyze the student's performance and provide a detailed, encouraging, and highly professional bilingual academic report for the parent.
+The report MUST be written in BOTH Arabic and English.
+Please format the report with the following structure:
+
+# 📊 التقرير الأكاديمي الذكي / Smart Academic Report
+
+## 🇸🇦 القسم العربي (Arabic Section)
+[Write the detailed analysis, student strengths, and areas for growth in high-quality professional Arabic here...]
+
+---
+
+## 🇬🇧 English Section (القسم الإنجليزي)
+[Write the detailed analysis, student strengths, and areas for growth in professional English here...]
+
+Always maintain an optimistic, encouraging, and highly academic tone. Use markdown formatting (bold, lists, headers) to make both sections easy to read.`
         })
       });
 
@@ -1982,7 +1997,7 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
       if (!resp.ok) {
         throw new Error(data.error || `Server error: ${resp.status}`);
       }
-      setSmartReport(data.text || (lang === 'ar' ? "عذراً، تعذر توليد التقرير حالياً." : "Sorry, report generation failed."));
+      setSmartReport(data.text || "عذراً، تعذر توليد التقرير حالياً. / Sorry, report generation failed.");
     } catch (err: any) {
       console.error("AI Report Error:", err);
       const msg = err.error || err.message || (typeof err === 'string' ? err : JSON.stringify(err));
@@ -5007,12 +5022,17 @@ export default function App() {
     }
 
     if (view === 'progress' && userProfile) {
+      const isParentOrAdmin = userProfile.role === 'parent' || userProfile.role === 'admin';
+      const targetUserId = isParentOrAdmin && activeStudentId ? activeStudentId : userProfile.uid;
+      const targetPoints = isParentOrAdmin && activeStudentProfile ? (activeStudentProfile.points || 0) : (userProfile.points || 0);
+      const targetLevel = isParentOrAdmin && activeStudentProfile ? (activeStudentProfile.level || 'A1') : (userProfile.level || 'A1');
+
       return (
         <StudentStats 
           lang={lang} 
-          userId={userProfile.uid} 
-          points={userProfile.points} 
-          level={userProfile.level}
+          userId={targetUserId} 
+          points={targetPoints} 
+          level={targetLevel}
         />
       );
     }

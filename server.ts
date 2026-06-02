@@ -11,6 +11,8 @@ const logToFile = (msg: string) => console.log(`[Server] ${msg}`);
 
 async function startServer() {
   const app = express();
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
   const server = createServer(app);
   const wss = new WebSocketServer({ noServer: true });
   const PORT = 3000;
@@ -843,7 +845,7 @@ async function startServer() {
   app.post("/api/admin/analyze", async (req, res) => {
     logToFile(`START /api/admin/analyze`);
     try {
-      const { data, prompt, useJson = false } = req.body;
+      const { data, prompt, useJson = false } = req.body || {};
 
       if (!initAI() || !aiLive) {
         logToFile("[Info] Using Simulated Data Analysis fallback due to missing api key in environment");
@@ -863,7 +865,7 @@ async function startServer() {
       res.json({ text });
     } catch (error: any) {
       logToFile(`[Info] Analysis Fallback triggered: ${error.message}`);
-      const { useJson = false } = req.body;
+      const { useJson = false } = req.body || {};
       if (useJson) {
         res.json({ text: JSON.stringify({ summary: "Excellent language usage with solid progression across active units." }) });
       } else {
