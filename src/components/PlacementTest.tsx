@@ -44,7 +44,7 @@ import {
 } from '../data/interactiveCurriculum';
 
 import { db } from '../lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 
 interface Question {
   id: number;
@@ -203,21 +203,138 @@ export const PlacementTest = ({
         setCurrentStep(currentStep + 1);
       } else {
         setIsFinished(true);
+        savePlacementProgressLocally(newAnswers);
       }
     }, 350);
   };
 
   const calculateLevel = (): proficiencyLevel => {
-    const score = answers.filter((ans, i) => ans === QUESTIONS[i].correct).length;
-    if (score <= 3) return proficiencyLevel.A1;
-    if (score <= 6) return proficiencyLevel.A2;
-    if (score <= 9) return proficiencyLevel.B1;
-    if (score <= 12) return proficiencyLevel.B2;
+    const scoreVal = answers.filter((ans, i) => ans === QUESTIONS[i].correct).length;
+    if (scoreVal <= 3) return proficiencyLevel.A1;
+    if (scoreVal <= 6) return proficiencyLevel.A2;
+    if (scoreVal <= 9) return proficiencyLevel.B1;
+    if (scoreVal <= 12) return proficiencyLevel.B2;
     return proficiencyLevel.C1;
   };
 
   const determinedLevel = calculateLevel();
   const score = answers.filter((ans, i) => ans === QUESTIONS[i].correct).length;
+
+  const getBilingualBulletPoints = (lvl: string, scoreVal: number) => {
+    if (lvl === proficiencyLevel.A1 || scoreVal <= 3) {
+      return {
+        titleAr: "تقرير تقييم تأسيسي (المستوى التأسيسي A1)",
+        titleEn: "Foundational Placement Report (A1 Level)",
+        arabic: [
+          "يملك الطالب أساسيات واعدة في التعرف على بعض الضمائر والكلمات البسيطة.",
+          "يحتاج إلى تقوية فاعلة في تراكيب الجمل المكتملة والمؤشرات النحوية الأساسية.",
+          "تم إعداد منهاج مخصص يدمج 'برامج الطفولة المبكرة' و'القاموس البصري الكرتوني'.",
+          "التركيز سيكون في تلمس الكلمات المنطوقة ورفع ثقة الطالب الذاتية أسبوعياً."
+        ],
+        english: [
+          "The student demonstrates good potential in recognizing basic pronouns and core words.",
+          "Active grammar reinforcement is recommended for complete sentence structures.",
+          "A customized syllabus is designed leveraging 'Early Childhood' and cartoon aids.",
+          "The upcoming milestones will focus on oral articulation and raising spoken confidence."
+        ]
+      };
+    } else if (lvl === proficiencyLevel.A2 || scoreVal <= 6) {
+      return {
+        titleAr: "تقرير تقييم ابتدائي (المستوى الابتدائي A2)",
+        titleEn: "Promising Primary Report (A2 Level)",
+        arabic: [
+          "يظهر الطالب فهمًا جيدًا للزمن المضارع والأسئلة الحوارية العادية.",
+          "يحتاج إلى تدريب مستمر على بناء جمل صحيحة نحويًا وتطوير طلاقة النطق.",
+          "منهاج الطالب سيشمل 'العالم بالإنجليزية' للمبتدئين وتدريبات تفاعلية قصيرة.",
+          "الاستراتيجية تركز على نطق الكلمات الشائعة وتسهيل سرد المحادثات اليومية."
+        ],
+        english: [
+          "The student shows a good grasp of the present context and daily questionnaire items.",
+          "Continuous practice is advised to structure grammatically sound statements.",
+          "Syllabus includes 'World in English' modules paired with short interactive tasks.",
+          "Direct focus will be on colloquial articulation and expanding oral conversational skills."
+        ]
+      };
+    } else if (lvl === proficiencyLevel.B1 || scoreVal <= 9) {
+      return {
+        titleAr: "تقرير تقييم متوسط (المستوى المتوسط B1)",
+        titleEn: "Splendid Intermediate Report (B1 Level)",
+        arabic: [
+          "يملك الطالب مهارات جيدة في الفهم السماعي وقراءة النصوص القصيرة السهلة.",
+          "يتطلب العمل على زيادة استخدام الأزمنة المستقبلية والشرطية الكثيرة في الحديث.",
+          "الخطة الدراسية ستتضمن مناهج 'أكسفورد ديسكفر الأكاديمية' وقصص عميقة.",
+          "نهدف إلى تمكين الطالب من التعبير وصياغة جمل أطول بقرينة لغوية متكاملة."
+        ],
+        english: [
+          "The student displays fine listening and reading comprehension of moderate passages.",
+          "Further practice is needed with complex future tenses and conditional structures.",
+          "The tailored pathway integrates 'Oxford Discover Academic' and detailed reading lessons.",
+          "Our objective is to empower the student to formulate personal perspectives fluently."
+        ]
+      };
+    } else if (lvl === proficiencyLevel.B2 || scoreVal <= 12) {
+      return {
+        titleAr: "تقرير تقييم فوق المتوسط (المستوى B2)",
+        titleEn: "Outstanding Upper-Intermediate Report (B2 Level)",
+        arabic: [
+          "يبرهن الطالب على ثقة وطلاقة ملموسة في المناقشات والتعبير اللغوي المكتوب.",
+          "يحتاج للانتقال لمهارات البحث الأكاديمي وصياغة المقالات النقدية والجدلية.",
+          "المنهاج المعتمد يركز على مناقشة المواضيع الحديثة وسلسلة المحادثات العميقة.",
+          "المستهدف هو إكساب الطالب قدرات خطابية وثقافية عالية تواكب المعايير الدولية."
+        ],
+        english: [
+          "The student exhibits tangible confidence and flow in both spoken and written communication.",
+          "Transitioning towards academic research and refined argumentative writing is advised.",
+          "The assigned curriculum centers around modern analytical topics and deep conversation series.",
+          "The target is to develop speech presentation skills matching standard global criteria."
+        ]
+      };
+    } else {
+      return {
+        titleAr: "تقرير تقييم متقدم واعد (المستوى المتقدم C1/C2)",
+        titleEn: "Exceptional Advanced Report (C1/C2 Level)",
+        arabic: [
+          "يتميز الطالب بمستوى استثنائي وقدرة واضحة على صياغة وبناء أفكار معقدة ببراعة.",
+          "يوصى بالانخراط في كتابة البحوث العلمية والخطابة والتفنيد المنهجي المقارن.",
+          "تم تخصيص مناهج 'مستشار تطوير الأكاديمية' وكيل التنمية الذاتية المعمق لتحدي قدراته.",
+          "سنركز على الصقل الخطابي التام للنقاشات والتفاعلات الاحترافية بمستوى أكاديمي نخبوي."
+        ],
+        english: [
+          "The student stands out with outstanding mastery, structuring advanced concepts with ease.",
+          "Engaging in advanced scholarly essays, public speaking, and critical debating is highly recommended.",
+          "Assigned custom PD (Professional Development) and deep development modules to push boundaries.",
+          "Focus lies on professional-grade conversational polish and elite academic interactions."
+        ]
+      };
+    }
+  };
+
+  const savePlacementProgressLocally = async (finalAnswers: number[]) => {
+    if (!userProfile) return;
+    try {
+      const scoreVal = finalAnswers.filter((ans, i) => ans === QUESTIONS[i].correct).length;
+      let calculatedLvl = proficiencyLevel.A1;
+      if (scoreVal <= 3) calculatedLvl = proficiencyLevel.A1;
+      else if (scoreVal <= 6) calculatedLvl = proficiencyLevel.A2;
+      else if (scoreVal <= 9) calculatedLvl = proficiencyLevel.B1;
+      else if (scoreVal <= 12) calculatedLvl = proficiencyLevel.B2;
+      else calculatedLvl = proficiencyLevel.C1;
+
+      await setDoc(doc(db, 'students', userProfile.uid), {
+        level: calculatedLvl,
+        placementTestCompleted: true,
+        placementScore: scoreVal,
+        placementAnswers: finalAnswers,
+        completedAt: new Date().toISOString()
+      }, { merge: true });
+
+      if (setUserProfile) {
+        setUserProfile(prev => prev ? { ...prev, level: calculatedLvl } as any : null);
+      }
+    } catch (err) {
+      console.error("Error saving placement details on handleAnswer completion:", err);
+    }
+  };
 
   const getStrengths = () => {
     const categories = Array.from(new Set(QUESTIONS.map(q => q.category.split(' (')[0])));
@@ -501,6 +618,15 @@ export const PlacementTest = ({
       };
 
       await addDoc(collection(db, 'studyPlans'), actualPlanDoc);
+
+      // Write completion state to students collection so metadata is kept fully locked
+      await setDoc(doc(db, 'students', userProfile.uid), {
+        level: determinedLevel,
+        placementTestCompleted: true,
+        placementScore: score,
+        placementAnswers: answers,
+        completedAt: new Date().toISOString()
+      }, { merge: true });
       
       // Update local react context if needed
       if (setUserProfile) {
@@ -729,24 +855,45 @@ export const PlacementTest = ({
                     </div>
                   </div>
 
-                  {/* Interactive Pedagogical Statement Card */}
-                  <div className="bg-amber-50/40 border border-amber-200/40 rounded-3xl p-5 flex gap-4 items-start">
-                    <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-amber-100 flex items-center justify-center shrink-0 text-[#C49E3A]">
-                      <Sparkles size={20} />
+                  {/* Elegant Bilingual Spot Report Card */}
+                  <div className="bg-gradient-to-br from-[#002147]/5 to-[#C49E3A]/5 border-2 border-[#C49E3A]/20 rounded-[2rem] p-6 md:p-8 space-y-6">
+                    <div className="flex items-center gap-3 justify-center mb-4 border-b border-slate-100 pb-4">
+                      <Sparkles className="text-[#C49E3A]" size={20} />
+                      <h3 className="font-black text-[#002147] text-center leading-none text-base md:text-lg">
+                        {isRtl ? 'التقرير اللغوي الفوري ثنائي اللغة' : 'Instant Bilingual Placement Report'}
+                      </h3>
                     </div>
-                    <div className="space-y-1">
-                      <h4 className="text-xs font-black text-[#002147]">
-                        {isRtl ? 'التوصية التربوية للبروفيسور باسم الخليل' : 'Professor Al-Khalil’s Endorsement'}
-                      </h4>
-                      <p className="text-xs leading-relaxed text-slate-600">
-                        {determinedLevel === 'A1' || determinedLevel === 'A2'
-                          ? (isRtl 
-                              ? 'لقد تم إعداد باقة مخصصة من برامج أكاديمية الطفولة المبكرة والقاموس البصري الكرتوني لتسريع الاستيعاب.' 
-                              : 'We have compiled early childhood programs and visual caricature systems to accelerate absorption.')
-                          : (isRtl 
-                              ? 'يوصى بالالتحاق بالبرامج المتطورة للرواية والنقد الأدبي وكتابة المقال والمحادثات الطليقة مباشرة.' 
-                              : 'We strongly recommend enrolling in advanced narrative studies and debate modules directly.')}
-                      </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 divide-y md:divide-y-0 md:divide-x md:divide-slate-200/60" dir={isRtl ? 'rtl' : 'ltr'}>
+                      {/* Arabic Summary Section */}
+                      <div className={`space-y-3 pb-4 md:pb-0 ${isRtl ? 'md:pl-6 text-right' : 'md:pr-1'}`}>
+                        <span className="text-xs font-black text-[#C49E3A] bg-[#C49E3A]/10 px-3 py-1 rounded-full uppercase tracking-wider inline-block">
+                          التحليل والتقييم اللغوي بالعربية
+                        </span>
+                        <div className="space-y-2.5 mt-2">
+                          {getBilingualBulletPoints(determinedLevel, score).arabic.map((pt, idx) => (
+                            <div key={idx} className="flex items-start gap-2 text-right">
+                              <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                              <p className="text-xs text-slate-600 leading-relaxed font-bold">{pt}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* English Summary Section */}
+                      <div className={`space-y-3 pt-4 md:pt-0 ${isRtl ? 'md:pr-6 text-left' : 'md:pl-1'}`}>
+                        <span className="text-xs font-black text-[#002147] bg-[#002147]/5 px-3 py-1 rounded-full uppercase tracking-wider inline-block">
+                          English Linguistic Observations
+                        </span>
+                        <div className="space-y-2.5 mt-2" dir="ltr">
+                          {getBilingualBulletPoints(determinedLevel, score).english.map((pt, idx) => (
+                            <div key={idx} className="flex items-start gap-2 text-left">
+                              <CheckCircle2 size={16} className="text-[#C49E3A] shrink-0 mt-0.5" />
+                              <p className="text-xs text-slate-650 leading-relaxed font-semibold">{pt}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -959,17 +1106,36 @@ export const PlacementTest = ({
               </div>
             </div>
 
-            {/* Professional pedagogical quote */}
+            {/* Dynamic Bilateral Placement Bullet Points */}
             <div className="w-full px-16 my-2 text-right">
-              <div className="bg-white/5 border border-white/5 p-5 rounded-2xl">
-                <h4 className="text-[11px] font-black text-[#C49E3A] uppercase tracking-wider mb-1">
-                  التوصية التربوية للبروفيسور / Recommendations:
-                </h4>
-                <p className="text-xs leading-relaxed text-slate-300 font-arabic">
-                  {determinedLevel === 'A1' || determinedLevel === 'A2'
-                    ? 'أثبت الطالب حساً تطلعياً ممتازاً. نوصي فوراً بالانخراط في تلاوات ومفردات القاموس البصري الكرتوني وبرامج الطفولة المبكرة لتعزيز سرعة النطق والبديهة.'
-                    : 'هيكل تركيبي ونحوي متين وتدفق فكري رائع. نوصي بقوة بالارتقاء بالمنهج لدمج المناهج المتطورة المخصصة للمناظرات، والتحاور الأكاديمي، والكتابة التحريرية العميقة.'}
-                </p>
+              <div className="bg-white/5 border border-white/10 p-5 rounded-2xl">
+                <span className="text-[10px] font-black text-[#C49E3A] uppercase tracking-wider block mb-3 text-center border-b border-white/5 pb-2">
+                  {getBilingualBulletPoints(determinedLevel, score).titleAr} | {getBilingualBulletPoints(determinedLevel, score).titleEn}
+                </span>
+                
+                <div className="grid grid-cols-2 gap-5 text-right font-sans" dir="rtl">
+                  {/* Arabic block */}
+                  <div className="space-y-2 border-l border-white/10 pl-4 text-right">
+                    <span className="text-[9px] font-black text-slate-400 block mb-1">📌 تفاصيل التقييم اللغوي:</span>
+                    {getBilingualBulletPoints(determinedLevel, score).arabic.map((pt, idx) => (
+                      <p key={idx} className="text-[10px] leading-relaxed text-slate-300 flex items-start gap-1 justify-start flex-row-reverse text-right">
+                        <span className="text-[#C49E3A] shrink-0 font-bold">•</span>
+                        <span>{pt}</span>
+                      </p>
+                    ))}
+                  </div>
+
+                  {/* English block */}
+                  <div className="space-y-2 text-left" dir="ltr">
+                    <span className="text-[9px] font-black text-slate-400 block mb-1">📌 Academic Milestones:</span>
+                    {getBilingualBulletPoints(determinedLevel, score).english.map((pt, idx) => (
+                      <p key={idx} className="text-[10px] leading-relaxed text-slate-350 flex items-start gap-1">
+                        <span className="text-[#C49E3A] shrink-0 font-bold">•</span>
+                        <span>{pt}</span>
+                      </p>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 

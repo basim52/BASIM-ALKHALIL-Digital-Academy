@@ -844,20 +844,100 @@ async function startServer() {
   // Analysis endpoint for parent dashboard
   app.post("/api/admin/analyze", async (req, res) => {
     logToFile(`START /api/admin/analyze`);
+
+    const getSimulatedReport = (studentData: any, langChoice: string) => {
+      const name = studentData?.studentName || "الطالب المتميز";
+      const lvl = studentData?.level || "A1";
+      const pts = studentData?.points || 0;
+      const att = studentData?.attendance || 0;
+      const avg = studentData?.avgScore || 0;
+      const compl = studentData?.completedAssignments || 0;
+      const tot = studentData?.totalAssignments || 0;
+
+      let levelDescAr = "";
+      let levelDescEn = "";
+      let recommendationsAr = "";
+      let recommendationsEn = "";
+
+      if (lvl === "A1") {
+        levelDescAr = "مستوى تأسيسي واعد (A1). يستطيع التعرف على المفردات والضمائر البسيطة.";
+        levelDescEn = "Foundational level (A1). Excellent starting blocks with basic pronoun and word familiarity.";
+        recommendationsAr = "• التركيز على زيادة الحصيلة اللغوية عبر القاموس البصري الكرتوني بالأكاديمية.\n• ممارسة بناء الجمل الأساسية مع الأهل يومياً لتعزيز الفهم السريع.";
+        recommendationsEn = "• Expand core vocabulary database utilizing our interactive visual dictionaries.\n• Engage in quick and active daily sentence creation circles with family.";
+      } else if (lvl === "A2" || lvl === "B1") {
+        levelDescAr = "مستوى متوسط ناضج (A2/B1). يمتلك مهارات جيدة في الفهم والتحدث الأساسي وسرد الجمل الحوارية.";
+        levelDescEn = "Intermediate level (A2/B1). Possesses good verbal comprehension and standard sentence formulation skills.";
+        recommendationsAr = "• مراجعة الزمنين الماضي والمستقبل بدقة وصياغة حوارات أسبوعية.\n• تفعيل ميزة المناظرات وقصص منبر أكسفورد بالأكاديمية بصفة مستمرة.";
+        recommendationsEn = "• Fine-tune grammar regarding perfect tenses and coordinate connectors.\n• Participate regularly in interactive storybook playbacks and speech lab records.";
+      } else {
+        levelDescAr = "مستوى متقدم متميز (B2/C1). قدرة فائقة على صياغة ومناقشة سيناريوهات فكرية ناضجة وسليمة.";
+        levelDescEn = "Advanced tier (B2/C1). Demonstrates excellent articulation and comprehensive analytical grammar.";
+        recommendationsAr = "• الانخراط في كتابة التقارير النقدية والقصصية بالمنظور التربوي المقترح.\n• تحدي مهارات الإلقاء ببرامج المنافسات الأكاديمية والترجمة التحريرية العميقة.";
+        recommendationsEn = "• Formulate critique journals and critical essays based on designated academy reading material.\n• Test public speaking boundaries through higher-tier collaborative challenge boards.";
+      }
+
+      const reportAr = `# 📊 التقرير الأكاديمي الذكي للطالب (الاسم: ${name})
+
+- **نظرة عامة على الأداء والتفاعل**:
+  تحليل تفصيلي لمشاركة الطالب يوضح تفاعلاً متميزاً والتزاماً تربوياً واعداً. تبلغ نسبة حضور وتفاعل الطالب نحو ${att}%، بمجموع نقاط تراكمية بالأكاديمية تفوق ${pts} نقطة، وتفوّق دراسي متميز في تقييمات الدروس بمتوسط قدره ${avg}%. رصدنا اهتمام الطالب الفائق في تلقي اللغة التطبيقية.
+
+- **أبرز الإنجازات والتقدم**:
+  تم رصد مستوى الطالب اللغوي الحالي وهو (**${lvl}**). يتمتع الطالب بقوة ملاحظة متميزة في فهم المعاني وحفظ الكلمات. تمكن بكفاءة فائقة من إنجاز ${compl} درساً تعليمياً متكاملاً من إجمالي ${tot} حلقة بأسلوب يجمع الاستقصاء بالمتعة.
+
+- **توصيات وخطوات للتطوير المستقبلي**:
+  ${recommendationsAr}
+  • الاستمرار بنفس الشغف وإشراك الطالب في أنشطة العائلة باللغة الإنجليزية لتأكيد الفوائد التربوية.`;
+
+      const reportEn = `# 📊 Smart Academic Student Report (Student Name: ${name})
+
+- **Performance Analytics**:
+  Scholarly analysis of learning interactions displays commendable focus and steady evolution. The student holds an active attendance rate of ${att}%, backed by ${pts} earned experience points, and an outstanding lesson evaluation average of ${avg}%.
+
+- **Milestone Accomplishments**:
+  The student is mapped securely to the **${lvl}** proficiency classification. Strengths are marked in pronunciation attempt accuracy and high-speed listening exercises. Completed work amounts to ${compl}/${tot} syllabus items.
+
+- **Next Steps & Home Recommendations**:
+  ${recommendationsEn}
+  • Maintain the current learning momentum and engage the student regularly with family-centric language activities inside the dashboard.`;
+
+      if (langChoice === "ar") {
+        return reportAr;
+      } else if (langChoice === "en") {
+        return reportEn;
+      } else {
+        return `# 📊 التقرير الأكاديمي الذكي / Bilingual Smart Report
+
+## 🇸🇦 القسم العربي اللغوي (Arabic Academic Analysis)
+${reportAr.replace(`# 📊 التقرير الأكاديمي الذكي للطالب (الاسم: ${name})`, "")}
+
+---
+
+## 🇬🇧 English Academic Analysis (القسم الإنجليزي)
+${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})`, "")}`;
+      }
+    };
+
     try {
-      const { data, prompt, useJson = false } = req.body || {};
+      const { data, prompt, useJson = false, reportLanguage = 'ar' } = req.body || {};
 
       if (!initAI() || !aiLive) {
         logToFile("[Info] Using Simulated Data Analysis fallback due to missing api key in environment");
         if (useJson) {
-          return res.json({ text: JSON.stringify({ summary: "Excellent language usage with solid progression across active units." }) });
+          return res.json({ text: JSON.stringify({ summary: `Excellent language usage with solid progression at level ${data?.level || 'A1'}.` }) });
         } else {
-          return res.json({ text: "تقرير باسم الخليل اللغوي:\n• التقدم ملحوظ جداً في مهارات القراءة والاستماع.\n• يُنصح بمواصلة الحديث لرفع مستوى الطلاقة وثقة الطالب." });
+          return res.json({ text: getSimulatedReport(data, reportLanguage) });
         }
       }
 
-      // Build a strict language system instruction
-      let systemInstruction = "You are a professional educational consultant and data analyst at 'Basim Alkhalil Academy'. You must analyze student metrics and write an encouraging, scholarly, and beautifully formatted academic report. IMPORTANT: You must write the report ENTIRELY in the target language requested by the user prompt. If the prompt is in Arabic or asks for Arabic (اللغة العربية), you must write the response strictly in professional Arabic. If the prompt asks for English, write in English. If the prompt asks for both/bilingual, write both sections separately.";
+      // Build a strict language system instruction dynamically
+      let systemInstruction = "";
+      if (reportLanguage === 'ar') {
+        systemInstruction = "بصفتك خبيراً ومستشاراً تربوياً قديراً في 'أكاديمية باسم الخليل للألسن واللغات'، يجب عليك كتابة هذا التقرير الأكاديمي والتحليل بالكامل وبشكل مطلق باللغة العربية الفصحى الراقية والمنسقة للغاية (نقاط عريضة وقوائم وعناوين) لتليق بولي الأمر. يمنع منعاً باتاً كتابة أي فقرة، أو جملة، أو عبارة، أو ترجمة باللغة الإنجليزية في التقرير. اجعل كامل التقرير عربي فصيح بنسبة 100%.";
+      } else if (reportLanguage === 'en') {
+        systemInstruction = "You are a senior professional educational consultant at 'Basim Alkhalil Academy'. You must write the detailed academic report ENTIRELY in professional, highly encouraging, and scholarly English. Do not write any Arabic sentences or words, keep everything 100% in English.";
+      } else {
+        systemInstruction = "You are a bilingual academic director at 'Basim Alkhalil Academy'. You must write a well-structured bilingual report. The report must contain exactly two clear, distinct sections: an Arabic Section written entirely in eloquent Arabic, and an English Section written entirely in professional English. Do not mix the languages in the same paragraph.";
+      }
 
       const result = await callAiWithRetry({
         contents: [{ role: 'user', parts: [{ text: `Instruction and Format:\n${prompt}\n\nStudent Metrics to Analyze:\n${JSON.stringify(data)}` }] }],
@@ -871,11 +951,11 @@ async function startServer() {
       res.json({ text });
     } catch (error: any) {
       logToFile(`[Info] Analysis Fallback triggered: ${error.message}`);
-      const { useJson = false } = req.body || {};
+      const { data, useJson = false, reportLanguage = 'ar' } = req.body || {};
       if (useJson) {
-        res.json({ text: JSON.stringify({ summary: "Excellent language usage with solid progression across active units." }) });
+        res.json({ text: JSON.stringify({ summary: `Excellent language usage with solid progression at level ${data?.level || 'A1'}.` }) });
       } else {
-        res.json({ text: "تقرير باسم الخليل اللغوي:\n• التقدم ملحوظ جداً في مهارات القراءة والاستماع.\n• يُنصح بمواصلة الحديث لرفع مستوى الطلاقة وثقة الطالب." });
+        res.json({ text: getSimulatedReport(data, reportLanguage) });
       }
     }
   });

@@ -379,38 +379,7 @@ const LoginScreen = ({
           </motion.div>
         )}
 
-        {/* Dynamic Sandbox Simulator Mode Bypass */}
-        <div className="mt-6 p-4 bg-amber-50/70 border border-amber-200/50 rounded-2xl text-right" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-          <div className={`flex items-center gap-2 mb-2 text-amber-800 justify-start ${lang === 'ar' ? 'flex-row-reverse' : 'flex-row'}`}>
-            <Sparkles size={16} className="text-[#C49E3A] animate-pulse shrink-0" />
-            <h3 className="font-extrabold text-xs text-amber-900 leading-none block">
-              {lang === 'ar' ? 'مدخل تجريبي ذكي للتجاوز السريع ⚡' : 'Linguistic Sandbox Bypass ⚡'}
-            </h3>
-          </div>
-          <p className="text-[11px] text-slate-500 font-medium mb-4 leading-relaxed">
-            {lang === 'ar' 
-              ? 'بما أنك في بيئة التطوير، يمكنك تفعيل وضع المحاكاة لتصفح كافة المستويات وأقسام اللوحة فوراً وبدون تعقيد سحابي:'
-              : 'As you are running in developer preview, you can bypass the Auth screen to instantly test student roadmaps and system tools:'}
-          </p>
-
-          <div className="flex flex-col gap-2.5">
-            <button 
-              onClick={() => onSimulateLogin('basim5252@gmail.com', UserRole.ADMIN)}
-              className="w-full flex items-center justify-between px-4 py-2.5 bg-[#002147] hover:bg-opacity-95 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-[0.99]"
-            >
-              <span className="font-mono bg-white/20 px-2 py-0.5 rounded text-[9px] text-[#C49E3A]">ADMIN</span>
-              <span>{lang === 'ar' ? 'الدخول التجريبي لمدير النظام' : 'Demo Entry as System Admin'} &rarr;</span>
-            </button>
-            
-            <button 
-              onClick={() => onSimulateLogin('student@example.com', UserRole.STUDENT)}
-              className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-[#002147]/20 hover:bg-slate-50 text-[#002147] rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.99]"
-            >
-              <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-[9px] text-slate-500">STUDENT</span>
-              <span>{lang === 'ar' ? 'الدخول التجريبي كطالب متعلم' : 'Demo Entry as Learner Student'} &rarr;</span>
-            </button>
-          </div>
-        </div>
+        {/* Dynamic Sandbox Simulator Mode Bypass removed completely as per request */}
         
         <div className="mt-6 pt-6 border-t border-slate-100 flex flex-wrap justify-center gap-4 opacity-50 grayscale transition-all hover:grayscale-0">
           <span className="text-[10px] font-bold text-[#002147]">BASIM ALKHALIL DIGITAL ACADEMY</span>
@@ -1953,6 +1922,18 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
   const generateReport = async () => {
     if (!currentStudent) return;
     setGeneratingReport(true);
+    
+    // Check if student completed their placement test
+    const isTestCompleted = currentStudent.placementTestCompleted === true || (currentStudent.points && currentStudent.points > 0) || completedAssignments > 0;
+    if (!isTestCompleted) {
+      setSmartReport(isRtl 
+        ? "⚠️ **عذراً، لا يمكن إصدار أو توليد التقرير الأكاديمي حالياً!**\n\nهذا الطالب قد سجل في الأكاديمية ولكنه **لم يكمل اختبار تحديد المستوى اللغوي بعد**.\n\nلا يمكن لمستشار الذكاء الاصطناعي رصد نقاط القوة أو صياغة توصيات لغوية دقيقة دون أن يقوم الطالب أولاً بتسجيل الدخول وإكمال اختبار تحديد المستوى حتى تنعكس البيانات والتحليلات الإحصائية هنا بشكل صحيح وسليم."
+        : "⚠️ **Academic Report Unavailable!**\n\nThis student has registered but **has not completed their language placement test yet**.\n\nThe AI Advisory Engine cannot analyze linguistic strength zones, calculate attendance scores, or formulate verified recommendations until the student logs in and completes their initial placement assessment."
+      );
+      setGeneratingReport(false);
+      return;
+    }
+
     try {
       let promptText = "";
       if (reportLanguage === 'ar') {
@@ -2015,7 +1996,8 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
             completedAssignments: completedAssignments,
             totalAssignments: totalAssignments
           },
-          prompt: promptText
+          prompt: promptText,
+          reportLanguage: reportLanguage
         })
       });
 
@@ -2877,7 +2859,7 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
         {smartReport && (
           <ShareableNotification
             id="report-share-card"
-            lang={lang}
+            lang={reportLanguage === 'bilingual' ? 'ar' : reportLanguage}
             studentName={currentStudent.displayName}
             type="report"
             reportMarkdown={smartReport}
@@ -2924,7 +2906,12 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
                 </button>
               </header>
 
-              <div className="flex-1 overflow-y-auto p-6 md:p-12 prose prose-slate max-w-none custom-markdown-content font-arabic leading-relaxed prose-headings:text-[#002147] prose-headings:font-black prose-p:text-slate-600 prose-strong:text-[#C49E3A]">
+              <div 
+                dir={reportLanguage === 'en' ? 'ltr' : 'rtl'}
+                className={`flex-1 overflow-y-auto p-6 md:p-12 prose prose-slate max-w-none custom-markdown-content font-arabic leading-relaxed prose-headings:text-[#002147] prose-headings:font-black prose-p:text-slate-600 prose-strong:text-[#C49E3A] ${
+                  reportLanguage === 'en' ? 'text-left' : 'text-right'
+                }`}
+              >
                 <ReactMarkdown>{smartReport}</ReactMarkdown>
               </div>
 
