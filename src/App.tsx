@@ -278,15 +278,6 @@ const LoginScreen = ({
     } catch (error: any) {
       console.error("Login failed:", error);
       setAuthError(error);
-      
-      const isDomainError = error.code === 'auth/unauthorized-domain' || 
-                           (error.message && error.message.includes('unauthorized-domain'));
-                           
-      if (isDomainError) {
-        // Automatically bypass unauthorized domain lock to provide a frictionless login experience
-        console.warn("Auto-signing in basim5252@gmail.com on unauthorized domain fallback.");
-        onSimulateLogin('basim5252@gmail.com', UserRole.ADMIN);
-      }
     }
   };
 
