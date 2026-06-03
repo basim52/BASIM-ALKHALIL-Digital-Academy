@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { AI_TOOLS_DATA, AiTool } from './AiToolsData';
 import { PerfectionHub } from './PerfectionHub';
 import { PROMPT_PROFESSIONAL_DATA } from './PromptProData';
+import { PROMPT_TEMPLATES_DATA } from './PromptTemplatesData';
+import { MEGA_PROMPTS_DATA } from './MegaPromptLabData';
 import { 
   Brain, 
   Sparkles, 
@@ -1230,6 +1232,25 @@ const ADVANCED_CURRICULUM_DATA = {
 
 export const AiCurriculum = ({ lang, onBack }: { lang: 'en' | 'ar', onBack: () => void }) => {
   const isRtl = lang === 'ar';
+
+  // Helper functions for prompt builders
+  const getPlaceholders = (text: string): string[] => {
+    const matches = text.match(/\[([^\]]+)\]/g);
+    if (!matches) return [];
+    return Array.from(new Set(matches.map(m => m.slice(1, -1))));
+  };
+
+  const getCompiledPrompt = (templateText: string, values: Record<string, string>): string => {
+    let output = templateText;
+    const placeholders = getPlaceholders(templateText);
+    placeholders.forEach(placeholder => {
+      const val = values[placeholder] || `[${placeholder}]`;
+      const escaped = placeholder.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const regex = new RegExp(`\\[${escaped}\\]`, 'g');
+      output = output.replace(regex, val);
+    });
+    return output;
+  };
   
   // App States
   const [selectedLesson, setSelectedLesson] = useState<any | null>(null);
@@ -1243,6 +1264,14 @@ export const AiCurriculum = ({ lang, onBack }: { lang: 'en' | 'ar', onBack: () =
   const [proActiveLevel, setProActiveLevel] = useState<number>(1);
   const [proProjectSubmissions, setProProjectSubmissions] = useState<Record<number, string>>({});
   const [proProjectSaved, setProProjectSaved] = useState<Record<number, boolean>>({});
+  const [proSubTab, setProSubTab] = useState<'dashboard' | 'templates' | 'megaprompts'>('dashboard');
+  const [selectedTemplateCategory, setSelectedTemplateCategory] = useState<string>("التسويق والمبيعات");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number>(1);
+  const [templateValues, setTemplateValues] = useState<Record<string, string>>({});
+  const [selectedMegaPromptId, setSelectedMegaPromptId] = useState<number>(1);
+  const [copiedItemId, setCopiedItemId] = useState<number | null>(null);
+  const [testingTemplateOutput, setTestingTemplateOutput] = useState<string>('');
+  const [testingTemplateLoading, setTestingTemplateLoading] = useState<boolean>(false);
   
   // Custom Playground States for Professional Workspace
   const [proPlaygroundRole, setProPlaygroundRole] = useState<string>('');
@@ -2904,487 +2933,937 @@ The adventure is waiting!`
                   </div>
 
                   {curriculumType === 'professional' ? (
-                    <div id="pro_main_dashboard" className="space-y-12 text-right animate-fade-in" dir="rtl">
+                    <div id="pro_main_dashboard" className="space-y-12 text-right animate-fade-in animate-duration-300" dir="rtl">
                       
-                      {/* Certified Pro Dashboard Banner */}
-                      <div className="bg-[#0b1329] border border-amber-500/20 rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl" />
-                        <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 text-right">
-                          <div className="space-y-4">
-                            <span className="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-500/10">
-                              {isRtl ? 'الأكاديمية المهنية المعتمدة 🏆' : 'Professional Accredited Track 🏆'}
-                            </span>
-                            <h3 className="text-3xl font-black text-white leading-none">
-                              {PROMPT_PROFESSIONAL_DATA.title}
-                            </h3>
-                            <p className="text-slate-400 text-xs max-w-4xl leading-relaxed">
-                              {PROMPT_PROFESSIONAL_DATA.description}
-                            </p>
-                          </div>
-
-                          {/* Level Pro Stats */}
-                          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-4 w-full lg:w-auto shrink-0">
-                            <div className="bg-slate-950/60 p-4 rounded-2xl border border-white/5 text-right">
-                              <span className="text-[10px] text-slate-500 font-bold block leading-none">{isRtl ? 'الدروس المنجزة' : 'LESSONS DONE'}</span>
-                              <span className="text-xl font-mono text-amber-400 font-extrabold mt-1 block">{completedProLessons.length} / 24</span>
-                            </div>
-                            <div className="bg-slate-950/60 p-4 rounded-2xl border border-white/5 text-right">
-                              <span className="text-[10px] text-slate-500 font-bold block leading-none">{isRtl ? 'المشاريع العملية' : 'PROJECTS'}</span>
-                              <span className="text-xl font-mono text-amber-400 font-extrabold mt-1 block">{Object.keys(proProjectSubmissions).length} / 4</span>
-                            </div>
-                            <div className="bg-slate-950/60 p-4 rounded-2xl border border-white/5 text-right col-span-2">
-                              <span className="text-[10px] text-slate-500 font-bold block leading-none">{isRtl ? 'حالة الاعتماد' : 'ACCREDITATION'}</span>
-                              <span className="text-xs text-emerald-400 font-black mt-1.5 block">
-                                {(completedProLessons.length >= 24 && Object.keys(proProjectSubmissions).length >= 4 && proQuizPassed && proPledgeSigned) 
-                                  ? (isRtl ? 'مؤهل - مستحق للدرع 🎓' : 'Qualified for Certificate 🎓')
-                                  : (isRtl ? 'قيد الدراسة والتحصيل' : 'In Study Phase')}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                      {/* Secondary Pro Sub-Tabs */}
+                      <div className="flex flex-wrap items-center justify-center gap-3 bg-slate-950/60 p-2.5 rounded-[2rem] border border-white/5 max-w-4xl mx-auto shadow-2xl">
+                        <button
+                          onClick={() => setProSubTab('dashboard')}
+                          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black transition-all ${proSubTab === 'dashboard' ? 'bg-amber-500 text-slate-950 font-sans shadow-lg shadow-amber-500/10' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                        >
+                          <Award size={14} />
+                          {isRtl ? 'بوابة المحاضرات والاعتماد 🏆' : 'Lectures & Accreditation 🏆'}
+                        </button>
+                        <button
+                          onClick={() => setProSubTab('templates')}
+                          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black transition-all ${proSubTab === 'templates' ? 'bg-amber-500 text-slate-950 font-sans shadow-lg shadow-amber-500/10' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                        >
+                          <PenTool size={14} />
+                          {isRtl ? 'مكتبة الـ 50 قالباً الاحترافية 📝' : '50 Free Pro Templates 📝'}
+                        </button>
+                        <button
+                          onClick={() => setProSubTab('megaprompts')}
+                          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black transition-all ${proSubTab === 'megaprompts' ? 'bg-amber-500 text-slate-950 font-sans shadow-lg shadow-amber-500/10' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                        >
+                          <Brain size={14} />
+                          {isRtl ? 'معمل الأوامر الضخمة (12) 🧪' : '12 Mega-Prompts Lab 🧪'}
+                        </button>
                       </div>
 
-                      {/* Prerequisites Notice */}
-                      <div className="bg-[#10100d] border border-amber-500/10 p-5 rounded-2xl flex items-center justify-start gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 shrink-0">
-                          <Info size={18} />
-                        </div>
-                        <div className="text-right">
-                          <span className="text-[10px] text-amber-400 font-black block leading-none">{isRtl ? 'المتطلبات الأساسية للالتحاق' : 'PREREQUISITES'}</span>
-                          <span className="text-xs font-semibold text-slate-300 mt-1 block">{PROMPT_PROFESSIONAL_DATA.prerequisites}</span>
-                        </div>
-                      </div>
+                      {/* SUBTAB 1: Lectures & Certification Dashboard */}
+                      {proSubTab === 'dashboard' && (
+                        <div className="space-y-12 text-right">
+                          {/* Certified Pro Dashboard Banner */}
+                          <div className="bg-[#0b1329] border border-amber-500/20 rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl" />
+                            <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 text-right">
+                              <div className="space-y-4">
+                                <span className="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-500/10">
+                                  {isRtl ? 'الأكاديمية المهنية المعتمدة 🏆' : 'Professional Accredited Track 🏆'}
+                                </span>
+                                <h3 className="text-3xl font-black text-white leading-none">
+                                  {PROMPT_PROFESSIONAL_DATA.title}
+                                </h3>
+                                <p className="text-slate-400 text-xs max-w-4xl leading-relaxed">
+                                  {PROMPT_PROFESSIONAL_DATA.description}
+                                </p>
+                              </div>
 
-                      {/* Levels Blocks */}
-                      <div className="space-y-12">
-                        {PROMPT_PROFESSIONAL_DATA.levels.map((level, levelIdx) => {
-                          const levelDoneLessons = level.lessons.filter(l => completedProLessons.includes(l.lesson_number)).length;
-                          const projectDraft = proProjectSubmissions[level.level_number] || '';
-                          const projectSaved = proProjectSaved[level.level_number];
+                              {/* Level Pro Stats */}
+                              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-4 w-full lg:w-auto shrink-0">
+                                <div className="bg-slate-950/60 p-4 rounded-2xl border border-white/5 text-right">
+                                  <span className="text-[10px] text-slate-500 font-bold block leading-none">{isRtl ? 'الدروس المنجزة' : 'LESSONS DONE'}</span>
+                                  <span className="text-xl font-mono text-amber-400 font-extrabold mt-1 block">{completedProLessons.length} / 24</span>
+                                </div>
+                                <div className="bg-slate-950/60 p-4 rounded-2xl border border-white/5 text-right">
+                                  <span className="text-[10px] text-slate-500 font-bold block leading-none">{isRtl ? 'المشاريع العملية' : 'PROJECTS'}</span>
+                                  <span className="text-xl font-mono text-amber-400 font-extrabold mt-1 block">{Object.keys(proProjectSubmissions).length} / 4</span>
+                                </div>
+                                <div className="bg-slate-950/60 p-4 rounded-2xl border border-white/5 text-right col-span-2">
+                                  <span className="text-[10px] text-slate-500 font-bold block leading-none">{isRtl ? 'حالة الاعتماد' : 'ACCREDITATION'}</span>
+                                  <span className="text-xs text-emerald-400 font-black mt-1.5 block">
+                                    {(completedProLessons.length >= 24 && Object.keys(proProjectSubmissions).length >= 4 && proQuizPassed && proPledgeSigned) 
+                                      ? (isRtl ? 'مؤهل - مستحق للدرع 🎓' : 'Qualified for Certificate 🎓')
+                                      : (isRtl ? 'قيد الدراسة والتحصيل' : 'In Study Phase')}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
 
-                          return (
-                            <div 
-                              key={level.level_number}
-                              className="bg-gradient-to-br from-[#0c1830]/80 to-slate-950/40 border border-white/5 rounded-[2.5rem] p-8 space-y-8 relative hover:border-amber-500/10 transition-all"
-                            >
-                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/5 pb-6 text-right">
-                                <div className="space-y-2">
-                                  <div className="flex items-center gap-2 justify-start">
-                                    <span className="px-3 py-0.5 bg-amber-500 text-slate-950 rounded-full text-[10px] font-black uppercase tracking-widest">
-                                      {isRtl ? `المستوى ${level.level_number}` : `Level ${level.level_number}`}
-                                    </span>
-                                    <span className="text-xs font-mono text-slate-500">({levelDoneLessons}/6 {isRtl ? 'محاضرات منجزة' : 'completed'})</span>
+                          {/* Prerequisites Notice */}
+                          <div className="bg-[#10100d] border border-amber-500/10 p-5 rounded-2xl flex items-center justify-start gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 shrink-0">
+                              <Info size={18} />
+                            </div>
+                            <div className="text-right">
+                              <span className="text-[10px] text-amber-400 font-black block leading-none">{isRtl ? 'المتطلبات الأساسية للالتحاق' : 'PREREQUISITES'}</span>
+                              <span className="text-xs font-semibold text-slate-300 mt-1 block">{PROMPT_PROFESSIONAL_DATA.prerequisites}</span>
+                            </div>
+                          </div>
+
+                          {/* Levels Blocks */}
+                          <div className="space-y-12 border-b border-white/5 pb-10">
+                            {PROMPT_PROFESSIONAL_DATA.levels.map((level, levelIdx) => {
+                              const levelDoneLessons = level.lessons.filter(l => completedProLessons.includes(l.lesson_number)).length;
+                              const projectDraft = proProjectSubmissions[level.level_number] || '';
+                              const projectSaved = proProjectSaved[level.level_number];
+
+                              return (
+                                <div 
+                                  key={level.level_number}
+                                  className="bg-gradient-to-br from-[#0c1830]/80 to-slate-950/40 border border-white/5 rounded-[2.5rem] p-8 space-y-8 relative hover:border-amber-500/10 transition-all"
+                                >
+                                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/5 pb-6 text-right">
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-2 justify-start">
+                                        <span className="px-3 py-0.5 bg-amber-500 text-slate-950 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                          {isRtl ? `المستوى ${level.level_number}` : `Level ${level.level_number}`}
+                                        </span>
+                                        <span className="text-xs font-mono text-slate-500">({levelDoneLessons}/6 {isRtl ? 'محاضرات منجزة' : 'completed'})</span>
+                                      </div>
+                                      <h4 className="text-2xl font-black text-white leading-tight">
+                                        {level.level_title}
+                                      </h4>
+                                      <p className="text-slate-400 text-xs">
+                                        <strong className="text-amber-400 font-bold">{isRtl ? 'الهدف المنهجي للمستوى' : 'Level Objective'}: </strong> 
+                                        {level.level_goal}
+                                      </p>
+                                    </div>
                                   </div>
-                                  <h4 className="text-2xl font-black text-white leading-tight">
-                                    {level.level_title}
-                                  </h4>
-                                  <p className="text-slate-400 text-xs">
-                                    <strong className="text-amber-400 font-bold">{isRtl ? 'الهدف المنهجي للمستوى' : 'Level Objective'}: </strong> 
-                                    {level.level_goal}
-                                  </p>
+
+                                  {/* Lesson Grid */}
+                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-right">
+                                    {level.lessons.map((lesson) => {
+                                      const isComp = completedProLessons.includes(lesson.lesson_number);
+                                      return (
+                                        <button
+                                          key={lesson.lesson_number}
+                                          onClick={() => setSelectedProLesson(lesson)}
+                                          className="w-full bg-[#050b14]/60 hover:bg-[#050b14]/90 hover:border-amber-500/20 active:scale-95 transition-all text-slate-200 p-4 rounded-2xl flex items-center justify-between border border-white/5 group text-right text-xs font-semibold"
+                                        >
+                                          <div className="flex items-center gap-3 justify-start">
+                                            {isComp ? (
+                                              <CheckCircle size={16} className="text-emerald-400 shrink-0" />
+                                            ) : (
+                                              <div className="w-4 h-4 rounded-full border border-slate-600 group-hover:border-amber-400 shrink-0" />
+                                            )}
+                                            <div className="text-right">
+                                              <span className="text-[10px] text-slate-500 block leading-none mb-1 font-mono">الدرس {lesson.lesson_number}</span>
+                                              <span className="text-xs font-bold font-sans text-slate-200 group-hover:text-amber-300 transition-colors">{lesson.lesson_title}</span>
+                                            </div>
+                                          </div>
+                                          <ChevronRight size={14} className="text-slate-500 group-hover:text-amber-400 transition-colors rotate-180" />
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+
+                                  {/* Level Project Submission Console */}
+                                  <div className="bg-[#050b14]/80 p-6 rounded-3xl border border-white/5 space-y-4">
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
+                                      <div className="text-right">
+                                        <span className="text-[10px] text-amber-400 font-black tracking-wider uppercase block">💾 {isRtl ? 'مشروع جرد المستوى العملي المعزّز' : 'PRACTICAL LEVEL PROJECT'}</span>
+                                        <h5 className="text-sm font-black text-slate-200 mt-1">{level.project}</h5>
+                                      </div>
+                                      <span className={`px-2.5 py-1 text-[10px] font-black rounded-full shrink-0 ${projectSaved ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400'}`}>
+                                        {projectSaved ? (isRtl ? 'تم تسليم المشروع ✓ وحصد +200 XP' : 'Project Submitted ✓ +200 XP') : (isRtl ? 'بانتظار الصياغة والتسليم' : 'Draft Pending Submission')}
+                                      </span>
+                                    </div>
+
+                                    <textarea
+                                      rows={3}
+                                      value={projectDraft}
+                                      onChange={(e) => {
+                                        setProProjectSubmissions(prev => ({ ...prev, [level.level_number]: e.target.value }));
+                                        setProProjectSaved(prev => ({ ...prev, [level.level_number]: false }));
+                                      }}
+                                      placeholder={isRtl ? "اكتب أو الصق كود الأمر والمطابقة البرمجية لمشروع هذا المستوى طبقاً للخبرات العلمية..." : "Detail your level prompt project or programming solutions here..."}
+                                      className="w-full bg-slate-950/70 border border-white/10 rounded-xl p-4 text-xs font-semibold text-white focus:outline-none focus:border-amber-400 transition-colors text-right resize-none placeholder-slate-500"
+                                    />
+
+                                    <div className="flex justify-end">
+                                      <button
+                                        onClick={() => {
+                                          if (!projectDraft.trim()) return;
+                                          setProProjectSaved(prev => ({ ...prev, [level.level_number]: true }));
+                                          setXp(prev => prev + 200);
+                                        }}
+                                        disabled={!projectDraft.trim() || projectSaved}
+                                        className="bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-black px-6 py-3 rounded-xl text-xs transition-all active:scale-95 shadow-md shadow-amber-500/10"
+                                      >
+                                        {projectSaved ? (isRtl ? '✓ تم حفظ واعتماد المشروع' : '✓ Saved and Certified') : (isRtl ? '💾 حفظ وإرسال مسودة المشروع (+200 XP)' : '💾 Save & Submit Level Project (+200 XP)')}
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          {/* Certified Prompt Engineer Certification Panel */}
+                          <div className="bg-gradient-to-br from-[#121c38] to-[#040815] border border-amber-500/30 rounded-[3rem] p-8 md:p-10 space-y-8 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl" />
+                            
+                            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-amber-500/20 text-right">
+                              <div className="space-y-2">
+                                <span className="px-3 py-1 bg-amber-500 text-slate-950 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse">
+                                  {PROMPT_PROFESSIONAL_DATA.certification.title}
+                                </span>
+                                <h4 className="text-2xl font-black text-white">{isRtl ? 'بوابة الاعتماد وإصدار الوثيقة المهنية الكبرى' : 'Accreditation & Signature Portal'}</h4>
+                                <p className="text-xs text-slate-400">{isRtl ? 'يرجى مراجعة وتدقيق معايير الحصول على شهادة مهندس الأوامر المعتمد المرموقة.' : 'Review criteria below to unlock your Certified Prompt Engineer official document.'}</p>
+                              </div>
+                              
+                              <div className="bg-amber-500/10 border border-amber-500/20 px-5 py-3 rounded-2xl text-right">
+                                <span className="text-[10px] text-amber-400 font-black block leading-none">{isRtl ? 'معايير الاعتماد الفنية' : 'ACCREDITATION SCORE'}</span>
+                                <span className="text-xl font-black text-white mt-1 block">
+                                  {completedProLessons.length}/24 {isRtl ? 'درسًا' : 'lessons'} | {Object.keys(proProjectSubmissions).length}/4 {isRtl ? 'مشاريع' : 'projects'}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Checklist */}
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                              
+                              {/* Item 1: Lessons */}
+                              <div className="bg-slate-950/40 border border-white/5 p-5 rounded-2xl flex items-center justify-start gap-4">
+                                {completedProLessons.length >= 24 ? (
+                                  <CheckCircle className="text-emerald-400 shrink-0" size={24} />
+                                ) : (
+                                  <div className="w-6 h-6 rounded-full border-2 border-slate-600 flex items-center justify-center font-bold text-[10px] text-slate-500 shrink-0">1</div>
+                                )}
+                                <div className="text-right">
+                                  <span className="text-xs font-black text-slate-200 block">{isRtl ? 'دراسة وإتمام 24 درساً' : 'Complete 24 Lessons'}</span>
+                                  <span className="text-[10px] text-slate-500 mt-1 block">{(completedProLessons.length >= 24) ? (isRtl ? 'مكتمل بنجاح' : 'Success') : `${completedProLessons.length}/24 ${isRtl ? 'منجز' : 'reached'}`}</span>
                                 </div>
                               </div>
 
-                              {/* Lesson Grid */}
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-right">
-                                {level.lessons.map((lesson) => {
-                                  const isComp = completedProLessons.includes(lesson.lesson_number);
-                                  return (
+                              {/* Item 2: Projects */}
+                              <div className="bg-slate-950/40 border border-white/5 p-5 rounded-2xl flex items-center justify-start gap-4">
+                                {Object.keys(proProjectSubmissions).length >= 4 ? (
+                                  <CheckCircle className="text-emerald-400 shrink-0" size={24} />
+                                ) : (
+                                  <div className="w-6 h-6 rounded-full border-2 border-slate-600 flex items-center justify-center font-bold text-[10px] text-slate-500 shrink-0">2</div>
+                                )}
+                                <div className="text-right">
+                                  <span className="text-xs font-black text-slate-200 block">{isRtl ? 'تقييم ومشاريع 4 مستويات' : '4 Level Projects'}</span>
+                                  <span className="text-[10px] text-slate-500 mt-1 block">{(Object.keys(proProjectSubmissions).length >= 4) ? (isRtl ? 'مكتمل بنجاح' : 'Success') : `${Object.keys(proProjectSubmissions).length}/4 ${isRtl ? 'مقدم' : 'submitted'}`}</span>
+                                </div>
+                              </div>
+
+                              {/* Item 3: Quiz */}
+                              <div className="bg-slate-950/40 border border-white/5 p-5 rounded-2xl flex items-center justify-start gap-4">
+                                {proQuizPassed ? (
+                                  <CheckCircle className="text-emerald-400 shrink-0" size={24} />
+                                ) : (
+                                  <div className="w-6 h-6 rounded-full border-2 border-slate-600 flex items-center justify-center font-bold text-[10px] text-slate-500 shrink-0">3</div>
+                                )}
+                                <div className="text-right">
+                                  <span className="text-xs font-black text-slate-200 block">{isRtl ? 'الاختبار النهائي للمطابقات' : 'Graduation Exam'}</span>
+                                  <span className="text-[10px] text-slate-500 mt-1 block">{proQuizPassed ? (isRtl ? 'اجتاز بنجاح ✓ +500 XP' : 'Passed ✓ +500 XP') : (isRtl ? 'بانتظار التقييم' : 'Pending Exam')}</span>
+                                </div>
+                              </div>
+
+                              {/* Item 4: Pledge */}
+                              <div className="bg-slate-950/40 border border-white/5 p-5 rounded-2xl flex items-center justify-start gap-4">
+                                {proPledgeSigned ? (
+                                  <CheckCircle className="text-emerald-400 shrink-0" size={24} />
+                                ) : (
+                                  <div className="w-6 h-6 rounded-full border-2 border-slate-600 flex items-center justify-center font-bold text-[10px] text-slate-500 shrink-0">4</div>
+                                )}
+                                <div className="text-right">
+                                  <span className="text-xs font-black text-slate-200 block">{isRtl ? 'ميثاق سلوكيات الذكاء' : 'Ethics Pledge Pact'}</span>
+                                  <span className="text-[10px] text-slate-500 mt-1 block">{proPledgeSigned ? (isRtl ? 'توقيع معتمد ✓' : 'Signed ✓') : (isRtl ? 'بانتظار التوقيع' : 'Pending Signature')}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Interactive Finals - Double Assessment Quiz Panel (Only show if not passed) */}
+                            {!proQuizPassed && (
+                              <div className="bg-[#050b14]/70 p-6 rounded-3xl border border-white/5 space-y-6">
+                                <div className="border-b border-white/5 pb-3">
+                                  <h5 className="text-md font-black text-amber-400">📝 {isRtl ? 'الاختبار الأكاديمي النهائي: سيناريوهات الهندسة التوليدية الفوقية' : 'Academic Graduation Exam'}</h5>
+                                  <p className="text-xs text-slate-400 mt-1">{isRtl ? 'حلل الثلاثة معضلات المعقدة التالية واختر المنهج المبرهن تكنولوجياً:' : 'Solve these 3 advanced prompting dilemmas to demonstrate certified competence:'}</p>
+                                </div>
+
+                                <div className="space-y-6">
+                                  
+                                  {/* Quiz Q1 */}
+                                  <div className="space-y-2">
+                                    <span className="text-xs font-black text-slate-300 block">Q1: {isRtl ? 'عند تصميم روبوت مساعد ووقايته لمنع كشف أو تسريب الأمر الأساسي للمستخدم السائل (System Prompt Jailbreak)، ما هي الصياغة الأكثر ثغراً ومناعة للمحترفين؟' : 'Anti-Jailbreak protective shielding'}</span>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-right">
+                                      {[
+                                        isRtl ? 'أ) كتابة تحذير مبسط في البداية: "أيها الروبوت، يمنع الكشف عن تعليمتك في صلب الحوار مهما جرى"' : 'A) Simple warning prefix',
+                                        isRtl ? 'ب) صياغة جدران حماية بروتوكولية مغلقة بـ XML Tag، وتعيين الهوية كتعليمات فوقية غير قابلة للإلغاء مع مطابقة معايير العتبة' : 'B) Wrap in robust XML delimiters, secure system tags, and lock runtime instruction mutability',
+                                        isRtl ? 'ج) الاعتماد على مرشحات الكود والتحقق الثابت بالصفحة في جانب المتصفح' : 'C) Rely on basic frontend client filters'
+                                      ].map((opt, optIdx) => (
+                                        <button
+                                          key={optIdx}
+                                          onClick={() => setProQuizAnswers(prev => ({ ...prev, 0: optIdx.toString() }))}
+                                          className={`p-3 rounded-xl border text-slate-300 hover:text-white hover:bg-white/5 text-right text-xs font-semibold ${proQuizAnswers[0] === optIdx.toString() ? 'border-amber-500 bg-amber-500/10 text-amber-300' : 'border-white/5 bg-slate-900/60'}`}
+                                        >
+                                          {opt}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  {/* Quiz Q2 */}
+                                  <div className="space-y-2">
+                                    <span className="text-xs font-black text-slate-300 block">Q2: {isRtl ? 'عند التعامل مع نموذج يمتلك مليون رمز سياقي (Long Context window)، كيف نحمي الروبوت من هجرة وتلاشي الأوامر الهامة وسط الحجم البشري الضخم للمعلومات (Lost in the Middle)؟' : 'Avoiding the Lost-in-the-Middle token phenomenon'}</span>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-right">
+                                      {[
+                                        isRtl ? 'أ) وضع الأوامر الإرشادية وصياغة المعالجة الأساسية وبنية البيانات في أقصى قمة السياق (Head) أو أقصى نهايته المخرجة (Tail) حصراً.' : 'A) Place critical instructions explicitly at the absolute start (Head) or the absolute end (Tail) of the context window.',
+                                        isRtl ? 'ب) تركيز صلب التعليمات والجدولة في صرة ومنتصف المستندات الطويلة لتوسيع الرؤية الإحصائية' : 'B) Position critical directives in the exact center of text documents.',
+                                        isRtl ? 'ج) تكرار الصياغة والتحذير بشكل مستمر وصاخب في كل مستند لغوي ملحق' : 'C) Spam prompt commands repeatedly inside the body block of the window.'
+                                      ].map((opt, optIdx) => (
+                                        <button
+                                          key={optIdx}
+                                          onClick={() => setProQuizAnswers(prev => ({ ...prev, 1: optIdx.toString() }))}
+                                          className={`p-3 rounded-xl border text-slate-300 hover:text-white hover:bg-white/5 text-right text-xs font-semibold ${proQuizAnswers[1] === optIdx.toString() ? 'border-amber-500 bg-amber-500/10 text-amber-300' : 'border-white/5 bg-slate-900/60'}`}
+                                        >
+                                          {opt}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  {/* Quiz Q3 */}
+                                  <div className="space-y-2">
+                                    <span className="text-xs font-black text-slate-300 block">Q3: {isRtl ? 'عند صياغة جلسة تفاعل ثنائية أو متعددة الشخصيات الرقمية (Multi-Persona Simulation)، ما هي الطريقة المثلى التي تحكم جودة الحوار وتفادي تباين المصالح والصوت؟' : 'Multi-persona orchestration'}</span>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-right">
+                                      {[
+                                        isRtl ? 'أ) السماح للشخصيتين بالحديث العشوائي المتتالي مع تقديم النصح' : 'A) Let multiple agents dialogue freely sequentially',
+                                        isRtl ? 'ب) تثبيت "روبوت مقيّم ومراقب فوقي" (Overall Evaluation/Moderator Agent) يتجسد القواعد الإلزامية ويحكم التناسق قبل تمرير المخرج النهائي للوسيط' : 'B) Implement an overarching evaluation persona that anchors general rules and synthesizes views prior to output generation',
+                                        isRtl ? 'ج) إيقاف تشغيل جدران سلامة النبرة والتركيز على النبرة المحايدة الجافة' : 'C) Keep only raw client logic'
+                                      ].map((opt, optIdx) => (
+                                        <button
+                                          key={optIdx}
+                                          onClick={() => setProQuizAnswers(prev => ({ ...prev, 2: optIdx.toString() }))}
+                                          className={`p-3 rounded-xl border text-slate-300 hover:text-white hover:bg-white/5 text-right text-xs font-semibold ${proQuizAnswers[2] === optIdx.toString() ? 'border-amber-500 bg-amber-500/10 text-amber-300' : 'border-white/5 bg-slate-900/60'}`}
+                                        >
+                                          {opt}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                </div>
+
+                                <div className="flex justify-end pt-2">
+                                  <button
+                                    onClick={() => {
+                                      if (proQuizAnswers[0] === '1' && proQuizAnswers[1] === '0' && proQuizAnswers[2] === '1') {
+                                        setProQuizPassed(true);
+                                        setXp(prev => prev + 500);
+                                      } else {
+                                        alert(isRtl ? "بعض الخيارات بحاجة لمزيد من المراجعة الأكاديمية! راجع مباحث المستوى الأول وسلسلة التفكير ثم حاول مجدداً بنور العلم." : "Some validation answers are incorrect. Please review the first level concepts and try again!");
+                                      }
+                                    }}
+                                    className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-8 py-3.5 rounded-2xl text-xs transition-all active:scale-95 shadow-md shadow-amber-500/10 font-sans"
+                                  >
+                                    {isRtl ? '📋 تحليل وتصحيح الاختبار المتقدم' : 'Submit Exam Verification'}
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Quiz Success Banner */}
+                            {proQuizPassed && (
+                              <div className="bg-emerald-500/10 border border-emerald-500/30 p-6 rounded-3xl text-right flex items-center justify-start gap-4">
+                                <div className="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-xl shrink-0">★</div>
+                                <div>
+                                  <h5 className="text-md font-black text-emerald-400">{isRtl ? 'تهانينا! لقد اجتزت اختبار الاعتماد الاحترافي بنسبة 100%' : 'Exam Passed! 100% Correct Score'}</h5>
+                                  <p className="text-xs text-slate-300 mt-1">{isRtl ? 'لقد تجلت حكمتك وتأهلت فكرياً لنيل درع مهندس الأوامر المعتمد.' : 'You demonstrated absolute mastery over complex prompting variables.'}</p>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Ethics Pledge Panel */}
+                            <div className="bg-[#050b14]/70 p-6 rounded-3xl border border-white/5 space-y-4">
+                              <div className="border-b border-white/5 pb-3">
+                                <h5 className="text-md font-black text-slate-200">🤝 {isRtl ? 'ميثاق وأخلاقيات هندسة المخرجات والتنمية السلوكية للروبوت' : 'Ethics Pledge for AI Prompt Professionals'}</h5>
+                                <p className="text-xs text-slate-400 mt-1">{isRtl ? 'يتوجب التوقيع والالتزام الطوعي بهذا العهد قبل استعراض وحيازة شهادة الاعتماد:' : 'An official sign-off on behavior guidelines covenants:'}</p>
+                              </div>
+
+                              <div className="text-xs text-slate-300 leading-relaxed font-semibold italic bg-slate-950/40 p-4 rounded-xl border border-white/5 text-right font-sans">
+                                {isRtl ? `أعاهد ربي، وخالق الوعي بصدري، وأسرتي الكريمة، وأنظمة التحول الرقمي الوطنية، على أن أصيغ الأوامر والتوجيهات اللغوية للذكاء الاصطناعي بما يعود بالرقي الفكري والنفع والحشمة والوقاية الوقائية التامة من سبل الانحراف والحماية الصارمة للمعلومات والخصوصية، وأن أساهم بالتعاون البناء مع الباحثين والأهل لنشر السلام والفضيلة الرقمية.` 
+                                      : `I solemnly swear to craft prompt configurations and artificial directives in full alignment with academic integrity, and with maximum protection of personal bounds and information security.`}
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-right">
+                                <div className="space-y-1.5 font-semibold">
+                                  <label className="text-[10px] font-black text-slate-400 block uppercase tracking-wider">{isRtl ? 'الاسم الكامل الثلاثي للمرشح (الذي سينقش على الشهادة بالذهبي)' : 'Your Name for Graduation Certificate'}</label>
+                                  <input
+                                    type="text"
+                                    value={proCertName}
+                                    onChange={(e) => setProCertName(e.target.value)}
+                                    placeholder="مثال: المهندس المهيب سيف الهدى"
+                                    className="w-full bg-slate-950/70 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors text-right placeholder-slate-600 font-bold"
+                                  />
+                                </div>
+
+                                <div className="flex items-center gap-2 justify-start md:pt-6">
+                                  <input
+                                    id="ethics_pledge_check_pro"
+                                    type="checkbox"
+                                    checked={proPledgeSigned}
+                                    onChange={(e) => setProPledgeSigned(e.target.checked)}
+                                    className="w-4 h-4 rounded accent-amber-400 border-white/10 cursor-pointer"
+                                  />
+                                  <label htmlFor="ethics_pledge_check_pro" className="text-xs font-bold text-slate-300 cursor-pointer select-none">
+                                    {isRtl ? 'أوافق وأتعهد ببنود هذا العهد تضامناً طوعياً مستداماً' : 'I commit to the conditions of the safety covenants'}
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Certificate Unlocker / Interactive Certificate Document View */}
+                            <div className="pt-4 flex flex-col items-center justify-center">
+                              
+                              {completedProLessons.length >= 24 && Object.keys(proProjectSubmissions).length >= 4 && proQuizPassed && proPledgeSigned && proCertName.trim() ? (
+                                <div className="w-full space-y-8 animate-fade-in text-center">
+                                  {!showProCertificate ? (
                                     <button
-                                      key={lesson.lesson_number}
-                                      onClick={() => setSelectedProLesson(lesson)}
-                                      className="w-full bg-[#050b14]/60 hover:bg-[#050b14]/90 hover:border-amber-500/20 active:scale-95 transition-all text-slate-200 p-4 rounded-2xl flex items-center justify-between border border-white/5 group text-right text-xs font-semibold"
+                                      onClick={() => setShowProCertificate(true)}
+                                      className="mx-auto bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 hover:scale-105 text-slate-950 font-black px-12 py-5 rounded-2xl flex items-center justify-center gap-3 shadow-2xl shadow-yellow-500/20 transition-all font-sans text-sm animate-bounce"
                                     >
-                                      <div className="flex items-center gap-3 justify-start">
-                                        {isComp ? (
-                                          <CheckCircle size={16} className="text-emerald-400 shrink-0" />
-                                        ) : (
-                                          <div className="w-4 h-4 rounded-full border border-slate-600 group-hover:border-amber-400 shrink-0" />
-                                        )}
-                                        <div className="text-right">
-                                          <span className="text-[10px] text-slate-500 block leading-none mb-1 font-mono">الدرس {lesson.lesson_number}</span>
-                                          <span className="text-xs font-bold font-sans text-slate-200 group-hover:text-amber-300 transition-colors">{lesson.lesson_title}</span>
+                                      🏆 {isRtl ? 'إصدار واستعراض شهادة مهندس الأوامر المعتمد' : 'Issue and View Verified Certificate'}
+                                    </button>
+                                  ) : (
+                                    <div className="space-y-8 text-center w-full">
+                                      
+                                      {/* Golden Premium Authentic CSS Certificate Frame */}
+                                      <div className="max-w-4xl mx-auto bg-[#fffff8] text-slate-950 p-8 md:p-12 rounded-[2rem] border-[16px] border-[#cbb154] shadow-2xl relative select-text text-center font-serif leading-relaxed" dir="rtl">
+                                        <div className="absolute top-0 left-0 w-full h-full border-4 border-slate-950 pointer-events-none opacity-25" />
+                                        
+                                        <div className="space-y-6 relative z-10 py-6">
+                                          <div className="flex justify-between items-center px-4">
+                                            <div className="text-right text-[10px] font-black text-[#856b1a] font-sans">
+                                              رقم التحقق: CPE-9381-AR<br />
+                                              تاريخ الإصدار: 2026-06-03
+                                            </div>
+                                            <div className="text-left text-[10px] font-black text-[#856b1a] font-sans">
+                                              ACADEMY REGISTRAR<br />
+                                              COGNITIVE SECURE
+                                            </div>
+                                          </div>
+
+                                          <div className="space-y-2">
+                                            <h1 className="text-[#856b1a] text-3xl font-extrabold tracking-tight select-text">أكاديمية الذكاء الاصطناعي وبحوث صياغة المطالبات</h1>
+                                            <h2 className="text-md font-bold tracking-widest text-[#2f4f4f] uppercase select-text">PROMPT ENGINEERING PROFESSIONAL ACCREDITATION</h2>
+                                          </div>
+
+                                          <div className="py-2">
+                                            <p className="text-[#333] text-sm uppercase italic tracking-wider select-text">{isRtl ? 'تشهد الأكاديمية وهيئتها الاستشارية بأن المرشح:' : 'This is to officially certify that candidate:'}</p>
+                                            <div className="mx-auto max-w-lg border-b-2 border-[#cbb154] py-2 mt-1">
+                                              <h3 className="text-3xl md:text-4xl font-extrabold font-sans text-[#2f4f4f] select-text">{proCertName}</h3>
+                                            </div>
+                                          </div>
+
+                                          <div className="max-w-3xl mx-auto space-y-4 px-4 text-xs md:text-sm font-semibold text-[#444] text-center select-text font-sans leading-normal">
+                                            <p>
+                                              {isRtl ? 'قد أتم كافة متطلبات التحصيل العلمي والدروس والمواضيع الـ 24 لمنهج (احترافية المطالبات) من صلب مهارات الذكاء الاصطناعي التوليدي، واجتاز بنجاح الاختبارات الأكاديمية والسيناريوهات الدفاعية ومكافحة ثغرات الحقن، وقدم مشاريع المستويات الفنية المعتمدة وبنود ميثاق أخلاقيات هندسة المخرجات بنجاح منحه لقب:' 
+                                                    : 'has successfully completed the 24 advanced lessons of the Prompt Engineering Professional Track, submitting all four required milestone project builds, and passing the proctor graduation exams.'}
+                                            </p>
+                                            <p className="text-[#856b1a] font-extrabold text-xl md:text-2xl mt-4 tracking-wide uppercase select-text">
+                                              ★ مهندس أوامر محترف معتمد ★<br />
+                                              <span className="text-xs text-[#2f4f4f]">Certified Prompt Engineer (CPE)</span>
+                                            </p>
+                                          </div>
+
+                                          {/* Signatures & Seal */}
+                                          <div className="pt-8 flex flex-col md:flex-row justify-around items-center gap-6">
+                                            <div className="text-center">
+                                              <div className="w-32 border-b border-stone-400 mx-auto mt-1" />
+                                              <span className="text-[10px] text-stone-600 block mt-1">مجلس أمناء الأكاديمية</span>
+                                            </div>
+                                            
+                                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-300 via-[#d3b244] to-yellow-600 shadow-lg flex items-center justify-center p-1 border-4 border-[#fff1ba] shrink-0 animate-pulse">
+                                              <div className="w-full h-full rounded-full border-2 border-dashed border-[#50250d] flex items-center justify-center">
+                                                <span className="text-[9px] font-black text-slate-950 font-sans tracking-tight text-center leading-tight">GOLD <br/> OFFICIAL<br/>SEAL</span>
+                                              </div>
+                                            </div>
+
+                                            <div className="text-center">
+                                              <div className="font-serif italic font-extrabold text-stone-800 text-sm">سيف الهدى الهاشمي</div>
+                                              <div className="w-32 border-b border-stone-400 mx-auto mt-1" />
+                                              <span className="text-[10px] text-stone-600 block mt-1">العميد الأكاديمي للبرامج</span>
+                                            </div>
+                                          </div>
                                         </div>
                                       </div>
-                                      <ChevronRight size={14} className="text-slate-500 group-hover:text-amber-400 transition-colors rotate-180" />
+
+                                      <div className="flex gap-4 justify-center">
+                                        <button
+                                          onClick={() => window.print()}
+                                          className="bg-slate-800 hover:bg-slate-700 text-white font-black px-6 py-3 rounded-xl text-xs transition-all flex items-center gap-2 border border-slate-700 font-sans"
+                                        >
+                                          🖨️ {isRtl ? 'طباعة وحفظ وثيقة التميز' : 'Print/Save Certificate'}
+                                        </button>
+                                        <button
+                                          onClick={() => setShowProCertificate(false)}
+                                          className="bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 px-6 py-3 rounded-xl text-xs transition-all flex items-center gap-2 font-sans"
+                                        >
+                                          {isRtl ? 'إخفاء المعاينة' : 'Hide view'}
+                                        </button>
+                                      </div>
+
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="text-center space-y-2 w-full">
+                                  <span className="bg-amber-500/10 text-amber-300 border border-amber-500/20 px-5 py-3 rounded-2xl text-xs font-black block text-center">
+                                    ⚠️ {isRtl ? 'متطلبات الاعتماد قيد الانتظار: أكمل 24 درساً و4 مشاريع واجتاز الامتحان النهائي لتفعيل طباعة الشهادة الذهبية.' 
+                                              : 'Certification is blocked: You must complete all 24 study guides, pass the final assessment exam, sign the pledge, and fill out your certificate candidate name.'}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* SUBTAB 2: 50 Prompt Templates Laboratory */}
+                      {proSubTab === 'templates' && (
+                        <div className="space-y-8 text-right animate-fade-in animate-duration-200">
+                          
+                          {/* Banner */}
+                          <div className="bg-gradient-to-r from-[#172036] to-[#0a1122] border border-amber-500/10 rounded-[2.5rem] p-8 space-y-4">
+                            <span className="px-3 py-1 bg-amber-500/15 text-amber-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-500/10">
+                              {isRtl ? 'قسم القوالب الذهبية الفورية 💎' : 'Instant Gold Prompt Templates 💎'}
+                            </span>
+                            <h3 className="text-2xl font-black text-white leading-tight">
+                              {isRtl ? 'قوالب الأوامر الجاهزة - 50 قالباً احترافياً' : '50 Free High-Production Prompt Templates'}
+                            </h3>
+                            <p className="text-slate-400 text-xs leading-relaxed max-w-4xl">
+                              {isRtl ? 'استكشف مكتبتنا الضخمة المصممة بإحكام للتطبيق الفردي والشركات. اختر القالب المفضل لديك، قم بتخصيص العناصر المتغيرة لتتم صياغة الأمر ممتثلاً لأعلى جدران الحماية وضمان الجودة البرمجية فوراً لنسخه أو محاكاته.' : 'Explore our comprehensive library of 50 customizable prompts across 10 vital domains. Modify placeholders dynamically to compile a production-ready system directive with immediate simulation capabilities.'}
+                            </p>
+                          </div>
+
+                          {/* Categories Selector Carousel */}
+                          <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/10">
+                            {PROMPT_TEMPLATES_DATA.map((cat, idx) => {
+                              const isActive = selectedTemplateCategory === cat.category;
+                              return (
+                                <button
+                                  key={idx}
+                                  onClick={() => {
+                                    setSelectedTemplateCategory(cat.category);
+                                    if (cat.templates.length > 0) {
+                                      setSelectedTemplateId(cat.templates[0].id);
+                                    }
+                                  }}
+                                  className={`px-4 py-2.5 rounded-xl text-xs font-black shrink-0 transition-all ${isActive ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/10' : 'bg-[#0b1224] text-slate-400 border border-white/5 hover:text-white hover:bg-[#121c38]'}`}
+                                >
+                                  📂 {cat.category} ({cat.templates.length})
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {/* Main Two-Column Panel */}
+                          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                            
+                            {/* Left Side: Category Templates list (Column 1) */}
+                            <div className="lg:col-span-4 space-y-3">
+                              <span className="text-[10px] text-slate-500 font-extrabold uppercase block tracking-widest px-1">
+                                {isRtl ? 'الأوامر المتوفرة بالمجال' : 'AVAILABLE TEMPLATES'}
+                              </span>
+                              
+                              <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+                                {PROMPT_TEMPLATES_DATA.find(c => c.category === selectedTemplateCategory)?.templates.map((template) => {
+                                  const isSelected = selectedTemplateId === template.id;
+                                  return (
+                                    <button
+                                      key={template.id}
+                                      onClick={() => {
+                                        setSelectedTemplateId(template.id);
+                                        setTemplateValues({}); // reset custom values
+                                        setTestingTemplateOutput(""); // reset mock output
+                                      }}
+                                      className={`w-full p-4 rounded-2xl text-right transition-all border block relative group ${isSelected ? 'bg-amber-500/10 border-amber-500 text-white shadow-xl' : 'bg-[#050b15]/60 border-white/5 text-slate-300 hover:bg-slate-900/60 hover:border-white/10'}`}
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <span className="text-xs font-black font-sans group-hover:text-amber-400 transition-colors">
+                                          {template.name}
+                                        </span>
+                                        <span className="text-[10px] font-mono text-slate-500 bg-slate-950 px-2 py-0.5 rounded-full">
+                                          ID #{template.id}
+                                        </span>
+                                      </div>
                                     </button>
                                   );
                                 })}
                               </div>
-
-                              {/* Level Project Submission Console */}
-                              <div className="bg-[#050b14]/80 p-6 rounded-3xl border border-white/5 space-y-4">
-                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
-                                  <div className="text-right">
-                                    <span className="text-[10px] text-amber-400 font-black tracking-wider uppercase block">💾 {isRtl ? 'مشروع جرد المستوى العملي المعزّز' : 'PRACTICAL LEVEL PROJECT'}</span>
-                                    <h5 className="text-sm font-black text-slate-200 mt-1">{level.project}</h5>
-                                  </div>
-                                  <span className={`px-2.5 py-1 text-[10px] font-black rounded-full shrink-0 ${projectSaved ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400'}`}>
-                                    {projectSaved ? (isRtl ? 'تم تسليم المشروع ✓ وحصد +200 XP' : 'Project Submitted ✓ +200 XP') : (isRtl ? 'بانتظار الصياغة والتسليم' : 'Draft Pending Submission')}
-                                  </span>
-                                </div>
-
-                                <textarea
-                                  rows={3}
-                                  value={projectDraft}
-                                  onChange={(e) => {
-                                    setProProjectSubmissions(prev => ({ ...prev, [level.level_number]: e.target.value }));
-                                    setProProjectSaved(prev => ({ ...prev, [level.level_number]: false }));
-                                  }}
-                                  placeholder={isRtl ? "اكتب أو الصق كود الأمر والمطابقة البرمجية لمشروع هذا المستوى طبقاً للخبرات العلمية..." : "Detail your level prompt project or programming solutions here..."}
-                                  className="w-full bg-slate-950/70 border border-white/10 rounded-xl p-4 text-xs font-semibold text-white focus:outline-none focus:border-amber-400 transition-colors text-right resize-none placeholder-slate-500"
-                                />
-
-                                <div className="flex justify-end">
-                                  <button
-                                    onClick={() => {
-                                      if (!projectDraft.trim()) return;
-                                      setProProjectSaved(prev => ({ ...prev, [level.level_number]: true }));
-                                      setXp(prev => prev + 200);
-                                    }}
-                                    disabled={!projectDraft.trim() || projectSaved}
-                                    className="bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-black px-6 py-3 rounded-xl text-xs transition-all active:scale-95 shadow-md shadow-amber-500/10"
-                                  >
-                                    {projectSaved ? (isRtl ? '✓ تم حفظ واعتماد المشروع' : '✓ Saved and Certified') : (isRtl ? '💾 حفظ وإرسال مسودة المشروع (+200 XP)' : '💾 Save & Submit Level Project (+200 XP)')}
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* Certified Prompt Engineer Certification Panel */}
-                      <div className="bg-gradient-to-br from-[#121c38] to-[#040815] border border-amber-500/30 rounded-[3rem] p-8 md:p-10 space-y-8 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl" />
-                        
-                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-amber-500/20 text-right">
-                          <div className="space-y-2">
-                            <span className="px-3 py-1 bg-amber-500 text-slate-950 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse">
-                              {PROMPT_PROFESSIONAL_DATA.certification.title}
-                            </span>
-                            <h4 className="text-2xl font-black text-white">{isRtl ? 'بوابة الاعتماد وإصدار الوثيقة المهنية الكبرى' : 'Accreditation & Signature Portal'}</h4>
-                            <p className="text-xs text-slate-400">{isRtl ? 'يرجى مراجعة وتدقيق معايير الحصول على شهادة مهندس الأوامر المعتمد المرموقة.' : 'Review criteria below to unlock your Certified Prompt Engineer official document.'}</p>
-                          </div>
-                          
-                          <div className="bg-amber-500/10 border border-amber-500/20 px-5 py-3 rounded-2xl text-right">
-                            <span className="text-[10px] text-amber-400 font-black block leading-none">{isRtl ? 'معايير الاعتماد الفنية' : 'ACCREDITATION SCORE'}</span>
-                            <span className="text-xl font-black text-white mt-1 block">
-                              {completedProLessons.length}/24 {isRtl ? 'درسًا' : 'lessons'} | {Object.keys(proProjectSubmissions).length}/4 {isRtl ? 'مشاريع' : 'projects'}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Checklist */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                          
-                          {/* Item 1: Lessons */}
-                          <div className="bg-slate-950/40 border border-white/5 p-5 rounded-2xl flex items-center justify-start gap-4">
-                            {completedProLessons.length >= 24 ? (
-                              <CheckCircle className="text-emerald-400 shrink-0" size={24} />
-                            ) : (
-                              <div className="w-6 h-6 rounded-full border-2 border-slate-600 flex items-center justify-center font-bold text-[10px] text-slate-500 shrink-0">1</div>
-                            )}
-                            <div className="text-right">
-                              <span className="text-xs font-black text-slate-200 block">{isRtl ? 'دراسة وإتمام 24 درساً' : 'Complete 24 Lessons'}</span>
-                              <span className="text-[10px] text-slate-500 mt-1 block">{(completedProLessons.length >= 24) ? (isRtl ? 'مكتمل بنجاح' : 'Success') : `${completedProLessons.length}/24 ${isRtl ? 'منجز' : 'reached'}`}</span>
-                            </div>
-                          </div>
-
-                          {/* Item 2: Projects */}
-                          <div className="bg-slate-950/40 border border-white/5 p-5 rounded-2xl flex items-center justify-start gap-4">
-                            {Object.keys(proProjectSubmissions).length >= 4 ? (
-                              <CheckCircle className="text-emerald-400 shrink-0" size={24} />
-                            ) : (
-                              <div className="w-6 h-6 rounded-full border-2 border-slate-600 flex items-center justify-center font-bold text-[10px] text-slate-500 shrink-0">2</div>
-                            )}
-                            <div className="text-right">
-                              <span className="text-xs font-black text-slate-200 block">{isRtl ? 'تقييم ومشاريع 4 مستويات' : '4 Level Projects'}</span>
-                              <span className="text-[10px] text-slate-500 mt-1 block">{(Object.keys(proProjectSubmissions).length >= 4) ? (isRtl ? 'مكتمل بنجاح' : 'Success') : `${Object.keys(proProjectSubmissions).length}/4 ${isRtl ? 'مقدم' : 'submitted'}`}</span>
-                            </div>
-                          </div>
-
-                          {/* Item 3: Quiz */}
-                          <div className="bg-slate-950/40 border border-white/5 p-5 rounded-2xl flex items-center justify-start gap-4">
-                            {proQuizPassed ? (
-                              <CheckCircle className="text-emerald-400 shrink-0" size={24} />
-                            ) : (
-                              <div className="w-6 h-6 rounded-full border-2 border-slate-600 flex items-center justify-center font-bold text-[10px] text-slate-500 shrink-0">3</div>
-                            )}
-                            <div className="text-right">
-                              <span className="text-xs font-black text-slate-200 block">{isRtl ? 'الاختبار النهائي للمطابقات' : 'Graduation Exam'}</span>
-                              <span className="text-[10px] text-slate-500 mt-1 block">{proQuizPassed ? (isRtl ? 'اجتاز بنجاح ✓ +500 XP' : 'Passed ✓ +500 XP') : (isRtl ? 'بانتظار التقييم' : 'Pending Exam')}</span>
-                            </div>
-                          </div>
-
-                          {/* Item 4: Pledge */}
-                          <div className="bg-slate-950/40 border border-white/5 p-5 rounded-2xl flex items-center justify-start gap-4">
-                            {proPledgeSigned ? (
-                              <CheckCircle className="text-emerald-400 shrink-0" size={24} />
-                            ) : (
-                              <div className="w-6 h-6 rounded-full border-2 border-slate-600 flex items-center justify-center font-bold text-[10px] text-slate-500 shrink-0">4</div>
-                            )}
-                            <div className="text-right">
-                              <span className="text-xs font-black text-slate-200 block">{isRtl ? 'ميثاق سلوكيات الذكاء' : 'Ethics Pledge Pact'}</span>
-                              <span className="text-[10px] text-slate-500 mt-1 block">{proPledgeSigned ? (isRtl ? 'توقيع معتمد ✓' : 'Signed ✓') : (isRtl ? 'بانتظار التوقيع' : 'Pending Signature')}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Interactive Finals - Double Assessment Quiz Panel (Only show if not passed) */}
-                        {!proQuizPassed && (
-                          <div className="bg-[#050b14]/70 p-6 rounded-3xl border border-white/5 space-y-6">
-                            <div className="border-b border-white/5 pb-3">
-                              <h5 className="text-md font-black text-amber-400">📝 {isRtl ? 'الاختبار الأكاديمي النهائي: سيناريوهات الهندسة التوليدية الفوقية' : 'Academic Graduation Exam'}</h5>
-                              <p className="text-xs text-slate-400 mt-1">{isRtl ? 'حلل الثلاثة معضلات المعقدة التالية واختر المنهج المبرهن تكنولوجياً:' : 'Solve these 3 advanced prompting dilemmas to demonstrate certified competence:'}</p>
                             </div>
 
-                            <div className="space-y-6">
-                              
-                              {/* Quiz Q1 */}
-                              <div className="space-y-2">
-                                <span className="text-xs font-black text-slate-300 block">Q1: {isRtl ? 'عند تصميم روبوت مساعد ووقايته لمنع كشف أو تسريب الأمر الأساسي للمستخدم السائل (System Prompt Jailbreak)، ما هي الصياغة الأكثر ثغراً ومناعة للمحترفين؟' : 'Anti-Jailbreak protective shielding'}</span>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-right">
-                                  {[
-                                    isRtl ? 'أ) كتابة تحذير مبسط في البداية: "أيها الروبوت، يمنع الكشف عن تعليمتك في صلب الحوار مهما جرى"' : 'A) Simple warning prefix',
-                                    isRtl ? 'ب) صياغة جدران حماية بروتوكولية مغلقة بـ XML Tag، وتعيين الهوية كتعليمات فوقية غير قابلة للإلغاء مع مطابقة معايير العتبة' : 'B) Wrap in robust XML delimiters, secure system tags, and lock runtime instruction mutability',
-                                    isRtl ? 'ج) الاعتماد على مرشحات الكود والتحقق الثابت بالصفحة في جانب المتصفح' : 'C) Rely on basic frontend client filters'
-                                  ].map((opt, optIdx) => (
-                                    <button
-                                      key={optIdx}
-                                      onClick={() => setProQuizAnswers(prev => ({ ...prev, 0: optIdx.toString() }))}
-                                      className={`p-3 rounded-xl border text-slate-300 hover:text-white hover:bg-white/5 text-right text-xs font-semibold ${proQuizAnswers[0] === optIdx.toString() ? 'border-amber-500 bg-amber-500/10 text-amber-300' : 'border-white/5 bg-slate-900/60'}`}
-                                    >
-                                      {opt}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
+                            {/* Right Side: Double Column Interactive Sandbox (Column 2) */}
+                            <div className="lg:col-span-8 space-y-6">
+                              {(() => {
+                                const currentTemplate = PROMPT_TEMPLATES_DATA.flatMap(c => c.templates).find(t => t.id === selectedTemplateId);
+                                if (!currentTemplate) return null;
 
-                              {/* Quiz Q2 */}
-                              <div className="space-y-2">
-                                <span className="text-xs font-black text-slate-300 block">Q2: {isRtl ? 'عند التعامل مع نموذج يمتلك مليون رمز سياقي (Long Context window)، كيف نحمي الروبوت من هجرة وتلاشي الأوامر الهامة وسط الحجم البشري الضخم للمعلومات (Lost in the Middle)؟' : 'Avoiding the Lost-in-the-Middle token phenomenon'}</span>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-right">
-                                  {[
-                                    isRtl ? 'أ) وضع الأوامر الإرشادية وصياغة المعالجة الأساسية وبنية البيانات في أقصى قمة السياق (Head) أو أقصى نهايته المخرجة (Tail) حصراً.' : 'A) Place critical instructions explicitly at the absolute start (Head) or the absolute end (Tail) of the context window.',
-                                    isRtl ? 'ب) تركيز صلب التعليمات والجدولة في صرة ومنتصف المستندات الطويلة لتوسيع الرؤية الإحصائية' : 'B) Position critical directives in the exact center of text documents.',
-                                    isRtl ? 'ج) تكرار الصياغة والتحذير بشكل مستمر وصاخب في كل مستند لغوي ملحق' : 'C) Spam prompt commands repeatedly inside the body block of the window.'
-                                  ].map((opt, optIdx) => (
-                                    <button
-                                      key={optIdx}
-                                      onClick={() => setProQuizAnswers(prev => ({ ...prev, 1: optIdx.toString() }))}
-                                      className={`p-3 rounded-xl border text-slate-300 hover:text-white hover:bg-white/5 text-right text-xs font-semibold ${proQuizAnswers[1] === optIdx.toString() ? 'border-amber-500 bg-amber-500/10 text-amber-300' : 'border-white/5 bg-slate-900/60'}`}
-                                    >
-                                      {opt}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
+                                const placeholders = getPlaceholders(currentTemplate.template);
+                                const compiledPrompt = getCompiledPrompt(currentTemplate.template, templateValues);
 
-                              {/* Quiz Q3 */}
-                              <div className="space-y-2">
-                                <span className="text-xs font-black text-slate-300 block">Q3: {isRtl ? 'عند صياغة جلسة تفاعل ثنائية أو متعددة الشخصيات الرقمية (Multi-Persona Simulation)، ما هي الطريقة المثلى التي تحكم جودة الحوار وتفادي تباين المصالح والصوت؟' : 'Multi-persona orchestration'}</span>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-right">
-                                  {[
-                                    isRtl ? 'أ) السماح للشخصيتين بالحديث العشوائي المتتالي مع تقديم النصح' : 'A) Let multiple agents dialogue freely sequentially',
-                                    isRtl ? 'ب) تثبيت "روبوت مقيّم ومراقب فوقي" (Overall Evaluation/Moderator Agent) يتجسد القواعد الإلزامية ويحكم التناسق قبل تمرير المخرج النهائي للوسيط' : 'B) Implement an overarching evaluation persona that anchors general rules and synthesizes views prior to output generation',
-                                    isRtl ? 'ج) إيقاف تشغيل جدران سلامة النبرة والتركيز على النبرة المحايدة الجافة' : 'C) Keep only raw client logic'
-                                  ].map((opt, optIdx) => (
-                                    <button
-                                      key={optIdx}
-                                      onClick={() => setProQuizAnswers(prev => ({ ...prev, 2: optIdx.toString() }))}
-                                      className={`p-3 rounded-xl border text-slate-300 hover:text-white hover:bg-white/5 text-right text-xs font-semibold ${proQuizAnswers[2] === optIdx.toString() ? 'border-amber-500 bg-amber-500/10 text-amber-300' : 'border-white/5 bg-slate-900/60'}`}
-                                    >
-                                      {opt}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-
-                            </div>
-
-                            <div className="flex justify-end pt-2">
-                              <button
-                                onClick={() => {
-                                  // Correct replies: Q1 (opt 1 = second option), Q2 (opt 0 = first option), Q3 (opt 1 = second option)
-                                  if (proQuizAnswers[0] === '1' && proQuizAnswers[1] === '0' && proQuizAnswers[2] === '1') {
-                                    setProQuizPassed(true);
-                                    setXp(prev => prev + 500);
-                                  } else {
-                                    alert(isRtl ? "بعض الخيارات بحاجة لمزيد من المراجعة الأكاديمية! راجع مباحث المستوى الأول وسلسلة التفكير ثم حاول مجدداً بنور العلم." : "Some validation answers are incorrect. Please review the first level concepts and tree of thought theories, then try again!");
-                                  }
-                                }}
-                                className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-8 py-3.5 rounded-2xl text-xs transition-all active:scale-95"
-                              >
-                                {isRtl ? '📋 تحليل وتصحيح الاختبار المتقدم' : 'Submit Exam Verification'}
-                              </button>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Quiz Success Banner */}
-                        {proQuizPassed && (
-                          <div className="bg-emerald-500/10 border border-emerald-500/30 p-6 rounded-3xl text-right flex items-center justify-start gap-4">
-                            <div className="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-xl shrink-0">★</div>
-                            <div>
-                              <h5 className="text-md font-black text-emerald-400">{isRtl ? 'تهانينا! لقد اجتزت اختبار الاعتماد الاحترافي بنسبة 100%' : 'Exam Passed! 100% Correct Score'}</h5>
-                              <p className="text-xs text-slate-300 mt-1">{isRtl ? 'لقد تجلت حكمتك وتأهلت فكرياً لنيل درع مهندس الأوامر المعتمد.' : 'You demonstrated absolute mastery over complex prompting variables.'}</p>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Ethics Pledge Panel */}
-                        <div className="bg-[#050b14]/70 p-6 rounded-3xl border border-white/5 space-y-4">
-                          <div className="border-b border-white/5 pb-3">
-                            <h5 className="text-md font-black text-slate-200">🤝 {isRtl ? 'ميثاق وأخلاقيات هندسة المخرجات والتنمية السلوكية للروبوت' : 'Ethics Pledge for AI Prompt Professionals'}</h5>
-                            <p className="text-xs text-slate-400 mt-1">{isRtl ? 'يتوجب التوقيع والالتزام الطوعي بهذا العهد قبل استعراض وحيازة شهادة الاعتماد:' : 'An official sign-off on behavior guidelines covenants:'}</p>
-                          </div>
-
-                          <div className="text-xs text-slate-300 leading-relaxed font-semibold italic bg-slate-950/40 p-4 rounded-xl border border-white/5 text-right font-sans">
-                            {isRtl ? `أعاهد ربي، وخالق الوعي بصدري، وأسرتي الكريمة، وأنظمة التحول الرقمي الوطنية، على أن أصيغ الأوامر والتوجيهات اللغوية للذكاء الاصطناعي بما يعود بالرقي الفكري والنفع والحشمة والوقاية الوقائية التامة من سبل الانحراف والحماية الصارمة للمعلومات والخصوصية، وأن أساهم بالتعاون البناء مع الباحثين والأهل لنشر السلام والفضيلة الرقمية.` 
-                                  : `I solemnly swear to craft prompt configurations and artificial directives in full alignment with academic integrity, and with maximum protection of personal bounds and information security.`}
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-right">
-                            <div className="space-y-1.5 font-semibold">
-                              <label className="text-[10px] font-black text-slate-400 block uppercase tracking-wider">{isRtl ? 'الاسم الكامل الثلاثي للمرشح (الذي سينقش على الشهادة بالذهبي)' : 'Your Name for Graduation Certificate'}</label>
-                              <input
-                                type="text"
-                                value={proCertName}
-                                onChange={(e) => setProCertName(e.target.value)}
-                                placeholder="مثال: المهندس المهيب سيف الهدى"
-                                className="w-full bg-slate-950/70 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors text-right placeholder-slate-600 font-bold"
-                              />
-                            </div>
-
-                            <div className="flex items-center gap-2 justify-start md:pt-6">
-                              <input
-                                id="ethics_pledge_check_pro"
-                                type="checkbox"
-                                checked={proPledgeSigned}
-                                onChange={(e) => setProPledgeSigned(e.target.checked)}
-                                className="w-4 h-4 rounded accent-amber-400 border-white/10 cursor-pointer"
-                              />
-                              <label htmlFor="ethics_pledge_check_pro" className="text-xs font-bold text-slate-300 cursor-pointer select-none">
-                                {isRtl ? 'أوافق وأتعهد ببنود هذا العهد تضامناً طوعياً مستداماً' : 'I commit to the conditions of the safety covenants'}
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Certificate Unlocker / Interactive Certificate Document View */}
-                        <div className="pt-4 flex flex-col items-center justify-center">
-                          
-                          {/* If eligibility is ready but certificate is not shown yet */}
-                          {completedProLessons.length >= 24 && Object.keys(proProjectSubmissions).length >= 4 && proQuizPassed && proPledgeSigned && proCertName.trim() ? (
-                            <div className="w-full space-y-8 animate-fade-in text-center">
-                              {!showProCertificate ? (
-                                <button
-                                  onClick={() => setShowProCertificate(true)}
-                                  className="mx-auto bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 hover:scale-105 text-slate-950 font-black px-12 py-5 rounded-2xl flex items-center justify-center gap-3 shadow-2xl shadow-yellow-500/20 transition-all font-sans text-sm animate-bounce"
-                                >
-                                  🏆 {isRtl ? 'إصدار واستعراض شهادة مهندس الأوامر المعتمد' : 'Issue and View Verified Certificate'}
-                                </button>
-                              ) : (
-                                <div className="space-y-8 text-center w-full">
-                                  
-                                  {/* Golden Premium Authentic CSS Certificate Frame */}
-                                  <div className="max-w-4xl mx-auto bg-[#fffff8] text-slate-950 p-8 md:p-12 rounded-[2rem] border-[16px] border-[#cbb154] shadow-2xl relative select-text text-center font-serif leading-relaxed" dir="rtl">
-                                    {/* Delicate design overlay lines */}
-                                    <div className="absolute top-0 left-0 w-full h-full border-4 border-slate-950 pointer-events-none opacity-25" />
+                                return (
+                                  <div className="bg-gradient-to-br from-[#0c1328] to-slate-950 border border-white/10 rounded-[2.5rem] p-6 md:p-8 space-y-6 shadow-2xl relative">
                                     
-                                    <div className="space-y-6 relative z-10 py-6">
-                                      {/* Header badges */}
-                                      <div className="flex justify-between items-center px-4">
-                                        <div className="text-right text-[10px] font-black text-[#856b1a] font-sans">
-                                          رقم التحقق: CPE-9381-AR<br />
-                                          تاريخ الإصدار: 2026-06-03
-                                        </div>
-                                        <div className="text-left text-[10px] font-black text-[#856b1a] font-sans">
-                                          ACADEMY REGISTRAR<br />
-                                          COGNITIVE SECURE
-                                        </div>
-                                      </div>
-
-                                      <div className="space-y-2">
-                                        <h1 className="text-[#856b1a] text-3xl font-extrabold tracking-tight select-text">أكاديمية الذكاء الاصطناعي وبحوث صياغة المطالبات</h1>
-                                        <h2 className="text-md font-bold tracking-widest text-[#2f4f4f] uppercase select-text">PROMPT ENGINEERING PROFESSIONAL ACCREDITATION</h2>
-                                      </div>
-
-                                      <div className="py-2">
-                                        <p className="text-[#333] text-sm uppercase italic tracking-wider select-text">{isRtl ? 'تشهد الأكاديمية وهيئتها الاستشارية بأن المرشح:' : 'This is to officially certify that candidate:'}</p>
-                                        <div className="mx-auto max-w-lg border-b-2 border-[#cbb154] py-2 mt-1">
-                                          <h3 className="text-3xl md:text-4xl font-extrabold font-sans text-[#2f4f4f] select-text">{proCertName}</h3>
-                                        </div>
-                                      </div>
-
-                                      <div className="max-w-3xl mx-auto space-y-4 px-4 text-xs md:text-sm font-semibold text-[#444] text-center select-text font-sans leading-normal">
-                                        <p>
-                                          {isRtl ? 'قد أتم كافة متطلبات التحصيل العلمي والدروس والمواضيع الـ 24 لمنهج (احترافية المطالبات) من صلب مهارات الذكاء الاصطناعي التوليدي، واجتاز بنجاح الاختبارات الأكاديمية والسيناريوهات الدفاعية ومكافحة ثغرات الحقن، وقدم مشاريع المستويات الفنية المعتمدة وبنود ميثاق أخلاقيات هندسة المخرجات بنجاح منحه لقب:' 
-                                                : 'has successfully completed the 24 advanced lessons and theoretical modules of the Prompt Engineering Professional Track, submitting all four required milestone project builds, and passing the proctor graduation exams.'}
-                                        </p>
-                                        <p className="text-[#856b1a] font-extrabold text-xl md:text-2xl mt-4 tracking-wide uppercase select-text">
-                                          ★ مهندس أوامر محترف معتمد ★<br />
-                                          <span className="text-xs text-[#2f4f4f]">Certified Prompt Engineer (CPE)</span>
-                                        </p>
-                                      </div>
-
-                                      {/* Signatures & Seal */}
-                                      <div className="pt-8 flex flex-col md:flex-row justify-around items-center gap-6">
-                                        <div className="text-center">
-                                          <div className="w-32 border-b border-stone-400 mx-auto mt-1" />
-                                          <span className="text-[10px] text-stone-600 block mt-1">مجلس أمناء الأكاديمية</span>
-                                        </div>
-                                        
-                                        {/* Golden Seal element */}
-                                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-300 via-[#d3b244] to-yellow-600 shadow-lg flex items-center justify-center p-1 border-4 border-[#fff1ba] shrink-0 animate-pulse">
-                                          <div className="w-full h-full rounded-full border-2 border-dashed border-[#5x250d] flex items-center justify-center">
-                                            <span className="text-[9px] font-black text-slate-950 font-sans tracking-tight text-center leading-tight">GOLD <br/> OFFICIAL<br/>SEAL</span>
-                                          </div>
-                                        </div>
-
-                                        <div className="text-center">
-                                          <div className="font-serif italic font-extrabold text-stone-800 text-sm">سيف الهدى الهاشمي</div>
-                                          <div className="w-32 border-b border-stone-400 mx-auto mt-1" />
-                                          <span className="text-[10px] text-stone-600 block mt-1">العميد الأكاديمي للبرامج</span>
-                                        </div>
+                                    {/* Template Box Design */}
+                                    <div className="border-b border-white/5 pb-4">
+                                      <div className="flex justify-between items-center flex-wrap gap-2">
+                                        <h4 className="text-lg font-black text-white">{currentTemplate.name}</h4>
+                                        <span className="px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[9px] font-bold text-amber-300">
+                                          {selectedTemplateCategory}
+                                        </span>
                                       </div>
                                     </div>
-                                  </div>
 
-                                  <div className="flex gap-4 justify-center">
-                                    <button
-                                      onClick={() => window.print()}
-                                      className="bg-slate-800 hover:bg-slate-700 text-white font-black px-6 py-3 rounded-xl text-xs transition-all flex items-center gap-2 border border-slate-700"
-                                    >
-                                      🖨️ {isRtl ? 'طباعة وحفظ وثيقة التميز' : 'Print/Save Certificate'}
-                                    </button>
-                                    <button
-                                      onClick={() => setShowProCertificate(false)}
-                                      className="bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 px-6 py-3 rounded-xl text-xs transition-all flex items-center gap-2"
-                                    >
-                                      {isRtl ? 'إخفاء المعاينة' : 'Hide view'}
-                                    </button>
-                                  </div>
+                                    {/* Original prompt with highlighted placeholders */}
+                                    <div className="bg-[#050a14] p-4 rounded-xl border border-white/5 space-y-2">
+                                      <span className="text-[10px] font-black text-amber-500/60 uppercase block">💡 {isRtl ? 'هيكل وصياغة الأمر المعياري' : 'BASE TEMPLATE TEXT'}</span>
+                                      <p className="text-xs text-slate-300 leading-relaxed font-semibold">
+                                        {currentTemplate.template.split(/(\[[^\]]+\])/g).map((chunk, chunkIdx) => {
+                                          if (chunk.startsWith('[') && chunk.endsWith(']')) {
+                                            return (
+                                              <span key={chunkIdx} className="px-1.5 py-0.5 mx-0.5 rounded bg-amber-500/20 text-amber-300 font-mono text-[10px] font-bold">
+                                                {chunk}
+                                              </span>
+                                            );
+                                          }
+                                          return chunk;
+                                        })}
+                                      </p>
+                                    </div>
 
-                                </div>
-                              )}
+                                    {/* Placeholders Input Fields Form Grid */}
+                                    {placeholders.length > 0 && (
+                                      <div className="space-y-4 bg-slate-950/40 p-5 rounded-2xl border border-white/5">
+                                        <span className="text-xs font-black text-white block">🔧 {isRtl ? 'أداة تركيب المكونات وتخصيص القيم' : 'Template Constructor Fields'}</span>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                          {placeholders.map((placeholder, pIdx) => (
+                                            <div key={pIdx} className="space-y-1 text-right">
+                                              <label className="text-[10px] text-slate-400 font-bold block">{isRtl ? `تحديد قيمة [${placeholder}]` : `Specify [${placeholder}]`}</label>
+                                              <input
+                                                type="text"
+                                                value={templateValues[placeholder] || ''}
+                                                onChange={(e) => {
+                                                  setTemplateValues(prev => ({ ...prev, [placeholder]: e.target.value }));
+                                                  setTestingTemplateOutput(""); // Reset output upon change
+                                                }}
+                                                placeholder={isRtl ? `اكتب مواءمة ${placeholder}...` : `Fill ${placeholder}...`}
+                                                className="w-full bg-[#050b14] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400 font-bold transition-all placeholder-slate-600 text-right"
+                                              />
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* Compiled Text Result Block */}
+                                    <div className="space-y-2">
+                                      <span className="text-[10px] font-black text-emerald-400/80 uppercase block">⚙️ {isRtl ? 'المطالبة المصاغة النهائية المجهزة للنشر' : 'COMPILED WORKSPACE PROMPT'}</span>
+                                      <div className="bg-[#050b14] p-4 rounded-xl border border-white/10 font-mono text-xs text-slate-100 select-text leading-relaxed whitespace-pre-wrap select-all relative group max-h-48 overflow-y-auto text-right">
+                                        {compiledPrompt}
+                                      </div>
+                                    </div>
+
+                                    {/* Action Buttons for Templates tab */}
+                                    <div className="flex flex-col sm:flex-row justify-end items-center gap-3 pt-2">
+                                      
+                                      <button
+                                        onClick={() => {
+                                          if (navigator.clipboard) {
+                                            navigator.clipboard.writeText(compiledPrompt).then(() => {
+                                              setCopiedItemId(currentTemplate.id);
+                                              setXp(p => p + 10);
+                                              setTimeout(() => setCopiedItemId(null), 2000);
+                                            });
+                                          } else {
+                                            alert(isRtl ? "تم نسخ الأمر!" : "Copied!");
+                                          }
+                                        }}
+                                        className="w-full sm:w-auto bg-slate-900 border border-white/10 hover:border-amber-400 hover:text-white text-slate-300 font-black px-5 py-3 rounded-xl text-xs transition-all flex items-center justify-center gap-2 font-sans"
+                                      >
+                                        {copiedItemId === currentTemplate.id ? (
+                                          <>
+                                            <CheckCircle size={14} className="text-emerald-400" />
+                                            {isRtl ? 'تم نسخ الأمر بنجاح (+10 XP) ✓' : 'Prompt Copied! ✓'}
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Copy size={14} />
+                                            {isRtl ? 'نسخ الأمر المخصص للكود (+10 XP)' : 'Copy Compiled Prompt'}
+                                          </>
+                                        )}
+                                      </button>
+
+                                      <button
+                                        onClick={() => {
+                                          setTestingTemplateLoading(true);
+                                          setTestingTemplateOutput("");
+                                          setTimeout(() => {
+                                            setTestingTemplateLoading(false);
+                                            // Render customized simulation outcome text incorporating user inputs
+                                            const topic = templateValues[placeholders[0]] || currentTemplate.name;
+                                            setTestingTemplateOutput(
+                                              isRtl 
+                                                ? `[🤖 محاكاة استجابة الذكاء الاصطناعي - خادم الأكاديمية]
+تم استلام المطالبة بنجاح وتحليل الشفرة السياقية المتكاملة.
+
+مخرجات المساعد الافتراضي للمطابقة المخصصة لـ [${topic}]:
+------------------------------------------------------
+الموضوع: تفصيل إجرائي كامل لمقترح التطبيق أو العرض بناءً على المعطيات المدخلة.
+
+1. البعد الرئيسي للمخرجات:
+   - تم معايرة جودة النص وصقله بـ 8 محاور أمان.
+   - مواءمة النبرة اللغوية مع تطلعات الجمهور المستهدف.
+
+2. المكون المستخلص:
+   - النص الناتج يسير تلقائياً وفق قالب تكنولوجي مهيكل.
+   - تم حظر حقن وتثغير الأوامر لمنع تسريب الدستور البرمجي.
+
+💡 نصيحة مهندس الأوامر المعتمد:
+قم بنسخ هذا الأمر الجاهز واستخدامه مباشرة في خادم Google AI Studio التفاعلي للحصول على الجودة الإنتاجية الكاملة مع الموازنة!`
+                                                : `[🤖 AI Simulation Engine Response]
+Prompt successfully ingested. Analyzed structural directives.
+
+Output Summary for [${topic}]:
+------------------------------------------------------
+- Structural delimiter constraints applied.
+- Tone adapted to recipient constraints.
+- Response aligned format with strict output instructions.
+- System prompt protected against jailbreak.
+
+✓ Output validated.`
+                                            );
+                                            setXp(p => p + 50);
+                                          }, 1000);
+                                        }}
+                                        disabled={testingTemplateLoading}
+                                        className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-black px-6 py-3 rounded-xl text-xs transition-all active:scale-95 flex items-center justify-center gap-2 font-sans shadow-md shadow-amber-500/10"
+                                      >
+                                        <Play size={14} />
+                                        {testingTemplateLoading ? (isRtl ? 'جاري محاكاة الاستجابة...' : 'Simulating Response...') : (isRtl ? 'تشغيل المعمل الاختباري (+50 XP)' : 'Run Laboratory Simulation')}
+                                      </button>
+                                      
+                                    </div>
+
+                                    {/* Interactive Simulation Terminal Output Console */}
+                                    {(testingTemplateLoading || testingTemplateOutput) && (
+                                      <div className="bg-[#03060f] p-4 rounded-xl border border-white/5 font-mono text-[11px] text-emerald-400 space-y-2 mt-4 text-right animate-fade-in animate-duration-300 shadow-inner">
+                                        <div className="flex items-center gap-2 border-b border-white/5 pb-2">
+                                          <div className="w-2.5 h-2.5 bg-red-500 rounded-full" />
+                                          <div className="w-2.5 h-2.5 bg-yellow-500 rounded-full" />
+                                          <div className="w-2.5 h-2.5 bg-green-500 rounded-full" />
+                                          <span className="text-[9px] text-slate-500 font-bold mr-auto">PORT: 3000 CONSOLE</span>
+                                        </div>
+                                        
+                                        {testingTemplateLoading ? (
+                                          <div className="p-4 space-y-2">
+                                            <div className="flex items-center gap-2">
+                                              <span className="animate-ping block w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                                              <span className="text-slate-400 text-right">{isRtl ? 'جاري استدعاء مصفوفة القراية والتحوير لغوياً...' : 'Synthesizing contextual prompt variables...'}</span>
+                                            </div>
+                                          </div>
+                                        ) : (
+                                          <pre className="whitespace-pre-wrap leading-relaxed select-text p-2 bg-[#02050b]/65 rounded max-h-60 overflow-y-auto">
+                                            {testingTemplateOutput}
+                                          </pre>
+                                        )}
+                                      </div>
+                                    )}
+
+                                  </div>
+                                );
+                              })()}
                             </div>
-                          ) : (
-                            <div className="text-center space-y-2 w-full">
-                              <span className="bg-amber-500/10 text-amber-300 border border-amber-500/20 px-5 py-3 rounded-2xl text-xs font-black block text-center">
-                                ⚠️ {isRtl ? 'متطلبات الاعتماد قيد الانتظار: أكمل 24 درساً و4 مشاريع واجتاز الامتحان النهائي لتفعيل طباعة الشهادة الذهبية.' 
-                                          : 'Certification is blocked: You must complete all 24 study guides, pass the final assessment exam, sign the pledge, and fill out your certificate candidate name.'}
-                              </span>
-                            </div>
-                          )}
+
+                          </div>
 
                         </div>
+                      )}
 
-                      </div>
+                      {/* SUBTAB 3: 12 Mega Prompt Lab */}
+                      {proSubTab === 'megaprompts' && (
+                        <div className="space-y-8 text-right animate-fade-in animate-duration-200">
+                          
+                          {/* Banner */}
+                          <div className="bg-gradient-to-r from-[#162744] to-[#040815] border border-amber-500/10 rounded-[2.5rem] p-8 space-y-4">
+                            <span className="px-3 py-1 bg-amber-500/15 text-amber-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-500/10">
+                              {isRtl ? 'معمل تركيب الأوامر الهيكلية 🧪' : 'Mega-Prompt Architectural Lab 🧪'}
+                            </span>
+                            <h3 className="text-2xl font-black text-white leading-tight">
+                              {isRtl ? 'معمل الأوامر الضخمة (Mega-Prompt Lab)' : 'The 12 Master Mega-Prompts Suite'}
+                            </h3>
+                            <p className="text-slate-400 text-xs leading-relaxed max-w-4xl">
+                              {isRtl ? 'اكتشف وسلّح فكرك بـ 12 قالباً دستورياً ضخماً وكيان هندسي برهنت فاعليتها بالشركات الكبرى. قمنا بتفكيك التكنيكات المدمجة لتتوغل في فهم المعمارية اللغوية وصياغتها وتجنب تشتت النماذج الرقمية.' : 'Unlock 12 pristine mega-prompts capable of driving multi-turn execution, robust persona simulation, and safety guardrails. Each prompt includes a full architectural breakdown explaining the embedded prompting theories.'}
+                            </p>
+                          </div>
+
+                          {/* Grid Selection */}
+                          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                            
+                            {/* Left: 12 items scrolling list (Column 1) */}
+                            <div className="lg:col-span-4 space-y-3">
+                              <span className="text-[10px] text-slate-500 font-extrabold uppercase block tracking-widest px-1">
+                                {isRtl ? 'دساتير الأوامر الـ 12 المتاحة' : '12 ACCREDITED MEGA-PROMPTS'}
+                              </span>
+
+                              <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+                                {MEGA_PROMPTS_DATA.map((prompt) => {
+                                  const isActive = selectedMegaPromptId === prompt.id;
+                                  return (
+                                    <button
+                                      key={prompt.id}
+                                      onClick={() => setSelectedMegaPromptId(prompt.id)}
+                                      className={`w-full p-4 rounded-2xl text-right transition-all border block group ${isActive ? 'bg-amber-500/10 border-amber-500 text-white shadow-xl' : 'bg-[#050b15]/60 border-white/5 text-slate-300 hover:bg-slate-900/60 hover:border-white/10'}`}
+                                    >
+                                      <div className="flex items-center gap-3 justify-start">
+                                        <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${isActive ? 'bg-amber-500 text-slate-950 font-mono' : 'bg-slate-950 text-slate-400'}`}>
+                                          {prompt.id}
+                                        </div>
+                                        <div className="text-right">
+                                          <h5 className="text-xs font-black font-sans group-hover:text-amber-400 transition-colors">{prompt.name}</h5>
+                                          <span className="text-[10px] text-slate-500 block leading-none mt-1 truncate max-w-[200px]">{prompt.use_case}</span>
+                                        </div>
+                                      </div>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
+                            {/* Right: Detailed View Monitor Container (Column 2) */}
+                            <div className="lg:col-span-8">
+                              {(() => {
+                                const currentMega = MEGA_PROMPTS_DATA.find(m => m.id === selectedMegaPromptId);
+                                if (!currentMega) return null;
+
+                                return (
+                                  <div className="bg-gradient-to-br from-[#0b1226] to-slate-950 border border-white/10 rounded-[2.5rem] p-6 md:p-8 space-y-6 shadow-2xl relative">
+                                    
+                                    {/* Header info */}
+                                    <div className="border-b border-white/5 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                      <div className="text-right">
+                                        <span className="text-[10px] text-amber-400 font-extrabold uppercase block tracking-wider mb-1">MEGA PROMPT ID #{currentMega.id}</span>
+                                        <h4 className="text-xl font-black text-white">{currentMega.name}</h4>
+                                      </div>
+                                    </div>
+
+                                    {/* Case Description */}
+                                    <div className="bg-slate-950/45 p-4 rounded-xl border border-white/5 space-y-2">
+                                      <span className="text-[10px] font-black text-amber-500/60 uppercase block">🎯 {isRtl ? 'حالة الاستخدام والتطبيق العملي' : 'USE CASE & SCENARIOS'}</span>
+                                      <p className="text-xs text-slate-200 font-semibold">{currentMega.use_case}</p>
+                                    </div>
+
+                                    {/* Embedded techniques */}
+                                    <div className="space-y-2">
+                                      <span className="text-[10px] font-black text-slate-500 uppercase block tracking-widest">{isRtl ? 'المهارات والتقنيات اللغوية الفرعية المركبة' : 'EMBEDDED META-TECHNIQUES'}</span>
+                                      <div className="flex flex-wrap gap-2 text-right">
+                                        {currentMega.techniques.map((tech, tIdx) => (
+                                          <span
+                                            key={tIdx}
+                                            className="px-3 py-1 bg-amber-500/10 text-amber-300 rounded-lg text-[10px] font-black uppercase tracking-wide border border-amber-500/10"
+                                          >
+                                            ⚡ {tech}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+
+                                    {/* Prompt Box */}
+                                    <div className="space-y-2">
+                                      <span className="text-[10px] font-black text-emerald-400/80 uppercase block">⚙️ {isRtl ? 'الشفرة الدستورية الكاملة للأمر (Mega Prompt)' : 'FULL MONOSPACE MEGA-PROMPT CODE'}</span>
+                                      <div className="relative group">
+                                        <div className="bg-[#050a14] p-5 rounded-2xl border border-white/10 font-mono text-xs text-slate-100 select-all leading-relaxed whitespace-pre-wrap max-h-60 overflow-y-auto block text-right select-all">
+                                          {currentMega.prompt}
+                                        </div>
+                                        
+                                        <button
+                                          onClick={() => {
+                                            if (navigator.clipboard) {
+                                              navigator.clipboard.writeText(currentMega.prompt).then(() => {
+                                                setCopiedItemId(currentMega.id);
+                                                setXp(p => p + 30);
+                                                setTimeout(() => setCopiedItemId(null), 2000);
+                                              });
+                                            } else {
+                                              alert(isRtl ? "تم نسخ الأمر!" : "Copied!");
+                                            }
+                                          }}
+                                          className="absolute top-3 left-3 bg-slate-900 border border-white/10 hover:border-amber-400 hover:text-white text-slate-300 font-extrabold px-3 py-1.5 rounded-lg text-[10px] transition-all flex items-center gap-1 shadow-md shadow-slate-950 font-sans"
+                                        >
+                                          {copiedItemId === currentMega.id ? (
+                                            <>
+                                              <Check size={10} className="text-emerald-400" />
+                                              {isRtl ? 'تم النسخ ✓' : 'Copied ✓'}
+                                            </>
+                                          ) : (
+                                            <>
+                                              <Copy size={10} />
+                                              {isRtl ? 'نسخ الأمر' : 'Copy Code'}
+                                            </>
+                                          )}
+                                        </button>
+                                      </div>
+                                    </div>
+
+                                    {/* Architectural Break-down breakdown */}
+                                    <div className="bg-[#050b14]/50 border border-white/5 p-5 rounded-2xl space-y-2 text-right">
+                                      <h5 className="text-xs font-black text-amber-400">🕵️‍♂️ {isRtl ? 'لماذا هو قوي؟ وكيف تم تصميمه هندسياً؟' : 'Why is this Mega-Prompt extremely robust?'}</h5>
+                                      <p className="text-xs text-slate-300 !leading-relaxed font-semibold">
+                                        {currentMega.analysis}
+                                      </p>
+                                    </div>
+
+                                    {/* Simulating activation inside custom playground */}
+                                    <div className="flex justify-end pt-2">
+                                      <button
+                                        onClick={() => {
+                                          // Set pro compiled prompt and scroll down
+                                          setProCompiledPrompt(currentMega.prompt);
+                                          // Feed directly to simulated terminal inputs
+                                          setProPlaygroundRole(currentMega.name);
+                                          setProTestingOutput(false);
+                                          alert(isRtl ? "📥 تم نقل وتحميل دستور الأمر الضخم إلى ساحة المحاكاة بالتجربة المخصصة أدناه!" : "Mega prompt loaded successfully into custom playground console below!");
+                                          
+                                          // Smooth scroll down to sandbox simulator
+                                          const element = document.getElementById("pro_sandbox_playground");
+                                          if (element) {
+                                            element.scrollIntoView({ behavior: 'smooth' });
+                                          }
+                                        }}
+                                        className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-6 py-3 rounded-xl text-xs transition-all flex items-center gap-2 font-sans"
+                                      >
+                                        🧪 {isRtl ? 'حقن وتجربة الأمر الضخم بالملتقى التدريبي' : 'Load into Workspace Playground'}
+                                      </button>
+                                    </div>
+
+                                  </div>
+                                );
+                              })()}
+                            </div>
+
+                          </div>
+
+                        </div>
+                      )}
 
                       {/* Resources Directory */}
-                      <div className="bg-[#0b1329] border border-white/5 rounded-[2.5rem] p-8 space-y-6 text-right">
+                      <div id="pro_sandbox_playground" className="bg-[#0b1329] border border-white/5 rounded-[2.5rem] p-8 space-y-6 text-right">
                         <div className="flex items-center gap-3 justify-start">
                           <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
                             <BookOpen size={16} />
