@@ -1324,41 +1324,294 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
     try {
       const { subject, goals, lang } = req.body;
 
-      if (!initAI() || !aiLive) {
-        logToFile("[Info] Using Simulated Curriculum generator fallback due to missing api key in environment");
-        const subj = subject || "Oxford Language Course";
-        return res.json({
-          A1: [
-            { id: "A1-1", title: `Introduction to ${subj}`, titleAr: `مقدمة في ${subj}`, description: "Basics and essentials", descriptionAr: "الأساسيات والمبادئ الأولية" }
-          ],
-          A2: [
-            { id: "A2-1", title: "Daily Conversations", titleAr: "المحادثات اليومية المعتادة", description: "Standard context phrasing", descriptionAr: "صياغة الجمل في السياقات اليومية" }
-          ],
-          B1: [
-            { id: "B1-1", title: "Active Grammatical Patterns", titleAr: "الأنماط القواعدية النشطة", description: "Intermediate structure rules", descriptionAr: "قواعد التراكيب اللغوية المتوسطة" }
-          ],
-          B2: [
-            { id: "B2-1", title: "Professional Presentation", titleAr: "التقديم الاحترافي والشرح", description: "Business and academic communication", descriptionAr: "التواصل الأكاديمي والمهني للتعبير" }
-          ],
-          C1: [
-            { id: "C1-1", title: "Academic Synthesis", titleAr: "التركيب والتوليف الأكاديمي", description: "Complex comprehension rules", descriptionAr: "قواعد الفهم والتحليل المعقدة" }
-          ],
-          C2: [
-            { id: "C2-1", title: `Native Mastery in ${subj}`, titleAr: `الإتقان اللغوي الكامل في ${subj}`, description: "Advanced fluency and expression", descriptionAr: "الطلاقة المتقدمة القصوى وطرق التعبير" }
-          ]
+      // Helper for dynamic localized 30-unit fallback (A1-C2, with exactly 5 unique progressive units per level)
+      const generateDynamicFallback = (subjInput: string, goalsInput: string) => {
+        const s = (subjInput || "").toLowerCase();
+        const g = (goalsInput || "").toLowerCase();
+
+        const isCoding = s.includes("برمج") || s.includes("كود") || s.includes("بايثون") || s.includes("برنامج") || s.includes("code") || s.includes("python") || s.includes("programming") || s.includes("develop") || s.includes("java") || s.includes("script") || g.includes("برمج") || g.includes("code") || g.includes("شغل");
+        const isArt = s.includes("رسم") || s.includes("فن") || s.includes("تصميم") || s.includes("صورة") || s.includes("art") || s.includes("design") || s.includes("illustration") || s.includes("paint") || s.includes("image") || s.includes("creative") || g.includes("رسم") || g.includes("art");
+        const isContent = s.includes("محتوى") || s.includes("تسويق") || s.includes("مدونة") || s.includes("كتابة") || s.includes("أرباح") || s.includes("سوشيال") || s.includes("content") || s.includes("marketing") || s.includes("copywrit") || s.includes("ads") || s.includes("social") || g.includes("محتوى") || g.includes("content");
+        const isSecurity = s.includes("أمان") || s.includes("حماية") || s.includes("خصوصية") || s.includes("اختراق") || s.includes("سيبراني") || s.includes("cyber") || s.includes("security") || s.includes("hack") || s.includes("privacy") || s.includes("safe") || g.includes("أمان") || g.includes("security");
+
+        let category = "general";
+        if (isCoding) category = "coding";
+        else if (isArt) category = "art";
+        else if (isContent) category = "content";
+        else if (isSecurity) category = "security";
+
+        const subj = subjInput || (category === "coding" ? "البرمجة بالذكاء" : category === "art" ? "التصميم الإبداعي" : category === "content" ? "صناعة المحتوى" : category === "security" ? "الأمن السيبراني" : "الذكاء الاصطناعي");
+
+        const dict: Record<string, Record<string, { title: string; titleAr: string; desc: string; descAr: string }[]>> = {
+          coding: {
+            A1: [
+              { title: `Foundations of coding with ${subj}`, titleAr: `تأسيس البرمجة والتكويد مع ${subj}`, desc: "Unveiling how computers read instructions", descAr: "فهم طريقة قراءة الحاسوب للأوامر البرمجية المختلفة" },
+              { title: "Synthesizing First Logic Commands", titleAr: "بناء أولى الأوامر المنطقية والمدروسة", desc: "Structuring loops, if statements and variables", descAr: "صياغة الشروط البسيطة ودور المتغيرات لتصحيح المسار" },
+              { title: "The Magic of Variables and Inputs", titleAr: "سحر المتغيرات والمدخلات السريعة", desc: "Letting the system adapt automatically", descAr: "إعطاء البرنامج القدرة على قراءة مدخلات المستخدم تلقائياً" },
+              { title: "Logical Operators and Algorithms", titleAr: "المعاملات المنطقية وبناء الخوارزميات", desc: "How boolean parameters direct the logic flow", descAr: "طريقة عمل البوابات المنطقية لتوجيه مسار التنفيذ والتحكم" },
+              { title: "Your First Functional Block (Hello World)", titleAr: "بناء أول دالة ووحدة تفاعلية متكاملة", desc: "Executing a complete operational script", descAr: "دمج السطور البرمجية لتأدية غرض ملموس وعرض النتيجة" }
+            ],
+            A2: [
+              { title: "Functions and Modularity", titleAr: "تصميم الدوال وتقسيم الكود البرمجي", desc: "Reusing scripts to optimize system resources", descAr: "هيكلية كتابة أكواد مستقلة وقابلة لإعادة الاستخدام بسهولة" },
+              { title: "Interpreting Error Logs (Debugging)", titleAr: "قراءة سجلات الخطأ ومعالجة المشاكل", desc: "Fixing compile and runtime bugs", descAr: "العثور على الثغرات وتصحيح العثرات البرمجية الشائعة" },
+              { title: "Dynamic Arrays and Lists Data", titleAr: "المصفوفات الديناميكية وهياكل البيانات", desc: "Storing multiple values inside one structured collection", descAr: "آليات تخزين واسترجاع حزم البيانات المتعددة بكفاءة" },
+              { title: "Object Property Bindings", titleAr: "خصائص الكائنات وربط القيم البرمجية", desc: "Learning the object-oriented structure basics", descAr: "طريقة تمثيل العناصر الواقعية والمفاهيم ككائنات برمجية" },
+              { title: "Designing Custom AI Prompts in Code", titleAr: "صياغة واستدعاء الأوامر الذكية برمجياً", desc: "How to call intelligence modules from your program", descAr: "طريقة ربط كودك البرمجي بالمساعد الذكي لحل المهام آلياً" }
+            ],
+            B1: [
+              { title: "Integrating Local Storage Storage", titleAr: "ربط ومعايرة التخزين المحلي للبيانات", desc: "Saving configurations on client browser", descAr: "حفظ تفضيلات ودرجات المستخدمين على المتصفح بشكل مستمر" },
+              { title: "Asynchronous Program Loops", titleAr: "الحلقات والعمليات غير المتزامنة (Async)", desc: "Running background searches without freezing UI", descAr: "تنفيذ العمليات المعقدة والبطيئة في الخلفية لضمان سرعة الواجهة" },
+              { title: "Data Sanitization & Input Safety", titleAr: "تصفية البيانات والمدخلات وتأمين الشاشات", desc: "Defending systems from bad formatting injections", descAr: "فحص مدخلات النصوص لمنع الانهيار البرمجي المفاجئ" },
+              { title: "Modular Interface Layout Controls", titleAr: "تحكم واجهات التطبيقات الديناميكية (UI Basics)", desc: "Connecting backend scripts with interactive buttons", descAr: "توجيه تصرفات شاشة المستخدم مباشرة عبر شيفرات منطقية مخصصة" },
+              { title: "Interactive Client-Server Diagnostics", titleAr: "تشخيص طلبات العميل والخادم اللحظية", desc: "Tracing network data transfer requests", descAr: "فعم طريقة مشاركة البيانات وتنسيقها بين الأطراف" }
+            ],
+            B2: [
+              { title: "Advanced State Managers", titleAr: "إدارة الحالات المتقدمة والمزامنة الشاملة", desc: "Keeping complex interfaces coherent and fast", descAr: "التحكم في تحديث حالات التطبيق دون هدر الموارد التقنية" },
+              { title: "Designing Complex Algorithmic Trees", titleAr: "بناء شجيرات الخوارزميات والقرارات المتفرعة", desc: "Structuring layered thinking processes inside code", descAr: "توجيه البرنامج لاتخاذ مسارات مختلفة طبقاً لنتيجة التحليل" },
+              { title: "Connecting External APIs Libraries", titleAr: "الربط التفاعلي واستخدام مكتبات الأطراف الثالثة", desc: "Extending application power with global frameworks", descAr: "استيراد واستدعاء الميزات الجاهزة لتخطي صعوبات التكويد" },
+              { title: "Automated Error Prevention Handlers", titleAr: "معالجة الأخطاء الذاتية وتفادي الانهيار", desc: "Graceful recovery during system timeouts and errors", descAr: "كتابة سيناريوهات حماية تلقائية تمنع توقف التطبيق في الكواليس" },
+              { title: "Developing Comprehensive Interactive Dashboards", titleAr: "تطوير لوحات تحكم ومراقبة تفاعلية متكاملة", desc: "Visualizing process analytics instantly to users", descAr: "عرض حركات واستخدام الميزات البرمجية في لوحة إحصائية ممتازة" }
+            ],
+            C1: [
+              { title: "Optimizing Processing Speeds", titleAr: "تحسين سرعات معالجة الكود والأداء المالي", desc: "Profiling slow functions and optimizing CPU usage", descAr: "قياس كفاءة الشيفرة وتسريع تنفيذ السطور والعمليات المعقدة" },
+              { title: "AI models API Handlers", titleAr: "تصميم واجهات الاتصال بمولدات الذكاء", desc: "Sending images and rich arrays to remote endpoints", descAr: "صياغة حزم بيانات متعددة الأنماط لإرسالها وقراءتها آلياً" },
+              { title: `Securing Data Access of ${subj}`, titleAr: `تأمين قنوات تبادل البيانات الخاصة بـ ${subj}`, desc: "Enforcing modern encryption and validation patterns", descAr: "تطبيق معايير التحقق الحديثة لحجب البيانات عن غير المخولين" },
+              { title: "Dynamic Schema Modeling Models", titleAr: "هندسة وبناء المخططات الديناميكية للمعلومات", desc: "Handling highly flexible server response structures", descAr: "القدرة التامة على صياغة خوادم تدرك تنوع الاحتياجات والتطوير" },
+              { title: "Mitigating Injection Vulnerabilities", titleAr: "استكشاف وسد ثغرات الكود البرمجي النشط", desc: "Defending from remote shell execution attacks", descAr: "الوقاية الكاملة والحماية من الاختراقات الخبيثة على الواجهة والخلفية" }
+            ],
+            C2: [
+              { title: `Master Architect Mastery of ${subj}`, titleAr: `الاحتراف والريادة الهندسية لـ ${subj}`, desc: "Supervising system dependencies and scalability", descAr: "الهيمنة على بناء الأنظمة عالية التوسع والقابلة للتحمل" },
+              { title: "Designing Global Automated Pipelines", titleAr: "تصميم ونمذجة أنابيب العمليات المستقلة العالمية", desc: "Triggering automated actions across multiple cloud nodes", descAr: "بناء سلسلة تحديثات وتشغيل برمجية خالية من التدخل البشري" },
+              { title: "Comprehensive Coding Graduation Capstone", titleAr: "مشروع التخرج البرمجي الشامل للريادة التقنية", desc: "Designing and deploying a fully functional software ecosystem", descAr: "تنزيل ونشر فكرة مشروع جاهزة للاستخدام تخدم المتطلبات الواقعية" },
+              { title: "Swarm AI Agentic Implementations", titleAr: "تطوير حركات وسلوك الكيانات الذاتية المتعددة (Swarm)", desc: "Enabling autonomous programs to split and solve massive tasks", descAr: "بناء ذكاء جماعي متكامل يدير العمليات بمثالية واستقلالية تامة" },
+              { title: "Quantum Logic and Future Development", titleAr: "دمج قواعد الحوسبة الكمية والتأثير اللحظي المستقبلي", desc: "Building scripts ready for next-gen processing hardware", descAr: "الاستعداد الكامل للموجة العارمة القادمة في الحوسبة فائقة السرعة" }
+            ]
+          },
+          art: {
+            A1: [
+              { title: `Introduction to Visual Art with ${subj}`, titleAr: `مقدمة في تاريخ الفنون البصرية مع ${subj}`, desc: "Unlocking style definitions and general prompt dynamics", descAr: "فهم لغة مولدات الصور وتحويل الكلمات إلى إلهام مرئي ملون" },
+              { title: "Writing Core Painter Prompts", titleAr: "صياغة أوامر الرسم والتوجيه الفني المتناسق", desc: "Directing lighting, medium, master artist styles", descAr: "اختيار الإضاءة، نوع القماش، وريشة الرسامين الكلاسيكيين بدقة" },
+              { title: "Setting Color Theory and Moods", titleAr: "إتقان نظريات الألوان والمزاج الجمالي للوحات", desc: "Using palette keywords like warm twilight, cold neon", descAr: "توجيه تدرجات الظل وتوفير درجات لونية تعكس الشعور الحقيقي" },
+              { title: "Mastering Aspect Ratios and Camera Scales", titleAr: "التحكم في أبعاد اللوحات وزوايا الكاميرا الذكية", desc: "Directing closeups, landscape ratios, widescreen layouts", descAr: "تثبيت الأبعاد المثالية للمنشورات واللوحات الجدارية والسينمائية" },
+              { title: "Your First Curated Digital Art Showcase", titleAr: "حفل إطلاق أول معرض رقمي لإنتاجاتك الفنية", desc: "Compiling five thematic rendering outputs together", descAr: "دمج وتصدير روائعك وإضافة البصمة الذوقية الفريدة لإبهار الجمهور" }
+            ],
+            A2: [
+              { title: "Advanced Prompt Weights and Priorities", titleAr: "موازنة أوزان الكلمات وتقليل شوائب الصور", desc: "Defining details significance inside generation string", descAr: "توجيه المولد للتركيز على عناصر مهمة وحجب العناصر غير المرغوبة" },
+              { title: "Fostering Character Consistency across Frames", titleAr: "بناء وتثبيت الملامح الشخصية عبر المشاهد", desc: "Using consistent style templates for storybooks", descAr: "الحفاظ على شكل البطل والملامح متقاربة لرسم القصص المتكاملة" },
+              { title: "Generating Highly Immersive Backgroundscapes", titleAr: "تصميم البيئات والخلفيات ثلاثية الأبعاد الفائقة", desc: "Creating concept art landscape plates", descAr: "بناء آفاق ساحرة، قلاع خيالية، وغابات غامضة بدقة مذهلة" },
+              { title: "Controlling Dynamic Lighting and Soft Textures", titleAr: "معالجة تفاصيل الإضاءة والظلال الجانبية (Raytracing)", desc: "Using volumetric scattering and realistic glow", descAr: "توظيف الضوء المتناثر لزيادة واقعية التفاصيل والتموجات بدقة" },
+              { title: "Generating Logo Variations for Brands", titleAr: "تصميم الشعارات الأنيقة وتحولات الهوية البصرية", desc: "Simplifying shapes for minimal modern graphic design", descAr: "تحويل الأفكار المعقدة لعلاقات رمزية وبناء هويات بصرية ممتازة" }
+            ],
+            B1: [
+              { title: "Expanding Horizons (Outpainting)", titleAr: "توسيع زوايا وأفق الصورة الذكية (Outpainting)", desc: "Using AI to generate beyond the canvas boundaries", descAr: "تخيل ورسم ما يقع خارج حدود الصورة الأصلية بسلاسة متناهية" },
+              { title: "Object Replacement Controls (Inpainting)", titleAr: "تعديل عناصر وتفاصيل داخل اللوحات (Inpainting)", desc: "Re-drawing localized spots inside the art", descAr: "تغيير تفاصيل صغيرة أو استبدال قطع في اللوحة مع الحفاظ على التناغم" },
+              { title: "Synthesizing Core Concept Styles", titleAr: "تركيب ودمج الأنماط الإبداعية المتداخلة", desc: "Blending cyberpunk aesthetics with classical realism", descAr: "مزاوجة الفن المستقبلي مع اللمسات التاريخية لإنتاج فريد" },
+              { title: "Illustration Rendering for Storybooks", titleAr: "تصميم وإخراج كتب ورسومات الأطفال والقصص", desc: "Creating colorful visuals capturing young minds", descAr: "هندسة أبعاد وعناصر جاذبة، مليئة بالحياة والألوان لمتعة المغامرة" },
+              { title: "Digital Art Copyrights and Verification", titleAr: "حقوق الفن الرقمي وأخلاقيات التوليد البصري", desc: "Safe authorship registration and fair reuse laws", descAr: "الوعي بحقوق الملكية الفكرية والفحص الأمني للعلامات المائية" }
+            ],
+            B2: [
+              { title: "Canvas Layer Manipulations", titleAr: "التحكم في طبقات وتدرج العناصر الفنية", desc: "Isolating foregrounds and backgrounds for print", descAr: "عزل عناصر المشهد لعمل تعديلات احترافية قبل الإنتاج والطباعة" },
+              { title: "Multi-Model Art Orchestration", titleAr: "تناغم ومزاوجة عدة محركات توليدية معاً", desc: "Assembling assets generated from diverse platforms", descAr: "دمج تفاصيل ومميزات مولدات مختلفة لصناعة مشهد فني مبهر" },
+              { title: "Motion Generation Foundations", titleAr: "توليد الحركات البسيطة وإضافة حيوية للرسم", desc: "Animating static assets into short looping clips", descAr: "تحويل الرسومات الثابتة إلى كليبات قصيرة تنبض بالحياة والجمال" },
+              { title: "Designing Cohesive Identity Guides", titleAr: "تصميم الكتيبات وتناسق علامات الهوية الكاملة", desc: "Establishing continuous aesthetic guidelines for companies", descAr: "كتابة دليل متكامل يضمن تناسق كافة المواد التسويقية مستقبلاً" },
+              { title: "Interactive UI/UX Visual Mockups", titleAr: "تصميم واجهات الويب الرقمية الجذابة بالذكاء", desc: "Drafting functional website mockups easily", descAr: "توليد تمثيلات بصرية سريعة ومبهرة للبرامج والمواقع والواجهات" }
+            ],
+            C1: [
+              { title: "Upscaling and Print Layout Preparations", titleAr: "زيادة دقة اللوحات وتحويلها لملفات جاهزة للمطابع", desc: "Transforming raw pixels to high DPI files", descAr: "زيادة حجم الريندر لأقصى حد لتلائم المعارض وتصميمات اللوحات العملاقة" },
+              { title: "Real-time Art Generation (SDXL Turbo)", titleAr: "التوليد البصري اللحظي وفن الرسم التفاعلي المباشر", desc: "Creating responsive art with custom drawing brushes", descAr: "ظهور التحف الفنية بالتزامن مع حركة يدك على رقعة التصميم" },
+              { title: "Dynamic Cinematography Storyboarding", titleAr: "هندسة لوحات القصة السينمائية المتتابعة (Storyboard)", desc: "Designing storyboard grids with strict style persistence", descAr: "توزيع زوايا التصوير واللقطات للتعبير عن تسلسل درامي متميز" },
+              { title: "Simulating Complex Environmental Effects", titleAr: "محاكاة العناصر الطبيعية والطقس في العمل الرقمي", desc: "Directing deep rain, smoke, and glass refractions", descAr: "توظيف الضباب، انعكاسات الزجاج وتناثر الأمطار لجذب الانتباه" },
+              { title: "Digital Fingerprinting & Security Authentication", titleAr: "البصمات الرقمية وتأمين اللمسة الإبداعية الخاصة بك", desc: "Embedding deep signature files directly into pixels", descAr: "تأمين فنك ضد التزييف والاستبصار الآلي من الأطراف الأخرى" }
+            ],
+            C2: [
+              { title: `Artistic Master of ${subj}`, titleAr: `الريادة والسيادة الفنية الشاملة لـ ${subj}`, desc: "Directing complex visual campaigns autonomously", descAr: "قيادة الإخراج الفني وبناء حملات عالمية متسقة الأسلوب بمثالية" },
+              { title: "Large-Scale Projection Art Deployments", titleAr: "تصميم أعمال العرض الجداري الفني الفائق والمكثف", desc: "Curating installations combining light, music, and AI patterns", descAr: "دمج الإضاءة والحركات البصرية بالهندسة المعمارية التفاعلية" },
+              { title: "Visual Art Portfolio Capstone", titleAr: "المشروع التخرج الإبداعي وموسوعة الفنون التوليدية", desc: "Launching your personalized premium art book", descAr: "إخراج وتوثيق مجموعتك الفنية المبتكرة في كتاب فوتوغرافي متكامل" },
+              { title: "Collaborative Generative Swarms studios", titleAr: "مختبرات التصميم المشترك والكيانات البصرية المستقلة", desc: "Orchestrating teams of AI drawers cooperating over web nodes", descAr: "بناء مرسم رقمي تفاعلي يدار بالكامل عبر وكلاء ذكاء اصطناعي" },
+              { title: "Future of Rendering and Spatial Canvas", titleAr: "مستقبل الريندر والرسم الفراغي والواقع المعزز (AR/VR)", desc: "Stepping into next-gen immersive dimensional canvases", descAr: "إمكانية إسقاط وتوليد النماذج الفنية الفائقة مباشرة داخل واقعنا" }
+            ]
+          },
+          content: {
+            A1: [
+              { title: `Intro to Strategic Writing with ${subj}`, titleAr: `تأسيس الكتابة الإبداعية بالذكاء مع ${subj}`, desc: "Learning the elements of high-converting text structures", descAr: "معالجة وبناء الجمل لجذب وإبهار مختلف الفئات والمستويات" },
+              { title: "Crafting Attention Hooks and Headlines", titleAr: "تصميم العناوين الجاذبة وضربات البداية المدهشة", desc: "Writing dynamic triggers that skyrocket click rates", descAr: "مهارات صياغة المقدمات المغناطيسية لضمان القراءة والمتابعة" },
+              { title: "Interactive Audience Analysis Tools", titleAr: "أدوات الذكاء لتحليل الجمهور وتحديد الفئات المستهدفة", desc: "Finding psychological profiles and interests of readers", descAr: "تصنيف المتابعين وفهم احتياجاتهم واهتماماتهم المعرفية بدقة" },
+              { title: "Directing Content Tone Variation (Warm vs Cold)", titleAr: "تنويع النبرة اللفظية وتلوين الخطاب بالذكاء", desc: "Shifting outputs from funny and playful to highly formal", descAr: "التحويل الفوري للنصوص من الأسلوب الفكاهي البسيط للمهني الوقور" },
+              { title: "Your First Structured Blog Outlines", titleAr: "بناء أول هيكلية متكاملة للمقالات والتدوينات", desc: "Compiling research and key points into robust visual formats", descAr: "تنسيق العناوين الرئيسية والفرعية لتسهيل القراءة وتوصيل الأفكار" }
+            ],
+            A2: [
+              { title: "AI SEO Content Generation", titleAr: "كتابة المحتوى الصديق لمحركات البحث (SEO)", desc: "Injecting high-potential keywords naturally with models", descAr: "صياغة مقالات تتصدر محركات البحث العالمية بكفاءة وهدوء" },
+              { title: "Continuous Calendars and Post Planners", titleAr: "جدولة وجدولة الخطط والنشر اليومي بالذكاء", desc: "Drafting 30 days of social updates in minutes", descAr: "هندسة خطة نشر ثلاثين يوماً لمنصات التواصل في دقائق معدودة" },
+              { title: "Video Scriptwriting for TikToks & Reels", titleAr: "صياغة سيناريوهات الفيديو القصير الجذابة بالذكاء", desc: "Directing audio triggers, visual prompts, and rapid edits", descAr: "مهارات توزيع المحتوى على ثوانٍ لضمان بقاء المتابع متفاعلاً" },
+              { title: "Dynamic Advertisement Concepts Variations", titleAr: "توليد أفكار النوافذ والإعلانات الترويجية الفائقة", desc: "Generating diverse marketing perspectives to maximize conversions", descAr: "تصميم عدة نماذج إعلانية لنفس المنتج لخدمة رغبات متباينة" },
+              { title: "Structuring Compelling Email Newsletters", titleAr: "كتابة رزم النشرات البريدية وحملات التراسل الذكي", desc: "Writing personal, warm and non-spammy outreach scripts", descAr: "صياغة رسائل الكترونية تحترم خصوصية وصبر المشترك وتدفعه للتفاعل" }
+            ],
+            B1: [
+              { title: "Deep Content Outlining & Synthesis", titleAr: "التلخيص الابتكاري والجمع الذكي للمعلومات", desc: "Condensing vast data sets into pristine action guides", descAr: "تحويل التقارير العملاقة والأوراق المعقدة لملخصات سريعة وسهلة" },
+              { title: "Surgical Copy-Editing Techniques", titleAr: "أدوات الفحص والتحرير اللغوي الفائق بالذكاء", desc: "Refining syntax, pacing and directness manually helped by AI", descAr: "تنقية النصوص من الحشو والتكرار اللفظي لرفع الجاذبية اللغوية" },
+              { title: "Establishing Dynamic Narrative Arcs", titleAr: "بناء سلاسل القصص والحبكات السردية المشوقة", desc: "Using storytelling frameworks to lock user focus", descAr: "توظيف الأساليب الروائية لربط المنتجات والخدمات بمشاعر الناس" },
+              { title: "Visual Layout & Readability Maximization", titleAr: "تنسيق المقالات وتوزيع الصور التوضيحية للتأثير", desc: "Formatting margins, quotes, and spacing for online users", descAr: "ترتيب الفقرات بطوابع تجذب العين وتيسر الفهم من النظرة الأولى" },
+              { title: "Mitigating Plagiarism & Fact-Checking Core", titleAr: "التحقق من الحقائق وتجنب النقل والاقتباس الأعمى", desc: "Verifying facts to preserve content purity and authority", descAr: "فحص مخرجات الذكاء لمنع الأكاذيب التوليدية وحفظ موثوقية علامتك" }
+            ],
+            B2: [
+              { title: "Crafting Brand Tone Guides with AI", titleAr: "تخصيص وتثبيت بصمة العلامة التجارية الفريدة", desc: "Writing instructions to enforce a single voice across all texts", descAr: "تلقين المساعد أسلوبك المعتاد ليكتب جميع مقالاتك القادمة كأنها أنت" },
+              { title: "Multi-Angle Campaign Copy Generative Engines", titleAr: "بناء حملات تسويق شاملة متعددة الاتجاهات", desc: "Structuring cross-channel copy simultaneously", descAr: "توليد منشورات ويب، وتغريدات، وإعلانات متكاملة ومترابطة دفعة واحدة" },
+              { title: "Integrating AI Audio Synthesizers for Podcasting", titleAr: "توظيف مصنعات الصوت والبودكاست التوليدي", desc: "Converting newsletters into rich conversational audio episodes", descAr: "تحويل نصوصك إلى حلقات مسموعة بنبرة طبيعية ودقيقة لإمتاع السمع" },
+              { title: "Automated Content Publishing Pipelines", titleAr: "أتمتة خطوط معالجة ونشر المحتوى تلقائياً", desc: "Setting up bots to organize and dispatch drafts automatically", descAr: "توفير وقتك بجعل الذكاء ينشر المسودات على منصاتك في الأوقات الفائقة" },
+              { title: "Content Marketing KPI Analytical Systems", titleAr: "تحليلات الأداء الذكي وفهم إحصائيات التفاعل", desc: "Synthesizing next optimal content topics from real performance metrics", descAr: "قراءة وتحليل أرقام المتابعة لبناء الخطة الدراسية والتسويقية القادمة" }
+            ],
+            C1: [
+              { title: "Interactive Conversion Funnel Mapping", titleAr: "هندسة رحلة العميل وبناء مسارات الإقناع والبيع", desc: "Writing targeted triggers guiding users to solutions step-by-step", descAr: "صياغة نصوص مخصصة ترافق المتابع من مرحلة التعارف وحتى الشراء" },
+              { title: "Auditing Content Ethics and Fairness", titleAr: "مراجعة عدالة المحتوى وتجنب الانحيازات الإنسانية", desc: "Inspecting outputs to respect global diverse communities fairly", descAr: "تنظيف مخرجاتك وكتاباتك من التحيزات النمطية لضمان سلامة الرسالة" },
+              { title: "High-Converting AI Landing Pages", titleAr: "تصميم واجهات الهبوط الرقمية التي تحقق أعلى مبيعات", desc: "Structuring headlines, features grids and call-to-actions", descAr: "تركيب شاشات سريعة تركز على القيمة وتسهل حسم القرار الفوري" },
+              { title: "Multi-Channel Orchestration Engines", titleAr: "تناغم القنوات وبناء سلاسل الرسائل الذكية", desc: "Automated follow-up sequences across mail and SMS tags", descAr: "تنظيم الرسائل المتسلسلة لضمان استمرار تفاعل العميل معك باستمرار" },
+              { title: "Detecting and Shielding from Fake Information", titleAr: "الوقاية من الشائعات والتحصين ضد التزييف للمحتوى", desc: "Securing your brand authority from deepfake impersonations", descAr: "دعم علامتك التجارية بحماية بصرية وحقائق لا يتسلل إليها الشك" }
+            ],
+            C2: [
+              { title: `Executive Master of ${subj}`, titleAr: `الريادة الاستراتيجية الشاملة لـ ${subj}`, desc: "Directing multi-million view media campaigns using AI systems", descAr: "إدارة وإطلاق الإعلانات والمقالات لملايين المشاهدين في ثقة تامة" },
+              { title: "Massive Automated Book & Video Ecosystem Launch", titleAr: "توليد وإطلاق موسوعات الماركتنج والتعليم المتكاملة", desc: "Generating educational directories in simple clicks", descAr: "بناء أدلة تفصيلية من مئات الصفحات باستخدام منسقات ذكاء ذكية" },
+              { title: "Content Marketing Graduation Capstone Portfolio", titleAr: "مشروع تخرج صناعة المحتوى الاستراتيجي الفائق", desc: "Launching a real-world enterprise content strategy portfolio", descAr: "تصميم خطة متكاملة حية تنشر في الأسواق وتقدم قيمة اقتصادية حقيقية" },
+              { title: "Autonomous Swarms of AI Writer Agents", titleAr: "تحالفات الكتابة الذاتية المستقلة (Copilot Swarms)", desc: "Orchestrating agents doing continuous research, writing, and auditing", descAr: "مجموعة من المساعدين يعملون ٢٤ ساعة في صمت لبناء محتوى مبهر" },
+              { title: "Next-Gen Trends and Quantum Trend Analysis", titleAr: "استبصار الاتجاهات والتحليل الكمي لسلوك المتابعين", desc: "Predicting market interests before they appear dynamically", descAr: "قراءة المستقبل المعرفي وتجهيز المحتوى الذي يبحث عنه الناس مسبقاً" }
+            ]
+          },
+          security: {
+            A1: [
+              { title: `Introduction to Cyber Awareness of ${subj}`, titleAr: `مقدمة في الوعي الأمني والسيبراني لـ ${subj}`, desc: "Understanding digital identity concept", descAr: "فهم طبيعة البصمة الرقمية على النت وأهمية الخصوصية" },
+              { title: "First Lines of Cyber Defense", titleAr: "أساسيات وجدران الحماية الرقمية الأولى", desc: "Fostering robust passphrases and MFA keys", descAr: "تحديد معايير كلمات المرور فائقة القوة وإدارة المصادقة الثنائية" },
+              { title: "Spotting Phishing Links and Tricky Requests", titleAr: "اصطياد الروابط الخبيثة ومهارات الفحص الأولى", desc: "Identifying unexpected digital files", descAr: "طريقة البحث عن التهديدات وتجنب النقر على العروض المشبوهة" },
+              { title: "Securing Personal Credentials and Profiles", titleAr: "خصوصية الحسابات الشخصية ومراجعة الأذونات", desc: "Cleaning redundant permissions of older mobile applications", descAr: "مراجعة ما تصل إليه التطبيقات والألعاب لضمان عدم تسريب البيانات" },
+              { title: "Your First Family Cybersecurity Protocol Checklist", titleAr: "وضع ميثاق الأمان العائلي الأول المتفق عليه", desc: "Defining continuous sharing safety regulations at home", descAr: "قواعد واضحة بين الوالدين والأطفال لحب الاستطلاع الرقمي الآمن" }
+            ],
+            A2: [
+              { title: "Understanding Voice Cloning Spoofs", titleAr: "فهم انتحال النبرات واستنساخ البصمة الصوتية", desc: "How AI mimics human sounds with short records", descAr: "مخاطر الكلونات الصوتية الذكية وطرق إدراك الفوارق السمعية" },
+              { title: "Designing Family Password Verification Procedures", titleAr: "بناء كلمة السر العائلية المشتركة للتحقق", desc: "Securing emergency requests using private verbal tokens", descAr: "الاتفاق على كلمة سرية شفهية للتأكد من هوية المتحدث في الطوارئ" },
+              { title: "Securing Local Wi-Fi Routers Networks", titleAr: "حماية الراوتر المحلي وتدريع شبكة المنزل", desc: "Changing baseline settings and disabling remote pings", descAr: "إجراءات التشفير القوي وإيقاف ظهور شبكة الواي فاي للغرباء" },
+              { title: "Mitigating Public Networking Exposure", titleAr: "الوقاية من مخاطر شبكات الإنترنت العامة وغير المشفرة", desc: "Best practices using tunnels and secured layers", descAr: "تطبيق قنوات الاتصال المشفرة لحجب نشاطاتك في المقاهي والمطارات" },
+              { title: "Setting Browser Shield Protections", titleAr: "تنصيب دروع المتصفحات وحمايات الخصوصية القصوى", desc: "Disabling aggressive ad tracking and canvas fingerprinters", descAr: "تفعيل ميزات منع تتبع الإعلانات والملفات الخبيثة لحظياً" }
+            ],
+            B1: [
+              { title: "Data Backup Encryption Protocols", titleAr: "تشفير النسخ الاحتياطية وتأمين الملفات الهامة", desc: "Keeping double offline and online encrypted records safely", descAr: "قواعد تخزين وحماية الملفات العائلية الثمينة من هجمات الفدية" },
+              { title: "Inspecting Automated Email Spoofing headers", titleAr: "فهم ترويسة الرسائل المزيفة وحركات انتحال النطاق", desc: "Auditing domain records to verify exact origins", descAr: "قراءة تفاصيل الإيميل في الخلفية لكشف الهوية والتحقق من النطاق" },
+              { title: "Dynamic Social Engineering Tactics Defensive", titleAr: "استراتيجيات الحماية من الهندسة الاجتماعية والتلاعب", desc: "Mitigating psychological manipulation scams online", descAr: "تدريب العقل على التمهل والتحقق وعدم الخضوع لطلبات السرعة المشبوهة" },
+              { title: "Managing Cloud Security Access Panels", titleAr: "تنظيم وإدارة فضاءات التخزين السحابي الآمن", desc: "Setting role-based reading access inside drive solutions", descAr: "تقييد الوصول لملفاتك السحابية بمشاركة حصرية للمخولين فقط" },
+              { title: "Anti-Malware and System Scanning Practices", titleAr: "مكافحة برمجيات التجسس وفحص الأنظمة الذكي الممنهج", desc: "Cleaning dormant spyware to maintain optimal terminal privacy", descAr: "إجراء مسح دوري عميق وإزالة الأدوات التدميرية والملفات المتسللة" }
+            ],
+            B2: [
+              { title: "Mitigating Advanced Prompt Injection and Swindles", titleAr: "الحماية من ثغرات الحقن للأوامر (Prompt Injections)", desc: "Defending systems from visual or textual hijacked instructions", descAr: "منع سيطرة الأوامر الخارجية على مساعد الذكاء الخاص بك" },
+              { title: "Isolating Suspicious Packages and Sandboxing", titleAr: "عزل الملفات والتجربة داخل بيئات الاختبار (Sandbox)", desc: "Opening unexpected file packages without exposing core devices", descAr: "تشغيل واختبار البرامج الغامضة في جدار آمن كلياً يضمن سلامة جهازك" },
+              { title: "Advanced Device Location Safety Rules", titleAr: "حماية وتشفير بيانات الموقع الجغرافي والتحرك", desc: "Clearing GPS metadata files from photos before publishing", descAr: "مسح بصمات الإحداثيات الجغرافية من صور الهاتف قبل رفعها للنت" },
+              { title: "Mitigating Smart Voice Assistants Risks", titleAr: "إجراءات الحفاظ على الخصوصية مع مكبرات الصوت الذكية", desc: "Enforcing safe speech recording guidelines around home", descAr: "تنظيم ميزات الاستماع الدائم للمساعدات المنزلية لتقليل التنصت" },
+              { title: "Incident Response and Disaster Readiness", titleAr: "صياغة خطة الاستجابة السريعة وحالات التعافي الفوري", desc: "What to do in seconds when digital intrusion is verified", descAr: "خطوات عاجلة للتحكم في الأضرار وعزل المشكلة فور حدوث الاختراق" }
+            ],
+            C1: [
+              { title: "Deploying Local Private LLMs Safely", titleAr: "تشغيل نماذج الذكاء محلياً بخصوصية حديدية", desc: "Processing highly personal information without cloud leak risks", descAr: "توطين ومعالجة ملفاتك وحساباتك على جهازك دون اتصال سحابي" },
+              { title: "Deep auditing of Database Access Audits", titleAr: "مراجعة وتدقيق جدران حماية قواعد البيانات باستمرار", desc: "Synthesizing safe database triggers and monitoring logs", descAr: "تسجيل كافة الحركات والتحقق من هوية وحصانة الاستعلامات الواردة" },
+              { title: "Cyber Threat Intelligence Modeling Systems", titleAr: "نمذجة وتتبع استخبارات التهديدات العالمية المتلاحقة", desc: "Learning global vector tracks to protect specialized infrastructures", descAr: "فهم سلوك المهاجمين لإحباط محاولات الاختراق قبل حدوثها" },
+              { title: "Auditing Supply Chain Library Risks", titleAr: "تدقيق حزم المكتبات والتأكد من موثوقية الأكواد", desc: "Using automated code auditing scanners dynamically", descAr: "تصفية الإضافات البرمجية واختبار سلامتها ضد الأكواد والتروجان الخفي" },
+              { title: "Red Team Simulated Attacks Penetration", titleAr: "تجارب الفريق الأحمر ومحاكاة الاختراقات الصديقة", desc: "Attacking your own application blocks to fix gaps responsibly", descAr: "اختبار قوة دفاعاتك عبر الهجوم الاستباقي لتصميم حلول صلبة" }
+            ],
+            C2: [
+              { title: `Executive Direct of Cyber Security of ${subj}`, titleAr: `السيادة والريادة الأمنية الشاملة لـ ${subj}`, desc: "Commanding complete enterprise secure networks setups", descAr: "إدارة البنية التحتية وحوكمة السياسات الأمنية لأبرز الكيانات مستقبلاً" },
+              { title: "Designing Advanced Cryptographic Defense Nodes", titleAr: "هندسة العقد الدفاعية فائقة التشفير ومقاومة الاختراق", desc: "Using zero-knowledge proof tokens in distributed setups", descAr: "صياغة بروتوكولات سرية تضمن منتهى المصداقية بلا كشف تفاصيل" },
+              { title: "Enterprise Cybersecurity Capstone Cap", titleAr: "مشروع التخرج الأمني الشامل والأمن القومي الرقمي", desc: "Assembling a master secure deployment with audit results", descAr: "تأسيس دراسة واقعية متقدمة تجمع أفضل جدران الحماية والابتكارات" },
+              { title: "Orchestrating Autonomous Counter-Infiltration Agents", titleAr: "تحالف المساعدين لمكافحة الهجمات السيبرانية ذاتياً", desc: "Setting up swarm security checkers to neutralize threats in milliseconds", descAr: "توجيه وكلاء ذكاء اصطناعي يعالجون محاولات التسلل ويطردون الخبثاء" },
+              { title: "Post-Quantum Cryptography and Post-Breakout Shielding", titleAr: "تشفير ما بعد الحوسبة الكمية وتطوير حماية المستقبل الأبدي", desc: "Implementing encryption impervious to quantum computation attacks", descAr: "اعتماد خوارزميات صلبة تحمي أسرار البشرية ضد أجهزة الغد الفائقة" }
+            ]
+          },
+          general: {
+            A1: [
+              { title: `Foundations and History of ${subj}`, titleAr: `مقدمة وتمهيد في تاريخ وأسس ${subj}`, desc: "Unlocking general concepts, definitions and primary capabilities", descAr: "فهم الفكرة الجوهرية والقدرات الأساسية للذكاء التوليدي" },
+              { title: "First Patterns and Where to Find Them", titleAr: "الأنماط الأولى وأين نبحث عنها حولنا", desc: "Exploring how computers recognize words and symbols", descAr: "استكشاف طريقة إدراك الآلات للأشكال والرموز المكررة" },
+              { title: "Concept of Processing and Structuring Inputs", titleAr: "مفهوم المعالجة وتنسيق وترتيب المدخلات", desc: "Understanding machine language basics clearly", descAr: "معرفة كيف يتم تحويل نصوصنا إلى بيانات رقمية قابلة للفهم للآلة" },
+              { title: "Basic Prompt Formulation Rules Level 1", titleAr: "قواعد صياغة الأوامر والتوجيهات البسيطة", desc: "Learning the elements of high-quality prompting", descAr: "كتابة طلبات واضحة تضمن الحصول على أفضل إجابة من المساعد" },
+              { title: "Your Progressive Step with Intelligence Modules", titleAr: "أولى خطوات التجربة مع الآلة المساعدة", desc: "Initiating a quick collaborative discussion with the model", descAr: "فتح حوار شيق وتعليمي يعود بالفائدة والخبرة للمبتدئين" }
+            ],
+            A2: [
+              { title: "Designing Flowcharts & Mind Mapping Basics", titleAr: "تصميم المخططات الانسيابية والخرائط الذهنية", desc: "Tracing dynamic logic paths step by step", descAr: "رسم المسارات والأفكار بشكل بصرى رائع يسهل الاستيعاب" },
+              { title: "Establishing Dynamic Context Pools", titleAr: "بناء وتغذية السياق المعرفي للمساعد", desc: "How to supply background information to direct output values", descAr: "تزويد المساعد بالمعلومات الضرورية لإثراء نقاشه ومعلوماته" },
+              { title: "Visual Understanding Map Configurations", titleAr: "إعداد خرائط الفهم البصري والأشكال", desc: "Connecting logical elements in structured canvas forms", descAr: "تحديد وتحليل الروابط البصرية وعلاقات الأجزاء في المستندات" },
+              { title: "Inference Optimization & Reasoning Basics", titleAr: "تطوير الاستنتاج والمنطق الاستدلالي الأساسي", desc: "Exploring how machines deduct solutions from structured scenarios", descAr: "فهم طريقة تفكير النماذج لحل المسائل واستنتاج الأجوبة" },
+              { title: "Refining Role Control Parameters", titleAr: "تنقيح وضبط قيود تخصيص هوية المساعد", desc: "Directing the model to speak and analyze inside exact rules", descAr: "أهم مفاتيح توجيه المساعد للتقمص الكامل للشخصية بدقة وإتقان" }
+            ],
+            B1: [
+              { title: "Verifying Information Quality (Fact Checking)", titleAr: "فحص جودة المعلومات ومحاربة التزييف المعرفي", desc: "Auditing references to combat dynamic hallucinations", descAr: "تطبيق أدوات التحقق الحية لكشف الأخطاء في الإجابات التوليدية" },
+              { title: "Advanced Word Tokenization & Text Extraction", titleAr: "تقطيع النصوص وفهم دلالات الكلمات الرقمية", desc: "How linguistic data is transformed to geometric models", descAr: "تحويل العبارات إلى متجهات هندسية تضمن إدراك المعنى المقارب" },
+              { title: "Methods of Errors Minimization", titleAr: "استراتيجيات تقليل العثرات وتقييد الاستبصار", desc: "Techniques to direct responses using secure boundaries", descAr: "وضع حدود حديدية تضمن بقاء النموذج مستقراً وتفادي الانهيارات" },
+              { title: "Connecting Collaborative Human-AI Teams", titleAr: "تناغم ومشاركة الفرق البشرية والذكية معاً", desc: "Sharing roles between human intuition and machine calculation speed", descAr: "توزيع المهام اليومية للاستفادة القصوى من مهارات البشر والآلات" },
+              { title: "Setting Private Usage Declarations", titleAr: "صياغة إشارات الخصوصية وحق استخدام البيانات", desc: "Respecting other's data privacy inside shared templates", descAr: "قواعد واضحة لحفظ المستندات الحساسة بعيداً عن أعين الغرباء" }
+            ],
+            B2: [
+              { title: "Synthesizing Rich Digital Experiences", titleAr: "صناعة التجارب والواجهات والحلول الرقمية", desc: "Enriching customer satisfaction metrics using interactive features", descAr: "طرق تزيين وترقية خدماتك لتوفير أقصى بهجة وفائدة للمستخدم" },
+              { title: "Dynamic Prompt Structures (Chain-of-Thought)", titleAr: "منطق التسلسل الذهني الممنهج (Chain of Thought)", desc: "Teaching the model to write out logical steps before final answers", descAr: "إلزام المساعد بكتابة خطوات تفكيره تدريجياً لزيادة دقته العقلية" },
+              { title: "Orchestrating Audio, Video and Text Tools", titleAr: "تناغم ودمج مولدات الصوت والصور والمستندات", desc: "Building immersive multi-sensory content libraries in seconds", descAr: "صهر المواد التوليدية المختلفة وتوحيد المخرجات لطابع مذهل" },
+              { title: "Professional Daily Workflow Automation Pipelines", titleAr: "تأسيس خطوط الأتمتة المتقدمة للعمليات المتكررة", desc: "Saving hundreds of hours by programming repetitive manual chores", descAr: "بناء روبوتات ذكية توفر وقتك وتنجز الأعمال الروتينية الطويلة" },
+              { title: "Integrating Online API Resources Connections", titleAr: "الدمج الذكي لواجهات برمجية التطبيقات الخارجية", desc: "Allowing your AI system to query public directories dynamically", descAr: "ربط المساعد بخوادم وقواعد بيانات خارجية لتعزيز قدراته البحثية" }
+            ],
+            C1: [
+              { title: "Deep Neural Network Evaluations", titleAr: "تقييم وبنية الشبكات العصبية العميقة", desc: "Tracing how mathematical weights balance to construct answers", descAr: "فهم لغة الأوزان الطبقية للشبكات وكيف يصقل النموذج سلوكه" },
+              { title: "Ethical Safe Usage and Data Audits", titleAr: "تدقيق معايير العدالة والمصداقية الأخلاقية للآلة", desc: "Scrutinizing automated biases in training metrics and sources", descAr: "فحص توازن البيانات للتأكد من خلو مخرجات الآلة من التحيزات الضارة" },
+              { title: "High-Fidelity Real-Time Data Streams Processing", titleAr: "معالجة تدفقات البيانات الضخمة وفائقة السرعة", desc: "Developing fast response structures for enterprise pipelines", descAr: "تنظيم تدفق المعلومات اللحظية لضمان استقرار القرار الآلي" },
+              { title: "Model Performance Tuning Handbooks", titleAr: "صقل كفاءة وثبات النماذج وتعديل الأوزان", desc: "Understanding parameter adjustments (temperature, top_p) like a pro", descAr: "استخدام مفاتيح التحكم الدقيقة لتعديل درجة ابتكار المساعد الذكي" },
+              { title: "Shielding Personal Interfaces and Assets", titleAr: "تدريع وتأمين الواجهات وفحص اختراقات الخلل", desc: "Securing system frameworks against bad intention injections", descAr: "بناء دفاعات قوية تمنع تسريب البيانات وتحافظ على الأسرار البرمجية" }
+            ],
+            C2: [
+              { title: `Creative Visionary Mastery of ${subj}`, titleAr: `الريادة والسيادة الابتكارية الشاملة لـ ${subj}`, desc: "Formulating complete system revolutions autonomously using AI integrations", descAr: "قيادة ركب الابتكار ودمج الحلول الذكية لبناء مستقبل باهر ومستدام" },
+              { title: "Massive Enterprise Scalable Architectures", titleAr: "هندسة الأنظمة فائقة القدرة والمرونة والتوسع", desc: "Designing structures supporting infinite user operations simultaneously", descAr: "صياغة شبكات تواصل متوازية تخدم آلاف المستخدمين في وقت واحد" },
+              { title: "Comprehensive Research Graduation Capstone Piece", titleAr: "مشروع التخرج البحثي الأكاديمي والحلول العملية", desc: "Presenting a solid study backed by dynamic proofs and setups", descAr: "صياغة فكرة مشروع متكامل وحي يجسد طموحاتك ويخدم مجتمعك" },
+              { title: "Autonomous Multi-Agent Collaborative Systems", titleAr: "بناء وتوجيه فرق المساعدين المستقلين المتناغمين", desc: "Directing collections of specialized robots coordinating via web scripts", descAr: "تصميم مصنع ذكي كامل يدار بالكامل من قبل مساعدي الذكاء بكفاءة" },
+              { title: "Quantum Future Paradigms and Post-Human Interfaces", titleAr: "رؤية آفاق الغد البعيد والحوسبة فائقة الأداء والسرعة", desc: "Preparing for the post-digital evolution of human knowledge", descAr: "مفتاحك لاستكشاف القفزات القادمة في العلوم والبرمجيات والمستقبليات" }
+            ]
+          }
+        };
+
+        const selectedCat = dict[category] || dict.general;
+        const out: Record<string, any[]> = {};
+        ["A1", "A2", "B1", "B2", "C1", "C2"].forEach((lvl) => {
+          const list = selectedCat[lvl];
+          out[lvl] = list.map((item, idx) => ({
+            id: `${lvl}-${idx + 1}`,
+            title: item.title,
+            titleAr: item.titleAr,
+            description: item.desc,
+            descriptionAr: item.descAr
+          }));
         });
+        return out;
+      };
+
+      if (!initAI() || !aiLive) {
+        logToFile("[Info] Using Custom Dynamic 30-Unit Curriculum generator fallback");
+        const fallbackObj = generateDynamicFallback(subject, goals);
+        return res.json(fallbackObj);
       }
 
       const promptText = `
         SYSTEM: You are a Curriculum Architect at Basim Alkhalil Academy.
-        TASK: Suggest a 6-level curriculum structure for a new subject: "${subject}".
+        TASK: Suggest a comprehensive 6-level curriculum structure for a new subject: "${subject}".
         GOALS: ${goals}
         
-        FORMAT: Return a JSON object with 6 levels (A1 to C2). 
-        Each level should have 5 units.
-        JSON format: { "A1": [ { "id": "...", "title": "...", "titleAr": "...", "description": "...", "descriptionAr": "..." }, ... ], ... }
+        FORMAT REQUIREMENTS: Return a JSON object with 6 levels (A1, A2, B1, B2, C1, C2). 
+        You MUST provide EXACTLY 5 distinct, progressive units for EACH of the 6 levels. This refers to 30 unique total modules across the entire section.
+        Do NOT repeat titles or templates across levels. Make sure each unit has unique and highly detailed localized titles ("title" in English, "titleAr" in Arabic) and descriptions ("description" in English, "descriptionAr" in Arabic) specifically focusing on "${subject}".
         
-        Language: High-quality ${lang === 'ar' ? 'Arabic' : 'English'}.
+        JSON schema format: 
+        {
+          "A1": [
+            { "id": "A1-1", "title": "Unit 1 English Title", "titleAr": "عنوان الوحدة الأولى بالرسمي الفصيح", "description": "English desc", "descriptionAr": "شرح الوحدة الأولى بالتفصيل" },
+            { "id": "A1-2", "title": "Unit 2 English Title", "titleAr": "عنوان الوحدة الثانية بالرسمي الفصيح", "description": "English desc", "descriptionAr": "شرح الوحدة الثانية بالتفصيل" },
+            { "id": "A1-3", "title": "Unit 3 English Title", "titleAr": "عنوان الوحدة الثالثة بالرسمي الفصيح", "description": "English desc", "descriptionAr": "شرح الوحدة الثالثة بالتفصيل" },
+            { "id": "A1-4", "title": "Unit 4 English Title", "titleAr": "عنوان الوحدة الرابعة بالرسمي الفصيح", "description": "English desc", "descriptionAr": "شرح الوحدة الرابعة بالتفصيل" },
+            { "id": "A1-5", "title": "Unit 5 English Title", "titleAr": "عنوان الوحدة الخامسة بالرسمي الفصيح", "description": "English desc", "descriptionAr": "شرح الوحدة الخامسة بالتفصيل" }
+          ],
+          "A2": [ ... 5 units ... ],
+          "B1": [ ... 5 units ... ],
+          "B2": [ ... 5 units ... ],
+          "C1": [ ... 5 units ... ],
+          "C2": [ ... 5 units ... ]
+        }
+        
+        Language: Extremely high-quality ${lang === 'ar' ? 'Arabic' : 'English'}.
       `;
 
       const result = await callAiWithRetry({
@@ -1373,7 +1626,7 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
       }
       res.json(JSON.parse(cleanText));
     } catch (error: any) {
-      logToFile(`[Info] Curriculum Design Fallback: ${error.message}`);
+      logToFile(`[Info] Curriculum Design Fallback on error: ${error.message}`);
       res.json({
         A1: [{ id: "A1-1", title: "Introduction", titleAr: "المقدمة والتمهيد", description: "Basics of communication", descriptionAr: "أساسيات التواصل للتحدث" }]
       });

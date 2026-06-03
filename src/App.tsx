@@ -3543,6 +3543,8 @@ export default function App() {
   const [activeStudentProfile, setActiveStudentProfile] = useState<UserProfile | null>(null);
   const [earlyChildhoodInitialLesson, setEarlyChildhoodInitialLesson] = useState<string | null>(null);
   const [activeInteractiveUnitId, setActiveInteractiveUnitId] = useState<string | null>(null);
+  const [aiCurriculumInitialLessonId, setAiCurriculumInitialLessonId] = useState<string | null>(null);
+  const [aiCurriculumInitialLobbyTab, setAiCurriculumInitialLobbyTab] = useState<string | null>(null);
 
   useEffect(() => {
     if (!activeStudentId) {
@@ -4176,6 +4178,10 @@ export default function App() {
             } else if (courseId === 'early_childhood') {
               setEarlyChildhoodInitialLesson(unitId);
               setView('early-childhood');
+            } else if (courseId === 'ai-curriculum') {
+              setAiCurriculumInitialLessonId(unitId);
+              setAiCurriculumInitialLobbyTab('study_plan');
+              setView('ai-curriculum');
             } else if (courseId === 'test') {
               setSelectedTestLevel(level);
               setSelectedTestUnitId(unitId);
@@ -4870,7 +4876,16 @@ export default function App() {
       return (
         <AiCurriculum 
           lang={lang} 
-          onBack={() => setView('dashboard')} 
+          userProfile={userProfile}
+          initialLessonId={aiCurriculumInitialLessonId || undefined}
+          initialLobbyTab={aiCurriculumInitialLobbyTab || undefined}
+          onNavigate={setView}
+          onBack={() => {
+            const cameFromPlanner = aiCurriculumInitialLobbyTab === 'study_plan' || !!aiCurriculumInitialLessonId;
+            setAiCurriculumInitialLessonId(null);
+            setAiCurriculumInitialLobbyTab(null);
+            setView(cameFromPlanner ? 'academic-planner' : 'dashboard');
+          }} 
         />
       );
     }

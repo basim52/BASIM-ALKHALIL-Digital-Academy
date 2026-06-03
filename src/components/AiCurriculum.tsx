@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import html2canvas from 'html2canvas';
 import { AI_TOOLS_DATA, AiTool } from './AiToolsData';
@@ -6,6 +6,9 @@ import { PerfectionHub } from './PerfectionHub';
 import { PROMPT_PROFESSIONAL_DATA } from './PromptProData';
 import { PROMPT_TEMPLATES_DATA } from './PromptTemplatesData';
 import { MEGA_PROMPTS_DATA } from './MegaPromptLabData';
+import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
+import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { UserProfile } from '../types';
 import { 
   Brain, 
   BrainCircuit,
@@ -46,7 +49,8 @@ import {
   Flame,
   Calendar,
   ExternalLink,
-  ShieldCheck
+  ShieldCheck,
+  Trash2
 } from 'lucide-react';
 
 interface Lesson {
@@ -1233,8 +1237,137 @@ const ADVANCED_CURRICULUM_DATA = {
 };
 
 
-export const AiCurriculum = ({ lang, onBack }: { lang: 'en' | 'ar', onBack: () => void }) => {
+const getCustomUnitActivity = (unit: any, isRtl: boolean) => {
+  const title = ((unit && (unit.title || unit.titleAr)) || '').toLowerCase();
+  
+  if (title.includes('رسم') || title.includes('فن') || title.includes('صورة') || title.includes('art') || title.includes('paint') || title.includes('draw') || title.includes('image')) {
+    return {
+      concept: isRtl 
+        ? "أنت الآن تتعلم كيف يرى الذكاء الاصطناعي الأشكال والألوان. من خلال النماذج التوليدية، يقوم الكمبيوتر بتحويل الكلمات إلى ملايين النقاط الملونة (البكسل) ليكوّن لك تحفة فنية فريدة بناءً على خيالك فقط."
+        : "You are learning how AI perceives shapes and colors. Through generative models, the computer translates textual descriptions into millions of colored points (pixels) to assemble a unique masterpiece based solely on your imagination.",
+      mission: isRtl
+        ? "انتقل إلى معمل الصور واكتب نصًا يصف: 'قطة فضائية ترتدي نظارة شمسية فوق كوكب المريخ بأسلوب ريشة كلاسيكية'، وشاهد النتيجة!"
+        : "Navigate to the AI Image Lab and enter the prompt: 'An astronaut cat wearing sunglasses on Mars, classical oil painting brush style', then visualize the outcome!",
+      question: isRtl
+        ? "ما الذي يجعل الذكاء الاصطناعي يفهم أسلوب الرسم المفضل لديك؟"
+        : "What enables generative AI to accurately replicate your desired painting style?",
+      options: isRtl
+        ? [
+            "اختيار كلمات دقيقة ووصف الأسلوب الفني في النص المحفز (Prompt)",
+            "توصيل كابلات الشاشات التلفزيونية القديمة وتدفئتها",
+            "زيادة كفاءة بطارية الهاتف الخلوي والإنترنت"
+          ]
+        : [
+            "Crafting precise words and specifying the aesthetic format in your Prompt",
+            "Plugging in cables on older analog television models",
+            "Boosting active mobile network signal bars"
+          ],
+      correctIndex: 0
+    };
+  }
+  
+  if (title.includes('برمج') || title.includes('كود') || title.includes('مطور') || title.includes('code') || title.includes('program') || title.includes('developer') || title.includes('python')) {
+    return {
+      concept: isRtl
+        ? "الذكاء الاصطناعي يقرأ ويكتب الأكواد البرمجية كأنه يتحدث معك. يقوم بتحليل المنطق، والبحث عن الأخطاء (Bugs)، ويساعد المطورين في كتابة تطبيقات كاملة في دقائق بأي لغة برمجة تريدها."
+        : "AI reads and structures computer code much like natural conversation. It analyzes programmatic logic, identifies bugs, and assists developers in assembling complete functional applications in minutes.",
+      mission: isRtl
+        ? "افتح معمل الأكواد واطلب من المحاكي: 'اكتب كود بايثون بسيط لحساب عمر المستخدم بالمرخ والزهرة'!"
+        : "Open the AI coding workspace/sandbox and prompt: 'Write a simple Python script calculating the user's age on Mars and Venus'!",
+      question: isRtl
+        ? "ما هي الفائدة الكبرى للذكاء الاصطناعي أثناء كتابة كود برمجي؟"
+        : "What is the primary advantage of using AI models when programming?",
+      options: isRtl
+        ? [
+            "المساعدة في تسريع العمل، شرح منطق السطور، وإيجاد الحل للأخطاء فورياً",
+            "تطبيق قواعد حسابية معقدة لشراء الدهانات المادية",
+            "تنظيف المعالج من الغبار المتراكم ببرامج التشغيل"
+          ]
+        : [
+            "Accelerating project cycles, explaining nested logic arrays, and fixing syntax errors instantly",
+            "Calculating compound formulas to buy paint brushes",
+            "Cleaning computer CPU exhaust fans through software updates"
+          ],
+      correctIndex: 0
+    };
+  }
+
+  if (title.includes('أمان') || title.includes('حماي') || title.includes('اختراق') || title.includes('cyber') || title.includes('security') || title.includes('safe') || title.includes('privacy')) {
+    return {
+      concept: isRtl
+        ? "حماية البيانات الشخصية والوعي السيبراني هما أهم دروع العصر الرقمي. الذكاء الاصطناعي يمكن استغلاله للتزييف العميق (Deepfakes) والكلونات الصوتية، لذا الاتفاق على كلمة سر عائلية هو حصنك الأول."
+        : "Data privacy and cyber literacy are key shields of our digital era. Since advanced models can mimic human voices or synthesise likenesses (Deepfakes), establishing personal verification steps is your primary defense.",
+      mission: isRtl
+        ? "قم بإجراء محاكاة عائلية سريعة: اجلس مع والديك واتفقوا اليوم على كلمة مرور سرية خاصة بالعائلة لوقف أي انتحال."
+        : "Lead a quick family drill: sit with your parents and declare a private verbal password to verify dynamic, unusual requests.",
+      question: isRtl
+        ? "كيف تواجه محاولات التزييف عبر الصوت الذكي المستنسخ؟"
+        : "How do you actively combat potential spoofing requests using cloned voices?",
+      options: isRtl
+        ? [
+            "الاتفاق الفوري على كلمة سر عائلية للتحقق الصوتي وطرح سؤال شخصي",
+            "عدم استخدام أجهزة الهواتف لمدة شهر كامل متواصل",
+            "فصل كيبل الكهرباء العائلي المنزلي بشكل مستمر"
+          ]
+        : [
+            "Agreeing on a private family verification phrase and asking personal questions",
+            "Stopping the use of all smartphones for an entire month",
+            "Unplugging household electrical circuit breakers permanently"
+          ],
+      correctIndex: 0
+    };
+  }
+
+  return {
+    concept: isRtl
+      ? "أنت الآن تبني أساساً قوياً للذكاء الاصطناعي التوليدي. صياغة النص المحفز (Prompt Engineering) تتيح لك أن تطلب من النموذج التفكير خطوة بخطوة، وتحديد شخصية معينة للرد عليك بدقة وحكمة متناهية."
+      : "You are mastering the core pillars of generative AI. Prompt Engineering allows you to instruct the model to reason step-by-step, assign distinct professional roles, and generate deeply structured, highly accurate responses.",
+    mission: isRtl
+      ? "جرب كتابة محفز متكامل في معمل الدردشة: 'تقمص دور معلم تاريخ مرح، واشرح لي بتبسيط شديد قصة بناء الأهرامات في ثلاثة أسطر مشوقة لطلبة الابتدائي'!"
+      : "Try writing a structured prompt in the general LLM sandbox: 'Act as a funny medieval knight and explain how castles were defended in 3 engaging bullet points for high-school students'!",
+    question: isRtl
+      ? "ماذا يعني 'تخصيص دور للمساعد' أو (Role Prompting) في الذكاء الذاتي؟"
+      : "What does 'Role Prompting' signify in prompt engineering?",
+    options: isRtl
+      ? [
+          "توجيه النموذج لتقمص كفاءة أو خبير معين لرفع دقة وجودة التحليل والمخرجات",
+          "زيادة معدلات تبريد الجهاز عبر خوارزميات الحوسبة السريعة",
+          "تحويل الكلمات إلى موجات كهرومغناطيسية ملموسة"
+        ]
+      : [
+          "Instructing the model to synthesize answers through the perspective and expertise of a specific persona",
+          "Increasing physical computer fan speed using computational code commands",
+          "Converting raw text inputs into physical electromagnetic waves"
+        ],
+    correctIndex: 0
+  };
+};
+
+
+export const AiCurriculum = ({ 
+  lang, 
+  onBack,
+  userProfile,
+  initialLessonId,
+  initialLobbyTab,
+  onNavigate
+}: { 
+  lang: 'en' | 'ar'; 
+  onBack: () => void;
+  userProfile?: UserProfile | null;
+  initialLessonId?: string;
+  initialLobbyTab?: string;
+  onNavigate?: (view: any) => void;
+}) => {
   const isRtl = lang === 'ar';
+
+  const isAboodB = userProfile && (
+    (userProfile.displayName && userProfile.displayName.trim().toUpperCase().includes('ABOOD B')) ||
+    (userProfile.email && userProfile.email.trim().toLowerCase().includes('abood')) ||
+    (userProfile.uid && userProfile.uid.trim().toLowerCase().includes('abood'))
+  );
+  const isAdmin = userProfile?.email && ['basim5252@gmail.com'].includes(userProfile.email.trim().toLowerCase());
+  const hasCompletedTest = (userProfile as any)?.placementTestCompleted === true || !!isAboodB || !!isAdmin;
 
   // Helper functions for prompt builders
   const getPlaceholders = (text: string): string[] => {
@@ -1500,11 +1633,260 @@ export const AiCurriculum = ({ lang, onBack }: { lang: 'en' | 'ar', onBack: () =
   const [lQuizAnswer, setLQuizAnswer] = useState<string | null>(null);
   const [lQuizFeedback, setLQuizFeedback] = useState<'correct' | 'wrong' | null>(null);
 
+  // On mount, load from localStorage if exists
+  useEffect(() => {
+    const savedPlan = localStorage.getItem('ai_custom_study_plan');
+    if (savedPlan) {
+      try {
+        const parsed = JSON.parse(savedPlan);
+        if (parsed.plan) {
+          setCustomStudyPlan(parsed.plan);
+        }
+        if (parsed.subject) {
+          setPlannerSubject(parsed.subject);
+        }
+        if (parsed.focus) {
+          setPlannerFocus(parsed.focus);
+        }
+      } catch (e) {
+        console.error("Error loading plan from storage", e);
+      }
+    }
+  }, []);
+
   // Custom AI Study Planner States
   const [plannerSubject, setPlannerSubject] = useState<string>('');
   const [plannerFocus, setPlannerFocus] = useState<string>('بسيط عائلي وعملي للمبتدئين');
   const [generatingPlan, setGeneratingPlan] = useState<boolean>(false);
   const [customStudyPlan, setCustomStudyPlan] = useState<any>(null);
+  const [savingToCloud, setSavingToCloud] = useState<boolean>(false);
+  const [cloudSaveSuccess, setCloudSaveSuccess] = useState<boolean>(false);
+
+  // Selected custom study plan unit states and hooks
+  const [selectedCustomUnit, setSelectedCustomUnit] = useState<any | null>(null);
+  const [completedCustomUnitIds, setCompletedCustomUnitIds] = useState<Set<string>>(new Set());
+  const [customUnitQuizSelected, setCustomUnitQuizSelected] = useState<number | null>(null);
+  const [customUnitQuizCorrect, setCustomUnitQuizCorrect] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (initialLobbyTab) {
+      setLobbyTab(initialLobbyTab as any);
+    }
+  }, [initialLobbyTab]);
+
+  useEffect(() => {
+    const fetchCompletionStatus = async () => {
+      const activeAuth = auth.currentUser;
+      const currentUid = userProfile?.uid || activeAuth?.uid;
+      if (!currentUid) return;
+      try {
+        const q = query(
+          collection(db, 'lessonResults'), 
+          where('userId', '==', currentUid), 
+          where('courseId', '==', 'ai-curriculum')
+        );
+        const querySnapshot = await getDocs(q);
+        const completedIds = new Set<string>();
+        querySnapshot.forEach(doc => {
+          completedIds.add(doc.data().lessonId);
+        });
+        setCompletedCustomUnitIds(completedIds);
+      } catch (err) {
+        console.error("Error fetching completed AI lessons:", err);
+      }
+    };
+    fetchCompletionStatus();
+  }, [userProfile, customStudyPlan]);
+
+  useEffect(() => {
+    if (initialLessonId && customStudyPlan) {
+      let foundUnit: any = null;
+      let foundLevel: string = '';
+      ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].forEach(lvl => {
+        const units = customStudyPlan[lvl] || [];
+        const unit = units.find((u: any) => u.id === initialLessonId);
+        if (unit) {
+          foundUnit = unit;
+          foundLevel = lvl;
+        }
+      });
+      if (foundUnit) {
+        setSelectedCustomUnit({ ...foundUnit, level: foundLevel });
+      }
+    }
+  }, [initialLessonId, customStudyPlan]);
+
+  const handleMarkCustomUnitCompleted = async (unit: any) => {
+    const activeAuth = auth.currentUser;
+    const currentUid = userProfile?.uid || activeAuth?.uid;
+    if (!currentUid) {
+      alert(isRtl ? 'بادر بتسجيل الدخول أولاً لحفظ إكمال الدرس!' : 'Please sign in to save lesson completion!');
+      return;
+    }
+
+    try {
+      const resultObj = {
+        userId: currentUid,
+        lessonId: unit.id || `ai-${unit.level}-${1}`,
+        courseId: 'ai-curriculum',
+        score: 10,
+        total: 10,
+        studentName: userProfile?.displayName || activeAuth?.displayName || (isRtl ? 'طالب متميز' : 'Shining Student'),
+        completedAt: serverTimestamp(),
+      };
+
+      await addDoc(collection(db, 'lessonResults'), resultObj);
+      
+      setCompletedCustomUnitIds(prev => {
+        const next = new Set(prev);
+        next.add(unit.id);
+        return next;
+      });
+
+      alert(isRtl ? 'رائع! تم تسجيل إكمال الدرس بنجاح وسيظهر كمكتمل في جدول مهامك!' : 'Excellent! Lesson marked as completed and will reflect on your task planner!');
+      setSelectedCustomUnit(null);
+    } catch (error) {
+      console.error("Error saving lesson result completion:", error);
+      alert(isRtl ? 'خطأ في عملية الحفظ' : 'Error saving completion');
+    }
+  };
+
+  const handleSaveToCloud = async () => {
+    if (!customStudyPlan) return;
+    const activeAuth = auth.currentUser;
+    const currentUid = userProfile?.uid || activeAuth?.uid;
+    if (!currentUid) {
+      alert(isRtl ? 'يرجى تسجيل الدخول أولاً لحفظ الخطة في السحابة!' : 'Please sign in to save your plan to the cloud!');
+      return;
+    }
+
+    setSavingToCloud(true);
+    setCloudSaveSuccess(false);
+
+    try {
+      const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+      const planItems: any[] = [];
+      const days = isRtl 
+        ? ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'] 
+        : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+      const allUnits: { unit: any; lvl: string }[] = [];
+      levels.forEach((lvl) => {
+        const units = customStudyPlan[lvl] || [];
+        units.forEach((unit: any) => {
+          allUnits.push({ unit, lvl });
+        });
+      });
+
+      let currentDate = new Date();
+      currentDate.setHours(17, 0, 0, 0); // 5 PM default
+
+      const advanceStudyDate = (date: Date) => {
+        const next = new Date(date);
+        do {
+          next.setDate(next.getDate() + 1);
+        } while (next.getDay() === 5 || next.getDay() === 6); // Skip Friday (5) and Saturday (6)
+        return next;
+      };
+
+      // If starting on a weekend, advance to next Sunday
+      while (currentDate.getDay() === 5 || currentDate.getDay() === 6) {
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+
+      let lessonCount = 0;
+      let testCount = 0;
+
+      allUnits.forEach(({ unit, lvl }, idx) => {
+        const dayName = days[currentDate.getDay()];
+        const weekNum = Math.ceil((idx + 1 + testCount) / 5);
+
+        planItems.push({
+          id: `plan-ai-l${idx + 1}`,
+          month: Math.ceil(weekNum / 4),
+          week: weekNum,
+          day: dayName,
+          courseId: 'ai-curriculum',
+          courseLabel: isRtl ? 'مخطط الدراسة الذكي (AI Planner)' : 'AI Smart Individual Planner',
+          topic: isRtl ? (unit.titleAr || unit.title) : (unit.title || unit.titleAr),
+          description: isRtl ? (unit.descriptionAr || unit.description) : (unit.description || unit.descriptionAr),
+          duration: '45 min',
+          level: lvl,
+          unitId: unit.id || `ai-${lvl}-${idx + 1}`,
+          dateLabel: currentDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
+          timeLabel: '17:00',
+          scheduledAt: currentDate.toISOString()
+        });
+
+        currentDate = advanceStudyDate(currentDate);
+        lessonCount++;
+
+        // Add exam after every 3 units
+        if (lessonCount % 3 === 0) {
+          testCount++;
+          const testDayName = days[currentDate.getDay()];
+          const testWeekNum = Math.ceil((idx + 1 + testCount) / 5);
+
+          planItems.push({
+            id: `plan-ai-test-${testCount}`,
+            month: Math.ceil(testWeekNum / 4),
+            week: testWeekNum,
+            day: testDayName,
+            courseId: 'test',
+            courseLabel: isRtl ? 'اختبار مراجعة الذكاء الاصطناعي 🏆' : 'AI Review Challenge 🏆',
+            topic: isRtl ? `مستوى ${lvl}: اختبار التمكن والتقييم الذكي` : `Level ${lvl}: AI Mastery Challenge`,
+            description: isRtl 
+              ? `اختبار مخصص ومكثف لتقييم المهارات المكتسبة لآخر ٣ وحدات دراسية في مستوى ${lvl}` 
+              : `A targeted proficiency test to review the last 3 units of your AI path in level ${lvl}`,
+            duration: '30 min',
+            level: lvl,
+            unitId: `test-${lvl}`,
+            isTest: true,
+            dateLabel: currentDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
+            timeLabel: '17:00',
+            scheduledAt: currentDate.toISOString()
+          });
+
+          currentDate = advanceStudyDate(currentDate);
+        }
+      });
+
+      const newPlan = {
+        studentName: userProfile?.displayName || activeAuth?.displayName || (isRtl ? 'طالب متميز' : 'Shining Student'),
+        startDate: new Date().toISOString().split('T')[0],
+        preferredTime: '17:00',
+        selectedDays: [0, 1, 2, 3, 4], // Sun to Thu
+        selectedCategories: ['ai-curriculum', 'test'],
+        lessonsPerDay: 1,
+        weeksToGenerate: Math.ceil((allUnits.length + testCount) / 5),
+        planItems: planItems,
+        userId: currentUid,
+        parentIds: userProfile ? ((userProfile as any).linkedParentIds || []) : [],
+        createdAt: serverTimestamp(),
+      };
+
+      await addDoc(collection(db, 'studyPlans'), newPlan);
+      setCloudSaveSuccess(true);
+      
+      // Also update local storage to stay in sync
+      localStorage.setItem('ai_custom_study_plan', JSON.stringify({
+        plan: customStudyPlan,
+        subject: plannerSubject,
+        focus: plannerFocus
+      }));
+
+      setTimeout(() => setCloudSaveSuccess(false), 4000);
+    } catch (error) {
+      console.error("Error saving custom study plan to cloud Firestore:", error);
+      try {
+        handleFirestoreError(error, OperationType.CREATE, 'studyPlans');
+      } catch (err: any) {
+        alert(isRtl ? `خطأ أثناء الحفظ: ${err.message}` : `Error saving plan: ${err.message}`);
+      }
+    } finally {
+      setSavingToCloud(false);
+    }
+  };
 
   const handleGenerateCustomPlan = async () => {
     if (!plannerSubject.trim()) return;
@@ -1523,11 +1905,17 @@ export const AiCurriculum = ({ lang, onBack }: { lang: 'en' | 'ar', onBack: () =
       if (!resp.ok) throw new Error("Failed to design curriculum");
       const data = await resp.json();
       setCustomStudyPlan(data);
+      // Save successfully to local storage for persistence
+      localStorage.setItem('ai_custom_study_plan', JSON.stringify({
+        plan: data,
+        subject: plannerSubject,
+        focus: plannerFocus
+      }));
     } catch (err) {
       console.error("Custom Plan Design Error:", err);
       // Premium fallback structure in case of network issue
       const fallbackSubject = plannerSubject || (isRtl ? 'الذكاء الاصطناعي وبناء الروبوتات' : 'AI & Robotics');
-      setCustomStudyPlan({
+      const fallbackPlan = {
         A1: [
           { id: "A1-1", title: isRtl ? `مقدمة في ${fallbackSubject}` : `Introduction to ${fallbackSubject}`, titleAr: `مقدمة في ${fallbackSubject}`, description: isRtl ? "فهم المبادئ والأساسيات التأسيسية بدون برمجة" : "Foundational concepts without coding", descriptionAr: "فهم المبادئ والأساسيات التأسيسية بدون برمجة" },
           { id: "A1-2", title: isRtl ? "الأنماط الأولى والبحث عنها" : "First Patterns Hunt", titleAr: "الأنماط الأولى والبحث عنها", description: isRtl ? "استكشاف أساسيات التعرف على الأنماط" : "Exploring basics of pattern recognition", descriptionAr: "استكشاف أساسيات التعرف على الأنماط والأشكال" },
@@ -1570,7 +1958,14 @@ export const AiCurriculum = ({ lang, onBack }: { lang: 'en' | 'ar', onBack: () =
           { id: "C2-4", title: isRtl ? "الأنظمة اللامركزية التوليدية" : "Decentralized Generative Cooperatives", description: "Autonomous swarm intelligence patterns", titleAr: "الأنظمة اللامركزية التوليدية", descriptionAr: "دراسة حركات النماذج اللامركزية النشطة" },
           { id: "C2-5", title: isRtl ? "قوة الحوسبة الكمومية والذكاء" : "Quantum Computational Integration", description: "Ultimate future vision and development rules", descriptionAr: "رؤية المستقبل الأقصى وقواعد التطوير المستدام", titleAr: "قوة الحوسبة الكمومية والذكاء" }
         ]
-      });
+      };
+      setCustomStudyPlan(fallbackPlan);
+      // Save fallback successfully to local storage for persistence
+      localStorage.setItem('ai_custom_study_plan', JSON.stringify({
+        plan: fallbackPlan,
+        subject: plannerSubject,
+        focus: plannerFocus
+      }));
     } finally {
       setGeneratingPlan(false);
     }
@@ -2982,7 +3377,45 @@ The adventure is waiting!`
 
               {/* Tab 1: Standard Levels Grid */}
               {lobbyTab === 'lessons' && (
-                <div className="space-y-8">
+                !hasCompletedTest ? (
+                  <div className="bg-[#0b1329] border border-amber-500/20 rounded-[2.5rem] p-10 relative overflow-hidden text-right shadow-2xl animate-fade-in w-full" dir="rtl">
+                    <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl opacity-30" />
+                    <div className="relative z-10 flex flex-col items-center text-center space-y-6 py-6 font-sans">
+                      <div className="w-20 h-20 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                        <Lock size={36} />
+                      </div>
+                      
+                      <div className="space-y-3 max-w-2xl">
+                        <h3 className="text-3xl font-black text-white">
+                          {isRtl ? '⚠️ اختبار تحديد المستوى مطلوب أولاً' : '⚠️ Placement Test Required First'}
+                        </h3>
+                        <p className="text-slate-300 text-sm leading-relaxed">
+                          {isRtl 
+                            ? 'لا يمكنك تصفح مستويات البرنامج التأسيسي أو التخصصي، ولا حصد نقاط الحكمة دون القيام باختبار تحديد المستوى التفاعلي أولاً للتأكد من ملائمة المنهج لمستواك الأكاديمي واللغوي الصحيح.'
+                            : 'You cannot browse the foundational or advanced course levels, nor earn Wisdom Points without first completing the placement test to determine your correct academic level.'}
+                        </p>
+                      </div>
+
+                      <div className="pt-4 flex flex-col sm:flex-row gap-4 items-center justify-center">
+                        <button
+                          onClick={() => onNavigate && onNavigate('placement-test')}
+                          className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-8 py-4 rounded-2xl text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all active:scale-95 shrink-0 hover:-translate-y-0.5 font-sans cursor-pointer"
+                        >
+                          <Sparkles size={16} />
+                          {isRtl ? 'ابدأ اختبار تحديد المستوى الآن 🎯' : 'Start Placement Test Now 🎯'}
+                        </button>
+                        
+                        <button
+                          onClick={() => onBack()}
+                          className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold px-6 py-4 rounded-2xl text-xs transition-all active:scale-95 font-sans cursor-pointer"
+                        >
+                          {isRtl ? 'العودة للرئيسية' : 'Back to Home'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-8">
                   {/* Curriculum Toggle Picker */}
                   <div className="flex justify-start pb-4">
                     <div className="p-1 bg-slate-950/80 border border-white/10 rounded-2xl flex flex-wrap gap-1">
@@ -4105,6 +4538,7 @@ Output Summary for [${topic}]:
                     </div>
                   )}
                 </div>
+                )
               )}
 
               {/* Tab: Tools Library 🛠️ */}
@@ -7454,6 +7888,44 @@ Your Guide: ${announcementCoordinator}`
               )}
 
               {lobbyTab === 'study_plan' && (
+                !hasCompletedTest ? (
+                  <div className="bg-[#0b1329] border border-amber-500/20 rounded-[2.5rem] p-10 relative overflow-hidden text-right shadow-2xl animate-fade-in w-full" dir="rtl">
+                    <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl opacity-30" />
+                    <div className="relative z-10 flex flex-col items-center text-center space-y-6 py-6 font-sans">
+                      <div className="w-20 h-20 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                        <Lock size={36} />
+                      </div>
+                      
+                      <div className="space-y-3 max-w-2xl">
+                        <h3 className="text-3xl font-black text-white">
+                          {isRtl ? '⚠️ اختبار تحديد المستوى مطلوب أولاً' : '⚠️ Placement Test Required First'}
+                        </h3>
+                        <p className="text-slate-300 text-sm leading-relaxed">
+                          {isRtl 
+                            ? 'لا يمكنك توليد خطة دراسية ذكية أو تصفح مستويات الكفاءة بالذكاء الاصطناعي دون القيام باختبار تحديد المستوى التفاعلي أولاً للتأكد من مواءمة المنهج والخطط المقترحة.'
+                            : 'You cannot generate a smart AI study plan or explore professional AI stages without first completing the interactive placement test.'}
+                        </p>
+                      </div>
+
+                      <div className="pt-4 flex flex-col sm:flex-row gap-4 items-center justify-center">
+                        <button
+                          onClick={() => onNavigate && onNavigate('placement-test')}
+                          className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-8 py-4 rounded-2xl text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all active:scale-95 shrink-0 hover:-translate-y-0.5 font-sans cursor-pointer"
+                        >
+                          <Sparkles size={16} />
+                          {isRtl ? 'ابدأ اختبار تحديد المستوى الآن 🎯' : 'Start Placement Test Now 🎯'}
+                        </button>
+                        
+                        <button
+                          onClick={() => onBack()}
+                          className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold px-6 py-4 rounded-2xl text-xs transition-all active:scale-95 font-sans cursor-pointer"
+                        >
+                          {isRtl ? 'العودة للرئيسية' : 'Back to Home'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
                 <div className="space-y-8 bg-[#0b172e] p-8 rounded-[2rem] border border-white/5 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full -mr-32 -mt-32 opacity-50 pointer-events-none" />
                   
@@ -7549,23 +8021,63 @@ Your Guide: ${announcementCoordinator}`
                                 <span className="text-[9px] font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-md">{isRtl ? 'جاهز للعرض' : 'READY TO STUDY'}</span>
                                 <h4 className="text-sm font-black text-white mt-1.5">{isRtl ? `الخطة التعليمية لـ: ${plannerSubject}` : `Study Plan for: ${plannerSubject}`}</h4>
                               </div>
-                              <button
-                                onClick={() => {
-                                  const ref = document.getElementById('custom-plan-print-area');
-                                  if (ref) {
-                                    html2canvas(ref, { scale: 2, useCORS: true, backgroundColor: '#050b14' }).then(canvas => {
-                                      const link = document.createElement('a');
-                                      link.href = canvas.toDataURL("image/png");
-                                      link.download = `AI-StudyPlan-${plannerSubject}.png`;
-                                      link.click();
-                                    });
-                                  }
-                                }}
-                                className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap self-stretch sm:self-auto justify-center"
-                              >
-                                <Download size={14} />
-                                {isRtl ? 'حفظ الخطة كصورة 💾' : 'Save Plan as Image 💾'}
-                              </button>
+                              <div className="flex flex-col sm:flex-row items-center gap-2 self-stretch sm:self-auto w-full sm:w-auto">
+                                <button
+                                  onClick={handleSaveToCloud}
+                                  disabled={savingToCloud}
+                                  className={`${
+                                    cloudSaveSuccess 
+                                      ? 'bg-emerald-500 hover:bg-emerald-400 text-white' 
+                                      : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                                  } px-4 py-2 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all cursor-pointer whitespace-nowrap w-full sm:w-auto`}
+                                >
+                                  {savingToCloud ? (
+                                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                  ) : cloudSaveSuccess ? (
+                                    <CheckCircle size={14} />
+                                  ) : (
+                                    <Brain size={14} />
+                                  )}
+                                  {cloudSaveSuccess 
+                                    ? (isRtl ? 'تم حفظ الخطة! ☁️' : 'Saved to Cloud! ☁️')
+                                    : (isRtl ? 'حفظ في حسابي السحابي ☁️' : 'Save to Cloud ☁️')}
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    const ref = document.getElementById('custom-plan-print-area');
+                                    if (ref) {
+                                      html2canvas(ref, { scale: 2, useCORS: true, backgroundColor: '#050b14' }).then(canvas => {
+                                        const link = document.createElement('a');
+                                        link.href = canvas.toDataURL("image/png");
+                                        link.download = `AI-StudyPlan-${plannerSubject}.png`;
+                                        link.click();
+                                      });
+                                    }
+                                  }}
+                                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap w-full sm:w-auto justify-center"
+                                >
+                                  <Download size={14} />
+                                  {isRtl ? 'حفظ كصورة 💾' : 'Save as Image 💾'}
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    const confirmed = window.confirm(
+                                      isRtl 
+                                        ? 'هل أنت متأكد من حذف وإعادة تعيين هذه الخطة الدراسية بالكامل؟ سيتم مسحها من جهازك الحالي.' 
+                                        : 'Are you sure you want to delete and reset this study plan entirely? It will be cleared from your local storage.'
+                                    );
+                                    if (confirmed) {
+                                      setCustomStudyPlan(null);
+                                      localStorage.removeItem('ai_custom_study_plan');
+                                      setPlannerSubject('');
+                                    }
+                                  }}
+                                  className="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all cursor-pointer whitespace-nowrap w-full sm:w-auto"
+                                >
+                                  <Trash2 size={14} />
+                                  {isRtl ? 'حذف وإعادة تعيين الخطة 🗑️' : 'Delete & Reset Plan 🗑️'}
+                                </button>
+                              </div>
                             </div>
 
                             <div id="custom-plan-print-area" className="bg-[#050b14] p-6 rounded-[2rem] border border-white/5 space-y-6">
@@ -7590,19 +8102,34 @@ Your Guide: ${announcementCoordinator}`
                                       </div>
 
                                       <div className="space-y-2.5">
-                                        {units.map((unit: any, idx: number) => (
-                                          <div key={unit.id || idx} className="bg-[#050b14]/50 p-3 rounded-xl border border-white/5 flex items-start gap-2.5">
-                                            <div className="w-5 h-5 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center text-[10px] font-black shrink-0">{idx + 1}</div>
-                                            <div className="space-y-1">
-                                              <h5 className="font-bold text-[11px] text-white">
-                                                {isRtl ? (unit.titleAr || unit.title) : (unit.title || unit.titleAr)}
-                                              </h5>
-                                              <p className="text-[10px] text-slate-400 leading-relaxed">
-                                                {isRtl ? (unit.descriptionAr || unit.description) : (unit.description || unit.descriptionAr)}
-                                              </p>
+                                        {units.map((unit: any, idx: number) => {
+                                          const unitId = unit.id || `ai-${level}-${idx + 1}`;
+                                          const isCompleted = completedCustomUnitIds.has(unitId);
+                                          return (
+                                            <div 
+                                              key={unitId} 
+                                              onClick={() => setSelectedCustomUnit({ ...unit, level, id: unitId })}
+                                              className="bg-[#050b14]/50 p-3 rounded-xl border border-white/5 hover:border-amber-500/40 hover:bg-amber-500/[0.02] flex items-start gap-2.5 cursor-pointer transition-all active:scale-98 group/unit"
+                                            >
+                                              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
+                                                isCompleted 
+                                                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                                                  : 'bg-amber-500/10 text-amber-400'
+                                              }`}>
+                                                {isCompleted ? <CheckCircle size={10} /> : idx + 1}
+                                              </div>
+                                              <div className="space-y-1">
+                                                <h5 className="font-bold text-[11px] text-white group-hover/unit:text-amber-400 transition-colors flex items-center gap-1.5 flex-wrap">
+                                                  {isRtl ? (unit.titleAr || unit.title) : (unit.title || unit.titleAr)}
+                                                  {isCompleted && <span className="text-[8px] bg-emerald-500/15 text-emerald-400 px-1.5 py-0.5 rounded font-black uppercase tracking-wider">{isRtl ? 'مكتمل ✅' : 'Completed ✅'}</span>}
+                                                </h5>
+                                                <p className="text-[10px] text-slate-400 leading-relaxed group-hover/unit:text-slate-300">
+                                                  {isRtl ? (unit.descriptionAr || unit.description) : (unit.description || unit.descriptionAr)}
+                                                </p>
+                                              </div>
                                             </div>
-                                          </div>
-                                        ))}
+                                          );
+                                        })}
                                       </div>
                                     </div>
                                   );
@@ -7622,6 +8149,7 @@ Your Guide: ${announcementCoordinator}`
                     </div>
                   </div>
                 </div>
+                )
               )}
             </motion.div>
           ) : isAdvanced ? (
@@ -8984,6 +9512,186 @@ Your Guide: ${announcementCoordinator}`
               </div>
             </motion.div>
           )}
+        </AnimatePresence>
+
+        {/* Custom AI Study Plan Lesson Detail Modal */}
+        <AnimatePresence>
+          {selectedCustomUnit && (() => {
+            const act = getCustomUnitActivity(selectedCustomUnit, isRtl);
+            const isCompleted = completedCustomUnitIds.has(selectedCustomUnit.id);
+            return (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-[#050b14]/95 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto"
+                onClick={() => {
+                  setSelectedCustomUnit(null);
+                  setCustomUnitQuizSelected(null);
+                  setCustomUnitQuizCorrect(null);
+                }}
+              >
+                <motion.div 
+                  initial={{ scale: 0.95, y: 20 }}
+                  animate={{ scale: 1, y: 0 }}
+                  exit={{ scale: 0.95, y: 20 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-[#0b172e] border border-white/10 rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl relative text-right"
+                  dir={isRtl ? 'rtl' : 'ltr'}
+                >
+                  {/* Top Bar Banner Accent */}
+                  <div className="bg-gradient-to-r from-amber-500/20 to-indigo-500/20 p-6 border-b border-white/5 flex justify-between items-center">
+                    <div className="text-right w-full">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-md inline-block">
+                        {isRtl ? `مستوى ${selectedCustomUnit.level} • خطتك الذكية` : `CEFR Level ${selectedCustomUnit.level} • Smart Path`}
+                      </span>
+                      <h4 className="text-lg font-black text-white mt-2 leading-tight">
+                        {isRtl ? (selectedCustomUnit.titleAr || selectedCustomUnit.title) : (selectedCustomUnit.title || selectedCustomUnit.titleAr)}
+                      </h4>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        setSelectedCustomUnit(null);
+                        setCustomUnitQuizSelected(null);
+                        setCustomUnitQuizCorrect(null);
+                      }}
+                      className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center font-bold text-lg cursor-pointer transition-all shrink-0 ml-4"
+                    >
+                      ✖
+                    </button>
+                  </div>
+
+                  {/* Body Content */}
+                  <div className="p-6 md:p-8 space-y-6 max-h-[70vh] overflow-y-auto">
+                    {/* Lecture Section */}
+                    <div className="space-y-2">
+                      <h5 className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5 justify-start">
+                        <BookOpen size={14} className="text-amber-400" />
+                        {isRtl ? '💡 المفهوم والدرس اليومي' : '💡 CORE LESSON CONCEPT'}
+                      </h5>
+                      <p className="text-xs text-slate-200 leading-relaxed font-semibold bg-white/[0.02] p-4 rounded-2xl border border-white/5">
+                        {act.concept}
+                      </p>
+                    </div>
+
+                    {/* Laboratory Practice */}
+                    <div className="space-y-2">
+                      <h5 className="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center gap-1.5 justify-start">
+                        <Bot size={14} className="text-indigo-400" />
+                        {isRtl ? '🔬 النشاط التجريبي العالي (Sandbox Mission)' : '🔬 PRACTICAL SANDBOX MISSION'}
+                      </h5>
+                      <div className="bg-indigo-500/5 p-4 rounded-2xl border border-indigo-500/10 space-y-3">
+                        <p className="text-[11px] text-slate-300 font-bold leading-relaxed">
+                          {act.mission}
+                        </p>
+                        <button
+                          onClick={() => {
+                            setSelectedCustomUnit(null);
+                            setCustomUnitQuizSelected(null);
+                            setCustomUnitQuizCorrect(null);
+                            setLobbyTab('launch'); // Go to play workspace
+                          }}
+                          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-[10px] font-black tracking-wider uppercase transition-all flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Play size={10} />
+                          {isRtl ? 'افتح المعمل التفاعلي الفوري 🚀' : 'Open AI Learning Lab Now 🚀'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Interactive Quiz Mini-Quest */}
+                    <div className="space-y-3 pt-2">
+                      <h5 className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5 justify-start">
+                        <Trophy size={14} className="text-amber-400" />
+                        {isRtl ? '🏁 التحدي السريع والتقييم' : '🏁 INTERACTIVE MINI-QUEST'}
+                      </h5>
+                      
+                      <div className="bg-[#050b14] p-5 rounded-2xl border border-white/5 space-y-4">
+                        <p className="text-xs font-bold text-white text-right">
+                          {act.question}
+                        </p>
+
+                        <div className="grid grid-cols-1 gap-2">
+                          {act.options.map((option, idx) => {
+                            const isSelected = customUnitQuizSelected === idx;
+                            return (
+                              <button
+                                key={idx}
+                                onClick={() => {
+                                  setCustomUnitQuizSelected(idx);
+                                  setCustomUnitQuizCorrect(idx === act.correctIndex);
+                                }}
+                                className={`w-full text-right p-3.5 rounded-xl text-xs font-bold border-2 transition-all flex items-center justify-between cursor-pointer ${
+                                  isSelected
+                                    ? idx === act.correctIndex
+                                      ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
+                                      : 'border-rose-500 bg-rose-500/10 text-rose-400'
+                                    : 'border-white/5 bg-white/[0.02] hover:bg-white/5 text-slate-300'
+                                }`}
+                              >
+                                <span>{option}</span>
+                                {isSelected && (
+                                  <span className="text-sm">
+                                    {idx === act.correctIndex ? '✅' : '❌'}
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {customUnitQuizCorrect !== null && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={`p-3 rounded-xl text-[11px] font-black ${
+                              customUnitQuizCorrect 
+                                ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' 
+                                : 'bg-rose-500/10 border border-rose-500/20 text-rose-400'
+                            }`}
+                          >
+                            {customUnitQuizCorrect 
+                              ? (isRtl ? '🎉 مذهل! إجابة ذكية وصحيحة كلياً!' : '🎉 Splendid! A deeply intuitive & correct answer!')
+                              : (isRtl ? '⛔ محاولة جيدة! عاود التفكير وجرب الخيار الأول!' : '⛔ Close! Think again and select the first option!')
+                            }
+                          </motion.div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions Footer */}
+                  <div className="p-6 bg-[#050b14]/50 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <button
+                      onClick={() => {
+                        setSelectedCustomUnit(null);
+                        setCustomUnitQuizSelected(null);
+                        setCustomUnitQuizCorrect(null);
+                      }}
+                      className="text-slate-400 hover:text-white text-xs font-black cursor-pointer transition-all self-stretch sm:self-auto text-center"
+                    >
+                      {isRtl ? 'إغلاق ❌' : 'Close'}
+                    </button>
+
+                    <button
+                      onClick={() => handleMarkCustomUnitCompleted(selectedCustomUnit)}
+                      disabled={isCompleted}
+                      className={`px-6 py-3 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all cursor-pointer whitespace-nowrap self-stretch sm:self-auto ${
+                        isCompleted 
+                          ? 'bg-emerald-500/25 text-emerald-400 border border-emerald-500/20 cursor-not-allowed' 
+                          : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/10'
+                      }`}
+                    >
+                      <CheckCircle size={14} />
+                      {isCompleted 
+                        ? (isRtl ? 'الدرس مكتمل بنجاح ✅' : 'Lesson Successfully Completed ✅')
+                        : (isRtl ? 'تأكيد إكمال ودراسة الدرس 🎓' : 'Mark Lesson as Completed 🎓')}
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            );
+          })()}
         </AnimatePresence>
       </main>
     </div>
