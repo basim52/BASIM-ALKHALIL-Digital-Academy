@@ -585,16 +585,27 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
             </header>
 
             {analysisResult && (
-              <motion.div 
-                ref={reportRef}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-slate-50 p-10 rounded-[3rem] border border-slate-100 shadow-sm relative overflow-hidden"
-              >
-                <div className="prose prose-slate max-w-none custom-markdown-content font-arabic leading-relaxed prose-headings:text-[#002147] prose-headings:font-black prose-p:text-slate-600 prose-strong:text-[#C49E3A]">
-                  <ReactMarkdown>{analysisResult}</ReactMarkdown>
+              <div className="space-y-4">
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleShareAsImage}
+                    className="bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-600 hover:text-white px-5 py-2.5 rounded-full flex items-center gap-2 text-xs font-black transition-all cursor-pointer shadow-sm"
+                  >
+                    <Download size={14} />
+                    {isRtl ? 'تحميل تقرير المنصة كصورة 💾' : 'Download Platform Report as Image 💾'}
+                  </button>
                 </div>
-              </motion.div>
+                <motion.div 
+                  ref={reportRef}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-slate-50 p-10 rounded-[3rem] border border-slate-100 shadow-sm relative overflow-hidden"
+                >
+                  <div className="prose prose-slate max-w-none custom-markdown-content font-arabic leading-relaxed prose-headings:text-[#002147] prose-headings:font-black prose-p:text-slate-600 prose-strong:text-[#C49E3A]">
+                    <ReactMarkdown>{analysisResult}</ReactMarkdown>
+                  </div>
+                </motion.div>
+              </div>
             )}
           </section>
 
