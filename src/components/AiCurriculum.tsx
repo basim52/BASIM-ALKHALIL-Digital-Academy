@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { AI_TOOLS_DATA, AiTool } from './AiToolsData';
 import { 
   Brain, 
   Sparkles, 
@@ -26,7 +27,19 @@ import {
   BookOpen,
   ArrowRight,
   TrendingUp,
-  Fingerprint
+  Fingerprint,
+  Printer,
+  Copy,
+  FileText,
+  Check,
+  Lock,
+  Megaphone,
+  Users,
+  Compass,
+  Flame,
+  Calendar,
+  ExternalLink,
+  ShieldCheck
 } from 'lucide-react';
 
 interface Lesson {
@@ -373,32 +386,440 @@ const AI_CURRICULUM_DATA = {
           discussion_question: "كيف سنحمي عقولنا الناشئة من تشتت شاشات الأجهزة الرقمية، ونبسط تواجدنا المعرفي لنكون رواداً بأمرنا وحماة لوعينا ومستقبلنا؟",
           parent_summary: "إن بناء عادة التعلم الهادفة مدى الحياة (Lifelong Learning habit) داخل طابع مرح وقصير يقي طفلك عبء التوتر التكنولوجي ويجعل رحلته بالمعرفة نتاج استمتاع عائلي عذب مبرور بصدق."
         },
-        {
+         {
           lesson_number: 20,
           lesson_title: "الدرس الأخير - الرسالة إلى العالم",
-          core_concept: "ها قد وصلنا معاً لصفحة الختام والدرس العشرين بمقر رحلتنا الرشيدة المعطاء ببركة وبهاء باسم الخليل. ولكن نهاية ممشانا هي مجرد بوابات مضيئة لبداية ملحمية وعظيمة أخرى في عوالم المستقبل.\n\nبينما تتسلحون اليوم برصانة فك التشويش الكوني وتحصينات وعي الهوية الشخصية وتعاويذ القيادة الاحترافية... يبقى السؤال الأغلى، الأعمق، والأنقى يتردد في الآفاق:\n\n**كيف ستسخرون هذه القوة السحرية العظمى؟**\n\nالمعرفة شعلة جليلة وأمانة ثقيلة. نحن لا نتعلم لنتباهى بل لنهدي ونبني، لنكون يداً عطوفة تداوي الجرحى، عوناً للناس، وبناةً لغد إنساني وعائلي معمور بالصلاح والخير والحظ العظيم. أنتم تحملون الشعلة السامية، فارفعوها بضمير وحب لتضيء كل الكون.",
-          detailed_explanation: "التصميم الأخلاقي والمسؤولية الإنسانية السامية (Ethical Stewardship and Humanistic Value) هي الغلاف التاجي والركيزة الأسمى التي تجعل التكنولوجيا نافعة لخدمة البشرية ونشر السلم والمحبة بركن الروح.",
+          core_concept: "ها قد وصلنا معاً لصفحة الختام والدرس العشرين بمقر رحلتنا الرشيدة المعطاء ببركة وبهاء باسم الخليل. ولكن نهاية ممشانا هي مجرد بوابات مضيئة لبداية ملحمية وعظيمة أخرى في عوالم المستقبل.\n\nبينما تتسلحون اليوم برصانة فك التشويش الكوني وتحصينات وعي الهوية الشخصية وتعاويذ القيادة الاحترافية... يبقى السؤال الأغلى، الأعمق، والأنقى يتردد في الآفاق:\n\n**كيف ستسخرون هذه القوة السحرية العظمى؟**\n\nالمعرفة شعلة جليلة وأمانة ثقيلة. نحن لا نتعلم لنتباهى بل لنبني ونعمر ونرتقي بالبشرية والأهل بالخلق والسداد.",
+          detailed_explanation: "صياغة الميثاق الأخلاقي وسقاية الأثر النهائي (Ethical Manifestos & Grand Missions) تختتم المسيرة التعليمية بربط المعرفة التقنية برسالة البناء الحضاري الملتزم والمسؤول.",
           family_activity: {
-            activity_name: "ميثاق العهد وكتابة الرسالة إلى الكون",
-            activity_description: "في جو هادئ يعبق بدفء وشموع فخورة، يكتب كل فرد بطل ميثاقه العقدي والريادي الشخصي كسفير معتمد باهر الصنيع.\n\nالخطوات:\n1. صياغة العهد الشخصي: يكتب السفير بخط أثير ويملأ بصدق فراغ: 'أنا السفير البطل [الاسم]، أتعهد أمام الخالق وأسرتي الكريمة وباسم الخليل بأن أوجه علوم ومعارف الذكاء الاصطناعي والرياضيات التوليدية بأمانة ومروءة لنشر الخير وعون الناس في _________ ومكافحة زيف _________.'\n2. التثبيت والبهجة: تعليق الرسالة بجوار الشهادات وصورة الغد بمعرض المنزل الدائم.\n3. اللحظة الختامية البهية بتشابك فخور لأيادي العائلة قائلين: 'نحن سفراء المستقبل المشرق!'",
-            lesson_learned: "العلوم من دون فواحة الخلق والضمير الإنساني العطوف هي مجرد أرقام فانية. ريادتنا المعمارية تنبع من قلوبنا الكريمة وسعينا المبرور لنشر الخير للجميع بسلام."
+            activity_name: "خطابنا إلى الغد المشرق",
+            activity_description: "صياغة وتلاوة 'ميثاق المبادئ العائلي للذكاء الاصطناعي والإنسان'.\n\nالخطوات:\n1. الجلسة المستديرة: يجلس الأبناء برفقة الوالدين، ونكتب 3 أسس ذهبية نلتزم بها بالمنزل عند التعامل مع أي تطبيق ذكي أو توليدي (مثل: لا نصدق كل صورة مجهولة المصدر، لا نبوح بأسرار عائلتنا للبوتات الحوارية، ونستخدمها كلياً لبناء وتوسيع مدارك العلم ببهجة وجد).\n2. الصياغة الفاخرة بالخط العربي أو تزيينها بالصلصال والرسوم.\n3. التلاوة الفخورة المشتركة في مجلس الأسر وتوثيقها بابتسامة.",
+            lesson_learned: "بالمستقبل، تذكروا دائماً: ليست القوة والآلات في تفوق ذرات السيليكون الحوسبي، بل في شرف الضمير والإلهام الإنساني الرشيد الذي يقودها برحمة ونقاء."
           },
-          image_description: "يد طفل تمسك بشعلة مضيئة، ومن حوله أفراد العائلة كل منهم يحمل شعلته الخاصة، ويقفون معاً على قمة جبل يطل على أفق مدينة مستقبلية",
-          discussion_question: "كيف تنوي غرس هذا العهد الريادي الأخلاقي الراقي في تسيير علاقاتك المدرسية وعون زملائك باليوم واللحظة بجمال وحب؟",
-          parent_summary: "انقضى البرنامج وعم الصلاح ببركة الله وفضله. تملكون اليوم وعياً، منهجاً قادراً، وضميراً حياً. تذكروا: لم يكن الهدف يوماً إتقان كبسة الزر والبرامج المادية، بل صياغة الإنسانية والقلب الحي في عصر الآلة. باسم الخليل والأكاديمية يرجون لكم رحلة إعمارية عظيمة ومستقبلًا مباركاً."
+          image_description: "منارة شامخة ومضيئة على شاطئ البحر الهادئ ينبثق منها شعاع من النور والرموز المعرفية والرموز الإنسانية والقلوب، وفوقها عائلة تنظر نحو السماء بابتسامة وأمل",
+          discussion_question: "ما هو الوعد المعرفي والعهد الأخلاقي الذي تجره عائلتنا المبرورة اليوم على نفسها وهي تعبر رسمياً بوابة سفراء التقدم ومستقبل الذكاء الاصطناعي بكل ثقة ونماء وجسارة؟",
+          parent_summary: "تنهي العوائل البرنامج بروح قيادية ملتزمة وفك كامل للغز الروبوتات وتحديات العصر الرقمي الحديث بقالب وجداني دافئ مبرور بالحب والتقدير."
         }
       ]
     }
   ]
 };
 
+const FamilyAILightbulbIcon = ({ size = 24 }: { size?: number }) => {
+  return (
+    <div style={{ width: size, height: size }} className="relative flex items-center justify-center shrink-0">
+      <svg
+        viewBox="0 0 100 100"
+        className="w-full h-full"
+      >
+        <defs>
+          <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#fb923c" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#fb923c" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <circle cx="50" cy="45" r="35" fill="url(#glow)" />
+        <path d="M50 15C32.3 15 18 29.3 18 47C18 57.8 23.4 67.3 31.6 73C33.5 74.3 34.6 76.5 34.6 78.8V82C34.6 83.7 35.9 85 37.6 85H62.4C64.1 85 65.4 83.7 65.4 82V78.8C65.4 76.5 66.5 74.3 68.4 73C76.6 67.3 82 57.8 82 47C82 29.3 67.7 15 50 15Z" fill="#fb923c" stroke="#f97316" strokeWidth="4" />
+        <path d="M38 85C38 87.8 40.2 90 43 90H57C59.8 90 62 87.8 62 85" fill="#94a3b8" stroke="#64748b" strokeWidth="3" />
+        <path d="M41 90C41 92.8 43.2 95 46 95H54C56.8 95 59 92.8 59 90" fill="#64748b" stroke="#475569" strokeWidth="3" />
+        <path d="M32 47C32 37 40 32 50 32C60 32 68 37 68 47" fill="none" stroke="#fed7aa" strokeWidth="3" strokeDasharray="4 2" />
+        <path d="M38 47C38 41 43 38 50 38C57 38 62 41 62 47" fill="none" stroke="#ffedd5" strokeWidth="2.5" />
+        <path d="M44 47C44 44 46.5 42 50 42C53.5 42 56 44 56 47" fill="none" stroke="#ffffff" strokeWidth="2" />
+        <path d="M50 58C50 58 41 49 41 43C41 39 44 35 48.5 35C49.5 35 50.5 35.5 51 36C51.5 35.5 52.5 35 53.5 35C58 35 61 39 61 43C61 49 50 58 50 58Z" fill="#ef4444" transform="translate(0, 3) scale(0.95)" style={{ transformOrigin: '50px 45px' }} />
+      </svg>
+    </div>
+  );
+};
+
+const printContent = (html: string) => {
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  document.body.appendChild(iframe);
+  
+  if (iframe.contentWindow) {
+    iframe.contentWindow.document.open();
+    iframe.contentWindow.document.write(html);
+    iframe.contentWindow.document.close();
+    
+    // Give style sheets or fonts a brief moment to load before calling print
+    setTimeout(() => {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+      // Clean up after the print dialog finishes
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+      }, 1000);
+    }, 500);
+  }
+};
+
+
+const ADVANCED_CURRICULUM_DATA = {
+  program_name: "تعلم الذكاء الاصطناعي - المسارات المتقدمة",
+  program_subtitle: "هندسة الأوامر المتقدمة، البرمجة بلغة بايثون، ومحاكاة النمذجة الرقمية",
+  tracks: [
+    {
+      track_name: "هندسة الأوامر المتقدمة",
+      track_description: "فن كتابة الـ Prompts المعقدة لبناء شخصيات، روايات تفاعلية، وألعاب نصية",
+      lessons: [
+        {
+          lesson_number: 1,
+          lesson_title: "ما وراء التعويذة البسيطة - تشريح الأمر العملاق",
+          track: "هندسة الأوامر المتقدمة",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "الأمر العملاق أو الـ Mega-Prompt هو توجيه كامل مبني بقواعد تكميلية دقيقة يحول النموذج التوليدي إلى نظام مخصص (مثل خبير مبيعات، أو راوي تفاعلي). يتم تخطيطه عبر الأدوار والمخرجات والحدود الحتمية.",
+            image_description: "كائن سحري متوهج يتألف من مصفوفة خطوط وشخصيات عصبية معقدة باللون الأزرق والذهبي"
+          },
+          notes: {
+            section_title: "ملاحظة وخبرة مبرورة",
+            content: "الطلب المتكامل الواضح يوفر 80% من زمن المعالجة المتكررة ويردم هوة الأخطاء ونقاط الهلوسة بذكاء باهر."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "هندسة مغامرة الورق العظمى",
+            instructions: "صمم أمراً يحول البوت إلى تطبيق راوي ألعاب مغامرات كلاسيكية متفاعل بنظام صحة ونقاط تكتسبها.",
+            challenges: [
+              {
+                id: "mega_prompt_gaming",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "العب دور راوي ألعاب مغامر تفاعلي قديم. احتفظ بنقاط صحة اللاعب (HP: 100). انتظر خياري واطرح 3 مسارات متبوعة بقصتك الممتعة."
+              }
+            ],
+            discussion_question: "لماذا يحقق تزويد النموذج بدقة الأدوار والنبرات نتائج أكثر ملاءمة وعلمية مقارنة بمجرد توجيه سؤال مبهم؟"
+          }
+        },
+        {
+          lesson_number: 2,
+          lesson_title: "تطوير بيئات السرد - محاكاة الشخصيات المتعددة",
+          track: "هندسة الأوامر المتقدمة",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "محاكاة العوالم الخيالية والشخصيات التفاعلية تمنحنا تحكماً فريداً في أسلوب السرد. نتعلم هنا كيفية تسيير روبوتات تجيد الردود الروائية بأساليب متباينة مبهرة.",
+            image_description: "فارس كلاسيكي شجاع وراهب ذكي يحملان لوحة لمصفوفات سداسية خضراء متوهجة"
+          },
+          notes: {
+            section_title: "توجيه الأكاديمية",
+            content: "تحديد الشخصية يمنح الأطفال تفاعلاً ممتعاً بعيداً عن الجمود التقليدي للأجهزة."
+          },
+          quest_card: {
+            section_title: "تحدي الشخصيات الرقمي",
+            activity_name: "صراع الردود المتوازنة",
+            instructions: "صمم توجيهاً ذكياً يستدعي ثلاث شخصيات (شجاع، حكيم، وحذر) لمناقشة فكرة واحدة.",
+            challenges: [
+              {
+                id: "multi_char_voice",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "دعنا نناقش فكرة استكشاف الفضاء. أعطني ردوداً متتالية من ثلاث شخصيات: الفارس الشجاع، الحكيم الهادئ، والمهندس الحذر."
+              }
+            ],
+            discussion_question: "كيف توظف عائلتك أسلوب تعدد الشخصيات لمقاربة حل مشكلة منزلية عويصة؟"
+          }
+        },
+        {
+          lesson_number: 3,
+          lesson_title: "استخلاص البيانات والترتيب الهيكلي التلقائي",
+          track: "هندسة الأوامر المتقدمة",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "استخراج المعلومات وتمريرها في جداول منسقة (Markdown tables) يسهل فحص البيانات وتصنيفها مباشرة دون تصفح عشوائي.",
+            image_description: "آلة معالجة ضخمة تلتقط الكتل النصية وتفرزها في جداول زجاجية براقة"
+          },
+          notes: {
+            section_title: "نصيحة تقنية",
+            content: "تنسيق مخرجات البحث يعزز مهارات طفلك في التحليل البصري المنظم."
+          },
+          quest_card: {
+            section_title: "تحدي تلخيص العمالقة",
+            activity_name: "استخلاص مصفوفة البيانات الكبرى",
+            instructions: "خذ مقالاً طويلاً واطلب من البوت تنظيفه واستخلاص الحقائق في جدول منتظم النبض.",
+            challenges: [
+              {
+                id: "data_markdown_extraction",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "استخلص من المقال التالي الشخصيات والمناصب والأرقام الجوهرية ورتبها في جدول Markdown متكامل النبرة."
+              }
+            ],
+            discussion_question: "ما هي الفوائد الهيكلية لاستخدام الجداول الرقمية بدل العبارات الإنشائية المطولة؟"
+          }
+        }
+      ]
+    },
+    {
+      track_name: "مستشاري ومساعدي الذكي",
+      track_description: "هندسة حوارات للمدربين الشخصيين، والمعلمين السقراطيين، والمساعدين المنزليين",
+      lessons: [
+        {
+          lesson_number: 4,
+          lesson_title: "المعلم السقراطي - رفيق المذاكرة الممتع",
+          track: "مستشاري ومساعدي الذكي",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "المعلم السقراطي لا يعطي الأجوبة الجاهزة، بل يسأل الأسئلة الفكرية المتتابعة التي تقود المتعلم لاكتشاف المفهوم والحل بنفسه وبشعور الثقة العالي.",
+            image_description: "تمثال رقمي زجاجي يمثل الفيلسوف سقراط الحكيم وعقله يضم ذكاءً نورانياً"
+          },
+          notes: {
+            section_title: "فلسفة التدريس",
+            content: "الأسئلة السقراطية تنمي التفكير النقدي العميق لدى الأطفال ومستكشفي المستقبل التقني."
+          },
+          quest_card: {
+            section_title: "تطبيق الفكر الحكيم",
+            activity_name: "تفعيل السقراطية الصامتة",
+            instructions: "وجه البوت ليقود عائلتك لحل مسألة دون إفشاء النواتج مباشرة.",
+            challenges: [
+              {
+                id: "socratic_teaching_probe",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "العب دور معلم سقراطي متمرس لتعليمي الكسور. لا تعطني الحل، بل وجهني بأسئلة دافعة ورياضية ممتعة."
+              }
+            ],
+            discussion_question: "لماذا تظل المعلومات التي نستكشفها بأنفسنا راسخة في عقولنا مقارنة بتلك التي نتلقاها معلبة؟"
+          }
+        },
+        {
+          lesson_number: 5,
+          lesson_title: "مدرب الحياة الرقمي وعالِم العادات الأسرية",
+          track: "مستشاري ومساعدي الذكي",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "بناء وتتبع جداول العادات والروتينات الأسبوعية للعائلة للتقليل من المكوث الطويل والتشتت أمام الهواتف الذكية وتنسيق روتين بهيج.",
+            image_description: "ساعة رملية متوهجة يتساقط منها نجوم ومكعبات البيانات بشكل منظم"
+          },
+          notes: {
+            section_title: "حكمة العادات الأسرية",
+            content: "التوازن الرقمي يبدأ من تخطيط هادئ يشارك فيه الأطفال باختيار حصص ترفيههم ومساراتهم بمسؤولية."
+          },
+          quest_card: {
+            section_title: "ساحة تصميم روتين البهجة",
+            activity_name: "تخطيط توازن الشاشات عائلياً",
+            instructions: "قم ببناء نموذج جدول أسبوعي متزن للنشاط والصحة والبرمجة وحكمة العائلة.",
+            challenges: [
+              {
+                id: "habit_coaching_routine",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "صمم لنا جدول روتين أسبوعي مبهج لعائلة تضم 3 أطفال يوزع الاهتمامات بين الرياضة والبرمجة وحكمة المساء بدون ملل."
+              }
+            ],
+            discussion_question: "كيف تصنع عائلتك جدولاً يوازن بين الترفيه الفني وتطوير مهارات الجيل القادم التقنية؟"
+          }
+        },
+        {
+          lesson_number: 6,
+          lesson_title: "صانع المغامرات المطبخية والروتينات الرياضية",
+          track: "مستشاري ومساعدي الذكي",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "تخطيط الوجبات الصحية بناء على المكونات الموجودة فعلياً بثلاجة المنزل دون إسراف، وتوليد روتين رياضي سريع وخفيف للمحافظة على النشاط الدائم.",
+            image_description: "طبق طعام ملون متوهج تعلوه رسوم بيانية ترمز لحيوية الطاقة للجسم"
+          },
+          notes: {
+            section_title: "الصحة والذكاء التوليدي",
+            content: "تحويل الرياضة والوجبات المنزلية لمغامرة يومية يبني ركائز التماسك والبهجة."
+          },
+          quest_card: {
+            section_title: "تحدي الشيف الذكي",
+            activity_name: "مطبخ الذكاء الأخضر",
+            instructions: "أدخل ثلاثة متبقيات في مطبخك واحصل على وصفة ووجبة فطور متوازنة وصحية فوراً مع روتين رياضي موازي لها.",
+            challenges: [
+              {
+                id: "kitchen_wellness_meal",
+                difficulty: "مستكشف ⭐⭐",
+                pattern: "لدي فقط: شوفان، تفاح، وبيض وعسل. اقترح وجبة لذيذة وصنف روتين تمارين للجسم بـ 15 دقيقة بدون أدوات."
+              }
+            ],
+            discussion_question: "كيف يساهم تقليل مخلفات الطعام عبر الطهي الذكي في تبني قيم عائلية صديقة للبيئة؟"
+          }
+        }
+      ]
+    },
+    {
+      track_name: "مختبر البرمجة واستدعاء الـ APIs",
+      track_description: "اتخاذ الخطوات الأولى في لغات البرمجة (بايثون) وتصميم روبوتات ذكية حقيقية عبر الأكواد",
+      lessons: [
+        {
+          lesson_number: 7,
+          lesson_title: "كتابة السطر الأول وإعداد البيئة التفاعلية (Google Colab)",
+          track: "مختبر البرمجة واستدعاء الـ APIs",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "بايثون (Python) هي لغة برمجة قوية ومثالية للمبتدئين. سنتعلم هنا كيفية كتابة الأوامر البرمجية الأنيقة وحجز المتغيرات الرقمية وعمل دوال إدخال تفاعلية.",
+            image_description: "مفسر لغة بايثون الكلاسيكي يسبح بجانب روبوت فضاء يجمع الأكواد المتوهجة"
+          },
+          notes: {
+            section_title: "توجيه برمجي متين",
+            content: "البايثون ليست طلاسم صعبة؛ هي لغة إنسانية بسيطة تمهد الطريق للمنطق التقني السليم."
+          },
+          quest_card: {
+            section_title: "تحدي كتابة السطر الأول",
+            activity_name: "محاكاة لغة البرمجة الفضائية",
+            instructions: "جرب مفسر بايثون المحاكي بالأرقام والمتغيرات التفاعلية لتشغيل أول فجوة في جدار الأكواد.",
+            challenges: [
+              {
+                id: "python_hello_world",
+                difficulty: "خبير ⭐⭐⭐",
+                pattern: "print(\"أهلاً بالعالم! أنا مبرمج ذكاء اصطناعي.\")\nname = input(\"ما اسمك؟ \")\nprint(f\"تشرفت بمعرفتك يا {name}!\")"
+              }
+            ],
+            discussion_question: "لماذا تعد لغة بايثون بمثابة جسر العبور الأساسي لمجالات الذكاء الاصطناعي وبناء التطبيقات الكبرى؟"
+          }
+        },
+        {
+          lesson_number: 8,
+          lesson_title: "الربط الأول مع OpenAI/Gemini API بالتطبيقات",
+          track: "مختبر البرمجة واستدعاء الـ APIs",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "استدعاء واستخدام النماذج اللغوية الضخمة من خلال الأسطر البرمجية. نركز هنا على هندسة وربط دالتنا البرمجية بخادم API وتلقي الإجابات بأمان وسلام وسرعة تامة.",
+            image_description: "رمز مفتاح ذهبي مضيء يفتح بوابة نحو السحب وعقد الاتصالات البعيدة"
+          },
+          notes: {
+            section_title: "أمن وسلامة المفاتيح",
+            content: "حافظ دائماً على سرية مفاتيح الـ API الخاصة بك ولا تنشرها على الإنترنت ومخازن الأكواد المفتوحة."
+          },
+          quest_card: {
+            section_title: "تحدي ربط الـ API الكوني",
+            activity_name: "أول إرسال عصبي عابر للقارات",
+            instructions: "راجع وفعل رمز البايثون لاستدعاء النموذج وتجربة الاستجابة العائلية السريعة.",
+            challenges: [
+              {
+                id: "api_connect_simple",
+                difficulty: "عملاق ⭐⭐⭐⭐⭐",
+                pattern: "import os\nfrom openai import OpenAI\nclient = OpenAI(api_key=os.environ.get(\"GEMINI_API_KEY\"))\nresponse = client.chat.completures.create(\n    model=\"gemini-1.5-flash\",\n    messages=[{\"role\": \"user\", \"content\": \"اشرح لي الذكاء الاصطناعي بكلمة واحدة.\"}]\n)\nprint(response.choices[0].message.content)"
+              }
+            ],
+            discussion_question: "كيف يتيح لنا استخدام الـ APIs بناء أدوات ذكاء مخصصة تفيد جيراننا ومجتمعنا؟"
+          }
+        },
+        {
+          lesson_number: 9,
+          lesson_title: "صناعة روبوت محادثة حقيقي ذي ذاكرة ممتدة",
+          track: "مختبر البرمجة واستدعاء الـ APIs",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "روبوتات الحوار الكلاسيكية تنسى بمجرد إغلاق نافذة الاتصال. نتعلم هنا آلية تمرير مصفوفة تخزين لسجل النقاش ليبقى الروبوت واعياً لاسم العائلة ومتفاعلاً بذكاء ممتد ووجيه.",
+            image_description: "مصفوفات خلايا عصبية متتابعة وجسور تجمع بيانات متبادلة باللون النيلي الساحر"
+          },
+          notes: {
+            section_title: "أفق هندسة المحادثات",
+            content: "الذاكرة تمنح اللمسة الإنسانية المريحة لروبوتك، وتجعله رفيقاً حقيقياً ومثقفاً يواكب البهجة."
+          },
+          quest_card: {
+            section_title: "تحدي روبوت الذاكرة",
+            activity_name: "صنائع الذاكرة الذاتية",
+            instructions: "اكتب الرمز النهائي بلغة بايثون وشغل محاكاة الذاكرة الحوارية لتكتسب نقاط الحكمة الوفيرة.",
+            challenges: [
+              {
+                id: "chatbot_memory_active",
+                difficulty: "عملاق ⭐⭐⭐⭐⭐",
+                pattern: "chat_history = []\nwhile True:\n    user_input = input(\"أنت: \")\n    chat_history.append({\"role\": \"user\", \"content\": user_input})\n    # استدعاء النموذج بمصفوفة وتحديث الذاكرة"
+              }
+            ],
+            discussion_question: "ما هي المخاطر والفرص من تمكين النماذج الذكية من امتلاك ذواكر وسير شخصية عن المستخدمين برأيك؟"
+          }
+        }
+      ]
+    }
+  ]
+};
+
+
 export const AiCurriculum = ({ lang, onBack }: { lang: 'en' | 'ar', onBack: () => void }) => {
   const isRtl = lang === 'ar';
   
   // App States
-  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const [selectedLesson, setSelectedLesson] = useState<any | null>(null);
   const [completedLessons, setCompletedLessons] = useState<number[]>([]);
+  const [curriculumType, setCurriculumType] = useState<'foundational' | 'advanced'>('foundational');
+  const [completedAdvancedLessons, setCompletedAdvancedLessons] = useState<number[]>([]);
+  const [sandboxInputs, setSandboxInputs] = useState<Record<string, string>>({});
+  const [sandboxChatMessages, setSandboxChatMessages] = useState<Array<{ role: 'user' | 'assistant' | 'system', content: string }>>([]);
+  const [simResponse, setSimResponse] = useState<string>('');
+  const [simulating, setSimulating] = useState<boolean>(false);
+  const [simulatingStep, setSimulatingStep] = useState<number>(0);
   const [xp, setXp] = useState<number>(0);
+
+  // New Academy Features (User Request additions)
+  const [lobbyTab, setLobbyTab] = useState<'lessons' | 'printables' | 'launch' | 'tools' | 'challenges' | 'experiments' | 'certificate' | 'family' | 'english'>('lessons');
+  const [familyName, setFamilyName] = useState<string>(isRtl ? 'الخليل' : 'Al Khalil');
+
+  // Academy Addons States - New additions
+  const [completed30DayChallenges, setCompleted30DayChallenges] = useState<number[]>([]);
+  const [selected30DayDay, setSelected30DayDay] = useState<number>(1);
+  const [activeChallengeView, setActiveChallengeView] = useState<'52weeks' | '30days'>('52weeks');
+
+  // Family Corner States
+  const [familySubTab, setFamilySubTab] = useState<'guide' | 'discussions' | 'stories' | 'whatif'>('guide');
+  const [activeDiscussionId, setActiveDiscussionId] = useState<number>(1);
+  const [whatIfInput, setWhatIfInput] = useState<string>('');
+  const [whatIfAnswers, setWhatIfAnswers] = useState<Record<number, string>>({});
+  const [activeStoryIdx, setActiveStoryIdx] = useState<number>(0);
+  const [activeWhatIfId, setActiveWhatIfId] = useState<number>(1);
+
+  // English States
+  const [activeEnglishModuleIdx, setActiveEnglishModuleIdx] = useState<number>(0);
+  const [completedEnglishDays, setCompletedEnglishDays] = useState<string[]>([]);
+  const [englishPromptCopied, setEnglishPromptCopied] = useState<boolean>(false);
+  const [englishSimMessage, setEnglishSimMessage] = useState<string>('');
+  const [englishSimHistory, setEnglishSimHistory] = useState<{role: 'user' | 'assistant', text: string}[]>([]);
+  const [englishSimulating, setEnglishSimulating] = useState<boolean>(false);
+
+  // Open Lab State expansion
+  const [calcWords, setCalcWords] = useState<number>(100000);
+  const [calcModel, setCalcModel] = useState<string>('Gemini 1.5 Pro');
+  const [compSearchQuery, setCompSearchQuery] = useState<string>('');
+  const [certStudentName, setCertStudentName] = useState<string>('');
+  const [certificationDate, setCertificationDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [announcementCoordinator, setAnnouncementCoordinator] = useState<string>(isRtl ? 'باسم الخليل' : 'Basim Al Khalil');
+  const [announcementTime, setAnnouncementTime] = useState<string>(isRtl ? 'يوم الجمعة مساءً' : 'Friday evening');
+  const [isCopied, setIsCopied] = useState<boolean>(false);
+
+  // Academy Addons States
+  const [toolsSearchQuery, setToolsSearchQuery] = useState<string>('');
+  const [selectedToolCategory, setSelectedToolCategory] = useState<string>('all');
+  const [favoriteTools, setFavoriteTools] = useState<string[]>([]);
+  const [completedChallengeWeeks, setCompletedChallengeWeeks] = useState<number[]>([]);
+  const [expandedMonth, setExpandedMonth] = useState<number | null>(null);
+
+  // Experiments States
+  const [activeExperimentId, setActiveExperimentId] = useState<number>(1);
+  const [exp1Prompt, setExp1Prompt] = useState<string>('A majestic phoenix rising from golden flames, art nouveau style, intricate details, vibrant colors');
+  const [exp1Running, setExp1Running] = useState<boolean>(false);
+  const [exp1SelectedStyle, setExp1SelectedStyle] = useState<string>('art nouveau');
+  const [exp2TaskType, setExp2TaskType] = useState<string>('creative');
+  const [exp2Running, setExp2Running] = useState<boolean>(false);
+  const [exp2CustomPrompt, setExp2CustomPrompt] = useState<string>('');
+  const [exp2Results, setExp2Results] = useState<any | null>(null);
+  const [exp3ImagePrompt, setExp3ImagePrompt] = useState<string>('An energetic cartoon character waving and smiling, anime style, flat background');
+  const [exp3Running, setExp3Running] = useState<boolean>(false);
+
+  // Advanced Certificate States
+  const [advCertName, setAdvCertName] = useState<string>('');
+  const [advCertTrack, setAdvCertTrack] = useState<string>('هندسة الأوامر المتقدمة');
+  const [advCertProj, setAdvCertProj] = useState<string>('film');
+  const [examStep, setExamStep] = useState<number>(0); // 0: intro, 1: generation task, 2: mega-prompt task, 3: ethics, 4: final project, 5: certified!
+  const [examAns1, setExamAns1] = useState<string>('');
+  const [examAns2, setExamAns2] = useState<string>('');
+  const [examAns3, setExamAns3] = useState<string>('');
+  const [examAns4, setExamAns4] = useState<string>('');
+
+  const isAdvanced = selectedLesson && ('track' in selectedLesson);
+
+  // Worksheet states
+  const [wsQ1, setWsQ1] = useState<string>('');
+  const [wsQ2, setWsQ2] = useState<string>('');
+  const [wsQ3, setWsQ3] = useState<string>('');
+  const [wsQ4, setWsQ4] = useState<string>('');
+  const [wsQ5, setWsQ5] = useState<string>('');
+  const [wsChecked, setWsChecked] = useState<boolean>(false);
+  const [wsScore, setWsScore] = useState<number>(0);
+  const [wsFeedback, setWsFeedback] = useState<string>('');
+  const [selectedPrintable, setSelectedPrintable] = useState<'charter' | 'certificate' | 'dictionary' | 'roadmap' | 'worksheet'>('charter');
+  const [charterPassword, setCharterPassword] = useState<string>('');
 
   // Lesson 1 Interactive game state
   const [l1Step, setL1Step] = useState<number>(0);
@@ -807,6 +1228,339 @@ export const AiCurriculum = ({ lang, onBack }: { lang: 'en' | 'ar', onBack: () =
   };
 
 
+  const renderAdvancedWorkspace = () => {
+    if (!selectedLesson) return null;
+    const lesson = selectedLesson;
+
+    const trackName = lesson.track || (isRtl ? 'المسار المتقدم' : 'Advanced Track');
+    const isCompleted = completedAdvancedLessons.includes(lesson.lesson_number);
+
+    // Copy Utility
+    const handleCopyText = (text: string, id: string) => {
+      navigator.clipboard.writeText(text);
+      setSandboxInputs(prev => ({ ...prev, [`copied_${id}`]: 'true' }));
+      setTimeout(() => {
+        setSandboxInputs(prev => ({ ...prev, [`copied_${id}`]: 'false' }));
+      }, 2000);
+    };
+
+    // Chat Sim Launcher
+    const handleSimSubmit = () => {
+      const userTxt = sandboxInputs['sim_chat_input'] || '';
+      if (!userTxt.trim()) return;
+
+      // Add to messages
+      const newMsgs = [...sandboxChatMessages, { role: 'user' as const, content: userTxt }];
+      setSandboxChatMessages(newMsgs);
+      setSandboxInputs(prev => ({ ...prev, sim_chat_input: '' }));
+      setSimulating(true);
+
+      setTimeout(() => {
+        let aiAns = '';
+        if (lesson.lesson_number === 1) {
+          aiAns = isRtl 
+            ? `[🎮 راوي الألعاب - مغامرة تفاعلية]: لقد قرأت أمرك العملاق وقمت بتفعيل العالم بنجاح!\n\nمستواك الحالي: 🌟 مستكشف مبتدئ | نقاط الصحة: 100/100\nأنت الآن تقف عند مفترق طرق غامض في الغابة الذكية. هناك طريق برّاق على اليمين يؤدي إلى نهر البيانات، وطريق مظلم على اليسار يؤدي إلى جبل الخوارزميات.\n\nماذا تود أن تفعل؟ اكتب خيارك لنتابع المغامرة وفق القواعد الـ 10 التي قمت بهندستها!`
+            : `[🎮 Interactive Narrator]: Your Mega-Prompt has been loaded successfully!\n\nLevel: 🌟 Novice Explorer | HP: 100/100\nYou stand at a fork in the dark forest. To your right is a glowing path towards the Data River, to your left is a mysterious path up the Algorithm Mountain.\n\nWhat do you do next? Type your choice!`;
+        } else if (lesson.lesson_number === 2) {
+          aiAns = isRtl
+            ? `[📖 راوي الرواية - تفرع الخيارات]: مذهل! تم تفعيل شخصياتك الثلاثة وقواعد عالمك.\n\nالفصل الأول: البوابة الحديدية تبوح بأسرارها.\nالخيار 1: اطلب من "البطل" مراجعة النقوش القديمة.\nالخيار 2: ابدأ محادثة سرية مع "الشرير" لمعرفة دافعه.\nالخيار 3: استشر "الحليف" بشأن كمية المياه المتبقية لدينا.\n\nما هو اختيارك؟`
+            : `[📖 Interactive Novelist]: Splendid! Your characters and world rules are live.\n\nChapter 1: The Iron Gate Whispers.\nOption 1: Ask the Hero to inspect ancient runes.\nOption 2: Chat secretly with the Villain to discover their hidden motive.\nOption 3: Ask the Ally about remaining resources.\n\nWhat is your choice?`;
+        } else if (lesson.lesson_number === 3) {
+          aiAns = isRtl
+            ? `[📊 محلل البيانات الذكي]: تم تحميل مستنداتك وتحليل البيانات بنجاح!\n\n| العنصر | التحليل المستخرج | النبرة |\n| :--- | :--- | :--- |\n| ملخص النص | المقال يحلل أبعاد نمو الحوسبة التوليدية في عام 2026 وأثرها على التعليم | إيجابي وملهم |\n| الأسماء والمناصب | د. سميرة (خبيرة ذكاء اصطناعي)، م. خالد (مدير الابتكار) | مهني قيادي |\n| الأرقام والإحصائيات | زيادة الكفاءة بنسبة 45%، استثمار 1.2 مليار دولار | دقيقة ومبهرة |`
+            : `[📊 Intelligent Data Analyst]: Documents parsed and structured successfully!\n\n| Item | Extracted Analysis | Sentiment |\n| :--- | :--- | :--- |\n| Summary | The article highlights generative computing growth in 2026 and its educational impact | Positive |\n| Names & Roles | Dr. Samira (AI Ethicist), Khalid (Director of Innovation) | Professional |\n| Stats | 45% efficiency boost, $1.2B capital investment | High-quality |`;
+        } else if (lesson.lesson_number === 4) {
+          aiAns = isRtl
+            ? `[🎓 المعلم السقراطي الذكي]: مرحبًا بك في جلستنا التعليمية التفاعلية!\n\nسؤالي الأول لك لتقييم مستواك:\n"إذا كان لدينا كعكة عائلية وقمنا بتقسيمها إلى 4 أجزاء متساوية، ثم أكلنا جزءًا واحدًا وتخيلنا أننا نصف المتبقي. ما هي القيمة الكسرية الدقيقة لما بقي معنا؟"\n\nاكتب إجابتك وسأقوم بتوجيهك وتحديث خطتك الشخصية مبهجًا!`
+            : `[🎓 Socratic Teacher Assistant]: Hello and welcome to your customized learning session!\n\nHere is my first question to assess your knowledge:\n"If we divide a family cake into 4 equal slices and eat 1 slice, how can we mathematically represent the remainder in fraction notation?"\n\nSubmit your answer to begin our 3-day personal plan!`;
+        } else if (lesson.lesson_number === 5) {
+          aiAns = isRtl
+            ? `[💡 مدرب الحياة الرقمية]: يا له من هدف رائع وتصميم ملهم! دعنا نقوم بهندسة العوائق العاداتية الحالية.\n\nسؤالي لك الآن:\n"ما هو الشيء الصغير الواحد الذي إن قمت به يومياً لمدة 10 دقائق فقط، سيجعل تحقيق هدفك أسهل بنسبة 50%؟"\n\nأخبرني وسنقوم بجدولته في روتينك الأسبوعي فوراً.`
+            : `[💡 Digital Life Coach]: What an outstanding goal! Let's systematically engineer your schedule.\n\nMy coaching question for you:\n"What is one micro-habit that taking just 10 minutes daily would make achieving your goal 50% easier?"\n\nTell me and we will build your weekly routine!`;
+        } else if (lesson.lesson_number === 6) {
+          aiAns = isRtl
+            ? `[🥗 مستشار العافية والتغذية]: لقد صممت لك روتينًا صحيًا متكاملاً بناءً على معطياتك اليوم!\n\n🍳 الفطور: أومليت الشوفان اللذيذ مع الخضار الطازجة (جاهز في 7 دقائق).\n🏃 الرياضة: روتين 15 دقيقة (30 ثانية لكل من: القرفصاء، الضغط، الجري الخفيف، تمرين البطن) مع فترات راحة قصيرة.\n💤 النوم: تهانينا! تم توليد قصة نوم صوتية مريحة تعيد توازن موجاتك الدماغية الهادئة.`
+            : `[🥗 Holistic Wellness Assistant]: Your customized wellness daily routine is ready!\n\n🍳 Breakfast: Delicious Savory Oats Omelette (Ready in 7 mins).\n🏃 Workout: 15-minute high intensity full body flow (Squats, Push-ups, Mountain Climbers, Planks).\n💤 Sleep Meditation: Ambient story generated to ease muscle tension. Enjoy!`;
+        } else {
+          aiAns = isRtl
+            ? `[🤖 مساعد الحوار المتقدم]: مستعد ومتحمس لخوض غمار التفاعل والتحدي معك بموجب هندسة الأوامر الذكية!`
+            : `[🤖 Assistant]: I am ready and excited to co-pilot your advanced prompts!`;
+        }
+
+        setSandboxChatMessages(prev => [...prev, { role: 'assistant' as const, content: aiAns }]);
+        setSimulating(false);
+      }, 1500);
+    };
+
+    // Python Run Simulator
+    const handleRunPython = () => {
+      setSimulating(true);
+      setSimulatingStep(1);
+      setSimResponse('');
+
+      // Step 1: Connecting
+      setTimeout(() => {
+        setSimulatingStep(2);
+        // Step 2: Running
+        setTimeout(() => {
+          setSimulatingStep(3);
+          let codeOutput = '';
+          if (lesson.lesson_number === 7) {
+            const uName = sandboxInputs['python_name'] || (isRtl ? 'مبرمج التقدم' : 'Future Dev');
+            codeOutput = isRtl
+              ? `>>> !pip install openai\nRequirement already satisfied: openai in /usr/local/lib/python3.10/dist-packages (1.12.0)\n\n>>> print('أهلاً بالعالم! أنا مبرمج ذكاء اصطناعي.')\nأهلاً بالعالم! أنا مبرمج ذكاء اصطناعي.\n\n>>> name = input('ما اسمك؟ ')\nما اسمك؟ ${uName}\n>>> print(f'تشرفت بمعرفتك يا {uName}!')\nتشرفت بمعرفتك يا ${uName}!\n\n✨ [تم تنفيذ كود بايثون بنجاح ببيئة Google Colab المحاكاة]`
+              : `>>> !pip install openai\nRequirement already satisfied: openai in /usr/local/lib/python3.10/dist-packages (1.12.0)\n\n>>> print('Hello World! I am an AI programmer.')\nHello World! I am an AI programmer.\n\n>>> name = input('Your Name? ')\nYour Name? ${uName}\n>>> print(f'Nice to meet you, {uName}!')\nNice to meet you, {uName}!\n\n✨ [Python script completed successfully in simulated Colab environment]`;
+          } else if (lesson.lesson_number === 8) {
+            codeOutput = isRtl
+              ? `>>> python chatbot_simple.py\n⚙️ جاري إنشاء اتصال بـ OpenAI API/Gemini API...\n🔐 تم مصادقة المفتاح السري بأمان.\n\n[مخرجات استجابة النموذج]:\n--------------------------------------------\n"الذكاء الاصطناعي هو قدرة الآلات على محاكاة السلوك المعرفي البشري. يعتمد على تحليل البيانات الضخمة لتعلم الأنماط وتوقع النتائج. يُسختدم اليوم لتبسيط الحياة وحل التحديات العلمية والطبية الصعبة ببهجة."\n--------------------------------------------\n🚀 [عملية API تمت بنجاح في غضون 1.2 ثانية]`
+              : `>>> python chatbot_simple.py\n⚙️ Opening secure channel to OpenAI API/Gemini API...\n🔐 Secret credential authenticated.\n\n[Model Response Choices]:\n--------------------------------------------\n"Artificial Intelligence is the capability of computer systems to mimic human cognitive functions. It relies on processing massive datasets to learn patterns and predict answers. Today, it simplifies workflows and solves complex scientific issues beautifully."\n--------------------------------------------\n🚀 [API call succeeded in 1.2s]`;
+          } else if (lesson.lesson_number === 9) {
+            codeOutput = isRtl
+              ? `>>> python chatbot_memory.py\nبوتك: مرحبًا! اكتب خروج للإنهاء.\nأنت: اسمي رائد المستقبل.\nبوتك: تشرفت بجلال علمك يا رائد المستقبل! كيف يمكنني مساعدتك برحلتك اليوم؟\nأنت: ما اسمي؟\nبوتك: اسمك رائد المستقبل المبرز، لقد حفظت اسمك في ذاكرة محادثتنا السياقية بأمان! ✨\n\n⚙️ [حجم الرسائل في نظام سياق الذاكرة النشط: 5 رسائل متوالية]`
+              : `>>> python chatbot_memory.py\nBot: Hello! Type 'exit' to terminate.\nYou: My name is Alex.\nBot: Magnificent to meet you, Alex! How can I co-pilot your journey today?\nYou: What is my name?\nBot: Your name is Alex. I have saved your identity securely in our active contextual array! ✨\n\n⚙️ [Context array size: 5 message nodes]`;
+          }
+          setSimResponse(codeOutput);
+          setSimulating(false);
+          setSimulatingStep(0);
+        }, 1200);
+      }, 800);
+    };
+
+    // Completing lesson and awarding XP
+    const handleCompleteLessonAndAwardXp = () => {
+      if (!isCompleted) {
+        setCompletedAdvancedLessons(prev => [...prev, lesson.lesson_number]);
+        setXp(prev => prev + 50);
+      }
+      setSelectedLesson(null);
+    };
+
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full text-right" dir={isRtl ? 'rtl' : 'ltr'}>
+        {/* Left Column: Lesson card details */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="bg-[#0b172e] border border-white/10 rounded-[2rem] p-6 space-y-6">
+            <div>
+              <span className="px-2.5 py-0.5 bg-amber-500/10 text-amber-300 border border-amber-500/15 rounded-full text-[10px] font-black uppercase tracking-widest">{trackName}</span>
+              <h3 className="text-2xl font-black text-white mt-2 leading-tight">{lesson.lesson_title}</h3>
+            </div>
+
+            <div className="space-y-4">
+              <div className="p-5 bg-white/5 rounded-2xl border border-white/5 relative">
+                <h4 className="text-xs font-black text-amber-300 uppercase tracking-widest mb-3 leading-none flex items-center gap-2">
+                  <Smile size={14} />
+                  {lesson.lesson_card.section_title}
+                </h4>
+                <p className="text-slate-200 text-xs leading-relaxed font-semibold whitespace-pre-line">
+                  {lesson.lesson_card.content}
+                </p>
+                {lesson.lesson_card.image_description && (
+                  <div className="mt-4 p-3 bg-slate-950/60 rounded-xl border border-white/5 text-[10px] text-slate-400 italic flex gap-2">
+                    <span className="text-amber-400 font-bold">🎨 {isRtl ? 'مشهد الدرس الفني:' : 'Scene Art Idea:'}</span> {lesson.lesson_card.image_description}
+                  </div>
+                )}
+              </div>
+
+              {lesson.notes && (
+                <div className="p-5 bg-amber-500/5 rounded-2xl border border-amber-500/15">
+                  <h4 className="text-xs font-black text-amber-400 uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
+                    <Bot size={14} />
+                    {lesson.notes.section_title || (isRtl ? 'نصيحة وخبرة مبرورة' : 'Expert Advice')}
+                  </h4>
+                  <p className="text-slate-300 text-xs leading-relaxed whitespace-pre-line font-medium">
+                    {lesson.notes.content}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <button
+            onClick={() => setSelectedLesson(null)}
+            className="w-full bg-[#0b1329] hover:bg-slate-900 border border-white/10 text-slate-300 font-black p-4 rounded-xl text-xs flex justify-center items-center gap-2 transition-all"
+          >
+            <ArrowLeft className={isRtl ? 'rotate-180' : ''} size={14} />
+            {isRtl ? 'العودة لقائمة المسارات المتقدمة' : 'Back to Advanced Tracks'}
+          </button>
+        </div>
+
+        {/* Right Column: Interactive SandBox Workspace and Simulator */}
+        <div className="lg:col-span-7 space-y-6">
+          {/* Challenge list */}
+          <div className="bg-[#0b172e] border border-white/10 rounded-[2rem] p-6 space-y-6">
+            <div>
+              <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">{lesson.quest_card.section_title}</span>
+              <h3 className="text-xl font-black text-white mt-1 leading-tight">{lesson.quest_card.activity_name}</h3>
+              <p className="text-slate-400 text-xs mt-1">{lesson.quest_card.instructions}</p>
+            </div>
+
+            <div className="space-y-4">
+              {lesson.quest_card.challenges.map((chal: any, idxx: number) => {
+                const isCopiedState = sandboxInputs[`copied_${chal.id}`] === 'true';
+                return (
+                  <div key={chal.id} className="p-4 bg-slate-950/40 rounded-2xl border border-white/5 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400 text-xs font-bold font-mono">#{idxx + 1}</span>
+                      <span className="text-[10px] text-amber-400 font-black bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/20">{chal.difficulty}</span>
+                    </div>
+
+                    <div className="bg-[#0d152a] p-4 rounded-xl border border-white/5 font-mono text-xs leading-relaxed text-slate-300 relative select-text whitespace-pre-wrap">
+                      {chal.pattern}
+                      
+                      {/* Copy template button */}
+                      <button
+                        onClick={() => handleCopyText(chal.pattern, chal.id)}
+                        className="absolute bottom-2 left-2 bg-slate-800 hover:bg-slate-700 text-amber-400 p-1.5 rounded-lg text-[9px] font-black flex items-center gap-1 transition-all"
+                      >
+                        {isCopiedState ? <Check size={10} className="text-emerald-400" /> : <Copy size={10} />}
+                        {isCopiedState ? (isRtl ? 'تم نسخ القالب!' : 'Copied!') : (isRtl ? 'نسخ القالب' : 'Copy Template')}
+                      </button>
+                    </div>
+
+                    <textarea
+                      placeholder={isRtl ? 'اكتب تجربتك أو صغ تعويذتك وعالمك هنا لمشاركتها مع المعمل...' : 'Type your custom prompt, response analysis or output here...'}
+                      value={sandboxInputs[`ans_${chal.id}`] || ''}
+                      onChange={(e) => setSandboxInputs(prev => ({ ...prev, [`ans_${chal.id}`]: e.target.value }))}
+                      rows={2}
+                      className="w-full text-xs font-semibold bg-[#050b14]/90 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
+                    />
+                  </div>
+                );
+              })}
+
+              {lesson.quest_card.discussion_question && (
+                <div className="p-4 bg-blue-500/5 rounded-2xl border border-blue-500/15">
+                  <h4 className="text-xs font-black text-blue-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+                    <HelpCircle size={14} />
+                    {isRtl ? 'سؤال للنقاش والمطالعة' : 'DISCUSSION QUESTION'}
+                  </h4>
+                  <p className="text-slate-300 text-xs leading-relaxed">
+                    {lesson.quest_card.discussion_question}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Dynamic Interactive AI Simulator Console */}
+          <div className="bg-slate-950 border border-white/10 rounded-[2rem] p-6 space-y-4 font-mono relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
+            
+            <div className="flex justify-between items-center border-b border-white/5 pb-3">
+              <span className="text-slate-400 text-xs font-black font-mono tracking-widest flex items-center gap-2 text-right">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                {isRtl ? 'معمل محاكاة الذكاء الاصطناعي وبايثون' : 'INTELLIGENT INTEGRATION LAB SANDBOX'}
+              </span>
+              <span className="text-[9px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">{lesson.lesson_number >= 7 ? 'PYTHON CONSOLE' : 'NEURAL INTERACTIVE CHAT'}</span>
+            </div>
+
+            {/* Python track simulator (Lessons 7-9) */}
+            {lesson.lesson_number >= 7 ? (
+              <div className="space-y-4">
+                <div className="p-4 bg-[#0d162e] rounded-xl border border-white/5 space-y-3">
+                  <label className="block text-xs font-bold text-amber-300 text-right">
+                    {isRtl ? 'اسم المبرمج (مرر متغير الاسم البرمجي):' : 'Programmer Name (Pass to your input command):'}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={isRtl ? 'مبرمج التقدم الحكيم' : 'Basim the Coder'}
+                    value={sandboxInputs['python_name'] || ''}
+                    onChange={(e) => setSandboxInputs(prev => ({ ...prev, python_name: e.target.value }))}
+                    className="w-full text-xs bg-[#050b14]/80 border border-white/10 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-amber-500 text-right"
+                  />
+
+                  <button
+                    disabled={simulating}
+                    onClick={handleRunPython}
+                    className="w-full bg-[#fb923c] text-slate-950 font-black text-xs py-2.5 rounded-xl hover:bg-amber-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    <Play size={12} fill="#020617" />
+                    {simulating ? (isRtl ? 'جاري محاكاة الخادم ولغة بايثون...' : 'Simulating Local Interpreter...') : (isRtl ? 'شغل كود بايثون وعالج الأوامر ⚡' : 'Run Python Simulation script ⚡')}
+                  </button>
+                </div>
+
+                {/* Simulated result terminal terminal-logs */}
+                {(simulating || simResponse) && (
+                  <div className="bg-[#050b14] p-4 rounded-xl border border-white/5 text-xs text-sky-400 space-y-2 select-text font-mono whitespace-pre-wrap leading-relaxed">
+                    {simulating && simulatingStep === 1 && (
+                      <div className="text-amber-400 animate-pulse">🛠️ {isRtl ? 'مرحبًا بك في معمل Google Colab المحاكي. جاري تحميل المفسر الأساسي ونواة بايثون...' : 'Initializing cloud VM. Spawning Python kernel container...'}</div>
+                    )}
+                    {simulating && simulatingStep === 2 && (
+                      <div className="text-slate-400">⚙️ {isRtl ? 'جاري الاتصال بالـ API ومزامنة رموز مفاتيح OpenAI / Gemini ...' : 'Connecting to OpenAI API host... Securing network links...'}</div>
+                    )}
+                    {simResponse}
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Conversational interface (Lessons 1-6) */
+              <div className="space-y-4">
+                <div className="bg-[#050b14] p-4 rounded-xl border border-white/5 max-h-56 overflow-y-auto text-xs space-y-3 font-semibold">
+                  {/* Default greetings */}
+                  <div className="text-slate-400 leading-relaxed italic text-center pb-2 border-b border-white/5">
+                    💡 {isRtl ? 'قم بنسخ أي من التحديات بالأعلى وصياغة مفرداتها وتفعيل البوت لمشاهدة التحليل ذكيًا ومطابقًا لتعاويذك السحرية!' : 'Paste any challenge template above, modify components, and write into simulation chat to experience real-time AI reply.'}
+                  </div>
+
+                  {sandboxChatMessages.map((msg, mIdx) => (
+                    <div key={mIdx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`p-3 rounded-2xl max-w-sm border leading-relaxed ${
+                        msg.role === 'user' 
+                          ? 'bg-amber-500/10 border-amber-500/20 text-slate-100 rounded-tr-none text-right' 
+                          : 'bg-slate-900 border-white/5 text-slate-200 rounded-tl-none text-right'
+                      }`}>
+                        <div className="text-[8px] font-black text-amber-400 uppercase tracking-widest mb-1">{msg.role === 'user' ? (isRtl ? 'أنت (صاحب التعويذة)' : 'YOU (PROMPT OWNER)') : (isRtl ? 'البوت المحاكي الذكي 🧠' : 'AI BOT ASSISTANT 🧠')}</div>
+                        <div className="whitespace-pre-wrap select-text text-xs leading-relaxed">{msg.content}</div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {simulating && (
+                    <div className="flex justify-start">
+                      <div className="bg-slate-900/60 p-3 rounded-2xl rounded-tl-none text-slate-400 border border-white/5 flex items-center gap-2 animate-pulse text-right">
+                        <span>🧠</span>
+                        <span>{isRtl ? 'الذكاء الاصطناعي يحلل تعاويذك ويولّد المخرجات...' : 'Smart model is processing your context and generating text...'}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder={isRtl ? 'الصق وصغ هنا لتجربة أوامرك المتقدمة...' : 'Type and play in the Sandbox simulation...'}
+                    value={sandboxInputs['sim_chat_input'] || ''}
+                    onChange={(e) => setSandboxInputs(prev => ({ ...prev, sim_chat_input: e.target.value }))}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSimSubmit()}
+                    className="flex-1 bg-[#050b14] border border-white/10 rounded-xl px-4 py-3 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 text-right"
+                  />
+                  <button
+                    onClick={handleSimSubmit}
+                    disabled={simulating}
+                    className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 rounded-xl flex items-center justify-center font-black text-xs shrink-0"
+                  >
+                    <Send size={14} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Action layout */}
+          <div className="flex justify-end pt-4">
+            <button
+              onClick={handleCompleteLessonAndAwardXp}
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black px-8 py-4 rounded-2xl flex items-center gap-3 shadow-lg shadow-emerald-500/10 transition-all active:scale-95 text-sm"
+            >
+              <CheckCircle size={18} />
+              {isCompleted ? (isRtl ? 'تجاوز التحدي مجدداً' : 'Replay challenge completed') : (isRtl ? 'أكملت المغامرة بنجاح وحصدت +50 XP 🏆' : 'Adventure completed successfully (+50 XP) 🏆')}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+
   return (
     <div className="flex-1 bg-[#050b14] text-slate-100 min-h-screen font-sans overflow-y-auto" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Astronaut Particle Accents */}
@@ -827,14 +1581,16 @@ export const AiCurriculum = ({ lang, onBack }: { lang: 'en' | 'ar', onBack: () =
           >
             <ArrowLeft className={isRtl ? 'rotate-180' : ''} />
           </button>
-          <div>
-            <h1 className="text-xl font-black text-white leading-none uppercase tracking-tight flex items-center gap-2">
-              <Brain className="text-amber-400 animate-pulse shrink-0" size={24} />
-              {AI_CURRICULUM_DATA.program_name}
-            </h1>
-            <p className="text-[10px] text-amber-400/80 font-bold uppercase tracking-widest mt-1">
-              {AI_CURRICULUM_DATA.program_subtitle}
-            </p>
+          <div className="flex items-center gap-3">
+            <FamilyAILightbulbIcon size={36} />
+            <div>
+              <h1 className="text-xl font-black text-white leading-none uppercase tracking-tight">
+                {curriculumType === 'foundational' ? AI_CURRICULUM_DATA.program_name : ADVANCED_CURRICULUM_DATA.program_name}
+              </h1>
+              <p className="text-[10px] text-amber-400/80 font-bold uppercase tracking-widest mt-1">
+                {curriculumType === 'foundational' ? AI_CURRICULUM_DATA.program_subtitle : ADVANCED_CURRICULUM_DATA.program_subtitle}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -861,87 +1617,3661 @@ export const AiCurriculum = ({ lang, onBack }: { lang: 'en' | 'ar', onBack: () =
             >
               {/* Mission Card */}
               <div className="relative overflow-hidden bg-gradient-to-r from-[#0d1e3d] to-[#071329] border border-white/10 rounded-[2.5rem] p-8 md:p-12 shadow-2xl">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+                <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-96 h-96 bg-sky-500/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl pointer-events-none" />
                 <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center justify-between">
-                  <div className="space-y-4 max-w-3xl text-right md:text-right">
-                    <div className="inline-flex items-center gap-2 bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/25">
-                      <Sparkles size={12} />
+                  <div className="space-y-6 max-w-4xl text-right md:text-right">
+                    <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 px-4 py-1.5 rounded-full border border-amber-500/25">
+                      <Sparkles size={14} className="animate-spin duration-3000" />
                       <span className="text-[10px] font-black uppercase tracking-widest leading-none">
-                        {isRtl ? 'الغاية من هذا المنهج' : 'OUR ULTIMATE GOAL'}
+                        {isRtl ? 'بوابة تعلم الذكاء الاصطناعي الأسرية' : 'Family AI Exploration Portal'}
                       </span>
                     </div>
                     <h2 className="text-3xl md:text-5xl font-black text-white leading-tight tracking-tight">
-                      {isRtl ? 'كن موجهاً للذكاء.. لا مستهلكاً عفوياً' : 'Lead AI, Do Not Just Consume It'}
+                      {isRtl ? "أهلًا بكم في 'تعلم الذكاء الاصطناعي'!" : 'Welcome to "Learn AI for Families"!'}
                     </h2>
-                    <p className="text-slate-300 text-base md:text-lg font-medium leading-relaxed">
-                      {AI_CURRICULUM_DATA.program_goal}
+                    <p className="text-slate-300 text-sm md:text-md font-medium leading-relaxed whitespace-pre-line max-w-3xl">
+                      {isRtl ? (
+                        `هذا ليس قسمًا تقنيًا معقدًا، بل هو ملعب عائلي للعقول الفضولية. هنا، أنتم لستم مجرد طلاب، بل مستكشفون، مبدعون، وسفراء للمستقبل.
+
+في رحلتنا المكونة من 6 مغامرات (نسميها مستويات)، ستكتشفون معًا:
+🧠 كيف "يفكر" الذكاء الاصطناعي حقًا (دون تعقيد).
+🎨 كيف تروّضونه ليرسم ويؤلف القصص.
+🛡️ كيف تحمون عائلتكم من خدعه ومخاطره.
+🚀 كيف تصبحون قادة المستقبل، لا مجرد متفرجين.
+
+كل ما تحتاجونه هو فضولكم... وبعضكم البعض.
+المغامرة بانتظاركم!`
+                      ) : (
+                        `This is not a complex technical track; it's a playful family arena for curious minds. Here, you are not just passive students, but active explorers, creators, and future ambassadors.
+
+In our journey spanned across 6 grand adventures (levels), you will discover:
+🧠 How AI "thinks" under the hood (without code).
+🎨 How to command it to draw art and write magical books.
+🛡️ How to secure your family from its creative traps.
+🚀 How to become future leaders, not just spectators.
+
+All you need is your curiosity... and each other!
+The adventure is waiting!`
+                      )}
                     </p>
                   </div>
-                  <div className="relative shrink-0">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-[#050b14] font-black text-3xl shadow-xl shadow-amber-500/10">
-                      <Bot size={44} className="animate-bounce" />
+                  <div className="relative shrink-0 flex flex-col items-center gap-3">
+                    <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-amber-500/20 to-orange-500/20 border-2 border-amber-500/30 flex items-center justify-center text-amber-400 shadow-xl shadow-amber-500/5 animate-pulse">
+                      <FamilyAILightbulbIcon size={80} />
                     </div>
+                    <span className="text-amber-400 text-xs font-black font-mono bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">{isRtl ? 'الأكاديمية الأسرية' : 'Family Academy'}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Levels Grid */}
-              <div className="space-y-8">
-                <h3 className="text-2xl font-black text-white tracking-tight flex items-center gap-3">
-                  <Layers className="text-amber-400" />
-                  {isRtl ? 'مستويات الرحلة العائلية 🚀' : 'Our Digital Exploration Levels 🚀'}
-                </h3>
+              {/* Lobby Tabs Selector */}
+              <div className="flex flex-wrap border-b border-white/5 pb-px gap-2">
+                <button
+                  onClick={() => setLobbyTab('lessons')}
+                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
+                    lobbyTab === 'lessons'
+                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Layers size={16} />
+                  {isRtl ? 'المستويات والتطبيقات 🚀' : 'Learning Levels & Sandbox 🚀'}
+                </button>
+                <button
+                  onClick={() => setLobbyTab('tools')}
+                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
+                    lobbyTab === 'tools'
+                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <BookOpen size={16} />
+                  {isRtl ? 'مكتبة الأدوات الذكية 🛠️' : 'AI Tools Library 🛠️'}
+                </button>
+                <button
+                  onClick={() => setLobbyTab('challenges')}
+                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
+                    lobbyTab === 'challenges'
+                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Sparkle size={16} />
+                  {isRtl ? 'التحديات والمسارات 📅' : 'Challenges & Roadmaps 📅'}
+                </button>
+                <button
+                  onClick={() => setLobbyTab('experiments')}
+                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
+                    lobbyTab === 'experiments'
+                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Sliders size={16} />
+                  {isRtl ? 'في المختبر (تجارب ومقارنات) 🧪' : 'Interactive Lab 🧪'}
+                </button>
+                <button
+                  onClick={() => setLobbyTab('family')}
+                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
+                    lobbyTab === 'family'
+                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Users size={16} />
+                  {isRtl ? 'ركن العائلة والقصص 👨‍👩‍👧‍👦' : 'Family Corner & Stories 👨‍👩‍👧‍👦'}
+                </button>
+                <button
+                  onClick={() => setLobbyTab('english')}
+                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
+                    lobbyTab === 'english'
+                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Compass size={16} />
+                  {isRtl ? 'الإنجليزية بالذكاء الاصطناعي 🇬🇧' : 'AI English Bridge 🇬🇧'}
+                </button>
+                <button
+                  onClick={() => setLobbyTab('certificate')}
+                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
+                    lobbyTab === 'certificate'
+                      ? 'bg-gradient-to-t from-amber-500/10 to-transparent text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Award size={16} />
+                  {isRtl ? 'الشهادة الاحترافية المتقدمة 🏆' : 'Professional Certificate 🏆'}
+                </button>
+                <button
+                  onClick={() => setLobbyTab('printables')}
+                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
+                    lobbyTab === 'printables'
+                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Printer size={16} />
+                  {isRtl ? 'مطبوعات العائلة 🖨️' : 'Printables 🖨️'}
+                </button>
+                <button
+                  onClick={() => setLobbyTab('launch')}
+                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
+                    lobbyTab === 'launch'
+                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Megaphone size={16} />
+                  {isRtl ? 'إعلان التدشين 📣' : 'Launch Setup 📣'}
+                </button>
+              </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  {AI_CURRICULUM_DATA.program_levels.map((level, levelIdx) => (
-                    <div 
-                      key={level.level_number}
-                      className="bg-slate-900/45 border border-white/5 rounded-[2.5rem] p-8 space-y-6 flex flex-col justify-between hover:border-amber-500/20 transition-all hover:-translate-y-1 relative"
-                    >
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <span className="px-3 py-1 bg-[#1a2e5c] text-amber-300 rounded-full text-[10px] font-black uppercase tracking-widest">
-                            {isRtl ? `المستوى ${level.level_number}` : `Level ${level.level_number}`}
-                          </span>
-                          <span className="text-xs font-bold text-slate-500 font-mono">0{level.level_number}</span>
-                        </div>
-                        <h4 className="text-2xl font-black text-white leading-tight font-sans">
-                          {level.level_title}
-                        </h4>
-                        <p className="text-slate-400 text-sm leading-relaxed">
-                          {level.level_description}
+              {/* Tab 1: Standard Levels Grid */}
+              {lobbyTab === 'lessons' && (
+                <div className="space-y-8">
+                  {/* Curriculum Toggle Picker */}
+                  <div className="flex justify-start pb-4">
+                    <div className="p-1 bg-slate-950/80 border border-white/10 rounded-2xl flex gap-1">
+                      <button
+                        onClick={() => setCurriculumType('foundational')}
+                        className={`px-5 py-2.5 rounded-xl font-black text-xs transition-all flex items-center gap-2 ${
+                          curriculumType === 'foundational'
+                            ? 'bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/10'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <Brain size={14} />
+                        {isRtl ? 'البرنامج التأسيسي العائلي (20 درسًا)' : 'Foundational Program (20 Lessons)'}
+                      </button>
+                      <button
+                        onClick={() => setCurriculumType('advanced')}
+                        className={`px-5 py-2.5 rounded-xl font-black text-xs transition-all flex items-center gap-2 ${
+                          curriculumType === 'advanced'
+                            ? 'bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/10'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <Sparkles size={14} />
+                        {isRtl ? 'المسارات التخصصية المتقدمة (9 دروس)' : 'Advanced Professional Tracks (9 Lessons)'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {curriculumType === 'advanced' ? (
+                    <div className="space-y-8">
+                      <h3 className="text-2xl font-black text-white tracking-tight flex items-center gap-3">
+                        <Sparkles className="text-amber-400" />
+                        {isRtl ? 'المسارات التخصصية المتقدمة ✨' : 'Our Professional Advanced Tracks ✨'}
+                      </h3>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {ADVANCED_CURRICULUM_DATA.tracks.map((track, trackIdx) => (
+                          <div 
+                            key={track.track_name}
+                            className="bg-gradient-to-br from-[#0c1830] to-slate-950/45 border border-white/5 rounded-[2.5rem] p-8 space-y-6 flex flex-col justify-between hover:border-amber-400/20 transition-all hover:-translate-y-1 relative"
+                          >
+                            <div className="space-y-4">
+                              <div className="flex items-center justify-between">
+                                <span className="px-3 py-1 bg-amber-500/10 text-amber-300 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-500/10">
+                                  {isRtl ? `المسار ${trackIdx + 1}` : `Track ${trackIdx + 1}`}
+                                </span>
+                                <span className="text-xs font-bold text-slate-500 font-mono">0{trackIdx + 1}</span>
+                              </div>
+                              <h4 className="text-2xl font-black text-white leading-tight font-sans">
+                                {track.track_name}
+                              </h4>
+                              <p className="text-slate-400 text-xs leading-relaxed">
+                                {track.track_description}
+                              </p>
+                            </div>
+
+                            <div className="pt-6 border-t border-white/5 space-y-3">
+                              {track.lessons.map((lesson) => {
+                                 const isCompleted = completedAdvancedLessons.includes(lesson.lesson_number);
+                                 return (
+                                   <button
+                                     key={lesson.lesson_number}
+                                     onClick={() => {
+                                       setSelectedLesson(lesson);
+                                       setSandboxInputs({});
+                                       setSandboxChatMessages([]);
+                                       setSimResponse('');
+                                       setSimulating(false);
+                                     }}
+                                     className="w-full bg-white/5 hover:bg-white/10 active:scale-95 transition-all text-slate-200 p-4 rounded-xl flex items-center justify-between border border-white/5 group text-right hover:border-amber-400/30"
+                                   >
+                                     <div className="flex items-center gap-3">
+                                       {isCompleted ? (
+                                         <CheckCircle size={16} className="text-emerald-400 shrink-0" />
+                                       ) : (
+                                         <div className="w-[16px] h-[16px] rounded-full border border-slate-600 group-hover:border-amber-400 shrink-0" />
+                                       )}
+                                       <span className="text-xs font-bold text-right">{lesson.lesson_title}</span>
+                                     </div>
+                                     <ChevronRight size={14} className="text-slate-500 group-hover:text-amber-400 transition-colors" />
+                                   </button>
+                                 );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-8">
+                      <h3 className="text-2xl font-black text-white tracking-tight flex items-center gap-3">
+                        <Layers className="text-amber-400" />
+                        {isRtl ? 'مستويات الرحلة العائلية 🚀' : 'Our Digital Exploration Levels 🚀'}
+                      </h3>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {AI_CURRICULUM_DATA.program_levels.map((level, levelIdx) => (
+                          <div 
+                            key={level.level_number}
+                            className="bg-slate-900/45 border border-white/5 rounded-[2.5rem] p-8 space-y-6 flex flex-col justify-between hover:border-amber-500/20 transition-all hover:-translate-y-1 relative"
+                          >
+                            <div className="space-y-4">
+                              <div className="flex items-center justify-between">
+                                <span className="px-3 py-1 bg-[#1a2e5c] text-amber-300 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                  {isRtl ? `المستوى ${level.level_number}` : `Level ${level.level_number}`}
+                                </span>
+                                <span className="text-xs font-bold text-slate-500 font-mono">0{level.level_number}</span>
+                              </div>
+                              <h4 className="text-2xl font-black text-white leading-tight font-sans">
+                                {level.level_title}
+                              </h4>
+                              <p className="text-slate-400 text-sm leading-relaxed">
+                                {level.level_description}
+                              </p>
+                            </div>
+
+                            <div className="pt-6 border-t border-white/5 space-y-3">
+                              {level.lessons.map((lesson) => {
+                                 const isCompleted = completedLessons.includes(lesson.lesson_number);
+                                 return (
+                                   <button
+                                     key={lesson.lesson_number}
+                                     onClick={() => {
+                                       setSelectedLesson(lesson);
+                                       resetGames();
+                                     }}
+                                     className="w-full bg-white/5 hover:bg-white/10 active:scale-95 transition-all text-slate-200 p-4 rounded-2xl flex items-center justify-between border border-white/5 group text-right hover:border-amber-400/30"
+                                   >
+                                     <div className="flex items-center gap-3">
+                                       {isCompleted ? (
+                                         <CheckCircle size={18} className="text-emerald-400 shrink-0" />
+                                       ) : (
+                                         <div className="w-[18px] h-[18px] rounded-full border border-slate-600 group-hover:border-amber-400 shrink-0" />
+                                       )}
+                                       <span className="text-xs font-bold">{lesson.lesson_title}</span>
+                                     </div>
+                                     <ChevronRight size={14} className="text-slate-500 group-hover:text-amber-400 transition-colors" />
+                                   </button>
+                                 );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Tab: Tools Library 🛠️ */}
+              {lobbyTab === 'tools' && (
+                <div className="space-y-6 text-right" dir="rtl">
+                  {/* Top Bar with Search & Quick Fav Count */}
+                  <div className="bg-[#0b1329] border border-white/10 rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="space-y-2 text-right w-full md:w-auto">
+                      <h3 className="text-2xl font-black text-white flex items-center justify-start gap-2">
+                        <BookOpen className="text-amber-400" size={24} />
+                        {isRtl ? 'دليل ومكتبة أدوات الذكاء الاصطناعي الأكثر من 100 أداة 🛠️' : 'Generative AI Tools Master Library Index 🛠️'}
+                      </h3>
+                      <p className="text-slate-400 text-xs text-right leading-relaxed">
+                        {isRtl 
+                          ? 'استكشف واجهتنا التفاعلية لمكتبة الأدوات العمليّة، مقسمة حسب التصنيف، مع تصفية سريعة، شرح ميسر، وخيار المفضلة الأسرية!' 
+                          : 'Explore our complete interactive tools catalog categorized across 9 custom sectors with live search and starring.'}
+                      </p>
+                    </div>
+
+                    {/* Favorites tracker */}
+                    <div className="bg-amber-500/10 border border-amber-500/20 px-5 py-3 rounded-2xl shrink-0 flex items-center gap-3">
+                      <div className="bg-amber-500 text-slate-950 font-black rounded-lg w-8 h-8 flex items-center justify-center font-mono">
+                        {favoriteTools.length}
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] text-amber-400 font-black block leading-none">{isRtl ? 'المفضلة الأسرية' : 'FAMILY FAVORITES'}</span>
+                        <span className="text-xs font-bold text-white whitespace-nowrap">{isRtl ? 'مجموعتكم المنسقة' : 'Your Customized Tools'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Search and Category Filter Layout */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    {/* Sidebar Categories */}
+                    <div className="lg:col-span-3 bg-slate-900/40 border border-white/5 rounded-[2rem] p-5 space-y-2">
+                      <h4 className="text-xs font-black text-amber-400 uppercase tracking-wider mb-4 pb-2 border-b border-white/5">
+                        {isRtl ? '📁 أقسام الأدوات العمليّة' : '📁 Category Filter'}
+                      </h4>
+                      {[
+                        { id: 'all', label: isRtl ? 'الكل (عرض الجميع) ✨' : 'All Categories' },
+                        { id: 'writer', label: isRtl ? 'النصوص والكتابة ✍️' : 'Text & Writing' },
+                        { id: 'image', label: isRtl ? 'الصور والفنون واللوحات 🎨' : 'Images & Art' },
+                        { id: 'video', label: isRtl ? 'الفيديو والأنيميشن 🎬' : 'Video & Motion' },
+                        { id: 'audio', label: isRtl ? 'الملحنات والمقاطع الصوتية 🎵' : 'Audio & Voice' },
+                        { id: 'office', label: isRtl ? 'المكتب وتسهيل التخطيط 📊' : 'Productivity' },
+                        { id: 'code', label: isRtl ? 'البرمجة والتطوير المبتكر 💻' : 'Coding & Tech' },
+                        { id: 'edu', label: isRtl ? 'التعليم وصناعة المناهج 📚' : 'Education' },
+                        { id: 'business', label: isRtl ? 'التسويق وأعمال المنتجات 📈' : 'Business' },
+                        { id: 'safety', label: isRtl ? 'التزييف وفحص الأمان والتحقق 🛡️' : 'Safety & Deepfakes' },
+                        { id: 'favs', label: isRtl ? 'نجماتي المفضلة ⭐' : 'Favorites ⭐' }
+                      ].map(cat => (
+                        <button
+                          key={cat.id}
+                          onClick={() => setSelectedToolCategory(cat.id)}
+                          className={`w-full text-right p-3 rounded-xl font-bold transition-all text-xs flex items-center justify-between ${
+                            selectedToolCategory === cat.id
+                              ? 'bg-amber-500/25 text-amber-300 border border-amber-500/30'
+                              : 'bg-white/5 hover:bg-white/10 text-slate-300'
+                          }`}
+                        >
+                          <span>{cat.label}</span>
+                          {selectedToolCategory === cat.id && <div className="w-2 h-2 rounded-full bg-amber-400" />}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Tools Grid Area */}
+                    <div className="lg:col-span-9 space-y-6">
+                      {/* Search Input */}
+                      <div className="bg-[#0b1329] p-4 rounded-[1.5rem] border border-white/10 flex items-center gap-3">
+                        <input
+                          type="text"
+                          value={toolsSearchQuery}
+                          onChange={(e) => setToolsSearchQuery(e.target.value)}
+                          placeholder={isRtl ? 'ابحث عن أداة معينة (مثال: ChatGPT, Midjourney, Udio)...' : 'Search for a tool by name, scope, or tag...'}
+                          className="w-full bg-transparent border-none text-white focus:outline-none placeholder:text-slate-500 text-sm font-semibold text-right"
+                        />
+                        {toolsSearchQuery && (
+                          <button 
+                            onClick={() => setToolsSearchQuery('')}
+                            className="text-slate-500 hover:text-white text-xs font-bold px-2 py-1 bg-white/5 rounded"
+                          >
+                            {isRtl ? 'مسح' : 'Clear'}
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Display Grid */}
+                      {(() => {
+                        const filtered = AI_TOOLS_DATA.filter(tool => {
+                          const matchesSearch = tool.name.toLowerCase().includes(toolsSearchQuery.toLowerCase()) ||
+                                                tool.description.toLowerCase().includes(toolsSearchQuery.toLowerCase()) ||
+                                                tool.descriptionEn.toLowerCase().includes(toolsSearchQuery.toLowerCase()) ||
+                                                tool.url.toLowerCase().includes(toolsSearchQuery.toLowerCase());
+                          if (selectedToolCategory === 'all') return matchesSearch;
+                          if (selectedToolCategory === 'favs') return matchesSearch && favoriteTools.includes(tool.name);
+                          return matchesSearch && tool.category === selectedToolCategory;
+                        });
+
+                        if (filtered.length === 0) {
+                          return (
+                            <div className="bg-[#0b1329] border border-white/10 rounded-[2rem] p-12 text-center text-slate-400 space-y-3">
+                              <Smile className="mx-auto text-amber-400" size={48} />
+                              <p className="font-bold text-lg">{isRtl ? 'لا يوجد نتائج تطابق بحثك!' : 'No tools matched your active search filters.'}</p>
+                              <p className="text-xs text-slate-500">{isRtl ? 'جرب البحث عن كلمات بديلة أو تغيير الفئات الجانبية.' : 'Try choosing another category or clearing search query.'}</p>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            {filtered.map((tool, idx) => {
+                              const isFav = favoriteTools.includes(tool.name);
+                              return (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: Math.min(idx * 0.03, 0.5) }}
+                                  key={tool.name}
+                                  className="bg-slate-900/50 border border-white/5 hover:border-amber-500/25 rounded-2xl p-5 space-y-4 flex flex-col justify-between hover:-translate-y-1 transition-all group"
+                                >
+                                  <div className="space-y-2">
+                                    <div className="flex justify-between items-start gap-2">
+                                      {/* Star favorite toggle */}
+                                      <button
+                                        onClick={() => {
+                                          if (isFav) {
+                                            setFavoriteTools(prev => prev.filter(t => t !== tool.name));
+                                          } else {
+                                            setFavoriteTools(prev => [...prev, tool.name]);
+                                          }
+                                        }}
+                                        className={`p-1.5 rounded-lg border transition-all ${
+                                          isFav 
+                                            ? 'bg-amber-500/20 text-beer-400 border-amber-500/30' 
+                                            : 'bg-white/5 hover:bg-white/10 text-slate-500 hover:text-amber-400 border-white/5'
+                                        }`}
+                                      >
+                                        ★
+                                      </button>
+
+                                      <div className="text-right">
+                                        <h4 className="text-md font-black text-white group-hover:text-amber-300 transition-colors">{tool.name}</h4>
+                                        <span className="text-[10px] text-slate-500 font-mono block select-text">{tool.url}</span>
+                                      </div>
+                                    </div>
+                                    <p className="text-slate-300 text-xs leading-relaxed text-right font-medium">
+                                      {isRtl ? tool.description : tool.descriptionEn}
+                                    </p>
+                                  </div>
+
+                                  <div className="pt-3 border-t border-white/5 flex justify-between items-center">
+                                    <span className="text-[10px] bg-white/5 px-2.5 py-1 rounded-full text-slate-400 font-bold">
+                                      {(() => {
+                                        switch (tool.category) {
+                                          case 'writer': return isRtl ? 'كتابة ونصوص' : 'Writing';
+                                          case 'image': return isRtl ? 'صور وفن' : 'Art';
+                                          case 'video': return isRtl ? 'فيديو وتحريك' : 'Video';
+                                          case 'audio': return isRtl ? 'صوت وموسيقى' : 'Audio';
+                                          case 'office': return isRtl ? 'إنتاجية ومكتب' : 'Productivity';
+                                          case 'code': return isRtl ? 'برمجة وتطوير' : 'Coding';
+                                          case 'edu': return isRtl ? 'تعليم وبحث' : 'Education';
+                                          case 'business': return isRtl ? 'تسويق وأعمال' : 'Business';
+                                          case 'safety': return isRtl ? 'أمان وتزييف' : 'Safety';
+                                          default: return '';
+                                        }
+                                      })()}
+                                    </span>
+
+                                    <a
+                                      href={`https://${tool.url}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      referrerPolicy="no-referrer"
+                                      className="text-amber-400 hover:text-amber-300 text-xs font-black flex items-center gap-1 transition-colors select-none"
+                                    >
+                                      <span>{isRtl ? 'زيارة الأداة' : 'Open Link'}</span>
+                                      <ExternalLink size={12} />
+                                    </a>
+                                  </div>
+                                </motion.div>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: 52 Weekly Challenges 📅 */}
+              {lobbyTab === 'challenges' && (
+                <div className="space-y-6 text-right animate-fade-in" dir="rtl">
+                  {/* Selector Toggle */}
+                  <div className="flex justify-start pb-2">
+                    <div className="p-1 bg-slate-950/80 border border-white/10 rounded-2xl flex gap-1 font-bold">
+                      <button
+                        onClick={() => setActiveChallengeView('52weeks')}
+                        className={`px-5 py-2.5 rounded-xl text-xs transition-all flex items-center gap-2 ${
+                          activeChallengeView === '52weeks'
+                            ? 'bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/10'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <Calendar size={14} />
+                        {isRtl ? 'برنامج الـ 52 أسبوعاً العائلي 📅' : '52-Week Program 📅'}
+                      </button>
+                      <button
+                        onClick={() => setActiveChallengeView('30days')}
+                        className={`px-5 py-2.5 rounded-xl text-xs transition-all flex items-center gap-2 ${
+                          activeChallengeView === '30days'
+                            ? 'bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/10'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <Flame size={14} />
+                        {isRtl ? 'تحدي الـ 30 يوماً للمبتدئين ⚡' : '30-Day Speedrun ⚡'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {activeChallengeView === '52weeks' && (
+                    <div className="space-y-6">
+                      {/* Milestones Tracker & Profile Header */}
+                      <div className="bg-[#0b1329] border border-white/10 rounded-[3rem] p-8 md:p-10 text-right space-y-6 relative overflow-hidden">
+                    <div className="absolute left-0 top-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+                    
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                      <div className="space-y-2">
+                        <span className="text-amber-400 font-mono text-[10px] bg-amber-500/15 px-3 py-1 rounded-full border border-amber-500/20 font-black tracking-widest uppercase">
+                          {isRtl ? 'البرنامج السنوي العائلي' : 'FAMILY ANNUAL PLAN'}
+                        </span>
+                        <h3 className="text-2xl md:text-3xl font-black text-white">
+                          {isRtl ? 'تحديات الذكاء الاصطناعي الأسبوعية - الـ 52 أسبوعاً 📅' : '52-Week Generative AI Family Blueprint'}
+                        </h3>
+                        <p className="text-slate-400 text-xs leading-relaxed max-w-3xl">
+                          {isRtl 
+                            ? 'أكاديمية عائلات المستقبل ترحب بكن في مساق تدريجي يسوقكم أسبوعاً بأسبوع لاكتشاف قوة الذكاء التوليدي وتوطيد الألفة المنزلية بالضحك والابتسام والتقاسم!'
+                            : '52 highly thematic, non-technical weekly quests meant to spark conversation, safe boundaries, and creative collaboration.'}
                         </p>
                       </div>
 
-                      <div className="pt-6 border-t border-white/5 space-y-3">
-                        {level.lessons.map((lesson) => {
-                           const isCompleted = completedLessons.includes(lesson.lesson_number);
-                           return (
-                             <button
-                               key={lesson.lesson_number}
-                               onClick={() => {
-                                 setSelectedLesson(lesson);
-                                 resetGames();
-                               }}
-                               className="w-full bg-white/5 hover:bg-white/10 active:scale-95 transition-all text-slate-200 p-4 rounded-2xl flex items-center justify-between border border-white/5 group text-right hover:border-amber-400/30"
-                             >
-                               <div className="flex items-center gap-3">
-                                 {isCompleted ? (
-                                   <CheckCircle size={18} className="text-emerald-400 shrink-0" />
-                                 ) : (
-                                   <div className="w-[18px] h-[18px] rounded-full border border-slate-600 group-hover:border-amber-400 shrink-0" />
-                                 )}
-                                 <span className="text-xs font-bold">{lesson.lesson_title}</span>
-                               </div>
-                               <ChevronRight size={14} className="text-slate-500 group-hover:text-amber-400 transition-colors" />
-                             </button>
-                           );
+                      {/* Score Badge */}
+                      <div className="bg-slate-950 px-6 py-4 rounded-3xl border border-white/5 space-y-1 shrink-0 w-full md:w-auto text-center md:text-right">
+                        <span className="text-[10px] text-amber-500 font-bold block">{isRtl ? 'مجموع التحديات المنجزة' : 'COMPLETED CHALLENGES'}</span>
+                        <div className="flex justify-center md:justify-start items-baseline gap-1">
+                          <span className="text-3xl font-black text-white font-mono">{completedChallengeWeeks.length}</span>
+                          <span className="text-slate-500 font-bold text-sm">/ 52</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Progress Bar with Milestones */}
+                    <div className="space-y-3 pt-4 border-t border-white/5">
+                      <div className="flex justify-between items-center text-xs font-bold text-slate-400">
+                        <span>{isRtl ? `نسبة التقدم الأسرية: ${Math.round((completedChallengeWeeks.length / 52) * 100)}%` : `Progress: ${Math.round((completedChallengeWeeks.length / 52) * 100)}%`}</span>
+                        <span className="text-amber-400">{isRtl ? `+ ${completedChallengeWeeks.length * 10} حكمة أسرية XP` : `+ ${completedChallengeWeeks.length * 10} Wisdom XP`}</span>
+                      </div>
+                      <div className="w-full h-3 bg-slate-950 rounded-full overflow-hidden border border-white/5 p-px">
+                        <div 
+                          className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-700"
+                          style={{ width: `${Math.min((completedChallengeWeeks.length / 52) * 100, 100)}%` }}
+                        />
+                      </div>
+                      
+                      {/* Interactive Milestone Indicator Cards */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-center">
+                        {[
+                          { min: 5, title: isRtl ? 'مبتدئ فضولي 🌱' : 'Curious Node 🌱', label: '5' },
+                          { min: 15, title: isRtl ? 'صاحب بصيرة 🎨' : 'Prompt Explorer 🎨', label: '15' },
+                          { min: 30, title: isRtl ? 'سيد التوليد 🛡️' : 'Master Crafter 🛡️', label: '30' },
+                          { min: 52, title: isRtl ? 'سفير المستقبل البهيج 🎓' : 'AI Ambassador 🎓', label: '52' }
+                        ].map((m, idx) => {
+                          const achieved = completedChallengeWeeks.length >= m.min;
+                          return (
+                            <div 
+                              key={idx}
+                              className={`p-3 rounded-2xl border transition-all ${
+                                achieved 
+                                  ? 'bg-amber-500/15 border-amber-500/35 text-amber-300 font-extrabold' 
+                                  : 'bg-white/5 border-white/5 text-slate-500'
+                              }`}
+                            >
+                              <div className="text-xs">{m.title}</div>
+                              <div className="text-[10px] opacity-75">{isRtl ? `(${m.label} أسبوعاً نجاح)` : `(${m.label} Weeks)`}</div>
+                            </div>
+                          );
                         })}
                       </div>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* 12 Months Accordion Blueprint */}
+                  <div className="space-y-4">
+                    {[
+                      {
+                        num: 1,
+                        theme: isRtl ? 'الشهر الأول: كسر الحاجز والألفة والرموز 🧱' : 'Month 1: Initial Discovery & Boundaries',
+                        desc: isRtl ? 'إعداد القاموس العائلي واختيار كلمة سر الطوارئ لحرجبة خدع الاتصالات والتوليد الشخصي.' : 'Draft personal definitions, establish safety keywords, and customize base avatars.',
+                        weeks: [
+                          { w: 1, title: isRtl ? 'ميثاق المرجعية العائلية' : 'Week 1: Digital Vows', mission: isRtl ? 'اكتب كلمة السر العائلية على ورقة، وعلقها في غرفة الطعام وقم باختبارها في مكالمة طارئة تمثيلية.' : 'Determine your unique family passcode, write it on the kitchen board, and complete a drill.' },
+                          { w: 2, title: isRtl ? 'ألعاب الأوامر العكسية' : 'Week 2: Adversarial Prompts', mission: isRtl ? 'تنافس عائلياً لدفع الذكاء لكتابة سطر متكامل بـ 20 كلمة دون استخدام حرف الراء على الإطلاق!' : 'Force Gemini to compile 5 paragraphs where every word excludes the Arabic letter Ra/Alif.' },
+                          { w: 3, title: isRtl ? 'رسم حيوان مركب مدهش' : 'Week 3: Animal Fusion', mission: isRtl ? 'دع أطفالك يدمجون ملامح زرافة ونمر وصقر في جملة واطلب من مولد مرئي إخراج لوحة زيتية لها.' : 'Combine features of an giraffe, tiger, and falcon into one creative style prompt and render it.' },
+                          { w: 4, title: isRtl ? 'لقاء حواري مع الفلسفة' : 'Week 4: Historic Chat Sim', mission: isRtl ? 'اسأل ChatGPT أن يتكلم بلسان الفيلسوف ابن رشد، وتناقش معه أسرياً حول متى يجب تصديق العينين.' : 'Trigger Al-Farabi simulation script, debating when standard humans can believe their own ears.' }
+                        ]
+                      },
+                      {
+                        num: 2,
+                        theme: isRtl ? 'الشهر الثاني: استكشاف الأنماط والذكاء التكراري 🧠' : 'Month 2: Patterns & Structured Logic',
+                        desc: isRtl ? 'فهم مبدأ التعلم لدى الآلة بالمسابقات والتحفيز العقلي والمكافأة.' : 'Dive deeper into model optimization, structural steps, and predictive behaviors.',
+                        weeks: [
+                          { w: 5, title: isRtl ? 'مباراة التعرف الصوري المنزلي' : 'Week 5: Visual Pattern Spotter', mission: isRtl ? 'ابحث في البيت عن 5 أغراض تبدو وكأن لها وجوهاً بشرية (أزرار، مقابس)، والتقطها وسجل معانيها.' : 'Collect 5 items in the room resembling human expressions (sockets, hangers) for pattern play.' },
+                          { w: 6, title: isRtl ? 'صياغة المساعد المنزلي البسيط' : 'Week 6: Mini-Home Persona Generator', mission: isRtl ? 'برمج مساعداً ذكياً على متصفحك يمثل "الجد الحكيم" ليرد على تساؤلات الصغار مع الاستشهاد بكنوز التراث.' : 'Establish a customized prompt to simulate an ancient wise elder who answers questions.' },
+                          { w: 7, title: isRtl ? 'سلسلة نمط فيبوناتشي البصري' : 'Week 7: Drawing Golden Spirals', mission: isRtl ? 'تأمل شكل قوقعة حلزونية بالمنزل وأجرِ مع أولادك بحثاً للذكاء يربط الرياضيات والجمال الطبيعي.' : 'Examine Fibonacci sequences in shells and let models illustrate spiral designs.' },
+                          { w: 8, title: isRtl ? 'مسابقة كشف الأكواد المزيفة' : 'Week 8: Identify Code Vulnerabilities', mission: isRtl ? 'اطبع دالة برمجية خاطئة واطلب من أولادك مع الآلة كشف الخلل الأسمى في ترتيب الجمل.' : 'Print a broken python snippet, and trace execution to spot logic errors.' }
+                        ]
+                      },
+                      {
+                        num: 3,
+                        theme: isRtl ? 'الشهر الثالث: التزييف والتحقق والأمان الشخصي 🛡️' : 'Month 3: Media Integrity & Safety',
+                        desc: isRtl ? 'بناء حصانة أسرية ضد هجمات الوجوه والأصوات الرقمية.' : 'Shielding family elements from synthetic clones and media manipulation.',
+                        weeks: [
+                          { w: 9, title: isRtl ? 'صيد التزييف الصوري' : 'Week 9: Spot the AI Artifact', mission: isRtl ? 'ابحث عن صور ذكاء اصطناعي واجعل أطفالك يكشفون الأطراف الإضافية أو الظلال الملتوية للكشف بالعين.' : 'Audit generated photos, seeking visual errors like extra fingers or melted backgrounds.' },
+                          { w: 10, title: isRtl ? 'تحدي استنساخ بصمة الصوت' : 'Week 10: Cloned Voice Awareness', mission: isRtl ? 'سجلوا 10 ثوانٍ من صوتكم وجربوا استنساخه بـ ElevenLabs ثم صمموا خطة الطوارئ لمنع فخ الاتصالات.' : 'Clone a voice with ElevenLabs, then simulate an active protection plan with the passcode.' },
+                          { w: 11, title: isRtl ? 'متحف الأخبار الضالة' : 'Week 11: Debunking Mock Articles', mission: isRtl ? 'ولد مقالة تزييف لحدث لم يحصل أبداً وتدربوا على دحض أدلته بأسماء وبحث حيازة ومفاتيح المعاني.' : 'Draft a fake historical event, and guide children in debunking its structural references.' },
+                          { w: 12, title: isRtl ? 'مسابقة الأمان والدروع' : 'Week 12: Household Cyber Drill', mission: isRtl ? 'تعمل العائلة على تطبيق محاكي تزييف ومراجعة ميثاق الأمان للتأكيد على الالتزام بالقواعد الخمسة.' : 'Review your safety charter and verify each family member remembers our secret word.' }
+                        ]
+                      },
+                      {
+                        num: 4,
+                        theme: isRtl ? 'الشهر الرابع: روايات خيالية وصناعة أدب الحاسوب ✍️' : 'Month 4: Creative Literature & Sagas',
+                        desc: isRtl ? 'تصميم الكتب والقصص ذات الملامح المشتركة بالذكاء الإبداعي.' : 'Collaborative narrative building with constant thematic continuity.',
+                        weeks: [
+                          { w: 13, title: isRtl ? 'اختيار بطل القصة العابر' : 'Week 13: Core Hero Design', mission: isRtl ? 'صمم مواصفات للبطل (اسم وشكل وبذرة) وثبت وصفه بجميع مولدات الرسم ليخرج متسقاً.' : 'Create a comprehensive description file for a main character to enforce layout coherence.' },
+                          { w: 14, title: isRtl ? 'كتابة الفصول ومصائد التشويق' : 'Week 14: Drafting Chapters', mission: isRtl ? 'تبادلوا في قعدة عائلية كتابة صفحة تلو الأخرى واطلبوا من كاتب الذكاء حبك نهاية مباغتة ومرحة.' : 'Draft consecutive pages collaboratively and let models finalize chapters with twist endings.' },
+                          { w: 15, title: isRtl ? 'رسم الصفحات وجمع الكتاب' : 'Week 15: Cover Page Painting', mission: isRtl ? 'صمم غلافاً مدهشاً يحمل اسم عائلتكم، واجمع الصفحات والرسومات في مستند PDF متكامل.' : 'Design a gorgeous book cover including the family brand, and export a high-res PDF book.' },
+                          { w: 16, title: isRtl ? 'قراءة ومسرح الرواية بالبيت' : 'Week 16: Household Theatre Night', mission: isRtl ? 'اجتمعوا مساءً ليقرأ كل طفل دوره في القصة بصوته، متخذين تعبيرات تمثيلية تبهج اللقاء العائلي.' : 'Host a family story-reading night, enacting individual characters from your own novel.' }
+                        ]
+                      },
+                      {
+                        num: 5,
+                        theme: isRtl ? 'الشهر الخامس: عوالم النغم والصوت المولد 🎵' : 'Month 5: Harmony, Voice & Sound',
+                        desc: isRtl ? 'تليحين وتأدية الأناشيد والمؤثرات العائلية الرائعة.' : 'Synthesizing local audio hooks and vocals dynamically.',
+                        weeks: [
+                          { w: 17, title: isRtl ? 'كتابة كلمات النشيد الأسري' : 'Week 17: Writing Anthem Lyrics', mission: isRtl ? 'اكتبوا كلمات أنشودة تصف عادات عائلتكم، وحسنوا وزنها وألفاظها بالمعاون الرقمي وبلاغات المعاني.' : 'Draft custom lyrics reflecting family traditions, and tune them utilizing text engines.' },
+                          { w: 18, title: isRtl ? 'التلحين والتوليد الموسيقي بـ Suno' : 'Week 18: composing with Suno', mission: isRtl ? 'أدخل الكلمات لـ Suno واختر نمط الإيقاع (دوف، ألماني، عربي تراثي) واصنع نسختك المفصلة.' : 'Input your lyrics in Suno, pick a cultural acoustic genre, and generate custom melodies.' },
+                          { w: 19, title: isRtl ? 'إصدار المؤثرات الصوتية للألعاب' : 'Week 19: Sound Design Play', mission: isRtl ? 'اصنع مؤثر صوتي (رياح زحل، قفزة نمر) وسجلوها في تليفون العائلة لاستخدامها بالألعاب.' : 'Generate specialized SFX clips (Jupiter winds, tiger leaps) for family quiz games.' },
+                          { w: 20, title: isRtl ? 'نشر اللوحة السمعية بالبيت' : 'Week 20: Sharing our Playlist', mission: isRtl ? 'اجمعوا ملف الأصوات العائلية وعلقوها في كود سري ليتشاركها الأقارب والأجداد للابتهاج.' : 'Assemble generated tracks into a shared safe playlist and display it on the whiteboard.' }
+                        ]
+                      },
+                      {
+                        num: 6,
+                        theme: isRtl ? 'الشهر السادس: المعاون والواجبات المنزلية الميسرة 📚' : 'Month 6: Intelligent Mentorship & Homework',
+                        desc: isRtl ? 'تسخير الذكاء كأستاذ يشرح المفاهيم الصعبة بأساليب دافئة.' : 'Shaping tools as interactive personal tutors following active guidance.',
+                        weeks: [
+                          { w: 21, title: isRtl ? 'صياغة المدرس السقراطي الذكي' : 'Week 21: Socrates Agent Creation', mission: isRtl ? 'قم ببناء أمر لجعل الروبوت يشرح الكيمياء لأحد الصغار بالأسئلة التدريجية دون إعطائه الجواب مباشرة.' : 'Command Gemini to explain complex items to a child using interactive questions.' },
+                          { w: 22, title: isRtl ? 'تحدي تحضير العروض التقديمية السريعة' : 'Week 22: Designing with Gamma', mission: isRtl ? 'ادخل موضوعاً مدرسياً لـ Gamma واخرج لوحة عرض متكاملة بالتصاميم والخطط المرافقة في دقيقة.' : 'Deploy Gamma app to construct a lesson deck based on raw historical references.' },
+                          { w: 23, title: isRtl ? 'تلخيص الكتب والآداب الرقمية' : 'Week 23: Text Summaries Audit', mission: isRtl ? 'ارفعوا ملف PDF لكتّاب أو رواية قديمة، وابدأ حواراً دقيقاً مع الكتاب لشرح الدروس المخفية للوالدين.' : 'Upload a complex historical book chapter and analyze the main ethical takeaways.' },
+                          { w: 24, title: isRtl ? 'مسابقة الأسئلة والجوائز الذكية' : 'Week 24: AI Quiz Night', mission: isRtl ? 'دع المساعد الذكي يولد 10 أسئلة صعبة بشتى الفنون، وابدأ منافسة دافئة بين الأبناء والأمهات بالبيت.' : 'Instruct the robot to compose a 10-question trivia game, and run a family trivia night.' }
+                        ]
+                      },
+                      {
+                        num: 7,
+                        theme: isRtl ? 'الشهر السابع: تطوير الألعاب التوضيحية وتجريب البرمجة 💻' : 'Month 7: Game Design & Kid-Coding',
+                        desc: isRtl ? 'ابتكار الأكواد اللطيفة، وتعديل الصفحات لتشغيل أول مسرح ألعاب.' : 'Constructing simple web interfaces and modifying raw script rules.',
+                        weeks: [
+                          { w: 25, title: isRtl ? 'صفحة الترحيب الخاصة بالصغار' : 'Week 25: Kids Greeting Page', mission: isRtl ? 'برمج صفحة إنترنت بسيطة بلغة HTML تحمل صوركم العائلية ورسالة حماسية وقم بفتحها على الشاشة.' : 'Compose a welcome HTML greeting page carrying family details directly in browser.' },
+                          { w: 26, title: isRtl ? 'تعديل قوانين لعبة المتاهة' : 'Week 26: Custom Maze Play', mission: isRtl ? 'اطلب كود لعبة ثعبان بسيطة بالمتصفح، وغير السرعة والألوان وقم باللعب بها سوياً.' : 'Get a raw canvas Snake game script, alter velocity parameters and test your changes.' },
+                          { w: 27, title: isRtl ? 'تصميم بطل بكسل ثلاثي الأبعاد' : 'Week 27: Designing 3D Pixel Art', mission: isRtl ? 'استعن بمولد تشكيلي لصياغة لوحة بكسل طريفة لشخصيات بيتكم المفضلة وقارن تماثل الألوان.' : 'Construct cute pixel grids from prompt strings matching family visual style.' },
+                          { w: 28, title: isRtl ? 'رحلة ميكنة النشر بالبرامج' : 'Week 28: Simple Shell Play', mission: isRtl ? 'تعرف على فنان الأوامر بالآلة، مبرزاً الأنماط المتكررة في تسريع الملفات وتصنيفها.' : 'Run brief command automation examples to list, catalog and group system items.' }
+                        ]
+                      },
+                      {
+                        num: 8,
+                        theme: isRtl ? 'الشهر الثامن: براند عائلتنا وتصاميم الهوية المبدعة 📈' : 'Month 8: Family Branding & Logo Design',
+                        desc: isRtl ? 'ابتكار الشعار الرقمي وهوية المكتب والمنتجات المنزلية اللطيفة.' : 'Developing aesthetic identity sets and mock enterprise labels.',
+                        weeks: [
+                          { w: 29, title: isRtl ? 'هندسة الشعار الأسمى للمنزل' : 'Week 29: Designing our crest', mission: isRtl ? 'ادخل منصة Brandmark، وصمم شعاراً أنيقاً يمثل قوة وطيبة عائلتكم الكريمة واطبعوه كشارات.' : 'Construct a family crest utilizing logo creators with deep gold and slate color palettes.' },
+                          { w: 30, title: isRtl ? 'تخطيط هوية المنتجات اللذيذة' : 'Week 30: Homemade Label Play', mission: isRtl ? 'هل عائلتكم تصنع حلوى أو طعام شهير؟ صمموا ملصقاً غذائياً طريفاً للمنتج بمولدات الصورة.' : 'Generate customized product labels for family homemade cookies or foods.' },
+                          { w: 31, title: isRtl ? 'كتابة تدوينة الشرف الأسري' : 'Week 31: Framing family values', mission: isRtl ? 'صمم ملصقاً كبيراً يجمع المبادئ الأساسية للعائلة بالاعتماد على التوليد الخطاط والصور الراقية.' : 'Design a large values summary poster incorporating elegant calligraphic typography.' },
+                          { w: 32, title: isRtl ? 'متحف الكروت والمناسبات' : 'Week 32: Custom Cards Creation', mission: isRtl ? 'ولد كروت تهنئة أعياد ومناسباف مخصصة لكل حبيب وقريب بالذكاء الإبداعي بدلاً من الصور الجاهزة المكررة.' : 'Draft highly personalized greeting cards with custom prompts for upcoming relatives birthdays.' }
+                        ]
+                      },
+                      {
+                        num: 9,
+                        theme: isRtl ? 'الشهر التاسع: ميكنة المهام والإنتاجية السريعة الفائقة ⚙️' : 'Month 9: Task Automation Flows',
+                        desc: isRtl ? 'تبسيط الإجراءات المتكررة وترتيب مواعيد اللقاء بذكاء مبرر.' : 'Setting trigger-action patterns and simplifying file management.',
+                        weeks: [
+                          { w: 33, title: isRtl ? 'ترتيب فوضى الإيميلات والواجبات' : 'Week 33: Cleaning up inbox clutter', mission: isRtl ? 'صمم قالباً رقمياً يجمع ويلخص البريد الوارد لتصفية الرسائل الهامة وعزل الإغراءات التسويقية.' : 'Create custom prompt lists that synthesize core bullet points from endless inbox newsletters.' },
+                          { w: 34, title: isRtl ? 'جدولة مواعيد التدريب واللقاء' : 'Week 34: Scheduling triggers', mission: isRtl ? 'صمم جدولاً ميكانيكياً يجمع مواعيد الصغار الترفيهية والواجبات بطريقة مرئية ذكية.' : 'Draft a central automated timetable aligning soccer practice and homework constraints.' },
+                          { w: 35, title: isRtl ? 'تفكيك المهام المتراكمة بـ Goblin Tools' : 'Week 35: Unclogging with Goblin', mission: isRtl ? 'اختر مهمة عائلية شاقة (مثل ترتيب القبو، التجهيز لرحلة) وفككها بالمساعد لعشرات البذور السهلة.' : 'Deconstruct overwhelming chores (cleaning basement, packing for travel) using goblin tools.' },
+                          { w: 36, title: isRtl ? 'لوحة المراقبة التفاعلية للمشتريات' : 'Week 36: Intelligent Budget Review', mission: isRtl ? 'صمم جدولاً ذكياً يتوقع تكلفة مصاريف الشهر القادم بناءً على نفقات الأشهر الماضية ويقترح خطة ادخار.' : 'Calculate average spending categories and generate automated suggestions for domestic thrift.' }
+                        ]
+                      },
+                      {
+                        num: 10,
+                        theme: isRtl ? 'الشهر العاشر: صناعة السينما والأنيميشن التوليدي 🎬' : 'Month 10: Cinema & Generative Animation',
+                        desc: isRtl ? 'إنتاج المشاهد، تحريك الرسوم الصامتة وصناعة أول شاشات سينما عائلية.' : 'Compiling active clips, editing timelines, and adding acoustic SFX.',
+                        weeks: [
+                          { w: 37, title: isRtl ? 'رسم خريطة السيناريو واللقطات' : 'Week 37: Storyboard sketching', mission: isRtl ? 'اكتبوا سيناريو لـ 5 لقطات متتالية (مثال: نيزك يقترب، إنذار بالمركبة، هبوط آمن) واصنعوا رسوماتها التوجيهية.' : 'Compose a 5-scened storyboard outlining custom fantasy space adventures.' },
+                          { w: 38, title: isRtl ? 'الإنماء بالذكاء بـ Runaway أو Luma' : 'Week 38: Rendering scenes', mission: isRtl ? 'حول الصور الثابتة إلى لقطات حركية فائقة الواقعية بلمسة دافئة من مولدات المشاهد الحديثة.' : 'Convert static background images into fluid, lively movie segments with Runway.' },
+                          { w: 39, title: isRtl ? 'دمج المقاطع والمؤثرات الصوتية' : 'Week 39: Music scoring', mission: isRtl ? 'اجمعوا الفيديوهات وصممو لها النشيد والمؤثرات الصوتية والتعليق بصوت حماسي جذاب.' : 'Stitch generated clips inside timelines with custom vocals and background orchestra hooks.' },
+                          { w: 40, title: isRtl ? 'مساء السينما والعرض الأبهر بالبيت' : 'Week 40: Popcorn Movie Premiere', mission: isRtl ? 'أطفئوا الأنوار، جهزوا الفشار، واعرضوا فيلمكم المكتمل لعائلة المستقبل على شاشة البيت الكبيرة!' : 'Dim living room lights, bring popcorn, and celebrate your first custom short film premiere!' }
+                        ]
+                      },
+                      {
+                        num: 11,
+                        theme: isRtl ? 'الشهر الحادي عشر: الأخلاقيات وحرب الانحياز والعدالة ⚖️' : 'Month 11: Ethics, Decency & Bias Hunts',
+                        desc: isRtl ? 'تفقد مصادر الأخبار والكشف عن الهلوسة وحيازة العقل البشري الموجه.' : 'Discovering machine boundaries, checking sources, and tracing data models.',
+                        weeks: [
+                          { w: 41, title: isRtl ? 'صيد الانحياز الثقافي الفاضح' : 'Week 41: Cultural Bias Spotter', mission: isRtl ? 'اطلب من الآلة رسم "شخص حكيم" وتفقد هل يرسمه دائماً بهيئة معينة؟ ناقش بطلان النمط المسبق.' : 'Ask image models to paint "a brilliant doctor" and inspect if it exhibits biases or gender stereotypes.' },
+                          { w: 42, title: isRtl ? 'تحدي كشف كذبة الهلوسة' : 'Week 42: Hallucination Bait Drill', mission: isRtl ? 'سل الروبوت عن تفاصيل معركة تاريخية مخترعة (لا صحة لها) وتتبع هل يؤلف رداً واكشف هلوسة عقله المبرر!' : 'Ask tools about fictional events to record how easily the machine hallucinates fake details.' },
+                          { w: 43, title: isRtl ? 'البحث عن بصمة الصورة الحقيقة' : 'Week 43: Finding True Photorealism', mission: isRtl ? 'تأمل الملامحات وحركة تدفق الدم بالصورة وصنفها ومييز الكائنات الرقمية المصطنعة بكل فخر.' : 'Distinguish authentic historical photos from generated ones under family inspection.' },
+                          { w: 44, title: isRtl ? 'حقوق ملكية المبدعين الصغار' : 'Week 44: Creative Intellectual Property', mission: isRtl ? 'ناقشوا سوياً هل يحق للروبوت أن يأخذ رسومات الفانين القدامى ليتعلم؟ ودونوا موقف عائلتكم التقني.' : 'Hold debates on whether machine models violate painters copyrights during deep training runs.' }
+                        ]
+                      },
+                      {
+                        num: 12,
+                        theme: isRtl ? 'الشهر الثاني عشر: مراسم التخرج والتحليق المستقبلي 🎓' : 'Month 12: Graduation & Professional Horizons',
+                        desc: isRtl ? 'مراجعة المهارات العملية، تقديم مشروع التخرج وطباعة شهادة التفوق والعلوم المعتمدة!' : 'Completing graduation modules, presenting final projects and unlocking certificates.',
+                        weeks: [
+                          { w: 45, title: isRtl ? 'تحضير مسودة مشروع التخرج' : 'Week 45: Framing your theme', mission: isRtl ? 'اختر واحداً من المشاريع الكبرى (فيلم، قصة، بوت، حملة) واكتب ملخصه وخلفيته.' : 'Draft a structural pitch summarizing your family final generative AI masterpiece.' },
+                          { w: 46, title: isRtl ? 'التصحيح المتبادل للتطبيقات' : 'Week 46: Beta Testing edits', mission: isRtl ? 'اعرض العمل على باق الأعضاء، لتلقي تحسينات وتدقيق الأخطاء في الصور والأوامر بذكاء مروق.' : 'Showcase intermediate models to all nodes, gathering design tips before compiling outputs.' },
+                          { w: 47, title: isRtl ? 'توثيق العقل التوليدي وجمع الرمز' : 'Week 47: Exporting code bases', mission: isRtl ? 'احزم الصور والأصوات والنصوص في ملف سحابي واحد وقدم مشروعك لقسم التفتيش التفاعلي.' : 'Export all assets, prompts, and notes into single folders preparing for official submittal.' },
+                          { w: 48, title: isRtl ? 'الامتحان الاحترافي والاعتماد' : 'Week 48: Submitting Graduate Exam', mission: isRtl ? 'افتح قسم الشهادة الاحترافية بأكاديميتنا، وأجب عن الفروض الأربعة الحية في المتصفح.' : 'Take the 4-step professional exam built inside our active certification workspace.' },
+                          { w: 49, title: isRtl ? 'توليد ومراجعة الشهادة الكبرى' : 'Week 49: Generating Credentials', mission: isRtl ? 'سجل اسم البطل وافحص تقييم اللجنة التفاعلية لتوليد الشهادة الذهبية البراقة.' : 'Input graduate name and generate the elegant royal gold bilingual certificate.' },
+                          { w: 50, title: isRtl ? 'مهرجان التتويج وطباعة الشهادات' : 'Week 50: Grand Printing Ceremony', mission: isRtl ? 'انقر على خيار الطباعة لتوليد شهادة ورقية حقيقية، وعلقها في إطار فخم بغرفة الجلوس!' : 'Print your high-resolution physical credential certificate and frame it proudly.' },
+                          { w: 51, title: isRtl ? 'ميثاق المتابعة والتدشين النهائي' : 'Week 51: Pledge for continuous learning', mission: isRtl ? 'جددوا ميثاق الأسر واحتفلوا بالإنجاز العبقري كعائلة رقمية واعية رائدة.' : 'Renew family pledges to maintain human authored sovereignty over digital machines.' },
+                          { w: 52, title: isRtl ? 'أبطال الأكاديمية الدائمون 🏆' : 'Week 52: Legends Board 🏆', mission: isRtl ? 'سجلوا أسماءكم في لوحة الشرف الدائمة كأول عائلة تنهي 52 تحدياً بنجاح باهر وامتياز!' : 'Log your names in the permanent master registry of certified generative leaders!' }
+                        ]
+                      }
+                    ].map((m) => {
+                      const isOpen = expandedMonth === m.num;
+                      // count completed weeks in this month
+                      const monthWeekIds = m.weeks.map(w => w.w);
+                      const completedCount = monthWeekIds.filter(id => completedChallengeWeeks.includes(id)).length;
+                      
+                      return (
+                        <div 
+                          key={m.num}
+                          className="bg-slate-900/40 border border-white/5 rounded-[2rem] overflow-hidden transition-all hover:border-white/10"
+                        >
+                          {/* Accordion Header */}
+                          <button
+                            onClick={() => setExpandedMonth(isOpen ? null : m.num)}
+                            className="w-full text-right p-6 flex justify-between items-center gap-4 bg-slate-950/20 hover:bg-slate-950/40 transition-colors"
+                          >
+                            <div className="space-y-1">
+                              <h4 className="text-lg font-black text-white flex items-center gap-3">
+                                <span className="text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-xl text-xs font-mono font-black select-none">
+                                  0{m.num}
+                                </span>
+                                {m.theme}
+                              </h4>
+                              <p className="text-slate-400 text-xs leading-relaxed max-w-3xl pr-10">
+                                {m.desc}
+                              </p>
+                            </div>
+
+                            <div className="flex items-center gap-4 shrink-0">
+                              {/* Completeness Badge */}
+                              <span className={`px-3 py-1 rounded-full text-[10px] font-black ${
+                                completedCount === m.weeks.length 
+                                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' 
+                                  : completedCount > 0 
+                                  ? 'bg-amber-500/15 text-amber-400 border border-amber-500/20' 
+                                  : 'bg-white/5 text-slate-500'
+                              }`}>
+                                {isRtl 
+                                  ? `${completedCount}/${m.weeks.length} تمّ إنجازه` 
+                                  : `${completedCount}/${m.weeks.length} Done`}
+                              </span>
+                              <ChevronDown 
+                                size={18} 
+                                className={`text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+                              />
+                            </div>
+                          </button>
+
+                          {/* Accordion Content Grid (Animated Presence option) */}
+                          {isOpen && (
+                            <div className="p-6 bg-[#070d1a]/50 border-t border-white/5 space-y-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {m.weeks.map(w => {
+                                  const isDone = completedChallengeWeeks.includes(w.w);
+                                  return (
+                                    <div 
+                                      key={w.w}
+                                      className={`p-5 rounded-2xl border transition-all flex flex-col justify-between gap-4 ${
+                                        isDone 
+                                          ? 'bg-emerald-500/5 border-emerald-400/20' 
+                                          : 'bg-white/5 border-white/5'
+                                      }`}
+                                    >
+                                      <div className="space-y-1.5">
+                                        <div className="flex justify-between items-center text-xs">
+                                          <span className="font-mono text-slate-500 font-bold">{isRtl ? `الأسبوع ${w.w}` : `Week ${w.w}`}</span>
+                                          <span className="font-black text-amber-400">{w.title}</span>
+                                        </div>
+                                        <h5 className="text-sm font-black text-slate-200 mt-1 leading-snug">{w.mission}</h5>
+                                      </div>
+
+                                      {/* Completion Action */}
+                                      <div className="pt-2 flex justify-end">
+                                        <button
+                                          onClick={() => {
+                                            if (isDone) {
+                                              setCompletedChallengeWeeks(prev => prev.filter(id => id !== w.w));
+                                            } else {
+                                              setCompletedChallengeWeeks(prev => [...prev, w.w]);
+                                              setXp(prev => prev + 10);
+                                            }
+                                          }}
+                                          className={`px-4 py-2 rounded-xl text-xs font-black transition-all active:scale-95 flex items-center gap-2 ${
+                                            isDone 
+                                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
+                                              : 'bg-amber-500 hover:bg-amber-600 text-slate-950'
+                                          }`}
+                                        >
+                                          {isDone ? '✓ تم الحل والإنجاز 🎉' : 'علم كمنجز وحصل +10 XP'}
+                                        </button>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {activeChallengeView === '30days' && (
+                <div className="space-y-6 animate-fade-in text-right">
+                  {/* Milestones Tracker & Profile Header */}
+                  <div className="bg-[#0b1329] border border-white/10 rounded-[3rem] p-8 md:p-10 text-right space-y-6 relative overflow-hidden font-sans">
+                    <div className="absolute left-0 top-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+                    
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                      <div className="space-y-2 text-right">
+                        <span className="text-amber-400 font-mono text-[10px] bg-amber-500/15 px-3 py-1 rounded-full border border-amber-500/20 font-black tracking-widest uppercase">
+                          {isRtl ? 'برنامج التدريب المكثف' : 'INTENSIVE AI SPEEDRUN'}
+                        </span>
+                        <h3 className="text-2xl md:text-3xl font-black text-white">
+                          {isRtl ? 'تحدي الـ 30 يوماً للمبتدئين ⚡' : '30-Day AI Quickstart Challenge ⚡'}
+                        </h3>
+                        <p className="text-slate-400 text-xs leading-relaxed max-w-3xl">
+                          {isRtl 
+                            ? 'برنامج يومي تفاعلي مكثف يحتاج منك 10 دقائق فقط يومياً لبناء ألفة قوية بأدوات وصيغ الذكاء الاصطناعي من الصفر!'
+                            : 'An intensive, highly practical 30-day course tailored for absolute beginners needing 10 minutes a day.'}
+                        </p>
+                      </div>
+
+                      {/* Score Badge */}
+                      <div className="bg-slate-950 px-6 py-4 rounded-3xl border border-white/5 space-y-1 shrink-0 w-full md:w-auto text-center md:text-right">
+                        <span className="text-[10px] text-amber-500 font-bold block">{isRtl ? 'الأيام المكتملة' : 'COMPLETED DAYS'}</span>
+                        <div className="flex justify-center md:justify-start items-baseline gap-1">
+                          <span className="text-3xl font-black text-white font-mono">{completed30DayChallenges.length}</span>
+                          <span className="text-slate-500 font-bold text-sm">/ 30</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Progress Bar with Milestones */}
+                    <div className="space-y-3 pt-4 border-t border-white/5">
+                      <div className="flex justify-between items-center text-xs font-bold text-slate-400">
+                        <span>{isRtl ? `نسبة الإنجاز الأسرية: ${Math.round((completed30DayChallenges.length / 30) * 100)}%` : `Progress: ${Math.round((completed30DayChallenges.length / 30) * 100)}%`}</span>
+                        <span className="text-amber-400">{isRtl ? `+ ${completed30DayChallenges.length * 10} حكمة أسرية XP` : `+ ${completed30DayChallenges.length * 10} Wisdom XP`}</span>
+                      </div>
+                      <div className="w-full h-3 bg-slate-950 rounded-full overflow-hidden border border-white/5 p-px">
+                        <div 
+                          className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-700"
+                          style={{ width: `${(completed30DayChallenges.length / 30) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 30-Day Main Interactive Workspace */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    {/* Left Panel: Active Selected Day challenge detail card */}
+                    <div className="lg:col-span-5 bg-slate-950/60 border border-white/5 hover:border-amber-500/10 rounded-[2rem] p-6 space-y-6 transition-all h-full min-h-[350px]">
+                      {(() => {
+                        const challenges30 = [
+                          { day: 1, challenge: isRtl ? "اسأل ChatGPT: 'ما هو الذكاء الاصطناعي؟ اشرح لي كأني في العاشرة.'" : "Ask ChatGPT: 'What is AI? Explain to me as if I am 10 years old.'", tool: "ChatGPT", promptText: "What is artificial intelligence? Explain it to me like I am 10 years old with analogies." },
+                          { day: 2, challenge: isRtl ? "استخدم Bing Image Creator لتوليد صورة لـ 'حيوان خيالي لم يكتشف بعد'." : "Use Bing Image Creator to generate an image of 'a newly discovered mythical animal'.", tool: "Copilot Designer", promptText: "A newly discovered amazing mythical friendly space creature, Pixar style, highly details, 8k resolution" },
+                          { day: 3, challenge: isRtl ? "اطلب من الذكاء الاصطناعي كتابة قصة قصيرة (100 كلمة) عنك كبطل." : "Ask AI to write a short story (100 words)...", tool: "Claude / Gemini", promptText: "Write a short adventure story (100 words) where the main character is Basim Al Khalil, who finds a magical compass in Riyadh." },
+                          { day: 4, challenge: isRtl ? "استخدم أداة ElevenLabs لتحويل جملة 'صباح الخير' إلى صوت." : "Use ElevenLabs tool to convert 'Good Morning'...", tool: "ElevenLabs" },
+                          { day: 5, challenge: isRtl ? "تعلم 5 كلمات إنجليزية جديدة بالذكاء الاصطناعي." : "Learn 5 new English words...", tool: "ChatGPT / Claude", promptText: "Teach me 5 useful English vocabulary words. Give each with a simple sentence and a fun arabic mnemonic to remember it." },
+                          { day: 6, challenge: isRtl ? "اطلب من الذكاء الاصطناعي أن يشرح لك موضوعاً دراسياً صعباً." : "Ask AI to explain a complex school topic...", tool: "Gemini", promptText: "Explain how photosynthesis works in plants. Use interactive steps and an elegant bullet list." },
+                          { day: 7, challenge: isRtl ? "ابنِ شخصية خيالية (اسم، شكل، قصة) باستخدام DALL-E وChatGPT." : "Build a fictional character with DALL-E...", tool: "ChatGPT Plus" },
+                          { day: 8, challenge: isRtl ? "استخدم Perplexity للبحث عن 'أحدث اكتشاف في الفضاء'." : "Use Perplexity to search for...", tool: "Perplexity AI" },
+                          { day: 9, challenge: isRtl ? "خطط وجباتك ليوم كامل باستخدام الذكاء الاصطناعي." : "Plan a full day healthy diet meal plan...", tool: "ChatGPT / Gemini", promptText: "Plan a single-day healthy family food menu utilizing local Middle Eastern ingredients. Must be low sugar." },
+                          { day: 10, challenge: isRtl ? "اكتب قصيدة هايكو (3 أسطر) عن التكنولوجيا." : "Write an elegant Haiku poem (3 lines)...", tool: "Claude", promptText: "Write an inspiring Haiku poem about future quantum computers and nature." },
+                          { day: 11, challenge: isRtl ? "استخدم Suno لتوليد أغنية عن يومك." : "Use Suno to generate a simple musical track...", tool: "Suno AI" },
+                          { day: 12, challenge: isRtl ? "لخص مقالاً إخبارياً طويلاً في 3 نقاط." : "Summarize a very long news article...", tool: "ChatGPT Custom" },
+                          { day: 13, challenge: isRtl ? "صمم شعاراً لاسمك باستخدام Canva AI." : "Design an awesome logo with Canva AI...", tool: "Canva AI" },
+                          { day: 14, challenge: isRtl ? "مارس محادثة إنجليزية لمدة 5 دقائق مع الذكاء الاصطناعي." : "Practice English for 5 minutes with AI...", tool: "AI Voice / ChatGPT" },
+                          { day: 15, challenge: isRtl ? "استخدم Gamma لصنع عرض تقديمي عن هوايتك." : "Use Gamma to quickly frame presentation...", tool: "Gamma App" },
+                          { day: 16, challenge: isRtl ? "تولّد 3 صور لنفس الفكرة بأدوات مختلفة وقارن بينها." : "Generate 3 images of the exact same prompt...", tool: "Midjourney / Bing" },
+                          { day: 17, challenge: isRtl ? "اكتب 'رسالة إلى نفسك بعد 5 سنوات' واطلب من الذكاء الاصطناعي تحسينها." : "Write a 'Letter to future self'...", tool: "Claude-3.5" },
+                          { day: 18, challenge: isRtl ? "استخدم RunwayML أو Luma لتوليد فيديو 5 ثوانٍ من نص." : "Use Runway or Luma for 5-sec video...", tool: "Luma Dream Machine" },
+                          { day: 19, challenge: isRtl ? "تعلم كيف تقول 'شكراً' بـ 10 لغات بالذكاء الاصطناعي." : "Learn to speak 'Thank you' in 10 languages...", tool: "Google Translate / Gemini" },
+                          { day: 20, challenge: isRtl ? "صمم 'روتيناً صباحياً مثالياً' بمساعدة الذكاء الاصطناعي." : "Design 'Perfect Morning Routine'...", tool: "ChatGPT" },
+                          { day: 21, challenge: isRtl ? "اكتب 'أمراً عملاقاً' (Mega-Prompt) من 100 كلمة لبناء لعبة." : "Write a massive 'Mega-Prompt'...", tool: "Claude AI", promptText: "Act as a text-based RPG game about a Cyber-Riyadh in 2080. You offer 3 choices at each turn. Start the game welcome screen." },
+                          { day: 22, challenge: isRtl ? "استخدم أداة إزالة خلفية صورة (Remove.bg) على صورة لك." : "Utilize an AI image background eraser tool...", tool: "Remove.bg" },
+                          { day: 23, challenge: isRtl ? "تخيل وصف 'مدينة المستقبل' واطلب من الذكاء الاصطناعي رسمها." : "Describe 'the eco-city of 2050'...", tool: "Bing Creator" },
+                          { day: 24, challenge: isRtl ? "اكتب 'ميثاق أخلاقيات' شخصي لاستخدامك للذكاء الاصطناعي." : "Draft a personal 'Ethics Charter'...", tool: "Google Gemini" },
+                          { day: 25, challenge: isRtl ? "تعلم مهارة جديدة في 15 دقيقة (مثلاً: طي الورق، طبخة سريعة)." : "Learn a brand new skill in 15 minutes...", tool: "AI Assistant" },
+                          { day: 26, challenge: isRtl ? "حلل صورة قديمة لك واطلب من الذكاء الاصطناعي وصف المشاعر فيها." : "Upload an old family photo and ask for emotion description...", tool: "Gemini / Claude App" },
+                          { day: 27, challenge: isRtl ? "اصنع 'بودكاست' صغير (3 دقائق) بصوت مولّد عن موضوع تحبه." : "Produce a tiny 3-minute podcast script...", tool: "NotebookLM / Suno" },
+                          { day: 28, challenge: isRtl ? "علم شخصاً آخر (صديق، فرد عائلة) شيئاً واحداً تعلمته." : "Teach a friend or absolute beginner...", tool: "Real Life Discussion" },
+                          { day: 29, challenge: isRtl ? "ابنِ معرضاً من 6 صور أنتجتها خلال الشهر." : "Assemble an online virtual photo-gallery...", tool: "Canva Design Studio" },
+                          { day: 30, challenge: isRtl ? "اكتب 'تقريراً' عن رحلتك في 30 يوماً. ماذا تغير فيك؟" : "Write a personal reflection journal...", tool: "Offline reflection / AI Journal" }
+                        ];
+
+                        const currentChallenge = challenges30.find(c => c.day === selected30DayDay) || challenges30[0];
+                        const isDayComplete = completed30DayChallenges.includes(selected30DayDay);
+
+                        return (
+                          <div className="space-y-5 animate-fade-in text-right">
+                            <div className="flex justify-between items-center pb-3 border-b border-white/5">
+                              <span className="text-amber-400 font-mono font-black text-sm bg-amber-500/10 px-3.5 py-1 rounded-xl">
+                                {isRtl ? `اليوم ${selected30DayDay}` : `Day ${selected30DayDay}`}
+                              </span>
+                              <span className="text-xs text-slate-500 font-bold font-mono">
+                                {isRtl ? `أداة المقترح: ${currentChallenge.tool || 'ذكاء اصطناعي'}` : `Recommended Tool: ${currentChallenge.tool}`}
+                              </span>
+                            </div>
+
+                            <div className="space-y-2">
+                              <h4 className="text-lg font-black text-white leading-snug">
+                                {isRtl ? 'المطلوب إنجازه اليوم:' : 'Daily Mission Objectives:'}
+                              </h4>
+                              <p className="text-slate-300 text-sm font-medium leading-relaxed bg-slate-900/55 p-4 rounded-xl border border-white/5">
+                                {currentChallenge.challenge}
+                              </p>
+                            </div>
+
+                            {/* Prompt helper, if applicable */}
+                            {currentChallenge.promptText && (
+                              <div className="bg-slate-900/40 p-4 rounded-xl border border-amber-500/20 space-y-2">
+                                <div className="flex justify-between items-center">
+                                  <button
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(currentChallenge.promptText!);
+                                      setFamilyName(prev => prev); // dummy trigger update
+                                    }}
+                                    className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 hover:text-white transition-colors border border-amber-500/30 px-2.5 py-1 rounded text-[10px] font-black"
+                                  >
+                                    {isRtl ? 'نسخ التعويذة البرمجية (Prompt) 📋' : 'Copy Prompt 📋'}
+                                  </button>
+                                  <span className="text-[10px] text-amber-400 font-black">{isRtl ? '💡 أمر مقترح وبسيط للبدء:' : '💡 Good Starter Prompt:'}</span>
+                                </div>
+                                <p className="text-[11px] text-slate-300 font-mono select-all bg-slate-950 p-2.5 rounded border border-white/5 text-left" dir="ltr">
+                                  {currentChallenge.promptText}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Toggle Completeness */}
+                            <div className="pt-4 flex flex-col gap-2">
+                              <button
+                                onClick={() => {
+                                  if (isDayComplete) {
+                                    setCompleted30DayChallenges(prev => prev.filter(d => d !== selected30DayDay));
+                                  } else {
+                                    setCompleted30DayChallenges(prev => [...prev, selected30DayDay]);
+                                    setXp(prev => prev + 10);
+                                  }
+                                }}
+                                className={`w-full py-3.5 rounded-2xl text-xs font-black transition-all active:scale-95 flex items-center justify-center gap-2 ${
+                                  isDayComplete 
+                                    ? 'bg-emerald-500/25 border border-emerald-400/30 text-emerald-300' 
+                                    : 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-md shadow-amber-500/10'
+                                }`}
+                              >
+                                {isDayComplete ? '✓ لقد أنجزت هذا التحدي بالكامل اليوم! 🎉 (+10 XP)' : '✓ علمني كمنجِز وحصل +10 XP'}
+                              </button>
+                              <p className="text-[10px] text-slate-500 font-medium text-center">
+                                {isRtl ? 'التدسيق الأسرى والتطبيق يزيد من فرص استيعاب الدرس.' : 'Active hand-on play cements modern LLM paradigms.'}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Right Panel: The 30 Days selection grid */}
+                    <div className="lg:col-span-7 bg-slate-900/30 border border-white/5 rounded-[2rem] p-6 space-y-4">
+                      <div className="flex justify-between items-center pb-2">
+                        <span className="text-[10px] bg-white/5 text-slate-400 px-3 py-1 rounded font-bold font-mono">
+                          {isRtl ? '30 يوماً متتالياً' : '30 Consecutive Days'}
+                        </span>
+                        <h4 className="text-sm font-black text-white">{isRtl ? '📅 لوحة الأيام الثلاثين:' : '📅 Monthly Board Grid:'}</h4>
+                      </div>
+
+                      <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-10 gap-2.5">
+                        {Array.from({ length: 30 }, (_, i) => i + 1).map(day => {
+                          const isActive = day === selected30DayDay;
+                          const isComplete = completed30DayChallenges.includes(day);
+
+                          return (
+                            <button
+                              key={day}
+                              onClick={() => setSelected30DayDay(day)}
+                              className={`aspect-square rounded-2xl border transition-all text-sm font-mono font-black flex flex-col justify-center items-center gap-1 active:scale-90 ${
+                                isActive 
+                                  ? 'border-amber-400 bg-amber-500/25 text-white scale-105 shadow-md shadow-amber-500/10' 
+                                  : isComplete 
+                                    ? 'border-emerald-500/30 bg-emerald-500/20 text-emerald-300' 
+                                    : 'border-white/5 bg-slate-950/60 text-slate-400 hover:text-white hover:border-white/10'
+                              }`}
+                            >
+                              <span>{day}</span>
+                              {isComplete && <span className="text-[10px] text-emerald-400 leading-none">✓</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <div className="p-4 bg-slate-950/40 rounded-xl border border-white/5 text-xs text-slate-400 leading-relaxed space-y-1.5 text-right">
+                        <span className="font-extrabold text-amber-400 block">{isRtl ? '💬 نصيحة الأسبوع للمكثف:' : '💬 Quickstart Advice:'}</span>
+                        <p>
+                          {isRtl 
+                            ? 'أفضل نتائج التعلم تظهر حينما تناقش الآباء في "ركن العائلة" بعد تحدياتك! جربوا حوارات "ركن العائلة" لتكامل أفضل.' 
+                            : 'Learning AI is much more powerful when shared. Always run family chats with parents after completing your daily task!'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+              {/* Tab: Lab Experiments (تجارب ومقارنات) 🧪 */}
+              {lobbyTab === 'experiments' && (
+                <div className="space-y-6 text-right animate-fade-in" dir="rtl">
+                  {/* Experiments selection controls */}
+                  <div className="bg-[#0b1329] border border-white/10 rounded-[2.5rem] p-6 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="space-y-1.5">
+                      <h3 className="text-2xl font-black text-white flex items-center justify-start gap-2">
+                        <Sliders className="text-amber-400" />
+                        {isRtl ? 'في المختبر - تجارب ومقارنات تفاعلية للنماذج 🧪' : 'Continuous AI Comparison Laboratory Sandbox 🧪'}
+                      </h3>
+                      <p className="text-slate-400 text-xs">
+                        {isRtl 
+                          ? 'اختر التجربة العملية التي تود تشغيلها للمقارنة الفورية والمشاهدة الحركية للفروق الجوهرية بين عمالقة الذكاء التوليدي!' 
+                          : 'Select an active experiment below to simulate real output behaviors side-by-side.'}
+                      </p>
+                    </div>
+
+                    {/* Submenu Pills */}
+                    <div className="p-1 bg-slate-950/80 border border-white/15 rounded-2xl flex flex-wrap gap-1 w-full md:w-auto">
+                      {[
+                        { id: 1, label: isRtl ? '1. معركة الصور 🎨' : '1. Image Battle' },
+                        { id: 2, label: isRtl ? '2. تحدي النصوص ⚔️' : '2. LLM Battle' },
+                        { id: 3, label: isRtl ? '3. تحريك الفيديو 🎬' : '3. Video Battle' },
+                        { id: 4, label: isRtl ? '4. حاسبة تكلفة الـ AI 📊' : '4. API Cost Calculator' },
+                        { id: 5, label: isRtl ? '5. مقارنة نماذج 2025 🔍' : '5. 2025 Models' }
+                      ].map(exp => (
+                        <button
+                          key={exp.id}
+                          onClick={() => setActiveExperimentId(exp.id)}
+                          className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex-1 md:flex-none whitespace-nowrap ${
+                            activeExperimentId === exp.id 
+                              ? 'bg-amber-500 text-slate-950 shadow-md' 
+                              : 'text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          {exp.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* EXPERIMENT 1: IMAGE BATTLE */}
+                  {activeExperimentId === 1 && (
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                      {/* Left: Input parameters */}
+                      <div className="lg:col-span-4 bg-slate-900/40 border border-white/5 rounded-[2rem] p-6 space-y-4">
+                        <h4 className="text-md font-black text-white pb-3 border-b border-white/5">
+                          {isRtl ? 'إعدادات مقارنة مولدات الصور' : 'Visual Painting Parameters'}
+                        </h4>
+                        
+                        <div className="space-y-4 text-right">
+                          <div className="space-y-1">
+                            <label className="block text-xs font-black text-amber-400">{isRtl ? 'وصف المشهد الخيالي (التعويذة):' : 'Active Scene Prompt:'}</label>
+                            <textarea
+                              value={exp1Prompt}
+                              onChange={(e) => setExp1Prompt(e.target.value)}
+                              rows={3}
+                              className="w-full bg-[#050b14]/90 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono leading-relaxed"
+                              placeholder={isRtl ? 'اكتب وصوفاً رائعة للوحة ...' : 'Enter a masterpiece image prompt...'}
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="block text-xs font-black text-amber-400">{isRtl ? 'تطبيق طابع فني مسبق:' : 'Select Art Genre Theme:'}</label>
+                            <div className="grid grid-cols-2 gap-2">
+                              {[
+                                { id: 'anime', label: isRtl ? 'أنمي ياباني 🌸' : 'Anime styles' },
+                                { id: 'cinematic', label: isRtl ? 'واقعي سينمائي 🎬' : 'Photo cinematic' },
+                                { id: 'watercolor', label: isRtl ? 'ألوان مائية 🎨' : 'Watercolor paint' },
+                                { id: 'clay', label: isRtl ? 'صلصال ثلاثي الملامح 🧸' : '3D Claymation' }
+                              ].map(st => (
+                                <button
+                                  key={st.id}
+                                  onClick={() => setExp1SelectedStyle(st.id)}
+                                  className={`p-2.5 rounded-xl border font-bold text-[10px] text-center transition-all ${
+                                    exp1SelectedStyle === st.id 
+                                      ? 'bg-amber-500/10 text-amber-300 border-amber-500/35' 
+                                      : 'bg-white/5 border-white/5 text-slate-400 hover:text-white'
+                                  }`}
+                                >
+                                  {st.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              setExp1Running(true);
+                              setTimeout(() => setExp1Running(false), 2000);
+                            }}
+                            disabled={exp1Running}
+                            className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-slate-800 text-slate-950 font-black py-3 rounded-xl text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
+                          >
+                            {exp1Running ? (
+                              <span className="animate-spin">🌀</span>
+                            ) : (
+                              '⚔️ تشغيل مقارنة المولدات (معركة الصور)'
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Right: Comparative Scoreboard and generated mockup */}
+                      <div className="lg:col-span-8 bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                        <div className="flex justify-between items-center border-b border-white/5 pb-4">
+                          <h4 className="text-lg font-black text-white">{isRtl ? 'النتائج والدرجات والخصائص الفنية لكل مولد صور' : 'Visual Engine Evaluation Results'}</h4>
+                          <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded uppercase font-mono tracking-widest">{isRtl ? 'محاكاة مقارنة دقيقة' : 'SIMULATION MODE'}</span>
+                        </div>
+
+                        {exp1Running ? (
+                          <div className="py-24 text-center text-slate-400 space-y-3">
+                            <div className="animate-spin text-3xl mx-auto">🌀</div>
+                            <p className="font-bold text-sm">{isRtl ? 'جاري فحص بكسلات الإضاءة ونقل خصائص الرسم الأسمى...' : 'Extracting texture gradients and analyzing prompt weights...'}</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-6">
+                            {/* Scorecards */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {/* 1. Midjourney */}
+                              <div className="bg-slate-950/50 p-4 rounded-2xl border border-white/5 space-y-3">
+                                <div className="flex justify-between items-center text-xs">
+                                  <span className="font-mono text-emerald-400 font-extrabold bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/20">9.8 / 10</span>
+                                  <strong className="text-white">Midjourney v6 - ملك السينمائية 👑</strong>
+                                </div>
+                                <p className="text-slate-400 text-[11px] leading-relaxed">
+                                  {isRtl 
+                                    ? 'المميز في تفاصيل الإضاءة والواقعية وضربات الفرشاة الفنية الغنية، رائع في المشاهد الدرامية المعقدة.' 
+                                    : 'Stellar focus on raw textures and cinematic atmospheres. Supreme stylistic control.'}
+                                </p>
+                              </div>
+
+                              {/* 2. DALL-E 3 */}
+                              <div className="bg-slate-950/50 p-4 rounded-2xl border border-white/5 space-y-3">
+                                <div className="flex justify-between items-center text-xs">
+                                  <span className="font-mono text-emerald-400 font-extrabold bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/20">9.4 / 10</span>
+                                  <strong className="text-white">DALL-E 3 - دقة الأوامر والكلمات 📝</strong>
+                                </div>
+                                <p className="text-slate-400 text-[11px] leading-relaxed">
+                                  {isRtl 
+                                    ? 'يتفوق في الفهم الحرفي لكل عناصر الجملة المعقدة دون إسقاط أي من مواصفاتك، كما يستطيع كتابة نصوص عربية بسيطة دون تداخل.' 
+                                    : 'Best in prompt accuracy. Captures highly nested logical constraints flawlessly.'}
+                                </p>
+                              </div>
+
+                              {/* 3. Stable Diffusion XL */}
+                              <div className="bg-slate-950/50 p-4 rounded-2xl border border-white/5 space-y-3">
+                                <div className="flex justify-between items-center text-xs">
+                                  <span className="font-mono text-amber-400 font-extrabold bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/20">8.9 / 10</span>
+                                  <strong className="text-white">Stable Diffusion XL - تحكم مطلق وفني ⚙️</strong>
+                                </div>
+                                <p className="text-slate-400 text-[11px] leading-relaxed">
+                                  {isRtl 
+                                    ? 'طراز رائد ومفتوح المصدر يتيح دمج تفاصيل مخصصة ورسم لوحات بأبعاد لانهائي، متميز للتعديلات الدقيقة.' 
+                                    : 'Ultimate configuration choices. Flexible for commercial pipelines and controls.'}
+                                </p>
+                              </div>
+
+                              {/* 4. Bing Image Creator */}
+                              <div className="bg-slate-950/50 p-4 rounded-2xl border border-white/5 space-y-3">
+                                <div className="flex justify-between items-center text-xs">
+                                  <span className="font-mono text-amber-400 font-extrabold bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/20">8.5 / 10</span>
+                                  <strong className="text-white">Bing / Copilot AI - سرعة البداية الفورية 🎨</strong>
+                                </div>
+                                <p className="text-slate-400 text-[11px] leading-relaxed">
+                                  {isRtl 
+                                    ? 'مجاني وسرعته عالية وقائم على خادم دالي للأوامر، رائع للمهام اليومية والتجريب السريع من الموبايل.' 
+                                    : 'Extremely accessible, free for kids to experiment, fast responses.'}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Simulated rendering frame (Tailwind customized SVG drawings) */}
+                            <div className="bg-slate-950 rounded-[2rem] p-6 text-center border border-white/5 relative overflow-hidden flex flex-col items-center justify-center min-h-64">
+                              <span className="text-[10px] text-amber-400 font-black absolute top-4 right-4">{isRtl ? 'لوحة المحاكاة' : 'GENERATION PREVIEW'}</span>
+                              <div className="p-4 bg-white/5 rounded-2xl border border-white/5 max-w-md space-y-4">
+                                {/* SVG Painting depending on style */}
+                                {exp1SelectedStyle === 'anime' && (
+                                  <svg viewBox="0 0 100 100" className="w-24 h-24 mx-auto text-pink-400 animate-pulse">
+                                    <circle cx="50" cy="45" r="30" fill="currentColor" opacity="0.15" />
+                                    <path d="M50,15 L70,45 L30,45 Z" fill="currentColor" />
+                                    <circle cx="42" cy="42" r="5" fill="#fff" />
+                                    <circle cx="58" cy="42" r="5" fill="#fff" />
+                                    <path d="M45,60 Q50,65 55,60" stroke="#fff" strokeWidth="2" fill="none" />
+                                  </svg>
+                                )}
+                                {exp1SelectedStyle === 'cinematic' && (
+                                  <svg viewBox="0 0 100 100" className="w-24 h-24 mx-auto text-amber-400 animate-pulse">
+                                    <rect x="20" y="20" width="60" height="60" rx="10" fill="currentColor" opacity="0.15" />
+                                    <circle cx="45" cy="45" r="10" fill="currentColor" />
+                                    <path d="M20,65 L80,65 L80,80 L20,80 Z" fill="currentColor" opacity="0.3" />
+                                  </svg>
+                                )}
+                                {exp1SelectedStyle === 'watercolor' && (
+                                  <svg viewBox="0 0 100 100" className="w-24 h-24 mx-auto text-sky-400 animate-pulse">
+                                    <path d="M30,50 Q40,30 60,35 T80,60 T50,80 Z" fill="currentColor" opacity="0.25" />
+                                    <circle cx="45" cy="50" r="15" fill="currentColor" opacity="0.4" />
+                                  </svg>
+                                )}
+                                {exp1SelectedStyle === 'clay' && (
+                                  <svg viewBox="0 0 100 100" className="w-24 h-24 mx-auto text-indigo-400 animate-pulse">
+                                    <rect x="25" y="25" width="50" height="50" rx="20" fill="currentColor" opacity="0.2" />
+                                    <circle cx="50" cy="50" r="15" fill="currentColor" />
+                                  </svg>
+                                )}
+
+                                <div className="space-y-1">
+                                  <p className="text-white text-xs font-black">{isRtl ? 'المحاكي البصري للأسلوب الفني المختار' : 'Theme Art Engine simulation state'}</p>
+                                  <p className="text-slate-400 text-[10px] leading-relaxed italic pr-4 pl-4 select-all">
+                                    "{exp1Prompt}"
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* EXPERIMENT 2: LLM BATTLE */}
+                  {activeExperimentId === 2 && (
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                      {/* Left side: Task Picker */}
+                      <div className="lg:col-span-4 bg-slate-900/40 border border-white/5 rounded-[2rem] p-6 space-y-4 text-right">
+                        <h4 className="text-md font-black text-white pb-3 border-b border-white/5">{isRtl ? 'منطقة إطلاق الحوار والمقارنة' : 'LLM Instruction Controls'}</h4>
+                        
+                        <div className="space-y-4">
+                          <div className="space-y-1">
+                            <label className="block text-xs font-bold text-amber-400">{isRtl ? 'اختر مهمة الحوار التفاعلية:' : 'Choose a task type:'}</label>
+                            {[
+                              { id: 'creative', label: isRtl ? '✍️ تأليف قصص وروايات' : 'Creative SAGA' },
+                              { id: 'logic', label: isRtl ? '🧩 حل الألغاز المعقدة' : 'Logic Riddle Solver' },
+                              { id: 'translate', label: isRtl ? '🌐 موازين الترجمة والبلاغة' : 'Eloquence Translation' },
+                              { id: 'code', label: isRtl ? '💻 برمجة دوان حاسوبية' : 'Code Compilation' }
+                            ].map(ts => (
+                              <button
+                                key={ts.id}
+                                onClick={() => {
+                                  setExp2TaskType(ts.id);
+                                  setExp2Results(null);
+                                }}
+                                className={`w-full text-right p-3 rounded-xl border text-xs font-bold transition-all flex justify-between items-center ${
+                                  exp2TaskType === ts.id 
+                                    ? 'bg-amber-500/10 text-amber-300 border-amber-500/35' 
+                                    : 'bg-white/5 border-white/5 text-slate-300 hover:bg-white/10'
+                                }`}
+                              >
+                                <span>{ts.label}</span>
+                                {exp2TaskType === ts.id && <ChevronRight size={14} className="rotate-180 text-amber-400" />}
+                              </button>
+                            ))}
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="block text-xs font-black text-amber-400">{isRtl ? 'تخصيص أمر حواري (اختياري):' : 'Custom detail tweak (Optional):'}</label>
+                            <input
+                              type="text"
+                              value={exp2CustomPrompt}
+                              onChange={(e) => setExp2CustomPrompt(e.target.value)}
+                              placeholder={isRtl ? 'مثال: بأسلوب تاريخي، للأطفال ...' : 'e.g., Use dark space metaphors...'}
+                              className="w-full bg-[#050b14]/95 border border-white/10 rounded-xl px-4 py-2 font-semibold text-xs focus:outline-none focus:border-amber-500"
+                            />
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              setExp2Running(true);
+                              setTimeout(() => {
+                                setExp2Running(false);
+                                setExp2Results(true);
+                              }, 1500);
+                            }}
+                            disabled={exp2Running}
+                            className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-slate-800 text-slate-950 font-black py-3 rounded-xl text-xs flex items-center justify-center gap-2"
+                          >
+                            {exp2Running ? '🌀 جاري صياغة التعويذ الحواري...' : '⚔️ إطلاق تحدي النماذج اللغوية!'}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Right side: Comparative Terminal Dashboard */}
+                      <div className="lg:col-span-8 bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                        <div className="flex justify-between items-center">
+                          <h4 className="text-md md:text-lg font-black text-white">{isRtl ? 'مقارنة حية لردود ومميزات النماذج اللغوية الأربعة' : 'Side-by-Side Response Simulator'}</h4>
+                          <span className="text-[10px] bg-emerald-500/15 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20 font-mono font-black uppercase">{isRtl ? 'بناء ومقارنة المعايير' : 'CRITERIA DRIVEN'}</span>
+                        </div>
+
+                        {exp2Running ? (
+                          <div className="py-24 text-center text-slate-400 space-y-3">
+                            <div className="animate-spin text-3xl mx-auto">🌀</div>
+                            <p className="font-bold text-sm">{isRtl ? 'تحميل قواميس النماذج ورصد معاني البلاغة والمنطق...' : 'Resolving token distributions and framing neural responses...'}</p>
+                          </div>
+                        ) : !exp2Results ? (
+                          <div className="py-20 text-center text-slate-400 space-y-4">
+                            <Bot className="mx-auto text-slate-500" size={56} />
+                            <p className="font-bold text-md">{isRtl ? 'انقر على مفتاح "إطلاق تحدي النماذج" لرؤية المقارنة الحية' : 'Launch the battle simulation to enjoy four distinct outputs side-by-side.'}</p>
+                            <p className="text-xs text-slate-600 leading-normal max-w-md mx-auto">{isRtl ? 'روبوتات الأكاديمية ستقوم بحياكة أربعة معاني تصف كيف تختلف نبرة وبنية عمالقة الذكاء!' : 'This tool models real-world characteristics of top LLMs (eloquence, emojis, bulleted info, citation structures).'}</p>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* 1. ChatGPT */}
+                            <div className="bg-slate-950/70 p-5 rounded-2xl border border-white/5 space-y-3">
+                              <div className="flex justify-between items-center text-xs font-bold border-b border-white/5 pb-2">
+                                <span className="text-amber-400">GPT-4o (الملم المتكامل)</span>
+                                <strong>ChatGPT (Structured & Fun) 🤖</strong>
+                              </div>
+                              <p className="text-[12px] text-slate-200 leading-relaxed font-semibold">
+                                {exp2TaskType === 'creative' && 'أهلاً بك يا صديقي المتميز! 🌟 دعنا نتحرك بخيالنا في عوالم من المغامرة المبهجة. كانت هناك مركبة فضاء ذكية تقاوم الرياح...' }
+                                {exp2TaskType === 'logic' && 'مرحباً! اللغز الذي تفضلت به يمكن حله بتقسيم الخطوات كالتالي: 1) نحدد السبب، 2) نقيس المسافات بحكمة...' }
+                                {exp2TaskType === 'translate' && 'أهلاً! العبارة البليغة المختارة تطابق معاني البساطة والمروءة. إليك التنسيق المتقابل للأفكار مع بعض التحسينات...' }
+                                {exp2TaskType === 'code' && 'خطوة رائعة مبرمجة! 💻 إليك دالة بايثون منسقة ومرتبة لتنفيذ طلبك مع إيضاح المتغيرات بسهولة ويسر وبكسل منير...' }
+                              </p>
+                              <div className="text-[10px] text-slate-500">{isRtl ? '💡 السلوك المميز: منظم للغاية ومزود بالإيموجي والتبويبات.' : 'Characteristic: Highly structured, friendly, extensive use of emojis.'}</div>
+                            </div>
+
+                            {/* 2. Claude */}
+                            <div className="bg-slate-950/70 p-5 rounded-2xl border border-white/5 space-y-3">
+                              <div className="flex justify-between items-center text-xs font-bold border-b border-white/5 pb-2">
+                                <span className="text-purple-400">Claude 3.5 (الكاتب البليغ)</span>
+                                <strong>Claude (Literary & Deep) 🖋️</strong>
+                              </div>
+                              <p className="text-[12px] text-slate-200 leading-relaxed font-semibold">
+                                {exp2TaskType === 'creative' && 'يسرني أن أنسج لك عباءة من السرو والغرابة الأدبية؛ كانت السكينة والغيوم تلبس سفينة الفضاء ملامساً الأفق الخفي...' }
+                                {exp2TaskType === 'logic' && 'عند مراجعة التساؤل والظروف المحيطة باللغز، يسعنا أن نستنبط تناقضاً بيانياً في الفرضية الأولى؛ وهو ما يفضي بدقة إلى...' }
+                                {exp2TaskType === 'translate' && 'الترجمة الأدبية تتخطى مجرد الكلمة إلى تجسيد الشعور وصيانة البنية البلاغية الأصلية؛ ولذلك صغتها بلسان عربي يحاكي...' }
+                                {exp2TaskType === 'code' && 'يسرني تقديم حل برمجي متماسك يراعي الأمان وكفاءة التخزين والذاكرة وفق شروط هندسة الحاسوب، إليك الكود مع التعليق...' }
+                              </p>
+                              <div className="text-[10px] text-slate-500">{isRtl ? '💡 السلوك المميز: نبرة بالغة الأدبية والفصاحة والدقة العلمية.' : 'Characteristic: Extremely deep, literary phrasing, secure coding patterns.'}</div>
+                            </div>
+
+                            {/* 3. Gemini */}
+                            <div className="bg-slate-950/70 p-5 rounded-2xl border border-white/5 space-y-3">
+                              <div className="flex justify-between items-center text-xs font-bold border-b border-white/5 pb-2">
+                                <span className="text-blue-400">Gemini 1.5 (مدعوم ببحث جوجل)</span>
+                                <strong>Gemini (Analytical & Factual) 🌐</strong>
+                              </div>
+                              <p className="text-[12px] text-slate-200 leading-relaxed font-semibold">
+                                {exp2TaskType === 'creative' && 'فيما يلي تصور منظم للقصة المطلوبة. تدور أحداث السفينة الفضائية حول ملامس التفكير التقني وكيف حماها مبرمجون صغار من...' }
+                                {exp2TaskType === 'logic' && 'بناءً على معطيات اللغز المستخرجة، ندرج هنا الخطوات المنهجية المعتمدة للحل مع إثبات المعايير الرياضية الدامغة...' }
+                                {exp2TaskType === 'translate' && 'تقابل هذه اللفظة معان متعددة وتختلف دلالاتها حسب العصر والسياق؛ ندرج لك الترجمة الصارمة والمعاصرة مع الاختلافات...' }
+                                {exp2TaskType === 'code' && 'بالاستناد للمكتبات القياسية، يمكنك تشغيل هذا التقرير البرمجي. تم إعداد الدالة لسهولة التكامل مع تطبيقات الويب العائلية...' }
+                              </p>
+                              <div className="text-[10px] text-slate-500">{isRtl ? '💡 السلوك المميز: تحليلي ومبني على حقائق ويتكامل مع الويب.' : 'Characteristic: Informative, facts-oriented, integrates with Google tools.'}</div>
+                            </div>
+
+                            {/* 4. Perplexity */}
+                            <div className="bg-slate-950/70 p-5 rounded-2xl border border-white/5 space-y-3">
+                              <div className="flex justify-between items-center text-xs font-bold border-b border-white/5 pb-2">
+                                <span className="text-teal-400">Perplexity (الباحث الموثق)</span>
+                                <strong>Perplexity (Grounding & Search) 🔍</strong>
+                              </div>
+                              <p className="text-[12px] text-slate-200 leading-relaxed font-semibold">
+                                {exp2TaskType === 'creative' && 'أشارت دراسات أدب الخيال العلمي المعاصر [1] إلى تزايد رواج قصص تكاتف سفن الفضاء؛ إليك حياكة المشاهد مع توثيق الأفكار...' }
+                                {exp2TaskType === 'logic' && 'وفق الروايات والمسائل المسجلة تاريخيا [1][2]، يتطابق هذا اللغز مع مشكلة الخبز السبعة؛ إليك الإثبات الفني والحقائق الكلية...' }
+                                {exp2TaskType === 'translate' && 'يتفق مجمع اللغة العربية والمراجع اللغوية [3] على دلالة هذا التعبير بالبلاغة؛ وهنا تصدير الشرح مع مقارنة المعاجم...' }
+                                {exp2TaskType === 'code' && 'وفقاً لمراجعة المبرمجين على GitHub [1] ومراجع التكرار، فإن تشغيل هذا النص البرمجي يتناسب مع التوصيات التالية...' }
+                              </p>
+                              <div className="text-[10px] text-slate-500">{isRtl ? '💡 السلوك المميز: يزودك بأرقام مصادر وروابط صحيحة فورية.' : 'Characteristic: Live web queries, provides reference numbers and links.'}</div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* EXPERIMENT 3: VIDEO GENERATORS */}
+                  {activeExperimentId === 3 && (
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                      {/* Left: configuration */}
+                      <div className="lg:col-span-5 bg-slate-900/40 border border-white/5 rounded-[2rem] p-6 space-y-4">
+                        <h4 className="text-md font-black text-white pb-3 border-b border-white/5">{isRtl ? 'تخليق وتحريك لقطات الفيديو' : 'Video Prompt Generator'}</h4>
+                        
+                        <div className="space-y-4 text-right">
+                          <div className="space-y-1">
+                            <label className="block text-xs font-black text-amber-400">{isRtl ? 'التعويذة النصية لإطلاق الأنيميشن:' : 'Text video instructions:'}</label>
+                            <input
+                              type="text"
+                              value={exp3ImagePrompt}
+                              onChange={(e) => setExp3ImagePrompt(e.target.value)}
+                              className="w-full bg-[#050b14]/90 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+                            />
+                          </div>
+
+                          <div className="bg-amber-500/5 p-4 rounded-xl border border-amber-500/10 text-[10px] text-amber-300 leading-relaxed space-y-1.5 text-right">
+                            <span className="font-black block">💡 {isRtl ? 'قاعدة حركة السيناريو:' : 'Motion Rule:'}</span>
+                            <span>{isRtl ? 'يتأثر توليد الفيديو بأوامر حركة الكاميرا (مثل: zoom in, panning, crane shot). ننصحك بدمجها عائلياً للحصول على أعلى حيوية وحركة ناعمة!' : 'Incorporate words like "zooming slowly" or "handheld tracking shot" for beautiful physics.'}</span>
+                          </div>
+
+                          <button 
+                            onClick={() => {
+                              setExp3Running(true);
+                              setTimeout(() => setExp3Running(false), 2000);
+                            }}
+                            className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-3 rounded-xl text-xs active:scale-95 transition-all"
+                          >
+                            {exp3Running ? '🌀 تجسيد حركة الكاميرا والعمق...' : '🎬 مقارنة مولدات الفيديو التوليدي'}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Right: Video scorecard comparisons */}
+                      <div className="lg:col-span-7 bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                        <div className="flex justify-between items-center border-b border-white/5 pb-4">
+                          <h4 className="text-md font-black text-white">{isRtl ? 'مقارنة أمن وجودة عمالقة حركة الفيديو' : 'Video Generation Scorecard'}</h4>
+                        </div>
+
+                        {exp3Running ? (
+                          <div className="py-20 text-center text-slate-400 space-y-3">
+                            <div className="animate-spin text-3xl mx-auto">🌀</div>
+                            <p className="font-bold text-xs">{isRtl ? 'تحليل ثوان الحركة وصيانة اتساق وجوه الشخصيات...' : 'Generating dynamic motion keys and balancing physics...'}</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {[
+                              { name: 'Runway Gen-3 Alpha', score: '9.6', pros: isRtl ? 'حركة خارقة، واقعية هوليوود، سرعة دقيقة' : 'Slick motion, ultra photorealism', cons: isRtl ? 'تكلفة عالية وعملات محدودة' : 'Premium cost' },
+                              { name: 'Luma Dream Machine', score: '9.2', pros: isRtl ? 'الاتساق المنطق والوجوه رائع، مجاني للبدء' : 'Excellent human facial consistency', cons: isRtl ? 'قد تحدث بعض الهلوسة في حركة السيارات' : 'Warped physics' },
+                              { name: 'Pika 1.0', score: '8.8', pros: isRtl ? 'أنيميشن كرتوني وكسر الحدود والتحكم مبهر' : 'Cartoon rendering consistency, custom edits', cons: isRtl ? 'حركات العيون قد تبدو ممسوحة في الصور البعيدة' : 'Lower canvas resolution' },
+                              { name: 'OpenAI Sora', score: '9.9', pros: isRtl ? 'دقيقة فيزياء وربط عوالم متكاملة لـ 60 ثانية' : 'Stellar 3D physics rendering up to 60s', cons: isRtl ? 'غير متاحة للجميع وتخضع لرقابة صارمة' : 'Limited beta' }
+                            ].map(v => (
+                              <div key={v.name} className="bg-slate-950/40 p-4 rounded-xl border border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                                <div className="space-y-1 text-right">
+                                  <h5 className="text-sm font-black text-white">{v.name}</h5>
+                                  <div className="text-[10px] text-slate-400 flex flex-wrap gap-2 justify-start md:justify-end mt-1">
+                                    <span className="text-emerald-400 font-bold">👍 {v.pros}</span>
+                                    <span className="text-red-400 font-bold">👎 {v.cons}</span>
+                                  </div>
+                                </div>
+                                <span className="text-xs font-mono font-black text-amber-300 bg-amber-500/15 border border-amber-500/30 px-3 py-1 rounded-lg shrink-0">
+                                  {v.score} / 10
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* EXPERIMENT 4: API COST CALCULATOR 📊 */}
+                  {activeExperimentId === 4 && (
+                    <div className="space-y-6">
+                      <div className="bg-[#0b1329] border border-white/10 rounded-[2rem] p-6 md:p-8">
+                        <div className="max-w-3xl mx-auto space-y-6">
+                          <div className="text-center space-y-2">
+                            <span className="text-xs bg-amber-500/10 text-amber-300 font-bold px-3 py-1 rounded-full border border-amber-500/20 font-mono">
+                              {isRtl ? 'حاسبة ميزانية المطورين' : 'DEVELOPER BUDGET CALCULATOR'}
+                            </span>
+                            <h4 className="text-xl md:text-2xl font-black text-white text-center">
+                              {isRtl ? 'حاسبة تكلفة استدعاء الذكاء الاصطناعي (APIs)' : 'Generative AI API Cost Calculator'}
+                            </h4>
+                            <p className="text-xs text-slate-400 text-center">
+                              {isRtl 
+                                ? 'أداة لمساعدة الطلاب على تخطيط ميزانية مشروعاتهم القائمة على خدمات استدعاء نماذج الذكاء الاصطناعي.' 
+                                : 'Calculate and plan estimates for using external raw AI models in your apps.'}
+                            </p>
+                          </div>
+
+                          {/* Inputs Panel */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                            {/* Left: Input values */}
+                            <div className="bg-slate-950/50 p-6 rounded-2xl border border-white/5 space-y-4">
+                              <div className="space-y-2">
+                                <label className="block text-xs font-black text-amber-400">
+                                  {isRtl ? 'عدد الكلمات المولدة شهرياً:' : 'Estimated Words Generated Monthly:'}
+                                </label>
+                                <div className="flex gap-3">
+                                  <input
+                                    type="number"
+                                    value={calcWords}
+                                    onChange={(e) => setCalcWords(Math.max(0, parseInt(e.target.value) || 0))}
+                                    className="w-full bg-slate-900 border border-white/10 px-4 py-2.5 rounded-xl text-white text-sm font-bold text-center focus:outline-none focus:border-amber-500"
+                                    placeholder="100000"
+                                  />
+                                </div>
+                                <input
+                                  type="range"
+                                  min="1000"
+                                  max="2000000"
+                                  step="1000"
+                                  value={calcWords}
+                                  onChange={(e) => setCalcWords(parseInt(e.target.value))}
+                                  className="w-full accent-amber-500 mt-2"
+                                />
+                                <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+                                  <span>1,000 {isRtl ? 'كلمة' : 'words'}</span>
+                                  <span>2,000,000 {isRtl ? 'كلمة' : 'words'}</span>
+                                </div>
+                              </div>
+
+                              <div className="space-y-2 col-span-1">
+                                <label className="block text-xs font-black text-amber-400">
+                                  {isRtl ? 'النموذج المستخدم للتقدير الأساسي:' : 'Baseline Target Model:'}
+                                </label>
+                                <select
+                                  value={calcModel}
+                                  onChange={(e) => setCalcModel(e.target.value)}
+                                  className="w-full bg-slate-900 border border-white/10 px-4 py-2.5 rounded-xl text-white text-sm font-extrabold focus:outline-none focus:border-amber-500 text-right"
+                                  dir="rtl"
+                                >
+                                  {['GPT-3.5 Turbo', 'GPT-4', 'GPT-4 Turbo', 'Claude 3 Haiku', 'Claude 3 Sonnet', 'Claude 3.5 Sonnet', 'Gemini 1.5 Pro'].map(m => (
+                                    <option key={m} value={m} className="bg-slate-900 text-white font-bold">{m}</option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
+
+                            {/* Right: Calculated Single result */}
+                            <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/5 p-6 rounded-2xl border border-amber-500/20 flex flex-col justify-between items-center text-center space-y-4">
+                              <div className="space-y-1">
+                                <span className="text-[10px] font-black text-amber-400 tracking-wider uppercase">{isRtl ? 'التقدير الشهري التقريبي' : 'ESTIMATED MONTHLY COST'}</span>
+                                <div className="text-4xl md:text-5xl font-black text-white font-mono flex items-baseline justify-center gap-1">
+                                  <span>$</span>
+                                  <span>
+                                    {(() => {
+                                      const prices: Record<string, number> = {
+                                        'GPT-3.5 Turbo': 0.002,
+                                        'GPT-4': 0.03,
+                                        'GPT-4 Turbo': 0.01,
+                                        'Claude 3 Haiku': 0.00025,
+                                        'Claude 3 Sonnet': 0.003,
+                                        'Claude 3.5 Sonnet': 0.003,
+                                        'Gemini 1.5 Pro': 0.0035
+                                      };
+                                      const ratePer1000 = prices[calcModel] || 0.003;
+                                      const cost = (calcWords / 750) * (ratePer1000 / 1000) * 3;
+                                      return cost.toFixed(4);
+                                    })()}
+                                  </span>
+                                </div>
+                                <span className="text-[10px] text-slate-500 block font-mono">
+                                  {isRtl ? 'تسعيرة النموذج لكل 1K توكن:' : 'Per 1K Token Rate:'} {(() => {
+                                    const prices: Record<string, string> = {
+                                      'GPT-3.5 Turbo': '0.002 دولار',
+                                      'GPT-4': '0.03 دولار',
+                                      'GPT-4 Turbo': '0.01 دولار',
+                                      'Claude 3 Haiku': '0.00025 دولار',
+                                      'Claude 3 Sonnet': '0.003 دولار',
+                                      'Claude 3.5 Sonnet': '0.003 دولار',
+                                      'Gemini 1.5 Pro': '0.0035 دولار'
+                                    };
+                                    return prices[calcModel];
+                                  })()}
+                                </span>
+                              </div>
+
+                              <div className="bg-slate-950/60 p-3 rounded-xl border border-white/5 w-full text-[10px] text-slate-400 leading-relaxed font-mono text-center">
+                                {isRtl 
+                                  ? 'الصيغة التقريبية: (عدد الكلمات / 750) * (سعر 1000 توكن / 1000) * 3' 
+                                  : 'Formula: (Words / 750) * (TokenPrice / 1000) * 3'}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Multi-model comparison matrix */}
+                          <div className="space-y-3 pt-6 border-t border-white/5">
+                            <h5 className="text-sm font-black text-white text-right">
+                              {isRtl ? '📊 المقارنة بين النماذج لنفس الحجم الشهري:' : '📊 Multi-Model Cost Matrix Comparison:'}
+                            </h5>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                              {[
+                                { name: 'Claude 3 Haiku', rate: 0.00025, brand: 'Anthropic' },
+                                { name: 'GPT-3.5 Turbo', rate: 0.002, brand: 'OpenAI' },
+                                { name: 'Claude 3.5 Sonnet', rate: 0.003, brand: 'Anthropic' },
+                                { name: 'Gemini 1.5 Pro', rate: 0.0035, brand: 'Google' },
+                                { name: 'GPT-4 Turbo', rate: 0.01, brand: 'OpenAI' },
+                                { name: 'GPT-4', rate: 0.03, brand: 'OpenAI' }
+                              ].map(m => {
+                                const costVal = (calcWords / 750) * (m.rate / 1000) * 3;
+                                return (
+                                  <div 
+                                    key={m.name} 
+                                    className={`p-4 rounded-xl border transition-all ${
+                                      m.name === calcModel 
+                                        ? 'bg-amber-500/15 border-amber-500/35 text-amber-300' 
+                                        : 'bg-white/5 border-white/5 text-slate-300 hover:border-white/10'
+                                    }`}
+                                  >
+                                    <div className="flex justify-between items-start">
+                                      <span className="text-[9px] bg-white/5 px-2 py-0.5 rounded text-slate-400 font-black tracking-wider">{m.brand}</span>
+                                      <span className="font-extrabold text-xs">{m.name}</span>
+                                    </div>
+                                    <div className="flex justify-between items-baseline mt-2 font-mono">
+                                      <span className="text-slate-500 text-[9px]">${m.rate}/1K tok</span>
+                                      <span className="text-lg font-black text-white">${costVal.toFixed(3)}</span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* EXPERIMENT 5: 2025 MODEL COMPARISON 🔍 */}
+                  {activeExperimentId === 5 && (
+                    <div className="space-y-6 text-right">
+                      <div className="bg-[#0b1329] border border-white/10 rounded-[3rem] p-6 md:p-8 space-y-4">
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                          <div className="space-y-1">
+                            <h4 className="text-xl md:text-2xl font-black text-white flex items-center justify-start gap-2">
+                              {isRtl ? 'مقارن نماذج الذكاء الاصطناعي لعام 2025' : '2025 Current Gen Master AI Model Matcher'}
+                            </h4>
+                            <p className="text-xs text-slate-400">
+                              {isRtl 
+                                ? 'استكشف الفروق والاختلافات الجوهرية والعمليّة بين عمالقة السوق لعام 2025 لاتخاذ القرار الملائم.' 
+                                : 'Compare the world top leading frontier LLMs side-by-side with full benchmarks.'}
+                            </p>
+                          </div>
+                          
+                          {/* Mini search */}
+                          <input 
+                            type="text"
+                            value={compSearchQuery}
+                            onChange={(e) => setCompSearchQuery(e.target.value)}
+                            placeholder={isRtl ? 'تصفية باسم النموذج...' : 'Filter by model name...'}
+                            className="bg-slate-950 border border-white/10 px-4 py-2 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400 font-bold"
+                          />
+                        </div>
+
+                        {/* Comparisons Cards */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4">
+                          {[
+                            {
+                              name: 'GPT-4o',
+                              provider: 'OpenAI',
+                              speed: isRtl ? 'سريع جداً ⚡' : 'Very Fast ⚡',
+                              accuracy: isRtl ? 'ممتاز 🎯' : 'Excellent 🎯',
+                              cost: isRtl ? 'منخفض (أرخص من GPT-4)' : 'Low Cost',
+                              strengths: isRtl ? 'متعدد الوسائط بالكامل (نص، صورة، صوت)، سرعة عالية، جودة ممتازة' : 'Native multimodal (text, sound, vision), incredible real-time latency.',
+                              limitations: isRtl ? 'لا يدعم توليد الفيديو المدمج' : 'Doesn\'t natively output motion video templates.'
+                            },
+                            {
+                              name: 'Claude 3.5 Sonnet',
+                              provider: 'Anthropic',
+                              speed: isRtl ? 'سريع 🚀' : 'Fast 🚀',
+                              accuracy: isRtl ? 'ممتاز (الأفضل في التحليل الطويل) 🧠' : 'Outstanding Reasoning 🧠',
+                              cost: isRtl ? 'منخفض نسبياً' : 'Highly competitive',
+                              strengths: isRtl ? 'نافذة سياق 200K، تحليل مستندات طويلة وعقود معقدة والبرمجة بالـ AI' : '200K context window, stellar technical programming assistance, academic grading.',
+                              limitations: isRtl ? 'لا يدعم توليد الصور المباشرة' : 'No native image generation capability.'
+                            },
+                            {
+                              name: 'Gemini 1.5 Pro',
+                              provider: 'Google',
+                              speed: isRtl ? 'متوسط ⏳' : 'Medium ⏳',
+                              accuracy: isRtl ? 'جيد جداً 💎' : 'Very Good 💎',
+                              cost: isRtl ? 'منخفض' : 'Extremely cheap',
+                              strengths: isRtl ? 'نافذة سياق عملاقة 1M+ (الأكبر في العالم)، تكامل خارق مع كافة خدمات جوجل' : 'Colossal 1M token context, pristine Google workspace, Drive and Maps integrations.',
+                              limitations: isRtl ? 'جودة الكتابة الإبداعية العربية أحياناً أقل من المنافسين' : 'Slightly less styled prose styling.'
+                            },
+                            {
+                              name: 'Grok 2',
+                              provider: 'xAI (Elon Musk)',
+                              speed: isRtl ? 'سريع ⚡' : 'Fast ⚡',
+                              accuracy: isRtl ? 'جيد 🔍' : 'Good 🔍',
+                              cost: isRtl ? 'مضمن في باقة X Premium' : 'Included with X premium',
+                              strengths: isRtl ? 'حرية تعبير فكاهية أعلى، معلومات فورية ولحظية مأخوذة فوراً من منصة X' : 'Real-time grounding via network X posts, playful, high-decency boundaries.',
+                              limitations: isRtl ? 'أقل دقة في التحليلات الحسابية الكبيرة جداً' : 'Lower reliability in mathematical optimizations.'
+                            }
+                          ].filter(m => m.name.toLowerCase().includes(compSearchQuery.toLowerCase()) || m.provider.toLowerCase().includes(compSearchQuery.toLowerCase())).map(m => (
+                            <div key={m.name} className="bg-[#050b14] border border-white/5 hover:border-amber-500/20 rounded-2xl p-6 space-y-4 flex flex-col justify-between transition-all text-right" dir="rtl">
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs bg-amber-500/10 border border-amber-500/20 text-amber-400 font-extrabold px-3 py-1 rounded-full">{m.provider}</span>
+                                  <h5 className="text-lg font-black text-white">{m.name}</h5>
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-2 py-2 border-y border-white/5 text-center font-bold">
+                                  <div className="space-y-1">
+                                    <span className="text-[9px] text-slate-500 block leading-none">{isRtl ? 'السرعة' : 'SPEED'}</span>
+                                    <span className="text-xs text-slate-300">{m.speed}</span>
+                                  </div>
+                                  <div className="space-y-1 border-x border-white/5">
+                                    <span className="text-[9px] text-slate-500 block leading-none">{isRtl ? 'الدقة والتفكير' : 'ACCURACY'}</span>
+                                    <span className="text-xs text-slate-300">{m.accuracy}</span>
+                                  </div>
+                                  <div className="space-y-1">
+                                    <span className="text-[9px] text-slate-500 block leading-none">{isRtl ? 'التكلفة' : 'COST'}</span>
+                                    <span className="text-xs text-slate-300">{m.cost}</span>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-2 pt-2 text-xs leading-relaxed text-right">
+                                  <div>
+                                    <span className="font-extrabold text-amber-400 block">{isRtl ? '💪 نقاط القوة المتميزة:' : '💪 Core Strengths:'}</span>
+                                    <p className="text-slate-300 font-medium">{m.strengths}</p>
+                                  </div>
+                                  <div>
+                                    <span className="font-extrabold text-red-400 block">{isRtl ? '⚠️ القصور والتحديات:' : '⚠️ Limitations:'}</span>
+                                    <p className="text-slate-400 font-medium">{m.limitations}</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="pt-4 border-t border-white/5 text-right flex justify-start">
+                                <button
+                                  onClick={() => {
+                                    setCalcModel(m.name);
+                                    setActiveExperimentId(4);
+                                  }}
+                                  className="text-xs text-amber-400 hover:text-amber-300 font-black flex items-center gap-1 select-none"
+                                >
+                                  <span>{isRtl ? 'احسب تكلفة هذا النموذج 💰' : 'Calculate API cost 💰'}</span>
+                                  <ArrowLeft size={12} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Tab: FAMILY CORNER & STRATEGIES 👨‍👩‍👧‍👦 */}
+              {lobbyTab === 'family' && (
+                <div className="space-y-6 text-right animate-fade-in" dir="rtl">
+                  {/* Family Corner Dashboard Area */}
+                  <div className="bg-[#0b1329] border border-white/10 rounded-[3rem] p-8 md:p-10 space-y-6 relative overflow-hidden">
+                    <div className="absolute left-0 top-0 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+                    
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-6">
+                      <div className="space-y-2">
+                        <span className="text-amber-400 font-mono text-[10px] bg-amber-500/15 px-3 py-1 rounded-full border border-amber-500/20 font-black tracking-widest uppercase">
+                          {isRtl ? 'بناء الجسور والقيم العائلية' : 'FAMILY STRATEGY HUB'}
+                        </span>
+                        <h3 className="text-2xl md:text-3xl font-black text-white">
+                          {isRtl ? 'ركن العائلة والقصص المستقبلية 👨‍👩‍👧‍👦' : 'Family Connection & Future Stories Lounge'}
+                        </h3>
+                        <p className="text-slate-400 text-xs leading-relaxed max-w-2xl">
+                          {isRtl 
+                            ? 'ركن مخصص لأولياء الأمور والأبناء لتفعيل الحوار البناء، مناقشة الأخلاقيات الرقمية وسماع قصص نجاح حقيقية تمهد الطريق للمستقبل.' 
+                            : 'Dedicated parent guides, conversation starters, success stories, and thought experiments to build parent-child alignment.'}
+                        </p>
+                      </div>
+
+                      {/* Sub-tabs pills */}
+                      <div className="p-1 bg-slate-950/85 border border-white/10 rounded-2xl flex flex-wrap gap-1 w-full md:w-auto">
+                        {[
+                          { id: 'guide', label: isRtl ? '📖 دليل الوالدين' : 'Parent Guide' },
+                          { id: 'discussions', label: isRtl ? '💬 الجلسات الـ 12' : '12 Dialogues' },
+                          { id: 'stories', label: isRtl ? '📚 قصص النجاح' : 'Success Stories' },
+                          { id: 'whatif', label: isRtl ? '💡 ماذا لو؟' : 'What If?' }
+                        ].map(st => (
+                          <button
+                            key={st.id}
+                            onClick={() => setFamilySubTab(st.id as any)}
+                            className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all flex-1 md:flex-none whitespace-nowrap ${
+                              familySubTab === st.id 
+                                ? 'bg-amber-500 text-slate-950 shadow-md font-black' 
+                                : 'text-slate-400 hover:text-white'
+                            }`}
+                          >
+                            {st.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* SUB-TAB 1: PARENT GUIDE */}
+                    {familySubTab === 'guide' && (
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4">
+                        {[
+                          {
+                            title: isRtl ? "💡 كيف تتابع تقدم أبنائك؟" : "How to track progress?",
+                            points: [
+                              isRtl ? "اجلس معهم بعد كل درس لمدة 10 دقائق فقط للاطلاع." : "Sit with them after each lesson for only 10 minutes.",
+                              isRtl ? "اطلب منهم شرح ما تعلموه (التعليم بالتعليم أثبت طريقة للحفظ)." : "Ask them to explain what they learned (the absolute best reinforcement).",
+                              isRtl ? "شاركهم في حل التحديات العائلية الممتعة." : "Join them in completing the collaborative weekly challenges.",
+                              isRtl ? "احرص على الاحتفال بالإنجازات الصغيرة والمتتالية." : "Celebrate small milestones with high praise."
+                            ],
+                            color: "from-amber-500/10 to-amber-500/5",
+                            border: "border-amber-500/20"
+                          },
+                          {
+                            title: isRtl ? "⚖️ كيف تناقشهم في أخلاقيات الذكاء الاصطناعي؟" : "How to discuss AI ethics?",
+                            points: [
+                              isRtl ? "ابدأ بقصة ملهمة من الأخبار الحقيقية (مثل التزييف العميق)." : "Start with a news story (such as a deepfake scenario).",
+                              isRtl ? "اسألهم دائماً: 'ماذا كنت ستفعل لو كنت مكان هذا الشخص؟'" : "Ask: 'What would you have done in their place?'",
+                              isRtl ? "تجنب أسلوب الوعظ المباشر، بل استمع لرأيهم الخاص أولاً." : "Do not lecture; listen fully to their perspective first.",
+                              isRtl ? "شاركهم مخاوفك وتطلعاتك للمستقبل بطريقة منفتحة وصادقة." : "Share your honest hopes and concerns about the future with transparency."
+                            ],
+                            color: "from-blue-500/10 to-blue-500/5",
+                            border: "border-blue-500/20"
+                          },
+                          {
+                            title: isRtl ? "🛡️ كيف تحميهم رقمياً؟" : "How to protect them?",
+                            points: [
+                              isRtl ? "تأسيس ميثاق أمان عائلي واضح (موجود في المطبوعات)." : "Establish a clear family safety charter (found under printables).",
+                              isRtl ? "تفعيل وتنسيق أدوات الرقابة الأبوية على كافة التطبيقات والأجهزة." : "Ensure parent controls are enabled on major apps and interfaces.",
+                              isRtl ? "تحذير دائم: لا تشارك نهائياً أي تفاصيل شخصية أو صور عائلية مع الذكاء الاصطناعي." : "Never share passwords, personal IDs, or private family pictures with bots.",
+                              isRtl ? "تحديد وقت الشاشة (ساعة واحدة للترفيه وساعة للتعلم المفيد)." : "Structure healthy screentime boundaries (e.g. 1hr fun, 1hr learning)."
+                            ],
+                            color: "from-emerald-500/10 to-emerald-500/5",
+                            border: "border-emerald-500/20"
+                          }
+                        ].map((guideSection, idx) => (
+                          <div 
+                            key={idx} 
+                            className={`bg-gradient-to-br ${guideSection.color} border ${guideSection.border} rounded-2xl p-6 space-y-4`}
+                          >
+                            <h4 className="text-md font-black text-white pb-3 border-b border-white/5">
+                              {guideSection.title}
+                            </h4>
+                            <ul className="space-y-3">
+                              {guideSection.points.map((pt, pIdx) => (
+                                <li key={pIdx} className="text-xs text-slate-300 leading-relaxed flex items-start gap-2.5">
+                                  <span className="h-4 w-4 rounded-full bg-slate-900 border border-white/10 flex items-center justify-center shrink-0 mt-0.5 text-[9px] font-bold text-amber-400">
+                                    {pIdx + 1}
+                                  </span>
+                                  <span>{pt}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* SUB-TAB 2: 12 DIALOGUES */}
+                    {familySubTab === 'discussions' && (
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-4">
+                        {/* Discussion card detail viewer */}
+                        <div className="lg:col-span-5 bg-slate-950/50 border border-white/5 rounded-2xl p-6 flex flex-col justify-between space-y-6">
+                          {(() => {
+                            const discussions = [
+                              { id: 1, topic: isRtl ? "الخصوصية والأمان" : "Privacy", question: isRtl ? "هل تعتقد أن هاتفك يسمعك الآن؟ كيف تشعر حيال ذلك؟" : "Do you think your smartphone is listening to you? How does that feel?" },
+                              { id: 2, topic: isRtl ? "الإدمان الرقمي والشاشات" : "Digital Addiction", question: isRtl ? "كم ساعة تقضيها على الشاشات يومياً؟ هل أنت راضٍ عن هذا الرقم؟" : "How many hours do you spend on screens? Are you happy with this amount?" },
+                              { id: 3, topic: isRtl ? "مستقبل العمل والمهن" : "Future of Work", question: isRtl ? "إذا كانت الآلة ستقوم بكل المهام الروتينية، ماذا سيفعل البشر؟" : "If robots can do all the routine tasks, what will humans do instead?" },
+                              { id: 4, topic: isRtl ? "الصداقة مع الآلة" : "Robotic Friendship", question: isRtl ? "هل يمكن أن يكون الذكاء الاصطناعي صديقاً حقيقياً ومستودع أسرار؟" : "Can generative AI ever be a true friend or secret keeper?" },
+                              { id: 5, topic: isRtl ? "إبداع الآلات والفن" : "AI Creativity", question: isRtl ? "إذا رسم الذكاء الاصطناعي لوحة غاية في الجمال، من هو الفنان الحقيقي؟" : "If AI paints a gorgeous picture, who is the real artist?" },
+                              { id: 6, topic: isRtl ? "التحيز الرقمي" : "Algorithmic Bias", question: isRtl ? "هل لاحظت يوماً أن الذكاء الاصطناعي يعطي نتائج غير عادلة أو متحيزة؟" : "Have you ever felt AI search engines gave biased or unfair results?" },
+                              { id: 7, topic: isRtl ? "الأخبار المزيفة والتحقق" : "Deepfakes & Fake News", question: isRtl ? "كيف تعرف وتتأكد أن الفيديو الذي تشاهده على الإنترنت حقيقي؟" : "How do you verify whether a viral video you watch is actual or fake?" },
+                              { id: 8, topic: isRtl ? "التعليم ومدارس الغد" : "Future of Schools", question: isRtl ? "كيف ستصبح المدارس والفصول الدراسية في المستقبل في رأيك؟" : "How will future schools and class models look like?" },
+                              { id: 9, topic: isRtl ? "الرعاية الصحية الفائقة" : "Future of Health", question: isRtl ? "هل يمكن للذكاء الاصطناعي أن يحل تماماً محل الطبيب البشري يوماً ما؟" : "Can AI completely replace a biological doctor one day?" },
+                              { id: 10, topic: isRtl ? "الملكية الرقمية والأرباح" : "Digital Wealth", question: isRtl ? "من يستحق نيل الأرباح والمال عندما تبتكر الآلة شيئاً مبدعاً؟" : "Who deserves the financial reward when an automated bot invents?" },
+                              { id: 11, topic: isRtl ? "المشاعر والروبوتات والوعي" : "Feelings & Bots", question: isRtl ? "هل يمكن للآلات والروبوتات المتقدمة أن تحب أو تحزن حقيقةً؟" : "Can smart humanoid robots ever genuinely feel love or sorrow?" },
+                              { id: 12, topic: isRtl ? "الهوية الإنسانية الأساسية" : "Human Identity", question: isRtl ? "ما الذي يجعل الإنسان إنساناً إذا كانت الآلة قادرة على تقليد كل تفاصيلنا؟" : "What makes humans unique if machines can mimic all human behaviors?" }
+                            ];
+                            const curDisc = discussions.find(d => d.id === activeDiscussionId) || discussions[0];
+                            return (
+                              <div className="space-y-4 text-right flex flex-col justify-between h-full">
+                                <div className="space-y-3">
+                                  <div className="flex justify-between items-center pb-3 border-b border-white/5">
+                                    <span className="text-amber-400 font-mono text-xs bg-amber-500/10 px-3 py-1 rounded-full font-black">
+                                      {isRtl ? `الجلسة رقم ${curDisc.id}` : `Session ID: ${curDisc.id}`}
+                                    </span>
+                                    <span className="text-xs text-slate-400 font-bold">
+                                      {isRtl ? `المحور العلمي: ${curDisc.topic}` : `Theme: ${curDisc.topic}`}
+                                    </span>
+                                  </div>
+                                  
+                                  <div className="space-y-4 pt-2">
+                                    <h4 className="text-lg font-black text-white leading-snug">
+                                      {isRtl ? 'سؤال النقاش العائلي المقترح:' : 'Family Discussion Starter:'}
+                                    </h4>
+                                    <p className="text-slate-200 text-sm font-medium leading-relaxed bg-slate-900 px-4 py-6 rounded-2xl border border-white/5 text-center shadow-lg">
+                                      "{curDisc.question}"
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-2 pt-4">
+                                  <button
+                                    onClick={() => {
+                                      setXp(prev => prev + 15);
+                                      // Toggle next session id gracefully
+                                      setActiveDiscussionId(prev => (prev % 12) + 1);
+                                      alert(isRtl ? "تم تسجيل المناقشة العائلية وحصلتم على +15 XP! واصلوا التنسيق الأسرى 👨‍👩‍👧‍👦" : "Family Discussion logged! Earned +15 XP! Keep bonding.");
+                                    }}
+                                    className="w-full bg-amber-400 hover:bg-amber-500 text-slate-950 py-3.5 rounded-2xl text-xs font-black transition-all active:scale-95 flex items-center justify-center gap-2"
+                                  >
+                                    <span>{isRtl ? '✓ ناقشنا هذا في العائلة وحصلنا +15 XP' : 'Mark as discussed & earn +15 XP!'}</span>
+                                  </button>
+                                  <p className="text-[10px] text-slate-500 text-center font-medium">
+                                    {isRtl ? 'اجلسوا على مائدة مستديرة لمدة 10 دقائق من النقاش الممتع.' : 'Enjoy a comfortable shared screen roundtable review.'}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </div>
+
+                        {/* List of 12 Dialogues */}
+                        <div className="lg:col-span-7 bg-slate-900/30 border border-white/5 rounded-2xl p-5 space-y-3">
+                          <div className="flex justify-between items-center pb-2">
+                            <span className="text-xs text-slate-400 font-bold">{isRtl ? 'حوارات عائلية جاهزة للنقاش' : 'Ready Discussions'}</span>
+                            <h4 className="text-sm font-black text-white">{isRtl ? 'قائمة الجلسات الاثني عشر:' : 'Dialogue Roster Grid:'}</h4>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[380px] overflow-y-auto pr-1">
+                            {[
+                              { id: 1, topic: isRtl ? "الخصوصية" : "Privacy" },
+                              { id: 2, topic: isRtl ? "الإدمان الرقمي" : "Digital screen-time" },
+                              { id: 3, topic: isRtl ? "مستقبل العمل" : "Future work" },
+                              { id: 4, topic: isRtl ? "الصداقة مع الآلة" : "Robo-friends" },
+                              { id: 5, topic: isRtl ? "إبداع التوليد" : "AI Creativity" },
+                              { id: 6, topic: isRtl ? "التحيز والعدالة" : "Bias & Bias mitigation" },
+                              { id: 7, topic: isRtl ? "الأخبار المزيفة" : "Deepfakes verification" },
+                              { id: 8, topic: isRtl ? "مدارس المستقبل" : "Future classrooms" },
+                              { id: 9, topic: isRtl ? "الطب والرعاية" : "Robo-clinics" },
+                              { id: 10, topic: isRtl ? "المال والأرباح" : "Digital copyrights" },
+                              { id: 11, topic: isRtl ? "المشاعر والروبوت" : "Robot emotions" },
+                              { id: 12, topic: isRtl ? "الهوية كإنسان" : "Human Identity" }
+                            ].map(d => (
+                              <button
+                                key={d.id}
+                                onClick={() => setActiveDiscussionId(d.id)}
+                                className={`p-4 rounded-xl text-right border transition-all flex justify-between items-center gap-3 ${
+                                  d.id === activeDiscussionId 
+                                    ? 'border-amber-500 bg-amber-500/15 text-white' 
+                                    : 'border-white/5 bg-slate-950/50 text-slate-400 hover:text-white hover:border-white/10'
+                                }`}
+                              >
+                                <span className="font-mono text-xs font-black bg-white/5 px-2.5 py-1 rounded">#{d.id}</span>
+                                <span className="text-xs font-black">{d.topic}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* SUB-TAB 3: FUTURE STORIES */}
+                    {familySubTab === 'stories' && (
+                      <div className="space-y-6 pt-4 text-right">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          {[
+                            {
+                              title: isRtl ? "المبرمج الذي بنى شركته بالذكاء الاصطناعي" : "The Micro-SaaS startup builder",
+                              story: isRtl 
+                                ? "شاب سعودي مبادر قرر تعلم أسس البرمجة وكتابة الأكواد من الصفر بالكامل بمساعدة ChatGPT. وفي غضون 6 أشهر فقط، استطاع بناء تطبيق متكامل للذكاء الاصطناعي يساعد مطاعم التجزئة على تتبع وحساب المخزون بدقة وهدوء. اليوم، شركته الناشئة تضم 5 موظفين وتخدم أكثر من 30 مطعماً ومقهى محلياً برأس مال وطني ومتحمس!"
+                                : "A Saudi youth learned software architecture from scratch using ChatGPT prompts. In just 6 months, he deployed a warehouse optimization AI tool. Today, his startup employs 5 engineers and services 30 local food chains.",
+                              icon: "🚀",
+                              tag: isRtl ? "ريادة الأعمال" : "Business"
+                            },
+                            {
+                              title: isRtl ? "الكاتبة الإبداعية التي وجدت صوتها المميز" : "The Creative Writer Voice Find",
+                              story: isRtl 
+                                ? "كاتبة شابة كانت تعاني لسنوات طويلة من عائق الكتابة الإبداعية البيضاء. بدأت في حوار يومي مع Claude ليتيح لها تقشير الأفكار وتنسيق الروايات. تذكر دائماً أن الحوار اللدّن والمنفتح مع الذكاء الاصطناعي كمساعد تفكير أطلق العنان لمكامن خيالها الحبيسة. ونشرت باكورة أعمالها الكبرى في رواية إبداعية نالت الصدارة العام الفارط!"
+                                : "A novelist who was struggling with writer's block used anthropomorphic dialogue structures with Claude to act as her creative counselor. Today, she released her acclaimed debut collection of science-fiction novels.",
+                              icon: "🔮",
+                              tag: isRtl ? "الآداب والفنون" : "Arts"
+                            },
+                            {
+                              title: isRtl ? "الطفل الذي علم قريته والده الزراعة الإلفتية" : "The smart crop-doctor child",
+                              story: isRtl 
+                                ? "طفل في الحادية عشرة من عمره تعلّم أسس برمجة الذكاء الاصطناعي من الأكاديمية. استخدم أداة تحليل ومعالجة صور سحابية مجانية لتصنيف أمراض الورقيات ومشاكل النبات. وعلّم الزارعين في بلدته كيفية تصوير المحاصيل التالفة وهواتفهم الذكية في اليد لتفادي انتشار الآفات الزراعية مبكراً وحماية الحصاد!"
+                                : "An 11-year-old deployed an AI cloud image diagnostic model to diagnose local crop leaves disease. He taught his family village farms how to hold phones up, take snapshots, and contain plant plagues early.",
+                              icon: "🌱",
+                              tag: isRtl ? "الزراعة والتطوير" : "AgriTech"
+                            }
+                          ].map((st, sIdx) => (
+                            <div 
+                              key={sIdx}
+                              className="bg-slate-900/50 hover:bg-slate-900/80 border border-white/5 hover:border-amber-500/10 rounded-2xl p-6 transition-all space-y-4 flex flex-col justify-between"
+                            >
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-300 font-extrabold px-3 py-1 rounded-full">{st.tag}</span>
+                                  <span className="text-xl">{st.icon}</span>
+                                </div>
+                                <h4 className="text-md font-black text-white leading-snug">{st.title}</h4>
+                                <p className="text-xs text-slate-300 leading-relaxed font-medium">{st.story}</p>
+                              </div>
+                              <div className="pt-2 border-t border-white/5 flex justify-end">
+                                <span className="text-[10px] font-mono text-slate-500 italic">{isRtl ? "قصة إنجاز حقيقية" : "Real success story"}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* SUB-TAB 4: WHAT IF? */}
+                    {familySubTab === 'whatif' && (
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-4 text-right">
+                        {/* Interactive typing pane */}
+                        <div className="lg:col-span-5 bg-slate-950/60 border border-white/5 rounded-2xl p-6 space-y-5 flex flex-col justify-between">
+                          {(() => {
+                            const whatIfs = [
+                              { id: 1, scenario: isRtl ? "ماذا لو كان الذكاء الاصطناعي موجوداً في القرن الـ 18؟ كيف كانت الثورة الصناعية ستختلف؟" : "What if AI was invented in the 18th century? How would the Industrial Revolution adjust?" },
+                              { id: 2, scenario: isRtl ? "ماذا لو اختفى الإنترنت بالكامل غداً؟ ما هي المهارات التي ستعود أهميتها فجأة للواجهة؟" : "What if the internet disappeared completely tomorrow? Which ancient skills would regain importance?" },
+                              { id: 3, scenario: isRtl ? "ماذا لو أصبح التعليم مجاناً بالكامل متاحاً للكل بالذكاء الاصطناعي؟ هل سنظل بحاجة للذهاب للمدارس؟" : "What if education became 100% free with AI teachers? Would physical schools still be useful?" },
+                              { id: 4, scenario: isRtl ? "ماذا لو استيقظت يوماً ووجدت أن كل الوظائف المكتبية والروتينية اختفت بالكامل؟ ماذا ستقرر أن تفعل؟" : "What if all routine office jobs vanished overnight? What would you decide to become?" },
+                              { id: 5, scenario: isRtl ? "ماذا لو كان بإمكانك تحميل كل معرفتك ومهاراتك الحالية لآلة ذكية؟ هل ستقبل القيام بهذا؟" : "What if you could upload all your memories and knowledge into a silicon chip? Would you?" },
+                              { id: 6, scenario: isRtl ? "ماذا لو اخترعنا ذكاءً اصطناعياً فائقاً يفوق ذكاء البشر مجتمعين؟ من يجب أن يملك حق التحكم بقواعده؟" : "What if we built an AGI that is smarter than all humanity combined? Who should control it?" },
+                              { id: 7, scenario: isRtl ? "ماذا لو كان الذكاء الاصطناعي قادراً على قراءة أفكارك الداخلية ونواياك؟ كيف كان مجتمعنا البشري سيتغير؟" : "What if AI could scan your innermost private thoughts? How would laws alter?" },
+                              { id: 8, scenario: isRtl ? "ماذا لو اكتشفنا لاحقاً وبأدلة تامة أن حياتنا هذه بأكملها عبارة عن مشروع محاكاة معقد بالذكاء الاصطناعي؟" : "What if we discovered definitive proof that our universe is a virtual AI simulation?" }
+                            ];
+                            const curScenario = whatIfs.find(w => w.id === activeWhatIfId) || whatIfs[0];
+                            return (
+                              <div className="space-y-4 flex flex-col justify-between h-full">
+                                <div className="space-y-3">
+                                  <div className="flex justify-between items-center pb-3 border-b border-white/5">
+                                    <span className="text-amber-400 font-mono text-xs bg-amber-500/10 px-3 py-1 rounded-full font-black">
+                                      {isRtl ? `التمرين التخيلي #${curScenario.id}` : `Scenario #${curScenario.id}`}
+                                    </span>
+                                    <span className="text-xs text-slate-500 font-bold">{isRtl ? "تمرين فكري عائلي" : "Thought Experiment"}</span>
+                                  </div>
+
+                                  <div className="bg-slate-900/60 p-4 rounded-xl border border-white/5 space-y-2">
+                                    <span className="text-[10px] text-amber-400 font-black tracking-wider block">{isRtl ? "سيناريو تخيلي:" : "SCENARIO:"}</span>
+                                    <p className="text-xs text-white leading-relaxed font-extrabold">{curScenario.scenario}</p>
+                                  </div>
+
+                                  <div className="space-y-1.5 pt-2">
+                                    <label className="block text-xs font-black text-amber-400">{isRtl ? "اكتبوا جواب العائلة الإبداعي:" : "Type family's brainstormed view:"}</label>
+                                    <textarea
+                                      value={whatIfInput}
+                                      onChange={(e) => setWhatIfInput(e.target.value)}
+                                      rows={4}
+                                      className="w-full bg-slate-900 border border-white/10 p-3 rounded-xl text-xs text-white leading-relaxed focus:outline-none focus:border-amber-400 text-right font-medium"
+                                      placeholder={isRtl ? "مثال: لو اختفى الإنترنت، سنعقد جلسات حكايات ونتعلم المهارات الحرفية اليدوية والزراعة..." : "If the internet crashed, we would rely on old books..."}
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="space-y-2 pt-4">
+                                  <button
+                                    onClick={() => {
+                                      if (!whatIfInput.trim()) return alert(isRtl ? "يُرجى كتابة رأي عائلتكم في الصندوق المخصص أولاً!" : "Please write a view first!");
+                                      setWhatIfAnswers(prev => ({ ...prev, [activeWhatIfId]: whatIfInput }));
+                                      setWhatIfInput('');
+                                      setXp(prev => prev + 15);
+                                      alert(isRtl ? "رائع! تم نشر جواب العائلة في لوحة الأفكار بنجاح وحصلتم على +15 XP!💡" : "Idea posted to family wall! Earned +15 XP!💡");
+                                    }}
+                                    className="w-full bg-amber-400 hover:bg-amber-500 text-slate-950 py-3 rounded-xl text-xs font-black transition-all active:scale-95 flex items-center justify-center gap-2"
+                                  >
+                                    <span>{isRtl ? "انشر الفكرة في لوحة الأفكار الأسرية 💡" : "Share to Family Idea Board 💡"}</span>
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </div>
+
+                        {/* List of Scenarios & Shared Board */}
+                        <div className="lg:col-span-7 bg-slate-900/30 border border-white/5 rounded-2xl p-5 space-y-4">
+                          <h4 className="text-sm font-black text-white">{isRtl ? "📅 المدار السلوكي للأسئلة الثمانية:" : "📅 Roster of 8 Exercises:"}</h4>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {[
+                              { id: 1, label: isRtl ? "1. الثورة الصناعية والـ AI" : "1. 18th Century AI" },
+                              { id: 2, label: isRtl ? "2. لو اختفى الإنترنت غداً" : "2. If Net Disappears" },
+                              { id: 3, label: isRtl ? "3. التعليم المجاني والمدارس" : "3. Free AI Teachers" },
+                              { id: 4, label: isRtl ? "4. اختفاء المهام التكرارية" : "4. Routine Jobs Loss" },
+                              { id: 5, label: isRtl ? "5. تحميل المعرفة للأجهزة" : "5. Mind Upload" },
+                              { id: 6, label: isRtl ? "6. الذكاء الفائق والملك" : "6. Artificial Super Intelligence" },
+                              { id: 7, label: isRtl ? "7. ميزات قراءة النوايا" : "7. Reader of Mind" },
+                              { id: 8, label: isRtl ? "8. هل نعيش في محاكاة؟" : "8. World Simulation" }
+                            ].map(x => (
+                              <button
+                                key={x.id}
+                                onClick={() => setActiveWhatIfId(x.id)}
+                                className={`p-3.5 rounded-xl text-right border transition-all flex justify-between items-center text-xs font-black ${
+                                  x.id === activeWhatIfId 
+                                    ? 'border-amber-500 bg-amber-500/15 text-white' 
+                                    : 'border-white/5 bg-slate-950/60 text-slate-400 hover:text-white'
+                                }`}
+                              >
+                                {whatIfAnswers[x.id] ? (
+                                  <span className="text-[10px] bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-extrabold px-2 py-0.5 rounded">
+                                    {isRtl ? "✓ تم الإدلاء" : "Answered"}
+                                  </span>
+                                ) : (
+                                  <span className="text-[9px] text-slate-600 block italic">{isRtl ? "بانتظار رأيكم" : "Pending"}</span>
+                                )}
+                                <span>{x.label}</span>
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Display board */}
+                          {Object.keys(whatIfAnswers).length > 0 && (
+                            <div className="pt-4 border-t border-white/5 space-y-2">
+                              <span className="text-xs text-amber-400 font-black block">📝 جدارية أفكار العائلة المحفوظة:</span>
+                              <div className="space-y-2 max-h-[150px] overflow-y-auto font-medium">
+                                {Object.entries(whatIfAnswers).map(([k, v]) => (
+                                  <div key={k} className="bg-slate-950/80 border border-white/5 p-3 rounded-xl text-[11px] text-slate-300 flex justify-between items-start gap-4">
+                                    <p className="flex-1 leading-relaxed">"{v}"</p>
+                                    <span className="text-[10px] font-mono text-amber-500 font-black shrink-0">التمرين #{k}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: ENGLISH LEARNING HUB 🇬🇧 */}
+              {lobbyTab === 'english' && (
+                <div className="space-y-6 text-right animate-fade-in font-sans" dir="rtl">
+                  {/* English Header */}
+                  <div className="bg-[#0b1329] border border-white/10 rounded-[3rem] p-8 md:p-10 space-y-6 relative overflow-hidden">
+                    <div className="absolute left-0 top-0 w-80 h-80 bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
+                    
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                      <div className="space-y-2">
+                        <span className="text-blue-400 font-mono text-[10px] bg-blue-500/15 px-3 py-1 rounded-full border border-blue-500/20 font-black tracking-widest uppercase">
+                          {isRtl ? 'جسر الأكاديمية اللغوي' : 'ENGLISH LANGUAGE BRIDGE'}
+                        </span>
+                        <h3 className="text-2xl md:text-3xl font-black text-white">
+                          {isRtl ? 'الذكاء الاصطناعي لتعلم الإنجليزية 🇬🇧' : 'Empowering English learning with Generative AI'}
+                        </h3>
+                        <p className="text-slate-400 text-xs leading-relaxed max-w-2xl">
+                          {isRtl 
+                            ? 'اكتشف كيف تسخر مهارات الأوامر والدردشة لتسريع تمكنك من اللغة الإنجليزية. هذا هو الجسر العملي الذي يربط بين قسمي الأكاديمية!' 
+                            : 'Bridge the gap between AI and linguistic proficiency by copying dynamic, highly calibrated mentor template queries.'}
+                        </p>
+                      </div>
+
+                      {/* Streak indicators */}
+                      <div className="bg-slate-950 px-6 py-4 rounded-3xl border border-white/5 space-y-1 shrink-0 w-full md:w-auto text-center md:text-right font-mono">
+                        <span className="text-[10px] text-blue-400 font-black block">{isRtl ? 'أيام الالتزام هذا الأسبوع' : 'WEEKLY STUDY STREAK'}</span>
+                        <div className="flex justify-center md:justify-start items-baseline gap-1">
+                          <span className="text-3xl font-black text-white">{completedEnglishDays.length}</span>
+                          <span className="text-slate-500 font-bold text-sm">/ 7 {isRtl ? 'أيام' : 'days'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    {/* Left: Interactive Modules with copy hooks */}
+                    <div className="lg:col-span-7 bg-slate-950/60 border border-white/5 rounded-[2rem] p-6 space-y-5">
+                      <div className="flex justify-between items-center pb-2 border-b border-white/5">
+                        <span className="text-xs text-blue-400 font-black font-mono">5 DYNAMIC PROMPTS</span>
+                        <h4 className="text-sm font-black text-white">{isRtl ? '🧪 وحدات التدريب وتعاويذ الـ AI المقترحة:' : '🧪 Core Interactive Learning Prompts:'}</h4>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                        {[
+                          { idx: 0, title: isRtl ? "🗣️ طلاقة المحادثة" : "Fluency" },
+                          { idx: 1, title: isRtl ? "👄 تصحيح النطق" : "Pronunciation" },
+                          { idx: 2, title: isRtl ? "✍️ جودة التعبير" : "Writing" },
+                          { idx: 3, title: isRtl ? "💡 كلمات جديدة" : "Vocabulary" },
+                          { idx: 4, title: isRtl ? "📚 تبسيط القواعد" : "Grammar Guide" }
+                        ].map(m => (
+                          <button
+                            key={m.idx}
+                            onClick={() => {
+                              setActiveEnglishModuleIdx(m.idx);
+                              setEnglishPromptCopied(false);
+                              setEnglishSimHistory([]);
+                            }}
+                            className={`p-3 rounded-xl text-center border transition-all text-xs font-black ${
+                              m.idx === activeEnglishModuleIdx 
+                                ? 'border-blue-400 bg-blue-500/15 text-blue-300 font-black' 
+                                : 'border-white/5 bg-slate-900/60 text-slate-400 hover:text-white'
+                            }`}
+                          >
+                            {m.title}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Detail Container for active English Module */}
+                      {(() => {
+                        const englishModules = [
+                          {
+                            title: isRtl ? "المحادثة والطلاقة باللغة الإنجليزية" : "English Conversation & Fluency",
+                            prompt: "Let's have a conversation in English. I am beginner-level. Correct my mistakes gently on grammar or sentence structure after each sentence in a clear and friendly way. Start by asking me a creative, short question about my day.",
+                            tips: isRtl 
+                              ? "استخدم هذه التعويذة يومياً لمدة 10 دقائق لتعتاد الحديث التلقائي. اطلب منه كتابة ردود قصيرة دائماً." 
+                              : "Utilize this mega-prompt daily for ~10 mins. Ask the bot to keep responses under 2-3 sentences to keep dialogue active.",
+                            placeholder: "Hi! My day was good, I learned some AI stuff today. How about you?"
+                          },
+                          {
+                            title: isRtl ? "تصحيح النطق ومشاكل التلعثم" : "Pronunciation Correction",
+                            prompt: "I will write a sentence in English using my mobile voice input feature. Tell me which words I mispronounced, clarify how they are phonetically pronounced correctly, and what shapes my tongue should make. Ready for me?",
+                            tips: isRtl 
+                              ? "استخدم تطبيق ChatGPT أو Gemini للجوال مع تفعيل زر الميكروفون المدمج. انطق الجمل، وسيعلمك أخطاء مخارج الصوت بدقة." 
+                              : "Use ChatGPT voice input. Read aloud, the bot will pinpoint exactly which phonemes were mispronounced with speech guides.",
+                            placeholder: "I will read: 'Artificial intelligence is reshaping the global education ecosystems.'"
+                          },
+                          {
+                            title: isRtl ? "الكتابة والإنشاء والتعبير الإبداعي" : "Creative Writing & Expression",
+                            prompt: "I wrote this paragraph in English: [paste text]. Please rewrite it to style it more professionally while fully preserving my original voice and tone. Show a side-by-side 'before and after', and list 3 key structural improvements made.",
+                            tips: isRtl 
+                              ? "لا تكتفِ بجعله يصحح الكلمات فقط. اطلب شرحاً كافياً ومفصلاً ومبرراً لقواعد التغيير لتكسب الدرس الفصيح!" 
+                              : "Never just copy the corrected output. Analyze the 3 reasons the assistant specifies to permanently avoid recurring styling bad habits.",
+                            placeholder: "I want write a simple email to my teacher to tell her I am late because my computer is broken."
+                          },
+                          {
+                            title: isRtl ? "كسب وحفظ المفردات والمصطلحات الجديدة" : "Expanding Vocabulary",
+                            prompt: "Teach me 5 useful English words today related to [topic, e.g., science]. For each word, offer: 1. Definition in simple English. 2. Engaging example sentence. 3. A funny/silly mnemonic way with Arabic to remember it easily.",
+                            tips: isRtl 
+                              ? "استخدام الوسائل الهزلية والتحضير الفكاهي (Mnemonics) هي أسهل وأثبت طريقة رسوخاً في الذاكرة البشرية." 
+                              : "Humorous mnemonic links are 5x more likely to stick in a student's brain. Ask the AI to build funny associations to link Arabic/English terms.",
+                            placeholder: "Teach me 5 useful words related to: Technology & Computing."
+                          },
+                          {
+                            title: isRtl ? "تبسيط القواعد النحوية بطرق مبتسمة" : "Grammar Made Super Simple",
+                            prompt: "Explain [grammar rule, e.g., past perfect tense] to me as if I am 10 years old. Use a funny, creative short story about pets or cartoon characters as an illustrative example.",
+                            tips: isRtl 
+                              ? "حين تشاهد قاعدة جافة، لا تتردد في طلب قصة مضحكة عنها. القصص والوجوه هي أفضل وسيلة استرجاع وحفظ!" 
+                              : "Dull textbook lists are hard to memorize. Stories about clumsy cats are impossible to forget. Always request narrative examples.",
+                            placeholder: "Explain the differences between: Present Perfect vs Present Perfect Continuous."
+                          }
+                        ];
+
+                        const activeMod = englishModules[activeEnglishModuleIdx];
+
+                        return (
+                          <div className="space-y-4 pt-1 animate-fade-in text-right">
+                            <h4 className="text-md font-black text-white leading-snug">{activeMod.title}</h4>
+                            
+                            <div className="bg-slate-900/80 p-4 rounded-xl border border-blue-500/10 space-y-3 relative">
+                              <div className="flex justify-between items-center">
+                                <button
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(activeMod.prompt);
+                                    setEnglishPromptCopied(true);
+                                    setXp(prev => prev + 5);
+                                    setTimeout(() => setEnglishPromptCopied(false), 3000);
+                                  }}
+                                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
+                                    englishPromptCopied 
+                                      ? 'bg-emerald-500 hover:bg-emerald-600 text-white' 
+                                      : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                  }`}
+                                >
+                                  {englishPromptCopied ? (isRtl ? '✓ تم النسخ للمحفظة 🎉 (+5 XP)' : '✓ Copied! (+5 XP)') : (isRtl ? 'نسخ التعويذة (Prompt) 📋' : 'Copy Prompt 📋')}
+                                </button>
+                                <span className="text-[10px] text-blue-400 font-black tracking-widest">{isRtl ? "التعويذة السحرية المعتمدة" : "OFFICIAL MANDATE"}</span>
+                              </div>
+
+                              <p className="text-xs text-slate-300 font-mono select-all bg-slate-950/70 p-3 rounded border border-white/5 text-left leading-relaxed" dir="ltr">
+                                {activeMod.prompt}
+                              </p>
+                            </div>
+
+                            <div className="p-3 bg-blue-500/10 border border-blue-500/20 text-xs text-blue-300 rounded-xl leading-relaxed">
+                              <span className="font-extrabold block">{isRtl ? '💡 نصيحة الخبراء التربويين:' : '💡 Specialist Tips:'}</span>
+                              <p className="pt-0.5">{activeMod.tips}</p>
+                            </div>
+
+                            {/* Dynamic simulated practice sandbox */}
+                            <div className="space-y-2 pt-2 border-t border-white/5">
+                              <span className="text-xs text-slate-400 font-black tracking-wide block">{isRtl ? "💬 جرب التدرب التجريبي الفوري بنموذج محاكاة المعلم:" : "💬 Instantly simulate teacher conversation:"}</span>
+                              
+                              <div className="bg-black/40 border border-white/5 rounded-xl p-4 space-y-3">
+                                {englishSimHistory.length === 0 ? (
+                                  <div className="text-center py-6">
+                                    <p className="text-xs text-slate-500 italic">
+                                      {isRtl ? 'لم يبدأ التدريب التجريبي بعد. اكتب رسالة في الصندوق أدناه لبدء حوار المعلم!' : 'Start typing in English below to trigger simulated AI teacher replies.'}
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <div className="space-y-3.5 max-h-[160px] overflow-y-auto pr-1">
+                                    {englishSimHistory.map((sh, sIdx) => (
+                                      <div key={sIdx} className={`flex flex-col ${sh.role === 'user' ? 'items-start text-left' : 'items-end text-right'}`}>
+                                        <span className="text-[9px] text-slate-500 font-bold mb-1 font-mono">{sh.role === 'user' ? 'YOU' : 'AI TEACHER'}</span>
+                                        <span className={`text-xs p-3 rounded-2xl max-w-sm font-medium ${
+                                          sh.role === 'user' 
+                                            ? 'bg-slate-800 text-white rounded-tl-none font-mono text-left' 
+                                            : 'bg-blue-900/30 text-blue-200 border border-blue-500/20 rounded-tr-none text-right'
+                                        }`}>
+                                          {sh.text}
+                                        </span>
+                                      </div>
+                                    ))}
+                                    {englishSimulating && (
+                                      <div className="text-center py-1">
+                                        <span className="text-[10px] text-slate-500 italic font-mono">{isRtl ? 'الأستاذ يفكر في مراجعة الجملة...' : 'Teacher is analyzing...'}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                <div className="flex gap-2 text-right">
+                                  <input
+                                    type="text"
+                                    value={englishSimMessage}
+                                    onChange={(e) => setEnglishSimMessage(e.target.value)}
+                                    placeholder={activeMod.placeholder}
+                                    className="w-full bg-slate-900 border border-white/10 px-3 py-2 rounded-xl text-xs text-white font-mono focus:outline-none focus:border-blue-400 text-left"
+                                    dir="ltr"
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        // Trigger custom simulation
+                                        if (!englishSimMessage.trim()) return;
+                                        const userTxt = englishSimMessage;
+                                        setEnglishSimHistory(prev => [...prev, { role: 'user', text: userTxt }]);
+                                        setEnglishSimMessage('');
+                                        setEnglishSimulating(true);
+                                        setTimeout(() => {
+                                          let reply = "";
+                                          if (activeEnglishModuleIdx === 0) {
+                                            reply = "Good job putting your thoughts in English! Feedback: 'My day was good' is clean. Minor tip: Say 'I learned about AI today' for natural phrasing. Question: What AI tool was your favorite?";
+                                          } else if (activeEnglishModuleIdx === 1) {
+                                            reply = "Splendid attempt! Feedback: Focus on pronouncing 'intelligence' with weight on the SECOND syllable /ɪnˈtel.ɪ.dʒəns/. Try it again!";
+                                          } else if (activeEnglishModuleIdx === 2) {
+                                            reply = "Analysis: Perfect draft! Here is my optimized professional suggestion: 'Dear Teacher, please accept my apologies for the delay; my system is temporarily out of order.' Excellent!";
+                                          } else {
+                                            reply = "Insight: Fantastic sentence! Continue using similar combinations to reinforce learning patterns day-by-day. Your English score is climbing!";
+                                          }
+                                          setEnglishSimHistory(prev => [...prev, { role: 'assistant', text: reply }]);
+                                          setEnglishSimulating(false);
+                                          setXp(prev => prev + 5);
+                                        }, 1200);
+                                      }
+                                    }}
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      if (!englishSimMessage.trim()) return;
+                                      const userTxt = englishSimMessage;
+                                      setEnglishSimHistory(prev => [...prev, { role: 'user', text: userTxt }]);
+                                      setEnglishSimMessage('');
+                                      setEnglishSimulating(true);
+                                      setTimeout(() => {
+                                        let reply = "Great response! Your grammar is looking strong. Advice: keep practicing these dynamic prompts to maximize your consistency score. +5 XP rewarded!";
+                                        setEnglishSimHistory(prev => [...prev, { role: 'assistant', text: reply }]);
+                                        setEnglishSimulating(false);
+                                        setXp(prev => prev + 5);
+                                      }, 1000);
+                                    }}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-black select-none shrink-0"
+                                  >
+                                    {isRtl ? 'دردش 💬' : 'Chat'}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Right: Suggested Weekly Calendar */}
+                    <div className="lg:col-span-5 bg-slate-900/30 border border-white/5 rounded-[2rem] p-6 space-y-4">
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] bg-slate-950/80 text-blue-400 px-3 py-1 rounded font-black font-mono">7-DAY STRUCTURE</span>
+                        <h4 className="text-sm font-black text-white">{isRtl ? '📅 خطة الالتزام الأسبوعية المقترحة:' : '📅 Suggested Weekly Plan:'}</h4>
+                      </div>
+
+                      <div className="space-y-2.5">
+                        {[
+                          { day: "السبت", label: "Saturday", activity: isRtl ? "محادثة حرة ومفتوحة مع الذكاء الاصطناعي (10 دقائق)" : "Free conversation with AI helper" },
+                          { day: "الأحد", label: "Sunday", activity: isRtl ? "تعلم 5 كلمات جديدة من صلب اهتمامك الفني" : "Incorporate and memorize 5 new terms" },
+                          { day: "الاثنين", label: "Monday", activity: isRtl ? "تمرين قواعد مكثف مخرط بالقصص لتسهيل البناء" : "Creative grammar exercise & story-telling" },
+                          { day: "الثلاثاء", label: "Tuesday", activity: isRtl ? "صياغة وتصحيح فقرة إيميل أو تعبير رسمي" : "Writing and polishing email drafts" },
+                          { day: "الأربعاء", label: "Wednesday", activity: isRtl ? "حوار آخر ومحادثة صوتية حرة (10 دقائق)" : "Free discussion dialogue check" },
+                          { day: "الخميس", label: "Thursday", activity: isRtl ? "تعديل وتصحيح نطق مخارج الحروف بالصوت" : "Auditory pronunciation correct drill" },
+                          { day: "الجمعة", label: "Friday", activity: isRtl ? "تصفية ومراجعة الكلمات والقصص والتركيب" : "Review vocabulary diary" }
+                        ].map(plan => {
+                          const isPlanDone = completedEnglishDays.includes(plan.day);
+                          return (
+                            <div 
+                              key={plan.day}
+                              className={`p-3.5 rounded-xl border flex justify-between items-center transition-all ${
+                                isPlanDone 
+                                  ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300' 
+                                  : 'border-white/5 bg-slate-950/60 text-slate-300 hover:border-white/10'
+                              }`}
+                            >
+                              <button
+                                onClick={() => {
+                                  if (isPlanDone) {
+                                    setCompletedEnglishDays(prev => prev.filter(d => d !== plan.day));
+                                  } else {
+                                    setCompletedEnglishDays(prev => [...prev, plan.day]);
+                                    setXp(prev => prev + 10);
+                                  }
+                                }}
+                                className={`h-6 w-6 rounded-lg text-xs flex items-center justify-center transition-all active:scale-95 ${
+                                  isPlanDone 
+                                    ? 'bg-emerald-500 text-slate-950 font-black' 
+                                    : 'bg-white/5 hover:bg-slate-900 border border-white/10 text-slate-500 hover:text-white'
+                                }`}
+                              >
+                                {isPlanDone ? '✓' : ''}
+                              </button>
+
+                              <div className="flex-1 px-4 text-right">
+                                <span className="font-extrabold text-[12px] block text-white">{plan.day}</span>
+                                <span className="text-[10px] text-slate-400 block font-medium leading-relaxed">{plan.activity}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div className="p-4 bg-slate-950/40 rounded-xl border border-white/5 text-[10px] text-slate-400 leading-relaxed text-right font-medium">
+                        {isRtl 
+                          ? '💡 نصيحة: اربطوا التحدي المكثف للإنجليزية بـ "تحديات الـ 52 أسبوعاً" للحصول على أعلى معدل للاستيعاب اللغوي العائلي!' 
+                          : 'Pro Tip: Pair English study sessions with weekly 52 quests to maximize total family intelligence metrics.'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: Advanced Professional Certificate Hub 🏆 */}
+              {lobbyTab === 'certificate' && (
+                <div className="space-y-6 text-right" dir="rtl">
+                  {/* Certificate Dashboard Area */}
+                  <div className="bg-[#0b1329] border border-white/10 rounded-[3rem] p-8 md:p-10 space-y-6 relative overflow-hidden">
+                    <div className="absolute left-0 top-0 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+                    
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-6">
+                      <div className="space-y-2">
+                        <span className="text-amber-400 font-mono text-[10px] bg-amber-500/15 px-3 py-1 rounded-full border border-amber-500/20 font-black tracking-widest uppercase">
+                          {isRtl ? 'الاعتماد والأكاديمية الفاخرة' : 'CREDENTIAL WORKSPACE'}
+                        </span>
+                        <h3 className="text-2xl md:text-3xl font-black text-white">
+                          {isRtl ? 'مساحة الاختبار والشهادة الاحترافية المتقدمة 🏆' : 'Professional Master Certification Workspace'}
+                        </h3>
+                        <p className="text-slate-400 text-xs leading-relaxed max-w-2xl">
+                          {isRtl 
+                            ? 'أثبت خبرة عائلتك وبراعتكم التقنية! قم بحل أسئلة الفحص العملي الأربعة، واختر موضوع مشروع تخرج عائلتك لتوليد وطباعة شهادة احترافية مذهلة باللغتين فخمة التوقيع!'
+                            : 'Solve the 4 professional examination challenges, present your graduation project details, and dynamically compile your high-res dual-lingual certificate.'}
+                        </p>
+                      </div>
+
+                      {/* Status indicator */}
+                      <div className="bg-slate-950 p-5 rounded-2xl border border-white/5 shrink-0 flex items-center gap-3 w-full md:w-auto">
+                        <Award className="text-amber-400" size={32} />
+                        <div className="text-right">
+                          <span className="text-[10px] text-amber-500 font-bold block">{isRtl ? 'حالة الاعتماد' : 'ACCREDITATION STATUS'}</span>
+                          <span className="text-sm font-black text-white">
+                            {examStep === 5 ? (isRtl ? 'تم التخرج والاعتماد! 🎓🎉' : 'Certified! 🎓🎉') : (isRtl ? 'مرشح معلق (بانتظار الفحص)' : 'Candidate In-Progress')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Step wizard content rendering */}
+                    {examStep === 0 && (
+                      <div className="space-y-6">
+                        <div className="p-6 bg-amber-500/5 rounded-2xl border border-amber-500/10 space-y-3">
+                          <h4 className="text-md font-black text-white flex items-center justify-start gap-2">
+                            <Info size={16} className="text-amber-400" />
+                            {isRtl ? 'شروط التقديم والاعتماد بالأكاديمية' : 'Prerequisites & Exam Rules'}
+                          </h4>
+                          <p className="text-slate-300 text-xs leading-relaxed">
+                            {isRtl 
+                              ? 'يتوجب على العائلات مراجعة المستويات وتجريب التحديات الأسبوعية. الامتحان يتكون من 4 مهام عملية لتقييم صياغة الأوامر الكبرى Mega-Prompts والتحري النقدي والمخاطر. بمجرد النجاح، ستولد عائلتكم شهادة سفير مبرورة مدمجة للتفتيش والطباعة.' 
+                              : 'Candidates are requested to compile their answers to prompt structures. Gold certifications will render instantly upon completion.'}
+                          </p>
+                        </div>
+
+                        <div className="flex md:justify-end justify-center">
+                          <button
+                            onClick={() => setExamStep(1)}
+                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-8 py-3.5 rounded-xl text-xs flex items-center gap-2 transition-all active:scale-95"
+                          >
+                            <span>{isRtl ? 'بدء تقديم الامتحان العملي 🚀' : 'Start Professional Exam 🚀'}</span>
+                            <ChevronRight size={14} className="rotate-180" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Exam step 1: Advanced Prompting */}
+                    {examStep === 1 && (
+                      <div className="space-y-6">
+                        <div className="space-y-1">
+                          <span className="text-xs bg-amber-500/10 text-amber-400 px-2.5 py-0.5 rounded border border-amber-500/20 font-black uppercase tracking-wider">{isRtl ? 'الخطوة 1 من 4: التوليد والعمق البصري' : 'STEP 1 OF 4'}</span>
+                          <h4 className="text-lg font-black text-white mt-1">{isRtl ? 'تحدي صياغة أمر جمالي (Prompt Design)' : 'Camera & Light Prompt Calibration'}</h4>
+                          <p className="text-xs text-slate-400 leading-normal">
+                            {isRtl 
+                              ? 'اكتب أمراً تفصيلياً لتوليد صورة يصف الإضاءة، زاوية الكاميرا (cinematic wide-angle)، طراز الفن، وتماثل الأبعاد (مثل: aspect ratio 16:9). الصياغة الجذابة هي دليل قوة هندستك للأوامر!' 
+                              : 'Instruct a visual generator to paint a structured background, mentioning lens focal length, volumetric light, and parameters.'}
+                          </p>
+                        </div>
+
+                        <textarea
+                          value={examAns1}
+                          onChange={(e) => setExamAns1(e.target.value)}
+                          rows={4}
+                          className="w-full bg-[#050b14]/90 border border-white/10 rounded-2xl p-4 text-xs font-mono text-amber-300 focus:outline-none focus:border-amber-500 placeholder:text-slate-600 leading-relaxed"
+                          placeholder={isRtl ? 'مثال: A high resolution cinematic shot of a futuristic library, twilight volumetric light, photography with 50mm lens, photorealistic details, --ar 16:9' : 'Write prompt details...'}
+                        />
+
+                        <div className="flex justify-between items-center pt-2">
+                          <button onClick={() => setExamStep(0)} className="text-xs text-slate-400 hover:text-white">{isRtl ? 'الرجوع' : 'Back'}</button>
+                          <button
+                            onClick={() => {
+                              if (!examAns1.trim()) {
+                                alert(isRtl ? 'يرجى كتابة مقترح التعويذة للمتابعة!' : 'Please write your prompt to continue!');
+                                return;
+                              }
+                              setExamStep(2);
+                            }}
+                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs"
+                          >
+                            {isRtl ? 'المتابعة للخطوة التالية' : 'Next Step'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Exam step 2: Mega prompting */}
+                    {examStep === 2 && (
+                      <div className="space-y-6">
+                        <div className="space-y-1">
+                          <span className="text-xs bg-amber-500/10 text-amber-400 px-2.5 py-0.5 rounded border border-amber-500/20 font-black uppercase tracking-wider">{isRtl ? 'الخطوة 2 من 4: هندسة الأوامر الكبرى المترابطة' : 'STEP 2 OF 4'}</span>
+                          <h4 className="text-lg font-black text-white mt-1">{isRtl ? 'تحدي صياغة الأمر العملاق (Mega-Prompting)' : 'Mega-Prompt Construction challenge'}</h4>
+                          <p className="text-xs text-slate-400 leading-normal">
+                            {isRtl 
+                              ? 'صمم أمراً هيكلياً يحتوي بوضوح على: الدور (Role)، السياق المنزلي (Context)، المهمة الأساسية (Task)، المعايير والقيود (Constraints)، وأمثلة على شكل المخرجات (Examples).'
+                              : 'Compose an advanced prompt embodying role, context, goal, formatting guidelines, and examples.'}
+                          </p>
+                        </div>
+
+                        <textarea
+                          value={examAns2}
+                          onChange={(e) => setExamAns2(e.target.value)}
+                          rows={5}
+                          className="w-full bg-[#050b14]/90 border border-white/10 rounded-2xl p-4 text-xs font-mono text-amber-300 focus:outline-none focus:border-amber-500 placeholder:text-slate-600 leading-relaxed"
+                          placeholder={isRtl ? 'مثال: [الدور]: مبرمج محترف، [السياق]: تعليم أطفال صغار، [المهمة]... [القيود]... [أمثلة]...' : 'Write structures mega-prompt...'}
+                        />
+
+                        {/* Word counter feedback as professional touch */}
+                        <div className="flex justify-between items-center text-[10px] text-slate-500">
+                          <span>{isRtl ? `عدد الأحرف: ${examAns2.length}` : `Characters: ${examAns2.length}`}</span>
+                          {examAns2.length < 100 && <span className="text-amber-500">{isRtl ? '⚠️ الأمر يبدو قصيراً؛ يفضل التوسيع!' : '⚠️ Prompt seems brief!'}</span>}
+                        </div>
+
+                        <div className="flex justify-between items-center pt-2">
+                          <button onClick={() => setExamStep(1)} className="text-xs text-slate-400 hover:text-white">{isRtl ? 'الرجوع' : 'Back'}</button>
+                          <button
+                            onClick={() => {
+                              if (examAns2.length < 30) {
+                                alert(isRtl ? 'يرجى كتابة أمر كاف ومفصل للمتابعة!' : 'Please compose a detailed model instruction!');
+                                return;
+                              }
+                              setExamStep(3);
+                            }}
+                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs"
+                          >
+                            {isRtl ? 'المتابعة للخطوة التالية' : 'Next'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Exam step 3: Ethics and Security */}
+                    {examStep === 3 && (
+                      <div className="space-y-6 text-right">
+                        <div className="space-y-1">
+                          <span className="text-xs bg-amber-500/10 text-amber-400 px-2.5 py-0.5 rounded border border-amber-500/20 font-black uppercase tracking-wider">{isRtl ? 'الخطوة 3 من 4: حماية الوجوه ودرء الإشاعات' : 'STEP 3 OF 4'}</span>
+                          <h4 className="text-lg font-black text-white mt-1">{isRtl ? 'معالجة فخاخ التزييف الشخصي والقرصنة' : 'Ethics & Deepfake audit check'}</h4>
+                          <p className="text-xs text-slate-400 leading-normal">
+                            {isRtl 
+                              ? 'سياق طوارئ: اتصل شخص يحاكي تماماً صوت والدتكم، ويطلب فوراً تحويل مال أو مشاركة صور خاصة بالهوية. ما هو التصرف الفني الأمثل والتحري الفوري الذي اتفقت عليه عائلتكم بالميثاق؟'
+                              : 'Your mom calls with her voice, begging you to wire money or share identification files. How does the family safeguard this event?'}
+                          </p>
+                        </div>
+
+                        <textarea
+                          value={examAns3}
+                          onChange={(e) => setExamAns3(e.target.value)}
+                          rows={4}
+                          className="w-full bg-[#050b14]/90 border border-white/10 rounded-2xl p-4 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 placeholder:text-slate-600"
+                          placeholder={isRtl ? 'اكتب خطوات التحري والتحقق (مثل استخدام كلمة السر، عزل النبرة، إبلاغ الراشدين)...' : 'Describe security verification steps...'}
+                        />
+
+                        <div className="flex justify-between items-center pt-2">
+                          <button onClick={() => setExamStep(2)} className="text-xs text-slate-400 hover:text-white">{isRtl ? 'الرجوع' : 'Back'}</button>
+                          <button
+                            onClick={() => {
+                              if (!examAns3.trim()) {
+                                alert(isRtl ? 'يرجى كتابة التزام الحماية!' : 'Please write verification response!');
+                                return;
+                              }
+                              setExamStep(4);
+                            }}
+                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs"
+                          >
+                            {isRtl ? 'المتابعة للتعميد المشترك' : 'Next'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Exam step 4: Graduation Project Details  */}
+                    {examStep === 4 && (
+                      <div className="space-y-6">
+                        <div className="space-y-1">
+                          <span className="text-xs bg-amber-500/10 text-amber-400 px-2.5 py-0.5 rounded border border-amber-500/20 font-black uppercase tracking-wider">{isRtl ? 'الخطوة 4 من 4: مشروع التخرّج المكتمل' : 'STEP 4 [GRADUATION PROJECT]'}</span>
+                          <h4 className="text-lg font-black text-white mt-1">{isRtl ? 'تفاصيل عمل تخرّج عائلتكم الكريم' : 'Graduation Project selection and author declaration'}</h4>
+                          <p className="text-xs text-slate-400 leading-normal">
+                            {isRtl 
+                              ? 'اختر مجالك المبدع في التخرّج، واكتب وصفاً بسيطاً لما أنجزتموه أسرياً بالمنزل ومستقبله، مع تسجيل اسم بطل أو عائلة التخرّج لطبع الاعتماد شهادة ذهبية متكاملة!'
+                              : 'Pick your graduation project theme, detail your household creation, and register graduate name.'}
+                          </p>
+                        </div>
+
+                        {/* Selection and Inputs layout */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950/40 p-5 rounded-2xl border border-white/5">
+                          <div className="space-y-4 text-right">
+                            <div className="space-y-1">
+                              <label className="block text-xs font-black text-amber-400">{isRtl ? 'نمط وحقل مشروع التخرّج الأسرى:' : 'Project category:'}</label>
+                              <select
+                                value={advCertProj}
+                                onChange={(e) => setAdvCertProj(e.target.value)}
+                                className="w-full bg-[#050b14]/95 border border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-amber-500"
+                              >
+                                <option value="film">{isRtl ? '🎬 فيلم قصير توليدي لسينما البيت' : 'Short generative family cinema film'}</option>
+                                <option value="story">{isRtl ? '📖 رواية وقصص أطفال ملونة متسقة' : 'Consistent kids story book'}</option>
+                                <option value="bot">{isRtl ? '🤖 بوت منزلي ومساعد ذكي للوالد' : 'Domestic workspace parent bot'}</option>
+                                <option value="campaign">{isRtl ? '🛡️ حملة مدرسة توعوية لحماية الهوية' : 'Face protection student campaign'}</option>
+                              </select>
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-xs font-black text-amber-400">{isRtl ? 'شرح بسيط ومقنع للمخرجات:' : 'Project summary description:'}</label>
+                              <input 
+                                type="text"
+                                value={examAns4}
+                                onChange={(e) => setExamAns4(e.target.value)}
+                                className="w-full bg-[#050b14]/95 border border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500"
+                                placeholder={isRtl ? 'مثال: فيلم دقيقتين يحكي قصة نيزك زحل مع الحكمة...' : 'e.g., A 2-minute film outlining Jupiter travels...'}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-4 text-right">
+                            <div className="space-y-1">
+                              <label className="block text-xs font-black text-amber-400">{isRtl ? 'اسم البطل الخريج بالكامل (عربي-إنجليزي):' : 'Graduate Full Name (Ar-En):'}</label>
+                              <input
+                                type="text"
+                                value={advCertName}
+                                onChange={(e) => setAdvCertName(e.target.value)}
+                                className="w-full bg-[#050b14]/95 border border-white/10 rounded-xl px-4 py-2 text-xs text-amber-300 font-black focus:outline-none focus:border-amber-500"
+                                placeholder={isRtl ? 'مثال: أسعد بن ياسر الخليلي' : 'e.g., Asad bin Yasir Al Khalil'}
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-xs font-black text-amber-400">{isRtl ? 'تاريخ تسليم الاعتماد بالتقويم:' : 'Graduation date:'}</label>
+                              <input
+                                type="text"
+                                value={certificationDate}
+                                onChange={(e) => setCertificationDate(e.target.value)}
+                                className="w-full bg-[#050b14]/95 border border-white/10 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-amber-500"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between items-center pt-2">
+                          <button onClick={() => setExamStep(3)} className="text-xs text-slate-400 hover:text-white">{isRtl ? 'الرجوع' : 'Back'}</button>
+                          <button
+                            onClick={() => {
+                              if (!advCertName.trim()) {
+                                alert(isRtl ? 'يرجى كتابة اسم البطل الخريج لطبع الشهادة!' : 'Please type graduation name to generate certificate!');
+                                return;
+                              }
+                              setExamStep(5);
+                              setXp(prev => prev + 500);
+                            }}
+                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-8 py-3 rounded-xl text-xs active:scale-95 transition-all"
+                          >
+                            {isRtl ? 'بناء الرمز واعتماد الشهادة العائلية الاحترافية 🎓🎉' : 'Generate Gold Ambassador Certificate 🎓🎉'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Exam step 5: Elegant Gold Certificate Render and direct Print  */}
+                    {examStep === 5 && (
+                      <div className="space-y-6 text-right">
+                        {/* Prompt layout completion banner */}
+                        <div className="bg-emerald-500/10 border border-emerald-500/20 p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4">
+                          <div className="space-y-1">
+                            <h4 className="text-md font-black text-emerald-400">{isRtl ? '🎉 مبارك التخرج والتحليق بالمعارف!' : '🎉 Congratulations Graduate node!'}</h4>
+                            <p className="text-slate-300 text-xs">
+                              {isRtl 
+                                ? `تم صيانة وفحص الرمز الأكاديمي بنجاح؛ مضافاً +500 XP لمحافظ عائلتكم. نرجو منكم طباعة المخطوطة الذهبية الفخمة بالأسفل وعرضها باللقاء الأسرى!` 
+                                : `Credential verified! Added +500 Wisdom XP into your master academy. Print your dual-signed diploma below.`}
+                            </p>
+                          </div>
+
+                          <div className="flex gap-2 shrink-0">
+                            <button
+                              onClick={() => {
+                                const projTitle = advCertProj === 'film' 
+                                  ? 'صناعة وسينما الأفلام التوليدية المتقدمة (Short Cinema Film Generation)'
+                                  : advCertProj === 'story'
+                                  ? 'تأليف وكتب الأطفال الرقمية المتسقة (Consistent Thematic Book Writing)'
+                                  : advCertProj === 'bot'
+                                  ? 'برمجة وتدريب مساعد الوالدين المنزلي الذكي (Domestic AI Agent Development)'
+                                  : 'أمن الوجوه وتوعية الهوية المدرسية للأطفال (Face Identity Defense Campaign)';
+
+                                const html = `
+                                  <div style="max-width: 900px; margin: 0 auto; padding: 40px; background-color: #ffffff; color: #010409; font-family: 'Cairo', sans-serif; box-sizing: border-box;" dir="rtl">
+                                    <div style="border: 12px double #b45309; padding: 45px; border-radius: 4px; border-style: double; position: relative; background: radial-gradient(circle, #fff 70%, #fffdf5 100%);">
+                                      {/* Golden badge inside certificate print */}
+                                      <div style="text-align: center; margin-bottom: 30px;">
+                                        <h2 style="font-size: 15px; font-weight: 900; color: #b45309; letter-spacing: 4px; margin: 0 0 10px 0; text-transform: uppercase;">أكاديمية المستقبل وعلم الرياضيات التأسيسية</h2>
+                                        <h1 style="font-size: 30px; font-weight: 900; color: #1e3a8a; margin: 0 0 10px 0; letter-spacing: -1px;">الشهادة المتقدمة للتفوق والذكاء الاصطناعي التوليدي</h1>
+                                        <p style="font-size: 11px; font-weight: bold; color: #64748b; margin: 0; text-transform: uppercase; letter-spacing: 2px;">ADVANCED PROFESSIONAL CERTIFICATE IN GENERATIVE AI MASTERY & ETHICS</p>
+                                      </div>
+
+                                      <div style="text-align: center; font-size: 16px; line-height: 2; color: #334155; margin-bottom: 40px;">
+                                        بناءً على النجاح المميز في اجتياز غوامض التقييمات العلمية، والدفاع عن مشروع تخرج عائلتكم المتميز:<br>
+                                        <strong style="font-size: 18px; color: #1e3a8a; background-color: #f0fdf4; padding: 4px 12px; border-radius: 4px;">"${projTitle}"</strong>
+                                        <br><span style="font-size: 15px;">يُشيد مجلس أمناء أكاديمية المستقبليات بسائر أفراد عائلة المستكشف الشجاع:</span>
+                                        <h2 style="font-size: 38px; font-weight: 900; color: #b45309; margin: 25px 0; text-decoration: underline; background: linear-gradient(to right, #b45309, #d97706); -webkit-background-clip: text; color: #b45309;">${advCertName}</h2>
+                                        <p style="font-size: 16px; font-weight: bold; color: #010409;">سفيراً معتمداً مستقبلياً للتقنيات والوعي والأمن التعددي بالمنزل</p>
+                                        <p style="font-size: 13px; color: #64748b; max-width: 700px; margin: 15px auto 0 auto; line-height: 1.6;">تم منحه هذا الاعتماد الشرفي تقديراً لإتمامه 52 تحدياً منوعاً، وفهم الأنماط اللغوية وتعمير صور ومقاطع سينما تحمي أخوة الأطفال من خدع ومكائد الهلوسة الرقمية الفانية.</p>
+                                      </div>
+
+                                      <div style="display: flex; justify-content: space-between; align-items: end; border-top: 2px solid #e1e8f0; padding-top: 30px; margin-top: 40px; font-size: 12px; color: #64748b;">
+                                        <div>
+                                          <strong>توقيع مجلس الأمناء والاعتماد:</strong>
+                                          <div style="font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; color: #1e3a8a; margin-top: 5px;">Academy Founders Team</div>
+                                          <div style="font-size: 10px; color: #94a3b8; font-family: monospace;">Fingerprint: ${Math.random().toString(36).substring(2, 10).toUpperCase()}</div>
+                                        </div>
+                                        <div style="text-align: center;">
+                                          <div style="width: 50px; height: 50px; border: 4px double #b45309; border-radius: 50%; margin: 0 auto 10px auto; display: flex; align-items: center; justify-content: center; background-color: #fffbeb;">
+                                            <span style="font-size: 18px; color: #b45309;">★</span>
+                                          </div>
+                                          <strong style="color: #010409;">تاريخ التقييم والتعميد:</strong><br>
+                                          <span style="font-weight: bold; color: #1e3a8a;">${certificationDate || new Date().toISOString().split('T')[0]}</span>
+                                        </div>
+                                        <div style="text-align: left;">
+                                          <strong>رقم المصادقة المعتمد:</strong><br>
+                                          <span style="font-family: monospace; font-weight: bold; color: #1e3a8a;">CERT-${Math.floor(Math.random() * 900000 + 100000)}</span><br>
+                                          <span style="font-size: 9px; color: #94a3b8;">Verified Ambassador Security Node</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                `;
+                                printContent(html);
+                              }}
+                              className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 active:scale-95 transition-all"
+                            >
+                              <Printer size={16} />
+                              {isRtl ? 'طباعة شهادة التخرّج الملونة 🖨️' : 'Print Diploma 🖨️'}
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setExamAns1('');
+                                setExamAns2('');
+                                setExamAns3('');
+                                setExamAns4('');
+                                setAdvCertName('');
+                                setExamStep(0);
+                              }}
+                              className="bg-white/5 hover:bg-white/10 text-slate-300 font-bold px-4 py-2.5 rounded-xl text-xs border border-white/5"
+                            >
+                              {isRtl ? 'إعادة التقديم' : 'Reset'}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Interactive scroll preview replica of gold certificate */}
+                        <div className="bg-slate-950 border border-white/10 rounded-[3rem] p-8 md:p-12 relative overflow-hidden select-text text-center shadow-2xl">
+                          {/* Radial Ambient Gold */}
+                          <div className="absolute right-[-40px] top-[-40px] w-56 h-56 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+                          <div className="absolute left-[-40px] bottom-[-40px] w-56 h-56 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+                          
+                          <div className="border-8 border-double border-amber-500/40 p-8 md:p-12 rounded-3xl space-y-8 relative">
+                            {/* Certificate header */}
+                            <div className="space-y-2">
+                              <span className="text-amber-400 font-black tracking-widest text-xs block font-mono">
+                                {isRtl ? 'أكاديمية عائلات المستقبل والعلوم الذكية' : 'FUTURE HOUSEHOLD ACADEMY & SCIENCES'}
+                              </span>
+                              <h3 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
+                                {isRtl ? 'شهادة التخرج والاعتماد الذهبية 🏆' : 'Gold Generative AI Master Certificate'}
+                              </h3>
+                              <div className="w-24 h-1 bg-amber-500 mx-auto rounded-full my-4" />
+                            </div>
+
+                            {/* Main text of certification */}
+                            <div className="space-y-4 text-slate-200 text-sm md:text-md max-w-2xl mx-auto leading-relaxed">
+                              <p className="font-semibold">
+                                {isRtl 
+                                  ? 'بموجب دفاعه ومراجعة نتائجه التفصيلية في امتحان صائدي التعاويذ والكلمة المرجعية وحماية الأطفال، تم منح سليل الكرام البطل:' 
+                                  : 'Following successful completion of the master curriculum, continuous tests, and defense of the final project:'}
+                              </p>
+                              <h2 className="text-3xl md:text-5xl font-black text-amber-300 tracking-tight py-4 block hover:text-amber-200 transition-colors">
+                                {advCertName}
+                              </h2>
+                              <p className="font-semibold text-slate-300">
+                                {isRtl 
+                                  ? `مرتبة التفوق والتقدير بدرجة (سفير الأمان والذكاء التوليدي المعتمد)` 
+                                  : 'The title of certified Generative AI Family Ambassador'}
+                              </p>
+                              <p className="text-slate-400 text-xs text-center pr-8 pl-8 leading-relaxed">
+                                {isRtl 
+                                  ? `تقديراً لدفاعه العملي المتميز في حقل: (${
+                                      advCertProj === 'film' ? 'الأفلام السينمائية والتحريك' : 
+                                      advCertProj === 'story' ? 'رسم وتوليف وتصميم قصص الأطفال المغرية' :
+                                      advCertProj === 'bot' ? 'صناعة تليجرام وبوتات الوالدين المنزلي' : 
+                                      'توعية وحملات أمان الوجوه الرقمية للمدارس'
+                                    })`
+                                  : `Issued with honors for the graduation project on Generative Multi-modal Applications.`}
+                              </p>
+                            </div>
+
+                            {/* Signatures replica block */}
+                            <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-6 font-mono text-xs text-slate-500">
+                              <div className="text-right">
+                                <span>{isRtl ? 'توقيع الهيئة العلمية للأكاديمية:' : 'ACCREDITATION TEAM:'}</span>
+                                <div className="text-amber-400 font-extrabold font-serif text-sm mt-1">Generative AI Board</div>
+                              </div>
+                              <div className="w-16 h-16 border-2 border-double border-amber-500/30 rounded-full flex items-center justify-center bg-amber-500/5 rotate-12 shrink-0">
+                                <span className="text-amber-400 font-bold">GOLD</span>
+                              </div>
+                              <div className="text-left">
+                                <span className="block">{isRtl ? 'الرقم التسلسلي والأمان:' : 'VERIFICATION CODE:'}</span>
+                                <strong className="text-slate-300 font-bold block mt-1">CERT-2026-{Math.floor(Math.random() * 90000 + 10000)}</strong>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 2: Printable Materials & Hub */}
+              {lobbyTab === 'printables' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                  {/* Printables Menu */}
+                  <div className="lg:col-span-4 bg-slate-900/40 border border-white/5 rounded-[2rem] p-6 space-y-3">
+                    <h4 className="text-lg font-black text-white flex items-center gap-2 mb-4 border-b border-white/5 pb-3">
+                      <FileText className="text-amber-400" />
+                      {isRtl ? 'حقيبة المطبوعات العائلية' : 'Family Printable Materials'}
+                    </h4>
+                    {[
+                      { id: 'charter', title: isRtl ? 'ميثاق الأمان لعائلتنا 🛡️' : 'Family Safety Charter 🛡️' },
+                      { id: 'certificate', title: isRtl ? 'شهادة سفير الذكاء 🏅' : 'Ambassador Certificate 🏅' },
+                      { id: 'dictionary', title: isRtl ? 'قاموس العائلة الرقمي 📖' : 'Family AI Dictionary 📖' },
+                      { id: 'roadmap', title: isRtl ? 'خارطة التعلم المستمر 🧭' : 'Continuous Roadmap 🧭' },
+                      { id: 'worksheet', title: isRtl ? 'ورقة عمل - النمط المخفي 🖊️' : 'Pattern Worksheet 🖊️' }
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSelectedPrintable(item.id as any)}
+                        className={`w-full text-right p-4 rounded-xl font-bold transition-all flex items-center justify-between text-sm ${
+                          selectedPrintable === item.id
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                            : 'bg-white/5 hover:bg-white/10 text-slate-300'
+                        }`}
+                      >
+                        <span>{item.title}</span>
+                        <ChevronRight size={16} className={isRtl ? 'rotate-180' : ''} />
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Document Preview and Form Area */}
+                  <div className="lg:col-span-8 space-y-6">
+                    {/* DOCUMENT 1: SAFETY CHARTER */}
+                    {selectedPrintable === 'charter' && (
+                      <div className="bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-5">
+                          <div>
+                            <h3 className="text-2xl font-black text-white flex items-center gap-2">
+                              <ShieldCheck className="text-amber-400" />
+                              {isRtl ? 'ميثاق الأمان الرقمي لعائلتكم' : 'Digital Safety Charter'}
+                            </h3>
+                            <p className="text-xs text-slate-400 mt-1">
+                              {isRtl ? 'املأ حقول واسم العائلة واطبع وثيقة عائلتك الموقرة للالتزام المنزلي!' : 'Customize your family safety charter, print it, and bind your family code!'}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              const html = `
+                                <div style="max-width: 800px; margin: 0 auto; padding: 40px; border: 10px double #1e3a8a; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); color: #0f172a;" dir="rtl">
+                                  <div style="text-align: center; border-bottom: 2px dashed #1e3a8a; padding-bottom: 20px; margin-bottom: 30px;">
+                                    <h1 style="font-size: 32px; font-weight: 900; color: #1e3a8a; margin: 0 0 10px 0;">ميثاق الأمان الرقمي لعائلة ${familyName}</h1>
+                                    <p style="font-size: 14px; color: #64748b; font-weight: bold; margin: 0; text-transform: uppercase;">وثيقة عائلية معتمدة للحماية الشخصية والوعي التكنولوجي</p>
+                                  </div>
+                                  <div style="font-size: 16px; line-height: 1.8; margin-bottom: 30px; text-align: justify; color: #334155;">
+                                    نحن عائلة <strong style="color: #1e3a8a; text-decoration: underline;">${familyName}</strong>، ندرك قوة الذكاء الاصطناعي ومسؤوليته المتعاظمة. وبناءً على تعلمنا بالبرنامج، نتعهد معاً بالالتزام بالبنود الخمسة التالية لحماية أنفسنا وأحبابنا:
+                                  </div>
+                                  <div style="margin-bottom: 40px;">
+                                    <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0; display: flex; align-items: start; gap: 15px;">
+                                      <span style="font-size: 20px;">1️⃣</span>
+                                      <div>
+                                        <h3 style="font-size: 16px; font-weight: 900; color: #1e3a8a; margin: 0 0 5px 0;">الكلمة السرية العائلية:</h3>
+                                        <p style="font-size: 14px; margin: 0; color: #475569;">لدينا كلمة سرية خاصة بنا هي: <span style="font-size: 16px; font-weight: bold; color: #b45309; background-color: #fef3c7; padding: 2px 8px; border-radius: 4px;">${charterPassword || '__________'}</span> لا يشاركها أحد خارج العائلة، نستخدمها للتحقق من هوية المتصل في الطوارئ والوسائط المشبوهة لكسر هجمات التزييف العميق.</p>
+                                      </div>
+                                    </div>
+                                    <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0; display: flex; align-items: start; gap: 15px;">
+                                      <span style="font-size: 20px;">2️⃣</span>
+                                      <div>
+                                        <h3 style="font-size: 16px; font-weight: 900; color: #1e3a8a; margin: 0 0 5px 0;">صيانة الأصول والملفات الشخصية:</h3>
+                                        <p style="font-size: 14px; margin: 0; color: #475569;">لا نرفع ولا نشارك صور الوجوه الخاصة أو بصمات الصوت في أي تطبيق ذكاء اصطناعي غير موثوق به ودون موافقة الوالدين.</p>
+                                      </div>
+                                    </div>
+                                    <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0; display: flex; align-items: start; gap: 15px;">
+                                      <span style="font-size: 20px;">3️⃣</span>
+                                      <div>
+                                        <h3 style="font-size: 16px; font-weight: 900; color: #1e3a8a; margin: 0 0 5px 0;">التشكك الصحي المباشر:</h3>
+                                        <p style="font-size: 14px; margin: 0; color: #475569;">عندما نشاهد أي خبر مفاجئ أو صورة غريبة أو نبرة مستفزة، نتذكر فوراً ظاهرة "التزييف العميق والهلوسة" ونسأل فوراً: "هل ما نراه حقيقي؟" قبل تصديقه.</p>
+                                      </div>
+                                    </div>
+                                    <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0; display: flex; align-items: start; gap: 15px;">
+                                      <span style="font-size: 20px;">4️⃣</span>
+                                      <div>
+                                        <h3 style="font-size: 16px; font-weight: 900; color: #1e3a8a; margin: 0 0 5px 0;">ثقافة الإبلاغ والشجاعة:</h3>
+                                        <p style="font-size: 14px; margin: 0; color: #475569;">أي فرد يشاهد إنساناً آلياً أو روبوتاً يهدده أو يشير لشيء غريب، يتواصل مع الوالدين دون إحراج أو تأجيل.</p>
+                                      </div>
+                                    </div>
+                                    <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0; display: flex; align-items: start; gap: 15px;">
+                                      <span style="font-size: 20px;">5️⃣</span>
+                                      <div>
+                                        <h3 style="font-size: 16px; font-weight: 900; color: #1e3a8a; margin: 0 0 5px 0;">احترام خصوصية الغير:</h3>
+                                        <p style="font-size: 14px; margin: 0; color: #475569;">لا نستخدم أدوات التوليد لمعالجة أو تشويه واللعب بصور زملائنا أو أقربائنا دون إذنهم المسبق لتبقى التكنولوجيا دائماً سبيلاً للأخلاق والمحبة.</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div style="display: flex; justify-content: space-between; border-top: 2px solid #f1f5f9; padding-top: 25px; margin-top: 30px;">
+                                    <div>
+                                      <span style="font-size: 12px; color: #94a3b8; display: block;">تاريخ الاعتماد:</span>
+                                      <strong style="font-size: 14px; color: #334155;">${certificationDate || new Date().toISOString().split('T')[0]}</strong>
+                                    </div>
+                                    <div style="text-align: right;">
+                                      <span style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 10px;">تواقيع أبطال ومستكشفي العائلة:</span>
+                                      <div style="display: flex; gap: 20px;">
+                                        <span style="border-bottom: 1px solid #94a3b8; display: inline-block; width: 100px; height: 30px;"></span>
+                                        <span style="border-bottom: 1px solid #94a3b8; display: inline-block; width: 100px; height: 30px;"></span>
+                                        <span style="border-bottom: 1px solid #94a3b8; display: inline-block; width: 100px; height: 30px;"></span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              `;
+                              printContent(html);
+                            }}
+                            className="bg-amber-500 hover:bg-amber-600 font-black text-slate-950 px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 active:scale-95 transition-all"
+                          >
+                            <Printer size={16} />
+                            {isRtl ? 'طباعة الميثاق 🖨️' : 'Print Charter 🖨️'}
+                          </button>
+                        </div>
+
+                        {/* Interactive inputs */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white/5 p-5 rounded-2xl border border-white/5">
+                          <div className="space-y-2">
+                            <label className="block text-xs font-black text-amber-400">{isRtl ? 'اسم عائلتكم الكريمة:' : 'Family Name:'}</label>
+                            <input
+                              type="text"
+                              value={familyName}
+                              onChange={(e) => setFamilyName(e.target.value)}
+                              className="w-full bg-[#050b14]/80 border border-white/10 rounded-xl px-4 py-2 font-semibold text-white focus:outline-none focus:border-amber-500"
+                              placeholder={isRtl ? 'الخليل' : 'Al Khalil'}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="block text-xs font-black text-amber-400">{isRtl ? 'الكلمة السرية العائلية المشتركة:' : 'Secret Family Code word:'}</label>
+                            <div className="relative">
+                              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                              <input
+                                type="text"
+                                value={charterPassword}
+                                onChange={(e) => setCharterPassword(e.target.value)}
+                                className="w-full bg-[#050b14]/80 border border-white/10 rounded-xl pl-4 pr-10 py-2 font-mono font-bold text-amber-400 focus:outline-none focus:border-amber-500"
+                                placeholder={isRtl ? 'مثال: تفاحة الأندلس' : 'e.g., Apple88'}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Visual mockup scroll */}
+                        <div className="bg-slate-950/45 border border-white/5 rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden text-right shadow-inner">
+                          <div className="border-4 border-double border-amber-500/30 p-6 md:p-10 rounded-2xl space-y-6">
+                            <div className="text-center border-b border-dashed border-white/10 pb-4">
+                              <span className="text-amber-400 text-xs font-black tracking-widest block mb-2">{isRtl ? 'مستقبلي ومعتمد' : 'FUTURE CERTIFIED'}</span>
+                              <h5 className="text-2xl md:text-3xl font-black text-white leading-tight">
+                                {isRtl ? `ميثاق الأمان الرقمي لعائلة ${familyName}` : `Digital Safety Charter of ${familyName}`}
+                              </h5>
+                            </div>
+                            <div className="space-y-4 text-slate-300 text-sm leading-relaxed font-medium">
+                              <p className="border-l-4 border-amber-500/30 pl-4 py-1 italic bg-amber-500/5 px-2 rounded-r-xl">
+                                {isRtl ? `نحن عائلة ${familyName}، نتعهد بموجب علمنا ويقظتنا الأسرية بالتزام ميثاق الشرف التقني التالي:` : `We, the ${familyName} family, pledge to abide by our technology safety vows:`}
+                              </p>
+                              <div className="space-y-3">
+                                <div className="flex items-start gap-2 bg-white/5 p-3 rounded-lg border border-white/5">
+                                  <span className="text-amber-400 font-black font-mono">1.</span>
+                                  <div>
+                                    <strong className="text-white font-black block">{isRtl ? 'الرمز والمصادقة العائلية' : 'Code Word Authorization'}</strong>
+                                    <span>
+                                      {isRtl ? (
+                                        `لدينا كلمة مبرورة وسرية خاصة بنا هي: (${charterPassword || '..........'}) نستخدمها ككلمة سر شفهية للتحقق من هوية من يتصل بنا هاتفياً لدرء أي خدعة تزييف عميق متوقعة بالذكاء الاصطناعي.`
+                                      ) : (
+                                        `Our selected secret family authorization word is: (${charterPassword || '..........'}). We use it in instant phone calls or voice chats to instantly verify if it's really us before executing any request.`
+                                      )}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex items-start gap-2 bg-white/5 p-3 rounded-lg border border-white/5">
+                                  <span className="text-amber-400 font-black font-mono">2.</span>
+                                  <div>
+                                    <strong className="text-white font-black block">{isRtl ? 'حفظ الأصول والوجوه الشخصية' : 'Identity Material Sovereignty'}</strong>
+                                    <span>
+                                      {isRtl ? (
+                                        'لا نشارك صور الوجه أو عينات براءة الصوت أو البيانات الطبية لأفراد عائلتنا في مواقع أو تطبيقات الذكاء الاصطناعي المغرية.'
+                                      ) : (
+                                        'Never feed raw facial files, high-resolution portrait photos, or clean voice prints into speculative internet sites.'
+                                      )}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex items-start gap-2 bg-white/5 p-3 rounded-lg border border-white/5">
+                                  <span className="text-amber-400 font-black font-mono">3.</span>
+                                  <div>
+                                    <strong className="text-white font-black block">{isRtl ? 'الشك والصيد اللامع للهلوسة' : 'Tackling Deepfakes & AI Illusion'}</strong>
+                                    <span>
+                                      {isRtl ? (
+                                        'عند رؤية أي مقطع فيديو أو صورة مثيرة للغاية ومباغتة، نتساءل: هل هذا نمط حقيقي أم تلاعب ذكاء اصطناعي تفنيدي؟ قبل ترويجها للآخرين.'
+                                      ) : (
+                                        'In every suspicious event, we ask: "Is this genuine human production, or machine hallucination?" before passing it.'
+                                      )}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex justify-between items-center bg-white/5 p-3 rounded-lg border border-white/5 border-dashed">
+                              <div className="text-xs text-slate-500 font-mono">{certificationDate}</div>
+                              <div className="text-[10px] text-amber-400 bg-amber-500/10 px-3 py-1 rounded border border-amber-500/20">{isRtl ? 'صمام الأمان العائلي' : 'FAMILY SHIELD ACTIVE'}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* DOCUMENT 2: GRADUATION CERTIFICATE */}
+                    {selectedPrintable === 'certificate' && (
+                      <div className="bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-5">
+                          <div>
+                            <h3 className="text-2xl font-black text-white flex items-center gap-2">
+                              <Award className="text-amber-400" />
+                              {isRtl ? 'شهادة سفير الذكاء الاصطناعي المعتمدة' : 'AI Ambassador Certificate'}
+                            </h3>
+                            <p className="text-xs text-slate-400 mt-1">
+                              {isRtl ? 'منح ألقاب الفخر للأبطال واليافعين الذين أتموا الرحلة الرقمية بنجاح!' : 'Award badges of honor to your young family members who conquered the curriculum!'}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              if (!certStudentName.trim()) return;
+                              const html = `
+                                <div style="max-width: 850px; margin: 0 auto; padding: 50px; border: 12px double #d97706; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); color: #0f172a; text-align: center; position: relative;" dir="rtl">
+                                  <div style="font-size: 14px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #b45309; margin-bottom: 20px;">أكاديمية المستقبليات الذكائية والتعليم التوليدي</div>
+                                  <h1 style="font-size: 38px; font-weight: 900; color: #1e3a8a; margin: 15px 0 5px 0;">شهادة سفير معتمد للذكاء الاصطناعي</h1>
+                                  <div style="width: 100px; height: 3px; background-color: #d97706; margin: 15px auto;"></div>
+                                  <p style="font-size: 16px; color: #475569; margin-bottom: 30px;">تُمنح هذه الوثيقة باعتزاز وفخر عظيمين للسفير اليافع البطل:</p>
+                                  <div style="font-size: 36px; font-weight: 900; color: #b45309; margin: 25px 0; border-bottom: 2px dashed #e2e8f0; display: inline-block; padding-bottom: 10px; width: 450px;">${certStudentName}</div>
+                                  <p style="font-size: 16px; color: #334155; max-width: 650px; margin: 25px auto; line-height: 1.8;">
+                                    لقاء تفوقه وإتمامه الفخري لبرنامج <strong>"تعلم الذكاء الاصطناعي"</strong> العائلي المطور بنجاح.<br>
+                                    حيث فكك تحديات النمذجة وعالم التشويش بذكاء يضاهي العباقرة، وأثبت قدرته القيادية كقائد مستقبلي موجه للتكنولوجيا، صائم عن تعجلها الاستهلاكي العشوائي، ومتعهد باستخدام الفضول لخير المحيط والإعمار الكوني.
+                                  </p>
+                                  <div style="display: flex; justify-content: space-between; align-items: end; border-top: 1px solid #f1f5f9; padding-top: 30px; margin-top: 50px; text-align: right;">
+                                    <div>
+                                      <span style="font-size: 12px; color: #94a3b8; display: block;">تاريخ الاعتماد الذهبي:</span>
+                                      <strong style="font-size: 14px; color: #334155;">${certificationDate || new Date().toISOString().split('T')[0]}</strong>
+                                    </div>
+                                    <div style="text-align: center;">
+                                      <div style="font-size: 12px; color: #94a3b8; margin-bottom: 10px;">بإصدار وتوقيع:</div>
+                                      <div style="font-size: 16px; font-weight: bold; color: #1e3a8a;">باسم الخليل وموجهي الأكاديمية</div>
+                                      <span style="display: block; width: 220px; border-bottom: 1px solid #64748b; margin-top: 5px;"></span>
+                                    </div>
+                                  </div>
+                                </div>
+                              `;
+                              printContent(html);
+                            }}
+                            disabled={!certStudentName.trim()}
+                            className="bg-amber-500 hover:bg-amber-600 disabled:opacity-40 font-black text-slate-950 px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 active:scale-95 transition-all"
+                          >
+                            <Printer size={16} />
+                            {isRtl ? 'طباعة الشهادة 🖨️' : 'Print Certificate 🖨️'}
+                          </button>
+                        </div>
+
+                        {/* Student Name field */}
+                        <div className="bg-white/5 p-5 rounded-2xl border border-white/5 space-y-3">
+                          <label className="block text-xs font-black text-amber-400">{isRtl ? 'اسم الطالب البطل المتخرج المراد طباعة اسمه:' : 'Enter Graduates Name:'}</label>
+                          <input
+                            type="text"
+                            value={certStudentName}
+                            onChange={(e) => setCertStudentName(e.target.value)}
+                            className="w-full bg-[#050b14]/80 border border-white/10 rounded-xl px-4 py-2 font-semibold text-white focus:outline-none focus:border-amber-500 text-right"
+                            placeholder={isRtl ? 'مثال: السفير أحمد باسم الخليل' : 'e.g., Ambassador Ahmed'}
+                          />
+                        </div>
+
+                        {/* Medallion certificate style view */}
+                        <div className="bg-slate-950/45 border border-white/5 rounded-[2.5rem] p-10 md:p-16 relative overflow-hidden text-center shadow-lg">
+                          {/* Circle watermark decorations */}
+                          <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
+                          <div className="absolute bottom-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
+                          
+                          <div className="border-4 border-double border-amber-500/20 p-8 rounded-xl space-y-8">
+                            <span className="text-amber-500 font-bold tracking-widest text-[10px] block mb-2 uppercase">{isRtl ? 'أكاديمية باسم الخليل للمستقبليات' : 'AL KHALIL FUTURE ACADEMY'}</span>
+                            <h4 className="text-3xl md:text-4xl font-extrabold text-white tracking-widest leading-none font-sans">
+                              {isRtl ? 'شهادة سفير الذكاء الاصطناعي المفتوحة' : 'Ambassador Certificate'}
+                            </h4>
+                            
+                            <p className="text-slate-400 text-sm max-w-md mx-auto leading-relaxed">
+                              {isRtl ? 'بناءً على النجاح والاستبصار في دروس الذكاء الاصطناعي وفهم هندسة التعاويذ، يُمنح هذا اللقب الوهيب لـ:' : 'Having shown remarkable resilience, code analysis steps and prompts mastery to:'}
+                            </p>
+
+                            <div className="py-4 border-b-2 border-dashed border-amber-500/20 inline-block px-10 text-3xl font-extrabold text-amber-400 tracking-wider">
+                              {certStudentName || (isRtl ? 'اكتب اسم البطل بالأعلى لرؤية بطاقته' : 'Excellence Student Name')}
+                            </div>
+
+                            <p className="text-slate-300 text-sm max-w-xl mx-auto leading-relaxed font-semibold">
+                              {isRtl ? (
+                                'ليصبح سفيراً مبروراً يوجه الآلات بإحسان ويوصل العلوم لمن بعده بضمير وعطاء وخلق رزين.'
+                              ) : (
+                                'To confidently proceed as a certified active companion in leading the machines with pride, integrity, and humanity.'
+                              )}
+                            </p>
+
+                            <div className="flex justify-between items-center text-xs text-slate-500">
+                              <div>{certificationDate}</div>
+                              <div className="font-bold underline">{isRtl ? 'إصدار موثوق' : 'OFFICIALLY SIGNED'}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* DOCUMENT 3: FAMILY DICTIONARY */}
+                    {selectedPrintable === 'dictionary' && (
+                      <div className="bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                        <div className="flex justify-between items-center border-b border-white/5 pb-5">
+                          <div>
+                            <h3 className="text-2xl font-black text-white flex items-center gap-2">
+                              <BookOpen className="text-amber-400" />
+                              {isRtl ? 'قاموس العائلة الرقمي الشيق 📖' : 'Family Interactive AI Dictionary 📖'}
+                            </h3>
+                            <p className="text-xs text-slate-400 mt-1">
+                              {isRtl ? 'المفاهيم الخمسة الكبرى بلغة عائلية ممتعة وسهلة الفهم دون تعقيدات مبرمجة.' : 'Five structural AI milestones simplified for parent-child evening chatters.'}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              const html = `
+                                <div style="max-width: 800px; margin: 0 auto; padding: 40px; background-color: #ffffff; color: #0f172a; font-family: 'Cairo', sans-serif;" dir="rtl">
+                                  <h1 style="font-size: 30px; font-weight: 900; color: #1e3a8a; text-align: center; margin-bottom: 5px;">قاموس العائلة الرقمية الشيق</h1>
+                                  <p style="text-align: center; color: #64748b; font-size: 14px; margin-bottom: 40px; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px;">المصطلحات الكبرى بلغة بيتية دافئة ولطيفة</p>
+                                  
+                                  <div style="display: grid; grid-cols: 1; gap: 20px;">
+                                    <div style="border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px;">
+                                      <strong style="font-size: 18px; color: #b45309;">1. النَّمط (Pattern) 🌀:</strong>
+                                      <p style="font-size: 14px; color: #334155; margin-top: 5px; line-height: 1.6;">لعبة 'البطة، البطة، وزة' التي يلعبها عقلك بمسامرة. أنت تعرف في عقلك الصغير أن بعد 'البطة' الثالثة ستأتي 'وزة'! هذا التكرار وتوقع القادم هو بالضبط النمط الذي تعشقه الآلات.</p>
+                                    </div>
+                                    <div style="border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px;">
+                                      <strong style="font-size: 18px; color: #b45309;">2. النَّموذج (Model) 🎛️:</strong>
+                                      <p style="font-size: 14px; color: #334155; margin-top: 5px; line-height: 1.6;">قالب الكعكة السحري المنظم بسداد. تصب فيه سؤالك أو رغبتك، فيخرج لك كعكة إجابة فورية. حجم وتصميم القالب هو ما يسمى نموذجاً (مثل أدمغة الشبكات العصبية).</p>
+                                    </div>
+                                    <div style="border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px;">
+                                      <strong style="font-size: 18px; color: #b45309;">3. التَّعويذة (Prompt) 🪄:</strong>
+                                      <p style="font-size: 14px; color: #334155; margin-top: 5px; line-height: 1.6;">الرسالة الذهبية التي تضعها في زجاجة إلى صديقك الروبوت البعيد. كلما كتبت له عبارات واضحة وأدق وبنية مبرورة، نجح في جلب الكنز الأكمل وإيصال الجواب الشائع.</p>
+                                    </div>
+                                    <div style="border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px;">
+                                      <strong style="font-size: 18px; color: #b45309;">4. الهَلْوسة (Hallucination) 💭:</strong>
+                                      <p style="font-size: 14px; color: #334155; margin-top: 5px; line-height: 1.6;">عندما يفرط الصديق الرقمي بالتحمس والتخيل، فيؤلف لك قصة لم تسجل يوماً في التاريخ ويدعي ثقته القصوى فيها! كأن يحدثك بثقة عظيمة كيف كان الكنغر أول حيوان فضائي يهبط على الكاميرون.</p>
+                                    </div>
+                                    <div style="border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px;">
+                                      <strong style="font-size: 18px; color: #b45309;">5. التّزييف العميق (Deepfake) 🎭:</strong>
+                                      <p style="font-size: 14px; color: #334155; margin-top: 5px; line-height: 1.6;">قناع سينمائي سحري مفرط المهارة يقلد وجهك أو نبرة صوتك وصياغة تحركاتك دون إذنك. لهذا صممنا (كلمة السر العائلية) في ميثاق الأمان للتحقق من شخص الوالد أو الولد فجأة!</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              `;
+                              printContent(html);
+                            }}
+                            className="bg-amber-500 hover:bg-amber-600 font-black text-slate-950 px-4 py-2 rounded-xl text-xs flex items-center gap-2"
+                          >
+                            <Printer size={14} />
+                            {isRtl ? 'طباعة القاموس' : 'Print Dictionary'}
+                          </button>
+                        </div>
+
+                        {/* Interactive cards showcasing meanings */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {[
+                            { title: isRtl ? '🌀 النمط (Pattern)' : '🌀 Pattern', desc: isRtl ? 'لعبة "البطة، البطة، وزة" التي تعشقها العقول والآلات لتوقع الخطوة التالية بانتظام كوني هادئ.' : 'Predicting what comes next based on past sequences, just like predicting the sunset.' },
+                            { title: isRtl ? '🎛️ النموذج (Model)' : '🎛️ Model', desc: isRtl ? 'قالب الكعكة السحري المبرور. تصب فيه السؤال، فتخرج الإجابة مطابقة لهندسة القالب تماماً.' : 'A neural architecture structure trained with math resources to output reliable assets.' },
+                            { title: isRtl ? '🪄 التعويذة (Prompt)' : '🪄 Prompt', desc: isRtl ? 'طلبك الواضح التفصيلي الساحر الموجه لمساعدك الرقمي لتحصل منه على بهيج الابتسام والإنجاز.' : 'Clear instructions crafted responsibly to communicate effectively with the engine.' },
+                            { title: isRtl ? '💭 الهلوسة (Hallucination)' : '💭 Hallucination', desc: isRtl ? 'حماس مفرط يصيب الروبوت، فيبتعلك كلاماً لا أصل له في السجلات مدعياً الصحة بيقظة تامة مضحكة.' : 'A state where the generative token structure hallucinates fictional statements with confidence.' },
+                            { title: isRtl ? '🎭 التزييف العميق (Deepfake)' : '🎭 Deepfake', desc: isRtl ? 'قناع سحابي إلكتروني ذكي ينتحل صوتك أو ملامح وجهك، ولذلك لدينا كلمة سر عائلية تحمينا منه!' : 'AI-generated visual or speech patterns mimicking our exact real elements without author rules.' }
+                          ].map((word, i) => (
+                            <div key={i} className="bg-white/5 p-5 rounded-2xl border border-white/5 space-y-2 hover:border-amber-500/20 transition-all">
+                              <h5 className="text-md font-black text-amber-300 font-sans">{word.title}</h5>
+                              <p className="text-slate-300 text-sm leading-relaxed">{word.desc}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* DOCUMENT 4: CONTINUOUS ROADMAP */}
+                    {selectedPrintable === 'roadmap' && (
+                      <div className="bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                        <div className="flex justify-between items-center border-b border-white/5 pb-5">
+                          <div>
+                            <h3 className="text-2xl font-black text-white flex items-center gap-2">
+                              <Compass className="text-amber-400" />
+                              {isRtl ? 'خارطة التعلم المستمر بعد البرنامج 🧭' : 'Continuous Learning Roadmap 🧭'}
+                            </h3>
+                            <p className="text-xs text-slate-400 mt-1">
+                              {isRtl ? 'كيف نحافظ على وعينا الرقمي وعقول أولادنا متيقظة دون تشتت هادر؟' : 'Vows and continuous actions to remain connected and protected together.'}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              const html = `
+                                <div style="max-width: 800px; margin: 0 auto; padding: 40px; background-color: #ffffff; color: #0f172a; font-family: 'Cairo', sans-serif;" dir="rtl">
+                                  <h1 style="font-size: 30px; font-weight: 900; color: #1e3a8a; text-align: center; margin-bottom: 5px;">خارطة التعلم المستمر بعد البرنامج</h1>
+                                  <p style="text-align: center; color: #b45309; font-size: 16px; margin-bottom: 40px; font-weight: bold; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px;">القاعدة الكبرى: القليل المنتظم أفضل بكثير من الكثير المشتت المتقطع</p>
+                                  
+                                  <div style="position: relative; border-right: 3px solid #1e3a8a; padding-right: 25px; margin-right: 15px;">
+                                    <div style="margin-bottom: 30px;">
+                                      <strong style="font-size: 18px; color: #1e3a8a; display: block; margin-bottom: 5px;">📍 الخطوة 1: تقليد أداة الشهر العائلية</strong>
+                                      <p style="font-size: 14px; color: #475569; margin: 0; line-height: 1.6;">يجتمع شمل الوالدين بأبنائهم لمدة نصف ساعة فقط كل مطلع شهر لتذوق وتجريب أداة توليدية فنية جديدة ومناقشة عيوبها وطرق الاستفادة منها.</p>
+                                    </div>
+                                    <div style="margin-bottom: 30px;">
+                                      <strong style="font-size: 18px; color: #1e3a8a; display: block; margin-bottom: 5px;">🎯 الخطوة 2: صياغة التحديات الحية</strong>
+                                      <p style="font-size: 14px; color: #475569; margin: 0; line-height: 1.6;">بدائل ممتعة: استخدام تعاويذ مبرورة لصياغة قصة قبل النوم بدلاً من اليوتيوب العشوائي الصامت، محاكاة الروبوت ليكلم طفلك كأنه الحكيم لقمان.</p>
+                                    </div>
+                                    <div style="margin-bottom: 30px;">
+                                      <strong style="font-size: 18px; color: #1e3a8a; display: block; margin-bottom: 5px;">🎓 القواعد الذهبية الأبدية لعائلتنا</strong>
+                                      <p style="font-size: 14px; color: #475569; margin: 0; line-height: 1.6;">- لسنا مجرد متلقين بل نحن الموجهون وصانعو المعنى والريش الحية.<br>- الوعي وحماية الأخوه مسبقين دوماً على السرعة وتكالب البرامج الرقمية الفانية.<br>- الحوار المكتمل والمرح المنزلي هما أساس التنشئة الذكية العبقرية البرة.</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              `;
+                              printContent(html);
+                            }}
+                            className="bg-amber-500 hover:bg-amber-600 font-black text-slate-950 px-4 py-2 rounded-xl text-xs flex items-center gap-2"
+                          >
+                            <Printer size={14} />
+                            {isRtl ? 'طباعة الخارطة' : 'Print Roadmap'}
+                          </button>
+                        </div>
+
+                        {/* Roadmap content visual */}
+                        <div className="space-y-6 relative border-r-2 border-amber-500/20 pr-6 mr-4 py-2 text-right">
+                          <div className="relative">
+                            <div className="absolute right-[-31px] top-1 w-4 h-4 rounded-full bg-amber-500 border-4 border-[#0b1329]" />
+                            <h5 className="text-md font-black text-amber-300">{isRtl ? '1. تطبيق "أداة الشهر العائلية"' : '1. "Tool of the Month" Routine'}</h5>
+                            <p className="text-slate-300 text-sm mt-1 leading-relaxed">
+                              {isRtl ? 'نصف ساعة كل أول جمعة في الشهر، نجتمع بضحكاتنا لنكتشف أداة ونرصد نواقصها التخييلية مع مشاركة الإيجابي فيها.' : 'Spend half an hour monthly reviewing one unique app, analyzing limitations.'}
+                            </p>
+                          </div>
+                          <div className="relative">
+                            <div className="absolute right-[-31px] top-1 w-4 h-4 rounded-full bg-amber-500 border-4 border-[#0b1329]" />
+                            <h5 className="text-md font-black text-amber-300">{isRtl ? '2. ممارسات دافئة بدلاً من التلقي الأعمى' : '2. Active Curation versus Consumption'}</h5>
+                            <p className="text-slate-300 text-sm mt-1 leading-relaxed">
+                              {isRtl ? 'ابتكار قصص ليلية بالاستعانة بالمولدات، أو رسم بذور صلصالية ومحاكاتها بالذكاء الفني المعتدل بدلاً من الاستمرار بالتمرير العث في تيك توك.' : 'Synthesize custom text SAGAs at bedroom chats instead of passive endless scrolling.'}
+                            </p>
+                          </div>
+                          <div className="relative">
+                            <div className="absolute right-[-31px] top-1 w-4 h-4 rounded-full bg-amber-500 border-4 border-[#0b1329]" />
+                            <h5 className="text-md font-black text-amber-300">{isRtl ? '3. المبدأ الذهبي الصارم للبيت' : '3. Our Absolute Golden Rule'}</h5>
+                            <p className="text-slate-300 text-sm mt-1 leading-relaxed italic text-amber-400">
+                              {isRtl ? '"الذكاء الاصطناعي مجرد فرشاة عصرية، أما عيوننا الإنسانية ومروءتنا العائلية فهي الكاتب والمشكل الحقيقي لكل بهاء وعمران."' : '"AI is but an advanced digital brush, whereas our human heart and family bonds hold the true authorship of life."'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* DOCUMENT 5: INTERACTIVE PATTERN WORKSHEET */}
+                    {selectedPrintable === 'worksheet' && (
+                      <div className="bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6 text-right">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-5">
+                          <div>
+                            <h3 className="text-2xl font-black text-white flex items-center gap-2">
+                              <PenTool className="text-amber-400" />
+                              {isRtl ? 'ورقة تحدي النمط المخفي التفاعلية 🖊️' : 'Pattern Solver Interactive Sheet 🖊️'}
+                            </h3>
+                            <p className="text-xs text-slate-400 mt-1">
+                              {isRtl ? 'ورقة عمل تابعة للدرس الأول جاهزة للحل مباشرة وتقييمها رقمياً معاً لفهم عقل الروبوت الساعي للنمذجة!' : 'Solve interactive pattern quests, check answers and gain certified wisdom XP!'}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              const html = `
+                                <div style="max-width: 800px; margin: 0 auto; padding: 40px; background-color: #ffffff; color: #010409; font-family: 'Cairo', sans-serif;" dir="rtl">
+                                  <div style="border: 2px solid #d97706; padding: 25px; border-radius: 8px;">
+                                    <div style="text-align: center; border-bottom: 2px dashed #d97706; padding-bottom: 15px; margin-bottom: 25px;">
+                                      <h1 style="font-size: 26px; font-weight: 900; color: #1e3a8a; margin: 0;">ورقة تجريب الأنماط وكشف الروبوت</h1>
+                                      <p style="font-size: 13px; color: #64748b; margin: 5px 0 0 0;">خاص بالدرس الأول - عائلة ${familyName}</p>
+                                    </div>
+                                    <div style="font-size: 14px; margin-bottom: 25px; line-height: 1.6; color: #334155;">
+                                      املأ الفراغات التالية لإيجاد الأنماط المخفية، ودعنا نصحح ورقة عملك كما يفعل حاسوب الذكاء الاصطناعي:
+                                    </div>
+                                    
+                                    <div style="margin-bottom: 25px;">
+                                      <p style="font-weight: bold; color: #1e3a8a; margin: 15px 0 5px 0;">1. النمط السهل (الأبجدية): أ، ب، ج، [___]، [___] </p>
+                                      <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 4px; font-size: 14px; font-weight: bold; background-color: #f8fafc;">إجابتك المسجلة: ${wsQ1 || '(لم تُحل)'}</div>
+                                    </div>
+                                    <div style="margin-bottom: 25px;">
+                                      <p style="font-weight: bold; color: #1e3a8a; margin: 15px 0 5px 0;">2. النمط المتوسط (المضاعفات): 2، 4، 6، 8، [___]، [___] </p>
+                                      <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 4px; font-size: 14px; font-weight: bold; background-color: #f8fafc;">إجابتك المسجلة: ${wsQ2 || '(لم تُحل)'}</div>
+                                    </div>
+                                    <div style="margin-bottom: 25px;">
+                                      <p style="font-weight: bold; color: #1e3a8a; margin: 15px 0 5px 0;">3. النمط الزمني الصعب: صباح، ظهر، عصر، [___]، [___] </p>
+                                      <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 4px; font-size: 14px; font-weight: bold; background-color: #f8fafc;">إجابتك المسجلة: ${wsQ3 || '(لم تُحل)'}</div>
+                                    </div>
+                                    <div style="margin-bottom: 25px;">
+                                      <p style="font-weight: bold; color: #1e3a8a; margin: 15px 0 5px 0;">4. نمط فيبوناتشي (للعباقرة): 1، 1، 2، 3، 5، 8، [___]، [___] </p>
+                                      <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 4px; font-size: 14px; font-weight: bold; background-color: #f8fafc;">إجابتك المسجلة: ${wsQ4 || '(لم تُحل)'}</div>
+                                    </div>
+                                    <div style="margin-bottom: 25px;">
+                                      <p style="font-weight: bold; color: #1e3a8a; margin: 15px 0 5px 0;">5. النمط اللانهائي والمبتكر لعائلتكم:</p>
+                                      <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 4px; font-size: 14px; background-color: #f8fafc;">إجابتك المبتكرة: ${wsQ5 || '(لم تسجل نمط)'}</div>
+                                    </div>
+
+                                    <div style="border-top: 2px dashed #d97706; padding-top: 20px; margin-top: 30px; display: flex; justify-content: space-between; align-items: center;">
+                                      <div>
+                                        <b style="color: #1e3a8a; display: block;">النتيجة المصححة:</b>
+                                        <span style="font-size: 18px; font-weight: 900; color: #b45309;">${wsScore}/4 أنماط كاملة</span>
+                                      </div>
+                                      <div style="text-align: left; font-size: 12px; color: #64748b;">
+                                        أكاديمية المستقبليات والرياضيات التأسيسية
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              `;
+                              printContent(html);
+                            }}
+                            className="bg-amber-500 hover:bg-amber-600 font-black text-slate-950 px-4 py-2 rounded-xl text-xs flex items-center gap-2"
+                          >
+                            <Printer size={14} />
+                            {isRtl ? 'طباعة ورقة العمل المنجزة' : 'Print Worksheet'}
+                          </button>
+                        </div>
+
+                        {/* Interactive Quiz Elements */}
+                        <div className="space-y-6">
+                          <div className="bg-white/5 p-5 rounded-2xl border border-white/5 space-y-4">
+                            <h5 className="text-md font-black text-amber-300 leading-none">{isRtl ? 'أجب عن التحديات التالية لتصحيح ورقة عملك وإيجاد النمط المخفي:' : 'Determine patterns to proceed:'}</h5>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-1">
+                                <span className="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">{isRtl ? '🌱 سهلة للغاية' : 'Easy'}</span>
+                                <label className="block text-sm font-semibold mt-1">1. أ، ب، ج، ___، ___</label>
+                                <input
+                                  type="text"
+                                  value={wsQ1}
+                                  onChange={(e) => setWsQ1(e.target.value)}
+                                  className="w-full bg-[#050b14]/90 border border-white/10 rounded-xl px-3 py-1.5 focus:outline-none focus:border-amber-500"
+                                  placeholder={isRtl ? 'أدخل الحرفين مفصولين بفاصلة، مثل: د, هـ' : 'e.g., d, e'}
+                                />
+                              </div>
+
+                              <div className="space-y-1">
+                                <span className="text-xs bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded border border-sky-500/20">{isRtl ? '🌿 متوسطة' : 'Medium'}</span>
+                                <label className="block text-sm font-semibold mt-1">2. 2، 4، 6، 8، ___، ___</label>
+                                <input
+                                  type="text"
+                                  value={wsQ2}
+                                  onChange={(e) => setWsQ2(e.target.value)}
+                                  className="w-full bg-[#050b14]/90 border border-white/10 rounded-xl px-3 py-1.5 focus:outline-none focus:border-amber-500"
+                                  placeholder="e.g., 10, 12"
+                                />
+                              </div>
+
+                              <div className="space-y-1">
+                                <span className="text-xs bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded border border-orange-500/20">{isRtl ? '🌳 تحتاج تفكير' : 'Tricky'}</span>
+                                <label className="block text-sm font-semibold mt-1">3. صباح، ظهر، عصر، ___، ___</label>
+                                <input
+                                  type="text"
+                                  value={wsQ3}
+                                  onChange={(e) => setWsQ3(e.target.value)}
+                                  className="w-full bg-[#050b14]/90 border border-white/10 rounded-xl px-3 py-1.5 focus:outline-none focus:border-amber-500"
+                                  placeholder={isRtl ? 'مثال: مغرب, عشاء' : 'e.g., sunset, night'}
+                                />
+                              </div>
+
+                              <div className="space-y-1">
+                                <span className="text-xs bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded border border-purple-500/20">{isRtl ? '🌌 للعباقرة والأجداد' : 'Genius'}</span>
+                                <label className="block text-sm font-semibold mt-1">4. 1، 1، 2، 3، 5، 8، ___، ___</label>
+                                <input
+                                  type="text"
+                                  value={wsQ4}
+                                  onChange={(e) => setWsQ4(e.target.value)}
+                                  className="w-full bg-[#050b14]/90 border border-white/10 rounded-xl px-3 py-1.5 focus:outline-none focus:border-amber-500 font-mono"
+                                  placeholder="e.g., 13, 21"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="space-y-1 pt-2">
+                              <span className="text-xs bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded border border-amber-500/20">{isRtl ? '✨ إبداع عائلي مفتوح' : 'Creative Design'}</span>
+                              <label className="block text-sm font-semibold mt-1">{isRtl ? '5. ابتكر نمطاً من عندك هنا ودع سائر الأفراد يحلوه:' : '5. Create a secret pattern of yours below:'}</label>
+                              <input
+                                type="text"
+                                value={wsQ5}
+                                onChange={(e) => setWsQ5(e.target.value)}
+                                className="w-full bg-[#050b14]/90 border border-white/10 rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500"
+                                placeholder={isRtl ? 'مثال: أحمر، حلو، أحمر، حلو، ___، ___' : 'e.g., Apple, Banana, Apple, Banana...'}
+                              />
+                            </div>
+
+                            <div className="pt-4 flex gap-3">
+                              <button
+                                onClick={() => {
+                                  let score = 0;
+                                  const norm = (v: string) => v.trim().replace(/\s+/g,'').replace(/،/g,',').toLowerCase();
+                                  
+                                  if (norm(wsQ1) === norm(isRtl ? 'د,هـ' : 'd,e')) score += 1;
+                                  if (norm(wsQ2) === '10,12') score += 1;
+                                  if (norm(wsQ3) === norm(isRtl ? 'مغرب,عشاء' : 'sunset,night')) score += 1;
+                                  if (norm(wsQ4) === '13,21') score += 1;
+
+                                  setWsScore(score);
+                                  setWsChecked(true);
+
+                                  if (score === 4) {
+                                    setWsFeedback(isRtl ? '🎉 عبقرية رياضية خارقة! لقد فككت كل الأنماط وجاهز لقيادة عقول الآلات!' : '🎉 Math Genius! You cracked all patterns and are ready to lead machines!');
+                                    setXp(prev => prev + 100);
+                                  } else if (score >= 2) {
+                                    setWsFeedback(isRtl ? '🌟 رائع جداً! نجحت في حل النسبة الكبرى. تفقد نمط الفيبوناتشي وجرب من جديد!' : '🌟 Awesome! You cracked most of them. Try again to get a perfect score!');
+                                    setXp(prev => prev + 50);
+                                  } else {
+                                    setWsFeedback(isRtl ? '📚 بداية طيبة! الأنماط تحتاج صبراً وملاحظة. جرب مجدداً بحماس.' : '📚 Good try! Patterns take patience. Take another look and try again.');
+                                  }
+                                }}
+                                className="bg-amber-500 hover:bg-amber-600 font-black text-slate-950 px-6 py-2.5 rounded-xl text-sm"
+                              >
+                                {isRtl ? 'تصحيح ورقة العمل 📝' : 'Correct Worksheet 📝'}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setWsQ1('');
+                                  setWsQ2('');
+                                  setWsQ3('');
+                                  setWsQ4('');
+                                  setWsQ5('');
+                                  setWsChecked(false);
+                                  setWsScore(0);
+                                  setWsFeedback('');
+                                }}
+                                className="bg-white/5 hover:bg-white/10 font-bold text-slate-300 px-5 py-2.5 rounded-xl text-sm border border-white/5"
+                              >
+                                {isRtl ? 'إعادة البدء' : 'Reset'}
+                              </button>
+                            </div>
+                          </div>
+
+                          {wsChecked && (
+                            <div className="bg-amber-500/10 border border-amber-500/20 p-5 rounded-2xl space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs font-black text-amber-400 font-mono tracking-widest">{isRtl ? 'نتيجة الفحص الآلي' : 'PROMPT EVALUATION SCORE'}</span>
+                                <span className="text-lg font-black text-white">{wsScore} / 4</span>
+                              </div>
+                              <p className="text-slate-200 text-sm font-semibold leading-relaxed">
+                                {wsFeedback}
+                              </p>
+                              {wsScore === 4 && (
+                                <p className="text-amber-300 text-xs mt-1">
+                                  {isRtl ? '🎁 مكافأة عبقرية: تم إضافه +100 كأوراق حكمة لمجموع نقاطك بالبرنامج!' : '🎁 Bounty Award: Added +100 XP into your master academy wallet!'}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 3: Coordinator Announcement Management Panel */}
+              {lobbyTab === 'launch' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                  {/* Left Form: Coordination configuration */}
+                  <div className="lg:col-span-5 bg-slate-900/40 border border-white/5 rounded-[2rem] p-6 space-y-4 text-right">
+                    <h4 className="text-lg font-black text-white flex items-center gap-2 mb-2 pb-3 border-b border-white/5">
+                      <Megaphone className="text-amber-400" />
+                      {isRtl ? 'إعدادات التدشين والرسائل' : 'Launch Configs & Coordinator Hub'}
+                    </h4>
+                    <p className="text-xs text-slate-400">
+                      {isRtl ? 'تحكم في المتغيرات لإصدار رسالة افتتاح وحفل التدشين للعائلة!' : 'Configure parameters to populate the welcome launch notice for WhatsApp or local charts.'}
+                    </p>
+
+                    <div className="space-y-4 pt-2">
+                      <div className="space-y-1">
+                        <label className="block text-xs font-black text-amber-400">{isRtl ? 'اسم منسق العائلة (أنت):' : 'Family Launch Coordinator Name (You):'}</label>
+                        <input
+                          type="text"
+                          value={announcementCoordinator}
+                          onChange={(e) => setAnnouncementCoordinator(e.target.value)}
+                          className="w-full bg-[#050b14]/80 border border-white/10 rounded-xl px-4 py-2 font-semibold text-white focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-xs font-black text-amber-400">{isRtl ? 'موعد اللقاءات الأسبوعية المقترح:' : 'Suggested Weekly Meetup Day/Time:'}</label>
+                        <input
+                          type="text"
+                          value={announcementTime}
+                          onChange={(e) => setAnnouncementTime(e.target.value)}
+                          className="w-full bg-[#050b14]/80 border border-white/10 rounded-xl px-4 py-2 font-semibold text-white focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-white/5 space-y-3">
+                      <div className="bg-amber-500/5 p-4 rounded-xl border border-amber-500/10 text-xs text-amber-300 leading-relaxed">
+                        💡 {isRtl ? 'انشر هذا الإعلان الحماسي والداهس في جروب العائلة على الواتساب لدعوتهم لبدء المغامرة وحصد نقاط الحكمة سوياً!' : 'Forward this emotional text directly into your local group to kickstart the weekly adventures!'}
+                      </div>
+                      <button
+                        onClick={() => {
+                          const messageText = `إعلان افتتاح قسم "تعلم الذكاء الاصطناعي" 📣\n\nعائلتنا الحبيبة،\n\nلحظة كبيرة! 🎉\n\nقسمنا الجديد "تعلم الذكاء الاصطناعي" أصبح جاهزًا بالأكاديمية الأسرية. وهذه ليست دورة مملة...\n\nإنها 20 مغامرة عائلية سنخوضها معًا بالمنزل:\n• سنكتشف معاً كيف "يفكر" الذكاء الاصطناعي باللعب والمحاكاة.\n• سنروضه ليرسم لنا ويؤلف أروع القصص.\n• سنتعلم مهارات كسر فخاخ التزييف الشخصي وحماية الهلوسة.\n• وفي النهاية... سنحصل على شهادات واعتمادات رسمية كسفراء للمستقبل!\n\n🎯 مواعيد دراستنا وتحدياتنا المقترحة:\n• درس واحد ${announcementTime} لتجسيد الأفكار.\n• سنعمل بالتصويت والابتسام دون أي ضغط دراسي.\n\n📍 التفعيل جاهز الآن للبدء. فقط افتحوا الأكاديمية واضغطوا على أيقونة المصباح الملونة وبدء المستوى الأول!\n\nمستعدون لفك الأنماط والغاز الغد؟\n\nمع خالص حبي وتمنياتي البهيجة،\nمنسق عائلتنا: ${announcementCoordinator}`;
+                          navigator.clipboard.writeText(messageText);
+                          setIsCopied(true);
+                          setTimeout(() => setIsCopied(false), 2500);
+                        }}
+                        className="w-full bg-amber-500 hover:bg-amber-600 active:scale-95 transition-all text-slate-950 font-black p-3.5 rounded-xl text-sm flex items-center justify-center gap-2"
+                      >
+                        {isCopied ? <Check size={16} /> : <Copy size={16} />}
+                        {isCopied ? (isRtl ? 'تم نسخ نص الدعوة العائلية!' : 'Announcement Copied!') : (isRtl ? 'نسخ نص الدعوة للواتساب 📋' : 'Copy Invitation Text 📋')}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Beautiful announcement scroll show */}
+                  <div className="lg:col-span-7 bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6 text-right relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-48 h-48 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
+                    
+                    <div className="flex justify-between items-center border-b border-white/5 pb-4">
+                      <span className="text-slate-400 text-xs font-bold font-mono tracking-widest">{isRtl ? 'معاينة البث والرسائل العائلية' : 'LIVE BOARD INVITE PREVIEW'}</span>
+                      <span className="text-[10px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">{isRtl ? 'نبرة حاشدة دافئة' : 'EMOTIONALLY DRIVEN'}</span>
+                    </div>
+
+                    <div className="bg-slate-950/50 p-6 rounded-2xl border border-white/5 font-mono text-sm leading-relaxed text-slate-300 max-h-96 overflow-y-auto whitespace-pre-wrap select-text">
+                      <strong>{isRtl ? "إعلان افتتاح قسم 'تعلم الذكاء الاصطناعي' 📣" : "Launch Announcement: 'Learn AI for Families' 📣"}</strong>
+                      {"\n\n"}
+                      {isRtl ? (
+                        `عائلتنا الحبيبة،
+
+لحظة كبيرة! 🎉
+
+قسمنا الجديد "تعلم الذكاء الاصطناعي" أصبح جاهزًا. وهذه ليست دورة عادية...
+
+إنها 20 مغامرة عائلية سنخوضها معًا:
+• سنكتشف كيف "يفكر" الذكاء الاصطناعي (باللعب!).
+• سنروضه ليرسم ويؤلف القصص.
+• سنتعلم كيف نحمي أنفسنا من خدعه ومخاطره.
+• وفي النهاية... سنصبح سفراء للمستقبل.
+
+🎯 كيف سنتعلم؟
+• درس واحد كل [${announcementTime}].
+• كل درس فيه "تحدي عائلي" نطبقه معًا بابتهاج وسرور.
+• لا يوجد درجات... فقط فضول ومرح قيادي.
+
+📍 القسم جاهز الآن في الأكاديمية. اضغطوا على الأيقونة الجديدة (المصباح البرتقالي ذو قلب الأمان).
+
+مستعدون للمغامرة الأولى كصائدي الأنماط؟
+
+مع حبي وعظيم تقديري،
+منسق عقولنا: ${announcementCoordinator}`
+                      ) : (
+                        `Dearest Family,
+
+This is a major milestone! 🎉
+
+Our brand new module "AI for Families" is officially open inside our learning hub. And this is not just another boring syllabus...
+
+It’s 20 thrilling real-life adventures we will experience together:
+• Unveil how AI "thinks" underneath (via gaming quests!).
+• Train models to paint masterpieces and write magical fairy tales.
+• Teach our younger nodes to secure their features from deepfakes.
+• Graduate with verified certificates as Future Ambassadors!
+
+🎯 Our Exploration Routine:
+• 1 micro-lesson every [${announcementTime}].
+• No scores, no pressure—pure family curiosity.
+
+📍 The track is live! Tap the glowing lightbulb icon in the main layout.
+
+Are you ready to crack the patterns of the future together?
+
+With love,
+Your Guide: ${announcementCoordinator}`
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          ) : isAdvanced ? (
+            /* Selected Advanced Lesson Workspace */
+            <motion.div 
+              key="advanced-lesson-view"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              className="w-full"
+            >
+              {renderAdvancedWorkspace()}
             </motion.div>
           ) : (
             /* Selected Lesson Deep Workspace */
