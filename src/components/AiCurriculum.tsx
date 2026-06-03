@@ -723,6 +723,504 @@ const ADVANCED_CURRICULUM_DATA = {
           }
         }
       ]
+    },
+    {
+      track_name: "الذكاء الاصطناعي للأعمال",
+      track_description: "تمكين المتعلم من بدء مشروع جانبي أو مشروع صغير بذكاء اصطناعي وفهم أساسيات ريادة الأعمال الرقمية",
+      lessons: [
+        {
+          lesson_number: 10,
+          lesson_title: "كيف تجد فكرة مشروع؟ - العصف الذهني بالذكاء الاصطناعي",
+          track: "الذكاء الاصطناعي للأعمال",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "الذكاء الاصطناعي ليس فقط منفذاً، بل شريكاً في التفكير. في هذا الدرس، ستتعلم تقنية 'العصف الذهني العكسي' و 'SCAMPER' باستخدام ChatGPT أو Claude. ستبدأ بمجال تحبه، وتسأل الذكاء الاصطناعي: 'ما هي 10 مشاكل يومية في [مجالك] يمكن حلها بتطبيق بسيط؟'. الخطوة التالية: 'لكل مشكلة، اقترح 3 حلول تقنية باستخدام الذكاء الاصطناعي'. وهكذا تصل إلى فكرة فريدة.",
+            image_description: "روبوت مفكر يجلس حول طاولة ورسم فكرة مشروع ساطعة بمشاركة الأطفال"
+          },
+          notes: {
+            section_title: "نصيحة الأكاديمية",
+            content: "العثور على فكرة ممتازة يتطلب البحث في صميم المشكلات اليومية لتوليد حلول ذكية يطلبها السوق حقاً."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "العصف الذهني الرقمي",
+            instructions: "اختر مجالاً (مثال: المطاعم، التعليم، الرياضة). نفذ جلسة عصف ذهني كاملة مع ChatGPT. وثق 3 أفكار مشاريع محتملة.",
+            challenges: [
+              {
+                id: "business_brainstorm",
+                difficulty: "مبتدئ ⭐",
+                pattern: "أنا مهتم بمجال [التعليم]. اقترح لي 10 مشكلات يومية يواجهها الطلاب والمعلمون، ثم اقترح 3 أفكار مبتكرة لحلها بالذكاء الاصطناعي."
+              }
+            ],
+            discussion_question: "لماذا يعد تحديد المشكلة أولاً أكثر أهمية من التسرع في بناء الحلول التقنية؟"
+          }
+        },
+        {
+          lesson_number: 11,
+          lesson_title: "دراسة جدوى في 30 دقيقة - تحليل السوق بالذكاء الاصطناعي",
+          track: "الذكاء الاصطناعي للأعمال",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "لست بحاجة إلى شركة أبحاث. باستخدام Perplexity.ai، يمكنك سؤال: 'ما هو حجم سوق [مجالك] في الشرق الأوسط؟'. باستخدام ChatGPT، اطلب: 'حلل لي نقاط القوة والضعف لأكبر 3 منافسين في [مجالك]'. وفي النهاية، اطلب منه: 'بناءً على هذه المعلومات، ما هي الفجوة في السوق التي يمكنني استغلالها؟'. هذا هو جوهر دراسة الجدوى.",
+            image_description: "بوابة سحابية تعرض نسب مئوية وبيانات إحصائية عن الأسواق العالمية"
+          },
+          notes: {
+            section_title: "أبحاث ريادة الأعمال",
+            content: "استغلال محركات البحث التوليدية يختصر أسابيع من تجميع الرؤى ويؤمن لك فهماً عميقاً للفجوات المفتوحة."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "تحليل السوق الرقمي",
+            instructions: "اختر فكرة مشروع من الدرس السابق. نفذ بحثاً عن السوق والمنافسين باستخدام Perplexity وChatGPT. اكتب صفحة واحدة تلخص فيها: الفرصة، الفجوة، والجمهور المستهدف.",
+            challenges: [
+              {
+                id: "feasibility_study",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "ما هو حجم سوق [تزيين المنازل والزخرفة] في الخليج العربي لعام 2026؟ وما هي نقاط القوة والضعف لأبرز المنافسين المحليين؟"
+              }
+            ],
+            discussion_question: "كيف تمكّنك فجوة السوق من المنافسة أمام الشركات الكبيرة المستقرة مسبقاً؟"
+          }
+        },
+        {
+          lesson_number: 12,
+          lesson_title: "بناء العلامة التجارية - الاسم، الشعار، والقصة",
+          track: "الذكاء الاصطناعي للأعمال",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "أعطِ ChatGPT وصفاً لمشروعك وقيمك، واطلب منه: 'اقترح 20 اسماً تجارياً لمشروعي، مع شرح لماذا كل اسم مناسب'. بعد اختيار اسم، استخدم Midjourney أو DALL-E لتصميم شعار: 'Minimalist logo for [your company name], representing [your value proposition], vector style'. ثم استخدمه لكتابة 'قصة العلامة التجارية' (Brand Story) من 150 كلمة.",
+            image_description: "رمز فني يدمج اسماً تجارياً في شعار مشع بألوان مستوحاة من الحكمة والأمان"
+          },
+          notes: {
+            section_title: "قصة البراند",
+            content: "العملاء لا يشترون فقط المنتج، بل يشترون القصة والقيم المتأصلة وراء علامتك التجارية."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "ولادة الهوية البصرية",
+            instructions: "ابنِ هوية علامتك التجارية: اسم، شعار، وقصة. اجمعهم في صفحة واحدة مبهجة.",
+            challenges: [
+              {
+                id: "brand_identity",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "اقترح لي 20 اسماً مميزاً لمشروع [تطبيقات ذكية لمساعدة الأمهات في رعاية الأطفال]، ثم اكتب قصة علامتنا التجارية (Brand Story) من 150 كلمة بنبرة دافئة وملهمة."
+              }
+            ],
+            discussion_question: "لماذا تظل الأسماء البسيطة والقصيرة ذات وقع أكبر في ذاكرة المستهلكين??"
+          }
+        },
+        {
+          lesson_number: 13,
+          lesson_title: "النموذج الأولي (Prototype) - بناء MVP بدون برمجة",
+          track: "الذكاء الاصطناعي للأعمال",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "لا تحتاج إلى مبرمج لبناء أول نسخة من منتجك. أدوات No-Code مثل 'Bubble' أو 'Glide' تسمح لك ببناء تطبيق. ولكن قبل ذلك، استخدم أداة مثل 'Framer AI' أو 'Vercel v0' لبناء صفحة هبوط (Landing Page) كاملة لفكرتك من مجرد وصف نصي. هذه الصفحة ستكون كافية لاختبار الفكرة مع الجمهور.",
+            image_description: "جهاز هاتف محمول ممتد عليه صفحة إنترنت مبنية بصورة آلية وبراقة"
+          },
+          notes: {
+            section_title: "الحد الأدنى للمنتج",
+            content: "اختبار الفكرة بأقل التكاليف عبر MVP يحميك من إضاعة الوقت والأموال في منتج قد لا يحتاجه أحد."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "تصميم صفحة الهبوط",
+            instructions: "استخدم أداة بناء مواقع بالذكاء الاصطناعي لبناء صفحة هبوط لمشروعك تتضمن عنواناً جذاباً ووصفاً ودعوة للاشتراك.",
+            challenges: [
+              {
+                id: "landing_page_mvp",
+                difficulty: "خبير ⭐⭐⭐⭐",
+                pattern: "ساعدني في وضع الهيكل النصي الموجه لأداة Framer لبناء موقع لخدمة [اشتراك أسبوعي للوجبات الصحية العائلية] متضمناً شعاراً فرعياً و3 ميزات رئيسية مع دعوة للاشتراك (CTA)."
+              }
+            ],
+            discussion_question: "كيف يساهم جمع بريد العملاء المهتمين قبل بدء المشروع في التحقق من جدية الإقبال؟"
+          }
+        },
+        {
+          lesson_number: 14,
+          lesson_title: "التسويق الذكي - كتابة المحتوى والإعلانات",
+          track: "الذكاء الاصطناعي للأعمال",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "التسويق هو وقود المشروع. تعلم كيف تستخدم Jasper أو Copy.ai لكتابة: 10 عناوين جذابة لإعلان، وصف منتج مقنع، 5 أفكار منشورات لوسائل التواصل الاجتماعي، وبريد إلكتروني تسويقي. السر: تعطي الأداة معلومات عن جمهورك ونبرة علامتك التجارية، فتكتب محتوى مخصصاً.",
+            image_description: "بث بريد إلكتروني ورايات تسويق طائرة تحيط بجسم كرة أرضية متوهجة"
+          },
+          notes: {
+            section_title: "أتمتة صناعة المحتوى",
+            content: "حدد نبرة علامتك التجارية بوضوح (مثلاً: مهنية، فكاهية، ودودة) واطلب من الكاتب الآلي توحيد نصوصه وفقها."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "خطابة الجمهور الرقمي",
+            instructions: "باستخدام ChatGPT، اكتب: منشورين لوسائل التواصل الاجتماعي، وصف منتجك، ونشرة بريدية واحدة موجهة لنفس الجمهور المستهدف.",
+            challenges: [
+              {
+                id: "smart_marketing",
+                difficulty: "مبتدئ ⭐",
+                pattern: "اكتب لي منشورين لوسائل السوشيال ميديا ونشرة ترحيبية بالبريد لمنتجي [حقيبة ألعاب علمية للأطفال] بنبرة حماسية وحكيمة تجذب الآباء."
+              }
+            ],
+            discussion_question: "لماذا يعد تخصيص المحتوى لكل منصة اجتماعية أمراً جوهرياً لزيادة تفاعل الجمهور؟"
+          }
+        },
+        {
+          lesson_number: 15,
+          lesson_title: "أتمتة خدمة العملاء - بناء بوت دعم فني",
+          track: "الذكاء الاصطناعي للأعمال",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "لا يمكنك الرد على العملاء 24 ساعة. الحل: بوت خدمة عملاء. استخدم منصة 'Botpress' أو 'Voiceflow' لبناء بوت محادثة. امنحه 'قاعدة معرفة' (Knowledge Base) عن منتجك (مثلاً: الأسئلة الشائعة، سياسة الاسترجاع، خطوات الاستخدام). البوت سيتعلم من هذه المعلومات ويرد على العملاء تلقائياً.",
+            image_description: "مساعد رعاية آلي لطيف يرتدي سماعة خدمة عملاء ويجيب على الاستفسارات الفورية"
+          },
+          notes: {
+            section_title: "خدمة فورية متواصلة",
+            content: "تزويد البوت بسياق واضح من الأسئلة والأجوبة المتكررة (FAQs) يمنحه دقة عالية وثباتاً في الإجابة."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "ولادة البوت المساعد",
+            instructions: "ابنِ سيناريو للبوت لتدريبه على الإجابة عن 5 أسئلة شائعة حول منتجك باحترافية.",
+            challenges: [
+              {
+                id: "customer_support_bot",
+                difficulty: "خبير ⭐⭐⭐⭐",
+                pattern: "صمم لي جدولاً يمثل قاعدة المعرفة לבوت دعم متجري الإلكتروني [أثاث منزلي ريفي] متضمناً سياسة الشحن والدفع والاسترجاع."
+              }
+            ],
+            discussion_question: "متى يجب على البوت الذكي التوقف وتحويل العميل إلى موظف بشري حقيقي؟"
+          }
+        },
+        {
+          lesson_number: 16,
+          lesson_title: "المالية الذكية - التسعير وتحليل الربحية",
+          track: "الذكاء الاصطناعي للأعمال",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "كم يجب أن تسعّر منتجك؟ استخدم الذكاء الاصطناعي كمساعد مالي. أعطه تفاصيل: تكلفة الإنتاج، أسعار المنافسين، القيمة التي تقدمها. واسأله: 'اقترح 3 استراتيجيات تسعير مع شرح إيجابيات وسلبيات كل منها'. ثم اطلب منه: 'ابنِ لي نموذجاً مبسطاً للإيرادات والمصروفات لأول 6 أشهر'.",
+            image_description: "آلة حاسبة بلورية مشعة تعرض معادلات ومكعبات مالية منظمة"
+          },
+          notes: {
+            section_title: "الإدارة المالية",
+            content: "لا تتسرع بالتسعير الرخيص؛ احسب هامش الربح الذي يضمن لك الاستدامة المالية وتوسيع شركتك."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "تخطيط الأرقام والربح",
+            instructions: "ضع استراتيجية تسعير لمنتجك، وابنِ نموذجاً مالياً مبسطاً لستة أشهر قادمة مستعيناً بالذكاء كشريك حسابي.",
+            challenges: [
+              {
+                id: "smart_finance",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "مشروعي هو [تنظيف المنازل الفاخر]. تكلفة المواد والوقود للمنزل الواحد 20$. المنافسون يسعرون بـ 60$ إلى 90$. ساعدني في تفصيل 3 سيناريوهات للتسعير وحساب الإيرادات والأرباح المتوقعة عند خدمة 40 منزلاً شهرياً."
+              }
+            ],
+            discussion_question: "لماذا تؤثر الميزة التنافسية لمنتجك على قدرتك في فرض سعر أعلى من المنافسين؟"
+          }
+        },
+        {
+          lesson_number: 17,
+          lesson_title: "العرض على المستثمرين - Pitch Deck احترافي",
+          track: "الذكاء الاصطناعي للأعمال",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "إذا أردت تمويلاً، تحتاج إلى عرض تقديمي (Pitch Deck). استخدم Gamma أو Tome لبناء عرض من 10 شرائح. هيكل العرض: 1. المشكلة. 2. الحل. 3. السوق. 4. المنتج. 5. نموذج العمل. 6. المنافسة. 7. الفريق. 8. التوقعات المالية. 9. السؤال (كم تريد؟). 10. الشكر. الذكاء الاصطناعي سيصمم الشرائح ويكتب المحتوى الأولي.",
+            image_description: "شاشة عرض ضخمة زجاجية تبرز شرائح منسقة لعرض فكرة مشروع ريادي"
+          },
+          notes: {
+            section_title: "الإقناع والجاذبية",
+            content: "المستثمر يركز على شريحتين أساسيتين: 'حجم المشكلة بالسوق' و'الجدوى المالية وقابلية التوسع'."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "صياغة الـ Pitch Deck",
+            instructions: "ابنِ خطوط عرض تقديمي لمشروعك من 10 شرائح متماسكة ومحكمة النبرات لجلب استثمار.",
+            challenges: [
+              {
+                id: "pitch_deck",
+                difficulty: "خبير ⭐⭐⭐⭐",
+                pattern: "اطلب من ChatGPT صياغة النصوص التفصيلية لكل شريحة من شرائح الـ Pitch Deck العشر لمشروع [مستكشف المحاصيل الزراعية بالذكاء الاصطناعي]."
+              }
+            ],
+            discussion_question: "لماذا يعتبر توضيح هيكل وخبرات الفريق المؤسس عاملاً حاسماً للمستثمرين في اتخاذ القرار؟"
+          }
+        },
+        {
+          lesson_number: 18,
+          lesson_title: "الإطلاق والتشغيل - خطة الذهاب إلى السوق",
+          track: "الذكاء الاصطناعي للأعمال",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "حان وقت الإطلاق. خطة الذهاب إلى السوق (Go-To-Market Strategy) يجب أن تكون واضحة. استخدم الذكاء الاصطناعي لصياغتها: 'أنا أطلق [منتجك] في [المدينة/البلد]. جمهوري هو [وصف الجمهور]. ميزانيتي التسويقية [الرقم]. اقترح لي خطة إطلاق من 3 مراحل: قبل الإطلاق، يوم الإطلاق، بعد الإطلاق بأسبوعين. مع قنوات التسويق المناسبة.'",
+            image_description: "شاحنة فضاء رقمية مشعة تبدأ بالانطلاق من منصة تدشين خوارزمية"
+          },
+          notes: {
+            section_title: "تكتيكات الذهاب للسوق",
+            content: "خطة الإطلاق التدريجي تبني زخماً وتشجع المتبنين الأوائل (Early Adopters) على تجربة منتجك أولاً وإعطائك تعليقات قيمة."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "خطة التدشين الكبرى",
+            instructions: "اكتب خطة إطلاق شاملة لمشروعك من 3 مراحل مستهدفاً جمهورك وقنواتك المفضلة.",
+            challenges: [
+              {
+                id: "go_to_market",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "أصيغ خطة تدشين لـ [تطبيق حجز الملاعب الرياضية]. الميزانية 500$, المنطقة المستهدفة الرياض، والجمهور هواة كرة القدم والبادرت. صمم لي الخطة من ثلاث مراحل زمنية واضحة."
+              }
+            ],
+            discussion_question: "ما أهمية آراء الدفعة الأولى من العملاء في تعديل مواصفات المنتج وتحسينه؟"
+          }
+        },
+        {
+          lesson_number: 19,
+          lesson_title: "المشروع النهائي - ملف مشروعك الكامل",
+          track: "الذكاء الاصطناعي للأعمال",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "اجمع كل ما عملت عليه in ملف واحد: 1. فكرة المشروع. 2. دراسة جدوى. 3. العلامة التجارية. 4. النموذج الأولي. 5. خطة التسويق. 6. الخطة المالية. 7. العرض التقديمي. هذا هو مشروعك النهائي. قدمه كأنك تقدمه لمستثمر حقيقي.",
+            image_description: "ملف مشع برّاق يضم مجلدات الهوية والجدوى المالية ليعلن ميلاد شركة جديدة"
+          },
+          notes: {
+            section_title: "تتويج رائد الأعمال",
+            content: "الآن أصبح لديك مشروع متكامل مصمم ومدروس بأحدث أدوات العصر. ثق بقدراتك وباشر العمل الفعلي للتجربة والتعلم المستمر!"
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "تتويج الشركة المستقبلية",
+            instructions: "اجمع كل مخرجات الدروس السابقة في ملف واحد، واطلب من الذكاء مراجعته وتلخيصه بأسلوب استثماري.",
+            challenges: [
+              {
+                id: "final_business_pitch",
+                difficulty: "عملاق ⭐⭐⭐⭐⭐",
+                pattern: "العب دور لجنة تقييم مسابقة ريادة أعمال دولية. راجع ملف مشروعي هذا المكون من [اسم، هوية، MVP، فجوة تسويقية، خطة تسعير] وامنحني تقيماً تفصيلياً مع 3 نصائح ذهبية لنمو أعمالي."
+              }
+            ],
+            discussion_question: "ما هو الإنجاز الأكبر الذي حققته في رحلة تصميم مشروعك المتكامل من الصفر؟"
+          }
+        }
+      ]
+    },
+    {
+      track_name: "الذكاء الاصطناعي والبيانات",
+      track_description: "فهم أساسيات تحليل البيانات باستخدام الذكاء الاصطناعي وتهيئة التقارير دون خبرة برمجية مسبقة",
+      lessons: [
+        {
+          lesson_number: 20,
+          lesson_title: "ما هي البيانات؟ - أنواعها ومصادرها",
+          track: "الذكاء الاصطناعي والبيانات",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "البيانات هي غذاء الذكاء الاصطناعي. في هذا الدرس، ستفهم الفرق بين البيانات المهيكلة (جداول)، وغير المهيكلة (نصوص، صور)، وشبه المهيكلة (JSON). ستتعلم أين تجد بيانات مفتوحة المصدر: Kaggle، Google Dataset Search، منصات الحكومات المفتوحة. التطبيق: تحميل مجموعة بيانات بسيطة (مثل: مبيعات متجر صغير) من Kaggle.",
+            image_description: "مكعبات وكتل معلوماتية ملونة تتجمع في مجرى ضوئي يغذّي عقل الذكاء الاصطناعي"
+          },
+          notes: {
+            section_title: "تعريف وقيم البيانات",
+            content: "جودة البيانات تغلب دائماً كميتها؛ لذا احرص على انتقاء مصادر بيانات عامة وعلمية موثوقة لمشاريعك."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "استكشاف الكنز البياني",
+            instructions: "حمل مجموعة بيانات من Kaggle أو ابحث عنها، ثم صف أعمدتها وعدد صفوفها والغاية من جمعها.",
+            challenges: [
+              {
+                id: "data_sources",
+                difficulty: "مبتدئ ⭐",
+                pattern: "اشرح لي بالتفصيل الفرق بين البيانات المهيكلة في جدول إكسل والبيانات غير المهيكلة كفيديو يوتيوب، مع إعطاء أمثلة عملية."
+              }
+            ],
+            discussion_question: "كيف يستفيد الذكاء الاصطناعي من البيانات غير المهيكلة (كالتغريدات والصور) اليوم؟"
+          }
+        },
+        {
+          lesson_number: 21,
+          lesson_title: "تنظيف البيانات - أهم 80% من العمل",
+          track: "الذكاء الاصطناعي والبيانات",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "البيانات الخام مليئة بالمشاكل: قيم فارغة، تكرار، أخطاء إملائية. في هذا الدرس، ستتعلم كيف تطلب من ChatGPT أن يكتب لك كود Python بسيطاً لتنظيف البيانات. أعطه نسخة من بياناتك (أول 10 صفوف) وقل له: 'نظف هذه البيانات: احذف التكرار، املأ القيم الفارغة بالمتوسط، صحح الأخطاء الإملائية'. هو سيكتب الكود، وأنت ستشغله.",
+            image_description: "مكنسة كهرومغناطيسية ذكية تلتقط الشوائب والأسطر المكررة من جدول بيانات بلوري"
+          },
+          notes: {
+            section_title: "تنظيف وتهيئة البيانات",
+            content: "تحري الأخطاء والقيم المبتورة وحذفها مبكراً هو الفارق الحقيقي بين نموذج دقيق للغاية ونموذج مليء بالمغالطات والتنبؤات الخاطئة."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "تطهير جدول البيانات",
+            instructions: "استخدم مكتبة بايثون (Pandas) المحاكية لتنظيف مجموعة بيانات مليئة بالأخطاء وحذف التكرار بذكاء.",
+            challenges: [
+              {
+                id: "data_cleaning_script",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "import pandas as pd\ndf = pd.read_csv('messy_data.csv')\n# اكتب كود تنظيف بسيط لحذف الصفوف المكررة وملء القيم المفقودة في عمود السعر بمتوسط الأسعار."
+              }
+            ],
+            discussion_question: "لماذا نقوم بملء القيم الفارغة أحياناً بالمتوسط الحسابي بدلاً من مجرد حذف الصف بالكامل؟"
+          }
+        },
+        {
+          lesson_number: 22,
+          lesson_title: "التحليل الاستكشافي - ماذا تقول بياناتك؟",
+          track: "الذكاء الاصطناعي والبيانات",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "قبل بناء أي نموذج، يجب أن 'تستمع' لبياناتك. اسأل ChatGPT: 'حلل بياناتي. أعطني: 1. ملخصاً إحصائياً (متوسط، وسيط، انحراف معياري). 2. أكثر 5 أنماط لافتة. 3. 3 أسئلة يجب أن أسألها عن هذه البيانات'. ثم استخدم مكتبة Pandas لتنفيذ هذا التحليل.",
+            image_description: "عدسة مكبرة ضوئية تبرز متوسطات وتوزيع الأنماط البيانية في مصفوفة ممتدة"
+          },
+          notes: {
+            section_title: "الاستماع للبيانات",
+            content: "التحليل الاستكشافي (EDA) يمنحك نظرة عميقة حول سلوك البيانات ويخبرك أين تكمن المفاجآت والميزات المخفية."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "تفكيك طلاسم الأرقام",
+            instructions: "قم بإجراء تحليل إحصائي لمبيعات متجر وتوزيع الفئات ومعدل تكرار المنتجات.",
+            challenges: [
+              {
+                id: "exploratory_data_analysis",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "import pandas as pd\ndf = pd.read_csv('sales.csv')\n# اكتب الرموز البرمجية اللازمة لإظهار المجموع الكلي والمتراكم لحجم المبيعات حسب فئة المنتجات في المتجر."
+              }
+            ],
+            discussion_question: "ماذا يعني الانحراف المعياري العالي في عمود مبيعات المتجر؟"
+          }
+        },
+        {
+          lesson_number: 23,
+          lesson_title: "الرسوم البيانية - تحويل الأرقام إلى قصة",
+          track: "الذكاء الاصطناعي والبيانات",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "الرسم البياني الجيد يروي قصة. استخدم ChatGPT لترشيح نوع الرسم البياني المناسب لبياناتك. أعطه وصفاً للبيانات واسأل: 'ما هو أفضل رسم بياني لإظهار العلاقة بين [متغير 1] و[متغير 2]؟'. ثم اطلب منه كود Python لإنشائه باستخدام Matplotlib أو Seaborn.",
+            image_description: "لوحة تحكم مشعة بأعمدة ومنحنيات بيانية ملونة تتراقص بألوان حيوية"
+          },
+          notes: {
+            section_title: "سرد القصص بصرياً",
+            content: "استخدم الألوان المتباينة لتسليط الضوء على النقاط الأكبر أو التغيرات الأكثر لفتاً للانتباه للأعين الحاضرة."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "صناعة اللوحات البيانية",
+            instructions: "استخدم كود بايثون البرمجي لتوليد رسومات بيانية شريطية أو دائرية متميزة تروي القصة.",
+            challenges: [
+              {
+                id: "data_visualization_plots",
+                difficulty: "مقدم ⭐⭐⭐",
+                pattern: "import matplotlib.pyplot as plt\n# اكتب كود بايثون متكامل لرسم مخطط خطي (Line Plot) يمثل تتبع أوزان المرضى على مدى 6 أشهر."
+              }
+            ],
+            discussion_question: "متى نفضل الكروكي البياني الدائري Pie Chart على المخططات الشريطية Bar Charts؟"
+          }
+        },
+        {
+          lesson_number: 24,
+          lesson_title: "التنبؤ - مقدمة في تعلم الآلة",
+          track: "الذكاء الاصطناعي والبيانات",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "الآن ننتقل إلى التنبؤ. إذا كان لديك بيانات مبيعات، هل يمكنك توقع مبيعات الشهر القادم؟ استخدم ChatGPT لبناء نموذج تنبؤ بسيط (Linear Regression). أعطه بياناتك واطلب منه: 'اكتب كود Python لبناء نموذج انحدار خطي يتنبأ بـ [المتغير المستهدف] بناءً على [المتغيرات المستقلة]. اشرح لي النتائج ببساطة.'",
+            image_description: "جسر نوراني يمتد من أرقام المبيعات الحاضرة ليتنبأ بالنتائج والأرباح المستقبلية"
+          },
+          notes: {
+            section_title: "التنبؤ الإحصائي",
+            content: "نموذج الانحدار الخطي يفترض علاقة خطية منتظمة بين المعطيات والنواتج، وهو البوابة الذهبية لخوارزميات التنبؤ المعقدة."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "النظر إلى المستقبل",
+            instructions: "قم ببناء نموذج تنبؤ بسيط لتوقع مبيعاتك القادمة بالاعتماد على ميزانية التسويق.",
+            challenges: [
+              {
+                id: "machine_learning_prediction",
+                difficulty: "خبير ⭐⭐⭐⭐",
+                pattern: "from sklearn.linear_model import LinearRegression\n# اكتب كود تدريب نموذج انحدار خطي بسيط لتطبيق توقع استهلاك الكهرباء بناءً على درجة حرارة الطقس."
+              }
+            ],
+            discussion_question: "كيف يساهم نموذج التنبؤ في تقليص التكاليف اللوجستية للمخازن والشركات الاستيرادية؟"
+          }
+        },
+        {
+          lesson_number: 25,
+          lesson_title: "التصنيف - تجميع البيانات في فئات",
+          track: "الذكاء الاصطناعي والبيانات",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "نوع آخر من تعلم الآلة: التصنيف. مثلاً، تصنيف العملاء إلى 'مخلصين' و'معرضين للخسارة'. أعطِ ChatGPT بيانات عملاء (عمر، مدة التعامل، عدد المشتريات) واطلب منه: 'اكتب كود K-Means Clustering لتقسيم العملاء إلى 3 مجموعات. اشرح خصائص كل مجموعة.'",
+            image_description: "حزم ضوئية تقسم كرات البيانات إلى 3 مجموعات مجزأة بالألوان"
+          },
+          notes: {
+            section_title: "ذكاء العولمة",
+            content: "تقسيم العملاء إلى شرائح (Customer Segmentation) يتيح للشركات توجيه حملات إعلانية خاصة ومثمرة لكل فئة بدلاً من عشوائية الإعلانات."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "شرائح ومجموعات العملاء",
+            instructions: "اكتب وطبق خوارزمية تجميعية (Clustering) لتقسيم الزبائن وفق معدلات تسوقهم وسلوك مكوثهم بالموقع الرقمي.",
+            challenges: [
+              {
+                id: "machine_learning_classification",
+                difficulty: "خبير ⭐⭐⭐⭐",
+                pattern: "from sklearn.cluster import KMeans\n# صغ كود تجميع لتقسيم عينة مستخدمي تطبيق صالة لياقة بدنية إلى 3 فئات ومستويات تفاعل."
+              }
+            ],
+            discussion_question: "كيف يدعم تصنيف العملاء الأوتوماتيكي اتخاذ قرارات تسويقية حكيمة؟"
+          }
+        },
+        {
+          lesson_number: 26,
+          lesson_title: "لوحة المعلومات (Dashboard) - كل شيء في مكان واحد",
+          track: "الذكاء الاصطناعي والبيانات",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "بدل النظر إلى جداول خام، لماذا لا تبني لوحة معلومات تفاعلية؟ استخدم Google Looker Studio (مجاني) أو Tableau Public لبناء Dashboard. ارفع بياناتك النظيفة، واختر الرسوم البيانية المناسبة، وصمم لوحة تحكي القصة كاملة في لمحة.",
+            image_description: "قمرة قيادة ذكية تفاعلية ملأى بالشاشات ولمحات الأرباح والسرعات الجغرافية"
+          },
+          notes: {
+            section_title: "التحليل البصري المتطور",
+            content: "لوحة التحكم تعطي المسؤولين والآباء لمحة فورية دون قراءة مئات الصفحات والمصفوفات المعقدة."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "تصميم قمرة التحليل",
+            instructions: "خطط وصمم لوحة تحكم تفاعلية تضم 4 رسوم وجداول تلخص رحلة مبيعات وتفاعل زبائن متجر العسل العائلي.",
+            challenges: [
+              {
+                id: "dashboard_design",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "صمم لي الهيكل البصري ومقاييس الأداء الرئيسية الـ 4 الأهم لعرضها في لوحة معلومات مخصصة لمدرسة أطفال رقمية."
+              }
+            ],
+            discussion_question: "لماذا تعد لوحات المعلومات التفاعلية أداة القيادة الأساسية في الشركات العملاقة اليوم؟"
+          }
+        },
+        {
+          lesson_number: 27,
+          lesson_title: "المشروع النهائي - تقرير بيانات متكامل",
+          track: "الذكاء الاصطناعي والبيانات",
+          lesson_card: {
+            section_title: "بطاقة الدرس",
+            content: "اجمع كل ما تعلمته: تنظيف البيانات، التحليل، الرسوم البيانية، التنبؤ، ولوحة المعلومات. اصنع تقريراً من 5 صفحات يحلل مجموعة بيانات من اختيارك. هذا التقرير يمكنك وضعه في سيرتك الذاتية كمشروع عملي في تحليل البيانات.",
+            image_description: "تقرير ورقي زجاجي نهائي يحمل كرات ورسوماً بيانية معلنة الاحتراف العلمي والعملي"
+          },
+          notes: {
+            section_title: "تتويج خبير البيانات",
+            content: "تهانينا! لقد تملّكت القدرة على تحويل الكتل النصية والأرقام والبيانات الصامتة إلى قصة وتوصيات ريادية حكيمة."
+          },
+          quest_card: {
+            section_title: "ساحة التحدي والتطبيق",
+            activity_name: "تتويج خبير البيانات الأكاديمي",
+            instructions: "اجمع نواتج التحليلات والرسوم في وثيقة نهائية وقدم توصيات ريادية مبهرة ليرفع تقييمك.",
+            challenges: [
+              {
+                id: "final_data_project",
+                difficulty: "عملاق ⭐⭐⭐⭐⭐",
+                pattern: "العب دور رئيس قسم البيانات في شركة عالمية. قيّم توصيات تقريري هذا حول مبيعات الأغذية المعتمد على خوارزميات التنبؤ وامنحني تقريراً بنقاط القوة والفرص."
+              }
+            ],
+            discussion_question: "ما هو الجانب الأكثر متعة وإثارة في تجربة تفكيك وتنظيف وسرد قصص البيانات الرقمية؟"
+          }
+        }
+      ]
     }
   ]
 };
@@ -1281,6 +1779,50 @@ export const AiCurriculum = ({ lang, onBack }: { lang: 'en' | 'ar', onBack: () =
           aiAns = isRtl
             ? `[🥗 مستشار العافية والتغذية]: لقد صممت لك روتينًا صحيًا متكاملاً بناءً على معطياتك اليوم!\n\n🍳 الفطور: أومليت الشوفان اللذيذ مع الخضار الطازجة (جاهز في 7 دقائق).\n🏃 الرياضة: روتين 15 دقيقة (30 ثانية لكل من: القرفصاء، الضغط، الجري الخفيف، تمرين البطن) مع فترات راحة قصيرة.\n💤 النوم: تهانينا! تم توليد قصة نوم صوتية مريحة تعيد توازن موجاتك الدماغية الهادئة.`
             : `[🥗 Holistic Wellness Assistant]: Your customized wellness daily routine is ready!\n\n🍳 Breakfast: Delicious Savory Oats Omelette (Ready in 7 mins).\n🏃 Workout: 15-minute high intensity full body flow (Squats, Push-ups, Mountain Climbers, Planks).\n💤 Sleep Meditation: Ambient story generated to ease muscle tension. Enjoy!`;
+        } else if (lesson.lesson_number === 10) {
+          aiAns = isRtl
+            ? `[💡 العصف الذهني لريادة الأعمال]: فكرة ممتازة وتفكير ريادي خلّاق! إليك تفصيل 3 أفكار مشاريع مبتكرة للذكاء الاصطناعي بناءً على المجال المختار:\n\n1. تطبيق "مرشدك الذكي": مساعد مخصص للطلاب لتنظيم الوقت وشرح الكفاءات الأكاديمية بأسلوب تفاعلي مشع.\n2. منصة "تعلّم بمتعة": ألعاب ذكية هادفة للأطفال لتطوير قدرات الرياضيات والتفكير الحواري.\n3. أداة "مصحح المعلم المساعد": مساعدة الآباء والمعلمين لتسهيل التبني والمتابعة المستمرة.`
+            : `[💡 Business Brainstorming Co-Pilot]: Excellent entrepreneurial direction! Here are 3 innovative AI startup concepts based on your field:\n\n1. "SmartGuide": AI tutor personalizing student schedules & breaking down difficult lessons.\n2. "LearnWithJoy": Adaptive gamified logic courses for young minds.\n3. "TeacherMate": Automating constructive grading & parent progress reports smoothly.`;
+        } else if (lesson.lesson_number === 11) {
+          aiAns = isRtl
+            ? `[📈 محلل الجدوى ودراسة السوق]: تحليل الجدوى والسوق لعام 2026 جاهز تماماً:\n\n- الحجم المتوقع للسوق: ما يقارب 3.5 مليون مستخدم نشط في مجتمعك المحلي.\n- نقاط قوة المنافسين: التواجد المسبق وسلاسل الفروع القائمة.\n- الفجوة المفتوحة: الافتقار الشديد للتخصيص الودود المناسب للعائلة والأطفال والمربين.\n- التوصية الذهبية: تقديم حل خفيف سهل الاستخدام يركز على الفئة المحددة لتضمن ميزة تنافسية ممتازة.`
+            : `[📈 Market Feasibility & Analyst]: Core market feedback for 2026 is ready:\n\n- Target Audience Size: Estimated ~3.5M active households in the regional market.\n- Competitor Strengths: Established brand equity and distribution networks.\n- Critical Industry Gap: Total lack of child-friendly, personalized educational modules for families.\n- Recommended Action: Launch a hyper-focused MVP solving one micro-pain point for instant trust.`;
+        } else if (lesson.lesson_number === 12) {
+          aiAns = isRtl
+            ? `[🎨 منشئ الهوية والاسم التجاري]: تم بناء هوية مشروعك الواعدة بنجاح!\n\n- الأسماء المقترحة: "منصة نبوغ", "ذكاء الغد", "أكاديمية السنابل الذكية".\n- قصة الماركة الموحدة: "نؤمن بأن كل طفل يحمل عبقرية فذة تنتظر من ينيرها. بالذكاء الاصطناعي الودود، نصنع واحة رعاية تفاعلية تنقل أطفالنا بثقة نحو آفاق المستقبل."\n- شعار الدليل: شريحة دماغ رقيقة تندمج مع زهرة أقحوان ترمز للنمو الطبيعي المعرفي.`
+            : `[🎨 Brand Designer & Storyteller]: Your venture identity elements have been generated:\n\n- Brand Options: "Noboogh AI", "FutureSeed", "WiseYouth Platform".\n- Global Brand Story: "Every child harbors a spark of genius. Through warm AI tools, we build a seamless, safe playground of interactive learning that guides families proudly into tomorrow."\n- Visual Motif: A delicate glowing seed intertwined with computer network lines indicating organic organic smart growth.`;
+        } else if (lesson.lesson_number === 13) {
+          aiAns = isRtl
+            ? `[🚀 منشئ صفحات الهبوط MVP]: تم إنتاج هيكل صفحة الهبوط المبتكرة الخاص بمنتجك لتجميع بريد المشتركين الأوائل:\n\n- العنوان الجاذب: "مرح واكتشاف.. وصناعة ذكاء مستقبلي واعد لجيل طفلي!"\n- الشرح الفرعي: "انضم لأول مدرسة عربية تعيد هندسة تفكير الأطفال عبر أصدقاء ذكاء اصطناعي تفاعليين دون تعقيد مسبق."\n- الحافز: "اشترك الآن بالنسخة التجريبية الأولى البيتا، للوصول لأول 3 مستويات مجاناً مدى الحياة!"`
+            : `[🚀 Landing Page MVP Builder]: High-conversion visual landing page blueprint generated:\n\n- Hero Heading: "Play, Discover, and Build Tomorrow's Bright Brains Today!"\n- Subtitle: "The first native platform empowering spatial & logical intelligence in kids using friendly AI buddies, zero setup."\n- Call To Action: "Join 1200+ elite parents for early beta access & secure 3 core tracks free for life!"`;
+        } else if (lesson.lesson_number === 14) {
+          aiAns = isRtl
+            ? `[📢 كاتب الإعلانات والمحتوى التسويقي]: تم صياغة خطتك التسويقية المذهلة:\n\n- منشور LinkedIn المهني: "كيف تعد عائلتك وأبنائك لوظائف المستقبل التقنية بحب وذكاء؟ المهارة المستقبلية الأسمى ليست فقط كتابة الشفرات، بل العثور على حلول المشكلات بالآلة..."\n- منشور Instagram الحماسي: "مفاجأة سارة! 🎉 اكتشف مهارات طفلك التحليلية عبر لعب تفاعلي خوارزمي ممتع. اشترك في قائمتنا اليوم!"`
+            : `[📢 Ad Copywriter & Content Engine]: Your outreach deliverables are ready:\n\n- Professional Post (LinkedIn): "Empowering the next generation is no longer about syntax memorization; it's about algorithmic problem-solving via custom co-pilots..."\n- Impact Post (SaaS Promo): "Unlock your child's logical growth through joyful puzzle simulations! 💡 Signup for our closed family beta this week!"`;
+        } else if (lesson.lesson_number === 15) {
+          aiAns = isRtl
+            ? `[🤖 بوت خدمة العملاء وتفاعل الدعم]: تم تجهيز قاعدة المعرفة بنجاح!\n\n- حوار الدعم: "أهلاً بك يا فندم! نعم، الباقة العائلية تدعم حتى 3 أطفال بملفات مستقلة لكل طفل مع لوحة تحكم وتفاصيل ذكاء تتبع للوالدين. كما نقدم تجربة مجانية كاملة لـ 7 أيام!"`
+            : `[🤖 Customer Care AI Bot]: Knowledge context compiled successfully!\n\n- Chat Simulation: "Hello there! Yes, our family plan supports up to 3 kids with distinct dashboards for parents. Also, enjoy a risk-free 7-day trials with zero billing!"`;
+        } else if (lesson.lesson_number === 16) {
+          aiAns = isRtl
+            ? `[🧮 مستشار التسعير الاستثماري]: تفاصيل تسعير الخطة المالية المقترحة:\n\n- السعر الأساسي المقترح: 12$ شهرياً للاشتراك المنفرد.\n- السعر العائلي (الأكثر قيمة): 24$ شهرياً (3 أطفال مع ميزة التقارير).\n- هامش الربحية المتوقع: 82% (نظراً لاعتماد الواجهة على محاكاة سحابية اقتصادية).\n- إيرادات سنة 1 المتوقعة عند جذب 500 عائلة نشطة: 144,000$ سنوياً.`
+            : `[🧮 Smart Pricing Analyst]: Optimized pricing architecture for your model:\n\n- Individual tier: $12/month.\n- Family Value Pack (Highly Recommended): $24/month (Up to 3 kids, parent analytics included).\n- Estimated margins: 82% due to clean API cost structures.\n- Year 1 Projections (Scaling to 500 active families): $144,000 ARR.`;
+        } else if (lesson.lesson_number === 17) {
+          aiAns = isRtl
+            ? `[💎 معالج العرض الاستثماري Pitch]: مبروك! تم تحديث الشريحة التاسعة "سؤال الاستثمار ومخطط استخدام الأموال":\n\n- التمويل المطلوب: 50,000$ لجولة ما قبل البذور (Pre-seed).\n- أوجه الصرف: 50% تطوير تقني ومحاكاة، 30% تسويق واكتساب عملاء، 20% لوجستيات وتشغيل لخدمة أول 2000 مشترك.`
+            : `[💎 Pitch Deck Architect]: Slide 9 "Fundraising Request & Capital Allocation" is finalized:\n\n- Ask: $50,000 Pre-Seed Round.\n- Allocation: 50% core platform engineering, 30% digital customer acquisition, 20% logistics and operational runway for first 2000 families.`;
+        } else if (lesson.lesson_number === 18) {
+          aiAns = isRtl
+            ? `[🚀 مستشار الإطلاق والذهاب للسوق]: تم تخطيط حملتك على قنوات النشر المفضلة:\n\n- مرحلة 1: بناء التشويق المسبق لنيل 1000 مشترك مسجل بريدياً.\n- مرحلة 2 (يوم التدشين): إعلان واسع وإرسال رموز الخصم المبكرة.\n- مرحلة 3 (ما بعد الإطلاق): استطلاعات فورية لتعديل محتوى الحزم ومزايا ركن الآباء الرقمي.`
+            : `[🚀 Go-To-Market Co-Pilot]: Launch strategy structured across acquisition channels:\n\n- Phase 1 (Pre-warm): Landing page referral contest aiming for 1000 double opt-in signups.\n- Phase 2 (Launch Day): High-impact webinar, broadcast invitations, early bird coupons.\n- Phase 3 (Post-launch feedback): Instant short loops to adjust roadmap and parent-support modules.`;
+        } else if (lesson.lesson_number === 19) {
+          aiAns = isRtl
+            ? `[🏆 تتويج ريادة الأعمال الفخري]: تهانينا البالغة! لقد قمت ببناء ملف مشروعك الريادي المتكامل بنجاح مذهل وبصيرة نيرة في ريادة الأعمال الرقمية. نمنحك الآن تقييم ريادي شامل 100% لتنطلق بثقة حقيقية وتقتحم عالم الأعمال ومشاريع الغد المشرقة!`
+            : `[🏆 Entrepreneurial Crown Awarded]: Hearty congratulations! You have built a production-ready business deck with outstanding strategic rigor. You are certified with 100% overall grade and ready to pitch your model to actual accelerators!`;
+        } else if (lesson.lesson_number === 20) {
+          aiAns = isRtl
+            ? `[📊 مستكشف مصادر البيانات]: تم فحص وتحميل مصفوفات مصادر البيانات بنجاح!\n\n- مصدر البيانات المحدد: Kaggle (سلوك مبيعات متجر أثاث منزلي).\n- حجم الجدول: 4 أعمدة رئيسية (تاريخ الطلب، الفئة، الدفع، التقييم)، مع 10,000 سطر متواصل مستقرين وجاهز للتنظيف بالأدوات البرمجية.`
+            : `[📊 Data Explorer & Sourcer]: Dataset loaded and registered successfully!\n\n- Source selected: Kaggle (E-commerce furniture transactions).\n- Shape of array: 4 dimensions (order_date, category, payment_method, user_rating) spanning 10,000 records, sanitized and ready for structural preprocessing.`;
         } else {
           aiAns = isRtl
             ? `[🤖 مساعد الحوار المتقدم]: مستعد ومتحمس لخوض غمار التفاعل والتحدي معك بموجب هندسة الأوامر الذكية!`
@@ -1318,6 +1860,34 @@ export const AiCurriculum = ({ lang, onBack }: { lang: 'en' | 'ar', onBack: () =
             codeOutput = isRtl
               ? `>>> python chatbot_memory.py\nبوتك: مرحبًا! اكتب خروج للإنهاء.\nأنت: اسمي رائد المستقبل.\nبوتك: تشرفت بجلال علمك يا رائد المستقبل! كيف يمكنني مساعدتك برحلتك اليوم؟\nأنت: ما اسمي؟\nبوتك: اسمك رائد المستقبل المبرز، لقد حفظت اسمك في ذاكرة محادثتنا السياقية بأمان! ✨\n\n⚙️ [حجم الرسائل في نظام سياق الذاكرة النشط: 5 رسائل متوالية]`
               : `>>> python chatbot_memory.py\nBot: Hello! Type 'exit' to terminate.\nYou: My name is Alex.\nBot: Magnificent to meet you, Alex! How can I co-pilot your journey today?\nYou: What is my name?\nBot: Your name is Alex. I have saved your identity securely in our active contextual array! ✨\n\n⚙️ [Context array size: 5 message nodes]`;
+          } else if (lesson.lesson_number === 21) {
+            codeOutput = isRtl
+              ? `>>> python data_cleaner.py\n⚡ جاري فحص ملف 'messy_data.csv'...\n- العثور على 412 سجلاً مكرراً: [تمت الإزالة تلقائياً ✔]\n- العثور على 180 قيمة فارغة في عمود 'السعر': [تم ملؤها بمتوسط السعر 45.0$ ✔]\n- العثور على أخطاء تنسيق التاريخ في 55 خلية: [تم تحويلها لنسق YYYY-MM-DD ✔]\n\n🎉 تم حفظ مصفوفة البيانات الجديدة النظيفة كـ 'cleaned_sales.csv'.`
+              : `>>> python data_cleaner.py\n⚡ Inspecting file 'messy_data.csv'...\n- Found 412 duplicated rows: [REMOVED successfully ✔]\n- Found 180 missing cells in 'price' column: [IMPUTED with mean price of $45.0 ✔]\n- Found date formatting errors in 55 cells: [CONVERTED to standard YYYY-MM-DD ✔]\n\n🎉 Cleaned and standardized dataset exported as 'cleaned_sales.csv'.`;
+          } else if (lesson.lesson_number === 22) {
+            codeOutput = isRtl
+              ? `>>> python exploratory_analysis.py\n📊 مخرجات التحليل الاستكشافي EDA الفوري لبيانات المبيعات:\n\n- ملخص إحصائي (متوسط السلعة): 35.4$\n- الانحراف المعياري للطلب: 12.8 (توزيع متناسق)\n- الفئة الأكثر مبيعاً: أثاث غرف النوم (بنسبة 42% من المبيعات الكلية)\n- ذروة ساعات التسوق العائلي: ما بين الساعة 6:00 مساءً إلى 9:00 مساءً.\n\n✨ [تم إنشاء مصفوفة الارتباط واستنباط الأنماط بدقة لترتكز مستقبلاً]`
+              : `>>> python exploratory_analysis.py\n📊 Performing Exploratory Data Analysis (EDA) on cleaned transactions:\n\n- Summary statistics (Average Item Price): $35.4\n- Item standard deviation: 12.8 (Symmetric balance)\n- Top Selling Category: Bedroom Furniture (Accounting for 42% of gross revenues)\n- Peak active hours: 6:00 PM to 9:00 PM local time.\n\n✨ [Correlation matrix completed and insights indexed correctly]`;
+          } else if (lesson.lesson_number === 23) {
+            codeOutput = isRtl
+              ? `>>> python visualizer_plots.py\n🎨 جاري تجميع الرسوم البيانية المتطورة...\n- رسم مخطط شريطي لمبيعات الفئات: [تم الحفظ بنجاح كـ category_sales.png ✔]\n- رسم مخطط خطي لتتبع المبيعات شهرياً: [تم الحفظ بنجاح كـ monthly_revenue_trend.png ✔]\n- رسم توزيع التقييمات عبر الهيستغرام: [تم الحفظ بنجاح كـ customer_satisfaction.png ✔]\n\n📊 [المخططات جاهزة للدمج الفوري في لوحتك القيادية الرقمية]`
+              : `>>> python visualizer_plots.py\n🎨 Compiling graphical plot elements via Matplotlib & Seaborn...\n- Bar plot of sales by product division: [Saved as category_sales.png ✔]\n- Line plot of monthly revenue trajectory: [Saved as monthly_revenue_trend.png ✔]\n- Histogram showing rating dispersion: [Saved as customer_satisfaction.png ✔]\n\n📊 [Charts generated and ready for looker dashboard integration]`;
+          } else if (lesson.lesson_number === 24) {
+            codeOutput = isRtl
+              ? `>>> python machine_learning_predict.py\n🤖 جاري تدريب نموذج تعلم الآلة Linear Regression...\n- حجم مجموعة البيانات للتدريب: 8000 عينة | عينات الاختبار: 2000 عينة.\n- معامل الارتباط R-squared: 0.89 (دقة تنبؤ عالية وممتازة 🎯)\n- مخرجات المعادلة: المبيعات المتوقعة للشهر القادم = 5.2 * ميزانية_الإعلان + 1200\n\n🔮 مبيعات الشهر المقبل المتوقعة لميزانية إعلان 1000$: 6400$ !`
+              : `>>> python machine_learning_predict.py\n🤖 Fitting machine learning Linear Regression curves...\n- Training set size: 8000 samples | Test set size: 2000 samples.\n- R-squared coefficient: 0.89 (Superb prediction fit 🎯)\n- Regression line: Predict_Sales = 5.2 * ad_spend + 1200\n\n🔮 Estimated sales next month with ad budget at $1000: $6,400 !`;
+          } else if (lesson.lesson_number === 25) {
+            codeOutput = isRtl
+              ? `>>> python customer_clusters.py\n🧩 جاري تدريب خوارزمية KMeans Clustering غير خاضعة للإشراف...\n🔐 تم استخلاص 3 شرائح حيوية من سلوكيات المشترين:\n\n1. شريحة المخلصين (Loyalists): شراء متكرر، قيمة مرتفعة (35% من المشترين).\n2. شريحة عشاق العروض (Bargain Hunters): مبيعات مرتبطة بالخصومات فقط (40%).\n3. شريحة المعرضين للهجر (At-Risk): مبيعات نادرة وتراجع تدريجي بالمنصة (25%).\n\n🛡️ [تم صياغة كود التجميع بدقة عالية لتهيئة استراتيجية التسويق]`
+              : `>>> python customer_clusters.py\n🧩 Fitting unsupervised KMeans Clustering arrays...\n🔐 Identified 3 premium customer segments from user behavior values:\n\n1. Category 1 (Loyals): Regular purchases, premium cart value (35% of database).\n2. Category 2 (Bargain Hunters): High conversion only during flash sale campaigns (40%).\n3. Category 3 (Chilled/At-Risk): Inactive for over 90 days, needs reactivation focus (25%).\n\n🛡️ [Clusters stored to target appropriate promotional sequences]`;
+          } else if (lesson.lesson_number === 26) {
+            codeOutput = isRtl
+              ? `>>> python looker_dashboard_builder.py\n⚙️ جاري تحديث واجهة لوحة التحكم Looker Studio...\n🔗 تم ربط البيانات النظيفة بـ Looker API وجاري نشر المؤشرات الـ 4 الأساسية:\n- إجمالي المبيعات النشطة: 125,400$\n- متوسط رضا العملاء الفعلي: 4.7 / 5\n- معدل تحويل السلات المتروكة: 8.5%\n- الفئة المتصدرة: مستلزمات المعيشة العصرية.\n\n🌐 تم إنشاء رابط لوحة التحكم بنجاح! جاهز للعرض الجاذب أمام المدراء.`
+              : `>>> python looker_dashboard_builder.py\n⚙️ Streaming data nodes to Google Looker Studio API...\n🔗 Connected sources and calculated live KPIs on public Dashboard:\n- Gross Annual Revenue: $125,400\n- Global Customer Rating: 4.7 / 5\n- Cart Recovery Conversion: 8.5%\n- Trending Category: Modern Living Room.\n\n🌐 Published dashboard link successfully! Ready to share with executives.`;
+          } else if (lesson.lesson_number === 27) {
+            codeOutput = isRtl
+              ? `>>> python generate_final_report.py\n⭐️ جاري تجميع تقرير البيانات الختامي المتكامل...\n[ملخص التقرير النهائي]:\n--------------------------------------------\n"لقد تحولت البيانات الصامتة لمتجرنا العائلي إلى قصة نمو ملهمة وقرارات تشغيلية حكيمة. تم تقليص المفقود بفضل تنبؤ خوارزميات تعلم الآلة، وحققنا 18% نمو في الأرباح بفضل تخصيص الإعلانات لشرائح العملاء المستخلصة."\n--------------------------------------------\n🏆 [تم إكمال المشروع الختامي وصيغت التوصيات الريادية بكفاءة 100%]`
+              : `>>> python generate_final_report.py\n⭐️ Bundling ultimate data analytics presentation artifacts...\n[Final Report Executive Summary]:\n--------------------------------------------\n"Our once raw e-commerce records have been successfully parsed into actionable, strategic recommendations. Implemented predictive demand models reducing logistical waste, and realized 18% profit uplifts by targeting high-converting user segments."\n--------------------------------------------\n🏆 [Graduation data project finalized and insights written to memory with 100% grade]`;
           }
           setSimResponse(codeOutput);
           setSimulating(false);
