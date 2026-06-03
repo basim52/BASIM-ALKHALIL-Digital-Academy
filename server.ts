@@ -415,11 +415,19 @@ async function startServer() {
 
   app.get("/api/health", (req, res) => {
     const key = getApiKey();
+    const envKeys = Object.keys(process.env).filter(k => 
+      k.toLowerCase().includes('key') || 
+      k.toLowerCase().includes('api') || 
+      k.toLowerCase().includes('gemini') || 
+      k.toLowerCase().includes('secret') ||
+      k.toLowerCase().includes('token')
+    );
     res.json({ 
       status: "ok", 
       geminiKeySet: !!key,
       keyPrefix: key ? `${key.substring(0, 4)}...` : 'none',
       nodeEnv: process.env.NODE_ENV || 'undefined',
+      availableKeyNames: envKeys,
       time: new Date().toISOString()
     });
   });

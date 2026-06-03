@@ -270,7 +270,10 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
         throw new Error(`HTTP ${resp.status} (Ping: ${pingText}): ${errorDetails.substring(0, 500)}`);
       }
       const data = await resp.json();
-      setAnalysisResult(`### System Health\n- **Intelligence Engine:** 🚀 Gemini 1.5 Flash (Active)\n- **Ping:** ${pingText}\n- **Status:** ${data.status}\n- **Gemini Key:** ${data.geminiKeySet ? '✅ Configured' : '❌ NOT SET'}\n- **Environment:** ${data.isProduction ? 'Production' : 'Development'}\n- **Server Time:** ${data.time}`);
+      const detectedKeys = data.availableKeyNames && data.availableKeyNames.length > 0 
+        ? data.availableKeyNames.join(", ") 
+        : (isRtl ? "لا توجد مفاتيح في بيئة التشغيل" : "None detected");
+      setAnalysisResult(`### System Health\n- **Intelligence Engine:** 🚀 Gemini 3.5 Flash (Active)\n- **Ping:** ${pingText}\n- **Status:** ${data.status}\n- **Gemini Key:** ${data.geminiKeySet ? '✅ Configured' : '❌ NOT SET'}\n- **Environment Variables Detected:** ${detectedKeys}\n- **Environment:** ${data.nodeEnv === 'production' ? 'Production' : 'Development'}\n- **Server Time:** ${data.time}`);
     } catch (err: any) {
       setAnalysisResult(`### ❌ Connection Failed\nError: ${err.message}`);
     } finally {

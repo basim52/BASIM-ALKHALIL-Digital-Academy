@@ -16,8 +16,8 @@ const getAI = () => {
 
 async function callAiWithRetry(options: any, maxRetries = 2) {
   let lastError: any;
-  const PRIMARY_MODEL = "gemini-3-flash-preview";
-  const FALLBACK_MODEL = "gemini-1.5-flash";
+  const PRIMARY_MODEL = "gemini-3.5-flash";
+  const FALLBACK_MODEL = "gemini-3.5-flash";
   const ai = getAI();
 
   for (let i = 0; i <= maxRetries; i++) {

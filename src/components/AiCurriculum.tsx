@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import html2canvas from 'html2canvas';
 import { AI_TOOLS_DATA, AiTool } from './AiToolsData';
 import { PerfectionHub } from './PerfectionHub';
 import { PROMPT_PROFESSIONAL_DATA } from './PromptProData';
@@ -7,8 +8,10 @@ import { PROMPT_TEMPLATES_DATA } from './PromptTemplatesData';
 import { MEGA_PROMPTS_DATA } from './MegaPromptLabData';
 import { 
   Brain, 
+  BrainCircuit,
+  Download,
   Sparkles, 
-  ArrowLeft, 
+  ArrowLeft,  
   ChevronRight, 
   Trophy, 
   Bot, 
@@ -693,7 +696,7 @@ const ADVANCED_CURRICULUM_DATA = {
               {
                 id: "api_connect_simple",
                 difficulty: "عملاق ⭐⭐⭐⭐⭐",
-                pattern: "import os\nfrom openai import OpenAI\nclient = OpenAI(api_key=os.environ.get(\"GEMINI_API_KEY\"))\nresponse = client.chat.completures.create(\n    model=\"gemini-1.5-flash\",\n    messages=[{\"role\": \"user\", \"content\": \"اشرح لي الذكاء الاصطناعي بكلمة واحدة.\"}]\n)\nprint(response.choices[0].message.content)"
+                pattern: "import os\nfrom openai import OpenAI\nclient = OpenAI(api_key=os.environ.get(\"GEMINI_API_KEY\"))\nresponse = client.chat.completures.create(\n    model=\"gemini-3.5-flash\",\n    messages=[{\"role\": \"user\", \"content\": \"اشرح لي الذكاء الاصطناعي بكلمة واحدة.\"}]\n)\nprint(response.choices[0].message.content)"
               }
             ],
             discussion_question: "كيف يتيح لنا استخدام الـ APIs بناء أدوات ذكاء مخصصة تفيد جيراننا ومجتمعنا؟"
@@ -1303,7 +1306,7 @@ export const AiCurriculum = ({ lang, onBack }: { lang: 'en' | 'ar', onBack: () =
   const [xp, setXp] = useState<number>(0);
 
   // New Academy Features (User Request additions)
-  const [lobbyTab, setLobbyTab] = useState<'lessons' | 'printables' | 'launch' | 'tools' | 'challenges' | 'experiments' | 'certificate' | 'family' | 'english' | 'perfection'>('lessons');
+  const [lobbyTab, setLobbyTab] = useState<'lessons' | 'printables' | 'launch' | 'tools' | 'challenges' | 'experiments' | 'certificate' | 'family' | 'english' | 'perfection' | 'study_plan'>('lessons');
   const [familyName, setFamilyName] = useState<string>(isRtl ? 'الخليل' : 'Al Khalil');
 
   // Perfection Hub States
@@ -1496,6 +1499,82 @@ export const AiCurriculum = ({ lang, onBack }: { lang: 'en' | 'ar', onBack: () =
   // General multiple choice quiz state for other lessons
   const [lQuizAnswer, setLQuizAnswer] = useState<string | null>(null);
   const [lQuizFeedback, setLQuizFeedback] = useState<'correct' | 'wrong' | null>(null);
+
+  // Custom AI Study Planner States
+  const [plannerSubject, setPlannerSubject] = useState<string>('');
+  const [plannerFocus, setPlannerFocus] = useState<string>('بسيط عائلي وعملي للمبتدئين');
+  const [generatingPlan, setGeneratingPlan] = useState<boolean>(false);
+  const [customStudyPlan, setCustomStudyPlan] = useState<any>(null);
+
+  const handleGenerateCustomPlan = async () => {
+    if (!plannerSubject.trim()) return;
+    setGeneratingPlan(true);
+    setCustomStudyPlan(null);
+    try {
+      const resp = await fetch('/api/curriculum/design', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          subject: plannerSubject, 
+          goals: plannerFocus || 'تعليم تفاعلي مبسط مع عصف ذهني ممتع ومصمم بطوابع أكسفورد وأكاديمية باسم الخليل للمستقبليات', 
+          lang: lang 
+        })
+      });
+      if (!resp.ok) throw new Error("Failed to design curriculum");
+      const data = await resp.json();
+      setCustomStudyPlan(data);
+    } catch (err) {
+      console.error("Custom Plan Design Error:", err);
+      // Premium fallback structure in case of network issue
+      const fallbackSubject = plannerSubject || (isRtl ? 'الذكاء الاصطناعي وبناء الروبوتات' : 'AI & Robotics');
+      setCustomStudyPlan({
+        A1: [
+          { id: "A1-1", title: isRtl ? `مقدمة في ${fallbackSubject}` : `Introduction to ${fallbackSubject}`, titleAr: `مقدمة في ${fallbackSubject}`, description: isRtl ? "فهم المبادئ والأساسيات التأسيسية بدون برمجة" : "Foundational concepts without coding", descriptionAr: "فهم المبادئ والأساسيات التأسيسية بدون برمجة" },
+          { id: "A1-2", title: isRtl ? "الأنماط الأولى والبحث عنها" : "First Patterns Hunt", titleAr: "الأنماط الأولى والبحث عنها", description: isRtl ? "استكشاف أساسيات التعرف على الأنماط" : "Exploring basics of pattern recognition", descriptionAr: "استكشاف أساسيات التعرف على الأنماط والأشكال" },
+          { id: "A1-3", title: isRtl ? "مفهوم المدخلات والمخرجات" : "Input and Output Basics", titleAr: "مفهوم المدخلات والمخرجات", description: isRtl ? "تعلم كيفية استقبال وتحليل البيانات" : "Learning how machines receive data", descriptionAr: "تعلم كيفية استقبال وتحليل الآلات للبيانات والمخرجات" },
+          { id: "A1-4", title: isRtl ? "الأوامر والتعاويذ السحرية" : "Magic Prompts Level 1", titleAr: "الأوامر والتعاويذ السحرية", description: isRtl ? "تركيب وصياغة الأوامر الأساسية البسيطة" : "Writing basic friendly prompts", descriptionAr: "تركيب وصياغة الأوامر الأساسية البسيطة" },
+          { id: "A1-5", title: isRtl ? "لغة الآلة البدائية" : "Primitive Machine Code", titleAr: "لغة الآلة البدائية", description: isRtl ? "فهم كيفية عد الحواسيب واستخدامها المنطق" : "How computers count with logic", descriptionAr: "فهم كيفية عد الحواسيب واستخدامها المنطق البسيط" }
+        ],
+        A2: [
+          { id: "A2-1", title: isRtl ? "تفاعل الأنظمة وتوقع الخطوات" : "Smarter Pattern Predictions", description: "Daily conversations contexts", titleAr: "تفاعل الأنظمة وتوقع الخطوات", descriptionAr: "كيف تترابط الأنظمة وتتوقع الخطوات" },
+          { id: "A2-2", title: isRtl ? "تصميم الحوار الماتع" : "Engaging Dialogues Creation", description: "Simple logic paths", titleAr: "تصميم الحوار الماتع", descriptionAr: "صياغة الحوار الماتع وبناء العقد المشوقة" },
+          { id: "A2-3", title: isRtl ? "فهم الخرائط الذهنية" : "Logic Mind Maps", description: "Structuring simple AI flows", titleAr: "فهم الخرائط الذهنية", descriptionAr: "بناء الرسوم والخرائط والمسارات العقلية" },
+          { id: "A2-4", title: isRtl ? "الألعاب الرياضية الذكية" : "Gamified Smart Reasoning", description: "Basic deduction principles", titleAr: "الألعاب الرياضية الذكية", descriptionAr: "ألعاب رياضية تنمي الاستنتاج والتسلسل" },
+          { id: "A2-5", title: isRtl ? "هوية الآلة المخصصة" : "Personalized Machine Roles", description: "How roles change answers", titleAr: "هوية الآلة المخصصة", descriptionAr: "تخصيص الأدوار لضبط المخرجات بدقة" }
+        ],
+        B1: [
+          { id: "B1-1", title: isRtl ? "تصنيف البيانات وتوزيع الصور" : "Data Classification Methods", description: "Intermediate logic flows", titleAr: "تصنيف البيانات وتوزيع الصور", descriptionAr: "التعريف بأساليب التصنيف والتوزيع" },
+          { id: "B1-2", title: isRtl ? "المعالجة اللغوية البسيطة" : "Text Processing & NLP Foundations", description: "Word association structures", titleAr: "المعالجة اللغوية البسيطة", descriptionAr: "تقطيع وتحليل النصوص والروابط اللغوية" },
+          { id: "B1-3", title: isRtl ? "منع الأخطاء في التوقع" : "Preventing Hallucinations", description: "How to check references", titleAr: "منع الأخطاء في التوقع", descriptionAr: "معالجة التخيل والتوقعات المغلوطة وثقافة التحقق" },
+          { id: "B1-4", title: isRtl ? "المشاريع الكودية الأولى" : "First Interactive Projects", description: "Connecting prompts inside scripts", titleAr: "المشاريع الكودية الأولى", descriptionAr: "تنسيق الخطوات التفاعلية للمشاريع التعليمية" },
+          { id: "B1-5", title: isRtl ? "الخصوصية في الاستخدام" : "Data Safety and Privacy", description: "Securing identity online", titleAr: "الخصوصية في الاستخدام", descriptionAr: "خصوصية البيانات الشخصية وحمايتها" }
+        ],
+        B2: [
+          { id: "B2-1", title: isRtl ? "تصميم الواجهات المبتكرة" : "Smart UI/UX Generation", description: "Designing web frames using AI", titleAr: "تصميم الواجهات المبتكرة", descriptionAr: "بناء واجهات تفاعلية مذهلة" },
+          { id: "B2-2", title: isRtl ? "هندسة الأوامر المتقدمة" : "Advanced Prompt Architectures", description: "Chain of thought scripting style", titleAr: "هندسة الأوامر المتقدمة", descriptionAr: "أساليب التسلسل الذهني الممنهج (Chain of Thought)" },
+          { id: "B2-3", title: isRtl ? "الإنتاج التوليدي المدمج" : "Hybrid Generative Tools Integration", description: "Combining video, audio and text", titleAr: "الإنتاج التوليدي المدمج", descriptionAr: "دمج مولدات الصوت والصورة والنص معاً" },
+          { id: "B2-4", title: isRtl ? "تطبيقات الذكاء للأعمال" : "Enterprise Work Practices", description: "Automating repetitive daily tasks", titleAr: "تطبيقات الذكاء للأعمال", descriptionAr: "تسهيل وأتمتة العمليات اليومية" },
+          { id: "B2-5", title: isRtl ? "المناداة الذكية للـ APIs" : "Dynamic API Implementations", description: "Connecting server structures logic", titleAr: "المناداة الذكية للـ APIs", descriptionAr: "الربط الخارجي بين الأنظمة البرمجية" }
+        ],
+        C1: [
+          { id: "C1-1", title: isRtl ? "تحليل الشبكات العصبية" : "Neural Network Evaluation", description: "Mathematical weights optimization", titleAr: "تحليل الشبكات العصبية", descriptionAr: "فهم ميكانيكية الأوزان والتحسين" },
+          { id: "C1-2", title: isRtl ? "أخلاقيات الآلة العميقة" : "Deep Philosophical Safety", description: "Auditing bias and fairness", titleAr: "أخلاقيات الآلة العميقة", descriptionAr: "تحليل توازن البيانات والعدالة اللغوية" },
+          { id: "C1-3", title: isRtl ? "معالجة الفيديو والصور الفائقة" : "Super Resolution Video Architectures", description: "Pixel manipulation frameworks", titleAr: "معالجة الفيديو والصور الفائقة", descriptionAr: "نمذجة وفك تشفير الفيديو اللحظي عالي الجودة" },
+          { id: "C1-4", title: isRtl ? "التحسين المتعدد النماذج" : "Multi-modal Training Concepts", description: "Tuning model performance rules", titleAr: "التحسين المتعدد النماذج", descriptionAr: "تناغم نماذج المكونات الرقمية المختلفة" },
+          { id: "C1-5", title: isRtl ? "أمن الشبكات الذكية" : "AI Security Safeguard", description: "Defense mechanisms against adversarial prompt attacks", titleAr: "أمن الشبكات الذكية", descriptionAr: "الحماية ضد الثغرات وهجمات الكلمات المفتاحية" }
+        ],
+        C2: [
+          { id: "C2-1", title: isRtl ? `ريادة المستقبل في ${fallbackSubject}` : `Future Mastery of ${fallbackSubject}`, titleAr: `ريادة المستقبل في ${fallbackSubject}`, description: isRtl ? "التحكم الكامل والريادة والابتكار الشامل" : "Peak performance and absolute innovation", descriptionAr: "التحكم الكامل والريادة والابتكار الشامل" },
+          { id: "C2-2", title: isRtl ? "تصميم الحلول العالمية" : "Global Solution Design Architectures", description: "Solving massive social challenges with models", titleAr: "تصميم الحلول العالمية", descriptionAr: "صياغة أنظمة معوضة للمشاكل العريضة" },
+          { id: "C2-3", title: isRtl ? "مشروع التخرج البحثي الأكاديمي" : "Academic Research Capstone", description: "Publishing new technical insights", titleAr: "مشروع التخرج البحثي الأكاديمي", descriptionAr: "نشر الأبحاث والتحليلات الابتكارية الذكية" },
+          { id: "C2-4", title: isRtl ? "الأنظمة اللامركزية التوليدية" : "Decentralized Generative Cooperatives", description: "Autonomous swarm intelligence patterns", titleAr: "الأنظمة اللامركزية التوليدية", descriptionAr: "دراسة حركات النماذج اللامركزية النشطة" },
+          { id: "C2-5", title: isRtl ? "قوة الحوسبة الكمومية والذكاء" : "Quantum Computational Integration", description: "Ultimate future vision and development rules", descriptionAr: "رؤية المستقبل الأقصى وقواعد التطوير المستدام", titleAr: "قوة الحوسبة الكمومية والذكاء" }
+        ]
+      });
+    } finally {
+      setGeneratingPlan(false);
+    }
+  };
 
   const handleQuizAnswer = (answer: string) => {
     setLQuizAnswer(answer);
@@ -2887,6 +2966,17 @@ The adventure is waiting!`
                 >
                   <Sparkles size={16} />
                   {isRtl ? 'إضافات الوصول للكمال ✨' : 'Perfection Addons ✨'}
+                </button>
+                <button
+                  onClick={() => setLobbyTab('study_plan')}
+                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
+                    lobbyTab === 'study_plan'
+                      ? 'bg-gradient-to-t from-amber-500/15 to-transparent text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <BrainCircuit size={16} />
+                  {isRtl ? 'مخطط الدراسة الذكي (AI Planner) 🧠' : 'Smart AI Study Planner 🧠'}
                 </button>
               </div>
 
@@ -7361,6 +7451,177 @@ Your Guide: ${announcementCoordinator}`
 
               {lobbyTab === 'perfection' && (
                 <PerfectionHub isRtl={isRtl} />
+              )}
+
+              {lobbyTab === 'study_plan' && (
+                <div className="space-y-8 bg-[#0b172e] p-8 rounded-[2rem] border border-white/5 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full -mr-32 -mt-32 opacity-50 pointer-events-none" />
+                  
+                  <div className="relative z-10">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 pb-6 border-b border-white/5">
+                      <div>
+                        <h3 className="text-2xl font-black text-white flex items-center gap-3">
+                          <BrainCircuit className="text-amber-400 animate-pulse" size={28} />
+                          {isRtl ? 'مخطط الدراسة الذكي (AI Study Planner)' : 'AI Smart Individual Study Planner'}
+                        </h3>
+                        <p className="text-slate-400 mt-1 font-medium text-sm">
+                          {isRtl ? 'صمم خطة دراسية متكاملة فورياً عبر الذكاء الاصطناعي مخصصة لأي موضوع أو كفاءة تريد تعلمها في الذكاء الاصطناعي.' : 'Instantly design a custom, structured 6-level curriculum for any specialized AI subject or competency you wish to study.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                      {/* Left: Input Sidebar */}
+                      <div className="lg:col-span-1 space-y-6">
+                        <div className="bg-[#050b14]/80 p-6 rounded-3xl border border-white/5 space-y-4">
+                          <div>
+                            <label className="block text-[10px] font-black text-amber-400 uppercase tracking-wider mb-2">
+                              {isRtl ? 'الموضوع أو التخصص المقترح' : 'PROPOSED AI SUBJECT'}
+                            </label>
+                            <input
+                              type="text"
+                              value={plannerSubject}
+                              onChange={(e) => setPlannerSubject(e.target.value)}
+                              placeholder={isRtl ? 'مثال: الرسم والإنتاج الفني بالذكاء، برمجة الألعاب بالذكاء...' : 'e.g., AI Art Production, Python for AI...'}
+                              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs focus:outline-none focus:border-amber-500 font-bold text-white placeholder-slate-500"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] font-black text-amber-400 uppercase tracking-wider mb-2">
+                              {isRtl ? 'طبيعة وتركيز الخطة' : 'PLAN STYLE / TARGET FOCUS'}
+                            </label>
+                            <select
+                              value={plannerFocus}
+                              onChange={(e) => setPlannerFocus(e.target.value)}
+                              className="w-full px-4 py-3 bg-[#050b14] border border-white/10 rounded-xl text-xs focus:outline-none focus:border-amber-500 font-bold text-white"
+                            >
+                              <option value="بسيط عائلي مخصص للمبتدئين والأطفال">{isRtl ? 'بسيط عائلي (للمبتدئين والأطفال)' : 'Simple Family (Beginners & Kids)'}</option>
+                              <option value="شغل عملي وبرمجة وتطبيق مشاريع">{isRtl ? 'تطبيقي عملي ومشاريع برمجية' : 'Hands-on Projects & Coding'}</option>
+                              <option value="أكاديمي ونظري معمق">{isRtl ? 'أكاديمي ونظري معقد' : 'Advanced Theoretical Academic'}</option>
+                              <option value="صناعة المحتوى والتسويق الرقمي بالذكاء">{isRtl ? 'صناعة المحتوى والمهن الرقمية' : 'Content Creation & Digital Jobs'}</option>
+                            </select>
+                          </div>
+
+                          <button
+                            onClick={handleGenerateCustomPlan}
+                            disabled={generatingPlan || !plannerSubject.trim()}
+                            className="w-full bg-amber-500 text-slate-950 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-amber-400 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-amber-500/10 disabled:opacity-50"
+                          >
+                            {generatingPlan ? (
+                              <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Sparkles size={14} className="text-slate-950" />
+                            )}
+                            {isRtl ? 'توليد الخطة الدراسية 🚀' : 'Design Study Plan 🚀'}
+                          </button>
+                        </div>
+
+                        <div className="bg-amber-500/5 p-6 rounded-3xl border border-amber-500/10">
+                          <h4 className="text-xs font-black text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <CheckCircle className="text-amber-400" size={14} />
+                            {isRtl ? 'قواعد التوليد الذكي' : 'SMART GENERATION RULES'}
+                          </h4>
+                          <ul className="text-[11px] text-slate-300 space-y-2 list-disc pl-4" dir={isRtl ? 'rtl' : 'ltr'}>
+                            <li>{isRtl ? 'يقوم النموذج ببناء مسار متكامل مكون من 6 مستويات لغوية (CEFR).' : 'Builds a complete pathway composed of 6 standard progressive levels (CEFR).'}</li>
+                            <li>{isRtl ? 'كل مستوى يحتوي على 5 فصول دراسية غنية بالتعليم والترجمة الثنائية.' : 'Each level yields 5 detailed lessons rich with bilingual text support.'}</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      {/* Right: Output Result Dashboard */}
+                      <div className="lg:col-span-3">
+                        {generatingPlan ? (
+                          <div className="flex flex-col items-center justify-center py-20 bg-white/5 border border-dashed border-white/10 rounded-[2rem]">
+                            <div className="relative mb-6">
+                              <div className="w-16 h-16 rounded-full border-4 border-amber-500/10 border-t-amber-500 animate-spin" />
+                              <BrainCircuit className="text-amber-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" size={24} />
+                            </div>
+                            <h4 className="text-lg font-black text-white mb-2">{isRtl ? 'جاري رسم وهيكلة خطتك الدراسية...' : 'Structuring custom academic path...'}</h4>
+                            <p className="text-xs text-slate-400 max-w-sm text-center">
+                              {isRtl ? 'يقوم مستشار الذكاء الاصطناعي ببناء 30 وحدة دراسية تدريجية في موضوعك بالكامل.' : 'Our algorithms are formulating 30 progressive curriculum modules tailored to your query.'}
+                            </p>
+                          </div>
+                        ) : customStudyPlan ? (
+                          <div className="space-y-6">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
+                              <div>
+                                <span className="text-[9px] font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-md">{isRtl ? 'جاهز للعرض' : 'READY TO STUDY'}</span>
+                                <h4 className="text-sm font-black text-white mt-1.5">{isRtl ? `الخطة التعليمية لـ: ${plannerSubject}` : `Study Plan for: ${plannerSubject}`}</h4>
+                              </div>
+                              <button
+                                onClick={() => {
+                                  const ref = document.getElementById('custom-plan-print-area');
+                                  if (ref) {
+                                    html2canvas(ref, { scale: 2, useCORS: true, backgroundColor: '#050b14' }).then(canvas => {
+                                      const link = document.createElement('a');
+                                      link.href = canvas.toDataURL("image/png");
+                                      link.download = `AI-StudyPlan-${plannerSubject}.png`;
+                                      link.click();
+                                    });
+                                  }
+                                }}
+                                className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap self-stretch sm:self-auto justify-center"
+                              >
+                                <Download size={14} />
+                                {isRtl ? 'حفظ الخطة كصورة 💾' : 'Save Plan as Image 💾'}
+                              </button>
+                            </div>
+
+                            <div id="custom-plan-print-area" className="bg-[#050b14] p-6 rounded-[2rem] border border-white/5 space-y-6">
+                              <div className="border-b border-dashed border-white/10 pb-4 flex justify-between items-center mr-2 ml-2">
+                                <div>
+                                  <p className="text-[9px] font-black text-amber-400 tracking-widest uppercase">{isRtl ? 'مسار دراسي مخصص بالذكاء الاصطناعي' : 'CUSTOM AI LEARNING DIRECTIVE'}</p>
+                                  <h4 className="text-sm font-black text-white mt-1">{isRtl ? `خطة: ${plannerSubject} (${plannerFocus})` : `Plan: ${plannerSubject} (${plannerFocus})`}</h4>
+                                </div>
+                                <div className="text-xs font-black text-slate-400 border border-white/10 px-3 py-1 rounded-full">{isRtl ? 'أكاديمية باسم الخليل' : 'Basim Academy'}</div>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((level) => {
+                                  const units = customStudyPlan[level] || [];
+                                  return (
+                                    <div key={level} className="bg-white/[0.02] hover:bg-white/[0.04] transition-all duration-300 p-5 rounded-2xl border border-white/5">
+                                      <div className="flex items-center gap-2.5 mb-3 border-b border-white/5 pb-2">
+                                        <span className="bg-amber-500 text-slate-950 font-serif text-[11px] font-extrabold px-3 py-0.5 rounded-lg">
+                                          {level}
+                                        </span>
+                                        <h4 className="font-extrabold text-white text-xs uppercase tracking-wider">{isRtl ? `مستوى ${level} (المستهدف)` : `${level} Learning Phase`}</h4>
+                                      </div>
+
+                                      <div className="space-y-2.5">
+                                        {units.map((unit: any, idx: number) => (
+                                          <div key={unit.id || idx} className="bg-[#050b14]/50 p-3 rounded-xl border border-white/5 flex items-start gap-2.5">
+                                            <div className="w-5 h-5 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center text-[10px] font-black shrink-0">{idx + 1}</div>
+                                            <div className="space-y-1">
+                                              <h5 className="font-bold text-[11px] text-white">
+                                                {isRtl ? (unit.titleAr || unit.title) : (unit.title || unit.titleAr)}
+                                              </h5>
+                                              <p className="text-[10px] text-slate-400 leading-relaxed">
+                                                {isRtl ? (unit.descriptionAr || unit.description) : (unit.description || unit.descriptionAr)}
+                                              </p>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center py-20 bg-white/[0.02] border border-dashed border-white/5 rounded-[2rem] opacity-60">
+                            <Sparkles className="text-amber-400/40 animate-pulse mb-3" size={36} />
+                            <p className="text-xs font-bold text-slate-400 text-center max-w-xs leading-relaxed">
+                              {isRtl ? 'اكتب موضوع المنهج الذكي الذي ترغب بتوليده على اليمين ثم اضغط على زر توليد لإنشاء الهيكل.' : 'Please enter a desire study subject on the left panel & click generate to architect your personalized learning map.'}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               )}
             </motion.div>
           ) : isAdvanced ? (
