@@ -1682,6 +1682,75 @@ export const AiCurriculum = ({
   const [selectedCustomUnit, setSelectedCustomUnit] = useState<any | null>(null);
   const [completedCustomUnitIds, setCompletedCustomUnitIds] = useState<Set<string>>(new Set());
   const [customUnitQuizSelected, setCustomUnitQuizSelected] = useState<number | null>(null);
+
+  const isCustomUnitCompleted = (unit: any) => {
+    if (!unit) return false;
+    
+    // 1. Direct completion record in database-synced Set
+    if (completedCustomUnitIds.has(unit.id)) return true;
+
+    // 2. Fallbacks for Grand Path IDs
+    if (unit.id && typeof unit.id === 'string') {
+      if (unit.id.startsWith('grand-f-')) {
+        const num = parseInt(unit.id.replace('grand-f-', ''), 10);
+        if (!isNaN(num) && completedLessons.includes(num)) return true;
+      }
+      if (unit.id.startsWith('grand-a-')) {
+        const num = parseInt(unit.id.replace('grand-a-', ''), 10);
+        if (!isNaN(num) && completedAdvancedLessons.includes(num)) return true;
+      }
+      if (unit.id.startsWith('grand-p-')) {
+        const num = parseInt(unit.id.replace('grand-p-', ''), 10);
+        if (!isNaN(num) && completedProLessons.includes(num)) return true;
+      }
+    }
+
+    // 3. Fallbacks if source-field is defined
+    if (unit.source === 'foundational' && unit.lesson_number && completedLessons.includes(unit.lesson_number)) {
+      return true;
+    }
+    if (unit.source === 'advanced' && unit.lesson_number && completedAdvancedLessons.includes(unit.lesson_number)) {
+      return true;
+    }
+    if (unit.source === 'professional' && unit.lesson_number && completedProLessons.includes(unit.lesson_number)) {
+      return true;
+    }
+
+    // 4. Custom syllabus: match by title to look up native lesson & check if that was completed
+    const unitTitle = (unit.titleAr || unit.title || unit.lesson_title || "").trim().toLowerCase();
+    const unitTitleEn = (unit.title || "").trim().toLowerCase();
+    if (unitTitle) {
+      // Look in AI_CURRICULUM_DATA (Foundational Program)
+      for (const lvl of AI_CURRICULUM_DATA.program_levels) {
+        for (const les of lvl.lessons) {
+          const lesTitle = (les.lesson_title || "").trim().toLowerCase();
+          if (lesTitle === unitTitle || lesTitle === unitTitleEn || unitTitle.includes(lesTitle) || lesTitle.includes(unitTitle)) {
+            if (completedLessons.includes(les.lesson_number)) return true;
+          }
+        }
+      }
+      // Check in ADVANCED_CURRICULUM_DATA (Advanced Program)
+      for (const track of ADVANCED_CURRICULUM_DATA.tracks) {
+        for (const les of track.lessons) {
+          const lesTitle = (les.lesson_title || "").trim().toLowerCase();
+          if (lesTitle === unitTitle || lesTitle === unitTitleEn || unitTitle.includes(lesTitle) || lesTitle.includes(unitTitle)) {
+            if (completedAdvancedLessons.includes(les.lesson_number)) return true;
+          }
+        }
+      }
+      // Check in PROMPT_PROFESSIONAL_DATA (Professional Program)
+      for (const lvl of PROMPT_PROFESSIONAL_DATA.levels) {
+        for (const les of lvl.lessons) {
+          const lesTitle = (les.lesson_title || "").trim().toLowerCase();
+          if (lesTitle === unitTitle || lesTitle === unitTitleEn || unitTitle.includes(lesTitle) || lesTitle.includes(unitTitle)) {
+            if (completedProLessons.includes(les.lesson_number)) return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  };
   const [customUnitQuizCorrect, setCustomUnitQuizCorrect] = useState<boolean | null>(null);
   const [customActivities, setCustomActivities] = useState<Record<string, any>>({});
   const [loadingActivity, setLoadingActivity] = useState<boolean>(false);
@@ -8373,11 +8442,13 @@ Output Summary for [${topic}]:
                                 <div className="space-y-6">
                                   {customStudyPlan.phases.map((phase: any, pIdx: number) => {
                                     const isPhaseUnlocked = pIdx === 0 || 
-                                      (pIdx === 1 && passedMilestones.has('exam_f_to_a')) ||
-                                      (pIdx === 2 && passedMilestones.has('exam_a_to_p'));
+                                      (pIdx === 1 && (passedMilestones.has('exam_f_to_a') || completedLessons.length >= 20)) ||
+                                      (pIdx === 2 && (passedMilestones.has('exam_a_to_p') || completedAdvancedLessons.length >= 9));
 
                                     const milestoneKey = phase.milestoneExam?.id;
-                                    const isMilestonePassed = passedMilestones.has(milestoneKey);
+                                    const isMilestonePassed = passedMilestones.has(milestoneKey) || 
+                                      (milestoneKey === 'exam_f_to_a' && completedLessons.length >= 20) ||
+                                      (milestoneKey === 'exam_a_to_p' && completedAdvancedLessons.length >= 9);
 
                                     return (
                                       <div key={phase.id} className="relative bg-white/[0.01] rounded-2xl border border-white/5 p-5 hover:border-amber-500/20 transition-all duration-300">
@@ -8423,7 +8494,7 @@ Output Summary for [${topic}]:
                                         {/* Phase Lessons lists */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                                           {phase.lessons.map((lesson: any, lIdx: number) => {
-                                            const isCompleted = completedCustomUnitIds.has(lesson.id);
+                                            const isCompleted = isCustomUnitCompleted(lesson);
                                             const grpTag = lesson.level || lesson.trackName || (isRtl ? "احترافي" : "PRO");
                                             return (
                                               <div
@@ -8526,7 +8597,7 @@ Output Summary for [${topic}]:
                                         <div className="space-y-2.5">
                                           {units.map((unit: any, idx: number) => {
                                             const unitId = unit.id || `ai-${level}-${idx + 1}`;
-                                            const isCompleted = completedCustomUnitIds.has(unitId);
+                                            const isCompleted = isCustomUnitCompleted({ ...unit, id: unitId, level });
                                             return (
                                               <div 
                                                 key={unitId} 
@@ -9941,7 +10012,7 @@ Output Summary for [${topic}]:
         <AnimatePresence>
           {selectedCustomUnit && (() => {
             const act = customActivities[selectedCustomUnit.id] || getCustomUnitActivity(selectedCustomUnit, isRtl);
-            const isCompleted = completedCustomUnitIds.has(selectedCustomUnit.id);
+            const isCompleted = isCustomUnitCompleted(selectedCustomUnit);
             return (
               <motion.div 
                 initial={{ opacity: 0 }}
