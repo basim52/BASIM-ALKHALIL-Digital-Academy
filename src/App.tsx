@@ -32,6 +32,7 @@ import {
   LogIn,
   LogOut,
   Sparkles,
+  Lock,
   Plus,
   Trash2,
   Clock,
@@ -949,6 +950,14 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
   const [selectedHomework, setSelectedHomework] = useState<any | null>(null);
   const [currentPlan, setCurrentPlan] = useState<any>(null);
 
+  const isAboodB = profile && (
+    (profile.displayName && profile.displayName.trim().toUpperCase().includes('ABOOD B')) ||
+    (profile.email && profile.email.trim().toLowerCase().includes('abood')) ||
+    (profile.uid && profile.uid.trim().toLowerCase().includes('abood'))
+  );
+  const isBasimAdmin = profile?.email && ['basim5252@gmail.com'].includes(profile.email.trim().toLowerCase());
+  const hasCompletedTest = (profile as any)?.placementTestCompleted === true || !!isAboodB || !!isBasimAdmin;
+
   useEffect(() => {
     const fetchPlan = async () => {
       try {
@@ -1064,7 +1073,9 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
                 </div>
                 <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl text-teal-300">
                   <span className="text-[9px] font-black text-white/50 uppercase tracking-wider">{isRtl ? 'مستواك الحالي:' : 'CURRENT LEVEL:'}</span>
-                  <span className="text-xs font-black uppercase tracking-wider">{(profile as any).level || 'A1'}</span>
+                  <span className="text-xs font-black uppercase tracking-wider">
+                    {hasCompletedTest ? ((profile as any).level || 'A1') : (isRtl ? 'بانتظار الاختبار ⚠️' : 'Pending Test ⚠️')}
+                  </span>
                 </div>
               </div>
             </div>
@@ -4091,6 +4102,71 @@ export default function App() {
 
   const renderContent = () => {
     try {
+      const levelBasedViews = [
+        'curriculum',
+        'modern-curriculum',
+        'reading-curriculum',
+        'grammar-curriculum',
+        'conversation-curriculum',
+        'writing-curriculum',
+        'expression-curriculum',
+        'oxford-discover',
+        'oxford-classic',
+        'ai-curriculum'
+      ];
+
+      const isAboodB = userProfile && (
+        (userProfile.displayName && userProfile.displayName.trim().toUpperCase().includes('ABOOD B')) ||
+        (userProfile.email && userProfile.email.trim().toLowerCase().includes('abood')) ||
+        (userProfile.uid && userProfile.uid.trim().toLowerCase().includes('abood'))
+      );
+      const isBasimAdmin = userProfile?.email && ['basim5252@gmail.com'].includes(userProfile.email.trim().toLowerCase());
+      const isParentOrAdmin = userProfile?.role === 'parent' || userProfile?.role === 'admin';
+      const studentHasCompletedTest = isParentOrAdmin || isBasimAdmin || isAboodB || (userProfile as any)?.placementTestCompleted === true;
+
+      if (levelBasedViews.includes(view) && !studentHasCompletedTest && userProfile?.role === UserRole.STUDENT) {
+        return (
+          <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] p-6 md:p-12 mb-30" dir="rtl">
+            <div className="bg-[#002147] border border-amber-500/20 rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden text-right shadow-2xl animate-fade-in w-full max-w-2xl text-white">
+              <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl opacity-30 pointer-events-none" />
+              <div className="relative z-10 flex flex-col items-center text-center space-y-6 py-6 font-sans">
+                <div className="w-20 h-20 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                  <Lock size={36} />
+                </div>
+                
+                <div className="space-y-3">
+                  <h3 className="text-2xl md:text-3xl font-black text-white">
+                    {isRtl ? '⚠️ اختبار تحديد المستوى مطلوب أولاً' : '⚠️ Placement Test Required First'}
+                  </h3>
+                  <p className="text-slate-300 text-xs md:text-sm leading-relaxed max-w-lg">
+                    {isRtl 
+                      ? 'لا يمكنك تصفح مستويات المنهج الدراسي، ولا تلقي الوحدات التدريبية دون القيام باختبار تحديد المستوى التفاعلي أولاً للتأكد من مواءمة المنهج لمستواك الأكاديمي واللغوي الصحيح.'
+                      : 'You cannot browse levels or view interactive learning modules without first completing the placement test to determine your correct academic and linguistic level.'}
+                  </p>
+                </div>
+
+                <div className="pt-4 flex flex-col sm:flex-row gap-4 items-center justify-center w-full">
+                  <button
+                    onClick={() => setView('placement-test')}
+                    className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-8 py-4 rounded-2xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all active:scale-95 shrink-0 hover:-translate-y-0.5 cursor-pointer w-full sm:w-auto"
+                  >
+                    <Sparkles size={16} />
+                    {isRtl ? 'ابدأ اختبار تحديد المستوى الآن 🎯' : 'Start Placement Test Now 🎯'}
+                  </button>
+                  
+                  <button
+                    onClick={() => setView('dashboard')}
+                    className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold px-6 py-4 rounded-2xl text-xs transition-all active:scale-95 cursor-pointer w-full sm:w-auto"
+                  >
+                    {isRtl ? 'العودة للرئيسية' : 'Back to Home'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
       if (view === 'admin' && isAdmin) {
       return <AdminDashboard lang={lang} />;
     }

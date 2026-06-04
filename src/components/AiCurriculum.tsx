@@ -1655,6 +1655,7 @@ export const AiCurriculum = ({
   }, []);
 
   // Custom AI Study Planner States
+  const [plannerCategory, setPlannerCategory] = useState<'grand' | 'custom'>('grand');
   const [plannerSubject, setPlannerSubject] = useState<string>('');
   const [plannerFocus, setPlannerFocus] = useState<string>('بسيط عائلي وعملي للمبتدئين');
   const [generatingPlan, setGeneratingPlan] = useState<boolean>(false);
@@ -1662,11 +1663,27 @@ export const AiCurriculum = ({
   const [savingToCloud, setSavingToCloud] = useState<boolean>(false);
   const [cloudSaveSuccess, setCloudSaveSuccess] = useState<boolean>(false);
 
+  // States for tracking Milestone Exam progression
+  const [unlockedPhases, setUnlockedPhases] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('ai_grand_plan_unlocked_phases');
+    return saved ? new Set(JSON.parse(saved)) : new Set(['phase1']);
+  });
+  const [passedMilestones, setPassedMilestones] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('ai_grand_plan_passed_milestones');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+  const [activeMilestoneExam, setActiveMilestoneExam] = useState<any | null>(null);
+  const [milestoneAnswers, setMilestoneAnswers] = useState<Record<number, number>>({});
+  const [milestoneExamSubmitted, setMilestoneExamSubmitted] = useState<boolean>(false);
+  const [milestoneSuccess, setMilestoneSuccess] = useState<boolean | null>(null);
+
   // Selected custom study plan unit states and hooks
   const [selectedCustomUnit, setSelectedCustomUnit] = useState<any | null>(null);
   const [completedCustomUnitIds, setCompletedCustomUnitIds] = useState<Set<string>>(new Set());
   const [customUnitQuizSelected, setCustomUnitQuizSelected] = useState<number | null>(null);
   const [customUnitQuizCorrect, setCustomUnitQuizCorrect] = useState<boolean | null>(null);
+  const [customActivities, setCustomActivities] = useState<Record<string, any>>({});
+  const [loadingActivity, setLoadingActivity] = useState<boolean>(false);
 
   useEffect(() => {
     if (initialLobbyTab) {
@@ -1888,7 +1905,304 @@ export const AiCurriculum = ({
     }
   };
 
+  // Helper to build the sequential Grand Integrated Plan from the real active curriculum data
+  const buildGrandIntegratedPlan = () => {
+    // 1. Foundational
+    const fLessons: any[] = [];
+    AI_CURRICULUM_DATA.program_levels.forEach((lvl: any) => {
+      lvl.lessons.forEach((l: any) => {
+        fLessons.push({
+          id: `grand-f-${l.lesson_number}`,
+          phase: 1,
+          level: `L${lvl.level_number}`,
+          levelTitle: lvl.level_title,
+          lesson_number: l.lesson_number,
+          title: l.lesson_title,
+          titleAr: l.lesson_title,
+          description: l.core_concept ? (l.core_concept.substring(0, 100) + "...") : "",
+          descriptionAr: l.core_concept ? (l.core_concept.substring(0, 100) + "...") : "",
+          realRef: l,
+          source: 'foundational'
+        });
+      });
+    });
+
+    // 2. Advanced Professional Tracks
+    const aLessons: any[] = [];
+    let advancedIdx = 1;
+    ADVANCED_CURRICULUM_DATA.tracks.forEach((track: any) => {
+      track.lessons.forEach((l: any) => {
+        aLessons.push({
+          id: `grand-a-${advancedIdx}`,
+          phase: 2,
+          trackName: track.track_name,
+          lesson_number: advancedIdx,
+          title: l.lesson_title,
+          titleAr: l.lesson_title,
+          description: l.lesson_card?.content ? (l.lesson_card.content.substring(0, 100) + "...") : track.track_description,
+          descriptionAr: l.lesson_card?.content ? (l.lesson_card.content.substring(0, 100) + "...") : track.track_description,
+          realRef: l,
+          source: 'advanced'
+        });
+        advancedIdx++;
+      });
+    });
+
+    // 3. Prompt Pro
+    const pLessons: any[] = [];
+    let proIdx = 1;
+    PROMPT_PROFESSIONAL_DATA.levels.forEach((lvl: any, lvlIdx: number) => {
+      lvl.lessons.forEach((l: any) => {
+        pLessons.push({
+          id: `grand-p-${proIdx}`,
+          phase: 3,
+          levelTitleAr: lvl.title,
+          levelTitleEn: lvl.titleEn,
+          lesson_number: proIdx,
+          title: l.lesson_title,
+          titleAr: l.lesson_title,
+          description: l.objectives || l.concept,
+          descriptionAr: l.objectives || l.concept,
+          realRef: l,
+          source: 'professional'
+        });
+        proIdx++;
+      });
+    });
+
+    return {
+      isGrandPath: true,
+      subject: isRtl ? "المسار الأكاديمي الكلي للذكاء الاصطناعي" : "Integrative Grand AI Academic Pathway",
+      phases: [
+        {
+          id: "phase1",
+          title: "المرحلة الأولى: البرنامج التأسيسي العائلي (6 مستويات - 20 درساً)",
+          titleEn: "Phase 1: Foundational Family Program (6 Levels - 20 Lessons)",
+          description: "رحلة تفاعلية دافئة من أساسيات صيد الأنماط الحيوية، محاكاة العقول اللغوية، إزالة التشويش في مولدات الصور الفنية وبصمات الصوت والفيديو المعزز بالتفكير الناقد.",
+          descriptionEn: "A progressive path from pattern recognition to text/image synthesis, voice clones, and critical reasoning.",
+          lessons: fLessons,
+          milestoneExam: {
+            id: "exam_f_to_a",
+            title: "🏆 اختبار الترقية الأكاديمية الأول (عبور للمسارات التخصصية المتقدمة)",
+            titleEn: "🏆 Foundational to Advanced Promotion Milestone Exam",
+            questions: [
+              {
+                question: "لماذا يقال أن الذكاء الاصطناعي صياد أنماط وليس مفكراً بالمعنى البشري الوجداني؟",
+                options: [
+                  "لأنه يعتمد على الإحصاء اللفظي والاحتمالات المتكررة بالبيانات دون وعي حقيقي بالمعاني",
+                  "لأنه يعمل بالطاقة المغناطيسية الفورية بدون كهرباء",
+                  "لأنه لا يحمل شاشة عرض أو لوحة مفاتيح حقيقية"
+                ],
+                correctIndex: 0
+              },
+              {
+                question: "ما هو الدماغ المدرَّب للآلة الذي يصنع المعايرة والتنبؤ بالبيانات؟",
+                options: [
+                  "النموذج المدرَّب (Model)",
+                  "مقبس الطاقة الكهربائية لجدار الحماية",
+                  "برنامج تصفح الملفات والإنترنت المكتبي"
+                ],
+                correctIndex: 0
+              },
+              {
+                question: "تنتج مولدات الصور التوليدية ملامح لوحاتها الفنية ميكانيكياً من خلال أي طريقة؟",
+                options: [
+                  "إزالة التشويش والضباب تدريجياً (Diffusion/Denoising) للوصول للتصميم المتناسق",
+                  "قص ولصق صور جاهزة من محرك البحث بشكل عشوائي ومباشر",
+                  "تغيير درجة تباين الشاشة المادية للجهاز"
+                ],
+                correctIndex: 0
+              }
+            ]
+          }
+        },
+        {
+          id: "phase2",
+          title: "المرحلة الثانية: المسارات التخصصية المتقدمة (3 مسارات - 9 دروس)",
+          titleEn: "Phase 2: Advanced Specialty Tracks (3 Tracks - 9 Lessons)",
+          description: "مسارات متقدمة لتطبيق البرمجة بلغة بايثون للذكاء، محاكاة النمذجة الرياضية، وصياغة الأوامر المخصصة والملحقة علمياً لدعم المشاريع والابتكارات السريعة.",
+          descriptionEn: "Specialized streams covering python workspace, agent behaviors, and complex prompting frameworks.",
+          lessons: aLessons,
+          milestoneExam: {
+            id: "exam_a_to_p",
+            title: "🏆 اختبار الترقية الأكاديمية الثاني (عبور لأكاديمية احترافية المطالبات)",
+            titleEn: "🏆 Advanced to Prompt Engineering Promotion Milestone Exam",
+            questions: [
+              {
+                question: "ما هي الفائدة العلمية الجوهرية لاستعراض وقائع الأدوار (Roles) داخل توجيهات الأوامر؟",
+                options: [
+                  "توجيه مصفوفات المفرزات لتناسب الاستبصار التخصصي المطلوب وهدم هوامش الخطأ بدقة",
+                  "زيادة استهلاك سعة الرام وسرعة دوران المعالج",
+                  "إيقاف تشغيل الخادم والبدء من جديد دون قيود"
+                ],
+                correctIndex: 0
+              },
+              {
+                question: "أي مما يلي يعد من أركان صياغة التوجيهات الحتمية الفعالة؟",
+                options: [
+                  "توفير سياق واضح، إمداد الدور التخصصي، وصياغة قيود صارمة على المخرجات مع طرح أمثلة",
+                  "كتابة توجيهات غامضة وقصيرة جداً دون تفاصيل",
+                  "الانتظار حتى يقوم النموذج بتخمين الأفكار عشوائياً"
+                ],
+                correctIndex: 0
+              }
+            ]
+          }
+        },
+        {
+          id: "phase3",
+          title: "المرحلة الثالثة: مساق احترافية المطالبات والاعتماد الأكاديمي الكلي (24 درساً ممتعاً)",
+          titleEn: "Phase 3: Prompt Pro Certificate & Mastery Program (24 Lessons)",
+          description: "أرقى مساق أكاديمي لصياغة المحفزات المتقدمة، معالجة ثغرات الحقن، محاكاة شجرة التفكير، والوسائط المدمجة الكاملة لتخريج خبراء الغد المعتمدين.",
+          descriptionEn: "The absolute mastery path for prompt optimization, cyber safety, Tree of Thoughts, and multi-modal templates.",
+          lessons: pLessons,
+          milestoneExam: {
+            id: "exam_graduation",
+            title: "🎓 الامتحان النهائي الشامل وبحث التخرج لتدقيق مخرجات الأكاديمية",
+            titleEn: "🎓 Ultimate Graduation Capstone & Project Verification Exam",
+            questions: [
+              {
+                question: "أي تقنيات هندسة الأوامر تقوم على حل المعضلات عبر محاكاة شجرة وسلسلة تفكير وحل العقد المعقدة تفريعياً؟",
+                options: [
+                  "شجرة التفكير (Tree of Thoughts - ToT)",
+                  "توجيه الكلمة المفتاحية الواحدة المباشرة",
+                  "البناء العشوائي المفتوح دون معايير"
+                ],
+                correctIndex: 0
+              },
+              {
+                question: "مكافحة ثغرات حقن الطرف الثالث (Prompt Injection) في هندسة الأمان تهدف لحجب ماذا؟",
+                options: [
+                  "منع محاولات الخداع أو تغذية النموذج بتوجيهات خبيثة وكلمات مفتاحية تحثه على تجاوز قيود السلامة والسرية والخصوصية",
+                  "تسريع كفاءة بطاقة الشاشة وأداء الأقراص الصلبة للمخدم",
+                  "ترجمة الأوامر للغات عشوائية غير مدعومة من محرك النمذجة الكلي"
+                ],
+                correctIndex: 0
+              }
+            ]
+          }
+        }
+      ]
+    };
+  };
+
+  const handleSelectCustomUnit = async (unit: any) => {
+    setSelectedCustomUnit(unit);
+    setCustomUnitQuizSelected(null);
+    setCustomUnitQuizCorrect(null);
+    
+    // Check if it is a Grand Integrated Plan lesson
+    if (unit.id && unit.id.startsWith('grand-')) {
+      let conceptText = "";
+      let missionText = "";
+      let quizQuestion = "";
+      let quizOptions: string[] = [];
+      let quizCorrectIndex = 0;
+
+      if (unit.source === 'foundational') {
+        const ref = unit.realRef;
+        conceptText = ref.core_concept || ref.detailed_explanation;
+        missionText = ref.family_activity 
+          ? `النشاط: ${ref.family_activity.activity_name}\n\nالوصف:\n${ref.family_activity.activity_description}\n\nالخلاصة المستفادة:\n${ref.family_activity.lesson_learned}`
+          : "لم يحدد نشاط أسري خاص بهذا الفصل، المراجعة هي النشاط الرئيسي.";
+        quizQuestion = ref.discussion_question || "ما المفهوم الأساسي للدرس؟";
+        quizOptions = [
+          ref.parent_summary || "الذكاء الاصطناعي أداة لاستخلاص الأنماط الحيوية ولا يفهم بالمعنى البشري الوجداني.",
+          "الذكاء هو جهاز سحري يقرأ العقول كلياً.",
+          "الشبكات العادية لا تحتاج للبيانات أو التدريب الرقمي."
+        ];
+        quizCorrectIndex = 0;
+      } else if (unit.source === 'advanced') {
+        const ref = unit.realRef;
+        conceptText = ref.lesson_card?.content || ref.notes?.content || "درس متقدم في المسارات التخصصية بالأكاديمية.";
+        missionText = ref.quest_card?.instructions || "راجع الدرس التخصصي وطبق تحدي بايثون البرمجي أو التلقيم.";
+        quizQuestion = ref.quest_card?.discussion_question || "كيف تمنع الهلوسة في هذا النموذج المتقدم؟";
+        quizOptions = [
+          "من خلال صياغة أوامر (Prompts) متكاملة دقيقة وتزويد السياق بالأدوار الصارمة.",
+          "عبر تكرار الجملة دون فواصل.",
+          "عبر حذف الكود والبدء بدون معايير."
+        ];
+        quizCorrectIndex = 0;
+      } else if (unit.source === 'professional') {
+        const ref = unit.realRef;
+        conceptText = `${ref.lesson_title}: ${ref.concept || ref.objectives || "محاضرة تخصصية علمية في احترافية المطالبات."}`;
+        missionText = ref.interactivePractice?.instructions || "قم ببناء طلب مطبقاً الأساليب والقوالب الاحترافية.";
+        quizQuestion = ref.interactivePractice?.question || "ما Goal الأساسي للهندسة الاحترافية للمطالبات في هذا الفصل؟";
+        quizOptions = [
+          ref.interactivePractice?.correctExplanation || "الوصول للنبرة المطلوبة وحقن المعايرة ومكافحة التلقيم الخبيث بمهارة.",
+          "إنتاج صور عشوائية غير منظمة بغير تبرير.",
+          "تعديل خط الشاشة للمتصفح دون جدوى."
+        ];
+        quizCorrectIndex = 0;
+      }
+
+      setCustomActivities(prev => ({
+        ...prev,
+        [unit.id]: {
+          concept: conceptText,
+          mission: missionText,
+          question: quizQuestion,
+          options: quizOptions,
+          correctIndex: quizCorrectIndex
+        }
+      }));
+      return;
+    }
+    
+    if (customActivities[unit.id]) {
+      // already cached
+      return;
+    }
+    
+    setLoadingActivity(true);
+    try {
+      const res = await fetch('/api/curriculum/unit-activity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: plannerSubject || 'الذكاء الاصطناعي العام والمستحدثات',
+          level: unit.level,
+          unitTitle: isRtl ? (unit.titleAr || unit.title) : (unit.title || unit.titleAr),
+          unitDescription: isRtl ? (unit.descriptionAr || unit.description) : (unit.description || unit.descriptionAr),
+          lang: lang
+        })
+      });
+      if (!res.ok) throw new Error("Failed to load unit activity");
+      const data = await res.json();
+      setCustomActivities(prev => ({
+        ...prev,
+        [unit.id]: data
+      }));
+    } catch (err) {
+      console.error("Error generating path activity details:", err);
+      const act = getCustomUnitActivity(unit, isRtl);
+      setCustomActivities(prev => ({
+        ...prev,
+        [unit.id]: act
+      }));
+    } finally {
+      setLoadingActivity(false);
+    }
+  };
+
   const handleGenerateCustomPlan = async () => {
+    if (plannerCategory === 'grand') {
+      setGeneratingPlan(true);
+      setCustomStudyPlan(null);
+      setTimeout(() => {
+        const grandPlan = buildGrandIntegratedPlan();
+        setCustomStudyPlan(grandPlan);
+        localStorage.setItem('ai_custom_study_plan', JSON.stringify({
+          plan: grandPlan,
+          subject: isRtl ? "المسار الأكاديمي الكلي للذكاء الاصطناعي" : "Integrative Grand AI Academic Pathway",
+          focus: plannerFocus,
+          isGrand: true
+        }));
+        setGeneratingPlan(false);
+      }, 1000);
+      return;
+    }
+
     if (!plannerSubject.trim()) return;
     setGeneratingPlan(true);
     setCustomStudyPlan(null);
@@ -7943,60 +8257,113 @@ Your Guide: ${announcementCoordinator}`
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                      {/* Left: Input Sidebar */}
+                       {/* Left: Input Sidebar */}
                       <div className="lg:col-span-1 space-y-6">
                         <div className="bg-[#050b14]/80 p-6 rounded-3xl border border-white/5 space-y-4">
                           <div>
                             <label className="block text-[10px] font-black text-amber-400 uppercase tracking-wider mb-2">
-                              {isRtl ? 'الموضوع أو التخصص المقترح' : 'PROPOSED AI SUBJECT'}
+                              {isRtl ? 'تصنيف الخطة العلمية' : 'LEARNING PATH LEVEL'}
                             </label>
-                            <input
-                              type="text"
-                              value={plannerSubject}
-                              onChange={(e) => setPlannerSubject(e.target.value)}
-                              placeholder={isRtl ? 'مثال: الرسم والإنتاج الفني بالذكاء، برمجة الألعاب بالذكاء...' : 'e.g., AI Art Production, Python for AI...'}
-                              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs focus:outline-none focus:border-amber-500 font-bold text-white placeholder-slate-500"
-                            />
+                            <div className="grid grid-cols-2 gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setPlannerCategory('grand')}
+                                className={`px-3 py-2.5 rounded-xl text-[11px] font-black leading-tight border transition-all cursor-pointer ${
+                                  plannerCategory === 'grand'
+                                    ? 'bg-amber-500 border-amber-500 text-slate-950 shadow-md shadow-amber-500/10'
+                                    : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
+                                }`}
+                              >
+                                {isRtl ? 'الأكاديمية الكبرى 👑' : 'Grand Path 👑'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setPlannerCategory('custom')}
+                                className={`px-3 py-2.5 rounded-xl text-[11px] font-black leading-tight border transition-all cursor-pointer ${
+                                  plannerCategory === 'custom'
+                                    ? 'bg-amber-500 border-amber-500 text-slate-950 shadow-md shadow-amber-500/10'
+                                    : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
+                                }`}
+                              >
+                                {isRtl ? 'موضوع مخصص 🚀' : 'Custom Subject 🚀'}
+                              </button>
+                            </div>
                           </div>
 
-                          <div>
-                            <label className="block text-[10px] font-black text-amber-400 uppercase tracking-wider mb-2">
-                              {isRtl ? 'طبيعة وتركيز الخطة' : 'PLAN STYLE / TARGET FOCUS'}
-                            </label>
-                            <select
-                              value={plannerFocus}
-                              onChange={(e) => setPlannerFocus(e.target.value)}
-                              className="w-full px-4 py-3 bg-[#050b14] border border-white/10 rounded-xl text-xs focus:outline-none focus:border-amber-500 font-bold text-white"
-                            >
-                              <option value="بسيط عائلي مخصص للمبتدئين والأطفال">{isRtl ? 'بسيط عائلي (للمبتدئين والأطفال)' : 'Simple Family (Beginners & Kids)'}</option>
-                              <option value="شغل عملي وبرمجة وتطبيق مشاريع">{isRtl ? 'تطبيقي عملي ومشاريع برمجية' : 'Hands-on Projects & Coding'}</option>
-                              <option value="أكاديمي ونظري معمق">{isRtl ? 'أكاديمي ونظري معقد' : 'Advanced Theoretical Academic'}</option>
-                              <option value="صناعة المحتوى والتسويق الرقمي بالذكاء">{isRtl ? 'صناعة المحتوى والمهن الرقمية' : 'Content Creation & Digital Jobs'}</option>
-                            </select>
-                          </div>
+                          {plannerCategory === 'custom' ? (
+                            <div>
+                              <label className="block text-[10px] font-black text-amber-400 uppercase tracking-wider mb-2">
+                                {isRtl ? 'الموضوع أو التخصص المقترح' : 'PROPOSED AI SUBJECT'}
+                              </label>
+                              <input
+                                type="text"
+                                value={plannerSubject}
+                                onChange={(e) => setPlannerSubject(e.target.value)}
+                                placeholder={isRtl ? 'مثال: الرسم والإنتاج الفني بالذكاء، برمجة الألعاب بالذكاء...' : 'e.g., AI Art Production, Python for AI...'}
+                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs focus:outline-none focus:border-amber-500 font-bold text-white placeholder-slate-500"
+                              />
+                            </div>
+                          ) : (
+                            <div className="bg-white/[0.02] border border-white/5 p-3 rounded-xl text-right">
+                              <p className="text-[10px] font-black text-amber-400 tracking-wider uppercase mb-1">{isRtl ? 'أكاديمية دمج المسارات الكلية' : 'CORE INTEGRATED PATHWAY'}</p>
+                              <p className="text-[10px] font-semibold text-slate-300 leading-relaxed">
+                                {isRtl ? 'يجمع هذا المسلط برنامج التأسيس بستة مستويات، ثم مسارات التخصص المتقدمة، وصولاً لاحترافية المطالبات، مفصلة باختبارات ترقية بينية دقيقة.' : 'Combines 20 Foundational lessons, 9 Advanced classes, and 24 Prompt Pro sessions, unlocked gradually via Milestone promotional checkpoints.'}
+                              </p>
+                            </div>
+                          )}
+
+                          {plannerCategory === 'custom' && (
+                            <div>
+                              <label className="block text-[10px] font-black text-amber-400 uppercase tracking-wider mb-2">
+                                {isRtl ? 'طبيعة وتركيز الخطة' : 'PLAN STYLE / TARGET FOCUS'}
+                              </label>
+                              <select
+                                value={plannerFocus}
+                                onChange={(e) => setPlannerFocus(e.target.value)}
+                                className="w-full px-4 py-3 bg-[#050b14]/90 border border-white/10 rounded-xl text-xs focus:outline-none focus:border-amber-500 font-bold text-white"
+                              >
+                                <option value="بسيط عائلي مخصص للمبتدئين والأطفال">{isRtl ? 'بسيط عائلي (للمبتدئين والأطفال)' : 'Simple Family (Beginners & Kids)'}</option>
+                                <option value="شغل عملي وبرمجة وتطبيق مشاريع">{isRtl ? 'تطبيقي عملي ومشاريع برمجية' : 'Hands-on Projects & Coding'}</option>
+                                <option value="أكاديمي ونظري معمق">{isRtl ? 'أكاديمي ونظري معقد' : 'Advanced Theoretical Academic'}</option>
+                                <option value="صناعة المحتوى والتسويق الرقمي بالذكاء">{isRtl ? 'صناعة المحتوى والمهن الرقمية' : 'Content Creation & Digital Jobs'}</option>
+                              </select>
+                            </div>
+                          )}
 
                           <button
                             onClick={handleGenerateCustomPlan}
-                            disabled={generatingPlan || !plannerSubject.trim()}
-                            className="w-full bg-amber-500 text-slate-950 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-amber-400 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-amber-500/10 disabled:opacity-50"
+                            disabled={generatingPlan || (plannerCategory === 'custom' && !plannerSubject.trim())}
+                            className="w-full bg-amber-500 text-slate-950 py-3.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-amber-400 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-amber-500/10 disabled:opacity-50"
                           >
                             {generatingPlan ? (
                               <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
                             ) : (
                               <Sparkles size={14} className="text-slate-950" />
                             )}
-                            {isRtl ? 'توليد الخطة الدراسية 🚀' : 'Design Study Plan 🚀'}
+                            {plannerCategory === 'grand' 
+                              ? (isRtl ? 'بناء مسار الأكاديمية الشامل 🎓' : 'Compile Grand Integrative Plan 🎓')
+                              : (isRtl ? 'توليد الخطة الدراسية 🚀' : 'Design Study Plan 🚀')
+                            }
                           </button>
                         </div>
 
                         <div className="bg-amber-500/5 p-6 rounded-3xl border border-amber-500/10">
                           <h4 className="text-xs font-black text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                             <CheckCircle className="text-amber-400" size={14} />
-                            {isRtl ? 'قواعد التوليد الذكي' : 'SMART GENERATION RULES'}
+                            {isRtl ? 'قواعد الأكاديمية' : 'ACADEMIC CHARTER'}
                           </h4>
                           <ul className="text-[11px] text-slate-300 space-y-2 list-disc pl-4" dir={isRtl ? 'rtl' : 'ltr'}>
-                            <li>{isRtl ? 'يقوم النموذج ببناء مسار متكامل مكون من 6 مستويات لغوية (CEFR).' : 'Builds a complete pathway composed of 6 standard progressive levels (CEFR).'}</li>
-                            <li>{isRtl ? 'كل مستوى يحتوي على 5 فصول دراسية غنية بالتعليم والترجمة الثنائية.' : 'Each level yields 5 detailed lessons rich with bilingual text support.'}</li>
+                            {plannerCategory === 'grand' ? (
+                              <>
+                                <li>{isRtl ? 'يجب دراسة مستويات التأسيس قبل فتح تخصصات بايثون وهندسة الأدوار المتقدمة.' : 'Must complete foundation levels before unlocking advanced python tracking.'}</li>
+                                <li>{isRtl ? 'اجتياز اختبارات الترقي البينية المدمجة يمنحك تصريح العبور الحصري للمراحل الأعلى.' : 'Passing milestone promo exams grants exclusive gateway passage to subsequent phases.'}</li>
+                              </>
+                            ) : (
+                              <>
+                                <li>{isRtl ? 'يقوم النموذج ببناء مسار متكامل مكون من 6 مستويات لغوية (CEFR).' : 'Builds a complete pathway composed of 6 standard progressive levels (CEFR).'}</li>
+                                <li>{isRtl ? 'كل مستوى يحتوي على 5 فصول دراسية غنية بالتعليم والترجمة الثنائية.' : 'Each level yields 5 detailed lessons rich with bilingual text support.'}</li>
+                              </>
+                            )}
                           </ul>
                         </div>
                       </div>
@@ -8080,62 +8447,208 @@ Your Guide: ${announcementCoordinator}`
                               </div>
                             </div>
 
-                            <div id="custom-plan-print-area" className="bg-[#050b14] p-6 rounded-[2rem] border border-white/5 space-y-6">
-                              <div className="border-b border-dashed border-white/10 pb-4 flex justify-between items-center mr-2 ml-2">
-                                <div>
-                                  <p className="text-[9px] font-black text-amber-400 tracking-widest uppercase">{isRtl ? 'مسار دراسي مخصص بالذكاء الاصطناعي' : 'CUSTOM AI LEARNING DIRECTIVE'}</p>
-                                  <h4 className="text-sm font-black text-white mt-1">{isRtl ? `خطة: ${plannerSubject} (${plannerFocus})` : `Plan: ${plannerSubject} (${plannerFocus})`}</h4>
+                             {customStudyPlan.isGrandPath ? (
+                              <div id="custom-plan-print-area" className="bg-[#050b14] p-6 rounded-[2rem] border border-white/5 space-y-8 select-none text-right">
+                                <div className="border-b border-dashed border-white/10 pb-4 flex justify-between items-center mr-2 ml-2">
+                                  <div>
+                                    <p className="text-[9px] font-black text-amber-400 tracking-widest uppercase flex items-center gap-1.5 justify-end">
+                                      <Sparkles size={11} className="text-amber-400 animate-pulse" />
+                                      {isRtl ? 'المسار الأكاديمي الكلي المتكامل' : 'INTEGRATIVE GRAND AI CAREER PATHWAY'}
+                                    </p>
+                                    <h4 className="text-sm font-black text-white mt-1">{isRtl ? 'البرنامج الموحد الشامل (مستويات ومسارات واختبارات)' : 'Unified Academy Certification Roadmap'}</h4>
+                                  </div>
+                                  <div className="text-xs font-black text-slate-405 text-amber-400 border border-amber-500/10 bg-amber-500/5 px-3 py-1 rounded-full">{isRtl ? 'أكاديمية باسم الخليل' : 'Basim Academy'}</div>
                                 </div>
-                                <div className="text-xs font-black text-slate-400 border border-white/10 px-3 py-1 rounded-full">{isRtl ? 'أكاديمية باسم الخليل' : 'Basim Academy'}</div>
-                              </div>
 
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((level) => {
-                                  const units = customStudyPlan[level] || [];
-                                  return (
-                                    <div key={level} className="bg-white/[0.02] hover:bg-white/[0.04] transition-all duration-300 p-5 rounded-2xl border border-white/5">
-                                      <div className="flex items-center gap-2.5 mb-3 border-b border-white/5 pb-2">
-                                        <span className="bg-amber-500 text-slate-950 font-serif text-[11px] font-extrabold px-3 py-0.5 rounded-lg">
-                                          {level}
-                                        </span>
-                                        <h4 className="font-extrabold text-white text-xs uppercase tracking-wider">{isRtl ? `مستوى ${level} (المستهدف)` : `${level} Learning Phase`}</h4>
-                                      </div>
+                                <div className="space-y-6">
+                                  {customStudyPlan.phases.map((phase: any, pIdx: number) => {
+                                    const isPhaseUnlocked = pIdx === 0 || 
+                                      (pIdx === 1 && passedMilestones.has('exam_f_to_a')) ||
+                                      (pIdx === 2 && passedMilestones.has('exam_a_to_p'));
 
-                                      <div className="space-y-2.5">
-                                        {units.map((unit: any, idx: number) => {
-                                          const unitId = unit.id || `ai-${level}-${idx + 1}`;
-                                          const isCompleted = completedCustomUnitIds.has(unitId);
-                                          return (
-                                            <div 
-                                              key={unitId} 
-                                              onClick={() => setSelectedCustomUnit({ ...unit, level, id: unitId })}
-                                              className="bg-[#050b14]/50 p-3 rounded-xl border border-white/5 hover:border-amber-500/40 hover:bg-amber-500/[0.02] flex items-start gap-2.5 cursor-pointer transition-all active:scale-98 group/unit"
-                                            >
-                                              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
-                                                isCompleted 
-                                                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
-                                                  : 'bg-amber-500/10 text-amber-400'
-                                              }`}>
-                                                {isCompleted ? <CheckCircle size={10} /> : idx + 1}
-                                              </div>
-                                              <div className="space-y-1">
-                                                <h5 className="font-bold text-[11px] text-white group-hover/unit:text-amber-400 transition-colors flex items-center gap-1.5 flex-wrap">
-                                                  {isRtl ? (unit.titleAr || unit.title) : (unit.title || unit.titleAr)}
-                                                  {isCompleted && <span className="text-[8px] bg-emerald-500/15 text-emerald-400 px-1.5 py-0.5 rounded font-black uppercase tracking-wider">{isRtl ? 'مكتمل ✅' : 'Completed ✅'}</span>}
-                                                </h5>
-                                                <p className="text-[10px] text-slate-400 leading-relaxed group-hover/unit:text-slate-300">
-                                                  {isRtl ? (unit.descriptionAr || unit.description) : (unit.description || unit.descriptionAr)}
-                                                </p>
-                                              </div>
+                                    const milestoneKey = phase.milestoneExam?.id;
+                                    const isMilestonePassed = passedMilestones.has(milestoneKey);
+
+                                    return (
+                                      <div key={phase.id} className="relative bg-white/[0.01] rounded-2xl border border-white/5 p-5 hover:border-amber-500/20 transition-all duration-300">
+                                        {/* Locked phase screen overlay */}
+                                        {!isPhaseUnlocked && (
+                                          <div className="absolute inset-0 bg-[#050b14]/95 backdrop-blur-sm rounded-2xl z-25 flex flex-col items-center justify-center text-center p-6 border border-white/5">
+                                            <Lock className="text-amber-400 mb-2 animate-bounce" size={24} />
+                                            <h5 className="text-xs font-black text-white">
+                                              {isRtl ? '🔒 هذه المرحلة مقفلة حالياً!' : '🔒 Phase Locked!'}
+                                            </h5>
+                                            <p className="text-[10px] text-slate-400 max-w-xs mt-1 mb-3">
+                                              {isRtl 
+                                                ? `لترقية حسابك الأكاديمي، يجب إنجاز متطلبات المرحلة العائلية السابقة ودخول اختبار الترقية بـ 100%.` 
+                                                : `Unlocking this advanced track requires completing previous milestones & passing the promotional assessment.`
+                                              }
+                                            </p>
+                                            <div className="text-[9px] bg-amber-500/10 text-amber-400 px-3 py-0.5 rounded-full font-black uppercase tracking-wider">
+                                              {isRtl ? `مطلوب: تصحيح اختبار مرحلة التأسيس` : `Required: Stage Checkpoint Correct`}
                                             </div>
-                                          );
-                                        })}
+                                          </div>
+                                        )}
+
+                                        {/* Phase Header details */}
+                                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-white/5 pb-3 mb-4">
+                                          <div className="text-right">
+                                            <span className="text-[9px] font-black uppercase text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded font-mono">
+                                              {isRtl ? `المرحلة ${pIdx + 1}` : `STAGE ${pIdx + 1}`}
+                                            </span>
+                                            <h4 className="font-extrabold text-xs text-white mt-2">{isRtl ? phase.title : phase.titleEn}</h4>
+                                            <p className="text-[10px] text-slate-400 mt-1 max-w-xl">{isRtl ? phase.description : phase.descriptionEn}</p>
+                                          </div>
+                                          <div className="shrink-0">
+                                            <span className={`text-[9px] font-black px-2.5 py-1 rounded-full uppercase ${
+                                              isPhaseUnlocked 
+                                                ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/10' 
+                                                : 'bg-slate-850 text-slate-500'
+                                            }`}>
+                                              {isPhaseUnlocked ? (isRtl ? 'نشط ومفتوح ✓' : 'Active ✓') : (isRtl ? 'مقفل 🔒' : 'Locked 🔒')}
+                                            </span>
+                                          </div>
+                                        </div>
+
+                                        {/* Phase Lessons lists */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                          {phase.lessons.map((lesson: any, lIdx: number) => {
+                                            const isCompleted = completedCustomUnitIds.has(lesson.id);
+                                            const grpTag = lesson.level || lesson.trackName || (isRtl ? "احترافي" : "PRO");
+                                            return (
+                                              <div
+                                                key={lesson.id}
+                                                onClick={() => handleSelectCustomUnit({ ...lesson, id: lesson.id, level: grpTag })}
+                                                className="bg-[#050b14]/40 p-3 rounded-xl border border-white/5 hover:border-amber-500/40 hover:bg-amber-500/[0.01]/30 flex items-start gap-2.5 cursor-pointer transition-all active:scale-98 group/unit"
+                                              >
+                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
+                                                  isCompleted 
+                                                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                                                    : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                                }`}>
+                                                  {isCompleted ? <CheckCircle size={10} /> : lIdx + 1}
+                                                </div>
+                                                <div className="space-y-0.5 text-right flex-1">
+                                                  <div className="flex items-center gap-1.5 flex-wrap justify-start">
+                                                    <span className="text-[8px] font-black text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded font-mono uppercase tracking-wider select-none shrink-0">
+                                                      {grpTag}
+                                                    </span>
+                                                    <h5 className="font-extrabold text-[11px] text-white group-hover/unit:text-amber-400 transition-colors">
+                                                      {isRtl ? lesson.titleAr : lesson.title}
+                                                    </h5>
+                                                    {isCompleted && (
+                                                      <span className="text-[8px] bg-emerald-500/15 text-emerald-450 text-emerald-450 px-1.5 py-0.5 rounded font-black tracking-wider uppercase shrink-0">
+                                                        {isRtl ? 'ناجح ✅' : 'Pass ✅'}
+                                                      </span>
+                                                    )}
+                                                  </div>
+                                                  <p className="text-[10px] text-slate-400 leading-relaxed font-semibold group-hover/unit:text-slate-300">
+                                                    {isRtl ? lesson.descriptionAr : lesson.description}
+                                                  </p>
+                                                </div>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+
+                                        {/* Phase Milestone gateway quiz block */}
+                                        {phase.milestoneExam && (
+                                          <div className="mt-5 pt-4 border-t border-dashed border-white/5 flex flex-col sm:flex-row justify-between items-center gap-3 bg-amber-500/[0.02] p-4 rounded-xl border border-amber-500/10 text-right">
+                                            <div className="text-right">
+                                              <span className="text-[8px] font-black uppercase text-amber-400 tracking-wider font-mono">{isRtl ? 'البوابة الترقوية للأكاديمية' : 'ACADEMIC CHECKPOINT GATES'}</span>
+                                              <h5 className="text-[11px] font-black text-white mt-1">{isRtl ? phase.milestoneExam.title : phase.milestoneExam.titleEn}</h5>
+                                              <p className="text-[9px] text-slate-400 leading-relaxed max-w-md">
+                                                {isRtl 
+                                                  ? 'يجب خوض هذا الاختبار التقيمي واجتيازه بشكل كامل لتنشيط وفتح دروس المرحلة المتعاقبة بشكل آلي.' 
+                                                  : 'Answer these intermediate promotional questions with 100% precision to auto-unlock subsequent phases.'
+                                                }
+                                              </p>
+                                            </div>
+                                            <button
+                                              onClick={() => {
+                                                setActiveMilestoneExam(phase.milestoneExam);
+                                                setMilestoneAnswers({});
+                                                setMilestoneExamSubmitted(false);
+                                                setMilestoneSuccess(null);
+                                              }}
+                                              className={`px-4 py-2 rounded-xl text-[10px] font-black tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap w-full sm:w-auto ${
+                                                isMilestonePassed
+                                                  ? 'bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 cursor-not-allowed text-center'
+                                                  : 'bg-amber-500 hover:bg-amber-405 bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/10 text-center'
+                                              }`}
+                                              disabled={isMilestonePassed}
+                                            >
+                                              <Trophy size={11} />
+                                              {isMilestonePassed 
+                                                ? (isRtl ? 'تم العبور بنجاح ✓' : 'Milestone Passed ✓') 
+                                                : (isRtl ? 'خوض اختبار الترقية 🏆' : 'Take Promotion Checkpoint 🏆')
+                                              }
+                                            </button>
+                                          </div>
+                                        )}
                                       </div>
-                                    </div>
-                                  );
-                                })}
+                                    );
+                                  })}
+                                </div>
                               </div>
-                            </div>
+                             ) : (
+                              <div id="custom-plan-print-area" className="bg-[#050b14] p-6 rounded-[2rem] border border-white/5 space-y-6 text-right">
+                                <div className="border-b border-dashed border-white/10 pb-4 flex justify-between items-center mr-2 ml-2">
+                                  <div>
+                                    <p className="text-[9px] font-black text-amber-400 tracking-widest uppercase">{isRtl ? 'مسار دراسي مخصص بالذكاء الاصطناعي' : 'CUSTOM AI LEARNING DIRECTIVE'}</p>
+                                    <h4 className="text-sm font-black text-white mt-1">{isRtl ? `خطة: ${plannerSubject} (${plannerFocus})` : `Plan: ${plannerSubject} (${plannerFocus})`}</h4>
+                                  </div>
+                                  <div className="text-xs font-black text-slate-400 border border-white/10 px-3 py-1 rounded-full">{isRtl ? 'أكاديمية باسم الخليل' : 'Basim Academy'}</div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((level) => {
+                                    const units = customStudyPlan[level] || [];
+                                    return (
+                                      <div key={level} className="bg-white/[0.02] hover:bg-white/[0.04] transition-all duration-300 p-5 rounded-2xl border border-white/5">
+                                        <div className="flex items-center gap-2.5 mb-3 border-b border-white/5 pb-2">
+                                          <span className="bg-amber-500 text-slate-950 font-serif text-[11px] font-extrabold px-3 py-0.5 rounded-lg">
+                                            {level}
+                                          </span>
+                                          <h4 className="font-extrabold text-white text-xs uppercase tracking-wider">{isRtl ? `مستوى ${level} (المستهدف)` : `${level} Learning Phase`}</h4>
+                                        </div>
+
+                                        <div className="space-y-2.5">
+                                          {units.map((unit: any, idx: number) => {
+                                            const unitId = unit.id || `ai-${level}-${idx + 1}`;
+                                            const isCompleted = completedCustomUnitIds.has(unitId);
+                                            return (
+                                              <div 
+                                                key={unitId} 
+                                                onClick={() => handleSelectCustomUnit({ ...unit, level, id: unitId })}
+                                                className="bg-[#050b14]/50 p-3 rounded-xl border border-white/5 hover:border-amber-500/40 hover:bg-amber-500/[0.02] flex items-start gap-2.5 cursor-pointer transition-all active:scale-98 group/unit"
+                                              >
+                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
+                                                  isCompleted 
+                                                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                                                    : 'bg-amber-500/10 text-amber-400'
+                                                }`}>
+                                                  {isCompleted ? <CheckCircle size={10} /> : idx + 1}
+                                                </div>
+                                                <div className="space-y-1">
+                                                  <h5 className="font-bold text-[11px] text-white group-hover/unit:text-amber-400 transition-colors flex items-center gap-1.5 flex-wrap">
+                                                    {isRtl ? (unit.titleAr || unit.title) : (unit.title || unit.titleAr)}
+                                                    {isCompleted && <span className="text-[8px] bg-emerald-500/15 text-emerald-400 px-1.5 py-0.5 rounded font-black uppercase tracking-wider">{isRtl ? 'مكتمل ✅' : 'Completed ✅'}</span>}
+                                                  </h5>
+                                                  <p className="text-[10px] text-slate-400 leading-relaxed group-hover/unit:text-slate-300">
+                                                    {isRtl ? (unit.descriptionAr || unit.description) : (unit.description || unit.descriptionAr)}
+                                                  </p>
+                                                </div>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                             )}
                           </div>
                         ) : (
                           <div className="flex flex-col items-center justify-center py-20 bg-white/[0.02] border border-dashed border-white/5 rounded-[2rem] opacity-60">
@@ -9517,7 +10030,7 @@ Your Guide: ${announcementCoordinator}`
         {/* Custom AI Study Plan Lesson Detail Modal */}
         <AnimatePresence>
           {selectedCustomUnit && (() => {
-            const act = getCustomUnitActivity(selectedCustomUnit, isRtl);
+            const act = customActivities[selectedCustomUnit.id] || getCustomUnitActivity(selectedCustomUnit, isRtl);
             const isCompleted = completedCustomUnitIds.has(selectedCustomUnit.id);
             return (
               <motion.div 
@@ -9563,101 +10076,122 @@ Your Guide: ${announcementCoordinator}`
 
                   {/* Body Content */}
                   <div className="p-6 md:p-8 space-y-6 max-h-[70vh] overflow-y-auto">
-                    {/* Lecture Section */}
-                    <div className="space-y-2">
-                      <h5 className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5 justify-start">
-                        <BookOpen size={14} className="text-amber-400" />
-                        {isRtl ? '💡 المفهوم والدرس اليومي' : '💡 CORE LESSON CONCEPT'}
-                      </h5>
-                      <p className="text-xs text-slate-200 leading-relaxed font-semibold bg-white/[0.02] p-4 rounded-2xl border border-white/5">
-                        {act.concept}
-                      </p>
-                    </div>
-
-                    {/* Laboratory Practice */}
-                    <div className="space-y-2">
-                      <h5 className="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center gap-1.5 justify-start">
-                        <Bot size={14} className="text-indigo-400" />
-                        {isRtl ? '🔬 النشاط التجريبي العالي (Sandbox Mission)' : '🔬 PRACTICAL SANDBOX MISSION'}
-                      </h5>
-                      <div className="bg-indigo-500/5 p-4 rounded-2xl border border-indigo-500/10 space-y-3">
-                        <p className="text-[11px] text-slate-300 font-bold leading-relaxed">
-                          {act.mission}
-                        </p>
-                        <button
-                          onClick={() => {
-                            setSelectedCustomUnit(null);
-                            setCustomUnitQuizSelected(null);
-                            setCustomUnitQuizCorrect(null);
-                            setLobbyTab('launch'); // Go to play workspace
-                          }}
-                          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-[10px] font-black tracking-wider uppercase transition-all flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <Play size={10} />
-                          {isRtl ? 'افتح المعمل التفاعلي الفوري 🚀' : 'Open AI Learning Lab Now 🚀'}
-                        </button>
+                    {loadingActivity ? (
+                      <div className="flex flex-col items-center justify-center py-16 space-y-4">
+                        <div className="relative">
+                          <div className="w-16 h-16 rounded-full border-4 border-amber-500/10 border-t-amber-500 animate-spin" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <BrainCircuit className="text-amber-400 animate-pulse" size={24} />
+                          </div>
+                        </div>
+                        <div className="text-center space-y-2">
+                          <p className="text-xs font-black text-amber-400 tracking-wider">
+                            {isRtl ? 'جاري الاستعانة بالذكاء الاصطناعي لتوليد محتوى الدرس والتقييم تفاعلياً...' : 'SYNTHESIZING TAILORED LESSON & QUIZ VIA AI...'}
+                          </p>
+                          <p className="text-[10px] text-slate-400 leading-relaxed max-w-md mx-auto">
+                            {isRtl ? 'الذكاء المستنير يصيغ لك مقدمة أكاديمية وتحديات عملية تناسب تخصصك بدقة' : 'Generating high density academic context and creative tasks tailored for your profile'}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-
-                    {/* Interactive Quiz Mini-Quest */}
-                    <div className="space-y-3 pt-2">
-                      <h5 className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5 justify-start">
-                        <Trophy size={14} className="text-amber-400" />
-                        {isRtl ? '🏁 التحدي السريع والتقييم' : '🏁 INTERACTIVE MINI-QUEST'}
-                      </h5>
-                      
-                      <div className="bg-[#050b14] p-5 rounded-2xl border border-white/5 space-y-4">
-                        <p className="text-xs font-bold text-white text-right">
-                          {act.question}
-                        </p>
-
-                        <div className="grid grid-cols-1 gap-2">
-                          {act.options.map((option, idx) => {
-                            const isSelected = customUnitQuizSelected === idx;
-                            return (
-                              <button
-                                key={idx}
-                                onClick={() => {
-                                  setCustomUnitQuizSelected(idx);
-                                  setCustomUnitQuizCorrect(idx === act.correctIndex);
-                                }}
-                                className={`w-full text-right p-3.5 rounded-xl text-xs font-bold border-2 transition-all flex items-center justify-between cursor-pointer ${
-                                  isSelected
-                                    ? idx === act.correctIndex
-                                      ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
-                                      : 'border-rose-500 bg-rose-500/10 text-rose-400'
-                                    : 'border-white/5 bg-white/[0.02] hover:bg-white/5 text-slate-300'
-                                }`}
-                              >
-                                <span>{option}</span>
-                                {isSelected && (
-                                  <span className="text-sm">
-                                    {idx === act.correctIndex ? '✅' : '❌'}
-                                  </span>
-                                )}
-                              </button>
-                            );
-                          })}
+                    ) : (
+                      <>
+                        {/* Lecture Section */}
+                        <div className="space-y-2">
+                          <h5 className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5 justify-start">
+                            <BookOpen size={14} className="text-amber-400" />
+                            {isRtl ? '💡 المفهوم والدرس اليومي' : '💡 CORE LESSON CONCEPT'}
+                          </h5>
+                          <p className="text-xs text-slate-200 leading-relaxed font-semibold bg-white/[0.02] p-4 rounded-2xl border border-white/5">
+                            {act.concept}
+                          </p>
                         </div>
 
-                        {customUnitQuizCorrect !== null && (
-                          <motion.div 
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className={`p-3 rounded-xl text-[11px] font-black ${
-                              customUnitQuizCorrect 
-                                ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' 
-                                : 'bg-rose-500/10 border border-rose-500/20 text-rose-400'
-                            }`}
-                          >
-                            {customUnitQuizCorrect 
-                              ? (isRtl ? '🎉 مذهل! إجابة ذكية وصحيحة كلياً!' : '🎉 Splendid! A deeply intuitive & correct answer!')
-                              : (isRtl ? '⛔ محاولة جيدة! عاود التفكير وجرب الخيار الأول!' : '⛔ Close! Think again and select the first option!')
-                            }
-                          </motion.div>
-                        )}
-                      </div>
-                    </div>
+                        {/* Laboratory Practice */}
+                        <div className="space-y-2">
+                          <h5 className="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center gap-1.5 justify-start">
+                            <Bot size={14} className="text-indigo-400" />
+                            {isRtl ? '🔬 النشاط التجريبي العالي (Sandbox Mission)' : '🔬 PRACTICAL SANDBOX MISSION'}
+                          </h5>
+                          <div className="bg-indigo-500/5 p-4 rounded-2xl border border-indigo-500/10 space-y-3">
+                            <p className="text-[11px] text-slate-300 font-bold leading-relaxed">
+                              {act.mission}
+                            </p>
+                            <button
+                              onClick={() => {
+                                setSelectedCustomUnit(null);
+                                setCustomUnitQuizSelected(null);
+                                setCustomUnitQuizCorrect(null);
+                                setLobbyTab('launch'); // Go to play workspace
+                              }}
+                              className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-[10px] font-black tracking-wider uppercase transition-all flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <Play size={10} />
+                              {isRtl ? 'افتح المعمل التفاعلي الفوري 🚀' : 'Open AI Learning Lab Now 🚀'}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Interactive Quiz Mini-Quest */}
+                        <div className="space-y-3 pt-2">
+                          <h5 className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5 justify-start">
+                            <Trophy size={14} className="text-amber-400" />
+                            {isRtl ? '🏁 التحدي السريع والتقييم' : '🏁 INTERACTIVE MINI-QUEST'}
+                          </h5>
+                          
+                          <div className="bg-[#050b14] p-5 rounded-2xl border border-white/5 space-y-4">
+                            <p className="text-xs font-bold text-white text-right">
+                              {act.question}
+                            </p>
+
+                            <div className="grid grid-cols-1 gap-2">
+                              {act.options.map((option, idx) => {
+                                const isSelected = customUnitQuizSelected === idx;
+                                return (
+                                  <button
+                                    key={idx}
+                                    onClick={() => {
+                                      setCustomUnitQuizSelected(idx);
+                                      setCustomUnitQuizCorrect(idx === act.correctIndex);
+                                    }}
+                                    className={`w-full text-right p-3.5 rounded-xl text-xs font-bold border-2 transition-all flex items-center justify-between cursor-pointer ${
+                                      isSelected
+                                        ? idx === act.correctIndex
+                                          ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
+                                          : 'border-rose-500 bg-rose-500/10 text-rose-400'
+                                        : 'border-white/5 bg-white/[0.02] hover:bg-white/5 text-slate-300'
+                                    }`}
+                                  >
+                                    <span>{option}</span>
+                                    {isSelected && (
+                                      <span className="text-sm">
+                                        {idx === act.correctIndex ? '✅' : '❌'}
+                                      </span>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+
+                            {customUnitQuizCorrect !== null && (
+                              <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className={`p-3 rounded-xl text-[11px] font-black ${
+                                  customUnitQuizCorrect 
+                                    ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' 
+                                    : 'bg-rose-500/10 border border-rose-500/20 text-rose-400'
+                                }`}
+                              >
+                                {customUnitQuizCorrect 
+                                  ? (isRtl ? '🎉 مذهل! إجابة ذكية وصحيحة كلياً!' : '🎉 Splendid! A deeply intuitive & correct answer!')
+                                  : (isRtl ? '⛔ محاولة جيدة! عاود التفكير وجرب الخيار الأول!' : '⛔ Close! Think again and select the first option!')
+                                }
+                              </motion.div>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {/* Actions Footer */}
@@ -9690,8 +10224,220 @@ Your Guide: ${announcementCoordinator}`
                   </div>
                 </motion.div>
               </motion.div>
-            );
-          })()}
+              );
+            })()}
+          </AnimatePresence>
+
+        {/* Academic Milestone Exam Modal Checkpoint */}
+        <AnimatePresence>
+          {activeMilestoneExam && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-[#050b14]/95 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto font-sans text-right"
+              onClick={() => {
+                setActiveMilestoneExam(null);
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0.95, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.95, y: 20 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-[#0b172e] border border-amber-500/30 rounded-[2.5rem] w-full max-w-xl overflow-hidden shadow-2xl relative"
+                dir={isRtl ? 'rtl' : 'ltr'}
+              >
+                {/* Top Banner accent */}
+                <div className="bg-gradient-to-r from-amber-500/20 to-yellow-600/20 p-6 border-b border-white/5 flex justify-between items-center">
+                  <div className="text-right">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-md inline-block">
+                      {isRtl ? 'بوابة الترقية الأكاديمية البينية' : 'ACADEMIC CHECKPOINT ASSESSMENT'}
+                    </span>
+                    <h4 className="text-base font-black text-white mt-1.5 leading-tight">
+                      {isRtl ? activeMilestoneExam.title : activeMilestoneExam.titleEn}
+                    </h4>
+                  </div>
+                  <button
+                    onClick={() => setActiveMilestoneExam(null)}
+                    className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center font-bold text-lg cursor-pointer transition-all ml-4 shrink-0"
+                  >
+                    ✖
+                  </button>
+                </div>
+
+                {/* Body details */}
+                <div className="p-6 md:p-8 space-y-6 max-h-[65vh] overflow-y-auto">
+                  <p className="text-xs text-slate-300 font-semibold leading-relaxed border-r-2 border-amber-500 pr-3 mr-1 ml-1 text-right" dir={isRtl ? 'rtl' : 'ltr'}>
+                    {isRtl
+                      ? "يسر الأكاديمية تقديم هذا الامتحان البيني لتقييم تحصيلك. يتطلب عبور الجدار الدراسي الحصول على درجة كاملة (100٪)."
+                      : "To unlock the next set of advanced modules, you must achieve a perfect score of 100% on this promotional gate."
+                    }
+                  </p>
+
+                  <div className="space-y-6">
+                    {activeMilestoneExam.questions.map((q: any, qIdx: number) => {
+                      const selectedOpt = milestoneAnswers[qIdx];
+                      return (
+                        <div key={qIdx} className="bg-white/[0.01] p-4 rounded-2xl border border-white/5 space-y-3 text-right">
+                          <p className="text-xs font-bold text-white">
+                            {qIdx + 1}. {q.question}
+                          </p>
+
+                          <div className="grid grid-cols-1 gap-2">
+                            {q.options.map((opt: string, optIdx: number) => {
+                              const isSelected = selectedOpt === optIdx;
+                              const showResults = milestoneExamSubmitted;
+                              const isCorrectOption = optIdx === q.correctIndex;
+                              
+                              let btnStyle = "border-white/5 bg-white/[0.02] hover:bg-white/5 text-slate-300";
+                              if (isSelected) {
+                                if (showResults) {
+                                  btnStyle = isCorrectOption 
+                                    ? "border-emerald-500 bg-emerald-500/10 text-emerald-400 font-black" 
+                                    : "border-rose-500 bg-rose-500/10 text-rose-400 font-black";
+                                } else {
+                                  btnStyle = "border-amber-500 bg-amber-500/15 text-amber-400 font-black";
+                                }
+                              } else if (showResults && isCorrectOption) {
+                                btnStyle = "border-emerald-500 bg-emerald-500/10 text-emerald-400 font-black";
+                              }
+
+                              return (
+                                <button
+                                  key={optIdx}
+                                  disabled={milestoneExamSubmitted}
+                                  onClick={() => {
+                                    setMilestoneAnswers(prev => ({
+                                      ...prev,
+                                      [qIdx]: optIdx
+                                    }));
+                                  }}
+                                  className={`w-full text-right p-3 rounded-xl text-xs font-bold border-2 transition-all flex items-center justify-between cursor-pointer ${btnStyle}`}
+                                >
+                                  <span>{opt}</span>
+                                  {isSelected && !showResults && <span className="text-[10px] bg-amber-505 bg-amber-500 text-slate-950 px-2 py-0.5 rounded-md font-black">✓</span>}
+                                  {showResults && isSelected && (
+                                    <span className="text-xs">
+                                      {isCorrectOption ? '✅' : '❌'}
+                                    </span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Submission and grade status */}
+                  {milestoneExamSubmitted && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`p-5 rounded-2xl border ${
+                        milestoneSuccess 
+                          ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 text-center space-y-2' 
+                          : 'bg-rose-500/10 border-rose-500/20 text-rose-400 text-center space-y-2'
+                      }`}
+                    >
+                      <h5 className="font-extrabold text-sm flex items-center justify-center gap-2">
+                        {milestoneSuccess ? '👑 مبارك عبور واجتياز الجدار بنجاح!' : '💔 لم تكتمل متطلبات الاجتياز بنجاح!'}
+                      </h5>
+                      <p className="text-xs">
+                        {milestoneSuccess 
+                          ? (isRtl ? 'لقد أحرزت 100٪ وتم تفعيل مسارك العلمي للمرحلة اللاحقة بنجاح.' : 'Perfect Score! Next academic phase is successfully activated & unlocked.')
+                          : (isRtl ? 'يتعين عليك مراجعة المفهوم والدروس السابقة والمحاولة مجدداً للحصول على الدرجة الكاملة.' : 'Please revise past concepts and attempt again to achieve 100% score.')
+                        }
+                      </p>
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Footer Controls */}
+                <div className="p-6 bg-[#050b14]/50 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
+                  <button
+                    onClick={() => setActiveMilestoneExam(null)}
+                    type="button"
+                    className="text-slate-400 hover:text-white text-xs font-black cursor-pointer transition-all self-stretch sm:self-auto text-center"
+                  >
+                    {isRtl ? 'إلغاء وإغلاق' : 'Close'}
+                  </button>
+
+                  {!milestoneExamSubmitted ? (
+                    <button
+                      onClick={() => {
+                        const totalQs = activeMilestoneExam.questions.length;
+                        const answeredCount = Object.keys(milestoneAnswers).length;
+                        if (answeredCount < totalQs) {
+                          alert(isRtl ? 'الرجاء الإجابة على جميع الأسئلة للمتابعة!' : 'Please answer all questions before submitting.');
+                          return;
+                        }
+                        
+                        let isAllCorrect = true;
+                        activeMilestoneExam.questions.forEach((q: any, idx: number) => {
+                          if (milestoneAnswers[idx] !== q.correctIndex) {
+                            isAllCorrect = false;
+                          }
+                        });
+
+                        setMilestoneExamSubmitted(true);
+                        setMilestoneSuccess(isAllCorrect);
+
+                        if (isAllCorrect) {
+                          const mKey = activeMilestoneExam.id;
+                          
+                          setPassedMilestones(prev => {
+                            const next = new Set(prev);
+                            next.add(mKey);
+                            localStorage.setItem('ai_grand_plan_passed_milestones', JSON.stringify(Array.from(next)));
+                            return next;
+                          });
+
+                          setUnlockedPhases(prev => {
+                            const next = new Set(prev);
+                            if (mKey === 'exam_f_to_a') {
+                              next.add('phase2');
+                            } else if (mKey === 'exam_a_to_p') {
+                              next.add('phase3');
+                            }
+                            localStorage.setItem('ai_grand_plan_unlocked_phases', JSON.stringify(Array.from(next)));
+                            return next;
+                          });
+                        }
+                      }}
+                      className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-6 py-2.5 rounded-xl text-xs font-black self-stretch sm:self-auto transition-all cursor-pointer shadow-md shadow-amber-500/10"
+                    >
+                      {isRtl ? 'تسجيل وتصحيح التقييم 🏆' : 'Submit Checkpoint Exam 🏆'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        if (milestoneSuccess) {
+                          setActiveMilestoneExam(null);
+                        } else {
+                          setMilestoneAnswers({});
+                          setMilestoneExamSubmitted(false);
+                          setMilestoneSuccess(null);
+                        }
+                      }}
+                      className={`px-6 py-2.5 rounded-xl text-xs font-black self-stretch sm:self-auto transition-all cursor-pointer text-center ${
+                        milestoneSuccess
+                          ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'
+                          : 'bg-amber-500 text-slate-950 hover:bg-amber-400'
+                      }`}
+                    >
+                      {milestoneSuccess 
+                        ? (isRtl ? 'تم العبور ومتابعة الدراسة' : 'Access pass, continue') 
+                        : (isRtl ? 'أعد المحاولة والامتحان' : 'Retake Exam')
+                      }
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
         </AnimatePresence>
       </main>
     </div>

@@ -1633,6 +1633,176 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
     }
   });
 
+  // Local helper for level-specific and topic-specific matched activities
+  function getLocalTailoredActivity(unitTitle: string, isAr: boolean) {
+    const title = (unitTitle || "").toLowerCase();
+    
+    if (title.includes('رسم') || title.includes('فن') || title.includes('صورة') || title.includes('art') || title.includes('paint') || title.includes('draw') || title.includes('image') || title.includes('تصميم') || title.includes('design')) {
+      return {
+        concept: isAr 
+          ? `مفهوم عميق حول [${unitTitle}]: أنت الآن تتعلم كيف تستعمل الأدوات المتقدمة في الفنون والتصوير لتجسيد خيالك. النماذج التوليدية تحلل ملامح التكوين والظلال والألوان لابتكار كائنات خيالية بدقة مبهرة.`
+          : `Deep concept about [${unitTitle}]: You are discovering special art and design methodologies. Generative systems calculate contrast, geometric perspective, and aesthetic palettes to synthesize custom artwork matching your text.`,
+        mission: isAr
+          ? "افتح معمل الصور واكتب نصًا يصف مشهدًا يعبر عن موضوع هذه الوحدة، مثل: 'رائد فضاء يسبح في محيط الفن الرقمي الكلاسيكي'!"
+          : "Navigate to the Image Lab and prompt a theme related to this unit, such as: 'An astronaut swimming in a classical digital dreamscape'!",
+        question: isAr
+          ? "ما هو العامل الأساسي الذي يزيد من تناسق اللوحة الناتجة من الذكاء الاصطناعي التوليدي؟"
+          : "What is the primary factor that boosts coherence in AI-generated artwork?",
+        options: isAr
+          ? [
+              "كتابة واصفات دقيقة لخطوط الضوء والأسلوب والزاوية والظلال في النص المحفز",
+              "زيادة درجة حرارة كابل الطاقة الكهربائية للجهاز",
+              "مسح ملفات المتصفح وإيقاف تشغيل كابل الشاشة بشكل متكرر"
+            ]
+          : [
+              "Detailing visual properties like ambient lighting, style, lens angle, and shading in your prompt",
+              "Increasing the physical temperature of the electrical power cable",
+              "Clearing browser cookies and turning off computer screen cables repeatedly"
+            ],
+        correctIndex: 0
+      };
+    }
+    
+    if (title.includes('برمج') || title.includes('كود') || title.includes('مطور') || title.includes('code') || title.includes('program') || title.includes('developer') || title.includes('python')) {
+      return {
+        concept: isAr
+          ? `تحليل برمجي لـ [${unitTitle}]: تتعرف في هذا الدرس على كيفية صياغة وتطوير البرامج والمشاريع خطوة بخطوة. الذكاء الاصطناعي يحاكي عقل المبرمج وخريطة تدفق الأكواد البرمجية لإتمام عمليات البحث وحل الثغرات.`
+          : `Programming analysis for [${unitTitle}]: You explore how to outline, syntax-check, and structuralize target software modules. Generative models trace design patterns to suggest automated solutions or resolve logical bugs.`,
+        mission: isAr
+          ? "افتح معمل الأكواد واطلب من المحاكي أن يكتب لك برنامجًا بلغة بايثون يخدم وظيفة هذه الوحدة ويسهل عملها!"
+          : "Launch the Coding Sandbox and command the AI to program a quick Python utility matching this unit's logical scope!",
+        question: isAr
+          ? "كيف يمكنك الاستفادة من الذكاء الاصطناعي لحل مشكلة توقف الكود البرمجي (Bug)؟"
+          : "What is the safest way to leverage AI when debugging an application?",
+        options: isAr
+          ? [
+              "تقديم كود الخطأ مع رسالة المترجم، وطلب شرح للمشكلة السطرية والحل المقترح",
+              "إغلاق مقبس تيار الخادم الرئيسي والبدء فجأة من الصفر كلياً",
+              "تغيير خلفية سطح المكتب لشاشة حاسوبك حتى تختفي المشاكل البرمجية"
+            ]
+          : [
+              "Inputting the broken function alongside the error log, and requesting line-by-line debugging advice",
+              "Pulling out the server's main power supply plug and rebuilding from scratch",
+              "Swapping the desktop wallpaper on your computer screen to eliminate backend exceptions"
+            ],
+        correctIndex: 0
+      };
+    }
+
+    if (title.includes('أمان') || title.includes('حماي') || title.includes('اختراق') || title.includes('cyber') || title.includes('security') || title.includes('safe') || title.includes('privacy')) {
+      return {
+        concept: isAr
+          ? `الأمان والوعي في [${unitTitle}]: الحماية السيبرانية وتأمين الحسابات الشخصية هي عماد العصر الرقمي. تتعلم هنا كيف تميز بين الروابط الرسمية والهجمات الخبيثة مع آليات تثبيت المصادقة الثنائية.`
+          : `Security awareness in [${unitTitle}]: High level data privacy and credential hardening are the core shields of today's users. Learn how to verify authentic endpoints and implement multi-factor authentication.`,
+        mission: isAr
+          ? "قم بفحص الإعدادات الأمنية لبريدك وتأكد من تفعيل ميزة التحقق بخطوتين وتعيين كلمة سر قوية ومستقلة."
+          : "Review the safety settings of your accounts and ensure multi-factor authentication (MFA) is fully enabled with a unique key.",
+        question: isAr
+          ? "أيها يعد الخط الدفاعي الأول لحماية حساباتك ضد التسلل العشوائي في عالم الإنترنت؟"
+          : "Which of the following serves as your strongest defense line against unauthorized account access on the web?",
+        options: isAr
+          ? [
+              "استخدام كلمات مرور معقدة تتضمن رموزاً وأرقاماً مختلفة ومصادقة ثنائية قوية",
+              "كتابة كلمة المرور على بطاقة لاصقة وتثبيتها بشكل مرئي بجانب الشاشة",
+              "تعطيل جدار الحماية وفتح كافة الرسائل المجهولة فوراً وبصورة دائمة"
+            ]
+          : [
+              "Utilizing unique complex passwords rich in symbols, and enabling multi-factor authentication",
+              "Writing down key variables on stick-it physical sticky notes displayed next to your screen",
+              "Disabling firewall protections and clicking on all spam mail links immediately"
+            ],
+        correctIndex: 0
+      };
+    }
+
+    // Default science/academic academic-oriented fallback
+    return {
+      concept: isAr
+        ? `دليل تعليمي مخصص لـ [${unitTitle}]: نركز في هذه الوحدة على بناء المبادئ وتحليل التطويرات التي تم تناولها في تخصصك. المراجعة المنظمة والمنطق الرياضي والذهني يمثلان الجسر نحو الطلاقة التامة.`
+        : `Educational Guide for [${unitTitle}]: We investigate the key building blocks, standard paradigms, and emerging practices related to this module. Systematic outline combined with practical exercises builds true fluency.`,
+      mission: isAr
+        ? "اكتب خلاصة تفاعلية من سطرين حول هذا المفهوم في معمل الدردشة وناقش المساعد الذكي حول تطبيقه العملي."
+        : "Draft a 2-sentence summary of this concept in the LLM Sandbox and prompt the conversational assistant for instant critique.",
+      question: isAr
+        ? "ما هي الطريقة الفضلى لمراجعة مخرجات المخطط الدراسي وبلوغ الفهم الأكاديمي الحقيقي؟"
+        : "What is the most effective technique to absorb topics and build lasting intellectual understanding?",
+      options: isAr
+        ? [
+            "الجمع المتوازن بين الفهم المعجمي وحل الأسئلة والتدريب التفاعلي والتطبيق المستمر",
+            "نسخ العناوين فقط ثلاث مرات دون قراءة الشروحات والتفاصيل والمدلولات علمياً",
+            "الجلوس بعيداً والانتظار دون حل أي نشاط أو اختبار أو تجارب ذاتية"
+          ]
+        : [
+            "Harmonizing conceptual reading with periodic custom quizzes and active practical sandbox tasks",
+            "Copying the titles three times while avoiding all explanations or unit details",
+            "Stepping away and expecting full competence to happen without completing exercises"
+          ],
+      correctIndex: 0
+    };
+  }
+
+  // Dynamic On-Demand Unit Activity Content Generator
+  app.post("/api/curriculum/unit-activity", async (req, res) => {
+    try {
+      const { subject, level, unitTitle, unitDescription, lang } = req.body;
+      const isAr = lang === 'ar';
+      
+      if (!initAI() || !aiLive) {
+        logToFile("[Info] Using local keyword matching fallback within Unit Activity endpoint");
+        return res.json(getLocalTailoredActivity(unitTitle, isAr));
+      }
+
+      const promptText = `
+        SYSTEM: You are an Educational Curriculum Designer at Basim Alkhalil Academy.
+        TASK: Write a highly detailed, personalized, engaging interactive lesson page for this specific unit.
+        
+        CONTEXT:
+        - Subject of Study: "${subject}"
+        - Academic Level: "${level}"
+        - Unit Title: "${unitTitle}"
+        - Unit Description: "${unitDescription}"
+        
+        You MUST return a JSON response containing these EXACT 5 fields:
+        - "concept": A highly descriptive, informative, and engaging lesson description (200-400 characters) specifically tailored to "${unitTitle}" in the context of "${subject}" at level "${level}". It must be written in beautiful, highly academic, yet accessible and encouraging ${isAr ? 'Arabic' : 'English'}. Explain the concepts clearly with high academic density.
+        - "mission": A highly engaging practical or experimental sandbox task (100-200 characters) guiding the student to apply what they've learned in the interactive tools or sandbox, specific to this unit.
+        - "question": A smart multiple-choice quiz question related directly to the content of this unit (concept-testing).
+        - "options": A list of exactly 3 or 4 plausible multiple-choice options with exactly 1 correct answer.
+        - "correctIndex": The integer index (0-indexed) of the correct option in the options array.
+        
+        Do not output any markdown formatting other than raw JSON.
+        
+        Example JSON output structure:
+        {
+          "concept": "...",
+          "mission": "...",
+          "question": "...",
+          "options": ["...", "...", "..."],
+          "correctIndex": 0
+        }
+      `;
+
+      const result = await callAiWithRetry({
+        contents: [{ role: 'user', parts: [{ text: promptText }] }],
+        config: { responseMimeType: "application/json" }
+      });
+
+      const text = result.text || "";
+      let cleanText = text.trim();
+      if (cleanText.startsWith("```")) {
+        cleanText = cleanText.replace(/^```json\n?/, "").replace(/\n?```$/, "");
+      }
+      res.json(JSON.parse(cleanText));
+    } catch (error: any) {
+      logToFile(`[Error] Unit Activity generation failed: ${error.message}. Returning rich local fallback.`);
+      try {
+        const { unitTitle, lang } = req.body;
+        res.json(getLocalTailoredActivity(unitTitle, lang === 'ar'));
+      } catch (nestedErr) {
+        res.status(500).json({ error: "Internal fallback error" });
+      }
+    }
+  });
+
   // Video Quiz Generator
   app.post("/api/generate/video-quiz", async (req, res) => {
     try {
