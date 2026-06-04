@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import html2canvas from 'html2canvas';
 import { AI_TOOLS_DATA, AiTool } from './AiToolsData';
 import { PerfectionHub } from './PerfectionHub';
+import { BalanceOasis } from './BalanceOasis';
 import { PROMPT_PROFESSIONAL_DATA } from './PromptProData';
 import { PROMPT_TEMPLATES_DATA } from './PromptTemplatesData';
 import { MEGA_PROMPTS_DATA } from './MegaPromptLabData';
@@ -1440,7 +1441,7 @@ export const AiCurriculum = ({
   const [xp, setXp] = useState<number>(0);
 
   // New Academy Features (User Request additions)
-  const [lobbyTab, setLobbyTab] = useState<'lessons' | 'printables' | 'tools' | 'challenges' | 'experiments' | 'certificate' | 'family' | 'english' | 'perfection' | 'study_plan'>('lessons');
+  const [lobbyTab, setLobbyTab] = useState<'lessons' | 'printables' | 'tools' | 'challenges' | 'experiments' | 'certificate' | 'family' | 'english' | 'perfection' | 'study_plan' | 'balance_oasis'>('lessons');
   const [familyName, setFamilyName] = useState<string>(isRtl ? 'الخليل' : 'Al Khalil');
 
   // Perfection Hub States
@@ -3783,6 +3784,17 @@ The adventure is waiting!`
                 >
                   <BrainCircuit size={16} />
                   {isRtl ? 'مخطط الدراسة الذكي (AI Planner) 🧠' : 'Smart AI Study Planner 🧠'}
+                </button>
+                <button
+                  onClick={() => setLobbyTab('balance_oasis')}
+                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
+                    lobbyTab === 'balance_oasis'
+                      ? 'bg-gradient-to-t from-teal-500/15 to-transparent text-teal-300 border-t border-x border-teal-500/10 border-b-2 border-b-[#050b14]'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Smile size={16} className="text-teal-400" />
+                  {isRtl ? 'واحة التوازن 🌊' : 'Balance Oasis 🌊'}
                 </button>
               </div>
 
@@ -8178,6 +8190,20 @@ Output Summary for [${topic}]:
 
               {lobbyTab === 'perfection' && (
                 <PerfectionHub isRtl={isRtl} />
+              )}
+
+              {lobbyTab === 'balance_oasis' && (
+                <BalanceOasis 
+                  isRtl={isRtl} 
+                  completedLessonIds={completedCustomUnitIds}
+                  onLessonCompleted={(id) => {
+                    setCompletedCustomUnitIds(prev => {
+                      const next = new Set(prev);
+                      next.add(id);
+                      return next;
+                    });
+                  }}
+                />
               )}
 
               {lobbyTab === 'study_plan' && (

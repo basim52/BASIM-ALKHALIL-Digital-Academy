@@ -47,7 +47,8 @@ import {
   Smartphone,
   Download,
   Zap,
-  Mic
+  Mic,
+  Smile
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'motion/react';
@@ -89,6 +90,7 @@ import { WritingCurriculumCompanion, WritingLevel, ALL_WRITING_UNITS } from './c
 import { ExpressionCurriculumCompanion, ExpressionLevel, ALL_EXPRESSION_UNITS } from './components/ExpressionCurriculumCompanion';
 import { ModernCurriculumHome } from './components/ModernCurriculumHome';
 import { AiCurriculum } from './components/AiCurriculum';
+import { BalanceOasis } from './components/BalanceOasis';
 import { ProfessionalDevelopment } from './components/ProfessionalDevelopment';
 import { GeminiDeveloperHub } from './components/GeminiDeveloperHub';
 import { AdultsDailyDose } from './components/AdultsDailyDose';
@@ -4965,6 +4967,23 @@ export default function App() {
         />
       );
     }
+    if (view === 'balance-oasis') {
+      return (
+        <div className="flex-1 p-5 md:p-12 overflow-y-auto bg-[#030712] min-h-screen text-right" dir={isRtl ? 'rtl' : 'ltr'}>
+          <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
+            <div className="flex justify-between items-center pb-4 border-b border-white/5">
+              <button
+                onClick={() => setView('dashboard')}
+                className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-black px-5 py-2.5 rounded-2xl text-xs transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
+              >
+                <span>{isRtl ? 'العودة للوحة الرئيسية 🏠' : 'Back to Dashboard 🏠'}</span>
+              </button>
+            </div>
+            <BalanceOasis isRtl={isRtl} />
+          </div>
+        </div>
+      );
+    }
     if (view === 'modern-curriculum') {
       return (
         <ModernCurriculumHome 
@@ -5360,6 +5379,7 @@ export default function App() {
                     { id: 'oxford-classic', label: lang === 'ar' ? 'أوكسفورد الكلاسيكي 📚' : 'Classic Oxford 📚', icon: OxfordClassicIcon },
                     { id: 'modern-curriculum', label: lang === 'ar' ? 'المناهج الدراسية المطورة' : 'Modernized Curriculums', icon: Sparkles },
                     { id: 'ai-curriculum', label: lang === 'ar' ? 'منهج الذكاء الاصطناعي 🧠' : 'AI Curriculum 🧠', icon: Brain },
+                    { id: 'balance-oasis', label: lang === 'ar' ? 'واحة التوازن 🌊' : 'Balance Oasis 🌊', icon: Smile },
                     { id: 'professional-development', label: lang === 'ar' ? 'دورات تطويرية' : 'Developmental Courses', icon: GraduationCap },
                     { id: 'early-childhood', label: t.earlyChildhood, icon: Baby },
                     { id: 'story-library', label: t.storyLibrary, icon: BookMarked },
@@ -5427,6 +5447,7 @@ export default function App() {
                     { id: 'oxford-classic', icon: OxfordClassicIcon },
                     { id: 'modern-curriculum', icon: BookOpen },
                     { id: 'ai-curriculum', icon: Brain },
+                    { id: 'balance-oasis', icon: Smile },
                     { id: 'early-childhood', icon: Baby },
                   ],
                   [
