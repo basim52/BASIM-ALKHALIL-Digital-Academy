@@ -1393,6 +1393,7 @@ export const AiCurriculum = ({
   const [completedLessons, setCompletedLessons] = useState<number[]>([]);
   const [curriculumType, setCurriculumType] = useState<'foundational' | 'advanced' | 'professional'>('foundational');
   const [completedAdvancedLessons, setCompletedAdvancedLessons] = useState<number[]>([]);
+  const [bypassTest, setBypassTest] = useState<boolean>(false);
   
   // Prompt Engineering Professional Program States
   const [selectedProLesson, setSelectedProLesson] = useState<any | null>(null);
@@ -1439,7 +1440,7 @@ export const AiCurriculum = ({
   const [xp, setXp] = useState<number>(0);
 
   // New Academy Features (User Request additions)
-  const [lobbyTab, setLobbyTab] = useState<'lessons' | 'printables' | 'launch' | 'tools' | 'challenges' | 'experiments' | 'certificate' | 'family' | 'english' | 'perfection' | 'study_plan'>('lessons');
+  const [lobbyTab, setLobbyTab] = useState<'lessons' | 'printables' | 'tools' | 'challenges' | 'experiments' | 'certificate' | 'family' | 'english' | 'perfection' | 'study_plan'>('lessons');
   const [familyName, setFamilyName] = useState<string>(isRtl ? 'الخليل' : 'Al Khalil');
 
   // Perfection Hub States
@@ -2087,101 +2088,138 @@ export const AiCurriculum = ({
   };
 
   const handleSelectCustomUnit = async (unit: any) => {
-    setSelectedCustomUnit(unit);
-    setCustomUnitQuizSelected(null);
-    setCustomUnitQuizCorrect(null);
-    
-    // Check if it is a Grand Integrated Plan lesson
-    if (unit.id && unit.id.startsWith('grand-')) {
-      let conceptText = "";
-      let missionText = "";
-      let quizQuestion = "";
-      let quizOptions: string[] = [];
-      let quizCorrectIndex = 0;
+    // Ensure test is bypassed so we don't lock the standard curriculum tab
+    setBypassTest(true);
 
-      if (unit.source === 'foundational') {
-        const ref = unit.realRef;
-        conceptText = ref.core_concept || ref.detailed_explanation;
-        missionText = ref.family_activity 
-          ? `النشاط: ${ref.family_activity.activity_name}\n\nالوصف:\n${ref.family_activity.activity_description}\n\nالخلاصة المستفادة:\n${ref.family_activity.lesson_learned}`
-          : "لم يحدد نشاط أسري خاص بهذا الفصل، المراجعة هي النشاط الرئيسي.";
-        quizQuestion = ref.discussion_question || "ما المفهوم الأساسي للدرس؟";
-        quizOptions = [
-          ref.parent_summary || "الذكاء الاصطناعي أداة لاستخلاص الأنماط الحيوية ولا يفهم بالمعنى البشري الوجداني.",
-          "الذكاء هو جهاز سحري يقرأ العقول كلياً.",
-          "الشبكات العادية لا تحتاج للبيانات أو التدريب الرقمي."
-        ];
-        quizCorrectIndex = 0;
-      } else if (unit.source === 'advanced') {
-        const ref = unit.realRef;
-        conceptText = ref.lesson_card?.content || ref.notes?.content || "درس متقدم في المسارات التخصصية بالأكاديمية.";
-        missionText = ref.quest_card?.instructions || "راجع الدرس التخصصي وطبق تحدي بايثون البرمجي أو التلقيم.";
-        quizQuestion = ref.quest_card?.discussion_question || "كيف تمنع الهلوسة في هذا النموذج المتقدم؟";
-        quizOptions = [
-          "من خلال صياغة أوامر (Prompts) متكاملة دقيقة وتزويد السياق بالأدوار الصارمة.",
-          "عبر تكرار الجملة دون فواصل.",
-          "عبر حذف الكود والبدء بدون معايير."
-        ];
-        quizCorrectIndex = 0;
-      } else if (unit.source === 'professional') {
-        const ref = unit.realRef;
-        conceptText = `${ref.lesson_title}: ${ref.concept || ref.objectives || "محاضرة تخصصية علمية في احترافية المطالبات."}`;
-        missionText = ref.interactivePractice?.instructions || "قم ببناء طلب مطبقاً الأساليب والقوالب الاحترافية.";
-        quizQuestion = ref.interactivePractice?.question || "ما Goal الأساسي للهندسة الاحترافية للمطالبات في هذا الفصل؟";
-        quizOptions = [
-          ref.interactivePractice?.correctExplanation || "الوصول للنبرة المطلوبة وحقن المعايرة ومكافحة التلقيم الخبيث بمهارة.",
-          "إنتاج صور عشوائية غير منظمة بغير تبرير.",
-          "تعديل خط الشاشة للمتصفح دون جدوى."
-        ];
-        quizCorrectIndex = 0;
-      }
+    const unitTitle = (unit.titleAr || unit.title || unit.lesson_title || "").trim();
+    const unitTitleLower = unitTitle.toLowerCase();
+    const unitTitleEn = (unit.title || "").trim().toLowerCase();
 
-      setCustomActivities(prev => ({
-        ...prev,
-        [unit.id]: {
-          concept: conceptText,
-          mission: missionText,
-          question: quizQuestion,
-          options: quizOptions,
-          correctIndex: quizCorrectIndex
+    // Collect all standard lessons objects to match from original references
+    let matchedLesson: any = null;
+    let matchedType: 'foundational' | 'advanced' | 'professional' = 'foundational';
+
+    // 1. Check in AI_CURRICULUM_DATA (Foundational Program)
+    let foundInFoundational = false;
+    for (const lvl of AI_CURRICULUM_DATA.program_levels) {
+      for (const les of lvl.lessons) {
+        const lesTitle = (les.lesson_title || "").trim().toLowerCase();
+        if (
+          lesTitle === unitTitleLower || 
+          lesTitle === unitTitleEn || 
+          unitTitleLower.includes(lesTitle) || 
+          lesTitle.includes(unitTitleLower) ||
+          (unit.id && unit.id === `grand-f-${les.lesson_number}`)
+        ) {
+          matchedLesson = les;
+          matchedType = 'foundational';
+          foundInFoundational = true;
+          break;
         }
-      }));
-      return;
+      }
+      if (foundInFoundational) break;
     }
-    
-    if (customActivities[unit.id]) {
-      // already cached
-      return;
+
+    // 2. Check in ADVANCED_CURRICULUM_DATA (Advanced Program)
+    if (!matchedLesson) {
+      let foundInAdvanced = false;
+      for (const track of ADVANCED_CURRICULUM_DATA.tracks) {
+        for (const les of track.lessons) {
+          const lesTitle = (les.lesson_title || "").trim().toLowerCase();
+          if (
+            lesTitle === unitTitleLower || 
+            lesTitle === unitTitleEn || 
+            unitTitleLower.includes(lesTitle) || 
+            lesTitle.includes(unitTitleLower) ||
+            (unit.id && unit.trackName === les.track && unit.lesson_number === les.lesson_number)
+          ) {
+            matchedLesson = les;
+            matchedType = 'advanced';
+            foundInAdvanced = true;
+            break;
+          }
+        }
+        if (foundInAdvanced) break;
+      }
     }
-    
-    setLoadingActivity(true);
-    try {
-      const res = await fetch('/api/curriculum/unit-activity', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          subject: plannerSubject || 'الذكاء الاصطناعي العام والمستحدثات',
-          level: unit.level,
-          unitTitle: isRtl ? (unit.titleAr || unit.title) : (unit.title || unit.titleAr),
-          unitDescription: isRtl ? (unit.descriptionAr || unit.description) : (unit.description || unit.descriptionAr),
-          lang: lang
-        })
-      });
-      if (!res.ok) throw new Error("Failed to load unit activity");
-      const data = await res.json();
-      setCustomActivities(prev => ({
-        ...prev,
-        [unit.id]: data
-      }));
-    } catch (err) {
-      console.error("Error generating path activity details:", err);
-      const act = getCustomUnitActivity(unit, isRtl);
-      setCustomActivities(prev => ({
-        ...prev,
-        [unit.id]: act
-      }));
-    } finally {
-      setLoadingActivity(false);
+
+    // 3. Check in PROMPT_PROFESSIONAL_DATA (Professional Program)
+    if (!matchedLesson) {
+      let foundInPro = false;
+      for (const lvl of PROMPT_PROFESSIONAL_DATA.levels) {
+        for (const les of lvl.lessons) {
+          const lesTitle = (les.lesson_title || "").trim().toLowerCase();
+          if (
+            lesTitle === unitTitleLower || 
+            lesTitle === unitTitleEn || 
+            unitTitleLower.includes(lesTitle) || 
+            lesTitle.includes(unitTitleLower)
+          ) {
+            matchedLesson = les;
+            matchedType = 'professional';
+            foundInPro = true;
+            break;
+          }
+        }
+        if (foundInPro) break;
+      }
+    }
+
+    // 4. Default fallbacks if no direct title match: Use dynamic level mapping
+    if (!matchedLesson) {
+      if (unit.realRef) {
+        matchedLesson = unit.realRef;
+        matchedType = (unit.source as any) || 'foundational';
+      } else {
+        const tag = (unit.level || unit.trackName || "").toUpperCase();
+        
+        let flatFoundational: any[] = [];
+        AI_CURRICULUM_DATA.program_levels.forEach(lvl => {
+          lvl.lessons.forEach(l => flatFoundational.push(l));
+        });
+
+        if (tag.includes('A1') || tag.includes('1')) {
+          matchedLesson = flatFoundational[0]; // Level 1 - Lesson 1
+          matchedType = 'foundational';
+        } else if (tag.includes('A2') || tag.includes('2')) {
+          matchedLesson = flatFoundational[3]; // Level 2 - Lesson 4
+          matchedType = 'foundational';
+        } else if (tag.includes('B1') || tag.includes('3')) {
+          matchedLesson = flatFoundational[6]; // Level 3 - Lesson 7
+          matchedType = 'foundational';
+        } else if (tag.includes('B2') || tag.includes('4')) {
+          matchedLesson = flatFoundational[9]; // Level 4 - Lesson 10
+          matchedType = 'foundational';
+        } else if (tag.includes('C1') || tag.includes('5')) {
+          matchedLesson = flatFoundational[12]; // Level 5 - Lesson 13
+          matchedType = 'foundational';
+        } else if (tag.includes('C2') || tag.includes('6')) {
+          matchedLesson = flatFoundational[16]; // Level 6 - Lesson 17
+          matchedType = 'foundational';
+        } else {
+          matchedLesson = flatFoundational[0]; // Fallback to Level 1 - Lesson 1
+          matchedType = 'foundational';
+        }
+      }
+    }
+
+    if (matchedLesson) {
+      setLobbyTab('lessons');
+      setCurriculumType(matchedType);
+      
+      if (matchedType === 'professional') {
+        setSelectedProLesson(matchedLesson);
+        setSelectedLesson(null);
+      } else {
+        setSelectedLesson(matchedLesson);
+        setSelectedProLesson(null);
+      }
+      
+      // Reset simulator states for the selected lesson
+      resetGames();
+      
+      // Close custom unit detail modal completely
+      setSelectedCustomUnit(null);
     }
   };
 
@@ -3654,17 +3692,7 @@ The adventure is waiting!`
                   <Printer size={16} />
                   {isRtl ? 'مطبوعات العائلة 🖨️' : 'Printables 🖨️'}
                 </button>
-                <button
-                  onClick={() => setLobbyTab('launch')}
-                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
-                    lobbyTab === 'launch'
-                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <Megaphone size={16} />
-                  {isRtl ? 'إعلان التدشين 📣' : 'Launch Setup 📣'}
-                </button>
+
                 <button
                   onClick={() => setLobbyTab('perfection')}
                   className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
@@ -3674,7 +3702,7 @@ The adventure is waiting!`
                   }`}
                 >
                   <Sparkles size={16} />
-                  {isRtl ? 'إضافات الوصول للكمال ✨' : 'Perfection Addons ✨'}
+                  {isRtl ? 'الوضع المتطور ✨' : 'Advanced Mode ✨'}
                 </button>
                 <button
                   onClick={() => setLobbyTab('study_plan')}
@@ -3691,7 +3719,7 @@ The adventure is waiting!`
 
               {/* Tab 1: Standard Levels Grid */}
               {lobbyTab === 'lessons' && (
-                !hasCompletedTest ? (
+                !(hasCompletedTest || bypassTest) ? (
                   <div className="bg-[#0b1329] border border-amber-500/20 rounded-[2.5rem] p-10 relative overflow-hidden text-right shadow-2xl animate-fade-in w-full" dir="rtl">
                     <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl opacity-30" />
                     <div className="relative z-10 flex flex-col items-center text-center space-y-6 py-6 font-sans">
@@ -8078,131 +8106,13 @@ Output Summary for [${topic}]:
                 </div>
               )}
 
-              {/* Tab 3: Coordinator Announcement Management Panel */}
-              {lobbyTab === 'launch' && (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                  {/* Left Form: Coordination configuration */}
-                  <div className="lg:col-span-5 bg-slate-900/40 border border-white/5 rounded-[2rem] p-6 space-y-4 text-right">
-                    <h4 className="text-lg font-black text-white flex items-center gap-2 mb-2 pb-3 border-b border-white/5">
-                      <Megaphone className="text-amber-400" />
-                      {isRtl ? 'إعدادات التدشين والرسائل' : 'Launch Configs & Coordinator Hub'}
-                    </h4>
-                    <p className="text-xs text-slate-400">
-                      {isRtl ? 'تحكم في المتغيرات لإصدار رسالة افتتاح وحفل التدشين للعائلة!' : 'Configure parameters to populate the welcome launch notice for WhatsApp or local charts.'}
-                    </p>
-
-                    <div className="space-y-4 pt-2">
-                      <div className="space-y-1">
-                        <label className="block text-xs font-black text-amber-400">{isRtl ? 'اسم منسق العائلة (أنت):' : 'Family Launch Coordinator Name (You):'}</label>
-                        <input
-                          type="text"
-                          value={announcementCoordinator}
-                          onChange={(e) => setAnnouncementCoordinator(e.target.value)}
-                          className="w-full bg-[#050b14]/80 border border-white/10 rounded-xl px-4 py-2 font-semibold text-white focus:outline-none focus:border-amber-500"
-                        />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="block text-xs font-black text-amber-400">{isRtl ? 'موعد اللقاءات الأسبوعية المقترح:' : 'Suggested Weekly Meetup Day/Time:'}</label>
-                        <input
-                          type="text"
-                          value={announcementTime}
-                          onChange={(e) => setAnnouncementTime(e.target.value)}
-                          className="w-full bg-[#050b14]/80 border border-white/10 rounded-xl px-4 py-2 font-semibold text-white focus:outline-none focus:border-amber-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="pt-4 border-t border-white/5 space-y-3">
-                      <div className="bg-amber-500/5 p-4 rounded-xl border border-amber-500/10 text-xs text-amber-300 leading-relaxed">
-                        💡 {isRtl ? 'انشر هذا الإعلان الحماسي والداهس في جروب العائلة على الواتساب لدعوتهم لبدء المغامرة وحصد نقاط الحكمة سوياً!' : 'Forward this emotional text directly into your local group to kickstart the weekly adventures!'}
-                      </div>
-                      <button
-                        onClick={() => {
-                          const messageText = `إعلان افتتاح قسم "تعلم الذكاء الاصطناعي" 📣\n\nعائلتنا الحبيبة،\n\nلحظة كبيرة! 🎉\n\nقسمنا الجديد "تعلم الذكاء الاصطناعي" أصبح جاهزًا بالأكاديمية الأسرية. وهذه ليست دورة مملة...\n\nإنها 20 مغامرة عائلية سنخوضها معًا بالمنزل:\n• سنكتشف معاً كيف "يفكر" الذكاء الاصطناعي باللعب والمحاكاة.\n• سنروضه ليرسم لنا ويؤلف أروع القصص.\n• سنتعلم مهارات كسر فخاخ التزييف الشخصي وحماية الهلوسة.\n• وفي النهاية... سنحصل على شهادات واعتمادات رسمية كسفراء للمستقبل!\n\n🎯 مواعيد دراستنا وتحدياتنا المقترحة:\n• درس واحد ${announcementTime} لتجسيد الأفكار.\n• سنعمل بالتصويت والابتسام دون أي ضغط دراسي.\n\n📍 التفعيل جاهز الآن للبدء. فقط افتحوا الأكاديمية واضغطوا على أيقونة المصباح الملونة وبدء المستوى الأول!\n\nمستعدون لفك الأنماط والغاز الغد؟\n\nمع خالص حبي وتمنياتي البهيجة،\nمنسق عائلتنا: ${announcementCoordinator}`;
-                          navigator.clipboard.writeText(messageText);
-                          setIsCopied(true);
-                          setTimeout(() => setIsCopied(false), 2500);
-                        }}
-                        className="w-full bg-amber-500 hover:bg-amber-600 active:scale-95 transition-all text-slate-950 font-black p-3.5 rounded-xl text-sm flex items-center justify-center gap-2"
-                      >
-                        {isCopied ? <Check size={16} /> : <Copy size={16} />}
-                        {isCopied ? (isRtl ? 'تم نسخ نص الدعوة العائلية!' : 'Announcement Copied!') : (isRtl ? 'نسخ نص الدعوة للواتساب 📋' : 'Copy Invitation Text 📋')}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Right Column: Beautiful announcement scroll show */}
-                  <div className="lg:col-span-7 bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6 text-right relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-48 h-48 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
-                    
-                    <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                      <span className="text-slate-400 text-xs font-bold font-mono tracking-widest">{isRtl ? 'معاينة البث والرسائل العائلية' : 'LIVE BOARD INVITE PREVIEW'}</span>
-                      <span className="text-[10px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">{isRtl ? 'نبرة حاشدة دافئة' : 'EMOTIONALLY DRIVEN'}</span>
-                    </div>
-
-                    <div className="bg-slate-950/50 p-6 rounded-2xl border border-white/5 font-mono text-sm leading-relaxed text-slate-300 max-h-96 overflow-y-auto whitespace-pre-wrap select-text">
-                      <strong>{isRtl ? "إعلان افتتاح قسم 'تعلم الذكاء الاصطناعي' 📣" : "Launch Announcement: 'Learn AI for Families' 📣"}</strong>
-                      {"\n\n"}
-                      {isRtl ? (
-                        `عائلتنا الحبيبة،
-
-لحظة كبيرة! 🎉
-
-قسمنا الجديد "تعلم الذكاء الاصطناعي" أصبح جاهزًا. وهذه ليست دورة عادية...
-
-إنها 20 مغامرة عائلية سنخوضها معًا:
-• سنكتشف كيف "يفكر" الذكاء الاصطناعي (باللعب!).
-• سنروضه ليرسم ويؤلف القصص.
-• سنتعلم كيف نحمي أنفسنا من خدعه ومخاطره.
-• وفي النهاية... سنصبح سفراء للمستقبل.
-
-🎯 كيف سنتعلم؟
-• درس واحد كل [${announcementTime}].
-• كل درس فيه "تحدي عائلي" نطبقه معًا بابتهاج وسرور.
-• لا يوجد درجات... فقط فضول ومرح قيادي.
-
-📍 القسم جاهز الآن في الأكاديمية. اضغطوا على الأيقونة الجديدة (المصباح البرتقالي ذو قلب الأمان).
-
-مستعدون للمغامرة الأولى كصائدي الأنماط؟
-
-مع حبي وعظيم تقديري،
-منسق عقولنا: ${announcementCoordinator}`
-                      ) : (
-                        `Dearest Family,
-
-This is a major milestone! 🎉
-
-Our brand new module "AI for Families" is officially open inside our learning hub. And this is not just another boring syllabus...
-
-It’s 20 thrilling real-life adventures we will experience together:
-• Unveil how AI "thinks" underneath (via gaming quests!).
-• Train models to paint masterpieces and write magical fairy tales.
-• Teach our younger nodes to secure their features from deepfakes.
-• Graduate with verified certificates as Future Ambassadors!
-
-🎯 Our Exploration Routine:
-• 1 micro-lesson every [${announcementTime}].
-• No scores, no pressure—pure family curiosity.
-
-📍 The track is live! Tap the glowing lightbulb icon in the main layout.
-
-Are you ready to crack the patterns of the future together?
-
-With love,
-Your Guide: ${announcementCoordinator}`
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {lobbyTab === 'perfection' && (
                 <PerfectionHub isRtl={isRtl} />
               )}
 
               {lobbyTab === 'study_plan' && (
-                !hasCompletedTest ? (
+                !(hasCompletedTest || bypassTest) ? (
                   <div className="bg-[#0b1329] border border-amber-500/20 rounded-[2.5rem] p-10 relative overflow-hidden text-right shadow-2xl animate-fade-in w-full" dir="rtl">
                     <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl opacity-30" />
                     <div className="relative z-10 flex flex-col items-center text-center space-y-6 py-6 font-sans">
@@ -10121,7 +10031,7 @@ Your Guide: ${announcementCoordinator}`
                                 setSelectedCustomUnit(null);
                                 setCustomUnitQuizSelected(null);
                                 setCustomUnitQuizCorrect(null);
-                                setLobbyTab('launch'); // Go to play workspace
+                                setLobbyTab('experiments'); // Go to play workspace
                               }}
                               className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-[10px] font-black tracking-wider uppercase transition-all flex items-center gap-1.5 cursor-pointer"
                             >
