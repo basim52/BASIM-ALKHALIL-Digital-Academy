@@ -24,6 +24,8 @@ import {
   Trash2,
   ChevronLeft
 } from 'lucide-react';
+import { EmotionExercise, EMOTION_EXERCISES } from './emotion_exercises';
+import { CommunicationExercise, COMMUNICATION_EXERCISES } from './communication_exercises';
 
 interface FocusExercise {
   id: string;
@@ -762,7 +764,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
   onLessonCompleted, 
   completedLessonIds = new Set() 
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'calm' | 'move' | 'writing'>('calm');
+  const [activeSubTab, setActiveSubTab] = useState<'calm' | 'move' | 'writing' | 'emotion' | 'communication'>('calm');
 
   // Active critical reflective writing states
   const [selectedWritingEx, setSelectedWritingEx] = useState<WritingExercise | null>(null);
@@ -786,6 +788,67 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     }
     stopSpeech();
   }, [selectedWritingEx]);
+
+  // Active emotional intelligence and tracking states
+  const [selectedEmotionEx, setSelectedEmotionEx] = useState<EmotionExercise | null>(null);
+  const [emotionStepsChecked, setEmotionStepsChecked] = useState<boolean[]>([]);
+  const [completedEmotionIds, setCompletedEmotionIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('balance_oasis_emotion_completed');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  // Active communication and social intelligence states
+  const [selectedCommEx, setSelectedCommEx] = useState<CommunicationExercise | null>(null);
+  const [commStepsChecked, setCommStepsChecked] = useState<boolean[]>([]);
+  const [completedCommIds, setCompletedCommIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('balance_oasis_comm_completed');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  useEffect(() => {
+    if (selectedCommEx) {
+      setCommStepsChecked(new Array(selectedCommEx.steps_ar.length).fill(false));
+    } else {
+      setCommStepsChecked([]);
+    }
+    stopSpeech();
+  }, [selectedCommEx]);
+
+  // Emotional thermometer tracking state
+  const [currentSelectedFeeling, setCurrentSelectedFeeling] = useState<string>('serene');
+  const [currentThermometerValue, setCurrentThermometerValue] = useState<number>(5);
+  const [feelingReflectiveNote, setFeelingReflectiveNote] = useState<string>('');
+  const [feelingLogs, setFeelingLogs] = useState<{
+    id: string;
+    timestamp: string;
+    feeling: string;
+    intensity: number;
+    note: string;
+  }[]>(() => {
+    try {
+      const saved = localStorage.getItem('balance_oasis_feeling_logs');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    if (selectedEmotionEx) {
+      setEmotionStepsChecked(new Array(selectedEmotionEx.steps_ar.length).fill(false));
+    } else {
+      setEmotionStepsChecked([]);
+    }
+    stopSpeech();
+  }, [selectedEmotionEx]);
 
   const [selectedEx, setSelectedEx] = useState<FocusExercise | null>(null);
   const [meditationTime, setMeditationTime] = useState<number>(60); // 60s default
@@ -820,7 +883,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
   // Voice recording & AI smart encouragement states
   const [completionSession, setCompletionSession] = useState<{
-    type: 'calm' | 'move' | 'writing';
+    type: 'calm' | 'move' | 'writing' | 'emotion' | 'communication';
     id: string;
     title: string;
     duration: number;
@@ -1003,6 +1066,18 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     "Incredible dynamic break! Transitioning from screen learning to active body coordination flushes away fatigue, rendering your neural pathways highly receptive for complex AI skills! 🚀🌟"
   ];
 
+  const AR_COMM_RESPONSES = [
+    "يا لك من ممارس اجتماعي رائع! التواصل الصادق وبناء جسور الفهم مع الآخرين والإنصات بعمق هو أساس الوعي والذكاء الاجتماعي الراقي. استمر في نشر الإيجابية! 💬✨",
+    "تطبيق متميز لمهارات التواصل الإيجابي! إن التعبير عن النفس بلطف والإنصات الفعال يبني علاقات أسرية واجتماعية متينة وقوية. فخورون بجهدك الراقي! 🤝🌟",
+    "رائع جداً! قدرتك على ضبط الحديث وتحويل الخلافات إلى تفاهم بناء يبني وعياً عاطفياً وسلوكياً مميزاً وثقة فائقة بالذات. أحسنت صنعاً! 🗣️💖"
+  ];
+
+  const EN_COMM_RESPONSES = [
+    "What a wonderful social practitioner! Sincere communication, deep listening, and building bridges of understanding build high-level social intelligence. Keep shining! 💬✨",
+    "Outstanding application of positive communication! Expressing yourself with gentle clarity and active listening cultivates unbreakable family and social bonds. Proud of your amazing efforts! 🤝🌟",
+    "Fantastic! Your ability to regulate conversations and turn disagreements into constructive understanding builds incredible emotional maturity and high confidence. Well done! 🗣️💖"
+  ];
+
   const triggerAiEncouragement = () => {
     let textToSpeak = '';
     const textLower = (recordedTranscript || '').toLowerCase();
@@ -1027,6 +1102,14 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
       } else {
         const rand = Math.floor(Math.random() * EN_CALM_RESPONSES.length);
         textToSpeak = EN_CALM_RESPONSES[rand];
+      }
+    } else if (completionSession?.type === 'communication') {
+      if (isRtl) {
+        const rand = Math.floor(Math.random() * AR_COMM_RESPONSES.length);
+        textToSpeak = AR_COMM_RESPONSES[rand];
+      } else {
+        const rand = Math.floor(Math.random() * EN_COMM_RESPONSES.length);
+        textToSpeak = EN_COMM_RESPONSES[rand];
       }
     } else {
       if (isRtl) {
@@ -1410,9 +1493,12 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
   const completedCount = localCompletedIds.size;
   const completedMoveCount = completedMoveIds.size;
-  const totalCompleted = completedCount + completedMoveCount;
-  const totalAvailable = EXERCISES.length + MOVEMENT_EXERCISES.length;
-  const progressPercent = Math.round((totalCompleted / totalAvailable) * 100);
+  const completedWritingCount = completedWritingIds.size;
+  const completedEmotionCount = completedEmotionIds.size;
+  const completedCommCount = completedCommIds.size;
+  const totalCompleted = completedCount + completedMoveCount + completedWritingCount + completedEmotionCount + completedCommCount;
+  const totalAvailable = EXERCISES.length + MOVEMENT_EXERCISES.length + WRITING_EXERCISES.length + EMOTION_EXERCISES.length + COMMUNICATION_EXERCISES.length;
+  const progressPercent = totalAvailable > 0 ? Math.round((totalCompleted / totalAvailable) * 100) : 0;
 
   return (
     <div className="w-full text-right space-y-8" dir={isRtl ? 'rtl' : 'ltr'}>
@@ -1462,13 +1548,15 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
       {/* 2. Sub-Tab Selector */}
       {!isPlaying && !isMovePlaying && !completionSession && (
-        <div className="flex bg-[#050b14] p-1 rounded-2xl border border-white/5 max-w-xl mx-auto shadow-xl">
+        <div className="grid grid-cols-2 md:flex bg-[#050b14] p-1 rounded-2xl border border-white/5 max-w-4xl mx-auto shadow-xl gap-1">
           <button
             onClick={() => {
               setActiveSubTab('calm');
               setSelectedWritingEx(null);
+              setSelectedEmotionEx(null);
+              setSelectedCommEx(null);
             }}
-            className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'calm'
                 ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-slate-950 font-black shadow-lg shadow-teal-500/10'
                 : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
@@ -1481,8 +1569,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             onClick={() => {
               setActiveSubTab('move');
               setSelectedWritingEx(null);
+              setSelectedEmotionEx(null);
+              setSelectedCommEx(null);
             }}
-            className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'move'
                 ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black shadow-lg shadow-amber-500/10'
                 : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
@@ -1495,15 +1585,49 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             onClick={() => {
               setActiveSubTab('writing');
               setSelectedWritingEx(null);
+              setSelectedEmotionEx(null);
+              setSelectedCommEx(null);
             }}
-            className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'writing'
                 ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-slate-950 font-black shadow-lg shadow-purple-500/10'
                 : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
             }`}
           >
             <span>✍️</span>
-            {isRtl ? 'الكتابة كأداة للتفكير' : 'Reflective Writing'}
+            {isRtl ? 'دفتر التفكير الصامت' : 'Reflective Notepad'}
+          </button>
+          <button
+            onClick={() => {
+              setActiveSubTab('emotion');
+              setSelectedWritingEx(null);
+              setSelectedEmotionEx(null);
+              setSelectedCommEx(null);
+            }}
+            className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              activeSubTab === 'emotion'
+                ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-slate-950 font-black shadow-lg shadow-emerald-500/10'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
+            }`}
+          >
+            <span>💎</span>
+            {isRtl ? 'الذكاء الوجداني' : 'Emotional Intelligence'}
+          </button>
+          <button
+            onClick={() => {
+              setActiveSubTab('communication');
+              setSelectedWritingEx(null);
+              setSelectedEmotionEx(null);
+              setSelectedCommEx(null);
+            }}
+            className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 col-span-2 md:col-span-1 ${
+              activeSubTab === 'communication'
+                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-slate-950 font-black shadow-lg shadow-blue-500/10'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
+            }`}
+          >
+            <span>💬</span>
+            {isRtl ? 'التواصل الإيجابي والذكاء الاجتماعي' : 'Positive Communication'}
           </button>
         </div>
       )}
@@ -2078,7 +2202,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   })}
                 </div>
               </div>
-            ) : (
+            ) : activeSubTab === 'writing' ? (
               // Active SubTab === 'writing' - Reflection Exercises
               selectedWritingEx ? (
                 <div className="space-y-6 animate-fade-in text-right" dir="rtl">
@@ -2379,6 +2503,691 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           >
                             <FileText size={11} />
                             {isRtl ? 'فتح التحدي ودفتر التعبير' : 'Open Creative Notepad'}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )
+            ) : activeSubTab === 'emotion' ? (
+              // Active SubTab === 'emotion' - Emotional Regulation Exercises
+              selectedEmotionEx ? (
+                <div className="space-y-6 animate-fade-in text-right" dir="rtl">
+                  {/* Step-by-Step interactive checklist container */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-4">
+                    <button
+                      onClick={() => {
+                        setSelectedEmotionEx(null);
+                        stopSpeech();
+                      }}
+                      className="bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <ChevronRight size={14} />
+                      {isRtl ? 'العودة لقائمة تمارين الوعي والذكاء الوجداني' : 'Back to Exercises'}
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold font-mono">
+                        🎯 {isRtl ? selectedEmotionEx.feeling_focus : 'Focus Area'}
+                      </span>
+                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-[#059669] font-bold font-mono">
+                        ✨ {isRtl ? selectedEmotionEx.activity_type : 'Type'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    {/* Left Column: Step checklist */}
+                    <div className="lg:col-span-8 bg-[#030712] border border-white/5 rounded-3xl p-6 space-y-6 shadow-2xl">
+                      <div className="space-y-2">
+                        <span className="text-3xl">{selectedEmotionEx.emoji}</span>
+                        <h3 className="text-xl font-black text-white">
+                          {isRtl ? selectedEmotionEx.title_ar : selectedEmotionEx.title_en}
+                        </h3>
+                        <p className="text-slate-400 text-xs">
+                          {isRtl ? selectedEmotionEx.description_ar : selectedEmotionEx.title_en}
+                        </p>
+                      </div>
+
+                      {/* Step-by-step interactive tasks */}
+                      <div className="space-y-4">
+                        <h4 className="text-xs font-black text-emerald-400 uppercase tracking-widest border-b border-white/5 pb-2">
+                          {isRtl ? 'خطوات التطبيق والتمرين العملي:' : 'Practical Exercise Checklist:'}
+                        </h4>
+
+                        <div className="space-y-3">
+                          {(isRtl ? selectedEmotionEx.steps_ar : selectedEmotionEx.steps_en).map((step, sIdx) => {
+                            const isChecked = emotionStepsChecked[sIdx] || false;
+
+                            return (
+                              <button
+                                key={sIdx}
+                                onClick={() => {
+                                  const updated = [...emotionStepsChecked];
+                                  updated[sIdx] = !updated[sIdx];
+                                  setEmotionStepsChecked(updated);
+                                }}
+                                className={`w-full text-right p-4 rounded-2xl border transition-all duration-200 flex items-start gap-4 cursor-pointer select-none ${
+                                  isChecked 
+                                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-100 shadow-inner' 
+                                    : 'bg-[#080f1a] border-white/5 text-slate-300 hover:border-emerald-500/20'
+                                }`}
+                              >
+                                <span className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
+                                  isChecked 
+                                    ? 'bg-emerald-500 border-emerald-500 text-slate-950' 
+                                    : 'border-slate-500 text-transparent'
+                                }`}>
+                                  <Check size={12} strokeWidth={4} />
+                                </span>
+                                <div className="space-y-1">
+                                  <span className="text-xs font-black text-slate-500 font-mono">
+                                    {isRtl ? `الخطوة ${sIdx + 1}` : `Step ${sIdx + 1}`}
+                                  </span>
+                                  <p className="text-xs md:text-sm font-medium leading-relaxed text-right">
+                                    {step}
+                                  </p>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Toolshelf for Reading Steps Out Loud */}
+                      <div className="flex border-t border-white/5 pt-4">
+                        <button
+                          onClick={() => {
+                            if (speechPlaybackActive) {
+                              stopSpeech();
+                            } else {
+                              stopSpeech();
+                              const textToRead = (isRtl ? selectedEmotionEx.steps_ar : selectedEmotionEx.steps_en).join('. ');
+                              const utter = new SpeechSynthesisUtterance(textToRead);
+                              utter.lang = isRtl ? 'ar-SA' : 'en-US';
+                              utter.onend = () => setSpeechPlaybackActive(false);
+                              utter.onerror = () => setSpeechPlaybackActive(false);
+                              currentUtteranceRef.current = utter;
+                              setSpeechPlaybackActive(true);
+                              window.speechSynthesis.speak(utter);
+                            }
+                          }}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
+                            speechPlaybackActive
+                              ? 'bg-amber-500 text-slate-900 font-black shadow-lg shadow-amber-500/20'
+                              : 'bg-white/5 hover:bg-white/10 text-slate-300'
+                          }`}
+                        >
+                          <span>🔊</span>
+                          {speechPlaybackActive 
+                            ? (isRtl ? 'إيقاف قراءة الصوت' : 'Stop Reading')
+                            : (isRtl ? 'تفقيط وقراءة خطوات التمرين بصوت مسموع' : 'Read Steps Aloud')
+                          }
+                        </button>
+                      </div>
+
+                    </div>
+
+                    {/* Right Column: Outcomes & Completion */}
+                    <div className="lg:col-span-4 bg-[#050b14] border border-white/5 rounded-3xl p-6 flex flex-col justify-between space-y-6 text-right">
+                      <div className="space-y-5">
+                        <div className="text-center pb-4 border-b border-white/5">
+                          <span className="text-3xl">💎</span>
+                          <h4 className="text-base font-black text-white mt-1">
+                            {isRtl ? 'الأثر المتوقع والمخرج الوجداني:' : 'Emotional Outcome & Depth:'}
+                          </h4>
+                        </div>
+
+                        <div className="bg-emerald-950/20 border border-emerald-500/20 rounded-2xl p-4 text-emerald-200 text-xs leading-relaxed" dir="rtl">
+                          <p className="font-extrabold mb-1">🌱 {isRtl ? 'الأثر الوجداني العاطفي:' : 'Emotional Impact:'}</p>
+                          <p>{selectedEmotionEx.outcome_ar}</p>
+                        </div>
+
+                        <p className="text-slate-400 text-[11px] leading-relaxed">
+                          {isRtl
+                            ? 'بمجرد استوعبت التلميح وتتبعت الخطوات المعروضة والتعليم عليها بأنها مكتملة، يرجى التعبير عن شعورك بالتحفيز والتعزيز الذكي لإنهاء المهمة بنجاح وعرض فخرك.'
+                            : 'Once you reflect and complete each task step, proceed to report completion and listen to automated supportive feedback.'}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const updated = new Set(completedEmotionIds);
+                          updated.add(selectedEmotionEx.id);
+                          setCompletedEmotionIds(updated);
+                          localStorage.setItem('balance_oasis_emotion_completed', JSON.stringify(Array.from(updated)));
+
+                          // Trigger the beautiful completion voice record encouraging session!
+                          setSelectedEx(null);
+                          setSelectedMoveEx(null);
+                          setSelectedWritingEx(null);
+                          setCompletionSession({
+                            type: 'emotion',
+                            id: selectedEmotionEx.id,
+                            title: selectedEmotionEx.title_ar,
+                            duration: 15 * 60 // average 15 minutes
+                          });
+
+                          setSelectedEmotionEx(null);
+                          stopSpeech();
+                        }}
+                        className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-emerald-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+                      >
+                        <span>✓</span>
+                        {isRtl ? 'تسجيل إنجاز تمرين الذكاء الوجداني والولوج للتعزيز 🎙' : 'Mark Completed & Open Encouragement 🎙'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // SelectedEmotionEx === null -> Grid list of 20 emotion exercises + Interactive Thermometer feeling tracker!
+                <div className="space-y-8 text-right" dir="rtl">
+                  
+                  {/* 1. Real-time Emotional Thermometer & Mood Log Section */}
+                  <div className="bg-gradient-to-br from-[#0c192e] to-[#050b14] border border-white/5 rounded-3xl p-6 shadow-2xl space-y-6">
+                    <div className="border-b border-white/5 pb-4">
+                      <div className="flex items-center gap-2.5 justify-end">
+                        <h3 className="text-lg font-black text-white">
+                          {isRtl ? 'مقياس الترمومتر العاطفي وسجل المشاعر المطلب 🌡️' : 'Emotional Thermometer & Live Feeling Log 🌡️'}
+                        </h3>
+                        <span className="text-xl">🌡️</span>
+                      </div>
+                      <p className="text-slate-400 text-xs mt-1">
+                        {isRtl 
+                          ? 'قس "حرارة" شعورك الآن على مقياس من 0 إلى 10 وسجل مشاعرك لتتبع أنماط وعيك الوجداني طيلة اليوم:' 
+                          : 'Monitor the thermal intensity of your mood from 0 to 10 and log current states for deep self-awareness:'}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                      
+                      {/* Interactive Log Entry */}
+                      <div className="lg:col-span-7 space-y-5">
+                        
+                        {/* Selected Feeling Icon Grid */}
+                        <div className="space-y-2">
+                          <label className="text-xs font-black text-teal-400 uppercase tracking-wider block">
+                            {isRtl ? 'بماذا تشعر الآن بالدرجة الأولى؟' : 'Primary Feeling Tag:'}
+                          </label>
+                          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                            {[
+                              { id: 'angry', emoji: '😡', label_ar: 'غضب', label_en: 'Anger', color: 'from-rose-500/20 to-red-500/20 border-red-500/40 text-red-200' },
+                              { id: 'anxious', emoji: '😰', label_ar: 'قلق/توتر', label_en: 'Anxiety', color: 'from-amber-500/20 to-orange-500/20 border-orange-500/40 text-orange-200' },
+                              { id: 'sad', emoji: '😢', label_ar: 'حزن/تعب', label_en: 'Sadness', color: 'from-sky-500/20 to-blue-500/20 border-blue-500/40 text-blue-200' },
+                              { id: 'fear', emoji: '😨', label_ar: 'خوف', label_en: 'Fear', color: 'from-yellow-500/20 to-yellow-600/20 border-yellow-500/40 text-yellow-100' },
+                              { id: 'serene', emoji: '🧘', label_ar: 'هدوء/سلام', label_en: 'Serenity', color: 'from-teal-500/20 to-emerald-500/20 border-teal-500/40 text-teal-200' },
+                              { id: 'joyful', emoji: '⭐', label_ar: 'فرح/إنجاز', label_en: 'Joy', color: 'from-purple-500/20 to-indigo-500/20 border-purple-500/40 text-purple-200' }
+                            ].map((feel) => (
+                              <button
+                                key={feel.id}
+                                onClick={() => setCurrentSelectedFeeling(feel.id)}
+                                className={`p-2.5 rounded-xl border text-xs font-bold transition flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                                  currentSelectedFeeling === feel.id 
+                                    ? `bg-gradient-to-b ${feel.color} border-2 scale-102` 
+                                    : 'bg-[#050b14]/50 border-white/5 text-slate-400 hover:border-white/10'
+                                }`}
+                              >
+                                <span className="text-xl">{feel.emoji}</span>
+                                <span>{isRtl ? feel.label_ar : feel.label_en}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Intensity Slider with color gradient background indicator */}
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="font-mono text-slate-400">{currentThermometerValue} / 10</span>
+                            <span className="font-black text-teal-400">
+                              {isRtl ? 'درجة الحرارة العاطفية والتأثير الحركي:' : 'Emotional Temperature Level:'}
+                            </span>
+                          </div>
+                          
+                          <div className="relative">
+                            <input
+                              type="range"
+                              min="0"
+                              max="10"
+                              value={currentThermometerValue}
+                              onChange={(e) => setCurrentThermometerValue(Number(e.target.value))}
+                              className="w-full h-2 rounded-lg bg-slate-800 accent-emerald-500 outline-none cursor-pointer"
+                            />
+                            {/* Color Bar Track Visual */}
+                            <div className="flex justify-between text-[10px] text-slate-500 mt-1 font-bold">
+                              <span>0 ({isRtl ? 'هادئ جداً ❄️' : 'Fully Calm'})</span>
+                              <span>5 ({isRtl ? 'متوسط ⚡' : 'Moderate'})</span>
+                              <span>10 ({isRtl ? 'عالي جداً/ناري 🔥' : 'Highly Intense'})</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Reflection prompt */}
+                        <div className="space-y-1.5 text-right">
+                          <label className="text-xs font-black text-teal-400 uppercase tracking-wider block">
+                            {isRtl ? 'صف باختصار سبب شعورك الحالي (اختياري للتفريغ):' : 'Brief Cause note (Optional for self-relief):'}
+                          </label>
+                          <input
+                            type="text"
+                            value={feelingReflectiveNote}
+                            onChange={(e) => setFeelingReflectiveNote(e.target.value)}
+                            placeholder={isRtl ? 'مثال: الفرح بإنجاز كود برمجي، أو التوتر من كثرة الشاشات...' : 'E.g., joy from completing a unit, or pressure from long study hours...'}
+                            className="w-full bg-[#030712] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-teal-500 text-right"
+                          />
+                        </div>
+
+                        {/* Trigger button */}
+                        <button
+                          onClick={() => {
+                            const newLog = {
+                              id: String(Date.now()),
+                              timestamp: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
+                              feeling: currentSelectedFeeling,
+                              intensity: currentThermometerValue,
+                              note: feelingReflectiveNote.trim()
+                            };
+                            const updated = [newLog, ...feelingLogs].slice(0, 30); // keep last 30 logs
+                            setFeelingLogs(updated);
+                            localStorage.setItem('balance_oasis_feeling_logs', JSON.stringify(updated));
+                            setFeelingReflectiveNote('');
+                          }}
+                          className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black py-2.5 rounded-xl text-xs shadow-lg transition duration-200 cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <span>🌡️</span>
+                          {isRtl ? 'تسجيل درجة الحرارة العاطفية في السجل' : 'Log Temperature Entry'}
+                        </button>
+
+                      </div>
+
+                      {/* Log History */}
+                      <div className="lg:col-span-5 bg-[#030712] p-5 rounded-2xl border border-white/5 space-y-4 max-h-[340px] overflow-y-auto">
+                        <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                          <button
+                            onClick={() => {
+                              if (window.confirm(isRtl ? 'هل تريد تشطير مسح جميع مشاعرك والبدء بصفحة بيضاء؟' : 'Delete all logged emotions?')) {
+                                setFeelingLogs([]);
+                                localStorage.removeItem('balance_oasis_feeling_logs');
+                              }
+                            }}
+                            className="text-[10px] text-rose-400 hover:text-rose-300 font-bold cursor-pointer"
+                          >
+                            {isRtl ? 'مسح السجل' : 'Clear Log'}
+                          </button>
+                          <h4 className="text-xs font-black text-slate-300">
+                            {isRtl ? 'سجل الوعي الوجداني اليومي:' : 'Daily Self-Awareness History:'}
+                          </h4>
+                        </div>
+
+                        {feelingLogs.length === 0 ? (
+                          <div className="h-44 flex flex-col items-center justify-center text-slate-600 text-xs text-center border-2 border-dashed border-white/5 rounded-xl p-4">
+                            <span>📊</span>
+                            <span className="mt-1">{isRtl ? 'لا توجد سجلات تتبع مضافة بعد اليوم' : 'No feeling tags recorded yet today.'}</span>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {feelingLogs.map((log) => {
+                              // label mapping
+                              const feelDetails = (() => {
+                                switch (log.feeling) {
+                                  case 'angry': return { emoji: '😡', bg: 'bg-rose-500/10 text-rose-300 border-rose-500/20', label: (isRtl ? 'غضب' : 'Anger') };
+                                  case 'anxious': return { emoji: '😰', bg: 'bg-amber-500/10 text-amber-300 border-amber-500/20', label: (isRtl ? 'قلق' : 'Anxiety') };
+                                  case 'sad': return { emoji: '😢', bg: 'bg-sky-500/10 text-sky-300 border-sky-500/20', label: (isRtl ? 'حزن' : 'Sadness') };
+                                  case 'fear': return { emoji: '😨', bg: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20', label: (isRtl ? 'خوف' : 'Fear') };
+                                  case 'serene': return { emoji: '🧘', bg: 'bg-teal-500/10 text-teal-300 border-teal-500/20', label: (isRtl ? 'هدوء' : 'Serene') };
+                                  case 'joyful': return { emoji: '⭐', bg: 'bg-purple-500/10 text-purple-300 border-purple-500/20', label: (isRtl ? 'فرح' : 'Joy') };
+                                  default: return { emoji: '💭', bg: 'bg-slate-500/10 text-slate-300 border-slate-500/20', label: 'شائع' };
+                                }
+                              })();
+
+                              return (
+                                <div key={log.id} className="p-3 bg-[#080e1b] rounded-xl border border-white/5 flex items-center justify-between text-xs gap-3">
+                                  <span className="text-[10px] text-slate-500 font-mono shrink-0">{log.timestamp}</span>
+                                  <div className="text-right flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5 justify-end">
+                                      <span className="text-slate-400 font-mono tracking-tighter">({log.intensity}/10)</span>
+                                      <span className={`px-2 py-0.5 rounded-full border text-[10px] font-black ${feelDetails.bg}`}>
+                                        {feelDetails.emoji} {feelDetails.label}
+                                      </span>
+                                    </div>
+                                    {log.note && (
+                                      <p className="text-[11px] text-slate-400 mt-1 truncate max-w-full italic">
+                                        "{log.note}"
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* 2. Grid list of 20 emotional intelligence exercises */}
+                  <div className="space-y-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-2 text-right">
+                      <div className="space-y-1">
+                        <h3 className="text-lg font-black text-white flex items-center gap-2 justify-end">
+                          <span className="text-emerald-400">💎</span>
+                          {isRtl ? 'منهج التعبير الإبداعي والذكاء الوجداني (الوحدة الأولى):' : 'Creative Writing & Emotional Intelligence (Unit 1):'}
+                        </h3>
+                        <p className="text-slate-400 text-xs">
+                          {isRtl ? 'الوحدة كاملة: 20 تمرين عملي لـ الوعي التام بالمشاعر، كفاءة ضبط الغضب، وتقوية المرونة العائلية:' : 'Complete 20 integrated interactive routines to bolster focus, anger containment, and constructive play:'}
+                        </p>
+                      </div>
+
+                      <div className="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-xl font-bold font-mono">
+                        {isRtl ? `أنجزت ${completedEmotionIds.size} من 20` : `${completedEmotionIds.size} / 20 Completed`}
+                      </div>
+                    </div>
+
+                    {/* Grid list container */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" dir="rtl">
+                      {EMOTION_EXERCISES.map((ex, idx) => {
+                        const isCompleted = completedEmotionIds.has(ex.id);
+
+                        return (
+                          <div
+                            key={ex.id}
+                            className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#050b14] flex flex-col justify-between group ${
+                              isCompleted
+                                ? 'border-emerald-500/30'
+                                : 'border-white/5 hover:border-emerald-500/30'
+                            }`}
+                          >
+                            {/* Badge */}
+                            <div className="flex justify-between items-center">
+                              <span className="text-[10px] text-slate-500 font-mono tracking-wider font-extrabold uppercase">
+                                {isRtl ? `تمرين وجداني ${idx + 1}` : `Emotion Exercise ${idx + 1}`}
+                              </span>
+
+                              {isCompleted ? (
+                                <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-0.5 rounded-full" title={isRtl ? "مكتمل" : "Completed"}>
+                                  <Check size={10} strokeWidth={3} />
+                                </span>
+                              ) : (
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/50" />
+                              )}
+                            </div>
+
+                            {/* Meta info */}
+                            <div className="space-y-1.5 text-right font-sans">
+                              <div className="flex items-center gap-2 justify-end">
+                                <h4 className="text-sm font-black text-white group-hover:text-emerald-300 transition line-clamp-1">
+                                  {isRtl ? ex.title_ar : ex.title_en}
+                                </h4>
+                                <span className="text-lg">{ex.emoji}</span>
+                              </div>
+                              <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                                {isRtl ? ex.description_ar : ex.title_en}
+                              </p>
+                            </div>
+
+                            {/* CTA button */}
+                            <button
+                              onClick={() => setSelectedEmotionEx(ex)}
+                              className={`w-full mt-2 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
+                                isCompleted
+                                  ? 'bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-300 border-emerald-500/10'
+                                  : 'bg-emerald-500/5 group-hover:bg-emerald-500 group-hover:text-slate-950 text-emerald-400 border-emerald-500/10 group-hover:border-emerald-500'
+                              }`}
+                            >
+                              <span>⚡</span>
+                              {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                </div>
+              )
+            ) : (
+              // Active SubTab === 'communication' - Positive Communication & Social Intelligence Exercises
+              selectedCommEx ? (
+                <div className="space-y-6 animate-fade-in text-right" dir="rtl">
+                  {/* Step-by-Step interactive checklist container */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-4">
+                    <button
+                      onClick={() => {
+                        setSelectedCommEx(null);
+                        stopSpeech();
+                      }}
+                      className="bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <ChevronRight size={14} />
+                      {isRtl ? 'العودة لقائمة تمارين التواصل الاجتماعي' : 'Back to Exercises'}
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold font-mono">
+                        🎯 {isRtl ? selectedCommEx.skill_focus : 'Focus Area'}
+                      </span>
+                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-[#3b82f6] font-bold font-mono">
+                        ✨ {isRtl ? selectedCommEx.activity_type : 'Type'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    {/* Left Column: Step checklist */}
+                    <div className="lg:col-span-8 bg-[#030712] border border-white/5 rounded-3xl p-6 space-y-6 shadow-2xl">
+                      <div className="space-y-2">
+                        <span className="text-3xl">💬</span>
+                        <h3 className="text-xl font-black text-white">
+                          {isRtl ? selectedCommEx.title_ar : selectedCommEx.title_en}
+                        </h3>
+                        <p className="text-slate-400 text-xs">
+                          {isRtl ? selectedCommEx.description_ar : selectedCommEx.title_en}
+                        </p>
+                      </div>
+
+                      {/* Step-by-step interactive tasks */}
+                      <div className="space-y-4">
+                        <h4 className="text-xs font-black text-blue-400 uppercase tracking-widest border-b border-white/5 pb-2">
+                          {isRtl ? 'خطوات التطبيق والتمرين العملي عائلياً:' : 'Practical Exercise Checklist:'}
+                        </h4>
+
+                        <div className="space-y-3">
+                          {(isRtl ? selectedCommEx.steps_ar : selectedCommEx.steps_en).map((step, sIdx) => {
+                            const isChecked = commStepsChecked[sIdx] || false;
+
+                            return (
+                              <button
+                                key={sIdx}
+                                onClick={() => {
+                                  const updated = [...commStepsChecked];
+                                  updated[sIdx] = !updated[sIdx];
+                                  setCommStepsChecked(updated);
+                                }}
+                                className={`w-full text-right p-4 rounded-2xl border transition-all duration-200 flex items-start gap-4 cursor-pointer select-none ${
+                                  isChecked 
+                                    ? 'bg-blue-500/10 border-blue-500/30 text-blue-100 shadow-inner' 
+                                    : 'bg-[#080f1a] border-white/5 text-slate-300 hover:border-blue-500/20'
+                                }`}
+                              >
+                                <span className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
+                                  isChecked 
+                                    ? 'bg-blue-500 border-blue-500 text-slate-950' 
+                                    : 'border-slate-500 text-transparent'
+                                }`}>
+                                  <Check size={12} strokeWidth={4} />
+                                </span>
+                                <div className="space-y-1">
+                                  <span className="text-xs font-black text-slate-500 font-mono">
+                                    {isRtl ? `الخطوة ${sIdx + 1}` : `Step ${sIdx + 1}`}
+                                  </span>
+                                  <p className="text-xs md:text-sm font-medium leading-relaxed text-right">
+                                    {step}
+                                  </p>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Toolshelf for Reading Steps Out Loud */}
+                      <div className="flex border-t border-white/5 pt-4">
+                        <button
+                          onClick={() => {
+                            if (speechPlaybackActive) {
+                              stopSpeech();
+                            } else {
+                              stopSpeech();
+                              const textToRead = (isRtl ? selectedCommEx.steps_ar : selectedCommEx.steps_en).join('. ');
+                              const utter = new SpeechSynthesisUtterance(textToRead);
+                              utter.lang = isRtl ? 'ar-SA' : 'en-US';
+                              utter.onend = () => setSpeechPlaybackActive(false);
+                              utter.onerror = () => setSpeechPlaybackActive(false);
+                              currentUtteranceRef.current = utter;
+                              setSpeechPlaybackActive(true);
+                              window.speechSynthesis.speak(utter);
+                            }
+                          }}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
+                            speechPlaybackActive
+                              ? 'bg-amber-500 text-slate-900 font-black shadow-lg shadow-amber-500/20'
+                              : 'bg-white/5 hover:bg-white/10 text-slate-300'
+                          }`}
+                        >
+                          <span>🔊</span>
+                          {speechPlaybackActive 
+                            ? (isRtl ? 'إيقاف قراءة الصوت' : 'Stop Reading')
+                            : (isRtl ? 'تفقيط وقراءة خطوات التمرين بصوت مسموع' : 'Read Steps Aloud')
+                          }
+                        </button>
+                      </div>
+
+                    </div>
+
+                    {/* Right Column: Outcomes & Completion */}
+                    <div className="lg:col-span-4 bg-[#050b14] border border-white/5 rounded-3xl p-6 flex flex-col justify-between space-y-6 text-right">
+                      <div className="space-y-5">
+                        <div className="text-center pb-4 border-b border-white/5">
+                          <span className="text-3xl">💬</span>
+                          <h4 className="text-base font-black text-white mt-1">
+                            {isRtl ? 'الأثر المتوقع والمخرج الاجتماعي:' : 'Social Outcome & Depth:'}
+                          </h4>
+                        </div>
+
+                        <div className="bg-blue-950/20 border border-blue-500/20 rounded-2xl p-4 text-blue-200 text-xs leading-relaxed" dir="rtl">
+                          <p className="font-extrabold mb-1">🤝 {isRtl ? 'الأثر والترابط العائلي:' : 'Social Impact:'}</p>
+                          <p>{isRtl ? 'يبني جسر تفاهم حقيقي مع شريك السكن أو الأبناء ويؤسس لعادات تواصل إيجابية تصفي القلوب.' : 'Builds a true bridge of understanding with family members, grounding positive daily social connections.'}</p>
+                        </div>
+
+                        <p className="text-slate-400 text-[11px] leading-relaxed">
+                          {isRtl
+                            ? 'بمجرد تطبيق الخطوات المعروضة والتعليم عليها كخطوات منجزة، اضغط على زر التسجيل لتوثيق إنجاز التمرين وتلقي كلمات التشجيع والدعم.'
+                            : 'Once you practice and check off each communication step, proceed to register completion and receive AI spoken feedback.'}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const updated = new Set(completedCommIds);
+                          updated.add(selectedCommEx.id);
+                          setCompletedCommIds(updated);
+                          localStorage.setItem('balance_oasis_comm_completed', JSON.stringify(Array.from(updated)));
+
+                          // Trigger the beautiful completion voice record encouraging session!
+                          setSelectedEx(null);
+                          setSelectedMoveEx(null);
+                          setSelectedWritingEx(null);
+                          setSelectedEmotionEx(null);
+                          setCompletionSession({
+                            type: 'communication',
+                            id: selectedCommEx.id,
+                            title: isRtl ? selectedCommEx.title_ar : selectedCommEx.title_en,
+                            duration: 10 * 60 // average 10 minutes
+                          });
+
+                          setSelectedCommEx(null);
+                          stopSpeech();
+                        }}
+                        className="w-full bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-blue-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+                      >
+                        <span>✓</span>
+                        {isRtl ? 'تسجيل إنجاز تمرين التواصل والولوج للتعزيز 🎙' : 'Mark Completed & Open Encouragement 🎙'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // SelectedCommEx === null -> Grid list of 20 positive communication exercises!
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-2 text-right">
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-black text-white flex items-center gap-2 justify-end">
+                        <span className="text-blue-400">💬</span>
+                        {isRtl ? 'منهج التواصل الإيجابي والذكاء الاجتماعي (الوحدة الأولى):' : 'Positive Communication & Social Intelligence (Unit 1):'}
+                      </h3>
+                      <p className="text-slate-400 text-xs">
+                        {isRtl ? 'تفاصيل المنهج بالكامل: 20 تمرين عملي لـ الإنصات الفعال، احتواء الخلافات، والترابط الأسري السلمي:' : 'Complete curriculum: 20 active interactive routines to foster active listening, peaceful conflict management, and deep social bond:'}
+                      </p>
+                    </div>
+
+                    <div className="text-xs bg-blue-500/10 border border-blue-500/20 text-blue-400 px-3 py-1.5 rounded-xl font-bold font-mono">
+                      {isRtl ? `أنجزت ${completedCommIds.size} من 20` : `${completedCommIds.size} / 20 Completed`}
+                    </div>
+                  </div>
+
+                  {/* Grid list container */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" dir="rtl">
+                    {COMMUNICATION_EXERCISES.map((ex, idx) => {
+                      const isCompleted = completedCommIds.has(ex.id);
+
+                      return (
+                        <div
+                          key={ex.id}
+                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#050b14] flex flex-col justify-between group ${
+                            isCompleted
+                              ? 'border-blue-500/30'
+                              : 'border-white/5 hover:border-blue-500/30'
+                          }`}
+                        >
+                          {/* Badge */}
+                          <div className="flex justify-between items-center">
+                            <span className="text-[10px] text-slate-500 font-mono tracking-wider font-extrabold uppercase">
+                              {isRtl ? `تمرين تواصل ${idx + 1}` : `Communication Exercise ${idx + 1}`}
+                            </span>
+
+                            {isCompleted ? (
+                              <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-0.5 rounded-full" title={isRtl ? "مكتمل" : "Completed"}>
+                                <Check size={10} strokeWidth={3} />
+                              </span>
+                            ) : (
+                              <span className="w-1.5 h-1.5 rounded-full bg-blue-500/50" />
+                            )}
+                          </div>
+
+                          {/* Meta info */}
+                          <div className="space-y-1.5 text-right font-sans">
+                            <div className="flex items-center gap-2 justify-end">
+                              <h4 className="text-sm font-black text-white group-hover:text-blue-300 transition line-clamp-1">
+                                {isRtl ? ex.title_ar : ex.title_en}
+                              </h4>
+                              <span className="text-lg">💬</span>
+                            </div>
+                            <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                              {isRtl ? ex.description_ar : ex.title_en}
+                            </p>
+                          </div>
+
+                          {/* CTA button */}
+                          <button
+                            onClick={() => setSelectedCommEx(ex)}
+                            className={`w-full mt-2 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
+                              isCompleted
+                                ? 'bg-blue-500/5 hover:bg-blue-500/10 text-blue-300 border-blue-500/10'
+                                : 'bg-blue-500/5 group-hover:bg-blue-500 group-hover:text-slate-950 text-blue-400 border-blue-500/10 group-hover:border-blue-500'
+                            }`}
+                          >
+                            <span>⚡</span>
+                            {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
                           </button>
                         </div>
                       );

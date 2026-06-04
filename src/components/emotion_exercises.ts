@@ -1,0 +1,451 @@
+export interface EmotionExercise {
+  id: string;
+  title_ar: string;
+  title_en: string;
+  description_ar: string;
+  feeling_focus: string;
+  activity_type: string;
+  steps_ar: string[];
+  steps_en: string[];
+  outcome_ar: string;
+  emoji: string;
+}
+
+export const EMOTION_EXERCISES: EmotionExercise[] = [
+  {
+    "id": "emotion_001",
+    "title_ar": "أنا ومشاعري لحظة بلحظة",
+    "title_en": "My Feelings in Real-Time",
+    "description_ar": "تدريب على تتبع المشاعر خلال اليوم. كل ساعتين، توقف واسأل نفسك: 'بماذا أشعر الآن؟' وسجله في جدول.",
+    "feeling_focus": "الوعي العام بالمشاعر",
+    "activity_type": "تتبع وتسجيل",
+    "steps_ar": [
+      "جهز جدولاً بسيطاً (وقت / شعور / سببه).",
+      "اضبط منبهاً لكل ساعتين.",
+      "عند رنين المنبه، توقف وسجل الشعور المسيطر ولحظة حدوثه.",
+      "في نهاية اليوم، راجع جدولك ولاحظ الأنماط."
+    ],
+    "steps_en": [
+      "Prepare a simple table (Time / Feeling / Cause).",
+      "Set an alarm every 2 hours.",
+      "When it rings, pause and note the main feeling you have.",
+      "At the end of the day, review your table and observe patterns."
+    ],
+    "outcome_ar": "زيادة الوعي بتغير المشاعر ومعرفة مسبباتها.",
+    "emoji": "⏱️"
+  },
+  {
+    "id": "emotion_002",
+    "title_ar": "مقياس الحرارة العاطفي",
+    "title_en": "Emotional Thermometer",
+    "description_ar": "ارسم مقياس حرارة من 0 إلى 10. كل ساعة، لون مستوى 'حرارة' شعورك. 0=هادئ، 10=مشتعل. يساعد على مراقبة تصاعد المشاعر.",
+    "feeling_focus": "الغضب، التوتر",
+    "activity_type": "رسم ومراقبة",
+    "steps_ar": [
+      "ارسم مقياس حرارة طويلاً على ورقة.",
+      "قسمه من 0 (أزرق، هادئ) إلى 10 (أحمر، مشتعل).",
+      "كل ساعة، لون مستوى شعورك الحالي.",
+      "لاحظ كيف تتغير الألوان ومتى تصل للقمة لتتعلم إشارات جسدك."
+    ],
+    "steps_en": [
+      "Draw a big thermometer on paper.",
+      "Mark from 0 (blue, calm) to 10 (red, fiery).",
+      "Color your current feeling level every hour.",
+      "Notice the color changes to identify your body's signals before anger peaks."
+    ],
+    "outcome_ar": "التعرف على إشارات الجسد المبكرة قبل الانفجار العاطفي.",
+    "emoji": "🌡️"
+  },
+  {
+    "id": "emotion_003",
+    "title_ar": "حول الغضب إلى حركة",
+    "title_en": "Turn Anger into Motion",
+    "description_ar": "عندما تشعر بموجة غضب، لا تكتمها. وجهها فوراً لنشاط بدني إيجابي (جري، قفز، ضرب وسادة). الطاقة تتحول من هدم إلى بناء.",
+    "feeling_focus": "الغضب، الإحباط",
+    "activity_type": "حركي وتفريغي",
+    "steps_ar": [
+      "لاحظ لحظة بدء الغضب في جسدك (قبضة يد، فك مشدود).",
+      "قل بصوت عالٍ: 'أنا غاضب/ة الآن، وسأحرر هذه الطاقة بإيجابية'.",
+      "قم بـ 20 قفزة نجمة أو اركض في مكانك لدقيقة.",
+      "بعدها، خذ 3 أنفاس عميقة ولاحظ الفرق في طاقتك."
+    ],
+    "steps_en": [
+      "Feel the start of anger in your body (fist, jaw).",
+      "Say out loud: 'I am angry now, and I will release this energy positively.'",
+      "Do 20 jumping jacks or run in place for a minute.",
+      "Then take 3 deep breaths and notice how your energy shifts."
+    ],
+    "outcome_ar": "تحويل طاقة الغضب إلى نشاط جسدي مفيد بدلاً من سلوك مدمر.",
+    "emoji": "🏃"
+  },
+  {
+    "id": "emotion_004",
+    "title_ar": "إعادة التسمية الإيجابية",
+    "title_en": "Positive Reframing",
+    "description_ar": "تدريب على تغيير اسم الشعور السلبي إلى تحدٍ إيجابي. أنا 'قلق' أصبح 'متحمس'، أنا 'خائف' أصبح 'حذر ومستعد'.",
+    "feeling_focus": "القلق، الخوف",
+    "activity_type": "إعادة صياغة لغوية",
+    "steps_ar": [
+      "اكتب قائمة بمشاعر سلبية تشعر بها كثيراً.",
+      "بجانب كل شعور، اكتب اسماً إيجابياً جديداً له.",
+      "مثال: 'توتر' = 'جاهزية للانطلاق'. 'حزن' = 'مساحة للراحة'.",
+      "مارس استخدام الاسم الجديد في حديثك الداخلي."
+    ],
+    "steps_en": [
+      "List negative feelings you often experience.",
+      "Next to each, write a new positive name for it.",
+      "Example: 'Anxiety' = 'Readiness to act'. 'Sadness' = 'Time for rest'.",
+      "Practice using the new name in your self-talk."
+    ],
+    "outcome_ar": "بناء عقلية مرنة ترى في المشاعر السلبية فرصة للتكيف.",
+    "emoji": "🔄"
+  },
+  {
+    "id": "emotion_005",
+    "title_ar": "التنفس للغضب: 4-7-8",
+    "title_en": "Breathing for Anger: 4-7-8",
+    "description_ar": "تقنية تنفس مثبتة علمياً لإطفاء موجة الغضب بسرعة. شهيق 4 ثوان، حبس 7 ثوان، زفير بطيء 8 ثوان.",
+    "feeling_focus": "الغضب، الاندفاع",
+    "activity_type": "تنفس وتأمل",
+    "steps_ar": [
+      "عند أول إشارة للغضب، اجلس وأغلق عينيك.",
+      "شهيق هادئ من الأنف (عدّ حتى 4).",
+      "احبس النفس (عدّ حتى 7).",
+      "زفير قوي وبطيء من الفم بصوت 'هففف' (عدّ حتى 8). كرر 4 مرات."
+    ],
+    "steps_en": [
+      "At the first anger signal, sit and close your eyes.",
+      "Inhale quietly through your nose (count to 4).",
+      "Hold your breath (count to 7).",
+      "Exhale forcefully and slowly with a 'whoosh' sound (count to 8). Repeat 4 times."
+    ],
+    "outcome_ar": "إبطاء ضربات القلب وتهدئة الجهاز العصبي في لحظات الغضب.",
+    "emoji": "💨"
+  },
+  {
+    "id": "emotion_006",
+    "title_ar": "الحديث مع الغضب",
+    "title_en": "Talking to Anger",
+    "description_ar": "حوار كتابي مع شعور الغضب. تعامل معه كضيف مؤقت. اسأله: 'ماذا جئت تعلمني؟' واستمع للإجابة بكتابتها.",
+    "feeling_focus": "الغضب، الإحباط العميق",
+    "activity_type": "كتابة وحوار داخلي",
+    "steps_ar": [
+      "في لحظة هدوء، تخيل أن غضبك شخص يجلس أمامك.",
+      "اكتب حواراً: 'لماذا أنت هنا؟'... 'ماذا تريدني أن أفعل؟'",
+      "استمع للإجابات التي تظهر في ذهنك واكتبها.",
+      "في النهاية، اشكره على الرسالة وأخبره أنه يمكنه الرحيل الآن."
+    ],
+    "steps_en": [
+      "In a calm moment, imagine your Anger as a person sitting before you.",
+      "Write a dialogue: 'Why are you here?'... 'What do you want me to do?'",
+      "Listen to the answers that come to mind and write them down.",
+      "Finally, thank it for the message and tell it, it can leave now."
+    ],
+    "outcome_ar": "فهم الرسالة وراء الغضب وتحويلها إلى دافع للتغيير.",
+    "emoji": "💬"
+  },
+  {
+    "id": "emotion_007",
+    "title_ar": "صندوق الإنجازات",
+    "title_en": "The Achievement Box",
+    "description_ar": "لحظات الإحباط تجعلنا ننسى نجاحاتنا. أنشئ صندوقاً مادياً تضع فيه أوراقاً صغيرة بإنجازاتك. عندما تشعر بالإحباط، افتحه واقرأ.",
+    "feeling_focus": "العجز والضعف واليأس",
+    "activity_type": "نشاط يدوي وتحفيزي",
+    "steps_ar": [
+      "أحضر علبة بسيطة وزينها واكتب عليها 'صندوق الإنجازات'.",
+      "كل يوم، اكتب إنجازاً واحداً صغيراً على ورقة وضعها فيه.",
+      "في لحظة الإحباط، افتح الصندوق واقرأ الأوراق بصوت عالٍ لنفسك."
+    ],
+    "steps_en": [
+      "Get a simple box, decorate it and write 'Achievement Box'.",
+      "Every day, write one small achievement on a paper and put it in.",
+      "In a moment of frustration, open the box and read your notes out loud to yourself."
+    ],
+    "outcome_ar": "بناء رصيد عاطفي إيجابي تستند إليه في أوقات الشدة.",
+    "emoji": "📦"
+  },
+  {
+    "id": "emotion_008",
+    "title_ar": "رسم المشاعر بالألوان",
+    "title_en": "Painting Feelings with Colors",
+    "description_ar": "اختر شعوراً تعيشه الآن (غضب، حزن، فرح) وأغلِق عينيك. افتحهما وارسمه كشكل ولون. لا تفكر، فقط عبر.",
+    "feeling_focus": "جميع المشاعر",
+    "activity_type": "تعبير فني",
+    "steps_ar": [
+      "أغمض عينيك واسأل نفسك: 'لو كان شعوري لوناً وشكلاً، فماذا سيكون؟'",
+      "استخدم ألواناً (أقلام، ماء) وارسم ما خطر ببالك دون حكم عليه.",
+      "بعد الانتهاء، انظر لرسمتك وقل: 'هكذا يبدو [اسم الشعور] اليوم'."
+    ],
+    "steps_en": [
+      "Close your eyes and ask: 'If my feeling were a color and shape, what would it be?'",
+      "Use colors (crayons, paint) and draw exactly what came to mind without judgment.",
+      "Afterwards, look at your drawing and say: 'This is what [feeling] looks like today.'"
+    ],
+    "outcome_ar": "التعبير عن المشاعر العميقة بطريقة غير لفظية وتحريرها.",
+    "emoji": "🎨"
+  },
+  {
+    "id": "emotion_009",
+    "title_ar": "الدرع الواقي من كلام الآخرين",
+    "title_en": "Shield Against Others' Words",
+    "description_ar": "تدريب ذهني لحماية النفس من الكلام الجارح. تخيل أن الكلمات تمر عبر درع شفاف ولا تخترق قلبك إلا ما كان مفيداً.",
+    "feeling_focus": "الحزن، الخذلان، الإهانة",
+    "activity_type": "تمرين خيالي وقائي",
+    "steps_ar": [
+      "استرخِ وأغمض عينيك. تخيل درعاً من الضوء حولك.",
+      "تخيل أن أحدهم يقول لك كلمة جارحة. الكلمة تضرب الدرع... تنزلق ببطء وتسقط على الأرض.",
+      "خذ نفساً عميقاً وقل: 'أنا أختار ما يؤثر فيّ. هذا لا يخترق درعي.'",
+      "افتح عينيك وأنت تشعر بالقوة والثبات."
+    ],
+    "steps_en": [
+      "Relax and close your eyes. Imagine a shield of light around you.",
+      "Imagine someone saying a hurtful word. The word hits the shield... slides slowly and falls to the ground.",
+      "Take a deep breath and say: 'I choose what affects me. This does not penetrate my shield.'",
+      "Open your eyes feeling strong and steady."
+    ],
+    "outcome_ar": "زيادة المرونة النفسية تجاه النقد والكلام السلبي.",
+    "emoji": "🛡️"
+  },
+  {
+    "id": "emotion_010",
+    "title_ar": "طاولة المشاعر العائلية",
+    "title_en": "Family Feelings Table",
+    "description_ar": "نشاط عائلي أسبوعي. يجلس الجميع ويضع كل فرد بطاقة تمثل شعوره السائد هذا الأسبوع. يشرحها باختصار ويستمع له الآخرون دون إعطاء حلول.",
+    "feeling_focus": "المشاركة الوجدانية",
+    "activity_type": "نشاط عائلي حواري",
+    "steps_ar": [
+      "اجتمعوا حول طاولة. لكل فرد بطاقة فارغة.",
+      "كل فرد يكتب أو يرسم شعوره الأسبوعي.",
+      "بالتناوب، يشرح كل فرد شعوره لمدة دقيقتين بينما يستمع الآخرون بصمت تام.",
+      "في النهاية، الكل يقول: 'شكراً لمشاركتك'."
+    ],
+    "steps_en": [
+      "Gather around a table. Everyone has a blank card.",
+      "Each person writes or draws their main feeling of the week.",
+      "Take turns explaining your feeling for 2 minutes while others listen in complete silence.",
+      "At the end, everyone says: 'Thank you for sharing.'"
+    ],
+    "outcome_ar": "خلق بيئة أسرية آمنة للتعبير عن المشاعر وزيادة التعاطف.",
+    "emoji": "👥"
+  },
+  {
+    "id": "emotion_011",
+    "title_ar": "جدار 'أستطيع'",
+    "title_en": "The 'I Can' Wall",
+    "description_ar": "خصص جداراً في غرفتك. كلما شعرت بالإحباط من 'لا أستطيع'، اكتب شيئاً واحداً 'أستطيع' فعله وألصقه على الجدار.",
+    "feeling_focus": "الإحباط، اليأس",
+    "activity_type": "تحفيز بصري",
+    "steps_ar": [
+      "اختر جداراً أو لوحاً فارغاً.",
+      "عند كل فكرة 'لا أستطيع'، اكتب عكسها 'أستطيع أن...' على ورقة ملونة.",
+      "ألصق الورقة على الجدار.",
+      "عندما يمتلئ الجدار، ستدرك كم أنت قوي وقادر."
+    ],
+    "steps_en": [
+      "Choose an empty wall or board.",
+      "With every 'I can't' thought, write its opposite 'I can...' on a colorful paper.",
+      "Stick the paper on the wall.",
+      "When the wall fills up, you will realize how strong and capable you are."
+    ],
+    "outcome_ar": "تحويل العقلية من عجز إلى قدرة بطريقة مرئية وملهمة.",
+    "emoji": "🧗"
+  },
+  {
+    "id": "emotion_012",
+    "title_ar": "لأعلى / لأسفل",
+    "title_en": "Up / Down",
+    "description_ar": "نشاط حركي للتمييز بين المشاعر 'الخافضة' و'الرافعة'. عند ذكر كلمة (مثل: نجاح)، اقفز لأعلى. عند ذكر كلمة (مثل: فشل)، انخفض للأسفل.",
+    "feeling_focus": "التمييز العاطفي",
+    "activity_type": "حركي وتفاعلي",
+    "steps_ar": [
+      "قف في منتصف الغرفة.",
+      "اطلب من أحدهم قراءة كلمات مختلفة (حب، خسارة، هدف، خوف...).",
+      "إذا شعرت أن الكلمة ترفع طاقتك، اقفز عالياً. إذا شعرت أنها تخفضها، انخفض بجسمك للأسفل.",
+      "ناقش لماذا اختلفت ردود الأفعال."
+    ],
+    "steps_en": [
+      "Stand in the middle of the room.",
+      "Ask someone to read different words (love, loss, goal, fear...).",
+      "If the word lifts you, jump high. If it brings you down, lower your body.",
+      "Discuss why reactions were different."
+    ],
+    "outcome_ar": "فهم تأثير الكلمات والأحداث على طاقة الجسد بشكل مباشر.",
+    "emoji": "🦘"
+  },
+  {
+    "id": "emotion_013",
+    "title_ar": "القلق صديق أم عدو؟",
+    "title_en": "Anxiety: Friend or Foe?",
+    "description_ar": "اكتب حواراً مع 'القلق'. في النصف الأول، أنت تلومه. في النصف الثاني، أنت تشكره على أنه حاول حمايتك. ما الذي سيتغير؟",
+    "feeling_focus": "القلق، التوتر",
+    "activity_type": "كتابة علاجية",
+    "steps_ar": [
+      "تخيل 'القلق' كشخص يريد حمايتك.",
+      "اكتب له: 'أنت تزعجني لأنك...'",
+      "الآن بدّل الأدوار، واكتب رده: 'أنا أحاول حمايتك من...'",
+      "أنهِ الحوار بشكر متبادل."
+    ],
+    "steps_en": [
+      "Imagine 'Anxiety' as a person trying to protect you.",
+      "Write to it: 'You bother me because you...'",
+      "Now switch roles, and write its reply: 'I am trying to protect you from...'",
+      "End the dialogue with mutual thanks."
+    ],
+    "outcome_ar": "تغيير العلاقة مع القلق من صراع إلى تعاون وتقدير.",
+    "emoji": "🤝"
+  },
+  {
+    "id": "emotion_014",
+    "title_ar": "إحباط اليوم = درس الغد",
+    "title_en": "Today's Frustration = Tomorrow's Lesson",
+    "description_ar": "في نهاية اليوم، اكتب أسوأ لحظة إحباط مرت بك. ثم فكر: 'ما هو الدرس المخبأ فيها؟' اكتب الدرس بجانبها.",
+    "feeling_focus": "الإحباط",
+    "activity_type": "كتابة تأملية",
+    "steps_ar": [
+      "قبل النوم، افتح دفترك.",
+      "اكتب: 'اليوم شعرت بإحباط شديد عندما...'",
+      "تحت ذلك، أكمل: 'لكن الدرس الذي تعلمته هو...'",
+      "أغلق الدفتر وأنت ممتن للدرس الجديد."
+    ],
+    "steps_en": [
+      "Before sleep, open your journal.",
+      "Write: 'Today I felt deeply frustrated when...'",
+      "Below it, complete: 'But the lesson I learned is...'",
+      "Close the journal feeling grateful for the new lesson."
+    ],
+    "outcome_ar": "تحويل الإحباط اليومي إلى مادة تعلم ونمو مستمر.",
+    "emoji": "📖"
+  },
+  {
+    "id": "emotion_015",
+    "title_ar": "قبعة الأدوار",
+    "title_en": "The Role Hat",
+    "description_ar": "عندما تشعر بالغضب من شخص، ارتدِ 'قبعته' في خيالك. تحدث بصوته 3 دقائق. ماذا يرى؟ بماذا يشعر؟ هذا يبني التعاطف.",
+    "feeling_focus": "الغضب من الآخرين",
+    "activity_type": "تمثيل وتعاطف",
+    "steps_ar": [
+      "تخيل أنك ترتدي قبعة الشخص الذي أغضبك.",
+      "تحدث بصوته (بصوت عالٍ أو كتابة) وأكمل: 'أنا [الاسم]، أشعر بـ...'",
+      "استمر 3 دقائق وأنت تتقمص وجهة نظره بالكامل.",
+      "بعدها، اخلع القبعة ولاحظ إن كان غضبك قد خف."
+    ],
+    "steps_en": [
+      "Imagine putting on the hat of the person who angered you.",
+      "Speak in their voice (out loud or writing) completing: 'I am [name], I feel...'",
+      "Continue for 3 minutes fully taking their perspective.",
+      "Afterwards, take off the hat and notice if your anger has softened."
+    ],
+    "outcome_ar": "بناء مهارة التعاطف وتقبل وجهات النظر المختلفة.",
+    "emoji": "🎩"
+  },
+  {
+    "id": "emotion_016",
+    "title_ar": "حرر المشاعر بالموسيقى",
+    "title_en": "Freeing Emotions with Music",
+    "description_ar": "اختر 3 أغانٍ: واحدة حزينة، واحدة غاضبة، واحدة مفرحة. استمع لكل منها 3 دقائق وحرر الشعور بالبكاء، الرقص، أو الصراخ في وسادة.",
+    "feeling_focus": "جميع المشاعر المكبوتة",
+    "activity_type": "موسيقي وتفريغي",
+    "steps_ar": [
+      "جهّز 3 أغانٍ مختلفة المشاعر مسبقاً.",
+      "استمع للأولى وأطلق العنان للشعور المرتبط بها دون كبت.",
+      "تنفس دقيقة بين كل أغنية.",
+      "بعد الثالثة، اشرب ماءً ولاحظ شعورك بالخفة."
+    ],
+    "steps_en": [
+      "Prepare 3 songs with different moods.",
+      "Listen to the first and freely release the emotion it brings.",
+      "Breathe for a minute between songs.",
+      "After the third, drink water and notice your feeling of lightness."
+    ],
+    "outcome_ar": "إطلاق المشاعر المكبوتة بطريقة آمنة ومضبوطة.",
+    "emoji": "🎵"
+  },
+  {
+    "id": "emotion_017",
+    "title_ar": "منجم الألم",
+    "title_en": "The Pain Mine",
+    "description_ar": "ارسم منجماً عميقاً. اكتب في قاعه ألمك الأكبر. الآن ارسم سلماً يخرج منه واكتب على كل درجة خطوة تخرجك من هذا الألم نحو النور.",
+    "feeling_focus": "الحزن العميق، الألم",
+    "activity_type": "رسم وكتابة رمزية",
+    "steps_ar": [
+      "ارسم منجماً مظلماً على ورقة.",
+      "اكتب في أعمق نقطة فيه الحدث أو الشعور المؤلم.",
+      "ارسم سلماً حلزونياً يخرج من المنجم إلى السطح.",
+      "على كل درجة، اكتب شيئاً واحداً يساعدك على الصعود (صديق، هواية، أمل...)."
+    ],
+    "steps_en": [
+      "Draw a dark mine on paper.",
+      "Write the painful event or feeling at its deepest point.",
+      "Draw a spiral ladder coming out of the mine.",
+      "On each rung, write one thing that helps you climb (a friend, a hobby, a hope...)."
+    ],
+    "outcome_ar": "رؤية طريق واضح للخروج من الألم بدلاً من البقاء عالقاً فيه.",
+    "emoji": "🪜"
+  },
+  {
+    "id": "emotion_018",
+    "title_ar": "بذور الغد",
+    "title_en": "Seeds of Tomorrow",
+    "description_ar": "عند الشعور بالإحباط من هدف لم تحققه، اكتب الهدف على ورقة على شكل بذرة. 'ازرعها' في علبة تراب على مكتبك كتذكير بأن كل إنجاز كبير بدأ كبذرة.",
+    "feeling_focus": "الإحباط من بطء التقدم",
+    "activity_type": "نشاط يدوي ورمزي",
+    "steps_ar": [
+      "اكتب هدفك المؤجل على ورقة خضراء صغيرة.",
+      "اطوِ الورقة وضعها في علبة تراب صغيرة على مكتبك.",
+      "كل يوم، 'اسقِ' العلبة بقليل من الماء وقل: 'هدفي ينمو'.",
+      "عندما تشعر بالإحباط، انظر للعلبة وتذكر أن النمو صامت وتحت السطح."
+    ],
+    "steps_en": [
+      "Write your delayed goal on a small green paper.",
+      "Fold it and place it in a small pot of soil on your desk.",
+      "Every day, 'water' it with a little water and say: 'My goal is growing.'",
+      "When frustrated, look at the pot and remember growth is silent and under the surface."
+    ],
+    "outcome_ar": "تعزيز الصبر والإيمان بأن النمو يحتاج وقتاً.",
+    "emoji": "🌱"
+  },
+  {
+    "id": "emotion_019",
+    "title_ar": "ساعة القلق المسموح",
+    "title_en": "The Allowed Worry Hour",
+    "description_ar": "خصص 15 دقيقة يومياً 'للقلق الرسمي'. خلالها، اكتب كل مخاوفك. بعد انتهاء الوقت، أغلق الدفتر وقل: 'انتهى وقت القلق، لن أعطيه أكثر من هذا.'",
+    "feeling_focus": "القلق المزمن",
+    "activity_type": "تنظيم الوقت والتفكير",
+    "steps_ar": [
+      "حدد وقتاً ثابتاً يومياً (مثلاً 5:00 مساءً) لمدة 15 دقيقة.",
+      "في هذا الوقت فقط، اسمح لنفسك بالقلق واكتب كل ما يقلقك.",
+      "بعد 15 دقيقة، أغلق الدفتر وقل: 'انتهى. غداً لي وقته.'",
+      "إذا خطر القلق في وقت آخر، ذكّر نفسك: 'ليس الآن، لك وقتك المخصص.'"
+    ],
+    "steps_en": [
+      "Set a fixed daily time (e.g., 5:00 PM) for 15 minutes.",
+      "Only in this time, allow yourself to worry and write down all worries.",
+      "After 15 minutes, close the notebook and say: 'Done. Tomorrow has its time.'",
+      "If worry pops up at other times, remind yourself: 'Not now, you have your own time.'"
+    ],
+    "outcome_ar": "تحديد القلق في وقت محصور يمنعه من السيطرة على اليوم كله.",
+    "emoji": "🕒"
+  },
+  {
+    "id": "emotion_020",
+    "title_ar": "رسالة شكر لنفسي",
+    "title_en": "A Thank You Letter to Myself",
+    "description_ar": "اكتب رسالة شكر لنفسك. اشكر جسدك على صبره، وعقلك على محاولاته، وقلبك على شجاعته رغم كل الصعاب. هذه الرسالة هي ترياق الإحباط.",
+    "feeling_focus": "الإحباط العام، ضعف الثقة",
+    "activity_type": "كتابة علاجية",
+    "steps_ar": [
+      "ابدأ رسالتك بـ 'عزيزي أنا...'",
+      "اشكر نفسك على 3 تحديات واجهتها هذا الأسبوع ولم تستسلم.",
+      "امتدح صفة واحدة في شخصيتك ساعدتك على الاستمرار.",
+      "أنهِ الرسالة بوعد: 'سأبقى بجانبك مهما حصل' ووقعها باسمك."
+    ],
+    "steps_en": [
+      "Start your letter with 'Dear Me...'",
+      "Thank yourself for 3 challenges you faced this week and did not give up.",
+      "Praise one character trait that helped you keep going.",
+      "End with a promise: 'I will stay by your side no matter what' and sign it."
+    ],
+    "outcome_ar": "بناء علاقة إيجابية مع الذات وتقدير المرونة الشخصية.",
+    "emoji": "📝"
+  }
+];
