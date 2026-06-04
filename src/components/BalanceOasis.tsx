@@ -26,6 +26,8 @@ import {
 } from 'lucide-react';
 import { EmotionExercise, EMOTION_EXERCISES } from './emotion_exercises';
 import { CommunicationExercise, COMMUNICATION_EXERCISES } from './communication_exercises';
+import { LeadershipExercise, LEADERSHIP_EXERCISES } from './leadership_exercises';
+import { TeamworkExercise, TEAMWORK_EXERCISES } from './teamwork_exercises';
 
 interface FocusExercise {
   id: string;
@@ -764,7 +766,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
   onLessonCompleted, 
   completedLessonIds = new Set() 
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'calm' | 'move' | 'writing' | 'emotion' | 'communication'>('calm');
+  const [activeSubTab, setActiveSubTab] = useState<'calm' | 'move' | 'writing' | 'emotion' | 'communication' | 'leadership' | 'teamwork'>('calm');
 
   // Active critical reflective writing states
   const [selectedWritingEx, setSelectedWritingEx] = useState<WritingExercise | null>(null);
@@ -821,6 +823,48 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     }
     stopSpeech();
   }, [selectedCommEx]);
+
+  // Active leadership and time management states
+  const [selectedLeaderEx, setSelectedLeaderEx] = useState<LeadershipExercise | null>(null);
+  const [leaderStepsChecked, setLeaderStepsChecked] = useState<boolean[]>([]);
+  const [completedLeaderIds, setCompletedLeaderIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('balance_oasis_leader_completed');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  useEffect(() => {
+    if (selectedLeaderEx) {
+      setLeaderStepsChecked(new Array(selectedLeaderEx.steps_ar.length).fill(false));
+    } else {
+      setLeaderStepsChecked([]);
+    }
+    stopSpeech();
+  }, [selectedLeaderEx]);
+
+  // Active cooperation, teamwork & joint projects states
+  const [selectedTeamEx, setSelectedTeamEx] = useState<TeamworkExercise | null>(null);
+  const [teamStepsChecked, setTeamStepsChecked] = useState<boolean[]>([]);
+  const [completedTeamIds, setCompletedTeamIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('balance_oasis_team_completed');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  useEffect(() => {
+    if (selectedTeamEx) {
+      setTeamStepsChecked(new Array(selectedTeamEx.steps_ar.length).fill(false));
+    } else {
+      setTeamStepsChecked([]);
+    }
+    stopSpeech();
+  }, [selectedTeamEx]);
 
   // Emotional thermometer tracking state
   const [currentSelectedFeeling, setCurrentSelectedFeeling] = useState<string>('serene');
@@ -883,7 +927,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
   // Voice recording & AI smart encouragement states
   const [completionSession, setCompletionSession] = useState<{
-    type: 'calm' | 'move' | 'writing' | 'emotion' | 'communication';
+    type: 'calm' | 'move' | 'writing' | 'emotion' | 'communication' | 'leadership' | 'teamwork';
     id: string;
     title: string;
     duration: number;
@@ -1078,6 +1122,30 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     "Fantastic! Your ability to regulate conversations and turn disagreements into constructive understanding builds incredible emotional maturity and high confidence. Well done! 🗣️💖"
   ];
 
+  const AR_LEADER_RESPONSES = [
+    "يا لك من قائد عظيم! التحكم بالوقت وتنظيم الأولويات وإدارة المهام بذكاء يبني شخصية قوية ومنتجة ومؤثرة في مجتمعك. فخورون بوعيك القيادي الفائق! 👑⏱️",
+    "تطبيق استثنائي لمهارات القيادة الشخصية وإدارة الذات! التغلب على الكسل والمماطلة ووضع أهداف واضحة يجعلك من المنجزين الكبار. واصل القيادة والتميز! 🌅🧗",
+    "قائد المستقبل الرائع! التزامك بالخطوات العملية والمبادرات العائلية يبني ثقتك بنفسك ويزيد من مرونتك وقدرتك على مواجهة الصعاب بكل فخر وقدرة! 🏆🧠"
+  ];
+
+  const EN_LEADER_RESPONSES = [
+    "What an amazing leader! Taking control of your time, prioritizing tasks, and managing goals builds a strong, highly productive, and influential character. We are incredibly proud of your leadership! 👑⏱️",
+    "Exceptional application of self-leadership and time management! Overcoming procrastination and setting transparent targets makes you an elite high-achiever. Keep leading and shining! 🌅🧗",
+    "Great future commander! Sticking to your tactical plans and taking family initiatives reinforces your self-confidence and grows your resilience to face all challenges with courage! 🏆🧠"
+  ];
+
+  const AR_TEAMWORK_RESPONSES = [
+    "عمل جماعي مذهل! العمل كفريق، ومشاركة الأدوار، والمساعدة المتبادلة هي سر بناء المجتمعات الكبرى والنجاح المشترك. أنتم رائعون ومبادرون متميزون! 🤝🍳🏡",
+    "تطبيق مثالي بروح الفريق الواحد وعقلية التعاون! توزيع المسؤوليات بالتساوي واحترام جهود بعضكم البعض يبني ترابطاً عائلياً قوياً وثقة عالية. مستمرون في الإبداع! 🌱🏛️🎨",
+    "رائع جداً! تحويل المهام المنزلية والخدمية إلى مشاريع تشاركية مرحة ينمي ذكاءكم الاجتماعي ويصنع ذكريات لا تُنسى. فخورون جداً بتعاونكم وإنجازكم! 🧹📦🎶"
+  ];
+
+  const EN_TEAMWORK_RESPONSES = [
+    "Amazing teamwork! Working together, sharing roles, and helping one another is the secret to building great communities and shared success. You are outstanding collaborators! 🤝🍳🏡",
+    "Perfect application of team spirit and cooperative mindsets! Distributing responsibilities and respecting each other's efforts builds unbreakable family bonds and high confidence! 🌱🏛️🎨",
+    "Fantastic! Transforming household tasks and shared duties into fun joint projects nurtures your social intelligence and shapes lasting memories. Incredibly proud! 🧹📦🎶"
+  ];
+
   const triggerAiEncouragement = () => {
     let textToSpeak = '';
     const textLower = (recordedTranscript || '').toLowerCase();
@@ -1110,6 +1178,22 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
       } else {
         const rand = Math.floor(Math.random() * EN_COMM_RESPONSES.length);
         textToSpeak = EN_COMM_RESPONSES[rand];
+      }
+    } else if (completionSession?.type === 'leadership') {
+      if (isRtl) {
+        const rand = Math.floor(Math.random() * AR_LEADER_RESPONSES.length);
+        textToSpeak = AR_LEADER_RESPONSES[rand];
+      } else {
+        const rand = Math.floor(Math.random() * EN_LEADER_RESPONSES.length);
+        textToSpeak = EN_LEADER_RESPONSES[rand];
+      }
+    } else if (completionSession?.type === 'teamwork') {
+      if (isRtl) {
+        const rand = Math.floor(Math.random() * AR_TEAMWORK_RESPONSES.length);
+        textToSpeak = AR_TEAMWORK_RESPONSES[rand];
+      } else {
+        const rand = Math.floor(Math.random() * EN_TEAMWORK_RESPONSES.length);
+        textToSpeak = EN_TEAMWORK_RESPONSES[rand];
       }
     } else {
       if (isRtl) {
@@ -1372,132 +1456,15 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     }
   };
 
-  const speakMoveTranscript = () => {
-    if (!selectedMoveEx) return;
-    try {
-      window.speechSynthesis.cancel();
-      // Speak the prompt energetic phrases
-      const speechText = isRtl 
-        ? `${selectedMoveEx.command_ar}. الطريقة والمهمة: ${selectedMoveEx.description_ar}. ردد بصوت عالٍ: ${selectedMoveEx.say_while_moving}`
-        : `${selectedMoveEx.command_en}. Instuctions: ${selectedMoveEx.description_ar}. Say with pride: ${selectedMoveEx.say_while_moving}`;
-      const utterance = new SpeechSynthesisUtterance(speechText);
-      utterance.lang = isRtl ? 'ar-SA' : 'en-US';
-      utterance.rate = 1.0;
-      utterance.pitch = 1.1;
-
-      utterance.onend = () => {
-        setMoveSpeechActive(false);
-      };
-
-      currentUtteranceRef.current = utterance;
-      setMoveSpeechActive(true);
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.warn("Speech Synthesis issue", e);
-    }
-  };
-
-  const handleStartSession = (ex: FocusExercise) => {
-    setSelectedEx(ex);
-    setTimeLeft(meditationTime);
-    setIsPlaying(true);
-    setBreathState('inhale');
-    setSpeechPlaybackActive(false);
-
-    // Play serene start bell
-    setTimeout(() => {
-      playSereneFreq(528, 3, 'sine'); // Solfeggio 528Hz Transformation frequency
-    }, 200);
-  };
-
-  const handleStopSession = () => {
-    setIsPlaying(false);
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    if (synthIntervalRef.current) clearInterval(synthIntervalRef.current);
-    stopSpeech();
-  };
-
-  const handleSessionComplete = () => {
-    setIsPlaying(false);
-    if (synthIntervalRef.current) clearInterval(synthIntervalRef.current);
-    
-    // Play sweet chime
-    playSereneFreq(528, 3, 'sine');
-    setTimeout(() => playSereneFreq(659, 2, 'sine'), 400);
-
-    const completedId = selectedEx?.id;
-    if (completedId) {
-      const updated = new Set(localCompletedIds);
-      updated.add(completedId);
-      setLocalCompletedIds(updated);
-      try {
-        localStorage.setItem('balance_oasis_completed', JSON.stringify(Array.from(updated)));
-      } catch (e) {
-        console.error(e);
-      }
-
-      // Bubble up completed lesson to parent state / DB
-      if (onLessonCompleted) {
-        onLessonCompleted(completedId);
-      }
-
-      // Enter speech recorder & AI praise completion system view!
-      if (selectedEx) {
-        setCompletionSession({
-          type: 'calm',
-          id: selectedEx.id,
-          title: isRtl ? selectedEx.title_ar : selectedEx.title_en,
-          duration: meditationTime
-        });
-      }
-    }
-  };
-
-  const speakTranscript = () => {
-    if (!selectedEx) return;
-    try {
-      window.speechSynthesis.cancel();
-      const textToSpeak = isRtl ? selectedEx.script_ar : selectedEx.script_en;
-      const utterance = new SpeechSynthesisUtterance(textToSpeak);
-      
-      // Auto select matching language locale
-      utterance.lang = isRtl ? 'ar-SA' : 'en-US';
-      utterance.rate = 0.82; // Calm, meditative pace
-      utterance.pitch = 1.05;
-
-      utterance.onend = () => {
-        setSpeechPlaybackActive(false);
-      };
-
-      currentUtteranceRef.current = utterance;
-      setSpeechPlaybackActive(true);
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.warn("Speech Synthesis is unsupported or locked", e);
-    }
-  };
-
-  const stopSpeech = () => {
-    try {
-      window.speechSynthesis.cancel();
-      setSpeechPlaybackActive(false);
-      setMoveSpeechActive(false);
-    } catch {}
-  };
-
-  // Safe sound trigger to avoid browser autoplay policy limits
-  const enableSoundManually = () => {
-    setSoundEnabled(true);
-    playSereneFreq(432, 0.5, 'sine');
-  };
-
   const completedCount = localCompletedIds.size;
   const completedMoveCount = completedMoveIds.size;
   const completedWritingCount = completedWritingIds.size;
   const completedEmotionCount = completedEmotionIds.size;
   const completedCommCount = completedCommIds.size;
-  const totalCompleted = completedCount + completedMoveCount + completedWritingCount + completedEmotionCount + completedCommCount;
-  const totalAvailable = EXERCISES.length + MOVEMENT_EXERCISES.length + WRITING_EXERCISES.length + EMOTION_EXERCISES.length + COMMUNICATION_EXERCISES.length;
+  const completedLeaderCount = completedLeaderIds.size;
+  const completedTeamCount = completedTeamIds.size;
+  const totalCompleted = completedCount + completedMoveCount + completedWritingCount + completedEmotionCount + completedCommCount + completedLeaderCount + completedTeamCount;
+  const totalAvailable = EXERCISES.length + MOVEMENT_EXERCISES.length + WRITING_EXERCISES.length + EMOTION_EXERCISES.length + COMMUNICATION_EXERCISES.length + LEADERSHIP_EXERCISES.length + TEAMWORK_EXERCISES.length;
   const progressPercent = totalAvailable > 0 ? Math.round((totalCompleted / totalAvailable) * 100) : 0;
 
   return (
@@ -1548,13 +1515,15 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
       {/* 2. Sub-Tab Selector */}
       {!isPlaying && !isMovePlaying && !completionSession && (
-        <div className="grid grid-cols-2 md:flex bg-[#050b14] p-1 rounded-2xl border border-white/5 max-w-4xl mx-auto shadow-xl gap-1">
+        <div className="grid grid-cols-2 md:flex md:flex-wrap bg-[#050b14] p-1 rounded-2xl border border-white/5 max-w-5xl mx-auto shadow-xl gap-1 justify-center">
           <button
             onClick={() => {
               setActiveSubTab('calm');
               setSelectedWritingEx(null);
               setSelectedEmotionEx(null);
               setSelectedCommEx(null);
+              setSelectedLeaderEx(null);
+              setSelectedTeamEx(null);
             }}
             className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'calm'
@@ -1571,6 +1540,8 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               setSelectedWritingEx(null);
               setSelectedEmotionEx(null);
               setSelectedCommEx(null);
+              setSelectedLeaderEx(null);
+              setSelectedTeamEx(null);
             }}
             className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'move'
@@ -1587,6 +1558,8 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               setSelectedWritingEx(null);
               setSelectedEmotionEx(null);
               setSelectedCommEx(null);
+              setSelectedLeaderEx(null);
+              setSelectedTeamEx(null);
             }}
             className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'writing'
@@ -1603,6 +1576,8 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               setSelectedWritingEx(null);
               setSelectedEmotionEx(null);
               setSelectedCommEx(null);
+              setSelectedLeaderEx(null);
+              setSelectedTeamEx(null);
             }}
             className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'emotion'
@@ -1619,8 +1594,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               setSelectedWritingEx(null);
               setSelectedEmotionEx(null);
               setSelectedCommEx(null);
+              setSelectedLeaderEx(null);
+              setSelectedTeamEx(null);
             }}
-            className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 col-span-2 md:col-span-1 ${
+            className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'communication'
                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-slate-950 font-black shadow-lg shadow-blue-500/10'
                 : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
@@ -1628,6 +1605,42 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
           >
             <span>💬</span>
             {isRtl ? 'التواصل الإيجابي والذكاء الاجتماعي' : 'Positive Communication'}
+          </button>
+          <button
+            onClick={() => {
+              setActiveSubTab('leadership');
+              setSelectedWritingEx(null);
+              setSelectedEmotionEx(null);
+              setSelectedCommEx(null);
+              setSelectedLeaderEx(null);
+              setSelectedTeamEx(null);
+            }}
+            className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              activeSubTab === 'leadership'
+                ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-slate-950 font-black shadow-lg shadow-rose-500/10'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
+            }`}
+          >
+            <span>👑</span>
+            {isRtl ? 'القيادة وإدارة الوقت' : 'Leadership & Time'}
+          </button>
+          <button
+            onClick={() => {
+              setActiveSubTab('teamwork');
+              setSelectedWritingEx(null);
+              setSelectedEmotionEx(null);
+              setSelectedCommEx(null);
+              setSelectedLeaderEx(null);
+              setSelectedTeamEx(null);
+            }}
+            className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 col-span-2 md:col-span-1 ${
+              activeSubTab === 'teamwork'
+                ? 'bg-gradient-to-r from-indigo-500 to-sky-500 text-slate-950 font-black shadow-lg shadow-indigo-500/15'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
+            }`}
+          >
+            <span>🤝</span>
+            {isRtl ? 'التعاون والمشاريع الجماعية' : 'Cooperation & Teamwork'}
           </button>
         </div>
       )}
@@ -2945,7 +2958,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                 </div>
               )
-            ) : (
+            ) : activeSubTab === 'communication' ? (
               // Active SubTab === 'communication' - Positive Communication & Social Intelligence Exercises
               selectedCommEx ? (
                 <div className="space-y-6 animate-fade-in text-right" dir="rtl">
@@ -3098,6 +3111,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           setSelectedMoveEx(null);
                           setSelectedWritingEx(null);
                           setSelectedEmotionEx(null);
+                          setSelectedLeaderEx(null);
                           setCompletionSession({
                             type: 'communication',
                             id: selectedCommEx.id,
@@ -3195,7 +3209,258 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   </div>
                 </div>
               )
-            )}
+            ) : activeSubTab === 'leadership' ? (
+              // Active SubTab === 'leadership' - Leadership & Time Management Exercises
+              selectedLeaderEx ? (
+                <div className="space-y-6 animate-fade-in text-right" dir="rtl">
+                  {/* Step-by-Step interactive checklist container */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-4">
+                    <button
+                      onClick={() => {
+                        setSelectedLeaderEx(null);
+                        stopSpeech();
+                      }}
+                      className="bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <ChevronRight size={14} />
+                      {isRtl ? 'العودة لقائمة تمارين القيادة بالكامل' : 'Back to Exercises'}
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold font-mono">
+                        🎯 {isRtl ? selectedLeaderEx.skill_focus : 'Focus Area'}
+                      </span>
+                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-[#f43f5e] font-bold font-mono">
+                        👑 {isRtl ? selectedLeaderEx.activity_type : 'Type'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    {/* Left Column: Step checklist */}
+                    <div className="lg:col-span-8 bg-[#030712] border border-white/5 rounded-3xl p-6 space-y-6 shadow-2xl">
+                      <div className="space-y-2">
+                        <span className="text-3xl">{selectedLeaderEx.emoji}</span>
+                        <h3 className="text-xl font-black text-white">
+                          {isRtl ? selectedLeaderEx.title_ar : selectedLeaderEx.title_en}
+                        </h3>
+                        <p className="text-slate-400 text-xs">
+                          {isRtl ? selectedLeaderEx.description_ar : selectedLeaderEx.title_en}
+                        </p>
+                      </div>
+
+                      {/* Step-by-step interactive tasks */}
+                      <div className="space-y-4">
+                        <h4 className="text-xs font-black text-rose-400 uppercase tracking-widest border-b border-white/5 pb-2">
+                          {isRtl ? 'خطوات التطبيق والتمرين العملي عائلياً والقيادي:' : 'Practical Leadership Steps:'}
+                        </h4>
+
+                        <div className="space-y-3">
+                          {(isRtl ? selectedLeaderEx.steps_ar : selectedLeaderEx.steps_en).map((step, sIdx) => {
+                            const isChecked = leaderStepsChecked[sIdx] || false;
+
+                            return (
+                              <button
+                                key={sIdx}
+                                onClick={() => {
+                                  const updated = [...leaderStepsChecked];
+                                  updated[sIdx] = !updated[sIdx];
+                                  setLeaderStepsChecked(updated);
+                                }}
+                                className={`w-full text-right p-4 rounded-2xl border transition-all duration-200 flex items-start gap-4 cursor-pointer select-none ${
+                                  isChecked 
+                                    ? 'bg-rose-500/10 border-rose-500/30 text-rose-100 shadow-inner' 
+                                    : 'bg-[#080f1a] border-white/5 text-slate-300 hover:border-rose-500/20'
+                                }`}
+                              >
+                                <span className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
+                                  isChecked 
+                                    ? 'bg-rose-500 border-rose-500 text-slate-950' 
+                                    : 'border-slate-500 text-transparent'
+                                }`}>
+                                  <Check size={12} strokeWidth={4} />
+                                </span>
+                                <div className="space-y-1">
+                                  <span className="text-xs font-black text-slate-500 font-mono">
+                                    {isRtl ? `الخطوة ${sIdx + 1}` : `Step ${sIdx + 1}`}
+                                  </span>
+                                  <p className="text-xs md:text-sm font-medium leading-relaxed text-right">
+                                    {step}
+                                  </p>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Toolshelf for Reading Steps Out Loud */}
+                      <div className="flex border-t border-white/5 pt-4">
+                        <button
+                          onClick={() => {
+                            if (speechPlaybackActive) {
+                              stopSpeech();
+                            } else {
+                              stopSpeech();
+                              const textToRead = (isRtl ? selectedLeaderEx.steps_ar : selectedLeaderEx.steps_en).join('. ');
+                              const utter = new SpeechSynthesisUtterance(textToRead);
+                              utter.lang = isRtl ? 'ar-SA' : 'en-US';
+                              utter.onend = () => setSpeechPlaybackActive(false);
+                              utter.onerror = () => setSpeechPlaybackActive(false);
+                              currentUtteranceRef.current = utter;
+                              setSpeechPlaybackActive(true);
+                              window.speechSynthesis.speak(utter);
+                            }
+                          }}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
+                            speechPlaybackActive
+                              ? 'bg-amber-500 text-slate-900 font-black shadow-lg shadow-amber-500/20'
+                              : 'bg-white/5 hover:bg-white/10 text-slate-300'
+                          }`}
+                        >
+                          <span>🔊</span>
+                          {speechPlaybackActive 
+                            ? (isRtl ? 'إيقاف قراءة الصوت' : 'Stop Reading')
+                            : (isRtl ? 'تفقيط وقراءة خطوات التمرين بصوت مسموع' : 'Read Steps Aloud')
+                          }
+                        </button>
+                      </div>
+
+                    </div>
+
+                    {/* Right Column: Outcomes & Completion */}
+                    <div className="lg:col-span-4 bg-[#050b14] border border-white/5 rounded-3xl p-6 flex flex-col justify-between space-y-6 text-right">
+                      <div className="space-y-5">
+                        <div className="text-center pb-4 border-b border-white/5">
+                          <span className="text-3xl">{selectedLeaderEx.emoji}</span>
+                          <h4 className="text-base font-black text-white mt-1">
+                            {isRtl ? 'الأثر المتوقع والمخرج القيادي:' : 'Expected Leadership Outcome:'}
+                          </h4>
+                        </div>
+
+                        <div className="bg-rose-950/20 border border-rose-500/20 rounded-2xl p-4 text-rose-200 text-xs leading-relaxed" dir="rtl">
+                          <p className="font-extrabold mb-1">👑 {isRtl ? 'مهارات القيادة الشخصية:' : 'Self Leadership:'}</p>
+                          <p>{selectedLeaderEx.outcome_ar || (isRtl ? 'تعليم القيادة وبناء الشخصية المنظمة والمبادر الفعال.' : 'Cultivate order, self-initiation, and personal leadership.')}</p>
+                        </div>
+
+                        <p className="text-slate-400 text-[11px] leading-relaxed">
+                          {isRtl
+                            ? 'بمجرد تطبيق الخطوات المعروضة والتعليم عليها كخطوات منجزة، اضغط على زر تسجيل إنجاز تمرين القيادة وتلقي مكامل الحكاية.'
+                            : 'Once you practice and check off each leadership task, proceed to register completion and receive AI spoken feedback.'}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const updated = new Set(completedLeaderIds);
+                          updated.add(selectedLeaderEx.id);
+                          setCompletedLeaderIds(updated);
+                          localStorage.setItem('balance_oasis_leader_completed', JSON.stringify(Array.from(updated)));
+
+                          // Trigger the beautiful completion voice record encouraging session!
+                          setSelectedEx(null);
+                          setSelectedMoveEx(null);
+                          setSelectedWritingEx(null);
+                          setSelectedEmotionEx(null);
+                          setSelectedCommEx(null);
+                          setCompletionSession({
+                            type: 'leadership',
+                            id: selectedLeaderEx.id,
+                            title: isRtl ? selectedLeaderEx.title_ar : selectedLeaderEx.title_en,
+                            duration: 10 * 60 // average 10 minutes
+                          });
+
+                          setSelectedLeaderEx(null);
+                          stopSpeech();
+                        }}
+                        className="w-full bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-rose-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+                      >
+                        <span>✓</span>
+                        {isRtl ? 'تسجيل إنجاز تمرين القيادة وإطلاق التحفيز 🎙' : 'Mark Completed & Open Encouragement 🎙'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // SelectedLeaderEx === null -> Grid list of 20 leadership and time management exercises!
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-2 text-right">
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-black text-white flex items-center gap-2 justify-end">
+                        <span className="text-rose-400">👑</span>
+                        {isRtl ? 'منهج القيادة وإدارة الوقت للنشء (الوحدة الأولى):' : 'Leadership & Time Management Curriculum (Unit 1):'}
+                      </h3>
+                      <p className="text-slate-400 text-xs">
+                        {isRtl ? 'الوحدة كاملة: 20 تمرين عملي لـ الوعي التام للأهداف، كفاءة تنظيم الوقت، والمبادرة الإيجابية عائلياً:' : 'Complete 20 integrated interactive routines to foster self-organization, timer challenges, and active household stewardship:'}
+                      </p>
+                    </div>
+
+                    <div className="text-xs bg-rose-500/10 border border-rose-500/20 text-rose-400 px-3 py-1.5 rounded-xl font-bold font-mono">
+                      {isRtl ? `أنجزت ${completedLeaderIds.size} من 20` : `${completedLeaderIds.size} / 20 Completed`}
+                    </div>
+                  </div>
+
+                  {/* Grid list container */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" dir="rtl">
+                    {LEADERSHIP_EXERCISES.map((ex, idx) => {
+                      const isCompleted = completedLeaderIds.has(ex.id);
+
+                      return (
+                        <div
+                          key={ex.id}
+                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#050b14] flex flex-col justify-between group ${
+                            isCompleted
+                              ? 'border-rose-500/30'
+                              : 'border-white/5 hover:border-rose-500/30'
+                          }`}
+                        >
+                          {/* Badge */}
+                          <div className="flex justify-between items-center">
+                            <span className="text-[10px] text-slate-500 font-mono tracking-wider font-extrabold uppercase">
+                              {isRtl ? `تمرين قيادي ${idx + 1}` : `Leadership Exercise ${idx + 1}`}
+                            </span>
+
+                            {isCompleted ? (
+                              <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-0.5 rounded-full" title={isRtl ? "مكتمل" : "Completed"}>
+                                <Check size={10} strokeWidth={3} />
+                              </span>
+                            ) : (
+                              <span className="w-1.5 h-1.5 rounded-full bg-rose-500/50" />
+                            )}
+                          </div>
+
+                          {/* Meta info */}
+                          <div className="space-y-1.5 text-right font-sans">
+                            <div className="flex items-center gap-2 justify-end">
+                              <h4 className="text-sm font-black text-white group-hover:text-rose-300 transition line-clamp-1">
+                                {isRtl ? ex.title_ar : ex.title_en}
+                              </h4>
+                              <span className="text-lg">{ex.emoji}</span>
+                            </div>
+                            <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                              {isRtl ? ex.description_ar : ex.title_en}
+                            </p>
+                          </div>
+
+                          {/* CTA button */}
+                          <button
+                            onClick={() => setSelectedLeaderEx(ex)}
+                            className={`w-full mt-2 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
+                              isCompleted
+                                ? 'bg-rose-500/5 hover:bg-rose-500/10 text-rose-300 border-rose-500/10'
+                                : 'bg-rose-500/5 group-hover:bg-rose-500 group-hover:text-slate-950 text-rose-400 border-rose-500/10 group-hover:border-rose-500'
+                            }`}
+                          >
+                            <span>⚡</span>
+                            {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )
+            ) : null}
           </motion.div>
         )}
       </AnimatePresence>
