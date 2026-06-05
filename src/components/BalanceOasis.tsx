@@ -468,211 +468,495 @@ export interface WritingExercise {
   title_ar: string;
   title_en: string;
   description_ar: string;
-  writing_prompt_ar: string;
-  writing_prompt_en: string;
-  expression_ar: string;
-  duration_minutes: number;
+  skill_focus: string;
+  activity_type: string;
+  steps_ar: string[];
+  steps_en: string[];
+  outcome_ar: string;
+  emoji: string;
+  expression_ar?: string;
+  duration_minutes?: number;
 }
 
 export const WRITING_EXERCISES: WritingExercise[] = [
   {
-    "id": "writing_001",
-    "title_ar": "رسالة إلى نفسي بعد عام",
-    "title_en": "A Letter to Myself in One Year",
-    "description_ar": "اكتب رسالة لنفسك في المستقبل. ماذا تتمنى أن تكون قد تعلمت؟ ما هي أهدافك؟ احفظها واقرأها بعد عام.",
-    "writing_prompt_ar": "عزيزي/عزيزتي [اسمك]، أتمنى أن تكون...",
-    "writing_prompt_en": "Dear future [Your Name], I hope you are...",
-    "expression_ar": "التعبير عن الأمل والطموح",
-    "duration_minutes": 20
-  },
-  {
-    "id": "writing_002",
-    "title_ar": "أنا ممتن لـ...",
-    "title_en": "I Am Grateful For...",
-    "description_ar": "اكتب قائمة بـ 5 أشياء أنت ممتن لها اليوم. حاول أن تكون محدداً وتشرح سبب امتنانك وكيف تؤثر في حياتك اليومية وباقي تفاصيل نهارك.",
-    "writing_prompt_ar": "أنا ممتن اليوم لـ [الشيء الأول] لأن...",
-    "writing_prompt_en": "Today, I am grateful for [First thing] because...",
-    "expression_ar": "التدرب على الامتنان والتقدير",
+    "id": "story_001",
+    "title_ar": "بطل من ورق",
+    "title_en": "A Paper Hero",
+    "description_ar": "اصنع بطلاً خارقاً من خيالك. ارسمه، اكتب اسمه، قدراته الخارقة، نقطة ضعفه، ورسالته التي يحمي بها العالم.",
+    "skill_focus": "ابتكار شخصية رئيسية",
+    "activity_type": "رسم وكتابة",
+    "steps_ar": [
+      "ارسم بطلك على ورقة بيضاء. أعطه شكلاً مميزاً.",
+      "اكتب اسمه البطولي بالإنجليزية.",
+      "اكتب 3 قدرات يمتلكها وقدرة ضعف واحدة.",
+      "اكتب جمله الشهيرة: 'أنا هنا من أجل...'."
+    ],
+    "steps_en": [
+      "Draw your hero on a white paper. Give them a unique look.",
+      "Write their heroic name in English.",
+      "Write 3 powers they have and one weakness.",
+      "Write their catchphrase: 'I am here to...'."
+    ],
+    "outcome_ar": "فهم أن لكل بطل قصة ودافع، وبناء شخصية متكاملة.",
+    "emoji": "🦸‍♂️",
+    "expression_ar": "ابتكار شخصية رئيسية",
     "duration_minutes": 15
   },
   {
-    "id": "writing_003",
-    "title_ar": "خارطة مشاعري اليوم",
-    "title_en": "My Emotions Map Today",
-    "description_ar": "اختر 3 مشاعر تشعر بها الآن واصفاً إياها كأنها تضاريس طبيعية (مثل نبع جارٍ، جبل صامد، أو عاصفة عابرة تطهر الأرجاء).",
-    "writing_prompt_ar": "أشعر اليوم بمزيج من المشاعر، أولها يشبه...",
-    "writing_prompt_en": "Today I feel a mix of emotions, the first resembles...",
-    "expression_ar": "الوعي الذاتي ووصف المشاعر",
+    "id": "story_002",
+    "title_ar": "الشرير الذي نتعاطف معه",
+    "title_en": "The Villain We Sympathize With",
+    "description_ar": "اصنع 'شريراً' لكن اكتب قصته من وجهة نظره. لماذا أصبح شريراً؟ ما ألمه؟ ما الذي يتمناه حقاً؟",
+    "skill_focus": "كتابة منظور الشخصية",
+    "activity_type": "كتابة تأملية",
+    "steps_ar": [
+      "ارسم شخصية شريرة وأعطها اسماً.",
+      "اكتب يومياتها: 'مرحباً، اسمي... أصبحت هكذا لأن...'.",
+      "اكتب شيئاً واحداً يحلم به هذا الشرير غير تدمير العالم.",
+      "اسأل: 'هل يمكن إصلاحه؟ كيف؟'."
+    ],
+    "steps_en": [
+      "Draw a villain and give them a name.",
+      "Write their diary: 'Hello, my name is... I became like this because...'.",
+      "Write one thing this villain dreams of, besides destroying the world.",
+      "Ask: 'Can they be fixed? How?'."
+    ],
+    "outcome_ar": "فهم أن لكل إنسان قصة، حتى من نراهم 'أشراراً' في البداية.",
+    "emoji": "🦹‍♂️",
+    "expression_ar": "كتابة منظور الشخصية",
     "duration_minutes": 15
   },
   {
-    "id": "writing_004",
-    "title_ar": "حوار مع مخاوفي",
-    "title_en": "Dialogue with My Fears",
-    "description_ar": "تخيل أن خوفك الأكبر هو شخص يجلس أمامك في مقعد وثيق. اكتب حواراً هادئاً وودياً معه لتفهم ما يحاول حمايتك منه في حقيقة أمره.",
-    "writing_prompt_ar": "مرحباً يا خوفي، أعلم أنك جئت اليوم لـ...",
-    "writing_prompt_en": "Hello my fear, I know you came today to...",
-    "expression_ar": "فك شفرة القلق ومواجهة الذات",
-    "duration_minutes": 25
-  },
-  {
-    "id": "writing_005",
-    "title_ar": "مذكرات الإنجازات الصغيرة",
-    "title_en": "Journal of Small Wins",
-    "description_ar": "دون 3 نجاحات صغيرة حققتها هذا الأسبوع، حتى لو كانت الاستيقاظ مبكراً أو مساعدة صديق برفق، واشرح أثرها الوجداني.",
-    "writing_prompt_ar": "أفخر هذا الأسبوع بأني...",
-    "writing_prompt_en": "This week, I am proud that I...",
-    "expression_ar": "بناء الثقة بالنفس والتقدير",
-    "duration_minutes": 10
-  },
-  {
-    "id": "writing_006",
-    "title_ar": "لو كنت مكانه",
-    "title_en": "If I Were in Their Shoes",
-    "description_ar": "اختر شخصاً اختلفت معه مؤخراً في الرأي. اكتب فقرة من وجهة نظره بالكامل تشرح دوافعه الحقيقية ومشاعره الدفينة.",
-    "writing_prompt_ar": "لو نظرت للأمر من عينيه ومكانه، لشعرت بـ...",
-    "writing_prompt_en": "If I looked at this through their eyes, I would feel...",
-    "expression_ar": "تطوير التعاطف والذكاء الاجتماعي",
-    "duration_minutes": 20
-  },
-  {
-    "id": "writing_007",
-    "title_ar": "رسالة مسامحة لنفسي",
-    "title_en": "A Letter of Forgiveness to Myself",
-    "description_ar": "فكر في خطأ قديم تلوم نفسك عليه على الدوام. اكتب رسالة تسامح فيها نفسك وتتقبل من خلالها أنك إنسان ينمو ويتعلم.",
-    "writing_prompt_ar": "أنا أسامح نفسي اليوم بكل حب على...",
-    "writing_prompt_en": "Today, I forgive myself with love for...",
-    "expression_ar": "الشفقة بالذات والتسامح الداخلي",
+    "id": "story_003",
+    "title_ar": "حكاية الـ 6 كلمات",
+    "title_en": "The 6-Word Tale",
+    "description_ar": "اكتب قصة كاملة من 6 كلمات فقط. مثال: 'وصل، رأى، أحب، خسر، تعلم، عاد.' تحدى نفسك أن تروي مشاعر كاملة في 6 كلمات.",
+    "skill_focus": "الإيجاز والتكثيف",
+    "activity_type": "تحدي كتابي",
+    "steps_ar": [
+      "فكر في قصة كبيرة تعرفها (حب، مغامرة، فشل ثم نجاح).",
+      "اختصر كل مرحلة من مراحلها في كلمة واحدة.",
+      "اجمع 6 كلمات متتالية تروي القصة كاملة.",
+      "اقرأها بصوت عالٍ ولاحظ أثر الكلمات القليلة."
+    ],
+    "steps_en": [
+      "Think of a big story you know (love, adventure, failure then success).",
+      "Condense each stage into one word.",
+      "Collect 6 consecutive words that tell the whole story.",
+      "Read it aloud and notice the impact of few words."
+    ],
+    "outcome_ar": "اكتشاف أن القوة ليست في كثرة الكلمات بل في عمقها.",
+    "emoji": "📝",
+    "expression_ar": "الإيجاز والتكثيف",
     "duration_minutes": 15
   },
   {
-    "id": "writing_008",
-    "title_ar": "عاصفة العقل الخلاقة",
-    "title_en": "Creative Mindstorm",
-    "description_ar": "اغمض عينيك ثم اكتب كل الأفكار التي تخطر ببالك الآن دون توقف، حتى لو لم تكن مترابطة ومكتملة. استمر بالكتابة دون أي تصحيح قيادي.",
-    "writing_prompt_ar": "تدور في عقلي الآن عاصفة من الأفكار، منها...",
-    "writing_prompt_en": "Spinning in my mind right now is a storm of ideas, including...",
-    "expression_ar": "تحرير العقل من التشتت والقيود",
-    "duration_minutes": 10
-  },
-  {
-    "id": "writing_009",
-    "title_ar": "ماذا لو؟",
-    "title_en": "What If?",
-    "description_ar": "اكتب تصوراً لعالم خيالي مبهج تختفي منه كلمة 'مستحيل'. كيف ستبدو حياتك ومشاهد يومك وأحلامك؟",
-    "writing_prompt_ar": "لو كان كل شيء ممكن في هذا الوجود، لبدأت يومي بـ...",
-    "writing_prompt_en": "If everything were possible in this existence, I would start by...",
-    "expression_ar": "تحفيز الخيال اللامحدود",
-    "duration_minutes": 20
-  },
-  {
-    "id": "writing_010",
-    "title_ar": "رسالة تقدير غامضة لقائد ملهم",
-    "title_en": "A Secret Appreciation to a Mentor",
-    "description_ar": "اكتب رسالة شكر عميقة لشخص ألهمك أو غيّر مسار تفكيرك بحكمة وعمل (معلم، والد، أو صديق)، واشرح له بالتفصيل كيف أثّر بوجدانك.",
-    "writing_prompt_ar": "أريد أن أشكرك بشدة بكلمات نابعة من القلب على اليوم الذي...",
-    "writing_prompt_en": "I want to deeply thank you from my heart for the day that...",
-    "expression_ar": "تثبيت الامتنان وتكريم العلاقات",
+    "id": "story_004",
+    "title_ar": "خريطة عالمي",
+    "title_en": "Map of My World",
+    "description_ar": "ارسم خريطة لعالم خيالي من ابتكارك. عليها جبال، أنهار، مدن مخفية. اكتب أسماء الأماكن بالإنجليزية واشرح لماذا هي مميزة.",
+    "skill_focus": "بناء عالم قصصي",
+    "activity_type": "رسم خرائط",
+    "steps_ar": [
+      "أحضر ورقة كبيرة وألواناً.",
+      "ارسم قارة خيالية وشكلها بحدود غير تقليدية.",
+      "ضع 5 أماكن رئيسية (غابة مسحورة، مدينة ذهبية...).",
+      "اكتب اسم كل مكان بالإنجليزية وجملة تصفه."
+    ],
+    "steps_en": [
+      "Get a large paper and colors.",
+      "Draw an imaginary continent with unconventional borders.",
+      "Place 5 main locations (enchanted forest, golden city...).",
+      "Write each place's name in English and one descriptive sentence."
+    ],
+    "outcome_ar": "فهم أن القصص العظيمة تولد من عوالم غنية بالتفاصيل.",
+    "emoji": "🗺️",
+    "expression_ar": "بناء عالم قصصي",
     "duration_minutes": 15
   },
   {
-    "id": "writing_011",
-    "title_ar": "وصف مشهد من نافذتي",
-    "title_en": "Describing a Scene from My Window",
-    "description_ar": "انظر من نافذتك أو تخيلها بوضوح. اكتب تفاصيل المشهد بدقة حسية بالغة: الألوان، حركة الناس المارة، شجو الطير، والأثر الوجداني للمشهد الصامت عليك.",
-    "writing_prompt_ar": "من نافذتي اليوم، أرى الحياة تجري كأنها...",
-    "writing_prompt_en": "From my window today, I see life moving as if...",
-    "expression_ar": "اليقظة الذهنية والتركيز الحسي",
+    "id": "story_005",
+    "title_ar": "قصة من صورة",
+    "title_en": "A Story from a Picture",
+    "description_ar": "ابحث عن صورة غامضة في المجلات أو الإنترنت. اكتب قصة كاملة عنها: ماذا حدث قبل الصورة؟ ماذا حدث بعدها؟ من كان خلف الكاميرا؟",
+    "skill_focus": "الاستدعاء القصصي",
+    "activity_type": "كتابة من محفز بصري",
+    "steps_ar": [
+      "اختر صورة واحدة فقط تشد انتباهك.",
+      "تأملها 5 دقائق. اسأل: 'ماذا حدث قبل ثوانٍ من هذه اللحظة؟'.",
+      "اكتب فقرة عن 'ما قبل' وفقرة عن 'ما بعد' الصورة.",
+      "أعط القصة عنواناً مشوقاً."
+    ],
+    "steps_en": [
+      "Choose only one photo that catches your attention.",
+      "Observe it for 5 minutes. Ask: 'What happened seconds before this moment?'.",
+      "Write a paragraph about 'before' and a paragraph about 'after' the photo.",
+      "Give the story an intriguing title."
+    ],
+    "outcome_ar": "إطلاق الخيال من نقطة بصرية ثابتة إلى سرد متحرك.",
+    "emoji": "🖼️",
+    "expression_ar": "الاستدعاء القصصي",
     "duration_minutes": 15
   },
   {
-    "id": "writing_012",
-    "title_ar": "قوتي الكامنة",
-    "title_en": "My Inner Strength",
-    "description_ar": "تذكر عاصفة وموقفاً صعباً مررت به وتغلبت عليه مسبقاً. ما هي الصفة أو القوة الكامنة بداخلك التي نصرتك ووجهتك لتجاوز ذلك بنجاح؟",
-    "writing_prompt_ar": "القوة التي اكتشفتها في نفسي عندما واجهت ذلك الموقف هي...",
-    "writing_prompt_en": "The strength I discovered in myself when I faced that obstacle was...",
-    "expression_ar": "التفكير المرن واستدعاء القوة",
-    "duration_minutes": 20
-  },
-  {
-    "id": "writing_013",
-    "title_ar": "يوميات فكرة طارئة",
-    "title_en": "Diary of a Sudden Idea",
-    "description_ar": "تخيل أن هناك فكرة صغيرة وذكية طرقت باب عقلك هذا المساء. عماذا تبحث هذه الفكرة؟ وما هو المشروع العظيم اللطيف الذي تريد بناؤه معك؟",
-    "writing_prompt_ar": "الفكرة التي زارتني فجأة اليوم تهمس قائلة...",
-    "writing_prompt_en": "The idea that suddenly visited me today whispers...",
-    "expression_ar": "الابتكار وتحريك الأفكار الريادية",
+    "id": "story_006",
+    "title_ar": "رسالة من شخصيتي",
+    "title_en": "A Letter from My Character",
+    "description_ar": "تخيل أن الشخصية التي اخترعتها ترسل لك رسالة. ماذا ستقول لك؟ اكتب الرسالة بخط يد الشخصية (غير خطك).",
+    "skill_focus": "التوحد مع الشخصية",
+    "activity_type": "كتابة بضمير المتكلم",
+    "steps_ar": [
+      "اختر شخصيتك المفضلة التي صنعتها.",
+      "تخيل أنها تكتب لك رسالة. كيف ستبدأ؟ 'صديقي/مخترعي العزيز...'.",
+      "اكتب الرسالة كلها بصوت الشخصية (ليس صوتك أنت).",
+      "في النهاية، اطوِ الرسالة كأنها وصلتك فعلاً."
+    ],
+    "steps_en": [
+      "Choose your favorite character you've created.",
+      "Imagine they are writing you a letter. How would they start? 'Dear friend/creator...'.",
+      "Write the whole letter in the character's voice (not yours).",
+      "Finally, fold the letter as if it really arrived."
+    ],
+    "outcome_ar": "فهم أن الشخصية تصبح حية عندما يكون لها صوتها الخاص.",
+    "emoji": "✉️",
+    "expression_ar": "التوحد مع الشخصية",
     "duration_minutes": 15
   },
   {
-    "id": "writing_014",
-    "title_ar": "التغلب على التحديات",
-    "title_en": "Overcoming Challenges",
-    "description_ar": "اكتب عن تحدٍ كبير يواجهك الآن. قسمه إلى ثلاث خطوات صغيرة جداً قابلة للتنفيذ السريع والمباشر اليوم لتحويل القلق المتربص إلى عمل مثمر.",
-    "writing_prompt_ar": "التحدي الذي أواجهه هو [التحدي]، وسأبدأ اليوم بـ...",
-    "writing_prompt_en": "The challenge I face is [Challenge], and I will start today by...",
-    "expression_ar": "مهارات حل المشكلات وتنظيم التفكير",
+    "id": "story_007",
+    "title_ar": "كوميكس المشاعر",
+    "title_en": "Emotion Comics",
+    "description_ar": "ارسم شريطاً مصوراً من 4 مربعات. في كل مربع، شخصيتك تعبر عن شعور مختلف: فرح، حزن، غضب، مفاجأة. استخدم فقاعات الكلام بالإنجليزية.",
+    "skill_focus": "التعبير البصري عن المشاعر",
+    "activity_type": "رسم قصص مصورة",
+    "steps_ar": [
+      "ارسم 4 مربعات متسلسلة.",
+      "ارسم نفس الشخصية في كل مربع لكن بتعبير وجه مختلف.",
+      "في فقاعة فوقها، اكتب ما تقوله بالإنجليزية.",
+      "لون الخلفية بلون يعبر عن الشعور (أصفر للفرح، أزرق للحزن)."
+    ],
+    "steps_en": [
+      "Draw 4 sequential squares.",
+      "Draw the same character in each square but with a different facial expression.",
+      "In a bubble above, write what they say in English.",
+      "Color the background with a feeling color (yellow for joy, blue for sadness)."
+    ],
+    "outcome_ar": "تعلم أن الوجه والجسد يحكيان القصة قبل الكلمات.",
+    "emoji": "🗯️",
+    "expression_ar": "التعبير البصري عن المشاعر",
     "duration_minutes": 15
   },
   {
-    "id": "writing_015",
-    "title_ar": "رسالة حب لصفاتي المفضلة",
-    "title_en": "A Love Letter to My Best Traits",
-    "description_ar": "الكثير منا يمدح الآخرين وينسى نفسه. اكتب رسالة تقر فيها بأروع ثلاث صفات في شخصيتك وتفتخر بوجودها في خصالك الطيبة.",
-    "writing_prompt_ar": "أنا أقدر بشدة في نفسي هذه الصفات لأنها تجعلني...",
-    "writing_prompt_en": "I appreciate in myself these traits because they make me...",
-    "expression_ar": "توثيق التقبل الإيجابي للذات",
+    "id": "story_008",
+    "title_ar": "النهاية المفتوحة",
+    "title_en": "The Open Ending",
+    "description_ar": "اقرأ بداية قصة قصيرة جداً، ثم اكتب أنت النهاية. لكن لا تغلقها تماماً. اترك سؤالاً واحداً عالقاً في ذهن القارئ.",
+    "skill_focus": "كتابة نهايات مبدعة",
+    "activity_type": "إكمال قصة",
+    "steps_ar": [
+      "استخدم البداية: 'وجدت باباً في الحديقة لم أره من قبل. فتحته و...'.",
+      "اكتب 5 جمل تنهي بها القصة.",
+      "تأكد أن الجملة الأخيرة تترك سؤالاً مفتوحاً.",
+      "اقرأها لشخص واسأله: 'ماذا تتوقع أن يحدث بعد ذلك؟'."
+    ],
+    "steps_en": [
+      "Use the beginning: 'I found a door in the garden I'd never seen before. I opened it and...'.",
+      "Write 5 sentences to finish the story.",
+      "Make sure the last sentence leaves an open question.",
+      "Read it to someone and ask: 'What do you think happens next?'."
+    ],
+    "outcome_ar": "فهم أن القصص العظيمة تبقى في الذهن لأنها لا تنتهي تماماً.",
+    "emoji": "🚪",
+    "expression_ar": "كتابة نهايات مبدعة",
     "duration_minutes": 15
   },
   {
-    "id": "writing_016",
-    "title_ar": "محادثة تخيلية مع شخصية حكيمة",
-    "title_en": "Imaginary Chat with a Wise Mentor",
-    "description_ar": "تخيل أنك تجلس مع شخص حكيم جداً (أو نسخة مسنة من نفسك في سن الثمانين). ما هي النصيحة التي سيسديها لك بخصوص قلقك الحالي؟",
-    "writing_prompt_ar": "قال لي الحكيم بلطف وصوت دافئ ممتد...",
-    "writing_prompt_en": "The wise mentor told me gently in a warm voice...",
-    "expression_ar": "البصيرة وإيجاد الدعم العقلي",
-    "duration_minutes": 20
-  },
-  {
-    "id": "writing_017",
-    "title_ar": "غرفتي السرية في عقلي",
-    "title_en": "My Mind's Secret Safe Room",
-    "description_ar": "صف مكاناً سرياً في مخبأ عقلك تصنعه لترضى وترتاح فيه عندما يصبح العالم صاخباً ومزعجاً. كيف يبدو أثاثه وإضاءته وهدوءه المصفى؟",
-    "writing_prompt_ar": "غرفتي السرية في عقلي تقع خلف غيمة من السلام، وهناك أجد...",
-    "writing_prompt_en": "My secret mind room lies behind a cloud of peace, and there I find...",
-    "expression_ar": "التأمل الخلاق وتخفيف الضغوط",
+    "id": "story_009",
+    "title_ar": "جواز سفر الشخصية",
+    "title_en": "Character Passport",
+    "description_ar": "صمم 'جواز سفر' لشخصيتك. اكتب بياناتها: اسمها، مكان ميلادها، عمرها، طعامها المفضل، أعز أصدقائها، أكبر مخاوفها.",
+    "skill_focus": "بناء ملف شخصي للشخصية",
+    "activity_type": "تصميم وثيقة",
+    "steps_ar": [
+      "ارسم جواز سفر صغيراً من ورق مقوى.",
+      "في صفحة البيانات: الاسم، الجنسية (مكان خيالي)، تاريخ الميلاد.",
+      "في صفحة 'معلومات خاصة': الطعام المفضل، الأغنية المفضلة، الصديق المقرب.",
+      "في الصفحة الأخيرة: ختم 'مملكة الخيال'."
+    ],
+    "steps_en": [
+      "Draw a small passport from cardboard.",
+      "On the data page: name, nationality (imaginary place), birthdate.",
+      "On the 'Special Info' page: favorite food, song, best friend.",
+      "On the last page: a 'Kingdom of Imagination' stamp."
+    ],
+    "outcome_ar": "جعل الشخصية 'رسمية' وحقيقية بتفاصيل حياتها اليومية.",
+    "emoji": "🛂",
+    "expression_ar": "بناء ملف شخصي للشخصية",
     "duration_minutes": 15
   },
   {
-    "id": "writing_018",
-    "title_ar": "قبل أن ينام العالم",
-    "title_en": "Before the World Falls Asleep",
-    "description_ar": "اكتب عما تنوي تركه خلفك اليوم من جهد، تعب، أو مشاعر ثقيلة لتبدأ غداً بضمير مستريح ونفس منبسطة مطمئنة.",
-    "writing_prompt_ar": "أستعد الليلة لأغمض عيني، وأترك خلفي كل...",
-    "writing_prompt_en": "Tonight, I prepare to close my eyes, leaving behind all...",
-    "expression_ar": "التصفية العاطفية والهدوء المسائي",
-    "duration_minutes": 10
-  },
-  {
-    "id": "writing_019",
-    "title_ar": "تعريف شخصي للسعادة",
-    "title_en": "My Definition of Happiness",
-    "description_ar": "بالنسبة للكثيرين السعادة هي الشهرة أو تراكم المال. بالنسبة لك، ما هي السعادة المطلقة في تعريفها البسيط، الخالي من الزيف والملموس بالقلب؟",
-    "writing_prompt_ar": "السعادة في نظري ليست لغزاً، بل هي لحظة بسيطة مثل...",
-    "writing_prompt_en": "Happiness to me is not a puzzle, but a simple moment like...",
-    "expression_ar": "إعادة ضبط القيم والأولويات",
+    "id": "story_010",
+    "title_ar": "حوار الصراع",
+    "title_en": "Conflict Dialogue",
+    "description_ar": "اكتب حواراً بين شخصيتين تختلفان بشدة حول موضوع واحد. لا تكتب راوياً، فقط حوارهما. دع القارئ يفهم القصة من الحوار فقط.",
+    "skill_focus": "كتابة الحوار القصصي",
+    "activity_type": "كتابة سيناريو",
+    "steps_ar": [
+      "اختر صراعاً بسيطاً (أخ وأخته على جهاز التحكم، صديقان يختلفان على لعبة).",
+      "اكتب 6 جمل حوارية فقط بينهما. لا تشرح شيئاً خارج الأقواس.",
+      "اجعل لكل شخصية طريقة كلام مختلفة (واحدة سريعة، واحدة هادئة).",
+      "اقرأ الحوار بصوت عالٍ بصوتين مختلفين."
+    ],
+    "steps_en": [
+      "Choose a simple conflict (siblings over the remote, friends disagreeing on a game).",
+      "Write only 6 dialogue lines between them. Explain nothing outside quotes.",
+      "Give each character a different speech style (one fast, one calm).",
+      "Read the dialogue aloud in two different voices."
+    ],
+    "outcome_ar": "اكتشاف أن الحوار وحده قادر على حمل قصة كاملة.",
+    "emoji": "🗣️",
+    "expression_ar": "كتابة الحوار القصصي",
     "duration_minutes": 15
   },
   {
-    "id": "writing_020",
-    "title_ar": "قصيدتي الأولى للسلام الداخلي",
-    "title_en": "My First Poem for Inner Peace",
-    "description_ar": "اكتب بضعة أسطر بنثر إيقاعي معبر يرقص مع حبك للحياة وثقتك التامة بأن الغد يحمل بين طياته السلام والمستقبل الوضاء والخير العميم.",
-    "writing_prompt_ar": "سأمضي في طريقي والهدوء رفيقي، لأن قلبي...",
-    "writing_prompt_en": "I will walk my path with calm as my companion, for my heart...",
-    "expression_ar": "البلاغة الروحية والتأصيل التعبيري",
+    "id": "story_011",
+    "title_ar": "حكاية جدتي، بقلمي",
+    "title_en": "Grandma's Tale, by Me",
+    "description_ar": "اسأل أحد كبار العائلة عن قصة من طفولته. اكتبها بأسلوبك أنت. أضف خيالك على الحقيقة. امزج الواقع بالخيال.",
+    "skill_focus": "المزج بين الواقع والخيال",
+    "activity_type": "كتابة من مصدر شفهي",
+    "steps_ar": [
+      "اجلس مع جد/جدة واسأل: 'احكِ لي عن أجمل موقف في طفولتك'.",
+      "سجل القصة أو اكتب ملاحظات سريعة.",
+      "أعد كتابة القصة لكن أضف شيئاً خيالياً (تنين مر من القرية، مثلاً).",
+      "اقرأ القصة الجديدة لجدك واسأله رأيه."
+    ],
+    "steps_en": [
+      "Sit with a grandparent and ask: 'Tell me about the best moment of your childhood'.",
+      "Record the story or take quick notes.",
+      "Rewrite the story but add something imaginary (a dragon passed through the village).",
+      "Read the new story to your grandparent and ask their opinion."
+    ],
+    "outcome_ar": "ربط الأجيال عبر القصص وفهم أن الحقيقة نواة لكل خيال.",
+    "emoji": "👵",
+    "expression_ar": "المزج بين الواقع والخيال",
+    "duration_minutes": 15
+  },
+  {
+    "id": "story_012",
+    "title_ar": "مذكرات شيء",
+    "title_en": "Diary of an Object",
+    "description_ar": "تخيل أن شيء في غرفتك (قلم، كوب، وسادة) يكتب مذكراته اليومية. اكتب صفحة واحدة من يومياته. ماذا رأى؟ بماذا شعر؟",
+    "skill_focus": "الكتابة من منظور غير بشري",
+    "activity_type": "كتابة إبداعية",
+    "steps_ar": [
+      "اختر شيئاً واحداً من محيطك.",
+      "تخيل يومه: 'عزيزي المذكرات، اليوم حمَلَني صاحبي وكتب بي...'.",
+      "اكتب مشاعره: هل يشعر بالتقدير أم الإهمال؟",
+      "أنهِ الصفحة بأمنية لهذا الشيء."
+    ],
+    "steps_en": [
+      "Choose one object from your surroundings.",
+      "Imagine its day: 'Dear diary, today my owner held me and wrote with me...'.",
+      "Write its feelings: Does it feel appreciated or neglected?",
+      "End the page with a wish for this object."
+    ],
+    "outcome_ar": "تنمية التعاطف مع كل شيء وتعلم رؤية العالم من عيون مختلفة.",
+    "emoji": "🛋️",
+    "expression_ar": "الكتابة من منظور غير بشري",
+    "duration_minutes": 15
+  },
+  {
+    "id": "story_013",
+    "title_ar": "قصة بلا كلمات",
+    "title_en": "A Story Without Words",
+    "description_ar": "ارسم قصة كاملة في صفحة واحدة دون أي كتابة. فقط صور متسلسلة. أعطها لآخر واطلب منه أن 'يقرأها' لك.",
+    "skill_focus": "السرد البصري",
+    "activity_type": "رسم قصصي",
+    "steps_ar": [
+      "قسم الصفحة لـ 6 مربعات.",
+      "ارسم قصة بسيطة (طفل يفقد لعبته ثم يجدها) في المربعات دون أي كلمات.",
+      "استخدم تعابير الوجوه والألوان للتعبير عن المشاعر.",
+      "أعط القصة لأحد واطلب منه أن يحكي لك ما فهمه."
+    ],
+    "steps_en": [
+      "Divide the page into 6 boxes.",
+      "Draw a simple story (child loses toy then finds it) in the boxes without any words.",
+      "Use facial expressions and colors to express feelings.",
+      "Give the story to someone and ask them to tell you what they understood."
+    ],
+    "outcome_ar": "اكتشاف أن الصورة الواحدة تساوي ألف كلمة، وأن القصص أقدم من الكتابة.",
+    "emoji": "🎨",
+    "expression_ar": "السرد البصري",
+    "duration_minutes": 15
+  },
+  {
+    "id": "story_014",
+    "title_ar": "ماذا لو كنتُ...",
+    "title_en": "What If I Were...",
+    "description_ar": "اختر شيئاً لا تشبهه في الواقع (نملة، سحابة، قطرة مطر). اكتب قصة حياتك لو كنت هذا الشيء. صف العالم من منظورك الجديد.",
+    "skill_focus": "الكتابة التخيلية",
+    "activity_type": "كتابة تأملية",
+    "steps_ar": [
+      "اختر شيئاً بعيداً عنك تماماً.",
+      "ابدأ: 'اليوم استيقظت وأنا [النملة]. العالم من هنا...'.",
+      "صف مشهداً واحداً بتفاصيل دقيقة من منظور هذا الشيء.",
+      "اختم برسالة من هذا الشيء للبشر."
+    ],
+    "steps_en": [
+      "Choose something completely unlike you.",
+      "Start: 'Today I woke up as [the ant]. The world from here...'.",
+      "Describe one scene in detailed perspective of this thing.",
+      "End with a message from this thing to humans."
+    ],
+    "outcome_ar": "توسيع حدود الخيال والخروج من الذات لفهم الكون.",
+    "emoji": "🐜",
+    "expression_ar": "الكتابة التخيلية",
+    "duration_minutes": 15
+  },
+  {
+    "id": "story_015",
+    "title_ar": "إعادة تدوير الحكايات",
+    "title_en": "Recycling Tales",
+    "description_ar": "خذ قصة قديمة تعرفها (سندريلا، ليلى والذئب). اقلبها: ماذا لو كانت سندريلا تحب تنظيف المداخن؟ ماذا لو كان الذئب نباتياً؟",
+    "skill_focus": "التفكير العكسي والإبداع",
+    "activity_type": "تحوير القصص",
+    "steps_ar": [
+      "اختر قصة مشهورة.",
+      "غير عنصراً واحداً جوهرياً فيها (البطل جبان، الشرير طيب...).",
+      "اكتب القصة الجديدة كما لو كانت الأصلية.",
+      "اسأل: 'ما الرسالة الجديدة التي تقدمها قصتي؟'."
+    ],
+    "steps_en": [
+      "Choose a famous story.",
+      "Change one fundamental element (the hero is a coward, the villain is kind...).",
+      "Write the new story as if it were the original.",
+      "Ask: 'What new message does my story offer?'."
+    ],
+    "outcome_ar": "فهم أن كل قصة قابلة لإعادة الاختراع، وأن الإبداع لا سقف له.",
+    "emoji": "🔄",
+    "expression_ar": "التفكير العكسي والإبداع",
+    "duration_minutes": 15
+  },
+  {
+    "id": "story_016",
+    "title_ar": "معرض الشخصيات",
+    "title_en": "Character Gallery",
+    "description_ar": "ارسم 5 شخصيات مختلفة على أوراق منفصلة. علقها على حائط. اكتب تحت كل منها: 'اسمها'، 'حلمها'، 'خوفها'. ادعُ أسرتك للتجول في 'المعرض'.",
+    "skill_focus": "عرض الإبداع",
+    "activity_type": "معرض فني منزلي",
+    "steps_ar": [
+      "ارسم 5 شخصيات متنوعة (بطل، شرير، حكيم، طفل، مخلوق غريب).",
+      "اكتب بطاقة تعريف صغيرة لكل شخصية.",
+      "علقهم على حائط الممر أو الغرفة.",
+      "تجول مع أسرتك واشرح لهم 'من هم'."
+    ],
+    "steps_en": [
+      "Draw 5 diverse characters (hero, villain, sage, child, strange creature).",
+      "Write a small ID card for each character.",
+      "Hang them on the hallway or room wall.",
+      "Walk with your family and explain 'who they are'."
+    ],
+    "outcome_ar": "الفخر بالإنتاج الإبداعي ومشاركته مع الأحبة.",
+    "emoji": "🖼️",
+    "expression_ar": "عرض الإبداع",
+    "duration_minutes": 15
+  },
+  {
+    "id": "story_017",
+    "title_ar": "الصراع الداخلي",
+    "title_en": "The Inner Conflict",
+    "description_ar": "اكتب قصة لا تدور حول معركة خارجية، بل معركة داخل بطلها: هل يخبر الحقيقة أم يكذب؟ هل يساعد أم يخاف؟ القرار هو ذروة القصة.",
+    "skill_focus": "العمق النفسي في القصة",
+    "activity_type": "كتابة دراما نفسية",
+    "steps_ar": [
+      "فكر في موقف أخلاقي صعب.",
+      "اكتب قصة قصيرة حيث البطل يقف بين خيارين.",
+      "صوّر أفكاره الداخلية: 'قال لنفسه...'.",
+      "اجعل القارئ يشعر بمعاناة الاختيار قبل أن يصل للحل."
+    ],
+    "steps_en": [
+      "Think of a difficult moral situation.",
+      "Write a short story where the hero stands between two choices.",
+      "Portray their inner thoughts: 'He said to himself...'.",
+      "Make the reader feel the struggle of choice before reaching the solution."
+    ],
+    "outcome_ar": "فهم أن أقوى القصص هي التي تدور داخل النفس البشرية.",
+    "emoji": "🧠",
+    "expression_ar": "العمق النفسي في القصة",
+    "duration_minutes": 15
+  },
+  {
+    "id": "story_018",
+    "title_ar": "قصة عائلية مشتركة",
+    "title_en": "A Shared Family Story",
+    "description_ar": "اكتبوا قصة معاً. شخص يبدأ بجملة، والثاني يضيف جملة، والثالث يضيف ثالثة... حتى تكتمل القصة في 10 جمل. لا تخططوا مسبقاً.",
+    "skill_focus": "الإبداع الجماعي",
+    "activity_type": "لعبة كتابة عائلية",
+    "steps_ar": [
+      "اجلسوا في دائرة. أحضروا ورقة واحدة.",
+      "الشخص الأول يكتب جملة افتتاحية مشوقة.",
+      "يطوي الورقة بحيث لا يرى التالي إلا آخر جملة.",
+      "بعد 10 أدوار، افتحوا الورقة واقرأوا 'القصة المجنونة' التي ظهرت."
+    ],
+    "steps_en": [
+      "Sit in a circle. Bring one paper.",
+      "The first person writes an exciting opening sentence.",
+      "Fold the paper so the next only sees the last sentence.",
+      "After 10 turns, open the paper and read the 'crazy story' that emerged."
+    ],
+    "outcome_ar": "الاستمتاع بعدم اليقين وتقبل أفكار الآخرين في العمل الإبداعي.",
+    "emoji": "👪",
+    "expression_ar": "الإبداع الجماعي",
+    "duration_minutes": 15
+  },
+  {
+    "id": "story_019",
+    "title_ar": "غلاف كتابي المستقبلي",
+    "title_en": "My Future Book Cover",
+    "description_ar": "صمم غلاف كتابك الذي ستنشره يوماً ما. ارسم الغلاف الأمامي والخلفي. اكتب عنوان الكتاب، اسمك، وتلخيصاً صغيراً في الخلف.",
+    "skill_focus": "تحفيز الطموح الكتابي",
+    "activity_type": "تصميم غلاف",
+    "steps_ar": [
+      "أحضر ورقة كبيرة واطوِها كغلاف كتاب.",
+      "في الأمام: ارسم صورة معبرة واكتب العنوان بالإنجليزية.",
+      "في الخلف: اكتب 3 جمل تشويقية عن القصة دون حرق النهاية.",
+      "ضع الغلاف على مكتبك كحلم تراه يومياً."
+    ],
+    "steps_en": [
+      "Get a big paper and fold it like a book cover.",
+      "On the front: draw an expressive image and write the title in English.",
+      "On the back: write 3 intriguing sentences about the story without spoilers.",
+      "Place the cover on your desk as a daily dream to see."
+    ],
+    "outcome_ar": "تحويل الحلم بالكتابة إلى شيء مرئي وملموس يذكر به يومياً.",
+    "emoji": "📘",
+    "expression_ar": "تحفيز الطموح الكتابي",
+    "duration_minutes": 15
+  },
+  {
+    "id": "story_020",
+    "title_ar": "رسالة إلى شخصيتي بعد 10 سنوات",
+    "title_en": "A Letter to My Character in 10 Years",
+    "description_ar": "تخيل أن شخصيتك المفضلة كبرت 10 سنوات. اكتب لها رسالة. ماذا أصبحت؟ هل حققت أحلامها؟ هل ما زالت تتذكرك أنت كمخترع لها؟",
+    "skill_focus": "تأمل النمو والتغير",
+    "activity_type": "كتابة استشرافية",
+    "steps_ar": [
+      "اختر شخصيتك المفضلة.",
+      "تخيلها بعد 10 سنوات. أين تعيش؟ ماذا تفعل؟",
+      "اكتب رسالة تسألها عن حياتها الآن.",
+      "في النهاية، اشكرها على كل ما علمتك إياه."
+    ],
+    "steps_en": [
+      "Choose your favorite character.",
+      "Imagine them 10 years later. Where do they live? What do they do?",
+      "Write a letter asking about their life now.",
+      "At the end, thank them for everything they taught you."
+    ],
+    "outcome_ar": "فهم أن الشخصيات تنمو معنا، وقد تكون مرآة لأحلامنا المستقبلية.",
+    "emoji": "⏳",
+    "expression_ar": "تأمل النمو والتغير",
     "duration_minutes": 15
   }
 ];
@@ -772,6 +1056,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
   const [selectedWritingEx, setSelectedWritingEx] = useState<WritingExercise | null>(null);
   const [writingDraft, setWritingDraft] = useState<string>('');
   const [isWritingSpeechActive, setIsWritingSpeechActive] = useState<boolean>(false);
+  const [writingStepsChecked, setWritingStepsChecked] = useState<boolean[]>([]);
   const [completedWritingIds, setCompletedWritingIds] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem('balance_oasis_writing_completed');
@@ -785,8 +1070,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     if (selectedWritingEx) {
       const draft = localStorage.getItem(`balance_oasis_draft_${selectedWritingEx.id}`) || '';
       setWritingDraft(draft);
+      setWritingStepsChecked(new Array(selectedWritingEx.steps_ar.length).fill(false));
     } else {
       setWritingDraft('');
+      setWritingStepsChecked([]);
     }
     stopSpeech();
   }, [selectedWritingEx]);
@@ -1454,6 +1741,98 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
         });
       }
     }
+  };
+
+  const stopSpeech = () => {
+    try {
+      window.speechSynthesis.cancel();
+    } catch (e) {
+      console.warn(e);
+    }
+    setSpeechPlaybackActive(false);
+    setMoveSpeechActive(false);
+    setIsWritingSpeechActive(false);
+    setIsSpeakingEncouragement(false);
+  };
+
+  const handleStartSession = (ex: FocusExercise) => {
+    setSelectedEx(ex);
+    setTimeLeft(meditationTime);
+    setIsPlaying(true);
+
+    // Play serene soft introductory notes
+    setTimeout(() => {
+      playSereneFreq(432, 0.8, 'sine');
+      setTimeout(() => playSereneFreq(528, 0.8, 'triangle'), 150);
+    }, 150);
+  };
+
+  const handleStopSession = () => {
+    setIsPlaying(false);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    stopSpeech();
+  };
+
+  const handleSessionComplete = () => {
+    setIsPlaying(false);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+
+    // Play victory frequency triple chime
+    playSereneFreq(528, 1.5, 'sine');
+    setTimeout(() => playSereneFreq(659, 1.2, 'sine'), 200);
+    setTimeout(() => playSereneFreq(784, 1.5, 'sine'), 400);
+
+    const completedId = selectedEx?.id;
+    if (completedId) {
+      const updated = new Set(localCompletedIds);
+      updated.add(completedId);
+      setLocalCompletedIds(updated);
+      try {
+        localStorage.setItem('balance_oasis_completed', JSON.stringify(Array.from(updated)));
+      } catch (e) {
+        console.error(e);
+      }
+
+      if (onLessonCompleted) {
+        onLessonCompleted(completedId);
+      }
+
+      // Enter speech recorder & AI praise completion system view!
+      if (selectedEx) {
+        setCompletionSession({
+          type: 'calm',
+          id: selectedEx.id,
+          title: isRtl ? selectedEx.title_ar : selectedEx.title_en,
+          duration: meditationTime
+        });
+      }
+    }
+  };
+
+  const speakTranscript = () => {
+    if (!selectedEx) return;
+    stopSpeech();
+    const textToRead = isRtl ? selectedEx.script_ar : selectedEx.script_en;
+    const utter = new SpeechSynthesisUtterance(textToRead);
+    utter.lang = isRtl ? 'ar-SA' : 'en-US';
+    utter.onend = () => setSpeechPlaybackActive(false);
+    utter.onerror = () => setSpeechPlaybackActive(false);
+    currentUtteranceRef.current = utter;
+    setSpeechPlaybackActive(true);
+    window.speechSynthesis.speak(utter);
+  };
+
+  const speakMoveTranscript = () => {
+    if (!selectedMoveEx) return;
+    stopSpeech();
+    const textToRead = (isRtl ? selectedMoveEx.command_ar : selectedMoveEx.command_en) + '. ' + selectedMoveEx.description_ar;
+    const utter = new SpeechSynthesisUtterance(textToRead);
+    utter.lang = isRtl ? 'ar-SA' : 'en-US';
+    utter.onend = () => setMoveSpeechActive(false);
+    utter.onerror = () => setMoveSpeechActive(false);
+    currentUtteranceRef.current = utter;
+    setMoveSpeechActive(true);
+    window.speechSynthesis.speak(utter);
   };
 
   const completedCount = localCompletedIds.size;
@@ -2229,15 +2608,15 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       className="bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
                     >
                       <ChevronRight size={14} />
-                      {isRtl ? 'العودة لقائمة تمارين الكتابة' : 'Back to Writing Prompts'}
+                      {isRtl ? 'العودة لقائمة تمارين الكتابة القصصية' : 'Back to Writing Prompts'}
                     </button>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold font-mono">
-                        ✍️ {isRtl ? selectedWritingEx.expression_ar : 'Reflective Path'}
+                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-[#c084fc] font-bold font-mono">
+                        🎯 {isRtl ? selectedWritingEx.skill_focus : 'Focus Area'}
                       </span>
-                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold font-mono">
-                        ⏱️ {selectedWritingEx.duration_minutes}m
+                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-emerald-400 font-bold font-mono">
+                        ✨ {isRtl ? selectedWritingEx.activity_type : 'Type'}
                       </span>
                     </div>
                   </div>
@@ -2248,10 +2627,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     <div className="lg:col-span-8 bg-[#030712] border border-purple-500/10 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
                       <div className="space-y-2">
                         <label className="block text-xs font-black text-purple-400 uppercase tracking-widest text-right">
-                          {isRtl ? 'دفتر الملاحظات والوجدان' : 'Personal Journal & Insights Notepad'}
+                          {isRtl ? 'صندوق التعبير والإنتاج الوجداني والقصصي' : 'Creative Writing & Emotional Expression Panel'}
                         </label>
                         <p className="text-[11px] text-slate-400 text-right italic leading-relaxed">
-                          {isRtl ? 'اكتب ما يجول بخاطرك وباشر الإبداع. يتم الحفظ تلقائياً في المتصفح بكل أمان.' : 'Write what feels true to you. Your thoughts are auto-saved locally in your secure frame.'}
+                          {isRtl ? 'اكتب ما يجول بخاطرك وباشر إبداعك طبقاً لخطوات التمرين على اليسار. يتم الحفظ تلقائياً في المتصفح بكل أمان.' : 'Write your creative story or response following the challenge steps. Your work is safely auto-saved.'}
                         </p>
                       </div>
 
@@ -2264,8 +2643,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             localStorage.setItem(`balance_oasis_draft_${selectedWritingEx.id}`, e.target.value);
                           }
                         }}
-                        placeholder={isRtl ? selectedWritingEx.writing_prompt_ar : selectedWritingEx.writing_prompt_en}
-                        className="w-full min-h-[220px] bg-[#02050c] border border-white/5 focus:border-purple-500/50 rounded-xl p-4 text-sm md:text-base text-slate-100 placeholder-slate-500 focus:outline-none transition leading-relaxed text-right"
+                        placeholder={isRtl 
+                          ? `ابدأ بكتابة قصتك وإبداعك هنا متبعاً خطوات التحدي...` 
+                          : `Start writing your story here, following the challenge steps...`}
+                        className="w-full min-h-[250px] bg-[#02050c] border border-white/5 focus:border-purple-500/50 rounded-xl p-4 text-sm md:text-base text-slate-100 placeholder-slate-500 focus:outline-none transition leading-relaxed text-right"
                         dir="rtl"
                       />
 
@@ -2285,8 +2666,8 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                         <button
                           onClick={() => {
                             if (!selectedWritingEx) return;
-                            const promptText = isRtl ? selectedWritingEx.writing_prompt_ar : selectedWritingEx.writing_prompt_en;
-                            const fullText = (isRtl ? `التحدي: ${selectedWritingEx.description_ar}. البداية المقترحة: ` : 'Prompt Description: ') + promptText;
+                            const stepsText = (isRtl ? selectedWritingEx.steps_ar : selectedWritingEx.steps_en).join('. ');
+                            const fullText = (isRtl ? `التمرين: ${selectedWritingEx.title_ar}. المهارة المستهدفة: ${selectedWritingEx.skill_focus}. التفاصيل: ${selectedWritingEx.description_ar}. خطوات التطبيق: ` : 'Exercise Description: ') + stepsText;
                             
                             try {
                               window.speechSynthesis.cancel();
@@ -2316,7 +2697,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           <span>🔊</span>
                           {isWritingSpeechActive
                             ? (isRtl ? 'جاري القراءة بصوت المساعد...' : 'AI Voice reading...')
-                            : (isRtl ? 'قراءة التحدي بصوت الذكاء 🎙️' : 'Read Prompt Out Loud')}
+                            : (isRtl ? 'قراءة التحدي والخطوات بصوت الذكاء 🎙️' : 'Read Prompt Out Loud')}
                         </button>
 
                         {/* Export Draft Text */}
@@ -2325,8 +2706,8 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             if (!selectedWritingEx) return;
                             const title = isRtl ? selectedWritingEx.title_ar : selectedWritingEx.title_en;
                             const desc = isRtl ? selectedWritingEx.description_ar : selectedWritingEx.title_en;
-                            const val = writingDraft || (isRtl ? selectedWritingEx.writing_prompt_ar : selectedWritingEx.writing_prompt_en);
-                            const fileContent = `=== ${title} ===\n\nChallenge: ${desc}\n\nMy Thoughts:\n---------------\n${val}\n\nWritten on Balance Oasis Notebook of Creative Expression & Emotional Intelligence.`;
+                            const val = writingDraft || '';
+                            const fileContent = `=== ${title} ===\n\nChallenge: ${desc}\n\nMy Story:\n---------------\n${val}\n\nWritten on Balance Oasis Notebook of Creative Expression & Emotional Intelligence.`;
                             
                             const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
                             const url = URL.createObjectURL(blob);
@@ -2372,11 +2753,11 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       </div>
                     </div>
 
-                    {/* Right Column: Prompt Guideline Board */}
+                    {/* Right Column: Prompt Guideline Board & Steps Checklist */}
                     <div className="lg:col-span-4 bg-[#050b14] border border-white/5 rounded-2xl p-5 flex flex-col justify-between text-right space-y-4">
                       <div className="space-y-4">
                         <div className="text-center pb-3 border-b border-white/5">
-                          <span className="text-2xl">✍️</span>
+                          <span className="text-3xl">{selectedWritingEx.emoji || '✍️'}</span>
                           <h4 className="text-base font-black text-white mt-1">
                             {isRtl ? selectedWritingEx.title_ar : selectedWritingEx.title_en}
                           </h4>
@@ -2385,31 +2766,58 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           </h5>
                         </div>
 
-                        <div className="space-y-2.5" dir="rtl">
+                        <div className="space-y-3" dir="rtl">
                           <div>
                             <h6 className="text-[10px] font-black uppercase text-purple-400 tracking-wider">
-                              {isRtl ? 'التصنيف المنهجي والمغزى:' : 'Systemic Category & Theme:'}
-                            </h6>
-                            <p className="text-xs text-slate-300 mt-1">
-                              🌿 {isRtl ? selectedWritingEx.expression_ar : 'Reflective growth & Emotional Insight'}
-                            </p>
-                          </div>
-
-                          <div>
-                            <h6 className="text-[10px] font-black uppercase text-purple-400 tracking-wider">
-                              {isRtl ? 'وصف التحدي الإبداعي:' : 'Creative Task Description:'}
+                              {isRtl ? 'وصف التحدي الإبداعي وطرحه:' : 'Creative Task Description:'}
                             </h6>
                             <p className="text-xs text-slate-300 leading-relaxed mt-1">
                               {isRtl ? selectedWritingEx.description_ar : 'Engage with this deep self-awareness scenario.'}
                             </p>
                           </div>
 
-                          <div>
-                            <h6 className="text-[10px] font-black uppercase text-purple-400 tracking-wider">
-                              {isRtl ? 'البداية الإلزامية المقترحة:' : 'Starting Prompt Invitation:'}
+                          {/* Steps Checklist */}
+                          <div className="space-y-2 mt-2 pt-2 border-t border-white/5">
+                            <h6 className="text-[10px] font-black uppercase text-purple-400 tracking-wider mb-2">
+                              {isRtl ? 'خطوات التطبيق العملي للنشاط والقصة:' : 'Practical Steps Checklist:'}
                             </h6>
-                            <p className="text-xs text-slate-400 italic bg-purple-950/20 border border-purple-500/10 p-2.5 rounded-xl leading-relaxed mt-1">
-                              "{isRtl ? selectedWritingEx.writing_prompt_ar : selectedWritingEx.writing_prompt_en}"
+                            <div className="space-y-2 max-h-[170px] overflow-y-auto pr-1">
+                              {(isRtl ? selectedWritingEx.steps_ar : selectedWritingEx.steps_en).map((step, sIdx) => {
+                                const isChecked = writingStepsChecked[sIdx] || false;
+                                return (
+                                  <button
+                                    key={sIdx}
+                                    onClick={() => {
+                                      const updated = [...writingStepsChecked];
+                                      updated[sIdx] = !updated[sIdx];
+                                      setWritingStepsChecked(updated);
+                                    }}
+                                    className={`w-full text-right p-2.5 rounded-xl border transition-all text-[11px] flex items-start gap-2.5 cursor-pointer select-none ${
+                                      isChecked 
+                                        ? 'bg-purple-500/10 border-purple-500/20 text-purple-200' 
+                                        : 'bg-[#030712] border-white/5 text-slate-400 hover:border-purple-500/10'
+                                    }`}
+                                  >
+                                    <span className={`mt-0.5 w-4.5 h-4.5 rounded border flex items-center justify-center shrink-0 transition-all ${
+                                      isChecked 
+                                        ? 'bg-purple-500 border-purple-500 text-slate-950' 
+                                        : 'border-slate-600 text-transparent'
+                                    }`}>
+                                      <Check size={9} strokeWidth={4} />
+                                    </span>
+                                    <p className="font-medium leading-relaxed text-right flex-1">{step}</p>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          <div className="pt-2 border-t border-white/5">
+                            <h6 className="text-[10px] font-black uppercase text-purple-400 tracking-wider">
+                              {isRtl ? 'الأثر النفسي والتربوي المتوقع:' : 'Expected Outcome:'}
+                            </h6>
+                            <p className="text-xs text-slate-300 leading-relaxed mt-1">
+                              🌟 {isRtl ? selectedWritingEx.outcome_ar : 'Deep creative thinking and self-discovery.'}
                             </p>
                           </div>
                         </div>
@@ -2426,11 +2834,15 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           // Trigger the beautiful voice record encouraging session!
                           setSelectedEx(null);
                           setSelectedMoveEx(null);
+                          setSelectedEmotionEx(null);
+                          setSelectedCommEx(null);
+                          setSelectedLeaderEx(null);
+                          setSelectedTeamEx(null);
                           setCompletionSession({
                             type: 'writing',
                             id: selectedWritingEx.id,
-                            title: selectedWritingEx.title_ar,
-                            duration: selectedWritingEx.duration_minutes * 60
+                            title: isRtl ? selectedWritingEx.title_ar : selectedWritingEx.title_en,
+                            duration: 15 * 60 // average 15 minutes
                           });
 
                           setSelectedWritingEx(null);
@@ -3449,6 +3861,258 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                               isCompleted
                                 ? 'bg-rose-500/5 hover:bg-rose-500/10 text-rose-300 border-rose-500/10'
                                 : 'bg-rose-500/5 group-hover:bg-rose-500 group-hover:text-slate-950 text-rose-400 border-rose-500/10 group-hover:border-rose-500'
+                            }`}
+                          >
+                            <span>⚡</span>
+                            {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )
+            ) : activeSubTab === 'teamwork' ? (
+              // Active SubTab === 'teamwork' - Cooperation & Teamwork Exercises
+              selectedTeamEx ? (
+                <div className="space-y-6 animate-fade-in text-right" dir="rtl">
+                  {/* Step-by-Step interactive checklist container */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-4">
+                    <button
+                      onClick={() => {
+                        setSelectedTeamEx(null);
+                        stopSpeech();
+                      }}
+                      className="bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <ChevronRight size={14} />
+                      {isRtl ? 'العودة لقائمة تمارين التعاون بالكامل' : 'Back to Exercises'}
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold font-mono">
+                        🎯 {isRtl ? selectedTeamEx.skill_focus : 'Focus Area'}
+                      </span>
+                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-[#6366f1] font-bold font-mono">
+                        🤝 {isRtl ? selectedTeamEx.activity_type : 'Type'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    {/* Left Column: Step checklist */}
+                    <div className="lg:col-span-8 bg-[#030712] border border-white/5 rounded-3xl p-6 space-y-6 shadow-2xl">
+                      <div className="space-y-2">
+                        <span className="text-3xl">{selectedTeamEx.emoji}</span>
+                        <h3 className="text-xl font-black text-white">
+                          {isRtl ? selectedTeamEx.title_ar : selectedTeamEx.title_en}
+                        </h3>
+                        <p className="text-slate-400 text-xs">
+                          {isRtl ? selectedTeamEx.description_ar : selectedTeamEx.title_en}
+                        </p>
+                      </div>
+
+                      {/* Step-by-step interactive tasks */}
+                      <div className="space-y-4">
+                        <h4 className="text-xs font-black text-indigo-400 uppercase tracking-widest border-b border-white/5 pb-2">
+                          {isRtl ? 'خطوات التطبيق والتمرين الميداني عائلياً والتعاوني:' : 'Practical Cooperation Steps:'}
+                        </h4>
+
+                        <div className="space-y-3">
+                          {(isRtl ? selectedTeamEx.steps_ar : selectedTeamEx.steps_en).map((step, sIdx) => {
+                            const isChecked = teamStepsChecked[sIdx] || false;
+
+                            return (
+                              <button
+                                key={sIdx}
+                                onClick={() => {
+                                  const updated = [...teamStepsChecked];
+                                  updated[sIdx] = !updated[sIdx];
+                                  setTeamStepsChecked(updated);
+                                }}
+                                className={`w-full text-right p-4 rounded-2xl border transition-all duration-200 flex items-start gap-4 cursor-pointer select-none ${
+                                  isChecked 
+                                    ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-100 shadow-inner' 
+                                    : 'bg-[#080f1a] border-white/5 text-slate-300 hover:border-indigo-500/20'
+                                }`}
+                              >
+                                <span className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
+                                  isChecked 
+                                    ? 'bg-indigo-500 border-indigo-500 text-slate-950' 
+                                    : 'border-slate-500 text-transparent'
+                                }`}>
+                                  <Check size={12} strokeWidth={4} />
+                                </span>
+                                <div className="space-y-1">
+                                  <span className="text-xs font-black text-slate-500 font-mono">
+                                    {isRtl ? `الخطوة ${sIdx + 1}` : `Step ${sIdx + 1}`}
+                                  </span>
+                                  <p className="text-xs md:text-sm font-medium leading-relaxed text-right">
+                                    {step}
+                                  </p>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Toolshelf for Reading Steps Out Loud */}
+                      <div className="flex border-t border-white/5 pt-4">
+                        <button
+                          onClick={() => {
+                            if (speechPlaybackActive) {
+                              stopSpeech();
+                            } else {
+                              stopSpeech();
+                              const textToRead = (isRtl ? selectedTeamEx.steps_ar : selectedTeamEx.steps_en).join('. ');
+                              const utter = new SpeechSynthesisUtterance(textToRead);
+                              utter.lang = isRtl ? 'ar-SA' : 'en-US';
+                              utter.onend = () => setSpeechPlaybackActive(false);
+                              utter.onerror = () => setSpeechPlaybackActive(false);
+                              currentUtteranceRef.current = utter;
+                              setSpeechPlaybackActive(true);
+                              window.speechSynthesis.speak(utter);
+                            }
+                          }}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
+                            speechPlaybackActive
+                              ? 'bg-amber-500 text-slate-900 font-black shadow-lg shadow-amber-500/20'
+                              : 'bg-white/5 hover:bg-white/10 text-slate-300'
+                          }`}
+                        >
+                          <span>🔊</span>
+                          {speechPlaybackActive 
+                            ? (isRtl ? 'إيقاف قراءة الصوت' : 'Stop Reading')
+                            : (isRtl ? 'تفقيط وقراءة خطوات التمرين بصوت مسموع' : 'Read Steps Aloud')
+                          }
+                        </button>
+                      </div>
+
+                    </div>
+
+                    {/* Right Column: Outcomes & Completion */}
+                    <div className="lg:col-span-4 bg-[#050b14] border border-white/5 rounded-3xl p-6 flex flex-col justify-between space-y-6 text-right">
+                      <div className="space-y-5">
+                        <div className="text-center pb-4 border-b border-white/5">
+                          <span className="text-3xl">{selectedTeamEx.emoji}</span>
+                          <h4 className="text-base font-black text-white mt-1">
+                            {isRtl ? 'الأثر المتوقع والمخرج التعاوني:' : 'Expected Cooperative Outcome:'}
+                          </h4>
+                        </div>
+
+                        <div className="bg-indigo-950/20 border border-indigo-500/20 rounded-2xl p-4 text-indigo-200 text-xs leading-relaxed" dir="rtl">
+                          <p className="font-extrabold mb-1">🤝 {isRtl ? 'الروح الجماعية والتعاون:' : 'Teamwork & Synergy:'}</p>
+                          <p>{selectedTeamEx.outcome_ar || (isRtl ? 'بناء قيم التعاون المشترك بين الإخوة وأفراد الأسرة.' : 'Strengthening brotherly ties and core cooperative values.')}</p>
+                        </div>
+
+                        <p className="text-slate-400 text-[11px] leading-relaxed">
+                          {isRtl
+                            ? 'بمجرد تطبيق الخطوات المعروضة والتعليم عليها كخطوات منجزة، اضغط على زر تسجيل إنجاز تمرين التعاون وتلقي حافز الذكاء الاصطناعي.'
+                            : 'Once you practice and check off each task, proceed to register completion and receive AI spoken feedback.'}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const updated = new Set(completedTeamIds);
+                          updated.add(selectedTeamEx.id);
+                          setCompletedTeamIds(updated);
+                          localStorage.setItem('balance_oasis_team_completed', JSON.stringify(Array.from(updated)));
+
+                          // Trigger the beautiful completion voice record encouraging session!
+                          setSelectedEx(null);
+                          setSelectedMoveEx(null);
+                          setSelectedWritingEx(null);
+                          setSelectedEmotionEx(null);
+                          setSelectedCommEx(null);
+                          setSelectedLeaderEx(null);
+                          setCompletionSession({
+                            type: 'teamwork',
+                            id: selectedTeamEx.id,
+                            title: isRtl ? selectedTeamEx.title_ar : selectedTeamEx.title_en,
+                            duration: 15 * 60 // average 15 minutes
+                          });
+
+                          setSelectedTeamEx(null);
+                          stopSpeech();
+                        }}
+                        className="w-full bg-gradient-to-r from-indigo-500 to-sky-500 hover:from-indigo-600 hover:to-sky-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-indigo-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+                      >
+                        <span>✓</span>
+                        {isRtl ? 'تسجيل إنجاز تمرين التعاون وإطلاق التحفيز 🎙' : 'Mark Completed & Open Encouragement 🎙'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // SelectedTeamEx === null -> Grid list of 24 teamwork and cooperation exercises!
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-2 text-right">
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-black text-white flex items-center gap-2 justify-end">
+                        <span className="text-indigo-400">🤝</span>
+                        {isRtl ? 'منهج التعاون المشاريع الجماعية للنشء (الوحدة الأولى):' : 'Cooperation & Joint Projects Curriculum (Unit 1):'}
+                      </h3>
+                      <p className="text-slate-400 text-xs">
+                        {isRtl ? 'الوحدة كاملة: 20 تمرين عملي لـ الوعي التام للغير، كفاءة مشاركة الأدوار، والتعاطف والتواصل الإنساني:' : 'Complete 20 integrated interactive routines to foster other-awareness, dynamic role sharing, empathy, and positive human communication:'}
+                      </p>
+                    </div>
+
+                    <div className="text-xs bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-3 py-1.5 rounded-xl font-bold font-mono">
+                      {isRtl ? `أنجزت ${completedTeamIds.size} من 20` : `${completedTeamIds.size} / 20 Completed`}
+                    </div>
+                  </div>
+
+                  {/* Grid list container */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" dir="rtl">
+                    {TEAMWORK_EXERCISES.map((ex, idx) => {
+                      const isCompleted = completedTeamIds.has(ex.id);
+
+                      return (
+                        <div
+                          key={ex.id}
+                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#050b14] flex flex-col justify-between group ${
+                            isCompleted
+                              ? 'border-indigo-500/30'
+                              : 'border-white/5 hover:border-indigo-500/30'
+                          }`}
+                        >
+                          {/* Badge */}
+                          <div className="flex justify-between items-center">
+                            <span className="text-[10px] text-slate-500 font-mono tracking-wider font-extrabold uppercase">
+                              {isRtl ? `تمرين تعاوني ${idx + 1}` : `Teamwork Exercise ${idx + 1}`}
+                            </span>
+
+                            {isCompleted ? (
+                              <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-0.5 rounded-full" title={isRtl ? "مكتمل" : "Completed"}>
+                                <Check size={10} strokeWidth={3} />
+                              </span>
+                            ) : (
+                              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500/50" />
+                            )}
+                          </div>
+
+                          {/* Meta info */}
+                          <div className="space-y-1.5 text-right font-sans">
+                            <div className="flex items-center gap-2 justify-end">
+                              <h4 className="text-sm font-black text-white group-hover:text-indigo-300 transition line-clamp-1">
+                                {isRtl ? ex.title_ar : ex.title_en}
+                              </h4>
+                              <span className="text-lg">{ex.emoji}</span>
+                            </div>
+                            <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                              {isRtl ? ex.description_ar : ex.title_en}
+                            </p>
+                          </div>
+
+                          {/* CTA button */}
+                          <button
+                            onClick={() => setSelectedTeamEx(ex)}
+                            className={`w-full mt-2 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
+                              isCompleted
+                                ? 'bg-indigo-500/5 hover:bg-indigo-500/10 text-indigo-300 border-indigo-500/10'
+                                : 'bg-indigo-500/5 group-hover:bg-indigo-500 group-hover:text-slate-950 text-indigo-400 border-indigo-500/10 group-hover:border-indigo-500'
                             }`}
                           >
                             <span>⚡</span>
