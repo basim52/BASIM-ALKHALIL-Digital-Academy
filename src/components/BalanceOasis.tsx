@@ -30,6 +30,10 @@ import { EmotionExercise, EMOTION_EXERCISES } from './emotion_exercises';
 import { CommunicationExercise, COMMUNICATION_EXERCISES } from './communication_exercises';
 import { LeadershipExercise, LEADERSHIP_EXERCISES } from './leadership_exercises';
 import { TeamworkExercise, TEAMWORK_EXERCISES } from './teamwork_exercises';
+import { FinancialExercise, FINANCIAL_EXERCISES } from './financial_exercises';
+import { ConfidenceExercise, CONFIDENCE_EXERCISES } from './confidence_exercises';
+import { CriticalExercise, CRITICAL_EXERCISES } from './critical_exercises';
+import { InnovExercise, INNOV_EXERCISES } from './innov_exercises';
 
 interface FocusExercise {
   id: string;
@@ -1054,7 +1058,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
   completedLessonIds = new Set(),
   studentName = ''
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'calm' | 'move' | 'writing' | 'emotion' | 'communication' | 'leadership' | 'teamwork'>('calm');
+  const [activeSubTab, setActiveSubTab] = useState<'calm' | 'move' | 'writing' | 'emotion' | 'communication' | 'leadership' | 'teamwork' | 'money' | 'confidence' | 'critical' | 'innov'>('calm');
 
   const [customStudentName, setCustomStudentName] = useState<string>(studentName);
   const [isExporting, setIsExporting] = useState<boolean>(false);
@@ -1181,6 +1185,90 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     stopSpeech();
   }, [selectedTeamEx]);
 
+  // Active early financial literacy states
+  const [selectedMoneyEx, setSelectedMoneyEx] = useState<FinancialExercise | null>(null);
+  const [moneyStepsChecked, setMoneyStepsChecked] = useState<boolean[]>([]);
+  const [completedMoneyIds, setCompletedMoneyIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('balance_oasis_money_completed');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  useEffect(() => {
+    if (selectedMoneyEx) {
+      setMoneyStepsChecked(new Array(selectedMoneyEx.steps_ar.length).fill(false));
+    } else {
+      setMoneyStepsChecked([]);
+    }
+    stopSpeech();
+  }, [selectedMoneyEx]);
+
+  // Active self confidence & public speaking states
+  const [selectedConfidenceEx, setSelectedConfidenceEx] = useState<ConfidenceExercise | null>(null);
+  const [confidenceStepsChecked, setConfidenceStepsChecked] = useState<boolean[]>([]);
+  const [completedConfidenceIds, setCompletedConfidenceIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('balance_oasis_confidence_completed');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  useEffect(() => {
+    if (selectedConfidenceEx) {
+      setConfidenceStepsChecked(new Array(selectedConfidenceEx.steps_ar.length).fill(false));
+    } else {
+      setConfidenceStepsChecked([]);
+    }
+    stopSpeech();
+  }, [selectedConfidenceEx]);
+
+  // Active critical thinking & problem solving states
+  const [selectedCriticalEx, setSelectedCriticalEx] = useState<CriticalExercise | null>(null);
+  const [criticalStepsChecked, setCriticalStepsChecked] = useState<boolean[]>([]);
+  const [completedCriticalIds, setCompletedCriticalIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('balance_oasis_critical_completed');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  useEffect(() => {
+    if (selectedCriticalEx) {
+      setCriticalStepsChecked(new Array(selectedCriticalEx.steps_ar.length).fill(false));
+    } else {
+      setCriticalStepsChecked([]);
+    }
+    stopSpeech();
+  }, [selectedCriticalEx]);
+
+  // Active innovators & entrepreneurship ("مبتكرون بالفطرة") states
+  const [selectedInnovEx, setSelectedInnovEx] = useState<InnovExercise | null>(null);
+  const [innovStepsChecked, setInnovStepsChecked] = useState<boolean[]>([]);
+  const [completedInnovIds, setCompletedInnovIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('balance_oasis_innov_completed');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  useEffect(() => {
+    if (selectedInnovEx) {
+      setInnovStepsChecked(new Array(selectedInnovEx.steps_ar.length).fill(false));
+    } else {
+      setInnovStepsChecked([]);
+    }
+    stopSpeech();
+  }, [selectedInnovEx]);
+
   // Emotional thermometer tracking state
   const [currentSelectedFeeling, setCurrentSelectedFeeling] = useState<string>('serene');
   const [currentThermometerValue, setCurrentThermometerValue] = useState<number>(5);
@@ -1242,7 +1330,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
   // Voice recording & AI smart encouragement states
   const [completionSession, setCompletionSession] = useState<{
-    type: 'calm' | 'move' | 'writing' | 'emotion' | 'communication' | 'leadership' | 'teamwork';
+    type: 'calm' | 'move' | 'writing' | 'emotion' | 'communication' | 'leadership' | 'teamwork' | 'money' | 'confidence' | 'critical' | 'innov';
     id: string;
     title: string;
     duration: number;
@@ -1461,6 +1549,54 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     "Fantastic! Transforming household tasks and shared duties into fun joint projects nurtures your social intelligence and shapes lasting memories. Incredibly proud! 🧹📦🎶"
   ];
 
+  const AR_FINANCE_RESPONSES = [
+    "رائع جداً! فهمك للثقافة المالية في سن مبكرة يضعك على الطريق الصحيح لتكون مميزاً وذكياً في إدارة أموالك وتخطيطك للمستقبل. 💰📈🏆",
+    "أحسنت! إدراك الفرق بين الرغبات والاحتياجات والادخار بوعي هو أساس النجاح المالي. فخور جداً بقراراتك المالية المسؤولة! 🎯📉⚖️",
+    "ممتاز! لقد اجتزت التحدي المالي بنجاح. تذكر دائماً أن الاستثمار في نفسك وفي تطوير مهاراتك هو أفضل استثمار للمستقبل. 🚀🌟💸"
+  ];
+
+  const EN_FINANCE_RESPONSES = [
+    "Fantastic! Understanding money at a young age puts you on the right path to financial success and smart decision making! Keep planning your future! 💰📈🏆",
+    "Great job! Distinguishing between needs and wants and saving on purpose is the foundation of smart finance. Super proud of your responsible decisions! 🎯📉⚖️",
+    "Excellent! You successfully completed your financial challenge. Remember, investing in your own skills is the best investment you can make! 🚀🌟💸"
+  ];
+
+  const AR_CONFIDENCE_RESPONSES = [
+    "يا لك من متحدث بارع وواثق! وقوفك بثبات وتعبيراتك الواضحة وإلقاؤك الرائع يثبت للجميع أنك بطل حقيقي وصوتك يستحق الاستماع إليه. 🗣️👑🌟",
+    "أحسنت جداً! كسر حاجز القلق والتحدث أمام جمهور أو مرآة بشجاعة هو خطوة عملاقة نحو التميز ولغة الجسد المؤثرة. فخور بك للغاية! 🎤🎭🦸",
+    "مذهل! لقد أتممت تمرين الثقة والتحدث بطلبة واقتدار. استمر في التدرب وصوتك الشجاع يوماً ما سيلهم الملايين! 🚀📈🏆"
+  ];
+
+  const AR_CRITICAL_RESPONSES = [
+    "يا لك من مفكر ذكي ونبيه! قدرتك على تحليل الادعاءات وفحص الأدلة وكشف الفروق بين الرغبات والحقائق أو الشائعات تثبت عمق ذكائك ووعيك الفكري المتين! 🧐🔍⚖️",
+    "تطبيق متميز لمدارك التفكير النقدي وحل المشكلات! تقسيم التحديات لجزئيات صغيرة يبسط تعقد الحياة ويجعل عقلك المشرق مستعداً دائماً لتخطي العوائق الذكية! 🧠🧩💡",
+    "بطل المنطق والتجرد الأخلاقي الفائق! اتخاذك للقرارات المنطقية والفرق بين العاطفة والإثبات هو ميزان نجاح الحوارات والنقاشات الراقية في مستقبلك! ⚖️🚀🏆"
+  ];
+
+  const EN_CONFIDENCE_RESPONSES = [
+    "What a brilliant and confident speaker you are! Standing tall, projecting clearly, and expressing your thoughts proves you are a true champion! 🗣️👑🌟",
+    "Great job! Conquering anxiety and speaking bravely in front of others or a mirror is a giant step toward speaking mastery and powerful body language! 🎤🎭🦸",
+    "Spectacular! You completed your confidence and public speaking challenge. Keep practicing, and your brave voice will motivate millions one day! 🚀📈🏆"
+  ];
+
+  const EN_CRITICAL_RESPONSES = [
+    "What a brilliant and critical thinker you are! Your ability to analyze claims, check proofs, and filter facts from opinions proves your outstanding logical power! 🧐🔍⚖️",
+    "Spectacular problem-solving skills! Chunking down massive hurdles into actionable baby steps simplifies life's complexities and primes your vibrant mind for clever triumphs! 🧠🧩💡",
+    "Champion of logic and objective ethics! Making proof-based decisions and distinguishing emotion from empirical fact is the ultimate crown of supreme intellect! ⚖️🚀🏆"
+  ];
+
+  const AR_INNOV_RESPONSES = [
+    "يا لك من رائد أعمال ومبتكر عبقري بالفطرة! قدرتك على التعاطف مع احتياجات الناس وابتكار الحلول الذكية والتخطيط بخطوات ثابتة تدل على قائد أعمال عظيم في المستقبل! 🎨👁️🤝",
+    "تطبيق متميز لمدارك الابتكار والريادة! تحويل الفكرة من مجرد خيال إلى رسم ونموذج أولي واختبارها مع الجمهور هو سر نجاح أكبر المشاريع العالمية! 💡📈🏆",
+    "رائع جداً! فهمك للتسعير والاسم التجاري وسماع ردود الفعل بروح مرنة يصنع منك مبادراً ناجحاً قادراً على ترك بصمة حقيقية في مجتمعك! 🏷️💼🎪"
+  ];
+
+  const EN_INNOV_RESPONSES = [
+    "What a brilliant natural innovator and entrepreneur you are! Your ability to empathize with people's needs, design smart solutions, and plan with confidence shows you are a future business leader! 🎨👁️🤝",
+    "Spectacular application of innovation and micro-business skills! Transforming ideas from pure imagination to paper prototypes and validation is the secret of the world's greatest endeavors! 💡📈🏆",
+    "Outstanding! Understanding cost, pricing, branding, and gathering constructive feedback with a growth mindset shapes you into a resilient, impactful initiator! 🏷️💼🎪"
+  ];
+
   const triggerAiEncouragement = () => {
     let textToSpeak = '';
     const textLower = (recordedTranscript || '').toLowerCase();
@@ -1509,6 +1645,38 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
       } else {
         const rand = Math.floor(Math.random() * EN_TEAMWORK_RESPONSES.length);
         textToSpeak = EN_TEAMWORK_RESPONSES[rand];
+      }
+    } else if (completionSession?.type === 'money') {
+      if (isRtl) {
+        const rand = Math.floor(Math.random() * AR_FINANCE_RESPONSES.length);
+        textToSpeak = AR_FINANCE_RESPONSES[rand];
+      } else {
+        const rand = Math.floor(Math.random() * EN_FINANCE_RESPONSES.length);
+        textToSpeak = EN_FINANCE_RESPONSES[rand];
+      }
+    } else if (completionSession?.type === 'confidence') {
+      if (isRtl) {
+        const rand = Math.floor(Math.random() * AR_CONFIDENCE_RESPONSES.length);
+        textToSpeak = AR_CONFIDENCE_RESPONSES[rand];
+      } else {
+        const rand = Math.floor(Math.random() * EN_CONFIDENCE_RESPONSES.length);
+        textToSpeak = EN_CONFIDENCE_RESPONSES[rand];
+      }
+    } else if (completionSession?.type === 'critical') {
+      if (isRtl) {
+        const rand = Math.floor(Math.random() * AR_CRITICAL_RESPONSES.length);
+        textToSpeak = AR_CRITICAL_RESPONSES[rand];
+      } else {
+        const rand = Math.floor(Math.random() * EN_CRITICAL_RESPONSES.length);
+        textToSpeak = EN_CRITICAL_RESPONSES[rand];
+      }
+    } else if (completionSession?.type === 'innov') {
+      if (isRtl) {
+        const rand = Math.floor(Math.random() * AR_INNOV_RESPONSES.length);
+        textToSpeak = AR_INNOV_RESPONSES[rand];
+      } else {
+        const rand = Math.floor(Math.random() * EN_INNOV_RESPONSES.length);
+        textToSpeak = EN_INNOV_RESPONSES[rand];
       }
     } else {
       if (isRtl) {
@@ -1870,8 +2038,12 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
   const completedCommCount = completedCommIds.size;
   const completedLeaderCount = completedLeaderIds.size;
   const completedTeamCount = completedTeamIds.size;
-  const totalCompleted = completedCount + completedMoveCount + completedWritingCount + completedEmotionCount + completedCommCount + completedLeaderCount + completedTeamCount;
-  const totalAvailable = EXERCISES.length + MOVEMENT_EXERCISES.length + WRITING_EXERCISES.length + EMOTION_EXERCISES.length + COMMUNICATION_EXERCISES.length + LEADERSHIP_EXERCISES.length + TEAMWORK_EXERCISES.length;
+  const completedMoneyCount = completedMoneyIds.size;
+  const completedConfidenceCount = completedConfidenceIds.size;
+  const completedCriticalCount = completedCriticalIds.size;
+  const completedInnovCount = completedInnovIds.size;
+  const totalCompleted = completedCount + completedMoveCount + completedWritingCount + completedEmotionCount + completedCommCount + completedLeaderCount + completedTeamCount + completedMoneyCount + completedConfidenceCount + completedCriticalCount + completedInnovCount;
+  const totalAvailable = EXERCISES.length + MOVEMENT_EXERCISES.length + WRITING_EXERCISES.length + EMOTION_EXERCISES.length + COMMUNICATION_EXERCISES.length + LEADERSHIP_EXERCISES.length + TEAMWORK_EXERCISES.length + FINANCIAL_EXERCISES.length + CONFIDENCE_EXERCISES.length + CRITICAL_EXERCISES.length + INNOV_EXERCISES.length;
   const progressPercent = totalAvailable > 0 ? Math.round((totalCompleted / totalAvailable) * 100) : 0;
 
   // Compile lists of all completed exercises for the certificate download
@@ -1882,6 +2054,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
   const completedCommList = COMMUNICATION_EXERCISES.filter(ex => completedCommIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
   const completedLeaderList = LEADERSHIP_EXERCISES.filter(ex => completedLeaderIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
   const completedTeamList = TEAMWORK_EXERCISES.filter(ex => completedTeamIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedMoneyList = FINANCIAL_EXERCISES.filter(ex => completedMoneyIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedConfidenceList = CONFIDENCE_EXERCISES.filter(ex => completedConfidenceIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedCriticalList = CRITICAL_EXERCISES.filter(ex => completedCriticalIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedInnovList = INNOV_EXERCISES.filter(ex => completedInnovIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
 
   const allCompletedTitles = [
     ...completedCalmList,
@@ -1890,7 +2066,11 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     ...completedEmotionList,
     ...completedCommList,
     ...completedLeaderList,
-    ...completedTeamList
+    ...completedTeamList,
+    ...completedMoneyList,
+    ...completedConfidenceList,
+    ...completedCriticalList,
+    ...completedInnovList
   ];
 
   const handleExportOasisCard = async () => {
@@ -1936,7 +2116,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     }, 400);
   };
 
-  const handleExportSingleExercise = (ex: any, type: 'calm' | 'move' | 'writing' | 'emotion' | 'communication' | 'leadership' | 'teamwork') => {
+  const handleExportSingleExercise = (ex: any, type: 'calm' | 'move' | 'writing' | 'emotion' | 'communication' | 'leadership' | 'teamwork' | 'money' | 'confidence' | 'critical' | 'innov') => {
     let title = '';
     let category = '';
     let categoryEn = '';
@@ -2028,6 +2208,50 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
         benefit = ex.cohesion_focus_ar;
       }
       emoji = ex.emoji || '🤝';
+    } else if (type === 'money') {
+      title = isRtl ? ex.title_ar : ex.title_en;
+      category = 'الثقافة المالية المبكرة';
+      categoryEn = 'Early Financial Literacy';
+      content = ex.description_ar;
+      if (ex.steps_ar) {
+        steps = Array.isArray(ex.steps_ar) ? ex.steps_ar : [ex.steps_ar];
+      }
+      benefitLabel = isRtl ? 'المهارة والوعي والأثر المالي المكتسب:' : 'Financial Target & Practical Outcome:';
+      benefit = isRtl ? `${ex.skill_focus} - ${ex.outcome_ar}` : `${ex.skill_focus} - ${ex.outcome_ar}`;
+      emoji = ex.emoji || '💰';
+    } else if (type === 'confidence') {
+      title = isRtl ? ex.title_ar : ex.title_en;
+      category = 'الثقة بالنفس والتحدث أمام الجمهور';
+      categoryEn = 'Self-Confidence & Public Speaking';
+      content = ex.description_ar;
+      if (ex.steps_ar) {
+        steps = Array.isArray(ex.steps_ar) ? ex.steps_ar : [ex.steps_ar];
+      }
+      benefitLabel = isRtl ? 'الركن المستهدف والأثر السلوكي المعزز للثقة:' : 'Confidence Target & Behavioral Outcome:';
+      benefit = isRtl ? `${ex.skill_focus} - ${ex.outcome_ar}` : `${ex.skill_focus} - ${ex.outcome_ar}`;
+      emoji = ex.emoji || '🎙️';
+    } else if (type === 'critical') {
+      title = isRtl ? ex.title_ar : ex.title_en;
+      category = 'التفكير النقدي وحل المشكلات';
+      categoryEn = 'Critical Thinking & Problem Solving';
+      content = ex.description_ar;
+      if (ex.steps_ar) {
+        steps = Array.isArray(ex.steps_ar) ? ex.steps_ar : [ex.steps_ar];
+      }
+      benefitLabel = isRtl ? 'الأثر السلوكي وهدف التفكير النقدي:' : 'Critical Thinking Target & Outcome:';
+      benefit = isRtl ? `${ex.skill_focus} - ${ex.outcome_ar}` : `${ex.skill_focus} - ${ex.outcome_ar}`;
+      emoji = ex.emoji || '🧐';
+    } else if (type === 'innov') {
+      title = isRtl ? ex.title_ar : ex.title_en;
+      category = 'مبتكرون بالفطرة والمبادرات الإبداعية';
+      categoryEn = 'Natural Innovators & Micro-Enterprise';
+      content = ex.description_ar;
+      if (ex.steps_ar) {
+        steps = Array.isArray(ex.steps_ar) ? ex.steps_ar : [ex.steps_ar];
+      }
+      benefitLabel = isRtl ? 'الأثر السلوكي وتطوير عقلية ريادة الأعمال:' : 'Entrepreneurial Mindset & Target Benefit:';
+      benefit = isRtl ? `${ex.skill_focus} - ${ex.outcome_ar}` : `${ex.skill_focus} - ${ex.outcome_ar}`;
+      emoji = ex.emoji || '💡';
     }
 
     setExerciseToExport({
@@ -2164,7 +2388,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
       {/* 2. Sub-Tab Selector */}
       {!isPlaying && !isMovePlaying && !completionSession && (
-        <div className="grid grid-cols-2 md:flex md:flex-wrap bg-[#050b14] p-1 rounded-2xl border border-white/5 max-w-5xl mx-auto shadow-xl gap-1 justify-center">
+        <div className="grid grid-cols-2 lg:flex lg:flex-wrap bg-[#050b14] p-1 rounded-2xl border border-white/5 max-w-5xl mx-auto shadow-xl gap-1 justify-center">
           <button
             onClick={() => {
               setActiveSubTab('calm');
@@ -2173,6 +2397,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               setSelectedCommEx(null);
               setSelectedLeaderEx(null);
               setSelectedTeamEx(null);
+              setSelectedMoneyEx(null);
+              setSelectedConfidenceEx(null);
+              setSelectedCriticalEx(null);
+              setSelectedInnovEx(null);
             }}
             className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'calm'
@@ -2191,6 +2419,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               setSelectedCommEx(null);
               setSelectedLeaderEx(null);
               setSelectedTeamEx(null);
+              setSelectedMoneyEx(null);
+              setSelectedConfidenceEx(null);
+              setSelectedCriticalEx(null);
+              setSelectedInnovEx(null);
             }}
             className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'move'
@@ -2209,6 +2441,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               setSelectedCommEx(null);
               setSelectedLeaderEx(null);
               setSelectedTeamEx(null);
+              setSelectedMoneyEx(null);
+              setSelectedConfidenceEx(null);
+              setSelectedCriticalEx(null);
+              setSelectedInnovEx(null);
             }}
             className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'writing'
@@ -2227,6 +2463,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               setSelectedCommEx(null);
               setSelectedLeaderEx(null);
               setSelectedTeamEx(null);
+              setSelectedMoneyEx(null);
+              setSelectedConfidenceEx(null);
+              setSelectedCriticalEx(null);
+              setSelectedInnovEx(null);
             }}
             className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'emotion'
@@ -2245,6 +2485,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               setSelectedCommEx(null);
               setSelectedLeaderEx(null);
               setSelectedTeamEx(null);
+              setSelectedMoneyEx(null);
+              setSelectedConfidenceEx(null);
+              setSelectedCriticalEx(null);
+              setSelectedInnovEx(null);
             }}
             className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'communication'
@@ -2263,6 +2507,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               setSelectedCommEx(null);
               setSelectedLeaderEx(null);
               setSelectedTeamEx(null);
+              setSelectedMoneyEx(null);
+              setSelectedConfidenceEx(null);
+              setSelectedCriticalEx(null);
+              setSelectedInnovEx(null);
             }}
             className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'leadership'
@@ -2281,8 +2529,12 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               setSelectedCommEx(null);
               setSelectedLeaderEx(null);
               setSelectedTeamEx(null);
+              setSelectedMoneyEx(null);
+              setSelectedConfidenceEx(null);
+              setSelectedCriticalEx(null);
+              setSelectedInnovEx(null);
             }}
-            className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 col-span-2 md:col-span-1 ${
+            className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'teamwork'
                 ? 'bg-gradient-to-r from-indigo-500 to-sky-500 text-slate-950 font-black shadow-lg shadow-indigo-500/15'
                 : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
@@ -2290,6 +2542,94 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
           >
             <span>🤝</span>
             {isRtl ? 'التعاون والمشاريع الجماعية' : 'Cooperation & Teamwork'}
+          </button>
+          <button
+            onClick={() => {
+              setActiveSubTab('money');
+              setSelectedWritingEx(null);
+              setSelectedEmotionEx(null);
+              setSelectedCommEx(null);
+              setSelectedLeaderEx(null);
+              setSelectedTeamEx(null);
+              setSelectedMoneyEx(null);
+              setSelectedConfidenceEx(null);
+              setSelectedCriticalEx(null);
+              setSelectedInnovEx(null);
+            }}
+            className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              activeSubTab === 'money'
+                ? 'bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-400 text-slate-950 font-black shadow-lg shadow-orange-500/15'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
+            }`}
+          >
+            <span>☀️💰</span>
+            {isRtl ? 'الثقافة المالية المبكرة' : 'Early Finance'}
+          </button>
+          <button
+            onClick={() => {
+              setActiveSubTab('confidence');
+              setSelectedWritingEx(null);
+              setSelectedEmotionEx(null);
+              setSelectedCommEx(null);
+              setSelectedLeaderEx(null);
+              setSelectedTeamEx(null);
+              setSelectedMoneyEx(null);
+              setSelectedConfidenceEx(null);
+              setSelectedCriticalEx(null);
+              setSelectedInnovEx(null);
+            }}
+            className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              activeSubTab === 'confidence'
+                ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-slate-950 font-black shadow-lg shadow-orange-500/20'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
+            }`}
+          >
+            <span>🎙️</span>
+            {isRtl ? 'الثقة والخطابة' : 'Self-Confidence'}
+          </button>
+          <button
+            onClick={() => {
+              setActiveSubTab('critical');
+              setSelectedWritingEx(null);
+              setSelectedEmotionEx(null);
+              setSelectedCommEx(null);
+              setSelectedLeaderEx(null);
+              setSelectedTeamEx(null);
+              setSelectedMoneyEx(null);
+              setSelectedConfidenceEx(null);
+              setSelectedCriticalEx(null);
+              setSelectedInnovEx(null);
+            }}
+            className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              activeSubTab === 'critical'
+                ? 'bg-gradient-to-r from-orange-500 via-rose-500 to-pink-500 text-slate-950 font-black shadow-lg shadow-pink-500/20'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
+            }`}
+          >
+            <span>🧐💡</span>
+            {isRtl ? 'التفكير النقدي وحل المشكلات' : 'Critical Thinking'}
+          </button>
+          <button
+            onClick={() => {
+              setActiveSubTab('innov');
+              setSelectedWritingEx(null);
+              setSelectedEmotionEx(null);
+              setSelectedCommEx(null);
+              setSelectedLeaderEx(null);
+              setSelectedTeamEx(null);
+              setSelectedMoneyEx(null);
+              setSelectedConfidenceEx(null);
+              setSelectedCriticalEx(null);
+              setSelectedInnovEx(null);
+            }}
+            className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              activeSubTab === 'innov'
+                ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-emerald-400 text-slate-950 font-black shadow-lg shadow-emerald-500/20'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
+            }`}
+          >
+            <span>💡✨</span>
+            {isRtl ? 'مبتكرون بالفطرة' : 'Natural Innovators'}
           </button>
         </div>
       )}
@@ -4592,6 +4932,1063 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             >
                               {exportingExerciseId === ex.id ? (
                                 <RefreshCw size={12} className="animate-spin text-amber-400" />
+                              ) : (
+                                <Download size={12} strokeWidth={3} />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )
+            ) : activeSubTab === 'money' ? (
+              // Active SubTab === 'money' - Early Financial Literacy
+              selectedMoneyEx ? (
+                <div className="space-y-6 animate-fade-in text-right" dir="rtl">
+                  {/* Step-by-Step interactive checklist container */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[#f59e0b]/10 pb-4 gap-4">
+                    <button
+                      onClick={() => {
+                        setSelectedMoneyEx(null);
+                        stopSpeech();
+                      }}
+                      className="bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <ChevronRight size={14} />
+                      {isRtl ? 'العودة لقائمة الثقافة المالية' : 'Back to Finance'}
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs bg-[#1e1503] border border-[#f59e0b]/20 px-3 py-1.5 rounded-xl text-amber-300 font-bold font-mono">
+                        🎯 {isRtl ? selectedMoneyEx.skill_focus : 'Focus Skill'}
+                      </span>
+                      <span className="text-xs bg-[#1e1503] border border-[#f59e0b]/20 px-3 py-1.5 rounded-xl text-amber-300 font-bold font-mono">
+                        ⚙️ {isRtl ? selectedMoneyEx.activity_type : 'Activity Type'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left Column: Steps Checklist */}
+                    <div className="lg:col-span-2 space-y-4">
+                      <div className="bg-[#050b14]/60 border border-white/5 rounded-2xl p-6 md:p-8 space-y-6">
+                        <div className="flex items-center gap-3 justify-end">
+                          <span className="text-3xl">{selectedMoneyEx.emoji}</span>
+                          <div>
+                            <h3 className="text-xl font-black text-white">
+                              {isRtl ? selectedMoneyEx.title_ar : selectedMoneyEx.title_en}
+                            </h3>
+                            <p className="text-slate-400 text-xs mt-1">
+                              {selectedMoneyEx.description_ar}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Interactive Steps list checklist */}
+                        <div className="space-y-3">
+                          <label className="text-xs text-amber-400 font-extrabold flex justify-end gap-1.5 mb-2.5">
+                            <span>📝</span>
+                            {isRtl ? 'الخطوات والتحديات التشاركية المطلوبة:' : 'Interactive Steps & Challenges Required:'}
+                          </label>
+
+                          {(isRtl ? selectedMoneyEx.steps_ar : selectedMoneyEx.steps_en).map((step, sIdx) => {
+                            const isChecked = moneyStepsChecked[sIdx];
+                            return (
+                              <div
+                                key={sIdx}
+                                onClick={() => {
+                                  const updated = [...moneyStepsChecked];
+                                  updated[sIdx] = !updated[sIdx];
+                                  setMoneyStepsChecked(updated);
+                                }}
+                                className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer flex items-center justify-between group ${
+                                  isChecked
+                                    ? 'bg-[#f59e0b]/5 border-[#f59e0b]/30 text-slate-300'
+                                    : 'bg-white/[0.01] border-white/5 hover:border-amber-500/20 text-slate-400'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+                                    isChecked
+                                      ? 'bg-amber-500 border-amber-500 text-slate-950'
+                                      : 'border-white/20 group-hover:border-amber-400'
+                                  }`}>
+                                    {isChecked && <Check size={12} strokeWidth={4} />}
+                                  </span>
+                                </div>
+                                <span className="text-xs leading-relaxed text-right flex-1 pr-3">
+                                  {step}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Speech buttons for Steps */}
+                        <div className="flex flex-col sm:flex-row justify-between items-center bg-amber-500/5 border border-amber-500/10 p-4 rounded-2xl gap-3">
+                          <button
+                            onClick={() => {
+                              if (speechPlaybackActive) {
+                                stopSpeech();
+                              } else {
+                                stopSpeech();
+                                const textToRead = (isRtl ? selectedMoneyEx.steps_ar : selectedMoneyEx.steps_en).join('. ');
+                                const utter = new SpeechSynthesisUtterance(textToRead);
+                                utter.lang = isRtl ? 'ar-SA' : 'en-US';
+                                utter.onend = () => setSpeechPlaybackActive(false);
+                                utter.onerror = () => setSpeechPlaybackActive(false);
+                                currentUtteranceRef.current = utter;
+                                setSpeechPlaybackActive(true);
+                                window.speechSynthesis.speak(utter);
+                              }
+                            }}
+                            className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
+                              speechPlaybackActive
+                                ? 'bg-amber-500 text-slate-950 shadow-lg'
+                                : 'bg-white/5 hover:bg-white/10 text-slate-200'
+                            }`}
+                          >
+                            <span>📢</span>
+                            {speechPlaybackActive
+                              ? (isRtl ? 'إيقاف القراءة الصوتية' : 'Stop Reading')
+                              : (isRtl ? 'الاستماع لخطوات التمرين' : 'Listen to Steps')}
+                          </button>
+
+                          <button
+                            onClick={() => handleExportSingleExercise(selectedMoneyEx, 'money')}
+                            className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 px-4 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                          >
+                            {exportingExerciseId === selectedMoneyEx.id ? (
+                              <RefreshCw size={13} className="animate-spin text-amber-400" />
+                            ) : (
+                              <Download size={13} strokeWidth={3} />
+                            )}
+                            <span>{isRtl ? 'تصدير بطاقة هذا التمرين كصورة 📸' : 'Export Card as Image 📸'}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right column: Target outcomes inside card */}
+                    <div className="space-y-4">
+                      <div className="bg-gradient-to-br from-[#1e1503] via-[#050b14] to-[#040915] border border-[#f59e0b]/15 rounded-2xl p-6 text-center space-y-4 relative overflow-hidden">
+                        <div className="absolute -top-12 -left-12 w-32 h-32 bg-amber-500/5 rounded-full blur-[40px] pointer-events-none" />
+                        <span className="text-3xl">{selectedMoneyEx.emoji}</span>
+                        <div className="space-y-1">
+                          <h4 className="text-xs uppercase font-extrabold text-amber-400 tracking-wider">
+                            {isRtl ? 'الأثر السلوكي المستقبلي والمهاري المالي:' : 'Practical Target & Future Financial Goal:'}
+                          </h4>
+                          <p className="text-xs text-slate-300 font-bold leading-relaxed">
+                            {selectedMoneyEx.outcome_ar || (isRtl ? 'بناء قيم التخطيط المالي وتنمية مهارات الادخار في سن مبكرة.' : 'Fostering financial logic and budgeting values in early childhood.')}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const updated = new Set(completedMoneyIds);
+                          updated.add(selectedMoneyEx.id);
+                          setCompletedMoneyIds(updated);
+                          localStorage.setItem('balance_oasis_money_completed', JSON.stringify(Array.from(updated)));
+
+                          // Trigger the beautiful completion voice record encouraging session!
+                          setSelectedEx(null);
+                          setSelectedMoveEx(null);
+                          setSelectedWritingEx(null);
+                          setSelectedEmotionEx(null);
+                          setSelectedCommEx(null);
+                          setSelectedLeaderEx(null);
+                          setSelectedTeamEx(null);
+                          setCompletionSession({
+                            type: 'money',
+                            id: selectedMoneyEx.id,
+                            title: isRtl ? selectedMoneyEx.title_ar : selectedMoneyEx.title_en,
+                            duration: 15 * 60 // average 15 minutes of interactive discussion
+                          });
+
+                          setSelectedMoneyEx(null);
+                          stopSpeech();
+                        }}
+                        className="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-orange-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+                      >
+                        <span>✓</span>
+                        {isRtl ? 'تسجيل إنجاز تمرين الثقافة المالية وإطلاق التحفيز 🎙' : 'Mark Completed & Open Encouragement 🎙'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // selectedMoneyEx === null -> Grid list of 20 Early Financial Literacy exercises
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-amber-500/10 pb-4 gap-2 text-right">
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-black text-white flex items-center gap-2 justify-end">
+                        <span className="text-amber-400">☀️💰</span>
+                        {isRtl ? 'منهج الثقافة المالية المبكرة للنشء (ألوان صيفية مبهجة):' : 'Early Financial Literacy Summer Edition:'}
+                      </h3>
+                      <p className="text-amber-400/80 text-xs">
+                        {isRtl ? 'تجمع بين المتعة والفوائد المالية العملية لتنمية مهارات التخطيط، والادخار المبكر بأسلوب تفاعلي رائع:' : 'A cheerful interactive financial literacy curriculum to master budgeting, saving, and smart choices with summer heat:'}
+                      </p>
+                    </div>
+
+                    <div className="text-xs bg-amber-500/10 border border-amber-500/20 text-amber-400 px-3 py-1.5 rounded-xl font-bold font-mono">
+                      {isRtl ? `أنجزت ${completedMoneyIds.size} من 20` : `${completedMoneyIds.size} / 20 Completed`}
+                    </div>
+                  </div>
+
+                  {/* Grid list container */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" dir="rtl">
+                    {FINANCIAL_EXERCISES.map((ex, idx) => {
+                      const isCompleted = completedMoneyIds.has(ex.id);
+
+                      return (
+                        <div
+                          key={ex.id}
+                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#050b14] flex flex-col justify-between group ${
+                            isCompleted
+                              ? 'border-amber-500/30 shadow-lg shadow-amber-500/5'
+                              : 'border-white/5 hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/5'
+                          }`}
+                        >
+                          {/* Badge */}
+                          <div className="flex justify-between items-center">
+                            <span className="text-[10px] text-amber-400/65 font-mono tracking-wider font-extrabold uppercase">
+                              {isRtl ? `تمرين مالي صيفي ${idx + 1}` : `Summer Finance ${idx + 1}`}
+                            </span>
+
+                            {isCompleted ? (
+                              <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-0.5 rounded-full" title={isRtl ? "مكتمل" : "Completed"}>
+                                <Check size={10} strokeWidth={3} />
+                              </span>
+                            ) : (
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500/50" />
+                            )}
+                          </div>
+
+                          {/* Meta info */}
+                          <div className="space-y-1.5 text-right font-sans">
+                            <div className="flex items-center gap-2 justify-end">
+                              <h4 className="text-sm font-black text-white group-hover:text-amber-300 transition line-clamp-1">
+                                {isRtl ? ex.title_ar : ex.title_en}
+                              </h4>
+                              <span className="text-lg">{ex.emoji}</span>
+                            </div>
+                            <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                              {isRtl ? ex.description_ar : ex.title_en}
+                            </p>
+                          </div>
+
+                          {/* CTA buttons */}
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={() => setSelectedMoneyEx(ex)}
+                              className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
+                                isCompleted
+                                  ? 'bg-amber-500/5 hover:bg-amber-500/10 text-amber-300 border-amber-500/10'
+                                  : 'bg-amber-500/5 group-hover:bg-gradient-to-r group-hover:from-amber-400 group-hover:to-orange-500 group-hover:text-slate-950 text-amber-400 border-amber-500/10 group-hover:border-amber-400'
+                              }`}
+                            >
+                              <span>⚡</span>
+                              {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
+                            </button>
+
+                            <button
+                              disabled={exportingExerciseId !== null}
+                              onClick={() => handleExportSingleExercise(ex, 'money')}
+                              className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
+                            >
+                              {exportingExerciseId === ex.id ? (
+                                <RefreshCw size={12} className="animate-spin text-amber-400" />
+                              ) : (
+                                <Download size={12} strokeWidth={3} />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )
+            ) : activeSubTab === 'confidence' ? (
+              // Active SubTab === 'confidence' - Self-Confidence & Public Speaking
+              selectedConfidenceEx ? (
+                <div className="space-y-6 animate-fade-in text-right" dir="rtl">
+                  {/* Step-by-Step interactive checklist container */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-orange-500/10 pb-4 gap-4">
+                    <button
+                      onClick={() => {
+                        setSelectedConfidenceEx(null);
+                        stopSpeech();
+                      }}
+                      className="bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <ChevronRight size={14} />
+                      {isRtl ? 'العودة لقائمة بناء الثقة' : 'Back to Confidence'}
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs bg-[#1e1003] border border-orange-500/20 px-3 py-1.5 rounded-xl text-orange-300 font-bold font-mono">
+                        🎯 {isRtl ? selectedConfidenceEx.skill_focus : 'Focus Skill'}
+                      </span>
+                      <span className="text-xs bg-[#1e1003] border border-orange-500/20 px-3 py-1.5 rounded-xl text-orange-300 font-bold font-mono">
+                        ⚙️ {isRtl ? selectedConfidenceEx.activity_type : 'Activity Type'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left Column: Steps Checklist */}
+                    <div className="lg:col-span-2 space-y-4">
+                      <div className="bg-[#050b14]/60 border border-white/5 rounded-2xl p-6 md:p-8 space-y-6">
+                        <div className="flex items-center gap-3 justify-end">
+                          <span className="text-3xl">{selectedConfidenceEx.emoji}</span>
+                          <div>
+                            <h3 className="text-xl font-black text-white">
+                              {isRtl ? selectedConfidenceEx.title_ar : selectedConfidenceEx.title_en}
+                            </h3>
+                            <p className="text-slate-400 text-xs mt-1">
+                              {selectedConfidenceEx.description_ar}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Interactive Steps list checklist */}
+                        <div className="space-y-3">
+                          <label className="text-xs text-orange-400 font-extrabold flex justify-end gap-1.5 mb-2.5">
+                            <span>📝</span>
+                            {isRtl ? 'خطوات التحدي المطلوبة:' : 'Required Challenge Steps:'}
+                          </label>
+
+                          {(isRtl ? selectedConfidenceEx.steps_ar : selectedConfidenceEx.steps_en).map((step, sIdx) => {
+                            const isChecked = confidenceStepsChecked[sIdx];
+                            return (
+                              <div
+                                key={sIdx}
+                                onClick={() => {
+                                  const updated = [...confidenceStepsChecked];
+                                  updated[sIdx] = !updated[sIdx];
+                                  setConfidenceStepsChecked(updated);
+                                }}
+                                className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer flex items-center justify-between group ${
+                                  isChecked
+                                    ? 'bg-orange-500/5 border-orange-500/30 text-slate-300'
+                                    : 'bg-white/[0.01] border-white/5 hover:border-orange-500/20 text-slate-400'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+                                    isChecked
+                                      ? 'bg-orange-500 border-orange-500 text-slate-950'
+                                      : 'border-white/20 group-hover:border-orange-400'
+                                  }`}>
+                                    {isChecked && <Check size={12} strokeWidth={4} />}
+                                  </span>
+                                </div>
+                                <span className="text-xs leading-relaxed text-right flex-1 pr-3">
+                                  {step}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Speech buttons for Steps */}
+                        <div className="flex flex-col sm:flex-row justify-between items-center bg-orange-500/5 border border-orange-500/10 p-4 rounded-2xl gap-3">
+                          <button
+                            onClick={() => {
+                              if (speechPlaybackActive) {
+                                stopSpeech();
+                              } else {
+                                stopSpeech();
+                                const textToRead = (isRtl ? selectedConfidenceEx.steps_ar : selectedConfidenceEx.steps_en).join('. ');
+                                const utter = new SpeechSynthesisUtterance(textToRead);
+                                utter.lang = isRtl ? 'ar-SA' : 'en-US';
+                                utter.onend = () => setSpeechPlaybackActive(false);
+                                utter.onerror = () => setSpeechPlaybackActive(false);
+                                currentUtteranceRef.current = utter;
+                                setSpeechPlaybackActive(true);
+                                window.speechSynthesis.speak(utter);
+                              }
+                            }}
+                            className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
+                              speechPlaybackActive
+                                ? 'bg-orange-500 text-slate-950 shadow-lg'
+                                : 'bg-white/5 hover:bg-white/10 text-slate-200'
+                            }`}
+                          >
+                            <span>📢</span>
+                            {speechPlaybackActive
+                              ? (isRtl ? 'إيقاف القراءة الصوتية' : 'Stop Reading')
+                              : (isRtl ? 'الاستماع لخطوات التمرين' : 'Listen to Steps')}
+                          </button>
+
+                          <button
+                            onClick={() => handleExportSingleExercise(selectedConfidenceEx, 'confidence')}
+                            className="bg-[#0b172e] border border-white/5 hover:border-orange-500 hover:text-orange-300 text-slate-400 px-4 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                          >
+                            {exportingExerciseId === selectedConfidenceEx.id ? (
+                              <RefreshCw size={13} className="animate-spin text-orange-400" />
+                            ) : (
+                              <Download size={13} strokeWidth={3} />
+                            )}
+                            <span>{isRtl ? 'تصدير بطاقة هذا التمرين كصورة 📸' : 'Export Card as Image 📸'}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right column: Target outcomes inside card */}
+                    <div className="space-y-4">
+                      <div className="bg-gradient-to-br from-[#1e1003] via-[#050b14] to-[#040915] border border-orange-500/15 rounded-2xl p-6 text-center space-y-4 relative overflow-hidden">
+                        <div className="absolute -top-12 -left-12 w-32 h-32 bg-orange-500/5 rounded-full blur-[40px] pointer-events-none" />
+                        <span className="text-3xl">{selectedConfidenceEx.emoji}</span>
+                        <div className="space-y-1">
+                          <h4 className="text-xs uppercase font-extrabold text-orange-400 tracking-wider">
+                            {isRtl ? 'الأثر السلوكي وتنمية الثقة والتعبير:' : 'Practical Target & Future Confidence:'}
+                          </h4>
+                          <p className="text-xs text-slate-300 font-bold leading-relaxed">
+                            {selectedConfidenceEx.outcome_ar || (isRtl ? 'بناء الوعي بالذات وتخطي التوتر.' : 'Fostering expressive qualities and confidence.')}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const updated = new Set(completedConfidenceIds);
+                          updated.add(selectedConfidenceEx.id);
+                          setCompletedConfidenceIds(updated);
+                          localStorage.setItem('balance_oasis_confidence_completed', JSON.stringify(Array.from(updated)));
+
+                          // Trigger the beautiful completion voice record encouraging session!
+                          setSelectedEx(null);
+                          setSelectedMoveEx(null);
+                          setSelectedWritingEx(null);
+                          setSelectedEmotionEx(null);
+                          setSelectedCommEx(null);
+                          setSelectedLeaderEx(null);
+                          setSelectedTeamEx(null);
+                          setSelectedMoneyEx(null);
+                          setCompletionSession({
+                            type: 'confidence',
+                            id: selectedConfidenceEx.id,
+                            title: isRtl ? selectedConfidenceEx.title_ar : selectedConfidenceEx.title_en,
+                            duration: 15 * 60 // average 15 minutes of interactive discussion
+                          });
+
+                          setSelectedConfidenceEx(null);
+                          stopSpeech();
+                        }}
+                        className="w-full bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-orange-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+                      >
+                        <span>✓</span>
+                        {isRtl ? 'تسجيل إنجاز تمرين الثقة وإطلاق التحفيز 🎙' : 'Mark Completed & Open Encouragement 🎙'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // selectedConfidenceEx === null -> Grid list of 20 elements
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-orange-500/10 pb-4 gap-2 text-right">
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-black text-white flex items-center gap-2 justify-end">
+                        <span className="text-orange-400">🎙️🗣️</span>
+                        {isRtl ? 'منهج بناء الثقة بالنفس والارتجال والخطابة للنشء:' : 'Self-Confidence & Public Speaking Curriculum:'}
+                      </h3>
+                      <p className="text-orange-400/85 text-xs">
+                        {isRtl ? 'سلسلة تمارين عملية لبناء حضور متميز، وتطوير لغة الجسد وصاحبة طلاقة الصوت:' : 'Active challenges to form a magnetic presence, expand vocabulary, and speak masterfully before others:'}
+                      </p>
+                    </div>
+
+                    <div className="text-xs bg-orange-500/10 border border-orange-500/20 text-orange-400 px-3 py-1.5 rounded-xl font-bold font-mono">
+                      {isRtl ? `أنجزت ${completedConfidenceIds.size} من 20` : `${completedConfidenceIds.size} / 20 Completed`}
+                    </div>
+                  </div>
+
+                  {/* Grid list container */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" dir="rtl">
+                    {CONFIDENCE_EXERCISES.map((ex, idx) => {
+                      const isCompleted = completedConfidenceIds.has(ex.id);
+
+                      return (
+                        <div
+                          key={ex.id}
+                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#050b14] flex flex-col justify-between group ${
+                            isCompleted
+                              ? 'border-orange-500/30 shadow-lg shadow-orange-500/5'
+                              : 'border-white/5 hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/5'
+                          }`}
+                        >
+                          {/* Badge */}
+                          <div className="flex justify-between items-center">
+                            <span className="text-[10px] text-orange-400/65 font-mono tracking-wider font-extrabold uppercase">
+                              {isRtl ? `تمرين خطابة وثقة ${idx + 1}` : `Speaking & Confidence ${idx + 1}`}
+                            </span>
+
+                            {isCompleted ? (
+                              <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-0.5 rounded-full" title={isRtl ? "مكتمل" : "Completed"}>
+                                <Check size={10} strokeWidth={3} />
+                              </span>
+                            ) : (
+                              <span className="w-1.5 h-1.5 rounded-full bg-orange-500/50" />
+                            )}
+                          </div>
+
+                          {/* Meta info */}
+                          <div className="space-y-1.5 text-right font-sans">
+                            <div className="flex items-center gap-2 justify-end">
+                              <h4 className="text-sm font-black text-white group-hover:text-orange-300 transition line-clamp-1">
+                                {isRtl ? ex.title_ar : ex.title_en}
+                              </h4>
+                              <span className="text-lg">{ex.emoji}</span>
+                            </div>
+                            <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                              {isRtl ? ex.description_ar : ex.title_en}
+                            </p>
+                          </div>
+
+                          {/* CTA buttons */}
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={() => setSelectedConfidenceEx(ex)}
+                              className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
+                                isCompleted
+                                  ? 'bg-orange-500/5 hover:bg-orange-500/10 text-orange-300 border-orange-500/10'
+                                  : 'bg-orange-500/5 group-hover:bg-gradient-to-r group-hover:from-orange-400 group-hover:to-amber-500 group-hover:text-slate-950 text-orange-400 border-orange-500/10 group-hover:border-orange-400'
+                              }`}
+                            >
+                              <span>⚡</span>
+                              {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
+                            </button>
+
+                            <button
+                              disabled={exportingExerciseId !== null}
+                              onClick={() => handleExportSingleExercise(ex, 'confidence')}
+                              className="bg-[#0b172e] border border-white/5 hover:border-orange-500 hover:text-orange-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
+                            >
+                              {exportingExerciseId === ex.id ? (
+                                <RefreshCw size={12} className="animate-spin text-orange-400" />
+                              ) : (
+                                <Download size={12} strokeWidth={3} />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )
+            ) : activeSubTab === 'critical' ? (
+              // Active SubTab === 'critical' - Critical Thinking & Problem Solving
+              selectedCriticalEx ? (
+                <div className="space-y-6 animate-fade-in text-right" dir="rtl">
+                  {/* Step-by-Step interactive checklist container */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-rose-500/10 pb-4 gap-4">
+                    <button
+                      onClick={() => {
+                        setSelectedCriticalEx(null);
+                        stopSpeech();
+                      }}
+                      className="bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <ChevronRight size={14} />
+                      {isRtl ? 'العودة لقائمة التفكير النقدي' : 'Back to Critical Thinking'}
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs bg-[#1a0e13] border border-rose-500/20 px-3 py-1.5 rounded-xl text-rose-300 font-bold font-mono">
+                        🎯 {isRtl ? selectedCriticalEx.skill_focus : 'Focus Skill'}
+                      </span>
+                      <span className="text-xs bg-[#1a0e13] border border-rose-500/20 px-3 py-1.5 rounded-xl text-rose-300 font-bold font-mono">
+                        ⚙️ {isRtl ? selectedCriticalEx.activity_type : 'Activity Type'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left Column: Steps Checklist */}
+                    <div className="lg:col-span-2 space-y-4">
+                      <div className="bg-[#050b14]/60 border border-white/5 rounded-2xl p-6 md:p-8 space-y-6">
+                        <div className="flex items-center gap-3 justify-end">
+                          <span className="text-3xl">{selectedCriticalEx.emoji}</span>
+                          <div>
+                            <h3 className="text-xl font-black text-white">
+                              {isRtl ? selectedCriticalEx.title_ar : selectedCriticalEx.title_en}
+                            </h3>
+                            <p className="text-slate-400 text-xs mt-1">
+                              {selectedCriticalEx.description_ar}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Interactive Steps list checklist */}
+                        <div className="space-y-3">
+                          <label className="text-xs text-rose-400 font-extrabold flex justify-end gap-1.5 mb-2.5">
+                            <span>📝</span>
+                            {isRtl ? 'خطوات التحدي المطلوبة:' : 'Required Challenge Steps:'}
+                          </label>
+
+                          {(isRtl ? selectedCriticalEx.steps_ar : selectedCriticalEx.steps_en).map((step, sIdx) => {
+                            const isChecked = criticalStepsChecked[sIdx];
+                            return (
+                              <div
+                                key={sIdx}
+                                onClick={() => {
+                                  const updated = [...criticalStepsChecked];
+                                  updated[sIdx] = !updated[sIdx];
+                                  setCriticalStepsChecked(updated);
+                                }}
+                                className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer flex items-center justify-between group ${
+                                  isChecked
+                                    ? 'bg-rose-500/5 border-rose-500/30 text-slate-300'
+                                    : 'bg-white/[0.01] border-white/5 hover:border-rose-500/20 text-slate-400'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+                                    isChecked
+                                      ? 'bg-rose-500 border-rose-500 text-slate-950'
+                                      : 'border-white/20 group-hover:border-rose-400'
+                                  }`}>
+                                    {isChecked && <Check size={12} strokeWidth={4} />}
+                                  </span>
+                                </div>
+                                <span className="text-xs leading-relaxed text-right flex-1 pr-3">
+                                  {step}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Speech buttons for Steps */}
+                        <div className="flex flex-col sm:flex-row justify-between items-center bg-rose-500/5 border border-rose-500/10 p-4 rounded-2xl gap-3">
+                          <button
+                            onClick={() => {
+                              if (speechPlaybackActive) {
+                                stopSpeech();
+                              } else {
+                                stopSpeech();
+                                const textToRead = (isRtl ? selectedCriticalEx.steps_ar : selectedCriticalEx.steps_en).join('. ');
+                                const utter = new SpeechSynthesisUtterance(textToRead);
+                                utter.lang = isRtl ? 'ar-SA' : 'en-US';
+                                utter.onend = () => setSpeechPlaybackActive(false);
+                                utter.onerror = () => setSpeechPlaybackActive(false);
+                                currentUtteranceRef.current = utter;
+                                setSpeechPlaybackActive(true);
+                                window.speechSynthesis.speak(utter);
+                              }
+                            }}
+                            className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
+                              speechPlaybackActive
+                                ? 'bg-rose-500 text-slate-950 shadow-lg'
+                                : 'bg-white/5 hover:bg-white/10 text-slate-200'
+                            }`}
+                          >
+                            <span>📢</span>
+                            {speechPlaybackActive
+                              ? (isRtl ? 'إيقاف القراءة الصوتية' : 'Stop Reading')
+                              : (isRtl ? 'الاستماع لخطوات التمرين' : 'Listen to Steps')}
+                          </button>
+
+                          <button
+                            onClick={() => handleExportSingleExercise(selectedCriticalEx, 'critical')}
+                            className="bg-[#0b172e] border border-white/5 hover:border-rose-500 hover:text-rose-300 text-slate-400 px-4 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                          >
+                            {exportingExerciseId === selectedCriticalEx.id ? (
+                              <RefreshCw size={13} className="animate-spin text-rose-400" />
+                            ) : (
+                              <Download size={13} strokeWidth={3} />
+                            )}
+                            <span>{isRtl ? 'تصدير بطاقة هذا التمرين كصورة 📸' : 'Export Card as Image 📸'}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right column: Target outcomes inside card */}
+                    <div className="space-y-4">
+                      <div className="bg-gradient-to-br from-[#1a0e13] via-[#050b14] to-[#040915] border border-rose-500/15 rounded-2xl p-6 text-center space-y-4 relative overflow-hidden">
+                        <div className="absolute -top-12 -left-12 w-32 h-32 bg-rose-500/5 rounded-full blur-[40px] pointer-events-none" />
+                        <span className="text-3xl">{selectedCriticalEx.emoji}</span>
+                        <div className="space-y-1">
+                          <h4 className="text-xs uppercase font-extrabold text-rose-400 tracking-wider">
+                            {isRtl ? 'الأثر السلوكي وتنمية الفكر التحليلي والتفكير النقدي:' : 'Practical Target & Critical Thinking outcome:'}
+                          </h4>
+                          <p className="text-xs text-slate-300 font-bold leading-relaxed">
+                            {selectedCriticalEx.outcome_ar || (isRtl ? 'بناء الوعي بالذات وتخطي التوتر.' : 'Fostering analytical thinking and logic.')}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const updated = new Set(completedCriticalIds);
+                          updated.add(selectedCriticalEx.id);
+                          setCompletedCriticalIds(updated);
+                          localStorage.setItem('balance_oasis_critical_completed', JSON.stringify(Array.from(updated)));
+
+                          // Trigger completion presentation voice session
+                          setSelectedEx(null);
+                          setSelectedMoveEx(null);
+                          setSelectedWritingEx(null);
+                          setSelectedEmotionEx(null);
+                          setSelectedCommEx(null);
+                          setSelectedLeaderEx(null);
+                          setSelectedTeamEx(null);
+                          setSelectedMoneyEx(null);
+                          setSelectedConfidenceEx(null);
+                          setCompletionSession({
+                            type: 'critical',
+                            id: selectedCriticalEx.id,
+                            title: isRtl ? selectedCriticalEx.title_ar : selectedCriticalEx.title_en,
+                            duration: 15 * 60
+                          });
+
+                          setSelectedCriticalEx(null);
+                          stopSpeech();
+                        }}
+                        className="w-full bg-gradient-to-r from-orange-400 to-rose-500 hover:from-orange-500 hover:to-rose-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-rose-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+                      >
+                        <span>✓</span>
+                        {isRtl ? 'تسجيل إنجاز تمرين التفكير وإطلاق التحفيز 🎙' : 'Mark Completed & Open Encouragement 🎙'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // selectedCriticalEx === null -> Grid list of 20 elements
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-rose-500/10 pb-4 gap-2 text-right">
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-black text-white flex items-center gap-2 justify-end">
+                        <span className="text-rose-400">🧐💡</span>
+                        {isRtl ? 'منهج التفكير النقدي وحل المشكلات للنشء:' : 'Critical Thinking & Problem Solving Curriculum:'}
+                      </h3>
+                      <p className="text-rose-400/85 text-xs">
+                        {isRtl ? 'سلسلة تمارين و ألغاز عملية لتطوير التفكير المنطقي المتسلسل، التفكير خارج الصندوق، وتقسيم التحديات:' : 'Active challenges and puzzles to cultivate step-by-step logic, outside-the-box reasoning, and structured debate:'}
+                      </p>
+                    </div>
+
+                    <div className="text-xs bg-rose-500/10 border border-rose-500/20 text-rose-400 px-3 py-1.5 rounded-xl font-bold font-mono">
+                      {isRtl ? `أنجزت ${completedCriticalIds.size} من 20` : `${completedCriticalIds.size} / 20 Completed`}
+                    </div>
+                  </div>
+
+                  {/* Grid list container */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" dir="rtl">
+                    {CRITICAL_EXERCISES.map((ex, idx) => {
+                      const isCompleted = completedCriticalIds.has(ex.id);
+
+                      return (
+                        <div
+                          key={ex.id}
+                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#050b14] flex flex-col justify-between group ${
+                            isCompleted
+                              ? 'border-rose-500/30 shadow-lg shadow-rose-500/5'
+                              : 'border-white/5 hover:border-rose-500/30 hover:shadow-lg hover:shadow-rose-500/5'
+                          }`}
+                        >
+                          {/* Badge */}
+                          <div className="flex justify-between items-center">
+                            <span className="text-[10px] text-rose-400/65 font-mono tracking-wider font-extrabold uppercase">
+                              {isRtl ? `تمرين تفكير نقدي ${idx + 21}`.replace('21', String(idx + 1)) : `Critical Exercise ${idx + 1}`}
+                            </span>
+
+                            {isCompleted ? (
+                              <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-0.5 rounded-full" title={isRtl ? "مكتمل" : "Completed"}>
+                                <Check size={10} strokeWidth={3} />
+                              </span>
+                            ) : (
+                              <span className="w-1.5 h-1.5 rounded-full bg-rose-500/50" />
+                            )}
+                          </div>
+
+                          {/* Meta info */}
+                          <div className="space-y-1.5 text-right font-sans">
+                            <div className="flex items-center gap-2 justify-end">
+                              <h4 className="text-sm font-black text-white group-hover:text-rose-300 transition line-clamp-1">
+                                {isRtl ? ex.title_ar : ex.title_en}
+                              </h4>
+                              <span className="text-lg">{ex.emoji}</span>
+                            </div>
+                            <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                              {isRtl ? ex.description_ar : ex.title_en}
+                            </p>
+                          </div>
+
+                          {/* CTA buttons */}
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={() => setSelectedCriticalEx(ex)}
+                              className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
+                                isCompleted
+                                  ? 'bg-rose-500/5 hover:bg-rose-500/10 text-rose-300 border-rose-500/10'
+                                  : 'bg-rose-500/5 group-hover:bg-gradient-to-r group-hover:from-orange-400 group-hover:to-rose-500 group-hover:text-slate-950 text-rose-400 border-rose-500/10 group-hover:border-rose-400'
+                              }`}
+                            >
+                              <span>⚡</span>
+                              {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
+                            </button>
+
+                            <button
+                              disabled={exportingExerciseId !== null}
+                              onClick={() => handleExportSingleExercise(ex, 'critical')}
+                              className="bg-[#0b172e] border border-white/5 hover:border-rose-500 hover:text-rose-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
+                            >
+                              {exportingExerciseId === ex.id ? (
+                                <RefreshCw size={12} className="animate-spin text-rose-400" />
+                              ) : (
+                                <Download size={12} strokeWidth={3} />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )
+            ) : activeSubTab === 'innov' ? (
+              // Active SubTab === 'innov' - Natural Innovators & Entrepreneurship
+              selectedInnovEx ? (
+                <div className="space-y-6 animate-fade-in text-right" dir="rtl">
+                  {/* Step-by-Step interactive checklist container */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-emerald-500/10 pb-4 gap-4">
+                    <button
+                      onClick={() => {
+                        setSelectedInnovEx(null);
+                        stopSpeech();
+                      }}
+                      className="bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <ChevronRight size={14} />
+                      {isRtl ? 'العودة لقائمة مبتكرون بالفطرة' : 'Back to Natural Innovators'}
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs bg-[#0b1710] border border-emerald-500/20 px-3 py-1.5 rounded-xl text-emerald-300 font-bold font-mono">
+                        🎯 {isRtl ? selectedInnovEx.skill_focus : 'Focus Skill'}
+                      </span>
+                      <span className="text-xs bg-[#0b1710] border border-emerald-500/20 px-3 py-1.5 rounded-xl text-emerald-300 font-bold font-mono">
+                        ⚙️ {isRtl ? selectedInnovEx.activity_type : 'Activity Type'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left Column: Steps Checklist */}
+                    <div className="lg:col-span-2 space-y-4">
+                      <div className="bg-[#050b14]/60 border border-white/5 rounded-2xl p-6 md:p-8 space-y-6">
+                        <div className="flex items-center gap-3 justify-end">
+                          <span className="text-3xl">{selectedInnovEx.emoji}</span>
+                          <div>
+                            <h3 className="text-lg font-black text-white">
+                              {isRtl ? selectedInnovEx.title_ar : selectedInnovEx.title_en}
+                            </h3>
+                            <p className="text-xs text-slate-400 mt-1">
+                              {isRtl ? 'تطبيق عملي خطوة بخطوة لبناء العقلية الريادية والابتكار السريع' : 'Step-by-step practical challenge for building innovators spirit'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <p className="text-sm text-slate-300 leading-relaxed bg-[#0b1710]/40 border border-emerald-500/5 p-4 rounded-xl">
+                          {selectedInnovEx.description_ar}
+                        </p>
+
+                        <div className="space-y-3.5">
+                          <h4 className="text-xs font-black text-emerald-400 uppercase tracking-widest text-right mb-1">
+                            {isRtl ? 'خطوات التحدي العملي والتطبيق:' : 'Action Steps & Implementation:'}
+                          </h4>
+
+                          {selectedInnovEx.steps_ar.map((step, sIdx) => {
+                            const isChecked = !!innovStepsChecked[sIdx];
+                            return (
+                              <label
+                                key={sIdx}
+                                className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer select-none ${
+                                  isChecked
+                                    ? 'bg-emerald-550/5 border-emerald-500/25 text-slate-300'
+                                    : 'bg-slate-900/40 border-white/5 text-slate-400 hover:border-white/10 hover:text-white'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => {
+                                    const next = [...innovStepsChecked];
+                                    next[sIdx] = !next[sIdx];
+                                    setInnovStepsChecked(next);
+                                  }}
+                                  className="mt-0.5 rounded border-slate-700 bg-slate-950 text-emerald-500 focus:ring-0 focus:ring-offset-0 transition-all shrink-0 cursor-pointer"
+                                />
+                                <span className="text-xs font-medium leading-relaxed text-right flex-1">
+                                  {step}
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
+
+                        {/* Interactive Reflection / Finish Checkbox */}
+                        <div className="pt-4 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
+                          <button
+                            onClick={() => {
+                              // Play a positive chime 
+                              playSereneFreq(659.25, 0.25); // Mi
+                              setTimeout(() => playSereneFreq(880, 0.45), 200);   // La
+
+                              // Mark it completed!
+                              const nextCompleted = new Set(completedInnovIds);
+                              nextCompleted.add(selectedInnovEx.id);
+                              setCompletedInnovIds(nextCompleted);
+                              localStorage.setItem('balance_oasis_innov_completed', JSON.stringify(Array.from(nextCompleted)));
+
+                              // Trigger completion sessions representation details!
+                              setCompletionSession({
+                                type: 'innov',
+                                id: selectedInnovEx.id,
+                                title: isRtl ? selectedInnovEx.title_ar : selectedInnovEx.title_en,
+                                duration: 180 // Arbitrary 3 mins value
+                              });
+
+                              // Cleanly play the vocal reward
+                              setTimeout(() => {
+                                triggerAiEncouragement();
+                              }, 1100);
+                            }}
+                            disabled={innovStepsChecked.some(c => !c)}
+                            className="bg-gradient-to-r from-yellow-400 via-amber-400 to-emerald-400 disabled:opacity-40 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-slate-950 font-black px-6 py-3 rounded-xl text-xs tracking-wide shadow-xl active:scale-95 transition-all w-full cursor-pointer"
+                          >
+                            {innovStepsChecked.some(c => !c)
+                              ? (isRtl ? '⚠️ أكمل جميع الخطوات للإنهاء والتسجيل' : '⚠️ Complete all checklist steps to finish')
+                              : (isRtl ? '🎉 إنهاء التمرين وتسجيل الإنجاز في الواحة' : '🎉 Finish exercise and log achievement')}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column: Outcomes & Quick audio description of benefits */}
+                    <div className="space-y-4">
+                      <div className="bg-[#050b14]/60 border border-white/5 rounded-2xl p-6 space-y-4 text-right">
+                        <h4 className="text-xs font-black text-slate-300 uppercase tracking-wide">
+                          {isRtl ? 'الأثر والمكتسب المعرفي:' : 'Developmental Outcome:'}
+                        </h4>
+                        <div className="bg-emerald-500/5 border border-emerald-550/10 p-4 rounded-xl text-xs text-emerald-300 leading-relaxed font-bold">
+                          💡 {selectedInnovEx.outcome_ar}
+                        </div>
+                      </div>
+
+                      <div className="bg-[#050b14]/60 border border-white/5 rounded-2xl p-6 space-y-4">
+                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest text-right">
+                          {isRtl ? 'البطاقة الريادية الملخصة:' : 'Micro-Business Printable Card:'}
+                        </h4>
+
+                        <button
+                          disabled={exportingExerciseId !== null}
+                          onClick={() => handleExportSingleExercise(selectedInnovEx, 'innov')}
+                          className="w-full bg-[#0b172e] border border-white/5 hover:border-emerald-500 hover:text-emerald-300 text-slate-400 px-4 py-3 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                        >
+                          {exportingExerciseId === selectedInnovEx.id ? (
+                            <>
+                              <RefreshCw size={13} className="animate-spin text-emerald-400" />
+                              <span>{isRtl ? 'جاري تصدير البطاقة الريادية...' : 'Exporting...'}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Download size={13} strokeWidth={3} />
+                              <span>{isRtl ? 'تصدير بطاقة المشروع كصورة للنشر 📸' : 'Export card as Image 📸'}</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6 animate-fade-in text-right">
+                  <div className="text-right">
+                    <h2 className="text-xl font-black text-white flex items-center gap-2 justify-end">
+                      <span>💡✨</span>
+                      {isRtl ? 'مبتكرون بالفطرة والمشاريع الإبداعية' : 'Natural Innovators & Creative Initiatives'}
+                    </h2>
+                    <p className="text-slate-400 text-xs mt-1 leading-relaxed max-w-2xl ml-auto">
+                      {isRtl 
+                        ? 'انطلق في رحلة المبتكرين لتعلم مهارات التعاطف مع متطلبات الآخرين، وتوليد الأفكار الإبداعية الجريئة، وبناء نماذج أولية عملية وتطوير العقلية التسعيرية، وصناعة الهوية البصرية والتسويق للمستقبل.' 
+                        : 'Learn core micro-entrepreneurship and design systems: empathy mapping, prototyping, cost calculator, visual identity, and investor pitching.'}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {INNOV_EXERCISES.map((ex, idx) => {
+                      const isCompleted = completedInnovIds.has(ex.id);
+                      return (
+                        <div
+                          key={ex.id}
+                          className={`group bg-[#040913]/90 border p-5 rounded-2xl flex flex-col justify-between transition-all duration-300 relative overflow-hidden ${
+                            isCompleted
+                              ? 'border-emerald-500/20 bg-emerald-[#0b1710]/80 hover:border-emerald-500/40'
+                              : 'border-white/5 hover:border-emerald-500/25 hover:bg-[#070e1b]/80 shadow-lg'
+                          }`}
+                        >
+                          {/* Top row icons & badges */}
+                          <div className="flex justify-between items-start mb-3">
+                            <span className="text-2xl">{ex.emoji}</span>
+                            <div className="flex flex-col items-end gap-1">
+                              <span className="text-[9px] bg-slate-900 border border-white/5 py-0.5 px-2 rounded-md font-bold text-slate-400 font-mono">
+                                #{idx + 1}
+                              </span>
+                              {isCompleted && (
+                                <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 py-0.5 px-2 rounded-md font-bold">
+                                  ✓ {isRtl ? 'مكتمل' : 'Completed'}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="space-y-1 text-right flex-1 mb-4">
+                            <h3 className="text-xs font-black text-slate-100 group-hover:text-emerald-300 transition-colors">
+                              {isRtl ? ex.title_ar : ex.title_en}
+                            </h3>
+                            <div className="flex justify-end gap-1.5 flex-wrap my-1">
+                              <span className="text-[9px] bg-slate-950 border border-white/5 px-2 py-0.5 rounded-md text-emerald-400 font-bold font-mono">
+                                🎯 {isRtl ? ex.skill_focus : 'Focus Skill'}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                              {ex.description_ar}
+                            </p>
+                          </div>
+
+                          {/* CTA buttons */}
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={() => setSelectedInnovEx(ex)}
+                              className={`flex-1 py-1.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
+                                isCompleted
+                                  ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border-emerald-500/25'
+                                  : 'bg-emerald-500/5 group-hover:bg-gradient-to-r group-hover:from-yellow-400 group-hover:via-amber-400 group-hover:to-emerald-400 group-hover:text-slate-950 text-emerald-400 border-emerald-500/10 group-hover:border-emerald-400'
+                              }`}
+                            >
+                              <span>⚡</span>
+                              {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
+                            </button>
+
+                            <button
+                              disabled={exportingExerciseId !== null}
+                              onClick={() => handleExportSingleExercise(ex, 'innov')}
+                              className="bg-[#0b172e] border border-white/5 hover:border-emerald-500 hover:text-emerald-300 text-slate-400 p-2 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
+                            >
+                              {exportingExerciseId === ex.id ? (
+                                <RefreshCw size={12} className="animate-spin text-emerald-400" />
                               ) : (
                                 <Download size={12} strokeWidth={3} />
                               )}
