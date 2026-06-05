@@ -34,6 +34,8 @@ import { FinancialExercise, FINANCIAL_EXERCISES } from './financial_exercises';
 import { ConfidenceExercise, CONFIDENCE_EXERCISES } from './confidence_exercises';
 import { CriticalExercise, CRITICAL_EXERCISES } from './critical_exercises';
 import { InnovExercise, INNOV_EXERCISES } from './innov_exercises';
+import { ArtExercise, ART_EXERCISES } from './art_exercises';
+import { LifeExercise, LIFE_EXERCISES } from './life_exercises';
 
 interface FocusExercise {
   id: string;
@@ -1058,7 +1060,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
   completedLessonIds = new Set(),
   studentName = ''
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'calm' | 'move' | 'writing' | 'emotion' | 'communication' | 'leadership' | 'teamwork' | 'money' | 'confidence' | 'critical' | 'innov'>('calm');
+  const [activeSubTab, setActiveSubTab] = useState<'calm' | 'move' | 'writing' | 'emotion' | 'communication' | 'leadership' | 'teamwork' | 'money' | 'confidence' | 'critical' | 'innov' | 'art' | 'life'>('calm');
 
   const [customStudentName, setCustomStudentName] = useState<string>(studentName);
   const [isExporting, setIsExporting] = useState<boolean>(false);
@@ -1269,6 +1271,48 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     stopSpeech();
   }, [selectedInnovEx]);
 
+  // Active literature & art ("نوافذ الفن والجمال" / "الأدب والفن") states
+  const [selectedArtEx, setSelectedArtEx] = useState<ArtExercise | null>(null);
+  const [artStepsChecked, setArtStepsChecked] = useState<boolean[]>([]);
+  const [completedArtIds, setCompletedArtIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('balance_oasis_art_completed');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  useEffect(() => {
+    if (selectedArtEx) {
+      setArtStepsChecked(new Array(selectedArtEx.steps_ar.length).fill(false));
+    } else {
+      setArtStepsChecked([]);
+    }
+    stopSpeech();
+  }, [selectedArtEx]);
+
+  // Active life skills & emergency actions ("بطل الحياة والسلامة") states
+  const [selectedLifeEx, setSelectedLifeEx] = useState<LifeExercise | null>(null);
+  const [lifeStepsChecked, setLifeStepsChecked] = useState<boolean[]>([]);
+  const [completedLifeIds, setCompletedLifeIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('balance_oasis_life_completed');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  useEffect(() => {
+    if (selectedLifeEx) {
+      setLifeStepsChecked(new Array(selectedLifeEx.steps_ar.length).fill(false));
+    } else {
+      setLifeStepsChecked([]);
+    }
+    stopSpeech();
+  }, [selectedLifeEx]);
+
   // Emotional thermometer tracking state
   const [currentSelectedFeeling, setCurrentSelectedFeeling] = useState<string>('serene');
   const [currentThermometerValue, setCurrentThermometerValue] = useState<number>(5);
@@ -1330,7 +1374,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
   // Voice recording & AI smart encouragement states
   const [completionSession, setCompletionSession] = useState<{
-    type: 'calm' | 'move' | 'writing' | 'emotion' | 'communication' | 'leadership' | 'teamwork' | 'money' | 'confidence' | 'critical' | 'innov';
+    type: 'calm' | 'move' | 'writing' | 'emotion' | 'communication' | 'leadership' | 'teamwork' | 'money' | 'confidence' | 'critical' | 'innov' | 'art' | 'life';
     id: string;
     title: string;
     duration: number;
@@ -1597,6 +1641,30 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     "Outstanding! Understanding cost, pricing, branding, and gathering constructive feedback with a growth mindset shapes you into a resilient, impactful initiator! 🏷️💼🎪"
   ];
 
+  const AR_ART_RESPONSES = [
+    "يا لك من فنان متذوق وأديب بارع! قدرتك على التعبير الجمالي ووصف المشاعر ونحت الأحاسيس وتأمل مواطن الجمال تبرز روحك الفنية الراقية وموهبتك الاستثنائية! 🎨✍️✨",
+    "تطبيق رائع لأدوات الفن والأدب! رسم القصص وتأدية الحوارات وكتابة الاستعارات البليغة يثري مخيلتك ويعطيك صوتاً فريداً ولغة نابضة بالجمال والتأثير! 🎭📖🖼️",
+    "بطل التعبير والجمال الساحر! دمجك وعيشك لهوية الفنان وتقديم أعمالك في معرض يعزز ثقتك بقدرتك على تلوين العالم بأفكارك وتصاميمك الراقية! 🎨🏛️🕊️"
+  ];
+
+  const EN_ART_RESPONSES = [
+    "What a wonderful artist and brilliant writer you are! Your ability to express beauty, describe feelings, sculpt emotions, and reflect on aesthetic nuances shows a deeply creative soul! 🎨✍️✨",
+    "A gorgeous application of literary and creative arts! Recreating stories, writing vivid metaphors, and performing voice roles ignites your imagination and crafts a powerful, unique voice! 🎭📖🖼️",
+    "Champion of creativity and beautiful self-expression! Embracing your identity as an artist and presenting your creations to others shows awesome confidence of a master designer! 🎨🏛️🕊️"
+  ];
+
+  const AR_LIFE_RESPONSES = [
+    "يا لك من بطل حقيقي في الحياة ومنظم بارع! تنظيم مساحتك الخاصة ومعرفة أرقام وحقائب الطوارئ وتحدي نفسك بالاعتماد الكامل يبني شخصيتك القوية والمستقلة! 🏠🚨🩹",
+    "تطبيق مذهل لمهارات الإنقاذ والسلامة والاعتماد على النفس! طي ملابسك بنفسك، التعامل السليم مع الجروح الخفيفة والحروق، وإدارة ميزانيتك هي خصال القادة الأقوياء والمستقلين! 💰🧥🛟",
+    "فخور جداً بإنجازك الرائع لهذا التحدي العملي! استحقاقك لشهادة بطل الحياة يثبت أنك فرد يبني مجتمعه بثقة، أمان، ونبض مفعم بالمسؤولية! 🎓🔧🛠️"
+  ];
+
+  const EN_LIFE_RESPONSES = [
+    "What a true life hero and master organizer you are! Tidying your space, mastering emergency numbers, and taking direct responsibility builds an independent, reliable personality! 🏠🚨🩹",
+    "A legendary application of rescue safety and self-reliance skills! Folding clothes, managing emergencies safely, and budgeting your allowance are the true markers of a strong future leader! 💰🧥🛟",
+    "Incredibly proud of your wonderful practical achievement! Earning your Life Hero certificate proves you are safe, capable of helping yourself and others, and full of responsibility! 🎓🔧🛠️"
+  ];
+
   const triggerAiEncouragement = () => {
     let textToSpeak = '';
     const textLower = (recordedTranscript || '').toLowerCase();
@@ -1677,6 +1745,22 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
       } else {
         const rand = Math.floor(Math.random() * EN_INNOV_RESPONSES.length);
         textToSpeak = EN_INNOV_RESPONSES[rand];
+      }
+    } else if (completionSession?.type === 'art') {
+      if (isRtl) {
+        const rand = Math.floor(Math.random() * AR_ART_RESPONSES.length);
+        textToSpeak = AR_ART_RESPONSES[rand];
+      } else {
+        const rand = Math.floor(Math.random() * EN_ART_RESPONSES.length);
+        textToSpeak = EN_ART_RESPONSES[rand];
+      }
+    } else if (completionSession?.type === 'life') {
+      if (isRtl) {
+        const rand = Math.floor(Math.random() * AR_LIFE_RESPONSES.length);
+        textToSpeak = AR_LIFE_RESPONSES[rand];
+      } else {
+        const rand = Math.floor(Math.random() * EN_LIFE_RESPONSES.length);
+        textToSpeak = EN_LIFE_RESPONSES[rand];
       }
     } else {
       if (isRtl) {
@@ -2042,8 +2126,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
   const completedConfidenceCount = completedConfidenceIds.size;
   const completedCriticalCount = completedCriticalIds.size;
   const completedInnovCount = completedInnovIds.size;
-  const totalCompleted = completedCount + completedMoveCount + completedWritingCount + completedEmotionCount + completedCommCount + completedLeaderCount + completedTeamCount + completedMoneyCount + completedConfidenceCount + completedCriticalCount + completedInnovCount;
-  const totalAvailable = EXERCISES.length + MOVEMENT_EXERCISES.length + WRITING_EXERCISES.length + EMOTION_EXERCISES.length + COMMUNICATION_EXERCISES.length + LEADERSHIP_EXERCISES.length + TEAMWORK_EXERCISES.length + FINANCIAL_EXERCISES.length + CONFIDENCE_EXERCISES.length + CRITICAL_EXERCISES.length + INNOV_EXERCISES.length;
+  const completedArtCount = completedArtIds.size;
+  const completedLifeCount = completedLifeIds.size;
+  const totalCompleted = completedCount + completedMoveCount + completedWritingCount + completedEmotionCount + completedCommCount + completedLeaderCount + completedTeamCount + completedMoneyCount + completedConfidenceCount + completedCriticalCount + completedInnovCount + completedArtCount + completedLifeCount;
+  const totalAvailable = EXERCISES.length + MOVEMENT_EXERCISES.length + WRITING_EXERCISES.length + EMOTION_EXERCISES.length + COMMUNICATION_EXERCISES.length + LEADERSHIP_EXERCISES.length + TEAMWORK_EXERCISES.length + FINANCIAL_EXERCISES.length + CONFIDENCE_EXERCISES.length + CRITICAL_EXERCISES.length + INNOV_EXERCISES.length + ART_EXERCISES.length + LIFE_EXERCISES.length;
   const progressPercent = totalAvailable > 0 ? Math.round((totalCompleted / totalAvailable) * 100) : 0;
 
   // Compile lists of all completed exercises for the certificate download
@@ -2058,6 +2144,8 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
   const completedConfidenceList = CONFIDENCE_EXERCISES.filter(ex => completedConfidenceIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
   const completedCriticalList = CRITICAL_EXERCISES.filter(ex => completedCriticalIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
   const completedInnovList = INNOV_EXERCISES.filter(ex => completedInnovIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedArtList = ART_EXERCISES.filter(ex => completedArtIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedLifeList = LIFE_EXERCISES.filter(ex => completedLifeIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
 
   const allCompletedTitles = [
     ...completedCalmList,
@@ -2070,7 +2158,9 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     ...completedMoneyList,
     ...completedConfidenceList,
     ...completedCriticalList,
-    ...completedInnovList
+    ...completedInnovList,
+    ...completedArtList,
+    ...completedLifeList
   ];
 
   const handleExportOasisCard = async () => {
@@ -2116,7 +2206,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     }, 400);
   };
 
-  const handleExportSingleExercise = (ex: any, type: 'calm' | 'move' | 'writing' | 'emotion' | 'communication' | 'leadership' | 'teamwork' | 'money' | 'confidence' | 'critical' | 'innov') => {
+  const handleExportSingleExercise = (ex: any, type: 'calm' | 'move' | 'writing' | 'emotion' | 'communication' | 'leadership' | 'teamwork' | 'money' | 'confidence' | 'critical' | 'innov' | 'art' | 'life') => {
     let title = '';
     let category = '';
     let categoryEn = '';
@@ -2186,7 +2276,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
       title = isRtl ? ex.title_ar : ex.title_en;
       category = 'روح المبادرة والقيادة الريادية';
       categoryEn = 'Pioneering Leadership & Bravery';
-      content = isRtl ? ex.mission_brief_ar : ex.title_en;
+      content = ex.mission_brief_ar || (isRtl ? ex.title_ar : ex.title_en);
       if (ex.action_challenge_ar) {
         steps.push(isRtl ? `تحدي المهمة القيادية: ${ex.action_challenge_ar}` : `Action Challenge: ${ex.action_challenge_ar}`);
       }
@@ -2199,7 +2289,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
       title = isRtl ? ex.title_ar : ex.title_en;
       category = 'التعاون التشاركي والتلاحم الأسري';
       categoryEn = 'Cooperative Team Cohesion';
-      content = isRtl ? ex.coop_activity_ar : ex.title_en;
+      content = ex.coop_activity_ar || (isRtl ? ex.title_ar : ex.title_en);
       if (ex.connection_prompt_ar) {
         steps.push(isRtl ? `حوار التلاحم الفكري الأسري: "${ex.connection_prompt_ar}"` : `Connection Query: "${ex.connection_prompt_ar}"`);
       }
@@ -2252,6 +2342,28 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
       benefitLabel = isRtl ? 'الأثر السلوكي وتطوير عقلية ريادة الأعمال:' : 'Entrepreneurial Mindset & Target Benefit:';
       benefit = isRtl ? `${ex.skill_focus} - ${ex.outcome_ar}` : `${ex.skill_focus} - ${ex.outcome_ar}`;
       emoji = ex.emoji || '💡';
+    } else if (type === 'art') {
+      title = isRtl ? ex.title_ar : ex.title_en;
+      category = 'نوافذ الفن والجمال والأدب';
+      categoryEn = 'Literary & Creative Arts (Windows of Beauty)';
+      content = ex.description_ar;
+      if (ex.steps_ar) {
+        steps = Array.isArray(ex.steps_ar) ? ex.steps_ar : [ex.steps_ar];
+      }
+      benefitLabel = isRtl ? 'الأثر السلوكي وتطوير التعبير الجمالي والأدبي:' : 'Aesthetic Expression & Creative Literature Benefit:';
+      benefit = isRtl ? `${ex.skill_focus} - ${ex.outcome_ar}` : `${ex.skill_focus} - ${ex.outcome_ar}`;
+      emoji = ex.emoji || '🎨';
+    } else if (type === 'life') {
+      title = isRtl ? ex.title_ar : ex.title_en;
+      category = 'بطل الحياة والسلامة والاعتماد الذاتي';
+      categoryEn = 'Life Skills, Emergency Actions & Independence';
+      content = ex.description_ar;
+      if (ex.steps_ar) {
+        steps = Array.isArray(ex.steps_ar) ? ex.steps_ar : [ex.steps_ar];
+      }
+      benefitLabel = isRtl ? 'الأثر والاعتماد وتطوير السلوك المستقل والآمن:' : 'Independence, Safety & Life Skills Benefit:';
+      benefit = isRtl ? `${ex.skill_focus} - ${ex.outcome_ar}` : `${ex.skill_focus} - ${ex.outcome_ar}`;
+      emoji = ex.emoji || '💪';
     }
 
     setExerciseToExport({
@@ -2313,7 +2425,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     <div className="w-full text-right space-y-8" dir={isRtl ? 'rtl' : 'ltr'}>
       
       {/* 1. Header Banner */}
-      <div className="relative bg-gradient-to-r from-teal-950/40 via-[#0a1628]/80 to-teal-950/40 border border-teal-500/20 rounded-[2.5rem] p-8 md:p-10 overflow-hidden text-right shadow-2xl">
+      <div className="relative bg-gradient-to-r from-teal-900/40 via-[#162a4d]/90 to-teal-900/40 border border-teal-500/20 rounded-[2.5rem] p-8 md:p-10 overflow-hidden text-right shadow-2xl">
         <div className="absolute top-0 right-0 w-80 h-80 bg-teal-500/5 rounded-full blur-[100px] opacity-40 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-[100px] opacity-40 pointer-events-none" />
         
@@ -2334,7 +2446,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
           </div>
 
           {/* Progress Widget & Customizable Export Dashboard */}
-          <div className="bg-[#050c18] border border-white/5 rounded-2xl p-5 w-full md:w-72 space-y-3 shrink-0">
+          <div className="bg-[#12244a] border border-white/10 rounded-2xl p-5 w-full md:w-72 space-y-3 shrink-0">
             <div className="flex justify-between items-center text-xs">
               <span className="text-slate-400 font-bold">{isRtl ? 'إجمالي الإنجاز بالواحة:' : 'Oasis Progress:'}</span>
               <span className="text-teal-400 font-black font-mono tracking-tight">{totalCompleted} / {totalAvailable}</span>
@@ -2388,7 +2500,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
       {/* 2. Sub-Tab Selector */}
       {!isPlaying && !isMovePlaying && !completionSession && (
-        <div className="grid grid-cols-2 lg:flex lg:flex-wrap bg-[#050b14] p-1 rounded-2xl border border-white/5 max-w-5xl mx-auto shadow-xl gap-1 justify-center">
+        <div className="grid grid-cols-2 lg:flex lg:flex-wrap bg-[#13284f] p-1 rounded-2xl border border-white/5 max-w-5xl mx-auto shadow-xl gap-1 justify-center">
           <button
             onClick={() => {
               setActiveSubTab('calm');
@@ -2631,6 +2743,54 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             <span>💡✨</span>
             {isRtl ? 'مبتكرون بالفطرة' : 'Natural Innovators'}
           </button>
+          <button
+            onClick={() => {
+              setActiveSubTab('art');
+              setSelectedWritingEx(null);
+              setSelectedEmotionEx(null);
+              setSelectedCommEx(null);
+              setSelectedLeaderEx(null);
+              setSelectedTeamEx(null);
+              setSelectedMoneyEx(null);
+              setSelectedConfidenceEx(null);
+              setSelectedCriticalEx(null);
+              setSelectedInnovEx(null);
+              setSelectedArtEx(null);
+              setSelectedLifeEx(null);
+            }}
+            className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              activeSubTab === 'art'
+                ? 'bg-gradient-to-r from-pink-400 via-rose-400 to-indigo-400 text-slate-950 font-black shadow-lg shadow-pink-500/20'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
+            }`}
+          >
+            <span>🎨✨</span>
+            {isRtl ? 'الأدب والفنون والجمال' : 'Literature & Arts'}
+          </button>
+          <button
+            onClick={() => {
+              setActiveSubTab('life');
+              setSelectedWritingEx(null);
+              setSelectedEmotionEx(null);
+              setSelectedCommEx(null);
+              setSelectedLeaderEx(null);
+              setSelectedTeamEx(null);
+              setSelectedMoneyEx(null);
+              setSelectedConfidenceEx(null);
+              setSelectedCriticalEx(null);
+              setSelectedInnovEx(null);
+              setSelectedArtEx(null);
+              setSelectedLifeEx(null);
+            }}
+            className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              activeSubTab === 'life'
+                ? 'bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-slate-950 font-black shadow-lg shadow-teal-500/20'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
+            }`}
+          >
+            <span>🦸✨</span>
+            {isRtl ? 'بطل الحياة والسلامة' : 'Life Skills & Safety'}
+          </button>
         </div>
       )}
 
@@ -2642,7 +2802,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
-            className="bg-[#040a15] border border-teal-500/20 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden"
+            className="bg-[#15274d] border border-teal-500/20 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden"
           >
             {/* Ambient Background Sparkles */}
             <div className="absolute inset-0 pointer-events-none opacity-25">
@@ -2666,7 +2826,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               </div>
 
               {/* Main Recording Grid Container */}
-              <div className="w-full bg-[#050c18] border border-white/5 rounded-2xl p-6 space-y-6">
+              <div className="w-full bg-[#162d57] border border-white/5 rounded-2xl p-6 space-y-6">
                 <div className="text-center space-y-2">
                   <span className="text-xs font-bold text-teal-400 bg-teal-500/10 border border-teal-500/20 px-3 py-1 rounded-full inline-block">
                     🎙️ {isRtl ? 'واحة التسجيل الصوتي والتحفيظ اللفظي' : 'Voice Reflection & Speech Mantra'}
@@ -2796,7 +2956,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            className="bg-[#040a15] border border-teal-500/30 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden text-center"
+            className="bg-[#15274d] border border-teal-500/30 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden text-center"
           >
             {/* Meditative floating background sparkles */}
             <div className="absolute inset-0 pointer-events-none opacity-20">
@@ -2829,7 +2989,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
                   </button>
 
-                  <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold flex items-center gap-1.5 font-mono">
+                  <span className="text-xs bg-[#1e345c] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold flex items-center gap-1.5 font-mono">
                     <Timer size={13} className="text-teal-400 animate-pulse" />
                     {timeLeft}s {isRtl ? 'متبقية' : 'left'}
                   </span>
@@ -2936,7 +3096,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            className="bg-[#040812] border border-amber-500/30 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden text-center"
+            className="bg-[#13244a] border border-amber-500/30 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden text-center"
           >
             {/* Ambient energetic sparks */}
             <div className="absolute inset-0 pointer-events-none opacity-20">
@@ -3066,7 +3226,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             key="dashboard-view"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-[#040812] border border-white/5 rounded-3xl p-6 md:p-8 space-y-6"
+            className="bg-[#13244a] border border-white/5 rounded-3xl p-6 md:p-8 space-y-6"
           >
             {activeSubTab === 'calm' ? (
               <div className="space-y-6">
@@ -3112,7 +3272,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     return (
                       <div
                         key={ex.id}
-                        className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#050b14] flex flex-col justify-between group ${
+                        className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#13284f] flex flex-col justify-between group ${
                           isCompleted 
                             ? 'border-emerald-500/30' 
                             : 'border-white/5 hover:border-teal-500/30'
@@ -3163,7 +3323,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           <button
                             disabled={exportingExerciseId !== null}
                             onClick={() => handleExportSingleExercise(ex, 'calm')}
-                            className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                            className="bg-[#243d70] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
                             title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
                           >
                             {exportingExerciseId === ex.id ? (
@@ -3198,7 +3358,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     return (
                       <div
                         key={ex.id}
-                        className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#050b14] flex flex-col justify-between group ${
+                        className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#13284f] flex flex-col justify-between group ${
                           isCompleted 
                             ? 'border-emerald-500/30' 
                             : 'border-white/5 hover:border-amber-500/30'
@@ -3249,7 +3409,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           <button
                             disabled={exportingExerciseId !== null}
                             onClick={() => handleExportSingleExercise(ex, 'move')}
-                            className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                            className="bg-[#243d70] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
                             title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
                           >
                             {exportingExerciseId === ex.id ? (
@@ -3282,10 +3442,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </button>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-[#c084fc] font-bold font-mono">
+                      <span className="text-xs bg-[#1e345c] border border-white/5 px-3 py-1.5 rounded-xl text-[#c084fc] font-bold font-mono">
                         🎯 {isRtl ? selectedWritingEx.skill_focus : 'Focus Area'}
                       </span>
-                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-emerald-400 font-bold font-mono">
+                      <span className="text-xs bg-[#1e345c] border border-white/5 px-3 py-1.5 rounded-xl text-emerald-400 font-bold font-mono">
                         ✨ {isRtl ? selectedWritingEx.activity_type : 'Type'}
                       </span>
                     </div>
@@ -3294,7 +3454,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   {/* Core Editor Container Layout */}
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
                     {/* Left Column: Notepad Textarea */}
-                    <div className="lg:col-span-8 bg-[#030712] border border-purple-500/10 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+                    <div className="lg:col-span-8 bg-[#142345] border border-purple-500/10 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
                       <div className="space-y-2">
                         <label className="block text-xs font-black text-purple-400 uppercase tracking-widest text-right">
                           {isRtl ? 'صندوق التعبير والإنتاج الوجداني والقصصي' : 'Creative Writing & Emotional Expression Panel'}
@@ -3316,7 +3476,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                         placeholder={isRtl 
                           ? `ابدأ بكتابة قصتك وإبداعك هنا متبعاً خطوات التحدي...` 
                           : `Start writing your story here, following the challenge steps...`}
-                        className="w-full min-h-[250px] bg-[#02050c] border border-white/5 focus:border-purple-500/50 rounded-xl p-4 text-sm md:text-base text-slate-100 placeholder-slate-500 focus:outline-none transition leading-relaxed text-right"
+                        className="w-full min-h-[250px] bg-[#101d36] border border-white/5 focus:border-purple-500/50 rounded-xl p-4 text-sm md:text-base text-slate-100 placeholder-slate-500 focus:outline-none transition leading-relaxed text-right"
                         dir="rtl"
                       />
 
@@ -3439,7 +3599,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </div>
 
                     {/* Right Column: Prompt Guideline Board & Steps Checklist */}
-                    <div className="lg:col-span-4 bg-[#050b14] border border-white/5 rounded-2xl p-5 flex flex-col justify-between text-right space-y-4">
+                    <div className="lg:col-span-4 bg-[#13284f] border border-white/5 rounded-2xl p-5 flex flex-col justify-between text-right space-y-4">
                       <div className="space-y-4">
                         <div className="text-center pb-3 border-b border-white/5">
                           <span className="text-3xl">{selectedWritingEx.emoji || '✍️'}</span>
@@ -3480,7 +3640,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                     className={`w-full text-right p-2.5 rounded-xl border transition-all text-[11px] flex items-start gap-2.5 cursor-pointer select-none ${
                                       isChecked 
                                         ? 'bg-purple-500/10 border-purple-500/20 text-purple-200' 
-                                        : 'bg-[#030712] border-white/5 text-slate-400 hover:border-purple-500/10'
+                                        : 'bg-[#142345] border-white/5 text-slate-400 hover:border-purple-500/10'
                                     }`}
                                   >
                                     <span className={`mt-0.5 w-4.5 h-4.5 rounded border flex items-center justify-center shrink-0 transition-all ${
@@ -3568,7 +3728,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       return (
                         <div
                           key={ex.id}
-                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#050b14] flex flex-col justify-between group ${
+                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#13284f] flex flex-col justify-between group ${
                             isCompleted
                               ? 'border-emerald-500/30'
                               : 'border-white/5 hover:border-purple-500/30'
@@ -3619,7 +3779,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             <button
                               disabled={exportingExerciseId !== null}
                               onClick={() => handleExportSingleExercise(ex, 'writing')}
-                              className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              className="bg-[#243d70] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
                               title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
                             >
                               {exportingExerciseId === ex.id ? (
@@ -3653,10 +3813,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </button>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold font-mono">
+                      <span className="text-xs bg-[#1e345c] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold font-mono">
                         🎯 {isRtl ? selectedEmotionEx.feeling_focus : 'Focus Area'}
                       </span>
-                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-[#059669] font-bold font-mono">
+                      <span className="text-xs bg-[#1e345c] border border-white/5 px-3 py-1.5 rounded-xl text-[#059669] font-bold font-mono">
                         ✨ {isRtl ? selectedEmotionEx.activity_type : 'Type'}
                       </span>
                     </div>
@@ -3664,7 +3824,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     {/* Left Column: Step checklist */}
-                    <div className="lg:col-span-8 bg-[#030712] border border-white/5 rounded-3xl p-6 space-y-6 shadow-2xl">
+                    <div className="lg:col-span-8 bg-[#142345] border border-white/5 rounded-3xl p-6 space-y-6 shadow-2xl">
                       <div className="space-y-2">
                         <span className="text-3xl">{selectedEmotionEx.emoji}</span>
                         <h3 className="text-xl font-black text-white">
@@ -3696,7 +3856,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                 className={`w-full text-right p-4 rounded-2xl border transition-all duration-200 flex items-start gap-4 cursor-pointer select-none ${
                                   isChecked 
                                     ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-100 shadow-inner' 
-                                    : 'bg-[#080f1a] border-white/5 text-slate-300 hover:border-emerald-500/20'
+                                    : 'bg-[#1d315c] border-white/5 text-slate-300 hover:border-emerald-500/20'
                                 }`}
                               >
                                 <span className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
@@ -3769,7 +3929,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </div>
 
                     {/* Right Column: Outcomes & Completion */}
-                    <div className="lg:col-span-4 bg-[#050b14] border border-white/5 rounded-3xl p-6 flex flex-col justify-between space-y-6 text-right">
+                    <div className="lg:col-span-4 bg-[#13284f] border border-white/5 rounded-3xl p-6 flex flex-col justify-between space-y-6 text-right">
                       <div className="space-y-5">
                         <div className="text-center pb-4 border-b border-white/5">
                           <span className="text-3xl">💎</span>
@@ -3864,7 +4024,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                 className={`p-2.5 rounded-xl border text-xs font-bold transition flex flex-col items-center justify-center gap-1 cursor-pointer ${
                                   currentSelectedFeeling === feel.id 
                                     ? `bg-gradient-to-b ${feel.color} border-2 scale-102` 
-                                    : 'bg-[#050b14]/50 border-white/5 text-slate-400 hover:border-white/10'
+                                    : 'bg-[#13284f]/50 border-white/5 text-slate-400 hover:border-white/10'
                                 }`}
                               >
                                 <span className="text-xl">{feel.emoji}</span>
@@ -3911,7 +4071,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             value={feelingReflectiveNote}
                             onChange={(e) => setFeelingReflectiveNote(e.target.value)}
                             placeholder={isRtl ? 'مثال: الفرح بإنجاز كود برمجي، أو التوتر من كثرة الشاشات...' : 'E.g., joy from completing a unit, or pressure from long study hours...'}
-                            className="w-full bg-[#030712] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-teal-500 text-right"
+                            className="w-full bg-[#142345] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-teal-500 text-right"
                           />
                         </div>
 
@@ -3939,7 +4099,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       </div>
 
                       {/* Log History */}
-                      <div className="lg:col-span-5 bg-[#030712] p-5 rounded-2xl border border-white/5 space-y-4 max-h-[340px] overflow-y-auto">
+                      <div className="lg:col-span-5 bg-[#142345] p-5 rounded-2xl border border-white/5 space-y-4 max-h-[340px] overflow-y-auto">
                         <div className="flex justify-between items-center border-b border-white/5 pb-2">
                           <button
                             onClick={() => {
@@ -3979,7 +4139,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                               })();
 
                               return (
-                                <div key={log.id} className="p-3 bg-[#080e1b] rounded-xl border border-white/5 flex items-center justify-between text-xs gap-3">
+                                <div key={log.id} className="p-3 bg-[#1a2d54] rounded-xl border border-white/5 flex items-center justify-between text-xs gap-3">
                                   <span className="text-[10px] text-slate-500 font-mono shrink-0">{log.timestamp}</span>
                                   <div className="text-right flex-1 min-w-0">
                                     <div className="flex items-center gap-1.5 justify-end">
@@ -4030,7 +4190,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                         return (
                           <div
                             key={ex.id}
-                            className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#050b14] flex flex-col justify-between group ${
+                            className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#13284f] flex flex-col justify-between group ${
                               isCompleted
                                 ? 'border-emerald-500/30'
                                 : 'border-white/5 hover:border-emerald-500/30'
@@ -4081,7 +4241,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                               <button
                                 disabled={exportingExerciseId !== null}
                                 onClick={() => handleExportSingleExercise(ex, 'emotion')}
-                                className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                                className="bg-[#243d70] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
                                 title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
                               >
                                 {exportingExerciseId === ex.id ? (
@@ -4117,10 +4277,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </button>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold font-mono">
+                      <span className="text-xs bg-[#1e345c] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold font-mono">
                         🎯 {isRtl ? selectedCommEx.skill_focus : 'Focus Area'}
                       </span>
-                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-[#3b82f6] font-bold font-mono">
+                      <span className="text-xs bg-[#1e345c] border border-white/5 px-3 py-1.5 rounded-xl text-[#3b82f6] font-bold font-mono">
                         ✨ {isRtl ? selectedCommEx.activity_type : 'Type'}
                       </span>
                     </div>
@@ -4128,7 +4288,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     {/* Left Column: Step checklist */}
-                    <div className="lg:col-span-8 bg-[#030712] border border-white/5 rounded-3xl p-6 space-y-6 shadow-2xl">
+                    <div className="lg:col-span-8 bg-[#142345] border border-white/5 rounded-3xl p-6 space-y-6 shadow-2xl">
                       <div className="space-y-2">
                         <span className="text-3xl">💬</span>
                         <h3 className="text-xl font-black text-white">
@@ -4160,7 +4320,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                 className={`w-full text-right p-4 rounded-2xl border transition-all duration-200 flex items-start gap-4 cursor-pointer select-none ${
                                   isChecked 
                                     ? 'bg-blue-500/10 border-blue-500/30 text-blue-100 shadow-inner' 
-                                    : 'bg-[#080f1a] border-white/5 text-slate-300 hover:border-blue-500/20'
+                                    : 'bg-[#1d315c] border-white/5 text-slate-300 hover:border-blue-500/20'
                                 }`}
                               >
                                 <span className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
@@ -4233,7 +4393,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </div>
 
                     {/* Right Column: Outcomes & Completion */}
-                    <div className="lg:col-span-4 bg-[#050b14] border border-white/5 rounded-3xl p-6 flex flex-col justify-between space-y-6 text-right">
+                    <div className="lg:col-span-4 bg-[#13284f] border border-white/5 rounded-3xl p-6 flex flex-col justify-between space-y-6 text-right">
                       <div className="space-y-5">
                         <div className="text-center pb-4 border-b border-white/5">
                           <span className="text-3xl">💬</span>
@@ -4312,7 +4472,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       return (
                         <div
                           key={ex.id}
-                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#050b14] flex flex-col justify-between group ${
+                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#13284f] flex flex-col justify-between group ${
                             isCompleted
                               ? 'border-blue-500/30'
                               : 'border-white/5 hover:border-blue-500/30'
@@ -4364,7 +4524,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             <button
                               disabled={exportingExerciseId !== null}
                               onClick={() => handleExportSingleExercise(ex, 'communication')}
-                              className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              className="bg-[#243d70] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
                               title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
                             >
                               {exportingExerciseId === ex.id ? (
@@ -4398,10 +4558,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </button>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold font-mono">
+                      <span className="text-xs bg-[#1e345c] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold font-mono">
                         🎯 {isRtl ? selectedLeaderEx.skill_focus : 'Focus Area'}
                       </span>
-                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-[#f43f5e] font-bold font-mono">
+                      <span className="text-xs bg-[#1e345c] border border-white/5 px-3 py-1.5 rounded-xl text-[#f43f5e] font-bold font-mono">
                         👑 {isRtl ? selectedLeaderEx.activity_type : 'Type'}
                       </span>
                     </div>
@@ -4409,7 +4569,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     {/* Left Column: Step checklist */}
-                    <div className="lg:col-span-8 bg-[#030712] border border-white/5 rounded-3xl p-6 space-y-6 shadow-2xl">
+                    <div className="lg:col-span-8 bg-[#142345] border border-white/5 rounded-3xl p-6 space-y-6 shadow-2xl">
                       <div className="space-y-2">
                         <span className="text-3xl">{selectedLeaderEx.emoji}</span>
                         <h3 className="text-xl font-black text-white">
@@ -4441,7 +4601,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                 className={`w-full text-right p-4 rounded-2xl border transition-all duration-200 flex items-start gap-4 cursor-pointer select-none ${
                                   isChecked 
                                     ? 'bg-rose-500/10 border-rose-500/30 text-rose-100 shadow-inner' 
-                                    : 'bg-[#080f1a] border-white/5 text-slate-300 hover:border-rose-500/20'
+                                    : 'bg-[#1d315c] border-white/5 text-slate-300 hover:border-rose-500/20'
                                 }`}
                               >
                                 <span className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
@@ -4514,7 +4674,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </div>
 
                     {/* Right Column: Outcomes & Completion */}
-                    <div className="lg:col-span-4 bg-[#050b14] border border-white/5 rounded-3xl p-6 flex flex-col justify-between space-y-6 text-right">
+                    <div className="lg:col-span-4 bg-[#13284f] border border-white/5 rounded-3xl p-6 flex flex-col justify-between space-y-6 text-right">
                       <div className="space-y-5">
                         <div className="text-center pb-4 border-b border-white/5">
                           <span className="text-3xl">{selectedLeaderEx.emoji}</span>
@@ -4593,7 +4753,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       return (
                         <div
                           key={ex.id}
-                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#050b14] flex flex-col justify-between group ${
+                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#13284f] flex flex-col justify-between group ${
                             isCompleted
                               ? 'border-rose-500/30'
                               : 'border-white/5 hover:border-rose-500/30'
@@ -4645,7 +4805,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             <button
                               disabled={exportingExerciseId !== null}
                               onClick={() => handleExportSingleExercise(ex, 'leadership')}
-                              className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              className="bg-[#243d70] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
                               title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
                             >
                               {exportingExerciseId === ex.id ? (
@@ -4679,10 +4839,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </button>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold font-mono">
+                      <span className="text-xs bg-[#1e345c] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold font-mono">
                         🎯 {isRtl ? selectedTeamEx.skill_focus : 'Focus Area'}
                       </span>
-                      <span className="text-xs bg-[#0b1329] border border-white/5 px-3 py-1.5 rounded-xl text-[#6366f1] font-bold font-mono">
+                      <span className="text-xs bg-[#1e345c] border border-white/5 px-3 py-1.5 rounded-xl text-[#6366f1] font-bold font-mono">
                         🤝 {isRtl ? selectedTeamEx.activity_type : 'Type'}
                       </span>
                     </div>
@@ -4690,7 +4850,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     {/* Left Column: Step checklist */}
-                    <div className="lg:col-span-8 bg-[#030712] border border-white/5 rounded-3xl p-6 space-y-6 shadow-2xl">
+                    <div className="lg:col-span-8 bg-[#142345] border border-white/5 rounded-3xl p-6 space-y-6 shadow-2xl">
                       <div className="space-y-2">
                         <span className="text-3xl">{selectedTeamEx.emoji}</span>
                         <h3 className="text-xl font-black text-white">
@@ -4722,7 +4882,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                 className={`w-full text-right p-4 rounded-2xl border transition-all duration-200 flex items-start gap-4 cursor-pointer select-none ${
                                   isChecked 
                                     ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-100 shadow-inner' 
-                                    : 'bg-[#080f1a] border-white/5 text-slate-300 hover:border-indigo-500/20'
+                                    : 'bg-[#1d315c] border-white/5 text-slate-300 hover:border-indigo-500/20'
                                 }`}
                               >
                                 <span className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
@@ -4795,7 +4955,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </div>
 
                     {/* Right Column: Outcomes & Completion */}
-                    <div className="lg:col-span-4 bg-[#050b14] border border-white/5 rounded-3xl p-6 flex flex-col justify-between space-y-6 text-right">
+                    <div className="lg:col-span-4 bg-[#13284f] border border-white/5 rounded-3xl p-6 flex flex-col justify-between space-y-6 text-right">
                       <div className="space-y-5">
                         <div className="text-center pb-4 border-b border-white/5">
                           <span className="text-3xl">{selectedTeamEx.emoji}</span>
@@ -4875,7 +5035,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       return (
                         <div
                           key={ex.id}
-                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#050b14] flex flex-col justify-between group ${
+                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#13284f] flex flex-col justify-between group ${
                             isCompleted
                               ? 'border-indigo-500/30'
                               : 'border-white/5 hover:border-indigo-500/30'
@@ -4927,7 +5087,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             <button
                               disabled={exportingExerciseId !== null}
                               onClick={() => handleExportSingleExercise(ex, 'teamwork')}
-                              className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              className="bg-[#243d70] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
                               title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
                             >
                               {exportingExerciseId === ex.id ? (
@@ -4973,7 +5133,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left Column: Steps Checklist */}
                     <div className="lg:col-span-2 space-y-4">
-                      <div className="bg-[#050b14]/60 border border-white/5 rounded-2xl p-6 md:p-8 space-y-6">
+                      <div className="bg-[#13284f]/60 border border-white/5 rounded-2xl p-6 md:p-8 space-y-6">
                         <div className="flex items-center gap-3 justify-end">
                           <span className="text-3xl">{selectedMoneyEx.emoji}</span>
                           <div>
@@ -5058,7 +5218,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                           <button
                             onClick={() => handleExportSingleExercise(selectedMoneyEx, 'money')}
-                            className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 px-4 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                            className="bg-[#243d70] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 px-4 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
                           >
                             {exportingExerciseId === selectedMoneyEx.id ? (
                               <RefreshCw size={13} className="animate-spin text-amber-400" />
@@ -5146,7 +5306,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       return (
                         <div
                           key={ex.id}
-                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#050b14] flex flex-col justify-between group ${
+                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#13284f] flex flex-col justify-between group ${
                             isCompleted
                               ? 'border-amber-500/30 shadow-lg shadow-amber-500/5'
                               : 'border-white/5 hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/5'
@@ -5197,7 +5357,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             <button
                               disabled={exportingExerciseId !== null}
                               onClick={() => handleExportSingleExercise(ex, 'money')}
-                              className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              className="bg-[#243d70] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
                               title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
                             >
                               {exportingExerciseId === ex.id ? (
@@ -5243,7 +5403,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left Column: Steps Checklist */}
                     <div className="lg:col-span-2 space-y-4">
-                      <div className="bg-[#050b14]/60 border border-white/5 rounded-2xl p-6 md:p-8 space-y-6">
+                      <div className="bg-[#13284f]/60 border border-white/5 rounded-2xl p-6 md:p-8 space-y-6">
                         <div className="flex items-center gap-3 justify-end">
                           <span className="text-3xl">{selectedConfidenceEx.emoji}</span>
                           <div>
@@ -5328,7 +5488,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                           <button
                             onClick={() => handleExportSingleExercise(selectedConfidenceEx, 'confidence')}
-                            className="bg-[#0b172e] border border-white/5 hover:border-orange-500 hover:text-orange-300 text-slate-400 px-4 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                            className="bg-[#243d70] border border-white/5 hover:border-orange-500 hover:text-orange-300 text-slate-400 px-4 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
                           >
                             {exportingExerciseId === selectedConfidenceEx.id ? (
                               <RefreshCw size={13} className="animate-spin text-orange-400" />
@@ -5417,7 +5577,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       return (
                         <div
                           key={ex.id}
-                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#050b14] flex flex-col justify-between group ${
+                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#13284f] flex flex-col justify-between group ${
                             isCompleted
                               ? 'border-orange-500/30 shadow-lg shadow-orange-500/5'
                               : 'border-white/5 hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/5'
@@ -5468,7 +5628,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             <button
                               disabled={exportingExerciseId !== null}
                               onClick={() => handleExportSingleExercise(ex, 'confidence')}
-                              className="bg-[#0b172e] border border-white/5 hover:border-orange-500 hover:text-orange-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              className="bg-[#243d70] border border-white/5 hover:border-orange-500 hover:text-orange-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
                               title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
                             >
                               {exportingExerciseId === ex.id ? (
@@ -5514,7 +5674,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left Column: Steps Checklist */}
                     <div className="lg:col-span-2 space-y-4">
-                      <div className="bg-[#050b14]/60 border border-white/5 rounded-2xl p-6 md:p-8 space-y-6">
+                      <div className="bg-[#13284f]/60 border border-white/5 rounded-2xl p-6 md:p-8 space-y-6">
                         <div className="flex items-center gap-3 justify-end">
                           <span className="text-3xl">{selectedCriticalEx.emoji}</span>
                           <div>
@@ -5599,7 +5759,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                           <button
                             onClick={() => handleExportSingleExercise(selectedCriticalEx, 'critical')}
-                            className="bg-[#0b172e] border border-white/5 hover:border-rose-500 hover:text-rose-300 text-slate-400 px-4 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                            className="bg-[#243d70] border border-white/5 hover:border-rose-500 hover:text-rose-300 text-slate-400 px-4 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
                           >
                             {exportingExerciseId === selectedCriticalEx.id ? (
                               <RefreshCw size={13} className="animate-spin text-rose-400" />
@@ -5689,7 +5849,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       return (
                         <div
                           key={ex.id}
-                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#050b14] flex flex-col justify-between group ${
+                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#13284f] flex flex-col justify-between group ${
                             isCompleted
                               ? 'border-rose-500/30 shadow-lg shadow-rose-500/5'
                               : 'border-white/5 hover:border-rose-500/30 hover:shadow-lg hover:shadow-rose-500/5'
@@ -5740,7 +5900,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             <button
                               disabled={exportingExerciseId !== null}
                               onClick={() => handleExportSingleExercise(ex, 'critical')}
-                              className="bg-[#0b172e] border border-white/5 hover:border-rose-500 hover:text-rose-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              className="bg-[#243d70] border border-white/5 hover:border-rose-500 hover:text-rose-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
                               title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
                             >
                               {exportingExerciseId === ex.id ? (
@@ -5786,7 +5946,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left Column: Steps Checklist */}
                     <div className="lg:col-span-2 space-y-4">
-                      <div className="bg-[#050b14]/60 border border-white/5 rounded-2xl p-6 md:p-8 space-y-6">
+                      <div className="bg-[#13284f]/60 border border-white/5 rounded-2xl p-6 md:p-8 space-y-6">
                         <div className="flex items-center gap-3 justify-end">
                           <span className="text-3xl">{selectedInnovEx.emoji}</span>
                           <div>
@@ -5877,7 +6037,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                     {/* Right Column: Outcomes & Quick audio description of benefits */}
                     <div className="space-y-4">
-                      <div className="bg-[#050b14]/60 border border-white/5 rounded-2xl p-6 space-y-4 text-right">
+                      <div className="bg-[#13284f]/60 border border-white/5 rounded-2xl p-6 space-y-4 text-right">
                         <h4 className="text-xs font-black text-slate-300 uppercase tracking-wide">
                           {isRtl ? 'الأثر والمكتسب المعرفي:' : 'Developmental Outcome:'}
                         </h4>
@@ -5886,7 +6046,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                         </div>
                       </div>
 
-                      <div className="bg-[#050b14]/60 border border-white/5 rounded-2xl p-6 space-y-4">
+                      <div className="bg-[#13284f]/60 border border-white/5 rounded-2xl p-6 space-y-4">
                         <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest text-right">
                           {isRtl ? 'البطاقة الريادية الملخصة:' : 'Micro-Business Printable Card:'}
                         </h4>
@@ -5894,7 +6054,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                         <button
                           disabled={exportingExerciseId !== null}
                           onClick={() => handleExportSingleExercise(selectedInnovEx, 'innov')}
-                          className="w-full bg-[#0b172e] border border-white/5 hover:border-emerald-500 hover:text-emerald-300 text-slate-400 px-4 py-3 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                          className="w-full bg-[#243d70] border border-white/5 hover:border-emerald-500 hover:text-emerald-300 text-slate-400 px-4 py-3 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
                         >
                           {exportingExerciseId === selectedInnovEx.id ? (
                             <>
@@ -5932,10 +6092,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       return (
                         <div
                           key={ex.id}
-                          className={`group bg-[#040913]/90 border p-5 rounded-2xl flex flex-col justify-between transition-all duration-300 relative overflow-hidden ${
+                          className={`group bg-[#15274c]/90 border p-5 rounded-2xl flex flex-col justify-between transition-all duration-300 relative overflow-hidden ${
                             isCompleted
                               ? 'border-emerald-500/20 bg-emerald-[#0b1710]/80 hover:border-emerald-500/40'
-                              : 'border-white/5 hover:border-emerald-500/25 hover:bg-[#070e1b]/80 shadow-lg'
+                              : 'border-white/5 hover:border-emerald-500/25 hover:bg-[#1d2f59]/80 shadow-lg'
                           }`}
                         >
                           {/* Top row icons & badges */}
@@ -5984,7 +6144,495 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             <button
                               disabled={exportingExerciseId !== null}
                               onClick={() => handleExportSingleExercise(ex, 'innov')}
-                              className="bg-[#0b172e] border border-white/5 hover:border-emerald-500 hover:text-emerald-300 text-slate-400 p-2 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              className="bg-[#243d70] border border-white/5 hover:border-emerald-500 hover:text-emerald-300 text-slate-400 p-2 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
+                            >
+                              {exportingExerciseId === ex.id ? (
+                                <RefreshCw size={12} className="animate-spin text-emerald-400" />
+                              ) : (
+                                <Download size={12} strokeWidth={3} />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )
+            ) : activeSubTab === 'art' ? (
+              // Active SubTab === 'art' - Literary & Creative Arts
+              selectedArtEx ? (
+                <div className="space-y-6 animate-fade-in text-right" dir="rtl">
+                  {/* Step-by-Step interactive checklist container */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-pink-500/10 pb-4 gap-4">
+                    <button
+                      onClick={() => {
+                        setSelectedArtEx(null);
+                        stopSpeech();
+                      }}
+                      className="bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <ChevronRight size={14} />
+                      {isRtl ? 'العودة لقائمة الفنون والجمال' : 'Back to Arts & Literature'}
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs bg-[#170b10] border border-pink-500/20 px-3 py-1.5 rounded-xl text-pink-300 font-bold font-mono">
+                        🎯 {isRtl ? selectedArtEx.skill_focus : 'Focus Skill'}
+                      </span>
+                      <span className="text-xs bg-[#170b10] border border-pink-500/20 px-3 py-1.5 rounded-xl text-pink-300 font-bold font-mono">
+                        ⚙️ {isRtl ? selectedArtEx.activity_type : 'Activity Type'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left Column: Steps Checklist */}
+                    <div className="lg:col-span-2 space-y-4">
+                      <div className="bg-[#13284f]/60 border border-white/5 rounded-2xl p-6 md:p-8 space-y-6">
+                        <div className="flex items-center gap-3 justify-end">
+                          <span className="text-3xl">{selectedArtEx.emoji}</span>
+                          <div>
+                            <h3 className="text-lg font-black text-white">
+                              {isRtl ? selectedArtEx.title_ar : selectedArtEx.title_en}
+                            </h3>
+                            <p className="text-xs text-slate-400 mt-1">
+                              {isRtl ? 'تطبيق عملي خطوة بخطوة لتنمية الذوق الجمالي ومهارات التعبير الأدبي' : 'Step-by-step practical challenge to develop aesthetic taste and literary expression'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <p className="text-sm text-slate-300 leading-relaxed bg-[#170b10]/40 border border-pink-500/5 p-4 rounded-xl">
+                          {selectedArtEx.description_ar}
+                        </p>
+
+                        <div className="space-y-3.5">
+                          <h4 className="text-xs font-black text-pink-400 uppercase tracking-widest text-right mb-1">
+                            {isRtl ? 'خطوات التحدي العملي والتطبيق:' : 'Action Steps & Implementation:'}
+                          </h4>
+
+                          {selectedArtEx.steps_ar.map((step, sIdx) => {
+                            const isChecked = !!artStepsChecked[sIdx];
+                            return (
+                              <label
+                                key={sIdx}
+                                className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer select-none ${
+                                  isChecked
+                                    ? 'bg-pink-550/5 border-pink-500/25 text-slate-300'
+                                    : 'bg-slate-900/40 border-white/5 text-slate-400 hover:border-white/10 hover:text-white'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => {
+                                    const next = [...artStepsChecked];
+                                    next[sIdx] = !next[sIdx];
+                                    setArtStepsChecked(next);
+                                  }}
+                                  className="mt-0.5 rounded border-slate-700 bg-slate-950 text-pink-500 focus:ring-0 focus:ring-offset-0 transition-all shrink-0 cursor-pointer"
+                                />
+                                <span className="text-xs font-medium leading-relaxed text-right flex-1">
+                                  {step}
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
+
+                        {/* Interactive Reflection / Finish Checkbox */}
+                        <div className="pt-4 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
+                          <button
+                            onClick={() => {
+                              // Play positive chime
+                              playSereneFreq(659.25, 0.25); // Mi
+                              setTimeout(() => playSereneFreq(880, 0.45), 200);   // La
+
+                              // Mark it completed!
+                              const nextCompleted = new Set(completedArtIds);
+                              nextCompleted.add(selectedArtEx.id);
+                              setCompletedArtIds(nextCompleted);
+                              localStorage.setItem('balance_oasis_art_completed', JSON.stringify(Array.from(nextCompleted)));
+
+                              // Trigger completion sessions representation details!
+                              setCompletionSession({
+                                type: 'art',
+                                id: selectedArtEx.id,
+                                title: isRtl ? selectedArtEx.title_ar : selectedArtEx.title_en,
+                                duration: 180 // Arbitrary 3 mins value
+                              });
+
+                              // Cleanly play the vocal reward
+                              setTimeout(() => {
+                                triggerAiEncouragement();
+                              }, 1100);
+                            }}
+                            disabled={artStepsChecked.some(c => !c)}
+                            className="bg-gradient-to-r from-pink-400 via-rose-400 to-indigo-400 disabled:opacity-40 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-slate-950 font-black px-6 py-3 rounded-xl text-xs tracking-wide shadow-xl active:scale-95 transition-all w-full cursor-pointer"
+                          >
+                            {artStepsChecked.some(c => !c)
+                              ? (isRtl ? '⚠️ أكمل جميع الخطوات للإنهاء والتسجيل' : '⚠️ Complete all checklist steps to finish')
+                              : (isRtl ? '🎉 إنهاء التمرين وتسجيل الإنجاز في الواحة' : '🎉 Finish exercise and log achievement')}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column: Outcomes & Quick audio description of benefits */}
+                    <div className="space-y-4">
+                      <div className="bg-[#13284f]/60 border border-white/5 rounded-2xl p-6 space-y-4 text-right">
+                        <h4 className="text-xs font-black text-slate-300 uppercase tracking-wide">
+                          {isRtl ? 'الأثر والمكتسب الفني والأدبي:' : 'Developmental Outcome:'}
+                        </h4>
+                        <div className="bg-pink-500/5 border border-pink-550/10 p-4 rounded-xl text-xs text-pink-300 leading-relaxed font-bold">
+                          🎨 {selectedArtEx.outcome_ar}
+                        </div>
+                      </div>
+
+                      <div className="bg-[#13284f]/60 border border-white/5 rounded-2xl p-6 space-y-4">
+                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest text-right">
+                          {isRtl ? 'البطاقة الفنية الملخصة:' : 'Micro-Art Printable Card:'}
+                        </h4>
+
+                        <button
+                          disabled={exportingExerciseId !== null}
+                          onClick={() => handleExportSingleExercise(selectedArtEx, 'art')}
+                          className="w-full bg-[#243d70] border border-white/5 hover:border-pink-500 hover:text-pink-300 text-slate-400 px-4 py-3 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                        >
+                          {exportingExerciseId === selectedArtEx.id ? (
+                            <>
+                              <RefreshCw size={13} className="animate-spin text-pink-400" />
+                              <span>{isRtl ? 'جاري تصدير البطاقة الفنية...' : 'Exporting...'}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Download size={13} strokeWidth={3} />
+                              <span>{isRtl ? 'تصدير بطاقة الأدب والفن كصورة للنشر 📸' : 'Export card as Image 📸'}</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6 animate-fade-in text-right">
+                  <div className="text-right">
+                    <h2 className="text-xl font-black text-white flex items-center gap-2 justify-end">
+                      <span>🎨✨</span>
+                      {isRtl ? 'الأدب والفنون والجمال (نوافذ الجمال)' : 'Literary & Creative Arts (Windows of Beauty)'}
+                    </h2>
+                    <p className="text-slate-400 text-xs mt-1 leading-relaxed max-w-2xl ml-auto">
+                      {isRtl 
+                        ? 'انطلق من نوافذ الجمال والأدب لتعلم تقدير اللوحات الفنية الشامخة، نسج الاستعارات البيانية، تجسيد العبر والمسرح الإبداعي، ونحت المشاعر وترتيل القصائد الشعرية المصنوعة من نبض الطبيعة وتوثيق رحلتك كفنان.' 
+                        : 'Explore aesthetic appreciation and creative literature: paintings interpretation, poetry, metaphors development, character lettering, sculpting emotions, and collaborative theatre.'}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {ART_EXERCISES.map((ex, idx) => {
+                      const isCompleted = completedArtIds.has(ex.id);
+                      return (
+                        <div
+                          key={ex.id}
+                          className={`group bg-[#15274c]/90 border p-5 rounded-2xl flex flex-col justify-between transition-all duration-300 relative overflow-hidden ${
+                            isCompleted
+                              ? 'border-pink-500/20 bg-pink-[#170b10]/85 hover:border-pink-500/40'
+                              : 'border-white/5 hover:border-pink-500/25 hover:bg-[#201530]/80 shadow-lg'
+                          }`}
+                        >
+                          {/* Top row icons & badges */}
+                          <div className="flex justify-between items-start mb-3">
+                            <span className="text-2xl">{ex.emoji}</span>
+                            <div className="flex flex-col items-end gap-1">
+                              <span className="text-[9px] bg-slate-900 border border-white/5 py-0.5 px-2 rounded-md font-bold text-slate-400 font-mono">
+                                #{idx + 1}
+                              </span>
+                              {isCompleted && (
+                                <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 py-0.5 px-2 rounded-md font-bold">
+                                  ✓ {isRtl ? 'مكتمل' : 'Completed'}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="space-y-1 text-right flex-1 mb-4">
+                            <h3 className="text-xs font-black text-slate-100 group-hover:text-pink-300 transition-colors">
+                              {isRtl ? ex.title_ar : ex.title_en}
+                            </h3>
+                            <div className="flex justify-end gap-1.5 flex-wrap my-1">
+                              <span className="text-[9px] bg-slate-950 border border-white/5 px-2 py-0.5 rounded-md text-pink-400 font-bold font-mono">
+                                🎯 {isRtl ? ex.skill_focus : 'Focus Skill'}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                              {ex.description_ar}
+                            </p>
+                          </div>
+
+                          {/* CTA buttons */}
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={() => setSelectedArtEx(ex)}
+                              className={`flex-1 py-1.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
+                                isCompleted
+                                  ? 'bg-pink-550/10 hover:bg-pink-550/20 text-pink-300 border-pink-500/25'
+                                  : 'bg-pink-500/5 group-hover:bg-gradient-to-r group-hover:from-pink-450 group-hover:via-rose-400 group-hover:to-indigo-400 group-hover:text-slate-950 text-pink-400 border-pink-500/10 group-hover:border-pink-400'
+                              }`}
+                            >
+                              <span>⚡</span>
+                              {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
+                            </button>
+
+                            <button
+                              disabled={exportingExerciseId !== null}
+                              onClick={() => handleExportSingleExercise(ex, 'art')}
+                              className="bg-[#243d70] border border-white/5 hover:border-pink-500 hover:text-pink-300 text-slate-400 p-2 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
+                            >
+                              {exportingExerciseId === ex.id ? (
+                                <RefreshCw size={12} className="animate-spin text-pink-400" />
+                              ) : (
+                                <Download size={12} strokeWidth={3} />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )
+            ) : activeSubTab === 'life' ? (
+              // Active SubTab === 'life' - Life Skills & Safety
+              selectedLifeEx ? (
+                <div className="space-y-6 animate-fade-in text-right" dir="rtl">
+                  {/* Step-by-Step interactive checklist container */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-emerald-500/10 pb-4 gap-4">
+                    <button
+                      onClick={() => {
+                        setSelectedLifeEx(null);
+                        stopSpeech();
+                      }}
+                      className="bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <ChevronRight size={14} />
+                      {isRtl ? 'العودة لقائمة السلامة وبطل الحياة' : 'Back to Life Skills & Safety'}
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs bg-[#0b1710] border border-emerald-500/20 px-3 py-1.5 rounded-xl text-emerald-300 font-bold font-mono">
+                        🎯 {isRtl ? selectedLifeEx.skill_focus : 'Focus Skill'}
+                      </span>
+                      <span className="text-xs bg-[#0b1710] border border-emerald-500/20 px-3 py-1.5 rounded-xl text-emerald-300 font-bold font-mono">
+                        ⚙️ {isRtl ? selectedLifeEx.activity_type : 'Activity Type'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left Column: Steps Checklist */}
+                    <div className="lg:col-span-2 space-y-4">
+                      <div className="bg-[#13284f]/60 border border-white/5 rounded-2xl p-6 md:p-8 space-y-6">
+                        <div className="flex items-center gap-3 justify-end">
+                          <span className="text-3xl">{selectedLifeEx.emoji}</span>
+                          <div>
+                            <h3 className="text-lg font-black text-white">
+                              {isRtl ? selectedLifeEx.title_ar : selectedLifeEx.title_en}
+                            </h3>
+                            <p className="text-xs text-slate-400 mt-1">
+                              {isRtl ? 'تطبيق عملي خطوة بخطوة لبناء المهارات الحياتية الطارئة والاعتماد الذاتي الآمن' : 'Step-by-step practical challenge to build life safety and independence skills'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <p className="text-sm text-slate-300 leading-relaxed bg-[#0b1710]/40 border border-emerald-500/5 p-4 rounded-xl">
+                          {selectedLifeEx.description_ar}
+                        </p>
+
+                        <div className="space-y-3.5">
+                          <h4 className="text-xs font-black text-emerald-400 uppercase tracking-widest text-right mb-1">
+                            {isRtl ? 'خطوات التحدي العملي والتطبيق:' : 'Action Steps & Implementation:'}
+                          </h4>
+
+                          {selectedLifeEx.steps_ar.map((step, sIdx) => {
+                            const isChecked = !!lifeStepsChecked[sIdx];
+                            return (
+                              <label
+                                key={sIdx}
+                                className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer select-none ${
+                                  isChecked
+                                    ? 'bg-emerald-550/5 border-emerald-500/25 text-slate-300'
+                                    : 'bg-slate-900/40 border-white/5 text-slate-400 hover:border-white/10 hover:text-white'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => {
+                                    const next = [...lifeStepsChecked];
+                                    next[sIdx] = !next[sIdx];
+                                    setLifeStepsChecked(next);
+                                  }}
+                                  className="mt-0.5 rounded border-slate-700 bg-slate-950 text-emerald-400 focus:ring-0 focus:ring-offset-0 transition-all shrink-0 cursor-pointer"
+                                />
+                                <span className="text-xs font-medium leading-relaxed text-right flex-1">
+                                  {step}
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
+
+                        {/* Interactive Reflection / Finish Checkbox */}
+                        <div className="pt-4 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
+                          <button
+                            onClick={() => {
+                              // Play positive chime
+                              playSereneFreq(523.25, 0.25); // Do
+                              setTimeout(() => playSereneFreq(659.25, 0.45), 200);   // Mi
+
+                              // Mark it completed!
+                              const nextCompleted = new Set(completedLifeIds);
+                              nextCompleted.add(selectedLifeEx.id);
+                              setCompletedLifeIds(nextCompleted);
+                              localStorage.setItem('balance_oasis_life_completed', JSON.stringify(Array.from(nextCompleted)));
+
+                              // Trigger completion sessions representation details!
+                              setCompletionSession({
+                                type: 'life',
+                                id: selectedLifeEx.id,
+                                title: isRtl ? selectedLifeEx.title_ar : selectedLifeEx.title_en,
+                                duration: 180 // Arbitrary 3 mins value
+                              });
+
+                              // Cleanly play the vocal reward
+                              setTimeout(() => {
+                                triggerAiEncouragement();
+                              }, 1100);
+                            }}
+                            disabled={lifeStepsChecked.some(c => !c)}
+                            className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 disabled:opacity-40 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-slate-950 font-black px-6 py-3 rounded-xl text-xs tracking-wide shadow-xl active:scale-95 transition-all w-full cursor-pointer"
+                          >
+                            {lifeStepsChecked.some(c => !c)
+                              ? (isRtl ? '⚠️ أكمل جميع الخطوات للإنهاء والتسجيل' : '⚠️ Complete all checklist steps to finish')
+                              : (isRtl ? '🎉 إنهاء التمرين وتسجيل الإنجاز في الواحة' : '🎉 Finish exercise and log achievement')}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column: Outcomes & Quick audio description of benefits */}
+                    <div className="space-y-4">
+                      <div className="bg-[#13284f]/60 border border-white/5 rounded-2xl p-6 space-y-4 text-right">
+                        <h4 className="text-xs font-black text-slate-300 uppercase tracking-wide">
+                          {isRtl ? 'الأثر والوعي المعزز بأسس السلامة والاعتماد:' : 'Developmental Outcome:'}
+                        </h4>
+                        <div className="bg-emerald-500/5 border border-emerald-550/10 p-4 rounded-xl text-xs text-emerald-300 leading-relaxed font-bold">
+                          🦸 {selectedLifeEx.outcome_ar}
+                        </div>
+                      </div>
+
+                      <div className="bg-[#13284f]/60 border border-white/5 rounded-2xl p-6 space-y-4">
+                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest text-right">
+                          {isRtl ? 'البطاقة الفنية الملخصة للبطولة الشخصية:' : 'Micro-Life Printable Card:'}
+                        </h4>
+
+                        <button
+                          disabled={exportingExerciseId !== null}
+                          onClick={() => handleExportSingleExercise(selectedLifeEx, 'life')}
+                          className="w-full bg-[#243d70] border border-white/5 hover:border-emerald-500 hover:text-emerald-300 text-slate-400 px-4 py-3 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                        >
+                          {exportingExerciseId === selectedLifeEx.id ? (
+                            <>
+                              <RefreshCw size={13} className="animate-spin text-emerald-400" />
+                              <span>{isRtl ? 'جاري تصدير بطاقة بطل الحياة...' : 'Exporting...'}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Download size={13} strokeWidth={3} />
+                              <span>{isRtl ? 'تصدير بطاقة الحياة والاعتماد كصورة للنشر 📸' : 'Export card as Image 📸'}</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6 animate-fade-in text-right">
+                  <div className="text-right">
+                    <h2 className="text-xl font-black text-white flex items-center gap-2 justify-end">
+                      <span>🦸✨</span>
+                      {isRtl ? 'بطل الحياة والسلامة والاعتماد الذاتي' : 'Life Skills, Emergency Actions & Independence Challenges'}
+                    </h2>
+                    <p className="text-slate-400 text-xs mt-1 leading-relaxed max-w-2xl ml-auto">
+                      {isRtl 
+                        ? 'تنمية عادات الاستقلال الشخصي وبناء المسؤولية المستدامة: ترتيب مساحاتك الخاصة، ممارسات الإسعاف الأولية البسيطة والإنقاذ، التعامل الشجاع مع حالات الطوارئ المعرفية وصناعة مظهر وميزانية مستقلة.'
+                        : 'Develop crucial self-reliance, domestic maintenance, emergency responsiveness lists, budget discipline and domestic life competence challenges.'}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {LIFE_EXERCISES.map((ex, idx) => {
+                      const isCompleted = completedLifeIds.has(ex.id);
+                      return (
+                        <div
+                          key={ex.id}
+                          className={`group bg-[#15274c]/90 border p-5 rounded-2xl flex flex-col justify-between transition-all duration-300 relative overflow-hidden ${
+                            isCompleted
+                              ? 'border-emerald-500/20 bg-[#0b1710]/85 hover:border-emerald-500/40'
+                              : 'border-white/5 hover:border-emerald-500/25 hover:bg-[#1d2f56]/80 shadow-lg'
+                          }`}
+                        >
+                          {/* Top row icons & badges */}
+                          <div className="flex justify-between items-start mb-3">
+                            <span className="text-2xl">{ex.emoji}</span>
+                            <div className="flex flex-col items-end gap-1">
+                              <span className="text-[9px] bg-slate-900 border border-white/5 py-0.5 px-2 rounded-md font-bold text-slate-400 font-mono">
+                                #{idx + 1}
+                              </span>
+                              {isCompleted && (
+                                <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 py-0.5 px-2 rounded-md font-bold">
+                                  ✓ {isRtl ? 'مكتمل' : 'Completed'}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="space-y-1 text-right flex-1 mb-4">
+                            <h3 className="text-xs font-black text-slate-100 group-hover:text-emerald-300 transition-colors block">
+                              {isRtl ? ex.title_ar : ex.title_en}
+                            </h3>
+                            <div className="flex justify-end gap-1.5 flex-wrap my-1 font-sans">
+                              <span className="text-[9px] bg-slate-950 border border-white/5 px-2 py-0.5 rounded-md text-emerald-400 font-bold font-mono">
+                                🎯 {isRtl ? ex.skill_focus : 'Focus Skill'}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                              {ex.description_ar}
+                            </p>
+                          </div>
+
+                          {/* CTA buttons */}
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={() => setSelectedLifeEx(ex)}
+                              className={`flex-1 py-1.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
+                                isCompleted
+                                  ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border-emerald-500/25'
+                                  : 'bg-emerald-500/5 group-hover:bg-gradient-to-r group-hover:from-emerald-450 group-hover:via-teal-450 group-hover:to-cyan-400 group-hover:text-slate-950 text-emerald-400 border-emerald-500/10 group-hover:border-emerald-400'
+                              }`}
+                            >
+                              <span>⚡</span>
+                              {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
+                            </button>
+
+                            <button
+                              disabled={exportingExerciseId !== null}
+                              onClick={() => handleExportSingleExercise(ex, 'life')}
+                              className="bg-[#243d70] border border-white/5 hover:border-emerald-500 hover:text-emerald-300 text-slate-400 p-2 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
                               title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
                             >
                               {exportingExerciseId === ex.id ? (
@@ -6006,7 +6654,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
       </AnimatePresence>
 
       {/* 4. Deep Educational Value Guideline */}
-      <div className="bg-[#040915] border border-white/5 rounded-2xl p-6 text-right space-y-3">
+      <div className="bg-[#16274d] border border-white/5 rounded-2xl p-6 text-right space-y-3">
         <h4 className="text-xs font-black uppercase text-teal-400 tracking-wider flex items-center gap-1.5">
           <span>🧠</span>
           {isRtl ? 'العلم خلف واحة السكينة والهدوء:' : 'Cognitive Science behind the Serenity Oasis:'}
@@ -6031,7 +6679,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
       <div 
         id="balance-oasis-capture-card" 
         style={{ width: '700px', minHeight: '620px', position: 'absolute', top: '-10000px', left: '-10000px' }} 
-        className="bg-[#030712] text-white p-12 pr-12 pl-12 rounded-[2.5rem] border-4 border-[#C49E3A] relative font-sans text-right"
+        className="bg-[#142345] text-white p-12 pr-12 pl-12 rounded-[2.5rem] border-4 border-[#C49E3A] relative font-sans text-right"
       >
         <div className="absolute inset-0 bg-gradient-to-tr from-[#051025] to-slate-950 opacity-95 rounded-[2.3rem] -z-10" />
         {/* Decorative elements */}
@@ -6115,7 +6763,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
         <div 
           id="single-exercise-capture-card" 
           style={{ width: '700px', minHeight: '620px', position: 'absolute', top: '-10000px', left: '-10000px' }} 
-          className="bg-[#020617] text-white p-12 pr-12 pl-12 rounded-[2rem] border border-slate-800/80 relative font-tajawal text-right shadow-2xl"
+          className="bg-[#112145] text-white p-12 pr-12 pl-12 rounded-[2rem] border border-slate-800/80 relative font-tajawal text-right shadow-2xl"
         >
           {/* Elegant background gradients - strictly dark mode tech-theme to match Bright Companion */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#091530] via-[#020617] to-[#020617] rounded-[1.9rem] -z-10" />
