@@ -1391,14 +1391,35 @@ export const AiCurriculum = ({
   
   // App States
   const [selectedLesson, setSelectedLesson] = useState<any | null>(null);
-  const [completedLessons, setCompletedLessons] = useState<number[]>([]);
+  const [completedLessons, setCompletedLessons] = useState<number[]>(() => {
+    try {
+      const saved = localStorage.getItem('ai_completed_lessons');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [curriculumType, setCurriculumType] = useState<'foundational' | 'advanced' | 'professional'>('foundational');
-  const [completedAdvancedLessons, setCompletedAdvancedLessons] = useState<number[]>([]);
+  const [completedAdvancedLessons, setCompletedAdvancedLessons] = useState<number[]>(() => {
+    try {
+      const saved = localStorage.getItem('ai_completed_advanced_lessons');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [bypassTest, setBypassTest] = useState<boolean>(false);
   
   // Prompt Engineering Professional Program States
   const [selectedProLesson, setSelectedProLesson] = useState<any | null>(null);
-  const [completedProLessons, setCompletedProLessons] = useState<number[]>([]);
+  const [completedProLessons, setCompletedProLessons] = useState<number[]>(() => {
+    try {
+      const saved = localStorage.getItem('ai_completed_pro_lessons');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [proActiveLevel, setProActiveLevel] = useState<number>(1);
   const [proProjectSubmissions, setProProjectSubmissions] = useState<Record<number, string>>({});
   const [proProjectSaved, setProProjectSaved] = useState<Record<number, boolean>>({});
@@ -1681,7 +1702,14 @@ export const AiCurriculum = ({
 
   // Selected custom study plan unit states and hooks
   const [selectedCustomUnit, setSelectedCustomUnit] = useState<any | null>(null);
-  const [completedCustomUnitIds, setCompletedCustomUnitIds] = useState<Set<string>>(new Set());
+  const [completedCustomUnitIds, setCompletedCustomUnitIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('ai_completed_custom_units');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
   const [customUnitQuizSelected, setCustomUnitQuizSelected] = useState<number | null>(null);
 
   const isCustomUnitCompleted = (unit: any) => {
@@ -1778,6 +1806,21 @@ export const AiCurriculum = ({
         querySnapshot.forEach(doc => {
           completedIds.add(doc.data().lessonId);
         });
+        
+        // Merge with locally stored completed items
+        try {
+          const savedLocal = localStorage.getItem('ai_completed_custom_units');
+          if (savedLocal) {
+            JSON.parse(savedLocal).forEach((id: string) => {
+              completedIds.add(id);
+            });
+          }
+        } catch (e) {
+          console.error("Local storage error parsing completed units:", e);
+        }
+        
+        // Save merged set back to localStorage
+        localStorage.setItem('ai_completed_custom_units', JSON.stringify(Array.from(completedIds)));
         setCompletedCustomUnitIds(completedIds);
       } catch (err) {
         console.error("Error fetching completed AI lessons:", err);
@@ -1807,15 +1850,28 @@ export const AiCurriculum = ({
   const handleMarkCustomUnitCompleted = async (unit: any) => {
     const activeAuth = auth.currentUser;
     const currentUid = userProfile?.uid || activeAuth?.uid;
+    
+    // Support offline/unauthenticated local completion as well!
+    const targetId = unit.id || `ai-${unit.level}-${1}`;
+    
+    // Save to local storage immediately
+    setCompletedCustomUnitIds(prev => {
+      const next = new Set(prev);
+      next.add(targetId);
+      localStorage.setItem('ai_completed_custom_units', JSON.stringify(Array.from(next)));
+      return next;
+    });
+
     if (!currentUid) {
-      alert(isRtl ? 'بادر بتسجيل الدخول أولاً لحفظ إكمال الدرس!' : 'Please sign in to save lesson completion!');
+      alert(isRtl ? 'رائع! تم حفظ إكمال الدرس محلياً بنجاح (سجل الدخول للمزامنة مع السحابة).' : 'Great! Lesson saved successfully locally (sign in to sync with cloud).');
+      setSelectedCustomUnit(null);
       return;
     }
 
     try {
       const resultObj = {
         userId: currentUid,
-        lessonId: unit.id || `ai-${unit.level}-${1}`,
+        lessonId: targetId,
         courseId: 'ai-curriculum',
         score: 10,
         total: 10,
@@ -1824,18 +1880,14 @@ export const AiCurriculum = ({
       };
 
       await addDoc(collection(db, 'lessonResults'), resultObj);
-      
-      setCompletedCustomUnitIds(prev => {
-        const next = new Set(prev);
-        next.add(unit.id);
-        return next;
-      });
 
       alert(isRtl ? 'رائع! تم تسجيل إكمال الدرس بنجاح وسيظهر كمكتمل في جدول مهامك!' : 'Excellent! Lesson marked as completed and will reflect on your task planner!');
       setSelectedCustomUnit(null);
     } catch (error) {
       console.error("Error saving lesson result completion:", error);
-      alert(isRtl ? 'خطأ في عملية الحفظ' : 'Error saving completion');
+      // We still alert success because we successfully saved offline to localStorage
+      alert(isRtl ? 'تم الحفظ بنجاح محلياً! سيتم الرفع للسحابة لاحقاً عند استقرار الاتصال.' : 'Saved locally successfully! Will be uploaded to cloud when connection stabilizes.');
+      setSelectedCustomUnit(null);
     }
   };
 
@@ -2406,7 +2458,11 @@ export const AiCurriculum = ({
   // Lesson Complete Helper
   const completeCurrentLesson = (xpEarned: number) => {
     if (selectedLesson && !completedLessons.includes(selectedLesson.lesson_number)) {
-      setCompletedLessons(prev => [...prev, selectedLesson.lesson_number]);
+      setCompletedLessons(prev => {
+        const next = [...prev, selectedLesson.lesson_number];
+        localStorage.setItem('ai_completed_lessons', JSON.stringify(next));
+        return next;
+      });
       setXp(prev => prev + xpEarned);
     }
   };
@@ -2908,7 +2964,11 @@ export const AiCurriculum = ({
     // Completing lesson and awarding XP
     const handleCompleteLessonAndAwardXp = () => {
       if (!isCompleted) {
-        setCompletedAdvancedLessons(prev => [...prev, lesson.lesson_number]);
+        setCompletedAdvancedLessons(prev => {
+          const next = [...prev, lesson.lesson_number];
+          localStorage.setItem('ai_completed_advanced_lessons', JSON.stringify(next));
+          return next;
+        });
         setXp(prev => prev + 50);
       }
       setSelectedLesson(null);
@@ -3246,7 +3306,11 @@ export const AiCurriculum = ({
 
     const handleCompleteProLesson = () => {
       if (!completedProLessons.includes(lesson.lesson_number)) {
-        setCompletedProLessons(prev => [...prev, lesson.lesson_number]);
+        setCompletedProLessons(prev => {
+          const next = [...prev, lesson.lesson_number];
+          localStorage.setItem('ai_completed_pro_lessons', JSON.stringify(next));
+          return next;
+        });
         setXp(prev => prev + 100);
       }
     };

@@ -48,7 +48,9 @@ import {
   Download,
   Zap,
   Mic,
-  Smile
+  Smile,
+  Menu,
+  MoreHorizontal
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'motion/react';
@@ -3532,6 +3534,7 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [view, setView] = useState<AppView>('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedReadingLevel, setSelectedReadingLevel] = useState<ReadingLevel>('A1');
   const [selectedGrammarLevel, setSelectedGrammarLevel] = useState<GrammarLevel>('A1');
   const [selectedConversationLevel, setSelectedConversationLevel] = useState<ConversationLevel>('A1');
@@ -5437,66 +5440,266 @@ export default function App() {
                 </div>
               </aside>
 
-              {/* Mobile Bottom Navigation - Two Floors */}
-              <nav className="md:hidden fixed bottom-2 left-3 right-3 bg-[#002147] text-white rounded-[2rem] p-2 flex flex-col gap-1 z-50 shadow-2xl border-b-4 border-[#C49E3A] overflow-hidden">
+              {/* Sleek Mobile Bottom Navigation Bar */}
+              <nav className="md:hidden fixed bottom-4 left-4 right-4 bg-[#002147] text-white rounded-[2rem] p-2 flex justify-around items-center z-50 shadow-2xl border-b-4 border-[#C49E3A] h-16">
                 {[
-                  [
-                    { id: 'dashboard', icon: LayoutDashboard },
-                    { id: 'academic-planner', icon: Sparkles },
-                    { id: 'oxford-discover', icon: OxfordIcon },
-                    { id: 'oxford-classic', icon: OxfordClassicIcon },
-                    { id: 'modern-curriculum', icon: BookOpen },
-                    { id: 'ai-curriculum', icon: Brain },
-                    { id: 'balance-oasis', icon: Smile },
-                    { id: 'early-childhood', icon: Baby },
-                  ],
-                  [
-                    { id: 'interactive-learning', icon: Gamepad2 },
-                    { id: 'story-library', icon: BookMarked },
-                    { id: 'pronunciation-lab', icon: Mic },
-                    { id: 'video-library', icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
-                    { id: 'progress', icon: BarChart3 },
-                    { id: 'ai-chat', icon: Mic2 },
-                    ...(isAdmin ? [{ id: 'admin', icon: ShieldAlert }] : []),
-                  ]
-                ].map((row, rowIndex) => (
-                  <div key={`mobile-nav-row-${rowIndex}`} className={`flex justify-around items-center w-full ${rowIndex === 1 ? 'border-t border-white/5 pt-1' : ''}`}>
-                    {row.filter((item: any) => item.show !== false).map((item: any, itemIndex: number) => {
-                      const isDisabled = item.disabled;
-                      return (
-                        <button 
-                          key={`mobile-nav-item-${item.id}-${itemIndex}`}
-                          disabled={isDisabled}
-                          onClick={() => {
-                            if (item.id === 'ai-chat') {
-                              handleStartAiChat();
-                            } else if (item.action) {
-                              item.action();
-                            } else {
-                              setView(item.id as AppView);
-                            }
-                          }}
-                          className={`flex flex-col items-center justify-center p-1 rounded-xl transition-all relative ${
-                            view === item.id 
-                            ? 'text-[#C49E3A] scale-110' : 'text-white/40'
-                          } ${isDisabled ? 'opacity-30 grayscale cursor-not-allowed' : ''}`}
-                        >
-                          <item.icon size={18} strokeWidth={view === item.id ? 3 : 2} />
-                          {view === item.id && (
-                            <motion.div 
-                              layoutId="activeTab"
-                              className="absolute -bottom-0.5 w-1 h-1 bg-[#C49E3A] rounded-full"
-                            />
-                          )}
-                          {isDisabled && (
-                            <span className="absolute -top-1 -right-1 text-[5px] font-black bg-red-500 text-white px-1 rounded-full">{isRtl ? 'قريباً' : 'SOON'}</span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))}
+                  { id: 'dashboard', label: isRtl ? 'الرئيسية' : 'Home', icon: LayoutDashboard },
+                  { id: 'ai-curriculum', label: isRtl ? 'الذكاء' : 'AI Unit', icon: Brain },
+                  { id: 'academic-planner', label: isRtl ? 'الجدول' : 'Planner', icon: Sparkles },
+                  { id: 'interactive-learning', label: isRtl ? 'الألعاب' : 'Play', icon: Gamepad2 },
+                  { id: 'more-menu', label: isRtl ? 'الأقسام' : 'More', icon: Menu, action: () => setIsMobileMenuOpen(true) },
+                ].map((item, idx) => {
+                  const isActive = view === item.id;
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={`mobile-nav-tab-${item.id}-${idx}`}
+                      onClick={() => {
+                        if (item.action) {
+                          item.action();
+                        } else {
+                          setView(item.id as AppView);
+                          setIsMobileMenuOpen(false);
+                        }
+                      }}
+                      className={`flex flex-col items-center justify-center flex-1 py-1 rounded-2xl transition-all relative ${
+                        isActive ? 'text-[#C49E3A] scale-110' : 'text-white/50 hover:text-white'
+                      }`}
+                    >
+                      <Icon size={20} strokeWidth={isActive ? 2.5 : 2} className="shrink-0 mb-0.5 animate-duration-1000" />
+                      <span className="text-[9px] font-black tracking-tight block leading-none">{item.label}</span>
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeTabDot"
+                          className="absolute -bottom-1 w-1.5 h-1.5 bg-[#C49E3A] rounded-full"
+                        />
+                      )}
+                    </button>
+                  );
+                })}
               </nav>
+
+              {/* High-Fidelity Mobile Full Navigation Bottom Sheet */}
+              <AnimatePresence>
+                {isMobileMenuOpen && (
+                  <>
+                    {/* Backdrop */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="md:hidden fixed inset-0 bg-slate-950/65 backdrop-blur-md z-[1002]"
+                    />
+
+                    {/* Drawer sheet container */}
+                    <motion.div
+                      initial={{ y: "100%" }}
+                      animate={{ y: 0 }}
+                      exit={{ y: "100%" }}
+                      transition={{ type: "spring", damping: 28, stiffness: 220 }}
+                      className="md:hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] shadow-2xl z-[1003] max-h-[85vh] overflow-y-auto border-t border-slate-100 flex flex-col font-sans"
+                      dir={isRtl ? 'rtl' : 'ltr'}
+                    >
+                      {/* Drag Indicator handle */}
+                      <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto my-4 shrink-0 cursor-pointer" onClick={() => setIsMobileMenuOpen(false)} />
+
+                      {/* Header title */}
+                      <div className="px-6 pb-4 flex justify-between items-center border-b border-slate-100 shrink-0">
+                        <div>
+                          <h3 className="text-base font-black text-[#002147] tracking-tight">{isRtl ? 'جميع أقسام الأكاديمية والمهارات' : 'All Academy Departments & Hubs'}</h3>
+                          <p className="text-[10px] text-[#C49E3A] font-black uppercase tracking-widest mt-0.5">{isRtl ? 'تصفح بمرونة عالية' : 'Browse with high responsive speed'}</p>
+                        </div>
+                        <button
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-all cursor-pointer"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+
+                      {/* Organized Categories list */}
+                      <div className="p-6 space-y-6 pb-24 overflow-y-auto">
+                        
+                        {/* 📚 Category: Academic & Core Curriculums */}
+                        <div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="text-xs bg-blue-50 text-[#002147] px-2.5 py-1 rounded-full font-black tracking-widest">{isRtl ? '👨‍🎓 الأكاديمية والخطط' : 'CORE PATHWAYS'}</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2.5">
+                            {[
+                              { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
+                              { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
+                              { id: 'oxford-discover', label: isRtl ? 'أوكسفورد المطور' : 'Oxford Discover', icon: Layers },
+                              { id: 'oxford-classic', label: isRtl ? 'أوكسفورد الكلاسيكي' : 'Classic Oxford', icon: OxfordClassicIcon },
+                              { id: 'modern-curriculum', label: isRtl ? 'المناهج المطورة' : 'Modernized Curriculas', icon: BookOpen },
+                              { id: 'ai-curriculum', label: isRtl ? 'منهج الذكاء الاصطناعي 🧠' : 'AI Curriculum 🧠', icon: Brain },
+                            ].map((item) => {
+                              const isActive = view === item.id;
+                              const Icon = item.icon;
+                              return (
+                                <button
+                                  key={`drawer-acad-${item.id}`}
+                                  onClick={() => {
+                                    setView(item.id as AppView);
+                                    setIsMobileMenuOpen(false);
+                                  }}
+                                  className={`flex items-center gap-3 p-3 rounded-2xl border text-right transition-all cursor-pointer ${
+                                    isActive 
+                                      ? 'bg-amber-500/10 border-amber-400 text-[#002147] font-black shadow-sm' 
+                                      : 'bg-slate-50/80 border-slate-100 hover:bg-slate-100/50 text-[#002147] font-bold'
+                                  }`}
+                                >
+                                  <Icon size={16} className={`shrink-0 ${isActive ? 'text-amber-600' : 'text-slate-400'}`} />
+                                  <span className="text-[11px] truncate">{item.label}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* 🎙️ Category: Interactive Lab & Practice */}
+                        <div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="text-xs bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-full font-black tracking-widest">{isRtl ? '🎙️ مختبر المحادثة والنطق' : 'PRACTICE LABS'}</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2.5">
+                            {[
+                              { id: 'interactive-learning', label: isRtl ? 'تعليم تفاعلي ⚡' : 'Interactive Play ⚡', icon: Gamepad2 },
+                              { id: 'pronunciation-lab', label: isRtl ? 'معمل النطق' : 'Pronunciation Lab', icon: Mic },
+                              { id: 'ai-chat', label: t.aiPartner, icon: Mic2, action: handleStartAiChat },
+                              { id: 'story-library', label: t.storyLibrary, icon: BookMarked },
+                              { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
+                              { id: 'professional-development', label: isRtl ? 'دورات التطوير المهني' : 'Professional Courses', icon: GraduationCap },
+                            ].map((item) => {
+                              const isActive = view === item.id;
+                              const Icon = item.icon;
+                              const isDisabled = item.disabled;
+                              return (
+                                <button
+                                  key={`drawer-lab-${item.id}`}
+                                  disabled={isDisabled}
+                                  onClick={() => {
+                                    if (item.action) {
+                                      item.action();
+                                    } else {
+                                      setView(item.id as AppView);
+                                    }
+                                    setIsMobileMenuOpen(false);
+                                  }}
+                                  className={`flex items-center gap-3 p-3 rounded-2xl border text-right transition-all cursor-pointer ${
+                                    isActive 
+                                      ? 'bg-amber-500/10 border-amber-400 text-[#002147] font-black shadow-sm' 
+                                      : 'bg-slate-50/80 border-slate-100 hover:bg-slate-100/50 text-[#002147] font-bold'
+                                  } ${isDisabled ? 'opacity-30 grayscale cursor-not-allowed' : ''}`}
+                                >
+                                  <Icon size={16} className={`shrink-0 ${isActive ? 'text-amber-600' : 'text-slate-400'}`} />
+                                  <span className="text-[11px] truncate flex-1">{item.label}</span>
+                                  {isDisabled && <span className="text-[7px] font-black bg-red-400 text-white px-1 py-0.5 rounded-full">{isRtl ? 'قريباً' : 'SOON'}</span>}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* 🌊 Category: Chill & Family const */}
+                        <div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="text-xs bg-amber-50 text-amber-900 px-2.5 py-1 rounded-full font-black tracking-widest">{isRtl ? '😊 الطفل والعائلة' : 'WELLNESS & CHILDHOOD'}</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2.5">
+                            {[
+                              { id: 'balance-oasis', label: isRtl ? 'واحة التوازن 🌊' : 'Balance Oasis 🌊', icon: Smile },
+                              { id: 'early-childhood', label: t.earlyChildhood, icon: Baby },
+                            ].map((item) => {
+                              const isActive = view === item.id;
+                              const Icon = item.icon;
+                              return (
+                                <button
+                                  key={`drawer-fam-${item.id}`}
+                                  onClick={() => {
+                                    setView(item.id as AppView);
+                                    setIsMobileMenuOpen(false);
+                                  }}
+                                  className={`flex items-center gap-3 p-3 rounded-2xl border text-right transition-all cursor-pointer ${
+                                    isActive 
+                                      ? 'bg-amber-500/10 border-amber-400 text-[#002147] font-black shadow-sm' 
+                                      : 'bg-slate-50/80 border-slate-100 hover:bg-slate-100/50 text-[#002147] font-bold'
+                                  }`}
+                                >
+                                  <Icon size={16} className={`shrink-0 ${isActive ? 'text-amber-600' : 'text-slate-400'}`} />
+                                  <span className="text-[11px] truncate">{item.label}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* 📊 Category: Social & Standings */}
+                        <div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="text-xs bg-purple-50 text-purple-900 px-2.5 py-1 rounded-full font-black tracking-widest">{isRtl ? '🏆 الترتيب والمجتمع' : 'SOCIAL & STATS'}</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2.5">
+                            {[
+                              { id: 'progress', label: t.performance, icon: BarChart3 },
+                              { id: 'leaderboard', label: t.leaderboard, icon: Trophy },
+                              { id: 'chat', label: t.chat, icon: MessageSquare },
+                              ...(isAdmin ? [{ id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert }] : []),
+                            ].map((item) => {
+                              const isActive = view === item.id;
+                              const Icon = item.icon;
+                              return (
+                                <button
+                                  key={`drawer-social-${item.id}`}
+                                  onClick={() => {
+                                    setView(item.id as AppView);
+                                    setIsMobileMenuOpen(false);
+                                  }}
+                                  className={`flex items-center gap-3 p-3 rounded-2xl border text-right transition-all cursor-pointer ${
+                                    isActive 
+                                      ? 'bg-amber-500/10 border-amber-400 text-[#002147] font-black shadow-sm' 
+                                      : 'bg-slate-50/80 border-slate-100 hover:bg-slate-100/50 text-[#002147] font-bold'
+                                  }`}
+                                >
+                                  <Icon size={16} className={`shrink-0 ${isActive ? 'text-amber-600' : 'text-slate-400'}`} />
+                                  <span className="text-[11px] truncate">{item.label}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* ⚙️ Category: System Quick Settings */}
+                        <div className="border-t border-slate-150 pt-5 flex items-center justify-between gap-4">
+                          <button
+                            onClick={() => {
+                              setLang(lang === 'ar' ? 'en' : 'ar');
+                              setIsMobileMenuOpen(false);
+                            }}
+                            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-[#002147] text-xs font-black transition-colors"
+                          >
+                            <Settings size={16} />
+                            <span>{t.languageToggle}</span>
+                          </button>
+                          
+                          <button
+                            onClick={() => {
+                              setIsMobileMenuOpen(false);
+                              handleLogout();
+                            }}
+                            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-red-50 hover:bg-red-100 text-red-600 text-xs font-black transition-colors"
+                          >
+                            <LogOut size={16} />
+                            <span>{t.logout}</span>
+                          </button>
+                        </div>
+
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
             </>
           )}
 
