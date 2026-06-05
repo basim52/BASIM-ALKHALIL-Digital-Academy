@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import html2canvas from 'html2canvas';
 import { 
   Wind, 
   Sparkles, 
@@ -1043,14 +1044,25 @@ interface BalanceOasisProps {
   isRtl?: boolean;
   onLessonCompleted?: (lessonId: string) => void;
   completedLessonIds?: Set<string>;
+  studentName?: string;
 }
 
 export const BalanceOasis: React.FC<BalanceOasisProps> = ({ 
   isRtl = true, 
   onLessonCompleted, 
-  completedLessonIds = new Set() 
+  completedLessonIds = new Set(),
+  studentName = ''
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<'calm' | 'move' | 'writing' | 'emotion' | 'communication' | 'leadership' | 'teamwork'>('calm');
+
+  const [customStudentName, setCustomStudentName] = useState<string>(studentName);
+  const [isExporting, setIsExporting] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (studentName) {
+      setCustomStudentName(studentName);
+    }
+  }, [studentName]);
 
   // Active critical reflective writing states
   const [selectedWritingEx, setSelectedWritingEx] = useState<WritingExercise | null>(null);
@@ -1846,6 +1858,57 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
   const totalAvailable = EXERCISES.length + MOVEMENT_EXERCISES.length + WRITING_EXERCISES.length + EMOTION_EXERCISES.length + COMMUNICATION_EXERCISES.length + LEADERSHIP_EXERCISES.length + TEAMWORK_EXERCISES.length;
   const progressPercent = totalAvailable > 0 ? Math.round((totalCompleted / totalAvailable) * 100) : 0;
 
+  // Compile lists of all completed exercises for the certificate download
+  const completedCalmList = EXERCISES.filter(ex => localCompletedIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedMoveList = MOVEMENT_EXERCISES.filter(ex => completedMoveIds.has(ex.id)).map(ex => isRtl ? ex.command_ar : ex.command_en);
+  const completedWritingList = WRITING_EXERCISES.filter(ex => completedWritingIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedEmotionList = EMOTION_EXERCISES.filter(ex => completedEmotionIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedCommList = COMMUNICATION_EXERCISES.filter(ex => completedCommIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedLeaderList = LEADERSHIP_EXERCISES.filter(ex => completedLeaderIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedTeamList = TEAMWORK_EXERCISES.filter(ex => completedTeamIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+
+  const allCompletedTitles = [
+    ...completedCalmList,
+    ...completedMoveList,
+    ...completedWritingList,
+    ...completedEmotionList,
+    ...completedCommList,
+    ...completedLeaderList,
+    ...completedTeamList
+  ];
+
+  const handleExportOasisCard = async () => {
+    setIsExporting(true);
+    setTimeout(async () => {
+      const element = document.getElementById('balance-oasis-capture-card');
+      if (element) {
+        try {
+          const canvas = await html2canvas(element, {
+            useCORS: true,
+            scale: 2,
+            backgroundColor: '#030712',
+            logging: false,
+            onclone: (clonedDoc) => {
+              const el = clonedDoc.getElementById('balance-oasis-capture-card');
+              if (el) {
+                el.style.display = 'block';
+                el.style.position = 'relative';
+              }
+            }
+          });
+          const link = document.createElement('a');
+          link.href = canvas.toDataURL('image/png');
+          link.download = `Oasis-Achievements-${customStudentName || 'Hero'}-${new Date().getTime()}.png`;
+          link.click();
+        } catch (error) {
+          console.error("Error generating Balance Oasis report card image:", error);
+          alert(isRtl ? 'حدث خطأ أثناء تصدير بطاقة الإنجاز كصورة' : 'Error exporting achievement card image');
+        }
+      }
+      setIsExporting(false);
+    }, 400);
+  };
+
   return (
     <div className="w-full text-right space-y-8" dir={isRtl ? 'rtl' : 'ltr'}>
       
@@ -1870,8 +1933,8 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             </p>
           </div>
 
-          {/* Progress Widget */}
-          <div className="bg-[#050c18] border border-white/5 rounded-2xl p-5 w-full md:w-64 space-y-3">
+          {/* Progress Widget & Customizable Export Dashboard */}
+          <div className="bg-[#050c18] border border-white/5 rounded-2xl p-5 w-full md:w-72 space-y-3 shrink-0">
             <div className="flex justify-between items-center text-xs">
               <span className="text-slate-400 font-bold">{isRtl ? 'إجمالي الإنجاز بالواحة:' : 'Oasis Progress:'}</span>
               <span className="text-teal-400 font-black font-mono tracking-tight">{totalCompleted} / {totalAvailable}</span>
@@ -1887,6 +1950,37 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             <div className="flex justify-between items-center text-[10px] text-slate-500">
               <span>{isRtl ? 'مؤشر التوازن الكلي' : 'Total Balance Index'}</span>
               <span className="text-emerald-300 font-bold">{progressPercent}%</span>
+            </div>
+
+            <div className="border-t border-white/5 pt-2.5 space-y-2">
+              <label className="block text-[10px] text-slate-400 font-bold text-right">
+                {isRtl ? 'اسم البطل على بطاقة الإنجاز:' : 'Hero Name on Certificate:'}
+              </label>
+              <input
+                type="text"
+                value={customStudentName}
+                onChange={(e) => setCustomStudentName(e.target.value)}
+                placeholder={isRtl ? 'اكتب اسمك هنا لتخصيص الصورة' : 'Type name here to customize'}
+                className="w-full bg-slate-950 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 text-right transition-all block"
+              />
+              
+              <button
+                disabled={isExporting}
+                onClick={handleExportOasisCard}
+                className="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 disabled:opacity-50 text-slate-950 font-black py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all cursor-pointer mt-1"
+              >
+                {isExporting ? (
+                  <>
+                    <RefreshCw size={13} className="animate-spin text-slate-950" />
+                    <span>{isRtl ? 'جاري التصدير...' : 'Exporting...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Download size={13} strokeWidth={3} className="text-slate-950" />
+                    <span>{isRtl ? 'تحميل بطاقة الإنجاز 📸' : 'Download report card 📸'}</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -4147,6 +4241,89 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
           <div className="space-y-1 bg-white/[0.01] p-4 rounded-xl border border-white/5">
             <h5 className="font-extrabold text-white">{isRtl ? '3. التفوق العائلي ومشاركة الأهل' : '3. Family Collaborative Flow'}</h5>
             <p>{isRtl ? 'مشاركة الأبناء والأسرة في تحدي الكنغر أو الطيران كالعصفور يخفف عبء الشاشات ويجعل جو الدراسة والتعلم ممتعاً للغاية.' : 'Sharing physical breaks within the household shifts technical learning from isolated screen static into high-energy, collaborative play.'}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Hidden high-fidelity certificate for exporting */}
+      <div 
+        id="balance-oasis-capture-card" 
+        style={{ display: 'none', width: '700px', minHeight: '620px', position: 'absolute', top: '-10000px', left: '-10000px' }} 
+        className="bg-[#030712] text-white p-12 pr-12 pl-12 rounded-[2.5rem] border-4 border-[#C49E3A] relative font-sans text-right"
+      >
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#051025] to-slate-950 opacity-95 rounded-[2.3rem] -z-10" />
+        {/* Decorative elements */}
+        <div className="absolute top-10 right-10 w-24 h-24 rounded-full border border-amber-500/10 -z-5" />
+        <div className="absolute bottom-10 left-10 w-40 h-40 rounded-full border border-teal-500/10 -z-5" />
+
+        <div className="flex justify-between items-start border-b border-white/10 pb-6 mb-8">
+          <div>
+            <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest text-left">Academic Companion</h4>
+            <span className="text-base font-black text-white tracking-widest block text-left">BRIGHT COMPANION ACADEMY</span>
+          </div>
+          <div className="text-right font-mono text-[9px] text-[#C49E3A] uppercase font-bold leading-tight">
+            <div>Authentic Learning Record</div>
+            <div>Balance & Mindfulness Oasis</div>
+            <div>Date: {new Date().toLocaleDateString('ar-EG')}</div>
+          </div>
+        </div>
+
+        {/* Logo/Badge */}
+        <div className="flex flex-col items-center justify-center text-center my-6">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#C49E3A] to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/20 mb-3 border-2 border-white/20">
+            <span className="text-2xl">🏆</span>
+          </div>
+          <h2 className="text-[#C49E3A] text-2xl font-black tracking-tight leading-none">
+            {isRtl ? 'شهادة التوازن والسلام الداخلي' : 'Mindfulness & Balance Certificate'}
+          </h2>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
+            {isRtl ? 'مكافآت وإنجازات واحة الطالب الذكية' : 'Student Oasis Rewards & Smart Achievements'}
+          </p>
+        </div>
+
+        <div className="my-8 text-center space-y-4">
+          <p className="text-xs text-slate-300 font-medium">
+            {isRtl ? 'تمنح هذه الشهادة المعتمدة لـلبـطل المتميز:' : 'This certificate is awarded to the distinguished student:'}
+          </p>
+          <div className="inline-block border-b-2 border-dashed border-[#C49E3A] pb-1 px-8">
+            <h1 className="text-3xl font-black text-white tracking-tight">{customStudentName || (isRtl ? 'بطل الأكاديمية' : 'Academy Hero')}</h1>
+          </div>
+          <p className="text-xs text-slate-300 leading-relaxed max-w-lg mx-auto">
+            {isRtl 
+              ? `الذي أتم بنجاح ومثابرة تمارين واحة التوازن والسكينة بمعدل إنجاز كلي بلغ (${progressPercent}%)، مبرهناً على جدارته في تنظيم طاقته النفسية، ممارسة الاستماع الواعي والتواصل الإيجابي، والتحضير الفعال للدراسة.` 
+              : `who successfully completed the Balance Oasis courses and mindfulness breaks with an completion score of (${progressPercent}%), showing exceptional growth, active emotional regulation, and deep communication skills.`}
+          </p>
+        </div>
+
+        {/* Grid of completed titles / milestones */}
+        <div className="bg-slate-900/65 border border-white/5 rounded-2xl p-5 my-6">
+          <h3 className="text-[10px] uppercase text-[#C49E3A] font-black tracking-widest mb-3 text-right">
+            {isRtl ? '📋 نماذج التمارين التي أنجزها البطل:' : '📋 Experices Successfully Completed:'}
+          </h3>
+          <div className="grid grid-cols-2 gap-2 text-right">
+            {allCompletedTitles.length > 0 ? (
+              allCompletedTitles.slice(0, 6).map((title, index) => (
+                <div key={index} className="flex items-center gap-2 justify-end text-[10px] text-slate-300 font-bold">
+                  <span>{title}</span>
+                  <span className="text-emerald-400">✓</span>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-2 text-center text-slate-500 text-[10px] font-bold py-2">
+                {isRtl ? 'تفضل بإكمال أي تمرين لتحديث قائمة الإنجازات!' : 'Complete any exercise to list it here!'}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex justify-between items-end border-t border-white/5 pt-6 mt-8 text-xs text-slate-400 font-bold">
+          <div className="text-left font-mono text-[9px]">
+            <div>ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}</div>
+            <div>VERIFIED ACADEMIC RECORD</div>
+          </div>
+          <div className="text-right">
+            <p className="text-[#C49E3A] font-black">{isRtl ? 'مستشار التطوير النفسي والأكاديمي' : 'Academic & Developmental Supervisor'}</p>
+            <p className="text-[10px] text-slate-500">Bright Companion - AI Studio Platform</p>
           </div>
         </div>
       </div>

@@ -1410,6 +1410,47 @@ export const AiCurriculum = ({
   });
   const [bypassTest, setBypassTest] = useState<boolean>(false);
   
+  // Lesson Export States
+  const [lessonToExport, setLessonToExport] = useState<any | null>(null);
+  const [exportingLesson, setExportingLesson] = useState<boolean>(false);
+  const [exportTrackType, setExportTrackType] = useState<'foundational' | 'advanced' | 'pro' | null>(null);
+
+  const handleExportLessonAsImage = (lesson: any, trackType: 'foundational' | 'advanced' | 'pro') => {
+    setLessonToExport(lesson);
+    setExportTrackType(trackType);
+    setExportingLesson(true);
+
+    setTimeout(async () => {
+      const element = document.getElementById('lesson-capture-card');
+      if (element) {
+        try {
+          const canvas = await html2canvas(element, {
+            useCORS: true,
+            scale: 2,
+            backgroundColor: '#030712',
+            logging: false,
+            onclone: (clonedDoc) => {
+              const el = clonedDoc.getElementById('lesson-capture-card');
+              if (el) {
+                el.style.display = 'block';
+                el.style.position = 'relative';
+              }
+            }
+          });
+          const link = document.createElement('a');
+          link.href = canvas.toDataURL('image/png');
+          const cleanTitle = (lesson.lesson_title || `Lesson-${lesson.lesson_number}`).replace(/[\s\/:]/g, '-');
+          link.download = `Academy-Lesson-${lesson.lesson_number}-${cleanTitle}-${new Date().getTime()}.png`;
+          link.click();
+        } catch (error) {
+          console.error("Error creating lesson report card:", error);
+          alert(isRtl ? 'حدث خطأ أثناء الاتصال لتصدير بطاقة الدرس المعتمدة كصورة عالية الدقة' : 'Error generating certified lesson card image');
+        }
+      }
+      setExportingLesson(false);
+    }, 450);
+  };
+  
   // Prompt Engineering Professional Program States
   const [selectedProLesson, setSelectedProLesson] = useState<any | null>(null);
   const [completedProLessons, setCompletedProLessons] = useState<number[]>(() => {
@@ -2979,9 +3020,28 @@ export const AiCurriculum = ({
         {/* Left Column: Lesson card details */}
         <div className="lg:col-span-5 space-y-6">
           <div className="bg-[#0b172e] border border-white/10 rounded-[2rem] p-6 space-y-6">
-            <div>
-              <span className="px-2.5 py-0.5 bg-amber-500/10 text-amber-300 border border-amber-500/15 rounded-full text-[10px] font-black uppercase tracking-widest">{trackName}</span>
-              <h3 className="text-2xl font-black text-white mt-2 leading-tight">{lesson.lesson_title}</h3>
+            <div className="flex justify-between items-start gap-4">
+              <div className="flex-1 text-right">
+                <span className="px-2.5 py-0.5 bg-amber-500/10 text-amber-300 border border-amber-500/15 rounded-full text-[10px] font-black uppercase tracking-widest">{trackName}</span>
+                <h3 className="text-2xl font-black text-white mt-2 leading-tight">{lesson.lesson_title}</h3>
+              </div>
+              <button
+                disabled={exportingLesson}
+                onClick={() => handleExportLessonAsImage(lesson, 'advanced')}
+                className="bg-[#050b14] border border-amber-500/35 hover:bg-amber-500 hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
+              >
+                {exportingLesson && lessonToExport?.lesson_number === lesson.lesson_number ? (
+                  <>
+                    <RefreshCw size={13} className="animate-spin" />
+                    <span>{isRtl ? 'تحميل...' : 'Loading...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Download size={13} strokeWidth={3} />
+                    <span>{isRtl ? 'تصدير 📸' : 'Export 📸'}</span>
+                  </>
+                )}
+              </button>
             </div>
 
             <div className="space-y-4">
@@ -3330,9 +3390,28 @@ export const AiCurriculum = ({
                   {isRtl ? `المستوى ${Math.ceil(lesson.lesson_number / 6)} - الدرس ${lesson.lesson_number}` : `Level ${Math.ceil(lesson.lesson_number / 6)} - Lesson ${lesson.lesson_number}`}
                 </span>
               </div>
-              <h2 className="text-3xl font-black text-white leading-tight font-sans">
-                {lesson.lesson_title}
-              </h2>
+              <div className="flex justify-between items-center gap-4 flex-wrap">
+                <h2 className="text-3xl font-black text-white leading-tight font-sans">
+                  {lesson.lesson_title}
+                </h2>
+                <button
+                  disabled={exportingLesson}
+                  onClick={() => handleExportLessonAsImage(lesson, 'pro')}
+                  className="bg-[#050b14] border border-amber-500/35 hover:bg-amber-500 hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
+                >
+                  {exportingLesson && lessonToExport?.lesson_number === lesson.lesson_number ? (
+                    <>
+                      <RefreshCw size={13} className="animate-spin" />
+                      <span>{isRtl ? 'تحميل...' : 'Loading...'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download size={13} strokeWidth={3} />
+                      <span>{isRtl ? 'تصدير 📸' : 'Export 📸'}</span>
+                    </>
+                  )}
+                </button>
+              </div>
               <p className="text-slate-400 text-xs max-w-3xl leading-relaxed">
                 {isRtl ? 'مستواك الحالي في ريادة الأوامر يتطلب مواءمة المتغيرات المتقدمة وصقل هيكل المطالبة لتفادي هلوسة المخرجات اللغوية.' : 'Your professional current position demands deep alignment of variables and robust formatting schemas to fully safeguard outputs.'}
               </p>
@@ -8760,9 +8839,28 @@ Output Summary for [${topic}]:
               <div className="lg:col-span-4 space-y-6">
                 {/* Information Node */}
                 <div className="bg-[#0b172e] border border-white/5 rounded-[2rem] p-6 space-y-6">
-                  <div>
-                    <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">{isRtl ? 'الدرس النشط' : 'ACTIVE EXERCISE'}</span>
-                    <h3 className="text-2xl font-black text-white mt-1 leading-tight">{selectedLesson.lesson_title}</h3>
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1 text-right">
+                      <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">{isRtl ? 'الدرس النشط' : 'ACTIVE EXERCISE'}</span>
+                      <h3 className="text-2xl font-black text-white mt-1 leading-tight">{selectedLesson.lesson_title}</h3>
+                    </div>
+                    <button
+                      disabled={exportingLesson}
+                      onClick={() => handleExportLessonAsImage(selectedLesson, 'foundational')}
+                      className="bg-[#050b14] border border-amber-500/35 hover:bg-amber-500 hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
+                    >
+                      {exportingLesson && lessonToExport?.lesson_number === selectedLesson.lesson_number ? (
+                        <>
+                          <RefreshCw size={13} className="animate-spin" />
+                          <span>{isRtl ? 'تحميل...' : 'Loading...'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Download size={13} strokeWidth={3} />
+                          <span>{isRtl ? 'تصدير 📸' : 'Export 📸'}</span>
+                        </>
+                      )}
+                    </button>
                   </div>
 
                   <div className="space-y-4">
@@ -10511,6 +10609,108 @@ Output Summary for [${topic}]:
           )}
         </AnimatePresence>
       </main>
+
+      {/* Hidden high-fidelity certificate for exporting AI lessons */}
+      {lessonToExport && (
+        <div 
+          id="lesson-capture-card" 
+          style={{ display: 'none', width: '700px', minHeight: '620px', position: 'absolute', top: '-10000px', left: '-10000px' }} 
+          className="bg-[#030712] text-white p-12 pr-12 pl-12 rounded-[2.5rem] border-4 border-[#C49E3A] relative font-sans text-right"
+        >
+          <div className="absolute inset-0 bg-gradient-to-tr from-[#0b172e] to-slate-950 opacity-95 rounded-[2.3rem] -z-10" />
+          {/* Subtle glowing accents */}
+          <div className="absolute top-10 right-10 w-24 h-24 rounded-full border border-amber-500/10 -z-5" />
+          <div className="absolute bottom-10 left-10 w-40 h-40 rounded-full border border-teal-500/10 -z-5" />
+
+          {/* Academic Headings */}
+          <div className="flex justify-between items-start border-b border-white/10 pb-6 mb-8" dir="rtl">
+            <div className="text-left font-sans">
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Bright Companion Academy</h4>
+              <span className="text-xs font-black text-[#C49E3A] block text-left">أكاديمية المبتكر الصغير</span>
+            </div>
+            {/* Custom dynamic student info */}
+            <div className="text-right font-mono text-[9px] text-[#C49E3A] uppercase font-bold leading-tight">
+              <div>Certified Learning Record</div>
+              <div>AI Curriculum Track</div>
+              <div>Date: {new Date().toLocaleDateString('ar-EG')}</div>
+            </div>
+          </div>
+
+          {/* Golden Academy Logo Seal */}
+          <div className="flex flex-col items-center justify-center text-center my-4">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#C49E3A] to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/20 mb-3 border-2 border-white/20">
+              <span className="text-2xl">🎓</span>
+            </div>
+            <h2 className="text-[#C49E3A] text-2xl font-black tracking-tight leading-none">
+              {isRtl ? 'وثيقة تفوق وإنجاز أكاديمية معتمدة' : 'Academic Excellence Achievement'}
+            </h2>
+            <div className="px-3.5 py-1 bg-white/5 rounded-full border border-white/10 mt-2.5 inline-block text-[10px] text-amber-300 font-extrabold whitespace-nowrap">
+              {exportTrackType === 'foundational' && (isRtl ? 'مسار الذكاء الاصطناعي الأساسي للأطفال' : 'Foundational AI Track')}
+              {exportTrackType === 'advanced' && (isRtl ? 'مسار التطبيقات الذكية المتقدمة' : 'Advanced AI Apps Track')}
+              {exportTrackType === 'pro' && (isRtl ? 'مسار هندسة المطالبات والريادة الاحترافية' : 'Prompt Engineering Pro Track')}
+            </div>
+          </div>
+
+          {/* Main certified student citation */}
+          <div className="my-6 text-center space-y-4" dir="rtl">
+            <p className="text-xs text-slate-300 font-medium">
+              {isRtl ? 'تشهد الأكاديمية بفخر ومباركة بأن البطل المبدع:' : 'The Academy proudly certifies that the outstanding student:'}
+            </p>
+            <div className="inline-block border-b-2 border-dashed border-[#C49E3A] pb-1 px-8">
+              <h1 className="text-2xl font-black text-white tracking-tight">
+                {userProfile?.displayName ? userProfile.displayName : (isRtl ? 'رائد الذكاء الاصطناعي المتميز' : 'Promising AI Pioneer')}
+              </h1>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed max-w-lg mx-auto">
+              {isRtl 
+                ? `قد أتم بنجاح ومثابرة دراسة وتطبيق الدرس رقم (${lessonToExport.lesson_number}): "${lessonToExport.lesson_title}"، مبرهناً على استيعاب عميق للمفاهيم الأساسية والأخلاقية وصناعة الابتكارات الفريدة بالذكاء الاصطناعي.`
+                : `has successfully and with high diligence mastered Lesson (${lessonToExport.lesson_number}): "${lessonToExport.lesson_title}", proving deep grasp of generative methodologies, design mechanics, and ethical dimensions.`}
+            </p>
+          </div>
+
+          {/* Dynamic details for standard vs advanced vs pro */}
+          <div className="bg-slate-900/70 border border-white/5 rounded-2xl p-5 my-6 text-right" dir="rtl">
+            <h3 className="text-[10px] uppercase text-[#C49E3A] font-black tracking-widest mb-3">
+              {isRtl ? '📌 المعارف والخبرات التي استعرضها البطل:' : '📌 Core Concepts & Project Skills:'}
+            </h3>
+            <div className="space-y-2">
+              {/* Concept detail */}
+              <div className="text-[11px] text-slate-300 leading-relaxed">
+                <span className="text-amber-400 font-bold ml-1">🧠 {isRtl ? 'الفكرة الجوهرية للدرس:' : 'Core Lesson Idea:'}</span>
+                {lessonToExport.core_concept || (lessonToExport.lesson_card && lessonToExport.lesson_card.content) || (isRtl ? 'تحسين صياغة وهيكلة المطالبات المهندسة للحصول على نتائج لغوية وصوتية دقيقة ومثالية.' : 'Refining instructions and variables to guarantee solid, context-aware output values.')}
+              </div>
+              
+              {/* Family/Startup Activity detail */}
+              {lessonToExport.family_activity && (
+                <div className="text-[11px] text-slate-300 leading-relaxed pt-1.5 border-t border-white/5">
+                  <span className="text-amber-400 font-bold ml-1">🏠 {isRtl ? 'النشاط العائلي المنجز شفهياً:' : 'Completed Family Active Play:'}</span>
+                  <strong>{lessonToExport.family_activity.activity_name}</strong> - {lessonToExport.family_activity.activity_description}
+                </div>
+              )}
+
+              {lessonToExport.lesson_card && lessonToExport.lesson_card.section_title && (
+                <div className="text-[11px] text-slate-300 leading-relaxed pt-1.5 border-t border-white/5">
+                  <span className="text-amber-400 font-bold ml-1">⭐️ {isRtl ? 'المهارة التطبيقية في الوشاح:' : 'Hands-on Skill Focus:'}</span>
+                  {lessonToExport.lesson_card.section_title} - {lessonToExport.lesson_card.content ? lessonToExport.lesson_card.content.substring(0, 150) : ''}...
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Certificate Footer */}
+          <div className="flex justify-between items-end border-t border-white/5 pt-6 mt-8 text-xs text-slate-400 font-bold" dir="rtl">
+            <div className="text-right">
+              <p className="text-[#C49E3A] font-black">{isRtl ? 'نهج التطوير والتعليم المنهجي الفعال' : 'Academic & Developmental Supervisor'}</p>
+              <p className="text-[10px] text-slate-500">Bright Companion - AI Studio Platform</p>
+            </div>
+            <div className="text-left font-mono text-[9px] text-slate-500">
+              <div>Code: Academy-AI-L{lessonToExport.lesson_number}-{Math.random().toString(36).substr(2, 6).toUpperCase()}</div>
+              <div>VERIFIED AUTHENTIC LEARNING RECORD</div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
