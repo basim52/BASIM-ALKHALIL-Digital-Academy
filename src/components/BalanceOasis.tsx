@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import { 
   Wind, 
   Sparkles, 
@@ -1058,6 +1059,21 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
   const [customStudentName, setCustomStudentName] = useState<string>(studentName);
   const [isExporting, setIsExporting] = useState<boolean>(false);
 
+  // Single Exercise Export States
+  interface SharedExportExercise {
+    id: string;
+    title: string;
+    category: string;
+    categoryEn: string;
+    content: string;
+    steps?: string[];
+    benefitLabel?: string;
+    benefit?: string;
+    emoji?: string;
+  }
+  const [exerciseToExport, setExerciseToExport] = useState<SharedExportExercise | null>(null);
+  const [exportingExerciseId, setExportingExerciseId] = useState<string | null>(null);
+
   useEffect(() => {
     if (studentName) {
       setCustomStudentName(studentName);
@@ -1883,30 +1899,190 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
       const element = document.getElementById('balance-oasis-capture-card');
       if (element) {
         try {
-          const canvas = await html2canvas(element, {
-            useCORS: true,
-            scale: 2,
+          const originalStyle = element.getAttribute('style') || '';
+          element.setAttribute('style', 'width: 700px; min-height: 620px; position: fixed; top: 0px; left: 0px; z-index: -9999; opacity: 0.99; pointer-events: none;');
+
+          const options = {
+            cacheBust: true,
+            pixelRatio: 2.5,
             backgroundColor: '#030712',
-            logging: false,
-            onclone: (clonedDoc) => {
-              const el = clonedDoc.getElementById('balance-oasis-capture-card');
-              if (el) {
-                el.style.display = 'block';
-                el.style.position = 'relative';
+            styleSheetsFilter: (styleSheet: CSSStyleSheet) => {
+              try {
+                const rules = styleSheet.cssRules;
+                return true;
+              } catch (e) {
+                return false;
               }
             }
-          });
+          };
+
+          // Call toPng twice: first call caches font/styling assets, second call outputs high-quality image
+          await toPng(element, options);
+          const dataUrl = await toPng(element, options);
+
+          // Restore original hidden style
+          element.setAttribute('style', originalStyle);
+
           const link = document.createElement('a');
-          link.href = canvas.toDataURL('image/png');
+          link.href = dataUrl;
           link.download = `Oasis-Achievements-${customStudentName || 'Hero'}-${new Date().getTime()}.png`;
           link.click();
         } catch (error) {
           console.error("Error generating Balance Oasis report card image:", error);
-          alert(isRtl ? 'حدث خطأ أثناء تصدير بطاقة الإنجاز كصورة' : 'Error exporting achievement card image');
+          alert(isRtl ? 'حدث خطأ أثناء تصدير بطاقة الإنجاز كصورة عالية الدقة' : 'Error exporting achievement card image');
         }
       }
       setIsExporting(false);
     }, 400);
+  };
+
+  const handleExportSingleExercise = (ex: any, type: 'calm' | 'move' | 'writing' | 'emotion' | 'communication' | 'leadership' | 'teamwork') => {
+    let title = '';
+    let category = '';
+    let categoryEn = '';
+    let content = '';
+    let steps: string[] = [];
+    let benefitLabel = isRtl ? 'الفائدة والأثر والنفسي المكتسب:' : 'Developmental Benefit Focus:';
+    let benefit = '';
+    let emoji = '🧘';
+
+    if (type === 'calm') {
+      title = isRtl ? ex.title_ar : ex.title_en;
+      category = 'واحة السكينة والتركيز الدراسي';
+      categoryEn = 'Calm & Intellectual focus Oasis';
+      content = isRtl ? ex.script_ar : ex.script_en;
+      benefit = isRtl ? 'يساعد على خفض درجات التوتر النفسي والذهني وتهدئة النبض وتثبيت الانتباه وبث طاقة الدرس.' : 'Helps minimize intellectual cognitive stress, slow down heart rates, and foster overall learning patience.';
+      emoji = '🧘';
+    } else if (type === 'move') {
+      title = isRtl ? ex.command_ar : ex.command_en;
+      category = 'التدفق والتنشيط الحركي الذكي';
+      categoryEn = 'Kinetic Flow & Energy breaks';
+      content = isRtl ? ex.description_ar : ex.command_en;
+      if (ex.say_while_moving) {
+        steps.push(isRtl ? `قل أثناء الحركة: "${ex.say_while_moving}"` : `Say while moving: "${ex.say_while_moving}"`);
+      }
+      benefit = isRtl ? ex.benefit_ar : 'Reduces muscle fatigue and refreshes screen-tired vision.';
+      emoji = '🏃';
+    } else if (type === 'writing') {
+      title = isRtl ? ex.title_ar : ex.title_en;
+      category = 'التفكير التأملي والتحليل اللإبداعي كتابةً';
+      categoryEn = 'Reflective Writing & Critical Creativity';
+      content = isRtl ? ex.description_ar : ex.title_en;
+      if (ex.steps_ar) {
+        steps = Array.isArray(ex.steps_ar) ? ex.steps_ar : [ex.steps_ar];
+      }
+      if (ex.skill_focus) {
+        benefitLabel = isRtl ? 'مهارات التعبير المستهدفة:' : 'Creative Skill Focus:';
+        benefit = isRtl ? ex.skill_focus : 'Fosters creative and personal synthesis skills.';
+      }
+      emoji = ex.emoji || '✍️';
+    } else if (type === 'emotion') {
+      title = isRtl ? ex.title_ar : ex.title_en;
+      category = 'الذكاء الوجداني والوعي الذاتي';
+      categoryEn = 'Social Emotional Intellect';
+      content = isRtl ? ex.description_ar : ex.title_en;
+      if (ex.exercise_steps_ar) {
+        steps = Array.isArray(ex.exercise_steps_ar) ? ex.exercise_steps_ar : [ex.exercise_steps_ar];
+      }
+      if (ex.core_purpose_ar) {
+        benefitLabel = isRtl ? 'الهدف النفسي الذاتي:' : 'Core Emotional Purpose:';
+        benefit = ex.core_purpose_ar;
+      }
+      emoji = ex.emoji || '🧠';
+    } else if (type === 'communication') {
+      title = isRtl ? ex.title_ar : ex.title_en;
+      category = 'البلاغة والتواصل الاجتماعي الفعال';
+      categoryEn = 'Dynamic Eloquent Communication';
+      content = isRtl ? ex.description_ar : ex.title_en;
+      if (ex.step_by_step_ar) {
+        steps = Array.isArray(ex.step_by_step_ar) ? ex.step_by_step_ar : [ex.step_by_step_ar];
+      }
+      if (ex.social_skill_ar) {
+        benefitLabel = isRtl ? 'المهارة الدبلوماسية المكتسبة:' : 'Target Social Skill:';
+        benefit = ex.social_skill_ar;
+      }
+      emoji = ex.emoji || '🗣️';
+    } else if (type === 'leadership') {
+      title = isRtl ? ex.title_ar : ex.title_en;
+      category = 'روح المبادرة والقيادة الريادية';
+      categoryEn = 'Pioneering Leadership & Bravery';
+      content = isRtl ? ex.mission_brief_ar : ex.title_en;
+      if (ex.action_challenge_ar) {
+        steps.push(isRtl ? `تحدي المهمة القيادية: ${ex.action_challenge_ar}` : `Action Challenge: ${ex.action_challenge_ar}`);
+      }
+      if (ex.leadership_lens_ar) {
+        benefitLabel = isRtl ? 'المنظور القيادي والشخصي المطور:' : 'Leadership Perspective:';
+        benefit = ex.leadership_lens_ar;
+      }
+      emoji = ex.emoji || '👑';
+    } else if (type === 'teamwork') {
+      title = isRtl ? ex.title_ar : ex.title_en;
+      category = 'التعاون التشاركي والتلاحم الأسري';
+      categoryEn = 'Cooperative Team Cohesion';
+      content = isRtl ? ex.coop_activity_ar : ex.title_en;
+      if (ex.connection_prompt_ar) {
+        steps.push(isRtl ? `حوار التلاحم الفكري الأسري: "${ex.connection_prompt_ar}"` : `Connection Query: "${ex.connection_prompt_ar}"`);
+      }
+      if (ex.cohesion_focus_ar) {
+        benefitLabel = isRtl ? 'البعد التشاركي المعزز للمهارات:' : 'Cohesion Goal:';
+        benefit = ex.cohesion_focus_ar;
+      }
+      emoji = ex.emoji || '🤝';
+    }
+
+    setExerciseToExport({
+      id: ex.id,
+      title,
+      category,
+      categoryEn,
+      content,
+      steps,
+      benefitLabel,
+      benefit,
+      emoji
+    });
+    setExportingExerciseId(ex.id);
+
+    setTimeout(async () => {
+      const element = document.getElementById('single-exercise-capture-card');
+      if (element) {
+        try {
+          const originalStyle = element.getAttribute('style') || '';
+          element.setAttribute('style', 'width: 700px; min-height: 620px; position: fixed; top: 0px; left: 0px; z-index: -9999; opacity: 0.99; pointer-events: none;');
+
+          const options = {
+            cacheBust: true,
+            pixelRatio: 2.5,
+            backgroundColor: '#020617',
+            styleSheetsFilter: (styleSheet: CSSStyleSheet) => {
+              try {
+                const rules = styleSheet.cssRules;
+                return true;
+              } catch (e) {
+                return false;
+              }
+            }
+          };
+
+          // Call toPng twice: first call caches font/styling assets, second call outputs high-quality image
+          await toPng(element, options);
+          const dataUrl = await toPng(element, options);
+
+          // Restore original hidden style
+          element.setAttribute('style', originalStyle);
+
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          const cleanTitle = title.replace(/[\s\/:]/g, '-');
+          link.download = `Oasis-Exercise-${cleanTitle}-${new Date().getTime()}.png`;
+          link.click();
+        } catch (error) {
+          console.error("Error creating exercise card:", error);
+          alert(isRtl ? 'حدث خطأ أثناء تصدير بطاقة التمرين كصورة عالية الدقة' : 'Error generating certified exercise card image');
+        }
+      }
+      setExportingExerciseId(null);
+    }, 450);
   };
 
   return (
@@ -2373,7 +2549,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                 </div>
 
                 {/* Audio Reader & Assistive Guidance */}
-                <div className="flex gap-2 justify-center items-center">
+                <div className="flex gap-2 flex-wrap justify-center items-center">
                   <button 
                     onClick={speechPlaybackActive ? stopSpeech : speakTranscript}
                     className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${
@@ -2386,6 +2562,21 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     {speechPlaybackActive 
                       ? (isRtl ? 'إيقاف قارئ الصوت' : 'Stop Audio Voice') 
                       : (isRtl ? 'قراءة النص بصوت المساعد 🎙️' : 'Read Aloud with Coach 🎙️')}
+                  </button>
+
+                  {/* Export Exercise as High-Quality Image */}
+                  <button
+                    disabled={exportingExerciseId !== null}
+                    onClick={() => handleExportSingleExercise(selectedEx, 'calm')}
+                    className="bg-amber-500/10 border border-amber-500/20 hover:border-amber-500 hover:text-amber-300 text-[#C49E3A] px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+                    title={isRtl ? "تصدير وحفظ بطاقة التمرين كصورة عالية الدقة 📸" : "Export Exercise Card as Image 📸"}
+                  >
+                    {exportingExerciseId === selectedEx.id ? (
+                      <RefreshCw size={13} className="animate-spin text-amber-500" />
+                    ) : (
+                      <span>📸</span>
+                    )}
+                    {isRtl ? 'حفظ للتصدير كصورة' : 'Save as Image'}
                   </button>
 
                   <button 
@@ -2489,7 +2680,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                 </div>
 
                 {/* Playback Trigger & Complete Button */}
-                <div className="flex gap-2 justify-center items-center">
+                <div className="flex gap-2 flex-wrap justify-center items-center">
                   <button 
                     onClick={moveSpeechActive ? stopSpeech : speakMoveTranscript}
                     className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${
@@ -2502,6 +2693,21 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     {moveSpeechActive 
                       ? (isRtl ? 'إيقاف دليل الصوت' : 'Stop Audio Guide') 
                       : (isRtl ? 'قراءة التحدي بصوت المساعد 🎙️' : 'Read Out Challenge 🎙️')}
+                  </button>
+
+                  {/* Export Exercise as High-Quality Image */}
+                  <button
+                    disabled={exportingExerciseId !== null}
+                    onClick={() => handleExportSingleExercise(selectedMoveEx, 'move')}
+                    className="bg-amber-500/10 border border-amber-500/20 hover:border-amber-500 hover:text-amber-300 text-[#C49E3A] px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+                    title={isRtl ? "تصدير وحفظ بطاقة التمرين كصورة عالية الدقة 📸" : "Export Exercise Card as Image 📸"}
+                  >
+                    {exportingExerciseId === selectedMoveEx.id ? (
+                      <RefreshCw size={13} className="animate-spin text-amber-500" />
+                    ) : (
+                      <span>📸</span>
+                    )}
+                    {isRtl ? 'حفظ للتصدير كصورة' : 'Save as Image'}
                   </button>
 
                   <button 
@@ -2600,18 +2806,33 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           </p>
                         </div>
 
-                        {/* Play Session CTA */}
-                        <button
-                          onClick={() => handleStartSession(ex)}
-                          className={`w-full mt-2 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border ${
-                            isCompleted 
-                              ? 'bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-300 border-emerald-500/10'
-                              : 'bg-teal-500/5 group-hover:bg-teal-500 group-hover:text-slate-950 text-teal-400 border-teal-500/10 group-hover:border-teal-500'
-                          }`}
-                        >
-                          <Play size={11} fill="currentColor" />
-                          {isRtl ? 'البدء بتمارين الهدوء' : 'Begin Relaxation'}
-                        </button>
+                        {/* Play Session CTA and Export */}
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={() => handleStartSession(ex)}
+                            className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border ${
+                              isCompleted 
+                                ? 'bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-300 border-emerald-500/10'
+                                : 'bg-teal-500/5 group-hover:bg-teal-500 group-hover:text-slate-950 text-teal-400 border-teal-500/10 group-hover:border-teal-500'
+                            }`}
+                          >
+                            <Play size={11} fill="currentColor" />
+                            {isRtl ? 'البدء بتمرين الهدوء' : 'Begin Relaxation'}
+                          </button>
+                          
+                          <button
+                            disabled={exportingExerciseId !== null}
+                            onClick={() => handleExportSingleExercise(ex, 'calm')}
+                            className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                            title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
+                          >
+                            {exportingExerciseId === ex.id ? (
+                              <RefreshCw size={12} className="animate-spin text-amber-400" />
+                            ) : (
+                              <Download size={12} strokeWidth={3} />
+                            )}
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
@@ -2671,18 +2892,33 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           </p>
                         </div>
 
-                        {/* CTA button */}
-                        <button
-                          onClick={() => handleStartMoveSession(ex)}
-                          className={`w-full mt-2 py-2 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border ${
-                            isCompleted 
-                              ? 'bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-300 border-emerald-500/10'
-                              : 'bg-amber-500/5 group-hover:bg-amber-500 group-hover:text-slate-950 text-amber-400 border-amber-500/20 group-hover:border-amber-500'
-                          }`}
-                        >
-                          <span>🏃</span>
-                          {isRtl ? 'البدء بتحدي الحركة' : 'Start Active Break'}
-                        </button>
+                        {/* CTA button and Export */}
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={() => handleStartMoveSession(ex)}
+                            className={`flex-1 py-2 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border ${
+                              isCompleted 
+                                ? 'bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-300 border-emerald-500/10'
+                                : 'bg-amber-500/5 group-hover:bg-amber-500 group-hover:text-slate-950 text-amber-400 border-amber-500/20 group-hover:border-amber-500'
+                            }`}
+                          >
+                            <span>🏃</span>
+                            {isRtl ? 'البدء بتحدي الحركة' : 'Start Active Break'}
+                          </button>
+
+                          <button
+                            disabled={exportingExerciseId !== null}
+                            onClick={() => handleExportSingleExercise(ex, 'move')}
+                            className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                            title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
+                          >
+                            {exportingExerciseId === ex.id ? (
+                              <RefreshCw size={12} className="animate-spin text-amber-400" />
+                            ) : (
+                              <Download size={12} strokeWidth={3} />
+                            )}
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
@@ -2817,6 +3053,21 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                         >
                           <Download size={13} />
                           {isRtl ? 'تحميل النص' : 'Download TXT'}
+                        </button>
+
+                        {/* Export Exercise as High-Quality Image */}
+                        <button
+                          disabled={exportingExerciseId !== null}
+                          onClick={() => handleExportSingleExercise(selectedWritingEx, 'writing')}
+                          className="bg-amber-500/10 border border-amber-500/20 hover:border-amber-500 hover:text-amber-300 text-[#C49E3A] px-3 py-2 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+                          title={isRtl ? "تصدير وحفظ بطاقة التمرين كصورة عالية الدقة 📸" : "Export Exercise Card as Image 📸"}
+                        >
+                          {exportingExerciseId === selectedWritingEx.id ? (
+                            <RefreshCw size={13} className="animate-spin text-amber-500" />
+                          ) : (
+                            <span>📸</span>
+                          )}
+                          {isRtl ? 'حفظ للتصدير كصورة' : 'Save as Image'}
                         </button>
 
                         {/* Print Note */}
@@ -3011,18 +3262,33 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             </p>
                           </div>
 
-                          {/* Open Notepad CTA */}
-                          <button
-                            onClick={() => setSelectedWritingEx(ex)}
-                            className={`w-full mt-2 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
-                              isCompleted
-                                ? 'bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-300 border-emerald-500/10'
-                                : 'bg-purple-500/5 group-hover:bg-purple-500 group-hover:text-slate-950 text-purple-400 border-purple-500/10 group-hover:border-purple-500'
-                            }`}
-                          >
-                            <FileText size={11} />
-                            {isRtl ? 'فتح التحدي ودفتر التعبير' : 'Open Creative Notepad'}
-                          </button>
+                          {/* Open Notepad CTA and Export */}
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={() => setSelectedWritingEx(ex)}
+                              className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
+                                isCompleted
+                                  ? 'bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-300 border-emerald-500/10'
+                                  : 'bg-purple-500/5 group-hover:bg-purple-500 group-hover:text-slate-950 text-purple-400 border-purple-500/10 group-hover:border-purple-500'
+                              }`}
+                            >
+                              <FileText size={11} />
+                              {isRtl ? 'فتح التحدي ودفتر التعبير' : 'Open Creative Notepad'}
+                            </button>
+
+                            <button
+                              disabled={exportingExerciseId !== null}
+                              onClick={() => handleExportSingleExercise(ex, 'writing')}
+                              className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
+                            >
+                              {exportingExerciseId === ex.id ? (
+                                <RefreshCw size={12} className="animate-spin text-amber-400" />
+                              ) : (
+                                <Download size={12} strokeWidth={3} />
+                              )}
+                            </button>
+                          </div>
                         </div>
                       );
                     })}
@@ -3115,7 +3381,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       </div>
 
                       {/* Toolshelf for Reading Steps Out Loud */}
-                      <div className="flex border-t border-white/5 pt-4">
+                      <div className="flex flex-wrap gap-2 border-t border-white/5 pt-4">
                         <button
                           onClick={() => {
                             if (speechPlaybackActive) {
@@ -3143,6 +3409,20 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             ? (isRtl ? 'إيقاف قراءة الصوت' : 'Stop Reading')
                             : (isRtl ? 'تفقيط وقراءة خطوات التمرين بصوت مسموع' : 'Read Steps Aloud')
                           }
+                        </button>
+
+                        <button
+                          disabled={exportingExerciseId !== null}
+                          onClick={() => handleExportSingleExercise(selectedEmotionEx, 'emotion')}
+                          className="px-4 py-2 bg-amber-500/10 border border-amber-500/20 hover:border-amber-500 hover:text-amber-300 text-[#C49E3A] rounded-xl text-xs font-black flex items-center gap-1.5 transition cursor-pointer active:scale-95"
+                          title={isRtl ? "تصدير وحفظ بطاقة التمرين كصورة عالية الدقة 📸" : "Export Exercise Card as Image 📸"}
+                        >
+                          {exportingExerciseId === selectedEmotionEx.id ? (
+                            <RefreshCw size={13} className="animate-spin text-amber-500" />
+                          ) : (
+                            <span>📸</span>
+                          )}
+                          {isRtl ? 'حفظ وتصدير التمرين كصورة' : 'Save as Image'}
                         </button>
                       </div>
 
@@ -3444,18 +3724,33 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                               </p>
                             </div>
 
-                            {/* CTA button */}
-                            <button
-                              onClick={() => setSelectedEmotionEx(ex)}
-                              className={`w-full mt-2 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
-                                isCompleted
-                                  ? 'bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-300 border-emerald-500/10'
-                                  : 'bg-emerald-500/5 group-hover:bg-emerald-500 group-hover:text-slate-950 text-emerald-400 border-emerald-500/10 group-hover:border-emerald-500'
-                              }`}
-                            >
-                              <span>⚡</span>
-                              {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
-                            </button>
+                            {/* CTA button and Export */}
+                            <div className="flex gap-2 mt-2">
+                              <button
+                                onClick={() => setSelectedEmotionEx(ex)}
+                                className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
+                                  isCompleted
+                                    ? 'bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-300 border-emerald-500/10'
+                                    : 'bg-emerald-500/5 group-hover:bg-emerald-500 group-hover:text-slate-950 text-emerald-400 border-emerald-500/10 group-hover:border-emerald-500'
+                                }`}
+                              >
+                                <span>⚡</span>
+                                {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
+                              </button>
+
+                              <button
+                                disabled={exportingExerciseId !== null}
+                                onClick={() => handleExportSingleExercise(ex, 'emotion')}
+                                className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                                title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
+                              >
+                                {exportingExerciseId === ex.id ? (
+                                  <RefreshCw size={12} className="animate-spin text-amber-400" />
+                                ) : (
+                                  <Download size={12} strokeWidth={3} />
+                                )}
+                              </button>
+                            </div>
                           </div>
                         );
                       })}
@@ -3550,7 +3845,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       </div>
 
                       {/* Toolshelf for Reading Steps Out Loud */}
-                      <div className="flex border-t border-white/5 pt-4">
+                      <div className="flex flex-wrap gap-2 border-t border-white/5 pt-4">
                         <button
                           onClick={() => {
                             if (speechPlaybackActive) {
@@ -3578,6 +3873,20 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             ? (isRtl ? 'إيقاف قراءة الصوت' : 'Stop Reading')
                             : (isRtl ? 'تفقيط وقراءة خطوات التمرين بصوت مسموع' : 'Read Steps Aloud')
                           }
+                        </button>
+
+                        <button
+                          disabled={exportingExerciseId !== null}
+                          onClick={() => handleExportSingleExercise(selectedCommEx, 'communication')}
+                          className="px-4 py-2 bg-amber-500/10 border border-amber-500/20 hover:border-amber-500 hover:text-amber-300 text-[#C49E3A] rounded-xl text-xs font-black flex items-center gap-1.5 transition cursor-pointer active:scale-95"
+                          title={isRtl ? "تصدير وحفظ بطاقة التمرين كصورة عالية الدقة 📸" : "Export Exercise Card as Image 📸"}
+                        >
+                          {exportingExerciseId === selectedCommEx.id ? (
+                            <RefreshCw size={13} className="animate-spin text-amber-500" />
+                          ) : (
+                            <span>📸</span>
+                          )}
+                          {isRtl ? 'حفظ وتصدير التمرين كصورة' : 'Save as Image'}
                         </button>
                       </div>
 
@@ -3698,17 +4007,33 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           </div>
 
                           {/* CTA button */}
-                          <button
-                            onClick={() => setSelectedCommEx(ex)}
-                            className={`w-full mt-2 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
-                              isCompleted
-                                ? 'bg-blue-500/5 hover:bg-blue-500/10 text-blue-300 border-blue-500/10'
-                                : 'bg-blue-500/5 group-hover:bg-blue-500 group-hover:text-slate-950 text-blue-400 border-blue-500/10 group-hover:border-blue-500'
-                            }`}
-                          >
-                            <span>⚡</span>
-                            {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
-                          </button>
+                          {/* CTA button and Export */}
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={() => setSelectedCommEx(ex)}
+                              className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
+                                isCompleted
+                                  ? 'bg-blue-500/5 hover:bg-blue-500/10 text-blue-300 border-blue-500/10'
+                                  : 'bg-blue-500/5 group-hover:bg-blue-500 group-hover:text-slate-950 text-blue-400 border-blue-500/10 group-hover:border-blue-500'
+                              }`}
+                            >
+                              <span>⚡</span>
+                              {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
+                            </button>
+
+                            <button
+                              disabled={exportingExerciseId !== null}
+                              onClick={() => handleExportSingleExercise(ex, 'communication')}
+                              className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
+                            >
+                              {exportingExerciseId === ex.id ? (
+                                <RefreshCw size={12} className="animate-spin text-amber-400" />
+                              ) : (
+                                <Download size={12} strokeWidth={3} />
+                              )}
+                            </button>
+                          </div>
                         </div>
                       );
                     })}
@@ -3801,7 +4126,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       </div>
 
                       {/* Toolshelf for Reading Steps Out Loud */}
-                      <div className="flex border-t border-white/5 pt-4">
+                      <div className="flex flex-wrap gap-2 border-t border-white/5 pt-4">
                         <button
                           onClick={() => {
                             if (speechPlaybackActive) {
@@ -3829,6 +4154,20 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             ? (isRtl ? 'إيقاف قراءة الصوت' : 'Stop Reading')
                             : (isRtl ? 'تفقيط وقراءة خطوات التمرين بصوت مسموع' : 'Read Steps Aloud')
                           }
+                        </button>
+
+                        <button
+                          disabled={exportingExerciseId !== null}
+                          onClick={() => handleExportSingleExercise(selectedLeaderEx, 'leadership')}
+                          className="px-4 py-2 bg-amber-500/10 border border-amber-500/20 hover:border-amber-500 hover:text-amber-300 text-[#C49E3A] rounded-xl text-xs font-black flex items-center gap-1.5 transition cursor-pointer active:scale-95"
+                          title={isRtl ? "تصدير وحفظ بطاقة التمرين كصورة عالية الدقة 📸" : "Export Exercise Card as Image 📸"}
+                        >
+                          {exportingExerciseId === selectedLeaderEx.id ? (
+                            <RefreshCw size={13} className="animate-spin text-amber-500" />
+                          ) : (
+                            <span>📸</span>
+                          )}
+                          {isRtl ? 'حفظ وتصدير التمرين كصورة' : 'Save as Image'}
                         </button>
                       </div>
 
@@ -3949,17 +4288,33 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           </div>
 
                           {/* CTA button */}
-                          <button
-                            onClick={() => setSelectedLeaderEx(ex)}
-                            className={`w-full mt-2 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
-                              isCompleted
-                                ? 'bg-rose-500/5 hover:bg-rose-500/10 text-rose-300 border-rose-500/10'
-                                : 'bg-rose-500/5 group-hover:bg-rose-500 group-hover:text-slate-950 text-rose-400 border-rose-500/10 group-hover:border-rose-500'
-                            }`}
-                          >
-                            <span>⚡</span>
-                            {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
-                          </button>
+                          {/* CTA button and Export */}
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={() => setSelectedLeaderEx(ex)}
+                              className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
+                                isCompleted
+                                  ? 'bg-rose-500/5 hover:bg-rose-500/10 text-rose-300 border-rose-500/10'
+                                  : 'bg-rose-500/5 group-hover:bg-rose-500 group-hover:text-slate-950 text-rose-400 border-rose-500/10 group-hover:border-rose-500'
+                              }`}
+                            >
+                              <span>⚡</span>
+                              {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
+                            </button>
+
+                            <button
+                              disabled={exportingExerciseId !== null}
+                              onClick={() => handleExportSingleExercise(ex, 'leadership')}
+                              className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
+                            >
+                              {exportingExerciseId === ex.id ? (
+                                <RefreshCw size={12} className="animate-spin text-amber-400" />
+                              ) : (
+                                <Download size={12} strokeWidth={3} />
+                              )}
+                            </button>
+                          </div>
                         </div>
                       );
                     })}
@@ -4052,7 +4407,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       </div>
 
                       {/* Toolshelf for Reading Steps Out Loud */}
-                      <div className="flex border-t border-white/5 pt-4">
+                      <div className="flex flex-wrap gap-2 border-t border-white/5 pt-4">
                         <button
                           onClick={() => {
                             if (speechPlaybackActive) {
@@ -4080,6 +4435,20 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             ? (isRtl ? 'إيقاف قراءة الصوت' : 'Stop Reading')
                             : (isRtl ? 'تفقيط وقراءة خطوات التمرين بصوت مسموع' : 'Read Steps Aloud')
                           }
+                        </button>
+
+                        <button
+                          disabled={exportingExerciseId !== null}
+                          onClick={() => handleExportSingleExercise(selectedTeamEx, 'teamwork')}
+                          className="px-4 py-2 bg-amber-500/10 border border-amber-500/20 hover:border-amber-500 hover:text-amber-300 text-[#C49E3A] rounded-xl text-xs font-black flex items-center gap-1.5 transition cursor-pointer active:scale-95"
+                          title={isRtl ? "تصدير وحفظ بطاقة التمرين كصورة عالية الدقة 📸" : "Export Exercise Card as Image 📸"}
+                        >
+                          {exportingExerciseId === selectedTeamEx.id ? (
+                            <RefreshCw size={13} className="animate-spin text-amber-500" />
+                          ) : (
+                            <span>📸</span>
+                          )}
+                          {isRtl ? 'حفظ وتصدير التمرين كصورة' : 'Save as Image'}
                         </button>
                       </div>
 
@@ -4201,17 +4570,33 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           </div>
 
                           {/* CTA button */}
-                          <button
-                            onClick={() => setSelectedTeamEx(ex)}
-                            className={`w-full mt-2 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
-                              isCompleted
-                                ? 'bg-indigo-500/5 hover:bg-indigo-500/10 text-indigo-300 border-indigo-500/10'
-                                : 'bg-indigo-500/5 group-hover:bg-indigo-500 group-hover:text-slate-950 text-indigo-400 border-indigo-500/10 group-hover:border-indigo-500'
-                            }`}
-                          >
-                            <span>⚡</span>
-                            {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
-                          </button>
+                          {/* CTA button and Export */}
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={() => setSelectedTeamEx(ex)}
+                              className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
+                                isCompleted
+                                  ? 'bg-indigo-500/5 hover:bg-indigo-500/10 text-indigo-300 border-indigo-500/10'
+                                  : 'bg-indigo-500/5 group-hover:bg-indigo-500 group-hover:text-slate-950 text-indigo-400 border-indigo-500/10 group-hover:border-indigo-500'
+                              }`}
+                            >
+                              <span>⚡</span>
+                              {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
+                            </button>
+
+                            <button
+                              disabled={exportingExerciseId !== null}
+                              onClick={() => handleExportSingleExercise(ex, 'teamwork')}
+                              className="bg-[#0b172e] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                              title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
+                            >
+                              {exportingExerciseId === ex.id ? (
+                                <RefreshCw size={12} className="animate-spin text-amber-400" />
+                              ) : (
+                                <Download size={12} strokeWidth={3} />
+                              )}
+                            </button>
+                          </div>
                         </div>
                       );
                     })}
@@ -4248,7 +4633,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
       {/* Hidden high-fidelity certificate for exporting */}
       <div 
         id="balance-oasis-capture-card" 
-        style={{ display: 'none', width: '700px', minHeight: '620px', position: 'absolute', top: '-10000px', left: '-10000px' }} 
+        style={{ width: '700px', minHeight: '620px', position: 'absolute', top: '-10000px', left: '-10000px' }} 
         className="bg-[#030712] text-white p-12 pr-12 pl-12 rounded-[2.5rem] border-4 border-[#C49E3A] relative font-sans text-right"
       >
         <div className="absolute inset-0 bg-gradient-to-tr from-[#051025] to-slate-950 opacity-95 rounded-[2.3rem] -z-10" />
@@ -4259,7 +4644,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
         <div className="flex justify-between items-start border-b border-white/10 pb-6 mb-8">
           <div>
             <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest text-left">Academic Companion</h4>
-            <span className="text-base font-black text-white tracking-widest block text-left">BRIGHT COMPANION ACADEMY</span>
+            <span className="text-base font-black text-white tracking-widest block text-left">BASIM AL KHALIL DIGITAL ACADEMY</span>
           </div>
           <div className="text-right font-mono text-[9px] text-[#C49E3A] uppercase font-bold leading-tight">
             <div>Authentic Learning Record</div>
@@ -4323,10 +4708,107 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
           </div>
           <div className="text-right">
             <p className="text-[#C49E3A] font-black">{isRtl ? 'مستشار التطوير النفسي والأكاديمي' : 'Academic & Developmental Supervisor'}</p>
-            <p className="text-[10px] text-slate-500">Bright Companion - AI Studio Platform</p>
+            <p className="text-[10px] text-slate-500">Basim Al Khalil Digital Academy - AI Studio Platform</p>
           </div>
         </div>
       </div>
+
+      {/* Hidden high-fidelity template for exporting individual exercises */}
+      {exerciseToExport && (
+        <div 
+          id="single-exercise-capture-card" 
+          style={{ width: '700px', minHeight: '620px', position: 'absolute', top: '-10000px', left: '-10000px' }} 
+          className="bg-[#020617] text-white p-12 pr-12 pl-12 rounded-[2rem] border border-slate-800/80 relative font-tajawal text-right shadow-2xl"
+        >
+          {/* Elegant background gradients - strictly dark mode tech-theme to match Bright Companion */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#091530] via-[#020617] to-[#020617] rounded-[1.9rem] -z-10" />
+          
+          {/* Subtle architectural abstract decor */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/5 rounded-full blur-3xl -z-5" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl -z-5" />
+
+          {/* Premium Academy Branding Header */}
+          <div className="flex justify-between items-center border-b border-white/10 pb-5 mb-6" dir="rtl">
+            <div className="text-right font-tajawal">
+              <span className="text-sm font-black text-[#C49E3A] tracking-wide block mb-0.5">أكاديمية باسم آل خليل الرقمية</span>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest font-sans">Basim Al Khalil Digital Academy</p>
+            </div>
+            <div className="text-left font-sans">
+              <span className="px-3 py-1 bg-teal-500/10 border border-teal-500/20 text-teal-300 rounded-full text-[10px] font-extrabold uppercase tracking-widest block font-sans">
+                {isRtl ? 'واحة التوازن واليقظة الذاتية' : 'Mindfulness & Balance Oasis'}
+              </span>
+              <span className="text-[9px] text-slate-500 block font-sans text-left mt-1">Date: {new Date().toLocaleDateString('ar-EG')}</span>
+            </div>
+          </div>
+
+          {/* Category Tag & Icon */}
+          <div className="flex flex-col items-center justify-center text-center my-4">
+            <div className="w-14 h-14 rounded-2xl bg-slate-900/80 border border-slate-700/50 flex items-center justify-center shadow-lg mb-3">
+              <span className="text-2xl">{exerciseToExport.emoji || '🧘'}</span>
+            </div>
+            <span className="text-xs font-black text-amber-400 uppercase tracking-widest font-sans px-3 py-0.5 bg-amber-400/5 border border-amber-400/10 rounded-full font-tajawal">
+              {exerciseToExport.category}
+            </span>
+            <span className="text-[9px] text-slate-400 font-sans block mt-1 tracking-wider uppercase">{exerciseToExport.categoryEn}</span>
+          </div>
+
+          {/* Main Exercise Title */}
+          <div className="my-5 text-center px-4" dir="rtl">
+            <h1 className="text-2xl font-black text-white leading-tight tracking-tight font-tajawal">
+              {exerciseToExport.title}
+            </h1>
+            <div className="w-16 h-1 bg-gradient-to-r from-teal-500 to-amber-400 mx-auto rounded-full mt-3.5" />
+          </div>
+
+          {/* Exercise Script Description Container */}
+          <div className="bg-slate-900/50 border border-white/5 rounded-2xl p-6 my-5 text-right space-y-4" dir="rtl">
+            <div className="text-sm text-slate-200 leading-relaxed font-semibold font-tajawal pr-1">
+              {exerciseToExport.content}
+            </div>
+
+            {/* Steps & Challenges if present */}
+            {exerciseToExport.steps && exerciseToExport.steps.length > 0 && (
+              <div className="space-y-3 pt-4 border-t border-white/5 text-right">
+                <span className="text-[11px] text-teal-400 font-extrabold tracking-wide block mb-1">
+                  {isRtl ? '📝 خطوات وتطبيقات التحدي بالتفصيل:' : '📝 Step-by-Step Action Guidelines:'}
+                </span>
+                {exerciseToExport.steps.map((st, i) => (
+                  <div key={i} className="flex items-start gap-2.5 justify-start text-right">
+                    <span className="text-amber-400 text-sm leading-none mt-0.5 font-bold">✦</span>
+                    <p className="text-xs text-slate-300 font-medium leading-relaxed font-tajawal">
+                      {st}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Core Benefit Block */}
+          {exerciseToExport.benefit && (
+            <div className="bg-amber-500/5 border border-amber-500/15 rounded-xl p-4 my-4 text-right" dir="rtl">
+              <span className="text-[10px] text-amber-300 font-black tracking-widest block mb-1.5 uppercase font-tajawal">
+                {exerciseToExport.benefitLabel || (isRtl ? '📌 الأثر السلوكي والفوائد المكتسبة:' : '📌 Target Behavioral Benefit:')}
+              </span>
+              <p className="text-xs text-slate-300 font-medium leading-relaxed font-tajawal pr-1">
+                {exerciseToExport.benefit}
+              </p>
+            </div>
+          )}
+
+          {/* Footnote Branding Instead of Certificates */}
+          <div className="flex justify-between items-center border-t border-white/10 pt-5 mt-6 text-xs text-slate-400 font-bold" dir="rtl">
+            <div className="text-right font-tajawal">
+              <p className="text-white font-black text-xs leading-none">مبادرات السكينة واليقظة العائلية الذكية</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-1">تنمية المهارات الوجدانية وبناء القدرات الذاتية للطفل</p>
+            </div>
+            <div className="text-left font-mono text-[9px] text-slate-500">
+              <div className="text-left">Oasis-ID: {exerciseToExport.id.substring(0, 8).toUpperCase()}</div>
+              <div>ACCREDITED LEARNING ACTION RECORD</div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

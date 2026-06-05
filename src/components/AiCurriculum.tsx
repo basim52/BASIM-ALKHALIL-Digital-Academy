@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import { AI_TOOLS_DATA, AiTool } from './AiToolsData';
 import { PerfectionHub } from './PerfectionHub';
 import { BalanceOasis } from './BalanceOasis';
@@ -51,7 +52,8 @@ import {
   Calendar,
   ExternalLink,
   ShieldCheck,
-  Trash2
+  Trash2,
+  RefreshCw
 } from 'lucide-react';
 
 interface Lesson {
@@ -1424,27 +1426,40 @@ export const AiCurriculum = ({
       const element = document.getElementById('lesson-capture-card');
       if (element) {
         try {
-          const canvas = await html2canvas(element, {
-            useCORS: true,
-            scale: 2,
-            backgroundColor: '#030712',
-            logging: false,
-            onclone: (clonedDoc) => {
-              const el = clonedDoc.getElementById('lesson-capture-card');
-              if (el) {
-                el.style.display = 'block';
-                el.style.position = 'relative';
+          // Temporarily alter styling to bring the element into viewport and ensure it paints fully
+          const originalStyle = element.getAttribute('style') || '';
+          element.setAttribute('style', 'width: 700px; min-height: 620px; position: fixed; top: 0px; left: 0px; z-index: -9999; opacity: 0.99; pointer-events: none;');
+
+          const options = {
+            cacheBust: true,
+            pixelRatio: 2.5,
+            backgroundColor: '#020617',
+            styleSheetsFilter: (styleSheet: CSSStyleSheet) => {
+              try {
+                // If we can read cssRules without throwing a SecurityError, preserve it
+                const rules = styleSheet.cssRules;
+                return true;
+              } catch (e) {
+                return false;
               }
             }
-          });
+          };
+
+          // Call toPng twice: first call caches font/styling assets, second call outputs high-quality image
+          await toPng(element, options);
+          const dataUrl = await toPng(element, options);
+
+          // Restore original hidden style
+          element.setAttribute('style', originalStyle);
+
           const link = document.createElement('a');
-          link.href = canvas.toDataURL('image/png');
+          link.href = dataUrl;
           const cleanTitle = (lesson.lesson_title || `Lesson-${lesson.lesson_number}`).replace(/[\s\/:]/g, '-');
           link.download = `Academy-Lesson-${lesson.lesson_number}-${cleanTitle}-${new Date().getTime()}.png`;
           link.click();
         } catch (error) {
           console.error("Error creating lesson report card:", error);
-          alert(isRtl ? 'حدث خطأ أثناء الاتصال لتصدير بطاقة الدرس المعتمدة كصورة عالية الدقة' : 'Error generating certified lesson card image');
+          alert(isRtl ? 'حدث خطأ أثناء تصدير بطاقة الدرس المعتمدة كصورة عالية الدقة' : 'Error generating certified lesson card image');
         }
       }
       setExportingLesson(false);
@@ -7936,7 +7951,7 @@ Output Summary for [${topic}]:
 
                         {/* Student Name field */}
                         <div className="bg-white/5 p-5 rounded-2xl border border-white/5 space-y-3">
-                          <label className="block text-xs font-black text-amber-400">{isRtl ? 'اسم الطالب البطل المتخرج المراد طباعة اسمه:' : 'Enter Graduates Name:'}</label>
+                          <label className="block text-xs font-black text-[#6366f1]">{isRtl ? 'اسم الطالب البطل المتخرج المراد طباعة اسمه:' : 'Enter Graduates Name:'}</label>
                           <input
                             type="text"
                             value={certStudentName}
@@ -8558,15 +8573,33 @@ Output Summary for [${topic}]:
                                     : (isRtl ? 'حفظ في حسابي السحابي ☁️' : 'Save to Cloud ☁️')}
                                 </button>
                                 <button
-                                  onClick={() => {
+                                  onClick={async () => {
                                     const ref = document.getElementById('custom-plan-print-area');
                                     if (ref) {
-                                      html2canvas(ref, { scale: 2, useCORS: true, backgroundColor: '#050b14' }).then(canvas => {
+                                      try {
+                                        const options = {
+                                          cacheBust: true,
+                                          pixelRatio: 2.5,
+                                          backgroundColor: '#050b14',
+                                          styleSheetsFilter: (styleSheet: CSSStyleSheet) => {
+                                            try {
+                                              const rules = styleSheet.cssRules;
+                                              return true;
+                                            } catch (e) {
+                                              return false;
+                                            }
+                                          }
+                                        };
+                                        // Force cache and warm up resources, then capture
+                                        await toPng(ref, options);
+                                        const dataUrl = await toPng(ref, options);
                                         const link = document.createElement('a');
-                                        link.href = canvas.toDataURL("image/png");
+                                        link.href = dataUrl;
                                         link.download = `AI-StudyPlan-${plannerSubject}.png`;
                                         link.click();
-                                      });
+                                      } catch (error) {
+                                        console.error("Error creating study plan image:", error);
+                                      }
                                     }
                                   }}
                                   className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap w-full sm:w-auto justify-center"
@@ -9174,76 +9207,58 @@ Output Summary for [${topic}]:
                               <span>📸</span>
                               <span>{lFrownCountExceeded() ? (isRtl ? 'اكتمال عينات العبوس ✓' : 'Frown Dataset Ready ✓') : (isRtl ? 'التقط 10 صور للعبوس 😡' : 'Capture 50 Frown Samples (+10)')}</span>
                             </button>
+
                           </div>
-
                         </div>
 
-                        {/* Training Action */}
-                        <div className="pt-4 border-t border-white/5">
-                          {!(lSmileCountExceeded() && lFrownCountExceeded()) ? (
-                            <div className="p-4 bg-slate-900/40 border border-dashed border-white/10 rounded-2xl text-center text-xs font-medium text-slate-400">
+                        {!l2ModelReady && !l2Training && (
+                          <div className="p-6 bg-slate-900/40 rounded-2xl border border-white/5 text-center space-y-4">
+                            <h6 className="text-white text-sm font-black">
+                              {isRtl ? 'صندوق التحكم بالتدريب 🎛️' : 'Training Control Console 🎛️'}
+                            </h6>
+                            <p className="text-xs text-slate-400">
                               {isRtl 
-                                ? '💡 يرجى تصوير 50 صورة ابتسامة و50 صورة عبوس من أفراد العائلة لبدء تشغيل محرك التدريب.' 
-                                : '💡 Gather 50 smile and 50 frown records to spin up the AI trainer model.'}
-                            </div>
-                          ) : (
-                            <div className="space-y-4">
-                              {!l2ModelReady && (
-                                <button
-                                  onClick={handleTrainL2Model}
-                                  disabled={l2Training}
-                                  className={`w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-3 transition-all relative overflow-hidden ${
-                                    l2Training 
-                                      ? 'bg-transparent text-amber-300 border border-amber-500/20 cursor-wait' 
-                                      : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 active:scale-95 shadow-xl shadow-amber-500/20'
-                                  }`}
-                                >
-                                  {l2Training ? (
-                                    <>
-                                      <RotateCcw className="animate-spin text-amber-400" size={18} />
-                                      <span className="animate-pulse">{isRtl ? 'جاري التدريب (استخلاص الأنماط وحساب مصفوفات الانحياز)...' : 'Ingesting datasets, calculating neural nodes...'}</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <span>🧠</span>
-                                      <span>{isRtl ? 'ابدأ تدريب النموذج الصغير الآن (اضغط للتدريب)' : 'Click to Train the Neural Network Template'}</span>
-                                    </>
-                                  )}
-                                </button>
-                              )}
+                                ? 'عندما تجمع 50 عينة لكل تعبير، تفضل بالضغط أدناه للبدء بتغذية الشبكة العصبية!' 
+                                : 'Once you accumulate 50 snapshots per class, trigger neural model construction below!'}
+                            </p>
+                            <button
+                              onClick={handleTrainL2Model}
+                              disabled={l2SmileCount < 50 || l2FrownCount < 50}
+                              className={`px-6 py-3 rounded-xl font-black text-xs transition-all ${
+                                l2SmileCount >= 50 && l2FrownCount >= 50
+                                  ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 active:scale-95 shadow-lg shadow-amber-500/20'
+                                  : 'bg-white/5 text-slate-500 cursor-not-allowed border border-white/5'
+                              }`}
+                            >
+                              {isRtl ? 'تدريب نموذج الذكاء الاصطناعي 🧠' : 'Train the AI Neural Net 🧠'}
+                            </button>
+                          </div>
+                        )}
 
-                              {l2Training && (
-                                <div className="space-y-2 p-4 bg-black/40 rounded-2xl border border-white/5 text-right font-mono text-xs text-amber-400/85">
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-[10px] text-slate-500">Processing...</span>
-                                    <span>{isRtl ? 'سير عملية التدريب:' : 'Training Pipeline'}</span>
-                                  </div>
-                                  <div className="text-[10px] space-y-1">
-                                    <p className="animate-pulse">• Ingesting 100 total family expressions...</p>
-                                    <p className="delay-300 animate-pulse">• Constructing 2-class logistic activation bounds...</p>
-                                    <p className="delay-500 animate-pulse">• Converging epochs at learning rate 0.01...</p>
-                                  </div>
-                                </div>
-                              )}
+                        {l2Training && (
+                          <div className="p-8 bg-slate-900/40 rounded-2xl border border-white/5 text-center space-y-4 flex flex-col items-center justify-center">
+                            <RefreshCw className="text-amber-400 animate-spin" size={36} />
+                            <h6 className="text-white text-sm font-black">
+                              {isRtl ? 'جاري تدريب النموذج العصبي حالياً...' : 'Constructing & Standardizing Neural Synapses...'}
+                            </h6>
+                            <div className="w-48 h-1.5 bg-slate-950 rounded-full overflow-hidden">
+                              <div className="bg-amber-500 h-full animate-pulse" style={{ width: '70%' }} />
                             </div>
-                          )}
-                        </div>
+                            <p className="text-[10px] text-slate-500 font-mono">
+                              OPTIMIZING WEIGHTS & GRADIENTS (SIMULATED COG ENGINE)
+                            </p>
+                          </div>
+                        )}
 
-                        {/* Predictions testing booth */}
                         {l2ModelReady && (
-                          <div className="space-y-5 pt-6 border-t border-white/5 bg-slate-900/35 p-6 rounded-3xl border border-white/5">
-                            <div className="space-y-1">
-                              <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">
-                                {isRtl ? 'منصة الاختبار الفعال 🧪' : 'DEPLOYED TESTING CENTER 🧪'}
+                          <div className="space-y-6 pt-4 border-t border-white/5">
+                            <div className="text-center space-y-1">
+                              <span className="text-[10px] text-emerald-400 uppercase font-black tracking-widest block">
+                                {isRtl ? 'المرحلة الثانية: اختبار استنتاج النموذج 🎯' : 'STAGE 2: CHIP INFERENCE TESTING 🎯'}
                               </span>
-                              <h6 className="text-white text-base font-black">
-                                {isRtl ? 'جرّب الموديل الآن!' : 'Test Your Trained Model!'}
-                              </h6>
-                              <p className="text-slate-400 text-xs leading-relaxed">
-                                {isRtl 
-                                  ? 'تخيلوا أنكم تقفون أمام الكاميرا المغناطيسية، اختاروا تعبير وجهكم الآن وشاهدوا دقة تنبؤ "دماغ الآلة" في تمييز ملامحكم!'
-                                  : 'Select which face is currently looking into your camera, and observe how well your statistical brain filters match!'}
-                              </p>
+                              <h5 className="text-md font-black text-white">
+                                {isRtl ? 'اعرض تعبيراً لمشاهدة التوقع المباشر للذكاء الاصطناعي!' : 'Show an expression to witness real-time prediction output!'}
+                              </h5>
                             </div>
 
                             <div className="grid grid-cols-3 gap-3">
@@ -9256,7 +9271,7 @@ Output Summary for [${topic}]:
                                 }`}
                               >
                                 <span className="text-3xl">😊</span>
-                                <span className="text-xs font-bold">{isRtl ? 'سمايل / فرحان' : 'Smiling Face'}</span>
+                                <span className="text-xs font-bold">{isRtl ? 'مبتسم' : 'Smile'}</span>
                               </button>
 
                               <button
@@ -9268,7 +9283,7 @@ Output Summary for [${topic}]:
                                 }`}
                               >
                                 <span className="text-3xl">😡</span>
-                                <span className="text-xs font-bold">{isRtl ? 'عابس / زعلان' : 'Frowning Face'}</span>
+                                <span className="text-xs font-bold">{isRtl ? 'عابس' : 'Frown'}</span>
                               </button>
 
                               <button
@@ -9331,29 +9346,31 @@ Output Summary for [${topic}]:
                             )}
 
                             {/* Award Completed Panel */}
-                            <motion.div 
-                              initial={{ scale: 0.9, opacity: 0 }} 
-                              animate={{ scale: 1, opacity: 1 }} 
-                              className="p-6 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-[2rem] text-center space-y-4"
-                            >
-                              <Smile size={44} className="text-emerald-400 mx-auto animate-bounce" />
-                              <h6 className="text-white text-lg font-black">{isRtl ? 'تم إنهاء تحدي تدريب النموذج بنجاح! 🎉 حصلت على 60 نقطة XP!' : 'Successfully completed training! Earned 60 XP!'}</h6>
+                            {l2Prediction && (
+                              <motion.div 
+                                initial={{ scale: 0.9, opacity: 0 }} 
+                                animate={{ scale: 1, opacity: 1 }} 
+                                className="p-6 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-[2rem] text-center space-y-4"
+                              >
+                                <Smile size={44} className="text-emerald-400 mx-auto animate-bounce" />
+                                <h6 className="text-white text-lg font-black">{isRtl ? 'تم إنهاء تحدي تدريب النموذج بنجاح! 🎉 حصلت على 60 نقطة XP!' : 'Successfully completed training! Earned 60 XP!'}</h6>
 
-                              <div className="p-5 bg-black/30 rounded-xl border border-white/5 space-y-2 text-right">
-                                <span className="text-[10px] text-amber-300 font-bold tracking-wider uppercase block">{isRtl ? 'سؤال للنقاش العائلي 💬' : 'FAMILY DEBATE 💬'}</span>
-                                <p className="text-sm text-slate-100 font-black leading-relaxed">
+                                <div className="p-5 bg-black/30 rounded-xl border border-white/5 space-y-2 text-right">
+                                  <span className="text-[10px] text-amber-300 font-bold tracking-wider uppercase block">{isRtl ? 'سؤال للنقاش العائلي 💬' : 'FAMILY DEBATE 💬'}</span>
+                                  <p className="text-sm text-slate-100 font-black leading-relaxed">
+                                    {isRtl 
+                                      ? 'في دقائق قليلة صنعنا "نموذجًا" لتعابير الوجه. تخيلوا لو تدرب النموذج على مليارات الصور بدل 50 صورة. كيف سيصبح أداؤه ودقته؟'
+                                      : 'In minutes we created a small model. Imagine if we trained it with billions of facial snapshots instead of just 50. How sharp would its accuracy become?'}
+                                  </p>
+                                </div>
+
+                                <p className="text-slate-300 text-xs leading-relaxed max-w-lg mx-auto">
                                   {isRtl 
-                                    ? 'في دقائق قليلة صنعنا "نموذجًا" لتعابير الوجه. تخيلوا لو تدرب النموذج على مليارات الصور بدل 50 صورة. كيف سيصبح أداؤه ودقته؟'
-                                    : 'In minutes we created a small model. Imagine if we trained it with billions of facial snapshots instead of just 50. How sharp would its accuracy become?'}
+                                    ? 'بهذا التمرين البسيط لمستم بأنفسكم معنى "التدريب" وصنع "النماذج". النموذج هو قالب وليس محرك تخزين مباشر، إنه يستخلص الأنماط من البيانات الضخمة التي استقبلها!'
+                                    : 'With this simple lab, you touched firsthand what "Training" is. A model is a math shape/template layer, not storage!'}
                                 </p>
-                              </div>
-
-                              <p className="text-slate-300 text-xs leading-relaxed max-w-lg mx-auto">
-                                {isRtl 
-                                  ? 'بهذا التمرين البسيط لمستم بأنفسكم معنى "التدريب" وصنع "النماذج". النموذج هو قالب وليس محرك تخزين مباشر، إنه يستخلص الأنماط من البيانات الضخمة التي استقبلها!'
-                                  : 'With this simple lab, you touched firsthand what "Training" is. A model is a math shape/template layer, not storage!'}
-                              </p>
-                            </motion.div>
+                              </motion.div>
+                            )}
                           </div>
                         )}
                         
@@ -10610,102 +10627,102 @@ Output Summary for [${topic}]:
         </AnimatePresence>
       </main>
 
-      {/* Hidden high-fidelity certificate for exporting AI lessons */}
+      {/* Hidden high-fidelity template for exporting AI lessons */}
       {lessonToExport && (
         <div 
           id="lesson-capture-card" 
-          style={{ display: 'none', width: '700px', minHeight: '620px', position: 'absolute', top: '-10000px', left: '-10000px' }} 
-          className="bg-[#030712] text-white p-12 pr-12 pl-12 rounded-[2.5rem] border-4 border-[#C49E3A] relative font-sans text-right"
+          style={{ width: '700px', minHeight: '620px', position: 'absolute', top: '-10000px', left: '-10000px' }} 
+          className="bg-[#020617] text-white p-12 pr-12 pl-12 rounded-[2rem] border border-slate-800/80 relative font-tajawal text-right shadow-2xl"
         >
-          <div className="absolute inset-0 bg-gradient-to-tr from-[#0b172e] to-slate-950 opacity-95 rounded-[2.3rem] -z-10" />
-          {/* Subtle glowing accents */}
-          <div className="absolute top-10 right-10 w-24 h-24 rounded-full border border-amber-500/10 -z-5" />
-          <div className="absolute bottom-10 left-10 w-40 h-40 rounded-full border border-teal-500/10 -z-5" />
+          {/* Elegant background gradients - matching Bright Companion tech theme */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0b172e] via-[#020617] to-[#020617] rounded-[1.9rem] -z-10" />
+          
+          {/* Glowing backdrops for visual depth */}
+          <div className="absolute top-10 right-10 w-24 h-24 bg-teal-500/5 rounded-full blur-2xl -z-5" />
+          <div className="absolute bottom-10 left-10 w-40 h-40 bg-amber-500/5 rounded-full blur-2xl -z-5" />
 
-          {/* Academic Headings */}
-          <div className="flex justify-between items-start border-b border-white/10 pb-6 mb-8" dir="rtl">
+          {/* Premium Academy Branding Header */}
+          <div className="flex justify-between items-center border-b border-white/10 pb-5 mb-6" dir="rtl">
+            <div className="text-right font-tajawal">
+              <span className="text-sm font-black text-[#C49E3A] tracking-wide block mb-0.5">أكاديمية باسم آل خليل الرقمية</span>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest font-sans">Basim Al Khalil Digital Academy</p>
+            </div>
             <div className="text-left font-sans">
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Bright Companion Academy</h4>
-              <span className="text-xs font-black text-[#C49E3A] block text-left">أكاديمية المبتكر الصغير</span>
-            </div>
-            {/* Custom dynamic student info */}
-            <div className="text-right font-mono text-[9px] text-[#C49E3A] uppercase font-bold leading-tight">
-              <div>Certified Learning Record</div>
-              <div>AI Curriculum Track</div>
-              <div>Date: {new Date().toLocaleDateString('ar-EG')}</div>
+              <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded-full text-[10px] font-extrabold uppercase tracking-widest block font-sans">
+                {exportTrackType === 'foundational' && (isRtl ? 'مسار الذكاء الاصطناعي الأساسي للأطفال' : 'Foundational AI Track')}
+                {exportTrackType === 'advanced' && (isRtl ? 'مسار التطبيقات الذكية المتقدمة' : 'Advanced AI Apps Track')}
+                {exportTrackType === 'pro' && (isRtl ? 'مسار هندسة المطالبات والريادة الاحترافية' : 'Prompt Engineering Pro Track')}
+              </span>
+              <span className="text-[9px] text-slate-500 block font-sans text-left mt-1">Date: {new Date().toLocaleDateString('ar-EG')}</span>
             </div>
           </div>
 
-          {/* Golden Academy Logo Seal */}
+          {/* Icon Seal of the Lesson Module */}
           <div className="flex flex-col items-center justify-center text-center my-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#C49E3A] to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/20 mb-3 border-2 border-white/20">
-              <span className="text-2xl">🎓</span>
+            <div className="w-14 h-14 rounded-2xl bg-slate-900/80 border border-slate-700/50 flex items-center justify-center shadow-lg mb-3">
+              <span className="text-2xl">🤖</span>
             </div>
-            <h2 className="text-[#C49E3A] text-2xl font-black tracking-tight leading-none">
-              {isRtl ? 'وثيقة تفوق وإنجاز أكاديمية معتمدة' : 'Academic Excellence Achievement'}
-            </h2>
-            <div className="px-3.5 py-1 bg-white/5 rounded-full border border-white/10 mt-2.5 inline-block text-[10px] text-amber-300 font-extrabold whitespace-nowrap">
-              {exportTrackType === 'foundational' && (isRtl ? 'مسار الذكاء الاصطناعي الأساسي للأطفال' : 'Foundational AI Track')}
-              {exportTrackType === 'advanced' && (isRtl ? 'مسار التطبيقات الذكية المتقدمة' : 'Advanced AI Apps Track')}
-              {exportTrackType === 'pro' && (isRtl ? 'مسار هندسة المطالبات والريادة الاحترافية' : 'Prompt Engineering Pro Track')}
-            </div>
+            <span className="text-[10px] text-teal-400 font-extrabold tracking-widest uppercase block font-sans">
+              {isRtl ? `الدرس ${lessonToExport.lesson_number}` : `Lesson ${lessonToExport.lesson_number}`}
+            </span>
           </div>
 
-          {/* Main certified student citation */}
-          <div className="my-6 text-center space-y-4" dir="rtl">
-            <p className="text-xs text-slate-300 font-medium">
-              {isRtl ? 'تشهد الأكاديمية بفخر ومباركة بأن البطل المبدع:' : 'The Academy proudly certifies that the outstanding student:'}
-            </p>
-            <div className="inline-block border-b-2 border-dashed border-[#C49E3A] pb-1 px-8">
-              <h1 className="text-2xl font-black text-white tracking-tight">
-                {userProfile?.displayName ? userProfile.displayName : (isRtl ? 'رائد الذكاء الاصطناعي المتميز' : 'Promising AI Pioneer')}
-              </h1>
-            </div>
-            <p className="text-xs text-slate-300 leading-relaxed max-w-lg mx-auto">
-              {isRtl 
-                ? `قد أتم بنجاح ومثابرة دراسة وتطبيق الدرس رقم (${lessonToExport.lesson_number}): "${lessonToExport.lesson_title}"، مبرهناً على استيعاب عميق للمفاهيم الأساسية والأخلاقية وصناعة الابتكارات الفريدة بالذكاء الاصطناعي.`
-                : `has successfully and with high diligence mastered Lesson (${lessonToExport.lesson_number}): "${lessonToExport.lesson_title}", proving deep grasp of generative methodologies, design mechanics, and ethical dimensions.`}
-            </p>
+          {/* Main Lesson Title Block */}
+          <div className="my-5 text-center px-4" dir="rtl">
+            <h1 className="text-2xl font-black text-white leading-tight tracking-tight font-tajawal">
+              {lessonToExport.lesson_title}
+            </h1>
+            <div className="w-16 h-1 bg-gradient-to-r from-amber-400 to-teal-400 mx-auto rounded-full mt-3.5" />
           </div>
 
-          {/* Dynamic details for standard vs advanced vs pro */}
-          <div className="bg-slate-900/70 border border-white/5 rounded-2xl p-5 my-6 text-right" dir="rtl">
-            <h3 className="text-[10px] uppercase text-[#C49E3A] font-black tracking-widest mb-3">
-              {isRtl ? '📌 المعارف والخبرات التي استعرضها البطل:' : '📌 Core Concepts & Project Skills:'}
-            </h3>
-            <div className="space-y-2">
-              {/* Concept detail */}
-              <div className="text-[11px] text-slate-300 leading-relaxed">
-                <span className="text-amber-400 font-bold ml-1">🧠 {isRtl ? 'الفكرة الجوهرية للدرس:' : 'Core Lesson Idea:'}</span>
-                {lessonToExport.core_concept || (lessonToExport.lesson_card && lessonToExport.lesson_card.content) || (isRtl ? 'تحسين صياغة وهيكلة المطالبات المهندسة للحصول على نتائج لغوية وصوتية دقيقة ومثالية.' : 'Refining instructions and variables to guarantee solid, context-aware output values.')}
-              </div>
-              
-              {/* Family/Startup Activity detail */}
-              {lessonToExport.family_activity && (
-                <div className="text-[11px] text-slate-300 leading-relaxed pt-1.5 border-t border-white/5">
-                  <span className="text-amber-400 font-bold ml-1">🏠 {isRtl ? 'النشاط العائلي المنجز شفهياً:' : 'Completed Family Active Play:'}</span>
-                  <strong>{lessonToExport.family_activity.activity_name}</strong> - {lessonToExport.family_activity.activity_description}
-                </div>
-              )}
-
-              {lessonToExport.lesson_card && lessonToExport.lesson_card.section_title && (
-                <div className="text-[11px] text-slate-300 leading-relaxed pt-1.5 border-t border-white/5">
-                  <span className="text-amber-400 font-bold ml-1">⭐️ {isRtl ? 'المهارة التطبيقية في الوشاح:' : 'Hands-on Skill Focus:'}</span>
-                  {lessonToExport.lesson_card.section_title} - {lessonToExport.lesson_card.content ? lessonToExport.lesson_card.content.substring(0, 150) : ''}...
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Certificate Footer */}
-          <div className="flex justify-between items-end border-t border-white/5 pt-6 mt-8 text-xs text-slate-400 font-bold" dir="rtl">
+          {/* Core Concept Statement Container */}
+          <div className="bg-[#0b172e]/50 border border-white/5 rounded-2xl p-6 my-5 text-right space-y-4 font-tajawal" dir="rtl">
             <div className="text-right">
-              <p className="text-[#C49E3A] font-black">{isRtl ? 'نهج التطوير والتعليم المنهجي الفعال' : 'Academic & Developmental Supervisor'}</p>
-              <p className="text-[10px] text-slate-500">Bright Companion - AI Studio Platform</p>
+              <span className="text-[11px] text-teal-400 font-extrabold tracking-wide block mb-1">
+                🧠 {isRtl ? 'الفكرة الجوهرية والمنهج التعليمي للدرس:' : 'Core Lesson Philosophy & Objective:'}
+              </span>
+              <p className="text-sm text-slate-200 leading-relaxed font-semibold font-tajawal pr-1">
+                {lessonToExport.core_concept || (lessonToExport.lesson_card && lessonToExport.lesson_card.content) || (isRtl ? 'تحسين صياغة وهيكلة المطالبات الموجهة للأنظمة التوليدية للحصول على مخرجات دقيقة ومثالية عائلية وعملية.' : 'Refining variables to safeguard context-aware output values.')}
+              </p>
             </div>
-            <div className="text-left font-mono text-[9px] text-slate-500">
-              <div>Code: Academy-AI-L{lessonToExport.lesson_number}-{Math.random().toString(36).substr(2, 6).toUpperCase()}</div>
-              <div>VERIFIED AUTHENTIC LEARNING RECORD</div>
+
+            {/* Dynamic Lesson Card specific insights */}
+            {lessonToExport.lesson_card && lessonToExport.lesson_card.section_title && (
+              <div className="space-y-1.5 pt-4 border-t border-white/5 text-right">
+                <span className="text-[11px] text-amber-300 font-extrabold tracking-wide block">
+                  ⭐️ {isRtl ? 'المهارة التطبيقية المستهدفة:' : 'Applied Skill Focus Detail:'}
+                </span>
+                <p className="text-xs text-slate-300 font-medium leading-relaxed font-tajawal pr-1">
+                  <strong>{lessonToExport.lesson_card.section_title}</strong>: {lessonToExport.lesson_card.content}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Practical Family Active Challenge */}
+          {lessonToExport.family_activity && (
+            <div className="bg-amber-500/5 border border-amber-500/15 rounded-xl p-5 my-4 text-right font-tajawal" dir="rtl">
+              <span className="text-[10px] text-amber-300 font-black tracking-widest block mb-1.5 uppercase font-tajawal">
+                🏠 {isRtl ? 'النشاط العائلي والتطبيق العملي شفهياً وميدانياً:' : '🏠 Family Active Challenge & Practice Play:'}
+              </span>
+              <p className="text-xs text-slate-200 font-bold leading-relaxed font-tajawal mb-1">
+                {lessonToExport.family_activity.activity_name}
+              </p>
+              <p className="text-xs text-slate-300 font-medium leading-relaxed font-tajawal opacity-90">
+                {lessonToExport.family_activity.activity_description}
+              </p>
+            </div>
+          )}
+
+          {/* Footnote Guide Information */}
+          <div className="flex justify-between items-center border-t border-white/10 pt-5 mt-6 text-xs text-slate-400 font-bold font-tajawal" dir="rtl">
+            <div className="text-right">
+              <p className="text-white font-black text-xs leading-none">مبادرات العلوم والذكاء الاصطناعي للمبتكرين الصغار</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-1">منصة التطوير المنهجي الفعّال لبناء مهارات ريادة المستقبل</p>
+            </div>
+            <div className="text-left font-mono text-[9px] text-slate-500 font-sans">
+              <div className="text-left">Code: Academic-AI-L{lessonToExport.lesson_number}</div>
+              <div>VERIFIED COMPANION STUDY RECORD</div>
             </div>
           </div>
         </div>
