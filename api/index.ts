@@ -6,11 +6,22 @@ const app = express();
 app.use(express.json());
 
 const getAI = () => {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not set in environment variables");
+  const key = (
+    process.env.GEMINI_API_KEY || 
+    process.env.GOOGLE_GENAI_API_KEY ||
+    process.env.GOOGLE_API_KEY || 
+    process.env.API_KEY || 
+    process.env.VITE_GEMINI_API_KEY || 
+    process.env.AI_STUDIO_API_KEY ||
+    ""
+  ).trim();
+
+  if (!key) {
+    throw new Error("No Gemini API Key found in env variables.");
   }
+
   return new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY
+    apiKey: key
   });
 };
 
@@ -190,6 +201,17 @@ function getSmartLessonFallbackResponse(prompt: string, context: string): string
         return `بالتأكيد! درس اليوم بعنوان **"${lessonTitle || 'درس اليوم'}"** يحمل أفكاراً ممتازة لتركيب الجمل الأكاديمية بنحت متميز. يهدف الدرس إلى تدريبك على مخارج الألفاظ وصياغة القواعد باحترافية. ما هي النقطة الدقيقة التي تود مني توضيحها ومناقشتها معك؟`;
       } else {
         return `Certainly! Today's unit of study **"${lessonTitle || 'Our Active Lesson'}"** aims to build robust English structuring confidence. It sharpens syntactic awareness and conversational ease. Which specific rule or section should we detail together?`;
+      }
+    }
+  }
+
+  // Check if prompt specifically asks about, contains, or references any exact word from vocabularyList
+  for (const v of vocabularyList) {
+    if (v.word && norm.includes(v.word.toLowerCase())) {
+      if (isAr) {
+        return `بخصوص الكلمة التي استفسرت عنها **"${v.word}"** من مفردات الدرس:\n\n• ترجمتها الدقيقة: **${v.translation}**\n\nوهي كلمة رائعة لتوسيع طلاقتك وتطوير تعبيرك! هل ترغب في استخدامها سوياً في جملة تعليمية؟`;
+      } else {
+        return `Regarding the word **"${v.word}"** in today's active study unit:\n\n• Translation mapping: **${v.translation}**\n\nThis is an excellent focus term for your learning journey! Would you like to practice building standard sentences with it?`;
       }
     }
   }

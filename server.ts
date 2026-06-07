@@ -517,6 +517,17 @@ async function startServer() {
       }
     }
 
+    // Check if prompt specifically asks about, contains, or references any exact word from vocabularyList
+    for (const v of vocabularyList) {
+      if (v.word && norm.includes(v.word.toLowerCase())) {
+        if (isAr) {
+          return `بخصوص الكلمة التي استفسرت عنها **"${v.word}"** من مفردات الدرس:\n\n• ترجمتها الدقيقة: **${v.translation}**\n\nوهي كلمة رائعة لتوسيع طلاقتك وتطوير تعبيرك! هل ترغب في استخدامها سوياً في جملة تعليمية؟`;
+        } else {
+          return `Regarding the word **"${v.word}"** in today's active study unit:\n\n• Translation mapping: **${v.translation}**\n\nThis is an excellent focus term for your learning journey! Would you like to practice building standard sentences with it?`;
+        }
+      }
+    }
+
     // Case 4: Default fallback
     if (isAr) {
       return `أهلاً بك يا بطل في درس اليوم **"${lessonTitle || 'هذا الدرس الممتاز'}"**! 👋

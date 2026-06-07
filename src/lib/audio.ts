@@ -105,6 +105,9 @@ function playPCM24k(
   }
 }
 
+// Global references array to prevent mid-speech garbage-collection of SpeechSynthesisUtterance in browsers
+let activeUtterances: SpeechSynthesisUtterance[] = [];
+
 /**
  * Standard native browser speech synthesis fallback
  */
@@ -118,15 +121,24 @@ function playNativeFallback(
     return { stop: () => {} };
   }
 
+  // Ensure any previous speech is cancelled on the synthesis engine to prevent blocking transitions
+  try {
+    window.speechSynthesis.cancel();
+  } catch (err) {}
+
   const utterance = new SpeechSynthesisUtterance(text);
+  activeUtterances.push(utterance);
+  
   utterance.lang = lang === "en" ? "en-US" : "ar-SA";
   utterance.rate = 0.95;
 
   utterance.onend = () => {
+    activeUtterances = activeUtterances.filter(u => u !== utterance);
     onEnd?.();
   };
 
   utterance.onerror = (e) => {
+    activeUtterances = activeUtterances.filter(u => u !== utterance);
     console.debug("Native speech ended with exception indicator:", e);
     onEnd?.();
   };
@@ -138,6 +150,7 @@ function playNativeFallback(
       try {
         window.speechSynthesis.cancel();
       } catch (e) {}
+      activeUtterances = activeUtterances.filter(u => u !== utterance);
     }
   };
 }
