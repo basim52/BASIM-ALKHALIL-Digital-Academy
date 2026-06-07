@@ -32,10 +32,22 @@ export const GeminiDeveloperHub = ({ lang, onBack, userProfile }: GeminiDevelope
   
   // Navigation tabs
   const [activeTab, setActiveTab] = useState<'docs' | 'sandbox' | 'snippets'>('docs');
-  const [sandboxType, setSandboxType] = useState<'function' | 'code' | 'doc'>('function');
+  const [sandboxType, setSandboxType] = useState<'function' | 'code' | 'doc' | 'academy-ai'>('academy-ai');
   
   // Sandbox Interactive States
-  const [promptInput, setPromptInput] = useState<string>('');
+  const [promptInput, setPromptInput] = useState<string>(() => {
+    return isRtl 
+      ? `قم بإنشاء وحدة تعليمية مصغرة لدرس قواعد (English Grammar) حول 'Conditional Sentences' للمستوى المتوسط.
+المطلوب صياغته في المخرج:
+1. شرح سريع ومبسط للقاعدة مع مثالين تطبيقيين.
+2. محادثة قصيرة (Dialogue) توضح استخدام القاعدة في الحياة اليومية.
+3. اختبار تفاعلي سريع مكون من 3 أسئلة اختيار من متعدد مع تحديد الإجابة الصحيحة وتفسيرها.`
+      : `Create a brief miniature educational module for an English Grammar lesson on 'Conditional Sentences' for intermediate level.
+Format expected in output:
+1. Quick, simplified explanation of the rule with two practical examples.
+2. Brief dialogue demonstrating the rule in real life.
+3. Quick interactive 3-question MCQ quiz with explanations for correct answers.`;
+  });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [sandboxResponse, setSandboxResponse] = useState<any | null>(null);
   const [customLogs, setCustomLogs] = useState<any[]>([]);
@@ -47,7 +59,20 @@ export const GeminiDeveloperHub = ({ lang, onBack, userProfile }: GeminiDevelope
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const getPrepopulatedPrompt = (type: 'function' | 'code' | 'doc', subType?: string) => {
+  const getPrepopulatedPrompt = (type: 'function' | 'code' | 'doc' | 'academy-ai', subType?: string) => {
+    if (type === 'academy-ai') {
+      return isRtl 
+        ? `قم بإنشاء وحدة تعليمية مصغرة لدرس قواعد (English Grammar) حول 'Conditional Sentences' للمستوى المتوسط.
+المطلوب صياغته في المخرج:
+1. شرح سريع ومبسط للقاعدة مع مثالين تطبيقيين.
+2. محادثة قصيرة (Dialogue) توضح استخدام القاعدة في الحياة اليومية.
+3. اختبار تفاعلي سريع مكون من 3 أسئلة اختيار من متعدد مع تحديد الإجابة الصحيحة وتفسيرها.`
+        : `Create a brief miniature educational module for an English Grammar lesson on 'Conditional Sentences' for intermediate level.
+Format expected in output:
+1. Quick, simplified explanation of the rule with two practical examples.
+2. Brief dialogue demonstrating the rule in real life.
+3. Quick interactive 3-question MCQ quiz with explanations for correct answers.`;
+    }
     if (isRtl) {
       if (type === 'function') {
         if (subType === 'inventory') return 'هل كتاب Oxford Discover 1 متوفر في المستودع وكم تبلغ قيمته المالية؟';
@@ -65,7 +90,7 @@ export const GeminiDeveloperHub = ({ lang, onBack, userProfile }: GeminiDevelope
     }
   };
 
-  const handleRunSandbox = async (type: 'function' | 'code' | 'doc') => {
+  const handleRunSandbox = async (type: 'function' | 'code' | 'doc' | 'academy-ai') => {
     if (!promptInput.trim()) return;
 
     setIsLoading(true);
@@ -78,7 +103,8 @@ export const GeminiDeveloperHub = ({ lang, onBack, userProfile }: GeminiDevelope
       const taskTypeMap = {
         'function': 'function-calling',
         'code': 'code-execution',
-        'doc': 'document-processing'
+        'doc': 'document-processing',
+        'academy-ai': 'academy-ai'
       };
 
       const response = await fetch('/api/gemini/developer-sandbox', {
@@ -327,6 +353,7 @@ export const GeminiDeveloperHub = ({ lang, onBack, userProfile }: GeminiDevelope
 
                 <div className="space-y-3">
                   {[
+                    { id: 'academy-ai', title: 'مساعد أكاديمية باسم الخليل الرقمية لتعليم الإنجليزية', desc: 'توليد المناهج ووحدات التدريس المبتكرة بنموذج Gemini 3 Flash', color: 'border-l-[#C49E3A] text-amber-700 font-extrabold pb-0.5' },
                     { id: 'function', title: 'وكيل استدعاء الدوال والربط', desc: 'يربط Gemini بقاعدة تفاعلية للمخزن والطلاب', color: 'border-l-blue-500 text-blue-700' },
                     { id: 'code', title: 'بيئة بايثون المعزولة (التحليل)', desc: 'مهمات حسابية مع كتابة وتشغيل كود حقيقي', color: 'border-l-green-500 text-green-700' },
                     { id: 'doc', title: 'معالجة المراجع والمستندات', desc: 'يفحص سياسات ولوائح الأكاديمية بنظام Citations', color: 'border-l-orange-500 text-orange-700' }
@@ -337,7 +364,7 @@ export const GeminiDeveloperHub = ({ lang, onBack, userProfile }: GeminiDevelope
                         key={item.id}
                         onClick={() => {
                           setSandboxType(item.id as any);
-                          setPromptInput('');
+                          setPromptInput(getPrepopulatedPrompt(item.id as any));
                           setSandboxResponse(null);
                         }}
                         className={`w-full text-right p-4 rounded-xl border-l-[4px] transition-all flex flex-col justify-center text-xs ${
@@ -360,7 +387,14 @@ export const GeminiDeveloperHub = ({ lang, onBack, userProfile }: GeminiDevelope
                   {isRtl ? 'مطالبات تجريبية نموذجية سريعة' : 'Try Prepopulated Prompts'}
                 </span>
                 <div className="space-y-2">
-                  {sandboxType === 'function' ? (
+                  {sandboxType === 'academy-ai' ? (
+                    <button 
+                      onClick={() => setPromptInput(getPrepopulatedPrompt('academy-ai'))}
+                      className="w-full text-right text-xs bg-amber-50 hover:bg-amber-100 p-2.5 rounded-lg text-amber-900 font-serif border border-amber-100 whitespace-normal block leading-relaxed"
+                    >
+                      {isRtl ? '📝 مراجعة درس Conditional Sentences للمستوى المتوسط' : 'Generate Conditional Sentences lesson'}
+                    </button>
+                  ) : sandboxType === 'function' ? (
                     <>
                       <button 
                         onClick={() => setPromptInput(getPrepopulatedPrompt('function', 'inventory'))}
@@ -400,11 +434,11 @@ export const GeminiDeveloperHub = ({ lang, onBack, userProfile }: GeminiDevelope
                 <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
                   <div className="text-left">
                     <span className="text-[10px] bg-[#002147]/10 text-[#002147] px-3 py-1 rounded-full font-bold">
-                      {sandboxType === 'function' ? 'Tool Grounded AI' : sandboxType === 'code' ? 'Code Sandbox Console' : 'Contextual Grounding QA'}
+                      {sandboxType === 'academy-ai' ? 'Academy Educational Assistant' : sandboxType === 'function' ? 'Tool Grounded AI' : sandboxType === 'code' ? 'Code Sandbox Console' : 'Contextual Grounding QA'}
                     </span>
                   </div>
                   <h3 className="text-lg font-black text-slate-900">
-                    {sandboxType === 'function' ? 'محاكاة استدعاء الدوال (SQL / DB Tool Call)' : sandboxType === 'code' ? 'منفّذ بايثون والتحاليل الحسابية' : 'مستكشف المراجع والوثائق بدقة الاستشهاد'}
+                    {sandboxType === 'academy-ai' ? 'مساعد التوجيه والتدريب الأكاديمي (Gemini 3 Flash)' : sandboxType === 'function' ? 'محاكاة استدعاء الدوال (SQL / DB Tool Call)' : sandboxType === 'code' ? 'منفّذ بايثون والتحاليل الحسابية' : 'مستكشف المراجع والوثائق بدقة الاستشهاد'}
                   </h3>
                 </div>
 
@@ -417,7 +451,9 @@ export const GeminiDeveloperHub = ({ lang, onBack, userProfile }: GeminiDevelope
                       value={promptInput}
                       onChange={(e) => setPromptInput(e.target.value)}
                       placeholder={
-                        sandboxType === 'function' 
+                        sandboxType === 'academy-ai'
+                          ? (isRtl ? 'اكتب طلبات المناهج أو القواعد أو تفاصيل تحضير الدروس للأكاديمية...' : 'e.g. Design structured lesson about auxiliary nouns...')
+                          : sandboxType === 'function' 
                           ? (isRtl ? 'اكتب مثلاً: كم رصيد كتاب Oxford Discover 1 في قاعدة البيانات؟' : 'e.g. Find pricing details for book Grammar Galaxy A1...')
                           : sandboxType === 'code'
                           ? (isRtl ? 'اكتب دراسة إحصائية تطلب حساب مصفوفات رياضية وبايثون...' : 'e.g. Write a script to calculate scores trend and summarize...')

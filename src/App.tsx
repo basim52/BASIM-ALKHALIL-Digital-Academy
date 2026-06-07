@@ -5377,6 +5377,7 @@ export default function App() {
                     { id: 'interactive-learning', label: lang === 'ar' ? 'تعليم تفاعلي ⚡' : 'Interactive Learning ⚡', icon: Gamepad2 },
                     { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
                     { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
+                    { id: 'gemini-developer-hub', label: lang === 'ar' ? 'مستودع المطور والـ Sandbox 🛠️' : 'Developer Sandbox 🛠️', icon: Key, show: isAdmin },
                     { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
                     { id: 'oxford-discover', label: lang === 'ar' ? 'أوكسفورد المطور 🌟' : 'Oxford Discover 🌟', icon: Layers },
                     { id: 'oxford-classic', label: lang === 'ar' ? 'أوكسفورد الكلاسيكي 📚' : 'Classic Oxford 📚', icon: OxfordClassicIcon },
@@ -5645,7 +5646,10 @@ export default function App() {
                               { id: 'progress', label: t.performance, icon: BarChart3 },
                               { id: 'leaderboard', label: t.leaderboard, icon: Trophy },
                               { id: 'chat', label: t.chat, icon: MessageSquare },
-                              ...(isAdmin ? [{ id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert }] : []),
+                              ...(isAdmin ? [
+                                { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert },
+                                { id: 'gemini-developer-hub', label: isRtl ? 'مستودع المطور والـ Sandbox 🛠️' : 'Developer Sandbox 🛠️', icon: Key }
+                              ] : []),
                             ].map((item) => {
                               const isActive = view === item.id;
                               const Icon = item.icon;

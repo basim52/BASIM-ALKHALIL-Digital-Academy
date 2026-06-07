@@ -1216,6 +1216,27 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
         });
       }
 
+      else if (taskType === 'academy-ai') {
+        logToFile("Calling Gemini with Academy Educational Assistant configuration...");
+        
+        const response = await aiLive.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: prompt,
+          config: {
+            systemInstruction: "أنت المساعد الذكي المخصص لأكاديمية باسم ال خليل الرقمية لتعليم اللغة الإنجليزية. مهمتك هي تصميم وتوليد محتوى تعليمي، مناهج مبتكرة، واختبارات تقييمية تفاعلية. احرص على أن يكون الأسلوب تعليمياً، واضحاً، ومباشراً دون أي حشو أو مقدمات تكرارية."
+          }
+        });
+
+        return res.json({
+          taskType,
+          finalResponseText: response.text,
+          logs: [
+            { status: "info", message: "تمت تهيئة واستدعاء المساعد الذكي المخصص لأكاديمية باسم الخليل الرقمية لتعليم اللغة الإنجليزية بنموذج Gemini 3 Flash." },
+            { status: "success", message: "أتم نموذج Gemini 3 Flash بنجاح معالجة أمر المدخلات وصياغة المحتوى التعليمي بالشروط الأكاديمية والتربوية المطلوبة." }
+          ]
+        });
+      }
+
       res.status(400).json({ error: "Unsupported task type." });
     } catch (error: any) {
       logToFile(`Developer Sandbox Error: ${error.message}`);
