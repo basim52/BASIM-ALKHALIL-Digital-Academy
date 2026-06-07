@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Lesson } from '../types';
 import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
+import { AILessonCompanion } from './AILessonCompanion';
 
 
 interface ReadingLessonProps {
@@ -612,6 +613,8 @@ export const ReadingLesson: React.FC<ReadingLessonProps> = ({ lesson, isRtl, cat
             </button>
          ))}
       </footer>
+
+      <AILessonCompanion lesson={lesson} isRtl={isRtl} />
     </div>
   );
 };

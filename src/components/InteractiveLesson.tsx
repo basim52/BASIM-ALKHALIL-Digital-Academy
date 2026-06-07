@@ -4,6 +4,7 @@ import { Play, Pause, ChevronDown, Check, X, ArrowRight, ArrowLeft, Timer, Award
 import ReactMarkdown from 'react-markdown';
 import { Lesson } from '../types';
 import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
+import { AILessonCompanion } from './AILessonCompanion';
 
 
 interface InteractiveLessonProps {
@@ -535,6 +536,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
         </AnimatePresence>
       </div>
 
+      <AILessonCompanion lesson={lesson} isRtl={isRtl} />
     </div>
   </div>
 </div>

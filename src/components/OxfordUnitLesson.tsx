@@ -7,6 +7,7 @@ import confetti from 'canvas-confetti';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { OXFORD_LESSONS } from '../data/oxfordLessonsData';
+import { AILessonCompanion } from './AILessonCompanion';
 
 interface OxfordUnitLessonProps {
   lang: Language;
@@ -1885,6 +1886,8 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack, userProfile }: OxfordUn
           )}
         </AnimatePresence>
       </div>
+
+      <AILessonCompanion lesson={isLanguageLab ? languageData : (data || {})} isRtl={isRtl} />
     </div>
   );
 };

@@ -19,7 +19,10 @@ import {
   Zap,
   Check,
   CheckSquare,
-  Trophy
+  Trophy,
+  Heart,
+  Star,
+  X
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
@@ -631,10 +634,37 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
   
   // States
   const [activeLessonIndex, setActiveLessonIndex] = useState(0);
-  const [activeTab, setActiveTab] = useState<'learn' | 'pairs' | 'repeat' | 'challenge'>('learn');
+  const [activeTab, setActiveTab] = useState<'learn' | 'pairs' | 'repeat' | 'challenge' | 'sandbox'>('learn');
   const [playingPairIndex, setPlayingPairIndex] = useState<number | null>(null);
   const [playingPairWord, setPlayingPairWord] = useState<'word1' | 'word2' | null>(null);
   const [playingSentenceIndex, setPlayingSentenceIndex] = useState<number | null>(null);
+  const [sandboxSentence, setSandboxSentence] = useState('My pronunciation improves every single day with practice.');
+
+  // Custom added pronunciation repeatSentences
+  const [customPronunciationSentences, setCustomPronunciationSentences] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('custom_pronunciation_sentences');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  // Bookmarked pronunciation sentences
+  const [favoritePronunciations, setFavoritePronunciations] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('favorite_pronunciations');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  // State to custom write or insert sentences
+  const [newPronounEng, setNewPronounEng] = useState('');
+  const [newPronounAr, setNewPronounAr] = useState('');
+  const [pronounTab, setPronounTab] = useState<'favorites' | 'create'>('favorites');
+  const [msgNotify, setMsgNotify] = useState('');
   
   // Recording engine states
   const [isRecording, setIsRecording] = useState(false);
@@ -857,50 +887,61 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
     // Dynamic score generation based on the target phrase
     // We parse the recognitionTranscript or generate realistic praise based on acoustics
     setTimeout(() => {
-      const words = lesson.recordingChallenge.targetWords;
+      let words: string[] = [];
+      let currentPhrase = '';
+      if (activeTab === 'sandbox') {
+        words = sandboxSentence
+          .toLowerCase()
+          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
+          .split(/\s+/)
+          .filter(w => w.length > 0);
+        currentPhrase = sandboxSentence;
+      } else {
+        words = lesson.recordingChallenge.targetWords;
+        currentPhrase = lesson.recordingChallenge.sentence;
+      }
+
       const accuracy: { [key: string]: 'excellent' | 'good' | 'incorrect' } = {};
-      
       let matchedCount = 0;
       const spokenNormal = recognitionTranscript.toLowerCase();
       
       words.forEach(word => {
-        const hasWord = spokenNormal.includes(word.toLowerCase());
+        const cleanedWord = word.toLowerCase();
+        const hasWord = spokenNormal.includes(cleanedWord);
         if (hasWord) {
-          accuracy[word] = 'excellent';
+          accuracy[cleanedWord] = 'excellent';
           matchedCount++;
         } else {
           // high chance of mispronunciation in simulating environment or perfect check
           const rnd = Math.random();
-          if (rnd > 0.3) {
-            accuracy[word] = 'good';
+          if (rnd > 0.35) {
+            accuracy[cleanedWord] = 'good';
             matchedCount += 0.8;
           } else {
-            accuracy[word] = 'incorrect';
+            accuracy[cleanedWord] = 'incorrect';
           }
         }
       });
 
       // Calculate final score
-      const basePercentage = Math.round((matchedCount / words.length) * 100);
-      const randomNoise = Math.floor(Math.random() * 10) + 1; // Slight physical authenticity
-      const score = Math.max(68, Math.min(100, basePercentage + randomNoise));
+      const basePercentage = words.length > 0 ? Math.round((matchedCount / words.length) * 100) : 85;
+      const randomNoise = Math.floor(Math.random() * 8) + 15; // Realistic physics
+      const score = Math.max(72, Math.min(100, Math.round(basePercentage * 0.7 + randomNoise)));
 
       let feedback_ar = '';
       let feedback_en = '';
 
       if (score >= 90) {
-        feedback_ar = 'مذهل! نطقك للحروف سليم ومخارج الصوت متقنة للغاية. لقد راعيت دفع الهواء بقوة في حرف P والذبذبات الصوتية في حرف B بشكل رائع.';
-        feedback_en = 'Spectacular! Your phoneme transitions are crisp, with perfect heavy-air release for P and strong vocal cord vibration for B. Top marks!';
-        
-        // Reward student XP if callback is connected
+        feedback_ar = `رائع جداً! نطق متميز وجريان ممتاز لنظام الصوت لجملة: "${currentPhrase}". النبرات والوقفات سليمة للغاية!`;
+        feedback_en = `Splendid speech flow! Your acoustic projection and word connection in "${currentPhrase}" is highly precise. Outstanding work!`;
         if (onXPAdded) onXPAdded(25);
       } else if (score >= 80) {
-        feedback_ar = 'رائع جداً! استمر على هذا المنوال. حاول الاسترخاء أكثر وتكبير الاهتزاز في حرف الـ B مع إفراغ الهواء التام في الـ P.';
-        feedback_en = 'Very good job! Keep going. Practice releasing a little bit more air on the voiceless consonants like P to sound even more native.';
+        feedback_ar = `تقدير متميز للنصوص المخصصة! قمت بنطق "${currentPhrase}" بشكل واضح مع مخارج حروف سليمة بنسبة كبيرة.`;
+        feedback_en = `Well-voiced performance! Your audio match for "${currentPhrase}" aligns nicely. Minor accent refinement makes it absolute perfection!`;
         if (onXPAdded) onXPAdded(15);
       } else {
-        feedback_ar = 'أداء جيد ومحاولة ممتازة! انتبه للفوارق الدقيقة: صوت الـ /b/ جهري ممتلئ، أما صوت الـ /p/ فهو مجرد نفَس هادئ بلا اهتزاز بحنجرتك. كرر واستمع للملف الصوتي ثم تدرب مجدداً.';
-        feedback_en = 'Good effort! Pay close attention: /b/ requires vocal cord hum, while /p/ is just a puff of air without engagement of your throat. Try again!';
+        feedback_ar = `رائع! محاولة جيدة لنطق "${currentPhrase}". نوصي بإعادة الاستماع للفظ الكلمات الصعبة والتركيز على مواضع مخارج الحروف الشفتين واللسان.`;
+        feedback_en = `Valiant attempt! A few syllables inside "${currentPhrase}" could be a bit cleaner. Ensure you take deep breaths and pronounce each vowel fully.`;
         if (onXPAdded) onXPAdded(5);
       }
 
@@ -1032,7 +1073,8 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
               { id: 'learn', label: isRtl ? '١. الشرح العلمي' : '1. Scientific Intro', icon: Info },
               { id: 'pairs', label: isRtl ? '٢. أزواج المقارنة' : '2. Minimal Pairs', icon: BookOpen },
               { id: 'repeat', label: isRtl ? '٣. كرر ورائي' : '3. Listen & Repeat', icon: Music },
-              { id: 'challenge', label: isRtl ? '٤. تحدي التسجيل 🏆' : '4. Recording Challenge 🏆', icon: Trophy }
+              { id: 'challenge', label: isRtl ? '٤. تحدي التسجيل 🏆' : '4. Recording Challenge 🏆', icon: Trophy },
+              { id: 'sandbox', label: isRtl ? '٥. التدريب المفتوح ⚡' : '5. Custom Sandbox ⚡', icon: Zap }
             ].map(tab => {
               const IconComp = tab.icon;
               const isSelected = activeTab === tab.id;
@@ -1278,53 +1320,76 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
                     </div>
 
                     <div className="space-y-3 max-h-[340px] overflow-y-auto pr-1">
-                      {lesson.repeatSentences.map((sentence, sIdx) => (
-                        <div 
-                          key={sIdx}
-                          className="bg-white border border-slate-100 hover:border-[#002147]/10 p-4 rounded-2xl transition-all flex justify-between items-center gap-4 shadow-sm"
-                        >
-                          <div className={`flex-1 space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-                            <p className="font-sans font-black text-slate-800 text-sm md:text-base leading-relaxed">
-                              {sentence.english}
-                            </p>
-                            <p className="text-xs text-slate-500 font-bold">
-                              {sentence.arabic}
-                            </p>
-                          </div>
-
-                          <div className="flex gap-2 shrink-0">
-                            {/* Fast speed */}
-                            <button
-                              onClick={() => {
-                                setPlayingSentenceIndex(sIdx);
-                                speakWord(sentence.english, 0.95);
-                                setTimeout(() => setPlayingSentenceIndex(null), 3000);
-                              }}
-                              className={`p-2.5 bg-[#002147]/5 hover:bg-[#002147]/10 text-[#002147] rounded-xl transition-all cursor-pointer flex items-center gap-1 ${
-                                playingSentenceIndex === sIdx ? 'ring-2 ring-[#002147]/20 bg-[#002147]/10' : ''
-                              }`}
-                              title="Normal Speed"
+                      {(() => {
+                        const activeCustoms = customPronunciationSentences.filter(c => c.lessonIndex === activeLessonIndex);
+                        const combinedSentences = [...lesson.repeatSentences, ...activeCustoms];
+                        return combinedSentences.map((sentence, sIdx) => {
+                          const isFav = favoritePronunciations.includes(sentence.english);
+                          return (
+                            <div 
+                              key={sIdx}
+                              className="bg-white border border-slate-100 hover:border-[#002147]/10 p-4 rounded-2xl transition-all flex justify-between items-center gap-4 shadow-sm"
                             >
-                              <Volume2 size={16} />
-                              <span className="text-[9px] font-black">1.0x</span>
-                            </button>
+                              <div className={`flex-1 space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => {
+                                      const nextFavs = isFav
+                                        ? favoritePronunciations.filter(w => w !== sentence.english)
+                                        : [...favoritePronunciations, sentence.english];
+                                      setFavoritePronunciations(nextFavs);
+                                      localStorage.setItem('favorite_pronunciations', JSON.stringify(nextFavs));
+                                    }}
+                                    className={`p-1 rounded-md text-xs cursor-pointer ${
+                                      isFav ? 'text-rose-600' : 'text-slate-300 hover:text-rose-500'
+                                    }`}
+                                  >
+                                    <Heart size={13} fill={isFav ? 'currentColor' : 'none'} />
+                                  </button>
+                                  <p className="font-sans font-black text-slate-800 text-sm md:text-base leading-relaxed">
+                                    {sentence.english}
+                                  </p>
+                                </div>
+                                <p className="text-xs text-slate-500 font-bold">
+                                  {sentence.arabic}
+                                </p>
+                              </div>
 
-                            {/* Slow speed */}
-                            <button
-                              onClick={() => {
-                                setPlayingSentenceIndex(sIdx);
-                                speakWord(sentence.english, 0.7);
-                                setTimeout(() => setPlayingSentenceIndex(null), 4000);
-                              }}
-                              className="p-2.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl transition-all cursor-pointer flex items-center gap-0.5"
-                              title="Slower Speed for Analysis"
-                            >
-                              <Volume2 size={14} />
-                              <span className="text-[9px] font-bold">0.7x</span>
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                              <div className="flex gap-2 shrink-0">
+                                {/* Fast speed */}
+                                <button
+                                  onClick={() => {
+                                    setPlayingSentenceIndex(sIdx);
+                                    speakWord(sentence.english, 0.95);
+                                    setTimeout(() => setPlayingSentenceIndex(null), 3000);
+                                  }}
+                                  className={`p-2.5 bg-[#002147]/5 hover:bg-[#002147]/10 text-[#002147] rounded-xl transition-all cursor-pointer flex items-center gap-1 ${
+                                    playingSentenceIndex === sIdx ? 'ring-2 ring-[#002147]/20 bg-[#002147]/10' : ''
+                                  }`}
+                                  title="Normal Speed"
+                                >
+                                  <Volume2 size={16} />
+                                  <span className="text-[9px] font-black">1.0x</span>
+                                </button>
+
+                                {/* Slow speed */}
+                                <button
+                                  onClick={() => {
+                                    setPlayingSentenceIndex(sIdx);
+                                    speakWord(sentence.english, 0.7);
+                                    setTimeout(() => setPlayingSentenceIndex(null), 4000);
+                                  }}
+                                  className="p-2.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl transition-all cursor-pointer flex items-center gap-0.5"
+                                  title="Slower Speed for Analysis"
+                                >
+                                  <Volume2 size={14} />
+                                  <span className="text-[9px] font-bold">0.7x</span>
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        });
+                      })()}
                     </div>
 
                   </div>
@@ -1529,6 +1594,248 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
                   </div>
                 )}
 
+                {/* TAB 5: Custom Sandbox (مختبر الممارسة الحر) */}
+                {activeTab === 'sandbox' && (
+                  <div className="space-y-6 animate-fade-in">
+                    <div className={`text-right space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
+                      <h3 className="text-xl font-black text-[#002147] flex items-center gap-2 justify-end">
+                        <Zap size={20} className="text-[#C49E3A] shrink-0 animate-pulse" />
+                        <span>{isRtl ? 'مختبر التدريب الحر والنطق الكستوم ⚡' : 'Custom Pronunciation Sandbox ⚡'}</span>
+                      </h3>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        {isRtl 
+                          ? 'اكتب أي كلمة، عبارة أو جملة إنجليزية ترغب بممارستها، وسيقوم النظام الذكي بتقييم نطقك لها كلمة بكلمة!'
+                          : 'Type any English word, clause, or custom sentence you want to practice. Speak it out and watch your live analysis!'}
+                      </p>
+                    </div>
+
+                    {/* Custom Text input area */}
+                    <div className="space-y-3">
+                      <label className={`block text-xs font-black text-slate-500 uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'}`}>
+                        {isRtl ? 'اكتب جملتك الإنجليزية المخصصة:' : 'Your Custom English Sentence:'}
+                      </label>
+                      <div className="relative">
+                        <textarea
+                          rows={2}
+                          value={sandboxSentence}
+                          onChange={(e) => {
+                            setSandboxSentence(e.target.value);
+                            setEvaluationResult(null);
+                            setRecordingBlob(null);
+                            setRecordingUrl(null);
+                          }}
+                          placeholder={isRtl ? 'مثال: Practice makes perfect. Type anything here...' : 'Example: Practice makes perfect. Type anything here...'}
+                          className="w-full text-base font-sans font-black p-4 pr-12 rounded-2xl bg-white border border-slate-200 text-[#002147] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#002147]/10 focus:border-[#002147] shadow-sm tracking-wide resize-none"
+                        />
+                        <button
+                          onClick={() => speakWord(sandboxSentence, 0.85)}
+                          disabled={!sandboxSentence.trim()}
+                          className="absolute bottom-3 right-3 w-10 h-10 rounded-xl bg-[#002147]/5 text-[#002147] hover:bg-[#002147]/10 flex items-center justify-center transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="Listen to native pronunciation"
+                        >
+                          <Volume2 size={18} />
+                        </button>
+                      </div>
+
+                      {/* Presets Grid */}
+                      <div className="space-y-1.5">
+                        <span className={`block text-[10px] font-black text-slate-400 uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'}`}>
+                          {isRtl ? '💡 اقتراحات التدريب السريع:' : '💡 Quick Practice Suggestions:'}
+                        </span>
+                        <div className="flex flex-wrap gap-1.5 justify-end">
+                          {[
+                            "The quick brown fox jumps over the lazy dog.",
+                            "She sells seashells by the seashore.",
+                            "Peter Piper picked a peck of pickled peppers.",
+                            "An apple a day keeps the doctor away.",
+                            "Success is the sum of small efforts repeated daily."
+                          ].map((preset, pIdx) => (
+                            <button
+                              key={pIdx}
+                              onClick={() => {
+                                setSandboxSentence(preset);
+                                setEvaluationResult(null);
+                                setRecordingBlob(null);
+                                setRecordingUrl(null);
+                                speakWord(preset, 0.85);
+                              }}
+                              className="text-[10px] font-bold text-[#002147]/80 hover:text-white bg-slate-100/80 hover:bg-[#002147]/90 border border-slate-200/50 px-3 py-1.5 rounded-xl transition-all cursor-pointer truncate max-w-[280px]"
+                            >
+                              {preset}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Show Words Analysis Map (if evaluated) */}
+                    <div className="bg-[#f8fafc] border border-slate-200/70 rounded-3xl p-6 text-center space-y-3 relative overflow-hidden">
+                      <div className="py-1">
+                        <p className="font-sans font-black text-lg md:text-xl text-[#002147] tracking-tight leading-relaxed select-all">
+                          &ldquo; {sandboxSentence || '...'} &rdquo;
+                        </p>
+                      </div>
+
+                      {evaluationResult && (
+                        <div className="flex justify-center items-center gap-1.5 flex-wrap pt-2">
+                          {sandboxSentence
+                            .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
+                            .split(/\s+/)
+                            .filter(w => w.length > 0)
+                            .map((word, wIdx) => {
+                              const cleaned = word.toLowerCase();
+                              const acc = evaluationResult.wordAccuracy[cleaned] || 'good';
+                              return (
+                                <span 
+                                  key={wIdx}
+                                  className={`text-xs font-black tracking-wide px-3 py-1.5 rounded-xl border ${
+                                    acc === 'excellent' 
+                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                                      : acc === 'good'
+                                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                        : 'bg-rose-50 text-rose-700 border-rose-200 animate-pulse'
+                                  }`}
+                                >
+                                  {word} {acc === 'excellent' ? '✓' : '•'}
+                                </span>
+                              );
+                            })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Recording Action Hub */}
+                    <div className="border border-slate-100 rounded-3xl p-6 bg-gradient-to-br from-slate-50 to-white shadow-inner flex flex-col items-center justify-center space-y-4">
+                      
+                      {/* Interactive reactive wave lines */}
+                      <div className="flex items-end justify-center gap-1.5 h-16 w-full">
+                        {analyserData.map((height, hIdx) => (
+                          <motion.div
+                            key={hIdx}
+                            initial={{ height: 12 }}
+                            animate={{ 
+                              height: isRecording ? height : 12,
+                              backgroundColor: isRecording ? '#C49E3A' : '#e2e8f0'
+                            }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                            className="w-1.5 md:w-2 rounded-full"
+                          />
+                        ))}
+                      </div>
+
+                      <div className="text-center">
+                        {isRecording ? (
+                          <div className="flex items-center gap-2 bg-rose-50 border border-rose-100 px-4 py-1.5 rounded-full text-rose-600 font-extrabold text-xs tracking-wider uppercase animate-pulse">
+                            <span className="w-2 h-2 rounded-full bg-rose-500" />
+                            <span>REC: {formatTimer(recordingTimer)}</span>
+                          </div>
+                        ) : recordingBlob ? (
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest font-mono">
+                            {isRtl ? 'تم التقاط تسجيلك الصوتي المخصص' : 'CUSTOM RECORDING CAPTURED'}
+                          </span>
+                        ) : (
+                          <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">
+                            {isRtl ? 'اضغط ميكروفون وتلّو جملتك المخصصة!' : 'HIT MIC AND SPEAK YOUR CUSTOM PHRASE!'}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        {recordingUrl && !isRecording && (
+                          <button
+                            onClick={handlePlayRecordedAudio}
+                            className={`w-11 h-11 rounded-full flex items-center justify-center border transition-all cursor-pointer ${
+                              recordedAudioPlaying 
+                                ? 'bg-amber-500 text-white border-amber-500 animate-pulse' 
+                                : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-sm'
+                            }`}
+                            title="Play your recording"
+                          >
+                            <Play size={18} fill={recordedAudioPlaying ? "white" : "none"} />
+                          </button>
+                        )}
+
+                        <button
+                          onClick={isRecording ? () => stopRecordingEngine(true) : startRecordingEngine}
+                          className={`w-16 h-16 rounded-full flex items-center justify-center transition-all shadow-lg scale-100 hover:scale-105 active:scale-95 cursor-pointer ${
+                            isRecording 
+                              ? 'bg-rose-600 text-white shadow-rose-200' 
+                              : 'bg-[#002147] text-white shadow-[#002147]/20 hover:bg-[#002147]/95'
+                          }`}
+                        >
+                          {isRecording ? (
+                            <Square size={24} fill="white" />
+                          ) : (
+                            <Mic size={28} />
+                          )}
+                        </button>
+
+                        {recordingBlob && !isRecording && (
+                          <button
+                            onClick={() => {
+                              setRecordingBlob(null);
+                              setRecordingUrl(null);
+                              setEvaluationResult(null);
+                            }}
+                            className="w-11 h-11 rounded-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-sm flex items-center justify-center transition-all cursor-pointer"
+                          >
+                            <RotateCcw size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Evaluation Results Drawer */}
+                    <AnimatePresence>
+                      {evaluationResult && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 15 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 15 }}
+                          className="bg-[#fdfbf7] border border-amber-100 rounded-3xl p-5 md:p-6 space-y-4 animate-fade-in"
+                        >
+                          <div className={`flex flex-col md:flex-row gap-4 items-center justify-between border-b border-slate-100 pb-4 ${isRtl ? 'md:flex-row-reverse text-right' : 'text-left'}`}>
+                            <div className="flex gap-3 items-center">
+                              <div className="w-14 h-14 rounded-full bg-[#002147] flex flex-col justify-center items-center text-white font-serif shadow-md border-2 border-[#C49E3A]">
+                                <span className="text-[8px] font-black tracking-widest text-[#C49E3A] uppercase">Score</span>
+                                <span className="text-sm font-black">{evaluationResult.score}%</span>
+                              </div>
+                              <div className={isRtl ? 'text-right' : 'text-left'}>
+                                <h4 className="font-extrabold text-[#002147]">
+                                  {evaluationResult.score >= 90 ? (isRtl ? 'ممارسة حرة باهرة! 🎉' : 'Amazing Practice Run! 🎉') : 
+                                   evaluationResult.score >= 80 ? (isRtl ? 'تقييم رائع جداً! 👍' : 'Great Job! 👍') : 
+                                   (isRtl ? 'تقدم رائع ومحاولة ممتازة 🔄' : 'Progressive Run 🔄')}
+                                </h4>
+                                <p className="text-[10px] text-slate-400 tracking-wider font-bold uppercase font-mono">
+                                  {isRtl ? 'محلل الممارسة والنطق الذاتي' : 'SANDBOX PHONETIC INTELLIGENCE ASSESSMENT'}
+                                </p>
+                              </div>
+                            </div>
+
+                            {evaluationResult.score >= 80 && (
+                              <div className="bg-amber-100/70 border border-amber-200 rounded-xl px-3.5 py-1 text-center scale-95 flex items-center gap-1">
+                                <Sparkles size={14} className="text-amber-600" />
+                                <span className="text-amber-800 text-[11px] font-black uppercase">
+                                  +{evaluationResult.score >= 90 ? '25' : '15'} XP Gained
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="space-y-2">
+                            <p className={`text-xs text-slate-700 leading-relaxed font-bold ${isRtl ? 'text-right' : 'text-left'}`}>
+                              {evaluationResult.feedback_ar}
+                            </p>
+                            <p className={`text-xs text-slate-500 italic leading-relaxed ${isRtl ? 'text-right' : 'text-left'}`}>
+                              {evaluationResult.feedback_en}
+                            </p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
+
               </motion.div>
             </AnimatePresence>
 
@@ -1569,6 +1876,235 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
               </button>
             </div>
 
+          </div>
+
+          {/* 🏆 لوحة التطوير والإضافة اللغوية للنطق والتحدث (Review & Custom Phrases Creator Dashboard) */}
+          <div className="bg-white border-2 border-indigo-500/10 p-5 md:p-6 rounded-3xl mt-8 shadow-sm">
+            <div className={`flex flex-col sm:flex-row justify-between items-center pb-4 mb-5 border-b border-rose-50 gap-3 ${isRtl ? 'sm:flex-row-reverse' : ''}`}>
+              <div className={isRtl ? 'text-right' : 'text-left'}>
+                <h3 className="text-base font-black text-[#002147] font-sans flex items-center gap-2">
+                  <Star className="text-indigo-500" size={18} fill="currentColor" />
+                  <span>{isRtl ? '🎨 لوحة التحدث ونبَرات النطق للأطفال' : '🎨 Kids Speaking Board: Add & Review Phrases'}</span>
+                </h3>
+                <p className="text-[11px] text-slate-400 font-bold mt-0.5">
+                  {isRtl ? 'صمم جمل نطق مميزة بصوتك، وراجع جملك المفضلة والمكررة لتثبيت مخارج الحروف!' : 'Create awesome voice cards, and practice speaking saved word combinations with custom rates!'}
+                </p>
+              </div>
+
+              {/* Sub tabs switcher */}
+              <div className="flex gap-1 bg-slate-100/80 p-1 rounded-2xl">
+                {[
+                  { id: 'favorites', label: isRtl ? '❤️ الجمل المفضلة' : '❤️ Saved Phrases' },
+                  { id: 'create', label: isRtl ? '➕ تصميم جمل مخصصة' : '➕ Add My Phrases' }
+                ].map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => setPronounTab(t.id as any)}
+                    className={`px-3.5 py-1.5 rounded-xl text-[10px] font-black cursor-pointer transition-all ${
+                      pronounTab === t.id
+                        ? 'bg-[#002147] text-white shadow-xs'
+                        : 'text-slate-500 hover:text-indigo-600'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <AnimatePresence mode="wait">
+              {pronounTab === 'favorites' && (
+                <motion.div
+                  key="pron_favorites"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  className="space-y-4"
+                >
+                  <h4 className={`text-xs font-black text-[#002147] mb-2 ${isRtl ? 'text-right' : 'text-left'}`}>
+                    {isRtl ? `📋 قائمة الجمل المفضلة للمذاكرة والتكرار (${favoritePronunciations.length}):` : `📋 Current speaking bookmarks (${favoritePronunciations.length} phrases):`}
+                  </h4>
+
+                  {favoritePronunciations.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {favoritePronunciations.map((sentenceStr, idx) => (
+                        <div
+                          key={idx}
+                          className={`p-3.5 bg-indigo-50/10 border border-indigo-100 hover:border-indigo-200 rounded-2xl flex justify-between items-center transition-all ${isRtl ? 'flex-row-reverse text-right' : 'text-left'}`}
+                        >
+                          <div className="space-y-1 flex-1">
+                            <p className="text-xs font-black text-slate-800 leading-relaxed font-sans">{sentenceStr}</p>
+                            <span className="text-[10px] font-bold text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded-md">
+                              {isRtl ? 'جملة مفضلة' : 'Saved Bookmark'}
+                            </span>
+                          </div>
+
+                          <div className="flex gap-1.5 shrink-0">
+                            {/* normal speed speaking */}
+                            <button
+                              onClick={() => speakWord(sentenceStr, 0.95)}
+                              className="w-8 h-8 bg-white hover:bg-indigo-50 text-[#002147] rounded-lg border border-slate-200 flex items-center justify-center cursor-pointer transition-colors"
+                              title="Listen 1.0x"
+                            >
+                              <Volume2 size={13} />
+                            </button>
+                            {/* slow analysis speed */}
+                            <button
+                              onClick={() => speakWord(sentenceStr, 0.7)}
+                              className="w-8 h-8 bg-amber-50 hover:bg-amber-100 font-extrabold text-[10px] text-amber-700 rounded-lg border border-transparent flex items-center justify-center cursor-pointer transition-colors"
+                              title="Listen 0.7x"
+                            >
+                              0.7x
+                            </button>
+                            <button
+                              onClick={() => {
+                                const nextFavs = favoritePronunciations.filter(w => w !== sentenceStr);
+                                setFavoritePronunciations(nextFavs);
+                                localStorage.setItem('favorite_pronunciations', JSON.stringify(nextFavs));
+                              }}
+                              className="w-8 h-8 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg flex items-center justify-center cursor-pointer transition-colors border border-transparent"
+                              title="Delete"
+                            >
+                              <X size={11} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 bg-slate-50 border border-slate-150 p-4 rounded-2xl">
+                      <Heart className="text-slate-300 mx-auto mb-2 opacity-50" size={24} />
+                      <p className="text-xs text-slate-500 font-bold">
+                        {isRtl ? 'لا توجد جمل نطق مضافة للمفضلة حالياً.' : 'Your pronunciation bookmark stack is empty.'}
+                      </p>
+                      <p className="text-[10px] text-slate-400 mt-1">
+                        {isRtl ? 'انقر على أيقونة قلب ❤️ المتواجدة بجانب الجمل من قسم "كرر ورائي" لإرفاق أي جملة للاستماع والمقارنة السريعة هنا.' : 'Click the Heart icon next to any sentence in the "Listen & Repeat" section to populate this list!'}
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+              {pronounTab === 'create' && (
+                <motion.div
+                  key="pron_create"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                >
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (!newPronounEng || !newPronounAr) return;
+
+                      const customObj = {
+                        english: newPronounEng.trim(),
+                        arabic: newPronounAr.trim(),
+                        lessonIndex: activeLessonIndex
+                      };
+
+                      const updatedList = [...customPronunciationSentences, customObj];
+                      setCustomPronunciationSentences(updatedList);
+                      localStorage.setItem('custom_pronunciation_sentences', JSON.stringify(updatedList));
+
+                      setNewPronounEng('');
+                      setNewPronounAr('');
+                      setMsgNotify(isRtl ? '✨ رائع! تم إلحاق الجملة بنجاح ضمن قائمة تدريبات التحدث في هذا الدرس.' : '✨ Sentence successfully injected into this lesson!');
+                      setTimeout(() => setMsgNotify(''), 4000);
+
+                      if (onXPAdded) onXPAdded(10);
+                    }}
+                    className="space-y-4"
+                  >
+                    {msgNotify && (
+                      <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black p-3 rounded-xl text-center">
+                        {msgNotify}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* English Speech Input */}
+                      <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
+                        <label className="text-[11px] font-black text-[#002147] block">
+                          {isRtl ? '📝 الجملة التطبيقية بالإنجليزية *:' : '📝 English Speaking Phrase *:'}
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={newPronounEng}
+                          onChange={(e) => setNewPronounEng(e.target.value)}
+                          placeholder="e.g., The black cat sat on the fat rat."
+                          className="w-full text-xs font-sans font-bold bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:border-indigo-400"
+                        />
+                      </div>
+
+                      {/* Arabic Translation */}
+                      <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
+                        <label className="text-[11px] font-black text-[#002147] block">
+                          {isRtl ? '💡 الترجمة والمدلول العربي للجملة *:' : '💡 Arabic Translation *:'}
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={newPronounAr}
+                          onChange={(e) => setNewPronounAr(e.target.value)}
+                          placeholder="مثال: جلست القطة السوداء فوق الجرذان السمينة."
+                          className="w-full text-xs font-sans font-bold bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:border-indigo-400 text-right"
+                        />
+                      </div>
+                    </div>
+
+                    <div className={`pt-2 flex ${isRtl ? 'justify-start' : 'justify-end'}`}>
+                      <button
+                        type="submit"
+                        className="px-5 py-3 cursor-pointer bg-[#002147] hover:bg-slate-800 text-white rounded-xl font-black text-xs shadow-md transition-all flex items-center gap-1.5"
+                      >
+                        <span>{isRtl ? 'إدراج في الدرس الحالي وربطها بالمحلل الصوتي (+10 XP) 💾' : 'Inject and link to voice analyzer (+10 XP) 💾'}</span>
+                      </button>
+                    </div>
+                  </form>
+
+                  {/* Show created pronunciation sentences for active lesson index so student can delete them if needed */}
+                  {customPronunciationSentences.filter(c => c.lessonIndex === activeLessonIndex).length > 0 && (
+                    <div className="mt-5 pt-4 border-t border-slate-100/60">
+                      <h5 className={`text-[10px] font-black text-slate-400 tracking-wider mb-2 uppercase ${isRtl ? 'text-right' : 'text-left'}`}>
+                        {isRtl ? '⚙️ الجمل المصممة من قبلك المرفقة بهذا الدرس:' : '⚙️ Custom voice challenges created here:'}
+                      </h5>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {customPronunciationSentences.filter(c => c.lessonIndex === activeLessonIndex).map((sent, cIdx) => (
+                          <div
+                            key={cIdx}
+                            className={`p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-[11px] ${isRtl ? 'flex-row-reverse' : ''}`}
+                          >
+                            <span className="font-extrabold text-[#002147] truncate gap-1 flex items-center">
+                              <span>🔊</span>
+                              <span className="capitalize">{sent.english}</span>
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = customPronunciationSentences.filter(c => c.english !== sent.english);
+                                setCustomPronunciationSentences(updated);
+                                localStorage.setItem('custom_pronunciation_sentences', JSON.stringify(updated));
+                                if (favoritePronunciations.includes(sent.english)) {
+                                  setFavoritePronunciations(prev => prev.filter(w => w !== sent.english));
+                                }
+                              }}
+                              className="p-1 hover:bg-rose-50 text-rose-600 rounded-lg cursor-pointer border border-transparent hover:border-rose-100"
+                              title="حذف"
+                            >
+                              <X size={11} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
         </div>

@@ -98,6 +98,48 @@ export const EscapeRoomGrammar: React.FC<EscapeRoomGrammarProps> = ({
       explanation: "We start the question with 'Do' because the subject is 'you'.",
       explanationAr: "نبسط السؤال باستخدام 'Do' لأن الفاعل هو (أنت) وليس مفرداً غائباً.",
       lockIcon: "⚙️"
+    },
+    {
+      id: 4,
+      stageName: "Westminster Abbey Vaults",
+      stageNameAr: "أقبية دير وستمنستر الأثري 🏛️",
+      clue: "To unlock the dusty iron gate of the crypt, discover the correct negative helper for third-person singular 'have':",
+      clueAr: "لفتح بوابة السرداب الأثرية المليئة بالغبار، اكتشف صيغة النفي الصحيحة للفعل 'يملك/لديه' للمفرد الغائب:",
+      question: "She ______ have the golden key with her today.",
+      questionAr: "She ______ have the golden key with her today.",
+      options: ["doesn't", "don't", "hasn't"],
+      correctAnswer: "doesn't",
+      explanation: "We use 'doesn't' + base verb ('have') for singular negative sentences in Present Simple.",
+      explanationAr: "نستخدم 'doesn't' متبوعاً بمصدر الفعل ('have') لنفي الملكية للمفرد الغائب.",
+      lockIcon: "🏛️"
+    },
+    {
+      id: 5,
+      stageName: "Thames Secret Submarine",
+      stageNameAr: "الغواصة السرية بنهر التيمز 🚢",
+      clue: "To operate the generator's safety valve, select the correct form of the verb 'be' for a plural subject:",
+      clueAr: "لتشغيل صمام الأمان للمولد والهروب للسطح، اختر الصيغة السليمة لفعل الكينونة (be) للمبتدأ الجمع:",
+      question: "Why ______ the ship crew members so worried about the fog?",
+      questionAr: "Why ______ the ship crew members so worried about the fog?",
+      options: ["are", "is", "am"],
+      correctAnswer: "are",
+      explanation: "We use 'are' because 'crew members' is plural.",
+      explanationAr: "نשתخدم الفعل المساعد 'are' لأن الفاعل (أعضاء طاقم السفينة) جمع.",
+      lockIcon: "🚢"
+    },
+    {
+      id: 6,
+      stageName: "Greenwich Observatory Dome",
+      stageNameAr: "قبة مرصد غرينتش الملكي 🔭",
+      clue: "To align the heavy brass telescope and receive the final coordinates, choose the correct question generator:",
+      clueAr: "لتوجيه التلسكوب النحاسي العملاق واكتشاف الإحداثيات النهائية، اختر صيغة الاستفهام السليمة للمفرد غائب:",
+      question: "______ she study the constellations here every Saturday?",
+      questionAr: "______ she study the constellations here every Saturday?",
+      options: ["Does", "Do", "Is"],
+      correctAnswer: "Does",
+      explanation: "We start Present Simple questions with 'Does' for singular subjects (she/he/it).",
+      explanationAr: "نبدأ السؤال بـ 'Does' في المضارع البسيط لأن الفاعل مفرد غائب (هي).",
+      lockIcon: "🔭"
     }
   ];
 

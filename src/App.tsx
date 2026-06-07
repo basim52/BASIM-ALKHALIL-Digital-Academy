@@ -104,6 +104,7 @@ import { VisualDictionary } from './components/VisualDictionary';
 import { EnglishSongs } from './components/EnglishSongs';
 import { AnimatedStoryboard } from './components/AnimatedStoryboard';
 import { EscapeRoomGrammar } from './components/EscapeRoomGrammar';
+import { FlashcardsHub } from './components/FlashcardsHub';
 import { FamilyActivities } from './components/FamilyActivities';
 import { InteractiveLearningHub } from './components/InteractiveLearningHub';
 import { Layers, Image as OxfordIcon, Library as OxfordClassicIcon } from 'lucide-react';
@@ -4740,6 +4741,45 @@ export default function App() {
                 alert(lang === 'ar' ? `هروب عبقري! عثرت على المفاتيح ونلت +${xp} نقطة تفوق! 🎉` : `Amazing Escape! You solved the code and earned +${xp} XP! 🎉`);
               } catch (e) {
                 console.error("Error updating points for Escape Room:", e);
+              }
+            }
+          }}
+        />
+      );
+    }
+    if (view === 'flashcards-hub') {
+      return (
+        <FlashcardsHub
+          lang={lang}
+          userProfile={userProfile}
+          onBack={() => setView('interactive-learning')}
+          onXPAdded={async (xp) => {
+            if (userProfile && currentUser) {
+              const currentPoints = (userProfile as any).points || 0;
+              const newPoints = currentPoints + xp;
+              try {
+                if (!currentUser.uid.startsWith('sim_')) {
+                  await updateDoc(doc(db, 'users', currentUser.uid), {
+                    points: newPoints
+                  });
+                }
+                await addDoc(collection(db, 'lessonResults'), {
+                  userId: currentUser.uid,
+                  parentIds: (userProfile as any).linkedParentIds || [],
+                  lessonId: 'fc_001',
+                  courseId: 'flashcards_hub',
+                  level: 'Memory Mastery',
+                  lessonTitle: 'Smart Flashcards Vocab',
+                  score: 10,
+                  total: 10,
+                  timestamp: serverTimestamp()
+                });
+                setUserProfile({
+                  ...userProfile,
+                  points: newPoints
+                } as any);
+              } catch (e) {
+                console.error("Error updating points for Flashcards Hub:", e);
               }
             }
           }}

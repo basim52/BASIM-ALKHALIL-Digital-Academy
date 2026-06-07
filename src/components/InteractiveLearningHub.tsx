@@ -33,6 +33,22 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
 
   const activities = [
     {
+      id: 'flashcards-hub' as const,
+      title: '📖 مستودع البطاقات التعليمية الذكية',
+      titleEn: 'Smart Vocabulary Flashcards 📖',
+      description: 'تعلم كلمات أكسفورد وقواعد الإنجليزية بالتكرار المتباعد والنطق المسموع والتقييم الفطن للذاكرة!',
+      descriptionEn: 'Master premium academic Oxford vocabulary and rules via interactive spaced-repetition card flipping and audio!',
+      icon: BookOpen,
+      color: 'bg-indigo-600',
+      textColor: 'text-indigo-800',
+      bgColor: 'bg-indigo-50/70',
+      borderColor: 'border-indigo-100',
+      pillColor: 'bg-indigo-100 text-indigo-800',
+      badge: isRtl ? 'حفظ ذكي وتكرار متباعد' : 'Spaced Repetition Mastery',
+      xpReward: '+30 XP',
+      level: 'All Levels'
+    },
+    {
       id: 'adults-daily-dose' as const,
       title: 'الجرعة اليومية للبالغين ⚡',
       titleEn: 'Adults Daily Dose ⚡',

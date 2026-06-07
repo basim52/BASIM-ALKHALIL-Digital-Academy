@@ -44,6 +44,36 @@ export const VisualDictionary: React.FC<VisualDictionaryProps> = ({
   const [selectedItem, setSelectedItem] = useState<DictionaryItem | null>(null);
   const [isSpeaking, setIsSpeaking] = useState<string | null>(null);
   
+  // Custom user created dictionary items
+  const [customDictionaryItems, setCustomDictionaryItems] = useState<DictionaryItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('custom_dictionary_items');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  // Favorite/challenging words to review (Review list)
+  const [favoriteWords, setFavoriteWords] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('favorite_dictionary_words');
+      return saved ? JSON.parse(saved) : [];
+    } catch (w) {
+      return [];
+    }
+  });
+
+  // Dynamic state for adding custom word
+  const [newWord, setNewWord] = useState('');
+  const [newMeaningAr, setNewMeaningAr] = useState('');
+  const [newEmoji, setNewEmoji] = useState('🍎');
+  const [newSentence, setNewSentence] = useState('');
+  const [newSentenceAr, setNewSentenceAr] = useState('');
+  const [newPrompt, setNewPrompt] = useState('');
+  const [dictionaryTab, setDictionaryTab] = useState<'review' | 'add'>('review');
+  const [addMsg, setAddMsg] = useState('');
+
   // Game state
   const [interactionMode, setInteractionMode] = useState<'browse' | 'quiz'>('browse');
   const [quizScore, setQuizScore] = useState<number>(0);
@@ -58,7 +88,10 @@ export const VisualDictionary: React.FC<VisualDictionaryProps> = ({
 
   // Filter dictionary items by category & search
   const categoryData = VISUAL_DICTIONARY.find(cat => cat.id === activeCategory) || VISUAL_DICTIONARY[0];
-  const pageItems = categoryData.items.filter(item => {
+  const activeCustoms = customDictionaryItems.filter((item: any) => item.category === activeCategory);
+  const combinedItems = [...categoryData.items, ...activeCustoms];
+
+  const pageItems = combinedItems.filter(item => {
     const q = searchQuery.toLowerCase();
     return item.word.toLowerCase().includes(q) || item.meaning_ar.includes(q);
   });
@@ -85,8 +118,11 @@ export const VisualDictionary: React.FC<VisualDictionaryProps> = ({
 
   // Setup / Reset the Vocabulary Quiz
   const startCategoryQuiz = () => {
-    const currentItems = [...categoryData.items];
-    if (currentItems.length < 3) return;
+    const currentItems = [...combinedItems];
+    if (currentItems.length < 3) {
+      alert(lang === 'ar' ? 'الرجاء إدخال المزيد من الكلمات في هذا القسم لبدء الاختبار التفاعلي!' : 'Please add more words to this section to start the interactive test!');
+      return;
+    }
 
     // Create 5 random questions
     const selectedQuestions = [];
@@ -96,7 +132,7 @@ export const VisualDictionary: React.FC<VisualDictionaryProps> = ({
     for (let i = 0; i < limit; i++) {
       const correct = shuffled[i];
       // get 2 random wrong options from either same or other categories
-      const wrongPool = VISUAL_DICTIONARY.flatMap(c => c.items)
+      const wrongPool = [...VISUAL_DICTIONARY.flatMap(c => c.items), ...customDictionaryItems]
         .filter(item => item.word !== correct.word);
       const shuffledWrong = wrongPool.sort(() => 0.5 - Math.random()).slice(0, 2);
       
@@ -151,10 +187,14 @@ export const VisualDictionary: React.FC<VisualDictionaryProps> = ({
 
   // Pre-select first item on category change
   useEffect(() => {
-    if (categoryData.items.length > 0) {
-      setSelectedItem(categoryData.items[0]);
+    const activeCustoms = customDictionaryItems.filter((item: any) => item.category === activeCategory);
+    const combined = [...categoryData.items, ...activeCustoms];
+    if (combined.length > 0) {
+      setSelectedItem(combined[0]);
+    } else {
+      setSelectedItem(null);
     }
-  }, [activeCategory]);
+  }, [activeCategory, customDictionaryItems.length]);
 
   return (
     <div className="min-h-screen bg-[#FAF9F5] pb-24 text-slate-800">
@@ -242,6 +282,7 @@ export const VisualDictionary: React.FC<VisualDictionaryProps> = ({
           /* =======================================
              BROWSE MODE: CARDS AND DETAILED SPLIT 
              ======================================= */
+          <div className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
             {/* Left sidebar: List of words matching search */}
@@ -353,10 +394,32 @@ export const VisualDictionary: React.FC<VisualDictionaryProps> = ({
                       
                       {/* English spelling name */}
                       <div className="space-y-1">
-                        <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider">
-                          {isRtl ? 'الكلمة باللغة الإنجليزية' : 'English Spelling'}
-                        </span>
-                        <h2 className="text-3xl md:text-4xl font-sans font-black text-[#002147] capitalize tracking-tight flex items-center gap-3">
+                        <div className="flex justify-between items-center w-full">
+                          <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider">
+                            {isRtl ? 'الكلمة باللغة الإنجليزية' : 'English Spelling'}
+                          </span>
+                          
+                          {/* Heart Bookmark icon for Review */}
+                          <button
+                            onClick={() => {
+                              const isFav = favoriteWords.includes(selectedItem.word);
+                              const nextFavs = isFav
+                                ? favoriteWords.filter(w => w !== selectedItem.word)
+                                : [...favoriteWords, selectedItem.word];
+                              setFavoriteWords(nextFavs);
+                              localStorage.setItem('favorite_dictionary_words', JSON.stringify(nextFavs));
+                            }}
+                            className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                              favoriteWords.includes(selectedItem.word)
+                                ? 'bg-rose-50 border-rose-200 text-rose-600'
+                                : 'bg-[#fafafa] border-slate-200 text-slate-400 hover:text-rose-500'
+                            }`}
+                            title={isRtl ? 'إضافة إلى قائمة المراجعة والمفضلة' : 'Add to review/favorites'}
+                          >
+                            <Heart size={14} fill={favoriteWords.includes(selectedItem.word) ? "currentColor" : "none"} />
+                          </button>
+                        </div>
+                        <h2 className="text-3xl md:text-3xl font-sans font-black text-[#002147] capitalize tracking-tight flex items-center gap-3">
                           {selectedItem.word}
                         </h2>
                       </div>
@@ -424,6 +487,281 @@ export const VisualDictionary: React.FC<VisualDictionaryProps> = ({
             </div>
 
           </div>
+
+          {/* 🏆 لوحة التطوير والإضافة اللغوية للقاموس المصور (Review & Custom Words Creator Hub) */}
+          <div className="bg-white border-2 border-amber-500/10 p-5 md:p-6 rounded-3xl mt-8 shadow-sm">
+            <div className={`flex flex-col sm:flex-row justify-between items-center pb-4 mb-5 border-b border-slate-100 gap-3 ${isRtl ? 'sm:flex-row-reverse' : ''}`}>
+              <div className={isRtl ? 'text-right' : 'text-left'}>
+                <h3 className="text-base font-black text-[#002147] font-sans flex items-center gap-2">
+                  <Star className="text-amber-500" size={18} fill="currentColor" />
+                  <span>{isRtl ? '🎨 لوحة الإضافة والمراجعة للقاموس المصور' : '🎨 Kids Board: Add & Review Dict Cards'}</span>
+                </h3>
+                <p className="text-[11px] text-slate-400 font-bold mt-0.5">
+                  {isRtl ? 'أضف كلمات كرتونية مخصصة لقاموسك، وراجع مفرداتك الصعبة والمفضلة للمذاكرة!' : 'Design custom visual words, choose funny symbols, and review saved dictionary items!'}
+                </p>
+              </div>
+
+              {/* Sub tabs */}
+              <div className="flex gap-1 bg-slate-100/80 p-1 rounded-2xl">
+                {[
+                  { id: 'review', label: isRtl ? '❤️ الكلمات المفضلة' : '❤️ My Favorites' },
+                  { id: 'add', label: isRtl ? '➕ إضافة كلمة مصورة' : '➕ Design New Card' }
+                ].map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => setDictionaryTab(t.id as any)}
+                    className={`px-3.5 py-1.5 rounded-xl text-[10px] font-black cursor-pointer transition-all ${
+                      dictionaryTab === t.id
+                        ? 'bg-amber-500 text-white shadow-sm'
+                        : 'text-slate-500 hover:text-amber-600'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Content area */}
+            <AnimatePresence mode="wait">
+              {dictionaryTab === 'review' && (
+                <motion.div
+                  key="review_sub"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  className="space-y-4"
+                >
+                  <h4 className={`text-xs font-black text-[#002147] mb-2 ${isRtl ? 'text-right' : 'text-left'}`}>
+                    {isRtl ? `📋 قائمة المراجعة المفضلة الحالية (${combinedItems.filter(item => favoriteWords.includes(item.word)).length} كلمات):` : `📋 Current word bookmarks to study (${combinedItems.filter(item => favoriteWords.includes(item.word)).length} cards):`}
+                  </h4>
+
+                  {combinedItems.filter(item => favoriteWords.includes(item.word)).length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {combinedItems.filter(item => favoriteWords.includes(item.word)).map(item => (
+                        <div
+                          key={item.word}
+                          className={`p-3 bg-amber-50/30 border border-amber-100 hover:border-amber-400/30 rounded-2xl flex justify-between items-center transition-all ${isRtl ? 'flex-row-reverse' : ''}`}
+                        >
+                          <div className={`flex items-center gap-2.5 ${isRtl ? 'flex-row-reverse text-right' : 'text-left'}`}>
+                            <span className="text-2xl bg-white p-1 rounded-lg border border-orange-100">{item.emoji}</span>
+                            <div>
+                              <p className="text-xs font-black text-[#002147] capitalize">{item.word}</p>
+                              <p className="text-[10px] text-amber-800 font-bold">{item.meaning_ar}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => speakWordOrSentence(item.word, `fav_${item.word}`)}
+                              className="w-7 h-7 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-lg flex items-center justify-center shrink-0"
+                            >
+                              <Volume2 size={13} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                const nextFavs = favoriteWords.filter(w => w !== item.word);
+                                setFavoriteWords(nextFavs);
+                                localStorage.setItem('favorite_dictionary_words', JSON.stringify(nextFavs));
+                              }}
+                              className="w-7 h-7 bg-rose-50 hover:bg-rose-100 border border-rose-100 text-rose-500 rounded-lg flex items-center justify-center shrink-0"
+                            >
+                              <X size={11} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 bg-slate-50 border border-slate-150 p-4 rounded-2xl">
+                      <Heart className="text-slate-300 mx-auto mb-2 opacity-50" size={24} />
+                      <p className="text-xs text-slate-500 font-bold">
+                        {isRtl ? 'لا توجد كلمات في قائمة مراجعة القاموس حالياً.' : 'Your favorite dictionary bookmark stack is empty.'}
+                      </p>
+                      <p className="text-[10px] text-slate-400 mt-1">
+                        {isRtl ? 'انقر على أيقونة القلب ❤️ المتواجدة أعلى بطاقات التعريف التفصيلية لإرفاق أي كلمة هنا.' : 'Click the Heart bookmark icon next to any word details to review it here easily.'}
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+              {dictionaryTab === 'add' && (
+                <motion.div
+                  key="add_sub"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                >
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (!newWord || !newMeaningAr || !newSentence) return;
+
+                      const customObj: DictionaryItem = {
+                        word: newWord.toLowerCase().trim(),
+                        meaning_ar: newMeaningAr.trim(),
+                        image_prompt: newPrompt.trim() || `Cute nursery graphic details of ${newWord.toLowerCase().trim()}, isolated vector white BG`,
+                        sentence: newSentence.trim(),
+                        sentence_ar: newSentenceAr.trim() || 'مثال تطبيقي للكلمة.',
+                        emoji: newEmoji,
+                        category: activeCategory as any
+                      };
+
+                      const updatedList = [...customDictionaryItems, customObj];
+                      setCustomDictionaryItems(updatedList);
+                      localStorage.setItem('custom_dictionary_items', JSON.stringify(updatedList));
+
+                      setNewWord('');
+                      setNewMeaningAr('');
+                      setNewSentence('');
+                      setNewSentenceAr('');
+                      setNewPrompt('');
+
+                      setAddMsg(isRtl ? '✨ رائع! تم حفظ الكلمة المصورة الجديدة بنجاح بالقاموس.' : '✨ Card created & compiled successfully!');
+                      setTimeout(() => setAddMsg(''), 4000);
+
+                      if (onXPAdded) onXPAdded(10);
+                    }}
+                    className="space-y-4"
+                  >
+                    {addMsg && (
+                      <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black p-3 rounded-xl text-center">
+                        {addMsg}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      {/* Word Name */}
+                      <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
+                        <label className="text-[11px] font-black text-[#002147] block">
+                          {isRtl ? '🔑 الكلمة الإنجليزية (English Word) *:' : '🔑 English Word *:'}
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={newWord}
+                          onChange={(e) => setNewWord(e.target.value)}
+                          placeholder="e.g., Apple"
+                          className="w-full text-xs font-sans font-bold bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:border-amber-400 transition-all"
+                        />
+                      </div>
+
+                      {/* Meaning Arabic */}
+                      <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
+                        <label className="text-[11px] font-black text-[#002147] block">
+                          {isRtl ? '🎨 المعنى بالعربية *:' : '🎨 Arabic Translation *:'}
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={newMeaningAr}
+                          onChange={(e) => setNewMeaningAr(e.target.value)}
+                          placeholder="مثال: تفاحه"
+                          className="w-full text-xs font-sans font-bold bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:border-amber-400 transition-all text-right"
+                        />
+                      </div>
+
+                      {/* Emoji selection */}
+                      <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
+                        <label className="text-[11px] font-black text-[#002147] block">
+                          {isRtl ? '🧸 رمز تعبيري دلالي (Emoji) *:' : '🧸 Emoji Symbol *:'}
+                        </label>
+                        <select
+                          value={newEmoji}
+                          onChange={(e) => setNewEmoji(e.target.value)}
+                          className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:border-amber-400 transition-all"
+                        >
+                          {['🍎', '🧸', '🚗', '🛹', '🛸', '🎮', '💡', '🐶', '🍕', '🥛', '🚲', '🍰', '🌸', '🏠', '🪑', '🛏️', '🚪', '📕'].map(em => (
+                            <option key={em} value={em}>{em}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* ENG Sentence */}
+                      <div className={`space-y-1 col-span-1 sm:col-span-2 ${isRtl ? 'text-right' : 'text-left'}`}>
+                        <label className="text-[11px] font-black text-[#002147] block">
+                          {isRtl ? '📝 الجملة التطبيقية بالإنجليزية *:' : '📝 English Sentence *:'}
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={newSentence}
+                          onChange={(e) => setNewSentence(e.target.value)}
+                          placeholder="e.g., I love eating a red apple."
+                          className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:border-amber-400 transition-all"
+                        />
+                      </div>
+
+                      {/* ARB Sentence */}
+                      <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
+                        <label className="text-[11px] font-black text-slate-400 block">
+                          {isRtl ? '🎯 ترجمة الجملة للعربية:' : '🎯 Arabic Translation:'}
+                        </label>
+                        <input
+                          type="text"
+                          value={newSentenceAr}
+                          onChange={(e) => setNewSentenceAr(e.target.value)}
+                          placeholder="مثال: أنا أحب أكل التفاح الأحمر اللذيذ."
+                          className="w-full text-xs bg-[#FAF9F5] border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:border-amber-400 transition-all text-right"
+                        />
+                      </div>
+                    </div>
+
+                    <div className={`pt-2 flex ${isRtl ? 'justify-start' : 'justify-end'}`}>
+                      <button
+                        type="submit"
+                        className="px-5 py-3 cursor-pointer bg-[#002147] hover:bg-[#002a5c] text-white rounded-xl font-black text-xs shadow-md transition-colors flex items-center gap-1.5"
+                      >
+                        <span>{isRtl ? 'حفظ الكارت التوضيحي بالقاموس (+10 XP) 💾' : 'Save To My Dictionary (+10 XP) 💾'}</span>
+                      </button>
+                    </div>
+                  </form>
+
+                  {/* Show created items of active category so kids can delete them if needed */}
+                  {activeCustoms.length > 0 && (
+                    <div className="mt-5 pt-4 border-t border-slate-100">
+                      <h5 className={`text-[10px] font-black text-slate-400 tracking-wider mb-2 uppercase ${isRtl ? 'text-right' : 'text-left'}`}>
+                        {isRtl ? '⚙️ الكروت التعليمية المضافة من قبلك في هذا القسم:' : '⚙️ Custom cards created in this category:'}
+                      </h5>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {activeCustoms.map(cust => (
+                          <div
+                            key={cust.word}
+                            className={`p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-[11px] ${isRtl ? 'flex-row-reverse' : ''}`}
+                          >
+                            <span className="font-extrabold text-[#002147] truncate gap-1 flex items-center">
+                              <span>{cust.emoji}</span>
+                              <span className="capitalize">{cust.word}</span>
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = customDictionaryItems.filter(c => c.word !== cust.word);
+                                setCustomDictionaryItems(updated);
+                                localStorage.setItem('custom_dictionary_items', JSON.stringify(updated));
+                                if (favoriteWords.includes(cust.word)) {
+                                  setFavoriteWords(prev => prev.filter(w => w !== cust.word));
+                                }
+                              }}
+                              className="p-1 hover:bg-rose-50 text-rose-600 rounded-lg cursor-pointer border border-transparent hover:border-rose-100"
+                              title="حذف"
+                            >
+                              <X size={11} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+        </div>
         ) : (
           /* =======================================
              QUIZ MODE: SPELLING & FLASH CHALLENGES

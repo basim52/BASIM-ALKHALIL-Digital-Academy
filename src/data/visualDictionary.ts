@@ -6,6 +6,7 @@ export interface DictionaryItem {
   sentence_ar?: string;  // helpful Arabic translation of the sentence for kids
   audio_url?: string;
   emoji: string;         // clean vector-like emoji representation for the card
+  category?: string;
 }
 
 export interface DictionaryCategory {
