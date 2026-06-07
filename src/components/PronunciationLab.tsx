@@ -644,7 +644,12 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
   const [customPronunciationSentences, setCustomPronunciationSentences] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem('custom_pronunciation_sentences');
-      return saved ? JSON.parse(saved) : [];
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        return parsed.filter(item => item && typeof item === 'object');
+      }
+      return [];
     } catch (e) {
       return [];
     }
@@ -654,7 +659,16 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
   const [favoritePronunciations, setFavoritePronunciations] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('favorite_pronunciations');
-      return saved ? JSON.parse(saved) : [];
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        return parsed.map(item => {
+          if (typeof item === 'string') return item;
+          if (item && typeof item === 'object' && (item as any).english) return (item as any).english;
+          return '';
+        }).filter(item => typeof item === 'string' && item.length > 0);
+      }
+      return [];
     } catch (e) {
       return [];
     }
@@ -1321,7 +1335,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
 
                     <div className="space-y-3 max-h-[340px] overflow-y-auto pr-1">
                       {(() => {
-                        const activeCustoms = customPronunciationSentences.filter(c => c.lessonIndex === activeLessonIndex);
+                        const activeCustoms = customPronunciationSentences.filter(c => c && typeof c === 'object' && c.lessonIndex === activeLessonIndex);
                         const combinedSentences = [...lesson.repeatSentences, ...activeCustoms];
                         return combinedSentences.map((sentence, sIdx) => {
                           const isFav = favoritePronunciations.includes(sentence.english);
@@ -2065,14 +2079,14 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
                   </form>
 
                   {/* Show created pronunciation sentences for active lesson index so student can delete them if needed */}
-                  {customPronunciationSentences.filter(c => c.lessonIndex === activeLessonIndex).length > 0 && (
+                  {customPronunciationSentences.filter(c => c && typeof c === 'object' && c.lessonIndex === activeLessonIndex).length > 0 && (
                     <div className="mt-5 pt-4 border-t border-slate-100/60">
                       <h5 className={`text-[10px] font-black text-slate-400 tracking-wider mb-2 uppercase ${isRtl ? 'text-right' : 'text-left'}`}>
                         {isRtl ? '⚙️ الجمل المصممة من قبلك المرفقة بهذا الدرس:' : '⚙️ Custom voice challenges created here:'}
                       </h5>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {customPronunciationSentences.filter(c => c.lessonIndex === activeLessonIndex).map((sent, cIdx) => (
+                        {customPronunciationSentences.filter(c => c && typeof c === 'object' && c.lessonIndex === activeLessonIndex).map((sent, cIdx) => (
                           <div
                             key={cIdx}
                             className={`p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-[11px] ${isRtl ? 'flex-row-reverse' : ''}`}
@@ -2085,7 +2099,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
                             <button
                               type="button"
                               onClick={() => {
-                                const updated = customPronunciationSentences.filter(c => c.english !== sent.english);
+                                const updated = customPronunciationSentences.filter(c => c && typeof c === 'object' && c.english !== sent.english);
                                 setCustomPronunciationSentences(updated);
                                 localStorage.setItem('custom_pronunciation_sentences', JSON.stringify(updated));
                                 if (favoritePronunciations.includes(sent.english)) {

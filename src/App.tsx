@@ -3895,34 +3895,95 @@ export default function App() {
               setUserProfile(adminProfile);
             }
           } else {
-            // Normal user flow
-            const userDoc = await getDoc(doc(db, 'users', user.uid));
-            if (userDoc.exists()) {
-              const profileData = userDoc.data() as UserProfile;
-              // Automatically demote if they were admins but are no longer in MASTER_ADMINS
-              if (profileData.role === UserRole.ADMIN) {
-                await updateDoc(doc(db, 'users', user.uid), { role: UserRole.STUDENT });
-                const demotedProfile = { ...profileData, role: UserRole.STUDENT };
-                setUserProfile(demotedProfile);
-                setActiveStudentId(demotedProfile.uid);
+            // Normal user flow with offline/error cache fallback to prevent locking users on RoleSelector
+            try {
+              const userDoc = await getDoc(doc(db, 'users', user.uid));
+              if (userDoc.exists()) {
+                const profileData = userDoc.data() as UserProfile;
+                // Automatically demote if they were admins but are no longer in MASTER_ADMINS
+                if (profileData.role === UserRole.ADMIN) {
+                  try {
+                    await updateDoc(doc(db, 'users', user.uid), { role: UserRole.STUDENT });
+                  } catch (e) {
+                    console.warn("Could not demote on server, will continue with local demotion", e);
+                  }
+                  const demotedProfile = { ...profileData, role: UserRole.STUDENT };
+                  setUserProfile(demotedProfile);
+                  localStorage.setItem(`cached_profile_${user.uid}`, JSON.stringify(demotedProfile));
+                  setActiveStudentId(demotedProfile.uid);
+                } else {
+                  setUserProfile(profileData);
+                  localStorage.setItem(`cached_profile_${user.uid}`, JSON.stringify(profileData));
+                  if (profileData.role === UserRole.STUDENT) {
+                    setActiveStudentId(profileData.uid);
+                  }
+                }
               } else {
-                setUserProfile(profileData);
-                if (profileData.role === UserRole.STUDENT) {
-                  setActiveStudentId(profileData.uid);
+                // Check if we have a locally cached profile even if document doesn't exist on server (offline situation)
+                const cachedRaw = localStorage.getItem(`cached_profile_${user.uid}`);
+                if (cachedRaw) {
+                  try {
+                    const cachedUser = JSON.parse(cachedRaw) as UserProfile;
+                    setUserProfile(cachedUser);
+                    if (cachedUser.role === UserRole.STUDENT) {
+                      setActiveStudentId(cachedUser.uid);
+                    }
+                  } catch (_) {
+                    // Let RoleSelector handle it
+                  }
+                } else {
+                  // RoleSelector will handle new non-admin users
                 }
               }
-            } else {
-              // RoleSelector will handle new non-admin users
+            } catch (innerError) {
+              console.warn("Firestore user profile getDoc threw error. Checking cached profile fallback...", innerError);
+              const cachedRaw = localStorage.getItem(`cached_profile_${user.uid}`);
+              if (cachedRaw) {
+                try {
+                  const cachedUser = JSON.parse(cachedRaw) as UserProfile;
+                  setUserProfile(cachedUser);
+                  if (cachedUser.role === UserRole.STUDENT) {
+                    setActiveStudentId(cachedUser.uid);
+                  }
+                  console.log("Successfully resolved user profile with offline cache:", cachedUser);
+                } catch (_) {
+                  // Fallback to guest student
+                  const fallbackData: UserProfile = {
+                    uid: user.uid,
+                    email: user.email || '',
+                    displayName: user.displayName || 'Academy Student',
+                    role: UserRole.STUDENT,
+                    createdAt: serverTimestamp(),
+                  };
+                  setUserProfile(fallbackData);
+                  setActiveStudentId(user.uid);
+                }
+              } else {
+                // If there's no cache and we are offline, auto-resolve as Student so the app is NOT broken
+                const fallbackData: UserProfile = {
+                  uid: user.uid,
+                  email: user.email || '',
+                  displayName: user.displayName || 'Academy Student',
+                  role: UserRole.STUDENT,
+                  createdAt: serverTimestamp(),
+                };
+                setUserProfile(fallbackData);
+                setActiveStudentId(user.uid);
+              }
             }
           }
         } catch (error) {
           console.error("Auth profile fetch error:", error);
-          // Only show fatal error if not the master admin (who has fallback)
-          const userEmail = (user.email || '').toLowerCase();
-          
-          if (!MASTER_ADMINS.includes(userEmail)) {
-            handleFirestoreError(error, OperationType.GET, `users/${user.uid}`);
-          }
+          // Fallback to guest profile instead of raising a red-screen error or crashing on offline startup
+          const fallbackData: UserProfile = {
+            uid: user.uid,
+            email: user.email || '',
+            displayName: user.displayName || 'Academy Student',
+            role: UserRole.STUDENT,
+            createdAt: serverTimestamp(),
+          };
+          setUserProfile(fallbackData);
+          setActiveStudentId(user.uid);
         } finally {
           setLoading(false);
         }

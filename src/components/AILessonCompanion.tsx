@@ -22,7 +22,8 @@ import {
   BrainCircuit,
   MessageCircleOff,
   User,
-  Activity
+  Activity,
+  Square
 } from 'lucide-react';
 import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
 
@@ -452,6 +453,24 @@ ${quizBlock}
               </div>
 
               <div className="flex items-center gap-2">
+                {/* Global Speech Stop Button (Pulsing when active) */}
+                {currentPlayingId !== null && (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    onClick={() => {
+                      cancelAllSpeech();
+                      setCurrentPlayingId(null);
+                    }}
+                    className="p-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white transition flex items-center gap-1 shadow-md"
+                    title={isRtl ? 'إيقاف نطق الصوت' : 'Stop Speaking Audio'}
+                  >
+                    <Square size={12} fill="currentColor" className="animate-pulse" />
+                    <span className="text-[10px] font-black px-0.5">{isRtl ? 'إيقاف النطق ⏹️' : 'Stop ⏹️'}</span>
+                  </motion.button>
+                )}
+
                 {/* Voice Auto-Speak Mode Toggle */}
                 <button
                   onClick={() => setAutoSpeakMode(!autoSpeakMode)}
@@ -522,16 +541,16 @@ ${quizBlock}
                             </span>
                             <button
                               onClick={() => handleTriggerSpeak(msg.text, msg.id)}
-                              className={`flex items-center gap-1 py-1 px-2.5 rounded-lg text-[10px] font-bold tracking-wide transition ${
+                              className={`flex items-center gap-1.5 py-1 px-2.5 rounded-lg text-[10px] font-bold tracking-wide transition border ${
                                 currentPlayingId === msg.id 
-                                  ? 'bg-amber-accent text-ink animate-pulse' 
-                                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                  ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 animate-pulse' 
+                                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-transparent'
                               }`}
                             >
                               {currentPlayingId === msg.id ? (
                                 <>
-                                  <Activity size={10} className="text-amber-action animate-bounce" />
-                                  <span>{isRtl ? 'جارٍ التشغيل...' : 'Playing...'}</span>
+                                  <Square size={9} fill="currentColor" className="text-rose-600 animate-pulse" />
+                                  <span>{isRtl ? 'توقف ⏹️' : 'Stop ⏹️'}</span>
                                 </>
                               ) : (
                                 <>
