@@ -28,6 +28,10 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { UserProfile } from '../types';
+import { LiveTranslate_Letters } from './LiveTranslate_Letters';
+import { LiveTranslate_Vocab } from './LiveTranslate_Vocab';
+import { LiveTranslate_Conversation } from './LiveTranslate_Conversation';
+import { ClipboardList, MessageSquare, BookOpenText } from 'lucide-react';
 
 interface LiveTranslateProps {
   isRtl?: boolean;
@@ -158,7 +162,7 @@ const speakText = (text: string, langCode: string) => {
 };
 
 export function LiveTranslate({ isRtl = true, lang = 'ar', userProfile, onBack }: LiveTranslateProps) {
-  const [activeTab, setActiveTab] = useState<'sandbox' | 'idioms' | 'challenge'>('sandbox');
+  const [activeTab, setActiveTab] = useState<'sandbox' | 'idioms' | 'challenge' | 'letters' | 'vocab' | 'conversation'>('sandbox');
   
   // Tab 1: Translation Sandbox states
   const [sourceText, setSourceText] = useState('');
@@ -186,7 +190,7 @@ export function LiveTranslate({ isRtl = true, lang = 'ar', userProfile, onBack }
   const [challengeHistory, setChallengeHistory] = useState<any[]>([]);
 
   // Sound triggering on first render / tab change
-  const handleTabChange = (tab: 'sandbox' | 'idioms' | 'challenge') => {
+  const handleTabChange = (tab: 'sandbox' | 'idioms' | 'challenge' | 'letters' | 'vocab' | 'conversation') => {
     setActiveTab(tab);
     playPristineChime('open');
   };
@@ -394,51 +398,115 @@ export function LiveTranslate({ isRtl = true, lang = 'ar', userProfile, onBack }
         </div>
 
         {/* Dynamic Mode Tabs with Pristine Audio */}
-        <div className="grid grid-cols-3 gap-2 bg-slate-200/60 p-1 rounded-2xl border border-slate-200">
-          <button
-            type="button"
-            onClick={() => handleTabChange('sandbox')}
-            className={`py-3.5 text-center font-black rounded-xl transition-all cursor-pointer flex flex-col md:flex-row items-center justify-center gap-2 ${
-              activeTab === 'sandbox'
-                ? 'bg-[#002147] text-white shadow-md shadow-[#002147]/10'
-                : 'text-slate-600 hover:text-slate-900 border-none bg-transparent text-xs hover:bg-slate-300/40'
-            }`}
-          >
-            <Languages size={16} />
-            <span className="text-[10px] md:text-sm leading-none font-bold">
-              {isRtl ? 'مدقق الترجمة والسياق' : 'Translation Sandbox'}
+        <div className="space-y-4">
+          {/* Category 1: Professional Translation Tools */}
+          <div className="space-y-1.5">
+            <span className="text-[10px] font-extrabold text-[#002147] uppercase tracking-wider block text-right px-1">
+              {isRtl ? '🛠️ أدوات الترجمة والتدقيق السياقي المهني:' : '🛠️ Professional Translation Suite:'}
             </span>
-          </button>
+            <div className="grid grid-cols-3 gap-2 bg-slate-200/60 p-1 rounded-2xl border border-slate-200">
+              <button
+                type="button"
+                onClick={() => handleTabChange('sandbox')}
+                className={`py-3 text-center font-black rounded-xl transition-all cursor-pointer flex flex-col md:flex-row items-center justify-center gap-2 ${
+                  activeTab === 'sandbox'
+                    ? 'bg-[#002147] text-white shadow-md shadow-[#002147]/10'
+                    : 'text-slate-600 hover:text-slate-900 border-none bg-transparent text-xs hover:bg-slate-300/40'
+                }`}
+              >
+                <Languages size={15} />
+                <span className="text-[10px] md:text-xs leading-none font-bold">
+                  {isRtl ? 'مدقق الترجمة والسياق' : 'Translation Sandbox'}
+                </span>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => handleTabChange('idioms')}
-            className={`py-3.5 text-center font-black rounded-xl transition-all cursor-pointer flex flex-col md:flex-row items-center justify-center gap-2 ${
-              activeTab === 'idioms'
-                ? 'bg-[#002147] text-white shadow-md shadow-[#002147]/10'
-                : 'text-slate-600 hover:text-slate-900 border-none bg-transparent text-xs hover:bg-slate-300/40'
-            }`}
-          >
-            <Compass size={16} />
-            <span className="text-[10px] md:text-sm leading-none font-bold">
-              {isRtl ? 'مصنع التعابير الروحية' : 'Idiom Transformer'}
-            </span>
-          </button>
+              <button
+                type="button"
+                onClick={() => handleTabChange('idioms')}
+                className={`py-3 text-center font-black rounded-xl transition-all cursor-pointer flex flex-col md:flex-row items-center justify-center gap-2 ${
+                  activeTab === 'idioms'
+                    ? 'bg-[#002147] text-white shadow-md shadow-[#002147]/10'
+                    : 'text-slate-600 hover:text-slate-900 border-none bg-transparent text-xs hover:bg-slate-300/40'
+                }`}
+              >
+                <Compass size={15} />
+                <span className="text-[10px] md:text-xs leading-none font-bold">
+                  {isRtl ? 'مصنع التعابير الروحية' : 'Idiom Transformer'}
+                </span>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => handleTabChange('challenge')}
-            className={`py-3.5 text-center font-black rounded-xl transition-all cursor-pointer flex flex-col md:flex-row items-center justify-center gap-2 ${
-              activeTab === 'challenge'
-                ? 'bg-[#002147] text-white shadow-md shadow-[#002147]/10'
-                : 'text-slate-600 hover:text-slate-900 border-none bg-transparent text-xs hover:bg-slate-300/40'
-            }`}
-          >
-            <Flame size={16} className="text-orange-500 animate-pulse" />
-            <span className="text-[10px] md:text-sm leading-none font-bold">
-              {isRtl ? 'تحدي المترجم المبارز' : 'Gladiator Challenge'}
-            </span>
-          </button>
+              <button
+                type="button"
+                onClick={() => handleTabChange('challenge')}
+                className={`py-3 text-center font-black rounded-xl transition-all cursor-pointer flex flex-col md:flex-row items-center justify-center gap-2 ${
+                  activeTab === 'challenge'
+                    ? 'bg-[#002147] text-white shadow-md shadow-[#002147]/10'
+                    : 'text-slate-600 hover:text-slate-900 border-none bg-transparent text-xs hover:bg-slate-300/40'
+                }`}
+              >
+                <Flame size={15} className="text-orange-500 animate-pulse" />
+                <span className="text-[10px] md:text-xs leading-none font-bold">
+                  {isRtl ? 'تحدي المترجم المبارز' : 'Gladiator Challenge'}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Category 2: Interactive Language Academy */}
+          <div className="space-y-1.5 pb-1 border-b border-slate-100">
+            <div className="flex justify-between items-center px-1">
+              <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-700 rounded text-[8px] font-black uppercase">Basim Academy</span>
+              <span className="text-[10px] font-extrabold text-[#002147] uppercase tracking-wider block text-right">
+                {isRtl ? '🏛️ صالونات وأكاديمية تعلم اللغات الحية:' : '🏛️ Interactive Language Academy Suite:'}
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 bg-amber-50/50 p-1 rounded-2xl border border-amber-200/60">
+              <button
+                type="button"
+                onClick={() => handleTabChange('letters')}
+                className={`py-3 text-center font-black rounded-xl transition-all cursor-pointer flex flex-col md:flex-row items-center justify-center gap-2 ${
+                  activeTab === 'letters'
+                    ? 'bg-amber-600 text-white shadow-md shadow-amber-600/10'
+                    : 'text-slate-600 hover:text-amber-800 border-none bg-transparent text-xs hover:bg-amber-100/30'
+                }`}
+              >
+                <BookOpenText size={15} />
+                <span className="text-[10px] md:text-sm leading-none font-black">
+                  {isRtl ? 'تعلم الحروف والفونيمات' : 'Learn Alphabets'}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTabChange('vocab')}
+                className={`py-3 text-center font-black rounded-xl transition-all cursor-pointer flex flex-col md:flex-row items-center justify-center gap-2 ${
+                  activeTab === 'vocab'
+                    ? 'bg-amber-600 text-white shadow-md shadow-amber-600/10'
+                    : 'text-slate-600 hover:text-amber-800 border-none bg-transparent text-xs hover:bg-amber-100/30'
+                }`}
+              >
+                <ClipboardList size={15} />
+                <span className="text-[10px] md:text-sm leading-none font-black">
+                  {isRtl ? 'تعلم المفردات والكلمات' : 'Learn Vocabulary'}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTabChange('conversation')}
+                className={`py-3 text-center font-black rounded-xl transition-all cursor-pointer flex flex-col md:flex-row items-center justify-center gap-2 ${
+                  activeTab === 'conversation'
+                    ? 'bg-amber-600 text-white shadow-md shadow-amber-600/10'
+                    : 'text-slate-600 hover:text-amber-800 border-none bg-transparent text-xs hover:bg-amber-100/30'
+                }`}
+              >
+                <MessageSquare size={15} />
+                <span className="text-[10px] md:text-sm leading-none font-black">
+                  {isRtl ? 'المحادثة والتقمص الحواري' : 'Interactive Conversations'}
+                </span>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Tab 1: Translation Sandbox Component Block */}
@@ -1270,6 +1338,36 @@ export function LiveTranslate({ isRtl = true, lang = 'ar', userProfile, onBack }
 
             </div>
           </div>
+        )}
+
+        {/* Tab 4: Letters & Phonetics */}
+        {activeTab === 'letters' && (
+          <LiveTranslate_Letters
+            isRtl={isRtl}
+            targetLang={targetLanguage}
+            onPlayChime={playPristineChime}
+            speakText={speakText}
+          />
+        )}
+
+        {/* Tab 5: Vocab Builder */}
+        {activeTab === 'vocab' && (
+          <LiveTranslate_Vocab
+            isRtl={isRtl}
+            targetLang={targetLanguage}
+            onPlayChime={playPristineChime}
+            speakText={speakText}
+          />
+        )}
+
+        {/* Tab 6: Dialogue Conversation Simulator */}
+        {activeTab === 'conversation' && (
+          <LiveTranslate_Conversation
+            isRtl={isRtl}
+            targetLang={targetLanguage}
+            onPlayChime={playPristineChime}
+            speakText={speakText}
+          />
         )}
 
       </div>
