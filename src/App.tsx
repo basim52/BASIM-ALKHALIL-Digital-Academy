@@ -93,6 +93,7 @@ import { ExpressionCurriculumCompanion, ExpressionLevel, ALL_EXPRESSION_UNITS } 
 import { ModernCurriculumHome } from './components/ModernCurriculumHome';
 import { AiCurriculum } from './components/AiCurriculum';
 import { BalanceOasis } from './components/BalanceOasis';
+import { LiveTranslate } from './components/LiveTranslate';
 import { ProfessionalDevelopment } from './components/ProfessionalDevelopment';
 import { AdultsDailyDose } from './components/AdultsDailyDose';
 import { ADULTS_DAILY_DOSES } from './data/adultsDailyDose';
@@ -107,7 +108,7 @@ import { EscapeRoomGrammar } from './components/EscapeRoomGrammar';
 import { FlashcardsHub } from './components/FlashcardsHub';
 import { FamilyActivities } from './components/FamilyActivities';
 import { InteractiveLearningHub } from './components/InteractiveLearningHub';
-import { Layers, Image as OxfordIcon, Library as OxfordClassicIcon } from 'lucide-react';
+import { Layers, Image as OxfordIcon, Library as OxfordClassicIcon, Languages } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { familyConstellationsLesson } from './data/lessons/r_a1_4';
 import { everydayInteractionLesson } from './data/lessons/r_a1_5';
@@ -1232,13 +1233,29 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
               descEn: 'Speak dynamically with live waveform visual analysis and clear color evaluation on syllables.',
               icon: Mic,
               glowColor: 'bg-amber-400/20',
-              badgeStyle: 'bg-amber-50 text-amber-700 border border-amber-150',
+              badgeStyle: 'bg-amber-50 text-amber-700 border border-[#C49E3A]/20',
               iconBg: 'bg-amber-50',
               iconColor: 'text-amber-600',
               btnTextColor: 'text-amber-600',
               btnBg: 'bg-amber-50',
               badgeAr: 'تدريب مباشر فوري',
               badgeEn: 'Mic Waveform Lab'
+            },
+            {
+              id: 'live-translate',
+              titleAr: 'المترجم المباشر وعالم اللغات 🌐',
+              titleEn: 'Gemini 3.5 Live Translate 🌐',
+              descAr: 'ترجم عباراتك بمستويات صياغة متعددة ومتكاملة مع استخراج مكعبات القواعد وتوليد التحديات اللغوية المباشرة.',
+              descEn: 'High-fidelity contextual translation sandbox. Adjust styles/tones, analyze grammar cubics, and tackle interactive matching challenges.',
+              icon: Languages,
+              glowColor: 'bg-emerald-400/20',
+              badgeStyle: 'bg-emerald-50 text-emerald-700 border border-emerald-150',
+              iconBg: 'bg-emerald-50',
+              iconColor: 'text-[#002147]',
+              btnTextColor: 'text-[#002147]',
+              btnBg: 'bg-amber-accent/10',
+              badgeAr: 'ميزة ذكاء فوري جديدة',
+              badgeEn: 'AI Translation & Play'
             },
             {
               id: 'story-library',
@@ -5061,6 +5078,16 @@ export default function App() {
         />
       );
     }
+    if (view === 'live-translate') {
+      return (
+        <LiveTranslate 
+          isRtl={isRtl}
+          lang={lang}
+          userProfile={userProfile}
+          onBack={() => setView('dashboard')}
+        />
+      );
+    }
     if (view === 'balance-oasis') {
       return (
         <div className="flex-1 p-5 md:p-12 overflow-y-auto bg-[#030712] min-h-screen text-right" dir={isRtl ? 'rtl' : 'ltr'}>
@@ -5465,6 +5492,7 @@ export default function App() {
                   {[
                     { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
                     { id: 'pronunciation-lab', label: lang === 'ar' ? 'معمل النطق 🎙️' : 'Pronunciation Lab 🎙️', icon: Mic },
+                    { id: 'live-translate', label: lang === 'ar' ? 'مترجم المباشر 🌐' : 'Live Translate 🌐', icon: Languages },
                     { id: 'interactive-learning', label: lang === 'ar' ? 'تعليم تفاعلي ⚡' : 'Interactive Learning ⚡', icon: Gamepad2 },
                     { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
                     { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
@@ -5658,6 +5686,7 @@ export default function App() {
                             {[
                               { id: 'interactive-learning', label: isRtl ? 'تعليم تفاعلي ⚡' : 'Interactive Play ⚡', icon: Gamepad2 },
                               { id: 'pronunciation-lab', label: isRtl ? 'معمل النطق' : 'Pronunciation Lab', icon: Mic },
+                              { id: 'live-translate', label: isRtl ? 'مترجم المباشر 🌐' : 'Live Translate', icon: Languages },
                               { id: 'ai-chat', label: t.aiPartner, icon: Mic2, action: handleStartAiChat },
                               { id: 'story-library', label: t.storyLibrary, icon: BookMarked },
                               { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },

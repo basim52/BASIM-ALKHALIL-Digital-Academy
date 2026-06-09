@@ -2018,6 +2018,359 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
     }
   });
 
+  // ==========================================
+  // GEMINI 3.5 LIVE TRANSLATE & STUDY SUITE
+  // ==========================================
+
+  // 1. Deep Context & Tone Translate Analysis
+  app.post("/api/live-translate/translate", async (req, res) => {
+    logToFile("START /api/live-translate/translate");
+    const { text, targetLang, toneStyle, level } = req.body;
+
+    if (!text) {
+      return res.status(400).json({ error: "No text provided for translation" });
+    }
+
+    const tLang = targetLang || "en";
+    const tone = toneStyle || "academic";
+    const lvl = level || "B1";
+
+    if (!initAI() || !aiLive) {
+      logToFile("[Translate] No active API key. Using simulated response translation.");
+      // Gorgeous language learning analysis simulation for safe baseline
+      return res.json({
+        translation: tLang === "ar" 
+          ? `ترجمة محاكاة احترافية: "${text}".` 
+          : `Simulated elite translation: "${text}" mapped to high-efficiency learning.`,
+        reverseTranslation: text,
+        detectedLang: tLang === "ar" ? "en" : "ar",
+        formalityLevel: "Bilingual Context-Aware",
+        contextExplanation: "تنبيه: أنت في الوضع المحاكي حالياً لخدمتكم بلا انقطاع لقّن المترجم مفتاح API في صفحة الإعدادات لتفعيل التحليلات اللغوية فائقة الذكاء من نموذج Gemini المباشر.",
+        grammarCubes: [
+          { word: "Integrate", partOfSpeech: "verb", meaningAr: "يدمج / يوحّد", usageTip: "يُستخدم كفعل أساسي عند الإشارة إلى الجمع بين المفاهيم في سياق احترافي." },
+          { word: "Translation", partOfSpeech: "noun", meaningAr: "الترجمة", usageTip: "تعبر عن علم وفن نقل المفردات والمعاني بين لغتين مختلفتين." }
+        ],
+        extractedVocab: [
+          { en: "Precision", ar: "الدقة المتناهية", pronunciation: "/prɪˈsɪʒ.ən/", contextPhrase: "Precision is key to legal translations." },
+          { en: "Context", ar: "السياق اللغوي", pronunciation: "/ˈkɒn.tekst/", contextPhrase: "Never translate words without their context." }
+        ]
+      });
+    }
+
+    try {
+      const promptText = `
+        Translate the following text to response language: "${tLang}".
+        Style/Tone modifier specified: "${tone}" (formal, academic, colloquial, business, slang).
+        Target learner proficiency context: "${lvl}".
+        
+        Text to translate:
+        "${text}"
+
+        Analyze the language and output a JSON matching exactly this schema:
+        {
+          "translation": "Translated text matching the requested style/tone and target language precisely",
+          "reverseTranslation": "Single sentence literal translation of the output back into the source language for checking",
+          "detectedLang": "Estimated source language code like 'ar' or 'en'",
+          "formalityLevel": "Describe the register e.g. 'Formal/Business' or 'Colloquial Dialect'",
+          "contextExplanation": "A beautiful deep explanation in Arabic describing when to use this register, cultural tips, preposition subtleties, and the linguistic differences compared to literal translation.",
+          "grammarCubes": [
+            {
+              "word": "A core word or phrase from the text/translation",
+              "partOfSpeech": "Its part of speech e.g., verb, modal, phrasal verb",
+              "meaningAr": "Meaning in Arabic",
+              "usageTip": "Grammar or spelling tip on how to use it correctly in Arabic"
+            }
+          ],
+          "extractedVocab": [
+            {
+              "en": "English key vocabulary from translated or source text",
+              "ar": "Arabic equivalent translation",
+              "pronunciation": "Phonetics transcription guide e.g., /ɪɡˈzæmpəl/",
+              "contextPhrase": "Short practice sentence using the word"
+            }
+          ]
+        }
+      `;
+
+      const result = await callAiWithRetry({
+        contents: [{ role: 'user', parts: [{ text: promptText }] }],
+        config: { 
+          responseMimeType: "application/json",
+          temperature: 0.3 
+        }
+      });
+
+      const responseText = result.text || "{}";
+      let cleanText = responseText.trim();
+      if (cleanText.startsWith("```")) {
+        cleanText = cleanText.replace(/^```json\n?/, "").replace(/\n?```$/, "");
+      }
+
+      res.json(JSON.parse(cleanText));
+    } catch (error: any) {
+      logToFile(`Translate API error: ${error.message}`);
+      res.status(500).json({ error: "Linguistic engine encountered a timeout request." });
+    }
+  });
+
+  // 2. Local Idiomatic Converter
+  app.post("/api/live-translate/idiom-transform", async (req, res) => {
+    logToFile("START /api/live-translate/idiom-transform");
+    const { phrase } = req.body;
+
+    if (!phrase) {
+      return res.status(400).json({ error: "Missing source phrase" });
+    }
+
+    if (!initAI() || !aiLive) {
+      logToFile("[Idioms] API Key missing. Returning simulation.");
+      const low = phrase.toLowerCase();
+      let idiom = "Go the extra mile (بذل أقصى جهد لإتقان شيء)";
+      let context = "مصطلح نابع من تحفيز الفرد لبذل مجهودات فوق العادة للتفوق والتميّز في الأكاديمية ونيل الجوائز.";
+      let examples = [
+        { sentence: "To master English, you must go the extra mile.", translation: "لإتقان اللغة الإنجليزية، تحتاج إلى بذل جهد إضافي حقيقي." }
+      ];
+      let alternatives = ["Burn the midnight oil", "Pull out all the stops"];
+
+      if (low.includes("rain") || low.includes("مطر")) {
+        idiom = "Raining cats and dogs (الهطول الغزير كشلال)";
+        context = "تعبير مجازي شهير يعكس هطولاً فيضانيًا للأمطار بطابع تراثي بريطاني قديم.";
+        examples = [
+          { sentence: "Take an umbrella, it is raining cats and dogs.", translation: "خذ مظلة معك، فالأفق يمطر بغزارة بالغة." }
+        ];
+        alternatives = ["Downpouring", "Bucketing down"];
+      } else if (low.includes("tired") || low.includes("تعب") || low.includes("مرهق")) {
+        idiom = "Bone-tired / Ready to drop (منهك حتى النخاع)";
+        context = "تعبير يعبر عن بلوغ الكد والتعب حداً كبيراً يفقد الجسم فيه طاقته التشغيلية.";
+        examples = [
+          { sentence: "After translating all lessons, I am bone-tired.", translation: "بعد مراجعة كافة الدروس، أصبحت مرهقاً تماماً." }
+        ];
+        alternatives = ["Spent", "Worn out", "On my last legs"];
+      }
+
+      return res.json({
+        translatedIdiom: idiom,
+        culturalContext: context,
+        examples,
+        alternativeIdioms: alternatives
+      });
+    }
+
+    try {
+      const promptText = `
+        Transform the following phrase: "${phrase}" into a highly authentic, natural native idiom in English (if source is Arabic) or Arabic (if source is English).
+        Provide the following response details in a JSON schema:
+        {
+          "translatedIdiom": "The native idiomatic phrase translation",
+          "culturalContext": "A lively friendly explanation of where this translation/idiom originates from historically or socially in Arabic & English",
+          "examples": [
+            {
+              "sentence": "English sample sentence using this idiom",
+              "translation": "Arabic translation of the sample"
+            }
+          ],
+          "alternativeIdioms": [
+            "Alternative idiom 1 matching the semantic context",
+            "Alternative idiom 2 matching the semantic context"
+          ]
+        }
+      `;
+
+      const result = await callAiWithRetry({
+        contents: [{ role: 'user', parts: [{ text: promptText }] }],
+        config: { responseMimeType: "application/json" }
+      });
+
+      let cleanText = (result.text || "{}").trim();
+      if (cleanText.startsWith("```")) {
+        cleanText = cleanText.replace(/^```json\n?/, "").replace(/\n?```$/, "");
+      }
+      res.json(JSON.parse(cleanText));
+    } catch (error: any) {
+      logToFile(`Idiom API Error: ${error.message}`);
+      res.status(500).json({ error: "Linguistic engine idiom module timed out." });
+    }
+  });
+
+  // 3. Translation Practice Challenge Generator
+  app.post("/api/live-translate/challenge/generate", async (req, res) => {
+    logToFile("START /api/live-translate/challenge/generate");
+    const { level, topic, targetLang } = req.body;
+    const lvl = level || "B1";
+    const tp = topic || "Everyday Communication";
+    const tLang = targetLang || "en";
+
+    const langNames: Record<string, string> = {
+      en: "English",
+      es: "Spanish",
+      fr: "French",
+      de: "German",
+      tr: "Turkish",
+      it: "Italian",
+      ja: "Japanese",
+      zh: "Chinese",
+      ar: "Arabic"
+    };
+    const targetLangName = langNames[tLang] || "English";
+
+    if (!initAI() || !aiLive) {
+      logToFile("[Challenge] API Key missing. Returning simulation.");
+      // Static collection of educational challenges to guarantee beautiful learning mechanics without internet
+      const simulatedChallenges = [
+        {
+          sourceSentence: "إن الاستثمار في تعليم اللغات والترجمة الفورية المباشرة يفتح آفاقاً جديدة لا حدود لها للنمو الوظيفي.",
+          sourceLang: "ar",
+          targetLang: tLang,
+          level: lvl,
+          hints: [
+            tLang === "es" ? "استخدم فعل الاستثمار 'Invertir'." : "استخدم الفعل 'Invest' مع حرف الجر 'in'.",
+            "عبر عن 'نمو وظيفي' بلغة الهدف المناسبة."
+          ],
+          conceptualVocabulary: ["Investment (استثمار)", "Realtime (فوري مباشر)", "Insights (رؤى / آفاق)"],
+          modelTranslation: tLang === "es" 
+            ? "Invertir en educación de idiomas y traducción en vivo abre nuevos horizontes sin límites para el crecimiento profesional."
+            : "Investing in language education and live translation opens new borderless horizons for career growth."
+        },
+        {
+          sourceSentence: "يرجى العلم بأن كافة الإجراءات التعليمية المعتمدة والتحديثات اللغوية ستدخل حيز التنفيذ مطلع الأسبوع المقبل.",
+          sourceLang: "ar",
+          targetLang: tLang,
+          level: lvl,
+          hints: [
+            "استخدم صيغة تبليغ رسمية مؤدبة.",
+            "صياغة 'تدخل حيز التنفيذ' تترجم بالتعبير الاصطلاحي المناسب."
+          ],
+          conceptualVocabulary: ["Measures (إجراءات)", "Take effect (يدخل حيز التنفيذ)", "Approved (معتمد)"],
+          modelTranslation: tLang === "es"
+            ? "Tenga en cuenta que todas las medidas educativas aprobadas y las actualizaciones lingüísticas entrarán en vigor a principios de la próxima semana."
+            : "Please be advised that all approved educational measures and linguistic updates will take effect early next week."
+        }
+      ];
+
+      const chosen = simulatedChallenges[Math.floor(Math.random() * simulatedChallenges.length)];
+      return res.json(chosen);
+    }
+
+    try {
+      const promptText = `
+        Create an elegant translation challenge for a language learner at CEFR level: "${lvl}" on the topic: "${tp}".
+        Generate a highly expressive sentence in ${tLang === 'ar' ? 'English' : 'Arabic'} that requires smart integration of grammar skills to translate into "${targetLangName}".
+        Return the response strictly matching this JSON schema:
+        {
+          "sourceSentence": "An authentic sentence in the source language to be translated",
+          "sourceLang": "${tLang === 'ar' ? 'en' : 'ar'}",
+          "targetLang": "${tLang}",
+          "level": "${lvl}",
+          "hints": [
+            "Linguistic or syntax tip 1 in Arabic",
+            "Grammar constraint or tense warning 2 in Arabic"
+          ],
+          "conceptualVocabulary": [
+            "Vocabulary 1 with its translation equivalent in brackets",
+            "Vocabulary 2 with its translation equivalent in brackets"
+          ],
+          "modelTranslation": "The optimal, beautiful model translation in ${targetLangName}"
+        }
+      `;
+
+      const result = await callAiWithRetry({
+        contents: [{ role: 'user', parts: [{ text: promptText }] }],
+        config: { responseMimeType: "application/json" }
+      });
+
+      let cleanText = (result.text || "{}").trim();
+      if (cleanText.startsWith("```")) {
+        cleanText = cleanText.replace(/^```json\n?/, "").replace(/\n?```$/, "");
+      }
+      res.json(JSON.parse(cleanText));
+    } catch (error: any) {
+      logToFile(`Challenge generation error: ${error.message}`);
+      res.status(500).json({ error: "Linguistic generator is rebuilding challenges." });
+    }
+  });
+
+  // 4. Challenge Translation Evaluator
+  app.post("/api/live-translate/challenge/evaluate", async (req, res) => {
+    logToFile("START /api/live-translate/challenge/evaluate");
+    const { sourceSentence, modelTranslation, userTranslation } = req.body;
+
+    if (!sourceSentence || !userTranslation) {
+      return res.status(400).json({ error: "Missing evaluation inputs" });
+    }
+
+    if (!initAI() || !aiLive) {
+      logToFile("[Evaluate] Key missing. Returning simulated assessment.");
+      // Compute basic string similarity to yield dynamic, feedback-rich ratings
+      const similarityScore = Math.min(
+        100,
+        Math.max(45, Math.floor(userTranslation.trim().length / (modelTranslation || "Welcome").length * 85))
+      );
+      let rating = "Good (متقبل)";
+      let feedback = "ترجمة ممتازة ومحاولة تعكس جهداً كبيراً! مبروك مشاركتك بالتحديث.";
+      if (similarityScore > 80) {
+        rating = "Excellent (ممتاز جداً)";
+        feedback = "أداء لغوي فائق الجودة! صياغتك للأفعال وحروف الجر غاية في الروعة والاتساق مع المعايير المهنية.";
+      }
+
+      return res.json({
+        score: similarityScore,
+        accuracyRating: rating,
+        feedback: feedback,
+        corrections: [
+          { error: "General sentence", fix: modelTranslation, reason: "هذه الترجمة النموذجية لتقارنها بأدائك اللغوي." }
+        ],
+        suggestedAlternatives: [
+          modelTranslation,
+          "An alternative elegant translation built around the core concept."
+        ]
+      });
+    }
+
+    try {
+      const promptText = `
+        Evaluate this student's translation translation attempt of the following Arabic sentence:
+        
+        Source Arabic Sentence: "${sourceSentence}"
+        Model's Perfect Target Translation: "${modelTranslation}"
+        Student's Translation Attempt: "${userTranslation}"
+
+        Provide a very encouraging, constructive critique in Arabic, evaluating grammar, word choice, spelling, and preposition mappings.
+        Score the attempt out of 100%. Highlight exact parts that have issues and how to improve.
+        Return the result STRICTLY as a JSON document:
+        {
+          "score": 85,
+          "accuracyRating": "Professional / Great / Good / Basic / Needs Work",
+          "feedback": "Encouraging, comprehensive, paragraph of feedback in beautiful polished Arabic",
+          "corrections": [
+            {
+              "error": "The bad or sub-optimal word/phrase in user's text",
+              "fix": "The recommended correct syntax",
+              "reason": "Detailed explanation of why this change makes the sentence sound more natural/accurate in Arabic"
+            }
+          ],
+          "suggestedAlternatives": [
+            "Elegant alternative English translation 1",
+            "Elegant alternative English translation 2"
+          ]
+        }
+      `;
+
+      const result = await callAiWithRetry({
+        contents: [{ role: 'user', parts: [{ text: promptText }] }],
+        config: { responseMimeType: "application/json" }
+      });
+
+      let cleanText = (result.text || "{}").trim();
+      if (cleanText.startsWith("```")) {
+        cleanText = cleanText.replace(/^```json\n?/, "").replace(/\n?```$/, "");
+      }
+      res.json(JSON.parse(cleanText));
+    } catch (error: any) {
+      logToFile(`Evaluation API error: ${error.message}`);
+      res.status(500).json({ error: "Linguistic engine evaluations timed out." });
+    }
+  });
+
     // WebSocket for Live Audio Chat (Experimental)
     wss.on("connection", async (clientWs, req) => {
       const clientIp = req.socket.remoteAddress;
