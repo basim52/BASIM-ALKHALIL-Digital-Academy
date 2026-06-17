@@ -634,6 +634,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
   
   // States
   const [activeLessonIndex, setActiveLessonIndex] = useState(0);
+  const [targetAccent, setTargetAccent] = useState<'US' | 'UK'>('US');
   const [activeTab, setActiveTab] = useState<'learn' | 'pairs' | 'repeat' | 'challenge' | 'sandbox'>('learn');
   const [playingPairIndex, setPlayingPairIndex] = useState<number | null>(null);
   const [playingPairWord, setPlayingPairWord] = useState<'word1' | 'word2' | null>(null);
@@ -722,15 +723,16 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel(); // Stop any currently playing audio
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
+      utterance.lang = targetAccent === 'US' ? 'en-US' : 'en-GB';
       utterance.rate = rate; // slightly slower for better learning
       
       // Attempt to find a premium English voice
       const voices = window.speechSynthesis.getVoices();
       const premiumVoice = voices.find(v => 
         (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Premium')) && 
-        v.lang.startsWith('en')
-      );
+        v.lang.startsWith(targetAccent === 'US' ? 'en-US' : 'en-GB')
+      ) || voices.find(v => v.lang.startsWith(targetAccent === 'US' ? 'en-US' : 'en-GB'));
+      
       if (premiumVoice) {
         utterance.voice = premiumVoice;
       }
@@ -1012,12 +1014,34 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
             </div>
           </div>
 
-          <button
-            onClick={onBack}
-            className={`flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-[#002147] rounded-xl font-bold text-xs transition-all shadow-xs cursor-pointer ${isRtl ? 'flex-row-reverse' : ''}`}
-          >
-            <span>{isRtl ? 'العودة للمنصة ↩️' : 'Back to Academy ↩️'}</span>
-          </button>
+          <div className="flex gap-2 items-center">
+            {/* Plan 4: Accent Matching Switcher */}
+            <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+              <button
+                onClick={() => setTargetAccent('US')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                  targetAccent === 'US' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                {isRtl ? 'لهجة أمريكية 🇺🇸' : 'US Accent 🇺🇸'}
+              </button>
+              <button
+                onClick={() => setTargetAccent('UK')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                  targetAccent === 'UK' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                {isRtl ? 'لهجة بريطانية 🇬🇧' : 'UK Accent 🇬🇧'}
+              </button>
+            </div>
+
+            <button
+              onClick={onBack}
+              className={`flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-[#002147] rounded-xl font-bold text-xs transition-all shadow-xs cursor-pointer ${isRtl ? 'flex-row-reverse' : ''}`}
+            >
+              <span>{isRtl ? 'العودة للمنصة ↩️' : 'Back to Academy ↩️'}</span>
+            </button>
+          </div>
         </div>
 
         {/* Lesson Select Grid */}

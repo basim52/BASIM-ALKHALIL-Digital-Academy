@@ -33,6 +33,22 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
 
   const activities = [
     {
+      id: 'educational-games' as const,
+      title: '🎮 واحة الألعاب التعليمية المشوقة',
+      titleEn: 'Immersive Educational Playzone 🎮',
+      description: 'انغمس في عالم المغامرات والألغاز الإنجليزية التفاعلية، وميز العادات الحسنة والذوقيات الرفيعة بمنتهى المتعة اللعبية!',
+      descriptionEn: 'Dive into interactive English word puzzles, detect and perfect noble habits and exquisite social etiquette with active gamified fun!',
+      icon: Gamepad2,
+      color: 'bg-rose-500',
+      textColor: 'text-rose-800',
+      bgColor: 'bg-rose-50/60',
+      borderColor: 'border-rose-100',
+      pillColor: 'bg-rose-100 text-rose-800',
+      badge: isRtl ? 'ألعاب، أدب، عادات وألغاز' : 'Etiquette, Riddles & Habits',
+      xpReward: '+50 XP',
+      level: 'All Ages ⭐'
+    },
+    {
       id: 'flashcards-hub' as const,
       title: '📖 مستودع البطاقات التعليمية الذكية',
       titleEn: 'Smart Vocabulary Flashcards 📖',
@@ -216,6 +232,48 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
             <span>{isRtl ? 'العودة للرئيسية' : 'Back to Dashboard'}</span>
           </button>
         </div>
+
+        {/* Plan 3: Custom Game Progression Key System & Cabin */}
+        <motion.div 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-10 bg-gradient-to-tr from-purple-900 via-[#002147] to-[#1e1b4b] p-6 rounded-[2.5rem] text-white overflow-hidden relative shadow-xl border-l-4 border-purple-500"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-1.5 flex-1 text-center md:text-start lg:text-right">
+              <span className="text-[10px] font-black uppercase tracking-widest text-purple-300 bg-purple-500/10 px-3 py-1 rounded-md">
+                {isRtl ? 'الخطة 3: بوابة المتعة واستحقاق الأوسمة والمفاتيح 🔑' : 'Plan 3: Gamified Rewards & Progression Keys 🔑'}
+              </span>
+              <h2 className="text-xl md:text-2xl font-black mt-1">
+                {isRtl ? 'حجرة مفاتيح التحديات الكبرى 🔐' : 'Grand Interactive Quest Cabin'}
+              </h2>
+              <p className="text-xs text-purple-200 font-semibold max-w-xl">
+                {isRtl 
+                  ? 'اجمع المفاتيح الذهبية عبر التفوق في الأنشطة التالية لتأهيل مجموع نقاطك إلى لوحة الشرف!' 
+                  : 'Complete mini-quests across playroom cards to earn magical golden progression keys and boost your overall rank.'}
+              </p>
+            </div>
+            
+            {/* Progression indicators */}
+            <div className="flex gap-4 items-center bg-white/5 border border-white/10 p-4 rounded-3xl">
+              {[
+                { nameAr: 'مفتاح الفلاش كاردز', key: 'flash', emoji: '🔑' },
+                { nameAr: 'مفتاح الهروب الأكاديمي', key: 'escape', emoji: '🔑' },
+                { nameAr: 'مفتاح الأداء الصوتي', key: 'acting', emoji: '🔑' }
+              ].map((item, idx) => (
+                <div key={`p-key-${idx}`} className="flex flex-col items-center">
+                  <div className="w-12 h-12 bg-purple-500/20 text-purple-300 hover:text-yellow-400 hover:bg-purple-500/40 rounded-2xl flex items-center justify-center text-xl transition-all shadow-sm">
+                    {item.emoji}
+                  </div>
+                  <span className="text-[9px] text-purple-250 mt-1.5 font-bold text-center max-w-[80px] truncate leading-tight">
+                    {isRtl ? item.nameAr : item.key}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
 
         {/* Interactive Apps Bento Grid (8 items grid) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">

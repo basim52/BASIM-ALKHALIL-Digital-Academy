@@ -189,6 +189,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
   const [loadingWord, setLoadingWord] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [activeWordIndex, setActiveWordIndex] = useState<number | null>(null);
   
   // Reading Test State
   const [isTestMode, setIsTestMode] = useState(false);
@@ -383,6 +384,16 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
+      
+      utterance.onboundary = (event: any) => {
+        if (event.name === 'word') {
+          const charIndex = event.charIndex;
+          const textAhead = text.substring(0, charIndex);
+          const wordsCount = textAhead.trim() === "" ? 0 : textAhead.split(/\s+/).filter(Boolean).length;
+          setActiveWordIndex(wordsCount);
+        }
+      };
+
       utterance.onstart = () => {
         setIsSpeaking(true);
         setIsPaused(false);
@@ -390,10 +401,12 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
       utterance.onend = () => {
         setIsSpeaking(false);
         setIsPaused(false);
+        setActiveWordIndex(null);
       };
       utterance.onerror = () => {
         setIsSpeaking(false);
         setIsPaused(false);
+        setActiveWordIndex(null);
       };
       window.speechSynthesis.speak(utterance);
     }
@@ -403,6 +416,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
     window.speechSynthesis.cancel();
     setIsSpeaking(false);
     setIsPaused(false);
+    setActiveWordIndex(null);
   };
 
   if (selectedStory) {
@@ -571,15 +585,20 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
 
             <div className="relative z-10">
               <div className={`text-xl md:text-2xl font-serif leading-[2.5] text-slate-700 select-text ${isRtl ? 'text-right' : 'text-left'}`}>
-                {selectedStory.content.split(' ').map((word, idx) => (
-                  <span 
-                    key={idx}
-                    onClick={() => handleWordClick(word)}
-                    className="px-1.5 py-0.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition-colors border border-transparent hover:border-blue-100 inline-block"
-                  >
-                    {word}{' '}
-                  </span>
-                ))}
+                {selectedStory.content.split(' ').map((word, idx) => {
+                  const isActive = activeWordIndex === idx;
+                  return (
+                    <span 
+                      key={idx}
+                      onClick={() => handleWordClick(word)}
+                      className={`px-1.5 py-0.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition-all border border-transparent inline-block ${
+                        isActive ? 'bg-amber-100 text-[#002147] font-extrabold border-amber-300 scale-105 shadow-xs' : 'hover:border-blue-100'
+                      }`}
+                    >
+                      {word}{' '}
+                    </span>
+                  );
+                })}
               </div>
             </div>
 

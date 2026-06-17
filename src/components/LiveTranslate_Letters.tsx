@@ -193,13 +193,22 @@ export function LiveTranslate_Letters({ isRtl, targetLang, onPlayChime, speakTex
             {letters.map((letItem) => {
               const isSelected = selectedLetter?.char === letItem.char;
               return (
-                <button
+                <div
                   key={letItem.char}
-                  type="button"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => {
                     setSelectedLetter(letItem);
                     speakText(letItem.char, targetLang);
                     onPlayChime('message');
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedLetter(letItem);
+                      speakText(letItem.char, targetLang);
+                      onPlayChime('message');
+                    }
                   }}
                   className={`p-4 rounded-2xl border text-right transition-all duration-300 relative overflow-hidden flex flex-col justify-between h-[115px] group cursor-pointer ${
                     isSelected 
@@ -239,7 +248,7 @@ export function LiveTranslate_Letters({ isRtl, targetLang, onPlayChime, speakTex
                       {letItem.exampleWord} ({letItem.exampleMeaning})
                     </span>
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>

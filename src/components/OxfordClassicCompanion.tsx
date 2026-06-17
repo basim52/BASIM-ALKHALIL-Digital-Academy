@@ -140,6 +140,9 @@ export const OxfordClassicCompanion = ({ lang, onBack, initialUnitId, userProfil
           </div>
         </header>
 
+        {/* Plan 7: Live Level-based Oxford Challenge Test Preps / Quick Mock Exams */}
+        <OxfordTestPrepChallenge lang={lang} isRtl={isRtl} />
+
         {/* Units Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredUnitKeys.map((key) => {
@@ -246,5 +249,196 @@ export const OxfordClassicCompanion = ({ lang, onBack, initialUnitId, userProfil
         )}
       </div>
     </div>
+  );
+};
+
+// Plan 7: Live Level-based Oxford Challenge Test Preps / Quick Mock Exams
+interface OxfordTestPrepChallengeProps {
+  lang: Language;
+  isRtl: boolean;
+}
+
+const OxfordTestPrepChallenge = ({ lang, isRtl }: OxfordTestPrepChallengeProps) => {
+  const [activeLevel, setActiveLevel] = React.useState<'A A1' | 'A A2' | 'A B1' | 'A B2'>('A A1');
+  const [currentQuizIndex, setCurrentQuizIndex] = React.useState<number | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = React.useState<number | null>(null);
+  const [isAnswered, setIsAnswered] = React.useState(false);
+  const [score, setScore] = React.useState(0);
+  const [quizFinished, setQuizFinished] = React.useState(false);
+
+  const quizzes = {
+    'A A1': [
+      { q: "Complete with the correct word: 'Please slice the ______ for the salad.'", a: ["onion", "backpack", "notebook", "airplane"], correct: 0 },
+      { q: "What is the correct vocabulary word for a place where books are kept?", a: ["Garage", "Library", "Kitchen", "Airport"], correct: 1 },
+    ],
+    'A A2': [
+      { q: "Select the match: 'We use a ______ to measure body temperature.'", a: ["microscope", "calculator", "thermometer", "compass"], correct: 2 },
+      { q: "Which academic word defines: 'A custom or traditional belief passed down through generations.'", a: ["Heritage", "Routine", "Instruction", "Syllable"], correct: 0 },
+    ],
+    'A B1': [
+      { q: "Complete: 'My English grades have improved _______ since I adopted the weekly study planner.'", a: ["hardly", "magnificently", "negatively", "accidentally"], correct: 1 },
+      { q: "Which exact verb means: 'To look at something very closely and critically.'", a: ["Ignore", "Analyze", "Translate", "Dismiss"], correct: 1 },
+    ],
+    'A B2': [
+      { q: "Select the standard academic term: 'Theoretical frameworks structure our research ______.'", a: ["hypotheses", "pronunciations", "stickers", "backpacks"], correct: 0 },
+      { q: "An elegant academic solution is often highly praised for its simplicity and ______.", a: ["clutter", "precision", "volume", "coarseness"], correct: 1 },
+    ]
+  };
+
+  const handleLevelChange = (lvl: 'A A1' | 'A A2' | 'A B1' | 'A B2') => {
+    setActiveLevel(lvl);
+    setCurrentQuizIndex(0);
+    setSelectedAnswer(null);
+    setIsAnswered(false);
+    setScore(0);
+    setQuizFinished(false);
+  };
+
+  const handleAnswerSelect = (idx: number) => {
+    if (isAnswered) return;
+    setSelectedAnswer(idx);
+    setIsAnswered(true);
+    const correctIdx = quizzes[activeLevel][currentQuizIndex || 0].correct;
+    if (idx === correctIdx) {
+      setScore(s => s + 1);
+    }
+  };
+
+  const handleNext = () => {
+    const list = quizzes[activeLevel];
+    if (currentQuizIndex !== null && currentQuizIndex + 1 < list.length) {
+      setCurrentQuizIndex(prev => (prev || 0) + 1);
+      setSelectedAnswer(null);
+      setIsAnswered(false);
+    } else {
+      setQuizFinished(true);
+    }
+  };
+
+  const currentQuiz = currentQuizIndex !== null ? quizzes[activeLevel][currentQuizIndex] : null;
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mb-10 bg-gradient-to-br from-[#002147] to-[#011429] p-8 rounded-[2.5rem] text-white border-2 border-[#C49E3A]/40 relative overflow-hidden shadow-xl"
+    >
+      <div className="absolute top-0 right-0 w-44 h-44 bg-[#C49E3A]/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative z-10">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-6 border-b border-white/10">
+          <div>
+            <span className="text-[10px] font-black uppercase text-[#C49E3A] tracking-wider bg-[#C49E3A]/10 px-3 py-1 rounded-md">
+              {isRtl ? 'الخطة 7: معسكر محاكاة اختبارات أكسفورد الدولية 🏆' : 'Plan 7: Oxford International Challenge Prep 🏆'}
+            </span>
+            <h2 className="text-xl md:text-2xl font-black mt-2">
+              {isRtl ? 'محاكاة اختبارات تحديد المستوى الفورية 📝' : 'Oxford Level-Based Diagnostic Tracker'}
+            </h2>
+            <p className="text-xs text-slate-300 font-medium mt-1">
+              {isRtl ? 'اختر مستواك المستهدف لخوض محاكاة حية مدتها دقيقة والحصول على وسام الدقة!' : 'Choose your target level below to start a quick live 2-question diagnostic match.'}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {(['A A1', 'A A2', 'A B1', 'A B2'] as const).map((lvl) => (
+              <button
+                key={lvl}
+                onClick={() => handleLevelChange(lvl)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                  activeLevel === lvl 
+                    ? 'bg-[#C49E3A] text-[#002147] shadow-md' 
+                    : 'bg-white/10 hover:bg-white/20 text-slate-200'
+                }`}
+              >
+                {lvl.replace('A ', '')}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {currentQuizIndex === null ? (
+          <div className="text-center py-6">
+            <button
+              onClick={() => handleLevelChange(activeLevel)}
+              className="px-6 py-3 bg-[#C49E3A] text-[#002147] rounded-2xl font-black text-xs uppercase tracking-wider hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+            >
+              {isRtl ? 'ابدأ تحدي المستوى الفوري ⚡' : 'Start Diagnostic Live Challenge ⚡'}
+            </button>
+          </div>
+        ) : quizFinished ? (
+          <div className="bg-white/5 border border-white/10 p-6 rounded-3xl text-center space-y-4">
+            <span className="text-4xl">🎓</span>
+            <div>
+              <h3 className="text-lg font-black text-white">
+                {isRtl ? 'اكتملت محاكاة التحدي بنجاح!' : 'Diagnostic Challenge Completed!'}
+              </h3>
+              <p className="text-xs text-slate-300 font-bold mt-1">
+                {isRtl 
+                  ? `لقد حصلت على درجة ${score} من أصل 2 بمستوى أكسفورد ${activeLevel.replace('A ', '')}` 
+                  : `You scored ${score} out of 2 on the Oxford ${activeLevel.replace('A ', '')} exam preparation match.`}
+              </p>
+            </div>
+            <button
+              onClick={() => handleLevelChange(activeLevel)}
+              className="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-[11px] font-black cursor-pointer transition-all"
+            >
+              {isRtl ? 'إعادة المحاولة 🔄' : 'Try Again 🔄'}
+            </button>
+          </div>
+        ) : (
+          currentQuiz && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center text-xs font-bold text-[#C49E3A]">
+                <span>{isRtl ? `سؤال ${currentQuizIndex + 1} من 2` : `Question ${currentQuizIndex + 1} of 2`}</span>
+                <span>{activeLevel.replace('A ', '')} {isRtl ? 'مستوى أكسفورد' : 'Oxford Prep'}</span>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 p-5 rounded-3xl">
+                <p className="text-sm font-black text-white leading-relaxed">{currentQuiz.q}</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {currentQuiz.a.map((opt, oIdx) => {
+                  const isSelected = selectedAnswer === oIdx;
+                  const isCorrect = oIdx === currentQuiz.correct;
+                  const btnColor = isAnswered
+                    ? isCorrect
+                      ? 'bg-emerald-600/30 border-emerald-500 text-emerald-200'
+                      : isSelected
+                        ? 'bg-red-600/30 border-red-500 text-red-200'
+                        : 'bg-white/5 border-white/5 text-slate-400 opacity-55'
+                    : isSelected
+                      ? 'bg-[#C49E3A]/20 border-[#C49E3A] text-white'
+                      : 'bg-white/5 border-white/10 hover:bg-white/10 text-white';
+
+                  return (
+                    <button
+                      key={oIdx}
+                      disabled={isAnswered}
+                      onClick={() => handleAnswerSelect(oIdx)}
+                      className={`p-4 rounded-2xl border text-xs font-black transition-all flex justify-between items-center ${btnColor} cursor-pointer text-left`}
+                    >
+                      <span>{opt}</span>
+                      {isAnswered && isCorrect && <span className="text-emerald-400 text-xs font-black">✓ Correct</span>}
+                      {isAnswered && isSelected && !isCorrect && <span className="text-red-400 text-xs font-black">✗ Incorr.</span>}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {isAnswered && (
+                <div className="flex justify-end pt-2">
+                  <button
+                    onClick={handleNext}
+                    className="px-5 py-2.5 bg-[#C49E3A] text-[#002147] rounded-xl text-xs font-black cursor-pointer hover:brightness-110 active:scale-95 transition-all"
+                  >
+                    {isRtl ? 'التالي ➔' : 'Next ➔'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )
+        )}
+      </div>
+    </motion.div>
   );
 };

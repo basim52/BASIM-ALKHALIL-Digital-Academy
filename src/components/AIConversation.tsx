@@ -32,6 +32,7 @@ export const AIConversation = ({ onBack, lang }: { onBack: () => void, lang: Lan
   const [isRecording, setIsRecording] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
+  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [showFeedback, setShowFeedback] = useState(typeof window !== 'undefined' ? window.innerWidth >= 1024 : false);
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
@@ -283,6 +284,17 @@ export const AIConversation = ({ onBack, lang }: { onBack: () => void, lang: Lan
           <span>{t.exitChat}</span>
         </button>
         <div className={`flex items-center gap-2 md:gap-4 ${!isRtl ? 'flex-row-reverse' : ''}`}>
+          {/* Plan 6: VIP Video simulation toggle button */}
+          <button 
+            onClick={() => setIsVideoEnabled(!isVideoEnabled)}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center text-white border transition-all mr-2 cursor-pointer ${
+              isVideoEnabled ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-white/10 border-white/10 text-[#C49E3A] hover:bg-white/20'
+            }`}
+            title="VIP Tutor Video Sim"
+          >
+            <span className="text-sm">📹</span>
+          </button>
+          
           <button 
             onClick={() => setShowFeedback(!showFeedback)}
             className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-[#C49E3A] hover:bg-white/20 transition-all mr-2 cursor-pointer"
@@ -306,6 +318,48 @@ export const AIConversation = ({ onBack, lang }: { onBack: () => void, lang: Lan
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden font-sans">
         {/* Chat Area */}
         <div className="flex-1 flex flex-col relative bg-[#f8fafc]">
+          {/* Plan 6: VIP Picture-In-Picture Video Tutor Simulation */}
+          {isVideoEnabled && (
+            <motion.div 
+              drag
+              dragConstraints={{ left: -500, right: 100, top: 0, bottom: 400 }}
+              className="absolute top-6 right-6 w-44 h-56 bg-[#002147] rounded-[2rem] shadow-2xl border-2 border-[#C49E3A] overflow-hidden flex flex-col z-30 cursor-grab active:cursor-grabbing text-white"
+            >
+              <div className="flex-1 relative bg-slate-900 flex items-center justify-center">
+                {/* AI Pulse effect */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#1e1b4b] to-indigo-950 flex flex-col items-center justify-center text-center p-3">
+                  <div className="relative">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#C49E3A] to-amber-300 flex items-center justify-center text-2xl shadow-lg relative z-15">
+                      🦁
+                    </div>
+                    {isSpeaking && (
+                      <span className="absolute inset-0 rounded-full border-4 border-[#C49E3A] animate-ping opacity-60 pointer-events-none" />
+                    )}
+                  </div>
+                  
+                  <span className="text-xs font-black mt-2 text-[#C49E3A] tracking-wider">
+                    {isRtl ? 'المعلم باسل 🎓' : 'Teacher Basil 🎓'}
+                  </span>
+                  <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 mt-1">
+                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                    {isSpeaking ? (isRtl ? 'يتحدث الآن...' : 'Speaking...') : (isThinking ? (isRtl ? 'يفكر...' : 'Thinking...') : (isRtl ? 'مستمع...' : 'Listening...'))}
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Ribbon */}
+              <div className="bg-[#001732] p-2.5 flex justify-between items-center border-t border-white/10">
+                <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{isRtl ? 'محاكاة VIP' : 'VIP SIM'}</span>
+                <button 
+                  onClick={() => setIsVideoEnabled(false)}
+                  className="p-1 hover:bg-white/10 rounded-md text-red-400 text-xs font-bold cursor-pointer"
+                >
+                  {isRtl ? 'إخفاء' : 'Hide'}
+                </button>
+              </div>
+            </motion.div>
+          )}
+
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 space-y-8 scroll-smooth">
             <AnimatePresence initial={false}>
               {messages.map((m, i) => (

@@ -108,6 +108,7 @@ import { EscapeRoomGrammar } from './components/EscapeRoomGrammar';
 import { FlashcardsHub } from './components/FlashcardsHub';
 import { FamilyActivities } from './components/FamilyActivities';
 import { InteractiveLearningHub } from './components/InteractiveLearningHub';
+import { EducationalGamesHub } from './components/EducationalGamesHub';
 import { Layers, Image as OxfordIcon, Library as OxfordClassicIcon, Languages } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { familyConstellationsLesson } from './data/lessons/r_a1_4';
@@ -1224,6 +1225,22 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
               btnBg: 'bg-purple-50',
               badgeAr: 'ألعاب وكسر جمود',
               badgeEn: 'Interactive Room'
+            },
+            {
+              id: 'educational-games',
+              titleAr: 'واحة الألعاب والآداب الراقية 🎮',
+              titleEn: 'Educational Games & Etiquette 🎮',
+              descAr: 'ألعاب تفاعلية مسلية، ألغاز المفردات والتهجئة المشوقة، تصحيح العادات اليومية، وفرسان الذوق والآداب الراقية بمكافآت سخية!',
+              descEn: 'Academic spelling riddles, interactive daily habits correction, and the Knights of Royal Etiquette & Social Manners challenge!',
+              icon: Gamepad2,
+              glowColor: 'bg-amber-400/20',
+              badgeStyle: 'bg-amber-50 text-amber-700 border border-[#C49E3A]/25',
+              iconBg: 'bg-amber-50',
+              iconColor: 'text-[#C49E3A]',
+              btnTextColor: 'text-[#C49E3A]',
+              btnBg: 'bg-amber-50',
+              badgeAr: 'ألعاب، عادات، وأدب راقي',
+              badgeEn: 'All Ages • Play & Etiquette'
             },
             {
               id: 'pronunciation-lab',
@@ -4704,6 +4721,46 @@ export default function App() {
         />
       );
     }
+    if (view === 'educational-games') {
+      return (
+        <EducationalGamesHub
+          lang={lang}
+          userProfile={userProfile}
+          onBack={() => setView('interactive-learning')}
+          onXPAdded={async (xp, details) => {
+            if (userProfile && currentUser) {
+              const currentPoints = (userProfile as any).points || 0;
+              const newPoints = currentPoints + xp;
+              try {
+                if (!currentUser.uid.startsWith('sim_')) {
+                  await updateDoc(doc(db, 'users', currentUser.uid), {
+                    points: newPoints
+                  });
+                }
+                await addDoc(collection(db, 'lessonResults'), {
+                  userId: currentUser.uid,
+                  parentIds: (userProfile as any).linkedParentIds || [],
+                  lessonId: details?.lessonId || 'game_general',
+                  courseId: 'educational_games',
+                  level: details?.level || 'Gamified Playroom',
+                  lessonTitle: details?.title || 'Educational Games & Etiquette',
+                  score: details?.score || 10,
+                  total: details?.total || 10,
+                  timestamp: serverTimestamp()
+                });
+                setUserProfile({
+                  ...userProfile,
+                  points: newPoints
+                } as any);
+                alert(lang === 'ar' ? `رائع جداً! مبروك يا بطل، حصلت على +${xp} نقطة تفوق في ساحة الألعاب! 🎮🏆` : `Hooray! You earned +${xp} XP in the educational playroom! 🎮🏆`);
+              } catch (e) {
+                console.error("Error updating points for Educational Games:", e);
+              }
+            }
+          }}
+        />
+      );
+    }
     if (view === 'english-songs') {
       return (
         <EnglishSongs
@@ -5494,6 +5551,7 @@ export default function App() {
                     { id: 'pronunciation-lab', label: lang === 'ar' ? 'معمل النطق 🎙️' : 'Pronunciation Lab 🎙️', icon: Mic },
                     { id: 'live-translate', label: lang === 'ar' ? 'مترجم المباشر 🌐' : 'Live Translate 🌐', icon: Languages },
                     { id: 'interactive-learning', label: lang === 'ar' ? 'تعليم تفاعلي ⚡' : 'Interactive Learning ⚡', icon: Gamepad2 },
+                    { id: 'educational-games', label: lang === 'ar' ? 'واحة الألعاب والآداب 🎮' : 'Games & Manners Hub 🎮', icon: Gamepad2 },
                     { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
                     { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
                     { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
@@ -5685,6 +5743,7 @@ export default function App() {
                           <div className="grid grid-cols-2 gap-2.5">
                             {[
                               { id: 'interactive-learning', label: isRtl ? 'تعليم تفاعلي ⚡' : 'Interactive Play ⚡', icon: Gamepad2 },
+                              { id: 'educational-games', label: isRtl ? 'واحة الألعاب والآداب 🎮' : 'Games & Manners Hub 🎮', icon: Gamepad2 },
                               { id: 'pronunciation-lab', label: isRtl ? 'معمل النطق' : 'Pronunciation Lab', icon: Mic },
                               { id: 'live-translate', label: isRtl ? 'مترجم المباشر 🌐' : 'Live Translate', icon: Languages },
                               { id: 'ai-chat', label: t.aiPartner, icon: Mic2, action: handleStartAiChat },

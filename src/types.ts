@@ -64,7 +64,7 @@ export const CHILDHOOD_PACKAGES = [
 
 export const MASTER_ADMINS = ['basim5252@gmail.com'];
 
-export type AppView = 'dashboard' | 'placement-test' | 'curriculum' | 'lesson' | 'progress' | 'leaderboard' | 'chat' | 'admin' | 'ai-chat' | 'video-library' | 'story-library' | 'early-childhood' | 'oxford-discover' | 'oxford-classic' | 'reading-curriculum' | 'grammar-curriculum' | 'conversation-curriculum' | 'writing-curriculum' | 'expression-curriculum' | 'modern-curriculum' | 'academic-planner' | 'academic-results' | 'academic-analytics' | 'bi-weekly-test' | 'professional-development' | 'adults-daily-dose' | 'kids-story-player' | 'pronunciation-lab' | 'roleplay-challenges' | 'visual-dictionary' | 'english-songs' | 'animated-storyboard' | 'escape-room' | 'family-activities' | 'interactive-learning' | 'ai-curriculum' | 'balance-oasis' | 'flashcards-hub' | 'live-translate';
+export type AppView = 'dashboard' | 'placement-test' | 'curriculum' | 'lesson' | 'progress' | 'leaderboard' | 'chat' | 'admin' | 'ai-chat' | 'video-library' | 'story-library' | 'early-childhood' | 'oxford-discover' | 'oxford-classic' | 'reading-curriculum' | 'grammar-curriculum' | 'conversation-curriculum' | 'writing-curriculum' | 'expression-curriculum' | 'modern-curriculum' | 'academic-planner' | 'academic-results' | 'academic-analytics' | 'bi-weekly-test' | 'professional-development' | 'adults-daily-dose' | 'kids-story-player' | 'pronunciation-lab' | 'roleplay-challenges' | 'visual-dictionary' | 'english-songs' | 'animated-storyboard' | 'escape-room' | 'family-activities' | 'interactive-learning' | 'ai-curriculum' | 'balance-oasis' | 'flashcards-hub' | 'live-translate' | 'educational-games';
 
 export interface WhatsAppNotification {
   id: string;

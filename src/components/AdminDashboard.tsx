@@ -77,6 +77,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState('');
   const studentReportRef = useRef<HTMLDivElement>(null);
+  const [wipingGames, setWipingGames] = useState(false);
 
   const handleSelectStudent = async (student: any) => {
     setSelectedStudent(student);
@@ -436,6 +437,40 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
       alert(isRtl ? "فشل في توليد الكود" : "Failed to generate voucher");
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleWipeGamesLessons = async () => {
+    const confirmMessage = isRtl 
+      ? "هل أنت متأكد تماماً من حذف جميع الدروس والنتائج وسجلات اللعب في واحة الألعاب والآداب الراقية بالكامل لكل الطلاب؟ لا يمكن التراجع عن هذا الإجراء."
+      : "Are you sure you want to delete all educational games and etiquette lesson results/records for all students? This action is irreversible.";
+    
+    if (!window.confirm(confirmMessage)) return;
+    
+    setWipingGames(true);
+    try {
+      const q = query(
+        collection(db, 'lessonResults'), 
+        where('courseId', 'in', ['educational_games', 'educational-games'])
+      );
+      const snapshot = await getDocs(q);
+      
+      let deletedCount = 0;
+      for (const d of snapshot.docs) {
+        await deleteDoc(doc(db, 'lessonResults', d.id));
+        deletedCount++;
+      }
+      
+      const successMsg = isRtl
+        ? `تم بنجاح حذف وتصفير جميع سجلات الدروس والنتائج الخاصة بواحة الألعاب بالكامل! عدد السجلات المحذوفة: ${deletedCount} سجل.`
+        : `Successfully deleted all (${deletedCount}) lesson results inside the Educational Games Oasis!`;
+        
+      alert(successMsg);
+    } catch (err: any) {
+      console.error("Error wiping games lessons:", err);
+      alert(isRtl ? "فشل في تصفير سجلات واحة الألعاب" : "Failed to wipe educational games history");
+    } finally {
+      setWipingGames(false);
     }
   };
 
@@ -1234,6 +1269,8 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
               <BrainCircuit size={18} />
               {analyzing ? (isRtl ? 'جاري الفحص...' : 'Checking...') : (isRtl ? 'فحص اتصال API V2' : 'Test API Connection V2')}
             </button>
+
+
             
             {analysisResult && (
               <div className="bg-white/10 p-6 rounded-2xl border border-white/5 prose prose-invert prose-sm max-w-none">

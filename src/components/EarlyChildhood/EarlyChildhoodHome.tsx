@@ -223,6 +223,24 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
     }
   };
 
+  const playMascotChime = (text: string, currentLang: 'en' | 'ar') => {
+    try {
+      window.speechSynthesis.cancel();
+    } catch (e) {}
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = currentLang === 'en' ? 'en-US' : 'ar-SA';
+    utterance.pitch = 1.35;
+    utterance.rate = 0.85;
+    window.speechSynthesis.speak(utterance);
+    
+    setMascotMood('celebrating');
+    setMascotMessage(isRtl ? `باسل يقول: "${text}"` : `Basil says: "${text}"`);
+    setTimeout(() => {
+      setMascotMood('happy');
+    }, 4500);
+  };
+
   useEffect(() => {
     // Initial welcome message
     const timer = setTimeout(() => {
@@ -834,6 +852,41 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
           </div>
         </motion.button>
       </div>
+
+      {/* Plan 1: Basil's Interactive Chimes & Voice Bubbles */}
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-6xl mx-auto mb-10 bg-gradient-to-br from-amber-50 to-orange-50/50 p-8 rounded-[3rem] shadow-sm border border-amber-200/60 flex flex-col md:flex-row items-center justify-between gap-6"
+      >
+        <div className={`text-center md:text-start ${isRtl ? 'md:text-right' : 'md:text-left'}`}>
+          <h2 className="text-xl md:text-2xl font-black text-[#002147] mb-1 flex items-center gap-2 justify-center md:justify-start">
+            <span>🦁</span>
+            {isRtl ? 'الخطة 1: أجراس باسل الصوتية التفاعلية 🎵' : 'Plan 1: Basil\'s Interactive Chimes 🎵'}
+          </h2>
+          <p className="text-slate-500 font-bold text-xs">
+            {isRtl ? 'اضغط على أي زر لتشجيع طفلك بصوت باسل المرح وتحفيزه فورياً!' : 'Click any chime bubble to hear Basil speak encouraging phrases out loud!'}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-3 justify-center">
+          {[
+            { labelAr: 'أنت بطل رائع! 🏆', labelEn: 'You are a champion! 🏆', phraseAr: 'أنت بطل رائع ومميز جداً في الأكاديمية يا بطل!', phraseEn: 'You are an absolute champion, keep shining!' },
+            { labelAr: 'هيا نستأر الغابة 🦁', labelEn: 'Let\'s roar! 🦁', phraseAr: 'هيا نكتشف مغامرات اللغة الإنجليزية الرائعة اليوم!', phraseEn: 'Let\'s roar and learn amazing English adventures today!' },
+            { labelAr: 'جهد مبهر جداً! ⭐', labelEn: 'Excellent work! ⭐', phraseAr: 'جهد رائع ومبهر جداً، أنا فخور بك للغاية يا شبلنا!', phraseEn: 'Outstanding effort, I am so incredibly proud of you!' }
+          ].map((item, idx) => (
+            <motion.button
+              key={`chime-btn-${idx}`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => playMascotChime(isRtl ? item.phraseAr : item.phraseEn, isRtl ? 'ar' : 'en')}
+              className="px-4 py-2.5 rounded-2xl bg-white hover:bg-amber-100 border border-amber-200 hover:border-amber-300 text-amber-800 font-black text-xs shadow-sm transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <span>🔔</span>
+              {isRtl ? item.labelAr : item.labelEn}
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
 
       {/* Mood Selector - Very Early Childhood Distinguishing Feature */}
       {!mood && (
