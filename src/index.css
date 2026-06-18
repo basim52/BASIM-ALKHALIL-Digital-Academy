@@ -15,19 +15,19 @@
   --color-cream: #faf6ef;
   --color-ink: #1a1209;
   --color-amber-accent: #c8721a;
-  --color-correct: #1e7a45;
-  --color-wrong: #c0392b;
-  --color-info: #1e6b6b;
+  --color-correct: #58CC02;
+  --color-wrong: #ea2b2b;
+  --color-info: #1cb0f6;
   --color-oxford-navy: #002147;
   --color-oxford-gold: #C49E3A;
-  --color-slate-50: #f8fafc;
-  --color-slate-100: #f1f5f9;
+  --color-slate-50: #F7F7F7;
+  --color-slate-100: #e5e5e5;
   --color-slate-200: #e2e8f0;
 }
 
 @layer base {
   body {
-    @apply font-sans antialiased bg-slate-50 text-slate-900;
+    @apply font-sans antialiased bg-[#F7F7F7] text-slate-900;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02";
   }
 }
@@ -43,4 +43,106 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Duolingo UI components design styles */
+.duo-card {
+  background-color: #ffffff;
+  border: 2px solid #e5e5e5;
+  border-bottom-width: 5px;
+  border-radius: 20px;
+  transition: all 0.1s ease;
+}
+.duo-card:hover {
+  border-color: #cdcdcd;
+}
+
+.duo-btn-green {
+  background-color: #58cc02;
+  color: #ffffff !important;
+  border: none;
+  border-bottom: 4px solid #46a302;
+  border-radius: 16px;
+  font-weight: 800;
+  transition: all 0.1s ease;
+  cursor: pointer;
+}
+.duo-btn-green:hover {
+  background-color: #61e004;
+}
+.duo-btn-green:active {
+  border-bottom-width: 0px;
+  transform: translateY(4px);
+}
+
+.duo-btn-blue {
+  background-color: #1cb0f6;
+  color: #ffffff !important;
+  border: none;
+  border-bottom: 4px solid #1899d6;
+  border-radius: 16px;
+  font-weight: 800;
+  transition: all 0.1s ease;
+  cursor: pointer;
+}
+.duo-btn-blue:hover {
+  background-color: #24bfff;
+}
+.duo-btn-blue:active {
+  border-bottom-width: 0px;
+  transform: translateY(4px);
+}
+
+.duo-btn-orange {
+  background-color: #ff9600;
+  color: #ffffff !important;
+  border: none;
+  border-bottom: 4px solid #e07500;
+  border-radius: 16px;
+  font-weight: 800;
+  transition: all 0.1s ease;
+  cursor: pointer;
+}
+.duo-btn-orange:hover {
+  background-color: #ffa61f;
+}
+.duo-btn-orange:active {
+  border-bottom-width: 0px;
+  transform: translateY(4px);
+}
+
+.duo-btn-violet {
+  background-color: #b87cf8;
+  color: #ffffff !important;
+  border: none;
+  border-bottom: 4px solid #9c5fe5;
+  border-radius: 16px;
+  font-weight: 800;
+  transition: all 0.1s ease;
+  cursor: pointer;
+}
+.duo-btn-violet:hover {
+  background-color: #c492ff;
+}
+.duo-btn-violet:active {
+  border-bottom-width: 0px;
+  transform: translateY(4px);
+}
+
+.duo-btn-white {
+  background-color: #ffffff;
+  color: #afafaf !important;
+  border: 2px solid #e5e5e5;
+  border-bottom-width: 4px;
+  border-radius: 16px;
+  font-weight: 800;
+  transition: all 0.1s ease;
+  cursor: pointer;
+}
+.duo-btn-white:hover {
+  background-color: #f7f7f7;
+}
+.duo-btn-white:active {
+  border-bottom-width: 2px;
+  transform: translateY(2px);
 }

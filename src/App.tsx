@@ -1047,39 +1047,77 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
   }, [profile.uid]);
 
   return (
-    <div className={`flex-1 p-5 md:p-12 overflow-y-auto ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#f8fafc]`} dir={isRtl ? 'rtl' : 'ltr'}>
-      <div className="max-w-7xl mx-auto space-y-12">
+    <div className={`flex-1 p-5 md:p-12 overflow-y-auto ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#F7F7F7]`} dir={isRtl ? 'rtl' : 'ltr'}>
+      <div className="max-w-7xl mx-auto space-y-10">
+
+        {/* DUOLINGO STATUS STRIP */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-6 bg-white border-2 border-b-4 border-slate-200 rounded-[2rem] shadow-none animate-fade-in relative overflow-hidden">
+          {/* Logo / Mascot area */}
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-[#58cc02] rounded-2xl flex items-center justify-center text-white text-3xl font-black shadow-md relative animate-bounce-slow shrink-0 border-b-4 border-[#46a302]">
+              🦉
+            </div>
+            <div>
+              <h2 className="text-base font-black text-slate-800 leading-tight">
+                {isRtl ? 'بوابة البطل التعليمية اليومية 🏆' : 'Daily Champion Learning Portal 🏆'}
+              </h2>
+              <p className="text-xs text-[#58cc02] font-black mt-0.5">
+                {isRtl ? 'أنت تبلي بلاءً رائعاً ومرتفعاً اليوم! استمر في التعميق 🔥' : 'You are doing magnificent work today! Keep rising! 🔥'}
+              </p>
+            </div>
+          </div>
+
+          {/* Stat indicators (Duolingo style) */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5 px-4 py-2 bg-orange-50 border-2 border-orange-200 rounded-2xl text-[#ff9600] font-black text-xs md:text-sm shadow-sm hover:scale-105 transition-all">
+              <span className="text-lg">🔥</span>
+              <span>7 {isRtl ? 'يوم' : 'Days'}</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-4 py-2 bg-blue-50 border-2 border-blue-200 rounded-2xl text-[#1cb0f6] font-black text-xs md:text-sm shadow-sm hover:scale-105 transition-all">
+              <span className="text-lg">💎</span>
+              <span>1,240</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-4 py-2 bg-rose-50 border-2 border-rose-200 rounded-2xl text-[#ea2b2b] font-black text-xs md:text-sm shadow-sm hover:scale-105 transition-all">
+              <span className="text-lg">❤️</span>
+              <span>5</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-4 py-2 bg-amber-50 border-2 border-amber-200 rounded-2xl text-[#ffc800] font-black text-xs md:text-sm shadow-sm hover:scale-105 transition-all">
+              <span className="text-lg">👑</span>
+              <span>12 {isRtl ? 'تاج' : 'Crowns'}</span>
+            </div>
+          </div>
+        </div>
         
         {/* LANDING PAGE HERO BANNER */}
-        <div className="relative p-8 md:p-12 rounded-[2.5rem] bg-[#002147] text-white overflow-hidden shadow-2xl border-b-8 border-[#C49E3A]">
-          <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-gradient-to-br from-indigo-500/10 to-teal-500/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-10 left-10 w-96 h-96 bg-[#C49E3A]/5 rounded-full blur-2xl pointer-events-none" />
+        <div className="relative p-8 md:p-12 rounded-[2.5rem] bg-gradient-to-br from-[#58cc02] to-[#46a302] text-white overflow-hidden shadow-xl border-b-8 border-[#3a8602]">
+          <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-gradient-to-br from-white/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-10 left-10 w-96 h-96 bg-white/5 rounded-full blur-2xl pointer-events-none" />
           
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8 animate-fade-in">
             <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#C49E3A]/15 border border-[#C49E3A]/30 rounded-xl text-[10px] font-black text-[#C49E3A] uppercase tracking-wider mb-2">
-                <Sparkles size={12} className="animate-pulse" />
-                <span>{isRtl ? 'مرحباً بك في بوابتك التعليمية الرسمية 🌟' : 'WELCOME TO YOUR ACADEMIC HOME 🌟'}</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 border border-white/20 rounded-xl text-[10px] font-black text-[#ffc800] uppercase tracking-wider mb-2">
+                <Sparkles size={12} className="animate-pulse text-[#ffc800]" />
+                <span>{isRtl ? 'مرحباً بك في بوابتك التعليمية شبيهة دولينجو 🌟' : 'WELCOME TO THE DUOLINGO-THEMED ACADEMY 🌟'}</span>
               </div>
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight leading-none text-white">
-                {t.welcomeUser} <span className="text-[#C49E3A]">{profile.displayName.split(' ')[0]}</span> !
+                {t.welcomeUser} <span className="text-[#ffc800]">{profile.displayName.split(' ')[0]}</span> !
               </h1>
-              <p className="text-slate-300 font-semibold text-xs md:text-sm max-w-xl leading-relaxed">
+              <p className="text-white/90 font-semibold text-xs md:text-sm max-w-xl leading-relaxed">
                 {isRtl
-                  ? 'أكاديمية باسم الخليل ترحب بك. مسارات تعليمية تفاعلية مدعومة بالذكاء الاصطناعي، ومخيمات تدريبية متخصصة ومصممة لتأخذ لغتك الإنجليزية إلى أرقى المستويات الحيوية.'
-                  : 'Basim Alkhalil Academy welcomes you. Embark on personalized learning paths, active recall suites, and voice phonic modules designed to unleash your English fluency.'}
+                  ? 'أكاديمية باسم الخليل ترحب بك في مسارك المشوق الجديد. اختر إحدى البوابات أدناه لتبدأ لعب الألعاب، المفردات، والمحادثة الصوتية بمتعة تشبه دولينجو تماماً!'
+                  : 'Basim Alkhalil Academy welcomes you. Embark on playful paths, pronunciation diagnostics, and voice phonic modules designed to unleash your English fluency like Duolingo!'}
               </p>
               
               <div className="flex flex-wrap items-center gap-2.5 pt-2">
-                <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl">
-                  <span className="text-[9px] font-black text-white/50 uppercase tracking-wider">{isRtl ? 'كود الطالب:' : 'STUDENT CODE:'}</span>
-                  <code className="text-xs font-mono font-bold text-[#C49E3A] select-all">
+                <div className="flex items-center gap-2 bg-white/10 border border-white/15 px-3 py-1.5 rounded-xl">
+                  <span className="text-[9px] font-black text-white/70 uppercase tracking-wider">{isRtl ? 'كود الطالب:' : 'STUDENT CODE:'}</span>
+                  <code className="text-xs font-mono font-bold text-[#ffc800] select-all">
                     {profile.studentCode ? `AK${profile.studentCode}` : profile.uid}
                   </code>
                 </div>
-                <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl text-teal-300">
-                  <span className="text-[9px] font-black text-white/50 uppercase tracking-wider">{isRtl ? 'مستواك الحالي:' : 'CURRENT LEVEL:'}</span>
-                  <span className="text-xs font-black uppercase tracking-wider">
+                <div className="flex items-center gap-2 bg-white/10 border border-white/15 px-3 py-1.5 rounded-xl text-yellow-300">
+                  <span className="text-[9px] font-black text-white/70 uppercase tracking-wider">{isRtl ? 'مستواك الحالي:' : 'CURRENT LEVEL:'}</span>
+                  <span className="text-xs font-black uppercase tracking-wider text-[#ffc800]">
                     {hasCompletedTest ? ((profile as any).level || 'A1') : (isRtl ? 'بانتظار الاختبار ⚠️' : 'Pending Test ⚠️')}
                   </span>
                 </div>
@@ -1087,12 +1125,12 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             </div>
             
             {/* HERO STATS BAR (Points & Actions) */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 bg-white/5 backdrop-blur-md p-3.5 rounded-3xl border border-white/10 w-full lg:w-auto shrink-0">
+            <div className="flex flex-col sm:flex-row items-center gap-3 bg-white/10 backdrop-blur-md p-3.5 rounded-3xl border border-white/15 w-full lg:w-auto shrink-0">
               <div className="flex-1 lg:flex-none flex items-center justify-center gap-3.5 px-6 py-4 bg-white/10 rounded-2xl w-full sm:w-auto">
-                <Trophy className="text-[#C49E3A] w-7 h-7" />
+                <Trophy className="text-[#ffc800] w-7 h-7" />
                 <div className="text-left font-black shrink-0">
                   <p className="text-2xl font-black text-white leading-none">1,240</p>
-                  <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-none mt-1">{t.points}</p>
+                  <p className="text-[9px] font-black text-white/80 uppercase tracking-widest leading-none mt-1">{t.points}</p>
                 </div>
               </div>
               <button 
@@ -1101,7 +1139,7 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
                   navigator.clipboard.writeText(codeToCopy);
                   alert(lang === 'ar' ? 'تم نسخ كود الطالب!' : 'Student code copied!');
                 }}
-                className="w-full sm:w-auto flex items-center justify-center p-4 bg-[#C49E3A] hover:bg-amber-500 text-[#002147] hover:scale-[1.02] active:scale-95 rounded-2xl transition-all font-black gap-2 text-xs uppercase shadow-lg shadow-black/20"
+                className="w-full sm:w-auto p-4 duo-btn-orange text-white flex items-center justify-center gap-2 text-xs uppercase font-black"
               >
                 <Settings size={16} />
                 <span>{isRtl ? 'نسخ كود الطالب' : 'Copy Student Code'}</span>
@@ -1115,14 +1153,14 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
           <motion.div 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl text-white shadow-xl flex items-center gap-6 border-l-8 border-[#C49E3A]"
+            className="p-6 bg-white border-2 border-b-4 border-slate-200 rounded-[2rem] text-slate-800 flex items-center gap-6 relative shadow-sm"
           >
-            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
-              <Sparkles className="text-amber-300 animate-pulse" />
+            <div className="w-14 h-14 bg-[#1cb0f6] rounded-2xl flex items-center justify-center shrink-0 shadow-sm border-b-4 border-[#1292ce]">
+              <Sparkles className="text-white animate-pulse" />
             </div>
             <div className={`flex-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-              <p className="text-[9px] font-black uppercase tracking-[0.2em] mb-1 text-white/70">{isRtl ? 'مستشار الذكاء الاصطناعي اليوم 🤖' : 'AI DAILY COUNSELLOR ADVICE 🤖'}</p>
-              <p className="font-extrabold text-sm md:text-base leading-relaxed break-words whitespace-pre-line">"{recommendation}"</p>
+              <p className="text-[9px] font-black uppercase tracking-[0.2em] mb-1 text-[#1cb0f6]">{isRtl ? 'نصيحة مستشار الذكاء الاصطناعي اليوم 🦉' : 'AI DAILY COUNSELLOR ADVICE 🦉'}</p>
+              <p className="font-extrabold text-xs md:text-sm leading-relaxed text-slate-700">"{recommendation}"</p>
             </div>
           </motion.div>
         )}
@@ -1383,22 +1421,22 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
                     onNavigate(sec.id as AppView);
                   }
                 }}
-                className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200/70 shadow-md hover:shadow-xl cursor-pointer transition-all flex flex-col justify-between relative overflow-hidden group"
+                className="bg-white p-6 md:p-8 rounded-[2rem] border-2 border-b-[6px] border-slate-200 hover:border-slate-300 cursor-pointer transition-all active:border-b-2 active:translate-y-[4px] flex flex-col justify-between relative overflow-hidden group"
               >
                 {/* Visual Glow Circle */}
-                <div className={`absolute right-[-15px] top-[-10px] w-24 h-24 ${sec.glowColor} rounded-full blur-xl opacity-30 group-hover:scale-130 transition-transform duration-500 pointer-events-none`} />
+                <div className={`absolute right-[-15px] top-[-10px] w-24 h-24 ${sec.glowColor} rounded-full blur-xl opacity-20 group-hover:scale-130 transition-transform duration-500 pointer-events-none`} />
 
                 <div>
                   <div className="flex items-center justify-between mb-5">
                     <span className={`px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider ${sec.badgeStyle}`}>
                       {isRtl ? sec.badgeAr : sec.badgeEn}
                     </span>
-                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-md ${sec.iconBg} ${sec.iconColor}`}>
+                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border-2 border-slate-100 ${sec.iconBg} ${sec.iconColor}`}>
                       <SectionIcon size={20} className="group-hover:scale-110 transition-transform duration-300" />
                     </div>
                   </div>
 
-                  <h3 className="text-base md:text-lg font-black text-[#002147] mb-2 leading-tight flex items-center gap-2 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-base md:text-lg font-black text-slate-800 mb-2 leading-tight flex items-center gap-2 group-hover:text-[#58cc02] transition-colors">
                     {isRtl ? sec.titleAr : sec.titleEn}
                   </h3>
 
@@ -1407,7 +1445,7 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between border-t border-slate-50 pt-4 mt-auto">
+                <div className="flex items-center justify-between border-t border-slate-100 pt-4 mt-auto">
                   <span className={`text-[10px] font-black ${sec.btnTextColor} uppercase tracking-widest`}>
                     {isRtl ? 'افتح البوابة 🧭' : 'Launch Corridor 🧭'}
                   </span>
@@ -1425,27 +1463,27 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
           <motion.div 
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-8 bg-white rounded-[2.5rem] border-2 border-blue-600/10 shadow-xl shadow-blue-100/20 relative overflow-hidden group"
+            className="p-8 bg-white rounded-[2rem] border-2 border-b-[6px] border-slate-200 relative overflow-hidden group shadow-sm"
           >
             <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform">
                <Brain size={120} />
             </div>
             <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
               <div className="flex items-center gap-6">
-                <div className="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
+                <div className="w-16 h-16 bg-[#1cb0f6] text-white rounded-2xl flex items-center justify-center shadow-md border-b-4 border-[#1292ce]">
                   <CalendarDays size={30} />
                 </div>
                 <div className={isRtl ? 'text-right' : 'text-left'}>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-widest">{isRtl ? 'خطة دراستك النشطة' : 'Active Study Plan'}</span>
-                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                    <span className="px-3 py-1 bg-blue-50 text-[#1cb0f6] rounded-lg text-[10px] font-black uppercase tracking-widest">{isRtl ? 'خطة دراستك النشطة' : 'Active Study Plan'}</span>
+                    <span className="w-1.5 h-1.5 bg-[#58cc02] rounded-full animate-pulse" />
                   </div>
-                  <h3 className="text-xl font-black text-[#002147] mb-0.5">
+                  <h3 className="text-xl font-black text-slate-800 mb-0.5">
                     {isRtl ? `خطة ${currentPlan.studentName}` : `${currentPlan.studentName}'s Custom Plan`}
                   </h3>
                   <p className="text-slate-400 font-bold text-xs">
                     {isRtl ? 'الدرس القادم المحدد اليوم: ' : 'Your scheduled lesson today: '} 
-                    <span className="text-blue-600 font-extrabold underline">{todayLesson.topic}</span>
+                    <span className="text-[#1cb0f6] font-extrabold underline">{todayLesson.topic}</span>
                   </p>
                 </div>
               </div>
@@ -1453,18 +1491,18 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
               <div className="flex items-center gap-3 w-full md:w-auto">
                 <button 
                   onClick={handleDeletePlanDashboard}
-                  className="p-3.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition-all border border-rose-100/50"
+                  className="p-3.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition-all border border-rose-100"
                   title={isRtl ? 'حذف الخطة' : 'Delete Plan'}
                 >
                   <Trash2 size={18} />
                 </button>
-                <div className="hidden lg:flex flex-col items-center px-6 py-2 border-r border-[#002147]/5 pr-8">
+                <div className="hidden lg:flex flex-col items-center px-6 py-2 border-r border-slate-100 pr-8">
                    <span className="text-[9px] font-black text-slate-300 uppercase mb-0.5">{isRtl ? 'الجدول المفضل' : 'Preferred Time'}</span>
-                   <span className="text-base font-black text-[#002147]">{currentPlan.preferredTime}</span>
+                   <span className="text-base font-black text-slate-700">{currentPlan.preferredTime}</span>
                 </div>
                 <button 
                   onClick={() => onNavigate('academic-planner')}
-                  className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-[#002147] text-white px-6 py-4 rounded-2xl font-black hover:bg-blue-600 transition-all shadow-md shadow-blue-900/10 text-xs"
+                  className="flex-1 md:flex-none flex items-center justify-center gap-2 duo-btn-blue text-white px-6 py-4 rounded-2xl text-xs uppercase"
                 >
                   {isRtl ? 'متابعة الخطة' : 'Follow Plan'}
                   <ChevronRight size={16} className={isRtl ? 'rotate-180' : ''} />
@@ -1484,10 +1522,10 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
           {/* Side Progress & Homework Card */}
           <div className="lg:col-span-1 space-y-8">
             {/* Homework List Card */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <div className="bg-white rounded-[2rem] p-6 border-2 border-b-[6px] border-slate-200 shadow-sm flex flex-col justify-between">
               <div>
-                <h3 className="font-bold text-[#002147] mb-6 flex items-center gap-3 border-b border-slate-50 pb-3">
-                  <Calendar className="text-[#C49E3A] shrink-0" size={18} />
+                <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-3 border-b border-slate-100 pb-3">
+                  <Calendar className="text-[#ff9600] shrink-0" size={18} />
                   <span className="text-sm font-black tracking-tight">{lang === 'ar' ? 'الواجبات والمهام التعليمية' : 'Smart Assigned Tasks'}</span>
                 </h3>
                 <div className="space-y-4 max-h-[280px] overflow-y-auto">
@@ -1505,21 +1543,21 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
                         onClick={() => setSelectedHomework(hw)}
                         className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
                           hw.status === 'completed' 
-                            ? 'bg-emerald-50/30 border-emerald-100' 
-                            : 'bg-indigo-50/30 border-indigo-150'
+                            ? 'bg-emerald-50/50 border-emerald-200' 
+                            : 'bg-blue-50/50 border-blue-200'
                         } ${lang === 'ar' ? 'flex-row-reverse text-right' : 'text-left'}`}
                       >
                         <div className={`p-1.5 rounded-lg ${
-                          hw.status === 'completed' ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-100 text-indigo-600'
+                          hw.status === 'completed' ? 'bg-[#58cc02] text-white' : 'bg-[#1cb0f6] text-white'
                         }`}>
                           {hw.status === 'completed' ? <CheckCircle2 size={16} /> : <Sparkles size={16} />}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className={`font-black text-xs truncate ${
-                            hw.status === 'completed' ? 'text-emerald-800' : 'text-indigo-800'
+                            hw.status === 'completed' ? 'text-emerald-800' : 'text-blue-800'
                           }`}>{isRtl ? hw.titleAr : hw.title}</p>
                           <p className={`text-[8px] font-black uppercase tracking-widest mt-0.5 ${
-                            hw.status === 'completed' ? 'text-emerald-500' : 'text-indigo-500'
+                            hw.status === 'completed' ? 'text-emerald-500' : 'text-[#1cb0f6]'
                           }`}>
                             {hw.status === 'completed' ? (isRtl ? 'تم التسليم والتقييم' : 'قيد الانتظار') : (isRtl ? 'مطلوب إنجازه' : 'PENDING ACTION')}
                           </p>
@@ -1532,24 +1570,24 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             </div>
 
             {/* Live Progress Analytics Metrics */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm">
-              <h3 className="font-bold text-[#002147] mb-6 flex items-center gap-2 border-b border-slate-50 pb-3">
-                <BarChart3 className="text-blue-600" size={18} />
+            <div className="bg-white rounded-[2rem] p-6 border-2 border-b-[6px] border-slate-200 shadow-sm">
+              <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2 border-b border-slate-100 pb-3">
+                <BarChart3 className="text-[#58cc02]" size={18} />
                 <span className="text-sm font-black tracking-tight">{t.skillAnalysis}</span>
               </h3>
               <div className="space-y-6">
                 {[
-                  { label: 'Listening', value: 85, color: 'bg-blue-600' },
-                  { label: 'Speaking', value: 62, color: 'bg-orange-500' },
-                  { label: 'Reading', value: 78, color: 'bg-emerald-500' },
-                  { label: 'Writing', value: 45, color: 'bg-[#C49E3A]' },
+                  { label: 'Listening 🎧', value: 85, color: 'bg-[#1cb0f6]' },
+                  { label: 'Speaking 🗣️', value: 62, color: 'bg-[#ff9600]' },
+                  { label: 'Reading 📖', value: 78, color: 'bg-[#58cc02]' },
+                  { label: 'Writing ✍️', value: 45, color: 'bg-[#b87cf8]' },
                 ].map((skill) => (
                   <div key={skill.label}>
                     <div className="flex justify-between items-center text-xs mb-2">
                       <span className="font-black text-slate-500 uppercase tracking-widest text-[9px]">{skill.label}</span>
                       <span className="text-slate-800 font-extrabold text-xs">%{skill.value}</span>
                     </div>
-                    <div className="h-1.5 bg-slate-50 border border-slate-100 rounded-full overflow-hidden">
+                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                       <motion.div 
                         initial={{ width: 0 }}
                         animate={{ width: `${skill.value}%` }}
@@ -5532,13 +5570,13 @@ export default function App() {
               </header>
 
               {/* Desktop/Tablet Sidebar */}
-              <aside className={`hidden md:flex ${isRtl ? 'right-0 border-l-[3px]' : 'left-0 border-r-[3px]'} w-20 lg:w-56 bg-[#002147] text-white flex-col p-4 lg:p-5 fixed h-full z-40 transition-all border-[#C49E3A]`}>
+              <aside className={`hidden md:flex ${isRtl ? 'right-0 border-l-2' : 'left-0 border-r-2'} w-20 lg:w-56 bg-white text-slate-800 flex-col p-4 lg:p-5 fixed h-full z-40 transition-all border-slate-200`}>
                 <div className="flex items-center gap-3 px-1 mb-10 overflow-hidden">
-                  <div className="w-10 h-10 lg:w-11 lg:h-11 bg-white rounded-xl flex shrink-0 items-center justify-center text-[#002147] shadow-xl font-black text-xl lg:text-2xl">
-                    B
+                  <div className="w-10 h-10 lg:w-11 lg:h-11 bg-[#58cc02] rounded-xl flex shrink-0 items-center justify-center text-white shadow-md font-black text-xl lg:text-2xl relative animate-bounce-slow">
+                    🦉
                   </div>
-                  <h1 className={`font-black text-sm lg:text-lg tracking-tight hidden lg:block leading-tight ${isRtl ? 'text-right' : 'text-left'}`}>
-                    {t.academyName}<br/><span className="text-[#C49E3A] text-[10px] font-bold tracking-widest">{t.academySubName}</span>
+                  <h1 className={`font-black text-sm lg:text-lg tracking-tight hidden lg:block leading-tight ${isRtl ? 'text-right' : 'text-left'} text-slate-800`}>
+                    {t.academyName}<br/><span className="text-[#58cc02] text-[10px] font-bold tracking-widest">{t.academySubName}</span>
                     {userProfile?.role === UserRole.ADMIN && (
                       <span className="block mt-1 text-[9px] bg-red-500 text-white px-2 py-0.5 rounded-full w-fit uppercase font-black tracking-widest">Admin</span>
                     )}
@@ -5569,6 +5607,7 @@ export default function App() {
                     { id: 'chat', label: t.chat, icon: MessageSquare },
                   ].filter(item => item.show !== false).map((item) => {
                     const isDisabled = (item as any).disabled;
+                    const isActive = view === item.id;
                     return (
                       <button 
                         key={item.id}
@@ -5580,12 +5619,13 @@ export default function App() {
                           setView(item.id as AppView);
                         }
                       }}
-                        className={`w-full flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-3 lg:py-3.5 rounded-xl lg:rounded-2xl transition-all group relative overflow-hidden ${
-                          view === item.id 
-                          ? 'bg-[#C49E3A] text-[#002147] font-black shadow-lg shadow-black/20 scale-[1.02]' : 'hover:bg-white/5 text-white/60 hover:text-white'
+                        className={`w-full flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-3 lg:py-3.5 rounded-xl lg:rounded-2xl transition-all group relative overflow-hidden text-slate-600 ${
+                          isActive 
+                          ? 'bg-[#58cc02]/10 text-[#58cc02] border-2 border-b-4 border-[#58cc02] font-black' 
+                          : 'hover:bg-slate-100/80 border-2 border-transparent text-slate-500 hover:text-slate-800'
                         } ${isDisabled ? 'opacity-30 cursor-not-allowed grayscale' : ''}`}
                       >
-                        <item.icon size={innerWidth < 1024 ? 22 : 20} className="shrink-0 group-hover:scale-110 transition-transform" />
+                        <item.icon size={innerWidth < 1024 ? 22 : 20} className={`shrink-0 group-hover:scale-110 transition-transform ${isActive ? 'text-[#58cc02]' : 'text-slate-400'}`} />
                         <span className={`text-[11px] lg:text-xs font-bold hidden lg:block uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'} w-full truncate`}>
                           {item.label}
                           {isDisabled && (
@@ -5599,26 +5639,26 @@ export default function App() {
                   })}
                 </nav>
 
-                <div className="pt-6 mt-6 border-t border-white/5 space-y-2">
+                <div className="pt-6 mt-6 border-t border-slate-100 space-y-2">
                   <button 
                     onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-                    className="w-full flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-all group"
+                    className="w-full flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition-all group"
                   >
-                    <Settings size={20} className="shrink-0" />
+                    <Settings size={20} className="shrink-0 text-slate-400" />
                     <span className={`text-[10px] lg:text-[11px] font-bold hidden lg:block uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'} w-full truncate`}>{t.languageToggle}</span>
                   </button>
                   <button 
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-3 rounded-xl hover:bg-red-500/10 text-red-100/60 hover:text-red-100 transition-all group"
+                    className="w-full flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-3 rounded-xl hover:bg-rose-50/80 text-rose-600 transition-all group"
                   >
-                    <LogOut size={20} className="shrink-0" />
+                    <LogOut size={20} className="shrink-0 text-rose-400" />
                     <span className={`text-[10px] lg:text-[11px] font-bold hidden lg:block uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'} w-full truncate`}>{t.logout}</span>
                   </button>
                 </div>
               </aside>
 
               {/* Sleek Mobile Bottom Navigation Bar */}
-              <nav className="md:hidden fixed bottom-4 left-4 right-4 bg-[#002147] text-white rounded-[2rem] p-2 flex justify-around items-center z-50 shadow-2xl border-b-4 border-[#C49E3A] h-16">
+              <nav className="md:hidden fixed bottom-4 left-4 right-4 bg-white text-slate-700 rounded-[2rem] p-2 flex justify-around items-center z-50 shadow-xl border-2 border-b-4 border-slate-200 h-16">
                 {[
                   { id: 'dashboard', label: isRtl ? 'الرئيسية' : 'Home', icon: LayoutDashboard },
                   { id: 'ai-curriculum', label: isRtl ? 'الذكاء' : 'AI Unit', icon: Brain },
@@ -5640,7 +5680,7 @@ export default function App() {
                         }
                       }}
                       className={`flex flex-col items-center justify-center flex-1 py-1 rounded-2xl transition-all relative ${
-                        isActive ? 'text-[#C49E3A] scale-110' : 'text-white/50 hover:text-white'
+                        isActive ? 'text-[#58cc02] scale-110 font-black' : 'text-slate-400 hover:text-slate-600'
                       }`}
                     >
                       <Icon size={20} strokeWidth={isActive ? 2.5 : 2} className="shrink-0 mb-0.5 animate-duration-1000" />
@@ -5648,7 +5688,7 @@ export default function App() {
                       {isActive && (
                         <motion.div
                           layoutId="activeTabDot"
-                          className="absolute -bottom-1 w-1.5 h-1.5 bg-[#C49E3A] rounded-full"
+                          className="absolute -bottom-1 w-1.5 h-1.5 bg-[#58cc02] rounded-full"
                         />
                       )}
                     </button>
