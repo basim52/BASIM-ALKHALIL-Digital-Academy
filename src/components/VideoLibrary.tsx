@@ -390,7 +390,7 @@ export const VideoLibrary = ({
   if (selectedVideo) {
     const isDirect = !!selectedVideo.directUrl;
     return (
-      <div className={`p-5 md:p-8 max-w-5xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#F7F7F7]`} dir={isRtl ? 'rtl' : 'ltr'}>
+      <div className={`p-5 md:p-8 max-w-4xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#F7F7F7]`} dir={isRtl ? 'rtl' : 'ltr'}>
         <button 
           onClick={() => {
             setSelectedVideo(null);
@@ -398,6 +398,8 @@ export const VideoLibrary = ({
             setQuizQuestions([]);
             setUserAnswers([]);
             setQuizFinished(false);
+            setSelectedOptionIdx(null);
+            setHasChecked(false);
           }}
           className="flex items-center gap-2 text-slate-400 hover:text-[#58cc02] transition-colors mb-8 font-black text-sm uppercase tracking-wider bg-white px-5 py-2.5 rounded-full border border-slate-200/60 shadow-sm w-fit active:scale-95 duration-100"
         >
@@ -405,255 +407,59 @@ export const VideoLibrary = ({
           {isRtl ? 'العودة للمكتبة' : 'Back to Library'}
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <div className="aspect-video rounded-[2rem] overflow-hidden shadow-md bg-black mb-8 border-4 border-white relative">
-              {isDirect ? (
-                // Direct high-resolution file player using native HTML5 tag
-                <video 
-                  controls
-                  autoPlay
-                  className="w-full h-full object-contain"
-                  src={selectedVideo.directUrl === 'local-placeholder' ? videoFileUrl : selectedVideo.directUrl}
-                  poster={selectedVideo.thumbnail}
-                />
-              ) : (
-                // Youtube Player
-                <iframe 
-                  width="100%" 
-                  height="100%" 
-                  src={`https://www.youtube.com/embed/${selectedVideo.youtubeId}?autoplay=1`} 
-                  title="YouTube video player" 
-                  frameBorder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowFullScreen
-                />
-              )}
-            </div>
-
-            <div className="bg-white rounded-[2rem] p-6 border-2 border-b-4 border-slate-200 relative">
-              <div className="flex flex-wrap items-center gap-2.5 mb-4">
-                <span className="bg-[#1cb0f6] text-white px-3 py-1 rounded-full text-[10px] font-black">{selectedVideo.level}</span>
-                <span className="bg-[#58cc02] text-white px-3 py-1 rounded-full text-[10px] font-black flex items-center gap-1">
-                  {isDirect ? (isRtl ? 'تحميل فيديو مباشر 📁' : 'Direct Video HD 📁') : 'YouTube HD'}
-                </span>
-                {selectedVideo.fileSize && (
-                  <span className="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-[10px] font-black">{selectedVideo.fileSize}</span>
-                )}
-              </div>
-              <h2 className="text-xl md:text-2xl font-black text-slate-800 mb-2 leading-tight">
-                {isRtl ? selectedVideo.titleAr : selectedVideo.titleEn}
-              </h2>
-              {isDirect && selectedVideo.directUrl === 'local-placeholder' && !videoFileUrl && (
-                <div className="p-4 bg-orange-50 border-2 border-orange-200 text-orange-700 rounded-2xl text-xs font-bold flex items-center gap-3 mt-4">
-                  <AlertTriangle size={18} className="shrink-0" />
-                  <span>
-                    {isRtl 
-                      ? 'هذا الفيديو يحمل كمادة مباشرة عالية الدقة. يمكنك أيضاً اختيار ملفك المحلي الآن لتشغيله بأقصى سرعة!' 
-                      : 'This is a premium high-definition direct file. Select your local video file to stream with maximum speed!'}
-                  </span>
-                </div>
-              )}
-              <p className="text-slate-500 text-xs md:text-sm leading-relaxed font-bold mt-4">
-                {isRtl 
-                  ? 'شاهد الفيديو بعناية ثم قم بحل الاختبار الذكي لتقييم مدى استيعابك للمهارات اللغوية المطروحة.' 
-                  : 'Watch the video carefully and then take the AI quiz to assess your understanding of the linguistic skills presented.'}
-              </p>
-            </div>
+        <div className="max-w-3xl mx-auto">
+          <div className="aspect-video rounded-[2rem] overflow-hidden shadow-md bg-black mb-8 border-4 border-white relative">
+            {isDirect ? (
+              // Direct high-resolution file player using native HTML5 tag
+              <video 
+                controls
+                autoPlay
+                className="w-full h-full object-contain"
+                src={selectedVideo.directUrl === 'local-placeholder' ? videoFileUrl : selectedVideo.directUrl}
+                poster={selectedVideo.thumbnail}
+              />
+            ) : (
+              // Youtube Player
+              <iframe 
+                width="100%" 
+                height="100%" 
+                src={`https://www.youtube.com/embed/${selectedVideo.youtubeId}?autoplay=1`} 
+                title="YouTube video player" 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowFullScreen
+              />
+            )}
           </div>
 
-          <div className="lg:col-span-1">
-            {!quizStarted ? (
-              <div className="bg-white rounded-[2rem] p-8 text-slate-800 flex flex-col items-center justify-center text-center border-2 border-b-[6px] border-slate-200 relative overflow-hidden h-full min-h-[320px]">
-                <div className="w-16 h-16 bg-[#b87cf8]/10 text-[#b87cf8] rounded-[1.5rem] flex items-center justify-center mb-6">
-                  <BrainCircuit size={36} />
-                </div>
-                <h3 className="text-lg font-black text-slate-800 mb-2">{t.aiQuiz}</h3>
-                <p className="text-slate-400 text-xs mb-8 font-bold leading-relaxed px-2">
-                  {isRtl ? 'سنولد لك اختباراً تفاعلياً يعتمد على محتوى هذا الفيديو فورياً!' : 'We will generate an interactive quiz based on this video content instantly!'}
-                </p>
-                <button 
-                  onClick={() => generateQuiz(selectedVideo)}
-                  disabled={quizLoading}
-                  className="w-full duo-btn-violet py-4 px-6 text-sm uppercase flex items-center justify-center gap-3 disabled:opacity-50"
-                >
-                  {quizLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Sparkles size={18} />}
-                  {quizLoading ? t.loadingAIQuestions : (isRtl ? 'توليد الاختبار الآن' : 'Generate Quiz Now')}
-                </button>
-              </div>
-            ) : (
-              <div className="bg-white rounded-[2rem] p-6 border-2 border-b-4 border-slate-200 h-full overflow-y-auto">
-                {quizFinished ? (
-                  <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-6">
-                    <div className="w-16 h-16 bg-[#58cc02] text-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border-b-4 border-[#46a302] text-2xl font-black">
-                      🏆
-                    </div>
-                    <h4 className="text-xl font-black text-slate-800 mb-1">{isRtl ? 'عمل رائع جداً!' : 'Excellent Work!'}</h4>
-                    <p className="text-xs text-slate-400 mb-8 font-bold">{isRtl ? 'لقد أتممت الاختبار الذكي بنجاح.' : 'You have completed the video quiz.'}</p>
-                    
-                    <div className="bg-slate-50 p-5 rounded-2xl border-2 border-slate-100">
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{isRtl ? 'الإجابات الصحيحة' : 'Correct Answers'}</span>
-                        <span className="text-base font-black text-[#58cc02]">
-                          {userAnswers.filter((a, i) => a === quizQuestions[i].correctIndex).length} / {quizQuestions.length}
-                        </span>
-                      </div>
-                      <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-[#58cc02]" 
-                          style={{ width: `${(userAnswers.filter((a, i) => a === quizQuestions[i].correctIndex).length / quizQuestions.length) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                    
-                    <button 
-                      onClick={() => {
-                        setQuizStarted(false);
-                        setQuizQuestions([]);
-                        setUserAnswers([]);
-                        setQuizFinished(false);
-                        setSelectedOptionIdx(null);
-                        setHasChecked(false);
-                      }}
-                      className="w-full mt-6 duo-btn-white py-3.5 px-5 text-xs text-slate-500 uppercase"
-                    >
-                      {isRtl ? 'إعادة المحاولة' : 'Try Again'}
-                    </button>
-                  </motion.div>
-                ) : (
-                  <div>
-                    <div className="flex items-center justify-between mb-6">
-                       <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">{t.aiQuiz}</h3>
-                       <span className="text-[10px] font-black bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full">{userAnswers.length + 1} / {quizQuestions.length}</span>
-                    </div>
-                    
-                    <AnimatePresence mode="wait">
-                      <motion.div 
-                        key={userAnswers.length}
-                        initial={{ x: 20, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        exit={{ x: -20, opacity: 0 }}
-                        className="space-y-5"
-                      >
-                        {/* Question content */}
-                        <p className="font-extrabold text-sm text-slate-700 leading-relaxed min-h-[48px]">
-                          {quizQuestions[userAnswers.length].question}
-                        </p>
-                        
-                        {/* Options container */}
-                        <div className="space-y-3">
-                          {quizQuestions[userAnswers.length].options.map((option: string, idx: number) => {
-                            const isSelected = selectedOptionIdx === idx;
-                            const isCorrectAnswer = idx === quizQuestions[userAnswers.length].correctIndex;
-                            
-                            let btnStyle = "bg-[#F7F7F7] border-slate-200/60 text-slate-600 hover:border-slate-350";
-                            let numberStyle = "bg-white border-slate-200 text-slate-500 group-hover:border-[#58cc02] group-hover:text-[#58cc02]";
-                            
-                            if (hasChecked) {
-                              if (isCorrectAnswer) {
-                                btnStyle = "bg-[#e2f0d9]/60 border-[#58cc02] text-[#439b02]";
-                                numberStyle = "bg-[#58cc02] border-[#58cc02] text-white";
-                              } else if (isSelected) {
-                                btnStyle = "bg-red-50 border-red-400 text-red-600";
-                                numberStyle = "bg-red-500 border-red-500 text-white";
-                              } else {
-                                btnStyle = "bg-slate-50 border-slate-100 text-slate-400 opacity-60";
-                                numberStyle = "bg-slate-100 border-slate-200 text-slate-300";
-                              }
-                            } else if (isSelected) {
-                              btnStyle = "bg-[#eef2f6] border-[#1cb0f6] text-[#1cb0f6]";
-                              numberStyle = "bg-[#1cb0f6] border-[#1cb0f6] text-white";
-                            }
-                            
-                            return (
-                              <button 
-                                key={idx}
-                                onClick={() => selectOption(idx)}
-                                disabled={hasChecked}
-                                className={`w-full text-right p-3.5 rounded-2xl border-2 transition-all text-sm font-bold flex items-center justify-between gap-3 group relative cursor-pointer font-sans ${btnStyle}`}
-                              >
-                                <span className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center text-[10px] font-black transition-all ${numberStyle}`}>{idx + 1}</span>
-                                <span className="flex-1 text-slate-700 font-bold">{option}</span>
-                                {hasChecked && isCorrectAnswer && (
-                                  <span className="text-[#58cc02] font-black text-sm">✓</span>
-                                )}
-                                {hasChecked && isSelected && !isCorrectAnswer && (
-                                  <span className="text-red-500 font-black text-sm">✗</span>
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        {/* Result Feedback Banner */}
-                        {hasChecked && (
-                          <motion.div 
-                            initial={{ opacity: 0, y: 10 }} 
-                            animate={{ opacity: 1, y: 0 }}
-                            className={`p-4 rounded-2xl border ${
-                              selectedOptionIdx === quizQuestions[userAnswers.length].correctIndex 
-                                ? "bg-green-50 border-green-200 text-green-800"
-                                : "bg-red-50 border-red-200 text-red-800"
-                            }`}
-                          >
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-lg">
-                                {selectedOptionIdx === quizQuestions[userAnswers.length].correctIndex ? "🎉" : "❌"}
-                              </span>
-                              <span className="font-black text-xs uppercase tracking-wide">
-                                {selectedOptionIdx === quizQuestions[userAnswers.length].correctIndex 
-                                  ? (isRtl ? "إجابة ممتازة وصحيحة!" : "Excellent Answer!") 
-                                  : (isRtl ? "إجابة غير صحيحة" : "Incorrect Answer")}
-                              </span>
-                            </div>
-                            
-                            {selectedOptionIdx !== quizQuestions[userAnswers.length].correctIndex && (
-                              <p className="text-xs font-bold mb-1.5 opacity-90 text-right">
-                                {isRtl 
-                                  ? `الإجابة الصحيحة هي: ${quizQuestions[userAnswers.length].options[quizQuestions[userAnswers.length].correctIndex]}` 
-                                  : `Correct answer is: ${quizQuestions[userAnswers.length].options[quizQuestions[userAnswers.length].correctIndex]}`
-                                }
-                              </p>
-                            )}
-                            
-                            {quizQuestions[userAnswers.length].explanation && (
-                              <p className="text-xs opacity-90 leading-relaxed font-bold text-right">
-                                <span className="font-extrabold">{isRtl ? "التفسير: " : "Explanation: "}</span>
-                                {quizQuestions[userAnswers.length].explanation}
-                              </p>
-                            )}
-                          </motion.div>
-                        )}
-
-                        {/* Action Button: Check / Continue */}
-                        <div className="pt-2">
-                          {!hasChecked ? (
-                            <button
-                              onClick={checkAnswer}
-                              disabled={selectedOptionIdx === null}
-                              className={`w-full py-3.5 px-6 rounded-2xl text-xs uppercase tracking-wider font-extrabold transition-all border-b-4 ${
-                                selectedOptionIdx === null
-                                  ? "bg-slate-100 border-slate-350 text-slate-400 cursor-not-allowed"
-                                  : "duo-btn-violet text-white active:scale-98 cursor-pointer"
-                              }`}
-                            >
-                              {isRtl ? "تحقق من الإجابة" : "Check Answer"}
-                            </button>
-                          ) : (
-                            <button
-                              onClick={continueQuiz}
-                              className="w-full py-3.5 px-6 rounded-2xl text-xs uppercase tracking-wider font-extrabold text-white transition-all bg-[#58cc02] border-b-4 border-[#439b02] hover:bg-[#61df02] active:scale-98 cursor-pointer"
-                            >
-                              {isRtl ? "استمرار" : "Continue"}
-                            </button>
-                          )}
-                        </div>
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
-                )}
+          <div className="bg-white rounded-[2rem] p-6 border-2 border-b-4 border-slate-200 relative">
+            <div className="flex flex-wrap items-center gap-2.5 mb-4">
+              <span className="bg-[#1cb0f6] text-white px-3 py-1 rounded-full text-[10px] font-black">{selectedVideo.level}</span>
+              <span className="bg-[#58cc02] text-white px-3 py-1 rounded-full text-[10px] font-black flex items-center gap-1">
+                {isDirect ? (isRtl ? 'تحميل فيديو مباشر 📁' : 'Direct Video HD 📁') : 'YouTube HD'}
+              </span>
+              {selectedVideo.fileSize && (
+                <span className="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-[10px] font-black">{selectedVideo.fileSize}</span>
+              )}
+            </div>
+            <h2 className="text-xl md:text-2xl font-black text-slate-800 mb-2 leading-tight">
+              {isRtl ? selectedVideo.titleAr : selectedVideo.titleEn}
+            </h2>
+            {isDirect && selectedVideo.directUrl === 'local-placeholder' && !videoFileUrl && (
+              <div className="p-4 bg-orange-50 border-2 border-orange-200 text-orange-700 rounded-2xl text-xs font-bold flex items-center gap-3 mt-4">
+                <AlertTriangle size={18} className="shrink-0" />
+                <span>
+                  {isRtl 
+                    ? 'هذا الفيديو يحمل كمادة مباشرة عالية الدقة. يمكنك أيضاً اختيار ملفك المحلي الآن لتشغيله بأقصى سرعة!' 
+                    : 'This is a premium high-definition direct file. Select your local video file to stream with maximum speed!'}
+                </span>
               </div>
             )}
+            <p className="text-slate-500 text-xs md:text-sm leading-relaxed font-bold mt-4">
+              {isRtl 
+                ? 'شاهد الفيديو واستمتع بالتعلم وتطوير مهارات الإستماع والتحدث بطلاقة وثقة.' 
+                : 'Watch the video and enjoy learning to develop premium listening, pronunciation, and speaking skills.'}
+            </p>
           </div>
         </div>
       </div>
