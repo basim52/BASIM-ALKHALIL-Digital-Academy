@@ -1987,23 +1987,89 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
       if (!initAI() || !aiLive) {
         logToFile("[Info] Using Simulated Video Quiz fallback due to missing api key in environment");
         const title = videoTitle || "Educational Video";
+        const isAr = lang === 'Arabic' || lang === 'ar' || lang === 'Ar';
         return res.json([
           {
-            question: `What was the primary educational objective in "${title}"?`,
-            questionAr: `ما هو الهدف التعليمي الرئيسي في مقطع "${title}"؟`,
-            options: ["Passive listening", "Active communication practice", "Translating words sequentially", "Ignoring context cues"],
-            optionsAr: ["الاستماع غير الفعال", "الممارسة اللغوية والتواصل النشط", "ترجمة الكلمات بشكل متعاقب", "تجاهل دلالات السياق"],
-            correctIndex: 1,
-            explanation: "Active communication forms the functional baseline of our system framework.",
-            explanationAr: "التدريب اللغوي النشط يبني الأساس المتين للمهارة المكتسبة."
+            question: isAr 
+              ? `What is the primary language objective represented in "${title}"? / ما هو الهدف اللغوي الأساسي الموضح في مقطع "${title}"؟`
+              : `What is the primary language objective represented in "${title}"?`,
+            options: isAr
+              ? [
+                  "Active language development & practice (الممارسة اللغوية والتطوير النشط)",
+                  "Passive hearing without learning (الاستماع السلبي دون تعلم)",
+                  "Direct word translation only (الترجمة الحرفية فقط)",
+                  "Ignoring cultural situational cues (تجاهل سياق الحديث الاجتماعي)"
+                ]
+              : [
+                  "Active language development & practice",
+                  "Passive hearing without learning",
+                  "Direct word translation only",
+                  "Ignoring cultural situational cues"
+                ],
+            correctIndex: 0,
+            explanation: isAr
+              ? `الاستماع والممارسة النشطة تبني المهارات الأساسية المطلوبة لإتقان الحديث بطلاقة وثقة.`
+              : "Active communication and contextual understanding form the solid baseline of high-efficiency language learning."
           }
         ]);
       }
 
-      const promptText = `Generate 3 multiple choice questions for: "${videoTitle}". Level: ${level}. JSON array format. Language: ${lang}`;
+      const promptText = `
+        You are an elite English Language Teaching (ELT) specialist.
+        Generate exactly 3 educational multiple choice questions (MCQs) for watching the English video: "${videoTitle}".
+        
+        Target Learner Level: ${level} (Make vocabulary complexity, sentence length, and grammatical patterns match this CEFR level perfectly).
+        Linguistic / Interface Language Context: ${lang}
+
+        Guidelines:
+        1. Contextual Relevance: Align questions perfectly with "${videoTitle}". For example:
+           - "Basic English Conversation": Focus on high-frequency greetings, replies, social courtesies.
+           - "How to introduce yourself": Focus on personal introduction terms, sharing names, passions, and job structures.
+           - "At the Restaurant": Focus on ordering food, courtesy words ("please", "may I"), talking to servers, paying.
+           - "Advanced Business English": Focus on formal expressions, corporate negotiations, idioms, or slide reviews.
+           - Others: Focus on listening scenarios, vocabulary meaning, or grammatical nuances related to the title.
+
+        2. Bilingual Support (CRITICAL):
+           - If the Language is 'Arabic', write the 'question' in a bilingual layout (e.g., "What does 'May I order?' suggest? / ماذا يفيد السؤال 'May I order؟'؟").
+           - Make the 'options' also clear and bilingual if it helps a beginner, or write them in clear English of level ${level} with Arabic translation in parentheses.
+           - Write the 'explanation' entirely in beautiful, clear Arabic so the student gains deep understanding of why the answer is correct.
+           - If the Language is 'English', write everything fully in English.
+
+        3. Ensure there is strictly 1 single correct answer, and correctIndex is from 0 to 3.
+      `;
+
       const result = await callAiWithRetry({
         contents: [{ role: 'user', parts: [{ text: promptText }] }],
-        config: { responseMimeType: "application/json" }
+        config: { 
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.ARRAY,
+            description: "Exactly 3 premium language questions.",
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                question: {
+                  type: Type.STRING,
+                  description: "Bilingual (English + Arabic) if Language is Arabic, otherwise pure English.",
+                },
+                options: {
+                  type: Type.ARRAY,
+                  items: { type: Type.STRING },
+                  description: "Exactly 4 options. Tailored to CEFR level.",
+                },
+                correctIndex: {
+                  type: Type.INTEGER,
+                  description: "Index of the correct option (0 to 3).",
+                },
+                explanation: {
+                  type: Type.STRING,
+                  description: "Brief pedagogical explanation. Written in Arabic if Language is Arabic.",
+                }
+              },
+              required: ["question", "options", "correctIndex", "explanation"]
+            }
+          }
+        }
       });
       
       const text = result.text || "";

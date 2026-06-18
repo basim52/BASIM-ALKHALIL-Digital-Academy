@@ -63,7 +63,7 @@ const DEFAULT_VIDEOS: VideoLesson[] = [
     titleAr: 'محادثات إنجليزية أساسية',
     level: 'A1',
     duration: '5:24',
-    thumbnail: 'https://img.youtube.com/vi/j7u280G6W3E/maxresdefault.jpg'
+    thumbnail: 'https://img.youtube.com/vi/j7u280G6W3E/hqdefault.jpg'
   },
   {
     id: 'default-2',
@@ -72,7 +72,7 @@ const DEFAULT_VIDEOS: VideoLesson[] = [
     titleAr: 'كيف تعرف عن نفسك',
     level: 'A1',
     duration: '3:45',
-    thumbnail: 'https://img.youtube.com/vi/L9A8fDQ_H_E/maxresdefault.jpg'
+    thumbnail: 'https://img.youtube.com/vi/L9A8fDQ_H_E/hqdefault.jpg'
   },
   {
     id: 'default-3',
@@ -81,7 +81,7 @@ const DEFAULT_VIDEOS: VideoLesson[] = [
     titleAr: 'في المطعم - محادثة',
     level: 'A2',
     duration: '6:12',
-    thumbnail: 'https://img.youtube.com/vi/6_pCAtZ5ZMI/maxresdefault.jpg'
+    thumbnail: 'https://img.youtube.com/vi/6_pCAtZ5ZMI/hqdefault.jpg'
   },
   {
     id: 'default-4',
@@ -90,7 +90,7 @@ const DEFAULT_VIDEOS: VideoLesson[] = [
     titleAr: 'إنجليزية الأعمال المتقدمة',
     level: 'B2',
     duration: '12:30',
-    thumbnail: 'https://img.youtube.com/vi/h2O3vHhREfA/maxresdefault.jpg'
+    thumbnail: 'https://img.youtube.com/vi/h2O3vHhREfA/hqdefault.jpg'
   }
 ];
 
@@ -144,6 +144,10 @@ export const VideoLibrary = ({
   const [quizStarted, setQuizStarted] = useState(false);
   const [userAnswers, setUserAnswers] = useState<number[]>([]);
   const [quizFinished, setQuizFinished] = useState(false);
+  
+  // New beautiful quiz workflow states
+  const [selectedOptionIdx, setSelectedOptionIdx] = useState<number | null>(null);
+  const [hasChecked, setHasChecked] = useState<boolean>(false);
 
   // Admin and Toggle State
   const isAdminUser = profile?.role === 'admin' || profile?.email === 'basim5252@gmail.com' || MASTER_ADMINS.includes(profile?.email || '');
@@ -244,9 +248,22 @@ export const VideoLibrary = ({
     }
   };
 
-  const handleAnswer = (index: number) => {
-    const newAnswers = [...userAnswers, index];
+  const selectOption = (idx: number) => {
+    if (hasChecked) return;
+    setSelectedOptionIdx(idx);
+  };
+
+  const checkAnswer = () => {
+    if (selectedOptionIdx === null) return;
+    setHasChecked(true);
+  };
+
+  const continueQuiz = () => {
+    if (selectedOptionIdx === null) return;
+    const newAnswers = [...userAnswers, selectedOptionIdx];
     setUserAnswers(newAnswers);
+    setSelectedOptionIdx(null);
+    setHasChecked(false);
     if (newAnswers.length === quizQuestions.length) {
       setQuizFinished(true);
     }
@@ -495,6 +512,8 @@ export const VideoLibrary = ({
                         setQuizQuestions([]);
                         setUserAnswers([]);
                         setQuizFinished(false);
+                        setSelectedOptionIdx(null);
+                        setHasChecked(false);
                       }}
                       className="w-full mt-6 duo-btn-white py-3.5 px-5 text-xs text-slate-500 uppercase"
                     >
@@ -514,20 +533,120 @@ export const VideoLibrary = ({
                         initial={{ x: 20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         exit={{ x: -20, opacity: 0 }}
-                        className="space-y-6"
+                        className="space-y-5"
                       >
-                        <p className="font-extrabold text-sm text-slate-700 leading-relaxed min-h-[48px]">{quizQuestions[userAnswers.length].question}</p>
+                        {/* Question content */}
+                        <p className="font-extrabold text-sm text-slate-700 leading-relaxed min-h-[48px]">
+                          {quizQuestions[userAnswers.length].question}
+                        </p>
+                        
+                        {/* Options container */}
                         <div className="space-y-3">
-                          {quizQuestions[userAnswers.length].options.map((option: string, idx: number) => (
-                            <button 
-                              key={idx}
-                              onClick={() => handleAnswer(idx)}
-                              className="w-full text-right p-3.5 rounded-2xl bg-[#F7F7F7] hover:bg-slate-100/50 active:bg-slate-100 border-2 border-slate-200/60 hover:border-slate-350 transition-all text-sm font-bold text-slate-600 flex items-center justify-between gap-3 group relative cursor-pointer font-sans"
+                          {quizQuestions[userAnswers.length].options.map((option: string, idx: number) => {
+                            const isSelected = selectedOptionIdx === idx;
+                            const isCorrectAnswer = idx === quizQuestions[userAnswers.length].correctIndex;
+                            
+                            let btnStyle = "bg-[#F7F7F7] border-slate-200/60 text-slate-600 hover:border-slate-350";
+                            let numberStyle = "bg-white border-slate-200 text-slate-500 group-hover:border-[#58cc02] group-hover:text-[#58cc02]";
+                            
+                            if (hasChecked) {
+                              if (isCorrectAnswer) {
+                                btnStyle = "bg-[#e2f0d9]/60 border-[#58cc02] text-[#439b02]";
+                                numberStyle = "bg-[#58cc02] border-[#58cc02] text-white";
+                              } else if (isSelected) {
+                                btnStyle = "bg-red-50 border-red-400 text-red-600";
+                                numberStyle = "bg-red-500 border-red-500 text-white";
+                              } else {
+                                btnStyle = "bg-slate-50 border-slate-100 text-slate-400 opacity-60";
+                                numberStyle = "bg-slate-100 border-slate-200 text-slate-300";
+                              }
+                            } else if (isSelected) {
+                              btnStyle = "bg-[#eef2f6] border-[#1cb0f6] text-[#1cb0f6]";
+                              numberStyle = "bg-[#1cb0f6] border-[#1cb0f6] text-white";
+                            }
+                            
+                            return (
+                              <button 
+                                key={idx}
+                                onClick={() => selectOption(idx)}
+                                disabled={hasChecked}
+                                className={`w-full text-right p-3.5 rounded-2xl border-2 transition-all text-sm font-bold flex items-center justify-between gap-3 group relative cursor-pointer font-sans ${btnStyle}`}
+                              >
+                                <span className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center text-[10px] font-black transition-all ${numberStyle}`}>{idx + 1}</span>
+                                <span className="flex-1 text-slate-700 font-bold">{option}</span>
+                                {hasChecked && isCorrectAnswer && (
+                                  <span className="text-[#58cc02] font-black text-sm">✓</span>
+                                )}
+                                {hasChecked && isSelected && !isCorrectAnswer && (
+                                  <span className="text-red-500 font-black text-sm">✗</span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Result Feedback Banner */}
+                        {hasChecked && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 10 }} 
+                            animate={{ opacity: 1, y: 0 }}
+                            className={`p-4 rounded-2xl border ${
+                              selectedOptionIdx === quizQuestions[userAnswers.length].correctIndex 
+                                ? "bg-green-50 border-green-200 text-green-800"
+                                : "bg-red-50 border-red-200 text-red-800"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-lg">
+                                {selectedOptionIdx === quizQuestions[userAnswers.length].correctIndex ? "🎉" : "❌"}
+                              </span>
+                              <span className="font-black text-xs uppercase tracking-wide">
+                                {selectedOptionIdx === quizQuestions[userAnswers.length].correctIndex 
+                                  ? (isRtl ? "إجابة ممتازة وصحيحة!" : "Excellent Answer!") 
+                                  : (isRtl ? "إجابة غير صحيحة" : "Incorrect Answer")}
+                              </span>
+                            </div>
+                            
+                            {selectedOptionIdx !== quizQuestions[userAnswers.length].correctIndex && (
+                              <p className="text-xs font-bold mb-1.5 opacity-90 text-right">
+                                {isRtl 
+                                  ? `الإجابة الصحيحة هي: ${quizQuestions[userAnswers.length].options[quizQuestions[userAnswers.length].correctIndex]}` 
+                                  : `Correct answer is: ${quizQuestions[userAnswers.length].options[quizQuestions[userAnswers.length].correctIndex]}`
+                                }
+                              </p>
+                            )}
+                            
+                            {quizQuestions[userAnswers.length].explanation && (
+                              <p className="text-xs opacity-90 leading-relaxed font-bold text-right">
+                                <span className="font-extrabold">{isRtl ? "التفسير: " : "Explanation: "}</span>
+                                {quizQuestions[userAnswers.length].explanation}
+                              </p>
+                            )}
+                          </motion.div>
+                        )}
+
+                        {/* Action Button: Check / Continue */}
+                        <div className="pt-2">
+                          {!hasChecked ? (
+                            <button
+                              onClick={checkAnswer}
+                              disabled={selectedOptionIdx === null}
+                              className={`w-full py-3.5 px-6 rounded-2xl text-xs uppercase tracking-wider font-extrabold transition-all border-b-4 ${
+                                selectedOptionIdx === null
+                                  ? "bg-slate-100 border-slate-350 text-slate-400 cursor-not-allowed"
+                                  : "duo-btn-violet text-white active:scale-98 cursor-pointer"
+                              }`}
                             >
-                              <span className="w-7 h-7 rounded-lg bg-white border-2 border-slate-200 flex items-center justify-center text-[10px] font-black group-hover:border-[#58cc02] group-hover:text-[#58cc02] transition-all">{idx + 1}</span>
-                              <span className="flex-1 text-slate-700 font-bold">{option}</span>
+                              {isRtl ? "تحقق من الإجابة" : "Check Answer"}
                             </button>
-                          ))}
+                          ) : (
+                            <button
+                              onClick={continueQuiz}
+                              className="w-full py-3.5 px-6 rounded-2xl text-xs uppercase tracking-wider font-extrabold text-white transition-all bg-[#58cc02] border-b-4 border-[#439b02] hover:bg-[#61df02] active:scale-98 cursor-pointer"
+                            >
+                              {isRtl ? "استمرار" : "Continue"}
+                            </button>
+                          )}
                         </div>
                       </motion.div>
                     </AnimatePresence>
