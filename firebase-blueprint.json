@@ -81,9 +81,29 @@
         "planItems": { "type": "array" }
       },
       "required": ["id", "userId", "planItems"]
+    },
+    "Video": {
+      "title": "Video Lesson",
+      "description": "A video lesson mapped from YouTube with language levels and custom quiz options",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "youtubeId": { "type": "string" },
+        "titleEn": { "type": "string" },
+        "titleAr": { "type": "string" },
+        "level": { "type": "string" },
+        "duration": { "type": "string" },
+        "thumbnail": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["youtubeId", "titleEn", "titleAr", "level", "duration"]
     }
   },
   "firestore": {
+    "/videos/{videoId}": {
+      "schema": "Video",
+      "description": "Dynamic Interactive Video Lessons"
+    },
     "/users/{userId}": {
       "schema": "User",
       "description": "Main user collection"

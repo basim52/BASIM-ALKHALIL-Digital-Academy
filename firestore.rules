@@ -66,6 +66,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Interactive Video Lessons
+    match /videos/{videoId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Users & Students
     match /users/{userId} {
       allow read: if isSignedIn();
