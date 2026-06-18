@@ -75,7 +75,9 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
   const [activeGameId, setActiveGameId] = useState<string | null>(null);
   const [sessionXP, setSessionXP] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<'all' | 'adventure' | 'speed' | 'etiquette' | 'grammar'>('all');
+  const [activeCategory, setActiveCategory] = useState<'all' | 'adventure' | 'speed' | 'etiquette' | 'grammar' | 'plan'>('all');
+  const [planTab, setPlanTab] = useState<'roadmap' | 'daily' | 'skills' | 'certificates'>('roadmap');
+  const [selectedCertificateId, setSelectedCertificateId] = useState<string | null>(null);
 
   // Unified voice speech helper
   const speakFeedback = (text: string, forceLang?: 'en' | 'ar') => {
@@ -191,6 +193,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
   // List of Categories
   const categories = [
     { id: 'all' as const, labelAr: '🎯 كل الألعاب العشرين', labelEn: 'All 20 Games' },
+    { id: 'plan' as const, labelAr: '📈 الخطة التطويرية للألعاب', labelEn: 'Professional Growth Plan' },
     { id: 'adventure' as const, labelAr: '🗺️ خرائط ومغامرات', labelEn: 'Adventure' },
     { id: 'speed' as const, labelAr: '⚡ إملاء وسرعة', labelEn: 'Speed & Action' },
     { id: 'etiquette' as const, labelAr: '👑 أدب وذوقيات راقية', labelEn: 'Etiquette & Manners' },
@@ -691,6 +694,609 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
   };
 
 
+  // ---------------------------------------------------------------------------------------
+  // PROFESSIONAL ACADEMY DEVELOPMENT PLAN & ROADMAP FOR STUDENTS
+  // ---------------------------------------------------------------------------------------
+  const renderDevelopmentPlan = () => {
+    const totalXP = sessionXP + (userProfile?.points || 0);
+    const candidateName = userProfile?.displayName || (isRtl ? 'بطل الأكاديمية اللامع' : 'Distinguished Academy Scholar');
+
+    return (
+      <div className="space-y-8">
+        {/* Elite Banner */}
+        <div className="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 rounded-3xl p-6 md:p-8 border border-[#6C5CE7]/30 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-[#6C5CE7]/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-36 h-36 bg-[#00CEC9]/5 rounded-full blur-2xl pointer-events-none" />
+          
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-6 relative z-10">
+            <div className="space-y-3 text-center lg:text-left">
+              <span className="px-3 py-1 bg-[#6C5CE7]/20 text-[#a29bfe] border border-[#6C5CE7]/40 rounded-full text-[11px] font-black uppercase tracking-wider font-mono">
+                {isRtl ? 'الدليل الاستراتيجي لتطور الطفل' : 'SYSTÈMATIC GROWTH ARCHITECTURE'}
+              </span>
+              <h2 className="text-xl md:text-3xl font-black text-[#FDCB6E] tracking-tight">
+                {isRtl ? 'الخطة التطويرية الاحترافية لألعاب الأكاديمية 📈✨' : 'Elite Game Development & Learning Plan 📈✨'}
+              </h2>
+              <p className="text-xs text-slate-300 font-medium leading-relaxed max-w-3xl">
+                {isRtl 
+                  ? 'بصفتك طالباً متميزاً في الأكاديمية الدولية، صممنا لك مصفوفة تدريبية مبنية على معايير تربوية عالمية لربط الميكرو-ألعاب بمستويات الإطار الأوروبي المشترك (CEFR)، وتتبع المهارات اللفظية والذوق الاجتماعي الرفيع خطوة بخطوة.'
+                  : 'As an elite student at the Academy, we constructed this systematic educational planner. It matches all 20 mini-games to international standards (CEFR) and tracks children behavioral etiquette and vocabulary speed, level by level.'}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-4 bg-slate-950/70 p-4 rounded-2xl border border-slate-800">
+              <div className="w-14 h-14 bg-gradient-to-br from-[#FDCB6E] to-amber-500 rounded-xl flex items-center justify-center text-2xl shadow-lg">
+                🏆
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-widest">{isRtl ? 'مجموع نقاط التأهيل' : 'AGGREGATE XP CREDIT'}</span>
+                <span className="text-lg font-black text-white font-mono">{totalXP} XP</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Plan Navigation Sub-Tabs */}
+        <div className="flex flex-wrap gap-2.5 border-b border-slate-800 pb-4">
+          {[
+            { id: 'roadmap' as const, labelAr: '🎯 خارطة طريق المسارات الأكاديمية', labelEn: 'Curriculum Roadmap' },
+            { id: 'daily' as const, labelAr: '📅 الجدول التدريبي اليومي', labelEn: 'Daily Routine' },
+            { id: 'skills' as const, labelAr: '📊 مصفوفة جدارة المهارات', labelEn: 'Skill Competencies' },
+            { id: 'certificates' as const, labelAr: '👑 شهادات ودبلوما التميز', labelEn: 'Honorary Diplomas' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setPlanTab(tab.id);
+                speakFeedback(isRtl ? `فتح ${tab.labelAr}` : `Opening ${tab.labelEn}`);
+              }}
+              className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 border ${
+                planTab === tab.id
+                  ? 'bg-gradient-to-r from-[#6C5CE7] to-[#5142be] text-white border-[#6C5CE7]/60 shadow-lg'
+                  : 'bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border-slate-800/80'
+              }`}
+            >
+              <span>{isRtl ? tab.labelAr : tab.labelEn}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Tab Contents */}
+        <AnimatePresence mode="wait">
+          {planTab === 'roadmap' && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
+            >
+              {/* The Three Educational Tracks */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                {/* TRACK 1 */}
+                <div className="bg-[#1e2324] rounded-2xl p-5 border border-indigo-500/20 shadow-md relative overflow-hidden flex flex-col justify-between">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="px-2.5 py-0.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full text-[10px] font-black uppercase tracking-wider font-mono">
+                        {isRtl ? 'المستوى 1: التأسيس والتهجئة السريعة' : 'Level 1: Phonics & Spelling'}
+                      </span>
+                      <span className="text-xs font-bold text-slate-400">CEFR: A1 - A2</span>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-black text-white mt-1">
+                        {isRtl ? 'مسار اللفظ السليم والسرعة الإملائية ⚡' : 'Spelling & Acoustics Track ⚡'}
+                      </h4>
+                      <p className="text-[11px] text-slate-400 leading-relaxed mt-2">
+                        {isRtl 
+                          ? 'يهتم هذا المسار بتمكين الطفل من حفظ مخارج الحروف الإنجليزية المانحة للثقة، وكشف التهجئة السريعة عبر ربط الحواس بالتكامل الصوتي والمحاكاة الذكية.'
+                          : 'This track solidifies foundational spelling speed, vocabulary letter recognition, and proper pronunciation detection by utilizing fast reactions and auditory cues.'}
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-slate-950/40 rounded-xl space-y-2">
+                      <span className="text-[9px] uppercase font-black text-[#00CEC9] block font-mono tracking-widest">{isRtl ? 'الألعاب المخصصة لهذا المسار' : 'CORE CURRICULUM GAMES'}</span>
+                      <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-350 font-bold">
+                        <div>⚔️ {isRtl ? 'معركة الكلمات (2)' : 'Word Battle (#2)'}</div>
+                        <div>⚔️ {isRtl ? 'بطل الإملاء (6)' : 'Spelling Hero (#6)'}</div>
+                        <div>⚔️ {isRtl ? 'محقق النطق (9)' : 'Acoustic Detective (#9)'}</div>
+                        <div>⚔️ {isRtl ? 'الكهف المظلم (19)' : 'The Dark Cave (#19)'}</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px] font-black text-slate-400 font-mono">
+                        <span>{isRtl ? 'الإنجاز الأكاديمي' : 'SYLLABUS PROGRESS'}</span>
+                        <span className="text-indigo-400">80%</span>
+                      </div>
+                      <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-indigo-500 h-full rounded-full" style={{ width: '80%' }} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      selectGame('game_006');
+                      speakFeedback("Launching Spelling Hero!");
+                    }}
+                    className="w-full mt-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1"
+                  >
+                    <Play className="w-3.5 h-3.5" />
+                    {isRtl ? 'البدء بتحدي الإملاء السريع' : 'Launch Speed Challenge'}
+                  </button>
+                </div>
+
+                {/* TRACK 2 */}
+                <div className="bg-[#1e2324] rounded-2xl p-5 border border-emerald-500/20 shadow-md relative overflow-hidden flex flex-col justify-between">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full text-[10px] font-black uppercase tracking-wider font-mono">
+                        {isRtl ? 'المستوى 2: النحو والمنطق اللغوي' : 'Level 2: Syntactic Grammar'}
+                      </span>
+                      <span className="text-xs font-bold text-slate-400">CEFR: A2 - B1</span>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-black text-white mt-1">
+                        {isRtl ? 'مسار تركيب وصياغة العبارات 🧪' : 'Sentence Architecture Track 🧪'}
+                      </h4>
+                      <p className="text-[11px] text-slate-400 leading-relaxed mt-2">
+                        {isRtl 
+                          ? 'يقود الطفل من مرحلة الكلمة المفردة إلى إتقان بناء الجمل الطويلة والقصيرة، فهم أحكام الفاعل والفعل والمفعول بطريقة طهي واختيار منطقي شيق.'
+                          : 'Transitions students from isolation of words to composing grammatically precise, flowing English sentences, masterfully explaining the parts of speech.'}
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-slate-950/40 rounded-xl space-y-2">
+                      <span className="text-[9px] uppercase font-black text-[#FDCB6E] block font-mono tracking-widest">{isRtl ? 'الألعاب المخصصة لهذا المسار' : 'CORE CURRICULUM GAMES'}</span>
+                      <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-350 font-bold">
+                        <div>⚔️ {isRtl ? 'كنز المعرفة (1)' : 'Treasure Hunt (#1)'}</div>
+                        <div>⚔️ {isRtl ? 'سلالم القواعد (3)' : 'Snakes & Ladders (#3)'}</div>
+                        <div>⚔️ {isRtl ? 'بستان المطر (7)' : 'Grammar Garden (#7)'}</div>
+                        <div>⚔️ {isRtl ? 'طباخ العبارات (18)' : 'Phrase Chef (#18)'}</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px] font-black text-slate-400 font-mono">
+                        <span>{isRtl ? 'الإنجاز الأكاديمي' : 'SYLLABUS PROGRESS'}</span>
+                        <span className="text-emerald-400">65%</span>
+                      </div>
+                      <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-emerald-500 h-full rounded-full" style={{ width: '65%' }} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      selectGame('game_018');
+                      speakFeedback("Launching Phrase Chef!");
+                    }}
+                    className="w-full mt-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1"
+                  >
+                    <Play className="w-3.5 h-3.5" />
+                    {isRtl ? 'اطبخ طبقاً نحوياً الآن' : 'Start Grammar Stove'}
+                  </button>
+                </div>
+
+                {/* TRACK 3 */}
+                <div className="bg-[#1e2324] rounded-2xl p-5 border border-purple-500/20 shadow-md relative overflow-hidden flex flex-col justify-between">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="px-2.5 py-0.5 bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-full text-[10px] font-black uppercase tracking-wider font-mono">
+                        {isRtl ? 'المستوى 3: بروتوكول والآداب الراقية' : 'Level 3: Protocol & Etiquette'}
+                      </span>
+                      <span className="text-xs font-bold text-slate-400">CEFR: B1 - B2</span>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-black text-white mt-1">
+                        {isRtl ? 'مسار سفير الأدب والذوق العالمي 👑' : 'Global Courtesy & Etiquette Track 👑'}
+                      </h4>
+                      <p className="text-[11px] text-slate-400 leading-relaxed mt-2">
+                        {isRtl 
+                          ? 'أهم ميزة حصرية بالبرنامج؛ غرس عادات وأخلاقيات السلوك السليم والمحادثات الطيبة والاعتذار وبناء الروابط الأخلاقية واكتشاف التقاليد الدولية بلباقة مكثفة.'
+                          : 'Our flagship training path. Infuses high-etiquette table manners, greeting conventions, and polite social behaviors, aligning linguistic progress with emotional intelligence.'}
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-slate-950/40 rounded-xl space-y-2">
+                      <span className="text-[9px] uppercase font-black text-indigo-400 block font-mono tracking-widest">{isRtl ? 'الألعاب المخصصة لهذا المسار' : 'CORE CURRICULUM GAMES'}</span>
+                      <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-350 font-bold">
+                        <div>⚔️ {isRtl ? 'سفير الحوار (5)' : 'Dialogue Ambassador (#5)'}</div>
+                        <div>⚔️ {isRtl ? 'مملكة الأدب (11)' : 'Etiquette Palace (#11)'}</div>
+                        <div>⚔️ {isRtl ? 'بستان المشاعر (17)' : 'Empathy Garden (#17)'}</div>
+                        <div>⚔️ {isRtl ? 'مهرجان الثقافات (20)' : 'Culture Festival (#20)'}</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px] font-black text-slate-400 font-mono">
+                        <span>{isRtl ? 'الإنجاز الأكاديمي' : 'SYLLABUS PROGRESS'}</span>
+                        <span className="text-purple-400">90%</span>
+                      </div>
+                      <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-purple-500 h-full rounded-full" style={{ width: '90%' }} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      selectGame('game_020');
+                      speakFeedback("Launching Festival of Cultures!");
+                    }}
+                    className="w-full mt-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1"
+                  >
+                    <Play className="w-3.5 h-3.5" />
+                    {isRtl ? 'ممارسة آداب السفر العالمية' : 'Practice World Etiquette'}
+                  </button>
+                </div>
+
+              </div>
+            </motion.div>
+          )}
+
+          {planTab === 'daily' && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6 max-w-3xl mx-auto"
+            >
+              <div className="bg-[#1e2324] rounded-2xl p-6 border border-slate-800 space-y-4">
+                <div className="flex items-center gap-2 text-amber-400 font-black">
+                  <Clock className="w-5 h-5" />
+                  <h3>{isRtl ? 'البرنامج التدريبي المقترح لهذا اليوم 📅' : 'Daily Personalized Routine Plan'}</h3>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  {isRtl 
+                    ? 'لتحقيق الجدوى القصوى وتجنب الإجهاد اللفظي، تقترح الأكاديمية لعب 3 ميكرو-ألعاب يومياً (إحماء صوتي، تحدي قواعد، وممارسة ذوقيات) لجمع 100 XP يومياً.'
+                    : 'To secure prime development without stress, we advise playing exactly three modules daily. Complete these steps now to maximize retention and credit 100 XP.'}
+                </p>
+
+                {/* Vertical Timeline */}
+                <div className="space-y-4 mt-4">
+                  
+                  {/* Step 1 */}
+                  <div className="flex gap-4 p-4.5 bg-slate-950/40 rounded-xl border border-slate-800 hover:border-[#6C5CE7]/30 transition-all">
+                    <span className="text-2xl mt-1">🌅</span>
+                    <div className="flex-1 space-y-1">
+                      <span className="text-[10px] font-mono text-cyan-400 font-extrabold uppercase tracking-wider block">
+                        {isRtl ? 'المهمة 1: الإحماء الصباحي اللفظي' : 'STEP 1: MORNING LANGUAGE WARM-UP'}
+                      </span>
+                      <h4 className="text-xs font-extrabold text-white">{isRtl ? 'محقق النطق والتدقيق السمعي' : 'Pronunciation Detective (Acoustic Training)'}</h4>
+                      <p className="text-[10px] text-slate-400">{isRtl ? 'سماع الفروقات الصوتية الدقيقة بين الكلمات الإنجليزية الصعبة.' : 'Discern and sort subtle vowel phonetic contrasts.'}</p>
+                    </div>
+                    <button
+                      onClick={() => selectGame('game_009')}
+                      className="px-3 py-1 bg-[#6C5CE7] hover:bg-[#5142be] text-white text-[10px] font-bold rounded-lg cursor-pointer my-auto"
+                    >
+                      {isRtl ? 'ابدأ' : 'Play'}
+                    </button>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div className="flex gap-4 p-4.5 bg-slate-950/40 rounded-xl border border-slate-800 hover:border-[#6C5CE7]/30 transition-all">
+                    <span className="text-2xl mt-1">🧪</span>
+                    <div className="flex-1 space-y-1">
+                      <span className="text-[10px] font-mono text-amber-400 font-extrabold uppercase tracking-wider block">
+                        {isRtl ? 'المهمة 2: بناء القواعد والمنطق' : 'STEP 2: MIDDAY THEORETICAL SYNTAX'}
+                      </span>
+                      <h4 className="text-xs font-extrabold text-white">{isRtl ? 'طباخ العبارات وصياغة الطعام النحوي' : 'Phrase Chef (Assemble Subject-Verb-Object)'}</h4>
+                      <p className="text-[10px] text-slate-400">{isRtl ? 'طهي المكونات اللغوية المختلفة لتقديم إملاء وقواعد مثالية.' : 'Compose perfect sentences under correct grammatical recipes.'}</p>
+                    </div>
+                    <button
+                      onClick={() => selectGame('game_018')}
+                      className="px-3 py-1 bg-teal-500 text-slate-950 text-[10px] font-bold rounded-lg cursor-pointer my-auto"
+                    >
+                      {isRtl ? 'ابدأ' : 'Play'}
+                    </button>
+                  </div>
+
+                  {/* Step 3 */}
+                  <div className="flex gap-4 p-4.5 bg-slate-950/40 rounded-xl border border-slate-800 hover:border-[#6C5CE7]/30 transition-all">
+                    <span className="text-2xl mt-1">👑</span>
+                    <div className="flex-1 space-y-1">
+                      <span className="text-[10px] font-mono text-purple-400 font-extrabold uppercase tracking-wider block">
+                        {isRtl ? 'المهمة 3: بروتوكول آداب المجتمع' : 'STEP 3: EVENING SOCIAL PROTOCOLS'}
+                      </span>
+                      <h4 className="text-xs font-extrabold text-white">{isRtl ? 'مملكة الأدب وبناء أبراج القصر الملكي' : 'Kingdom of Etiquette (High Etiquette Quest)'}</h4>
+                      <p className="text-[10px] text-slate-400">{isRtl ? 'حل مسائل السلوك والذوق الراقي لبناء الغرف الملكية الخمس لقصرك.' : 'Unlock royal rooms by proving top-tier host and guest table manners.'}</p>
+                    </div>
+                    <button
+                      onClick={() => selectGame('game_011')}
+                      className="px-3 py-1 bg-[#6C5CE7] hover:bg-[#5142be] text-white text-[10px] font-bold rounded-lg cursor-pointer my-auto"
+                    >
+                      {isRtl ? 'ابدأ' : 'Play'}
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {planTab === 'skills' && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6 max-w-2xl mx-auto"
+            >
+              <div className="bg-[#1e2324] rounded-2xl p-6 border border-slate-800 space-y-6">
+                <div className="border-b border-slate-800 pb-3">
+                  <h3 className="text-xs font-black text-[#FDCB6E] uppercase tracking-wider font-mono">
+                    {isRtl ? 'تشريح مهارات الجدارة والسلوك 📊' : 'Behavioral & Linguistic Competency Index'}
+                  </h3>
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    {isRtl ? 'تتبع نقاط قوتك التفاعلية بناءً على نوع اللعب ومجموع نقاطك عبر العشرين لعبة.' : 'Analysis of cognitive growth, social intelligence and English dexterity.'}
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Skill 1 */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center text-xs font-extrabold">
+                      <span className="text-slate-200">{isRtl ? '👂 دقة الاستماع وتمييز مخارج الحروف' : 'Acoustic Auditory & Sounds Distinction'}</span>
+                      <span className="text-cyan-400 font-mono">80%</span>
+                    </div>
+                    <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                      <div className="bg-gradient-to-r from-cyan-600 to-cyan-400 h-full rounded-full" style={{ width: '80%' }} />
+                    </div>
+                    <p className="text-[9px] text-slate-400 italic">
+                      {isRtl ? 'ممتاز جداً! تذكر ممارسة لعبة "محقق النطق" يومياً لرفعه إلى 95%.' : 'Fabulous response. Replay Pronunciation Detective to boost it.'}
+                    </p>
+                  </div>
+
+                  {/* Skill 2 */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center text-xs font-extrabold">
+                      <span className="text-slate-200">{isRtl ? '👑 الذكاء الاجتماعي وبوتوكول الرد اللبق' : 'Social Manners & Diplomacy Greeting'}</span>
+                      <span className="text-purple-400 font-mono">90%</span>
+                    </div>
+                    <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                      <div className="bg-gradient-to-r from-purple-650 to-purple-405 h-full rounded-full" style={{ width: '90%' }} />
+                    </div>
+                    <p className="text-[9px] text-slate-400 italic">
+                      {isRtl ? 'أنت رائع في مهارات اللباقة! تواصل التقدم في "سفير الحوار" و"فارس الكلمة المهذبة".' : 'Stellar achievement. Complete Dialogue Ambassador to keep it pristine.'}
+                    </p>
+                  </div>
+
+                  {/* Skill 3 */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center text-xs font-extrabold">
+                      <span className="text-slate-200">{isRtl ? '🧪 بناء العبارات وصياغة التركيب النحوي' : 'Syntax Compose & Grammatical Harmony'}</span>
+                      <span className="text-[#00CEC9] font-mono">65%</span>
+                    </div>
+                    <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                      <div className="bg-gradient-to-r from-teal-600 to-teal-400 h-full rounded-full" style={{ width: '65%' }} />
+                    </div>
+                    <p className="text-[9px] text-slate-400 italic">
+                      {isRtl ? 'منطقة تطوير رئيسية! تدرب على لعب "طباخ العبارات" و"بستان القواعد" لتعلم الفاعل والمفعول.' : 'Important improvement zone. Play Phrase Chef and Grammar Garden to strengthen sentence structures.'}
+                    </p>
+                  </div>
+
+                  {/* Skill 4 */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center text-xs font-extrabold">
+                      <span className="text-slate-200">{isRtl ? '⚡ سرعة البديهة والتهجئة الفورية' : 'Speed Spelling & Direct Lexicon Retrieval'}</span>
+                      <span className="text-rose-400 font-mono">75%</span>
+                    </div>
+                    <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                      <div className="bg-gradient-to-r from-rose-600 to-rose-400 h-full rounded-full" style={{ width: '75%' }} />
+                    </div>
+                    <p className="text-[9px] text-slate-400 italic">
+                      {isRtl ? 'سرعة طيبة في الاستدعاء اللفظي إملائياً! درب بديهتك مجدداً في "بطل الإملاء".' : 'Great spelling response. Push hard in Spelling Hero meteor levels to touch 90%.'}
+                    </p>
+                  </div>
+
+                  {/* Skill 5 */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center text-xs font-extrabold">
+                      <span className="text-slate-200">{isRtl ? '❤️ الذكاء العاطفي والتعاطف اللفظي' : 'Linguistic Empathy & Emotional Intelligence'}</span>
+                      <span className="text-[#FDCB6E] font-mono">85%</span>
+                    </div>
+                    <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                      <div className="bg-gradient-to-r from-amber-600 to-amber-400 h-full rounded-full" style={{ width: '85%' }} />
+                    </div>
+                    <p className="text-[9px] text-slate-400 italic">
+                      {isRtl ? 'عالي جداً! لقد نجحت زوهورك في حديقة المشاعر بسبب طيبة عباراتك في مساعدة الآخرين.' : 'Empathetic work. Rewarding results achieved by comforting Flowers of Garden of Emotions.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {planTab === 'certificates' && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
+            >
+              <p className="text-xs text-slate-450 font-bold text-center">
+                {isRtl 
+                  ? 'يتم منح وتفصيل هذه الدبلوما بشكل حصري للمشتركين بعد تخطي حدود معينة للنقاط والـ XP.'
+                  : 'Honorary credentials authorized dynamically from child session performance thresholds. Click to print and cherish.'}
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                {/* CERT 1 */}
+                <div className="bg-[#1e2324] rounded-2xl p-5 border border-amber-500/30 text-center space-y-4 shadow-lg hover:border-amber-400 transition-all flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <span className="text-4xl block animate-bounce">🎓</span>
+                    <h4 className="text-xs font-black text-white">{isRtl ? 'دبلوما سفير الدبلوماسية ولغويات الأدب' : 'Linguistic Courtesy Envoy Diploma'}</h4>
+                    <p className="text-[10px] text-slate-400">{isRtl ? 'تُمنح لإتقان آداب السلوك الحواري والرد المهذب والاعتذار.' : 'Authorized for polite reply systems and social dining mannerism.'}</p>
+                    <span className="inline-block px-2.5 py-0.5 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[9px] font-mono rounded font-bold">{isRtl ? 'جاهزة للاستلام' : 'AVAILABLE NOW'}</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSelectedCertificateId('cert_etiquette');
+                      speakFeedback("Displaying Courtesy Envoy Diploma. Congratulations!");
+                    }}
+                    className="w-full py-2 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl text-[10px] font-black tracking-wider transition-all cursor-pointer"
+                  >
+                    👑 {isRtl ? 'عرض واستلام الشهادة' : 'Claim & View Royal Award'}
+                  </button>
+                </div>
+
+                {/* CERT 2 */}
+                <div className="bg-[#1e2324] rounded-2xl p-5 border border-indigo-500/30 text-center space-y-4 shadow-lg hover:border-indigo-400 transition-all flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <span className="text-4xl block">🖋️</span>
+                    <h4 className="text-xs font-black text-white">{isRtl ? 'شهادة خبير التهجئة والاسترداد اللفظي' : 'Master of Phonetics & Spelling Specialist'}</h4>
+                    <p className="text-[10px] text-slate-400">{isRtl ? 'تُمنح لسرعة البديهة والتهجي الإملائي للكلمات المركبة الصعبة.' : 'Credentials for extreme velocity vocabulary meteor typing.'}</p>
+                    <span className="inline-block px-2.5 py-0.5 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[9px] font-mono rounded font-bold">{isRtl ? 'جاهزة للاستلام' : 'AVAILABLE NOW'}</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSelectedCertificateId('cert_spelling');
+                      speakFeedback("Displaying Master of Phonetics Certificate. Congratulations!");
+                    }}
+                    className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] font-black tracking-wider transition-all cursor-pointer"
+                  >
+                    👑 {isRtl ? 'عرض واستلام الشهادة' : 'Claim & View Royal Award'}
+                  </button>
+                </div>
+
+                {/* CERT 3 */}
+                <div className="bg-[#1e2324] rounded-2xl p-5 border border-slate-800 text-center space-y-4 shadow-md opacity-70 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <span className="text-4xl block grayscale opacity-60">🔮</span>
+                    <h4 className="text-xs font-black text-slate-400">{isRtl ? 'دكتور القواعد وسيد المنطق النحوي' : 'Doctor of Syntax & Grammar Fellowship'}</h4>
+                    <p className="text-[10px] text-slate-500">{isRtl ? 'تُمنح لإتقان طبخ وفك شفرات النحو الإنجليزي المعقد.' : 'Eminent fellowship honoring pure logical sentence composition.'}</p>
+                    <span className="inline-block px-2.5 py-0.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[9px] font-mono rounded font-bold">{isRtl ? 'مقفل - يتطلب 200 XP إضافي' : 'LOCKED - REQUIRES 200 MORE XP'}</span>
+                  </div>
+                  <button
+                    disabled
+                    className="w-full py-2 bg-slate-800 text-slate-500 rounded-xl text-[10px] font-black cursor-not-allowed"
+                  >
+                    🔒 {isRtl ? 'مقفل حالياً' : 'Locked Credentials'}
+                  </button>
+                </div>
+
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Certificate Modal */}
+        <AnimatePresence>
+          {selectedCertificateId && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto"
+            >
+              <motion.div
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 20 }}
+                className="bg-[#121617] rounded-3xl p-6 md:p-10 border-4 border-amber-500 max-w-2xl w-full text-center relative shadow-2xl space-y-6"
+              >
+                {/* Closed Close trigger */}
+                <button
+                  onClick={() => setSelectedCertificateId(null)}
+                  className="absolute top-4 right-4 w-8 h-8 bg-slate-800 hover:bg-slate-700 text-slate-450 border border-slate-705 rounded-full flex items-center justify-center font-bold cursor-pointer"
+                >
+                  ✕
+                </button>
+
+                {/* Certificate Border Details */}
+                <div className="border border-double border-amber-600/40 p-6 md:p-8 space-y-6 rounded-2xl bg-amber-500/[0.01]">
+                  
+                  {/* Crest Header */}
+                  <div className="space-y-1.5 text-center">
+                    <span className="text-3xl block">💎⚜️💎</span>
+                    <h5 className="text-[10px] font-black text-amber-500 uppercase font-mono tracking-widest leading-none">
+                      {isRtl ? 'أكاديمية أكسفورد الرقمية الدولية للصغار والآداب' : 'OXFORD DIGITAL EXCELLENCE EDUCATION FOUNDATION'}
+                    </h5>
+                    <p className="text-[8px] text-slate-500 uppercase tracking-widest font-mono">Certified Honor Registry #O-2026</p>
+                  </div>
+
+                  {/* Title */}
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-black text-slate-400 block uppercase tracking-wide font-mono">
+                      {isRtl ? 'رقعة تقدير وشهادة تقدير وتفوق' : 'CREDENTIAL DIPLOMA OF PRIMACY'}
+                    </span>
+                    <h3 className="text-md md:text-xl font-black text-[#FDCB6E] tracking-normal font-sans">
+                      {selectedCertificateId === 'cert_etiquette' 
+                        ? (isRtl ? 'دبلوما سفير الدبلوماسية ورائد الرد الطيِّب السليم 👑' : 'Ambassador Extraordinary of High Society Courtesy 👑')
+                        : (isRtl ? 'شهادة خبير التهجئة والاسترداد اللفظي والأبجدية ⚡' : 'Elite Fellowship of Acoustics & Ultra spelling ⚡')
+                      }
+                    </h3>
+                  </div>
+
+                  {/* Body Paragraph */}
+                  <div className="space-y-4">
+                    <p className="text-[10px] text-slate-400">{isRtl ? 'بموجب هذه الوثيقة، يُثبت مجلس الأكاديمية وباسل المرشد أن:' : 'Be it known that the Academic Council hereby awards and confirms:'}</p>
+                    <div className="px-6 py-2 border-b border-amber-600/30 max-w-xs mx-auto text-center">
+                      <span className="text-md md:text-lg font-black text-white font-mono tracking-wide">{candidateName}</span>
+                    </div>
+                    <p className="text-[10px] text-slate-300 leading-relaxed max-w-lg mx-auto">
+                      {selectedCertificateId === 'cert_etiquette' ? (
+                        isRtl 
+                          ? 'قد نفذ واجتاز بامتياز فائق العشرين تحدياً بأكاديمية الأدب، وأثبت تفهم وافٍ لقيم التعاون الرفيع والمجاملات الكريمة وبناء قصر آداب السلوك وسلوك الغد المهذب.'
+                          : 'has successfully solved and mastered high-etiquette dialogue channels, exhibited extraordinary warmth and empathetic cooperation within the Kingdom of Etiquette and global greetings.'
+                      ) : (
+                        isRtl 
+                          ? 'قد حقق تميزاً استثنائياً في التهجي والصوتيات وتفكيك الشفرات وحماية الأرض من صخور الإملاء المنهار، مما يثبت حضور سرعة البديهة والقاموس الإنجليزي المتأصل.'
+                          : 'has displayed magnificent lexical reaction tracking, rapid typing, and phonics discrimination, successfully restoring all illuminated torches of the Spelling Adventure.'
+                      )}
+                    </p>
+                  </div>
+
+                  {/* Signatures and Seal */}
+                  <div className="flex justify-between items-end pt-4 mt-6 border-t border-slate-900">
+                    <div className="text-left font-mono">
+                      <p className="text-[8px] text-slate-500">{isRtl ? 'رئيس هيئة التعليم:' : 'Chancellor of Council:'}</p>
+                      <p className="text-[10px] font-black text-amber-500 italic mt-0.5">Dr. Basil Al-Murshid</p>
+                    </div>
+                    
+                    {/* Simulated Shiny Gold Seal */}
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 via-yellow-300 to-amber-500 border border-yellow-250 flex items-center justify-center shadow-lg shadow-yellow-500/10 text-lg relative group">
+                      <div className="absolute inset-1 rounded-full border border-dashed border-amber-800 flex items-center justify-center font-bold text-[8px] text-amber-950 font-mono">
+                        OXFORD
+                      </div>
+                    </div>
+
+                    <div className="text-right font-mono">
+                      <p className="text-[8px] text-slate-500">{isRtl ? 'عميد القبول وأعراف السلوك:' : 'Dean of Manners & Courtesy:'}</p>
+                      <p className="text-[10px] font-black text-amber-500 italic mt-0.5">Court of Etiquette</p>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Claim Buttons */}
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => {
+                      speakFeedback(isRtl ? "مبارك الفوز والتميز الرائع!" : "Splendid work! We are so proud of you.");
+                      alert(isRtl ? "احسنت الاختيار! تم تحميل الشهادة وطباعتها بنجاح إلى ملف التميز بباحة مكتبتك! 🏆📄" : "Diploma certified! Saved securely inside your personal academic dashboard collection! 🏆📄");
+                    }}
+                    className="flex-1 py-3 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-slate-950 rounded-xl text-xs font-black shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
+                  >
+                    🚀 {isRtl ? 'تحميل وطباعة الشهادة 📄' : 'Download and Print Certificate 📄'}
+                  </button>
+                  <button
+                    onClick={() => setSelectedCertificateId(null)}
+                    className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                  >
+                    {isRtl ? 'إغلاق' : 'Dismiss'}
+                  </button>
+                </div>
+
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[#2D3436] text-slate-100 flex flex-col font-sans select-none pb-20">
       {/* Interactive header leveraging dynamic CSS values */}
@@ -775,72 +1381,78 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   ))}
                 </div>
 
-                <div className="relative w-full md:w-64">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={isRtl ? "البحث عن لعبة..." : "Search games..."}
-                    className="w-full pl-9 pr-4 py-2 bg-slate-800 border border-slate-700/60 rounded-xl text-xs text-white focus:outline-none focus:border-[#6C5CE7] transition-all"
-                  />
-                </div>
-              </div>
-
-              {/* The 20 Games Bento Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredGames.map((game, idx) => {
-                  const IconComp = game.icon;
-                  return (
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      key={game.id}
-                      className="bg-[#1e2324] hover:bg-slate-800/80 rounded-2xl p-5 border border-slate-700/60 hover:border-[#6C5CE7]/60 transition-all flex flex-col justify-between h-[230px] group shadow-sm relative overflow-hidden"
-                    >
-                      <div className="absolute top-2 right-2 text-[10px] font-mono text-slate-500 font-bold">
-                        #{idx+1}
-                      </div>
-
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-start">
-                          <div className={`p-2.5 rounded-xl ${game.color} text-white`}>
-                            <IconComp className="w-5 h-5" />
-                          </div>
-                          <span className="text-[10px] font-black text-[#FDCB6E] bg-slate-900/40 px-2.5 py-1 rounded-lg">
-                            {game.difficulty}
-                          </span>
-                        </div>
-
-                        <div>
-                          <h3 className="text-[14px] font-black text-white group-hover:text-[#FDCB6E] transition-all">
-                            {isRtl ? game.titleAr : game.titleEn}
-                          </h3>
-                          <p className="text-[11px] text-slate-300 font-medium leading-relaxed line-clamp-3 mt-1.5">
-                            {isRtl ? game.descriptionAr : game.descriptionEn}
-                          </p>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => selectGame(game.id)}
-                        className="w-full mt-4 py-2 bg-slate-700/80 hover:bg-[#6C5CE7] text-white hover:text-white rounded-xl text-[11px] font-black tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer"
-                      >
-                        <Play className="w-3.5 h-3.5" />
-                        {isRtl ? 'انطلق والعب الآن' : 'Unleash Gameplay'}
-                      </button>
-                    </motion.div>
-                  );
-                })}
-
-                {filteredGames.length === 0 && (
-                  <div className="col-span-full text-center py-12 bg-[#1e2324] rounded-2xl border border-slate-700/60">
-                    <span className="text-4xl block mb-2">🔍</span>
-                    <p className="text-xs font-bold text-slate-400">
-                      {isRtl ? 'لا توجد ألعاب مطابقة لهذا البحث.' : 'No matching activities inside our registry.'}
-                    </p>
+                {activeCategory !== 'plan' && (
+                  <div className="relative w-full md:w-64">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder={isRtl ? "البحث عن لعبة..." : "Search games..."}
+                      className="w-full pl-9 pr-4 py-2 bg-slate-800 border border-[#444C4E] rounded-xl text-xs text-white focus:outline-none focus:border-[#6C5CE7] transition-all"
+                    />
                   </div>
                 )}
               </div>
+
+              {/* The 20 Games Bento Grid */}
+              {activeCategory === 'plan' ? (
+                renderDevelopmentPlan()
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredGames.map((game, idx) => {
+                    const IconComp = game.icon;
+                    return (
+                      <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        key={game.id}
+                        className="bg-[#1e2324] hover:bg-slate-800/80 rounded-2xl p-5 border border-slate-700/60 hover:border-[#6C5CE7]/60 transition-all flex flex-col justify-between h-[230px] group shadow-sm relative overflow-hidden"
+                      >
+                        <div className="absolute top-2 right-2 text-[10px] font-mono text-slate-500 font-bold">
+                          #{idx+1}
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-start">
+                            <div className={`p-2.5 rounded-xl ${game.color} text-white`}>
+                              <IconComp className="w-5 h-5" />
+                            </div>
+                            <span className="text-[10px] font-black text-[#FDCB6E] bg-slate-900/40 px-2.5 py-1 rounded-lg">
+                              {game.difficulty}
+                            </span>
+                          </div>
+
+                          <div>
+                            <h3 className="text-[14px] font-black text-white group-hover:text-[#FDCB6E] transition-all">
+                              {isRtl ? game.titleAr : game.titleEn}
+                            </h3>
+                            <p className="text-[11px] text-slate-300 font-medium leading-relaxed line-clamp-3 mt-1.5">
+                              {isRtl ? game.descriptionAr : game.descriptionEn}
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => selectGame(game.id)}
+                          className="w-full mt-4 py-2 bg-slate-700/80 hover:bg-[#6C5CE7] text-white hover:text-white rounded-xl text-[11px] font-black tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer"
+                        >
+                          <Play className="w-3.5 h-3.5" />
+                          {isRtl ? 'انطلق والعب الآن' : 'Unleash Gameplay'}
+                        </button>
+                      </motion.div>
+                    );
+                  })}
+
+                  {filteredGames.length === 0 && (
+                    <div className="col-span-full text-center py-12 bg-[#1e2324] rounded-2xl border border-slate-700/60">
+                      <span className="text-4xl block mb-2">🔍</span>
+                      <p className="text-xs font-bold text-slate-400">
+                        {isRtl ? 'لا توجد ألعاب مطابقة لهذا البحث.' : 'No matching activities inside our registry.'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </motion.div>
           ) : (
             <motion.div
