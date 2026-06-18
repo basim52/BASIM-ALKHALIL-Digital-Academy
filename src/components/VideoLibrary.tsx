@@ -216,7 +216,7 @@ export const VideoLibrary = ({
     };
   }, []);
 
-  // Function to scan IndexedDB and update availability maps
+  // Function to scan IndexedDB & Express server to update availability maps
   const refreshLocalVideosMap = async () => {
     try {
       const dbAll = [
@@ -224,12 +224,25 @@ export const VideoLibrary = ({
         ...DEFAULT_VIDEOS
       ];
       const statusMap: Record<string, boolean> = {};
-      for (const v of dbAll) {
+      
+      await Promise.all(dbAll.map(async (v) => {
         if (v.directUrl) {
+          // 1. Check local IndexedDB first
           const blob = await getVideoFile(v.id);
-          statusMap[v.id] = !!blob;
+          if (blob) {
+            statusMap[v.id] = true;
+          } else {
+            // 2. Check Express server disk
+            try {
+              const res = await fetch(`/api/videos/check/${v.id}`);
+              const data = await res.json();
+              statusMap[v.id] = !!data.exists;
+            } catch (err) {
+              statusMap[v.id] = false;
+            }
+          }
         }
-      }
+      }));
       setLocalVideoStatusMap(statusMap);
     } catch (e) {
       console.error("Error refreshing local video cache map:", e);
@@ -241,17 +254,19 @@ export const VideoLibrary = ({
     refreshLocalVideosMap();
   }, [dbVideos, showAddForm]);
 
-  // Load local IndexedDB video file when a video is selected
+  // Load local IndexedDB video file or fallback to server stream when a video is selected
   useEffect(() => {
     let objectUrl = '';
     async function loadDirectVideo() {
       if (selectedVideo && selectedVideo.directUrl) {
+        // 1. Try local cache in IndexedDB
         const fileBlob = await getVideoFile(selectedVideo.id);
         if (fileBlob) {
           objectUrl = URL.createObjectURL(fileBlob);
           setActivePlayUrl(objectUrl);
         } else {
-          setActivePlayUrl('');
+          // 2. Fallback to Express server chunk streaming endpoint
+          setActivePlayUrl(`/api/videos/stream/${selectedVideo.id}`);
         }
       } else {
         setActivePlayUrl('');
@@ -367,7 +382,7 @@ export const VideoLibrary = ({
         // We store the direct upload metadata so students can view the designated video
         // Because Firestore has document limit, the metadata registers successfully and handles the local file playback beautifully
         const docRef = await addDoc(collection(db, 'videos'), {
-          directUrl: 'local-placeholder',
+          directUrl: `/api/videos/stream/${Date.now()}`, // Temporary URL structure, can stream dynamically
           fileName: videoFile.name,
           fileSize: `${sizeMB} MB`,
           titleEn: inputTitleEn.trim(),
@@ -378,10 +393,24 @@ export const VideoLibrary = ({
           createdAt: serverTimestamp()
         });
 
-        // Save the file binary in local IndexedDB
+        // 1. Save the file binary in local IndexedDB for instant zero-latency playback for the admin
         await storeVideoFile(docRef.id, videoFile);
 
-        setSuccessText(isRtl ? '🎉 تم تحميل الفيديو المباشر وحفظه بنجاح فوري بدقة عالية!' : '🎉 High-definition direct video uploaded and registered successfully!');
+        // 2. Upload the file binary to Express server for persistent cross-client playback
+        const fd = new FormData();
+        fd.append('video', videoFile);
+        fd.append('videoId', docRef.id);
+
+        const uploadResponse = await fetch('/api/videos/upload', {
+          method: 'POST',
+          body: fd
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload video to server');
+        }
+
+        setSuccessText(isRtl ? '🎉 تم تحميل الفيديو المباشر وحفظه بنجاح على الخادم فورا!' : '🎉 High-definition direct video uploaded and saved successfully on the server!');
       } else {
         // YouTube alternative
         const youtubeId = extractYoutubeId(inputUrl);
@@ -440,6 +469,10 @@ export const VideoLibrary = ({
         // Custom videos are deleted directly from Firestore
         await deleteDoc(doc(db, 'videos', vidId));
         await deleteVideoFile(vidId);
+        // Delete physical file from server
+        await fetch(`/api/videos/delete/${vidId}`, { method: 'DELETE' }).catch(err => {
+          console.error("Error deleting physical video from server:", err);
+        });
       }
     } catch (err) {
       console.error("Error deleting video doc:", err);
@@ -508,12 +541,24 @@ export const VideoLibrary = ({
                         if (file) {
                           setSavingRequiredFile(true);
                           try {
+                            // 1. Cache in IndexedDB
                             await storeVideoFile(selectedVideo.id, file);
+
+                            // 2. Upload to server
+                            const fd = new FormData();
+                            fd.append('video', file);
+                            fd.append('videoId', selectedVideo.id);
+
+                            await fetch('/api/videos/upload', {
+                              method: 'POST',
+                              body: fd
+                            });
+
                             const url = URL.createObjectURL(file);
                             setActivePlayUrl(url);
                             await refreshLocalVideosMap();
                           } catch (err) {
-                            console.error("Failed to store dropped file:", err);
+                            console.error("Failed to store and upload selected file:", err);
                           } finally {
                             setSavingRequiredFile(false);
                           }

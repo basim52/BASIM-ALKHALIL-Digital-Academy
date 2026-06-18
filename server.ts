@@ -2,6 +2,8 @@ import "dotenv/config";
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
+import fs from "fs";
+import multer from "multer";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -2730,6 +2732,128 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
         }
       });
     });
+
+  // ==========================================
+  // DIRECT VIDEO UPLOADS AND STREAMING SERVICE
+  // ==========================================
+  const UPLOADS_DIR = path.join(process.cwd(), "uploaded_videos");
+  if (!fs.existsSync(UPLOADS_DIR)) {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  }
+
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, UPLOADS_DIR);
+    },
+    filename: (req, file, cb) => {
+      const videoId = req.body.videoId || "temp-" + Date.now();
+      const ext = path.extname(file.originalname) || ".mp4";
+      cb(null, `${videoId}${ext}`);
+    }
+  });
+
+  const upload = multer({
+    storage: storage,
+    limits: { fileSize: 200 * 1024 * 1024 } // Support videos up to 200MB
+  });
+
+  app.post("/api/videos/upload", upload.single("video"), (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No video file was uploaded." });
+      }
+      logToFile(`[VideoUpload] Successfully saved video. Size: ${req.file.size} bytes. Saved to: ${req.file.path}`);
+      return res.json({ 
+        success: true, 
+        fileName: req.file.filename,
+        path: `/api/videos/stream/${req.body.videoId}` 
+      });
+    } catch (err: any) {
+      logToFile(`[VideoUpload Error] ${err.message}`);
+      return res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/videos/check/:id", (req, res) => {
+    try {
+      const videoId = req.params.id;
+      const files = fs.readdirSync(UPLOADS_DIR);
+      const matchedFile = files.find(f => f.startsWith(videoId + "."));
+      if (matchedFile) {
+        return res.json({ exists: true });
+      } else {
+        return res.json({ exists: false });
+      }
+    } catch (e: any) {
+      return res.json({ exists: false, error: e.message });
+    }
+  });
+
+  app.delete("/api/videos/delete/:id", (req, res) => {
+    try {
+      const videoId = req.params.id;
+      const files = fs.readdirSync(UPLOADS_DIR);
+      const matchedFile = files.find(f => f.startsWith(videoId + "."));
+      if (matchedFile) {
+        fs.unlinkSync(path.join(UPLOADS_DIR, matchedFile));
+        logToFile(`[VideoDelete] Deleted physical video: ${matchedFile}`);
+        return res.json({ success: true });
+      }
+      return res.json({ success: false, message: "No physical file found" });
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/videos/stream/:id", (req, res) => {
+    try {
+      const videoId = req.params.id;
+      const files = fs.readdirSync(UPLOADS_DIR);
+      const matchedFile = files.find(f => f.startsWith(videoId + "."));
+      
+      if (!matchedFile) {
+        return res.status(404).send("Video not found on server");
+      }
+      
+      const videoPath = path.join(UPLOADS_DIR, matchedFile);
+      const stat = fs.statSync(videoPath);
+      const fileSize = stat.size;
+      const range = req.headers.range;
+      
+      if (range) {
+        const parts = range.replace(/bytes=/, "").split("-");
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+        
+        if (start >= fileSize) {
+          res.status(416).send("Requested range not satisfiable\n" + start + " >= " + fileSize);
+          return;
+        }
+        
+        const chunksize = (end - start) + 1;
+        const file = fs.createReadStream(videoPath, { start, end });
+        const head = {
+          "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+          "Accept-Ranges": "bytes",
+          "Content-Length": chunksize,
+          "Content-Type": "video/mp4",
+        };
+        
+        res.writeHead(206, head);
+        file.pipe(res);
+      } else {
+        const head = {
+          "Content-Length": fileSize,
+          "Content-Type": "video/mp4",
+        };
+        res.writeHead(200, head);
+        fs.createReadStream(videoPath).pipe(res);
+      }
+    } catch (err: any) {
+      logToFile(`[VideoStreaming Error] ${err.message}`);
+      res.status(500).send("Streaming error occurred");
+    }
+  });
 
   // 404 for API routes
   app.all("/api/*", (req, res) => {
