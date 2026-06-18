@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { UserProfile, MASTER_ADMINS } from '../types';
 import { db } from '../lib/firebase';
+import { storeVideoFile, getVideoFile, deleteVideoFile } from '../lib/videoDb';
 import { 
   collection, 
   addDoc, 
@@ -160,6 +161,12 @@ export const VideoLibrary = ({
   // Direct video file states
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoFileUrl, setVideoFileUrl] = useState<string>('');
+  
+  // High-fidelity active play URL from IndexedDB cache
+  const [activePlayUrl, setActivePlayUrl] = useState<string>('');
+  // Status lookup for offline direct videos
+  const [localVideoStatusMap, setLocalVideoStatusMap] = useState<Record<string, boolean>>({});
+  const [savingRequiredFile, setSavingRequiredFile] = useState<boolean>(false);
 
   // Upload fields
   const [inputUrl, setInputUrl] = useState('');
@@ -208,6 +215,57 @@ export const VideoLibrary = ({
       if (unsubscribe) unsubscribe();
     };
   }, []);
+
+  // Function to scan IndexedDB and update availability maps
+  const refreshLocalVideosMap = async () => {
+    try {
+      const dbAll = [
+        ...dbVideos,
+        ...DEFAULT_VIDEOS
+      ];
+      const statusMap: Record<string, boolean> = {};
+      for (const v of dbAll) {
+        if (v.directUrl) {
+          const blob = await getVideoFile(v.id);
+          statusMap[v.id] = !!blob;
+        }
+      }
+      setLocalVideoStatusMap(statusMap);
+    } catch (e) {
+      console.error("Error refreshing local video cache map:", e);
+    }
+  };
+
+  // Keep local index of video availability fully synched
+  useEffect(() => {
+    refreshLocalVideosMap();
+  }, [dbVideos, showAddForm]);
+
+  // Load local IndexedDB video file when a video is selected
+  useEffect(() => {
+    let objectUrl = '';
+    async function loadDirectVideo() {
+      if (selectedVideo && selectedVideo.directUrl) {
+        const fileBlob = await getVideoFile(selectedVideo.id);
+        if (fileBlob) {
+          objectUrl = URL.createObjectURL(fileBlob);
+          setActivePlayUrl(objectUrl);
+        } else {
+          setActivePlayUrl('');
+        }
+      } else {
+        setActivePlayUrl('');
+      }
+    }
+
+    loadDirectVideo();
+
+    return () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [selectedVideo]);
 
   // Merge lists (custom videos uploaded via admin appear at front)
   const allVideos = [
@@ -308,8 +366,8 @@ export const VideoLibrary = ({
 
         // We store the direct upload metadata so students can view the designated video
         // Because Firestore has document limit, the metadata registers successfully and handles the local file playback beautifully
-        await addDoc(collection(db, 'videos'), {
-          directUrl: videoFileUrl || 'local-placeholder',
+        const docRef = await addDoc(collection(db, 'videos'), {
+          directUrl: 'local-placeholder',
           fileName: videoFile.name,
           fileSize: `${sizeMB} MB`,
           titleEn: inputTitleEn.trim(),
@@ -319,6 +377,9 @@ export const VideoLibrary = ({
           thumbnail: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=600&auto=format&fit=crop', // Beautiful placeholder
           createdAt: serverTimestamp()
         });
+
+        // Save the file binary in local IndexedDB
+        await storeVideoFile(docRef.id, videoFile);
 
         setSuccessText(isRtl ? '🎉 تم تحميل الفيديو المباشر وحفظه بنجاح فوري بدقة عالية!' : '🎉 High-definition direct video uploaded and registered successfully!');
       } else {
@@ -378,6 +439,7 @@ export const VideoLibrary = ({
       } else {
         // Custom videos are deleted directly from Firestore
         await deleteDoc(doc(db, 'videos', vidId));
+        await deleteVideoFile(vidId);
       }
     } catch (err) {
       console.error("Error deleting video doc:", err);
@@ -410,14 +472,64 @@ export const VideoLibrary = ({
         <div className="max-w-3xl mx-auto">
           <div className="aspect-video rounded-[2rem] overflow-hidden shadow-md bg-black mb-8 border-4 border-white relative">
             {isDirect ? (
-              // Direct high-resolution file player using native HTML5 tag
-              <video 
-                controls
-                autoPlay
-                className="w-full h-full object-contain"
-                src={selectedVideo.directUrl === 'local-placeholder' ? videoFileUrl : selectedVideo.directUrl}
-                poster={selectedVideo.thumbnail}
-              />
+              activePlayUrl ? (
+                // Direct high-resolution file player using native HTML5 tag
+                <video 
+                  controls
+                  autoPlay
+                  className="w-full h-full object-contain"
+                  src={activePlayUrl}
+                  poster={selectedVideo.thumbnail}
+                />
+              ) : (
+                // Elegant local upload zone to re-bind the local video file
+                <div className="w-full h-full bg-slate-900 flex flex-col items-center justify-center p-6 text-center text-white relative">
+                  <div className="w-16 h-16 bg-[#58cc02]/10 text-[#58cc02] rounded-2xl flex items-center justify-center mb-4 border border-[#58cc02]/20">
+                    <UploadCloud size={32} />
+                  </div>
+                  <h4 className="text-sm font-black mb-1.5 px-4 text-center leading-normal">
+                    {isRtl ? 'ملف الدرس غير متوقع أو غير متوفر حالياً' : 'Lesson file not loaded locally'}
+                  </h4>
+                  <p className="text-[11px] text-slate-400 font-bold mb-5 max-w-sm px-4 leading-relaxed">
+                    {isRtl 
+                      ? `لتشغيل هذا الدرس بجودة أصلية فائقة فورا، يرجى اختيار ملف الفيديو [ ${selectedVideo.fileName || 'ملف لدرس الفيديو'} ] لتثبيته محلياً.`
+                      : `To stream this video instantly with maximum offline speed, please choose your local file [ ${selectedVideo.fileName || 'Video lesson file'} ] to sync into your browser storage.`}
+                  </p>
+                  
+                  <label className="px-5 py-2.5 bg-[#58cc02] border-b-4 border-[#3c8c01] rounded-2xl text-[10px] font-black uppercase tracking-wider hover:bg-[#6be60c] transition-all cursor-pointer select-none shrink-0 inline-flex items-center gap-1.5 active:scale-95 duration-100">
+                    <FileVideo size={14} />
+                    {isRtl ? 'اختر ملف الفيديو للبدء 📁' : 'Choose Video File 📁'}
+                    <input 
+                      type="file" 
+                      accept="video/*" 
+                      className="hidden" 
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setSavingRequiredFile(true);
+                          try {
+                            await storeVideoFile(selectedVideo.id, file);
+                            const url = URL.createObjectURL(file);
+                            setActivePlayUrl(url);
+                            await refreshLocalVideosMap();
+                          } catch (err) {
+                            console.error("Failed to store dropped file:", err);
+                          } finally {
+                            setSavingRequiredFile(false);
+                          }
+                        }
+                      }}
+                    />
+                  </label>
+                  
+                  {savingRequiredFile && (
+                    <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center space-y-3 z-30 animate-fade-in">
+                      <div className="w-8 h-8 border-3 border-[#58cc02] border-t-transparent rounded-full animate-spin" />
+                      <span className="text-[10px] uppercase font-black tracking-wider text-slate-300">{isRtl ? 'جاري تحسين وتهيئة الفيديو وحفظه فورا...' : 'Buffering & caching locally...'}</span>
+                    </div>
+                  )}
+                </div>
+              )
             ) : (
               // Youtube Player
               <iframe 
@@ -445,13 +557,13 @@ export const VideoLibrary = ({
             <h2 className="text-xl md:text-2xl font-black text-slate-800 mb-2 leading-tight">
               {isRtl ? selectedVideo.titleAr : selectedVideo.titleEn}
             </h2>
-            {isDirect && selectedVideo.directUrl === 'local-placeholder' && !videoFileUrl && (
-              <div className="p-4 bg-orange-50 border-2 border-orange-200 text-orange-700 rounded-2xl text-xs font-bold flex items-center gap-3 mt-4">
-                <AlertTriangle size={18} className="shrink-0" />
+            {isDirect && !activePlayUrl && (
+              <div className="p-4 bg-amber-50 border-2 border-amber-200 text-amber-700 rounded-2xl text-xs font-bold flex items-center gap-3 mt-4">
+                <AlertCircle size={18} className="shrink-0 text-amber-500" />
                 <span>
                   {isRtl 
-                    ? 'هذا الفيديو يحمل كمادة مباشرة عالية الدقة. يمكنك أيضاً اختيار ملفك المحلي الآن لتشغيله بأقصى سرعة!' 
-                    : 'This is a premium high-definition direct file. Select your local video file to stream with maximum speed!'}
+                    ? 'يتطلب تشغيل هذا الملف اختيار ملف الفيديو المباشر من جهازك لمرة واحدة فقط ليقوم المتصفح بحفظه واستدعاءه تلقائياً دائماً.' 
+                    : 'Playing this file requires selecting the direct video file from your device once so your browser can recall and load it automatically.'}
                 </span>
               </div>
             )}
@@ -816,7 +928,22 @@ export const VideoLibrary = ({
                 </div>
 
                 <div className="p-5 flex flex-col justify-between flex-1">
-                  <h3 className="font-extrabold text-sm text-slate-800 line-clamp-2 mb-4 leading-snug group-hover:text-[#58cc02] transition-colors">{isRtl ? video.titleAr : video.titleEn}</h3>
+                  <div>
+                    <h3 className="font-extrabold text-sm text-slate-800 line-clamp-2 mb-3 leading-snug group-hover:text-[#58cc02] transition-colors">{isRtl ? video.titleAr : video.titleEn}</h3>
+                    {isDirectFile && (
+                      <div className="mb-4 flex items-center gap-1.5 text-[10px] font-black">
+                        {localVideoStatusMap[video.id] ? (
+                          <span className="text-[#58cc02] bg-green-50 px-2.5 py-1 rounded-lg border border-green-200 shadow-sm">
+                            {isRtl ? '⚡ جاهز للتشغيل الفوري' : '⚡ Ready in Cache'}
+                          </span>
+                        ) : (
+                          <span className="text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 shadow-sm animate-pulse">
+                            {isRtl ? '📁 يحتاج ربط ملف الفيديو' : '📁 Needs video file'}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   <button className="w-full duo-btn-white py-3 text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 font-black">
                     {t.watchNow}
                     <ChevronRight size={12} className={isRtl ? 'rotate-180' : ''} />
