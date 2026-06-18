@@ -398,10 +398,10 @@ export const VideoLibrary = ({
 
         // 2. Upload the file binary to Express server for persistent cross-client playback
         const fd = new FormData();
-        fd.append('video', videoFile);
         fd.append('videoId', docRef.id);
+        fd.append('video', videoFile);
 
-        const uploadResponse = await fetch('/api/videos/upload', {
+        const uploadResponse = await fetch(`/api/videos/upload?videoId=${docRef.id}`, {
           method: 'POST',
           body: fd
         });
@@ -546,10 +546,10 @@ export const VideoLibrary = ({
 
                             // 2. Upload to server
                             const fd = new FormData();
-                            fd.append('video', file);
                             fd.append('videoId', selectedVideo.id);
+                            fd.append('video', file);
 
-                            await fetch('/api/videos/upload', {
+                            await fetch(`/api/videos/upload?videoId=${selectedVideo.id}`, {
                               method: 'POST',
                               body: fd
                             });

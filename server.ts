@@ -2746,7 +2746,7 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
       cb(null, UPLOADS_DIR);
     },
     filename: (req, file, cb) => {
-      const videoId = req.body.videoId || "temp-" + Date.now();
+      const videoId = (req.query.videoId as string) || req.body.videoId || "temp-" + Date.now();
       const ext = path.extname(file.originalname) || ".mp4";
       cb(null, `${videoId}${ext}`);
     }
@@ -2762,11 +2762,12 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
       if (!req.file) {
         return res.status(400).json({ error: "No video file was uploaded." });
       }
-      logToFile(`[VideoUpload] Successfully saved video. Size: ${req.file.size} bytes. Saved to: ${req.file.path}`);
+      const finalVideoId = (req.query.videoId as string) || req.body.videoId || "temp-" + Date.now();
+      logToFile(`[VideoUpload] Successfully saved video ${finalVideoId}. Size: ${req.file.size} bytes. Saved to: ${req.file.path}`);
       return res.json({ 
         success: true, 
         fileName: req.file.filename,
-        path: `/api/videos/stream/${req.body.videoId}` 
+        path: `/api/videos/stream/${finalVideoId}` 
       });
     } catch (err: any) {
       logToFile(`[VideoUpload Error] ${err.message}`);
