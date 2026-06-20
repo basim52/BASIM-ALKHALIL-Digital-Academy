@@ -595,7 +595,7 @@ export const ReadingCurriculumCompanion = ({
     };
     
     utterance.onerror = (e) => {
-      console.error('Speech error:', e);
+      console.error('Speech error occurred:', e.error || 'unknown error');
       setIsSpeaking(false);
       setSpeakingId(null);
     };

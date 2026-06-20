@@ -4,6 +4,7 @@ import { translations, Language } from '../lib/translations';
 import { Trophy, Clock, BookCheck, TrendingUp } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { Badges } from './Badges';
 
 interface StudentStatsProps {
   lang: Language;
@@ -163,6 +164,10 @@ export const StudentStats = ({ lang, userId, points, level }: StudentStatsProps)
             </AreaChart>
           </ResponsiveContainer>
         </div>
+      </section>
+
+      <section className="bg-transparent pt-4">
+        <Badges lang={lang} userId={userId} points={points} />
       </section>
     </div>
   );

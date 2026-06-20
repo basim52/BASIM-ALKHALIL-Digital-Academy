@@ -158,6 +158,11 @@ export const VideoLibrary = ({
   const [showAddForm, setShowAddForm] = useState(false);
   const [uploadTab, setUploadTab] = useState<'direct' | 'youtube'>('direct');
 
+  // Direct video options (link vs local file)
+  const [directSourceMode, setDirectSourceMode] = useState<'link' | 'file'>('link'); // Default to persistent external link format!
+  const [directLinkUrl, setDirectLinkUrl] = useState('');
+  const [hasVideoPlayError, setHasVideoPlayError] = useState<boolean>(false);
+
   // Direct video file states
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoFileUrl, setVideoFileUrl] = useState<string>('');
@@ -203,11 +208,11 @@ export const VideoLibrary = ({
         setDbVideos(list);
         setDbLoading(false);
       }, (err) => {
-        console.error("Failed to load custom videos:", err);
+        console.warn("Failed to load custom videos:", String(err));
         setDbLoading(false);
       });
     } catch (e) {
-      console.error(e);
+      console.warn(String(e));
       setDbLoading(false);
     }
 
@@ -227,25 +232,30 @@ export const VideoLibrary = ({
       
       await Promise.all(dbAll.map(async (v) => {
         if (v.directUrl) {
-          // 1. Check local IndexedDB first
-          const blob = await getVideoFile(v.id);
-          if (blob) {
+          // A. If directUrl is an external cloud link, it's always ready!
+          if (v.directUrl.startsWith('http://') || v.directUrl.startsWith('https://')) {
             statusMap[v.id] = true;
           } else {
-            // 2. Check Express server disk
-            try {
-              const res = await fetch(`/api/videos/check/${v.id}`);
-              const data = await res.json();
-              statusMap[v.id] = !!data.exists;
-            } catch (err) {
-              statusMap[v.id] = false;
+            // 1. Check local IndexedDB first
+            const blob = await getVideoFile(v.id);
+            if (blob) {
+              statusMap[v.id] = true;
+            } else {
+              // 2. Check Express server disk
+              try {
+                const res = await fetch(`/api/videos/check/${v.id}`);
+                const data = await res.json();
+                statusMap[v.id] = !!data.exists;
+              } catch (err) {
+                statusMap[v.id] = false;
+              }
             }
           }
         }
       }));
       setLocalVideoStatusMap(statusMap);
     } catch (e) {
-      console.error("Error refreshing local video cache map:", e);
+      console.warn("Error refreshing local video cache map:", String(e));
     }
   };
 
@@ -257,15 +267,28 @@ export const VideoLibrary = ({
   // Load local IndexedDB video file or fallback to server stream when a video is selected
   useEffect(() => {
     let objectUrl = '';
+    setHasVideoPlayError(false); // Reset error state whenever chosen video changes
+    
     async function loadDirectVideo() {
       if (selectedVideo && selectedVideo.directUrl) {
-        // 1. Try local cache in IndexedDB
-        const fileBlob = await getVideoFile(selectedVideo.id);
-        if (fileBlob) {
-          objectUrl = URL.createObjectURL(fileBlob);
-          setActivePlayUrl(objectUrl);
-        } else {
-          // 2. Fallback to Express server chunk streaming endpoint
+        // A. If directUrl is an external web URL (Google Drive, Dropbox, public hosting), play it natively!
+        if (selectedVideo.directUrl.startsWith('http://') || selectedVideo.directUrl.startsWith('https://')) {
+          setActivePlayUrl(selectedVideo.directUrl);
+          return;
+        }
+
+        try {
+          // B. Try local cache in browser IndexedDB
+          const fileBlob = await getVideoFile(selectedVideo.id);
+          if (fileBlob) {
+            objectUrl = URL.createObjectURL(fileBlob as Blob);
+            setActivePlayUrl(objectUrl);
+          } else {
+            // C. Fallback to Express server chunk streaming endpoint
+            setActivePlayUrl(`/api/videos/stream/${selectedVideo.id}`);
+          }
+        } catch (err) {
+          console.warn("Failed to load local video cache:", String(err));
           setActivePlayUrl(`/api/videos/stream/${selectedVideo.id}`);
         }
       } else {
@@ -277,7 +300,11 @@ export const VideoLibrary = ({
 
     return () => {
       if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
+        try {
+          URL.revokeObjectURL(objectUrl);
+        } catch (e) {
+          console.warn("Error revoking URL:", String(e));
+        }
       }
     };
   }, [selectedVideo]);
@@ -315,7 +342,7 @@ export const VideoLibrary = ({
       setQuizQuestions(questions);
       setQuizStarted(true);
     } catch (err) {
-      console.error("Error generating quiz:", err);
+      console.warn("Error generating quiz:", String(err));
     } finally {
       setQuizLoading(false);
     }
@@ -371,46 +398,69 @@ export const VideoLibrary = ({
 
     try {
       if (uploadTab === 'direct') {
-        if (!videoFile) {
-          setErrorText(isRtl ? 'الرجاء اختيار ملف فيديو للتحميل المباشر.' : 'Please select a video file to proceed with direct upload.');
-          setActionLoading(false);
-          return;
+        let finalDirectUrl = '';
+        let finalFileName = '';
+        let finalFileSize = 'Direct HD';
+
+        if (directSourceMode === 'link') {
+          if (!directLinkUrl.trim()) {
+            setErrorText(isRtl ? 'الرجاء إدخال رابط الفيديو المباشر الأول.' : 'Please enter the direct video URL first.');
+            setActionLoading(false);
+            return;
+          }
+          finalDirectUrl = directLinkUrl.trim();
+          finalFileName = directLinkUrl.split('/').pop()?.split('?')[0] || 'Cloud Hosted Video';
+          finalFileSize = 'Persistent Web Link';
+        } else {
+          if (!videoFile) {
+            setErrorText(isRtl ? 'الرجاء اختيار ملف فيديو للتحميل المباشر.' : 'Please select a video file to proceed with direct upload.');
+            setActionLoading(false);
+            return;
+          }
+          const sizeMB = (videoFile.size / (1024 * 1024)).toFixed(1);
+          finalFileName = videoFile.name;
+          finalFileSize = `${sizeMB} MB`;
+          finalDirectUrl = `/api/videos/stream/${Date.now()}`;
         }
 
-        const sizeMB = (videoFile.size / (1024 * 1024)).toFixed(1);
-
-        // We store the direct upload metadata so students can view the designated video
-        // Because Firestore has document limit, the metadata registers successfully and handles the local file playback beautifully
+        // Add document to Firestore database
         const docRef = await addDoc(collection(db, 'videos'), {
-          directUrl: `/api/videos/stream/${Date.now()}`, // Temporary URL structure, can stream dynamically
-          fileName: videoFile.name,
-          fileSize: `${sizeMB} MB`,
-          titleEn: inputTitleEn.trim(),
-          titleAr: inputTitleAr.trim(),
+          directUrl: finalDirectUrl,
+          fileName: finalFileName,
+          fileSize: finalFileSize,
+          titleEn: inputTitleEn.trim() || finalFileName,
+          titleAr: inputTitleAr.trim() || finalFileName,
           level: inputLevel,
           duration: 'Direct HD',
           thumbnail: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=600&auto=format&fit=crop', // Beautiful placeholder
           createdAt: serverTimestamp()
         });
 
-        // 1. Save the file binary in local IndexedDB for instant zero-latency playback for the admin
-        await storeVideoFile(docRef.id, videoFile);
+        // 1. Only do local storage and serverside storage if it's physical file mode
+        if (directSourceMode === 'file' && videoFile) {
+          try {
+            // Save the file binary in local IndexedDB for instant zero-latency playback
+            await storeVideoFile(docRef.id, videoFile);
+          } catch (idbErr) {
+            console.warn("IndexedDB cache failing (sandboxed check):", String(idbErr));
+          }
 
-        // 2. Upload the file binary to Express server for persistent cross-client playback
-        const fd = new FormData();
-        fd.append('videoId', docRef.id);
-        fd.append('video', videoFile);
+          // Upload the file binary to Express server for persistent cross-client playback
+          const fd = new FormData();
+          fd.append('videoId', docRef.id);
+          fd.append('video', videoFile);
 
-        const uploadResponse = await fetch(`/api/videos/upload?videoId=${docRef.id}`, {
-          method: 'POST',
-          body: fd
-        });
+          const uploadResponse = await fetch(`/api/videos/upload?videoId=${docRef.id}`, {
+            method: 'POST',
+            body: fd
+          });
 
-        if (!uploadResponse.ok) {
-          throw new Error('Failed to upload video to server');
+          if (!uploadResponse.ok) {
+            throw new Error('Failed to upload video to server');
+          }
         }
 
-        setSuccessText(isRtl ? '🎉 تم تحميل الفيديو المباشر وحفظه بنجاح على الخادم فورا!' : '🎉 High-definition direct video uploaded and saved successfully on the server!');
+        setSuccessText(isRtl ? '🎉 تم إضافة الفيديو المباشر بنجاح وتأمينه للتشغيل الفوري!' : '🎉 Direct HD video added and secured successfully!');
       } else {
         // YouTube alternative
         const youtubeId = extractYoutubeId(inputUrl);
@@ -435,6 +485,7 @@ export const VideoLibrary = ({
 
       // Reset state
       setInputUrl('');
+      setDirectLinkUrl('');
       setInputTitleEn('');
       setInputTitleAr('');
       setInputLevel('A1');
@@ -446,7 +497,7 @@ export const VideoLibrary = ({
       }, 2000);
 
     } catch (err: any) {
-      console.error(err);
+      console.warn(String(err));
       setErrorText(isRtl ? 'حدث خطأ أثناء حفظ الفديو.' : 'Error occurred while saving the video.');
     } finally {
       setActionLoading(false);
@@ -471,11 +522,11 @@ export const VideoLibrary = ({
         await deleteVideoFile(vidId);
         // Delete physical file from server
         await fetch(`/api/videos/delete/${vidId}`, { method: 'DELETE' }).catch(err => {
-          console.error("Error deleting physical video from server:", err);
+          console.warn("Error deleting physical video from server:", String(err));
         });
       }
     } catch (err) {
-      console.error("Error deleting video doc:", err);
+      console.warn("Error deleting video doc:", String(err));
     }
   };
 
@@ -505,76 +556,106 @@ export const VideoLibrary = ({
         <div className="max-w-3xl mx-auto">
           <div className="aspect-video rounded-[2rem] overflow-hidden shadow-md bg-black mb-8 border-4 border-white relative">
             {isDirect ? (
-              activePlayUrl ? (
-                // Direct high-resolution file player using native HTML5 tag
-                <video 
-                  controls
-                  autoPlay
-                  className="w-full h-full object-contain"
-                  src={activePlayUrl}
-                  poster={selectedVideo.thumbnail}
-                />
-              ) : (
-                // Elegant local upload zone to re-bind the local video file
-                <div className="w-full h-full bg-slate-900 flex flex-col items-center justify-center p-6 text-center text-white relative">
-                  <div className="w-16 h-16 bg-[#58cc02]/10 text-[#58cc02] rounded-2xl flex items-center justify-center mb-4 border border-[#58cc02]/20">
-                    <UploadCloud size={32} />
+              <div className="w-full h-full relative">
+                {activePlayUrl ? (
+                  <video 
+                    controls
+                    autoPlay
+                    className="w-full h-full object-contain"
+                    src={activePlayUrl}
+                    poster={selectedVideo.thumbnail}
+                    onError={() => {
+                      console.warn("HTML5 playback error handled safely");
+                      setHasVideoPlayError(true);
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-slate-900 flex flex-col items-center justify-center">
+                    <div className="w-8 h-8 border-3 border-white border-t-transparent rounded-full animate-spin" />
                   </div>
-                  <h4 className="text-sm font-black mb-1.5 px-4 text-center leading-normal">
-                    {isRtl ? 'ملف الدرس غير متوقع أو غير متوفر حالياً' : 'Lesson file not loaded locally'}
-                  </h4>
-                  <p className="text-[11px] text-slate-400 font-bold mb-5 max-w-sm px-4 leading-relaxed">
-                    {isRtl 
-                      ? `لتشغيل هذا الدرس بجودة أصلية فائقة فورا، يرجى اختيار ملف الفيديو [ ${selectedVideo.fileName || 'ملف لدرس الفيديو'} ] لتثبيته محلياً.`
-                      : `To stream this video instantly with maximum offline speed, please choose your local file [ ${selectedVideo.fileName || 'Video lesson file'} ] to sync into your browser storage.`}
-                  </p>
-                  
-                  <label className="px-5 py-2.5 bg-[#58cc02] border-b-4 border-[#3c8c01] rounded-2xl text-[10px] font-black uppercase tracking-wider hover:bg-[#6be60c] transition-all cursor-pointer select-none shrink-0 inline-flex items-center gap-1.5 active:scale-95 duration-100">
-                    <FileVideo size={14} />
-                    {isRtl ? 'اختر ملف الفيديو للبدء 📁' : 'Choose Video File 📁'}
-                    <input 
-                      type="file" 
-                      accept="video/*" 
-                      className="hidden" 
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          setSavingRequiredFile(true);
-                          try {
-                            // 1. Cache in IndexedDB
-                            await storeVideoFile(selectedVideo.id, file);
+                )}
 
-                            // 2. Upload to server
-                            const fd = new FormData();
-                            fd.append('videoId', selectedVideo.id);
-                            fd.append('video', file);
-
-                            await fetch(`/api/videos/upload?videoId=${selectedVideo.id}`, {
-                              method: 'POST',
-                              body: fd
-                            });
-
-                            const url = URL.createObjectURL(file);
-                            setActivePlayUrl(url);
-                            await refreshLocalVideosMap();
-                          } catch (err) {
-                            console.error("Failed to store and upload selected file:", err);
-                          } finally {
-                            setSavingRequiredFile(false);
-                          }
-                        }
-                      }}
-                    />
-                  </label>
-                  
-                  {savingRequiredFile && (
-                    <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center space-y-3 z-30 animate-fade-in">
-                      <div className="w-8 h-8 border-3 border-[#58cc02] border-t-transparent rounded-full animate-spin" />
-                      <span className="text-[10px] uppercase font-black tracking-wider text-slate-300">{isRtl ? 'جاري تحسين وتهيئة الفيديو وحفظه فورا...' : 'Buffering & caching locally...'}</span>
+                {hasVideoPlayError && (
+                  <div className="absolute inset-0 bg-slate-950/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-white z-25 animate-fade-in font-sans">
+                    <div className="w-12 h-12 bg-rose-500/10 text-rose-400 rounded-2xl flex items-center justify-center mb-3 border border-rose-500/20">
+                      <AlertCircle size={24} />
                     </div>
-                  )}
-                </div>
-              )
+                    <h5 className="text-[13px] font-black mb-1 px-4 leading-normal text-rose-400">
+                      {isRtl ? 'عذراً، تعذر تشغيل ملف الفيديو المباشر في المتصفح' : 'Direct video stream cannot be loaded'}
+                    </h5>
+                    <p className="text-[10px] text-slate-400 font-bold mb-4 max-w-md px-4 leading-relaxed">
+                      {isRtl 
+                        ? `نظراً لإمكانية إعادة تشغيل خادم التطبيق السحابي المؤقت أو القيود المفروضة على IndexedDB بالمتصفح، قد لا يكون الملف متاحاً. يرجى إعادة اختيار ملف الفيديو [ ${selectedVideo.fileName || 'ملف الدرس'} ] من جهازك لرفعه للجميع واسترجاع البث فوراً!`
+                        : `Due to ephemeral cloud server restarts or browser sandbox storage limits, the video file might be off. Re-select [ ${selectedVideo.fileName || 'the lesson file'} ] to link it and stream instantly!`}
+                    </p>
+                    
+                    <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                      <label className="px-4 py-2 bg-[#58cc02] border-b-4 border-[#3c8c01] rounded-xl text-[9px] font-black uppercase tracking-wider hover:bg-[#6be60c] transition-all cursor-pointer select-none inline-flex items-center gap-1 active:scale-95 duration-100 text-white leading-none">
+                        <FileVideo size={12} />
+                        {isRtl ? 'اختر ملف الفيديو لإصلاحه 📁' : 'Choose Local File to Restore 📁'}
+                        <input 
+                          type="file" 
+                          accept="video/*" 
+                          className="hidden" 
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setSavingRequiredFile(true);
+                              try {
+                                // 1. Cache in IndexedDB
+                                try {
+                                  await storeVideoFile(selectedVideo.id, file);
+                                } catch (idbErr) {
+                                  console.warn("IndexedDB store fail within sandboxed iframe", String(idbErr));
+                                }
+
+                                // 2. Upload to server
+                                const fd = new FormData();
+                                fd.append('videoId', selectedVideo.id);
+                                fd.append('video', file);
+
+                                await fetch(`/api/videos/upload?videoId=${selectedVideo.id}`, {
+                                  method: 'POST',
+                                  body: fd
+                                });
+
+                                const url = URL.createObjectURL(file);
+                                setHasVideoPlayError(false);
+                                setActivePlayUrl(url);
+                                await refreshLocalVideosMap();
+                              } catch (err) {
+                                console.warn("Failed to store and upload selected file:", String(err));
+                              } finally {
+                                setSavingRequiredFile(false);
+                              }
+                            }
+                          }}
+                        />
+                      </label>
+                      
+                      <button 
+                        onClick={() => {
+                          setHasVideoPlayError(false);
+                          // Force a retry with a URL reset fallback helper
+                          const originalUrl = activePlayUrl;
+                          setActivePlayUrl('');
+                          setTimeout(() => setActivePlayUrl(originalUrl), 50);
+                        }}
+                        className="px-4 py-2 bg-slate-800 hover:bg-slate-700 transition-colors rounded-xl text-[9px] font-black uppercase tracking-wider text-slate-300"
+                      >
+                        {isRtl ? 'تخطي وإعادة المحاولة 🔄' : 'Ignore & Retry 🔄'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {savingRequiredFile && (
+                  <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center space-y-3 z-30 animate-fade-in">
+                    <div className="w-8 h-8 border-3 border-[#58cc02] border-t-transparent rounded-full animate-spin" />
+                    <span className="text-[10px] uppercase font-black tracking-wider text-slate-300">{isRtl ? 'جاري تحسين وتهيئة الفيديو وحفظه فورا...' : 'Buffering & caching locally...'}</span>
+                  </div>
+                )}
+              </div>
             ) : (
               // Youtube Player
               <iframe 
@@ -728,27 +809,80 @@ export const VideoLibrary = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     {uploadTab === 'direct' ? (
-                      /* File Uploader UI - Direct video */
-                      <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
-                          {isRtl ? 'اختر ملف الفيديو عالي الدقة (MP4, MOV, WEBM) 📂' : 'Select HD Video File (MP4, MOV, WEBM) 📂'}
+                      /* Flexible Direct Video Selection (External persistent Link vs local file upload) */
+                      <div className="space-y-4">
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                          {isRtl ? 'مصدر ملف الفيديو لتجنب الحذف الفجائي' : 'Video File Source (Prevents Ephemeral Erasing)'}
                         </label>
-                        <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-6 bg-slate-50 text-center hover:bg-slate-100/50 transition-colors cursor-pointer group">
-                          <input 
-                            type="file" 
-                            accept="video/*"
-                            required
-                            onChange={handleFileChange}
-                            className="absolute inset-0 opacity-0 cursor-pointer"
-                          />
-                          <UploadCloud size={32} className="mx-auto text-slate-400 group-hover:text-[#58cc02] transition-colors mb-2" />
-                          <p className="text-xs font-black text-slate-700">
-                            {videoFile ? videoFile.name : (isRtl ? 'اسحب ملف الفيديو هنا أو اضغط للتصفح' : 'Drag video file here or browse files')}
-                          </p>
-                          <p className="text-[9px] text-slate-400 mt-1 font-bold">
-                            {videoFile ? `${(videoFile.size / (1024*1024)).toFixed(1)} MB` : (isRtl ? 'سعة تحميل غير محدودة بدقة كاملة' : 'No size boundaries - Direct stream')}
-                          </p>
+                        <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
+                          <button
+                            type="button"
+                            onClick={() => { setDirectSourceMode('link'); setErrorText(''); }}
+                            className={`py-1.5 rounded-lg text-[10px] font-black transition-all ${
+                              directSourceMode === 'link' ? 'bg-[#58cc02] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                            }`}
+                          >
+                            {isRtl ? 'رابط ملف مباشر دائم (مستحسن ⚡)' : 'Persistent Direct URL (Recommended ⚡)'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setDirectSourceMode('file'); setErrorText(''); }}
+                            className={`py-1.5 rounded-lg text-[10px] font-black transition-all ${
+                              directSourceMode === 'file' ? 'bg-[#58cc02] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                            }`}
+                          >
+                            {isRtl ? 'رفع ملف فيديو (خادم مؤقت 📁)' : 'Upload Video File (Ephemeral 📁)'}
+                          </button>
                         </div>
+
+                        {directSourceMode === 'link' ? (
+                          /* Option A: Persistent Direct URL Link input */
+                          <div className="animate-fade-in">
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
+                              {isRtl ? 'رابط الفيديو المباشر المستضاف (تشغيل فوري دائم للجميع)' : 'Persistent Cloud Hosting Direct Link (Permanent Stream)'}
+                            </label>
+                            <input
+                              type="text"
+                              required={directSourceMode === 'link'}
+                              value={directLinkUrl}
+                              onChange={(e) => {
+                                setDirectLinkUrl(e.target.value);
+                                setErrorText('');
+                              }}
+                              placeholder={isRtl ? 'https://example.com/videos/lesson1.mp4 (رابط Dropbox أو Drive أو استضافة خارجية)' : 'e.g., dropbox direct link, static server url, etc'}
+                              className="w-full text-xs font-semibold border-2 border-slate-200 focus:border-[#58cc02] outline-none rounded-xl p-3.5 transition-colors placeholder-slate-300"
+                            />
+                            <p className="text-[9px] text-amber-600 font-bold mt-2 leading-relaxed">
+                              {isRtl 
+                                ? '⚠️ ملاحظة هامة: نظراً لطبيعة الخادم السحابي المؤقت، يُنصح بشدة بوضع الفيديوهات على Dropbox أو Google Drive ووضع الرابط المباشر هنا لضمان تشغيله بشكل دائم وثابت للطلاب دون الخوف من المسح المستقبلي.'
+                                : '⚠️ Highly recommended: Cloud links ensure steady, zero-touch perpetual views since the ephemeral server resets will not erase external files.'
+                              }
+                            </p>
+                          </div>
+                        ) : (
+                          /* Option B: Standard File Uploader UI - Direct video */
+                          <div className="animate-fade-in">
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
+                              {isRtl ? 'اختر ملف الفيديو عالي الدقة (MP4, MOV, WEBM) 📂' : 'Select HD Video File (MP4, MOV, WEBM) 📂'}
+                            </label>
+                            <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-6 bg-slate-50 text-center hover:bg-slate-100/50 transition-colors cursor-pointer group">
+                              <input 
+                                type="file" 
+                                accept="video/*"
+                                required={directSourceMode === 'file'}
+                                onChange={handleFileChange}
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                              />
+                              <UploadCloud size={32} className="mx-auto text-slate-400 group-hover:text-[#58cc02] transition-colors mb-2" />
+                              <p className="text-xs font-black text-slate-700">
+                                {videoFile ? videoFile.name : (isRtl ? 'اسحب ملف الفيديو هنا أو اضغط للتصفح' : 'Drag video file here or browse files')}
+                              </p>
+                              <p className="text-[9px] text-slate-400 mt-1 font-bold">
+                                {videoFile ? `${(videoFile.size / (1024*1024)).toFixed(1)} MB` : (isRtl ? 'ملفات يتم حفظها محلياً ومؤقتاً' : 'No size boundaries - Local & Ephemeral Server Storage')}
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       /* YouTube Link input */

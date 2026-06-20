@@ -2806,6 +2806,22 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
     }
   });
 
+  function getMimeType(filename: string): string {
+    const ext = path.extname(filename).toLowerCase();
+    switch (ext) {
+      case '.mp4': return 'video/mp4';
+      case '.webm': return 'video/webm';
+      case '.ogg': return 'video/ogg';
+      case '.mov':
+      case '.qt': return 'video/quicktime';
+      case '.mkv': return 'video/x-matroska';
+      case '.avi': return 'video/x-msvideo';
+      case '.wmv': return 'video/x-ms-wmv';
+      case '.3gp': return 'video/3gpp';
+      default: return 'video/mp4';
+    }
+  }
+
   app.get("/api/videos/stream/:id", (req, res) => {
     try {
       const videoId = req.params.id;
@@ -2820,6 +2836,7 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
       const stat = fs.statSync(videoPath);
       const fileSize = stat.size;
       const range = req.headers.range;
+      const contentType = getMimeType(matchedFile);
       
       if (range) {
         const parts = range.replace(/bytes=/, "").split("-");
@@ -2837,7 +2854,7 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
           "Content-Range": `bytes ${start}-${end}/${fileSize}`,
           "Accept-Ranges": "bytes",
           "Content-Length": chunksize,
-          "Content-Type": "video/mp4",
+          "Content-Type": contentType,
         };
         
         res.writeHead(206, head);
@@ -2845,7 +2862,7 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
       } else {
         const head = {
           "Content-Length": fileSize,
-          "Content-Type": "video/mp4",
+          "Content-Type": contentType,
         };
         res.writeHead(200, head);
         fs.createReadStream(videoPath).pipe(res);
