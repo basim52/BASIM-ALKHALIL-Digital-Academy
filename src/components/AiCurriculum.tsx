@@ -1840,6 +1840,122 @@ export const AiCurriculum = ({
   const [customActivities, setCustomActivities] = useState<Record<string, any>>({});
   const [loadingActivity, setLoadingActivity] = useState<boolean>(false);
 
+  // Custom states for 3-Question Lesson Quizzes
+  const [aiLessonResultsMap, setAiLessonResultsMap] = useState<Record<string, any>>({});
+  const [activeLessonQuiz, setActiveLessonQuiz] = useState<any[] | null>(null);
+  const [loadingQuiz, setLoadingQuiz] = useState<boolean>(false);
+  const [lessonQuizAnswers, setLessonQuizAnswers] = useState<Record<number, number>>({});
+  const [lessonQuizSubmitted, setLessonQuizSubmitted] = useState<boolean>(false);
+  const [lessonQuizResultScore, setLessonQuizResultScore] = useState<number | null>(null);
+  const [selectedQuizDifficulty, setSelectedQuizDifficulty] = useState<string>('Intermediate');
+
+  useEffect(() => {
+    if (selectedCustomUnit) {
+      setSelectedQuizDifficulty(selectedCustomUnit.level || 'Intermediate');
+    }
+  }, [selectedCustomUnit]);
+
+  const handleGenerateLessonQuiz = async (unit: any) => {
+    if (!unit) return;
+    setLoadingQuiz(true);
+    setLessonQuizAnswers({});
+    setLessonQuizSubmitted(false);
+    setLessonQuizResultScore(null);
+    setActiveLessonQuiz(null);
+
+    try {
+      const response = await fetch("/api/curriculum/lesson-quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject: plannerSubject || "AI Curriculum",
+          level: selectedQuizDifficulty,
+          unitTitle: unit.titleAr || unit.title || "",
+          unitDescription: unit.descriptionAr || unit.description || "",
+          lang: isRtl ? "ar" : "en",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate quiz");
+      }
+
+      const data = await response.json();
+      setActiveLessonQuiz(data);
+    } catch (err) {
+      console.error("Error generating quiz:", err);
+      alert(isRtl ? "فشل توليد الاختبار الذكي، يرجى المحاولة لاحقاً." : "Failed to generate smart quiz, please try again later.");
+    } finally {
+      setLoadingQuiz(false);
+    }
+  };
+
+  const handleSubmitLessonQuiz = async (unit: any) => {
+    if (!activeLessonQuiz || !unit) return;
+
+    let score = 0;
+    activeLessonQuiz.forEach((q, idx) => {
+      if (lessonQuizAnswers[idx] === q.correctIndex) {
+        score++;
+      }
+    });
+
+    setLessonQuizResultScore(score);
+    setLessonQuizSubmitted(true);
+
+    const activeAuth = auth.currentUser;
+    const currentUid = userProfile?.uid || activeAuth?.uid;
+    const quizId = `${unit.id}-quiz`;
+
+    setCompletedCustomUnitIds(prev => {
+      const next = new Set(prev);
+      next.add(quizId);
+      localStorage.setItem('ai_completed_custom_units', JSON.stringify(Array.from(next)));
+      return next;
+    });
+
+    setAiLessonResultsMap(prev => ({
+      ...prev,
+      [quizId]: {
+        score,
+        total: 3,
+        completedAt: new Date(),
+      }
+    }));
+
+    if (!currentUid) {
+      alert(isRtl 
+        ? `رائع! تم تسليم اختبارك بنجاح وحصلت على ${score}/3 محلياً!` 
+        : `Well done! Your quiz was submitted successfully with a score of ${score}/3 locally!`
+      );
+      return;
+    }
+
+    try {
+      const resultObj = {
+        userId: currentUid,
+        lessonId: quizId,
+        courseId: 'ai-curriculum',
+        score: score,
+        total: 3,
+        studentName: userProfile?.displayName || activeAuth?.displayName || (isRtl ? 'طالب متميز' : 'Shining Student'),
+        completedAt: serverTimestamp(),
+      };
+
+      await addDoc(collection(db, 'lessonResults'), resultObj);
+      alert(isRtl 
+        ? `رائع! تم تسجيل درجة اختبارك (${score}/3) بنجاح في سجل الدارس ولا يمكن إعادته.` 
+        : `Excellent! Your quiz grade (${score}/3) has been successfully recorded in your profile and cannot be retaken.`
+      );
+    } catch (error) {
+      console.error("Error saving lesson quiz result:", error);
+      alert(isRtl 
+        ? 'تم حفظ نتيجة اختبارك محلياً بنجاح! سيتم المزامنة مع السحابة لاحقاً.' 
+        : 'Your quiz result has been saved locally! Will sync with the cloud later.'
+      );
+    }
+  };
+
   useEffect(() => {
     if (initialLobbyTab) {
       setLobbyTab(initialLobbyTab as any);
@@ -1859,9 +1975,17 @@ export const AiCurriculum = ({
         );
         const querySnapshot = await getDocs(q);
         const completedIds = new Set<string>();
+        const resultsMap: Record<string, any> = {};
         querySnapshot.forEach(doc => {
-          completedIds.add(doc.data().lessonId);
+          const data = doc.data();
+          completedIds.add(data.lessonId);
+          resultsMap[data.lessonId] = {
+            score: data.score,
+            total: data.total,
+            completedAt: data.completedAt || data.timestamp,
+          };
         });
+        setAiLessonResultsMap(resultsMap);
         
         // Merge with locally stored completed items
         try {
@@ -10228,6 +10352,11 @@ Output Summary for [${topic}]:
                   setSelectedCustomUnit(null);
                   setCustomUnitQuizSelected(null);
                   setCustomUnitQuizCorrect(null);
+                  setActiveLessonQuiz(null);
+                  setLoadingQuiz(false);
+                  setLessonQuizAnswers({});
+                  setLessonQuizSubmitted(false);
+                  setLessonQuizResultScore(null);
                 }}
               >
                 <motion.div 
@@ -10253,6 +10382,11 @@ Output Summary for [${topic}]:
                         setSelectedCustomUnit(null);
                         setCustomUnitQuizSelected(null);
                         setCustomUnitQuizCorrect(null);
+                        setActiveLessonQuiz(null);
+                        setLoadingQuiz(false);
+                        setLessonQuizAnswers({});
+                        setLessonQuizSubmitted(false);
+                        setLessonQuizResultScore(null);
                       }}
                       className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center font-bold text-lg cursor-pointer transition-all shrink-0 ml-4"
                     >
@@ -10285,7 +10419,7 @@ Output Summary for [${topic}]:
                         <div className="space-y-2">
                           <h5 className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5 justify-start">
                             <BookOpen size={14} className="text-amber-400" />
-                            {isRtl ? '💡 المفهوم والدرس اليومي' : '💡 CORE LESSON CONCEPT'}
+                            {isRtl ? '💡 המفهوم والدرس اليومي' : '💡 CORE LESSON CONCEPT'}
                           </h5>
                           <p className="text-xs text-slate-200 leading-relaxed font-semibold bg-white/[0.02] p-4 rounded-2xl border border-white/5">
                             {act.concept}
@@ -10376,6 +10510,194 @@ Output Summary for [${topic}]:
                             )}
                           </div>
                         </div>
+
+                        {/* Custom Lesson Quiz Section */}
+                        {isCompleted && (
+                          <div className="border-t border-dashed border-white/10 pt-6 mt-6 space-y-4">
+                            <h5 className="text-xs font-black uppercase tracking-wider text-amber-405 text-amber-400 flex items-center gap-1.5 justify-start">
+                              <BrainCircuit size={14} className="text-amber-400" />
+                              {isRtl ? '📝 اختبار الدرس المنجز (٣ أسئلة)' : '📝 COMPLETED LESSON ASSESSMENT (3 QUESTIONS)'}
+                            </h5>
+
+                            {completedCustomUnitIds.has(selectedCustomUnit.id + '-quiz') ? (
+                              <div className="bg-emerald-500/10 p-5 rounded-2xl border border-emerald-500/20 space-y-3 text-right">
+                                <div className="flex items-center gap-2 justify-start">
+                                  <span className="text-lg">🏆</span>
+                                  <h6 className="text-xs font-black text-emerald-400">
+                                    {isRtl ? 'تم تقديم هذا الاختبار بنجاح!' : 'Quiz Submitted Successfully!'}
+                                  </h6>
+                                </div>
+                                <p className="text-[11px] text-slate-300 font-bold leading-relaxed">
+                                  {isRtl 
+                                    ? `لقد خضت اختبار هذا الدرس وحصلت على درجة: ${aiLessonResultsMap[selectedCustomUnit.id + '-quiz']?.score ?? 3} من 3.` 
+                                    : `You have completed this lesson's quiz and scored: ${aiLessonResultsMap[selectedCustomUnit.id + '-quiz']?.score ?? 3} out of 3.`
+                                  }
+                                </p>
+                                <div className="text-[9px] bg-emerald-500/15 text-emerald-400 px-3 py-1 rounded-full inline-block font-black uppercase tracking-wider">
+                                  {isRtl ? '🔒 لا يمكن إعادة تقديم الاختبار' : '🔒 Retakes are disabled for this quiz'}
+                                </div>
+                              </div>
+                            ) : !activeLessonQuiz ? (
+                              <div className="bg-[#050b14] p-5 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center space-y-4 py-8">
+                                <Sparkles size={24} className="text-amber-400 animate-pulse" />
+                                <p className="text-xs font-bold text-slate-300">
+                                  {isRtl 
+                                    ? 'يمكنك الآن توليد اختبار تقييمي مخصص من ٣ أسئلة بناءً على محتوى هذا الدرس لتعزيز فهمك وحفظ النتيجة في سجلك.' 
+                                    : 'You can now generate a personalized 3-question assessment based on this lesson to test your skills and save your grade.'
+                                  }
+                                </p>
+
+                                {/* Difficulty Level Selector */}
+                                <div className="flex flex-col items-center gap-2 w-full max-w-xs bg-white/[0.02] p-3 rounded-2xl border border-white/5">
+                                  <label className="text-[10px] font-black text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                                    🎯 {isRtl ? 'اختر مستوى صعوبة الاختبار:' : 'Choose quiz difficulty:'}
+                                  </label>
+                                  <div className="grid grid-cols-3 gap-1 bg-white/5 p-1 rounded-xl w-full border border-white/5">
+                                    {[
+                                      { value: 'Beginner', labelAr: 'مبتدئ', labelEn: 'Beginner' },
+                                      { value: 'Intermediate', labelAr: 'متوسط', labelEn: 'Intermediate' },
+                                      { value: 'Advanced', labelAr: 'متقدم', labelEn: 'Advanced' }
+                                    ].map((opt) => {
+                                      const isSel = selectedQuizDifficulty === opt.value;
+                                      return (
+                                        <button
+                                          key={opt.value}
+                                          type="button"
+                                          onClick={() => setSelectedQuizDifficulty(opt.value)}
+                                          className={`py-1.5 px-1 rounded-lg text-[10px] font-black transition-all cursor-pointer ${
+                                            isSel 
+                                              ? 'bg-amber-500 text-slate-950 shadow-md' 
+                                              : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
+                                          }`}
+                                        >
+                                          {isRtl ? opt.labelAr : opt.labelEn}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+
+                                <button
+                                  onClick={() => handleGenerateLessonQuiz(selectedCustomUnit)}
+                                  disabled={loadingQuiz}
+                                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-5 py-2.5 rounded-xl text-xs font-black tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-amber-500/10"
+                                >
+                                  {loadingQuiz ? (
+                                    <>
+                                      <div className="w-3 h-3 rounded-full border-2 border-slate-950/20 border-t-slate-950 animate-spin" />
+                                      {isRtl ? 'جاري التوليد عبر الذكاء الاصطناعي...' : 'Generating via AI...'}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <BrainCircuit size={13} />
+                                      {isRtl ? 'توليد اختبار الدرس المخصص 🧠' : 'Generate Custom Lesson Quiz 🧠'}
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="bg-[#050b14] p-5 rounded-2xl border border-white/5 space-y-6 text-right">
+                                {activeLessonQuiz.map((q, qIdx) => {
+                                  const selectedOptionIdx = lessonQuizAnswers[qIdx];
+                                  
+                                  return (
+                                    <div key={qIdx} className="space-y-3 border-b border-white/5 pb-4 last:border-0 last:pb-0">
+                                      <div className="flex items-start gap-2 justify-start">
+                                        <span className="bg-amber-500/15 text-amber-400 text-[10px] font-black px-2 py-0.5 rounded-md">
+                                          {isRtl ? `سؤال ${qIdx + 1}` : `Q${qIdx + 1}`}
+                                        </span>
+                                        <p className="text-xs font-bold text-white text-right leading-relaxed">
+                                          {q.question}
+                                        </p>
+                                      </div>
+
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                                        {q.options.map((option: string, oIdx: number) => {
+                                          const isOptionSelected = selectedOptionIdx === oIdx;
+                                          const isCorrectOption = oIdx === q.correctIndex;
+                                          
+                                          let btnStyle = 'border-white/5 bg-white/[0.02] hover:bg-white/5 text-slate-300';
+                                          if (lessonQuizSubmitted) {
+                                            if (isOptionSelected) {
+                                              btnStyle = isCorrectOption 
+                                                ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' 
+                                                : 'border-rose-500 bg-rose-500/10 text-rose-400';
+                                            } else if (isCorrectOption) {
+                                              btnStyle = 'border-emerald-500/50 bg-emerald-500/5 text-emerald-400/80';
+                                            }
+                                          } else if (isOptionSelected) {
+                                            btnStyle = 'border-amber-500 bg-amber-500/10 text-amber-400';
+                                          }
+
+                                          return (
+                                            <button
+                                              key={oIdx}
+                                              disabled={lessonQuizSubmitted}
+                                              onClick={() => {
+                                                setLessonQuizAnswers(prev => ({
+                                                  ...prev,
+                                                  [qIdx]: oIdx
+                                                }));
+                                              }}
+                                              className={`text-right w-full p-3 rounded-xl text-[11px] font-semibold border transition-all flex items-center justify-between cursor-pointer ${btnStyle}`}
+                                            >
+                                              <span>{option}</span>
+                                              {isOptionSelected && (
+                                                <span className="text-xs">
+                                                  {lessonQuizSubmitted ? (isCorrectOption ? '✅' : '❌') : '●'}
+                                                </span>
+                                              )}
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+
+                                      {lessonQuizSubmitted && q.explanation && (
+                                        <div className="p-3 rounded-xl text-[10px] font-medium bg-white/[0.02] border border-white/5 text-slate-400 leading-relaxed">
+                                          <span className="font-bold text-amber-400 block mb-1">{isRtl ? '💡 شرح الإجابة:' : '💡 Explanation:'}</span>
+                                          {q.explanation}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+
+                                {!lessonQuizSubmitted ? (
+                                  <div className="pt-4 border-t border-white/5 flex justify-end">
+                                    <button
+                                      onClick={() => handleSubmitLessonQuiz(selectedCustomUnit)}
+                                      disabled={Object.keys(lessonQuizAnswers).length < 3}
+                                      className={`px-6 py-2.5 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer ${
+                                        Object.keys(lessonQuizAnswers).length < 3
+                                          ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                                          : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/10'
+                                      }`}
+                                    >
+                                      <CheckCircle size={13} />
+                                      {isRtl ? 'تسليم الإجابات ورصد الدرجة 🎓' : 'Submit Answers & Save Grade 🎓'}
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="pt-4 border-t border-white/5 bg-emerald-500/5 p-4 rounded-xl border border-emerald-500/10 flex flex-col sm:flex-row justify-between items-center gap-3">
+                                    <div className="text-right">
+                                      <h6 className="text-xs font-black text-emerald-400">
+                                        {isRtl ? `درجتك الإجمالية: ${lessonQuizResultScore} من 3` : `Your Total Score: ${lessonQuizResultScore} / 3`}
+                                      </h6>
+                                      <p className="text-[10px] text-slate-400 leading-relaxed mt-1">
+                                        {isRtl 
+                                          ? 'تم حفظ النتيجة بنجاح في سجل الدارس ولا يمكن إعادة الاختبار.' 
+                                          : 'Grade recorded successfully in student record. Retakes are disabled.'}
+                                      </p>
+                                    </div>
+                                    <div className="text-[18px]">
+                                      {lessonQuizResultScore === 3 ? '🎉👑' : lessonQuizResultScore === 2 ? '👏✨' : '📚💪'}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </>
                     )}
                   </div>
@@ -10387,6 +10709,11 @@ Output Summary for [${topic}]:
                         setSelectedCustomUnit(null);
                         setCustomUnitQuizSelected(null);
                         setCustomUnitQuizCorrect(null);
+                        setActiveLessonQuiz(null);
+                        setLoadingQuiz(false);
+                        setLessonQuizAnswers({});
+                        setLessonQuizSubmitted(false);
+                        setLessonQuizResultScore(null);
                       }}
                       className="text-slate-400 hover:text-white text-xs font-black cursor-pointer transition-all self-stretch sm:self-auto text-center"
                     >

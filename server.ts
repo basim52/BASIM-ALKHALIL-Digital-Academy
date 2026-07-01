@@ -1981,6 +1981,158 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
     }
   });
 
+  // Local helper for lesson 3-question quiz fallback
+  function getLocalFallbackLessonQuiz(unitTitle: string, isAr: boolean) {
+    const title = unitTitle || "AI Concept";
+    if (isAr) {
+      return [
+        {
+          question: `ما هو المفهوم الأساسي الذي تدور حوله دراستنا لـ "${title}"؟`,
+          options: [
+            "تطبيق المبادئ النظرية في سيناريوهات عملية تفاعلية",
+            "حفظ المصطلحات والتعريفات غيباً دون فهم عميق",
+            "التركيز على المشاهدة السلبية وإهمال التمارين التطبيقية",
+            "تجاهل التطور المستمر للأدوات التقنية والذكية"
+          ],
+          correctIndex: 0,
+          explanation: "التطبيق العملي التفاعلي هو حجر الأساس لفهم التكنولوجيا والذكاء الاصطناعي بشكل مستدام وعميق."
+        },
+        {
+          question: `كيف يساهم إكمال الأنشطة التفاعلية والعملية في تحسين كفاءة الطالب في "${title}"؟`,
+          options: [
+            "يزيد من تعقيد المادة الدراسية ويقلل الفهم العام",
+            "يمنح الطالب مهارات تحليلية وتجريبية لحل المشكلات المعقدة",
+            "لا يوجد أي تأثير يذكر للتدريب العملي على الطالب",
+            "يؤدي إلى الاعتماد الكلي على الآلة دون تفكير بشري مستقل"
+          ],
+          correctIndex: 1,
+          explanation: "المحاكاة والتجارب التفاعلية تطور المهارات التحليلية والقدرة على ابتكار حلول ذكية للمشكلات."
+        },
+        {
+          question: `ما هي الخطوة الأفضل بعد الانتهاء من استيعاب المفاهيم النظرية لـ "${title}"؟`,
+          options: [
+            "الانتقال إلى الممارسات العملية والتحديات الذاتية واختبار الذات",
+            "التوقف التام عن مراجعة المادة لعدة شهور متواصلة",
+            "البحث عن موضوع مختلف كلياً وتجاهل التطبيق العملي",
+            "افتراض الفهم الكامل دون خوض أي تقييم أو اختبار قياسي"
+          ],
+          correctIndex: 0,
+          explanation: "اختبار معلوماتك ذاتياً وحل المسائل العملية يعزز تثبيت المعلومة وتصحيح المفاهيم المغلوطة فوراً."
+        }
+      ];
+    } else {
+      return [
+        {
+          question: `What is the main learning objective of our study of "${title}"?`,
+          options: [
+            "Applying theoretical principles to interactive, practical scenarios",
+            "Rote memorization of terminology without deep understanding",
+            "Passive viewing and avoiding hands-on practice",
+            "Ignoring the continuous development of intelligent tools"
+          ],
+          correctIndex: 0,
+          explanation: "Hands-on application is the cornerstone of understanding technology and AI sustainably and deeply."
+        },
+        {
+          question: `How does completing the practical activities improve the student's competence in "${title}"?`,
+          options: [
+            "It unnecessarily complicates the subject matter",
+            "It equips the student with analytical and experimental problem-solving skills",
+            "It has no measurable impact on the student's learning outcome",
+            "It leads to total dependency on machines without independent human logic"
+          ],
+          correctIndex: 1,
+          explanation: "Simulation and interactive experiments build critical thinking and the ability to formulate smart solutions."
+        },
+        {
+          question: `What is the most recommended next step after absorbing the theoretical concepts of "${title}"?`,
+          options: [
+            "Engaging with practical sandboxes and self-assessing via quizzes",
+            "Ceasing all studies on the topic for several months",
+            "Moving onto a completely unrelated topic immediately",
+            "Assuming full comprehension without ever testing your knowledge"
+          ],
+          correctIndex: 0,
+          explanation: "Self-assessment and interactive quizzes solidify concepts and correct any misunderstandings immediately."
+        }
+      ];
+    }
+  }
+
+  // 3-Question Lesson Quiz Generator
+  app.post("/api/curriculum/lesson-quiz", async (req, res) => {
+    try {
+      const { subject, level, unitTitle, unitDescription, lang } = req.body;
+      const isAr = lang === 'ar';
+      
+      if (!initAI() || !aiLive) {
+        logToFile("[Info] Using local fallback for 3-Question Lesson Quiz endpoint");
+        return res.json(getLocalFallbackLessonQuiz(unitTitle, isAr));
+      }
+
+      const promptText = `
+        SYSTEM: You are an Educational Assessment Specialist at Basim Alkhalil Academy.
+        TASK: Write exactly 3 smart, engaging multiple-choice questions for a quiz testing comprehension of this specific lesson.
+        
+        CONTEXT:
+        - Subject of Study: "${subject || 'AI Curriculum'}"
+        - Academic Level: "${level || 'Intermediate'}"
+        - Unit Title: "${unitTitle}"
+        - Unit Description: "${unitDescription || ''}"
+        
+        You MUST return a JSON array containing exactly 3 items. Each item must have these EXACT fields:
+        - "question": A smart multiple-choice quiz question related directly to the content or concepts of this unit (concept-testing). Written in beautiful, encouraging ${isAr ? 'Arabic' : 'English'}.
+        - "options": A list of exactly 4 plausible multiple-choice options with exactly 1 correct answer.
+        - "correctIndex": The integer index (0-indexed, i.e., 0, 1, 2, or 3) of the correct option in the options array.
+        - "explanation": A brief, highly encouraging explanation (in ${isAr ? 'Arabic' : 'English'}) of why that option is correct.
+        
+        Do not output any markdown formatting other than raw JSON.
+        
+        Example JSON output structure:
+        [
+          {
+            "question": "...",
+            "options": ["...", "...", "...", "..."],
+            "correctIndex": 1,
+            "explanation": "..."
+          },
+          {
+            "question": "...",
+            "options": ["...", "...", "...", "..."],
+            "correctIndex": 2,
+            "explanation": "..."
+          },
+          {
+            "question": "...",
+            "options": ["...", "...", "...", "..."],
+            "correctIndex": 0,
+            "explanation": "..."
+          }
+        ]
+      `;
+
+      const result = await callAiWithRetry({
+        contents: [{ role: 'user', parts: [{ text: promptText }] }],
+        config: { responseMimeType: "application/json" }
+      });
+
+      const text = result.text || "";
+      let cleanText = text.trim();
+      if (cleanText.startsWith("```")) {
+        cleanText = cleanText.replace(/^```json\n?/, "").replace(/\n?```$/, "");
+      }
+      res.json(JSON.parse(cleanText));
+    } catch (error: any) {
+      logToFile(`[Error] 3-Question Lesson Quiz generation failed: ${error.message}. Returning fallback.`);
+      try {
+        const { unitTitle, lang } = req.body;
+        res.json(getLocalFallbackLessonQuiz(unitTitle, lang === 'ar'));
+      } catch (nestedErr) {
+        res.status(500).json({ error: "Internal fallback error" });
+      }
+    }
+  });
+
   // Video Quiz Generator
   app.post("/api/generate/video-quiz", async (req, res) => {
     try {
