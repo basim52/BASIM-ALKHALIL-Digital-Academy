@@ -53,7 +53,8 @@ import {
   ExternalLink,
   ShieldCheck,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  GraduationCap
 } from 'lucide-react';
 
 interface Lesson {
@@ -1848,12 +1849,46 @@ export const AiCurriculum = ({
   const [lessonQuizSubmitted, setLessonQuizSubmitted] = useState<boolean>(false);
   const [lessonQuizResultScore, setLessonQuizResultScore] = useState<number | null>(null);
   const [selectedQuizDifficulty, setSelectedQuizDifficulty] = useState<string>('Intermediate');
+  const [showQuizReview, setShowQuizReview] = useState<boolean>(false);
+  const [showAICertificateModal, setShowAICertificateModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (selectedCustomUnit) {
       setSelectedQuizDifficulty(selectedCustomUnit.level || 'Intermediate');
     }
   }, [selectedCustomUnit]);
+
+  const completedLessonQuizzes = Object.entries(aiLessonResultsMap)
+    .filter(([key]) => key.endsWith('-quiz'))
+    .map(([key, value]: any) => {
+      const unitId = key.replace('-quiz', '');
+      return {
+        unitId,
+        score: value.score ?? 0,
+        difficulty: value.difficulty ?? 'Intermediate',
+        timestamp: value.timestamp ?? null,
+        questions: value.questions ?? []
+      };
+    });
+
+  const totalCompletedQuizzes = completedLessonQuizzes.length;
+  const averageQuizScore = totalCompletedQuizzes > 0
+    ? (completedLessonQuizzes.reduce((acc, q) => acc + q.score, 0) / totalCompletedQuizzes).toFixed(1)
+    : '0';
+
+  const isEligibleForAICertificate = totalCompletedQuizzes >= 3 && (parseFloat(averageQuizScore) >= 1.8);
+
+  const getUnitTitle = (unitId: string) => {
+    if (customStudyPlan?.levels) {
+      for (const lvl of customStudyPlan.levels) {
+        if (lvl.units) {
+          const u = lvl.units.find((unit: any) => unit.id === unitId);
+          if (u) return isRtl ? u.titleAr : u.title;
+        }
+      }
+    }
+    return isRtl ? 'درس مخصص' : 'Custom Lesson';
+  };
 
   const handleGenerateLessonQuiz = async (unit: any) => {
     if (!unit) return;
@@ -1920,6 +1955,9 @@ export const AiCurriculum = ({
         score,
         total: 3,
         completedAt: new Date(),
+        questions: activeLessonQuiz,
+        answers: lessonQuizAnswers,
+        difficulty: selectedQuizDifficulty,
       }
     }));
 
@@ -1940,6 +1978,9 @@ export const AiCurriculum = ({
         total: 3,
         studentName: userProfile?.displayName || activeAuth?.displayName || (isRtl ? 'طالب متميز' : 'Shining Student'),
         completedAt: serverTimestamp(),
+        questions: activeLessonQuiz,
+        answers: lessonQuizAnswers,
+        difficulty: selectedQuizDifficulty,
       };
 
       await addDoc(collection(db, 'lessonResults'), resultObj);
@@ -1983,6 +2024,9 @@ export const AiCurriculum = ({
             score: data.score,
             total: data.total,
             completedAt: data.completedAt || data.timestamp,
+            questions: data.questions || null,
+            answers: data.answers || null,
+            difficulty: data.difficulty || 'Intermediate',
           };
         });
         setAiLessonResultsMap(resultsMap);
@@ -8653,6 +8697,126 @@ Output Summary for [${topic}]:
                             )}
                           </ul>
                         </div>
+
+                        {/* سجل علامات الدارس الذكي بالذكاء الاصطناعي */}
+                        <div className="bg-[#050b14]/90 p-6 rounded-3xl border border-white/5 space-y-4 text-right">
+                          <h4 className="text-xs font-black text-amber-400 uppercase tracking-wider mb-1 flex items-center gap-1.5 justify-start">
+                            <GraduationCap className="text-amber-400" size={16} />
+                            {isRtl ? 'سجل درجات اختبارات الذكاء الاصطناعي 📊' : 'AI Quizzes Gradebook 📊'}
+                          </h4>
+                          <p className="text-[10px] text-slate-400 leading-relaxed text-right">
+                            {isRtl 
+                              ? 'تابع تقدمك الأكاديمي والدرجات المحققة في اختبارات الأكاديمية والدروس المخصصة.' 
+                              : 'Track your academic performance across customized lesson-by-lesson AI quizzes.'}
+                          </p>
+
+                          {completedLessonQuizzes.length === 0 ? (
+                            <div className="p-4 bg-white/[0.01] border border-dashed border-white/10 rounded-2xl text-center space-y-2">
+                              <span className="text-lg block">📭</span>
+                              <p className="text-[10px] font-bold text-slate-500">
+                                {isRtl ? 'لا توجد اختبارات منجزة بعد.' : 'No quizzes completed yet.'}
+                              </p>
+                              <p className="text-[9px] text-slate-600">
+                                {isRtl ? 'قم بإنهاء درس، وولد له اختباراً عبر الذكاء الاصطناعي لتبدأ البناء!' : 'Finish a lesson, generate its AI assessment, and submit to see results!'}
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="space-y-3 text-right">
+                              {/* Stats Overview Grid */}
+                              <div className="grid grid-cols-2 gap-2 bg-white/5 p-3 rounded-2xl border border-white/5">
+                                <div className="text-center">
+                                  <span className="text-[8px] font-black text-slate-400 block uppercase">{isRtl ? 'إجمالي الاختبارات' : 'QUIZZES TAKEN'}</span>
+                                  <span className="text-lg font-black text-white">{totalCompletedQuizzes}</span>
+                                </div>
+                                <div className="text-center border-r border-white/5">
+                                  <span className="text-[8px] font-black text-slate-400 block uppercase">{isRtl ? 'معدل الدرجات' : 'AVG SCORE'}</span>
+                                  <span className="text-lg font-black text-amber-400">{averageQuizScore} <span className="text-[10px] text-slate-500">/ 3</span></span>
+                                </div>
+                              </div>
+
+                              {/* Quizzes List */}
+                              <div className="max-h-48 overflow-y-auto space-y-2 pr-1 custom-scrollbar text-right">
+                                {completedLessonQuizzes.map((q) => {
+                                  const unitTitle = getUnitTitle(q.unitId);
+                                  const scoreColor = q.score === 3 
+                                    ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' 
+                                    : q.score === 2 
+                                      ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' 
+                                      : 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+
+                                  return (
+                                    <div key={q.unitId} className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col gap-1.5 text-right">
+                                      <div className="flex items-center justify-between gap-2">
+                                        <span className={`text-[8px] font-black px-1.5 py-0.5 rounded border uppercase tracking-wider shrink-0 ${scoreColor}`}>
+                                          {isRtl ? `الدرجة: ${q.score}/3` : `Score: ${q.score}/3`}
+                                        </span>
+                                        <h6 className="text-[10px] font-bold text-white truncate text-right flex-1">
+                                          {unitTitle}
+                                        </h6>
+                                      </div>
+                                      <div className="flex items-center justify-between text-[8px] text-slate-400">
+                                        <button
+                                          onClick={() => {
+                                            if (customStudyPlan?.levels) {
+                                              for (const lvl of customStudyPlan.levels) {
+                                                if (lvl.units) {
+                                                  const foundUnit = lvl.units.find((u: any) => u.id === q.unitId);
+                                                  if (foundUnit) {
+                                                    setSelectedCustomUnit(foundUnit);
+                                                    setShowQuizReview(true);
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }}
+                                          className="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-0.5 cursor-pointer underline decoration-dotted"
+                                        >
+                                          🔍 {isRtl ? 'مراجعة ورقة الأسئلة' : 'Review Quiz'}
+                                        </button>
+                                        <span className="bg-white/5 px-1.5 py-0.5 rounded text-slate-400 font-black">
+                                          {q.difficulty === 'Beginner' ? (isRtl ? 'مبتدئ' : 'Beginner') : q.difficulty === 'Intermediate' ? (isRtl ? 'متوسط' : 'Intermediate') : (isRtl ? 'متقدم' : 'Advanced')}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+
+                              {/* Certification Access */}
+                              {isEligibleForAICertificate ? (
+                                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-right space-y-2 animate-pulse mt-2">
+                                  <div className="flex items-center gap-1.5 justify-start">
+                                    <span className="text-xs">🏆</span>
+                                    <h6 className="text-[10px] font-black text-amber-300">
+                                      {isRtl ? 'مؤهل لشهادة التميز! 🎓' : 'Eligible for Excellence! 🎓'}
+                                    </h6>
+                                  </div>
+                                  <p className="text-[9px] text-slate-300 leading-normal text-right">
+                                    {isRtl 
+                                      ? 'تهانينا الحارة! لقد حققت شرط اجتياز ٣ اختبارات بمعدل ممتاز. بإمكانك الآن طباعة شهادة الإنجاز فورياً.' 
+                                      : 'Fabulous! You have completed at least 3 AI Quizzes with a passing grade. Access your formal certificate.'}
+                                  </p>
+                                  <button
+                                    onClick={() => setShowAICertificateModal(true)}
+                                    className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2 rounded-xl text-[9px] uppercase tracking-wider cursor-pointer transition-all flex items-center justify-center gap-1.5"
+                                  >
+                                    <Sparkles size={11} />
+                                    {isRtl ? 'عرض وطباعة شهادة التفوق 📜' : 'View & Print Certificate 📜'}
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="p-2.5 bg-white/[0.02] border border-white/5 rounded-xl text-right">
+                                  <span className="text-[8px] font-bold text-amber-400 block mb-1">🎓 {isRtl ? 'متطلبات شهادة التفوق:' : 'EXCELLENCE CERTIFICATE REQUIREMENT:'}</span>
+                                  <p className="text-[9px] text-slate-500 leading-normal text-right">
+                                    {isRtl 
+                                      ? `أكمل على الأقل ٣ اختبارات في الدروس المنجزة بمعدل نجاح لا يقل عن ٦٠٪ (درجتان أو أكثر لكل اختبار). التقدم الحالي: (${totalCompletedQuizzes} من ٣).`
+                                      : `Complete at least 3 AI quizzes with an average score of >= 60% (2+ score). Progress: (${totalCompletedQuizzes}/3).`}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Right: Output Result Dashboard */}
@@ -10357,6 +10521,7 @@ Output Summary for [${topic}]:
                   setLessonQuizAnswers({});
                   setLessonQuizSubmitted(false);
                   setLessonQuizResultScore(null);
+                  setShowQuizReview(false);
                 }}
               >
                 <motion.div 
@@ -10387,6 +10552,7 @@ Output Summary for [${topic}]:
                         setLessonQuizAnswers({});
                         setLessonQuizSubmitted(false);
                         setLessonQuizResultScore(null);
+                        setShowQuizReview(false);
                       }}
                       className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center font-bold text-lg cursor-pointer transition-all shrink-0 ml-4"
                     >
@@ -10536,6 +10702,80 @@ Output Summary for [${topic}]:
                                 <div className="text-[9px] bg-emerald-500/15 text-emerald-400 px-3 py-1 rounded-full inline-block font-black uppercase tracking-wider">
                                   {isRtl ? '🔒 لا يمكن إعادة تقديم الاختبار' : '🔒 Retakes are disabled for this quiz'}
                                 </div>
+
+                                {aiLessonResultsMap[selectedCustomUnit.id + '-quiz']?.questions && (
+                                  <div className="pt-2 border-t border-emerald-500/10 mt-2 flex justify-start">
+                                    <button
+                                      onClick={() => setShowQuizReview(!showQuizReview)}
+                                      className="bg-white/5 hover:bg-white/10 text-white border border-white/10 px-4 py-2 rounded-xl text-[10px] font-black tracking-wider transition-all flex items-center gap-1.5 cursor-pointer"
+                                    >
+                                      <Sparkles size={12} className="text-amber-400" />
+                                      {showQuizReview 
+                                        ? (isRtl ? 'إخفاء تفاصيل الإجابات 🔼' : 'Hide Quiz Review 🔼')
+                                        : (isRtl ? 'عرض ومراجعة الإجابات 🔎' : 'Review My Answers 🔎')
+                                      }
+                                    </button>
+                                  </div>
+                                )}
+
+                                {showQuizReview && aiLessonResultsMap[selectedCustomUnit.id + '-quiz']?.questions && (
+                                  <div className="mt-4 pt-4 border-t border-emerald-500/10 space-y-4 text-right">
+                                    {aiLessonResultsMap[selectedCustomUnit.id + '-quiz'].questions.map((q: any, qIdx: number) => {
+                                      const chosenIdx = aiLessonResultsMap[selectedCustomUnit.id + '-quiz'].answers?.[qIdx];
+                                      const isCorrect = chosenIdx === q.correctIndex;
+
+                                      return (
+                                        <div key={qIdx} className="space-y-2 border-b border-white/5 pb-3 last:border-0 last:pb-0 text-right">
+                                          <div className="flex items-start gap-2 justify-start text-right">
+                                            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-md shrink-0 ${
+                                              isCorrect ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
+                                            }`}>
+                                              {isRtl ? `سؤال ${qIdx + 1}` : `Q${qIdx + 1}`} ({isCorrect ? '✅' : '❌'})
+                                            </span>
+                                            <p className="text-[11px] font-bold text-white leading-relaxed text-right">
+                                              {q.question}
+                                            </p>
+                                          </div>
+                                          
+                                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mt-1" dir={isRtl ? 'rtl' : 'ltr'}>
+                                            {q.options.map((option: string, oIdx: number) => {
+                                              const wasChosen = chosenIdx === oIdx;
+                                              const isCorrectOption = oIdx === q.correctIndex;
+
+                                              let optStyle = 'border-white/5 bg-white/[0.01] text-slate-400';
+                                              if (wasChosen) {
+                                                optStyle = isCorrectOption 
+                                                  ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold' 
+                                                  : 'border-rose-500 bg-rose-500/10 text-rose-400 font-bold';
+                                              } else if (isCorrectOption) {
+                                                optStyle = 'border-emerald-500/30 bg-emerald-500/5 text-emerald-400/80 font-bold';
+                                              }
+
+                                              return (
+                                                <div
+                                                  key={oIdx}
+                                                  className={`p-2 rounded-lg text-[10px] font-semibold border flex items-center justify-between gap-1 ${optStyle}`}
+                                                >
+                                                  <span>{option}</span>
+                                                  {wasChosen && (
+                                                    <span className="text-[10px] shrink-0">{isCorrectOption ? '✅' : '❌'}</span>
+                                                  )}
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
+
+                                          {q.explanation && (
+                                            <div className="p-2.5 rounded-lg text-[9px] font-medium bg-white/[0.01] border border-white/5 text-slate-400 leading-relaxed text-right">
+                                              <span className="font-bold text-amber-400 block mb-0.5">{isRtl ? '💡 شرح الإجابة:' : '💡 Explanation:'}</span>
+                                              {q.explanation}
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                )}
                               </div>
                             ) : !activeLessonQuiz ? (
                               <div className="bg-[#050b14] p-5 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center space-y-4 py-8">
@@ -10714,6 +10954,7 @@ Output Summary for [${topic}]:
                         setLessonQuizAnswers({});
                         setLessonQuizSubmitted(false);
                         setLessonQuizResultScore(null);
+                        setShowQuizReview(false);
                       }}
                       className="text-slate-400 hover:text-white text-xs font-black cursor-pointer transition-all self-stretch sm:self-auto text-center"
                     >
@@ -10953,6 +11194,124 @@ Output Summary for [${topic}]:
           )}
         </AnimatePresence>
       </main>
+
+      {/* 📜 Printable AI Excellence Certificate Modal */}
+      <AnimatePresence>
+        {showAICertificateModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 md:p-6 overflow-y-auto font-tajawal"
+            onClick={() => setShowAICertificateModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#0b1329] border border-amber-500/20 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative"
+              dir={isRtl ? 'rtl' : 'ltr'}
+            >
+              {/* Header Actions */}
+              <div className="bg-slate-900/50 p-4 border-b border-white/5 flex justify-between items-center no-print">
+                <div className="flex items-center gap-1.5 justify-start">
+                  <span className="text-lg">📜</span>
+                  <h4 className="text-xs font-black text-white uppercase tracking-wider">
+                    {isRtl ? 'شهادة التميز في الذكاء الاصطناعي' : 'AI Academic Excellence Certificate'}
+                  </h4>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => window.print()}
+                    className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-[10px] font-black tracking-wider transition-all flex items-center gap-1 cursor-pointer"
+                  >
+                    <Printer size={12} />
+                    {isRtl ? 'طباعة / حفظ PDF 📄' : 'Print / Save PDF 📄'}
+                  </button>
+                  <button
+                    onClick={() => setShowAICertificateModal(false)}
+                    className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center font-bold text-sm cursor-pointer transition-all shrink-0"
+                  >
+                    ✖
+                  </button>
+                </div>
+              </div>
+
+              {/* The Certificate Stage */}
+              <div className="p-6 md:p-10 flex justify-center bg-slate-950">
+                <div 
+                  id="printable-ai-certificate" 
+                  className="w-full bg-[#020617] text-white p-8 md:p-12 rounded-2xl border-4 border-double border-amber-500/30 relative text-center font-sans overflow-hidden shadow-inner"
+                  style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, #0c1c38 0%, #020617 100%)' }}
+                >
+                  {/* Elegant Golden Laurel Corners */}
+                  <div className="absolute top-4 right-4 text-amber-500/10 text-5xl select-none">🪶</div>
+                  <div className="absolute top-4 left-4 text-amber-500/10 text-5xl select-none">🪶</div>
+                  <div className="absolute bottom-4 right-4 text-amber-500/10 text-5xl select-none">🪶</div>
+                  <div className="absolute bottom-4 left-4 text-amber-500/10 text-5xl select-none">🪶</div>
+
+                  {/* Top Seal */}
+                  <div className="flex justify-center mb-4">
+                    <div className="w-16 h-16 rounded-full bg-amber-500/10 border-2 border-dashed border-amber-500/40 flex items-center justify-center text-amber-400 text-3xl">
+                      🏅
+                    </div>
+                  </div>
+
+                  <span className="text-[10px] font-black tracking-widest text-amber-400 uppercase block mb-1">
+                    {isRtl ? 'مبادرة تعليم وترسيخ علوم المستقبل' : 'FUTURE FUTURES INITIATIVE & DESIGN'}
+                  </span>
+                  
+                  <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight mb-1">
+                    {isRtl ? 'شهادة تميز في المنهج المخصص' : 'Certificate of AI Excellence'}
+                  </h1>
+                  <span className="text-[9px] text-slate-400 uppercase tracking-widest block mb-6 font-mono">
+                    {isRtl ? 'أكاديمية الذكاء الاصطناعي الذاتية المخصصة' : 'CUSTOM AI STUDY PLANNER ACADEMY'}
+                  </span>
+
+                  <p className="text-xs text-slate-300 italic mb-6">
+                    {isRtl ? 'تُمنح هذه الشهادة بفخر واعتزاز إلى الطالب النابغة:' : 'This academic certificate is proudly conferred upon:'}
+                  </p>
+
+                  {/* Customizable name field with inline name on certificate modal */}
+                  <div className="max-w-xs mx-auto mb-6 no-print">
+                    <input 
+                      type="text"
+                      id="cert-name-input"
+                      placeholder={isRtl ? 'اكتب اسمك هنا للطباعة...' : 'Enter your name to print...'}
+                      defaultValue={auth.currentUser?.displayName || (isRtl ? 'دارس ذكي متفوق' : 'Brilliant AI Student')}
+                      className="w-full text-center bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white font-black placeholder-slate-500 focus:outline-none focus:border-amber-400 transition-all text-right"
+                    />
+                  </div>
+
+                  <p className="text-xs text-slate-300 leading-relaxed max-w-lg mx-auto mb-8 font-medium">
+                    {isRtl 
+                      ? `تقديراً لجهوده الأكاديمية الاستثنائية واجتيازه بنجاح للمناهج الذاتية التفاعلية للدرس المخصص في موضوع الذكاء الاصطناعي، وتحقيق معدل تميز بدرجة ${averageQuizScore} من ٣ بمتوسط علامات يعادل ${((parseFloat(averageQuizScore) / 3) * 100).toFixed(0)}٪ في الاختبارات الذكية المنجزة.`
+                      : `In recognition of outstanding academic diligence, successfully passing the required assessments for the customized AI study program, and scoring an average grade of ${averageQuizScore} out of 3 (${((parseFloat(averageQuizScore) / 3) * 100).toFixed(0)}%) in the verified curriculum quizzes.`}
+                  </p>
+
+                  {/* Footer of Certificate: QR & Signature */}
+                  <div className="grid grid-cols-2 gap-6 pt-6 border-t border-white/5 max-w-md mx-auto items-center">
+                    <div className="text-right">
+                      <span className="text-[8px] text-slate-500 block uppercase font-mono">{isRtl ? 'معرف التوثيق' : 'VERIFICATION ID'}</span>
+                      <span className="text-[9px] font-bold text-amber-400 font-mono">ACAD-AI-CERT-{Math.floor(100000 + Math.random() * 900000)}</span>
+                    </div>
+                    <div className="text-left font-mono">
+                      <span className="text-[8px] text-slate-500 block uppercase font-mono">{isRtl ? 'تاريخ التخرج' : 'GRADUATION DATE'}</span>
+                      <span className="text-[9px] font-bold text-white font-mono">{new Date().toLocaleDateString(isRtl ? 'ar-EG' : 'en-US')}</span>
+                    </div>
+                  </div>
+
+                  {/* Premium Seal Emblem */}
+                  <div className="absolute bottom-4 left-4 w-12 h-12 rounded-full border border-amber-500/20 flex items-center justify-center text-[10px] text-amber-500/30 font-black uppercase tracking-wider select-none">
+                    AI SEAL
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Hidden high-fidelity template for exporting AI lessons */}
       {lessonToExport && (

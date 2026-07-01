@@ -146,3 +146,43 @@
   border-bottom-width: 2px;
   transform: translateY(2px);
 }
+
+/* Custom Scrollbar for gradebook list */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Print Styles for Certificate of Excellence */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-ai-certificate, #printable-ai-certificate * {
+    visibility: visible;
+  }
+  #printable-ai-certificate {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    border: 4px double #C49E3A !important;
+    background: #020617 !important;
+    color: #ffffff !important;
+    border-radius: 0px !important;
+    box-shadow: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
