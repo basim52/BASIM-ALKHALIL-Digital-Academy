@@ -2886,6 +2886,77 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
     });
 
   // ==========================================
+  // RADICAL AI SANDBOX GAME GENERATOR ENDPOINT
+  // ==========================================
+  app.post("/api/games/ai-sandbox-game", async (req, res) => {
+    logToFile(`START /api/games/ai-sandbox-game - Theme: ${req.body.theme}`);
+    try {
+      const { theme, lang = 'ar' } = req.body;
+      if (!theme) {
+        return res.status(400).json({ error: "Missing theme parameter." });
+      }
+
+      if (!initAI() || !aiLive) {
+        return res.status(500).json({ error: "Gemini API key is not configured on the server." });
+      }
+
+      const prompt = `
+You are a creative child educational game designer for the "Games Oasis" (واحة الألعاب) at an elite academy. Your mission is to generate an immersive, interactive, bilingual educational micro-game based on the theme provided by the child.
+
+Theme chosen by child: "${theme}"
+
+Generate a JSON object containing:
+1. "story": An immersive, adventurous short narrative (2-3 sentences) setting the stage. Provide both "ar" (Arabic) and "en" (English) versions. It should mention the theme and invite the player to solve challenges to advance.
+2. "questions": An array of exactly 3 educational questions. These must be related to English grammar, spelling, vocabulary, or social etiquette, woven beautifully into the theme of "${theme}".
+   For each question, provide:
+   - "q": The question text in English.
+   - "opts": Exactly 4 multiple-choice options in English.
+   - "ansIdx": The 0-based index of the correct option (0, 1, 2, or 3).
+   - "explanation": A friendly, encouraging explanation from "Mentor Basil" (باسل المرشد) describing why this is correct and teaching the language rule. Provide both "ar" and "en" versions.
+
+Your output must be a single, valid JSON object matching this TypeScript structure:
+{
+  "theme": string,
+  "story": {
+    "ar": string,
+    "en": string
+  },
+  "questions": [
+    {
+      "q": string,
+      "opts": [string, string, string, string],
+      "ansIdx": number,
+      "explanation": {
+        "ar": string,
+        "en": string
+      }
+    }
+  ]
+}
+
+Ensure the output is valid JSON and nothing else. No extra text or markdown wrappers. Use double quotes for keys and strings.
+`;
+
+      const aiResponse = await callAiWithRetry({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        config: {
+          responseMimeType: "application/json"
+        }
+      });
+
+      const responseText = aiResponse.text || "{}";
+      const parsedData = JSON.parse(responseText.trim());
+      res.json(parsedData);
+    } catch (error: any) {
+      logToFile(`Error in /api/games/ai-sandbox-game: ${error.message}`);
+      res.status(500).json({ 
+        error: "Failed to generate custom AI game.",
+        details: error.message 
+      });
+    }
+  });
+
+  // ==========================================
   // DIRECT VIDEO UPLOADS AND STREAMING SERVICE
   // ==========================================
   const UPLOADS_DIR = path.join(process.cwd(), "uploaded_videos");

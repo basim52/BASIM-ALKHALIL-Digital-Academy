@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import confetti from 'canvas-confetti';
 import { 
   Gamepad2, 
   ArrowLeft, 
@@ -79,6 +80,85 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
   const [planTab, setPlanTab] = useState<'roadmap' | 'daily' | 'skills' | 'certificates'>('roadmap');
   const [selectedCertificateId, setSelectedCertificateId] = useState<string | null>(null);
 
+  // Radical Transformation: Lobby and AI Sandbox states
+  const [lobbyTab, setLobbyTab] = useState<'roadmap' | 'catalog' | 'sandbox' | 'achievements'>('roadmap');
+  const [gamesPlayedCount, setGamesPlayedCount] = useState<number>(0);
+  
+  // AI Sandbox game creation state
+  const [sandboxTheme, setSandboxTheme] = useState('');
+  const [sandboxLoading, setSandboxLoading] = useState(false);
+  const [sandboxGame, setSandboxGame] = useState<any | null>(null);
+  const [sandboxCurrentQuestionIdx, setSandboxCurrentQuestionIdx] = useState(0);
+  const [sandboxAnswers, setSandboxAnswers] = useState<number[]>([]);
+  const [sandboxScore, setSandboxScore] = useState(0);
+  const [sandboxCompleted, setSandboxCompleted] = useState(false);
+  const [sandboxSelectedOpt, setSandboxSelectedOpt] = useState<number | null>(null);
+  const [sandboxShowExplanation, setSandboxShowExplanation] = useState(false);
+
+  // Audio synthesis helper for rich arcade experience
+  const playSound = (type: 'success' | 'fail' | 'click' | 'powerup' | 'roll') => {
+    if (typeof window === 'undefined' || !window.AudioContext && !(window as any).webkitAudioContext) return;
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = new AudioContextClass();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      if (type === 'success') {
+        const now = ctx.currentTime;
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+        osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+        osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      } else if (type === 'fail') {
+        const now = ctx.currentTime;
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.exponentialRampToValueAtTime(70, now + 0.35);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      } else if (type === 'click') {
+        const now = ctx.currentTime;
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(500, now);
+        osc.frequency.setValueAtTime(250, now + 0.05);
+        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } else if (type === 'powerup') {
+        const now = ctx.currentTime;
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.exponentialRampToValueAtTime(1000, now + 0.25);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      } else if (type === 'roll') {
+        const now = ctx.currentTime;
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(Math.random() * 150 + 250, now);
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      }
+    } catch (e) {
+      console.warn("Audio Context init failed or blocked", e);
+    }
+  };
+
   // Unified voice speech helper
   const speakFeedback = (text: string, forceLang?: 'en' | 'ar') => {
     if ('speechSynthesis' in window) {
@@ -101,6 +181,95 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
         score: pts,
         total: pts
       });
+    }
+  };
+
+  // 🧪 AI Sandbox Game Methods
+  const handleGenerateSandboxGame = async (selectedTheme: string) => {
+    if (!selectedTheme.trim()) return;
+    setSandboxLoading(true);
+    setSandboxGame(null);
+    setSandboxCurrentQuestionIdx(0);
+    setSandboxAnswers([]);
+    setSandboxScore(0);
+    setSandboxCompleted(false);
+    setSandboxSelectedOpt(null);
+    setSandboxShowExplanation(false);
+    playSound('powerup');
+    speakFeedback(isRtl ? "جاري تحضير اللعبة المخصصة لك بالذكاء الاصطناعي..." : "Preparing your custom game with AI...");
+
+    try {
+      const response = await fetch('/api/games/ai-sandbox-game', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ theme: selectedTheme, lang: lang }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate sandbox game');
+      }
+
+      const data = await response.json();
+      setSandboxGame(data);
+      playSound('success');
+      const introText = isRtl ? data.story.ar : data.story.en;
+      speakFeedback(introText);
+    } catch (err) {
+      console.error(err);
+      playSound('fail');
+      speakFeedback(isRtl ? "عذراً، حدث خطأ أثناء الاتصال بالخادم الذكي." : "Sorry, an error occurred while building the game.");
+    } finally {
+      setSandboxLoading(false);
+    }
+  };
+
+  const handleAnswerSandbox = (optIdx: number) => {
+    if (sandboxSelectedOpt !== null) return;
+    setSandboxSelectedOpt(optIdx);
+    const currentQuestion = sandboxGame.questions[sandboxCurrentQuestionIdx];
+    const isCorrect = optIdx === currentQuestion.ansIdx;
+    
+    const nextAnswers = [...sandboxAnswers, optIdx];
+    setSandboxAnswers(nextAnswers);
+
+    if (isCorrect) {
+      playSound('success');
+      setSandboxScore(prev => prev + 1);
+      triggerPointsReward(20, `AI Sandbox Correct Answer: ${sandboxGame.theme}`, 'ai_sandbox');
+      const expl = isRtl ? currentQuestion.explanation.ar : currentQuestion.explanation.en;
+      speakFeedback((isRtl ? "إجابة رائعة وصحيحة! " : "Brilliant, that is correct! ") + expl);
+    } else {
+      playSound('fail');
+      const expl = isRtl ? currentQuestion.explanation.ar : currentQuestion.explanation.en;
+      speakFeedback((isRtl ? "إجابة خاطئة. " : "Not quite right. ") + expl);
+    }
+    setSandboxShowExplanation(true);
+  };
+
+  const handleNextSandboxQuestion = () => {
+    setSandboxSelectedOpt(null);
+    setSandboxShowExplanation(false);
+    playSound('click');
+
+    if (sandboxCurrentQuestionIdx + 1 < sandboxGame.questions.length) {
+      setSandboxCurrentQuestionIdx(prev => prev + 1);
+      setTimeout(() => {
+        if (sandboxGame && sandboxGame.questions) {
+          const nextQ = sandboxGame.questions[sandboxCurrentQuestionIdx + 1];
+          if (nextQ) speakFeedback(nextQ.q);
+        }
+      }, 300);
+    } else {
+      setSandboxCompleted(true);
+      playSound('powerup');
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
+      speakFeedback(isRtl ? `أحسنت! لقد أكملت اللعبة بنجاح وحققت درجة ${sandboxScore} من ٣` : `Fabulous! You completed the game with a score of ${sandboxScore} out of 3`);
     }
   };
 
@@ -604,6 +773,8 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
 
   // Launch any game
   const selectGame = (gameId: string) => {
+    setGamesPlayedCount(prev => prev + 1);
+    playSound('click');
     setActiveGameId(gameId);
     setShowInstructions(true);
     speakFeedback(isRtl ? "مستعد للمرح؟ فلنبأ!" : "Ready for active play? Let's start!");
@@ -1346,113 +1517,702 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                 <div className="absolute right-0 top-0 w-32 h-32 bg-[#6C5CE7]/5 rounded-full pointer-events-none" />
                 <div className="space-y-3">
                   <span className="px-2.5 py-0.5 bg-[#6C5CE7]/20 text-[#6C5CE7] border border-[#6C5CE7]/30 rounded-full text-[11px] font-bold">
-                    {isRtl ? 'ألعاب الأكاديمية العشرين متكاملة' : '20 Fully Integrated Master Games'}
+                    {isRtl ? 'بوابة الألعاب المطورة بالكامل 🧪✨' : 'Radically Transformed Play Portal 🧪✨'}
                   </span>
                   <h2 className="text-xl md:text-2xl font-black text-[#FDCB6E]">
-                    {isRtl ? 'عالم التحدي والذوق بانتظارك! 🦁✨' : 'The Marvelous Land of Play & Etiquette! 🦁✨'}
+                    {isRtl ? 'واحة الألعاب الذكية والمطورة! 🦁✨' : 'The Smart Gamified Games Oasis! 🦁✨'}
                   </h2>
                   <p className="text-xs text-slate-300 font-medium leading-relaxed max-w-3xl">
                     {isRtl 
-                      ? 'مرحباً بك في البوابة التفاعلية الشاملة. قمنا بتضمين العشرين لعبة المدرجة في الميثاق بطريقة لعب تفاعلية، بدءاً من خرائط المغامرة ومعارك السرعة حتى أدب المائدة وفارس اللغة المهذبة. حدد اللعبة المفضلة لك، واجمع نجاح النقاط لتتفوق فوزاً!'
-                      : 'Welcome to the complete bento playroom. All 20 requested educational micro-games are meticulously loaded. Uncover vocabulary matching, spelling meteors, social manners builders, and win bountiful merits!'}
+                      ? 'مرحباً بك في البوابة التفاعلية الشاملة بحلتها الجديدة. تم تطوير الواحة لتوفر لك طريق المهام والمستويات المفتوحة، ومختبر الابتكار لتوليد ألعاب لا حصر لها بذكائنا الاصطناعي، إلى جانب بازار الأوسمة والملصقات الفخرية الممتعة!'
+                      : 'Welcome to the newly re-imagined playroom. Explore custom visual roadmap quests, create your own endless custom games using the AI Innovation Lab, and display your achievements with badges and reward stickers!'}
                   </p>
                 </div>
                 <div className="flex flex-col items-center shrink-0">
-                  <span className="text-5xl animate-bounce">🦁</span>
-                  <span className="text-[10px] text-slate-400 font-bold mt-1">{isRtl ? 'باسل المرشد' : 'Mentor Basil'}</span>
+                  <span className="text-5xl animate-bounce cursor-pointer" onClick={() => { playSound('powerup'); speakFeedback(isRtl ? "مرحباً بك يا بطل في واحة الألعاب الذكية!" : "Welcome back hero, to the smart games oasis!"); }}>🦁</span>
+                  <span className="text-[10px] text-slate-400 font-bold mt-1">{isRtl ? 'اضغط باسل' : 'Tap Basil'}</span>
                 </div>
               </div>
 
-              {/* Filters and search block */}
-              <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                <div className="flex flex-wrap gap-2">
-                  {categories.map(c => (
-                    <button
-                      key={c.id}
-                      onClick={() => setActiveCategory(c.id)}
-                      className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                        activeCategory === c.id 
-                          ? 'bg-[#6C5CE7] text-white shadow-md' 
-                          : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                      }`}
-                    >
-                      {isRtl ? c.labelAr : c.labelEn}
-                    </button>
-                  ))}
-                </div>
-
-                {activeCategory !== 'plan' && (
-                  <div className="relative w-full md:w-64">
-                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder={isRtl ? "البحث عن لعبة..." : "Search games..."}
-                      className="w-full pl-9 pr-4 py-2 bg-slate-800 border border-[#444C4E] rounded-xl text-xs text-white focus:outline-none focus:border-[#6C5CE7] transition-all"
-                    />
-                  </div>
-                )}
+              {/* RADICAL LOBBY NAVIGATION TABS */}
+              <div className="bg-slate-900/60 p-2 rounded-2xl border border-slate-800/80 flex flex-wrap gap-2 justify-center md:justify-start">
+                <button
+                  onClick={() => { setLobbyTab('roadmap'); playSound('click'); }}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer ${
+                    lobbyTab === 'roadmap'
+                      ? 'bg-[#6C5CE7] text-white shadow-lg shadow-[#6C5CE7]/20'
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <Compass className="w-4 h-4" />
+                  {isRtl ? 'خريطة طريق المهام 🧭' : 'Adventure Roadmap 🧭'}
+                </button>
+                <button
+                  onClick={() => { setLobbyTab('catalog'); playSound('click'); }}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer ${
+                    lobbyTab === 'catalog'
+                      ? 'bg-[#6C5CE7] text-white shadow-lg shadow-[#6C5CE7]/20'
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <Gamepad2 className="w-4 h-4" />
+                  {isRtl ? 'منصة الألعاب العشرين 🎮' : 'Arcade Cabinet 🎮'}
+                </button>
+                <button
+                  onClick={() => { setLobbyTab('sandbox'); playSound('click'); }}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer relative overflow-hidden ${
+                    lobbyTab === 'sandbox'
+                      ? 'bg-[#00CEC9] text-slate-900 shadow-lg shadow-[#00CEC9]/20 font-black'
+                      : 'text-[#00CEC9] hover:bg-slate-800'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4 animate-pulse text-[#D63031]" />
+                  {isRtl ? 'مختبر الابتكار بالذكاء الاصطناعي 🧪' : 'AI Game Sandbox 🧪'}
+                  <span className="absolute -top-1 -right-4 px-3 bg-red-500 text-white text-[7px] rotate-12 uppercase font-black tracking-widest">AI</span>
+                </button>
+                <button
+                  onClick={() => { setLobbyTab('achievements'); playSound('click'); }}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer ${
+                    lobbyTab === 'achievements'
+                      ? 'bg-[#FDCB6E] text-slate-900 shadow-lg shadow-[#FDCB6E]/20'
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <Trophy className="w-4 h-4" />
+                  {isRtl ? 'بازار الأوسمة والملصقات 🏆' : 'Badges & Stickers 🏆'}
+                </button>
               </div>
 
-              {/* The 20 Games Bento Grid */}
-              {activeCategory === 'plan' ? (
-                renderDevelopmentPlan()
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredGames.map((game, idx) => {
-                    const IconComp = game.icon;
-                    return (
-                      <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        key={game.id}
-                        className="bg-[#1e2324] hover:bg-slate-800/80 rounded-2xl p-5 border border-slate-700/60 hover:border-[#6C5CE7]/60 transition-all flex flex-col justify-between h-[230px] group shadow-sm relative overflow-hidden"
-                      >
-                        <div className="absolute top-2 right-2 text-[10px] font-mono text-slate-500 font-bold">
-                          #{idx+1}
-                        </div>
+              {/* TAB CONTENT: ROADMAP */}
+              {lobbyTab === 'roadmap' && (() => {
+                const totalXP = (userProfile?.points || 0) + sessionXP;
+                const stages = [
+                  {
+                    id: 1,
+                    titleAr: 'المرحلة الأولى: ميناء المغامرين ⚓',
+                    titleEn: 'Stage 1: Explorer\'s Port ⚓',
+                    reqXp: 0,
+                    gameIds: ['game_001', 'game_002', 'game_003', 'game_009']
+                  },
+                  {
+                    id: 2,
+                    titleAr: 'المرحلة الثانية: وادي القواعد الساحر 🧙‍♂️',
+                    titleEn: 'Stage 2: Wizard\'s Grammar Valley 🧙‍♂️',
+                    reqXp: 100,
+                    gameIds: ['game_004', 'game_006', 'game_007', 'game_010', 'game_013']
+                  },
+                  {
+                    id: 3,
+                    titleAr: 'المرحلة الثالثة: بحر الكلمات الفصيحة 🌊',
+                    titleEn: 'Stage 3: Sea of Eloquent Words 🌊',
+                    reqXp: 250,
+                    gameIds: ['game_014', 'game_016', 'game_018', 'game_019']
+                  },
+                  {
+                    id: 4,
+                    titleAr: 'المرحلة الرابعة: قلعة الآداب والذوق 👑',
+                    titleEn: 'Stage 4: Palace of High Etiquette 👑',
+                    reqXp: 450,
+                    gameIds: ['game_005', 'game_008', 'game_011', 'game_012', 'game_017', 'game_020']
+                  }
+                ];
 
-                        <div className="space-y-3">
-                          <div className="flex justify-between items-start">
-                            <div className={`p-2.5 rounded-xl ${game.color} text-white`}>
-                              <IconComp className="w-5 h-5" />
-                            </div>
-                            <span className="text-[10px] font-black text-[#FDCB6E] bg-slate-900/40 px-2.5 py-1 rounded-lg">
-                              {game.difficulty}
-                            </span>
-                          </div>
+                return (
+                  <div className="space-y-10 py-4 relative">
+                    <div className="absolute top-10 bottom-10 left-4 md:left-1/2 w-1 bg-gradient-to-b from-[#6C5CE7] to-[#00CEC9] transform md:-translate-x-1/2 opacity-20 pointer-events-none" />
 
-                          <div>
-                            <h3 className="text-[14px] font-black text-white group-hover:text-[#FDCB6E] transition-all">
-                              {isRtl ? game.titleAr : game.titleEn}
-                            </h3>
-                            <p className="text-[11px] text-slate-300 font-medium leading-relaxed line-clamp-3 mt-1.5">
-                              {isRtl ? game.descriptionAr : game.descriptionEn}
-                            </p>
-                          </div>
-                        </div>
+                    {stages.map((stg, sIdx) => {
+                      const isUnlocked = totalXP >= stg.reqXp;
+                      const stageGames = gamesList.filter(g => stg.gameIds.includes(g.id));
 
-                        <button
-                          onClick={() => selectGame(game.id)}
-                          className="w-full mt-4 py-2 bg-slate-700/80 hover:bg-[#6C5CE7] text-white hover:text-white rounded-xl text-[11px] font-black tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer"
+                      return (
+                        <motion.div
+                          initial={{ opacity: 0, x: isRtl ? 20 : -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: sIdx * 0.1 }}
+                          key={stg.id}
+                          className={`relative bg-[#1e2324] rounded-3xl p-6 border ${
+                            isUnlocked 
+                              ? 'border-[#6C5CE7]/40 shadow-[#6C5CE7]/5 shadow-xl' 
+                              : 'border-slate-800/80 opacity-60'
+                          }`}
                         >
-                          <Play className="w-3.5 h-3.5" />
-                          {isRtl ? 'انطلق والعب الآن' : 'Unleash Gameplay'}
-                        </button>
-                      </motion.div>
-                    );
-                  })}
+                          <div className={`absolute left-4 md:left-1/2 top-6 w-8 h-8 rounded-full flex items-center justify-center font-black text-xs transform md:-translate-x-1/2 z-10 transition-all ${
+                            isUnlocked 
+                              ? 'bg-[#6C5CE7] text-white shadow-md shadow-[#6C5CE7]/30 ring-4 ring-[#6C5CE7]/10' 
+                              : 'bg-slate-800 text-slate-500'
+                          }`}>
+                            {stg.id}
+                          </div>
 
-                  {filteredGames.length === 0 && (
-                    <div className="col-span-full text-center py-12 bg-[#1e2324] rounded-2xl border border-slate-700/60">
-                      <span className="text-4xl block mb-2">🔍</span>
-                      <p className="text-xs font-bold text-slate-400">
-                        {isRtl ? 'لا توجد ألعاب مطابقة لهذا البحث.' : 'No matching activities inside our registry.'}
-                      </p>
+                          <div className="md:px-8 space-y-4">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-700/40 pb-3">
+                              <div>
+                                <h3 className="text-md font-black text-white flex items-center gap-2">
+                                  {isRtl ? stg.titleAr : stg.titleEn}
+                                  {!isUnlocked && <span className="text-xs px-2.5 py-0.5 bg-red-950/40 text-red-400 border border-red-900/40 rounded-full font-bold">🔒 {isRtl ? 'مغلق' : 'Locked'}</span>}
+                                </h3>
+                                <p className="text-[10px] text-slate-400 font-bold mt-1">
+                                  {isRtl 
+                                    ? `تطلب هذه المرحلة ${stg.reqXp} من نقاط الفوز الكلية للفتح.`
+                                    : `This stage requires ${stg.reqXp} cumulative XP merits to unlock.`}
+                                </p>
+                              </div>
+                              <span className="text-xs font-mono font-bold text-slate-500">
+                                {isUnlocked ? '🔓 OPEN ACCESS' : `🔒 LOCKED (${stg.reqXp - totalXP} XP remaining)`}
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+                              {stageGames.map((game) => {
+                                const IconComp = game.icon;
+                                return (
+                                  <div
+                                    key={game.id}
+                                    className={`p-4 rounded-2xl border transition-all flex flex-col justify-between h-[155px] relative overflow-hidden group ${
+                                      isUnlocked
+                                        ? 'bg-slate-900/60 border-slate-800 hover:border-[#6C5CE7]/50 hover:bg-slate-800/40'
+                                        : 'bg-slate-900/20 border-slate-900/40 select-none'
+                                    }`}
+                                  >
+                                    <div className="flex justify-between items-start">
+                                      <div className={`p-2 rounded-lg ${isUnlocked ? game.color : 'bg-slate-800 text-slate-600'} text-white`}>
+                                        <IconComp className="w-4 h-4" />
+                                      </div>
+                                      <span className="text-[9px] font-bold text-[#FDCB6E] bg-slate-900/60 px-2 py-0.5 rounded-md">
+                                        {game.difficulty}
+                                      </span>
+                                    </div>
+
+                                    <div className="mt-2.5">
+                                      <h4 className="text-xs font-black text-white group-hover:text-[#FDCB6E] transition-all">
+                                        {isRtl ? game.titleAr : game.titleEn}
+                                      </h4>
+                                      <p className="text-[10px] text-slate-400 line-clamp-2 leading-relaxed mt-1">
+                                        {isRtl ? game.descriptionAr : game.descriptionEn}
+                                      </p>
+                                    </div>
+
+                                    {isUnlocked ? (
+                                      <button
+                                        onClick={() => selectGame(game.id)}
+                                        className="w-full mt-3 py-1.5 bg-[#6C5CE7] hover:bg-[#5b4dbd] text-white text-[10px] font-black rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer"
+                                      >
+                                        <Play className="w-3 h-3" />
+                                        {isRtl ? 'ابدأ اللعب الآن' : 'Launch Game'}
+                                      </button>
+                                    ) : (
+                                      <div className="w-full mt-3 py-1.5 bg-slate-800/40 text-slate-600 text-[10px] font-black rounded-lg flex items-center justify-center gap-1">
+                                        <span>🔒 {isRtl ? 'المرحلة مغلقة' : 'Stage Locked'}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+
+              {/* TAB CONTENT: CATALOG */}
+              {lobbyTab === 'catalog' && (
+                <div className="space-y-6 animate-fadeIn">
+                  <div className="flex flex-col md:flex-row gap-4 items-center justify-between border-b border-slate-700/30 pb-4">
+                    <div className="flex flex-wrap gap-1.5">
+                      {categories.map(c => (
+                        <button
+                          key={c.id}
+                          onClick={() => { playSound('click'); setActiveCategory(c.id); }}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                            activeCategory === c.id 
+                              ? 'bg-[#6C5CE7] text-white shadow-md' 
+                              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                          }`}
+                        >
+                          {isRtl ? c.labelAr : c.labelEn}
+                        </button>
+                      ))}
+                    </div>
+
+                    {activeCategory !== 'plan' && (
+                      <div className="relative w-full md:w-64">
+                        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder={isRtl ? "البحث عن لعبة..." : "Search games..."}
+                          className="w-full pl-9 pr-4 py-2 bg-slate-800 border border-[#444C4E] rounded-xl text-xs text-white focus:outline-none focus:border-[#6C5CE7] transition-all"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {activeCategory === 'plan' ? (
+                    renderDevelopmentPlan()
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredGames.map((game, idx) => {
+                        const IconComp = game.icon;
+                        return (
+                          <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            key={game.id}
+                            className="bg-[#1e2324] hover:bg-slate-800/80 rounded-2xl p-5 border border-slate-700/60 hover:border-[#6C5CE7]/60 transition-all flex flex-col justify-between h-[230px] group shadow-sm relative overflow-hidden"
+                          >
+                            <div className="absolute top-2 right-2 text-[10px] font-mono text-slate-500 font-bold">
+                              #{idx+1}
+                            </div>
+
+                            <div className="space-y-3">
+                              <div className="flex justify-between items-start">
+                                <div className={`p-2.5 rounded-xl ${game.color} text-white`}>
+                                  <IconComp className="w-5 h-5" />
+                                </div>
+                                <span className="text-[10px] font-black text-[#FDCB6E] bg-slate-900/40 px-2.5 py-1 rounded-lg">
+                                  {game.difficulty}
+                                </span>
+                              </div>
+
+                              <div>
+                                <h3 className="text-[14px] font-black text-white group-hover:text-[#FDCB6E] transition-all">
+                                  {isRtl ? game.titleAr : game.titleEn}
+                                </h3>
+                                <p className="text-[11px] text-slate-300 font-medium leading-relaxed line-clamp-3 mt-1.5">
+                                  {isRtl ? game.descriptionAr : game.descriptionEn}
+                                </p>
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => selectGame(game.id)}
+                              className="w-full mt-4 py-2 bg-slate-700/80 hover:bg-[#6C5CE7] text-white hover:text-white rounded-xl text-[11px] font-black tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                              <Play className="w-3.5 h-3.5" />
+                              {isRtl ? 'انطلق والعب الآن' : 'Unleash Gameplay'}
+                            </button>
+                          </motion.div>
+                        );
+                      })}
+
+                      {filteredGames.length === 0 && (
+                        <div className="col-span-full text-center py-12 bg-[#1e2324] rounded-2xl border border-slate-700/60">
+                          <span className="text-4xl block mb-2">🔍</span>
+                          <p className="text-xs font-bold text-slate-400">
+                            {isRtl ? 'لا توجد ألعاب مطابقة لهذا البحث.' : 'No matching activities inside our registry.'}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               )}
+
+              {/* TAB CONTENT: AI CREATIVE WORKSPACE (SANDBOX) */}
+              {lobbyTab === 'sandbox' && (
+                <div className="bg-[#1e2324] rounded-3xl p-6 md:p-8 border border-slate-700/60 relative overflow-hidden shadow-2xl space-y-6 animate-fadeIn">
+                  <div className="absolute right-0 top-0 w-48 h-48 bg-[#00CEC9]/5 rounded-full pointer-events-none" />
+
+                  <div className="space-y-2">
+                    <h3 className="text-lg md:text-xl font-black text-[#00CEC9] flex items-center gap-2">
+                      <Sparkles className="w-5 h-5" />
+                      {isRtl ? 'مختبر ألعاب باسل بالذكاء الاصطناعي 🧪✨' : 'Mentor Basil\'s Custom AI Game Lab 🧪✨'}
+                    </h3>
+                    <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
+                      {isRtl 
+                        ? 'ألا تجد اللعبة التي تفضلها تماماً؟ اكتب أي فكرة أو اهتمام يدور ببالك (مثل: رحلة الديناصورات، مغامرة ماين كرافت، الفضاء الشاسع، أو قواعد اللغة الإنجليزية في الطائرة) وسيقوم باسل بتوليد قصة شيقة وأسئلة مخصصة لك بالكامل فوراً!'
+                        : 'Cannot find your exact theme? Simply input any topic or interest of yours (e.g. Dinosaur Era, Space Journeys, Minecraft rules, Plane Conversation) and Basil will build an interactive custom story game just for you on the fly!'}
+                    </p>
+                  </div>
+
+                  {!sandboxGame && !sandboxLoading && (
+                    <div className="space-y-6 pt-2">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-300 block">
+                          {isRtl ? 'أدخل فكرتك المفضلة أو موضوع اللعبة الجديد: ✍️' : 'Write your custom theme or lesson topic here: ✍️'}
+                        </label>
+                        <div className="flex flex-col md:flex-row gap-3">
+                          <input
+                            type="text"
+                            value={sandboxTheme}
+                            onChange={(e) => setSandboxTheme(e.target.value)}
+                            placeholder={isRtl ? "مثال: رحلة سفاري الديناصورات أو مغامرة فضاء..." : "e.g. Dinosaur Safari adventure, Minecraft Builder..."}
+                            className="flex-1 px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#00CEC9] font-medium transition-all"
+                          />
+                          <button
+                            onClick={() => handleGenerateSandboxGame(sandboxTheme)}
+                            disabled={!sandboxTheme.trim()}
+                            className="px-6 py-3 bg-[#00CEC9] hover:bg-[#00b2ae] disabled:bg-slate-800 disabled:text-slate-500 text-slate-900 font-black text-xs rounded-xl transition-all cursor-pointer shrink-0 flex items-center justify-center gap-2"
+                          >
+                            <Sparkles className="w-4 h-4 text-slate-900" />
+                            {isRtl ? 'توليد اللعبة المخصصة 🚀' : 'Build Custom Game 🚀'}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 pt-2">
+                        <span className="text-[11px] font-bold text-slate-400 block">{isRtl ? 'أو اختر أحد الأفكار الجاهزة المقترحة سريعاً:' : 'Or tap a rapid preset to launch immediately:'}</span>
+                        <div className="flex flex-wrap gap-2">
+                          {[
+                            { labelAr: "مستكشف الديناصورات 🦕", labelEn: "Dinosaur Explorer 🦕", term: "Dinosaurs safari grammar" },
+                            { labelAr: "رحلة الفضاء السحيق 🚀", labelEn: "Deep Space Journey 🚀", term: "Deep Space Journey verbs" },
+                            { labelAr: "فرسان القلعة الوسطى ⚔️", labelEn: "Medieval Knights ⚔️", term: "Medieval Knights grammar and honor" },
+                            { labelAr: "بناء ماين كرافت 🧱", labelEn: "Minecraft Architecture 🧱", term: "Minecraft builder spelling" },
+                            { labelAr: "أدب الشاي الملكي ☕", labelEn: "Royal Tea Party Manners ☕", term: "Royal Tea manners and social etiquette" }
+                          ].map((preset, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => { setSandboxTheme(isRtl ? preset.labelAr : preset.labelEn); handleGenerateSandboxGame(preset.term); }}
+                              className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl text-[11px] font-bold transition-all cursor-pointer"
+                            >
+                              {isRtl ? preset.labelAr : preset.labelEn}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {sandboxLoading && (
+                    <div className="py-12 flex flex-col items-center justify-center space-y-4">
+                      <div className="relative w-16 h-16">
+                        <div className="absolute inset-0 rounded-full border-4 border-slate-800" />
+                        <div className="absolute inset-0 rounded-full border-4 border-[#00CEC9] border-t-transparent animate-spin" />
+                        <span className="absolute inset-0 flex items-center justify-center text-lg">🧪</span>
+                      </div>
+                      <div className="text-center space-y-1">
+                        <p className="text-xs font-black text-[#00CEC9]">{isRtl ? 'يتم الآن صياغة واجهة اللعبة بالكامل...' : 'Compiling the ultimate tailored game...'}</p>
+                        <p className="text-[10px] text-slate-400">{isRtl ? 'يقوم باسل بالتعاون مع الذكاء الاصطناعي ببناء قصة وأسئلة فريدة' : 'Basil is co-authoring a custom gameplay script and audio'}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {sandboxGame && !sandboxCompleted && (() => {
+                    const currentQuestion = sandboxGame.questions[sandboxCurrentQuestionIdx];
+                    if (!currentQuestion) return null;
+                    return (
+                      <div className="space-y-6 pt-2 animate-fadeIn">
+                        <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+                          <span className="text-[10px] uppercase font-black tracking-wider text-[#00CEC9] block mb-1">📖 {isRtl ? 'المقدمة الغامرة' : 'Immersive Backstory'}</span>
+                          <p className="text-xs font-medium leading-relaxed text-slate-200">
+                            {isRtl ? sandboxGame.story.ar : sandboxGame.story.en}
+                          </p>
+                        </div>
+
+                        <div className="flex justify-between items-center bg-slate-900/30 px-4 py-2 rounded-xl">
+                          <span className="text-[10px] font-bold text-slate-400">
+                            {isRtl 
+                              ? `السؤال ${sandboxCurrentQuestionIdx + 1} من ٣` 
+                              : `Challenge ${sandboxCurrentQuestionIdx + 1} of 3`}
+                          </span>
+                          <div className="flex gap-1">
+                            {[0, 1, 2].map((dot) => (
+                              <div 
+                                key={dot} 
+                                className={`w-2 h-2 rounded-full transition-all ${
+                                  dot <= sandboxCurrentQuestionIdx 
+                                    ? 'bg-[#00CEC9]' 
+                                    : 'bg-slate-700'
+                                }`} 
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <h4 className="text-sm md:text-md font-black text-white bg-slate-900 p-4 rounded-xl border border-slate-800 text-center font-sans">
+                            {currentQuestion.q}
+                          </h4>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {currentQuestion.opts.map((opt: string, oIdx: number) => {
+                              const isSelected = sandboxSelectedOpt === oIdx;
+                              const isCorrectAnswer = oIdx === currentQuestion.ansIdx;
+                              const showSuccessBorder = sandboxSelectedOpt !== null && isCorrectAnswer;
+                              const showFailBorder = sandboxSelectedOpt !== null && isSelected && !isCorrectAnswer;
+
+                              return (
+                                <button
+                                  key={oIdx}
+                                  onClick={() => handleAnswerSandbox(oIdx)}
+                                  disabled={sandboxSelectedOpt !== null}
+                                  className={`p-3.5 rounded-xl text-xs font-bold text-left transition-all cursor-pointer flex items-center justify-between ${
+                                    sandboxSelectedOpt === null
+                                      ? 'bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-800 hover:border-[#00CEC9]/40'
+                                      : showSuccessBorder
+                                        ? 'bg-green-950/40 border-green-500 text-green-300 font-black'
+                                        : showFailBorder
+                                          ? 'bg-red-950/40 border-red-500 text-red-300 font-black'
+                                          : 'bg-slate-950/20 border-slate-900 text-slate-500'
+                                  }`}
+                                >
+                                  <span>{opt}</span>
+                                  {sandboxSelectedOpt !== null && isCorrectAnswer && (
+                                    <Check className="w-4 h-4 text-green-400 shrink-0" />
+                                  )}
+                                  {sandboxSelectedOpt !== null && isSelected && !isCorrectAnswer && (
+                                    <XCircle className="w-4 h-4 text-red-400 shrink-0" />
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {sandboxShowExplanation && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="p-4 bg-slate-900 border border-slate-800 rounded-xl flex items-start gap-3.5"
+                          >
+                            <span className="text-3xl shrink-0">🦁</span>
+                            <div className="space-y-1">
+                              <span className="text-[10px] font-black text-[#FDCB6E] block">{isRtl ? 'باسل يوضح الفكرة 💡' : 'Basil Explains 💡'}</span>
+                              <p className="text-xs text-slate-300 font-medium leading-relaxed">
+                                {isRtl ? currentQuestion.explanation.ar : currentQuestion.explanation.en}
+                              </p>
+                            </div>
+                          </motion.div>
+                        )}
+
+                        {sandboxSelectedOpt !== null && (
+                          <div className="flex justify-end">
+                            <button
+                              onClick={handleNextSandboxQuestion}
+                              className="px-5 py-2.5 bg-[#00CEC9] hover:bg-[#00b2ae] text-slate-900 font-black text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                            >
+                              <span>{sandboxCurrentQuestionIdx === 2 ? (isRtl ? 'عرض نتائج المهام 🏆' : 'See Quest Results 🏆') : (isRtl ? 'التالي ➡️' : 'Next Challenge ➡️')}</span>
+                              <ArrowRight className="w-3.5 h-3.5 text-slate-900" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  {sandboxCompleted && sandboxGame && (
+                    <motion.div 
+                      initial={{ scale: 0.95, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="text-center space-y-6 py-6"
+                    >
+                      <span className="text-6xl block animate-bounce">🏆🧪</span>
+                      <div className="space-y-2">
+                        <h4 className="text-lg font-black text-[#00CEC9]">
+                          {isRtl ? 'تم إكمال المهمة المبتكرة بنجاح!' : 'Innovative Quest Successfully Mastered!'}
+                        </h4>
+                        <p className="text-xs text-slate-300 font-medium">
+                          {isRtl 
+                            ? `مبارك يا بطل! لقد تغلبت على التحديات الثلاث بنجاح مع موضوع "${sandboxGame.theme}"`
+                            : `Outstanding! You fully resolved the tailored challenges for topic "${sandboxGame.theme}"`}
+                        </p>
+                      </div>
+
+                      <div className="max-w-md mx-auto bg-slate-900 border-2 border-dashed border-[#00CEC9]/40 p-5 rounded-2xl space-y-3 relative">
+                        <span className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-[#00CEC9] text-slate-900 text-[10px] font-black rounded-full uppercase tracking-widest">
+                          {isRtl ? 'شهادة إنجاز ذكية' : 'AI Academic Certificate'}
+                        </span>
+                        <div className="pt-3">
+                          <span className="text-2xl font-black text-[#FDCB6E] font-mono">{sandboxScore} / 3</span>
+                          <span className="text-[10px] text-slate-400 block font-bold uppercase mt-1">{isRtl ? 'النتيجة النهائية' : 'Final Assessment'}</span>
+                        </div>
+                        <p className="text-[11px] text-slate-300 font-sans italic px-4 leading-relaxed">
+                          {isRtl 
+                            ? `"تثبت هذه الوثيقة أن بطلنا قد أثبت مرونة لغوية ذكية، وحل جميع المهام بنجاح فائق."`
+                            : `"This document certifies that our brave learner successfully resolved custom AI problems with marvelous vocabulary skills."`}
+                        </p>
+                        <span className="text-[9px] text-[#00CEC9] font-black block mt-1">✓ VERIFIED BY BASIL DIGITAL ACADEMY</span>
+                      </div>
+
+                      <div className="flex justify-center gap-3">
+                        <button
+                          onClick={() => { setSandboxGame(null); setSandboxTheme(''); playSound('click'); }}
+                          className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-black text-xs rounded-xl transition-all cursor-pointer"
+                        >
+                          {isRtl ? 'موضوع مخصص آخر 🧪' : 'Try Another Theme 🧪'}
+                        </button>
+                        <button
+                          onClick={() => { setLobbyTab('roadmap'); playSound('click'); }}
+                          className="px-5 py-2.5 bg-[#6C5CE7] hover:bg-[#5b4dbd] text-white font-black text-xs rounded-xl transition-all cursor-pointer"
+                        >
+                          {isRtl ? 'العودة لخريطة المهام' : 'Back to Roadmap'}
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB CONTENT: ACHIEVEMENTS BAZAAR */}
+              {lobbyTab === 'achievements' && (() => {
+                const totalXP = (userProfile?.points || 0) + sessionXP;
+                const level = Math.floor(totalXP / 150) + 1;
+                const currentLevelXP = totalXP % 150;
+                const xpPercent = Math.min(100, Math.floor((currentLevelXP / 150) * 100));
+
+                const badgesList = [
+                  { 
+                    id: 'first_win', 
+                    titleAr: 'أول فوز 🏅', 
+                    titleEn: 'First Win 🏅', 
+                    descAr: 'اجمع نقاطاً في أي لعبة تعليمية.', 
+                    descEn: 'Gain merits in any educational playroom.',
+                    unlocked: sessionXP > 0 
+                  },
+                  { 
+                    id: 'word_knight', 
+                    titleAr: 'فارس الكلمات ⚔️', 
+                    titleEn: 'Word Knight ⚔️', 
+                    descAr: 'الوصول إلى المستوى الثالث في الأكاديمية.', 
+                    descEn: 'Reach academy level 3.',
+                    unlocked: level >= 3 
+                  },
+                  { 
+                    id: 'explorer', 
+                    titleAr: 'مستكشف الواحة 🧭', 
+                    titleEn: 'Oasis Explorer 🧭', 
+                    descAr: 'لعب لعبتين مختلفتين على الأقل.', 
+                    descEn: 'Launch and complete at least 2 distinct games.',
+                    unlocked: gamesPlayedCount >= 2 
+                  },
+                  { 
+                    id: 'ai_brain', 
+                    titleAr: 'العقل المفكر 🧪', 
+                    titleEn: 'The Brain 🧪', 
+                    descAr: 'إكمال تحدي واحد بالذكاء الاصطناعي مخصص.', 
+                    descEn: 'Solve a custom AI Sandbox game successfully.',
+                    unlocked: sandboxAnswers.length > 0 
+                  },
+                  { 
+                    id: 'ambassador', 
+                    titleAr: 'سفير الأدب 👑', 
+                    titleEn: 'Manners Master 👑', 
+                    descAr: 'احصل على ٨٠ درجة فوز كلية أو أكثر.', 
+                    descEn: 'Attain 80 cumulative session XP or more.',
+                    unlocked: sessionXP >= 80 
+                  }
+                ];
+
+                const stickersList = [
+                  { id: 'basil_lion', emoji: '🦁', nameAr: 'باسل المحفز', nameEn: 'Basil the Motivator', levelReq: 1 },
+                  { id: 'gold_shine', emoji: '⭐', nameAr: 'بريق الذهب', nameEn: 'Gold Glint', levelReq: 2 },
+                  { id: 'rocket', emoji: '🚀', nameAr: 'صاروخ المعرفة', nameEn: 'Intellect Rocket', levelReq: 4 },
+                  { id: 'chest', emoji: '💎', nameAr: 'صندوق الكنز', nameEn: 'Merit Chest', levelReq: 6 }
+                ];
+
+                return (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fadeIn">
+                    <div className="bg-[#1e2324] rounded-3xl p-6 border border-slate-700/60 shadow-xl flex flex-col justify-between space-y-6">
+                      <div className="space-y-3 text-center lg:text-left">
+                        <span className="text-4xl block animate-pulse">👑</span>
+                        <div>
+                          <h4 className="text-md font-black text-white">{isRtl ? 'مستواك الأكاديمي الحالي' : 'Academy Progress Rank'}</h4>
+                          <span className="text-xs text-slate-400 font-bold uppercase mt-0.5 block">{isRtl ? 'مسار رتبة باسل' : 'Basil\'s Path'}</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center text-xs font-mono font-bold">
+                          <span className="text-[#00CEC9]">LEVEL {level}</span>
+                          <span className="text-slate-400">{currentLevelXP} / 150 XP</span>
+                        </div>
+                        <div className="w-full bg-slate-900 h-3.5 rounded-full overflow-hidden border border-slate-800 p-0.5">
+                          <div 
+                            className="bg-gradient-to-r from-[#6C5CE7] to-[#00CEC9] h-full rounded-full transition-all duration-500"
+                            style={{ width: `${xpPercent}%` }}
+                          />
+                        </div>
+                        <span className="text-[10px] text-slate-500 block font-bold text-center">
+                          {isRtl 
+                            ? `تحتاج إلى ${150 - currentLevelXP} نقطة أخرى للوصول للمستوى التالي 🚀` 
+                            : `Acquire ${150 - currentLevelXP} more XP to reach level ${level + 1} 🚀`}
+                        </span>
+                      </div>
+
+                      <div className="bg-slate-900/40 p-4 rounded-2xl border border-slate-800/40">
+                        <span className="text-[10px] text-[#FDCB6E] font-black uppercase tracking-wider block mb-1">📊 {isRtl ? 'إحصائيات الجلسة الحالية' : 'Session Metrics'}</span>
+                        <div className="grid grid-cols-2 gap-3 pt-1 text-center font-mono">
+                          <div className="bg-slate-950/40 p-2.5 rounded-xl border border-slate-900">
+                            <span className="text-sm font-black text-white block">+{sessionXP}</span>
+                            <span className="text-[8px] text-slate-400 block font-bold uppercase mt-0.5">{isRtl ? 'النقاط المكتسبة' : 'XP Merited'}</span>
+                          </div>
+                          <div className="bg-slate-950/40 p-2.5 rounded-xl border border-slate-900">
+                            <span className="text-sm font-black text-white block">{gamesPlayedCount}</span>
+                            <span className="text-[8px] text-slate-400 block font-bold uppercase mt-0.5">{isRtl ? 'الألعاب الملعوبة' : 'Games Run'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="lg:col-span-2 space-y-6">
+                      <div className="bg-[#1e2324] rounded-3xl p-6 border border-slate-700/60 shadow-xl space-y-4">
+                        <h4 className="text-sm font-black text-white border-b border-slate-700/40 pb-2.5">
+                          🏆 {isRtl ? 'أوسمة الاستحقاق المكتسبة' : 'Earned Badges of Honor'}
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {badgesList.map((badge) => (
+                            <div 
+                              key={badge.id}
+                              className={`p-3.5 rounded-2xl border flex items-center gap-3.5 transition-all ${
+                                badge.unlocked 
+                                  ? 'bg-slate-900/60 border-slate-800' 
+                                  : 'bg-slate-900/10 border-slate-950 opacity-40 select-none'
+                              }`}
+                            >
+                              <span className="text-2xl shrink-0">{badge.unlocked ? '✨' : '🔒'}</span>
+                              <div className="space-y-0.5">
+                                <span className={`text-xs font-black block ${badge.unlocked ? 'text-[#FDCB6E]' : 'text-slate-500'}`}>
+                                  {isRtl ? badge.titleAr : badge.titleEn}
+                                </span>
+                                <p className="text-[10px] text-slate-400 font-medium leading-normal">
+                                  {isRtl ? badge.descAr : badge.descEn}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="bg-[#1e2324] rounded-3xl p-6 border border-slate-700/60 shadow-xl space-y-4">
+                        <h4 className="text-sm font-black text-white border-b border-slate-700/40 pb-2.5">
+                          🖼️ {isRtl ? 'ألبوم ملصقات باسل الرقمي' : 'Basil\'s Collectible Sticker Album'}
+                        </h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                          {stickersList.map((stk) => {
+                            const isStkUnlocked = level >= stk.levelReq;
+                            return (
+                              <div 
+                                key={stk.id}
+                                className={`p-4 rounded-2xl border text-center flex flex-col items-center justify-center space-y-2 transition-all ${
+                                  isStkUnlocked 
+                                    ? 'bg-slate-900/60 border-slate-800 shadow-md shadow-white/5' 
+                                    : 'bg-slate-900/10 border-slate-950 opacity-30 select-none'
+                                }`}
+                              >
+                                <span className={`text-4xl transition-all ${isStkUnlocked ? 'scale-100 animate-bounce' : 'scale-90 filter grayscale'}`}>
+                                  {isStkUnlocked ? stk.emoji : '🔒'}
+                                </span>
+                                <div className="space-y-0.5">
+                                  <span className={`text-[10px] font-black block ${isStkUnlocked ? 'text-white' : 'text-slate-500'}`}>
+                                    {isRtl ? stk.nameAr : stk.nameEn}
+                                  </span>
+                                  <span className="text-[8px] text-slate-400 font-bold block">
+                                    {isRtl ? `مستوى ${stk.levelReq}` : `Lvl ${stk.levelReq}`}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </motion.div>
           ) : (
             <motion.div
