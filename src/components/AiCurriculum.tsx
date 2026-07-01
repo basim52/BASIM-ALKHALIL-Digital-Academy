@@ -5280,6 +5280,18 @@ Output Summary for [${topic}]:
                                    </button>
                                  );
                               })}
+
+                              {level.lessons.every(lesson => completedLessons.includes(lesson.lesson_number)) && (
+                                <button
+                                  onClick={() => {
+                                    setQuizLevel(level.level_number);
+                                    setLobbyTab('perfection');
+                                  }}
+                                  className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 active:scale-95 transition-all text-slate-950 font-black p-4 rounded-2xl flex items-center justify-center gap-2 border border-amber-400/20 text-xs mt-4 animate-pulse shadow-lg shadow-amber-500/10 cursor-pointer text-center"
+                                >
+                                  📝 {isRtl ? `خوض اختبار المستوى ${level.level_number} المعتمد! 🏆` : `Take Certified Level ${level.level_number} Quiz! 🏆`}
+                                </button>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -8515,7 +8527,7 @@ Output Summary for [${topic}]:
 
 
               {lobbyTab === 'perfection' && (
-                <PerfectionHub isRtl={isRtl} />
+                <PerfectionHub isRtl={isRtl} initialQuizLevel={quizLevel} />
               )}
 
               {lobbyTab === 'balance_oasis' && (

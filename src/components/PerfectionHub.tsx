@@ -19,9 +19,10 @@ interface Quiz {
 
 interface PerfectionHubProps {
   isRtl: boolean;
+  initialQuizLevel?: number;
 }
 
-export const PerfectionHub: React.FC<PerfectionHubProps> = ({ isRtl }) => {
+export const PerfectionHub: React.FC<PerfectionHubProps> = ({ isRtl, initialQuizLevel }) => {
   const [subTab, setSubTab] = useState<'quizzes' | 'cyber' | 'prompts' | 'videos' | 'updates' | 'audit'>('quizzes');
 
   // --- Audit and Development Workspace States ---
@@ -42,11 +43,18 @@ export const PerfectionHub: React.FC<PerfectionHubProps> = ({ isRtl }) => {
   const [pathDiagnosticResult, setPathDiagnosticResult] = useState<any | null>(null);
 
   // --- 1. Interactive Quizzes States ---
-  const [activeQuizLevel, setActiveQuizLevel] = useState<number>(1);
+  const [activeQuizLevel, setActiveQuizLevel] = useState<number>(initialQuizLevel || 1);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [quizScore, setQuizScore] = useState<number | null>(null);
   const [quizSubmitted, setQuizSubmitted] = useState<boolean>(false);
   const [quizFeedback, setQuizFeedback] = useState<string>('');
+
+  useEffect(() => {
+    if (initialQuizLevel) {
+      setActiveQuizLevel(initialQuizLevel);
+      setSubTab('quizzes'); // automatically switch to quizzes subtab when initialQuizLevel is set
+    }
+  }, [initialQuizLevel]);
 
   const quizzes: Quiz[] = [
     {
