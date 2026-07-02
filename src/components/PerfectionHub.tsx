@@ -155,7 +155,7 @@ export const PerfectionHub: React.FC<PerfectionHubProps> = ({ isRtl, initialQuiz
     }
   ];
 
-  const currentQuiz = quizzes[activeQuizLevel - 1];
+  const currentQuiz = (quizzes[activeQuizLevel - 1] || quizzes[0]) as Quiz;
 
   const handleSelectAnswer = (qIdx: number, val: string) => {
     setSelectedAnswers(prev => ({ ...prev, [qIdx]: val }));
@@ -163,11 +163,13 @@ export const PerfectionHub: React.FC<PerfectionHubProps> = ({ isRtl, initialQuiz
 
   const handleSubmitQuiz = () => {
     let score = 0;
-    currentQuiz.questions.forEach((q, idx) => {
-      if (selectedAnswers[idx] === q.answer) {
-        score += 10;
-      }
-    });
+    if (currentQuiz && currentQuiz.questions) {
+      currentQuiz.questions.forEach((q, idx) => {
+        if (selectedAnswers[idx] === q.answer) {
+          score += 10;
+        }
+      });
+    }
 
     setQuizScore(score);
     setQuizSubmitted(true);
@@ -748,7 +750,7 @@ Output Formatting Protocol:
             <div className="bg-slate-950/40 border border-white/5 p-6 rounded-2xl space-y-6">
               <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/5">
                 <span className="text-xs font-black text-amber-300 font-mono tracking-wider">
-                  {currentQuiz.title}
+                  {currentQuiz?.title || ""}
                 </span>
                 <span className="text-[10px] text-slate-400 bg-slate-950 px-2 py-1 rounded-md">
                   {isRtl ? '10 أسئلة متكاملة' : '10 Evaluation Questions'}
@@ -756,7 +758,7 @@ Output Formatting Protocol:
               </div>
 
               <div className="space-y-6 divide-y divide-white/5">
-                {currentQuiz.questions.map((item, idx) => (
+                {currentQuiz?.questions && currentQuiz.questions.map((item, idx) => (
                   <div key={idx} className={`pt-4 ${idx === 0 ? 'pt-0' : ''} space-y-3`}>
                     <div className="flex items-start gap-2">
                       <span className="text-xs font-bold text-amber-500 font-mono bg-amber-500/10 px-2.5 py-0.5 rounded">
@@ -845,9 +847,9 @@ Output Formatting Protocol:
                 ) : (
                   <button
                     onClick={handleSubmitQuiz}
-                    disabled={Object.keys(selectedAnswers).length < currentQuiz.questions.length}
+                    disabled={!currentQuiz?.questions || Object.keys(selectedAnswers).length < currentQuiz.questions.length}
                     className={`w-full sm:w-auto px-6 py-3 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2 ${
-                      Object.keys(selectedAnswers).length < currentQuiz.questions.length
+                      (!currentQuiz?.questions || Object.keys(selectedAnswers).length < currentQuiz.questions.length)
                         ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
                         : 'bg-amber-500 text-slate-950 hover:bg-amber-600 active:scale-95 shadow-lg'
                     }`}
