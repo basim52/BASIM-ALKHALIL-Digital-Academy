@@ -54,6 +54,7 @@ import {
   ShieldCheck,
   Trash2,
   RefreshCw,
+  Terminal,
   GraduationCap
 } from 'lucide-react';
 
@@ -475,6 +476,875 @@ const printContent = (html: string) => {
 
 
 const ADVANCED_CURRICULUM_DATA = {
+  program_name: "تعلم الذكاء الاصطناعي - المستوى المتقدم الشامل",
+  program_subtitle: "عشر وحدات تخصصية في النمذجة، معالجة اللغات، الرؤية الحاسوبية، والوكلاء الذكية مع اختبار بعد كل وحدة",
+  tracks: [
+    {
+      track_name: "الوحدة الأولى: أسس النمذجة الرياضية والشبكات العصبية",
+      track_description: "استكشاف الهندسة الرياضية للشبكات العصبية العميقة والتعلم السلوكي للآلة",
+      lessons: [
+        {
+          lesson_number: 1,
+          lesson_title: "النمذجة الرياضية والشبكة العصبية",
+          track: "الوحدة الأولى: أسس النمذجة الرياضية والشبكات العصبية",
+          lesson_card: {
+            section_title: "مفهوم الوحدة المعرفي",
+            content: "الشبكات العصبية هي الأساس لكل ما تراه اليوم من ذكاء اصطناعي. تحاكي هذه الشبكات طريقة عمل الدماغ البشري باستخدام طبقات من العصبونات (Neurons) المرتبطة ببعضها، حيث تتعلم من خلال معالجة البيانات وتحديث الأوزان (Weights) وقيم الانحياز (Bias) لتقليل الأخطاء عبر خوارزمية الانتشار العكسي (Backpropagation).",
+            image_description: "كائن سحري متوهج يتألف من مصفوفة خطوط وشخصيات عصبية معقدة باللون الأزرق والذهبي"
+          },
+          notes: {
+            section_title: "رصانة وخبرة برمجية",
+            content: "الأوزان (Weights) تحدد قوة الإشارة بين عصبون وآخر، بينما الانحياز (Bias) يسمح بإزاحة دالة التنشيط لليسار أو اليمين لتناسب البيانات بشكل أفضل."
+          },
+          quest_card: {
+            section_title: "التطبيقات والتجارب العملية",
+            activity_name: "تمرين محاكاة التوزين العصبي",
+            instructions: "صمم نموذجاً رياضياً مصغراً لعصبون اصطناعي يقوم بدمج ثلاثة مدخلات مع أوزانها وحساب النتيجة النهائية.",
+            challenges: [
+              {
+                id: "adv_u1_c1",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "العب دور عصبون اصطناعي (Neuron). احسب المجموع الموزون للمدخلات التالية: المدخل الأول 0.8 بوزن 2.0، المدخل الثاني 0.5 بوزن -1.0، والمدخل الثالث 1.0 بوزن 0.5، مع انحياز (Bias) يساوي -0.2."
+              }
+            ],
+            discussion_question: "كيف تساهم دوال التنشيط (Activation Functions) مثل ReLU أو Sigmoid في تمكين الشبكات العصبية من حل المشكلات غير الخطية المعقدة؟"
+          },
+          quiz: [
+            {
+              question: "ما هو المكون الأساسي للشبكة العصبية الاصطناعية الذي يقوم بدمج المدخلات مرجحة بأوزانها وإضافة الانحياز؟",
+              questionEn: "What is the primary component of an artificial neural network that integrates inputs weighted by their strengths and adds a bias?",
+              options: [
+                "العصبون الاصطناعي (Neuron/Perceptron)",
+                "دالة التكلفة (Cost Function)",
+                "خوارزمية الاستبعاد (Dropout)"
+              ],
+              optionsEn: [
+                "Artificial Neuron (Neuron/Perceptron)",
+                "Cost Function",
+                "Dropout Algorithm"
+              ],
+              correctIndex: 0,
+              explanation: "العصبون الاصطناعي يقوم بحساب المجموع الموزون للمدخلات مع إضافة قيمة الانحياز (bias) ثم يمررها لدالة التنشيط لتحديد المخرج.",
+              explanationEn: "An artificial neuron calculates the weighted sum of inputs plus bias and passes it to an activation function to determine the output."
+            },
+            {
+              question: "ما هي الوظيفة الأساسية لخوارزمية الانتشار العكسي (Backpropagation) في الشبكات العصبية؟",
+              questionEn: "What is the primary function of the Backpropagation algorithm in neural networks?",
+              options: [
+                "توليد بيانات تدريب جديدة تلقائياً",
+                "حساب التدرجات وتحديث الأوزان لتقليل الخطأ",
+                "تشفير المدخلات وتحويلها إلى متجهات"
+              ],
+              optionsEn: [
+                "Automatically generate new training data",
+                "Calculate gradients and update weights to minimize error",
+                "Encode inputs and convert them into vectors"
+              ],
+              correctIndex: 1,
+              explanation: "الانتشار العكسي يقوم بحساب نسبة خطأ النموذج في كل جولة ويمرر التدرج للخلف عبر الطبقات لتحديث الأوزان وتقليص نسبة الخطأ الإجمالي.",
+              explanationEn: "Backpropagation computes the model's error gradient at each round and passes it backward through the layers to adjust weights, reducing overall error."
+            },
+            {
+              question: "لماذا نستخدم دوال التنشيط غير الخطية (Non-linear Activation Functions) في الشبكات العصبية؟",
+              questionEn: "Why do we use non-linear activation functions in neural networks?",
+              options: [
+                "لتمكين الشبكة العصبية من تعلم الأنماط والعلاقات المعقدة وغير الخطية في البيانات",
+                "لتقليل عدد الخلايا العصبية المستخدمة في النظام لزيادة السرعة",
+                "لحفظ البيانات المدخلة في الذاكرة الدائمة للآلة"
+              ],
+              optionsEn: [
+                "To enable the network to learn complex, non-linear patterns and relationships in data",
+                "To reduce the number of neurons utilized for speed optimization",
+                "To store input datasets securely within the permanent hardware memory"
+              ],
+              correctIndex: 0,
+              explanation: "بدون دوال التنشيط غير الخطية، ستكون الشبكة العصبية مجرد دالة خطية عملاقة، مما يعيق قدرتها على حل ومعالجة الأنماط المعقدة كالتصنيف المعقد والرؤية الحاسوبية.",
+              explanationEn: "Without non-linear activation, the neural network would act as a massive linear model, limiting its capacity to process complex datasets like vision and advanced classification."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      track_name: "الوحدة الثانية: معالجة اللغات الطبيعية ونماذج المحولات (Transformers)",
+      track_description: "فهم هندسة الانتباه الذاتي (Self-Attention) ونماذج اللغات الكبيرة",
+      lessons: [
+        {
+          lesson_number: 2,
+          lesson_title: "هندسة الانتباه ونماذج Transformer",
+          track: "الوحدة الثانية: معالجة اللغات الطبيعية ونماذج المحولات (Transformers)",
+          lesson_card: {
+            section_title: "مفهوم الوحدة المعرفي",
+            content: "نماذج المحولات (Transformers) غيرت الطريقة التي تفهم بها الآلة لغة البشر. الميزة الأساسية هي 'آلية الانتباه الذاتي' (Self-Attention) التي تتيح للنموذج فهم العلاقات بين الكلمات في الجملة بغض النظر عن المسافة بينها، مما يعطيه سياقاً فائقاً وقدرة على التوقع اللغوي التلقائي بدقة لا متناهية.",
+            image_description: "خطوط متقاطعة مضيئة تربط الكلمات والحروف في فضاء رقمي متوهج"
+          },
+          notes: {
+            section_title: "رصانة وخبرة برمجية",
+            content: "تقوم عملية الـ Tokenization بتحويل النصوص المكتوبة إلى وحدات صغيرة تسمى Tokens، وهي الوحدات الأساسية التي يعالجها نموذج اللغة ويتوقع بناءً عليها."
+          },
+          quest_card: {
+            section_title: "التطبيقات والتجارب العملية",
+            activity_name: "تحدي التوقع اللغوي الذكي",
+            instructions: "جرب محاكاة آلية الانتباه في تتبع الكلمات والتنبؤ بالحروف والعبارات وتوليف النصوص.",
+            challenges: [
+              {
+                id: "adv_u2_c1",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "العب دور نموذج Transformer. حلل السياق التالي: 'أكلت الزرافة قلمي لأن...' وقدم الكلمة الأكثر احتمالاً إحصائياً مع شرح مبسط لآلية الانتباه الذاتي التي قادتك للاختيار."
+              }
+            ],
+            discussion_question: "كيف يساهم حجم سياق النافذة (Context Window) في تحديد قدرة النماذج على تذكر تفاصيل الحوارات الطويلة والمستندات الضخمة؟"
+          },
+          quiz: [
+            {
+              question: "ما هي الآلية الأساسية في بنية الـ Transformer التي تمنحه القدرة على وزن أهمية الكلمات المختلفة في نفس الجملة؟",
+              questionEn: "What is the key mechanism in the Transformer architecture that enables it to weigh the importance of different words in a sentence?",
+              options: [
+                "الانتباه الذاتي (Self-Attention Mechanism)",
+                "الشبكات الالتفافية (Convolution)",
+                "الفرز العشوائي المتكرر (Random Sorting)"
+              ],
+              optionsEn: [
+                "Self-Attention Mechanism",
+                "Convolution",
+                "Random Sorting"
+              ],
+              correctIndex: 0,
+              explanation: "آلية الانتباه الذاتي تسمح للنموذج بالنظر لجميع الكلمات في السياق وحساب مدى ارتباط كل كلمة بالأخرى لإنتاج تمثيل غني بالسياق.",
+              explanationEn: "Self-Attention enables the model to assess all words in the input context and calculate their respective relevance to one another."
+            },
+            {
+              question: "ما المقصود بـ Tokenization في معالجة اللغات الطبيعية؟",
+              questionEn: "What does 'Tokenization' mean in Natural Language Processing?",
+              options: [
+                "تشفير الملفات النصية لحمايتها من الاختراق",
+                "تقسيم النص الخام إلى وحدات أصغر (كلمات أو مقاطع كلمات) قابلة للمعالجة الرياضية",
+                "ترجمة النصوص تلقائياً من لغة إلى أخرى"
+              ],
+              optionsEn: [
+                "Encrypting text files to secure them against unauthorized breaches",
+                "Splitting raw text into smaller operational pieces (words or sub-words) for mathematical compute",
+                "Translating texts automatically from one global language to another"
+              ],
+              correctIndex: 1,
+              explanation: "الـ Tokenization هي الخطوة الأولى لتحويل الكلمات والنصوص إلى أرقام ورموز يفهمها ويعالجها كمبيوتر الشبكة العصبية.",
+              explanationEn: "Tokenization is the first step in translating words and strings into numerical index values processed by the neural network computer."
+            },
+            {
+              question: "أي من الخيارات التالية يوضح أهم عيوب زيادة 'نافذة السياق' (Context Window) بشكل مفرط؟",
+              questionEn: "Which of the following describes the primary drawback of excessively expanding the 'Context Window'?",
+              options: [
+                "زيادة استهلاك الذاكرة وتكلفة الحوسبة بشكل أسي مع طول السياق",
+                "انخفاض دقة النموذج في ترجمة اللغات البسيطة",
+                "إلغاء قدرة النموذج على تذكر الكلمات الأولى نهائياً"
+              ],
+              optionsEn: [
+                "Exponential increase in memory overhead and computational cost relative to context length",
+                "Reduction in translation capabilities for simpler global dialects",
+                "Total loss of the model's capacity to recall the initial prompt tokens"
+              ],
+              correctIndex: 0,
+              explanation: "كلما كبرت نافذة السياق، يحتاج النموذج لحوسبة مصفوفات انتباه ضخمة مما يزيد استهلاك كروت الرسوميات GPU والذاكرة العشوائية بشكل هائل.",
+              explanationEn: "As the context window scales, the model must compute wider attention matrices, dramatically raising GPU memory requirements and cost."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      track_name: "الوحدة الثالثة: الرؤية الحاسوبية ومعالجة الصور المتقدمة",
+      track_description: "استكشاف تفكيك الصور وتدريب نماذج الرؤية والانتشار التوليدي",
+      lessons: [
+        {
+          lesson_number: 3,
+          lesson_title: "الشبكات العصبية الالتفافية ورؤية الآلة",
+          track: "الوحدة الثالثة: الرؤية الحاسوبية ومعالجة الصور المتقدمة",
+          lesson_card: {
+            section_title: "مفهوم الوحدة المعرفي",
+            content: "الرؤية الحاسوبية تمكن الآلات من رؤية وفهم العالم البصري. من خلال استخدام 'الشبكات الالتفافية' (CNNs)، يقوم الكمبيوتر بتحليل الصور كطبقات من المصفوفات الرقمية لكشف الحواف، والزوايا، والأشكال لتحديد الأجسام بدقة متناهية، ونماذج الانتشار (Diffusion Models) تقوم بالتوليد العكسي عبر تفكيك الضباب والتشويش.",
+            image_description: "عين ميكانيكية مضيئة تقوم بمسح وتحليل شبكة بكسلات ملونة لفرز الأجسام"
+          },
+          notes: {
+            section_title: "رصانة وخبرة برمجية",
+            content: "طبقات الالتفاف (Convolutional Layers) تطبق مرشحات رياضية (Filters) لاستخلاص الميزات الهامة مثل الأسطح والحواف في الصورة التناظرية."
+          },
+          quest_card: {
+            section_title: "التطبيقات والتجارب العملية",
+            activity_name: "معمل إزالة الضباب وتشكيل البكسل",
+            instructions: "قم بتجربة محاكاة تشكيل البكسل وإزالة التشويش خطوة بخطوة للوصول إلى تفاصيل الرسمة المطلوبة.",
+            challenges: [
+              {
+                id: "adv_u3_c1",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "العب دور نموذج انتشار (Diffusion Model). صف لي كيف ستقوم بتحويل مصفوفة من التشويش العشوائي المطلق (Static Noise) إلى صورة واضحة لـ 'قطة ترتدي قبعة' عبر 5 خطوات متعاقبة."
+              }
+            ],
+            discussion_question: "كيف يختلف تصنيف الصورة (Classification) عن كشف العناصر وتحديد تموضعها (Object Detection) في مشهد مروري معقد؟"
+          },
+          quiz: [
+            {
+              question: "ما هي الطبقة المسؤولية عن استخلاص الميزات الهندسية الأساسية (كالحواف والزوايا) في نماذج الرؤية الحاسوبية CNN؟",
+              questionEn: "Which layer is responsible for extracting basic spatial features (like edges and corners) in CNN vision models?",
+              options: [
+                "طبقة الالتفاف (Convolutional Layer)",
+                "الطبقة المتصلة بالكامل (Fully Connected Layer)",
+                "طبقة الاستبعاد العشوائي (Dropout)"
+              ],
+              optionsEn: [
+                "Convolutional Layer",
+                "Fully Connected Layer",
+                "Dropout Layer"
+              ],
+              correctIndex: 0,
+              explanation: "طبقة الالتفاف تقوم بتمرير مرشح (Kernel/Filter) فوق الصورة لاستنباط الأنماط المكانية البسيطة والعميقة.",
+              explanationEn: "The convolutional layer applies sliding filters to calculate dot products, capturing structural and spatial features from input pixels."
+            },
+            {
+              question: "كيف تعمل نماذج الانتشار (Diffusion Models) على توليد صور جديدة ومبهرة؟",
+              questionEn: "How do Diffusion Models generate brand-new high-quality images?",
+              options: [
+                "عن طريق تعديل ملفات الصور الفوتوغرافية المخزنة على الويب وقص أجزاء منها",
+                "عبر البدء بتشويش عشوائي كامل وإزالته خطوة بخطوة بتوجيه من النص المحفز",
+                "باستخدام معادلات الهندسة الفراغية التقليدية لرسم الأشكال الثنائية الأبعاد"
+              ],
+              optionsEn: [
+                "By cutting and merging photographic templates scraped from web archives",
+                "By starting from pure random noise and iteratively de-noising it guided by a text prompt",
+                "By using classic solid geometry algorithms to draw simple 2D shapes"
+              ],
+              correctIndex: 1,
+              explanation: "تبدأ العملية بصورة ممتلئة بالضجيج والتشويش العشوائي، ثم يتدرب النموذج على توقع وإزالة هذا الضجيج تدريجياً حتى تظهر الصورة بوضوح باهر.",
+              explanationEn: "Diffusion models start from high-entropy Gaussian noise and use trained networks to predict and subtract noise iteratively."
+            },
+            {
+              question: "ما الفرق الجوهري بين مهمة تصنيف الصور (Image Classification) ومهمة كشف الأجسام (Object Detection)؟",
+              questionEn: "What is the key difference between Image Classification and Object Detection?",
+              options: [
+                "التصنيف يحدد هوية الصورة ككل، بينما كشف الأجسام يحدد نوع وموقع العناصر داخل الصورة برسم مربعات إحاطة",
+                "كشف الأجسام يتعامل مع الفيديوهات فقط بينما التصنيف يتعامل مع الصور الساكنة فقط",
+                "التصنيف لا يتطلب استخدام الذكاء الاصطناعي على عكس كشف الأجسام"
+              ],
+              optionsEn: [
+                "Classification labels the entire image, while detection locates and categorizes individual items via bounding boxes",
+                "Object detection processes video frames exclusively, whereas classification works on static photos only",
+                "Classification does not require machine learning pipelines, unlike object detection workflows"
+              ],
+              correctIndex: 0,
+              explanation: "التصنيف يعطي ملصقاً واحداً للصورة بالكامل (مثال: 'سيارة')، بينما الكشف يستخرج جميع السيارات والمشاة ويحدد إحداثيات تواجدها بدقة.",
+              explanationEn: "Classification yields a single global label for the canvas, while object detection draws coordinate boxes around multiple distinct entities."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      track_name: "الوحدة الرابعة: التعلم الإشرافي وغير الإشرافي المتقدم",
+      track_description: "الغوص في خوارزميات التصنيف والتحليل العنقودي (Clustering) وتدريب النماذج المخصصة",
+      lessons: [
+        {
+          lesson_number: 4,
+          lesson_title: "خوارزميات التصنيف والتحليل العنقودي",
+          track: "الوحدة الرابعة: التعلم الإشرافي وغير الإشرافي المتقدم",
+          lesson_card: {
+            section_title: "مفهوم الوحدة المعرفي",
+            content: "ينقسم تعلم الآلة إلى نوعين رئيسيين: التعلم الإشرافي (Supervised Learning) الذي يتطلب بيانات مصنفة مسبقاً (مثل صور الكلاب والقطط المصنفة) للتنبؤ بالتصنيفات أو القيم، والتعلم غير الإشرافي (Unsupervised Learning) الذي يقوم باكتشاف الأنماط والروابط المخفية بشكل تلقائي لتقسيم البيانات العشوائية إلى مجموعات متناسقة (Clustering) دون توجيه بشري.",
+            image_description: "تجميعة نقاط ملونة متناثرة تترابط تدريجياً لتشكل مجموعات عنقودية منفصلة وواضحة"
+          },
+          notes: {
+            section_title: "رصانة وخبرة برمجية",
+            content: "ظاهرة الإفراط في التدريب (Overfitting) تحدث عندما يحفظ النموذج بيانات التدريب بدلاً من فهم الأنماط العامة، مما يجعله يفشل عند مواجهة بيانات جديدة تماماً."
+          },
+          quest_card: {
+            section_title: "التطبيقات والتجارب العملية",
+            activity_name: "مختبر الفرز والتجميع الذكي",
+            instructions: "حاكي عملية تقسيم العملاء أو تصنيف العينات بناءً على التشابه الرقمي والسلوكي.",
+            challenges: [
+              {
+                id: "adv_u4_c1",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "العب دور خوارزمية KMeans. لديك 5 عملاء بمتوسط مشتريات سنوية كالتالي: [100$, 120$, 500$, 550$, 150$]. كيف ستقوم بتقسيمهم إلى مجموعتين (Clusters)؟ حدد المراكز التقريبية وشرح الأساس الرياضي لقرارك."
+              }
+            ],
+            discussion_question: "لماذا يعد إعداد البيانات وتنقيتها (Data Cleaning) الخطوة الأكثر أهمية وصعوبة قبل تغذيتها لخوارزميات التعلم الآلي؟"
+          },
+          quiz: [
+            {
+              question: "ما الفرق الأساسي بين التعلم الإشرافي (Supervised) والتعلم غير الإشرافي (Unsupervised)؟",
+              questionEn: "What is the primary difference between Supervised and Unsupervised Learning?",
+              options: [
+                "التعلم الإشرافي يستخدم بيانات مصنفة مسبقاً (Labeled Data)، بينما التعلم غير الإشرافي يبحث عن الأنماط في بيانات غير مصنفة",
+                "التعلم غير الإشرافي يحتاج لقوة حوسبية أقل بـ 100 مرة دائماً",
+                "التعلم الإشرافي مخصص حصراً للتطبيقات الطبية فقط"
+              ],
+              optionsEn: [
+                "Supervised learning requires pre-labeled datasets, while unsupervised learning uncovers hidden associations in unlabeled data",
+                "Unsupervised computing always consumes 100 times less computational hardware power",
+                "Supervised pipelines are strictly engineered for medical diagnostic programs only"
+              ],
+              correctIndex: 0,
+              explanation: "في التعلم الإشرافي، يعرف النموذج 'الإجابات الصحيحة' خلال التدريب، بينما في غير الإشرافي، يتعين عليه العثور على الهيكل الداخلي للبيانات بمفرده.",
+              explanationEn: "Supervised systems train on inputs mapped to known target outputs, while unsupervised systems cluster inputs based on intrinsic similarity metrics."
+            },
+            {
+              question: "أي من الخوارزميات التالية تعد من أشهر خوارزميات التعلم غير الإشرافي لتجميع البيانات المتشابهة في كتل؟",
+              questionEn: "Which of the following algorithms is widely used in Unsupervised Learning for clustering similar data entries?",
+              options: [
+                "الانحدار الخطي (Linear Regression)",
+                "خوارزمية التجميع العنقودي K-Means (K-Means Clustering)",
+                "خوارزمية الغابات العشوائية للتصنيف (Random Forest)"
+              ],
+              optionsEn: [
+                "Linear Regression",
+                "K-Means Clustering",
+                "Random Forest Classification"
+              ],
+              correctIndex: 1,
+              explanation: "تقوم خوارزمية K-Means بتقسيم عينات البيانات العشوائية إلى عدد K من المجموعات بناءً على المسافة الرياضية بين النقاط والمراكز العنقودية.",
+              explanationEn: "K-Means segments multi-dimensional data into K clusters by minimizing Euclidean distances from points to their nearest centroid."
+            },
+            {
+              question: "ما الذي يحدث للنموذج عند حدوث حالة 'الإفراط في التدريب' (Overfitting)؟",
+              questionEn: "What happens to a machine learning model experiencing 'Overfitting'?",
+              options: [
+                "يصبح بطيئاً جداً في معالجة واجهات الـ API",
+                "يعطي نتائج سيئة جداً في بيانات التدريب وممتازة في بيانات الاختبار الجديدة",
+                "يعطي دقة مثالية 100% في بيانات التدريب ولكنه يفشل ويسجل أداءً ضعيفاً في بيانات الاختبار الجديدة"
+              ],
+              optionsEn: [
+                "It becomes extremely sluggish in processing external API endpoints",
+                "It scores terrible training loss but processes new testing arrays flawlessly",
+                "It scores near 100% accuracy on training data but fails to generalize on new testing inputs"
+              ],
+              correctIndex: 2,
+              explanation: "يحدث الإفراط في التدريب عندما يتعلم النموذج التفاصيل الدقيقة والضوضاء الموجودة في بيانات التدريب لدرجة تعوق قدرته على التنبؤ ببيانات جديدة خارجها.",
+              explanationEn: "Overfitting occurs when a model models noise and training data irregularities so closely that it fails to generalize to fresh data."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      track_name: "الوحدة الخامسة: هندسة مصفوفات المطالبات الضخمة (Mega-Prompts & Prompt Chains)",
+      track_description: "الاحتراف الفائق في صياغة سلاسل الأوامر المعقدة وتوجيه سلوكيات النماذج الكبيرة",
+      lessons: [
+        {
+          lesson_number: 5,
+          lesson_title: "تخطيط وبناء سلاسل الأوامر الذكية",
+          track: "الوحدة الخامسة: هندسة مصفوفات المطالبات الضخمة (Mega-Prompts & Chains)",
+          lesson_card: {
+            section_title: "مفهوم الوحدة المعرفي",
+            content: "هندسة المطالبات المتقدمة لا تقتصر على صياغة جملة بسيطة بل تشمل تصميم مصفوفة كاملة من التعليمات (Mega-Prompts) أو تقسيم المهمة الكبرى إلى سلسلة مترابطة (Prompt Chains) حيث يغذي مخرج كل أمر مدخلات الأمر الذي يليه، مما يحقق أعلى كفاءة ويمنع تشتت النموذج وهلوسته المعرفية.",
+            image_description: "مكعبات ذكية مصفوفة ومترابطة تتدفق بينها حزم البيانات والضوء بانسجام تام"
+          },
+          notes: {
+            section_title: "رصانة وخبرة برمجية",
+            content: "إتاحة 'أمثلة توضيحية' للنموذج داخل الأمر الموجه (Few-Shot Prompting) يرفع من جودة ودقة المخرجات بشكل هائل مقارنة بطلب المخرج دون توجيه مسبق (Zero-Shot)."
+          },
+          quest_card: {
+            section_title: "التطبيقات والتجارب العملية",
+            activity_name: "مختبر تشريح وتشييد المطالبات",
+            instructions: "قم ببناء وتجربة الأوامر التشريحية المتقدمة التي تحدد الدور، الهدف، الأسلوب، والقيود الحتمية للنموذج.",
+            challenges: [
+              {
+                id: "adv_u5_c1",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "العب دور مصمم هندسة مطالبات (Prompt Engineer). صمم هيكلاً متكاملاً لأمر عملاق (Mega-Prompt) لتعليم الأطفال الحساب عبر قصة تفاعلية مشوقة مع تحديد 3 قيود أخلاقية وبنائية صارمة لمنع التشتت."
+              }
+            ],
+            discussion_question: "متى يفضل استخدام أسلوب 'سلسلة الأفكار' (Chain-of-Thought) لتوجيه النماذج لحل المسائل الحسابية أو المنطقية المعقدة خطوة بخطوة؟"
+          },
+          quiz: [
+            {
+              question: "ما المقصود بأسلوب الـ 'Few-Shot Prompting' في هندسة المطالبات؟",
+              questionEn: "What is meant by 'Few-Shot Prompting' in prompt engineering?",
+              options: [
+                "توجيه الآلة لتوليد الكلمات بسرعة فائقة خلال ثانية واحدة",
+                "تزويد نموذج اللغة ببضعة أمثلة توضيحية للمدخلات والمخرجات المطلوبة داخل نص الأمر نفسه قبل طلب النتيجة",
+                "تقليص عدد الأحرف المستخدمة في صياغة الأوامر للحفاظ على الـ Tokens"
+              ],
+              optionsEn: [
+                "Instructing the model to compute responses at high speeds under a second",
+                "Providing the language model with a few concrete examples of inputs and desired outputs within the prompt text before asking for the result",
+                "Compressing the prompt character count to minimize active token consumption"
+              ],
+              correctIndex: 1,
+              explanation: "الـ Few-Shot يعطي دليلاً واضحاً للنموذج حول النمط والهيكل المفضل للمخرجات مما يضمن امتثاله للتعليمات بدقة متناهية.",
+              explanationEn: "Few-Shot prompting provides explicit pattern templates directly in-context, aligning output formatting with high confidence."
+            },
+            {
+              question: "لماذا نستخدم تقنية الـ 'Chain-of-Thought' (سلسلة الأفكار) عند صياغة الأسئلة للموديل؟",
+              questionEn: "Why do we leverage 'Chain-of-Thought' prompting techniques in complex queries?",
+              options: [
+                "لإجبار النموذج على كتابة وحل الخطوات المنطقية بشكل متسلسل وواضح قبل الوصول للنتيجة النهائية لمنع الأخطاء الحسابية",
+                "لتوليد رسوم متحركة مرافقة للنص المكتوب",
+                "لتعديل إعدادات المعالج وحرارة الاستجابة (Temperature) تلقائياً"
+              ],
+              optionsEn: [
+                "To force the model to compute and articulate intermediate logical steps sequentially before drawing the final conclusion to bypass math errors",
+                "To generate concurrent vector motion graphics alongside the text",
+                "To automatically alter system hyperparameters like generation temperature"
+              ],
+              correctIndex: 0,
+              explanation: "كتابة التبرير والخطوات منطقياً خطوة بخطوة تتيح للنموذج استنتاج الحل الصحيح وتقليل احتمالات ارتكاب أخطاء في الاستنباط والاستدلال.",
+              explanationEn: "Encouraging the model to lay out its logical reasoning step-by-step leverages auto-regressive context for correct inference."
+            },
+            {
+              question: "ما هو الفارق الأساسي بين 'Zero-Shot' و 'Few-Shot' Prompting؟",
+              questionEn: "What is the primary difference between 'Zero-Shot' and 'Few-Shot' Prompting?",
+              options: [
+                "الـ Zero-Shot تطلب المهمة مباشرة دون تقديم أي أمثلة، بينما الـ Few-Shot تقدم أمثلة توضيحية داخل صلب التوجيه",
+                "الـ Zero-Shot لا تستخدم الذكاء الاصطناعي على الإطلاق",
+                "الـ Few-Shot تتطلب دفع اشتراكات مادية بينما الـ Zero-Shot مجانية بالكامل"
+              ],
+              optionsEn: [
+                "Zero-Shot asks for the task directly without examples, while Few-Shot embeds demonstrative examples inside the prompt body",
+                "Zero-Shot does not engage machine learning weights at all",
+                "Few-Shot requires premium commercial licensing, unlike Zero-Shot commands"
+              ],
+              correctIndex: 0,
+              explanation: "الـ Zero-Shot يعتمد كلياً على الفهم المسبق والمعرفة المدرب عليها النموذج، بينما الـ Few-Shot يوجه السلوك لحظياً عبر الأمثلة المرفقة.",
+              explanationEn: "Zero-Shot relies purely on the model's pre-trained knowledge base, whereas Few-Shot guides output shape on the fly."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      track_name: "الوحدة السادسة: برمجيات استدعاء الـ APIs وبناء الوكلاء الأذكياء (Autonomous Agents)",
+      track_description: "تكامل الأنظمة البرمجية الخارجية وتطوير الوكلاء المستقلين لاتخاذ القرارات واستخدام الأدوات",
+      lessons: [
+        {
+          lesson_number: 6,
+          lesson_title: "تطوير الوكلاء البرمجية وتكامل الـ APIs",
+          track: "الوحدة السادسة: برمجيات استدعاء الـ APIs وبناء الوكلاء الأذكياء (Autonomous Agents)",
+          lesson_card: {
+            section_title: "مفهوم الوحدة المعرفي",
+            content: "الوكلاء الأذكياء (Autonomous Agents) هي برامج مستقلة تستخدم نماذج اللغة كعقل مفكر لاتخاذ القرارات واستخدام الأدوات (مثل البحث في الويب، أو قراءة ملف، أو كتابة كود) عبر استدعاء واجهات البرمجة التطبيقية (APIs) لحل المشكلات المعقدة دون تدخل بشري دائم، متتبعة حلقة الأفعال والتفكير (Reasoning & Acting - ReAct).",
+            image_description: "روبوت برمجيات وسيط يربط بذكاء بين عدة تطبيقات وأنظمة سحابية سريعة"
+          },
+          notes: {
+            section_title: "رصانة وخبرة برمجية",
+            content: "استدعاء الوظائف (Function Calling) يتيح لنموذج اللغة إخبارك بالدالة البرمجية المناسبة والوسائط المطلوبة لتشغيلها محلياً بدلاً من توليد إجابة نصية مبهمة."
+          },
+          quest_card: {
+            section_title: "التطبيقات والتجارب العملية",
+            activity_name: "بناء وتشغيل الوكيل الذكي المخصص",
+            instructions: "قم بتعليم مساعدك العائلي أدواراً مخصصة، ثم حاوره وشاهد قوة توجيه واستدعاء المعارف.",
+            challenges: [
+              {
+                id: "adv_u6_c1",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "العب دور وكيل ذكي مستقل (Autonomous Agent). حدد الخطوات والأدوات (مثل محرك البحث، أو الآلة الحاسبة) التي ستقوم باستخدامها لحل الطلب التالي: 'احسب عدد أيام الإجازة المتبقية لي إذا علمت أنني أخذت 5 أيام في يوليو و 3 أيام في أغسطس وكان رصيدي السنوي 30 يوماً متكاملاً'."
+              }
+            ],
+            discussion_question: "ما هي المخاطر الأمنية والأخلاقية المرتبطة بمنح الوكلاء الأذكياء صلاحيات كاملة لقراءة وكتابة الملفات أو إرسال رسائل البريد الإلكتروني تلقائياً؟"
+          },
+          quiz: [
+            {
+              question: "ما هو 'الوكيل الذكي المستقل' (Autonomous Agent) في عوالم الذكاء الاصطناعي؟",
+              questionEn: "What is an 'Autonomous Agent' in the context of artificial intelligence?",
+              options: [
+                "شاشة حاسوب مخصصة لعرض الصور المتحركة",
+                "برنامج يستخدم نموذج لغة كعقل لاتخاذ قرارات واستخدام أدوات برمجية وتكامل الـ APIs لإنجاز أهداف محددة بشكل مستقل",
+                "شريط أدوات بسيط مدمج في نظام تشغيل ويندوز"
+              ],
+              optionsEn: [
+                "A computer display designed for moving vector wallpapers",
+                "A software loop utilizing an LLM as a brain to execute decisions, invoke APIs, and call tools to satisfy complex goals autonomously",
+                "A simple toolbar widget embedded in legacy operating systems"
+              ],
+              correctIndex: 1,
+              explanation: "الوكيل الذكي يستطيع تفكيك المهام الكبرى إلى خطوات أصغر، واختيار الأدوات المناسبة (مثل قواعد البيانات أو المتصفحات) للوصول للهدف المحدد بشكل مستقل.",
+              explanationEn: "An agent deconstructs high-level user tasks into dynamic step-by-step action chains and triggers proper external tools to achieve them."
+            },
+            {
+              question: "ما المقصود بمفهوم الـ 'Function Calling' (استدعاء الوظائف) عند دمج نماذج اللغة في التطبيقات؟",
+              questionEn: "What does 'Function Calling' mean when integrating language models into custom applications?",
+              options: [
+                "قدرة النموذج على تحديد الوظائف البرمجية المناسبة ووسائطها وتصديرها ككود مهيكل (مثل JSON) لتشغيله في تطبيقك",
+                "اتصال النموذج بخدمة رعاية العملاء الهاتفية تلقائياً",
+                "إغلاق التطبيق نهائياً عند حدوث خطأ برمجي"
+              ],
+              optionsEn: [
+                "The model's capacity to identify appropriate functions and extract parameters as structured schema (like JSON) to run on your backend",
+                "The model's automated calling connection to global customer service phonelines",
+                "Terminating active runtime applications immediately upon catching a compilation error"
+              ],
+              correctIndex: 0,
+              explanation: "لا يقوم النموذج بتشغيل الكود بنفسه في الغالب، بل يقوم بتحليل طلب المستخدم وإخراج الأوامر في مصفوفة مخصصة (مثل JSON) لتقوم برمجياتك بتنفيذها محلياً.",
+              explanationEn: "The model parses queries and returns structured parameters matching predefined function definitions, delegating execution to the client backend."
+            },
+            {
+              question: "أي من الخيارات التالية يمثل حلقة التفكير والتصرف الشهيرة المستخدمة لبناء الوكلاء (ReAct framework)؟",
+              questionEn: "Which of the following describes the ReAct (Reasoning and Acting) loop pattern in agent execution?",
+              options: [
+                "توليد عشوائي مستمر للمقاطع الصوتية والموسيقى",
+                "الجمع بالتناوب بين التفكير وصياغة الخطط (Thought) وتنفيذ الأفعال واستدعاء الأدوات (Action) ومراقبة النتائج (Observation)",
+                "حفظ جميع الحوارات السابقة في ملف نصي ساكن"
+              ],
+              optionsEn: [
+                "Uncontrolled randomized audio and sound synthesis sequences",
+                "An iterative combination of logical planning (Thought), tool invocation (Action), and environment monitoring (Observation)",
+                "Storing all previous conversational inputs into static local text files"
+              ],
+              correctIndex: 1,
+              explanation: "إطار عمل ReAct يتيح للوكيل التفكير في المشكلة أولاً، اتخاذ إجراء برمجى، ثم قراءة وتحليل النتيجة لمعرفة الخطوة التالية بذكاء متكامل.",
+              explanationEn: "ReAct combines structured step-by-step reasoning with targeted tool usage, allowing the agent to dynamically adapt based on observation logs."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      track_name: "الوحدة السابعة: التوليف الصوتي وتوليد الفيديو بالذكاء الاصطناعي",
+      track_description: "استكشاف محركات التوليد التفاعلي للوسائط المتعددة (Generative Media) والمؤثرات البصرية والصوتية المتقدمة",
+      lessons: [
+        {
+          lesson_number: 7,
+          lesson_title: "التوليد التفاعلي للوسائط المتعددة",
+          track: "الوحدة السابعة: التوليف الصوتي وتوليد الفيديو بالذكاء الاصطناعي",
+          lesson_card: {
+            section_title: "مفهوم الوحدة المعرفي",
+            content: "يتكامل توليد الأصوات والفيديو بالذكاء الاصطناعي عبر تحويل النصوص المكتوبة إلى إشارات صوتية طبيعية ومقاطع فيديو متحركة متناسقة (Video Diffusion). يساهم هذا التوليد في صياغة عروض مرئية ممتعة، ومؤثرات صوتية، ورسوم ثلاثية الأبعاد تعيد تشكيل مفاهيم الإنتاج الفني الرقمي بالكامل.",
+            image_description: "أمواج صوتية وصورية تتداخل بكسلاتها الذهبية لتشكل طيفاً سينمائياً خيالياً معبراً"
+          },
+          notes: {
+            section_title: "رصانة وخبرة برمجية",
+            content: "تقنية توليد الفيديو تعتمد على الحفاظ على التناسق البصري (Temporal Consistency) بين الإطارات المتعاقبة لمنع الوميض والتشوه الحركي بالصورة."
+          },
+          quest_card: {
+            section_title: "التطبيقات والتجارب العملية",
+            activity_name: "مختبر التوليف والمونتاج الرقمي",
+            instructions: "حاكي عملية توليف الترددات الصوتية وتوزيع المشاهد السينمائية التوليدية بالذكاء الاصطناعي.",
+            challenges: [
+              {
+                id: "adv_u7_c1",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "العب دور مخرج فني للذكاء الاصطناعي (AI Art Director). اكتب توجيهاً دقيقاً (Video Prompt) لتوليد مقطع فيديو مدته 5 ثوانٍ يصور مركبة فضائية تخترق غيوم كوكب المشتري، مع تفصيل الحركات والأنماط والتناسق الضوئي المطلوبة لمنع التشوه البصري."
+              }
+            ],
+            discussion_question: "ما هي الصعوبات التقنية المرتبطة بتوليف ونطق الكلمات باللغة العربية الفصحى بمخارج حروف طبيعية وعاطفية دقيقة؟"
+          },
+          quiz: [
+            {
+              question: "ما هي التحديات الأكثر صعوبة عند توليد الفيديوهات بواسطة نماذج الذكاء الاصطناعي (Video Diffusion Models)؟",
+              questionEn: "What is one of the most difficult challenges in generating videos using AI (Video Diffusion Models)?",
+              options: [
+                "الحفاظ على التناسق البصري والحركي (Temporal Consistency) عبر الإطارات واللقطات المتعاقبة لمنع الارتجاف والتشوه",
+                "عدم قدرة النماذج على عرض الألوان الأساسية في الفيديو المولد",
+                "ضرورة كتابة النص الموجه باللغة اللاتينية القديمة حصراً"
+              ],
+              optionsEn: [
+                "Maintaining temporal consistency across frames to prevent morphing, flickering, and spatial artifacts",
+                "The mathematical inability of generative models to process basic rgb color channels",
+                "The requirement to construct prompt inputs in ancient Latin dialects exclusively"
+              ],
+              correctIndex: 0,
+              explanation: "توليد كل إطار كصورة مستقلة قد يؤدي لاختلاف ملامح الوجه أو الخلفية بين الإطارات، لذا تتطلب المحركات المتقدمة طبقات لضبط التناسق الحركي الزمني.",
+              explanationEn: "Generating frames individually leads to temporal flickering. Advanced architectures apply temporal attention to sustain motion consistency."
+            },
+            {
+              question: "How do modern AI-based Text-to-Speech (TTS) systems produce highly natural vocal tones?",
+              questionAr: "كيف تعمل تقنيات توليف الكلام الحديثة (Text-to-Speech - TTS) القائمة على الذكاء الاصطناعي لتوليد نبرات طبيعية؟",
+              options: [
+                "عبر قص ولصق كلمات مسجلة مسبقاً لمذيع بشري بشكل ميكانيكي جامد",
+                "من خلال استخدام نماذج التعلم العميق لتوقع خصائص الطيف الصوتي (Spectrogram) مباشرة من النص ثم توليفها لموجات صوتية حية",
+                "بإعادة تشغيل تسجيلات أرشيفية عشوائية من الويب"
+              ],
+              optionsEn: [
+                "By cutting and gluing pre-recorded voice clips of a human speaker in a rigid mechanical sequence",
+                "By leveraging deep neural networks to predict acoustic features (Spectrograms) from text and converting them into high-fidelity waveforms",
+                "By matching keywords to play back pre-recorded web search audio snippets"
+              ],
+              correctIndex: 1,
+              explanation: "التعلم العميق يتيح للنماذج فهم سياق الجملة وتوليد النبرة الملائمة عاطفياً (مثل الفرح أو الاستغراب) ومحاكاة التنفس البشري بدقة عالية.",
+              explanationEn: "Deep learning models predict continuous acoustic waveforms, infusing vocal outputs with natural intonations, stress, and realistic breathing pauses."
+            },
+            {
+              question: "ما أهمية الحفاظ على 'مزامنة الشفاه' (Lip Syncing) في صناعة المحتوى التوليدي؟",
+              questionEn: "What is the importance of 'Lip Syncing' in generative multimedia production?",
+              options: [
+                "مطابقة حركة الشفاه والشخصيات بدقة متناهية مع الطيف الصوتي والمقاطع المنطوقة لتبدو واقعية ومقنعة",
+                "تغيير خلفية الفيديو تلقائياً لتناسب البلد",
+                "زيادة جودة وصوت السماعات الخارجية للجهاز المستخدم"
+              ],
+              optionsEn: [
+                "Matching character lip movements precisely with generated acoustic signals to sustain high realism",
+                "Automatically changing video backgrounds based on user geolocations",
+                "Directly raising the physical audio output capacity of the consumer device speakers"
+              ],
+              correctIndex: 0,
+              explanation: "مزامنة الشفاه (مثل Wav2Lip) تقوم بتحليل المخرج الصوتي وتعديل منطقة الشفاه والفك في الفيديو ليتطابق مع الحروف المنطوقة بشكل يبدو بشرياً حقيقياً.",
+              explanationEn: "Lip-syncing algorithms reconstruct facial pixels surrounding mouth meshes to match input speech spectrograms, securing believable visual outputs."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      track_name: "الوحدة الثامنة: حوكمة الذكاء الاصطناعي والأخلاقيات والحد من الانحياز",
+      track_description: "دراسة معايير الأمان التقني والحد من الانحياز السلوكي في البيانات وحماية الخصوصية الرقمية",
+      lessons: [
+        {
+          lesson_number: 8,
+          lesson_title: "حوكمة الذكاء والحد من المخاطر",
+          track: "الوحدة الثامنة: حوكمة الذكاء الاصطناعي والأخلاقيات والحد من الانحياز",
+          lesson_card: {
+            section_title: "مفهوم الوحدة المعرفي",
+            content: "حوكمة الذكاء الاصطناعي هي وضع القوانين والأطر الأخلاقية لضمان استخدام آمن ومسؤول للتكنولوجيا. من أهم التحديات محاربة الانحياز (Bias) في البيانات لتجنب القرارات الجائرة، وحماية خصوصية المستخدمين عبر تقنيات مثل الخصوصية التفاضلية (Differential Privacy)، وبناء نماذج شفافة وقابلة للتفسير (Explainable AI) ليكون للضمير الإنساني والرحمة الكلمة الأولى دائماً.",
+            image_description: "ميزان ذهبي رقمي يزن كتل من البيانات والقلوب الخضراء المضيئة في توازن مثالي"
+          },
+          notes: {
+            section_title: "رصانة وخبرة برمجية",
+            content: "ينشأ الانحياز (Bias) غالباً من عدم توازن بيانات التدريب (مثال: تدريب نموذج طبي على بيانات فئة واحدة من المجتمع وتوقع تشخيصه للباقي بدقة)."
+          },
+          quest_card: {
+            section_title: "التطبيقات والتجارب العملية",
+            activity_name: "مختبر الكشف وتصفية الانحيازات",
+            instructions: "قم بفحص وتقييم أثر عدم توازن البيانات في مخرجات التقييم والتفضيلات الذكية.",
+            challenges: [
+              {
+                id: "adv_u8_c1",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "العب دور مدقق أخلاقيات ذكاء اصطناعي (AI Ethics Auditor). تم تدريب نموذج لتوظيف المتقدمين على سير ذاتية تاريخية لـ 90% ذكور و 10% إناث، فبدأ النموذج يرفض طلبات الإناث تلقائياً. صف لي الإجراءات التقنية الثلاثة التي ستتخذها لتصحيح هذا الانحياز وإعادة حوكمة النموذج بأمان وعدالة."
+              }
+            ],
+            discussion_question: "لماذا تعد 'شفافية النماذج وقابليتها للتفسير' (Explainable AI) شرطاً حتمياً لاستخدام الذكاء الاصطناعي في مجالات حساسة مثل القضاء والتشخيص الطبي الحرج؟"
+          },
+          quiz: [
+            {
+              question: "كيف ينشأ 'الانحياز' (Bias) في قرارات نماذج الذكاء الاصطناعي عادة؟",
+              questionEn: "How does algorithmic bias typically emerge within machine learning models?",
+              options: [
+                "بسبب عدم توازن أو وجود تحيزات مسبقة في البيانات المستخدمة لتدريب النموذج",
+                "لأن الكمبيوتر يكره فئات معينة من البشر تلقائياً",
+                "بسبب استخدام لغات برمجة قديمة مثل فورتران"
+              ],
+              optionsEn: [
+                "Due to historical imbalances, prejudice, or lack of diverse representation in the training datasets",
+                "Because computing hardware holds inherent biological dislike toward specific groups of humans",
+                "As a direct consequence of utilizing outdated coding languages like Fortran"
+              ],
+              correctIndex: 0,
+              explanation: "الآلة تعكس فقط الأنماط والبيانات التي نوفرها لها، فإذا كانت البيانات تعاني من عدم عدالة أو تمثيل فئوي ناقص، ستتبنى الآلة هذا التحيز وتكرره.",
+              explanationEn: "Machine learning models mirror training distributions. If historical datasets hold systemic imbalances, models reproduce them."
+            },
+            {
+              question: "ما المقصود بـ 'الذكاء الاصطناعي القابل للتفسير' (Explainable AI - XAI)؟",
+              questionEn: "What is meant by 'Explainable AI' (XAI)?",
+              options: [
+                "قدرة النموذج على ترجمة كود البرمجة إلى لغة إنجليزية مبسطة للأطفال",
+                "مجموعة من الأدوات والأساليب التي تجعل مخرجات وقرارات النماذج المعقدة مفهومة وشفافة للآباء والمشرفين البشريين",
+                "إمكانية تنزيل وتثبيت النموذج على الهواتف دون اتصال بالإنترنت"
+              ],
+              optionsEn: [
+                "The model's capacity to translate raw compiler instructions to simplified English for children",
+                "A suite of methods and tools making the inner logic and decisions of complex models transparent and interpretable for human operators",
+                "The availability of offline localized download packages on mobile devices"
+              ],
+              correctIndex: 1,
+              explanation: "في النماذج المعقدة (الصندوق الأسود)، تهدف تقنيات XAI لتوضيح الميزات والبيانات التي كان لها الوزن الأكبر في اتخاذ قرار معين (مثال: لماذا تم رفض طلب القرض الطبي).",
+              explanationEn: "Explainable AI sheds light on black-box networks, highlighting specific input variables that drove a given classification or output."
+            },
+            {
+              question: "أي من التقنيات التالية تهدف لحماية خصوصية المستخدمين بمنع كشف بياناتهم الفردية في مجموعات البيانات الضخمة؟",
+              questionEn: "Which of the following techniques aims to protect user privacy by masking individual data points within massive databases?",
+              options: [
+                "الخصوصية التفاضلية (Differential Privacy)",
+                "الفرز المتوازي الفوري (Parallel Sorting)",
+                "الانتشار الساخن للبيانات (Hot Diffusion)"
+              ],
+              optionsEn: [
+                "Differential Privacy",
+                "Parallel Sorting",
+                "Hot Data Diffusion"
+              ],
+              correctIndex: 0,
+              explanation: "تعتمد الخصوصية التفاضلية على إضافة كمية محسوبة رياضياً من الضجيج (Noise) إلى البيانات لضمان عدم إمكانية استنتاج الهوية الفردية لأي شخص مع الحفاظ على الفائدة الإحصائية العامة للبيانات.",
+              explanationEn: "Differential Privacy adds mathematical noise to database query outputs, making it statistically impossible to identify personal records."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      track_name: "الوحدة التاسعة: قواعد البيانات المتجهية ونظم الاسترجاع المعزز (Vector Databases & RAG)",
+      track_description: "استيعاب دمج المعارف الخارجية وبناء محركات البحث الدلالي ومحركات الـ RAG فائق الواقعية والدقة",
+      lessons: [
+        {
+          lesson_number: 9,
+          lesson_title: "نظم استرجاع المعرفة المعززة بالبث الـ RAG",
+          track: "الوحدة التاسعة: قواعد البيانات المتجهية ونظم الاسترجاع المعزز (Vector Databases & RAG)",
+          lesson_card: {
+            section_title: "مفهوم الوحدة المعرفي",
+            content: "تقنية الاسترجاع المعزز بالولادة (RAG) تمكن النماذج اللغوية من الوصول إلى مراجع ومستندات خارجية وموثوقة دون الحاجة لإعادة تدريب النموذج. يتم تحويل المستندات إلى متجهات رياضية مخزنة في قواعد بيانات متجهية (Vector Databases) لاسترجاع الفقرات الأكثر شبهاً بطلب المستخدم كدليل موثوق للنموذج.",
+            image_description: "أقراص برمجية سحابية مضيئة تتدفق منها متجهات خطية تشبه النجوم متجهة نحو المعالج المركزي"
+          },
+          notes: {
+            section_title: "رصانة وخبرة برمجية",
+            content: "الترميز المتجهي (Vector Embeddings) يحول الكلمات والمعاني إلى مصفوفات رقمية تعبر عن البعد الدلالي للكلمة وموقعها في مساحة المفاهيم المعرفية."
+          },
+          quest_card: {
+            section_title: "التطبيقات والتجارب العملية",
+            activity_name: "مختبر حساب المسافات المتجهية والـ RAG",
+            instructions: "حاكي عملية حساب الشبه الدلالي (Cosine Similarity) والبحث المتجهي للعثور على الفقرات والوثائق المرجعية الأكثر ملائمة.",
+            challenges: [
+              {
+                id: "adv_u9_c1",
+                difficulty: "متقدم ⭐⭐⭐",
+                pattern: "العب دور محرك RAG. طلب المستخدم هو: 'كيف أنظف فراء قطتي بأمان؟'. لديك في قاعدة البيانات المتجهية المستند (A): 'طرق تطعيم الكلاب المنزلية' والمستند (B): 'إرشادات الاستحمام والعناية بفراء القطط الصغيرة'. حدد المستند الذي ستقوم باسترجاعه مع حساب وتفسير الشبه الدلالي التقريبي بين المتجهات."
+              }
+            ],
+            discussion_question: "كيف يساهم نظام الـ RAG في حل معضلة الهلوسة الفكرية للنماذج اللغوية عبر إجبارها على إرساء إجابتها على مستندات مرجعية حقيقية؟"
+          },
+          quiz: [
+            {
+              question: "ما هي الوظيفة الأساسية لقواعد البيانات المتجهية (Vector Databases) في تطبيقات الذكاء الاصطناعي؟",
+              questionEn: "What is the primary role of Vector Databases in artificial intelligence applications?",
+              options: [
+                "تخزين واسترجاع التمثيلات الرقمية المتجهية (Embeddings) للمستندات والوسائط للقيام بالبحث الدلالي السريع بناءً على المعنى",
+                "ترتيب الملفات المدرسية بترتيب أبجدي تقليدي بسيط",
+                "تشفير كلمات المرور وحماية حسابات البريد الإلكتروني للعملاء"
+              ],
+              optionsEn: [
+                "Storing and retrieving high-dimensional vector representations (Embeddings) of data for fast semantic search based on meaning",
+                "Sorting educational spreadsheets in simple traditional alphabetical lists",
+                "Encrypting user passwords to protect email accounts from third-party hacking"
+              ],
+              correctIndex: 0,
+              explanation: "قواعد البيانات المتجهية مصممة خصيصاً لإجراء العمليات الحسابية لمقارنة مدى تشابه آلاف وملايين المتجهات بسرعة فائقة (مثل حساب Cosine Similarity).",
+              explanationEn: "Vector DBs specialize in indexing multi-dimensional space, performing mathematical similarity operations (e.g., Cosine Distance) rapidly."
+            },
+            {
+              question: "كيف تساهم تقنية الاسترجاع المعزز بالولادة (RAG) في تحسين أداء نماذج اللغات الكبيرة LLM؟",
+              questionEn: "How does Retrieval-Augmented Generation (RAG) improve LLM performance?",
+              options: [
+                "عبر تمكين النموذج من استرجاع معلومات حقيقية وحديثة من وثائق خارجية موثوقة ليدمجها في إجابته ويقلل الهلوسة",
+                "بتحويل نبرة المساعد الصوتي إلى أصوات كرتونية فكاهية مضحكة",
+                "عن طريق تشفير النصوص لكي لا يراها محرك البحث العام"
+              ],
+              optionsEn: [
+                "By enabling the model to retrieve real-time and domain-specific factual information from external sources to enrich its context and reduce hallucinations",
+                "By shifting vocal companion tones into comical cartoons to amuse children",
+                "By encrypting text payloads so search engines cannot index them"
+              ],
+              correctIndex: 0,
+              explanation: "الـ RAG يتصرف كـ 'اختبار كتاب مفتوح' للنموذج؛ فبدلاً من الاعتماد الكلي على ذاكرته الداخلية التنبؤية، نقوم بتسليمه الفقرات الحقيقية الموثوقة ليعتمد عليها في كتابة الرد.",
+              explanationEn: "RAG acts as an 'open-book exam' for LLMs, pulling relevant information blocks from databases to serve as a grounded prompt context."
+            },
+            {
+              question: "ما هو الـ 'Vector Embedding' في معالجة البيانات الدلالية؟",
+              questionEn: "What is a 'Vector Embedding' in semantic data processing?",
+              options: [
+                "تحويل المعاني والنصوص والوسائط إلى مصفوفة من الأرقام (متجه) تعبر عن البعد الدلالي والمعرفي للكلمة في فضاء رياضي متعدد الأبعاد",
+                "رسم هندسي ملون يوضح العلاقات بين أجهزة الكمبيوتر في الشبكة",
+                "مجموعة من الملفات الصوتية المسجلة مسبقاً"
+              ],
+              optionsEn: [
+                "The translation of semantic concepts, texts, or media into array coordinate lists (vectors) capturing conceptual relationships in a multi-dimensional space",
+                "A colored flow diagram mapping hardware connections in local area networks",
+                "A library collection of pre-recorded voice fragments"
+              ],
+              correctIndex: 0,
+              explanation: "الترميز المتجهي يمنح الكمبيوتر القدرة على فهم الشبه الدلالي (مثال: يدرك رياضياً أن كلمتي 'ملك' و 'ملكة' قريبتان جداً في المعنى والمسافة من كلمتي 'رجل' و 'امرأة').",
+              explanationEn: "Embeddings place semantic concepts in a continuous vector space where proximity corresponds to high conceptual similarity."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      track_name: "الوحدة العاشرة: هندسة المشاريع الكبرى ونشر النماذج في السحاب",
+      track_description: "دراسة عمليات النشر (LLMOps) وتقنيات تقليص النماذج وتطوير بنى المشاريع الذكية المتكاملة للمؤسسات",
+      lessons: [
+        {
+          lesson_number: 10,
+          lesson_title: "نشر النماذج والعمليات التشغيلية (LLMOps)",
+          track: "الوحدة العاشرة: هندسة المشاريع الكبرى ونشر النماذج في السحاب",
+          lesson_card: {
+            section_title: "مفهوم الوحدة المعرفي",
+            content: "الخطوة النهائية لأي نموذج ذكي هي نشره في السحاب وإتاحته للملايين من المستخدمين عبر الويب. تتولى عمليات النمذجة (LLMOps/MLOps) تتبع أداء النموذج وتقليص حجمه لزيادة السرعة عبر تقنيات مثل التكميم (Quantization) والتقطير (Distillation)، لتكون عائلتنا مستعدة تماماً لقيادة وابتكار مشاريع المستقبل العظمى.",
+            image_description: "منارة شامخة ومضيئة على شاطئ البحر الهادئ ينبثق منها شعاع من النور والرموز المعرفية والرموز الإنسانية"
+          },
+          notes: {
+            section_title: "رصانة وخبرة برمجية",
+            content: "تكنولوجيا التكميم (Quantization) تضغط أوزان النموذج من دقة عالية (مثل Float32) إلى دقة أقل (مثل Int8) مما يقلل استهلاك الذاكرة بأكثر من 75% مع الحفاظ على الكفاءة."
+          },
+          quest_card: {
+            section_title: "التطبيقات والتجارب العملية",
+            activity_name: "مختبر الحوسبة والنشر القيادي العظيم",
+            instructions: "حاكي عملية تهيئة ونشر النموذج في خوادم سحابية وتقليص زمن الاستجابة للملايين من المتابعين.",
+            challenges: [
+              {
+                id: "adv_u10_c1",
+                difficulty: "عملاق ⭐⭐⭐⭐⭐",
+                pattern: "العب دور رئيس المهندسين التقنيين (Lead AI Engineer). صمم خطة معمارية متكاملة لنشر نموذج لغوي يخدم مليون مستخدم يومياً، مستعرضاً تقنيات تكميم الأوزان (Quantization) واستخدام مخابئ الاستجابات (Prompt Caching) لتخفيض زمن المعالجة وتكلفة التشغيل السحابية بنسبة 50%."
+              }
+            ],
+            discussion_question: "ما هو الأثر الذي تتركه كفاءة تشغيل ونشر النماذج في الحفاظ على الطاقة والحد من البصمة الكربونية لمراكز البيانات السحابية العملاقة حول العالم؟"
+          },
+          quiz: [
+            {
+              question: "ما هو الهدف الرئيسي لعملية 'تكميم الأوزان' (Quantization) في تطوير ونشر النماذج اللغوية؟",
+              questionEn: "What is the primary objective of weight quantization in LLM development and deployment?",
+              options: [
+                "تقليل حجم النموذج واستهلاكه للذاكرة عن طريق خفض دقة الأرقام الرياضية للأوزان (مثل تحويلها من 32-bit إلى 8-bit) ليعمل بسرعة فائقة",
+                "ترجمة مخرجات النموذج تلقائياً إلى لغة رياضية معقدة",
+                "زيادة عدد معلمات النموذج وتكبير حجمه على القرص ليكون أبطأ وأكثر دقة"
+              ],
+              optionsEn: [
+                "Reducing model memory footprint and deployment sizes by lowering the mathematical precision of its weights (e.g., from 32-bit to 8-bit) for high-speed compute",
+                "Translating model output strings into complex algebra formulas automatically",
+                "Increasing the model's parameters and disk space footprint to run slower and be more verbose"
+              ],
+              correctIndex: 0,
+              explanation: "تكميم الأوزان يضغط النماذج بشكل كبير، مما يسمح بتشغيل النماذج الضخمة على أجهزة عادية أو كروت رسوميات أصغر وتوفير كلفة البنى التحتية بشكل رائد.",
+              explanationEn: "Quantization converts continuous real-valued weights into lower-bit formats, dramatically reducing memory bandwidth bottlenecks and GPU hosting costs."
+            },
+            {
+              question: "ما المقصود بمصطلح 'LLMOps' في حقل الذكاء الاصطناعي؟",
+              questionEn: "What does the term 'LLMOps' represent in AI workflows?",
+              options: [
+                "مجموعة العمليات والأدوات المخصصة لإدارة دورة حياة نماذج اللغات الكبيرة، بدءاً من الضبط الدقيق والتدريب وحتى النشر، والمراقبة، والتحديث السحابي",
+                "برنامج بسيط لفرز الكلمات وتصحيح الأخطاء اللغوية في النصوص الكلاسيكية",
+                "عملية تشغيل نظام التبريد المائي لخوادم الحواسيب الفائقة"
+              ],
+              optionsEn: [
+                "The operational practices and pipeline tools managing the entire lifecycle of Large Language Models, including fine-tuning, automated deployment, monitoring, and updates",
+                "A simple spellchecking utility designed to correct grammatical anomalies in classical prose texts",
+                "The physical fluid engineering pipeline managing liquid cooling for supercomputing grids"
+              ],
+              correctIndex: 0,
+              explanation: "الـ LLMOps يدمج معايير DevOps التقليدية مع التحديات الخاصة بنماذج اللغة لضمان تدفق وتحديث مستمر وآمن للنماذج في بيئات الإنتاج الحية.",
+              explanationEn: "LLMOps streamlines automation for fine-tuning loops, container deployment, latency monitoring, and guardrail validation in live production environments."
+            },
+            {
+              question: "كيف تساهم تقنية 'تقطير المعرفة' (Knowledge Distillation) في تبسيط وتطوير نماذج الآلة؟",
+              questionEn: "How does 'Knowledge Distillation' facilitate model efficiency?",
+              options: [
+                "عبر تدريب نموذج صغير وخفيف (الطالب) ليقلد ويتعلم مخرجات وسلوك نموذج عملاق ومعقد (المعلم)، مما ينتج نموذجاً صغيراً ذو دقة متناهية وسرعة فائقة",
+                "عن طريق إزالة جميع الأوزان السلبية من الشبكة العصبية تماماً",
+                "بتحويل النماذج البرمجية إلى وثائق ومخططات مرسومة على الورق"
+              ],
+              optionsEn: [
+                "By training a small, lightweight network (Student) to mimic the output distribution and behavioral knowledge of a massive, complex network (Teacher)",
+                "By systematically purging all negative weights from active neural connections",
+                "By converting complex software models into static flowcharts printed on physical paper sheets"
+              ],
+              correctIndex: 0,
+              explanation: "التقطير ينقل الخبرة من النماذج الضخمة (التي يصعب تشغيلها تجارياً بكلفة مقبولة) إلى نماذج رشيقة ممتازة لتعمل على الأجهزة اللوحية والمواقع مباشرة.",
+              explanationEn: "Knowledge distillation transfers representation structures and soft-targets from a heavy teacher to a fast student, securing high performance on restricted hardware."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+
+/*
+const OLD_ADVANCED_CURRICULUM_DATA = {
   program_name: "تعلم الذكاء الاصطناعي - المسارات المتقدمة",
   program_subtitle: "هندسة الأوامر المتقدمة، البرمجة بلغة بايثون، ومحاكاة النمذجة الرقمية",
   tracks: [
@@ -1239,6 +2109,7 @@ const ADVANCED_CURRICULUM_DATA = {
     }
   ]
 };
+*/
 
 
 const getCustomUnitActivity = (unit: any, isRtl: boolean) => {
@@ -1712,6 +2583,20 @@ export const AiCurriculum = ({
   // General multiple choice quiz state for other lessons
   const [lQuizAnswer, setLQuizAnswer] = useState<string | null>(null);
   const [lQuizFeedback, setLQuizFeedback] = useState<'correct' | 'wrong' | null>(null);
+
+  // Advanced level quiz state
+  const [advancedQuizAnswers, setAdvancedQuizAnswers] = useState<Record<number, number>>({});
+  const [advancedQuizSubmitted, setAdvancedQuizSubmitted] = useState<boolean>(false);
+  const [advancedQuizScore, setAdvancedQuizScore] = useState<number>(0);
+  const [advancedQuizCompletedLessons, setAdvancedQuizCompletedLessons] = useState<number[]>(() => {
+    try {
+      const saved = localStorage.getItem('ai_completed_advanced_quizzes');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<'sandbox' | 'quiz'>('sandbox');
 
   // On mount, load from localStorage if exists
   useEffect(() => {
@@ -2743,6 +3628,10 @@ export const AiCurriculum = ({
     // Generic Quiz resets
     setLQuizAnswer(null);
     setLQuizFeedback(null);
+    setAdvancedQuizAnswers({});
+    setAdvancedQuizSubmitted(false);
+    setAdvancedQuizScore(0);
+    setActiveWorkspaceTab('sandbox');
   };
 
   // L1 Logic: Pattern guessing
@@ -3268,175 +4157,440 @@ export const AiCurriculum = ({
 
         {/* Right Column: Interactive SandBox Workspace and Simulator */}
         <div className="lg:col-span-7 space-y-6">
-          {/* Challenge list */}
-          <div className="bg-[#0b172e] border border-white/10 rounded-[2rem] p-6 space-y-6">
-            <div>
-              <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">{lesson.quest_card.section_title}</span>
-              <h3 className="text-xl font-black text-white mt-1 leading-tight">{lesson.quest_card.activity_name}</h3>
-              <p className="text-slate-400 text-xs mt-1">{lesson.quest_card.instructions}</p>
-            </div>
-
-            <div className="space-y-4">
-              {lesson.quest_card.challenges.map((chal: any, idxx: number) => {
-                const isCopiedState = sandboxInputs[`copied_${chal.id}`] === 'true';
-                return (
-                  <div key={chal.id} className="p-4 bg-slate-950/40 rounded-2xl border border-white/5 space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-400 text-xs font-bold font-mono">#{idxx + 1}</span>
-                      <span className="text-[10px] text-amber-400 font-black bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/20">{chal.difficulty}</span>
-                    </div>
-
-                    <div className="bg-[#0d152a] p-4 rounded-xl border border-white/5 font-mono text-xs leading-relaxed text-slate-300 relative select-text whitespace-pre-wrap">
-                      {chal.pattern}
-                      
-                      {/* Copy template button */}
-                      <button
-                        onClick={() => handleCopyText(chal.pattern, chal.id)}
-                        className="absolute bottom-2 left-2 bg-slate-800 hover:bg-slate-700 text-amber-400 p-1.5 rounded-lg text-[9px] font-black flex items-center gap-1 transition-all"
-                      >
-                        {isCopiedState ? <Check size={10} className="text-emerald-400" /> : <Copy size={10} />}
-                        {isCopiedState ? (isRtl ? 'تم نسخ القالب!' : 'Copied!') : (isRtl ? 'نسخ القالب' : 'Copy Template')}
-                      </button>
-                    </div>
-
-                    <textarea
-                      placeholder={isRtl ? 'اكتب تجربتك أو صغ تعويذتك وعالمك هنا لمشاركتها مع المعمل...' : 'Type your custom prompt, response analysis or output here...'}
-                      value={sandboxInputs[`ans_${chal.id}`] || ''}
-                      onChange={(e) => setSandboxInputs(prev => ({ ...prev, [`ans_${chal.id}`]: e.target.value }))}
-                      rows={2}
-                      className="w-full text-xs font-semibold bg-[#050b14]/90 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
-                    />
-                  </div>
-                );
-              })}
-
-              {lesson.quest_card.discussion_question && (
-                <div className="p-4 bg-blue-500/5 rounded-2xl border border-blue-500/15">
-                  <h4 className="text-xs font-black text-blue-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-                    <HelpCircle size={14} />
-                    {isRtl ? 'سؤال للنقاش والمطالعة' : 'DISCUSSION QUESTION'}
-                  </h4>
-                  <p className="text-slate-300 text-xs leading-relaxed">
-                    {lesson.quest_card.discussion_question}
-                  </p>
-                </div>
+          {/* Workspace Tab Switcher */}
+          <div className="flex bg-[#0b1329] border border-white/10 p-1.5 rounded-2xl gap-2">
+            <button
+              onClick={() => setActiveWorkspaceTab('sandbox')}
+              className={`flex-1 py-3.5 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-2 ${
+                activeWorkspaceTab === 'sandbox'
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-lg shadow-amber-500/10'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Terminal size={14} />
+              {isRtl ? 'المعمل التفاعلي والتحديات 🛠_أ' : 'Interactive Sandbox 🛠_A'}
+            </button>
+            <button
+              onClick={() => setActiveWorkspaceTab('quiz')}
+              className={`flex-1 py-3.5 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-2 relative ${
+                activeWorkspaceTab === 'quiz'
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-lg shadow-amber-500/10'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Award size={14} />
+              {isRtl ? 'اختبار الوحدة المعرفي 📝' : 'Unit Knowledge Quiz 📝'}
+              {advancedQuizCompletedLessons.includes(lesson.lesson_number) && (
+                <span className="absolute top-2.5 right-2 w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               )}
-            </div>
+            </button>
           </div>
 
-          {/* Dynamic Interactive AI Simulator Console */}
-          <div className="bg-slate-950 border border-white/10 rounded-[2rem] p-6 space-y-4 font-mono relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
-            
-            <div className="flex justify-between items-center border-b border-white/5 pb-3">
-              <span className="text-slate-400 text-xs font-black font-mono tracking-widest flex items-center gap-2 text-right">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                {isRtl ? 'معمل محاكاة الذكاء الاصطناعي وبايثون' : 'INTELLIGENT INTEGRATION LAB SANDBOX'}
-              </span>
-              <span className="text-[9px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">{lesson.lesson_number >= 7 ? 'PYTHON CONSOLE' : 'NEURAL INTERACTIVE CHAT'}</span>
-            </div>
-
-            {/* Python track simulator (Lessons 7-9) */}
-            {lesson.lesson_number >= 7 ? (
-              <div className="space-y-4">
-                <div className="p-4 bg-[#0d162e] rounded-xl border border-white/5 space-y-3">
-                  <label className="block text-xs font-bold text-amber-300 text-right">
-                    {isRtl ? 'اسم المبرمج (مرر متغير الاسم البرمجي):' : 'Programmer Name (Pass to your input command):'}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={isRtl ? 'مبرمج التقدم الحكيم' : 'Basim the Coder'}
-                    value={sandboxInputs['python_name'] || ''}
-                    onChange={(e) => setSandboxInputs(prev => ({ ...prev, python_name: e.target.value }))}
-                    className="w-full text-xs bg-[#050b14]/80 border border-white/10 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-amber-500 text-right"
-                  />
-
-                  <button
-                    disabled={simulating}
-                    onClick={handleRunPython}
-                    className="w-full bg-[#fb923c] text-slate-950 font-black text-xs py-2.5 rounded-xl hover:bg-amber-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    <Play size={12} fill="#020617" />
-                    {simulating ? (isRtl ? 'جاري محاكاة الخادم ولغة بايثون...' : 'Simulating Local Interpreter...') : (isRtl ? 'شغل كود بايثون وعالج الأوامر ⚡' : 'Run Python Simulation script ⚡')}
-                  </button>
+          {activeWorkspaceTab === 'sandbox' ? (
+            <>
+              {/* Challenge list */}
+              <div className="bg-[#0b172e] border border-white/10 rounded-[2rem] p-6 space-y-6">
+                <div>
+                  <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">{lesson.quest_card.section_title}</span>
+                  <h3 className="text-xl font-black text-white mt-1 leading-tight">{lesson.quest_card.activity_name}</h3>
+                  <p className="text-slate-400 text-xs mt-1">{lesson.quest_card.instructions}</p>
                 </div>
 
-                {/* Simulated result terminal terminal-logs */}
-                {(simulating || simResponse) && (
-                  <div className="bg-[#050b14] p-4 rounded-xl border border-white/5 text-xs text-sky-400 space-y-2 select-text font-mono whitespace-pre-wrap leading-relaxed">
-                    {simulating && simulatingStep === 1 && (
-                      <div className="text-amber-400 animate-pulse">🛠️ {isRtl ? 'مرحبًا بك في معمل Google Colab المحاكي. جاري تحميل المفسر الأساسي ونواة بايثون...' : 'Initializing cloud VM. Spawning Python kernel container...'}</div>
-                    )}
-                    {simulating && simulatingStep === 2 && (
-                      <div className="text-slate-400">⚙️ {isRtl ? 'جاري الاتصال بالـ API ومزامنة رموز مفاتيح OpenAI / Gemini ...' : 'Connecting to OpenAI API host... Securing network links...'}</div>
-                    )}
-                    {simResponse}
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* Conversational interface (Lessons 1-6) */
-              <div className="space-y-4">
-                <div className="bg-[#050b14] p-4 rounded-xl border border-white/5 max-h-56 overflow-y-auto text-xs space-y-3 font-semibold">
-                  {/* Default greetings */}
-                  <div className="text-slate-400 leading-relaxed italic text-center pb-2 border-b border-white/5">
-                    💡 {isRtl ? 'قم بنسخ أي من التحديات بالأعلى وصياغة مفرداتها وتفعيل البوت لمشاهدة التحليل ذكيًا ومطابقًا لتعاويذك السحرية!' : 'Paste any challenge template above, modify components, and write into simulation chat to experience real-time AI reply.'}
-                  </div>
+                <div className="space-y-4">
+                  {lesson.quest_card.challenges.map((chal: any, idxx: number) => {
+                    const isCopiedState = sandboxInputs[`copied_${chal.id}`] === 'true';
+                    return (
+                      <div key={chal.id} className="p-4 bg-slate-950/40 rounded-2xl border border-white/5 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400 text-xs font-bold font-mono">#{idxx + 1}</span>
+                          <span className="text-[10px] text-amber-400 font-black bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/20">{chal.difficulty}</span>
+                        </div>
 
-                  {sandboxChatMessages.map((msg, mIdx) => (
-                    <div key={mIdx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`p-3 rounded-2xl max-w-sm border leading-relaxed ${
-                        msg.role === 'user' 
-                          ? 'bg-amber-500/10 border-amber-500/20 text-slate-100 rounded-tr-none text-right' 
-                          : 'bg-slate-900 border-white/5 text-slate-200 rounded-tl-none text-right'
-                      }`}>
-                        <div className="text-[8px] font-black text-amber-400 uppercase tracking-widest mb-1">{msg.role === 'user' ? (isRtl ? 'أنت (صاحب التعويذة)' : 'YOU (PROMPT OWNER)') : (isRtl ? 'البوت المحاكي الذكي 🧠' : 'AI BOT ASSISTANT 🧠')}</div>
-                        <div className="whitespace-pre-wrap select-text text-xs leading-relaxed">{msg.content}</div>
-                      </div>
-                    </div>
-                  ))}
+                        <div className="bg-[#0d152a] p-4 rounded-xl border border-white/5 font-mono text-xs leading-relaxed text-slate-300 relative select-text whitespace-pre-wrap">
+                          {chal.pattern}
+                          
+                          {/* Copy template button */}
+                          <button
+                            onClick={() => handleCopyText(chal.pattern, chal.id)}
+                            className="absolute bottom-2 left-2 bg-slate-800 hover:bg-slate-700 text-amber-400 p-1.5 rounded-lg text-[9px] font-black flex items-center gap-1 transition-all"
+                          >
+                            {isCopiedState ? <Check size={10} className="text-emerald-400" /> : <Copy size={10} />}
+                            {isCopiedState ? (isRtl ? 'تم نسخ القالب!' : 'Copied!') : (isRtl ? 'نسخ القالب' : 'Copy Template')}
+                          </button>
+                        </div>
 
-                  {simulating && (
-                    <div className="flex justify-start">
-                      <div className="bg-slate-900/60 p-3 rounded-2xl rounded-tl-none text-slate-400 border border-white/5 flex items-center gap-2 animate-pulse text-right">
-                        <span>🧠</span>
-                        <span>{isRtl ? 'الذكاء الاصطناعي يحلل تعاويذك ويولّد المخرجات...' : 'Smart model is processing your context and generating text...'}</span>
+                        <textarea
+                          placeholder={isRtl ? 'اكتب تجربتك أو صغ تعويذتك وعالمك هنا لمشاركتها مع المعمل...' : 'Type your custom prompt, response analysis or output here...'}
+                          value={sandboxInputs[`ans_${chal.id}`] || ''}
+                          onChange={(e) => setSandboxInputs(prev => ({ ...prev, [`ans_${chal.id}`]: e.target.value }))}
+                          rows={2}
+                          className="w-full text-xs font-semibold bg-[#050b14]/90 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
+                        />
                       </div>
+                    );
+                  })}
+
+                  {lesson.quest_card.discussion_question && (
+                    <div className="p-4 bg-blue-500/5 rounded-2xl border border-blue-500/15">
+                      <h4 className="text-xs font-black text-blue-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+                        <HelpCircle size={14} />
+                        {isRtl ? 'سؤال للنقاش والمطالعة' : 'DISCUSSION QUESTION'}
+                      </h4>
+                      <p className="text-slate-300 text-xs leading-relaxed">
+                        {lesson.quest_card.discussion_question}
+                      </p>
                     </div>
                   )}
                 </div>
+              </div>
 
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder={isRtl ? 'الصق وصغ هنا لتجربة أوامرك المتقدمة...' : 'Type and play in the Sandbox simulation...'}
-                    value={sandboxInputs['sim_chat_input'] || ''}
-                    onChange={(e) => setSandboxInputs(prev => ({ ...prev, sim_chat_input: e.target.value }))}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSimSubmit()}
-                    className="flex-1 bg-[#050b14] border border-white/10 rounded-xl px-4 py-3 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 text-right"
-                  />
-                  <button
-                    onClick={handleSimSubmit}
-                    disabled={simulating}
-                    className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 rounded-xl flex items-center justify-center font-black text-xs shrink-0"
-                  >
-                    <Send size={14} />
-                  </button>
+              {/* Dynamic Interactive AI Simulator Console */}
+              <div className="bg-slate-950 border border-white/10 rounded-[2rem] p-6 space-y-4 font-mono relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
+                
+                <div className="flex justify-between items-center border-b border-white/5 pb-3">
+                  <span className="text-slate-400 text-xs font-black font-mono tracking-widest flex items-center gap-2 text-right">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                    {isRtl ? 'معمل محاكاة الذكاء الاصطناعي وبايثون' : 'INTELLIGENT INTEGRATION LAB SANDBOX'}
+                  </span>
+                  <span className="text-[9px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">{lesson.lesson_number >= 7 ? 'PYTHON CONSOLE' : 'NEURAL INTERACTIVE CHAT'}</span>
+                </div>
+
+                {/* Python track simulator (Lessons 7-9) */}
+                {lesson.lesson_number >= 7 ? (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-[#0d162e] rounded-xl border border-white/5 space-y-3">
+                      <label className="block text-xs font-bold text-amber-300 text-right">
+                        {isRtl ? 'اسم المبرمج (مرر متغير الاسم البرمجي):' : 'Programmer Name (Pass to your input command):'}
+                      </label>
+                      <input
+                        type="text"
+                        placeholder={isRtl ? 'مبرمج التقدم الحكيم' : 'Basim the Coder'}
+                        value={sandboxInputs['python_name'] || ''}
+                        onChange={(e) => setSandboxInputs(prev => ({ ...prev, python_name: e.target.value }))}
+                        className="w-full text-xs bg-[#050b14]/80 border border-white/10 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-amber-500 text-right"
+                      />
+
+                      <button
+                        disabled={simulating}
+                        onClick={handleRunPython}
+                        className="w-full bg-[#fb923c] text-slate-950 font-black text-xs py-2.5 rounded-xl hover:bg-amber-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        <Play size={12} fill="#020617" />
+                        {simulating ? (isRtl ? 'جاري محاكاة الخادم ولغة بايثون...' : 'Simulating Local Interpreter...') : (isRtl ? 'شغل كود بايثون وعالج الأوامر ⚡' : 'Run Python Simulation script ⚡')}
+                      </button>
+                    </div>
+
+                    {/* Simulated result terminal terminal-logs */}
+                    {(simulating || simResponse) && (
+                      <div className="bg-[#050b14] p-4 rounded-xl border border-white/5 text-xs text-sky-400 space-y-2 select-text font-mono whitespace-pre-wrap leading-relaxed">
+                        {simulating && simulatingStep === 1 && (
+                          <div className="text-amber-400 animate-pulse">🛠️ {isRtl ? 'مرحبًا بك في معمل Google Colab المحاكي. جاري تحميل المفسر الأساسي ونواة بايثون...' : 'Initializing cloud VM. Spawning Python kernel container...'}</div>
+                        )}
+                        {simulating && simulatingStep === 2 && (
+                          <div className="text-slate-400">⚙️ {isRtl ? 'جاري الاتصال بالـ API ومزامنة رموز مفاتيح OpenAI / Gemini ...' : 'Connecting to OpenAI API host... Securing network links...'}</div>
+                        )}
+                        {simResponse}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Conversational interface (Lessons 1-6) */
+                  <div className="space-y-4">
+                    <div className="bg-[#050b14] p-4 rounded-xl border border-white/5 max-h-56 overflow-y-auto text-xs space-y-3 font-semibold">
+                      {/* Default greetings */}
+                      <div className="text-slate-400 leading-relaxed italic text-center pb-2 border-b border-white/5">
+                        💡 {isRtl ? 'قم بنسخ أي من التحديات بالأعلى وصياغة مفرداتها وتفعيل البوت لمشاهدة التحليل ذكيًا ومطابقًا لتعاويذك السحرية!' : 'Paste any challenge template above, modify components, and write into simulation chat to experience real-time AI reply.'}
+                      </div>
+
+                      {sandboxChatMessages.map((msg, mIdx) => (
+                        <div key={mIdx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`p-3 rounded-2xl max-w-sm border leading-relaxed ${
+                            msg.role === 'user' 
+                              ? 'bg-amber-500/10 border-amber-500/20 text-slate-100 rounded-tr-none text-right' 
+                              : 'bg-slate-900 border-white/5 text-slate-200 rounded-tl-none text-right'
+                          }`}>
+                            <div className="text-[8px] font-black text-amber-400 uppercase tracking-widest mb-1">{msg.role === 'user' ? (isRtl ? 'أنت (صاحب التعويذة)' : 'YOU (PROMPT OWNER)') : (isRtl ? 'البوت المحاكي الذكي 🧠' : 'AI BOT ASSISTANT 🧠')}</div>
+                            <div className="whitespace-pre-wrap select-text text-xs leading-relaxed">{msg.content}</div>
+                          </div>
+                        </div>
+                      ))}
+
+                      {simulating && (
+                        <div className="flex justify-start">
+                          <div className="bg-slate-900/60 p-3 rounded-2xl rounded-tl-none text-slate-400 border border-white/5 flex items-center gap-2 animate-pulse text-right">
+                            <span>🧠</span>
+                            <span>{isRtl ? 'الذكاء الاصطناعي يحلل تعاويذك ويولّد المخرجات...' : 'Smart model is processing your context and generating text...'}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder={isRtl ? 'الصق وصغ هنا لتجربة أوامرك المتقدمة...' : 'Type and play in the Sandbox simulation...'}
+                        value={sandboxInputs['sim_chat_input'] || ''}
+                        onChange={(e) => setSandboxInputs(prev => ({ ...prev, sim_chat_input: e.target.value }))}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSimSubmit()}
+                        className="flex-1 bg-[#050b14] border border-white/10 rounded-xl px-4 py-3 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 text-right"
+                      />
+                      <button
+                        onClick={handleSimSubmit}
+                        disabled={simulating}
+                        className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 rounded-xl flex items-center justify-center font-black text-xs shrink-0"
+                      >
+                        <Send size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Action layout */}
+              <div className="flex justify-end pt-4">
+                <button
+                  onClick={handleCompleteLessonAndAwardXp}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black px-8 py-4 rounded-2xl flex items-center gap-3 shadow-lg shadow-emerald-500/10 transition-all active:scale-95 text-sm"
+                >
+                  <CheckCircle size={18} />
+                  {isCompleted ? (isRtl ? 'تجاوز التحدي مجدداً' : 'Replay challenge completed') : (isRtl ? 'أكملت المغامرة بنجاح وحصدت +50 XP 🏆' : 'Adventure completed successfully (+50 XP) 🏆')}
+                </button>
+              </div>
+            </>
+          ) : (
+            /* Interactive Advanced Level Unit Quiz View */
+            <div className="bg-[#0b172e] border border-white/10 rounded-[2rem] p-6 space-y-6">
+              <div className="flex justify-between items-center border-b border-white/5 pb-4">
+                <div>
+                  <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">
+                    {isRtl ? `قياس الفهم المعرفي للوحدة ${lesson.lesson_number}` : `COMPREHENSION CHECK UNIT ${lesson.lesson_number}`}
+                  </span>
+                  <h3 className="text-xl font-black text-white mt-1 leading-tight">
+                    {isRtl ? 'اختبار الجودة والخبرة الأكاديمية 📝' : 'Unit Academic Assessment 📝'}
+                  </h3>
+                  <p className="text-slate-400 text-xs mt-1">
+                    {isRtl 
+                      ? 'أجب عن الأسئلة الثلاثة التالية لتقييم مستواك وحصد وسام التخرج والـ XP الأكاديمي!'
+                      : 'Answer the following 3 questions to assess your mastery and earn graduation points!'}
+                  </p>
+                </div>
+                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
+                  <Award className="text-amber-400" size={24} />
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* Action layout */}
-          <div className="flex justify-end pt-4">
-            <button
-              onClick={handleCompleteLessonAndAwardXp}
-              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black px-8 py-4 rounded-2xl flex items-center gap-3 shadow-lg shadow-emerald-500/10 transition-all active:scale-95 text-sm"
-            >
-              <CheckCircle size={18} />
-              {isCompleted ? (isRtl ? 'تجاوز التحدي مجدداً' : 'Replay challenge completed') : (isRtl ? 'أكملت المغامرة بنجاح وحصدت +50 XP 🏆' : 'Adventure completed successfully (+50 XP) 🏆')}
-            </button>
-          </div>
+              {lesson.quiz && lesson.quiz.length > 0 ? (
+                <div className="space-y-6">
+                  {lesson.quiz.map((q: any, qIdx: number) => {
+                    const selectedOptIdx = advancedQuizAnswers[qIdx];
+                    const hasSelected = selectedOptIdx !== undefined;
+
+                    return (
+                      <div key={qIdx} className="p-5 bg-slate-950/40 rounded-2xl border border-white/5 space-y-4">
+                        <div className="flex items-start gap-2">
+                          <span className="text-xs font-black text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded border border-amber-500/20 shrink-0">
+                            {isRtl ? `سؤال ${qIdx + 1}` : `Q${qIdx + 1}`}
+                          </span>
+                          <div className="space-y-1">
+                            <h4 className="text-sm font-black text-slate-100 leading-relaxed text-right">
+                              {isRtl ? q.question : (q.questionEn || q.question)}
+                            </h4>
+                            {isRtl && q.questionEn && (
+                              <p className="text-[10px] font-mono text-slate-400 italic text-right">
+                                {q.questionEn}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-3 pt-2">
+                          {q.options.map((opt: string, optIdx: number) => {
+                            const isSelected = selectedOptIdx === optIdx;
+                            const isCorrect = q.correctIndex === optIdx;
+                            const optEn = q.optionsEn ? q.optionsEn[optIdx] : null;
+
+                            // Styles based on submission state
+                            let optionStyle = 'border-white/5 hover:border-white/15 bg-[#070e1b] text-slate-300';
+                            if (advancedQuizSubmitted) {
+                              if (isCorrect) {
+                                optionStyle = 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400';
+                              } else if (isSelected && !isCorrect) {
+                                optionStyle = 'border-rose-500/30 bg-rose-500/10 text-rose-400';
+                              } else {
+                                optionStyle = 'border-white/5 bg-slate-950/20 text-slate-500';
+                              }
+                            } else if (isSelected) {
+                              optionStyle = 'border-amber-500 text-amber-400 bg-amber-500/5 shadow-md shadow-amber-500/5';
+                            }
+
+                            return (
+                              <button
+                                key={optIdx}
+                                disabled={advancedQuizSubmitted}
+                                onClick={() => setAdvancedQuizAnswers(prev => ({ ...prev, [qIdx]: optIdx }))}
+                                className={`w-full p-4 rounded-xl border text-right transition-all flex flex-col gap-1 text-xs font-semibold ${optionStyle}`}
+                              >
+                                <div className="flex justify-between items-center w-full">
+                                  <span>{opt}</span>
+                                  {!advancedQuizSubmitted && isSelected && (
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                  )}
+                                  {advancedQuizSubmitted && isCorrect && (
+                                    <span className="text-[10px] font-black uppercase text-emerald-400 tracking-widest shrink-0">✓ {isRtl ? 'صحيح' : 'Correct'}</span>
+                                  )}
+                                  {advancedQuizSubmitted && isSelected && !isCorrect && (
+                                    <span className="text-[10px] font-black uppercase text-rose-400 tracking-widest shrink-0">✗ {isRtl ? 'خطأ' : 'Wrong'}</span>
+                                  )}
+                                </div>
+                                {optEn && (
+                                  <span className="text-[10px] text-slate-400 font-mono italic mt-0.5 block text-right">
+                                    {optEn}
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Detailed Explanation */}
+                        {advancedQuizSubmitted && (
+                          <div className={`p-4 rounded-xl border leading-relaxed text-xs space-y-1 ${
+                            selectedOptIdx === q.correctIndex 
+                              ? 'bg-emerald-500/5 border-emerald-500/10 text-slate-300' 
+                              : 'bg-slate-900 border-white/5 text-slate-300'
+                          }`}>
+                            <div className="font-bold text-amber-400 text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1">
+                              <Info size={12} />
+                              {isRtl ? 'التفسير العلمي والأكاديمي:' : 'Academic Explanation:'}
+                            </div>
+                            <p className="text-slate-300 leading-relaxed text-right">
+                              {isRtl ? q.explanation : (q.explanationEn || q.explanation)}
+                            </p>
+                            {isRtl && q.explanationEn && (
+                              <p className="text-[10px] font-mono text-slate-400 italic text-right border-t border-white/5 pt-1 mt-1">
+                                {q.explanationEn}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* Submission and Scoring Area */}
+                  <div className="border-t border-white/5 pt-6 flex flex-col items-center gap-4">
+                    {!advancedQuizSubmitted ? (
+                      <div className="w-full text-center space-y-3">
+                        {Object.keys(advancedQuizAnswers).length < 3 && (
+                          <p className="text-xs text-amber-400 animate-pulse font-medium">
+                            {isRtl 
+                              ? `⚠️ الرجاء الإجابة على جميع الأسئلة لتسليم التقييم (المتبقي: ${3 - Object.keys(advancedQuizAnswers).length})` 
+                              : `⚠️ Please answer all questions before submitting (Remaining: ${3 - Object.keys(advancedQuizAnswers).length})`}
+                          </p>
+                        )}
+                        <button
+                          onClick={() => {
+                            if (!lesson.quiz) return;
+                            let correctCount = 0;
+                            lesson.quiz.forEach((q: any, qIdx: number) => {
+                              if (advancedQuizAnswers[qIdx] === q.correctIndex) {
+                                correctCount++;
+                              }
+                            });
+                            setAdvancedQuizScore(correctCount);
+                            setAdvancedQuizSubmitted(true);
+                            
+                            // If they score >= 2 (passing)
+                            if (correctCount >= 2) {
+                              if (!advancedQuizCompletedLessons.includes(lesson.lesson_number)) {
+                                const nextCompleted = [...advancedQuizCompletedLessons, lesson.lesson_number];
+                                setAdvancedQuizCompletedLessons(nextCompleted);
+                                localStorage.setItem('ai_completed_advanced_quizzes', JSON.stringify(nextCompleted));
+                                
+                                // Award XP (+100 XP)
+                                setXp(prev => prev + 100);
+                                
+                                // Also add to completedAdvancedLessons if not already completed!
+                                if (!completedAdvancedLessons.includes(lesson.lesson_number)) {
+                                  setCompletedAdvancedLessons(prev => {
+                                    const next = [...prev, lesson.lesson_number];
+                                    localStorage.setItem('ai_completed_advanced_lessons', JSON.stringify(next));
+                                    return next;
+                                  });
+                                }
+                              }
+                            }
+                          }}
+                          disabled={Object.keys(advancedQuizAnswers).length < 3}
+                          className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 disabled:from-slate-800 disabled:to-slate-800 text-slate-950 disabled:text-slate-500 font-black py-4 rounded-2xl transition-all shadow-lg active:scale-[0.98] text-xs uppercase tracking-wider flex justify-center items-center gap-2"
+                        >
+                          <Award size={16} />
+                          {isRtl ? 'تأكيد الإجابات واجتياز الاختبار 🎓' : 'Submit Answers & Verify Mastery 🎓'}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-full text-center space-y-4 bg-slate-950/60 p-6 rounded-3xl border border-white/5">
+                        <div className="flex flex-col items-center gap-1.5">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-widest font-mono font-black">
+                            {isRtl ? 'نتيجة تقييم الوحدة المعرفي' : 'UNIT ASSESSMENT SCORE'}
+                          </span>
+                          <div className="text-4xl font-black text-amber-400 font-mono tracking-tighter">
+                            {advancedQuizScore} / 3
+                          </div>
+                          <span className="text-xs text-slate-300 font-semibold">
+                            {isRtl 
+                              ? `النسبة المكتسبة: ${Math.round((advancedQuizScore / 3) * 100)}%`
+                              : `Score Earned: ${Math.round((advancedQuizScore / 3) * 100)}%`}
+                          </span>
+                        </div>
+
+                        {advancedQuizScore >= 2 ? (
+                          <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 space-y-2 max-w-md mx-auto">
+                            <h4 className="font-black text-sm">
+                              {isRtl ? '🎉 تهانينا الحارة يا بطل التميز المعرفي!' : '🎉 Congratulations, Knowledge Champion!'}
+                            </h4>
+                            <p className="text-[11px] leading-relaxed text-slate-300">
+                              {isRtl 
+                                ? 'لقد نجحت وتجاوزت اختبار هذه الوحدة بامتياز! تم ترقية حسابك وحصد مكافأة التميز الأكاديمي (+100 XP) بنجاح.'
+                                : 'You have successfully passed the unit quiz! Your progress has been logged and (+100 XP) has been awarded.'}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-400 space-y-2 max-w-md mx-auto">
+                            <h4 className="font-black text-sm">
+                              {isRtl ? '⚠️ مراجعة مطلوبة لضمان الاتقان' : '⚠️ Review Required for Mastery'}
+                            </h4>
+                            <p className="text-[11px] leading-relaxed text-slate-300">
+                              {isRtl 
+                                ? 'تحتاج لتحقيق درجة 2/3 (66%) على الأقل لاجتياز الوحدة. لا تقلق، اقرأ مفهوم الوحدة من جديد وأعد المحاولة!'
+                                : 'You need at least a 2/3 (66%) score to pass. Read the concept details on the left and try again!'}
+                            </p>
+                          </div>
+                        )}
+
+                        <button
+                          onClick={() => {
+                            setAdvancedQuizAnswers({});
+                            setAdvancedQuizSubmitted(false);
+                            setAdvancedQuizScore(0);
+                          }}
+                          className="px-6 py-3 bg-[#0d162e] hover:bg-slate-900 border border-white/10 text-slate-300 hover:text-white font-black text-xs rounded-xl transition-all inline-flex items-center gap-2"
+                        >
+                          <RotateCcw size={13} />
+                          {isRtl ? 'إعادة المحاولة مجدداً' : 'Retake Assessment'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-8 text-center text-slate-400 text-xs">
+                  {isRtl ? 'لا يوجد اختبار متاح لهذه الوحدة بعد.' : 'No quiz is defined for this unit yet.'}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -8945,12 +10099,12 @@ Output Summary for [${topic}]:
                                   {customStudyPlan.phases.map((phase: any, pIdx: number) => {
                                     const isPhaseUnlocked = pIdx === 0 || 
                                       (pIdx === 1 && (passedMilestones.has('exam_f_to_a') || completedLessons.length >= 20)) ||
-                                      (pIdx === 2 && (passedMilestones.has('exam_a_to_p') || completedAdvancedLessons.length >= 9));
+                                      (pIdx === 2 && (passedMilestones.has('exam_a_to_p') || completedAdvancedLessons.length >= 10));
 
                                     const milestoneKey = phase.milestoneExam?.id;
                                     const isMilestonePassed = passedMilestones.has(milestoneKey) || 
                                       (milestoneKey === 'exam_f_to_a' && completedLessons.length >= 20) ||
-                                      (milestoneKey === 'exam_a_to_p' && completedAdvancedLessons.length >= 9);
+                                      (milestoneKey === 'exam_a_to_p' && completedAdvancedLessons.length >= 10);
 
                                     return (
                                       <div key={phase.id} className="relative bg-white/[0.01] rounded-2xl border border-white/5 p-5 hover:border-amber-500/20 transition-all duration-300">
