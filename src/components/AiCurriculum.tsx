@@ -2390,7 +2390,7 @@ export const AiCurriculum = ({
   const [xp, setXp] = useState<number>(0);
 
   // New Academy Features (User Request additions)
-  const [lobbyTab, setLobbyTab] = useState<'lessons' | 'printables' | 'tools' | 'challenges' | 'experiments' | 'certificate' | 'family' | 'english' | 'perfection' | 'study_plan' | 'balance_oasis'>('lessons');
+  const [lobbyTab, setLobbyTab] = useState<'lessons' | 'printables' | 'tools' | 'challenges' | 'experiments' | 'certificate' | 'family' | 'english' | 'perfection' | 'study_plan' | 'balance_oasis' | 'updates'>('lessons');
   const [familyName, setFamilyName] = useState<string>(isRtl ? 'الخليل' : 'Al Khalil');
 
   // Perfection Hub States
@@ -2405,6 +2405,62 @@ export const AiCurriculum = ({
   const [activeQuestionIdx, setActiveQuestionIdx] = useState<number>(0);
 
   // Cybersecurity Unit States
+  const [updatesQaInput, setUpdatesQaInput] = useState<string>('');
+  const [updatesChatHistory, setUpdatesChatHistory] = useState<Array<{ role: 'user' | 'assistant', text: string }>>([
+    {
+      role: 'assistant',
+      text: isRtl
+        ? "أهلاً بك في منصة أحدث تطورات الذكاء الاصطناعي لعام 2026! أنا مستشارك الذكي الشخصي. يمكنك سؤالي عن النماذج الجديدة مثل Gemini 2.0، توليد الفيديوهات مع Sora، وكلاء الذكاء الاصطناعي الذاتيين، أو طرق حماية صوت عائلتك من انتحال الهوية الصوتية بالتزييف العميق!"
+        : "Welcome to the 2026 AI Breakthroughs and Updates platform! I am your smart safety counselor. Ask me anything about next-gen models like Gemini 2.0, state-of-the-art physics generators like Sora, autonomous AI agents, or how to secure your family's vocal footprint from deepfakes!"
+    }
+  ]);
+  const [updatesQaLoading, setUpdatesQaLoading] = useState<boolean>(false);
+
+  const handleSendUpdatesChat = (inputVal?: string) => {
+    const textToSend = inputVal !== undefined ? inputVal : updatesQaInput;
+    if (!textToSend || !textToSend.trim()) return;
+
+    setUpdatesChatHistory(prev => [...prev, { role: 'user', text: textToSend }]);
+    if (inputVal === undefined) {
+      setUpdatesQaInput('');
+    }
+    setUpdatesQaLoading(true);
+
+    setTimeout(() => {
+      let responseText = '';
+      const queryLower = textToSend.toLowerCase();
+
+      if (queryLower.includes('صوت') || queryLower.includes('فويس') || queryLower.includes('voice') || queryLower.includes('deepfake') || queryLower.includes('انتحال') || queryLower.includes('تزييف') || queryLower.includes('بصم')) {
+        responseText = isRtl
+          ? "🔒 درع الأمان الصوتي لعام 2026:\nاستنساخ الصوت يحتاج إلى 3 ثوانٍ فقط من التسجيل! لحماية عائلتك:\n1. حددوا 'كلمة سر عائلية لفظية سرية' لا يعرفها سواكم (مثل: الأناناس الطائر 🍍).\n2. تجنبوا رفع تسجيلات صوتية نقية تزيد عن 5 ثوانٍ على منصات التواصل العامة.\n3. عند تلقي اتصال مريب بطلب نجدة مالية أو طارئة، اطلبوا شفرة العائلة اللفظية فوراً للتأكد!"
+          : "🔒 2026 Voice Safety Shield:\nVoice cloning requires only 3 seconds of reference audio! To secure your family:\n1. Immediately declare a secret 'family vocal passcode' known only to your members (e.g. 'Flying Pineapple 🍍').\n2. Avoid uploading high-quality, continuous voice recordings longer than 5 seconds on public accounts.\n3. If you receive a suspicious emergency call demanding urgent financial transfers, demand the secret family passcode first!";
+      } else if (queryLower.includes('جيميني') || queryLower.includes('gemini') || queryLower.includes('pro') || queryLower.includes('flash') || queryLower.includes('2.0') || queryLower.includes('نماذج') || queryLower.includes('موديل') || queryLower.includes('تطور')) {
+        responseText = isRtl
+          ? "🚀 ثورة نماذج Gemini 2.0:\nتقدم هذه العائلة تفاعلاً متعدد الوسائط مباشراً (Live Multimodal). يمكنك الحديث مع النموذج ورؤية محيطك عبر الكاميرا في نفس اللحظة بزمن استجابة مذهل (أقل من 200 مللي ثانية)، مع قدرات خارقة في البرمجة والتخطيط وتصميم المهام المعقدة."
+          : "🚀 Gemini 2.0 Revolution:\nThis model family features Live Multimodal communication. You can speak continuously while sharing live video streams with latency under 200ms. Logic reasoning, system tool execution, and structural code-writing are highly advanced.";
+      } else if (queryLower.includes('سورا') || queryLower.includes('sora') || queryLower.includes('فيديو') || queryLower.includes('video') || queryLower.includes('توليد') || queryLower.includes('صنع')) {
+        responseText = isRtl
+          ? "🎬 جيل Sora و Gen-3 لتوليد الفيديوهات:\nتجاوز الذكاء الاصطناعي تحريك الصور البسيط إلى فهم عميق لفيزياء الأجسام! النماذج تفهم الجاذبية، وتصادم الكتل، والإنعكاسات البصرية وحركة السوائل، لتنتج مقاطع سينمائية متناسقة تصل لدقيقة كاملة مع الحفاظ على ملامح الشخصيات."
+          : "🎬 Sora & Gen-3 Video Generation:\nAI video has transformed from basic pixel-shifting into actual physical modeling! Models comprehend weight, physical collisions, liquid dynamics, and shadow consistency, generating coherent, gorgeous scenes up to 60 seconds.";
+      } else if (queryLower.includes('وكيل') || queryLower.includes('وكلاء') || queryLower.includes('agent') || queryLower.includes('agents')) {
+        responseText = isRtl
+          ? "🤖 عصر الوكلاء الأذكياء (Autonomous Agents):\nتحول الذكاء الاصطناعي من مجرد مجيب على الأسئلة إلى 'منفذ مهام مستقل'! يستطيع الوكيل تصفح المواقع، حجز الرحلات، تشغيل وفحص الأكواد البرمجية، واكتشاف الأخطاء وتصحيحها ذاتياً بشكل متكرر حتى يحقق الهدف المطلوب دون تدخل منك."
+          : "🤖 The Rise of Autonomous Agents:\nAI has transitioned from passive chat responses to independent task execution! Intelligent agents can surf websites, purchase tickets, run local terminal scripts, and recursively self-correct until your complex objective is completed.";
+      } else if (queryLower.includes('تعويذ') || queryLower.includes('امر') || queryLower.includes('أمر') || queryLower.includes('برومبت') || queryLower.includes('prompt') || queryLower.includes('هندسة')) {
+        responseText = isRtl
+          ? "📜 هندسة الأوامر الذهبية (5 عناصر):\nلكتابة تعويذة خارقة النتائج، ادمج دائماً:\n1. الدور (من يكون الذكاء الاصطناعي؟)\n2. الهدف (المهمة المحددة بدقة)\n3. السياق (معلومات مساندة)\n4. القيود (الممنوعات التي يتفاداها)\n5. التنسيق (كيف تظهر المخرجات؟)"
+          : "📜 Golden Prompt Formula (5 Ingredients):\nTo draft highly optimized commands, always include:\n1. Role (Who should the AI act as?)\n2. Goal (The precise task requested)\n3. Context (Relevant background info)\n4. Constraints (Strict rules & boundaries)\n5. Format (How the output should be structured)";
+      } else {
+        responseText = isRtl
+          ? "💡 نصيحة الأمن والتقدم لعام 2026:\nالسر ليس في كثرة استخدام الأدوات، بل في الفهم الناقد لحدودها. شجع عائلتك على مبدأ 'تحدي أداة الشهر' (Tool of the Month) لتجربة أداة واحدة شهرياً كفريق واحد ومناقشة مصداقيتها ومخاطرها المحتملة."
+          : "💡 2026 safety and innovation insight:\nSuccess lies not in hoarding tools, but in critical assessment. Encourage your family unit to adopt the 'Tool of the Month' ritual: exploring one new AI software together to analyze its reliability, constraints, and potential biases.";
+      }
+
+      setUpdatesChatHistory(prev => [...prev, { role: 'assistant', text: responseText }]);
+      setUpdatesQaLoading(false);
+    }, 1200);
+  };
+
   const [cyberActiveLesson, setCyberActiveLesson] = useState<number>(1);
   const [cyberCompletedLessons, setCyberCompletedLessons] = useState<number[]>([]);
   const [cyberFootprintSearch, setCyberFootprintSearch] = useState<string>('');
@@ -5893,6 +5949,17 @@ The adventure is waiting!`
                 >
                   <Smile size={16} className="text-teal-400" />
                   {isRtl ? 'واحة التوازن 🌊' : 'Balance Oasis 🌊'}
+                </button>
+                <button
+                  onClick={() => setLobbyTab('updates')}
+                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
+                    lobbyTab === 'updates'
+                      ? 'bg-gradient-to-t from-amber-500/15 to-transparent text-amber-300 border-t border-x border-amber-500/10 border-b-2 border-b-[#050b14]'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <RefreshCw size={16} className="text-amber-400" />
+                  {isRtl ? 'الجديد والتحديثات (الجدية) 🔄' : 'New & Updates 🔄'}
                 </button>
               </div>
 
@@ -10316,6 +10383,235 @@ Output Summary for [${topic}]:
                     });
                   }}
                 />
+              )}
+
+              {lobbyTab === 'updates' && (
+                <div className="bg-[#0b172e] border border-white/10 rounded-[2.5rem] p-6 lg:p-8 space-y-6 text-right relative overflow-hidden shadow-2xl animate-fade-in w-full" dir={isRtl ? 'rtl' : 'ltr'}>
+                  <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl opacity-30 pointer-events-none" />
+                  
+                  {/* Title & Subtitle */}
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-white/5 pb-4 gap-4">
+                    <div>
+                      <h3 className="text-2xl font-black text-white flex items-center gap-2">
+                        <span className="text-amber-400">🔄</span>
+                        {isRtl ? 'الجديد والتحديثات في عالم الذكاء الاصطناعي لعام 2026' : "What's New & AI Breakthroughs (2026)"}
+                      </h3>
+                      <p className="text-slate-400 text-xs mt-1">
+                        {isRtl 
+                          ? 'متابعة حية ومستمرة لأحدث طفرات التكنولوجيا وحلول حماية العائلة من التزييف والسرقة الصوتية' 
+                          : 'Live tracking of next-gen AI revolutions and robust cyber safety frameworks.'}
+                      </p>
+                    </div>
+                    <span className="text-xs bg-amber-500/10 text-amber-300 border border-amber-500/20 px-3 py-1.5 rounded-full font-black uppercase tracking-wider shrink-0 select-none animate-pulse">
+                      {isRtl ? 'تحديث حي ومستدام 🟢' : 'LIVE AUTO-SYNC 🟢'}
+                    </span>
+                  </div>
+
+                  {/* 2-Column Dashboard Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start font-sans">
+                    
+                    {/* Column 1: Core 2026 AI Breakthroughs (col-span-6) */}
+                    <div className="lg:col-span-6 space-y-4 text-right">
+                      <div className="bg-slate-950/40 p-5 rounded-2xl border border-white/5 space-y-4">
+                        <h4 className="text-xs font-black uppercase text-amber-400 tracking-wider flex items-center gap-1.5 justify-start">
+                          <span>🌟</span>
+                          {isRtl ? 'أحدث طفرات الذكاء الاصطناعي لعام 2026:' : 'Key AI Breakthroughs of 2026:'}
+                        </h4>
+
+                        <div className="space-y-3">
+                          {/* Breakthrough 1 */}
+                          <div className="bg-slate-900/60 p-4 rounded-xl border border-white/5 hover:border-amber-500/20 transition-all group">
+                            <div className="flex justify-between items-start gap-2">
+                              <span className="text-[10px] font-black uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">
+                                {isRtl ? 'متاح للدمج' : 'INTEGRATED'}
+                              </span>
+                              <h5 className="text-xs font-black text-white group-hover:text-amber-400 transition-colors">
+                                {isRtl ? '1. تفاعل Gemini 2.0 المتكامل بالوسائط (Live Multimodal)' : '1. Gemini 2.0 Live Multimodal'}
+                              </h5>
+                            </div>
+                            <p className="text-[11px] text-slate-400 mt-1 leading-relaxed text-right">
+                              {isRtl 
+                                ? 'التفاعل الصوتي والمرئي اللحظي المباشر مع النماذج بزمن استجابة أقل من 200 مللي ثانية مع تفوق كلي في هندسة التخطيط والبرمجة.'
+                                : 'Continuous voice-to-video real-time reasoning with under 200ms of latency and flawless coding capabilities.'}
+                            </p>
+                          </div>
+
+                          {/* Breakthrough 2 */}
+                          <div className="bg-slate-900/60 p-4 rounded-xl border border-white/5 hover:border-amber-500/20 transition-all group">
+                            <div className="flex justify-between items-start gap-2">
+                              <span className="text-[10px] font-black uppercase bg-amber-500/10 text-amber-300 border border-amber-500/20 px-2 py-0.5 rounded">
+                                {isRtl ? 'توليد سينمائي' : 'CINEMATIC'}
+                              </span>
+                              <h5 className="text-xs font-black text-white group-hover:text-amber-400 transition-colors">
+                                {isRtl ? '2. فيزياء Sora و Gen-3 لتوليد الفيديوهات' : '2. Sora & Gen-3 Video Physics'}
+                              </h5>
+                            </div>
+                            <p className="text-[11px] text-slate-400 mt-1 leading-relaxed text-right">
+                              {isRtl 
+                                ? 'تجاوز تحريك الصور البسيط إلى فهم حقيقي لقوانين الجاذبية وتصادم الكتل وحركة السوائل وتماسك ملامح الوجوه باللقطات الطويلة.'
+                                : 'Advanced video generation that respects actual weight, friction, lighting reflection, and continuous character identity.'}
+                            </p>
+                          </div>
+
+                          {/* Breakthrough 3 */}
+                          <div className="bg-slate-900/60 p-4 rounded-xl border border-white/5 hover:border-amber-500/20 transition-all group">
+                            <div className="flex justify-between items-start gap-2">
+                              <span className="text-[10px] font-black uppercase bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded">
+                                {isRtl ? 'ذاتي العمل' : 'AUTONOMOUS'}
+                              </span>
+                              <h5 className="text-xs font-black text-white group-hover:text-amber-400 transition-colors">
+                                {isRtl ? '3. وكلاء الذكاء الاصطناعي الذاتيين (Agentic Workflows)' : '3. Agentic Workflows & Auto-Agents'}
+                              </h5>
+                            </div>
+                            <p className="text-[11px] text-slate-400 mt-1 leading-relaxed text-right">
+                              {isRtl 
+                                ? 'تحول الأدوار من الإجابة عن الأسئلة إلى تنفيذ المهام بشكل كامل: تصفح الويب، جدولة المواعيد، وتجربة البرمجة وإصلاحها ذاتياً.'
+                                : 'AI agents executing multi-step complex workflows, searching webs, executing terminals, and self-correcting iteratively.'}
+                            </p>
+                          </div>
+
+                          {/* Breakthrough 4 */}
+                          <div className="bg-slate-900/60 p-4 rounded-xl border border-white/5 hover:border-amber-500/20 transition-all group">
+                            <div className="flex justify-between items-start gap-2">
+                              <span className="text-[10px] font-black uppercase bg-rose-500/10 text-rose-300 border border-rose-500/20 px-2 py-0.5 rounded">
+                                {isRtl ? 'تحديث أمني' : 'CYBER SHIELD'}
+                              </span>
+                              <h5 className="text-xs font-black text-white group-hover:text-amber-400 transition-colors">
+                                {isRtl ? '4. درع الحماية ضد استنساخ الصوت (Vocal Deepfakes)' : '4. Vocal Deepfake Safety Protocols'}
+                              </h5>
+                            </div>
+                            <p className="text-[11px] text-slate-400 mt-1 leading-relaxed text-right">
+                              {isRtl 
+                                ? 'مع إمكانية استنساخ الصوت في 3 ثوانٍ فقط، تتبنى العائلات الحكيمة "كلمات مرور لفظية سرية" لتأكيد الاتصالات الطارئة والمخاطر.'
+                                : 'With voice-cloning shrinking to 3 seconds of reference audio, families set secure verbal code phrases to verify emergency calls.'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Column 2: Interactive AI Safety Counselor Chat (col-span-6) */}
+                    <div className="lg:col-span-6 bg-[#040915] rounded-2xl border border-white/10 p-5 space-y-4 flex flex-col h-full min-h-[450px] justify-between">
+                      
+                      {/* Chat Header */}
+                      <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                        <span className="text-xs font-black text-white flex items-center gap-1.5 justify-start">
+                          <span className="text-amber-400">🤖</span>
+                          {isRtl ? 'المستشار الذكي لأمن وتطورات الذكاء الاصطناعي' : 'Smart AI & Safety Counselor'}
+                        </span>
+                        <span className="text-[10px] bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 px-2 py-0.5 rounded font-mono font-bold select-none">
+                          {isRtl ? 'متوفر للتوجيه' : 'ONLINE'}
+                        </span>
+                      </div>
+
+                      {/* Chat Messages Scroll */}
+                      <div className="space-y-3 max-h-[260px] overflow-y-auto p-1 leading-relaxed flex-1 flex flex-col gap-2 scrollbar-thin">
+                        {updatesChatHistory.map((chat, idx) => (
+                          <div 
+                            key={idx}
+                            className={`p-3 rounded-xl text-xs space-y-1 text-right ${
+                              chat.role === 'assistant' 
+                                ? 'bg-slate-900 border-l-2 border-l-amber-500 text-slate-200' 
+                                : 'bg-amber-500/10 border border-amber-500/20 text-amber-300 self-end max-w-[85%]'
+                            }`}
+                          >
+                            <span className="text-[9px] uppercase font-black text-slate-400 block pb-1">
+                              {chat.role === 'assistant' ? (isRtl ? 'المستشار الذكي' : 'AI Counselor') : (isRtl ? 'أنت' : 'You')}
+                            </span>
+                            <p className="font-sans leading-relaxed whitespace-pre-wrap">{chat.text}</p>
+                          </div>
+                        ))}
+                        {updatesQaLoading && (
+                          <div className="p-3 rounded-xl bg-slate-900/80 text-xs text-slate-400 animate-pulse text-right">
+                            {isRtl ? 'جاري الصياغة والتحليل المبرمج...' : 'Formulating intelligence report...'}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Quick Option Chips */}
+                      <div className="space-y-1.5 pt-2 border-t border-white/5">
+                        <span className="text-[9px] font-black uppercase text-slate-500 tracking-wider block text-right">
+                          {isRtl ? 'أسئلة سريعة شائعة (انقر للسؤال فوراً):' : 'Frequently Asked Questions (Click to Ask):'}
+                        </span>
+                        <div className="flex flex-wrap gap-1.5 justify-end">
+                          {[
+                            {
+                              ar: "🔒 حماية الصوت من التزييف",
+                              en: "🔒 Protect against voice clones",
+                              q: isRtl ? "كيف أحمي بصمة صوت عائلتي من استنساخ التزييف العميق؟" : "How do I secure my family voice from deepfakes?"
+                            },
+                            {
+                              ar: "🚀 ما الجديد في Gemini 2.0؟",
+                              en: "🚀 Gemini 2.0 breakthroughs",
+                              q: isRtl ? "ما الذي يميز نماذج Gemini 2.0 الجديدة؟" : "What makes the Gemini 2.0 models unique?"
+                            },
+                            {
+                              ar: "🎬 كيف يعمل توليد فيديو Sora؟",
+                              en: "🎬 Sora video generation",
+                              q: isRtl ? "شرح مبسط لكيفية توليد الفيديو في Sora" : "Explain how Sora video physics works"
+                            },
+                            {
+                              ar: "🤖 ما هي ثورة الوكلاء الأذكياء؟",
+                              en: "🤖 What are AI agents?",
+                              q: isRtl ? "ما هو الوكيل الذكي (AI Agent)؟" : "What is an autonomous AI agent?"
+                            },
+                            {
+                              ar: "📜 خلطة الأوامر الاحترافية",
+                              en: "📜 Professional prompting template",
+                              q: isRtl ? "كيف أصيغ تعويذة هندسية متكاملة بـ 5 عناصر؟" : "How do I write a prompt using the 5 core elements?"
+                            }
+                          ].map((chip, cIdx) => (
+                            <button
+                              key={cIdx}
+                              type="button"
+                              onClick={() => {
+                                if (!updatesQaLoading) {
+                                  const textVal = isRtl ? chip.q : chip.q;
+                                  // Call a helper function defined in component context, or let's use the local handler
+                                  // @ts-ignore
+                                  handleSendUpdatesChat(textVal);
+                                }
+                              }}
+                              className="bg-white/5 hover:bg-white/10 text-[10px] text-slate-300 hover:text-white px-2.5 py-1 rounded-lg border border-white/5 transition-all duration-200 cursor-pointer text-right"
+                            >
+                              {isRtl ? chip.ar : chip.en}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Chat Input Field */}
+                      <div className="flex gap-2 pt-2 border-t border-white/5">
+                        <input
+                          type="text"
+                          value={updatesQaInput}
+                          onChange={(e) => setUpdatesQaInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !updatesQaLoading) {
+                              // @ts-ignore
+                              handleSendUpdatesChat();
+                            }
+                          }}
+                          placeholder={isRtl ? "اسألني عن أي تطور أو نصيحة حماية..." : "Ask me about any AI update or security advice..."}
+                          className="flex-1 bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 text-right font-sans"
+                        />
+                        <button
+                          onClick={() => {
+                            if (!updatesQaLoading) {
+                              // @ts-ignore
+                              handleSendUpdatesChat();
+                            }
+                          }}
+                          disabled={updatesQaLoading}
+                          className="bg-amber-500 hover:bg-amber-600 disabled:bg-slate-800 disabled:text-slate-500 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs transition-all flex items-center justify-center shrink-0"
+                        >
+                          <Send size={12} />
+                        </button>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
               )}
 
               {lobbyTab === 'study_plan' && (
