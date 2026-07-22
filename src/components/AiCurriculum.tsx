@@ -10567,8 +10567,6 @@ Output Summary for [${topic}]:
                               onClick={() => {
                                 if (!updatesQaLoading) {
                                   const textVal = isRtl ? chip.q : chip.q;
-                                  // Call a helper function defined in component context, or let's use the local handler
-                                  // @ts-ignore
                                   handleSendUpdatesChat(textVal);
                                 }
                               }}
@@ -10588,7 +10586,6 @@ Output Summary for [${topic}]:
                           onChange={(e) => setUpdatesQaInput(e.target.value)}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter' && !updatesQaLoading) {
-                              // @ts-ignore
                               handleSendUpdatesChat();
                             }
                           }}
@@ -10598,7 +10595,6 @@ Output Summary for [${topic}]:
                         <button
                           onClick={() => {
                             if (!updatesQaLoading) {
-                              // @ts-ignore
                               handleSendUpdatesChat();
                             }
                           }}
