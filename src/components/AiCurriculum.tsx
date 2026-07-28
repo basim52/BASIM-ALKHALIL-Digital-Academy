@@ -8,6 +8,7 @@ import { BalanceOasis } from './BalanceOasis';
 import { PROMPT_PROFESSIONAL_DATA } from './PromptProData';
 import { PROMPT_TEMPLATES_DATA } from './PromptTemplatesData';
 import { MEGA_PROMPTS_DATA } from './MegaPromptLabData';
+import { CapstoneProjectHub } from './CapstoneProjectHub';
 import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { UserProfile } from '../types';
@@ -2273,7 +2274,7 @@ export const AiCurriculum = ({
       return [];
     }
   });
-  const [curriculumType, setCurriculumType] = useState<'foundational' | 'advanced' | 'professional'>('foundational');
+  const [curriculumType, setCurriculumType] = useState<'foundational' | 'advanced' | 'professional' | 'capstone'>('foundational');
   const [completedAdvancedLessons, setCompletedAdvancedLessons] = useState<number[]>(() => {
     try {
       const saved = localStorage.getItem('ai_completed_advanced_lessons');
@@ -2351,7 +2352,7 @@ export const AiCurriculum = ({
   const [proActiveLevel, setProActiveLevel] = useState<number>(1);
   const [proProjectSubmissions, setProProjectSubmissions] = useState<Record<number, string>>({});
   const [proProjectSaved, setProProjectSaved] = useState<Record<number, boolean>>({});
-  const [proSubTab, setProSubTab] = useState<'dashboard' | 'templates' | 'megaprompts'>('dashboard');
+  const [proSubTab, setProSubTab] = useState<'dashboard' | 'templates' | 'megaprompts' | 'capstone'>('dashboard');
   const [selectedTemplateCategory, setSelectedTemplateCategory] = useState<string>("التسويق والمبيعات");
   const [selectedTemplateId, setSelectedTemplateId] = useState<number>(1);
   const [templateValues, setTemplateValues] = useState<Record<string, string>>({});
@@ -6040,14 +6041,27 @@ The adventure is waiting!`
                         <Award size={14} />
                         {isRtl ? 'احترافية المطالبات (24 درساً) 🏆' : 'Prompt Pro Program (24 Lessons) 🏆'}
                       </button>
+                      <button
+                        onClick={() => setCurriculumType('capstone')}
+                        className={`px-5 py-2.5 rounded-xl font-black text-xs transition-all flex items-center gap-2 ${
+                          curriculumType === 'capstone'
+                            ? 'bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/10'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <GraduationCap size={14} />
+                        {isRtl ? 'مشروع التخرج: بناء موقع ذكي 🎓' : 'AI Graduation Capstone 🎓'}
+                      </button>
                     </div>
                   </div>
 
-                  {curriculumType === 'professional' ? (
+                  {curriculumType === 'capstone' ? (
+                    <CapstoneProjectHub isRtl={isRtl} onBackToMain={() => setCurriculumType('foundational')} />
+                  ) : curriculumType === 'professional' ? (
                     <div id="pro_main_dashboard" className="space-y-12 text-right animate-fade-in animate-duration-300" dir="rtl">
                       
                       {/* Secondary Pro Sub-Tabs */}
-                      <div className="flex flex-wrap items-center justify-center gap-3 bg-slate-950/60 p-2.5 rounded-[2rem] border border-white/5 max-w-4xl mx-auto shadow-2xl">
+                      <div className="flex flex-wrap items-center justify-center gap-3 bg-slate-950/60 p-2.5 rounded-[2rem] border border-white/5 max-w-5xl mx-auto shadow-2xl">
                         <button
                           onClick={() => setProSubTab('dashboard')}
                           className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black transition-all ${proSubTab === 'dashboard' ? 'bg-amber-500 text-slate-950 font-sans shadow-lg shadow-amber-500/10' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
@@ -6068,6 +6082,13 @@ The adventure is waiting!`
                         >
                           <Brain size={14} />
                           {isRtl ? 'معمل الأوامر الضخمة (12) 🧪' : '12 Mega-Prompts Lab 🧪'}
+                        </button>
+                        <button
+                          onClick={() => setProSubTab('capstone')}
+                          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black transition-all ${proSubTab === 'capstone' ? 'bg-amber-500 text-slate-950 font-sans shadow-lg shadow-amber-500/10' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                        >
+                          <GraduationCap size={14} />
+                          {isRtl ? 'مشروع التخرج: بناء موقع ذكي 🎓' : 'AI Graduation Capstone 🎓'}
                         </button>
                       </div>
 
@@ -6971,6 +6992,11 @@ Output Summary for [${topic}]:
                           </div>
 
                         </div>
+                      )}
+
+                      {/* SUBTAB 4: Capstone Graduation Hub */}
+                      {proSubTab === 'capstone' && (
+                        <CapstoneProjectHub isRtl={isRtl} onBackToMain={() => setProSubTab('dashboard')} />
                       )}
 
                       {/* Resources Directory */}
