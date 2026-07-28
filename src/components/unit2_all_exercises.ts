@@ -1,0 +1,44 @@
+// Unit 2 Advanced & Spring Curriculum Exercises for Balance Oasis sections
+// Re-exporting 20 full exercises for each section
+
+import {
+  EXERCISES_UNIT2,
+  MOVEMENT_EXERCISES_UNIT2,
+  WRITING_EXERCISES_UNIT2,
+  EMOTION_EXERCISES_UNIT2,
+  FocusExercise,
+  MovementExercise,
+  WritingExercise,
+  GenericExercise
+} from './unit2_data_part1';
+
+import {
+  LEADERSHIP_EXERCISES_UNIT2,
+  TEAMWORK_EXERCISES_UNIT2,
+  FINANCIAL_EXERCISES_UNIT2,
+  CONFIDENCE_EXERCISES_UNIT2
+} from './unit2_data_part2';
+
+import {
+  CRITICAL_EXERCISES_UNIT2,
+  INNOV_EXERCISES_UNIT2,
+  ART_EXERCISES_UNIT2,
+  LIFE_EXERCISES_UNIT2
+} from './unit2_data_part3';
+
+export type { FocusExercise, MovementExercise, WritingExercise, GenericExercise };
+
+export {
+  EXERCISES_UNIT2,
+  MOVEMENT_EXERCISES_UNIT2,
+  WRITING_EXERCISES_UNIT2,
+  EMOTION_EXERCISES_UNIT2,
+  LEADERSHIP_EXERCISES_UNIT2,
+  TEAMWORK_EXERCISES_UNIT2,
+  FINANCIAL_EXERCISES_UNIT2,
+  CONFIDENCE_EXERCISES_UNIT2,
+  CRITICAL_EXERCISES_UNIT2,
+  INNOV_EXERCISES_UNIT2,
+  ART_EXERCISES_UNIT2,
+  LIFE_EXERCISES_UNIT2
+};

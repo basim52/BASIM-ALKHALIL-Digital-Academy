@@ -36,6 +36,20 @@ import { CriticalExercise, CRITICAL_EXERCISES } from './critical_exercises';
 import { InnovExercise, INNOV_EXERCISES } from './innov_exercises';
 import { ArtExercise, ART_EXERCISES } from './art_exercises';
 import { LifeExercise, LIFE_EXERCISES } from './life_exercises';
+import {
+  EXERCISES_UNIT2,
+  MOVEMENT_EXERCISES_UNIT2,
+  WRITING_EXERCISES_UNIT2,
+  EMOTION_EXERCISES_UNIT2,
+  LEADERSHIP_EXERCISES_UNIT2,
+  TEAMWORK_EXERCISES_UNIT2,
+  FINANCIAL_EXERCISES_UNIT2,
+  CONFIDENCE_EXERCISES_UNIT2,
+  CRITICAL_EXERCISES_UNIT2,
+  INNOV_EXERCISES_UNIT2,
+  ART_EXERCISES_UNIT2,
+  LIFE_EXERCISES_UNIT2
+} from './unit2_all_exercises';
 
 interface FocusExercise {
   id: string;
@@ -1124,9 +1138,22 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     }
   });
 
-  // Active communication and social intelligence states
+  // Active unit selection states for all sections
+  const [calmActiveUnit, setCalmActiveUnit] = useState<1 | 2>(1);
+  const [moveActiveUnit, setMoveActiveUnit] = useState<1 | 2>(1);
+  const [writingActiveUnit, setWritingActiveUnit] = useState<1 | 2>(1);
+  const [emotionActiveUnit, setEmotionActiveUnit] = useState<1 | 2>(1);
   const [commActiveUnit, setCommActiveUnit] = useState<1 | 2>(1);
-  const [unitToExport, setUnitToExport] = useState<{ unitNumber: 1 | 2; title: string; exercises: CommunicationExercise[] } | null>(null);
+  const [leaderActiveUnit, setLeaderActiveUnit] = useState<1 | 2>(1);
+  const [teamActiveUnit, setTeamActiveUnit] = useState<1 | 2>(1);
+  const [moneyActiveUnit, setMoneyActiveUnit] = useState<1 | 2>(1);
+  const [confidenceActiveUnit, setConfidenceActiveUnit] = useState<1 | 2>(1);
+  const [criticalActiveUnit, setCriticalActiveUnit] = useState<1 | 2>(1);
+  const [innovActiveUnit, setInnovActiveUnit] = useState<1 | 2>(1);
+  const [artActiveUnit, setArtActiveUnit] = useState<1 | 2>(1);
+  const [lifeActiveUnit, setLifeActiveUnit] = useState<1 | 2>(1);
+
+  const [unitToExport, setUnitToExport] = useState<{ unitNumber: 1 | 2; title: string; exercises: any[] } | null>(null);
   const [isExportingUnit, setIsExportingUnit] = useState<boolean>(false);
   const [selectedCommEx, setSelectedCommEx] = useState<CommunicationExercise | null>(null);
   const [commStepsChecked, setCommStepsChecked] = useState<boolean[]>([]);
@@ -2132,23 +2159,35 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
   const completedArtCount = completedArtIds.size;
   const completedLifeCount = completedLifeIds.size;
   const totalCompleted = completedCount + completedMoveCount + completedWritingCount + completedEmotionCount + completedCommCount + completedLeaderCount + completedTeamCount + completedMoneyCount + completedConfidenceCount + completedCriticalCount + completedInnovCount + completedArtCount + completedLifeCount;
-  const totalAvailable = EXERCISES.length + MOVEMENT_EXERCISES.length + WRITING_EXERCISES.length + EMOTION_EXERCISES.length + COMMUNICATION_EXERCISES.length + COMMUNICATION_EXERCISES_UNIT2.length + LEADERSHIP_EXERCISES.length + TEAMWORK_EXERCISES.length + FINANCIAL_EXERCISES.length + CONFIDENCE_EXERCISES.length + CRITICAL_EXERCISES.length + INNOV_EXERCISES.length + ART_EXERCISES.length + LIFE_EXERCISES.length;
+  const totalAvailable = EXERCISES.length + EXERCISES_UNIT2.length
+    + MOVEMENT_EXERCISES.length + MOVEMENT_EXERCISES_UNIT2.length
+    + WRITING_EXERCISES.length + WRITING_EXERCISES_UNIT2.length
+    + EMOTION_EXERCISES.length + EMOTION_EXERCISES_UNIT2.length
+    + COMMUNICATION_EXERCISES.length + COMMUNICATION_EXERCISES_UNIT2.length
+    + LEADERSHIP_EXERCISES.length + LEADERSHIP_EXERCISES_UNIT2.length
+    + TEAMWORK_EXERCISES.length + TEAMWORK_EXERCISES_UNIT2.length
+    + FINANCIAL_EXERCISES.length + FINANCIAL_EXERCISES_UNIT2.length
+    + CONFIDENCE_EXERCISES.length + CONFIDENCE_EXERCISES_UNIT2.length
+    + CRITICAL_EXERCISES.length + CRITICAL_EXERCISES_UNIT2.length
+    + INNOV_EXERCISES.length + INNOV_EXERCISES_UNIT2.length
+    + ART_EXERCISES.length + ART_EXERCISES_UNIT2.length
+    + LIFE_EXERCISES.length + LIFE_EXERCISES_UNIT2.length;
   const progressPercent = totalAvailable > 0 ? Math.round((totalCompleted / totalAvailable) * 100) : 0;
 
   // Compile lists of all completed exercises for the certificate download
-  const completedCalmList = EXERCISES.filter(ex => localCompletedIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
-  const completedMoveList = MOVEMENT_EXERCISES.filter(ex => completedMoveIds.has(ex.id)).map(ex => isRtl ? ex.command_ar : ex.command_en);
-  const completedWritingList = WRITING_EXERCISES.filter(ex => completedWritingIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
-  const completedEmotionList = EMOTION_EXERCISES.filter(ex => completedEmotionIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedCalmList = [...EXERCISES, ...EXERCISES_UNIT2].filter(ex => localCompletedIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedMoveList = [...MOVEMENT_EXERCISES, ...MOVEMENT_EXERCISES_UNIT2].filter(ex => completedMoveIds.has(ex.id)).map(ex => isRtl ? ex.command_ar : ex.command_en);
+  const completedWritingList = [...WRITING_EXERCISES, ...WRITING_EXERCISES_UNIT2].filter(ex => completedWritingIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedEmotionList = [...EMOTION_EXERCISES, ...EMOTION_EXERCISES_UNIT2].filter(ex => completedEmotionIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
   const completedCommList = [...COMMUNICATION_EXERCISES, ...COMMUNICATION_EXERCISES_UNIT2].filter(ex => completedCommIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
-  const completedLeaderList = LEADERSHIP_EXERCISES.filter(ex => completedLeaderIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
-  const completedTeamList = TEAMWORK_EXERCISES.filter(ex => completedTeamIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
-  const completedMoneyList = FINANCIAL_EXERCISES.filter(ex => completedMoneyIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
-  const completedConfidenceList = CONFIDENCE_EXERCISES.filter(ex => completedConfidenceIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
-  const completedCriticalList = CRITICAL_EXERCISES.filter(ex => completedCriticalIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
-  const completedInnovList = INNOV_EXERCISES.filter(ex => completedInnovIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
-  const completedArtList = ART_EXERCISES.filter(ex => completedArtIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
-  const completedLifeList = LIFE_EXERCISES.filter(ex => completedLifeIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedLeaderList = [...LEADERSHIP_EXERCISES, ...LEADERSHIP_EXERCISES_UNIT2].filter(ex => completedLeaderIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedTeamList = [...TEAMWORK_EXERCISES, ...TEAMWORK_EXERCISES_UNIT2].filter(ex => completedTeamIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedMoneyList = [...FINANCIAL_EXERCISES, ...FINANCIAL_EXERCISES_UNIT2].filter(ex => completedMoneyIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedConfidenceList = [...CONFIDENCE_EXERCISES, ...CONFIDENCE_EXERCISES_UNIT2].filter(ex => completedConfidenceIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedCriticalList = [...CRITICAL_EXERCISES, ...CRITICAL_EXERCISES_UNIT2].filter(ex => completedCriticalIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedInnovList = [...INNOV_EXERCISES, ...INNOV_EXERCISES_UNIT2].filter(ex => completedInnovIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedArtList = [...ART_EXERCISES, ...ART_EXERCISES_UNIT2].filter(ex => completedArtIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedLifeList = [...LIFE_EXERCISES, ...LIFE_EXERCISES_UNIT2].filter(ex => completedLifeIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
 
   const allCompletedTitles = [
     ...completedCalmList,
@@ -2437,11 +2476,153 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     }, 450);
   };
 
-  const handleExportUnitSummary = (unitNum: 1 | 2) => {
-    const exercises = unitNum === 1 ? COMMUNICATION_EXERCISES : COMMUNICATION_EXERCISES_UNIT2;
-    const title = unitNum === 1
-      ? (isRtl ? 'الوحدة الأولى: الإنصات الفعال والترابط الاجتماعي (20 تمرين)' : 'Unit 1: Active Listening & Social Connection (20 Exercises)')
-      : (isRtl ? 'الوحدة الثانية: الذكاء الاجتماعي الربيعي والتواصل الداعم (20 تمرين)' : 'Unit 2: Spring Social Intelligence & Supportive Communication (20 Exercises)');
+  const renderUnitSwitcherBanner = (
+    unitNum: 1 | 2,
+    setUnitNum: (u: 1 | 2) => void,
+    unit1LabelAr: string,
+    unit1LabelEn: string,
+    unit2LabelAr: string,
+    unit2LabelEn: string,
+    subTabKey: string,
+    unit1Count: number,
+    unit2Count: number,
+    icon1: string = '📘',
+    icon2: string = '🌸'
+  ) => (
+    <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-gradient-to-r from-slate-900/90 via-slate-800/90 to-slate-900/90 p-3 rounded-2xl border border-white/10 shadow-xl" dir="rtl">
+      <div className="flex flex-wrap items-center gap-2.5">
+        <button
+          onClick={() => {
+            setUnitNum(1);
+            stopSpeech();
+          }}
+          className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all duration-300 flex items-center gap-2 cursor-pointer select-none ${
+            unitNum === 1
+              ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25 scale-[1.02]'
+              : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
+          }`}
+        >
+          <span className="text-sm">{icon1}</span>
+          {isRtl ? `الوحدة الأولى: ${unit1LabelAr} (${unit1Count} تمرين)` : `Unit 1: ${unit1LabelEn} (${unit1Count})`}
+        </button>
+
+        <button
+          onClick={() => {
+            setUnitNum(2);
+            stopSpeech();
+          }}
+          className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all duration-300 flex items-center gap-2 cursor-pointer select-none ${
+            unitNum === 2
+              ? 'bg-gradient-to-r from-amber-400 via-rose-500 to-emerald-400 text-slate-950 shadow-lg shadow-amber-500/25 scale-[1.02]'
+              : 'text-amber-300/90 hover:text-amber-200 hover:bg-amber-500/10 border border-amber-500/30'
+          }`}
+        >
+          <span className="text-sm">{icon2}</span>
+          {isRtl ? `الوحدة الثانية: ${unit2LabelAr} (${unit2Count} تمرين)` : `Unit 2: ${unit2LabelEn} (${unit2Count})`}
+        </button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          disabled={isExportingUnit}
+          onClick={() => handleExportUnitSummary(subTabKey, unitNum)}
+          className="px-3.5 py-2 bg-gradient-to-r from-amber-500/20 via-rose-500/20 to-teal-500/20 border border-amber-400/40 hover:border-amber-400 text-amber-200 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-md"
+          title={isRtl ? `تصدير كامل بوستر خطوات تمارين الوحدة ${unitNum === 1 ? 'الأولى' : 'الثانية'} كصورة عالية الدقة 📸` : 'Export unit steps poster as image 📸'}
+        >
+          {isExportingUnit ? (
+            <RefreshCw size={13} className="animate-spin text-amber-400" />
+          ) : (
+            <Download size={13} strokeWidth={3} className="text-amber-400" />
+          )}
+          <span>
+            {isRtl
+              ? `تصدير بوستر خطوات الوحدة ${unitNum === 1 ? '1' : '2'} كصورة 📸`
+              : `Export Unit ${unitNum} Steps Poster 📸`}
+          </span>
+        </button>
+
+        <span className={`text-[11px] font-extrabold px-3 py-1.5 rounded-xl border flex items-center gap-1.5 font-mono ${
+          unitNum === 2
+            ? 'bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-emerald-500/10 border-amber-500/30 text-amber-300'
+            : 'bg-blue-500/10 border-blue-500/20 text-blue-300'
+        }`}>
+          <span>{unitNum === 2 ? '🌸' : '⚡'}</span>
+          <span>{isRtl ? `الوحدة ${unitNum === 1 ? '1' : '2'}` : `Unit ${unitNum}`}</span>
+        </span>
+      </div>
+    </div>
+  );
+
+  const handleExportUnitSummary = (subTabKey: string, unitNum: 1 | 2) => {
+    let exercises: any[] = [];
+    let title = '';
+
+    if (subTabKey === 'calm') {
+      exercises = unitNum === 1 ? EXERCISES : EXERCISES_UNIT2;
+      title = unitNum === 1
+        ? (isRtl ? 'الوحدة الأولى: التركيز والسكينة واليقظة الذهنية' : 'Unit 1: Focus & Calm')
+        : (isRtl ? 'الوحدة الثانية: الصفاء الذهني والعمق التأملي الربيعي' : 'Unit 2: Spring Deep Focus & Clarity');
+    } else if (subTabKey === 'move') {
+      exercises = unitNum === 1 ? MOVEMENT_EXERCISES : MOVEMENT_EXERCISES_UNIT2;
+      title = unitNum === 1
+        ? (isRtl ? 'الوحدة الأولى: التنشيط والحركة الإيقاعية' : 'Unit 1: Kinetic Flow')
+        : (isRtl ? 'الوحدة الثانية: التوازن البدني والتنشيط المتقدم' : 'Unit 2: Spring Physical Balance');
+    } else if (subTabKey === 'writing') {
+      exercises = unitNum === 1 ? WRITING_EXERCISES : WRITING_EXERCISES_UNIT2;
+      title = unitNum === 1
+        ? (isRtl ? 'الوحدة الأولى: دفتر التفكير والتأمل الصامت' : 'Unit 1: Silent Journaling')
+        : (isRtl ? 'الوحدة الثانية: الكتابة الإبداعية والاستبصار الذاتي' : 'Unit 2: Spring Creative Journaling');
+    } else if (subTabKey === 'emotion') {
+      exercises = unitNum === 1 ? EMOTION_EXERCISES : EMOTION_EXERCISES_UNIT2;
+      title = unitNum === 1
+        ? (isRtl ? 'الوحدة الأولى: الوعي بالمشاعر وضبط النفس' : 'Unit 1: Emotion Awareness')
+        : (isRtl ? 'الوحدة الثانية: إدارة المشاعر والتعاطف الاجتماعي' : 'Unit 2: Spring Emotional Empathy');
+    } else if (subTabKey === 'communication') {
+      exercises = unitNum === 1 ? COMMUNICATION_EXERCISES : COMMUNICATION_EXERCISES_UNIT2;
+      title = unitNum === 1
+        ? (isRtl ? 'الوحدة الأولى: الإنصات الفعال والترابط الاجتماعي' : 'Unit 1: Active Listening')
+        : (isRtl ? 'الوحدة الثانية: الذكاء الاجتماعي الربيعي والتواصل' : 'Unit 2: Spring Social Intelligence');
+    } else if (subTabKey === 'leadership') {
+      exercises = unitNum === 1 ? LEADERSHIP_EXERCISES : LEADERSHIP_EXERCISES_UNIT2;
+      title = unitNum === 1
+        ? (isRtl ? 'الوحدة الأولى: روح المبادرة وتنظيم الوقت' : 'Unit 1: Leadership & Initiative')
+        : (isRtl ? 'الوحدة الثانية: التفكير الاستراتيجي وقيادة الفرق' : 'Unit 2: Spring Strategic Leadership');
+    } else if (subTabKey === 'teamwork') {
+      exercises = unitNum === 1 ? TEAMWORK_EXERCISES : TEAMWORK_EXERCISES_UNIT2;
+      title = unitNum === 1
+        ? (isRtl ? 'الوحدة الأولى: التعاون والتلاحم الأسري' : 'Unit 1: Teamwork & Family Cohesion')
+        : (isRtl ? 'الوحدة الثانية: التضافر والابتكار التشاركي' : 'Unit 2: Spring Collaborative Synergy');
+    } else if (subTabKey === 'money') {
+      exercises = unitNum === 1 ? FINANCIAL_EXERCISES : FINANCIAL_EXERCISES_UNIT2;
+      title = unitNum === 1
+        ? (isRtl ? 'الوحدة الأولى: الادخار والوعي المالي المبكر' : 'Unit 1: Financial Awareness')
+        : (isRtl ? 'الوحدة الثانية: التخطيط المالي والاستثمار المستدام' : 'Unit 2: Spring Financial Planning');
+    } else if (subTabKey === 'confidence') {
+      exercises = unitNum === 1 ? CONFIDENCE_EXERCISES : CONFIDENCE_EXERCISES_UNIT2;
+      title = unitNum === 1
+        ? (isRtl ? 'الوحدة الأولى: الثقة بالنفس والتعبير الجسور' : 'Unit 1: Self-Confidence')
+        : (isRtl ? 'الوحدة الثانية: الخطابة الجماهيرية والإقناع المتقدم' : 'Unit 2: Spring Public Speaking');
+    } else if (subTabKey === 'critical') {
+      exercises = unitNum === 1 ? CRITICAL_EXERCISES : CRITICAL_EXERCISES_UNIT2;
+      title = unitNum === 1
+        ? (isRtl ? 'الوحدة الأولى: التفكير النقدي المنطقي' : 'Unit 1: Critical Logic')
+        : (isRtl ? 'الوحدة الثانية: التحليل وصنع القرار المعقد' : 'Unit 2: Spring Problem Solving');
+    } else if (subTabKey === 'innov') {
+      exercises = unitNum === 1 ? INNOV_EXERCISES : INNOV_EXERCISES_UNIT2;
+      title = unitNum === 1
+        ? (isRtl ? 'الوحدة الأولى: مبتكرون بالفطرة والابتكار الفردي' : 'Unit 1: Natural Innovators')
+        : (isRtl ? 'الوحدة الثانية: التفكير التصميمي والابتكار الربيعي' : 'Unit 2: Spring Design Thinking');
+    } else if (subTabKey === 'art') {
+      exercises = unitNum === 1 ? ART_EXERCISES : ART_EXERCISES_UNIT2;
+      title = unitNum === 1
+        ? (isRtl ? 'الوحدة الأولى: نوافذ الفن والجمال والأدب' : 'Unit 1: Artistic Beauty')
+        : (isRtl ? 'الوحدة الثانية: النقد الجمالي والإبداع الأدبي' : 'Unit 2: Spring Literary & Arts');
+    } else if (subTabKey === 'life') {
+      exercises = unitNum === 1 ? LIFE_EXERCISES : LIFE_EXERCISES_UNIT2;
+      title = unitNum === 1
+        ? (isRtl ? 'الوحدة الأولى: بطل الحياة والاعتماد الذاتي' : 'Unit 1: Self-Reliance')
+        : (isRtl ? 'الوحدة الثانية: السلامة المتقدمة وإدارة الطوارئ' : 'Unit 2: Spring Life Safety');
+    }
 
     setUnitToExport({ unitNumber: unitNum, title, exercises });
     setIsExportingUnit(true);
@@ -2467,7 +2648,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
           const link = document.createElement('a');
           link.href = dataUrl;
-          link.download = `Oasis-Communication-Unit-${unitNum}-Steps-Poster-${new Date().getTime()}.png`;
+          link.download = `Oasis-${subTabKey}-Unit-${unitNum}-Steps-Poster-${new Date().getTime()}.png`;
           link.click();
         } catch (error) {
           console.error("Error generating unit summary poster image:", error);
@@ -3287,6 +3468,21 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
           >
             {activeSubTab === 'calm' ? (
               <div className="space-y-6">
+                {/* Unit Switcher Banner */}
+                {renderUnitSwitcherBanner(
+                  calmActiveUnit,
+                  setCalmActiveUnit,
+                  'التركيز والسكينة واليقظة الذهنية',
+                  'Focus & Calm',
+                  'الصفاء الذهني والعمق التأملي الربيعي',
+                  'Spring Deep Focus',
+                  'calm',
+                  EXERCISES.length,
+                  EXERCISES_UNIT2.length,
+                  '🧘',
+                  '☀️'
+                )}
+
                 {/* Setting the duration before play */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-white/5 pb-4 gap-4">
                   <div>
@@ -3320,9 +3516,9 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   </div>
                 </div>
 
-                {/* Exercise Selection Grid - 20 items */}
+                {/* Exercise Selection Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {EXERCISES.map((ex, idx) => {
+                  {(calmActiveUnit === 1 ? EXERCISES : EXERCISES_UNIT2).map((ex, idx) => {
                     const isCompleted = localCompletedIds.has(ex.id);
                     const cardIcon = getExerciseIcon(ex.id, 18);
 
@@ -3397,6 +3593,21 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               </div>
             ) : activeSubTab === 'move' ? (
               <div className="space-y-6">
+                {/* Unit Switcher Banner */}
+                {renderUnitSwitcherBanner(
+                  moveActiveUnit,
+                  setMoveActiveUnit,
+                  'التنشيط والحركة الإيقاعية',
+                  'Kinetic Flow',
+                  'التوازن البدني والتنشيط المتقدم',
+                  'Spring Physical Balance',
+                  'move',
+                  MOVEMENT_EXERCISES.length,
+                  MOVEMENT_EXERCISES_UNIT2.length,
+                  '⚡',
+                  '🏃'
+                )}
+
                 <div>
                   <h3 className="text-lg font-black text-white flex items-center gap-2">
                     <span className="text-amber-400">⚡</span>
@@ -3407,9 +3618,9 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   </p>
                 </div>
 
-                {/* Movement Exercise Grid - 30 items */}
+                {/* Movement Exercise Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {MOVEMENT_EXERCISES.map((ex, idx) => {
+                  {(moveActiveUnit === 1 ? MOVEMENT_EXERCISES : MOVEMENT_EXERCISES_UNIT2).map((ex, idx) => {
                     const isCompleted = completedMoveIds.has(ex.id);
 
                     return (
@@ -3759,8 +3970,23 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   </div>
                 </div>
               ) : (
-                // SelectedWritingEx === null -> Grid list of 20 writing prompts catalog!
+                // SelectedWritingEx === null -> Grid list of writing prompts catalog!
                 <div className="space-y-6">
+                  {/* Unit Switcher Banner */}
+                  {renderUnitSwitcherBanner(
+                    writingActiveUnit,
+                    setWritingActiveUnit,
+                    'دفتر التفكير والتأمل الصامت',
+                    'Silent Journaling',
+                    'الكتابة الإبداعية والاستبصار الذاتي',
+                    'Spring Creative Journaling',
+                    'writing',
+                    WRITING_EXERCISES.length,
+                    WRITING_EXERCISES_UNIT2.length,
+                    '✍️',
+                    '🌳'
+                  )}
+
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-2 text-right" dir="rtl">
                     <div className="space-y-1">
                       <h3 className="text-lg font-black text-white flex items-center gap-2 justify-end">
@@ -3768,18 +3994,18 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                         {isRtl ? 'التعبير الإبداعي والذكاء العاطفي (الكتابة كأداة للتفكير):' : 'Creative Writing & Emotional Intelligence (Notepad as a Tool for Thinking):'}
                       </h3>
                       <p className="text-slate-400 text-xs">
-                        {isRtl ? 'الوحدة الأولى كاملة: 20 تمرين كتابة للتفريغ والوعي الوجداني والتعزيز الذكي مع تسجيل كلامك واستقبل لطف الذكاء المسموع:' : 'Unit 1 Complete Catalog: 20 experiential interactive writing prompts to foster tranquility, gratitude, and deep self-awareness:'}
+                        {isRtl ? 'تمارين عملية للتفريغ والوعي الوجداني والتعزيز الذكي مع تسجيل كلامك واستقبل لطف الذكاء المسموع:' : 'Experiential interactive writing prompts to foster tranquility, gratitude, and deep self-awareness:'}
                       </p>
                     </div>
 
                     <div className="text-xs bg-purple-500/10 border border-purple-500/20 text-purple-400 px-3 py-1.5 rounded-xl font-bold font-mono">
-                      {isRtl ? `أنجزت ${completedWritingIds.size} من 20` : `${completedWritingIds.size} / 20 Completed`}
+                      {isRtl ? `أنجزت ${completedWritingIds.size} تمارين` : `${completedWritingIds.size} Completed`}
                     </div>
                   </div>
 
-                  {/* 20 Exercises Grid */}
+                  {/* Exercises Grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" dir="rtl">
-                    {WRITING_EXERCISES.map((ex, idx) => {
+                    {(writingActiveUnit === 1 ? WRITING_EXERCISES : WRITING_EXERCISES_UNIT2).map((ex, idx) => {
                       const isCompleted = completedWritingIds.has(ex.id);
                       
                       return (
@@ -4221,27 +4447,42 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </div>
                   </div>
 
-                  {/* 2. Grid list of 20 emotional intelligence exercises */}
+                  {/* Grid list of emotional intelligence exercises */}
                   <div className="space-y-6">
+                    {/* Unit Switcher Banner */}
+                    {renderUnitSwitcherBanner(
+                      emotionActiveUnit,
+                      setEmotionActiveUnit,
+                      'الوعي بالمشاعر وضبط النفس',
+                      'Emotion Awareness',
+                      'إدارة المشاعر والتعاطف الاجتماعي',
+                      'Spring Emotional Empathy',
+                      'emotion',
+                      EMOTION_EXERCISES.length,
+                      EMOTION_EXERCISES_UNIT2.length,
+                      '🧠',
+                      '💎'
+                    )}
+
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-2 text-right">
                       <div className="space-y-1">
                         <h3 className="text-lg font-black text-white flex items-center gap-2 justify-end">
                           <span className="text-emerald-400">💎</span>
-                          {isRtl ? 'منهج التعبير الإبداعي والذكاء الوجداني (الوحدة الأولى):' : 'Creative Writing & Emotional Intelligence (Unit 1):'}
+                          {isRtl ? 'منهج الذكاء الوجداني وإدارة المشاعر:' : 'Social Emotional Intelligence Curriculum:'}
                         </h3>
                         <p className="text-slate-400 text-xs">
-                          {isRtl ? 'الوحدة كاملة: 20 تمرين عملي لـ الوعي التام بالمشاعر، كفاءة ضبط الغضب، وتقوية المرونة العائلية:' : 'Complete 20 integrated interactive routines to bolster focus, anger containment, and constructive play:'}
+                          {isRtl ? 'تمارين عملية للوعي التام بالمشاعر، ضبط الغضب، وتقوية التلاحم العاطفي:' : 'Integrated interactive routines to bolster emotional awareness and empathy:'}
                         </p>
                       </div>
 
                       <div className="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-xl font-bold font-mono">
-                        {isRtl ? `أنجزت ${completedEmotionIds.size} من 20` : `${completedEmotionIds.size} / 20 Completed`}
+                        {isRtl ? `أنجزت ${completedEmotionIds.size} تمارين` : `${completedEmotionIds.size} Completed`}
                       </div>
                     </div>
 
                     {/* Grid list container */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" dir="rtl">
-                      {EMOTION_EXERCISES.map((ex, idx) => {
+                      {(emotionActiveUnit === 1 ? EMOTION_EXERCISES : EMOTION_EXERCISES_UNIT2).map((ex, idx) => {
                         const isCompleted = completedEmotionIds.has(ex.id);
 
                         return (
@@ -4358,7 +4599,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       disabled={isExportingUnit}
-                      onClick={() => handleExportUnitSummary(commActiveUnit)}
+                      onClick={() => handleExportUnitSummary('communication', commActiveUnit)}
                       className="px-3.5 py-2 bg-gradient-to-r from-amber-500/20 via-rose-500/20 to-teal-500/20 border border-amber-400/40 hover:border-amber-400 text-amber-200 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-md"
                       title={isRtl ? `تصدير كامل بوستر خطوات تمارين الوحدة ${commActiveUnit === 1 ? 'الأولى' : 'الثانية'} كصورة عالية الدقة 📸` : 'Export unit steps poster as image 📸'}
                     >
@@ -4938,27 +5179,42 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   </div>
                 </div>
               ) : (
-                // SelectedLeaderEx === null -> Grid list of 20 leadership and time management exercises!
+                // SelectedLeaderEx === null -> Grid list of leadership exercises!
                 <div className="space-y-6">
+                  {/* Unit Switcher Banner */}
+                  {renderUnitSwitcherBanner(
+                    leaderActiveUnit,
+                    setLeaderActiveUnit,
+                    'روح المبادرة وتنظيم الوقت',
+                    'Leadership & Initiative',
+                    'التفكير الاستراتيجي وقيادة الفرق',
+                    'Spring Strategic Leadership',
+                    'leadership',
+                    LEADERSHIP_EXERCISES.length,
+                    LEADERSHIP_EXERCISES_UNIT2.length,
+                    '👑',
+                    '🚀'
+                  )}
+
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-2 text-right">
                     <div className="space-y-1">
                       <h3 className="text-lg font-black text-white flex items-center gap-2 justify-end">
                         <span className="text-rose-400">👑</span>
-                        {isRtl ? 'منهج القيادة وإدارة الوقت للنشء (الوحدة الأولى):' : 'Leadership & Time Management Curriculum (Unit 1):'}
+                        {isRtl ? 'منهج القيادة وإدارة الوقت للنشء:' : 'Leadership & Time Management Curriculum:'}
                       </h3>
                       <p className="text-slate-400 text-xs">
-                        {isRtl ? 'الوحدة كاملة: 20 تمرين عملي لـ الوعي التام للأهداف، كفاءة تنظيم الوقت، والمبادرة الإيجابية عائلياً:' : 'Complete 20 integrated interactive routines to foster self-organization, timer challenges, and active household stewardship:'}
+                        {isRtl ? 'تمارين عملية لـ الوعي التام للأهداف، كفاءة تنظيم الوقت، والمبادرة الإيجابية عائلياً:' : 'Integrated interactive routines to foster self-organization and active leadership:'}
                       </p>
                     </div>
 
                     <div className="text-xs bg-rose-500/10 border border-rose-500/20 text-rose-400 px-3 py-1.5 rounded-xl font-bold font-mono">
-                      {isRtl ? `أنجزت ${completedLeaderIds.size} من 20` : `${completedLeaderIds.size} / 20 Completed`}
+                      {isRtl ? `أنجزت ${completedLeaderIds.size} تمارين` : `${completedLeaderIds.size} Completed`}
                     </div>
                   </div>
 
                   {/* Grid list container */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" dir="rtl">
-                    {LEADERSHIP_EXERCISES.map((ex, idx) => {
+                    {(leaderActiveUnit === 1 ? LEADERSHIP_EXERCISES : LEADERSHIP_EXERCISES_UNIT2).map((ex, idx) => {
                       const isCompleted = completedLeaderIds.has(ex.id);
 
                       return (
@@ -5220,27 +5476,42 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   </div>
                 </div>
               ) : (
-                // SelectedTeamEx === null -> Grid list of 24 teamwork and cooperation exercises!
+                // SelectedTeamEx === null -> Grid list of teamwork exercises!
                 <div className="space-y-6">
+                  {/* Unit Switcher Banner */}
+                  {renderUnitSwitcherBanner(
+                    teamActiveUnit,
+                    setTeamActiveUnit,
+                    'التعاون والتلاحم الأسري',
+                    'Teamwork & Cohesion',
+                    'التضافر والابتكار التشاركي',
+                    'Spring Collaborative Synergy',
+                    'teamwork',
+                    TEAMWORK_EXERCISES.length,
+                    TEAMWORK_EXERCISES_UNIT2.length,
+                    '🤝',
+                    '🌟'
+                  )}
+
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-2 text-right">
                     <div className="space-y-1">
                       <h3 className="text-lg font-black text-white flex items-center gap-2 justify-end">
                         <span className="text-indigo-400">🤝</span>
-                        {isRtl ? 'منهج التعاون المشاريع الجماعية للنشء (الوحدة الأولى):' : 'Cooperation & Joint Projects Curriculum (Unit 1):'}
+                        {isRtl ? 'منهج التعاون والمشاريع الجماعية للنشء:' : 'Cooperation & Joint Projects Curriculum:'}
                       </h3>
                       <p className="text-slate-400 text-xs">
-                        {isRtl ? 'الوحدة كاملة: 20 تمرين عملي لـ الوعي التام للغير، كفاءة مشاركة الأدوار، والتعاطف والتواصل الإنساني:' : 'Complete 20 integrated interactive routines to foster other-awareness, dynamic role sharing, empathy, and positive human communication:'}
+                        {isRtl ? 'تمارين عملية لـ الوعي التام للغير، كفاءة مشاركة الأدوار، والتعاطف والتواصل الإنساني:' : 'Integrated interactive routines to foster role sharing, empathy, and positive team communication:'}
                       </p>
                     </div>
 
                     <div className="text-xs bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-3 py-1.5 rounded-xl font-bold font-mono">
-                      {isRtl ? `أنجزت ${completedTeamIds.size} من 20` : `${completedTeamIds.size} / 20 Completed`}
+                      {isRtl ? `أنجزت ${completedTeamIds.size} تمارين` : `${completedTeamIds.size} Completed`}
                     </div>
                   </div>
 
                   {/* Grid list container */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" dir="rtl">
-                    {TEAMWORK_EXERCISES.map((ex, idx) => {
+                    {(teamActiveUnit === 1 ? TEAMWORK_EXERCISES : TEAMWORK_EXERCISES_UNIT2).map((ex, idx) => {
                       const isCompleted = completedTeamIds.has(ex.id);
 
                       return (
@@ -5491,27 +5762,42 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   </div>
                 </div>
               ) : (
-                // selectedMoneyEx === null -> Grid list of 20 Early Financial Literacy exercises
+                // selectedMoneyEx === null -> Grid list of Financial Literacy exercises
                 <div className="space-y-6">
+                  {/* Unit Switcher Banner */}
+                  {renderUnitSwitcherBanner(
+                    moneyActiveUnit,
+                    setMoneyActiveUnit,
+                    'الادخار والوعي المالي المبكر',
+                    'Financial Awareness',
+                    'التخطيط المالي والاستثمار المستدام',
+                    'Spring Financial Planning',
+                    'money',
+                    FINANCIAL_EXERCISES.length,
+                    FINANCIAL_EXERCISES_UNIT2.length,
+                    '💰',
+                    '💎'
+                  )}
+
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-amber-500/10 pb-4 gap-2 text-right">
                     <div className="space-y-1">
                       <h3 className="text-lg font-black text-white flex items-center gap-2 justify-end">
                         <span className="text-amber-400">☀️💰</span>
-                        {isRtl ? 'منهج الثقافة المالية المبكرة للنشء (ألوان صيفية مبهجة):' : 'Early Financial Literacy Summer Edition:'}
+                        {isRtl ? 'منهج الثقافة المالية للنشء:' : 'Financial Literacy Curriculum:'}
                       </h3>
                       <p className="text-amber-400/80 text-xs">
-                        {isRtl ? 'تجمع بين المتعة والفوائد المالية العملية لتنمية مهارات التخطيط، والادخار المبكر بأسلوب تفاعلي رائع:' : 'A cheerful interactive financial literacy curriculum to master budgeting, saving, and smart choices with summer heat:'}
+                        {isRtl ? 'تنمية مهارات التخطيط والادخار بأسلوب تفاعلي رائع:' : 'Interactive financial literacy curriculum to master budgeting and smart choices:'}
                       </p>
                     </div>
 
                     <div className="text-xs bg-amber-500/10 border border-amber-500/20 text-amber-400 px-3 py-1.5 rounded-xl font-bold font-mono">
-                      {isRtl ? `أنجزت ${completedMoneyIds.size} من 20` : `${completedMoneyIds.size} / 20 Completed`}
+                      {isRtl ? `أنجزت ${completedMoneyIds.size} تمارين` : `${completedMoneyIds.size} Completed`}
                     </div>
                   </div>
 
                   {/* Grid list container */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" dir="rtl">
-                    {FINANCIAL_EXERCISES.map((ex, idx) => {
+                    {(moneyActiveUnit === 1 ? FINANCIAL_EXERCISES : FINANCIAL_EXERCISES_UNIT2).map((ex, idx) => {
                       const isCompleted = completedMoneyIds.has(ex.id);
 
                       return (
@@ -5762,8 +6048,23 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   </div>
                 </div>
               ) : (
-                // selectedConfidenceEx === null -> Grid list of 20 elements
+                // selectedConfidenceEx === null -> Grid list of confidence exercises
                 <div className="space-y-6 animate-fade-in">
+                  {/* Unit Switcher Banner */}
+                  {renderUnitSwitcherBanner(
+                    confidenceActiveUnit,
+                    setConfidenceActiveUnit,
+                    'الثقة بالنفس والتعبير الجسور',
+                    'Self-Confidence',
+                    'الخطابة الجماهيرية والإقناع المتقدم',
+                    'Spring Public Speaking',
+                    'confidence',
+                    CONFIDENCE_EXERCISES.length,
+                    CONFIDENCE_EXERCISES_UNIT2.length,
+                    '🎙️',
+                    '🔥'
+                  )}
+
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-orange-500/10 pb-4 gap-2 text-right">
                     <div className="space-y-1">
                       <h3 className="text-lg font-black text-white flex items-center gap-2 justify-end">
@@ -5776,13 +6077,13 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </div>
 
                     <div className="text-xs bg-orange-500/10 border border-orange-500/20 text-orange-400 px-3 py-1.5 rounded-xl font-bold font-mono">
-                      {isRtl ? `أنجزت ${completedConfidenceIds.size} من 20` : `${completedConfidenceIds.size} / 20 Completed`}
+                      {isRtl ? `أنجزت ${completedConfidenceIds.size} تمارين` : `${completedConfidenceIds.size} Completed`}
                     </div>
                   </div>
 
                   {/* Grid list container */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" dir="rtl">
-                    {CONFIDENCE_EXERCISES.map((ex, idx) => {
+                    {(confidenceActiveUnit === 1 ? CONFIDENCE_EXERCISES : CONFIDENCE_EXERCISES_UNIT2).map((ex, idx) => {
                       const isCompleted = completedConfidenceIds.has(ex.id);
 
                       return (
@@ -6034,8 +6335,23 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   </div>
                 </div>
               ) : (
-                // selectedCriticalEx === null -> Grid list of 20 elements
+                // selectedCriticalEx === null -> Grid list of critical thinking exercises
                 <div className="space-y-6 animate-fade-in">
+                  {/* Unit Switcher Banner */}
+                  {renderUnitSwitcherBanner(
+                    criticalActiveUnit,
+                    setCriticalActiveUnit,
+                    'التفكير النقدي المنطقي',
+                    'Critical Logic',
+                    'التحليل وصنع القرار المعقد',
+                    'Spring Problem Solving',
+                    'critical',
+                    CRITICAL_EXERCISES.length,
+                    CRITICAL_EXERCISES_UNIT2.length,
+                    '🧐',
+                    '💡'
+                  )}
+
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-rose-500/10 pb-4 gap-2 text-right">
                     <div className="space-y-1">
                       <h3 className="text-lg font-black text-white flex items-center gap-2 justify-end">
@@ -6043,18 +6359,18 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                         {isRtl ? 'منهج التفكير النقدي وحل المشكلات للنشء:' : 'Critical Thinking & Problem Solving Curriculum:'}
                       </h3>
                       <p className="text-rose-400/85 text-xs">
-                        {isRtl ? 'سلسلة تمارين و ألغاز عملية لتطوير التفكير المنطقي المتسلسل، التفكير خارج الصندوق، وتقسيم التحديات:' : 'Active challenges and puzzles to cultivate step-by-step logic, outside-the-box reasoning, and structured debate:'}
+                        {isRtl ? 'سلسلة تمارين وألغاز عملية لتطوير التفكير المنطقي المتسلسل، التفكير خارج الصندوق، وتقسيم التحديات:' : 'Active challenges and puzzles to cultivate step-by-step logic, outside-the-box reasoning, and structured debate:'}
                       </p>
                     </div>
 
                     <div className="text-xs bg-rose-500/10 border border-rose-500/20 text-rose-400 px-3 py-1.5 rounded-xl font-bold font-mono">
-                      {isRtl ? `أنجزت ${completedCriticalIds.size} من 20` : `${completedCriticalIds.size} / 20 Completed`}
+                      {isRtl ? `أنجزت ${completedCriticalIds.size} تمارين` : `${completedCriticalIds.size} Completed`}
                     </div>
                   </div>
 
                   {/* Grid list container */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" dir="rtl">
-                    {CRITICAL_EXERCISES.map((ex, idx) => {
+                    {(criticalActiveUnit === 1 ? CRITICAL_EXERCISES : CRITICAL_EXERCISES_UNIT2).map((ex, idx) => {
                       const isCompleted = completedCriticalIds.has(ex.id);
 
                       return (
@@ -6285,6 +6601,21 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                 </div>
               ) : (
                 <div className="space-y-6 animate-fade-in text-right">
+                  {/* Unit Switcher Banner */}
+                  {renderUnitSwitcherBanner(
+                    innovActiveUnit,
+                    setInnovActiveUnit,
+                    'مبتكرون بالفطرة والابتكار الفردي',
+                    'Natural Innovators',
+                    'التفكير التصميمي والابتكار الربيعي',
+                    'Spring Design Thinking',
+                    'innov',
+                    INNOV_EXERCISES.length,
+                    INNOV_EXERCISES_UNIT2.length,
+                    '💡',
+                    '🚀'
+                  )}
+
                   <div className="text-right">
                     <h2 className="text-xl font-black text-white flex items-center gap-2 justify-end">
                       <span>💡✨</span>
@@ -6292,13 +6623,13 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </h2>
                     <p className="text-slate-400 text-xs mt-1 leading-relaxed max-w-2xl ml-auto">
                       {isRtl 
-                        ? 'انطلق في رحلة المبتكرين لتعلم مهارات التعاطف مع متطلبات الآخرين، وتوليد الأفكار الإبداعية الجريئة، وبناء نماذج أولية عملية وتطوير العقلية التسعيرية، وصناعة الهوية البصرية والتسويق للمستقبل.' 
+                        ? 'انطلق في رحلة المبتكرين لتعلم مهارات التعاطف مع متطلبات الآخرين، وتوليد الأفكار الإبداعية الجريئة، وبناء نماذج أولية عملية وتطوير العقلية التسعيرية.' 
                         : 'Learn core micro-entrepreneurship and design systems: empathy mapping, prototyping, cost calculator, visual identity, and investor pitching.'}
                     </p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {INNOV_EXERCISES.map((ex, idx) => {
+                    {(innovActiveUnit === 1 ? INNOV_EXERCISES : INNOV_EXERCISES_UNIT2).map((ex, idx) => {
                       const isCompleted = completedInnovIds.has(ex.id);
                       return (
                         <div
@@ -6529,6 +6860,21 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                 </div>
               ) : (
                 <div className="space-y-6 animate-fade-in text-right">
+                  {/* Unit Switcher Banner */}
+                  {renderUnitSwitcherBanner(
+                    artActiveUnit,
+                    setArtActiveUnit,
+                    'نوافذ الفن والجمال والأدب',
+                    'Artistic Beauty',
+                    'النقد الجمالي والإبداع الأدبي',
+                    'Spring Literary & Arts',
+                    'art',
+                    ART_EXERCISES.length,
+                    ART_EXERCISES_UNIT2.length,
+                    '🎨',
+                    '🌸'
+                  )}
+
                   <div className="text-right">
                     <h2 className="text-xl font-black text-white flex items-center gap-2 justify-end">
                       <span>🎨✨</span>
@@ -6536,13 +6882,13 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </h2>
                     <p className="text-slate-400 text-xs mt-1 leading-relaxed max-w-2xl ml-auto">
                       {isRtl 
-                        ? 'انطلق من نوافذ الجمال والأدب لتعلم تقدير اللوحات الفنية الشامخة، نسج الاستعارات البيانية، تجسيد العبر والمسرح الإبداعي، ونحت المشاعر وترتيل القصائد الشعرية المصنوعة من نبض الطبيعة وتوثيق رحلتك كفنان.' 
+                        ? 'انطلق من نوافذ الجمال والأدب لتعلم تقدير اللوحات الفنية الشامخة، نسج الاستعارات البيانية، تجسيد العبر والمسرح الإبداعي، وتوثيق رحلتك كفنان.' 
                         : 'Explore aesthetic appreciation and creative literature: paintings interpretation, poetry, metaphors development, character lettering, sculpting emotions, and collaborative theatre.'}
                     </p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {ART_EXERCISES.map((ex, idx) => {
+                    {(artActiveUnit === 1 ? ART_EXERCISES : ART_EXERCISES_UNIT2).map((ex, idx) => {
                       const isCompleted = completedArtIds.has(ex.id);
                       return (
                         <div
@@ -6773,6 +7119,21 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                 </div>
               ) : (
                 <div className="space-y-6 animate-fade-in text-right">
+                  {/* Unit Switcher Banner */}
+                  {renderUnitSwitcherBanner(
+                    lifeActiveUnit,
+                    setLifeActiveUnit,
+                    'بطل الحياة والاعتماد الذاتي',
+                    'Self-Reliance',
+                    'السلامة المتقدمة وإدارة الطوارئ',
+                    'Spring Life Safety',
+                    'life',
+                    LIFE_EXERCISES.length,
+                    LIFE_EXERCISES_UNIT2.length,
+                    '🦸',
+                    '🛡️'
+                  )}
+
                   <div className="text-right">
                     <h2 className="text-xl font-black text-white flex items-center gap-2 justify-end">
                       <span>🦸✨</span>
@@ -6780,13 +7141,13 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </h2>
                     <p className="text-slate-400 text-xs mt-1 leading-relaxed max-w-2xl ml-auto">
                       {isRtl 
-                        ? 'تنمية عادات الاستقلال الشخصي وبناء المسؤولية المستدامة: ترتيب مساحاتك الخاصة، ممارسات الإسعاف الأولية البسيطة والإنقاذ، التعامل الشجاع مع حالات الطوارئ المعرفية وصناعة مظهر وميزانية مستقلة.'
+                        ? 'تنمية عادات الاستقلال الشخصي وبناء المسؤولية المستدامة: ترتيب مساحاتك الخاصة، ممارسات الإسعاف الأولية والتعامل الشجاع مع حالات الطوارئ.'
                         : 'Develop crucial self-reliance, domestic maintenance, emergency responsiveness lists, budget discipline and domestic life competence challenges.'}
                     </p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {LIFE_EXERCISES.map((ex, idx) => {
+                    {(lifeActiveUnit === 1 ? LIFE_EXERCISES : LIFE_EXERCISES_UNIT2).map((ex, idx) => {
                       const isCompleted = completedLifeIds.has(ex.id);
                       return (
                         <div
@@ -7100,27 +7461,37 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
           {/* 20 Exercises Steps Grid */}
           <div className="grid grid-cols-2 gap-4">
-            {unitToExport.exercises.map((ex, idx) => (
-              <div key={ex.id} className="bg-[#122347] border border-white/10 rounded-2xl p-4 space-y-2">
-                <div className="flex justify-between items-center border-b border-white/10 pb-2">
-                  <span className="text-xs font-black text-white flex items-center gap-1.5">
-                    <span>{ex.emoji || '💬'}</span>
-                    <span>{idx + 1}. {isRtl ? ex.title_ar : ex.title_en}</span>
-                  </span>
-                  <span className="text-[9px] bg-amber-500/10 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/20 font-bold">
-                    {ex.skill_focus}
-                  </span>
+            {unitToExport.exercises.map((ex, idx) => {
+              const stepsList: string[] = (isRtl ? ex.steps_ar : ex.steps_en)
+                || (ex.exercise_steps_ar ? (isRtl ? ex.exercise_steps_ar : ex.exercise_steps_ar) : null)
+                || (ex.step_by_step_ar ? (isRtl ? ex.step_by_step_ar : ex.step_by_step_ar) : null)
+                || [isRtl ? (ex.script_ar || ex.description_ar || ex.command_ar || ex.title_ar) : (ex.script_en || ex.description_en || ex.command_en || ex.title_en)];
+
+              const titleText = isRtl ? (ex.title_ar || ex.command_ar) : (ex.title_en || ex.command_en);
+              const badgeText = ex.skill_focus || ex.feeling_focus || ex.activity_type || (isRtl ? 'خطوة تنفيذية' : 'Action Step');
+
+              return (
+                <div key={ex.id || idx} className="bg-[#122347] border border-white/10 rounded-2xl p-4 space-y-2">
+                  <div className="flex justify-between items-center border-b border-white/10 pb-2">
+                    <span className="text-xs font-black text-white flex items-center gap-1.5">
+                      <span>{ex.emoji || '💬'}</span>
+                      <span>{idx + 1}. {titleText}</span>
+                    </span>
+                    <span className="text-[9px] bg-amber-500/10 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/20 font-bold">
+                      {badgeText}
+                    </span>
+                  </div>
+                  <div className="space-y-1 text-right">
+                    {stepsList.map((step, sIdx) => (
+                      <p key={sIdx} className="text-[11px] text-slate-200 leading-relaxed flex items-start gap-1.5">
+                        <span className="text-amber-400 text-xs font-bold shrink-0">•</span>
+                        <span>{step}</span>
+                      </p>
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-1 text-right">
-                  {(isRtl ? ex.steps_ar : ex.steps_en).map((step, sIdx) => (
-                    <p key={sIdx} className="text-[11px] text-slate-200 leading-relaxed flex items-start gap-1.5">
-                      <span className="text-amber-400 text-xs font-bold shrink-0">•</span>
-                      <span>{step}</span>
-                    </p>
-                  ))}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Footer */}
