@@ -1126,6 +1126,8 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
   // Active communication and social intelligence states
   const [commActiveUnit, setCommActiveUnit] = useState<1 | 2>(1);
+  const [unitToExport, setUnitToExport] = useState<{ unitNumber: 1 | 2; title: string; exercises: CommunicationExercise[] } | null>(null);
+  const [isExportingUnit, setIsExportingUnit] = useState<boolean>(false);
   const [selectedCommEx, setSelectedCommEx] = useState<CommunicationExercise | null>(null);
   const [commStepsChecked, setCommStepsChecked] = useState<boolean[]>([]);
   const [completedCommIds, setCompletedCommIds] = useState<Set<string>>(() => {
@@ -2261,18 +2263,31 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
       }
       emoji = ex.emoji || '🧠';
     } else if (type === 'communication') {
+      const isUnit2 = ex.id && (ex.id.includes('u2') || commActiveUnit === 2);
       title = isRtl ? ex.title_ar : ex.title_en;
-      category = 'البلاغة والتواصل الاجتماعي الفعال';
-      categoryEn = 'Dynamic Eloquent Communication';
+      category = isUnit2
+        ? 'الذكاء الاجتماعي والتواصل الربيعي (الوحدة الثانية)'
+        : 'البلاغة والتواصل الاجتماعي الفعال (الوحدة الأولى)';
+      categoryEn = isUnit2
+        ? 'Spring Social Intelligence (Unit 2)'
+        : 'Dynamic Eloquent Communication (Unit 1)';
       content = isRtl ? ex.description_ar : ex.title_en;
-      if (ex.step_by_step_ar) {
+      if (isRtl ? ex.steps_ar : ex.steps_en) {
+        const stepsList = isRtl ? ex.steps_ar : ex.steps_en;
+        steps = Array.isArray(stepsList) ? stepsList : [stepsList];
+      } else if (ex.step_by_step_ar) {
         steps = Array.isArray(ex.step_by_step_ar) ? ex.step_by_step_ar : [ex.step_by_step_ar];
       }
-      if (ex.social_skill_ar) {
+      if (ex.outcome_ar || ex.skill_focus) {
+        benefitLabel = isRtl ? 'المهارة الدبلوماسية والأثر الاجتماعي المكتسب:' : 'Target Social Skill & Outcome:';
+        benefit = isRtl
+          ? `${ex.skill_focus ? ex.skill_focus + ' - ' : ''}${ex.outcome_ar || ''}`
+          : `${ex.skill_focus ? ex.skill_focus + ' - ' : ''}${ex.outcome_ar || ''}`;
+      } else if (ex.social_skill_ar) {
         benefitLabel = isRtl ? 'المهارة الدبلوماسية المكتسبة:' : 'Target Social Skill:';
         benefit = ex.social_skill_ar;
       }
-      emoji = ex.emoji || '🗣️';
+      emoji = ex.emoji || (isUnit2 ? '🌸' : '💬');
     } else if (type === 'leadership') {
       title = isRtl ? ex.title_ar : ex.title_en;
       category = 'روح المبادرة والقيادة الريادية';
@@ -2419,6 +2434,47 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
         }
       }
       setExportingExerciseId(null);
+    }, 450);
+  };
+
+  const handleExportUnitSummary = (unitNum: 1 | 2) => {
+    const exercises = unitNum === 1 ? COMMUNICATION_EXERCISES : COMMUNICATION_EXERCISES_UNIT2;
+    const title = unitNum === 1
+      ? (isRtl ? 'الوحدة الأولى: الإنصات الفعال والترابط الاجتماعي (20 تمرين)' : 'Unit 1: Active Listening & Social Connection (20 Exercises)')
+      : (isRtl ? 'الوحدة الثانية: الذكاء الاجتماعي الربيعي والتواصل الداعم (20 تمرين)' : 'Unit 2: Spring Social Intelligence & Supportive Communication (20 Exercises)');
+
+    setUnitToExport({ unitNumber: unitNum, title, exercises });
+    setIsExportingUnit(true);
+
+    setTimeout(async () => {
+      const element = document.getElementById('unit-summary-capture-card');
+      if (element) {
+        try {
+          const originalStyle = element.getAttribute('style') || '';
+          element.setAttribute('style', 'width: 1000px; position: fixed; top: 0px; left: 0px; z-index: -9999; opacity: 0.99; pointer-events: none;');
+
+          const options = {
+            cacheBust: true,
+            pixelRatio: 2,
+            backgroundColor: '#0b1736',
+            styleSheetsFilter: (styleSheet: CSSStyleSheet) => true
+          };
+
+          await toPng(element, options);
+          const dataUrl = await toPng(element, options);
+
+          element.setAttribute('style', originalStyle);
+
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          link.download = `Oasis-Communication-Unit-${unitNum}-Steps-Poster-${new Date().getTime()}.png`;
+          link.click();
+        } catch (error) {
+          console.error("Error generating unit summary poster image:", error);
+          alert(isRtl ? 'حدث خطأ أثناء تصدير بوستر خطوات الوحدة كصورة' : 'Error exporting unit summary poster image');
+        }
+      }
+      setIsExportingUnit(false);
     }, 450);
   };
 
@@ -4299,7 +4355,25 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </button>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      disabled={isExportingUnit}
+                      onClick={() => handleExportUnitSummary(commActiveUnit)}
+                      className="px-3.5 py-2 bg-gradient-to-r from-amber-500/20 via-rose-500/20 to-teal-500/20 border border-amber-400/40 hover:border-amber-400 text-amber-200 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-md"
+                      title={isRtl ? `تصدير كامل بوستر خطوات تمارين الوحدة ${commActiveUnit === 1 ? 'الأولى' : 'الثانية'} كصورة عالية الدقة 📸` : 'Export unit steps poster as image 📸'}
+                    >
+                      {isExportingUnit ? (
+                        <RefreshCw size={13} className="animate-spin text-amber-400" />
+                      ) : (
+                        <Download size={13} strokeWidth={3} className="text-amber-400" />
+                      )}
+                      <span>
+                        {isRtl
+                          ? `تصدير بوستر خطوات الوحدة ${commActiveUnit === 1 ? '1' : '2'} كصورة 📸`
+                          : `Export Unit ${commActiveUnit} Steps Poster 📸`}
+                      </span>
+                    </button>
+
                     <span className={`text-[11px] font-extrabold px-3 py-1.5 rounded-xl border flex items-center gap-1.5 font-mono ${
                       commActiveUnit === 2
                         ? 'bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-emerald-500/10 border-amber-500/30 text-amber-300'
@@ -6988,6 +7062,71 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               <div className="text-left">Oasis-ID: {exerciseToExport.id.substring(0, 8).toUpperCase()}</div>
               <div>ACCREDITED LEARNING ACTION RECORD</div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden template for exporting full unit poster summary image */}
+      {unitToExport && (
+        <div
+          id="unit-summary-capture-card"
+          style={{ width: '1000px', position: 'absolute', top: '-10000px', left: '-10000px' }}
+          className="bg-[#0b1736] text-white p-10 rounded-[2rem] border border-slate-700/80 font-tajawal text-right shadow-2xl space-y-6"
+          dir="rtl"
+        >
+          {/* Academy Header */}
+          <div className="flex justify-between items-center border-b border-white/10 pb-5">
+            <div className="text-right">
+              <span className="text-base font-black text-[#C49E3A] block">أكاديمية باسم آل خليل الرقمية</span>
+              <p className="text-xs font-bold text-slate-400 font-sans">Basim Al Khalil Digital Academy</p>
+            </div>
+            <div className="text-left font-sans">
+              <span className="px-3.5 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded-full text-xs font-extrabold uppercase block font-sans">
+                {unitToExport.title}
+              </span>
+              <span className="text-[10px] text-slate-400 block font-sans text-left mt-1">20 تمارين عملية متكاملة</span>
+            </div>
+          </div>
+
+          {/* Poster Header */}
+          <div className="text-center space-y-2 py-2">
+            <h2 className="text-2xl font-black text-white">
+              دليل خطوات التمارين العملية - {unitToExport.title}
+            </h2>
+            <p className="text-xs text-slate-300">
+              منهج التواصل الإيجابي والذكاء الاجتماعي - واحة التوازن واليقظة الذاتية
+            </p>
+          </div>
+
+          {/* 20 Exercises Steps Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            {unitToExport.exercises.map((ex, idx) => (
+              <div key={ex.id} className="bg-[#122347] border border-white/10 rounded-2xl p-4 space-y-2">
+                <div className="flex justify-between items-center border-b border-white/10 pb-2">
+                  <span className="text-xs font-black text-white flex items-center gap-1.5">
+                    <span>{ex.emoji || '💬'}</span>
+                    <span>{idx + 1}. {isRtl ? ex.title_ar : ex.title_en}</span>
+                  </span>
+                  <span className="text-[9px] bg-amber-500/10 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/20 font-bold">
+                    {ex.skill_focus}
+                  </span>
+                </div>
+                <div className="space-y-1 text-right">
+                  {(isRtl ? ex.steps_ar : ex.steps_en).map((step, sIdx) => (
+                    <p key={sIdx} className="text-[11px] text-slate-200 leading-relaxed flex items-start gap-1.5">
+                      <span className="text-amber-400 text-xs font-bold shrink-0">•</span>
+                      <span>{step}</span>
+                    </p>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Footer */}
+          <div className="flex justify-between items-center border-t border-white/10 pt-4 text-xs text-slate-400 font-bold">
+            <p>واحة التوازن - جميع الحقوق محفوظة لأكاديمية باسم آل خليل الرقمية</p>
+            <p className="text-[#C49E3A]">Basim Al Khalil Digital Academy</p>
           </div>
         </div>
       )}
