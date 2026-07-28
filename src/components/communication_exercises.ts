@@ -453,3 +453,447 @@ export const COMMUNICATION_EXERCISES: CommunicationExercise[] = [
     "emoji": "🗣️"
   }
 ];
+
+export const COMMUNICATION_EXERCISES_UNIT2: CommunicationExercise[] = [
+  {
+    "id": "comm_u2_001",
+    "title_ar": "دبلوماسية حوار الذكاء الاجتماعي",
+    "title_en": "Social Intelligence Dialogue Diplomacy",
+    "description_ar": "تعلم تقنية التوافُق والإضافة 'نعم، وبجانب ذلك...' بدلاً من الصدام الجاف برفض آراء الآخرين باستخدام كلمة 'لكن'.",
+    "skill_focus": "الدبلوماسية الحوارية والإقناع الناعم",
+    "activity_type": "تفاعل حواري ربيعي",
+    "steps_ar": [
+      "في أي نقاش اليوم، عندما يعبر شخص عن رأي يخالفك، تجنب استخدام كلمة 'لكن' تماماً.",
+      "استبدلها بجملة: 'نعم كلامك يحمل وجهة نظر مقدرة، وبجانب ذلك يمكننا أن ننظر للأمر من زاوية...'.",
+      "لاحظ كيف تحول النقاش من معركة دفاعية إلى بناء مشافهه إيجابي.",
+      "اكتب في مفكرتك كيف استجاب الطرف الآخر للتحول الصيفي الدافئ في الحوار."
+    ],
+    "steps_en": [
+      "In any discussion today, when someone expresses a opposing view, completely avoid using the word 'But'.",
+      "Replace it with: 'Yes, your point is appreciated, and alongside that we can also see it from another angle...'.",
+      "Notice how the debate transforms from defensive conflict into constructive dialogue.",
+      "Write down how the other party responded to this warm, gentle conversational shift."
+    ],
+    "outcome_ar": "بناء جسور التواصل بدون إثارة الحساسيات أو الصدمات النفسية.",
+    "emoji": "🌸"
+  },
+  {
+    "id": "comm_u2_002",
+    "title_ar": "قراءة لغة الجسد الصامتة",
+    "title_en": "Reading Silent Body Language",
+    "description_ar": "طوّر فراسة الملاحظة الدقيقة وتفسير نبرة الصوت وإيماءات اليدين لفهم المشاعر غير المنطوقة لدى عائلتك وأصدقائك.",
+    "skill_focus": "الفراسة والذكاء الاجتماعي العاطفي",
+    "activity_type": "ملاحظة ميدانية",
+    "steps_ar": [
+      "اختر جلسة عائلية أو اجتماع أصدقاء وانتبه للغة الجسد دون مقاطعة.",
+      "لاحظ شبك الأيدي، اتجاه الأكتاف، نبرة الصوت، وسرعة النظرات.",
+      "إذا شعرت بوجود توتر أو حزن غير منطوق، اسأل بلطف: 'أشعر أنك متعب قليلاً اليوم، هل تحب أن نتحدث؟'.",
+      "سجل مدى تأثير هذه اللفتة الإنسانية الدافئة على تشجيعه للبوح."
+    ],
+    "steps_en": [
+      "Choose a family or friend gathering and observe body language without interrupting.",
+      "Notice crossed hands, shoulder direction, vocal pitch, and eye movement speed.",
+      "If you sense unspoken tension or sadness, ask gently: 'You seem a bit tired, would you like to chat?'.",
+      "Record how this warm human touch encouraged them to open up."
+    ],
+    "outcome_ar": "تعميق الفراسة الاجتماعية واحتواء المشاعر المستترة بذكاء ورقي.",
+    "emoji": "☀️"
+  },
+  {
+    "id": "comm_u2_003",
+    "title_ar": "فن المصافحة ونبرة الصدق",
+    "title_en": "Warm Handshake & Vocal Authenticity",
+    "description_ar": "تمرين عملي على استخدام المصافحة الدافئة والتواصل البصري المباشر مع إخراج صوت دافئ ومستقر يمنح الطمأنينة.",
+    "skill_focus": "الانطباع الأول والثقة الصوتية",
+    "activity_type": "تطبيق سلوكي مباشر",
+    "steps_ar": [
+      "عند لقاء شخص اليوم، صافحه بضغط دافئ ومتزن مع ابتسامة صادقة.",
+      "انظر في عينيه مباشرة لمدة 3 ثوانٍ كاملة.",
+      "نادي باسمه بنبرة صوتية ربيعية مشاطرة: 'أهلاً بك يا [الاسم]، يسعدني جداً لقاؤك اليوم'.",
+      "لاحظ أثر طاقة الصدق والدفء في كسر الجليد فوراً."
+    ],
+    "steps_en": [
+      "When meeting someone today, give a warm, balanced handshake with a genuine smile.",
+      "Look directly into their eyes for 3 full seconds.",
+      "Say their name in a warm, welcoming tone: 'Welcome [Name], I am so happy to see you today'.",
+      "Observe the instant effect of warm energy in breaking the ice."
+    ],
+    "outcome_ar": "إرساء انطباع أول مبهر ومحمل بعبق الثقة والمودة.",
+    "emoji": "🌿"
+  },
+  {
+    "id": "comm_u2_004",
+    "title_ar": "المديح الصادق الملاحظ (غير الفضفاض)",
+    "title_en": "Specific Sincere Praise",
+    "description_ar": "الابتعاد عن الإطراءات العامة وتدريب النفس على توجيه مديح دقيق ومحدد يلامس جهداً حقيقياً بذله الآخر.",
+    "skill_focus": "التقدير الإيجابي وبناء العلاقات",
+    "activity_type": "تطبيق تقديري",
+    "steps_ar": [
+      "اختر شخصاً في بيتك أو عملك بذل جهداً صغيراً اليوم.",
+      "تجنب الكلمات الفضفاضة مثل 'أنت ممتاز'، بل استخدم تخصيصاً دقيقاً.",
+      "قل له: 'أقدر جداً اهتمامك بتنظيم هذه التفاصيل الدقيقة بطريقة رتبت لنا المكان وأراحتنا'.",
+      "لاحظ كيف تحول وجهه للإشراق لأن المديح كان ملامساً لحقيقة عمله."
+    ],
+    "steps_en": [
+      "Pick a person at home or work who made a small effort today.",
+      "Avoid general words like 'You are great', use precise feedback instead.",
+      "Tell them: 'I deeply appreciate how carefully you organized these details, it made the space so comfortable'.",
+      "Notice how their face lights up because the praise resonated with their real effort."
+    ],
+    "outcome_ar": "مضاعفة دافعية المحيطين وغرس ثقافة الاعتراف بالفضل.",
+    "emoji": "🌺"
+  },
+  {
+    "id": "comm_u2_005",
+    "title_ar": "حدود المحبة والاحترام (قول لا بلطف)",
+    "title_en": "Loving Boundaries & Gentle Refusal",
+    "description_ar": "كيفية رفض الطلبات الإضافية التي تتجاوز طاقتك دون جرح الآخرين أو الشعور بالذنب.",
+    "skill_focus": "تأكيد الذات وتحديد الحدود السليمة",
+    "activity_type": "تدريب على الحزم المحب",
+    "steps_ar": [
+      "عندما يطلب منك شخص طلباً يتجاوز وقتك أو طاقتك اليوم، لا تندفع بالقبول الزائف.",
+      "استخدم قاعدة الرفض الإيجابي: 'أشكرك جداً على ثقتك بي، ولأنني أحب أن أؤدي العمل بإتقان، لن أتمكن من استلام هذه المهمة حالياً'.",
+      "اقترح حلاً بديلاً إن أمكن دون أن تبرر باعتذارات طارئة متكلفة.",
+      "اشعر بالراحة والسلام الداخلي لحمايتك وقتك وصحتك النفسية."
+    ],
+    "steps_en": [
+      "When someone asks for something exceeding your bandwidth today, don't rush to falsely accept.",
+      "Use positive refusal: 'Thank you for trusting me. To give things the quality they deserve, I won't be able to take this on right now'.",
+      "Offer an alternative solution if possible without over-explaining or apologizing excessively.",
+      "Feel inner peace and satisfaction from protecting your time and mental wellness."
+    ],
+    "outcome_ar": "حماية الطاقة الذاتية وإعادة رسم العلاقات على أسس الاحترام المتبادل.",
+    "emoji": "🌻"
+  },
+  {
+    "id": "comm_u2_006",
+    "title_ar": "إدارة نبرة الصوت عند اشتداد الحوار",
+    "title_en": "Tone Control in Heated Conversations",
+    "description_ar": "استخدام خفض الصوت الهادئ لامتصاص حماس أو توتر الطرف الآخر وإعادة النقاش لمساره العقلاني.",
+    "skill_focus": "الضبط الذاتي وإدارة النزاعات",
+    "activity_type": "تمرين صوتي تطبيقي",
+    "steps_ar": [
+      "إذا ارتفع صوت الطرف المقابل في نقاش ما، خذ نفساً عميقاً وأخفض صوتك أنت بمقدار درجتين.",
+      "تحدث ببطء أكبر وبنبرة ربيعية دافئة ورزينة.",
+      "لاحظ كيف يضطر الطرف الآخر تلقائياً إلى خفض صوته ليلائم مستوى صوتك.",
+      "قيّم كيف نجحت في قيادة الجو العام من التوتر إلى السلام والهدوء."
+    ],
+    "steps_en": [
+      "If the other person raises their voice in a debate, take a deep breath and lower your own tone by two steps.",
+      "Speak more slowly in a calm, warm, balanced spring tone.",
+      "Watch how the other person automatically lowers their volume to match yours.",
+      "Evaluate how you successfully led the atmosphere from tension to serenity."
+    ],
+    "outcome_ar": "امتلاك زمام السيطرة على أجواء النقاشات ومنع تصاعد المشادات.",
+    "emoji": "🍃"
+  },
+  {
+    "id": "comm_u2_007",
+    "title_ar": "التحقق العاطفي الاحتوائي",
+    "title_en": "Empathic Emotional Validation",
+    "description_ar": "فن إشعار الآخر بأن مشاعره (حزنه، قلقه، حماسه) مقبولة ومفهومة تماماً قبل إعطاء النصائح.",
+    "skill_focus": "التعاطف والذكاء العاطفي الاجتماعي",
+    "activity_type": "احتواء وتواصل عميق",
+    "steps_ar": [
+      "عندما يشاركك صديق أو فرد من العائلة مشكلة، قاوم رغبتك الفورية في القفز لحلول سريعة.",
+      "قل له أولاً: 'من الطبيعي جداً أن تشعر بهذا الشعور في هذا الموقف الصعب، أنا معك وأفهمك'.",
+      "توقف لمدة 10 ثوانٍ ودعه يتنفس ويشعر بشرعية أحاسيسه.",
+      "اسأله بعدها: 'هل تحب أن نفكر معاً في حل أم تفضل أن أستمع لك فقط؟'."
+    ],
+    "steps_en": [
+      "When a friend or family member shares a problem, resist the urge to immediately jump into solutions.",
+      "Say first: 'It is completely understandable that you feel this way in this situation. I am with you and I understand'.",
+      "Pause for 10 seconds to let them feel their emotions are validated.",
+      "Then ask: 'Would you like us to brainstorm solutions together, or do you just want me to listen?'."
+    ],
+    "outcome_ar": "بناء أمان عاطفي عميق يجعل منك ملاذاً صادقاً للمحيطين بك.",
+    "emoji": "🍑"
+  },
+  {
+    "id": "comm_u2_008",
+    "title_ar": "كسر الجليد وتذويب التحفظ مع الجدد",
+    "title_en": "Warm Icebreaking with New Acquaintances",
+    "description_ar": "تقنيات مبسطة لفتح حوارات دافئة وممتعة مع زملائه الجدد أو أشخاص تلتقي بهم للمرة الأولى.",
+    "skill_focus": "المرونة الاجتماعية والود المباشر",
+    "activity_type": "مبادرة مجتمعية",
+    "steps_ar": [
+      "عند تواجدك في مكان جديد، ابدأ بالابتسامة والملاحظة الإيجابية المحيطة.",
+      "اطرح سؤالاً استكشافياً مفتوحاً: 'ما رأيك في تنظيم هذا اللقاء اليوم؟' أو 'كيف تجد أجواء المكان؟'.",
+      "استمع لإجابته باهتمام وعقّب بنقطة تلاقٍ مشتركة بينكما.",
+      "أنهِ الحوار بعبارة لطيفة تترك أثراً زاهياً: 'سررت جداً بهذه الدردشة الممتعة معك'."
+    ],
+    "steps_en": [
+      "When in a new environment, start with a smile and a warm observation of the surroundings.",
+      "Ask an exploratory open question: 'What do you think of today's gathering?' or 'How do you like this ambiance?'.",
+      "Listen attentively and respond with a shared common point.",
+      "Conclude with a warm parting thought: 'I truly enjoyed chatting with you'."
+    ],
+    "outcome_ar": "توسيع الدائرة الاجتماعية بسهولة وثقة مفعمة بالحيوية الصيفية.",
+    "emoji": "🌼"
+  },
+  {
+    "id": "comm_u2_009",
+    "title_ar": "التواصل الرقمي الواعي والدافئ",
+    "title_en": "Mindful & Warm Digital Messaging",
+    "description_ar": "صياغة الرسائل النصية وتطبيقات المراسلة بأسلوب واضح يمنع سوء الفهم وينقل المشاعر الإيجابية.",
+    "skill_focus": "الذكاء الرقمي والذوق في المراسلة",
+    "activity_type": "تطوير الرسائل النصية",
+    "steps_ar": [
+      "قبل إرسال أي رسالة نصية مهمة اليوم، اقرأها بصوت عالٍ لتفقد نبرتها الضمنية.",
+      "أضف عبارة افتتاحيّة دافئة مثل: 'أتمنى لك يوماً مشرقاً ومثمراً 🌸'.",
+      "إذا كان موضوع الرسالة يحتمل التأويل، استخدم رسالة صوتية قصيرة ناعمة بدلاً من النص الجاف.",
+      "لاحظ انسيابية الردود والارتياح في التواصل الرقمي."
+    ],
+    "steps_en": [
+      "Before sending any important text message today, read it out loud to check its underlying tone.",
+      "Add a warm opening line like: 'Wishing you a bright and fruitful day 🌸'.",
+      "If the topic could be misunderstood, send a short, gentle voice note instead of dry text.",
+      "Observe the smooth and pleasant flow of digital responses."
+    ],
+    "outcome_ar": "تجنب جفاف الرسائل النصية وإضفاء طابع إنساني راقٍ على المحادثات الرقمية.",
+    "emoji": "📱"
+  },
+  {
+    "id": "comm_u2_010",
+    "title_ar": "تحويل التذمر إلى طاقة حلول إيجابية",
+    "title_en": "Reframing Complaints into Positive Solutions",
+    "description_ar": "قيادة الجلسات التي يكثر فيها التذمر ونقل التركيز من ندب الحظ إلى صناعة الفرص.",
+    "skill_focus": "القيادة الاجتماعية والتفكير الإيجابي",
+    "activity_type": "توجيه حواري مثبت",
+    "steps_ar": [
+      "إذا تواجدت في مجموعة تكرر الشكوى والتذمر حول موضوع ما، استمع أولاً بدقيقة تعاطف.",
+      "ثم وجه السؤال المغير للاتجاه: 'فهمت التحدي جيداً، ما هي الخطة البسيطة التي يمكننا البدء بها الآن لتحسين الوضع؟'.",
+      "طرح خيارين عمليين محفزين ونقل النقاش نحو الفعل والإنتاج.",
+      "لاحظ كيف تتغير طاقة المكان من الخمول والسلبية إلى الحماس المشرق."
+    ],
+    "steps_en": [
+      "If you find yourself in a group complaining endlessly about a topic, listen for a minute with empathy.",
+      "Then ask the pivot question: 'I understand the challenge well, what simple step can we take right now to improve this?'.",
+      "Propose two inspiring practical options to shift focus toward action and output.",
+      "Notice how the room's energy transforms from negativity to bright enthusiasm."
+    ],
+    "outcome_ar": "تحويل مجرى المحادثات نحو الإيجابية ونشر روح الأمل والعمل.",
+    "emoji": "🌅"
+  },
+  {
+    "id": "comm_u2_011",
+    "title_ar": "تقنية الجسر الحواري لتأليف القلوب",
+    "title_en": "The Dialogue Bridge Technique",
+    "description_ar": "الربط بين وجهتي نظر متخالفتين بين صديقين أو فردين في العائلة وتوضيح نقاط الالتقاء بينهما.",
+    "skill_focus": "الوساطة الذكية وإصلاح ذات البين",
+    "activity_type": "وساطة وتقريب آراء",
+    "steps_ar": [
+      "عند وجود اختلاف في الرأي بين طرفين أمامك، استمع لكليهما بإنصات متزن.",
+      "قل لهما: 'إذا سمحتما لي، أرى أن كلاكما يهدف للخير نفسه، فالأول يحرص على [الهدف 1] والثاني يركز على [الهدف 2]'..",
+      "بث روح التوفيق: 'ما رأيكم أن ندمج الفكرتين ليكون لدينا حل مكتمل؟'.",
+      "سجل كيف أسهمت كلمتك المصلحة في إعادة الدفء والسلام بينهما."
+    ],
+    "steps_en": [
+      "When two people disagree in front of you, listen to both with balanced attention.",
+      "Say: 'If you allow me, I see that both of you want the best result; the first cares about [Goal 1] and the second focuses on [Goal 2]'.",
+      "Bridge them: 'What if we combine both ideas into a complete solution?'.",
+      "Note how your harmonizing words restored warmth and harmony."
+    ],
+    "outcome_ar": "لعب دور حمامة السلام وتجسيد الذكاء الاجتماعي في أبهى صوره.",
+    "emoji": "🌉"
+  },
+  {
+    "id": "comm_u2_012",
+    "title_ar": "حضور التواصل البصري الدافئ (دون إحراج)",
+    "title_en": "Warm & Respectful Eye Contact Presence",
+    "description_ar": "التوازن في التواصل البصري أثناء الاستماع والمحادثة لمنح الشعور بالأهمية والاهتمام المتبادل.",
+    "skill_focus": "الكاريزما والحضور الاجتماعي",
+    "activity_type": "تدريب بصري سلوكي",
+    "steps_ar": [
+      "أثناء حديث شخص معك اليوم، حافظ على نظر مريح لمثلث الوجه (العينين والجبين) بنسبة 70% من الوقت.",
+      "اشعر بالدفء الداخلي والاهتمام الحقيقي بكلامه دون التحديق المزعج.",
+      "انظر جانباً برفق عند التفكير ثم أعد عينيك إليه عند التأكيد والإيماء.",
+      "استشعر عمق الترابط والمصداقية التي تتولد من هذا التواصل المباشر."
+    ],
+    "steps_en": [
+      "While someone speaks with you today, maintain comfortable eye contact (eyes and forehead triangle) 70% of the time.",
+      "Feel inner warmth and genuine care for their words without uncomfortable staring.",
+      "Gently look away when reflecting, then return eye contact when nodding and confirming.",
+      "Feel the deep bonding and credibility born from this direct connection."
+    ],
+    "outcome_ar": "تعزيز الكاريزما الشخصية ومنح المتحدث شعوراً راقياً بالاحترام والتقدير.",
+    "emoji": "👁️"
+  },
+  {
+    "id": "comm_u2_013",
+    "title_ar": "فن الأسئلة المفتوحة والمثمرة",
+    "title_en": "Art of Fruitful Open-Ended Questions",
+    "description_ar": "صياغة أسئلة تبدأ بـ 'كيف' و'ماذا' لفتح آفاق الحوار المشوق وتوسيع أفكار الطرف الآخر.",
+    "skill_focus": "إدارة الحوارات العميقة",
+    "activity_type": "تطوير الأسئلة الحوارية",
+    "steps_ar": [
+      "تجنب الأسئلة المغلقة التي تجبر الآخر على إجابة اختصارية بـ 'نعم' أو 'لا'.",
+      "استبدل سؤال 'هل كان يومك جيداً؟' بسؤال ربيعي مشوق: 'ما أجمل تجربة أضاءت يومك اليوم؟'.",
+      "استمع للإجابة بشغف واسأله سؤالاً متفرعاً عنها.",
+      "سجل فرق عمق المحادثة وتدفق الأفكار بين الطريقتين."
+    ],
+    "steps_en": [
+      "Avoid closed questions that force a short 'Yes' or 'No' answer.",
+      "Replace 'Was your day good?' with an inspiring question: 'What was the brightest experience that lit up your day?'.",
+      "Listen with enthusiasm and ask a follow-up question based on their answer.",
+      "Record the difference in conversation depth and idea flow."
+    ],
+    "outcome_ar": "إثراء جلسات الحوار واستخراج الكنوز والخبرات المخبأة لدى الآخرين.",
+    "emoji": "🌱"
+  },
+  {
+    "id": "comm_u2_014",
+    "title_ar": "امتصاص واحتواء الغضب العابر",
+    "title_en": "Containing Fleeting Anger Calmly",
+    "description_ar": "التعامل مع انفعال أحد أفراد الأسرة أو الأصدقاء بهدوء تام دون أخذ الأمر بشكل شخصي.",
+    "skill_focus": "الصلابة النفسية والاحتواء الإنساني",
+    "activity_type": "مواجهة واحتواء الانفعال",
+    "steps_ar": [
+      "إذا صادفت شخصاً غاضباً أو منفصماً اليوم، كرر في سرك: 'غضبه يعبر عن ألمه الداخلي وليس عني'.",
+      "حافظ على ثبات جسدك ولا ترد بنفس الأسلوب الأرادي المنفعل.",
+      "انتظر حتى ينهي ثورته ثم قل بصلابة وهدوء: 'أسمعك جيدا، يهمني أمرك ودعنا نتحدث بهدوء لنصل لحل'.",
+      "تأمل كيف يذوب الانفعال أمام صخرة الهدوء والذكاء الاجتماعي."
+    ],
+    "steps_en": [
+      "If you encounter an angry or agitated person today, repeat internally: 'Their anger reflects their inner pain, not me'.",
+      "Keep your posture steady and do not respond with reactive anger.",
+      "Wait until they finish venting, then say calmly: 'I hear you clearly, I care about you, let us talk quietly to solve this'.",
+      "Observe how emotion melts away against the rock of calm social intelligence."
+    ],
+    "outcome_ar": "حماية نفسك من الانجرار للمشاحنات العبثية وحفظ السلام العائلي والمجتمعي.",
+    "emoji": "🌊"
+  },
+  {
+    "id": "comm_u2_015",
+    "title_ar": "إبراز ونسب الفضل لإنجازات الفريق",
+    "title_en": "Highlighting & Attributing Team Accomplishments",
+    "description_ar": "الاحتفاء بنجاحات الزملاء ونسب الفضل لأصحابه لتعزيز روح الأخوة والعمل الجماعي.",
+    "skill_focus": "الكرم الاجتماعي والروح الجماعية",
+    "activity_type": "تقدير وثناء علني",
+    "steps_ar": [
+      "عند تحقيق نجاح أو إنجاز في مشروع أو عمل عائلي، لا تسلط الضوء على نفسك فقط.",
+      "اذكر أسماء المساهمين علناً: 'هذا النجاح بفضل الفكرة المبدعة التي اقترحها [الاسم] والجهد المميز من [الاسم]'..",
+      "لاحظ علامات السعادة والولاء والمحبة الصادقة في وجوههم.",
+      "سجل كيف يزيد هذا السلوك القيادي الراقي من مكانتك ومحبتك في قلوبهم."
+    ],
+    "steps_en": [
+      "When achieving success in a project or family task, do not spotlight yourself alone.",
+      "Publicly acknowledge contributors: 'This success happened thanks to the creative idea proposed by [Name] and the effort of [Name]'.",
+      "Notice the signs of genuine happiness, loyalty, and affection on their faces.",
+      "Record how this noble leadership behavior builds respect and deep admiration."
+    ],
+    "outcome_ar": "ترسيخ بيئة عمل وعائلة قائمة على السخاء النفسي والتقدير المتبادل.",
+    "emoji": "🎉"
+  },
+  {
+    "id": "comm_u2_016",
+    "title_ar": "فراسة الانطباع الربيعي المشرق",
+    "title_en": "Bright Spring Impression Mastery",
+    "description_ar": "الدخول إلى أي مجلس بطاقة إيجابية وهندام مرتب وابتسامة تشع بالأمل وتنعش الحاضرين.",
+    "skill_focus": "الكاريزما والطاقة الإيجابية",
+    "activity_type": "حضور وإشراق اجتماعي",
+    "steps_ar": [
+      "قبل دخولك أي اجتماع أو مجلس اليوم، أصلح قامتك وخذ نفساً عميقاً يملأ رئتيك.",
+      "تذكر فكرة سعيدة تضفي بريقاً صادقاً على عينيك وابتسامتك.",
+      "ادخل بقدم واثقة وسلم بتحية دافئة بصوت مسموع ومبهج.",
+      "شاهد كيف تنتقل الطاقة الربيعية المشرقة فوراً إلى كل من في القاعة."
+    ],
+    "steps_en": [
+      "Before entering any gathering or room today, straighten your posture and take a deep, refreshing breath.",
+      "Recall a happy memory that adds a natural shine to your eyes and smile.",
+      "Enter with confident steps and greet everyone with a warm, uplifting voice.",
+      "Watch how bright spring energy instantly spreads to everyone in the room."
+    ],
+    "outcome_ar": "جعل حضورك مكسباً ينتظره الجميع ومصدراً للبهجة والانشراح.",
+    "emoji": "☀️"
+  },
+  {
+    "id": "comm_u2_017",
+    "title_ar": "عادة الثناء والامتنان العائلي اليومي",
+    "title_en": "Daily Family Gratitude & Praise Ritual",
+    "description_ar": "إبتكار طقس عائلي محبب في ختام اليوم لتبادل عبارات الشكر والتقدير بين الأفراد.",
+    "skill_focus": "الترابط الأسري والتواصل الإيجابي",
+    "activity_type": "طقس عائلي مستدام",
+    "steps_ar": [
+      "في نهاية اليوم (على العشاء أو قبل النوم)، تجمع مع أسرتك لمدة 5 دقائق.",
+      "ليشارك كل فرد شيئاً واحداً جميلاً لاحظه في فرد آخر اليوم وقدم له الشكر عليه.",
+      "شجع الصغار والكبار على المشاركة بلطف دون خجل.",
+      "استشعر الدفء والسكينة التي تحف المنزل قبل النوم بفضل هذا التواصل الطيب."
+    ],
+    "steps_en": [
+      "At the end of the day (dinner or bedtime), gather with your family for 5 minutes.",
+      "Have each member share one nice thing they noticed about another member today and thank them for it.",
+      "Encourage everyone, young and old, to participate warmly.",
+      "Feel the cozy warmth and tranquility enveloping the home before sleep."
+    ],
+    "outcome_ar": "تغذية جذور المحبة الأسرية وإغلاق اليوم بحس مفعم بالأمان والامتنان.",
+    "emoji": "🏡"
+  },
+  {
+    "id": "comm_u2_018",
+    "title_ar": "الإصغاء الوجداني الخالي من التشتت الرقمي",
+    "title_en": "Distraction-Free Empathic Listening",
+    "description_ar": "إبعاد الهواتف والشاشات بنسبة 100% أثناء حوارك مع ابنك، زوجتك، أو صديقك للتفرغ التام له.",
+    "skill_focus": "التركيز والاهتمام الكامل",
+    "activity_type": "جلسة إنصات صافية",
+    "steps_ar": [
+      "عندما يأتي إليك شخص ليتحدث معك اليوم، ضع هاتفك واقلبه على شاشته بعيداً عن عينيك.",
+      "وجه جسدك بالكامل نحو المتحدث وأعطه انتباهك الصافي 100%.",
+      "لا تنظر إلى الإشعارات أو الساعة أثناء حديثه نهائياً.",
+      "لاحظ امتنان الطرف الآخر وشعوره القوي بقيمته ومكانته العالية لديك."
+    ],
+    "steps_en": [
+      "When someone comes to talk to you today, put your phone face down away from sight.",
+      "Turn your entire body toward the speaker and give them 100% focused attention.",
+      "Do not look at notifications or your watch at all while they speak.",
+      "Notice the other person's gratitude and their strong sense of being truly valued."
+    ],
+    "outcome_ar": "إعادة القيمة والكرامة الإنسانية للتواصل المباشر بعيداً عن صخب الشاشات.",
+    "emoji": "🌷"
+  },
+  {
+    "id": "comm_u2_019",
+    "title_ar": "إدارة الحديث السلبي والشائعات بلباكة",
+    "title_en": "Tactfully Handling Gossip & Negative Rumors",
+    "description_ar": "حماية المجالس من الخوض في أعراض الآخرين وتغيير مسار الحديث بأسلوب ذكي ومقبول.",
+    "skill_focus": "النزاهة والذكاء الاجتماعي الأخلاقي",
+    "activity_type": "حماية الجلسات وتوجيهها",
+    "steps_ar": [
+      "إذا بدأ الحوار يتحول إلى غيبة أو تناقل شائعات عن غائب، لا تشارك بالاستماع الخامل.",
+      "تدخل بلباقة ورقة: 'فلان فيه خير كثير، وما رأيكم أن نتحدث في موضوعنا الممتع اليوم عن...'..",
+      "أو اذكر صفة إيجابية واحدة عن الغائب لتلطيف الجو وإغلاق باب السلبية.",
+      "شاهد كيف تحمي المجلس وتكسب احترام الجميع لنزاهتك."
+    ],
+    "steps_en": [
+      "If the conversation turns to gossip or rumors about an absent person, do not passively listen.",
+      "Intervene tactfully: '[Person] has many great qualities, what if we talk about our exciting topic today regarding...'..",
+      "Or mention one positive trait about the absent person to soften the atmosphere and close the door to negativity.",
+      "Watch how you preserve the gathering's purity and gain everyone's respect for your integrity."
+    ],
+    "outcome_ar": "إحلال الطهارة والسلام في المجالس وبناء سمعة اجتماعية ناصعة.",
+    "emoji": "🦋"
+  },
+  {
+    "id": "comm_u2_020",
+    "title_ar": "بطاقة المحبة اليدوية الرقيقة",
+    "title_en": "Handwritten Heartfelt Appreciation Note",
+    "description_ar": "كتابة بطاقة شكر بخط اليد وتقديمها لشخص قدم لك معروفا أو ترك أثرا جميلا في حياتك.",
+    "skill_focus": "التعبير الرقيق وترك الأثر الطيب",
+    "activity_type": "هدية إنسانية دافئة",
+    "steps_ar": [
+      "احضر ورقة أو بطاقة جميلة واكتب فيها بخط يدك 3 أسطر تعبر عن تقديرك لشخص عزيز.",
+      "اكتب كلمات من القلب مثل: 'شكراً لوجودك الصادق في حياتي، طاقتك الإيجابية تلهمني دائماً'.",
+      "قدمها له مع ابتسامة وردة ربيعية بسيطة أو كبسولة قهوة.",
+      "احتفظ بذكرى هذه اللحظة الدافئة في وجدانكما معاً."
+    ],
+    "steps_en": [
+      "Get a nice piece of paper or card and write by hand 3 lines expressing appreciation to a dear person.",
+      "Write heartfelt words like: 'Thank you for your sincere presence in my life, your positive energy always inspires me'.",
+      "Give it to them with a smile, a simple spring flower, or a coffee.",
+      "Cherish the memory of this warm, beautiful moment shared together."
+    ],
+    "outcome_ar": "صناعة ذكريات إنسانية لا تُنسى وترسيخ مشاعر الود الخالص.",
+    "emoji": "💌"
+  }
+];
+

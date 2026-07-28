@@ -27,7 +27,7 @@ import {
   ChevronLeft
 } from 'lucide-react';
 import { EmotionExercise, EMOTION_EXERCISES } from './emotion_exercises';
-import { CommunicationExercise, COMMUNICATION_EXERCISES } from './communication_exercises';
+import { CommunicationExercise, COMMUNICATION_EXERCISES, COMMUNICATION_EXERCISES_UNIT2 } from './communication_exercises';
 import { LeadershipExercise, LEADERSHIP_EXERCISES } from './leadership_exercises';
 import { TeamworkExercise, TEAMWORK_EXERCISES } from './teamwork_exercises';
 import { FinancialExercise, FINANCIAL_EXERCISES } from './financial_exercises';
@@ -1125,6 +1125,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
   });
 
   // Active communication and social intelligence states
+  const [commActiveUnit, setCommActiveUnit] = useState<1 | 2>(1);
   const [selectedCommEx, setSelectedCommEx] = useState<CommunicationExercise | null>(null);
   const [commStepsChecked, setCommStepsChecked] = useState<boolean[]>([]);
   const [completedCommIds, setCompletedCommIds] = useState<Set<string>>(() => {
@@ -2129,7 +2130,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
   const completedArtCount = completedArtIds.size;
   const completedLifeCount = completedLifeIds.size;
   const totalCompleted = completedCount + completedMoveCount + completedWritingCount + completedEmotionCount + completedCommCount + completedLeaderCount + completedTeamCount + completedMoneyCount + completedConfidenceCount + completedCriticalCount + completedInnovCount + completedArtCount + completedLifeCount;
-  const totalAvailable = EXERCISES.length + MOVEMENT_EXERCISES.length + WRITING_EXERCISES.length + EMOTION_EXERCISES.length + COMMUNICATION_EXERCISES.length + LEADERSHIP_EXERCISES.length + TEAMWORK_EXERCISES.length + FINANCIAL_EXERCISES.length + CONFIDENCE_EXERCISES.length + CRITICAL_EXERCISES.length + INNOV_EXERCISES.length + ART_EXERCISES.length + LIFE_EXERCISES.length;
+  const totalAvailable = EXERCISES.length + MOVEMENT_EXERCISES.length + WRITING_EXERCISES.length + EMOTION_EXERCISES.length + COMMUNICATION_EXERCISES.length + COMMUNICATION_EXERCISES_UNIT2.length + LEADERSHIP_EXERCISES.length + TEAMWORK_EXERCISES.length + FINANCIAL_EXERCISES.length + CONFIDENCE_EXERCISES.length + CRITICAL_EXERCISES.length + INNOV_EXERCISES.length + ART_EXERCISES.length + LIFE_EXERCISES.length;
   const progressPercent = totalAvailable > 0 ? Math.round((totalCompleted / totalAvailable) * 100) : 0;
 
   // Compile lists of all completed exercises for the certificate download
@@ -2137,7 +2138,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
   const completedMoveList = MOVEMENT_EXERCISES.filter(ex => completedMoveIds.has(ex.id)).map(ex => isRtl ? ex.command_ar : ex.command_en);
   const completedWritingList = WRITING_EXERCISES.filter(ex => completedWritingIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
   const completedEmotionList = EMOTION_EXERCISES.filter(ex => completedEmotionIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
-  const completedCommList = COMMUNICATION_EXERCISES.filter(ex => completedCommIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
+  const completedCommList = [...COMMUNICATION_EXERCISES, ...COMMUNICATION_EXERCISES_UNIT2].filter(ex => completedCommIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
   const completedLeaderList = LEADERSHIP_EXERCISES.filter(ex => completedLeaderIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
   const completedTeamList = TEAMWORK_EXERCISES.filter(ex => completedTeamIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
   const completedMoneyList = FINANCIAL_EXERCISES.filter(ex => completedMoneyIds.has(ex.id)).map(ex => isRtl ? ex.title_ar : ex.title_en);
@@ -4260,286 +4261,422 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                 </div>
               )
             ) : activeSubTab === 'communication' ? (
-              // Active SubTab === 'communication' - Positive Communication & Social Intelligence Exercises
-              selectedCommEx ? (
-                <div className="space-y-6 animate-fade-in text-right" dir="rtl">
-                  {/* Step-by-Step interactive checklist container */}
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-4">
+              // Active SubTab === 'communication' - Positive Communication & Social Intelligence Exercises (Unit 1 & Unit 2)
+              <div className="space-y-6">
+                {/* Unit Switcher Header Banner */}
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-gradient-to-r from-slate-900/90 via-slate-800/90 to-slate-900/90 p-3 rounded-2xl border border-white/10 shadow-xl" dir="rtl">
+                  <div className="flex flex-wrap items-center gap-2.5">
                     <button
                       onClick={() => {
+                        setCommActiveUnit(1);
                         setSelectedCommEx(null);
                         stopSpeech();
                       }}
-                      className="bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                      className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all duration-300 flex items-center gap-2 cursor-pointer select-none ${
+                        commActiveUnit === 1
+                          ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25 scale-[1.02]'
+                          : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
+                      }`}
                     >
-                      <ChevronRight size={14} />
-                      {isRtl ? 'العودة لقائمة تمارين التواصل الاجتماعي' : 'Back to Exercises'}
+                      <span className="text-sm">💬</span>
+                      {isRtl ? 'الوحدة الأولى: الإنصات والترابط (20 تمرين)' : 'Unit 1: Listening & Connection'}
                     </button>
 
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs bg-[#1e345c] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold font-mono">
-                        🎯 {isRtl ? selectedCommEx.skill_focus : 'Focus Area'}
-                      </span>
-                      <span className="text-xs bg-[#1e345c] border border-white/5 px-3 py-1.5 rounded-xl text-[#3b82f6] font-bold font-mono">
-                        ✨ {isRtl ? selectedCommEx.activity_type : 'Type'}
-                      </span>
-                    </div>
+                    <button
+                      onClick={() => {
+                        setCommActiveUnit(2);
+                        setSelectedCommEx(null);
+                        stopSpeech();
+                      }}
+                      className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all duration-300 flex items-center gap-2 cursor-pointer select-none ${
+                        commActiveUnit === 2
+                          ? 'bg-gradient-to-r from-amber-400 via-rose-500 to-emerald-400 text-slate-950 shadow-lg shadow-amber-500/25 scale-[1.02]'
+                          : 'text-amber-300/90 hover:text-amber-200 hover:bg-amber-500/10 border border-amber-500/30'
+                      }`}
+                    >
+                      <span className="text-sm">🌸☀️</span>
+                      {isRtl ? 'الوحدة الثانية: الذكاء الاجتماعي الربيعي (20 تمرين)' : 'Unit 2: Spring Social Intelligence'}
+                    </button>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    {/* Left Column: Step checklist */}
-                    <div className="lg:col-span-8 bg-[#142345] border border-white/5 rounded-3xl p-6 space-y-6 shadow-2xl">
-                      <div className="space-y-2">
-                        <span className="text-3xl">💬</span>
-                        <h3 className="text-xl font-black text-white">
-                          {isRtl ? selectedCommEx.title_ar : selectedCommEx.title_en}
-                        </h3>
-                        <p className="text-slate-400 text-xs">
-                          {isRtl ? selectedCommEx.description_ar : selectedCommEx.title_en}
-                        </p>
-                      </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[11px] font-extrabold px-3 py-1.5 rounded-xl border flex items-center gap-1.5 font-mono ${
+                      commActiveUnit === 2
+                        ? 'bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-emerald-500/10 border-amber-500/30 text-amber-300'
+                        : 'bg-blue-500/10 border-blue-500/20 text-blue-400'
+                    }`}>
+                      <span>{commActiveUnit === 2 ? '🌸' : '💬'}</span>
+                      {commActiveUnit === 2
+                        ? (isRtl ? 'ثيم ربيعي صيفي مشرق ☀️' : 'Vibrant Spring/Summer Colors ☀️')
+                        : (isRtl ? 'ثيم التواصل الهادئ 💙' : 'Calm Blue Communication 💙')}
+                    </span>
+                  </div>
+                </div>
 
-                      {/* Step-by-step interactive tasks */}
-                      <div className="space-y-4">
-                        <h4 className="text-xs font-black text-blue-400 uppercase tracking-widest border-b border-white/5 pb-2">
-                          {isRtl ? 'خطوات التطبيق والتمرين العملي عائلياً:' : 'Practical Exercise Checklist:'}
-                        </h4>
-
-                        <div className="space-y-3">
-                          {(isRtl ? selectedCommEx.steps_ar : selectedCommEx.steps_en).map((step, sIdx) => {
-                            const isChecked = commStepsChecked[sIdx] || false;
-
-                            return (
-                              <button
-                                key={sIdx}
-                                onClick={() => {
-                                  const updated = [...commStepsChecked];
-                                  updated[sIdx] = !updated[sIdx];
-                                  setCommStepsChecked(updated);
-                                }}
-                                className={`w-full text-right p-4 rounded-2xl border transition-all duration-200 flex items-start gap-4 cursor-pointer select-none ${
-                                  isChecked 
-                                    ? 'bg-blue-500/10 border-blue-500/30 text-blue-100 shadow-inner' 
-                                    : 'bg-[#1d315c] border-white/5 text-slate-300 hover:border-blue-500/20'
-                                }`}
-                              >
-                                <span className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
-                                  isChecked 
-                                    ? 'bg-blue-500 border-blue-500 text-slate-950' 
-                                    : 'border-slate-500 text-transparent'
-                                }`}>
-                                  <Check size={12} strokeWidth={4} />
-                                </span>
-                                <div className="space-y-1">
-                                  <span className="text-xs font-black text-slate-500 font-mono">
-                                    {isRtl ? `الخطوة ${sIdx + 1}` : `Step ${sIdx + 1}`}
-                                  </span>
-                                  <p className="text-xs md:text-sm font-medium leading-relaxed text-right">
-                                    {step}
-                                  </p>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Toolshelf for Reading Steps Out Loud */}
-                      <div className="flex flex-wrap gap-2 border-t border-white/5 pt-4">
-                        <button
-                          onClick={() => {
-                            if (speechPlaybackActive) {
-                              stopSpeech();
-                            } else {
-                              stopSpeech();
-                              const textToRead = (isRtl ? selectedCommEx.steps_ar : selectedCommEx.steps_en).join('. ');
-                              const utter = new SpeechSynthesisUtterance(textToRead);
-                              utter.lang = isRtl ? 'ar-SA' : 'en-US';
-                              utter.onend = () => setSpeechPlaybackActive(false);
-                              utter.onerror = () => setSpeechPlaybackActive(false);
-                              currentUtteranceRef.current = utter;
-                              setSpeechPlaybackActive(true);
-                              window.speechSynthesis.speak(utter);
-                            }
-                          }}
-                          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
-                            speechPlaybackActive
-                              ? 'bg-amber-500 text-slate-900 font-black shadow-lg shadow-amber-500/20'
-                              : 'bg-white/5 hover:bg-white/10 text-slate-300'
-                          }`}
-                        >
-                          <span>🔊</span>
-                          {speechPlaybackActive 
-                            ? (isRtl ? 'إيقاف قراءة الصوت' : 'Stop Reading')
-                            : (isRtl ? 'تفقيط وقراءة خطوات التمرين بصوت مسموع' : 'Read Steps Aloud')
-                          }
-                        </button>
-
-                        <button
-                          disabled={exportingExerciseId !== null}
-                          onClick={() => handleExportSingleExercise(selectedCommEx, 'communication')}
-                          className="px-4 py-2 bg-amber-500/10 border border-amber-500/20 hover:border-amber-500 hover:text-amber-300 text-[#C49E3A] rounded-xl text-xs font-black flex items-center gap-1.5 transition cursor-pointer active:scale-95"
-                          title={isRtl ? "تصدير وحفظ بطاقة التمرين كصورة عالية الدقة 📸" : "Export Exercise Card as Image 📸"}
-                        >
-                          {exportingExerciseId === selectedCommEx.id ? (
-                            <RefreshCw size={13} className="animate-spin text-amber-500" />
-                          ) : (
-                            <span>📸</span>
-                          )}
-                          {isRtl ? 'حفظ وتصدير التمرين كصورة' : 'Save as Image'}
-                        </button>
-                      </div>
-
-                    </div>
-
-                    {/* Right Column: Outcomes & Completion */}
-                    <div className="lg:col-span-4 bg-[#13284f] border border-white/5 rounded-3xl p-6 flex flex-col justify-between space-y-6 text-right">
-                      <div className="space-y-5">
-                        <div className="text-center pb-4 border-b border-white/5">
-                          <span className="text-3xl">💬</span>
-                          <h4 className="text-base font-black text-white mt-1">
-                            {isRtl ? 'الأثر المتوقع والمخرج الاجتماعي:' : 'Social Outcome & Depth:'}
-                          </h4>
-                        </div>
-
-                        <div className="bg-blue-950/20 border border-blue-500/20 rounded-2xl p-4 text-blue-200 text-xs leading-relaxed" dir="rtl">
-                          <p className="font-extrabold mb-1">🤝 {isRtl ? 'الأثر والترابط العائلي:' : 'Social Impact:'}</p>
-                          <p>{isRtl ? 'يبني جسر تفاهم حقيقي مع شريك السكن أو الأبناء ويؤسس لعادات تواصل إيجابية تصفي القلوب.' : 'Builds a true bridge of understanding with family members, grounding positive daily social connections.'}</p>
-                        </div>
-
-                        <p className="text-slate-400 text-[11px] leading-relaxed">
-                          {isRtl
-                            ? 'بمجرد تطبيق الخطوات المعروضة والتعليم عليها كخطوات منجزة، اضغط على زر التسجيل لتوثيق إنجاز التمرين وتلقي كلمات التشجيع والدعم.'
-                            : 'Once you practice and check off each communication step, proceed to register completion and receive AI spoken feedback.'}
-                        </p>
-                      </div>
-
+                {selectedCommEx ? (
+                  <div className="space-y-6 animate-fade-in text-right" dir="rtl">
+                    {/* Step-by-Step interactive checklist container */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-4">
                       <button
                         onClick={() => {
-                          const updated = new Set(completedCommIds);
-                          updated.add(selectedCommEx.id);
-                          setCompletedCommIds(updated);
-                          localStorage.setItem('balance_oasis_comm_completed', JSON.stringify(Array.from(updated)));
-
-                          // Trigger the beautiful completion voice record encouraging session!
-                          setSelectedEx(null);
-                          setSelectedMoveEx(null);
-                          setSelectedWritingEx(null);
-                          setSelectedEmotionEx(null);
-                          setSelectedLeaderEx(null);
-                          setCompletionSession({
-                            type: 'communication',
-                            id: selectedCommEx.id,
-                            title: isRtl ? selectedCommEx.title_ar : selectedCommEx.title_en,
-                            duration: 10 * 60 // average 10 minutes
-                          });
-
                           setSelectedCommEx(null);
                           stopSpeech();
                         }}
-                        className="w-full bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-blue-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                          commActiveUnit === 2
+                            ? 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                            : 'bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white'
+                        }`}
                       >
-                        <span>✓</span>
-                        {isRtl ? 'تسجيل إنجاز تمرين التواصل والولوج للتعزيز 🎙' : 'Mark Completed & Open Encouragement 🎙'}
+                        <ChevronRight size={14} />
+                        {isRtl 
+                          ? (commActiveUnit === 2 ? 'العودة لقائمة تمارين الوحدة الثانية (الربيعية)' : 'العودة لقائمة تمارين التواصل الاجتماعي') 
+                          : 'Back to Exercises'}
                       </button>
+
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs border px-3 py-1.5 rounded-xl font-bold font-mono ${
+                          commActiveUnit === 2
+                            ? 'bg-[#291e38] border-amber-500/20 text-amber-200'
+                            : 'bg-[#1e345c] border-white/5 text-slate-300'
+                        }`}>
+                          🎯 {isRtl ? selectedCommEx.skill_focus : 'Focus Area'}
+                        </span>
+                        <span className={`text-xs border px-3 py-1.5 rounded-xl font-bold font-mono ${
+                          commActiveUnit === 2
+                            ? 'bg-[#291e38] border-rose-500/30 text-rose-300'
+                            : 'bg-[#1e345c] border-white/5 text-[#3b82f6]'
+                        }`}>
+                          ✨ {isRtl ? selectedCommEx.activity_type : 'Type'}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ) : (
-                // SelectedCommEx === null -> Grid list of 20 positive communication exercises!
-                <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-2 text-right">
-                    <div className="space-y-1">
-                      <h3 className="text-lg font-black text-white flex items-center gap-2 justify-end">
-                        <span className="text-blue-400">💬</span>
-                        {isRtl ? 'منهج التواصل الإيجابي والذكاء الاجتماعي (الوحدة الأولى):' : 'Positive Communication & Social Intelligence (Unit 1):'}
-                      </h3>
-                      <p className="text-slate-400 text-xs">
-                        {isRtl ? 'تفاصيل المنهج بالكامل: 20 تمرين عملي لـ الإنصات الفعال، احتواء الخلافات، والترابط الأسري السلمي:' : 'Complete curriculum: 20 active interactive routines to foster active listening, peaceful conflict management, and deep social bond:'}
-                      </p>
-                    </div>
 
-                    <div className="text-xs bg-blue-500/10 border border-blue-500/20 text-blue-400 px-3 py-1.5 rounded-xl font-bold font-mono">
-                      {isRtl ? `أنجزت ${completedCommIds.size} من 20` : `${completedCommIds.size} / 20 Completed`}
-                    </div>
-                  </div>
-
-                  {/* Grid list container */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" dir="rtl">
-                    {COMMUNICATION_EXERCISES.map((ex, idx) => {
-                      const isCompleted = completedCommIds.has(ex.id);
-
-                      return (
-                        <div
-                          key={ex.id}
-                          className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#13284f] flex flex-col justify-between group ${
-                            isCompleted
-                              ? 'border-blue-500/30'
-                              : 'border-white/5 hover:border-blue-500/30'
-                          }`}
-                        >
-                          {/* Badge */}
-                          <div className="flex justify-between items-center">
-                            <span className="text-[10px] text-slate-500 font-mono tracking-wider font-extrabold uppercase">
-                              {isRtl ? `تمرين تواصل ${idx + 1}` : `Communication Exercise ${idx + 1}`}
-                            </span>
-
-                            {isCompleted ? (
-                              <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-0.5 rounded-full" title={isRtl ? "مكتمل" : "Completed"}>
-                                <Check size={10} strokeWidth={3} />
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                      {/* Left Column: Step checklist */}
+                      <div className={`lg:col-span-8 border rounded-3xl p-6 space-y-6 shadow-2xl ${
+                        commActiveUnit === 2
+                          ? 'bg-gradient-to-b from-[#251a36] via-[#1a2138] to-[#152a36] border-amber-500/20'
+                          : 'bg-[#142345] border-white/5'
+                      }`}>
+                        <div className="space-y-2">
+                          <span className="text-3xl">{selectedCommEx.emoji || (commActiveUnit === 2 ? '🌸' : '💬')}</span>
+                          <h3 className="text-xl font-black text-white flex items-center gap-2">
+                            {isRtl ? selectedCommEx.title_ar : selectedCommEx.title_en}
+                            {commActiveUnit === 2 && (
+                              <span className="text-xs bg-gradient-to-r from-amber-400 to-rose-400 text-slate-950 font-black px-2.5 py-0.5 rounded-full">
+                                {isRtl ? 'ربيعي 🌸' : 'Spring'}
                               </span>
-                            ) : (
-                              <span className="w-1.5 h-1.5 rounded-full bg-blue-500/50" />
                             )}
-                          </div>
+                          </h3>
+                          <p className="text-slate-300 text-xs leading-relaxed">
+                            {isRtl ? selectedCommEx.description_ar : selectedCommEx.title_en}
+                          </p>
+                        </div>
 
-                          {/* Meta info */}
-                          <div className="space-y-1.5 text-right font-sans">
-                            <div className="flex items-center gap-2 justify-end">
-                              <h4 className="text-sm font-black text-white group-hover:text-blue-300 transition line-clamp-1">
-                                {isRtl ? ex.title_ar : ex.title_en}
-                              </h4>
-                              <span className="text-lg">💬</span>
-                            </div>
-                            <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
-                              {isRtl ? ex.description_ar : ex.title_en}
-                            </p>
-                          </div>
+                        {/* Step-by-step interactive tasks */}
+                        <div className="space-y-4">
+                          <h4 className={`text-xs font-black uppercase tracking-widest border-b pb-2 ${
+                            commActiveUnit === 2 
+                              ? 'text-amber-300 border-amber-500/20' 
+                              : 'text-blue-400 border-white/5'
+                          }`}>
+                            {isRtl ? 'خطوات التطبيق والتمرين العملي:' : 'Practical Exercise Checklist:'}
+                          </h4>
 
-                          {/* CTA button */}
-                          {/* CTA button and Export */}
-                          <div className="flex gap-2 mt-2">
-                            <button
-                              onClick={() => setSelectedCommEx(ex)}
-                              className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
-                                isCompleted
-                                  ? 'bg-blue-500/5 hover:bg-blue-500/10 text-blue-300 border-blue-500/10'
-                                  : 'bg-blue-500/5 group-hover:bg-blue-500 group-hover:text-slate-950 text-blue-400 border-blue-500/10 group-hover:border-blue-500'
-                              }`}
-                            >
-                              <span>⚡</span>
-                              {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
-                            </button>
+                          <div className="space-y-3">
+                            {(isRtl ? selectedCommEx.steps_ar : selectedCommEx.steps_en).map((step, sIdx) => {
+                              const isChecked = commStepsChecked[sIdx] || false;
 
-                            <button
-                              disabled={exportingExerciseId !== null}
-                              onClick={() => handleExportSingleExercise(ex, 'communication')}
-                              className="bg-[#243d70] border border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400 p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
-                              title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
-                            >
-                              {exportingExerciseId === ex.id ? (
-                                <RefreshCw size={12} className="animate-spin text-amber-400" />
-                              ) : (
-                                <Download size={12} strokeWidth={3} />
-                              )}
-                            </button>
+                              return (
+                                <button
+                                  key={sIdx}
+                                  onClick={() => {
+                                    const updated = [...commStepsChecked];
+                                    updated[sIdx] = !updated[sIdx];
+                                    setCommStepsChecked(updated);
+                                  }}
+                                  className={`w-full text-right p-4 rounded-2xl border transition-all duration-200 flex items-start gap-4 cursor-pointer select-none ${
+                                    isChecked 
+                                      ? commActiveUnit === 2
+                                        ? 'bg-gradient-to-r from-amber-500/20 via-rose-500/20 to-emerald-500/20 border-amber-400/50 text-amber-100 shadow-inner'
+                                        : 'bg-blue-500/10 border-blue-500/30 text-blue-100 shadow-inner' 
+                                      : commActiveUnit === 2
+                                        ? 'bg-[#1e1f3a] border-amber-500/10 text-slate-300 hover:border-amber-400/30'
+                                        : 'bg-[#1d315c] border-white/5 text-slate-300 hover:border-blue-500/20'
+                                  }`}
+                                >
+                                  <span className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
+                                    isChecked 
+                                      ? commActiveUnit === 2
+                                        ? 'bg-gradient-to-r from-amber-400 to-rose-400 border-amber-400 text-slate-950 font-black'
+                                        : 'bg-blue-500 border-blue-500 text-slate-950' 
+                                      : 'border-slate-500 text-transparent'
+                                  }`}>
+                                    <Check size={12} strokeWidth={4} />
+                                  </span>
+                                  <div className="space-y-1">
+                                    <span className={`text-xs font-black font-mono ${
+                                      commActiveUnit === 2 ? 'text-amber-400/70' : 'text-slate-500'
+                                    }`}>
+                                      {isRtl ? `الخطوة ${sIdx + 1}` : `Step ${sIdx + 1}`}
+                                    </span>
+                                    <p className="text-xs md:text-sm font-medium leading-relaxed text-right">
+                                      {step}
+                                    </p>
+                                  </div>
+                                </button>
+                              );
+                            })}
                           </div>
                         </div>
-                      );
-                    })}
+
+                        {/* Toolshelf for Reading Steps Out Loud */}
+                        <div className="flex flex-wrap gap-2 border-t border-white/5 pt-4">
+                          <button
+                            onClick={() => {
+                              if (speechPlaybackActive) {
+                                stopSpeech();
+                              } else {
+                                stopSpeech();
+                                const textToRead = (isRtl ? selectedCommEx.steps_ar : selectedCommEx.steps_en).join('. ');
+                                const utter = new SpeechSynthesisUtterance(textToRead);
+                                utter.lang = isRtl ? 'ar-SA' : 'en-US';
+                                utter.onend = () => setSpeechPlaybackActive(false);
+                                utter.onerror = () => setSpeechPlaybackActive(false);
+                                currentUtteranceRef.current = utter;
+                                setSpeechPlaybackActive(true);
+                                window.speechSynthesis.speak(utter);
+                              }
+                            }}
+                            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
+                              speechPlaybackActive
+                                ? 'bg-amber-500 text-slate-900 font-black shadow-lg shadow-amber-500/20'
+                                : 'bg-white/5 hover:bg-white/10 text-slate-300'
+                            }`}
+                          >
+                            <span>🔊</span>
+                            {speechPlaybackActive 
+                              ? (isRtl ? 'إيقاف قراءة الصوت' : 'Stop Reading')
+                              : (isRtl ? 'تفقيط وقراءة خطوات التمرين بصوت مسموع' : 'Read Steps Aloud')
+                            }
+                          </button>
+
+                          <button
+                            disabled={exportingExerciseId !== null}
+                            onClick={() => handleExportSingleExercise(selectedCommEx, 'communication')}
+                            className="px-4 py-2 bg-amber-500/10 border border-amber-500/20 hover:border-amber-500 hover:text-amber-300 text-[#C49E3A] rounded-xl text-xs font-black flex items-center gap-1.5 transition cursor-pointer active:scale-95"
+                            title={isRtl ? "تصدير وحفظ بطاقة التمرين كصورة عالية الدقة 📸" : "Export Exercise Card as Image 📸"}
+                          >
+                            {exportingExerciseId === selectedCommEx.id ? (
+                              <RefreshCw size={13} className="animate-spin text-amber-500" />
+                            ) : (
+                              <span>📸</span>
+                            )}
+                            {isRtl ? 'حفظ وتصدير التمرين كصورة' : 'Save as Image'}
+                          </button>
+                        </div>
+
+                      </div>
+
+                      {/* Right Column: Outcomes & Completion */}
+                      <div className={`lg:col-span-4 border rounded-3xl p-6 flex flex-col justify-between space-y-6 text-right ${
+                        commActiveUnit === 2
+                          ? 'bg-gradient-to-b from-[#2a1a36] via-[#1c223a] to-[#162738] border-amber-500/20'
+                          : 'bg-[#13284f] border-white/5'
+                      }`}>
+                        <div className="space-y-5">
+                          <div className="text-center pb-4 border-b border-white/5">
+                            <span className="text-3xl">{selectedCommEx.emoji || (commActiveUnit === 2 ? '🌸' : '💬')}</span>
+                            <h4 className="text-base font-black text-white mt-1">
+                              {isRtl ? 'الأثر المتوقع والمخرج الاجتماعي:' : 'Social Outcome & Depth:'}
+                            </h4>
+                          </div>
+
+                          <div className={`border rounded-2xl p-4 text-xs leading-relaxed ${
+                            commActiveUnit === 2
+                              ? 'bg-gradient-to-r from-amber-950/40 via-rose-950/40 to-emerald-950/40 border-amber-500/30 text-amber-200'
+                              : 'bg-blue-950/20 border-blue-500/20 text-blue-200'
+                          }`} dir="rtl">
+                            <p className="font-extrabold mb-1">
+                              {commActiveUnit === 2 ? '🌸' : '🤝'} {isRtl ? 'الأثر والترابط العائلي:' : 'Social Impact:'}
+                            </p>
+                            <p>{isRtl ? (selectedCommEx.outcome_ar || 'يبني جسر تفاهم حقيقي وتواصل ربيعي إيجابي ينعش القلوب.') : 'Builds a true bridge of understanding and positive social connections.'}</p>
+                          </div>
+
+                          <p className="text-slate-400 text-[11px] leading-relaxed">
+                            {isRtl
+                              ? 'بمجرد تطبيق الخطوات المعروضة والتعليم عليها كخطوات منجزة، اضغط على زر التسجيل لتوثيق إنجاز التمرين وتلقي كلمات التشجيع والدعم.'
+                              : 'Once you practice and check off each communication step, proceed to register completion and receive AI spoken feedback.'}
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            const updated = new Set(completedCommIds);
+                            updated.add(selectedCommEx.id);
+                            setCompletedCommIds(updated);
+                            localStorage.setItem('balance_oasis_comm_completed', JSON.stringify(Array.from(updated)));
+
+                            // Trigger the completion voice record encouraging session
+                            setSelectedEx(null);
+                            setSelectedMoveEx(null);
+                            setSelectedWritingEx(null);
+                            setSelectedEmotionEx(null);
+                            setSelectedLeaderEx(null);
+                            setCompletionSession({
+                              type: 'communication',
+                              id: selectedCommEx.id,
+                              title: isRtl ? selectedCommEx.title_ar : selectedCommEx.title_en,
+                              duration: 10 * 60
+                            });
+
+                            setSelectedCommEx(null);
+                            stopSpeech();
+                          }}
+                          className={`w-full font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4 ${
+                            commActiveUnit === 2
+                              ? 'bg-gradient-to-r from-amber-400 via-rose-500 to-emerald-400 hover:from-amber-300 hover:via-rose-400 hover:to-emerald-300 text-slate-950 shadow-amber-500/20'
+                              : 'bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-slate-950 shadow-blue-500/10'
+                          }`}
+                        >
+                          <span>✓</span>
+                          {isRtl ? 'تسجيل إنجاز تمرين التواصل والولوج للتعزيز 🎙' : 'Mark Completed & Open Encouragement 🎙'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )
+                ) : (
+                  // SelectedCommEx === null -> Grid list of exercises for Unit 1 or Unit 2!
+                  <div className="space-y-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-2 text-right" dir="rtl">
+                      <div className="space-y-1">
+                        <h3 className="text-lg font-black text-white flex items-center gap-2">
+                          <span className={commActiveUnit === 2 ? 'text-amber-400' : 'text-blue-400'}>
+                            {commActiveUnit === 2 ? '🌸☀️' : '💬'}
+                          </span>
+                          {commActiveUnit === 2 
+                            ? (isRtl ? 'منهج الذكاء الاجتماعي والتواصل الإيجابي (الوحدة الثانية - ألوان صيفية ربيعية):' : 'Social Intelligence & Positive Communication (Unit 2 - Spring/Summer Colors):')
+                            : (isRtl ? 'منهج التواصل الإيجابي والذكاء الاجتماعي (الوحدة الأولى):' : 'Positive Communication & Social Intelligence (Unit 1):')}
+                        </h3>
+                        <p className="text-slate-400 text-xs">
+                          {commActiveUnit === 2
+                            ? (isRtl ? '20 تمرين عملي بألوان صيفية ربيعية مبهجة: الدبلوماسية الحوارية، فراسة الجسد، احتواء الغضب، والامتنان العائلي:' : '20 interactive routines in vibrant spring/summer colors: dialogue diplomacy, body language, anger containment, family gratitude:')
+                            : (isRtl ? 'تفاصيل المنهج بالكامل: 20 تمرين عملي لـ الإنصات الفعال، احتواء الخلافات، والترابط الأسري السلمي:' : 'Complete curriculum: 20 active interactive routines to foster active listening, peaceful conflict management, and deep social bond:')}
+                        </p>
+                      </div>
+
+                      <div className={`text-xs border px-3 py-1.5 rounded-xl font-bold font-mono ${
+                        commActiveUnit === 2
+                          ? 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+                          : 'bg-blue-500/10 border-blue-500/20 text-blue-400'
+                      }`}>
+                        {isRtl 
+                          ? `أنجزت ${(commActiveUnit === 1 ? COMMUNICATION_EXERCISES : COMMUNICATION_EXERCISES_UNIT2).filter(ex => completedCommIds.has(ex.id)).length} من 20` 
+                          : `${(commActiveUnit === 1 ? COMMUNICATION_EXERCISES : COMMUNICATION_EXERCISES_UNIT2).filter(ex => completedCommIds.has(ex.id)).length} / 20 Completed`}
+                      </div>
+                    </div>
+
+                    {/* Grid list container */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" dir="rtl">
+                      {(commActiveUnit === 1 ? COMMUNICATION_EXERCISES : COMMUNICATION_EXERCISES_UNIT2).map((ex, idx) => {
+                        const isCompleted = completedCommIds.has(ex.id);
+
+                        return (
+                          <div
+                            key={ex.id}
+                            className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 flex flex-col justify-between group ${
+                              commActiveUnit === 2
+                                ? isCompleted
+                                  ? 'bg-gradient-to-br from-[#271b36] via-[#1d2238] to-[#152a38] border-amber-400/40 shadow-md shadow-amber-500/10'
+                                  : 'bg-gradient-to-br from-[#1e1b33] via-[#172036] to-[#132534] border-amber-500/20 hover:border-amber-400/60 hover:shadow-lg hover:shadow-amber-500/10'
+                                : isCompleted
+                                  ? 'bg-[#13284f] border-blue-500/30'
+                                  : 'bg-[#13284f] border-white/5 hover:border-blue-500/30'
+                            }`}
+                          >
+                            {/* Badge */}
+                            <div className="flex justify-between items-center">
+                              <span className={`text-[10px] font-mono tracking-wider font-extrabold uppercase ${
+                                commActiveUnit === 2 ? 'text-amber-400/70' : 'text-slate-500'
+                              }`}>
+                                {isRtl 
+                                  ? (commActiveUnit === 2 ? `تمرين ربيعي ${idx + 1}` : `تمرين تواصل ${idx + 1}`) 
+                                  : `Exercise ${idx + 1}`}
+                              </span>
+
+                              {isCompleted ? (
+                                <span className={`p-0.5 rounded-full border ${
+                                  commActiveUnit === 2
+                                    ? 'bg-amber-500/20 border-amber-400/40 text-amber-300'
+                                    : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                                }`} title={isRtl ? "مكتمل" : "Completed"}>
+                                  <Check size={10} strokeWidth={3} />
+                                </span>
+                              ) : (
+                                <span className={`w-1.5 h-1.5 rounded-full ${
+                                  commActiveUnit === 2 ? 'bg-amber-400/60' : 'bg-blue-500/50'
+                                }`} />
+                              )}
+                            </div>
+
+                            {/* Meta info */}
+                            <div className="space-y-1.5 text-right font-sans">
+                              <div className="flex items-center gap-2 justify-end">
+                                <h4 className={`text-sm font-black text-white transition line-clamp-1 ${
+                                  commActiveUnit === 2 ? 'group-hover:text-amber-300' : 'group-hover:text-blue-300'
+                                }`}>
+                                  {isRtl ? ex.title_ar : ex.title_en}
+                                </h4>
+                                <span className="text-lg">{ex.emoji || (commActiveUnit === 2 ? '🌸' : '💬')}</span>
+                              </div>
+                              <p className="text-[11px] text-slate-300 line-clamp-2 leading-relaxed">
+                                {isRtl ? ex.description_ar : ex.title_en}
+                              </p>
+                            </div>
+
+                            {/* CTA button and Export */}
+                            <div className="flex gap-2 mt-2">
+                              <button
+                                onClick={() => setSelectedCommEx(ex)}
+                                className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
+                                  commActiveUnit === 2
+                                    ? isCompleted
+                                      ? 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/20'
+                                      : 'bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-emerald-500/10 group-hover:from-amber-400 group-hover:via-rose-500 group-hover:to-emerald-400 group-hover:text-slate-950 text-amber-300 border-amber-500/30'
+                                    : isCompleted
+                                      ? 'bg-blue-500/5 hover:bg-blue-500/10 text-blue-300 border-blue-500/10'
+                                      : 'bg-blue-500/5 group-hover:bg-blue-500 group-hover:text-slate-950 text-blue-400 border-blue-500/10 group-hover:border-blue-500'
+                                }`}
+                              >
+                                <span>{commActiveUnit === 2 ? '🌸' : '⚡'}</span>
+                                {isRtl ? 'البدء بتطبيق خطوات التمرين' : 'Open Exercise Details'}
+                              </button>
+
+                              <button
+                                disabled={exportingExerciseId !== null}
+                                onClick={() => handleExportSingleExercise(ex, 'communication')}
+                                className={`p-2.5 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border ${
+                                  commActiveUnit === 2
+                                    ? 'bg-[#291b38] border-amber-500/20 hover:border-amber-400 hover:text-amber-300 text-slate-300'
+                                    : 'bg-[#243d70] border-white/5 hover:border-amber-500 hover:text-amber-300 text-slate-400'
+                                }`}
+                                title={isRtl ? 'تصدير كصورة للنشر 📸' : 'Export as Image 📸'}
+                              >
+                                {exportingExerciseId === ex.id ? (
+                                  <RefreshCw size={12} className="animate-spin text-amber-400" />
+                                ) : (
+                                  <Download size={12} strokeWidth={3} />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : activeSubTab === 'leadership' ? (
               // Active SubTab === 'leadership' - Leadership & Time Management Exercises
               selectedLeaderEx ? (
