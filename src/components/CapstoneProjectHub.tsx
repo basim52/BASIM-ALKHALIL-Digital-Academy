@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toPng } from 'html-to-image';
 import { 
   CAPSTONE_PROJECT_IDEAS, 
   CapstoneIdea 
@@ -31,7 +32,10 @@ import {
   MapPin, 
   Smile, 
   BarChart3,
-  ExternalLink
+  ExternalLink,
+  Camera,
+  Printer,
+  Image as ImageIcon
 } from 'lucide-react';
 
 interface CapstoneProjectHubProps {
@@ -66,6 +70,44 @@ export const CapstoneProjectHub: React.FC<CapstoneProjectHubProps> = ({
   // Certificate / Student Name
   const [studentName, setStudentName] = useState<string>('');
   const [certGenerated, setCertGenerated] = useState<boolean>(false);
+  const [isExportingCertImage, setIsExportingCertImage] = useState<boolean>(false);
+
+  const handleExportCertAsImage = async () => {
+    setIsExportingCertImage(true);
+    setTimeout(async () => {
+      const element = document.getElementById('capstone-certificate-card');
+      if (element) {
+        try {
+          const options = {
+            cacheBust: true,
+            pixelRatio: 2.5,
+            backgroundColor: '#080d19',
+            styleSheetsFilter: (styleSheet: CSSStyleSheet) => {
+              try {
+                const rules = styleSheet.cssRules;
+                return true;
+              } catch (e) {
+                return false;
+              }
+            }
+          };
+
+          // Warm up resources and render twice for maximum resolution and accurate rendering
+          await toPng(element, options);
+          const dataUrl = await toPng(element, options);
+
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          link.download = `شهادة-تخرج-مشروع-الذكاء-الاصطناعي-${studentName || 'البطل'}-${new Date().getTime()}.png`;
+          link.click();
+        } catch (error) {
+          console.error("Error exporting capstone certificate image:", error);
+          alert(isRtl ? 'حدث خطأ أثناء تصدير شهادة التخرج كصورة عالية الدقة' : 'Error exporting certificate image');
+        }
+      }
+      setIsExportingCertImage(false);
+    }, 400);
+  };
 
   // Icon Resolver
   const renderIcon = (iconName: string) => {
@@ -875,7 +917,7 @@ export const CapstoneProjectHub: React.FC<CapstoneProjectHubProps> = ({
 
           {/* OFFICIAL DIPLOMA / CERTIFICATE CARD */}
           {certGenerated && (
-            <div className="bg-[#080d19] border-4 border-amber-500/50 rounded-[3rem] p-8 md:p-12 relative overflow-hidden shadow-2xl text-center space-y-8 animate-fade-in">
+            <div id="capstone-certificate-card" className="bg-[#080d19] border-4 border-amber-500/50 rounded-[3rem] p-8 md:p-12 relative overflow-hidden shadow-2xl text-center space-y-8 animate-fade-in">
               <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute bottom-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -905,7 +947,7 @@ export const CapstoneProjectHub: React.FC<CapstoneProjectHubProps> = ({
                   قد أتم بنجاح واقتدار كافة متطلبات تطوير واجتياز مشروع التخرج المعتمد لبناء الموقع الذكي:
                 </p>
                 <div className="p-4 bg-slate-900/80 rounded-2xl border border-amber-500/30 inline-block px-8">
-                  <span className="text-base font-black text-white">{activeIdea.titleAr}</span>
+                  <span className="text-base font-black text-white">{activeIdea ? activeIdea.titleAr : customTitle}</span>
                   <span className="block text-[11px] text-amber-400 font-mono mt-1">بدرجة تقييم: 98/100 (ممتاز مرتفع)</span>
                 </div>
               </div>
@@ -932,15 +974,26 @@ export const CapstoneProjectHub: React.FC<CapstoneProjectHubProps> = ({
               {/* Actions */}
               <div className="pt-6 flex flex-wrap items-center justify-center gap-4 relative z-10">
                 <button
-                  onClick={() => window.print()}
-                  className="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl flex items-center gap-2 shadow-xl shadow-amber-500/20"
+                  onClick={handleExportCertAsImage}
+                  disabled={isExportingCertImage}
+                  className="px-6 py-3 bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:brightness-110 text-slate-950 font-black text-xs rounded-xl flex items-center gap-2 shadow-xl shadow-amber-500/20 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
                 >
-                  <Download size={16} />
-                  طباعة وتصدير شهادة التخرج (PDF)
+                  <Camera size={16} />
+                  {isExportingCertImage 
+                    ? (isRtl ? 'جاري تصدير الشهادة كصورة... 📸' : 'Exporting image...') 
+                    : (isRtl ? 'تصدير شهادة التخرج كصورة عالية الدقة (PNG) 📸' : 'Export Certificate as High-Res PNG 📸')
+                  }
+                </button>
+                <button
+                  onClick={() => window.print()}
+                  className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 font-black text-xs rounded-xl flex items-center gap-2 shadow-lg"
+                >
+                  <Printer size={16} />
+                  {isRtl ? 'طباعة وحفظ كـ PDF 🖨️' : 'Print / Save as PDF 🖨️'}
                 </button>
                 <button
                   onClick={onBackToMain}
-                  className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-xs rounded-xl flex items-center gap-2"
+                  className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-white/10 font-bold text-xs rounded-xl flex items-center gap-2"
                 >
                   العودة للبرنامج الرئيسي
                 </button>

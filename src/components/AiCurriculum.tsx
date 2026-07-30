@@ -9595,6 +9595,42 @@ Output Summary for [${topic}]:
 
                           <div className="flex gap-2 shrink-0">
                             <button
+                              onClick={async () => {
+                                const element = document.getElementById('ai-gold-certificate-card');
+                                if (element) {
+                                  try {
+                                    const options = {
+                                      cacheBust: true,
+                                      pixelRatio: 2.5,
+                                      backgroundColor: '#030712',
+                                      styleSheetsFilter: (styleSheet: CSSStyleSheet) => {
+                                        try {
+                                          const rules = styleSheet.cssRules;
+                                          return true;
+                                        } catch (e) {
+                                          return false;
+                                        }
+                                      }
+                                    };
+                                    await toPng(element, options);
+                                    const dataUrl = await toPng(element, options);
+                                    const link = document.createElement('a');
+                                    link.href = dataUrl;
+                                    link.download = `شهادة-التخرج-الذهبية-منهج-الذكاء-الاصطناعي-${advCertName || 'البطل'}-${new Date().getTime()}.png`;
+                                    link.click();
+                                  } catch (err) {
+                                    console.error("Error exporting AI gold certificate as image:", err);
+                                    alert(isRtl ? 'حدث خطأ أثناء تصدير الشهادة كصورة' : 'Error exporting certificate image');
+                                  }
+                                }
+                              }}
+                              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 active:scale-95 transition-all shadow-lg cursor-pointer"
+                            >
+                              <Download size={16} />
+                              {isRtl ? 'تصدير الشهادة كصورة PNG 📸' : 'Export Certificate as PNG 📸'}
+                            </button>
+
+                            <button
                               onClick={() => {
                                 const projTitle = advCertProj === 'film' 
                                   ? 'صناعة وسينما الأفلام التوليدية المتقدمة (Short Cinema Film Generation)'
@@ -9647,10 +9683,10 @@ Output Summary for [${topic}]:
                                 `;
                                 printContent(html);
                               }}
-                              className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 active:scale-95 transition-all"
+                              className="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 border border-amber-500/30 active:scale-95 transition-all"
                             >
                               <Printer size={16} />
-                              {isRtl ? 'طباعة شهادة التخرّج الملونة 🖨️' : 'Print Diploma 🖨️'}
+                              {isRtl ? 'طباعة وحفظ كـ PDF 🖨️' : 'Print Diploma / PDF 🖨️'}
                             </button>
 
                             <button
@@ -9670,7 +9706,7 @@ Output Summary for [${topic}]:
                         </div>
 
                         {/* Interactive scroll preview replica of gold certificate */}
-                        <div className="bg-slate-950 border border-white/10 rounded-[3rem] p-8 md:p-12 relative overflow-hidden select-text text-center shadow-2xl">
+                        <div id="ai-gold-certificate-card" className="bg-slate-950 border border-white/10 rounded-[3rem] p-8 md:p-12 relative overflow-hidden select-text text-center shadow-2xl">
                           {/* Radial Ambient Gold */}
                           <div className="absolute right-[-40px] top-[-40px] w-56 h-56 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
                           <div className="absolute left-[-40px] bottom-[-40px] w-56 h-56 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -9959,41 +9995,81 @@ Output Summary for [${topic}]:
                               {isRtl ? 'منح ألقاب الفخر للأبطال واليافعين الذين أتموا الرحلة الرقمية بنجاح!' : 'Award badges of honor to your young family members who conquered the curriculum!'}
                             </p>
                           </div>
-                          <button
-                            onClick={() => {
-                              if (!certStudentName.trim()) return;
-                              const html = `
-                                <div style="max-width: 850px; margin: 0 auto; padding: 50px; border: 12px double #d97706; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); color: #0f172a; text-align: center; position: relative;" dir="rtl">
-                                  <div style="font-size: 14px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #b45309; margin-bottom: 20px;">أكاديمية المستقبليات الذكائية والتعليم التوليدي</div>
-                                  <h1 style="font-size: 38px; font-weight: 900; color: #1e3a8a; margin: 15px 0 5px 0;">شهادة سفير معتمد للذكاء الاصطناعي</h1>
-                                  <div style="width: 100px; height: 3px; background-color: #d97706; margin: 15px auto;"></div>
-                                  <p style="font-size: 16px; color: #475569; margin-bottom: 30px;">تُمنح هذه الوثيقة باعتزاز وفخر عظيمين للسفير اليافع البطل:</p>
-                                  <div style="font-size: 36px; font-weight: 900; color: #b45309; margin: 25px 0; border-bottom: 2px dashed #e2e8f0; display: inline-block; padding-bottom: 10px; width: 450px;">${certStudentName}</div>
-                                  <p style="font-size: 16px; color: #334155; max-width: 650px; margin: 25px auto; line-height: 1.8;">
-                                    لقاء تفوقه وإتمامه الفخري لبرنامج <strong>"تعلم الذكاء الاصطناعي"</strong> العائلي المطور بنجاح.<br>
-                                    حيث فكك تحديات النمذجة وعالم التشويش بذكاء يضاهي العباقرة، وأثبت قدرته القيادية كقائد مستقبلي موجه للتكنولوجيا، صائم عن تعجلها الاستهلاكي العشوائي، ومتعهد باستخدام الفضول لخير المحيط والإعمار الكوني.
-                                  </p>
-                                  <div style="display: flex; justify-content: space-between; align-items: end; border-top: 1px solid #f1f5f9; padding-top: 30px; margin-top: 50px; text-align: right;">
-                                    <div>
-                                      <span style="font-size: 12px; color: #94a3b8; display: block;">تاريخ الاعتماد الذهبي:</span>
-                                      <strong style="font-size: 14px; color: #334155;">${certificationDate || new Date().toISOString().split('T')[0]}</strong>
-                                    </div>
-                                    <div style="text-align: center;">
-                                      <div style="font-size: 12px; color: #94a3b8; margin-bottom: 10px;">بإصدار وتوقيع:</div>
-                                      <div style="font-size: 16px; font-weight: bold; color: #1e3a8a;">باسم الخليل وموجهي الأكاديمية</div>
-                                      <span style="display: block; width: 220px; border-bottom: 1px solid #64748b; margin-top: 5px;"></span>
+                          <div className="flex gap-2 shrink-0">
+                            <button
+                              onClick={async () => {
+                                if (!certStudentName.trim()) return;
+                                const element = document.getElementById('ai-printable-certificate-card');
+                                if (element) {
+                                  try {
+                                    const options = {
+                                      cacheBust: true,
+                                      pixelRatio: 2.5,
+                                      backgroundColor: '#0b1329',
+                                      styleSheetsFilter: (styleSheet: CSSStyleSheet) => {
+                                        try {
+                                          const rules = styleSheet.cssRules;
+                                          return true;
+                                        } catch (e) {
+                                          return false;
+                                        }
+                                      }
+                                    };
+                                    await toPng(element, options);
+                                    const dataUrl = await toPng(element, options);
+                                    const link = document.createElement('a');
+                                    link.href = dataUrl;
+                                    link.download = `شهادة-سفير-الذكاء-الاصطناعي-${certStudentName}-${new Date().getTime()}.png`;
+                                    link.click();
+                                  } catch (err) {
+                                    console.error("Error exporting AI ambassador certificate image:", err);
+                                    alert(isRtl ? 'حدث خطأ أثناء تصدير الشهادة كصورة' : 'Error exporting certificate image');
+                                  }
+                                }
+                              }}
+                              disabled={!certStudentName.trim()}
+                              className="bg-amber-500 hover:bg-amber-400 disabled:opacity-40 font-black text-slate-950 px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 active:scale-95 transition-all shadow-lg cursor-pointer"
+                            >
+                              <Download size={16} />
+                              {isRtl ? 'تصدير الشهادة كصورة PNG 📸' : 'Export Certificate as PNG 📸'}
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                if (!certStudentName.trim()) return;
+                                const html = `
+                                  <div style="max-width: 850px; margin: 0 auto; padding: 50px; border: 12px double #d97706; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); color: #0f172a; text-align: center; position: relative;" dir="rtl">
+                                    <div style="font-size: 14px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #b45309; margin-bottom: 20px;">أكاديمية المستقبليات الذكائية والتعليم التوليدي</div>
+                                    <h1 style="font-size: 38px; font-weight: 900; color: #1e3a8a; margin: 15px 0 5px 0;">شهادة سفير معتمد للذكاء الاصطناعي</h1>
+                                    <div style="width: 100px; height: 3px; background-color: #d97706; margin: 15px auto;"></div>
+                                    <p style="font-size: 16px; color: #475569; margin-bottom: 30px;">تُمنح هذه الوثيقة باعتزاز وفخر عظيمين للسفير اليافع البطل:</p>
+                                    <div style="font-size: 36px; font-weight: 900; color: #b45309; margin: 25px 0; border-bottom: 2px dashed #e2e8f0; display: inline-block; padding-bottom: 10px; width: 450px;">${certStudentName}</div>
+                                    <p style="font-size: 16px; color: #334155; max-width: 650px; margin: 25px auto; line-height: 1.8;">
+                                      لقاء تفوقه وإتمامه الفخري لبرنامج <strong>"تعلم الذكاء الاصطناعي"</strong> العائلي المطور بنجاح.<br>
+                                      حيث فكك تحديات النمذجة وعالم التشويش بذكاء يضاهي العباقرة، وأثبت قدرته القيادية كقائد مستقبلي موجه للتكنولوجيا، صائم عن تعجلها الاستهلاكي العشوائي، ومتعهد باستخدام الفضول لخير المحيط والإعمار الكوني.
+                                    </p>
+                                    <div style="display: flex; justify-content: space-between; align-items: end; border-top: 1px solid #f1f5f9; padding-top: 30px; margin-top: 50px; text-align: right;">
+                                      <div>
+                                        <span style="font-size: 12px; color: #94a3b8; display: block;">تاريخ الاعتماد الذهبي:</span>
+                                        <strong style="font-size: 14px; color: #334155;">${certificationDate || new Date().toISOString().split('T')[0]}</strong>
+                                      </div>
+                                      <div style="text-align: center;">
+                                        <div style="font-size: 12px; color: #94a3b8; margin-bottom: 10px;">بإصدار وتوقيع:</div>
+                                        <div style="font-size: 16px; font-weight: bold; color: #1e3a8a;">باسم الخليل وموجهي الأكاديمية</div>
+                                        <span style="display: block; width: 220px; border-bottom: 1px solid #64748b; margin-top: 5px;"></span>
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              `;
-                              printContent(html);
-                            }}
-                            disabled={!certStudentName.trim()}
-                            className="bg-amber-500 hover:bg-amber-600 disabled:opacity-40 font-black text-slate-950 px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 active:scale-95 transition-all"
-                          >
-                            <Printer size={16} />
-                            {isRtl ? 'طباعة الشهادة 🖨️' : 'Print Certificate 🖨️'}
-                          </button>
+                                `;
+                                printContent(html);
+                              }}
+                              disabled={!certStudentName.trim()}
+                              className="bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 disabled:opacity-40 font-black px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 active:scale-95 transition-all"
+                            >
+                              <Printer size={16} />
+                              {isRtl ? 'طباعة وحفظ كـ PDF 🖨️' : 'Print / Save as PDF 🖨️'}
+                            </button>
+                          </div>
                         </div>
 
                         {/* Student Name field */}
@@ -10009,7 +10085,7 @@ Output Summary for [${topic}]:
                         </div>
 
                         {/* Medallion certificate style view */}
-                        <div className="bg-slate-950/45 border border-white/5 rounded-[2.5rem] p-10 md:p-16 relative overflow-hidden text-center shadow-lg">
+                        <div id="ai-printable-certificate-card" className="bg-slate-950/45 border border-white/5 rounded-[2.5rem] p-10 md:p-16 relative overflow-hidden text-center shadow-lg">
                           {/* Circle watermark decorations */}
                           <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
                           <div className="absolute bottom-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
