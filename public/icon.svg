@@ -1,0 +1,39 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#030712" />
+      <stop offset="50%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e3a8a" />
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Card -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="none" stroke="url(#gold)" stroke-width="6" opacity="0.4" />
+
+  <!-- Graduation Cap & Neural Emblem -->
+  <g transform="translate(256, 230)">
+    <!-- Cap Diamond -->
+    <polygon points="0,-100 160,-20 0,60 -160,-20" fill="url(#gold)" />
+    <polygon points="0,-80 130,-15 0,50 -130,-15" fill="#1e3a8a" opacity="0.6" />
+    
+    <!-- Cap Base -->
+    <path d="M -80,10 C -80,60 80,60 80,10 L 80,50 C 80,90 -80,90 -80,50 Z" fill="url(#gold)" />
+    
+    <!-- Tassel -->
+    <path d="M 160,-20 L 180,40 L 175,110" stroke="#fbbf24" stroke-width="8" stroke-linecap="round" fill="none" />
+    <circle cx="175" cy="115" r="10" fill="#fbbf24" />
+
+    <!-- AI Sparkle Nodes -->
+    <circle cx="0" cy="-100" r="12" fill="#60a5fa" />
+    <circle cx="-160" cy="-20" r="10" fill="#60a5fa" />
+    <circle cx="160" cy="-20" r="10" fill="#60a5fa" />
+  </g>
+
+  <!-- Arabic Typography / Subtitle Emblem -->
+  <text x="256" y="430" text-anchor="middle" fill="#f59e0b" font-family="sans-serif" font-weight="900" font-size="38" letter-spacing="2">الأكاديمية</text>
+</svg>
