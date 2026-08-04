@@ -1,14 +1,17 @@
 {
+  "id": "/",
   "name": "أكاديمية باسم آل خليل الرقمية",
   "short_name": "الأكاديمية",
+  "description": "أكاديمية باسم آل خليل الرقمية - منصة متكاملة للتنمية الأكاديمية والمهنية والذكاء الاصطناعي.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#030712",
   "theme_color": "#1e40af",
   "orientation": "portrait",
   "lang": "ar",
   "dir": "rtl",
-  "description": "أكاديمية باسم آل خليل الرقمية - منصة متكاملة للتنمية الأكاديمية والمهنية والذكاء الاصطناعي.",
+  "categories": ["education", "productivity"],
   "icons": [
     {
       "src": "/icon-192.png",
