@@ -1,0 +1,26 @@
+{
+  "name": "أكاديمية باسم آل خليل الرقمية",
+  "short_name": "الأكاديمية",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#030712",
+  "theme_color": "#1e40af",
+  "orientation": "portrait",
+  "lang": "ar",
+  "dir": "rtl",
+  "description": "أكاديمية باسم آل خليل الرقمية - منصة متكاملة للتنمية الأكاديمية والمهنية والذكاء الاصطناعي.",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
