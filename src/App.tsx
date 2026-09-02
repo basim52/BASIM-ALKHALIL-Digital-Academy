@@ -50,7 +50,14 @@ import {
   Mic,
   Smile,
   Menu,
-  MoreHorizontal
+  MoreHorizontal,
+  Search,
+  Flame,
+  Globe,
+  Compass,
+  Filter,
+  Check,
+  Copy
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'motion/react';
@@ -270,7 +277,6 @@ import { AIOmniCompanion } from './components/AIOmniCompanion';
 import { GlobalCommandPalette } from './components/GlobalCommandPalette';
 import { RealtimeVoiceCall } from './components/RealtimeVoiceCall';
 import { AdaptiveLearningPath } from './components/AdaptiveLearningPath';
-import { Search } from 'lucide-react';
 
 // Removed local AppView declaration as it is now imported from ./types
 
@@ -1018,6 +1024,17 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
     }
   };
 
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [copiedCode, setCopiedCode] = useState(false);
+
+  const handleCopyCode = () => {
+    const code = profile.studentCode ? `AK${profile.studentCode}` : profile.uid;
+    navigator.clipboard?.writeText(code);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
+
   useEffect(() => {
     const getRec = async () => {
       setLoadingRec(true);
@@ -1054,417 +1071,529 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
     return () => unsubscribe();
   }, [profile.uid]);
 
-  return (
-    <div className={`flex-1 p-5 md:p-12 overflow-y-auto ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#F7F7F7]`} dir={isRtl ? 'rtl' : 'ltr'}>
-      <div className="max-w-7xl mx-auto space-y-10">
+  const allSections = [
+    {
+      id: 'academic-planner',
+      category: 'core',
+      titleAr: 'الخطة الأكاديمية والجدول 🗓️',
+      titleEn: 'Academic Planner 🗓️',
+      descAr: 'خطتك الشخصية لجدولة الحصص الدراسية، أرشفة تقارير التقييم، وتوليد الاختبارات الدورية الشاملة.',
+      descEn: 'Plan your personalized study schedule, manage bi-weekly tests, and check auto-generated reports.',
+      icon: Sparkles,
+      glowColor: 'bg-indigo-400/20',
+      badgeStyle: 'bg-indigo-50 text-indigo-700 border border-indigo-150',
+      iconBg: 'bg-indigo-50',
+      iconColor: 'text-indigo-600',
+      btnTextColor: 'text-indigo-600',
+      btnBg: 'bg-indigo-50',
+      badgeAr: 'جدول ذكي مخصص',
+      badgeEn: 'Smart Schedule'
+    },
+    {
+      id: 'grammar-academy',
+      category: 'core',
+      titleAr: 'أكاديمية القواعد والتراكيب 📐',
+      titleEn: 'Grammar & Syntax Academy 📐',
+      descAr: 'المعادلات النحوية البصرية التفاعلية، تشخيص وتحليل الجمل المباشر، واختبارات قياس الفهم المتدرجة.',
+      descEn: 'Master syntax with visual formula engines, live sentence doctor, and smart diagnostic quizzes.',
+      icon: Brain,
+      glowColor: 'bg-blue-400/20',
+      badgeStyle: 'bg-blue-50 text-blue-700 border border-blue-200',
+      iconBg: 'bg-blue-50',
+      iconColor: 'text-blue-600',
+      btnTextColor: 'text-blue-600',
+      btnBg: 'bg-blue-50',
+      badgeAr: 'علمي وتفاعلي',
+      badgeEn: 'Scientific Grammar'
+    },
+    {
+      id: 'reading-lab',
+      category: 'core',
+      titleAr: 'مختبر القراءة والفهم الاستيعابي 📖',
+      titleEn: 'Active Reading & Fluency Lab 📖',
+      descAr: 'نصوص وقصص تفاعلية ناطقة متزامنة، بنك مفردات صوتي، واختبارات قياس الفهم القرائي والاستيعاب.',
+      descEn: 'Synchronized audio reading passages, interactive contextual vocabulary, and comprehension checks.',
+      icon: BookOpen,
+      glowColor: 'bg-emerald-400/20',
+      badgeStyle: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+      iconBg: 'bg-emerald-50',
+      iconColor: 'text-emerald-600',
+      btnTextColor: 'text-emerald-600',
+      btnBg: 'bg-emerald-50',
+      badgeAr: 'قراءة ناطقة متزامنة',
+      badgeEn: 'Interactive Audio'
+    },
+    {
+      id: 'writing-spelling-studio',
+      category: 'core',
+      titleAr: 'استوديو التعبير والكتابة والإملاء ✍️',
+      titleEn: 'Writing, Expression & Spelling Studio ✍️',
+      descAr: 'صياغة التعبير البليغ، محرر المقالات مع الفحص الفوري بالذكاء الاصطناعي، وتدريبات الإملاء الصوتي والقواعد الصوتية.',
+      descEn: 'Smart rhetoric transitions, essay crafter with AI grading, and scientific phonics spelling drills.',
+      icon: PenTool,
+      glowColor: 'bg-purple-400/20',
+      badgeStyle: 'bg-purple-50 text-purple-700 border border-purple-200',
+      iconBg: 'bg-purple-50',
+      iconColor: 'text-purple-600',
+      btnTextColor: 'text-purple-600',
+      btnBg: 'bg-purple-50',
+      badgeAr: 'بلاغة وإملاء علمي',
+      badgeEn: 'Scientific Spelling'
+    },
+    {
+      id: 'interactive-learning',
+      category: 'interactive',
+      titleAr: 'بوابة المتعة والألعاب 🎪',
+      titleEn: 'Interactive Playroom 🎪',
+      descAr: 'كاريوكي الأغاني الإنجليزية، ألغاز غرف الهروب للقواعد، صانع السيناريو التفاعلي، ومسابقات العائلة.',
+      descEn: 'Gamified interactive lyric karaoke, escape room challenges, and customized offline family Bingo cards.',
+      icon: Gamepad2,
+      glowColor: 'bg-purple-400/20',
+      badgeStyle: 'bg-purple-50 text-purple-700 border border-purple-150',
+      iconBg: 'bg-purple-50',
+      iconColor: 'text-purple-600',
+      btnTextColor: 'text-purple-600',
+      btnBg: 'bg-purple-50',
+      badgeAr: 'ألعاب وكسر جمود',
+      badgeEn: 'Interactive Room'
+    },
+    {
+      id: 'educational-games',
+      category: 'interactive',
+      titleAr: 'واحة الألعاب والآداب الراقية 🎮',
+      titleEn: 'Educational Games & Etiquette 🎮',
+      descAr: 'ألعاب تفاعلية مسلية، ألغاز المفردات والتهجئة المشوقة، تصحيح العادات اليومية، وفرسان الذوق والآداب الراقية بمكافآت سخية!',
+      descEn: 'Academic spelling riddles, interactive daily habits correction, and the Knights of Royal Etiquette & Social Manners challenge!',
+      icon: Gamepad2,
+      glowColor: 'bg-amber-400/20',
+      badgeStyle: 'bg-amber-50 text-amber-700 border border-[#C49E3A]/25',
+      iconBg: 'bg-amber-50',
+      iconColor: 'text-[#C49E3A]',
+      btnTextColor: 'text-[#C49E3A]',
+      btnBg: 'bg-amber-50',
+      badgeAr: 'ألعاب، عادات، وأدب راقي',
+      badgeEn: 'All Ages • Play & Etiquette'
+    },
+    {
+      id: 'pronunciation-lab',
+      category: 'skills',
+      titleAr: 'معمل الصوتيات والمخارج 🎙️',
+      titleEn: 'Pronunciation Lab 🎙️',
+      descAr: 'ميكروفون محاكي لتسجيل نطقك والتحقق الدقيق من مطابقة نبرتك عبر تحليلات الموجة وتلوين مستويات الكلمات.',
+      descEn: 'Speak dynamically with live waveform visual analysis and clear color evaluation on syllables.',
+      icon: Mic,
+      glowColor: 'bg-amber-400/20',
+      badgeStyle: 'bg-amber-50 text-amber-700 border border-[#C49E3A]/20',
+      iconBg: 'bg-amber-50',
+      iconColor: 'text-amber-600',
+      btnTextColor: 'text-amber-600',
+      btnBg: 'bg-amber-50',
+      badgeAr: 'تدريب مباشر فوري',
+      badgeEn: 'Mic Waveform Lab'
+    },
+    {
+      id: 'live-translate',
+      category: 'skills',
+      titleAr: 'المترجم المباشر وعالم اللغات 🌐',
+      titleEn: 'Gemini Live Translate 🌐',
+      descAr: 'ترجم عباراتك بمستويات صياغة متعددة ومتكاملة مع استخراج مكعبات القواعد وتوليد التحديات اللغوية المباشرة.',
+      descEn: 'High-fidelity contextual translation sandbox. Adjust styles/tones, analyze grammar cubics, and tackle interactive matching challenges.',
+      icon: Globe,
+      glowColor: 'bg-emerald-400/20',
+      badgeStyle: 'bg-emerald-50 text-emerald-700 border border-emerald-150',
+      iconBg: 'bg-emerald-50',
+      iconColor: 'text-[#002147]',
+      btnTextColor: 'text-[#002147]',
+      btnBg: 'bg-amber-accent/10',
+      badgeAr: 'ميزة ذكاء فوري جديدة',
+      badgeEn: 'AI Translation & Play'
+    },
+    {
+      id: 'story-library',
+      category: 'interactive',
+      titleAr: 'مكتبة القصص الممتعة 📖',
+      titleEn: 'Audiovisual Story Library 📖',
+      descAr: 'مجموعة من القصص والمغامرات المسموعة والمقروءة المزودة بأصوات مشوقة وقاموس كلمات فوري واختبارات قياس الفهم.',
+      descEn: 'Enchanting stories with highlighted text-to-speech syncing, interactive mini dictionaries and comprehension tasks.',
+      icon: BookMarked,
+      glowColor: 'bg-teal-400/20',
+      badgeStyle: 'bg-teal-50 text-teal-700 border border-teal-150',
+      iconBg: 'bg-teal-50',
+      iconColor: 'text-teal-600',
+      btnTextColor: 'text-teal-600',
+      btnBg: 'bg-teal-50',
+      badgeAr: 'استماع وقاموس فوري',
+      badgeEn: 'Immersive stories'
+    },
+    {
+      id: 'early-childhood',
+      category: 'toddler',
+      titleAr: 'قسم الصغار التمهيدي 👶',
+      titleEn: 'Early Childhood Zone 👶',
+      descAr: 'مخزون الحروف الهجائية التأسيسية، لوحة الكلمات البسيطة الأولى، وألعاب تنمية الملاحظة للأشبال الصغار.',
+      descEn: 'Colorful preschool interfaces dedicated to building alphabets, basic vocabulary, puzzles and simple words.',
+      icon: Baby,
+      glowColor: 'bg-pink-400/20',
+      badgeStyle: 'bg-pink-50 text-pink-700 border border-pink-150',
+      iconBg: 'bg-pink-50',
+      iconColor: 'text-pink-600',
+      btnTextColor: 'text-pink-600',
+      btnBg: 'bg-pink-50',
+      badgeAr: 'تأسيس وبناء لغوي للطفل',
+      badgeEn: 'Toddler Phonics'
+    },
+    {
+      id: 'ai-chat',
+      category: 'skills',
+      titleAr: 'شريك المحادثة الذكي 🤖',
+      titleEn: 'Basim AI Dialog Partner 🤖',
+      descAr: 'تحدث بالصوت والرسائل النصية مع باسم في مواضيع تفاعلية واحصل على تصحيحات فورية للأخطاء اللغوية.',
+      descEn: 'Build oral courage and correct grammatical syntax live by talking to your smart buddy Basim.',
+      icon: Mic2,
+      glowColor: 'bg-slate-400/20',
+      badgeStyle: 'bg-slate-100 text-slate-800 border border-slate-200',
+      iconBg: 'bg-slate-50',
+      iconColor: 'text-slate-700',
+      btnTextColor: 'text-slate-700',
+      btnBg: 'bg-slate-50',
+      badgeAr: 'رفيق المحادثة الصوتي',
+      badgeEn: 'Speech Companion'
+    },
+    {
+      id: 'video-library',
+      category: 'core',
+      titleAr: 'المرئيات والشروحات 🎬',
+      titleEn: 'Interactive Video Hub 🎬',
+      descAr: 'سلسلة الدروس الأكاديمية المصورة للبرنامج التعليمي، مرفقة بأسئلة اختيار من متعدد أثناء التشغيل.',
+      descEn: 'Curated explainer video sessions combined with timely quizzes during learning checkpoints.',
+      icon: Play,
+      glowColor: 'bg-sky-400/20',
+      badgeStyle: 'bg-sky-50 text-sky-700 border border-sky-150',
+      iconBg: 'bg-sky-50',
+      iconColor: 'text-sky-600',
+      btnTextColor: 'text-sky-600',
+      btnBg: 'bg-sky-50',
+      badgeAr: 'مرئيات باسم الممتعة',
+      badgeEn: 'Animated Lectures'
+    },
+    {
+      id: 'progress',
+      category: 'social',
+      titleAr: 'لوحة الأبطال والصدارة 🏆',
+      titleEn: 'Performance Tracker 🏆',
+      descAr: 'استعرض رصيد الأوسمة التي حققتها، نقاط قوتك، ومقدار تقدمك مقارنة بزملائك الطلاب في لوحة الشرف.',
+      descEn: 'Review cumulative point badges, live leaderboard standings, and overall developmental stats.',
+      icon: Trophy,
+      glowColor: 'bg-amber-400/20',
+      badgeStyle: 'bg-amber-50 text-amber-700 border border-amber-150',
+      iconBg: 'bg-amber-50',
+      iconColor: 'text-amber-500',
+      btnTextColor: 'text-[#002147]',
+      btnBg: 'bg-amber-50',
+      badgeAr: 'الملف الشخصي للتميز',
+      badgeEn: 'Honors Board'
+    },
+    {
+      id: 'chat',
+      category: 'social',
+      titleAr: 'صالون تفاعل الطلاب 💬',
+      titleEn: 'Peer Lounge & Chat 💬',
+      descAr: 'غرفة المحادثة الصوتية والكتابية باللغة الإنجليزية حصراً للتواصل الآمن ومناقشة التحديات مع الأصدقاء.',
+      descEn: 'English-only collaborative chatrooms and safe peer corridors to build dialog courage interactively.',
+      icon: MessageSquare,
+      glowColor: 'bg-violet-400/20',
+      badgeStyle: 'bg-violet-50 text-violet-700 border border-violet-150',
+      iconBg: 'bg-violet-50',
+      iconColor: 'text-violet-600',
+      btnTextColor: 'text-violet-600',
+      btnBg: 'bg-violet-50',
+      badgeAr: 'التواصل الآمن والتألق',
+      badgeEn: 'Student Collaboration'
+    }
+  ];
 
-        {/* DUOLINGO STATUS STRIP */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-6 bg-white border-2 border-b-4 border-slate-200 rounded-[2rem] shadow-none animate-fade-in relative overflow-hidden">
+  const categoriesList = [
+    { id: 'all', labelAr: 'الكل 🌟', labelEn: 'All 🌟' },
+    { id: 'core', labelAr: '👨‍🎓 الأكاديمية والخطط', labelEn: 'Core & Academic' },
+    { id: 'skills', labelAr: '🎙️ المهارات والنطق', labelEn: 'Skills & Voice' },
+    { id: 'interactive', labelAr: '🎪 التفاعل والألعاب', labelEn: 'Play & Games' },
+    { id: 'toddler', labelAr: '👶 الصغار والطفولة', labelEn: 'Early Childhood' },
+    { id: 'social', labelAr: '🏆 الصدارة والمجتمع', labelEn: 'Leaderboard & Social' },
+  ];
+
+  const filteredSections = allSections.filter((sec) => {
+    const matchesCat = selectedCategory === 'all' || sec.category === selectedCategory;
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return matchesCat;
+    const matchesSearch = 
+      sec.titleAr.toLowerCase().includes(query) ||
+      sec.titleEn.toLowerCase().includes(query) ||
+      sec.descAr.toLowerCase().includes(query) ||
+      sec.descEn.toLowerCase().includes(query) ||
+      sec.badgeAr.toLowerCase().includes(query) ||
+      sec.badgeEn.toLowerCase().includes(query);
+    return matchesCat && matchesSearch;
+  });
+
+  return (
+    <div className={`flex-1 p-3.5 sm:p-6 md:p-10 lg:p-12 overflow-y-auto ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#F7F7F7]`} dir={isRtl ? 'rtl' : 'ltr'}>
+      <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
+
+        {/* DUOLINGO STATUS STRIP - MOBILE OPTIMIZED */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 bg-white border-2 border-b-4 border-slate-200 rounded-3xl sm:rounded-[2rem] shadow-sm animate-fade-in relative overflow-hidden">
           {/* Logo / Mascot area */}
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-[#58cc02] rounded-2xl flex items-center justify-center text-white text-3xl font-black shadow-md relative animate-bounce-slow shrink-0 border-b-4 border-[#46a302]">
+          <div className="flex items-center gap-3.5 w-full sm:w-auto">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#58cc02] rounded-2xl flex items-center justify-center text-white text-2xl sm:text-3xl font-black shadow-md relative animate-bounce-slow shrink-0 border-b-4 border-[#46a302]">
               🦉
             </div>
-            <div>
-              <h2 className="text-base font-black text-slate-800 leading-tight">
-                {isRtl ? 'بوابة البطل التعليمية اليومية 🏆' : 'Daily Champion Learning Portal 🏆'}
+            <div className="flex-1 min-w-0">
+              <h2 className="text-sm sm:text-base font-black text-slate-800 leading-tight truncate">
+                {isRtl ? 'بوابة البطل اليومية 🏆' : 'Daily Champion Portal 🏆'}
               </h2>
-              <p className="text-xs text-[#58cc02] font-black mt-0.5">
-                {isRtl ? 'أنت تبلي بلاءً رائعاً ومرتفعاً اليوم! استمر في التعميق 🔥' : 'You are doing magnificent work today! Keep rising! 🔥'}
+              <p className="text-[11px] sm:text-xs text-[#58cc02] font-black mt-0.5 truncate">
+                {isRtl ? 'أنت تبلي بلاءً رائعاً! استمر في التقدم 🔥' : 'Magnificent work today! Keep rising! 🔥'}
               </p>
             </div>
           </div>
 
           {/* Stat indicators (Duolingo style) */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1.5 px-4 py-2 bg-orange-50 border-2 border-orange-200 rounded-2xl text-[#ff9600] font-black text-xs md:text-sm shadow-sm hover:scale-105 transition-all">
-              <span className="text-lg">🔥</span>
-              <span>7 {isRtl ? 'يوم' : 'Days'}</span>
+          <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-2">
+            <div className="flex items-center gap-1 px-3 py-1.5 bg-orange-50 border-2 border-orange-200 rounded-2xl text-[#ff9600] font-black text-xs shadow-sm hover:scale-105 transition-all">
+              <span className="text-base">🔥</span>
+              <span>7 {isRtl ? 'ي' : 'd'}</span>
             </div>
-            <div className="flex items-center gap-1.5 px-4 py-2 bg-blue-50 border-2 border-blue-200 rounded-2xl text-[#1cb0f6] font-black text-xs md:text-sm shadow-sm hover:scale-105 transition-all">
-              <span className="text-lg">💎</span>
+            <div className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 border-2 border-blue-200 rounded-2xl text-[#1cb0f6] font-black text-xs shadow-sm hover:scale-105 transition-all">
+              <span className="text-base">💎</span>
               <span>1,240</span>
             </div>
-            <div className="flex items-center gap-1.5 px-4 py-2 bg-rose-50 border-2 border-rose-200 rounded-2xl text-[#ea2b2b] font-black text-xs md:text-sm shadow-sm hover:scale-105 transition-all">
-              <span className="text-lg">❤️</span>
+            <div className="flex items-center gap-1 px-3 py-1.5 bg-rose-50 border-2 border-rose-200 rounded-2xl text-[#ea2b2b] font-black text-xs shadow-sm hover:scale-105 transition-all">
+              <span className="text-base">❤️</span>
               <span>5</span>
             </div>
-            <div className="flex items-center gap-1.5 px-4 py-2 bg-amber-50 border-2 border-amber-200 rounded-2xl text-[#ffc800] font-black text-xs md:text-sm shadow-sm hover:scale-105 transition-all">
-              <span className="text-lg">👑</span>
-              <span>12 {isRtl ? 'تاج' : 'Crowns'}</span>
+            <div className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 border-2 border-amber-200 rounded-2xl text-[#ffc800] font-black text-xs shadow-sm hover:scale-105 transition-all">
+              <span className="text-base">👑</span>
+              <span>12</span>
             </div>
           </div>
         </div>
         
         {/* LANDING PAGE HERO BANNER */}
-        <div className="relative p-8 md:p-12 rounded-[2.5rem] bg-gradient-to-br from-[#58cc02] to-[#46a302] text-white overflow-hidden shadow-xl border-b-8 border-[#3a8602]">
-          <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-gradient-to-br from-white/10 to-transparent rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-10 left-10 w-96 h-96 bg-white/5 rounded-full blur-2xl pointer-events-none" />
+        <div className="relative p-6 sm:p-8 md:p-10 rounded-3xl sm:rounded-[2.5rem] bg-gradient-to-br from-[#58cc02] via-[#4db802] to-[#3a8602] text-white overflow-hidden shadow-lg border-b-6 border-[#2d6b00]">
+          <div className="absolute top-0 right-0 w-72 sm:w-[450px] h-72 sm:h-[450px] bg-gradient-to-br from-white/20 to-transparent rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-10 left-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
           
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8 animate-fade-in">
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 border border-white/20 rounded-xl text-[10px] font-black text-[#ffc800] uppercase tracking-wider mb-2">
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 animate-fade-in">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/15 backdrop-blur-md border border-white/20 rounded-xl text-[10px] font-black text-[#ffc800] uppercase tracking-wider">
                 <Sparkles size={12} className="animate-pulse text-[#ffc800]" />
-                <span>{isRtl ? 'مرحباً بك في بوابتك التعليمية شبيهة دولينجو 🌟' : 'WELCOME TO THE DUOLINGO-THEMED ACADEMY 🌟'}</span>
+                <span>{isRtl ? 'أكاديمية باسم الخليل التفاعلية 🌟' : 'BASIM ACADEMY INTERACTIVE 🌟'}</span>
               </div>
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight leading-none text-white">
+              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-white">
                 {t.welcomeUser} <span className="text-[#ffc800]">{profile.displayName.split(' ')[0]}</span> !
               </h1>
-              <p className="text-white/90 font-semibold text-xs md:text-sm max-w-xl leading-relaxed">
+              <p className="text-white/90 font-bold text-xs sm:text-sm max-w-xl leading-relaxed">
                 {isRtl
-                  ? 'أكاديمية باسم الخليل ترحب بك في مسارك المشوق الجديد. اختر إحدى البوابات أدناه لتبدأ لعب الألعاب، المفردات، والمحادثة الصوتية بمتعة تشبه دولينجو تماماً!'
-                  : 'Basim Alkhalil Academy welcomes you. Embark on playful paths, pronunciation diagnostics, and voice phonic modules designed to unleash your English fluency like Duolingo!'}
+                  ? 'مرحباً بك في بوابتك التعليمية الشاملة! تدرب على القواعد، القراءة الناطقة، والتعبير والإملاء بمتعة وحيوية تامة.'
+                  : 'Welcome to your smart learning portal! Master grammar, voice reading, spelling, and dialogues playfully.'}
               </p>
               
-              <div className="flex flex-wrap items-center gap-2.5 pt-2">
-                <div className="flex items-center gap-2 bg-white/10 border border-white/15 px-3 py-1.5 rounded-xl">
-                  <span className="text-[9px] font-black text-white/70 uppercase tracking-wider">{isRtl ? 'كود الطالب:' : 'STUDENT CODE:'}</span>
-                  <code className="text-xs font-mono font-bold text-[#ffc800] select-all">
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                {/* Copy Student Code */}
+                <button
+                  onClick={handleCopyCode}
+                  className="flex items-center gap-2 bg-white/15 hover:bg-white/25 active:scale-95 border border-white/20 px-3 py-1.5 rounded-xl transition-all cursor-pointer"
+                  title={isRtl ? 'انقر لنسخ كود الطالب' : 'Click to copy student code'}
+                >
+                  <span className="text-[9px] font-black text-white/80 uppercase tracking-wider">{isRtl ? 'كود الطالب:' : 'CODE:'}</span>
+                  <code className="text-xs font-mono font-black text-[#ffc800]">
                     {profile.studentCode ? `AK${profile.studentCode}` : profile.uid}
                   </code>
-                </div>
-                <div className="flex items-center gap-2 bg-white/10 border border-white/15 px-3 py-1.5 rounded-xl text-yellow-300">
-                  <span className="text-[9px] font-black text-white/70 uppercase tracking-wider">{isRtl ? 'مستواك الحالي:' : 'CURRENT LEVEL:'}</span>
+                  {copiedCode ? (
+                    <Check size={13} className="text-emerald-300 animate-bounce" />
+                  ) : (
+                    <Copy size={13} className="text-white/70" />
+                  )}
+                </button>
+
+                {/* Level badge */}
+                <div className="flex items-center gap-1.5 bg-white/15 border border-white/20 px-3 py-1.5 rounded-xl text-yellow-300">
+                  <span className="text-[9px] font-black text-white/80 uppercase tracking-wider">{isRtl ? 'المستوى:' : 'LEVEL:'}</span>
                   <span className="text-xs font-black uppercase tracking-wider text-[#ffc800]">
-                    {hasCompletedTest ? ((profile as any).level || 'A1') : (isRtl ? 'بانتظار الاختبار ⚠️' : 'Pending Test ⚠️')}
+                    {hasCompletedTest ? ((profile as any).level || 'A1') : (isRtl ? 'بانتظار الاختبار ⚠️' : 'Pending ⚠️')}
                   </span>
                 </div>
               </div>
             </div>
             
-            {/* HERO STATS BAR (Points & Actions) */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 bg-white/10 backdrop-blur-md p-3.5 rounded-3xl border border-white/15 w-full lg:w-auto shrink-0">
-              <div className="flex-1 lg:flex-none flex items-center justify-center gap-3.5 px-6 py-4 bg-white/10 rounded-2xl w-full sm:w-auto">
-                <Trophy className="text-[#ffc800] w-7 h-7" />
-                <div className="text-left font-black shrink-0">
-                  <p className="text-2xl font-black text-white leading-none">1,240</p>
+            {/* HERO STATS BAR & QUICK ACTION */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 bg-black/15 backdrop-blur-md p-3 rounded-2xl sm:rounded-3xl border border-white/15 shrink-0">
+              <div className="flex items-center justify-center gap-3 px-4 py-3 bg-white/15 rounded-xl sm:rounded-2xl">
+                <Trophy className="text-[#ffc800] w-6 h-6 sm:w-7 sm:h-7" />
+                <div className="text-left font-black">
+                  <p className="text-xl sm:text-2xl font-black text-white leading-none">1,240</p>
                   <p className="text-[9px] font-black text-white/80 uppercase tracking-widest leading-none mt-1">{t.points}</p>
                 </div>
               </div>
-              <button 
-                onClick={() => {
-                  const codeToCopy = profile.studentCode ? `AK${profile.studentCode}` : profile.uid;
-                  navigator.clipboard.writeText(codeToCopy);
-                  alert(lang === 'ar' ? 'تم نسخ كود الطالب!' : 'Student code copied!');
-                }}
-                className="w-full sm:w-auto p-4 duo-btn-orange text-white flex items-center justify-center gap-2 text-xs uppercase font-black"
+
+              <button
+                onClick={() => onNavigate('interactive-learning')}
+                className="px-4 py-3 bg-[#ffc800] hover:bg-[#e6b400] active:scale-95 text-slate-900 font-black text-xs sm:text-sm rounded-xl sm:rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Settings size={16} />
-                <span>{isRtl ? 'نسخ كود الطالب' : 'Copy Student Code'}</span>
+                <Gamepad2 size={16} />
+                <span>{isRtl ? 'العب وتفاعل الآن 🚀' : 'Play & Practice Now 🚀'}</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* AI GENUINE RECOMMENDATION BLOCK */}
+        {/* AI DAILY RECOMMENDATION CARD */}
         {recommendation && (
           <motion.div 
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 bg-white border-2 border-b-4 border-slate-200 rounded-[2rem] text-slate-800 flex items-center gap-6 relative shadow-sm"
+            className="p-4 sm:p-5 bg-white border-2 border-b-4 border-slate-200 rounded-2xl sm:rounded-[2rem] text-slate-800 flex items-center gap-4 relative shadow-sm"
           >
-            <div className="w-14 h-14 bg-[#1cb0f6] rounded-2xl flex items-center justify-center shrink-0 shadow-sm border-b-4 border-[#1292ce]">
-              <Sparkles className="text-white animate-pulse" />
+            <div className="w-11 h-11 sm:w-13 sm:h-13 bg-[#1cb0f6] rounded-2xl flex items-center justify-center shrink-0 shadow-sm border-b-4 border-[#1292ce]">
+              <Sparkles className="text-white animate-pulse w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div className={`flex-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-              <p className="text-[9px] font-black uppercase tracking-[0.2em] mb-1 text-[#1cb0f6]">{isRtl ? 'نصيحة مستشار الذكاء الاصطناعي اليوم 🦉' : 'AI DAILY COUNSELLOR ADVICE 🦉'}</p>
-              <p className="font-extrabold text-xs md:text-sm leading-relaxed text-slate-700">"{recommendation}"</p>
+            <div className={`flex-1 min-w-0 ${isRtl ? 'text-right' : 'text-left'}`}>
+              <p className="text-[9px] font-black uppercase tracking-wider mb-0.5 text-[#1cb0f6]">{isRtl ? 'نصيحة مستشار الذكاء الاصطناعي 🦉' : 'AI DAILY ADVICE 🦉'}</p>
+              <p className="font-bold text-xs sm:text-sm leading-relaxed text-slate-700">"{recommendation}"</p>
             </div>
           </motion.div>
         )}
 
-        {/* SECTION NAVIGATION TITLE */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 pb-4">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-black text-[#002147] tracking-tight">
-              {isRtl ? 'بوابة الأقسام والمحتوى التعليمي 🚀' : 'Explore Academic Sections 🚀'}
-            </h2>
-            <p className="text-slate-400 font-extrabold text-xs mt-0.5">
-              {isRtl ? 'اضغط على أي قسم مخصص أدناه للانتقال للمحتوى التفاعلي والمراجعة فورا:' : 'Click on any section to enter interactive training rooms, custom modules, and speak directly.'}
-            </p>
+        {/* MODERN MOBILE FILTER & SEARCH CONTROLS */}
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-black text-[#002147] tracking-tight">
+                {isRtl ? 'الأقسام والمسارات التعليمية 🚀' : 'Learning Hubs & Corridors 🚀'}
+              </h2>
+              <p className="text-slate-400 font-bold text-xs mt-0.5">
+                {isRtl ? 'اختر مسارك التعليمي المفضل أو ابحث في المحتوى مباشرة:' : 'Select your pathway or quickly search for modules:'}
+              </p>
+            </div>
+
+            {/* Quick Search Input */}
+            <div className="relative w-full sm:w-64 md:w-72">
+              <Search size={15} className={`absolute ${isRtl ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none`} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={isRtl ? 'بحث في الأقسام...' : 'Search hubs...'}
+                className={`w-full bg-white border-2 border-slate-200 focus:border-[#58cc02] rounded-2xl py-2 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none transition-all shadow-sm ${
+                  isRtl ? 'pr-9 pl-8 text-right' : 'pl-9 pr-8 text-left'
+                }`}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className={`absolute ${isRtl ? 'left-2.5' : 'right-2.5'} top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600`}
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700">{isRtl ? 'تحديث تلقائي متاح' : 'Live Connected'}</span>
+
+          {/* Horizontal Scrollable Category Filter Chips */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+            {categoriesList.map((cat) => {
+              const isActive = selectedCategory === cat.id;
+              const count = cat.id === 'all' 
+                ? allSections.length 
+                : allSections.filter(s => s.category === cat.id).length;
+              return (
+                <button
+                  key={`cat-pill-${cat.id}`}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-black shrink-0 transition-all border-2 active:scale-95 cursor-pointer ${
+                    isActive
+                      ? 'bg-[#58cc02] text-white border-[#46a302] shadow-sm border-b-4'
+                      : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <span>{isRtl ? cat.labelAr : cat.labelEn}</span>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
+                    isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* LANDING PAGE MAIN CARD LAUNCHER GRID (12 LARGE SECTIONS) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[
-            {
-              id: 'academic-planner',
-              titleAr: 'الخطة الأكاديمية والجدول 🗓️',
-              titleEn: 'Academic Planner 🗓️',
-              descAr: 'خطتك الشخصية لجدولة الحصص الدراسية، أرشفة تقارير التقييم، وتوليد الاختبارات الدورية الشاملة.',
-              descEn: 'Plan your personalized study schedule, manage bi-weekly tests, and check auto-generated reports.',
-              icon: Sparkles,
-              glowColor: 'bg-indigo-400/20',
-              badgeStyle: 'bg-indigo-50 text-indigo-700 border border-indigo-150',
-              iconBg: 'bg-indigo-50',
-              iconColor: 'text-indigo-600',
-              btnTextColor: 'text-indigo-600',
-              btnBg: 'bg-indigo-50',
-              badgeAr: 'جدول ذكي مخصص',
-              badgeEn: 'Smart Schedule'
-            },
-            {
-              id: 'grammar-academy',
-              titleAr: 'أكاديمية القواعد والتراكيب 📐',
-              titleEn: 'Grammar & Syntax Academy 📐',
-              descAr: 'المعادلات النحوية البصرية التفاعلية، تشخيص وتحليل الجمل المباشر، واختبارات قياس الفهم المتدرجة.',
-              descEn: 'Master syntax with visual formula engines, live sentence doctor, and smart diagnostic quizzes.',
-              icon: Brain,
-              glowColor: 'bg-blue-400/20',
-              badgeStyle: 'bg-blue-50 text-blue-700 border border-blue-200',
-              iconBg: 'bg-blue-50',
-              iconColor: 'text-blue-600',
-              btnTextColor: 'text-blue-600',
-              btnBg: 'bg-blue-50',
-              badgeAr: 'علمي وتفاعلي',
-              badgeEn: 'Scientific Grammar'
-            },
-            {
-              id: 'reading-lab',
-              titleAr: 'مختبر القراءة والفهم الاستيعابي 📖',
-              titleEn: 'Active Reading & Fluency Lab 📖',
-              descAr: 'نصوص وقصص تفاعلية ناطقة متزامنة، بنك مفردات صوتي، واختبارات قياس الفهم القرائي والاستيعاب.',
-              descEn: 'Synchronized audio reading passages, interactive contextual vocabulary, and comprehension checks.',
-              icon: BookOpen,
-              glowColor: 'bg-emerald-400/20',
-              badgeStyle: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-              iconBg: 'bg-emerald-50',
-              iconColor: 'text-emerald-600',
-              btnTextColor: 'text-emerald-600',
-              btnBg: 'bg-emerald-50',
-              badgeAr: 'قراءة ناطقة متزامنة',
-              badgeEn: 'Interactive Audio'
-            },
-            {
-              id: 'writing-spelling-studio',
-              titleAr: 'استوديو التعبير والكتابة والإملاء ✍️',
-              titleEn: 'Writing, Expression & Spelling Studio ✍️',
-              descAr: 'صياغة التعبير البليغ، محرر المقالات مع الفحص الفوري بالذكاء الاصطناعي، وتدريبات الإملاء الصوتي والقواعد الصوتية.',
-              descEn: 'Smart rhetoric transitions, essay crafter with AI grading, and scientific phonics spelling drills.',
-              icon: PenTool,
-              glowColor: 'bg-purple-400/20',
-              badgeStyle: 'bg-purple-50 text-purple-700 border border-purple-200',
-              iconBg: 'bg-purple-50',
-              iconColor: 'text-purple-600',
-              btnTextColor: 'text-purple-600',
-              btnBg: 'bg-purple-50',
-              badgeAr: 'بلاغة وإملاء علمي',
-              badgeEn: 'Scientific Spelling'
-            },
-            {
-              id: 'interactive-learning',
-              titleAr: 'بوابة المتعة والألعاب 🎪',
-              titleEn: 'Interactive Playroom 🎪',
-              descAr: 'كاريوكي الأغاني الإنجليزية، ألغاز غرف الهروب للقواعد، صانع السيناريو التفاعلي، ومسابقات العائلة.',
-              descEn: 'Gamified interactive lyric karaoke, escape room challenges, and customized offline family Bingo cards.',
-              icon: Gamepad2,
-              glowColor: 'bg-purple-400/20',
-              badgeStyle: 'bg-purple-50 text-purple-700 border border-purple-150',
-              iconBg: 'bg-purple-50',
-              iconColor: 'text-purple-600',
-              btnTextColor: 'text-purple-600',
-              btnBg: 'bg-purple-50',
-              badgeAr: 'ألعاب وكسر جمود',
-              badgeEn: 'Interactive Room'
-            },
-            {
-              id: 'educational-games',
-              titleAr: 'واحة الألعاب والآداب الراقية 🎮',
-              titleEn: 'Educational Games & Etiquette 🎮',
-              descAr: 'ألعاب تفاعلية مسلية، ألغاز المفردات والتهجئة المشوقة، تصحيح العادات اليومية، وفرسان الذوق والآداب الراقية بمكافآت سخية!',
-              descEn: 'Academic spelling riddles, interactive daily habits correction, and the Knights of Royal Etiquette & Social Manners challenge!',
-              icon: Gamepad2,
-              glowColor: 'bg-amber-400/20',
-              badgeStyle: 'bg-amber-50 text-amber-700 border border-[#C49E3A]/25',
-              iconBg: 'bg-amber-50',
-              iconColor: 'text-[#C49E3A]',
-              btnTextColor: 'text-[#C49E3A]',
-              btnBg: 'bg-amber-50',
-              badgeAr: 'ألعاب، عادات، وأدب راقي',
-              badgeEn: 'All Ages • Play & Etiquette'
-            },
-            {
-              id: 'pronunciation-lab',
-              titleAr: 'معمل الصوتيات والمخارج 🎙️',
-              titleEn: 'Pronunciation Lab 🎙️',
-              descAr: 'ميكروفون محاكي لتسجيل نطقك والتحقق الدقيق من مطابقة نبرتك عبر تحليلات الموجة وتلوين مستويات الكلمات.',
-              descEn: 'Speak dynamically with live waveform visual analysis and clear color evaluation on syllables.',
-              icon: Mic,
-              glowColor: 'bg-amber-400/20',
-              badgeStyle: 'bg-amber-50 text-amber-700 border border-[#C49E3A]/20',
-              iconBg: 'bg-amber-50',
-              iconColor: 'text-amber-600',
-              btnTextColor: 'text-amber-600',
-              btnBg: 'bg-amber-50',
-              badgeAr: 'تدريب مباشر فوري',
-              badgeEn: 'Mic Waveform Lab'
-            },
-            {
-              id: 'live-translate',
-              titleAr: 'المترجم المباشر وعالم اللغات 🌐',
-              titleEn: 'Gemini 3.5 Live Translate 🌐',
-              descAr: 'ترجم عباراتك بمستويات صياغة متعددة ومتكاملة مع استخراج مكعبات القواعد وتوليد التحديات اللغوية المباشرة.',
-              descEn: 'High-fidelity contextual translation sandbox. Adjust styles/tones, analyze grammar cubics, and tackle interactive matching challenges.',
-              icon: Languages,
-              glowColor: 'bg-emerald-400/20',
-              badgeStyle: 'bg-emerald-50 text-emerald-700 border border-emerald-150',
-              iconBg: 'bg-emerald-50',
-              iconColor: 'text-[#002147]',
-              btnTextColor: 'text-[#002147]',
-              btnBg: 'bg-amber-accent/10',
-              badgeAr: 'ميزة ذكاء فوري جديدة',
-              badgeEn: 'AI Translation & Play'
-            },
-            {
-              id: 'story-library',
-              titleAr: 'مكتبة القصص الممتعة 📖',
-              titleEn: 'Audiovisual Story Library 📖',
-              descAr: 'مجموعة من القصص والمغامرات المسموعة والمقروءة المزودة بأصوات مشوقة وقاموس كلمات فوري واختبارات قياس الفهم.',
-              descEn: 'Enchanting stories with highlighted text-to-speech syncing, interactive mini dictionaries and comprehension tasks.',
-              icon: BookMarked,
-              glowColor: 'bg-teal-400/20',
-              badgeStyle: 'bg-teal-50 text-teal-700 border border-teal-150',
-              iconBg: 'bg-teal-50',
-              iconColor: 'text-teal-600',
-              btnTextColor: 'text-teal-600',
-              btnBg: 'bg-teal-50',
-              badgeAr: 'استماع وقاموس فوري',
-              badgeEn: 'Immersive stories'
-            },
-            {
-              id: 'early-childhood',
-              titleAr: 'قسم الصغار التمهيدي 👶',
-              titleEn: 'Early Childhood Zone 👶',
-              descAr: 'مخزون الحروف الهجائية التأسيسية، لوحة الكلمات البسيطة الأولى، وألعاب تنمية الملاحظة للأشبال الصغار.',
-              descEn: 'Colorful preschool interfaces dedicated to building alphabets, basic vocabulary, puzzles and simple words.',
-              icon: Baby,
-              glowColor: 'bg-pink-400/20',
-              badgeStyle: 'bg-pink-50 text-pink-700 border border-pink-150',
-              iconBg: 'bg-pink-50',
-              iconColor: 'text-pink-600',
-              btnTextColor: 'text-pink-600',
-              btnBg: 'bg-pink-50',
-              badgeAr: 'تأسيس وبناء لغوي للطفل',
-              badgeEn: 'Toddler Phonics'
-            },
-            {
-              id: 'ai-chat',
-              titleAr: 'شريك المحادثة الذكي 🤖',
-              titleEn: 'Basim AI Dialog Partner 🤖',
-              descAr: 'تحدث بالصوت والرسائل النصية مع باسم في مواضيع تفاعلية واحصل على تصحيحات فورية للأخطاء اللغوية.',
-              descEn: 'Build oral courage and correct grammatical syntax live by talking to your smart buddy Basim.',
-              icon: Mic2,
-              glowColor: 'bg-slate-400/20',
-              badgeStyle: 'bg-slate-100 text-slate-800 border border-slate-200',
-              iconBg: 'bg-slate-50',
-              iconColor: 'text-slate-700',
-              btnTextColor: 'text-slate-700',
-              btnBg: 'bg-slate-50',
-              badgeAr: 'رفيق المحادثة الصوتي',
-              badgeEn: 'Speech Companion'
-            },
-            {
-              id: 'video-library',
-              titleAr: 'المرئيات والشروحات 🎬',
-              titleEn: 'Interactive Video Hub 🎬',
-              descAr: 'سلسلة الدروس الأكاديمية المصورة للبرنامج التعليمي، مرفقة بأسئلة اختيار من متعدد أثناء التشغيل.',
-              descEn: 'Curated explainer video sessions combined with timely quizzes during learning checkpoints.',
-              icon: Play,
-              glowColor: 'bg-sky-400/20',
-              badgeStyle: 'bg-sky-50 text-sky-700 border border-sky-150',
-              iconBg: 'bg-sky-50',
-              iconColor: 'text-sky-600',
-              btnTextColor: 'text-sky-600',
-              btnBg: 'bg-sky-50',
-              badgeAr: 'مرئيات باسم الممتعة',
-              badgeEn: 'Animated Lectures'
-            },
-            {
-              id: 'progress',
-              titleAr: 'لوحة الأبطال والصدارة 🏆',
-              titleEn: 'Performance Tracker 🏆',
-              descAr: 'استعرض رصيد الأوسمة التي حققتها، نقاط قوتك، ومقدار تقدمك مقارنة بزملائك الطلاب في لوحة الشرف.',
-              descEn: 'Review cumulative point badges, live leaderboard standings, and overall developmental stats.',
-              icon: Trophy,
-              glowColor: 'bg-amber-400/20',
-              badgeStyle: 'bg-amber-50 text-amber-700 border border-amber-150',
-              iconBg: 'bg-amber-50',
-              iconColor: 'text-amber-500',
-              btnTextColor: 'text-[#002147]',
-              btnBg: 'bg-amber-50',
-              badgeAr: 'الملف الشخصي للتميز',
-              badgeEn: 'Honors Board'
-            },
-            {
-              id: 'chat',
-              titleAr: 'صالون تفاعل الطلاب 💬',
-              titleEn: 'Peer Lounge & Chat 💬',
-              descAr: 'غرفة المحادثة الصوتية والكتابية باللغة الإنجليزية حصراً للتواصل الآمن ومناقشة التحديات مع الأصدقاء.',
-              descEn: 'English-only collaborative chatrooms and safe peer corridors to build dialog courage interactively.',
-              icon: MessageSquare,
-              glowColor: 'bg-violet-400/20',
-              badgeStyle: 'bg-violet-50 text-violet-700 border border-violet-150',
-              iconBg: 'bg-violet-50',
-              iconColor: 'text-violet-600',
-              btnTextColor: 'text-violet-600',
-              btnBg: 'bg-violet-50',
-              badgeAr: 'التواصل الآمن والتألق',
-              badgeEn: 'Student Collaboration'
-            }
-          ].map((sec, sIdx) => {
-            const SectionIcon = sec.icon;
-            return (
-              <motion.div
-                key={`landing-sec-${sec.id}-${sIdx}`}
-                whileHover={{ y: -6, scale: 1.01 }}
-                onClick={() => {
-                  if (sec.id === 'ai-chat') {
-                    onStartConversation();
-                  } else {
-                    onNavigate(sec.id as AppView);
-                  }
-                }}
-                className="bg-white p-6 md:p-8 rounded-[2rem] border-2 border-b-[6px] border-slate-200 hover:border-slate-300 cursor-pointer transition-all active:border-b-2 active:translate-y-[4px] flex flex-col justify-between relative overflow-hidden group"
-              >
-                {/* Visual Glow Circle */}
-                <div className={`absolute right-[-15px] top-[-10px] w-24 h-24 ${sec.glowColor} rounded-full blur-xl opacity-20 group-hover:scale-130 transition-transform duration-500 pointer-events-none`} />
+        {/* CARDS GRID - RESPONSIVE & MODERN */}
+        {filteredSections.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {filteredSections.map((sec, sIdx) => {
+              const SectionIcon = sec.icon;
+              return (
+                <motion.div
+                  key={`landing-sec-${sec.id}-${sIdx}`}
+                  whileHover={{ y: -5 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    if (sec.id === 'ai-chat') {
+                      onStartConversation();
+                    } else {
+                      onNavigate(sec.id as AppView);
+                    }
+                  }}
+                  className="bg-white p-5 sm:p-6 rounded-3xl border-2 border-b-[5px] border-slate-200 hover:border-[#58cc02]/50 hover:shadow-md cursor-pointer transition-all flex flex-col justify-between relative overflow-hidden group"
+                >
+                  {/* Visual Glow Circle */}
+                  <div className={`absolute right-[-15px] top-[-10px] w-24 h-24 ${sec.glowColor} rounded-full blur-xl opacity-20 group-hover:scale-130 transition-transform duration-500 pointer-events-none`} />
 
-                <div>
-                  <div className="flex items-center justify-between mb-5">
-                    <span className={`px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider ${sec.badgeStyle}`}>
-                      {isRtl ? sec.badgeAr : sec.badgeEn}
-                    </span>
-                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border-2 border-slate-100 ${sec.iconBg} ${sec.iconColor}`}>
-                      <SectionIcon size={20} className="group-hover:scale-110 transition-transform duration-300" />
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className={`px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider ${sec.badgeStyle}`}>
+                        {isRtl ? sec.badgeAr : sec.badgeEn}
+                      </span>
+                      <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border-2 border-slate-100 ${sec.iconBg} ${sec.iconColor} group-hover:scale-110 transition-transform`}>
+                        <SectionIcon size={20} />
+                      </div>
                     </div>
+
+                    <h3 className="text-base sm:text-lg font-black text-slate-800 mb-2 leading-tight flex items-center gap-2 group-hover:text-[#58cc02] transition-colors">
+                      {isRtl ? sec.titleAr : sec.titleEn}
+                    </h3>
+
+                    <p className="text-slate-500 font-semibold text-xs leading-relaxed mb-5 line-clamp-3">
+                      {isRtl ? sec.descAr : sec.descEn}
+                    </p>
                   </div>
 
-                  <h3 className="text-base md:text-lg font-black text-slate-800 mb-2 leading-tight flex items-center gap-2 group-hover:text-[#58cc02] transition-colors">
-                    {isRtl ? sec.titleAr : sec.titleEn}
-                  </h3>
-
-                  <p className="text-slate-400 font-bold text-[11px] leading-relaxed mb-6">
-                    {isRtl ? sec.descAr : sec.descEn}
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between border-t border-slate-100 pt-4 mt-auto">
-                  <span className={`text-[10px] font-black ${sec.btnTextColor} uppercase tracking-widest`}>
-                    {isRtl ? 'افتح البوابة 🧭' : 'Launch Corridor 🧭'}
-                  </span>
-                  <span className={`w-7 h-7 rounded-lg ${sec.btnBg} ${sec.iconColor} flex items-center justify-center text-xs font-black group-hover:translate-x-1 transition-transform`}>
-                    {isRtl ? '←' : '→'}
-                  </span>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-3.5 mt-auto">
+                    <span className={`text-[10px] font-black ${sec.btnTextColor} uppercase tracking-widest`}>
+                      {isRtl ? 'دخول مباشر ⚡' : 'Open Corridor ⚡'}
+                    </span>
+                    <span className={`w-7 h-7 rounded-xl ${sec.btnBg} ${sec.iconColor} flex items-center justify-center text-xs font-black group-hover:translate-x-1 transition-transform`}>
+                      {isRtl ? '←' : '→'}
+                    </span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-10 bg-white border-2 border-dashed border-slate-200 rounded-3xl text-center space-y-3">
+            <Search size={32} className="mx-auto text-slate-300" />
+            <p className="text-sm font-bold text-slate-500">
+              {isRtl ? 'لم يتم العثور على أقسام تطابق بحثك.' : 'No hubs matching your search criteria.'}
+            </p>
+            <button
+              onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
+              className="px-4 py-2 bg-[#58cc02] text-white rounded-xl text-xs font-black cursor-pointer"
+            >
+              {isRtl ? 'إعادة ضبط التصفية' : 'Reset Filters'}
+            </button>
+          </div>
+        )}
 
         {/* ACTIVE STUDY PLAN BANNER */}
         {currentPlan && todayLesson && (
@@ -4353,23 +4482,33 @@ export default function App() {
           onBack={() => setView('dashboard')} 
           onNavigateToResults={() => setView('academic-results')}
           onNavigateToLesson={(courseId, level, unitId) => {
-            if (courseId === 'reading') {
+            if (courseId === 'reading' || courseId === 'reading_lab') {
               setSelectedReadingLevel(level as ReadingLevel);
               setAutoStartUnitId(unitId);
               setView('reading-curriculum');
-            } else if (courseId === 'grammar') {
+            } else if (courseId === 'grammar' || courseId === 'grammar_academy') {
               setSelectedGrammarLevel(level as GrammarLevel);
               setAutoStartUnitId(unitId);
               setView('grammar-curriculum');
-            } else if (courseId === 'writing') {
+            } else if (courseId === 'writing' || courseId === 'writing_studio') {
               setSelectedWritingLevel(level as WritingLevel);
               setAutoStartUnitId(unitId);
               setView('writing-curriculum');
+            } else if (courseId === 'expression') {
+              setSelectedWritingLevel(level as WritingLevel);
+              setAutoStartUnitId(unitId);
+              setView('writing-curriculum');
+            } else if (courseId === 'conversation') {
+              setView('ai-chat');
+            } else if (courseId === 'pronunciation') {
+              setView('pronunciation-lab');
+            } else if (courseId === 'live_translate' || courseId === 'translation') {
+              setView('live-translate');
             } else if (courseId === 'oxford') {
               setAutoStartUnitId(unitId);
               const isOld = !isNaN(Number(unitId)) || String(unitId).startsWith('old_');
               setView(isOld ? 'oxford-classic' : 'oxford-discover');
-            } else if (courseId === 'story-library') {
+            } else if (courseId === 'story-library' || courseId === 'stories') {
               setInitialStoryId(unitId);
               setView('story-library');
             } else if (courseId === 'english_songs' || courseId === 'english-songs') {
@@ -4390,7 +4529,7 @@ export default function App() {
             } else if (courseId === 'family_activities' || courseId === 'family-activities') {
               setActiveInteractiveUnitId(unitId);
               setView('family-activities');
-            } else if (courseId === 'adults_daily_dose' || courseId === 'adults-daily-dose') {
+            } else if (courseId === 'adults_daily_dose' || courseId === 'adults-daily-dose' || courseId === 'daily_dose') {
               const idx = ADULTS_DAILY_DOSES.findIndex(d => d.lesson_id === unitId || d.lesson_id === 'adults-daily-dose');
               setSelectedDailyDoseIndex(idx !== -1 ? idx : 0);
               setView('adults-daily-dose');
@@ -4445,10 +4584,12 @@ export default function App() {
       return (
         <SmartAnalytics 
           lang={lang} 
-          onBack={() => setView('academic-results')} 
+          onBack={() => setView('academic-planner')} 
           planItems={globalPlan?.planItems}
           studentName={globalPlan?.studentName || currentStudentName}
           studentId={currentStudentId}
+          level={userProfile?.level || 'B1'}
+          onNavigateToSection={(target) => setView(target as any)}
         />
       );
     }
@@ -5234,6 +5375,36 @@ export default function App() {
           lang={lang}
           onBack={() => setView('dashboard')}
           userLevel={userProfile?.level}
+          onXPAdded={async (xp, details) => {
+            if (userProfile && currentUser) {
+              const currentPoints = (userProfile as any).points || 0;
+              const newPoints = currentPoints + xp;
+              try {
+                if (!currentUser.uid.startsWith('sim_')) {
+                  await updateDoc(doc(db, 'users', currentUser.uid), {
+                    points: newPoints
+                  });
+                }
+                await addDoc(collection(db, 'lessonResults'), {
+                  userId: currentUser.uid,
+                  parentIds: (userProfile as any).linkedParentIds || [],
+                  lessonId: details?.lessonId || 'g_unit',
+                  courseId: 'grammar_academy',
+                  level: details?.level || userProfile?.level || 'B1',
+                  lessonTitle: details?.title || 'Grammar Academy Quiz',
+                  score: details?.score || 10,
+                  total: details?.total || 10,
+                  timestamp: serverTimestamp()
+                });
+                setUserProfile({
+                  ...userProfile,
+                  points: newPoints
+                } as any);
+              } catch (e) {
+                console.error("Error updating points for Grammar Academy:", e);
+              }
+            }
+          }}
         />
       );
     }
@@ -5243,6 +5414,36 @@ export default function App() {
           lang={lang}
           onBack={() => setView('dashboard')}
           userLevel={userProfile?.level}
+          onXPAdded={async (xp, details) => {
+            if (userProfile && currentUser) {
+              const currentPoints = (userProfile as any).points || 0;
+              const newPoints = currentPoints + xp;
+              try {
+                if (!currentUser.uid.startsWith('sim_')) {
+                  await updateDoc(doc(db, 'users', currentUser.uid), {
+                    points: newPoints
+                  });
+                }
+                await addDoc(collection(db, 'lessonResults'), {
+                  userId: currentUser.uid,
+                  parentIds: (userProfile as any).linkedParentIds || [],
+                  lessonId: details?.lessonId || 'r_unit',
+                  courseId: 'reading_lab',
+                  level: details?.level || userProfile?.level || 'B1',
+                  lessonTitle: details?.title || 'Reading Lab Passage',
+                  score: details?.score || 10,
+                  total: details?.total || 10,
+                  timestamp: serverTimestamp()
+                });
+                setUserProfile({
+                  ...userProfile,
+                  points: newPoints
+                } as any);
+              } catch (e) {
+                console.error("Error updating points for Reading Lab:", e);
+              }
+            }
+          }}
         />
       );
     }
@@ -5252,6 +5453,36 @@ export default function App() {
           lang={lang}
           onBack={() => setView('dashboard')}
           userLevel={userProfile?.level}
+          onXPAdded={async (xp, details) => {
+            if (userProfile && currentUser) {
+              const currentPoints = (userProfile as any).points || 0;
+              const newPoints = currentPoints + xp;
+              try {
+                if (!currentUser.uid.startsWith('sim_')) {
+                  await updateDoc(doc(db, 'users', currentUser.uid), {
+                    points: newPoints
+                  });
+                }
+                await addDoc(collection(db, 'lessonResults'), {
+                  userId: currentUser.uid,
+                  parentIds: (userProfile as any).linkedParentIds || [],
+                  lessonId: details?.lessonId || 'w_unit',
+                  courseId: 'writing_studio',
+                  level: details?.level || userProfile?.level || 'B1',
+                  lessonTitle: details?.title || 'Writing & Spelling Studio',
+                  score: details?.score || 10,
+                  total: details?.total || 10,
+                  timestamp: serverTimestamp()
+                });
+                setUserProfile({
+                  ...userProfile,
+                  points: newPoints
+                } as any);
+              } catch (e) {
+                console.error("Error updating points for Writing Studio:", e);
+              }
+            }
+          }}
         />
       );
     }

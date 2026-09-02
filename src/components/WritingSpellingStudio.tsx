@@ -29,6 +29,7 @@ interface WritingSpellingStudioProps {
   lang: Language;
   onBack?: () => void;
   userLevel?: string;
+  onXPAdded?: (xp: number, details?: { lessonId: string; title: string; score: number; total: number; level: string }) => void;
 }
 
 interface SpellingItem {
@@ -95,7 +96,7 @@ const SPELLING_DATASET: SpellingItem[] = [
   }
 ];
 
-export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ lang, onBack }) => {
+export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ lang, onBack, userLevel, onXPAdded }) => {
   const isRtl = lang === 'ar';
   const [activeStudioTab, setActiveStudioTab] = useState<'expression' | 'essay' | 'spelling'>('expression');
 
@@ -157,6 +158,15 @@ export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ la
       });
       const data = await res.json();
       setEvaluationResult(data);
+      if (onXPAdded && data.overallScore) {
+        onXPAdded(100, {
+          lessonId: 'essay_ai_future',
+          title: isRtl ? 'استوديو التعبير: تقييم المقال الأكاديمي' : 'Writing Studio: Essay Evaluation',
+          score: data.overallScore,
+          total: 100,
+          level: userLevel || 'B2'
+        });
+      }
     } catch (err) {
       console.error("Evaluation error:", err);
     } finally {

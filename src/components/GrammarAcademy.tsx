@@ -31,6 +31,7 @@ interface GrammarAcademyProps {
   lang: Language;
   onBack?: () => void;
   userLevel?: string;
+  onXPAdded?: (xp: number, details?: { lessonId: string; title: string; score: number; total: number; level: string }) => void;
 }
 
 interface GrammarTopic {
@@ -231,7 +232,7 @@ const PRESET_TOPICS: GrammarTopic[] = [
   }
 ];
 
-export const GrammarAcademy: React.FC<GrammarAcademyProps> = ({ lang, onBack }) => {
+export const GrammarAcademy: React.FC<GrammarAcademyProps> = ({ lang, onBack, userLevel, onXPAdded }) => {
   const isRtl = lang === 'ar';
   const [activeCategory, setActiveCategory] = useState<'all' | 'tenses' | 'syntax' | 'modals' | 'connectors'>('all');
   const [selectedTopic, setSelectedTopic] = useState<GrammarTopic>(PRESET_TOPICS[0]);
@@ -290,6 +291,16 @@ export const GrammarAcademy: React.FC<GrammarAcademyProps> = ({ lang, onBack }) 
       setIsAnswerSubmitted(false);
     } else {
       setQuizCompleted(true);
+      if (onXPAdded) {
+        const calculatedXP = (quizScore + (selectedAnswer === selectedTopic.quiz[currentQuizIndex]?.correctIndex && !isAnswerSubmitted ? 1 : 0)) * 25 + 25;
+        onXPAdded(calculatedXP, {
+          lessonId: selectedTopic.id,
+          title: isRtl ? selectedTopic.titleAr : selectedTopic.titleEn,
+          score: quizScore,
+          total: selectedTopic.quiz.length,
+          level: selectedTopic.level
+        });
+      }
     }
   };
 

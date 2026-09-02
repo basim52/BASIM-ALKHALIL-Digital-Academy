@@ -28,6 +28,7 @@ interface ReadingLabProps {
   lang: Language;
   onBack?: () => void;
   userLevel?: string;
+  onXPAdded?: (xp: number, details?: { lessonId: string; title: string; score: number; total: number; level: string }) => void;
 }
 
 interface ReadingPassage {
@@ -200,7 +201,7 @@ const PRESET_PASSAGES: ReadingPassage[] = [
   }
 ];
 
-export const ReadingLab: React.FC<ReadingLabProps> = ({ lang, onBack }) => {
+export const ReadingLab: React.FC<ReadingLabProps> = ({ lang, onBack, userLevel, onXPAdded }) => {
   const isRtl = lang === 'ar';
   const [selectedPassage, setSelectedPassage] = useState<ReadingPassage>(PRESET_PASSAGES[0]);
   const [activeTab, setActiveTab] = useState<'read' | 'vocab' | 'quiz' | 'generator'>('read');
@@ -284,6 +285,16 @@ export const ReadingLab: React.FC<ReadingLabProps> = ({ lang, onBack }) => {
     });
     setQuizScore(score);
     setIsQuizSubmitted(true);
+    if (onXPAdded) {
+      const calculatedXP = score * 30 + 20;
+      onXPAdded(calculatedXP, {
+        lessonId: selectedPassage.id,
+        title: isRtl ? selectedPassage.titleAr : selectedPassage.titleEn,
+        score,
+        total: selectedPassage.comprehensionQuiz.length,
+        level: selectedPassage.level
+      });
+    }
   };
 
   const handleGenerateCustomStory = async () => {

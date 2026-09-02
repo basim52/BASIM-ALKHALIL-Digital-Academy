@@ -31,6 +31,7 @@ import {
 import { translations, Language } from '../../lib/translations';
 import { db } from '../../lib/firebase';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { mapResultToPillar } from '../../utils/academicData';
 
 interface ResultsChartProps {
   lang: Language;
@@ -87,25 +88,15 @@ export const ResultsChart: React.FC<ResultsChartProps> = ({
 
   const totalLessons = planItems?.length || 0;
   
-  // Calculate category averages
+  // Calculate category averages using unified taxonomy
   const getCategoryAvg = (categoryId: string) => {
     const catResults = results.filter(r => {
-      if (r.courseId === categoryId) return true;
-      if (r.lessonId?.startsWith(categoryId)) return true;
-      
-      // Fallback matching logic for legacy data or simple IDs
-      if (categoryId === 'reading' && r.lessonId?.startsWith('r_')) return true;
-      if (categoryId === 'grammar' && r.lessonId?.startsWith('g_')) return true;
-      if (categoryId === 'writing' && r.lessonId?.startsWith('w_')) return true;
-      if (categoryId === 'conversation' && r.lessonId?.startsWith('c_')) return true;
-      if (categoryId === 'expression' && r.lessonId?.startsWith('e_')) return true;
-      if (categoryId === 'oxford' && (!isNaN(Number(r.lessonId)) || r.lessonId?.startsWith('oxford') || r.courseId === 'oxford')) return true;
-
-      return false;
+      const pillar = mapResultToPillar(r);
+      return pillar.id === categoryId;
     });
     if (catResults.length === 0) return 0;
     const total = catResults.reduce((acc, r) => acc + (r.score || 0), 0);
-    const possible = catResults.reduce((acc, r) => acc + (r.total || 10), 0);
+    const possible = catResults.reduce((acc, r) => acc + (r.total || (r.score > 0 ? r.score : 100)), 0);
     return Math.round((total / possible) * 100);
   };
 
