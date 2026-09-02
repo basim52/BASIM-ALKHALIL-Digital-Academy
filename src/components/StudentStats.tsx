@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { translations, Language } from '../lib/translations';
-import { Trophy, Clock, BookCheck, TrendingUp } from 'lucide-react';
+import { Trophy, Clock, BookCheck, TrendingUp, Sparkles, Brain, ArrowUpRight } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { Badges } from './Badges';
+import { ProgressRoadmap } from './ProgressRoadmap';
 
 interface StudentStatsProps {
   lang: Language;
   userId: string;
   points?: number;
   level?: string;
+  onNavigateToAdaptive?: () => void;
 }
 
-export const StudentStats = ({ lang, userId, points, level }: StudentStatsProps) => {
+export const StudentStats = ({ lang, userId, points, level, onNavigateToAdaptive }: StudentStatsProps) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [loading, setLoading] = useState(true);
@@ -164,6 +166,14 @@ export const StudentStats = ({ lang, userId, points, level }: StudentStatsProps)
             </AreaChart>
           </ResponsiveContainer>
         </div>
+      </section>
+
+      <section className="bg-transparent pt-4">
+        <ProgressRoadmap
+          lang={lang}
+          currentLevel={level || 'B1'}
+          onNavigateToAdaptive={onNavigateToAdaptive}
+        />
       </section>
 
       <section className="bg-transparent pt-4">

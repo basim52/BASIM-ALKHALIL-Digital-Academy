@@ -56,6 +56,7 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
+  const [tutorMode, setTutorMode] = useState<'general' | 'grammar' | 'vocab' | 'culture'>('general');
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -145,16 +146,16 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
   };
 
   // Send message to instant tutor
-  const handleSendMessage = async (e?: React.FormEvent) => {
+  const handleSendMessage = async (e?: React.FormEvent, directText?: string) => {
     if (e) e.preventDefault();
-    if (!inputMessage.trim() || isLoading) return;
+    const textToSend = (directText || inputMessage).trim();
+    if (!textToSend || isLoading) return;
 
-    const userText = inputMessage.trim();
     setInputMessage('');
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
       sender: 'user',
-      text: userText,
+      text: textToSend,
       timestamp: new Date()
     };
     setMessages(prev => [...prev, userMsg]);
@@ -170,8 +171,9 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: userText,
+          message: textToSend,
           context: currentContext,
+          mode: tutorMode,
           history: historyPayload
         })
       });
@@ -377,10 +379,23 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
+                {onNavigateToView && (
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      onNavigateToView('real-time-voice-call');
+                    }}
+                    className="px-2.5 py-1 rounded-xl bg-white/20 hover:bg-white/30 text-white flex items-center gap-1.5 text-[10px] font-black transition-all cursor-pointer border border-white/30"
+                    title={isRtl ? 'فتح المكالمة الصوتية المباشرة' : 'Open Live Voice Call'}
+                  >
+                    <Mic size={12} className="animate-pulse" />
+                    <span>{isRtl ? 'مكالمة مباشرة 📞' : 'Live Call 📞'}</span>
+                  </button>
+                )}
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
                 >
                   <X size={18} />
                 </button>
@@ -412,8 +427,31 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
             {/* TAB 1: INSTANT TUTOR CHAT */}
             {activeTab === 'chat' && (
               <div className="flex-1 flex flex-col justify-between overflow-hidden p-4 bg-[#F8FAFC]">
+                {/* Mode Selector Chips */}
+                <div className="flex items-center gap-1.5 pb-2 border-b border-slate-200/80 shrink-0 overflow-x-auto text-[11px] font-black no-scrollbar">
+                  {[
+                    { id: 'general', labelAr: 'الرفيق العام 🤖', labelEn: 'General AI 🤖' },
+                    { id: 'grammar', labelAr: 'تدقيق نحوي ✍️', labelEn: 'Grammar Coach ✍️' },
+                    { id: 'vocab', labelAr: 'مفردات وسياق 📚', labelEn: 'Vocab & Idioms 📚' },
+                    { id: 'culture', labelAr: 'إتيكيت وثقافة 🌍', labelEn: 'Culture & Etiquette 🌍' },
+                  ].map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setTutorMode(m.id as any)}
+                      className={`px-2.5 py-1 rounded-lg border whitespace-nowrap transition-all cursor-pointer ${
+                        tutorMode === m.id
+                          ? 'bg-[#58cc02] text-white border-[#58cc02] shadow-sm font-black scale-105'
+                          : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      {isRtl ? m.labelAr : m.labelEn}
+                    </button>
+                  ))}
+                </div>
+
                 {/* Message Log */}
-                <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+                <div className="flex-1 overflow-y-auto space-y-3 pr-1 pt-2">
                   {messages.map((m) => (
                     <div
                       key={m.id}
@@ -453,8 +491,33 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
                   <div ref={chatBottomRef} />
                 </div>
 
+                {/* Quick Prompts Suggestions */}
+                <div className="flex items-center gap-1.5 py-2 overflow-x-auto text-[10px] font-bold text-slate-600 no-scrollbar shrink-0">
+                  <span className="text-slate-400 shrink-0">{isRtl ? 'اقتراحات سريعة:' : 'Quick:'}</span>
+                  {(isRtl ? [
+                    'كيف أفرق بين Since و For؟',
+                    'أعطني 3 مصطلحات للاعتذار بلباقة',
+                    'صحح لي: "I am agree with you"',
+                    'كيف أسأل عن الاتجاهات باحترافية؟'
+                  ] : [
+                    'Difference between Since and For?',
+                    '3 Polite ways to disagree',
+                    'Correct: "I am agree with you"',
+                    'Asking for directions fluently'
+                  ]).map((promptText, pIdx) => (
+                    <button
+                      key={pIdx}
+                      type="button"
+                      onClick={() => handleSendMessage(undefined, promptText)}
+                      className="px-2.5 py-1 bg-white border border-slate-200 hover:border-[#58cc02] hover:text-[#58cc02] rounded-lg whitespace-nowrap shadow-xs transition-colors shrink-0 cursor-pointer"
+                    >
+                      {promptText}
+                    </button>
+                  ))}
+                </div>
+
                 {/* Chat Input Bar */}
-                <form onSubmit={handleSendMessage} className="mt-3 pt-2 border-t border-slate-200 flex items-center gap-2">
+                <form onSubmit={handleSendMessage} className="pt-2 border-t border-slate-200 flex items-center gap-2">
                   <button
                     type="button"
                     onClick={toggleSpeechRecognition}

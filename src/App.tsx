@@ -109,6 +109,9 @@ import { FlashcardsHub } from './components/FlashcardsHub';
 import { FamilyActivities } from './components/FamilyActivities';
 import { InteractiveLearningHub } from './components/InteractiveLearningHub';
 import { EducationalGamesHub } from './components/EducationalGamesHub';
+import { GrammarAcademy } from './components/GrammarAcademy';
+import { ReadingLab } from './components/ReadingLab';
+import { WritingSpellingStudio } from './components/WritingSpellingStudio';
 import { Layers, Image as OxfordIcon, Library as OxfordClassicIcon, Languages } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { familyConstellationsLesson } from './data/lessons/r_a1_4';
@@ -265,6 +268,8 @@ import { linguisticFluidityE1 } from './data/lessons/e_c2_4';
 import { aestheticSynthesisE1 } from './data/lessons/e_c2_5';
 import { AIOmniCompanion } from './components/AIOmniCompanion';
 import { GlobalCommandPalette } from './components/GlobalCommandPalette';
+import { RealtimeVoiceCall } from './components/RealtimeVoiceCall';
+import { AdaptiveLearningPath } from './components/AdaptiveLearningPath';
 import { Search } from 'lucide-react';
 
 // Removed local AppView declaration as it is now imported from ./types
@@ -1204,52 +1209,52 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
               badgeEn: 'Smart Schedule'
             },
             {
-              id: 'oxford-discover',
-              titleAr: 'أوكسفورد المطور 🌟',
-              titleEn: 'Oxford Discover 🌟',
-              descAr: 'بطاقات المفردات الذكية لتخطي مراحل الاستذكار النشط، تدريبات التهجئة بالنقر، ومعمل رصد المقاطع للنطق.',
-              descEn: 'Active recall card decks, fast syllable sound tracks, and spelling speed drills for newly adapted modules.',
-              icon: Layers,
-              glowColor: 'bg-rose-400/20',
-              badgeStyle: 'bg-rose-50 text-rose-700 border border-rose-150',
-              iconBg: 'bg-rose-50',
-              iconColor: 'text-rose-500',
-              btnTextColor: 'text-rose-500',
-              btnBg: 'bg-rose-50',
-              badgeAr: 'التكرار المتباعد',
-              badgeEn: 'Active Recall'
+              id: 'grammar-academy',
+              titleAr: 'أكاديمية القواعد والتراكيب 📐',
+              titleEn: 'Grammar & Syntax Academy 📐',
+              descAr: 'المعادلات النحوية البصرية التفاعلية، تشخيص وتحليل الجمل المباشر، واختبارات قياس الفهم المتدرجة.',
+              descEn: 'Master syntax with visual formula engines, live sentence doctor, and smart diagnostic quizzes.',
+              icon: Brain,
+              glowColor: 'bg-blue-400/20',
+              badgeStyle: 'bg-blue-50 text-blue-700 border border-blue-200',
+              iconBg: 'bg-blue-50',
+              iconColor: 'text-blue-600',
+              btnTextColor: 'text-blue-600',
+              btnBg: 'bg-blue-50',
+              badgeAr: 'علمي وتفاعلي',
+              badgeEn: 'Scientific Grammar'
             },
             {
-              id: 'oxford-classic',
-              titleAr: 'أوكسفورد الكلاسيكي 📚',
-              titleEn: 'Classic Oxford 📚',
-              descAr: 'القاموس المصور الكامل وألعاب مطابقة الصور بالمفردات مع الوحدة الثامنة "الطعام اللذيذ" العابرة.',
-              descEn: 'Prestige pictorial vocabularies, click match tables, and Unit 8 "Delicious Food" original phonic games.',
-              icon: OxfordClassicIcon,
+              id: 'reading-lab',
+              titleAr: 'مختبر القراءة والفهم الاستيعابي 📖',
+              titleEn: 'Active Reading & Fluency Lab 📖',
+              descAr: 'نصوص وقصص تفاعلية ناطقة متزامنة، بنك مفردات صوتي، واختبارات قياس الفهم القرائي والاستيعاب.',
+              descEn: 'Synchronized audio reading passages, interactive contextual vocabulary, and comprehension checks.',
+              icon: BookOpen,
               glowColor: 'bg-emerald-400/20',
-              badgeStyle: 'bg-emerald-50 text-emerald-700 border border-emerald-150',
+              badgeStyle: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
               iconBg: 'bg-emerald-50',
-              iconColor: 'text-emerald-600Dark',
+              iconColor: 'text-emerald-600',
               btnTextColor: 'text-emerald-600',
               btnBg: 'bg-emerald-50',
-              badgeAr: 'المنهج الكلاسيكي القديم',
-              badgeEn: 'Classic Dictionary'
+              badgeAr: 'قراءة ناطقة متزامنة',
+              badgeEn: 'Interactive Audio'
             },
             {
-              id: 'modern-curriculum',
-              titleAr: 'المناهج الدراسية المطورة 🏫',
-              titleEn: 'Modernized Curriculums 🏫',
-              descAr: 'منظومة الدراسة الأكاديمية العميقة لمهارات اللغة الأساسية: القراءة، القواعد، الكتابة، المحادثة والتعبير.',
-              descEn: 'Fascinating curriculum frameworks covering core skills from Reading & Grammar to Oral Writing companions.',
-              icon: GraduationCap,
-              glowColor: 'bg-cyan-400/20',
-              badgeStyle: 'bg-cyan-50 text-[#002147] border border-cyan-150',
-              iconBg: 'bg-cyan-50',
-              iconColor: 'text-cyan-600',
-              btnTextColor: 'text-cyan-600',
-              btnBg: 'bg-cyan-50',
-              badgeAr: 'الفصول التأسيسية',
-              badgeEn: 'Essential Curriculums'
+              id: 'writing-spelling-studio',
+              titleAr: 'استوديو التعبير والكتابة والإملاء ✍️',
+              titleEn: 'Writing, Expression & Spelling Studio ✍️',
+              descAr: 'صياغة التعبير البليغ، محرر المقالات مع الفحص الفوري بالذكاء الاصطناعي، وتدريبات الإملاء الصوتي والقواعد الصوتية.',
+              descEn: 'Smart rhetoric transitions, essay crafter with AI grading, and scientific phonics spelling drills.',
+              icon: PenTool,
+              glowColor: 'bg-purple-400/20',
+              badgeStyle: 'bg-purple-50 text-purple-700 border border-purple-200',
+              iconBg: 'bg-purple-50',
+              iconColor: 'text-purple-600',
+              btnTextColor: 'text-purple-600',
+              btnBg: 'bg-purple-50',
+              badgeAr: 'بلاغة وإملاء علمي',
+              badgeEn: 'Scientific Spelling'
             },
             {
               id: 'interactive-learning',
@@ -4753,6 +4758,25 @@ export default function App() {
         />
       );
     }
+    if (view === 'real-time-voice-call') {
+      return (
+        <RealtimeVoiceCall
+          lang={lang}
+          onBack={() => setView('interactive-learning')}
+        />
+      );
+    }
+    if (view === 'adaptive-learning-path') {
+      return (
+        <AdaptiveLearningPath
+          lang={lang}
+          userLevel={userProfile?.level || 'B1'}
+          userName={(userProfile as any)?.name || (userProfile as any)?.displayName || currentUser?.displayName || 'Student'}
+          onBack={() => setView('progress')}
+          onNavigateToView={(target) => setView(target)}
+        />
+      );
+    }
     if (view === 'interactive-learning') {
       return (
         <InteractiveLearningHub
@@ -5204,6 +5228,33 @@ export default function App() {
         </div>
       );
     }
+    if (view === 'grammar-academy') {
+      return (
+        <GrammarAcademy
+          lang={lang}
+          onBack={() => setView('dashboard')}
+          userLevel={userProfile?.level}
+        />
+      );
+    }
+    if (view === 'reading-lab') {
+      return (
+        <ReadingLab
+          lang={lang}
+          onBack={() => setView('dashboard')}
+          userLevel={userProfile?.level}
+        />
+      );
+    }
+    if (view === 'writing-spelling-studio') {
+      return (
+        <WritingSpellingStudio
+          lang={lang}
+          onBack={() => setView('dashboard')}
+          userLevel={userProfile?.level}
+        />
+      );
+    }
     if (view === 'modern-curriculum') {
       return (
         <ModernCurriculumHome 
@@ -5485,6 +5536,7 @@ export default function App() {
           userId={targetUserId} 
           points={targetPoints} 
           level={targetLevel}
+          onNavigateToAdaptive={() => setView('adaptive-learning-path')}
         />
       );
     }
@@ -5616,11 +5668,11 @@ export default function App() {
                     { id: 'interactive-learning', label: lang === 'ar' ? 'تعليم تفاعلي ⚡' : 'Interactive Learning ⚡', icon: Gamepad2 },
                     { id: 'educational-games', label: lang === 'ar' ? 'واحة الألعاب والآداب 🎮' : 'Games & Manners Hub 🎮', icon: Gamepad2 },
                     { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
+                    { id: 'grammar-academy', label: lang === 'ar' ? 'أكاديمية القواعد 📐' : 'Grammar Academy 📐', icon: Brain },
+                    { id: 'reading-lab', label: lang === 'ar' ? 'مختبر القراءة 📖' : 'Reading Lab 📖', icon: BookOpen },
+                    { id: 'writing-spelling-studio', label: lang === 'ar' ? 'استوديو التعبير والإملاء ✍️' : 'Writing & Spelling Studio ✍️', icon: PenTool },
                     { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
                     { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
-                    { id: 'oxford-discover', label: lang === 'ar' ? 'أوكسفورد المطور 🌟' : 'Oxford Discover 🌟', icon: Layers },
-                    { id: 'oxford-classic', label: lang === 'ar' ? 'أوكسفورد الكلاسيكي 📚' : 'Classic Oxford 📚', icon: OxfordClassicIcon },
-                    { id: 'modern-curriculum', label: lang === 'ar' ? 'المناهج الدراسية المطورة' : 'Modernized Curriculums', icon: Sparkles },
                     { id: 'ai-curriculum', label: lang === 'ar' ? 'منهج الذكاء الاصطناعي 🧠' : 'AI Curriculum 🧠', icon: Brain },
                     { id: 'balance-oasis', label: lang === 'ar' ? 'واحة التوازن 🌊' : 'Balance Oasis 🌊', icon: Smile },
                     { id: 'professional-development', label: lang === 'ar' ? 'دورات تطويرية' : 'Developmental Courses', icon: GraduationCap },
@@ -5772,9 +5824,9 @@ export default function App() {
                             {[
                               { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
                               { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
-                              { id: 'oxford-discover', label: isRtl ? 'أوكسفورد المطور' : 'Oxford Discover', icon: Layers },
-                              { id: 'oxford-classic', label: isRtl ? 'أوكسفورد الكلاسيكي' : 'Classic Oxford', icon: OxfordClassicIcon },
-                              { id: 'modern-curriculum', label: isRtl ? 'المناهج المطورة' : 'Modernized Curriculas', icon: BookOpen },
+                              { id: 'grammar-academy', label: isRtl ? 'أكاديمية القواعد 📐' : 'Grammar Academy 📐', icon: Brain },
+                              { id: 'reading-lab', label: isRtl ? 'مختبر القراءة 📖' : 'Reading Lab 📖', icon: BookOpen },
+                              { id: 'writing-spelling-studio', label: isRtl ? 'استوديو التعبير والإملاء ✍️' : 'Writing & Spelling Studio ✍️', icon: PenTool },
                               { id: 'ai-curriculum', label: isRtl ? 'منهج الذكاء الاصطناعي 🧠' : 'AI Curriculum 🧠', icon: Brain },
                             ].map((item) => {
                               const isActive = view === item.id;

@@ -17,7 +17,8 @@ import {
   Zap,
   Star,
   CheckCircle2,
-  FolderOpen
+  FolderOpen,
+  Brain
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AppView } from '../types';
@@ -133,15 +134,26 @@ export const GlobalCommandPalette: React.FC<GlobalCommandPaletteProps> = ({
 
     // AI & Smart Tools
     {
+      id: 'ai-adaptive-path',
+      titleAr: 'مسار التعلم التكيفي وتشخيص الثغرات (Adaptive Path 🧠)',
+      titleEn: 'Adaptive Learning Path & Gap Diagnostic 🧠',
+      descriptionAr: 'تشخيص الثغرات اللغوية الدقيقة وتوليد تمارين علاجية وكويزات ذكية',
+      descriptionEn: 'Targeted language gap analysis with dynamic remedial drills',
+      icon: Brain,
+      category: 'ai',
+      view: 'adaptive-learning-path',
+      badge: 'Adaptive AI'
+    },
+    {
       id: 'ai-live-voice',
-      titleAr: 'المحادثة الصوتية المباشرة (Live AI Voice)',
-      titleEn: 'Live Voice AI Conversation',
-      descriptionAr: 'تحدث صوتياً مع الذكاء الاصطناعي مع قياس مخارج الحروف والنبر',
-      descriptionEn: 'Real-time spoken dialogue with accent coaching',
+      titleAr: 'المحادثة الصوتية المباشرة (Live AI Voice 🎙️)',
+      titleEn: 'Live Voice AI Conversation 🎙️',
+      descriptionAr: 'تحدث صوتياً مع الذكاء الاصطناعي مع قياس مخارج الحروف والنبر اللحظي',
+      descriptionEn: 'Real-time spoken dialogue with accent and acoustic coaching',
       icon: Mic,
       category: 'ai',
-      view: 'ai-chat',
-      badge: 'Gemini 3.7'
+      view: 'real-time-voice-call',
+      badge: 'Gemini 3.7 Live'
     },
     {
       id: 'ai-placement-test',

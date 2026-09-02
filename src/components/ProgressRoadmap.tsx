@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { motion } from 'motion/react';
 import { translations, Language } from '../lib/translations';
-import { Trophy, CheckCircle2, ChevronRight, Star, Download } from 'lucide-react';
+import { Trophy, CheckCircle2, ChevronRight, Star, Download, Sparkles, Brain, ArrowUpRight } from 'lucide-react';
 import { proficiencyLevel } from '../types';
 import html2canvas from 'html2canvas';
 
@@ -9,6 +9,7 @@ interface ProgressRoadmapProps {
   lang: Language;
   currentLevel: string;
   studentName?: string;
+  onNavigateToAdaptive?: () => void;
 }
 
 const levels = [
@@ -20,7 +21,7 @@ const levels = [
   { id: proficiencyLevel.C2, label: 'C2', color: 'from-indigo-500 to-indigo-600', icon: '👑', benchmark: 'IELTS 8.5-9.0' },
 ];
 
-export const ProgressRoadmap = ({ lang, currentLevel, studentName }: ProgressRoadmapProps) => {
+export const ProgressRoadmap = ({ lang, currentLevel, studentName, onNavigateToAdaptive }: ProgressRoadmapProps) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const roadmapRef = useRef<HTMLDivElement>(null);
@@ -64,10 +65,20 @@ export const ProgressRoadmap = ({ lang, currentLevel, studentName }: ProgressRoa
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {onNavigateToAdaptive && (
+          <button
+            onClick={onNavigateToAdaptive}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-black text-xs hover:from-indigo-500 hover:to-purple-500 transition-all shadow-md active:scale-95 cursor-pointer"
+          >
+            <Brain size={15} />
+            <span>{isRtl ? 'تشخيص الثغرات والمسار التكيفي (Adaptive AI)' : 'AI Gap Diagnostic & Adaptive Path'}</span>
+            <ArrowUpRight size={14} />
+          </button>
+        )}
         <button
           onClick={handleExportImage}
-          className="flex items-center gap-2 px-4 py-2 bg-[#002147] text-white rounded-xl font-bold text-xs hover:bg-[#003366] transition-colors shadow-lg active:scale-95"
+          className="flex items-center gap-2 px-4 py-2 bg-[#002147] text-white rounded-xl font-bold text-xs hover:bg-[#003366] transition-colors shadow-lg active:scale-95 ms-auto cursor-pointer"
         >
           <Download size={14} />
           {isRtl ? 'تحميل المسار كصورة' : 'Download Roadmap Image'}

@@ -11,6 +11,7 @@ import {
   Palette,
   Trophy,
   Gamepad2,
+  Brain,
   ArrowRight,
   ArrowLeft
 } from 'lucide-react';
@@ -32,6 +33,38 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
   const isRtl = lang === 'ar';
 
   const activities = [
+    {
+      id: 'adaptive-learning-path' as const,
+      title: '🧠 مسار التعلم التكيفي وتشخيص الثغرات الذكي',
+      titleEn: 'Adaptive Learning Path & Knowledge Gap Diagnostics 🧠',
+      description: 'يقوم الذكاء الاصطناعي بتحليل إجاباتك ورصد نقاط الضعف الدقيقة وتوليد كويزات وتمارين علاجية مخصصة فوراً!',
+      descriptionEn: 'AI pinpoints exact linguistic weaknesses, offering custom targeted drills and dynamic quizzes to master every skill!',
+      icon: Brain,
+      color: 'bg-indigo-600',
+      textColor: 'text-indigo-800',
+      bgColor: 'bg-indigo-50/80',
+      borderColor: 'border-indigo-200',
+      pillColor: 'bg-indigo-100 text-indigo-800',
+      badge: isRtl ? 'ذكاء تكيفي دقيق' : 'Adaptive AI Path',
+      xpReward: '+200 XP',
+      level: 'All CEFR Tiers 🎯'
+    },
+    {
+      id: 'real-time-voice-call' as const,
+      title: '🎙️ المكالمة الصوتية المباشرة (Gemini 3.7 Voice Live)',
+      titleEn: 'Ultra-Fast Real-Time Voice AI Call 🎙️',
+      description: 'مكالمات صوتية فائقة السرعة مع متحدثين أصليين بالذكاء الاصطناعي مع رسم بياني لحظي لنبرة الصوت ومخارج الحروف!',
+      descriptionEn: 'Ultra-fast voice call with native AI tutors featuring real-time acoustic waveform and intonation coaching!',
+      icon: Zap,
+      color: 'bg-emerald-600',
+      textColor: 'text-emerald-800',
+      bgColor: 'bg-emerald-50/80',
+      borderColor: 'border-emerald-200',
+      pillColor: 'bg-emerald-100 text-emerald-800',
+      badge: isRtl ? 'صوت مباشر فائق السرعة' : 'Gemini 3.7 Voice Live',
+      xpReward: '+150 XP',
+      level: 'All Levels 🔥'
+    },
     {
       id: 'educational-games' as const,
       title: '🎮 واحة الألعاب التعليمية المشوقة',
