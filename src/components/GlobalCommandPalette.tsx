@@ -18,7 +18,8 @@ import {
   Star,
   CheckCircle2,
   FolderOpen,
-  Brain
+  Brain,
+  GitBranch
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AppView } from '../types';
@@ -153,7 +154,29 @@ export const GlobalCommandPalette: React.FC<GlobalCommandPaletteProps> = ({
       icon: Mic,
       category: 'ai',
       view: 'real-time-voice-call',
-      badge: 'Gemini 3.7 Live'
+      badge: 'Gemini 3.8 Live'
+    },
+    {
+      id: 'ai-dynamic-worksheets',
+      titleAr: 'صانع أوراق العمل والاختبارات التوليدية 📄',
+      titleEn: 'Dynamic AI Worksheet & Quiz Generator 📄',
+      descriptionAr: 'توليد أوراق عمل مخصصة بالذكاء الاصطناعي حسب مستواك واهتماماتك مع خيار الطباعة',
+      descriptionEn: 'Custom dynamic academic worksheets with instant online grading and printable PDF mode',
+      icon: FileText,
+      category: 'ai',
+      view: 'dynamic-worksheets',
+      badge: 'Gemini 3.8 Worksheets'
+    },
+    {
+      id: 'ai-branching-stories',
+      titleAr: 'القصص التفاعلية متعددة النهايات (Branching Stories 🌟)',
+      titleEn: 'Branching Interactive Stories & Choices 🌟',
+      descriptionAr: 'اتخذ قرارات باللغة الإنجليزية في لندن والفضاء لتوجيه مسار القصة بنهايات متعددة',
+      descriptionEn: 'Make meaningful decisions in English to shape AI-crafted chapters and multiple endings',
+      icon: GitBranch,
+      category: 'ai',
+      view: 'branching-stories',
+      badge: 'Interactive Stories'
     },
     {
       id: 'ai-placement-test',

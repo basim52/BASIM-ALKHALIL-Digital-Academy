@@ -370,7 +370,7 @@ export const RealtimeVoiceCall: React.FC<RealtimeVoiceCallProps> = ({
                 {isRtl ? 'المكالمات الصوتية المباشرة فائقة السرعة' : 'Ultra-Fast Real-Time Voice AI Call'}
               </h2>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                Gemini 3.7 Voice Live
+                Gemini 3.8 Flash Voice Live
               </span>
             </div>
             <p className="text-xs text-slate-400 font-medium">

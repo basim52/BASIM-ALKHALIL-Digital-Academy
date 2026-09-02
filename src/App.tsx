@@ -277,6 +277,8 @@ import { AIOmniCompanion } from './components/AIOmniCompanion';
 import { GlobalCommandPalette } from './components/GlobalCommandPalette';
 import { RealtimeVoiceCall } from './components/RealtimeVoiceCall';
 import { AdaptiveLearningPath } from './components/AdaptiveLearningPath';
+import { DynamicWorksheetGenerator } from './components/DynamicWorksheetGenerator';
+import { BranchingStoryEngine } from './components/BranchingStoryEngine';
 
 // Removed local AppView declaration as it is now imported from ./types
 
@@ -4913,8 +4915,48 @@ export default function App() {
           lang={lang}
           userLevel={userProfile?.level || 'B1'}
           userName={(userProfile as any)?.name || (userProfile as any)?.displayName || currentUser?.displayName || 'Student'}
-          onBack={() => setView('progress')}
+          onBack={() => setView('interactive-learning')}
           onNavigateToView={(target) => setView(target)}
+        />
+      );
+    }
+    if (view === 'dynamic-worksheets') {
+      return (
+        <DynamicWorksheetGenerator
+          lang={lang}
+          userName={(userProfile as any)?.name || (userProfile as any)?.displayName || currentUser?.displayName || 'Student'}
+          userLevel={userProfile?.level || 'B1'}
+          onBack={() => setView('interactive-learning')}
+          onAwardXp={(xp) => {
+            if (userProfile && db && currentUser) {
+              try {
+                const userRef = doc(db, 'users', currentUser.uid);
+                updateDoc(userRef, { points: (userProfile.points || 0) + xp });
+              } catch (e) {
+                console.error("Error updating XP for Worksheet:", e);
+              }
+            }
+          }}
+        />
+      );
+    }
+    if (view === 'branching-stories') {
+      return (
+        <BranchingStoryEngine
+          lang={lang}
+          userName={(userProfile as any)?.name || (userProfile as any)?.displayName || currentUser?.displayName || 'Nour'}
+          userLevel={userProfile?.level || 'A2'}
+          onBack={() => setView('interactive-learning')}
+          onAwardXp={(xp) => {
+            if (userProfile && db && currentUser) {
+              try {
+                const userRef = doc(db, 'users', currentUser.uid);
+                updateDoc(userRef, { points: (userProfile.points || 0) + xp });
+              } catch (e) {
+                console.error("Error updating XP for Story:", e);
+              }
+            }
+          }}
         />
       );
     }

@@ -85,10 +85,10 @@ async function startServer() {
 
   initAI();
 
-  // Robust AI caller with retry and fallback using modern `@google/genai` and "gemini-3.7-flash"
+  // Robust AI caller with retry and fallback using modern `@google/genai` and "gemini-3.8-flash"
   async function callAiWithRetry(options: any, maxRetries = 2) {
     let lastError: any;
-    const PRIMARY_MODEL = "gemini-3.7-flash"; 
+    const PRIMARY_MODEL = "gemini-3.8-flash"; 
 
     for (let i = 0; i <= maxRetries; i++) {
       // Ensure AI is fully initialized before each run
@@ -98,8 +98,8 @@ async function startServer() {
       
       try {
         let modelToUse = PRIMARY_MODEL;
-        if (i === 1) modelToUse = "gemini-2.5-flash";
-        if (i === 2) modelToUse = "gemini-3.1-pro-preview";
+        if (i === 1) modelToUse = "gemini-3.1-pro-preview";
+        if (i === 2) modelToUse = "gemini-2.5-flash";
         
         logToFile(`AI Call Attempt ${i+1}/${maxRetries+1} using ${modelToUse} (API Key Status: ${!!API_KEY})`);
       
@@ -1447,6 +1447,286 @@ Respond ONLY with a valid JSON object matching:
       }
     } catch (err: any) {
       logToFile(`Error in /api/ai/generate-dynamic-adaptive-quiz: ${err.message}`);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Dynamic Academic Worksheet Generator Endpoint (Powered by Gemini 3.8 Flash)
+  app.post("/api/ai/generate-worksheet", async (req, res) => {
+    try {
+      const { 
+        studentName = "Student", 
+        level = "B1", 
+        domain = "Grammar & Structure", 
+        theme = "Adventures & Daily Life", 
+        count = 5 
+      } = req.body;
+
+      if (!initAI() || !aiLive) {
+        return res.json({
+          titleEn: `Academic English Mastery Worksheet: ${domain}`,
+          titleAr: `ورقة عمل التميز الأكاديمي: ${domain}`,
+          studentName,
+          level,
+          theme,
+          instructionsEn: `Read each exercise carefully. Answer all questions thoroughly. Maximum score: 100 points.`,
+          instructionsAr: `اقرأ التعليمات والأسئلة بعناية وأجب عن جميع التمارين. الدرجة الكلية: 100 درجة.`,
+          passage: `Noor woke up early on a brisk London morning. She prepared her backpack with her Oxford dictionary and a notebook. Today was her first visit to the historic British Museum. "If I take the underground," she thought, "I will arrive just in time for the opening tour." Along the way, she greeted the friendly barista and ordered a warm cup of English tea, practicing her modal verbs and polite requests.`,
+          passageTitle: `A Morning Journey in London`,
+          questions: [
+            {
+              id: "ws-1",
+              type: "mcq",
+              question: "In the sentence 'If I take the underground, I will arrive in time', which conditional form is used?",
+              options: ["First Conditional (Real Future)", "Zero Conditional (General Fact)", "Second Conditional (Hypothetical)", "Third Conditional (Past Regret)"],
+              correctAnswer: "First Conditional (Real Future)",
+              explanationAr: "جملة الشرط الأولى تعبر عن حدث مستقبلي محتمل الحدوث باستخدام المضارع البسيط بعد if ومستقبل بسيط مع will.",
+              hint: "لاحظ استخدام take مع will arrive."
+            },
+            {
+              id: "ws-2",
+              type: "fill-blank",
+              question: "Noor asked the barista politely: 'Could I please ________ (have / having / to have) a cup of tea?'",
+              options: ["have", "having", "had", "to have"],
+              correctAnswer: "have",
+              explanationAr: "الأفعال الناقصة (Modal verbs) مثل could يتبعها الفعل في المصدر المجرد (Base Form).",
+              hint: "بعد can/could/would نستخدم المصدر مجرداً."
+            },
+            {
+              id: "ws-3",
+              type: "correction",
+              question: "Correct the underlined error: 'She has arrived to London yesterday morning.'",
+              options: ["arrived in London yesterday", "has arrived at London", "arrived at London yesterday", "is arriving in London"],
+              correctAnswer: "arrived in London yesterday",
+              explanationAr: "مع وجود ظرف زمني ماضٍ محدد مثل 'yesterday'، نستخدم الماضي البسيط (arrived) وليس المضارع التام، ومع المدن الكبيرة نستخدم 'in'.",
+              hint: "وجود 'yesterday' يمنع استخدام Present Perfect."
+            },
+            {
+              id: "ws-4",
+              type: "mcq",
+              question: "What is the synonym of the word 'brisk' in 'a brisk London morning'?",
+              options: ["Fresh, energetic and cool", "Extremely hot and humid", "Gloomy and dark", "Noisy and crowded"],
+              correctAnswer: "Fresh, energetic and cool",
+              explanationAr: "كلمة brisk تعني منعشاً ونشطاً وبارداً بلطف في وصف الطقس والمشي.",
+              hint: "تشير للنشاط والانتعاش الصباحي."
+            },
+            {
+              id: "ws-5",
+              type: "mcq",
+              question: "Why did Noor want to take the underground?",
+              options: ["To arrive just in time for the opening tour", "Because she was tired of walking", "To buy a souvenir", "To meet her teacher"],
+              correctAnswer: "To arrive just in time for the opening tour",
+              explanationAr: "مذكور في النص: 'I will arrive just in time for the opening tour'.",
+              hint: "راجع الفقرة الثانية من النص."
+            }
+          ],
+          teacherKeyNotes: "Review common L1 Arabic interference regarding prepositions ('arrived in' vs 'arrived to') and past simple vs present perfect with specific time markers."
+        });
+      }
+
+      const prompt = `You are the Master Curriculum Designer for Basim Alkhalil English Academy.
+Generate a comprehensive, pedagogically elite Academic English Worksheet powered by Gemini 3.8 Flash.
+Student Name: ${studentName}
+CEFR Level: ${level}
+Linguistic Domain: ${domain}
+Theme / Interest: ${theme}
+Number of Questions: ${count}
+
+Create a worksheet containing:
+1. Title in English and Arabic.
+2. Pedagogical Instructions in English and Arabic.
+3. A short, culturally rich and engaging reading passage (approx 60-90 words) tailored to the theme and CEFR level.
+4. Exactly ${count} questions of varied pedagogical formats (MCQ, Fill in the blanks, Sentence Correction, Vocabulary in context).
+5. Detailed Arabic explanations and hints for each question.
+6. Teacher / Parent answer key notes.
+
+Respond ONLY with a valid JSON object matching:
+{
+  "titleEn": "String",
+  "titleAr": "String",
+  "studentName": "${studentName}",
+  "level": "${level}",
+  "theme": "${theme}",
+  "instructionsEn": "String",
+  "instructionsAr": "String",
+  "passageTitle": "String",
+  "passage": "String",
+  "questions": [
+    {
+      "id": "ws-1",
+      "type": "mcq" | "fill-blank" | "correction",
+      "question": "Question text",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctAnswer": "Correct answer string",
+      "explanationAr": "Arabic explanation",
+      "hint": "Pedagogical hint"
+    }
+  ],
+  "teacherKeyNotes": "String summary of linguistic points covered"
+}`;
+
+      const result = await callAiWithRetry({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        config: {
+          responseMimeType: "application/json"
+        }
+      });
+
+      try {
+        const parsed = JSON.parse(result.text || "{}");
+        res.json(parsed);
+      } catch (parseErr) {
+        res.status(500).json({ error: "Failed to parse generated worksheet" });
+      }
+    } catch (err: any) {
+      logToFile(`Error in /api/ai/generate-worksheet: ${err.message}`);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Branching Interactive Story Engine Endpoint (Powered by Gemini 3.8 Flash)
+  app.post("/api/ai/branching-story", async (req, res) => {
+    try {
+      const { 
+        storyTheme = "Noor in London", 
+        studentLevel = "A2", 
+        decisionHistory = [], 
+        currentChoice = null, 
+        studentName = "Nour" 
+      } = req.body;
+
+      if (!initAI() || !aiLive) {
+        const step = decisionHistory.length;
+        if (step === 0) {
+          return res.json({
+            chapterTitle: "Chapter 1: Arrival at Heathrow Station 🚇",
+            sceneTextEn: `Noor stood on the bright platform at Heathrow Airport with her blue suitcase. The digital display boards flickered with train departures to Central London. She felt both thrilled and cautious. A station attendant wearing a navy uniform smiled from behind the information desk.`,
+            sceneTextAr: `وقفت نور على رصيف محطة مطار هيثرو اللامع وبجانبها حقيبتها الزرقاء. كانت الشاشات الرقمية تضيء بمواعيد القطارات المتجهة لوسط لندن. شعرت بالحماسة والحذر. ابتسم لها موظف المحطة من خلف مكتب الاستعلامات.`,
+            audioNarrationText: `Noor stood on the bright platform at Heathrow Airport with her blue suitcase. She had two ways to travel into Central London.`,
+            targetedVocab: [
+              { word: "platform", ipa: "/ˈplætfɔːm/", meaningAr: "رصيف المحطة", partOfSpeech: "noun" },
+              { word: "departures", ipa: "/dɪˈpɑːtʃəz/", meaningAr: "رحلات المغادرة", partOfSpeech: "noun" },
+              { word: "cautious", ipa: "/ˈkɔːʃəs/", meaningAr: "حذر ومتأني", partOfSpeech: "adjective" }
+            ],
+            choices: [
+              {
+                id: "choice-underground",
+                textEn: "Take the London Underground (Piccadilly Line) to explore the city stops directly.",
+                textAr: "ركوب قطار الأنفاق (خط بيكاديللي) لمشاهدة محطات المدينة بأسلوب تقليدي.",
+                consequenceHint: "Practice buying an Oyster card and asking directions."
+              },
+              {
+                id: "choice-express",
+                textEn: "Board the ultra-fast Heathrow Express train to reach Paddington in 15 minutes.",
+                textAr: "ركوب قطار هيثرو إكسبريس فائق السرعة للوصول إلى بادينغتون خلال 15 دقيقة.",
+                consequenceHint: "Meet an international student traveling to Oxford."
+              }
+            ],
+            comprehensionCheck: {
+              question: "Where did Noor stand at the beginning of the adventure?",
+              options: ["At Heathrow Airport platform", "In a London taxi", "At Oxford University", "Inside the British Museum"],
+              correctIndex: 0,
+              explanationAr: "بدأت القصة على رصيف محطة مطار هيثرو (Heathrow platform)."
+            },
+            progressPercentage: 25,
+            isEnding: false
+          });
+        } else {
+          return res.json({
+            chapterTitle: `Chapter 2: The Journey Unfolds 🌟`,
+            sceneTextEn: `Following your decision to choose "${currentChoice || 'the journey'}", Noor made remarkable progress! She practiced speaking in clear, fluent sentences with native commuters. Everyone complimented her impressive English articulation and courteous manners.`,
+            sceneTextAr: `بناءً على اختيارك، حققت نور تقدماً مبهراً! تدربت على التحدث بجمل واضحة وواثقة مع الركاب، وأثنى الجميع على حسن لفظها وأدبها الرفيع.`,
+            audioNarrationText: `Noor made remarkable progress on her journey. She spoke clearly and made new friends in London.`,
+            targetedVocab: [
+              { word: "commuters", ipa: "/kəˈmjuːtəz/", meaningAr: "المسافرون يومياً للعمل", partOfSpeech: "noun" },
+              { word: "courteous", ipa: "/ˈkɜːtiəs/", meaningAr: "مهذب ودود", partOfSpeech: "adjective" },
+              { word: "articulation", ipa: "/ɑːˌtɪkjuˈleɪʃn/", meaningAr: "وضوح مخارج الحروف", partOfSpeech: "noun" }
+            ],
+            choices: [
+              {
+                id: "choice-museum",
+                textEn: "Visit the British Museum to solve an ancient Egyptian language riddle.",
+                textAr: "زيارة المتحف البريطاني لحل لغز لغوي تاريخي مشوق.",
+                consequenceHint: "Uncover academic vocabulary and ancient mysteries."
+              },
+              {
+                id: "choice-oxford",
+                textEn: "Take the scenic coach to the University of Oxford for an academic debate.",
+                textAr: "استقلال حافلة سياحية إلى جامعة أكسفورد لحضور مناظرة أكاديمية.",
+                consequenceHint: "Participate in a prestigious debate club."
+              }
+            ],
+            comprehensionCheck: {
+              question: "What did the commuters compliment Noor on?",
+              options: ["Her impressive English articulation", "Her heavy blue suitcase", "Her train ticket", "Her map reading"],
+              correctIndex: 0,
+              explanationAr: "أثنى الركاب على طلاقتها ووضوح مخارج حروفها (English articulation)."
+            },
+            progressPercentage: 60,
+            isEnding: false
+          });
+        }
+      }
+
+      const prompt = `You are the Branching Story Master for Basim Alkhalil English Academy, powered by Gemini 3.8 Flash.
+Create an interactive, multi-branching story adventure in English with Arabic pedagogical support.
+Theme: ${storyTheme}
+Student Name: ${studentName}
+CEFR Target Level: ${studentLevel}
+History of past choices: ${JSON.stringify(decisionHistory)}
+Student's Latest Choice: ${currentChoice ? `"${currentChoice}"` : "Starting fresh chapter 1"}
+
+Requirements:
+1. Write an immersive, narrative scene in English (70-100 words) using CEFR ${studentLevel} vocabulary and grammar.
+2. Provide a friendly Arabic parallel summary.
+3. Clean spoken audio narration string.
+4. Exactly 3 key targeted vocabulary words with word, IPA transcription, Arabic meaning, and part of speech.
+5. Exactly 2 or 3 compelling next decision choices for the student to choose where the story goes next.
+6. A quick 1-question reading comprehension check.
+7. Set progressPercentage (between 20 and 100). If this is step 4 or more or a natural climax, isEnding can be true.
+
+Respond ONLY with a valid JSON object matching:
+{
+  "chapterTitle": "Chapter Title in English with Emoji",
+  "sceneTextEn": "Engaging scene text in English",
+  "sceneTextAr": "Arabic translation and summary",
+  "audioNarrationText": "Text for text-to-speech narration",
+  "targetedVocab": [
+    { "word": "word", "ipa": "/ipa/", "meaningAr": "معنى", "partOfSpeech": "noun/verb/adj" }
+  ],
+  "choices": [
+    {
+      "id": "choice-1",
+      "textEn": "English choice action",
+      "textAr": "Arabic choice description",
+      "consequenceHint": "Pedagogical or story preview"
+    }
+  ],
+  "comprehensionCheck": {
+    "question": "Comprehension question in English",
+    "options": ["Correct Option", "Distractor 1", "Distractor 2", "Distractor 3"],
+    "correctIndex": 0,
+    "explanationAr": "Arabic explanation"
+  },
+  "progressPercentage": 35,
+  "isEnding": false
+}`;
+
+      const result = await callAiWithRetry({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        config: {
+          responseMimeType: "application/json"
+        }
+      });
+
+      try {
+        const parsed = JSON.parse(result.text || "{}");
+        res.json(parsed);
+      } catch (parseErr) {
+        res.status(500).json({ error: "Failed to parse branching story" });
+      }
+    } catch (err: any) {
+      logToFile(`Error in /api/ai/branching-story: ${err.message}`);
       res.status(500).json({ error: err.message });
     }
   });

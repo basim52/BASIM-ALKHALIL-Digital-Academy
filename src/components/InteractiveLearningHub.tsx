@@ -12,6 +12,8 @@ import {
   Trophy,
   Gamepad2,
   Brain,
+  FileText,
+  GitBranch,
   ArrowRight,
   ArrowLeft
 } from 'lucide-react';
@@ -34,6 +36,22 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
 
   const activities = [
     {
+      id: 'real-time-voice-call' as const,
+      title: '🎙️ المكالمة الصوتية المباشرة (Gemini 3.8 Flash)',
+      titleEn: 'Ultra-Fast Real-Time Voice AI Call 🎙️',
+      description: 'مكالمات صوتية فائقة السرعة مع متحدثين أصليين بالذكاء الاصطناعي مع رسم بياني لحظي لنبرة الصوت ومخارج الحروف!',
+      descriptionEn: 'Ultra-fast voice call with native AI tutors featuring real-time acoustic waveform and intonation coaching!',
+      icon: Zap,
+      color: 'bg-emerald-600',
+      textColor: 'text-emerald-800',
+      bgColor: 'bg-emerald-50/80',
+      borderColor: 'border-emerald-200',
+      pillColor: 'bg-emerald-100 text-emerald-800',
+      badge: isRtl ? 'صوت مباشر Gemini 3.8' : 'Gemini 3.8 Flash Live',
+      xpReward: '+150 XP',
+      level: 'All Levels 🔥'
+    },
+    {
       id: 'adaptive-learning-path' as const,
       title: '🧠 مسار التعلم التكيفي وتشخيص الثغرات الذكي',
       titleEn: 'Adaptive Learning Path & Knowledge Gap Diagnostics 🧠',
@@ -45,25 +63,41 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
       bgColor: 'bg-indigo-50/80',
       borderColor: 'border-indigo-200',
       pillColor: 'bg-indigo-100 text-indigo-800',
-      badge: isRtl ? 'ذكاء تكيفي دقيق' : 'Adaptive AI Path',
+      badge: isRtl ? 'ذكاء تكيفي تنبؤي' : 'Predictive Gap Tree',
       xpReward: '+200 XP',
       level: 'All CEFR Tiers 🎯'
     },
     {
-      id: 'real-time-voice-call' as const,
-      title: '🎙️ المكالمة الصوتية المباشرة (Gemini 3.7 Voice Live)',
-      titleEn: 'Ultra-Fast Real-Time Voice AI Call 🎙️',
-      description: 'مكالمات صوتية فائقة السرعة مع متحدثين أصليين بالذكاء الاصطناعي مع رسم بياني لحظي لنبرة الصوت ومخارج الحروف!',
-      descriptionEn: 'Ultra-fast voice call with native AI tutors featuring real-time acoustic waveform and intonation coaching!',
-      icon: Zap,
-      color: 'bg-emerald-600',
-      textColor: 'text-emerald-800',
-      bgColor: 'bg-emerald-50/80',
-      borderColor: 'border-emerald-200',
-      pillColor: 'bg-emerald-100 text-emerald-800',
-      badge: isRtl ? 'صوت مباشر فائق السرعة' : 'Gemini 3.7 Voice Live',
+      id: 'dynamic-worksheets' as const,
+      title: '📄 صانع أوراق العمل والاختبارات التوليدية',
+      titleEn: 'Dynamic AI Worksheet & Exam Generator 📄',
+      description: 'قم بتوليد أوراق عمل واختبارات تفاعلية مخصصة فوراً حسب اهتماماتك ومستواك، مع خيار الحل المباشر أو الطباعة الأكاديمية بنموذج الإجابة!',
+      descriptionEn: 'Generate tailored academic worksheets with instant online grading, printable PDF mode, and comprehensive answer keys!',
+      icon: FileText,
+      color: 'bg-blue-600',
+      textColor: 'text-blue-800',
+      bgColor: 'bg-blue-50/80',
+      borderColor: 'border-blue-200',
+      pillColor: 'bg-blue-100 text-blue-800',
+      badge: isRtl ? 'أوراق عمل تفاعلية وطباعة' : 'Gemini 3.8 Worksheets',
+      xpReward: '+120 XP',
+      level: 'A1 - C2 📄'
+    },
+    {
+      id: 'branching-stories' as const,
+      title: '🌟 القصص التفاعلية متعددة النهايات (Branching Stories)',
+      titleEn: 'Interactive Branching Stories & Decisions 🌟',
+      description: 'اختر مسار مغامراتك باللغة الإنجليزية في لندن والفضاء وأكسفورد! كل قرار تتخذه يصنع فصلاً جديداً ونهايات مشوقة غير متوقعة.',
+      descriptionEn: 'Make critical choices in authentic English adventures. Every decision dynamically crafts new plot branches with audio narration!',
+      icon: GitBranch,
+      color: 'bg-teal-600',
+      textColor: 'text-teal-800',
+      bgColor: 'bg-teal-50/80',
+      borderColor: 'border-teal-200',
+      pillColor: 'bg-teal-100 text-teal-800',
+      badge: isRtl ? 'مغامرات متفرعة حية' : 'Branching Choices',
       xpReward: '+150 XP',
-      level: 'All Levels 🔥'
+      level: 'All Tiers 🧭'
     },
     {
       id: 'educational-games' as const,
