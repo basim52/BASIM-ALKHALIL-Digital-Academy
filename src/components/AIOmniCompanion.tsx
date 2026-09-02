@@ -17,7 +17,8 @@ import {
   Maximize2,
   Minimize2,
   ChevronDown,
-  Sparkle
+  Sparkle,
+  GripVertical
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
@@ -79,6 +80,10 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
   const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
+
+  // Drag & constraints ref for full-screen draggable button
+  const dragConstraintsRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -320,48 +325,99 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
   };
 
   return (
-    <aside 
-      aria-label={isRtl ? 'المساعد الذكي للأكاديمية' : 'AI Academy Companion'}
-      className={`fixed bottom-6 ${isRtl ? 'left-6' : 'right-6'} z-50`} 
-      dir={isRtl ? 'rtl' : 'ltr'}
-    >
-      {/* TRIGGER FLOATING BUTTON */}
+    <>
+      {/* Full-viewport boundary for dragging anywhere */}
+      <div 
+        ref={dragConstraintsRef} 
+        className="fixed inset-0 pointer-events-none z-[990] overflow-hidden select-none" 
+        aria-hidden="true"
+      />
+
+      {/* DRAGGABLE FLOATING TRIGGER BUTTON */}
       {!isOpen && (
-        <motion.button
+        <motion.div
+          drag
+          dragConstraints={dragConstraintsRef}
+          dragElastic={0.15}
+          dragMomentum={false}
+          onDragStart={() => {
+            isDraggingRef.current = true;
+          }}
+          onDragEnd={() => {
+            setTimeout(() => {
+              isDraggingRef.current = false;
+            }, 180);
+          }}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setIsOpen(true)}
-          className="flex items-center gap-3 px-5 py-3.5 bg-gradient-to-r from-[#58cc02] via-[#22c55e] to-[#1cb0f6] text-white rounded-full shadow-2xl border-2 border-white/80 backdrop-blur-md font-black text-xs uppercase tracking-wider group cursor-pointer"
+          whileHover={{ scale: 1.05 }}
+          whileDrag={{ scale: 1.1, cursor: 'grabbing', filter: 'brightness(1.08)' }}
+          className={`fixed bottom-24 ${isRtl ? 'left-4 sm:left-6' : 'right-4 sm:right-6'} z-[995] touch-none select-none cursor-grab active:cursor-grabbing`}
+          dir={isRtl ? 'rtl' : 'ltr'}
+          aria-label={isRtl ? 'المساعد الذكي للأكاديمية - قابل للسحب' : 'AI Academy Companion - Draggable'}
         >
-          <div className="relative">
-            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-              <Bot size={20} className="text-white animate-bounce" />
+          <div
+            onClick={() => {
+              if (isDraggingRef.current) return;
+              setIsOpen(true);
+            }}
+            className="flex items-center gap-2 sm:gap-3 px-3.5 py-2.5 sm:px-4 sm:py-3 bg-gradient-to-r from-[#58cc02] via-[#22c55e] to-[#1cb0f6] text-white rounded-full shadow-2xl border-2 border-white/90 backdrop-blur-md group select-none cursor-pointer active:scale-95 transition-transform"
+          >
+            {/* Drag grip handle */}
+            <div 
+              className="text-white/70 group-hover:text-white transition-colors flex items-center justify-center -mr-1"
+              title={isRtl ? 'اسحب لنقل الزر لأي مكان' : 'Drag to move anywhere'}
+            >
+              <GripVertical size={16} />
             </div>
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 border-2 border-white rounded-full animate-ping" />
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 border-2 border-white rounded-full" />
+
+            {/* AI Avatar with status pulse */}
+            <div className="relative shrink-0">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 bg-white/20 rounded-full flex items-center justify-center shadow-inner">
+                <Bot size={20} className="text-white animate-bounce [animation-duration:2.5s]" />
+              </div>
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 border-2 border-white rounded-full animate-ping" />
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 border-2 border-white rounded-full" />
+            </div>
+
+            {/* Label & Drag hint */}
+            <div className={`${isRtl ? 'text-right' : 'text-left'}`}>
+              <div className="flex items-center gap-1">
+                <span className="font-black text-xs leading-tight whitespace-nowrap">
+                  {isRtl ? 'المساعد الذكي 🪄' : 'AI Tutor 🪄'}
+                </span>
+              </div>
+              <span className="text-[9px] text-white/90 font-bold opacity-80 leading-none block whitespace-nowrap">
+                {isRtl ? 'اسحبني لأي مكان ✋' : 'Drag anywhere ✋'}
+              </span>
+            </div>
           </div>
-          <div className="text-right">
-            <span className="block font-black text-xs leading-none">
-              {isRtl ? 'المساعد الذكي الفوري 🪄' : 'Instant AI Tutor 🪄'}
-            </span>
-            <span className="text-[9px] text-white/90 font-bold opacity-80 leading-none">
-              {isRtl ? 'نطق • ترجمة • تصحيح • اختبارات' : 'Voice • Translate • Quiz'}
-            </span>
-          </div>
-        </motion.button>
+        </motion.div>
       )}
 
-      {/* EXPANDED AI ASSISTANT MODAL */}
+      {/* EXPANDED AI ASSISTANT MODAL OVERLAY */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="w-[92vw] sm:w-[460px] h-[600px] max-h-[85vh] bg-white rounded-3xl shadow-2xl border-4 border-slate-100 flex flex-col overflow-hidden relative backdrop-blur-xl"
+          <div 
+            className="fixed inset-0 z-[1050] flex items-center justify-center p-3 sm:p-4 md:p-6" 
+            dir={isRtl ? 'rtl' : 'ltr'}
           >
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm"
+            />
+
+            {/* Modal Container */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative z-10 w-full max-w-lg md:max-w-xl h-[620px] max-h-[88vh] bg-white rounded-3xl shadow-2xl border-4 border-slate-100 flex flex-col overflow-hidden backdrop-blur-xl"
+            >
             {/* MODAL HEADER */}
             <div className="bg-gradient-to-r from-[#58cc02] via-[#22c55e] to-[#1cb0f6] p-4 text-white flex items-center justify-between shrink-0 shadow-md">
               <div className="flex items-center gap-3">
@@ -816,9 +872,10 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
                 )}
               </div>
             )}
-          </motion.div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
-    </aside>
+    </>
   );
 };
