@@ -263,6 +263,9 @@ import { macroeconomicAuditsE1 } from './data/lessons/e_c2_2';
 import { existentialInquiryE1 } from './data/lessons/e_c2_3';
 import { linguisticFluidityE1 } from './data/lessons/e_c2_4';
 import { aestheticSynthesisE1 } from './data/lessons/e_c2_5';
+import { AIOmniCompanion } from './components/AIOmniCompanion';
+import { GlobalCommandPalette } from './components/GlobalCommandPalette';
+import { Search } from 'lucide-react';
 
 // Removed local AppView declaration as it is now imported from ./types
 
@@ -3607,6 +3610,7 @@ export default function App() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [view, setView] = useState<AppView>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [selectedReadingLevel, setSelectedReadingLevel] = useState<ReadingLevel>('A1');
   const [selectedGrammarLevel, setSelectedGrammarLevel] = useState<GrammarLevel>('A1');
   const [selectedConversationLevel, setSelectedConversationLevel] = useState<ConversationLevel>('A1');
@@ -5549,6 +5553,14 @@ export default function App() {
                 {/* Quick Access Pills for Newly Added Sections */}
                 <div className="flex items-center gap-1.5">
                   <button 
+                    onClick={() => setIsCommandPaletteOpen(true)}
+                    className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 text-slate-700"
+                    title={isRtl ? 'بحث سريع' : 'Quick Search'}
+                  >
+                    <Search size={14} className="text-[#58cc02]" />
+                  </button>
+
+                  <button 
                     onClick={() => setView('interactive-learning')}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[10px] font-black transition-all cursor-pointer ${
                       view === 'interactive-learning' 
@@ -5571,7 +5583,7 @@ export default function App() {
 
               {/* Desktop/Tablet Sidebar */}
               <aside className={`hidden md:flex ${isRtl ? 'right-0 border-l-2' : 'left-0 border-r-2'} w-20 lg:w-56 bg-white text-slate-800 flex-col p-4 lg:p-5 fixed h-full z-40 transition-all border-slate-200`}>
-                <div className="flex items-center gap-3 px-1 mb-10 overflow-hidden">
+                <div className="flex items-center gap-3 px-1 mb-6 overflow-hidden">
                   <div className="w-10 h-10 lg:w-11 lg:h-11 bg-[#58cc02] rounded-xl flex shrink-0 items-center justify-center text-white shadow-md font-black text-xl lg:text-2xl relative animate-bounce-slow">
                     🦉
                   </div>
@@ -5582,6 +5594,19 @@ export default function App() {
                     )}
                   </h1>
                 </div>
+
+                {/* Quick Command Palette Launcher */}
+                <button
+                  onClick={() => setIsCommandPaletteOpen(true)}
+                  className="w-full mb-4 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl border border-slate-200 flex items-center justify-between transition-all group cursor-pointer"
+                  title={isRtl ? 'بحث سريع (Ctrl + K)' : 'Quick Search (Ctrl + K)'}
+                >
+                  <div className="flex items-center gap-2">
+                    <Search size={16} className="text-[#58cc02]" />
+                    <span className="text-[11px] font-bold hidden lg:block">{isRtl ? 'بحث في المناهج...' : 'Search academy...'}</span>
+                  </div>
+                  <span className="hidden lg:inline-block text-[9px] font-black bg-white px-1.5 py-0.5 rounded border text-slate-400">Ctrl+K</span>
+                </button>
                 
                 <nav className="flex-1 space-y-2 overflow-y-auto no-scrollbar">
                   {[
@@ -5956,6 +5981,21 @@ export default function App() {
               )}
             </AnimatePresence>
           </main>
+
+          {/* Global Omnipresent AI Companion */}
+          <AIOmniCompanion
+            isRtl={isRtl}
+            currentContext={`Active Academy Section: ${view}`}
+            onNavigateToView={(targetView) => setView(targetView as AppView)}
+          />
+
+          {/* Global Command Palette (Ctrl+K) */}
+          <GlobalCommandPalette
+            isOpen={isCommandPaletteOpen}
+            onClose={() => setIsCommandPaletteOpen(false)}
+            onNavigate={(targetView) => setView(targetView)}
+            isRtl={isRtl}
+          />
         </motion.div>
       </AnimatePresence>
 

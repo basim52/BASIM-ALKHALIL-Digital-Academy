@@ -85,10 +85,10 @@ async function startServer() {
 
   initAI();
 
-  // Robust AI caller with retry and fallback using modern `@google/genai` and "gemini-3.5-flash"
+  // Robust AI caller with retry and fallback using modern `@google/genai` and "gemini-3.7-flash"
   async function callAiWithRetry(options: any, maxRetries = 2) {
     let lastError: any;
-    const PRIMARY_MODEL = "gemini-3.5-flash"; 
+    const PRIMARY_MODEL = "gemini-3.7-flash"; 
 
     for (let i = 0; i <= maxRetries; i++) {
       // Ensure AI is fully initialized before each run
@@ -98,9 +98,8 @@ async function startServer() {
       
       try {
         let modelToUse = PRIMARY_MODEL;
-        // Keep using gemini-3.5-flash as it is highly stable and advanced
-        if (i === 1) modelToUse = "gemini-3.5-flash";
-        if (i === 2) modelToUse = "gemini-3.5-flash";
+        if (i === 1) modelToUse = "gemini-2.5-flash";
+        if (i === 2) modelToUse = "gemini-3.1-pro-preview";
         
         logToFile(`AI Call Attempt ${i+1}/${maxRetries+1} using ${modelToUse} (API Key Status: ${!!API_KEY})`);
       
@@ -607,6 +606,206 @@ Looking forward to your reply. Tell me what we're tackling first!`;
       });
     } else {
       socket.destroy();
+    }
+  });
+
+  // Modern AI Omnipresent Instant Tutor Endpoint
+  app.post("/api/ai/instant-tutor", async (req, res) => {
+    try {
+      const { message, context, mode = "general", history = [] } = req.body;
+      if (!message) return res.status(400).json({ error: "Message is required" });
+
+      if (!initAI() || !aiLive) {
+        // High quality simulated response
+        const isAr = /[\u0600-\u06FF]/.test(message);
+        let fallbackReply = isAr 
+          ? `أهلاً بك يا بطل! أنا رفيقك الذكي في أكاديمية باسم آل خليل. بالنسبة لسؤالك حول "${message}"، تذكر أن سر الطلاقة اللغوية يكمن في الربط بين القواعد والممارسة اليومية. هل ترغب في صياغة جملة معاً لتثبيت المفهوم؟`
+          : `Hello champion! I'm your AI tutor at Basim Alkhalil Academy. Regarding "${message}", daily active practice is key to genuine fluency. Would you like to build an example sentence together?`;
+        return res.json({ reply: fallbackReply, mode });
+      }
+
+      const systemInstruction = `You are "Alkhalil AI Companion" (مساعد أكاديمية باسم آل خليل الذكي), an elite, hyper-encouraging, bilingual (Arabic & English) personal English tutor and language mentor.
+Your goal is to help students learn English with extreme clarity, confidence, and warmth.
+- When explaining words or phrases: Provide the English term, Arabic meaning, phonetic transcription in Arabic letters (نطق تقريبي بالحروف العربية), and a practical daily life example sentence.
+- When correcting grammar or writing: Praise the effort, point out the exact correction gently, explain WHY in 1 concise bullet, and provide the polished version.
+- When answering general English questions: Keep responses structured, concise, visually appealing with emojis, and end with a quick interactive check question or invitation to speak.
+- Maintain a friendly, supportive tone suitable for learners of all ages (Kids to Adults).`;
+
+      const contents = formatGeminiHistory(history, `Context: ${context || "Global Academy Assistant"}\nMode: ${mode}\nStudent Query: ${message}`);
+
+      const result = await callAiWithRetry({
+        contents,
+        config: {
+          systemInstruction,
+          temperature: 0.7,
+        }
+      });
+
+      res.json({ reply: result.text || "", mode });
+    } catch (err: any) {
+      logToFile(`Error in /api/ai/instant-tutor: ${err.message}`);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Modern Smart Translator with Formality and Context
+  app.post("/api/ai/smart-translator", async (req, res) => {
+    try {
+      const { text, targetLang = "auto", context = "general" } = req.body;
+      if (!text) return res.status(400).json({ error: "Text is required" });
+
+      if (!initAI() || !aiLive) {
+        return res.json({
+          natural: text,
+          formal: text,
+          casual: text,
+          phonetics: "",
+          notes: "AI service initialized in offline simulated mode."
+        });
+      }
+
+      const prompt = `You are a state-of-the-art linguistic translator specialized in English-Arabic academic and conversational mastery.
+Translate and analyze the following text:
+Text: "${text}"
+Target: ${targetLang}
+Context: ${context}
+
+Respond ONLY with a valid JSON object matching this structure:
+{
+  "natural": "Most natural, culturally accurate translation",
+  "formal": "Professional/academic high-register translation",
+  "casual": "Everyday colloquial conversational translation",
+  "phonetics": "Phonetic pronunciation guide (IPA or Arabized sounds for English words)",
+  "culturalNote": "Brief 1-sentence tip on usage, nuance, or common mistakes",
+  "exampleSentence": "A sample sentence using this word/phrase with translation"
+}`;
+
+      const result = await callAiWithRetry({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        config: {
+          responseMimeType: "application/json"
+        }
+      });
+
+      try {
+        const parsed = JSON.parse(result.text || "{}");
+        res.json(parsed);
+      } catch (parseErr) {
+        res.json({ natural: result.text || "", formal: "", casual: "", phonetics: "", culturalNote: "" });
+      }
+    } catch (err: any) {
+      logToFile(`Error in /api/ai/smart-translator: ${err.message}`);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Modern Pronunciation & Accent Coach
+  app.post("/api/ai/live-pronunciation-coach", async (req, res) => {
+    try {
+      const { phrase } = req.body;
+      if (!phrase) return res.status(400).json({ error: "Phrase is required" });
+
+      if (!initAI() || !aiLive) {
+        return res.json({
+          phrase,
+          ipa: "/.../",
+          syllables: phrase,
+          stressPattern: "Standard stress",
+          arabicSpeakersTip: "تأكد من إخراج الحروف بوضوح وضم الشفاه في الأصوات المزدوجة.",
+          practiceWords: ["practice", "fluency"]
+        });
+      }
+
+      const prompt = `You are an expert English Phonetics & Accent Coach for Arabic native speakers.
+Analyze the pronunciation of this phrase: "${phrase}"
+
+Respond ONLY with a valid JSON object:
+{
+  "phrase": "${phrase}",
+  "ipa": "Accurate IPA transcription",
+  "arabizedPhonetics": "Pronunciation spelled out using Arabic letters (e.g., 'هَلُو وِيرْلد')",
+  "syllables": "Syllable breakdown with hyphens and UPPERCASE for stressed syllable (e.g. pho-TO-graph-y)",
+  "stressPattern": "Brief explanation of word/sentence stress",
+  "arabicSpeakersTip": "Specific tip addressing common pitfalls for Arabic speakers (e.g., P vs B, V vs F, silent letters, dark L, vowel length)",
+  "similarSoundingWords": ["word1", "word2", "word3"]
+}`;
+
+      const result = await callAiWithRetry({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        config: {
+          responseMimeType: "application/json"
+        }
+      });
+
+      try {
+        const parsed = JSON.parse(result.text || "{}");
+        res.json(parsed);
+      } catch (parseErr) {
+        res.json({ phrase, ipa: "", arabizedPhonetics: "", syllables: phrase, stressPattern: "", arabicSpeakersTip: "" });
+      }
+    } catch (err: any) {
+      logToFile(`Error in /api/ai/live-pronunciation-coach: ${err.message}`);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Modern Adaptive Quiz Generator
+  app.post("/api/ai/adaptive-quiz", async (req, res) => {
+    try {
+      const { topic = "General English", level = "B1", count = 4 } = req.body;
+
+      if (!initAI() || !aiLive) {
+        return res.json({
+          title: `Quiz: ${topic}`,
+          level,
+          questions: [
+            {
+              id: "q1",
+              questionEn: "Choose the correct verb form: 'She ____ to the academy every day.'",
+              questionAr: "اختر الصيغة الصحيحة للفعل:",
+              options: ["goes", "go", "going", "gone"],
+              correctIndex: 0,
+              explanation: "'She' is third person singular, so we add -es to 'go' in Present Simple."
+            }
+          ]
+        });
+      }
+
+      const prompt = `Generate an interactive ${count}-question English quiz for level ${level} on topic: "${topic}".
+Include multiple-choice questions with 4 options each, covering vocabulary, grammar, and conversational comprehension.
+Respond ONLY with a valid JSON object matching:
+{
+  "title": "Quiz Title (e.g. Master Present Perfect)",
+  "topic": "${topic}",
+  "level": "${level}",
+  "questions": [
+    {
+      "id": "q1",
+      "questionEn": "Question in English",
+      "questionAr": "Arabic translation/instruction of the question",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctIndex": 0,
+      "explanation": "Brief explanation of why this answer is correct"
+    }
+  ]
+}`;
+
+      const result = await callAiWithRetry({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        config: {
+          responseMimeType: "application/json"
+        }
+      });
+
+      try {
+        const parsed = JSON.parse(result.text || "{}");
+        res.json(parsed);
+      } catch (parseErr) {
+        res.status(500).json({ error: "Failed to parse quiz response" });
+      }
+    } catch (err: any) {
+      logToFile(`Error in /api/ai/adaptive-quiz: ${err.message}`);
+      res.status(500).json({ error: err.message });
     }
   });
 
