@@ -3096,6 +3096,295 @@ Ensure the output is valid JSON and nothing else. No extra text or markdown wrap
     }
   });
 
+  // Direct video download endpoint with Content-Disposition attachment
+  app.get("/api/videos/download/:id", (req, res) => {
+    try {
+      const videoId = req.params.id;
+      const files = fs.readdirSync(UPLOADS_DIR);
+      const matchedFile = files.find(f => f.startsWith(videoId + "."));
+      
+      if (!matchedFile) {
+        return res.status(404).json({ error: "Video file not found on server for download" });
+      }
+      
+      const videoPath = path.join(UPLOADS_DIR, matchedFile);
+      const filename = req.query.filename ? String(req.query.filename) : matchedFile;
+      const cleanFilename = filename.endsWith(".mp4") ? filename : `${filename}.mp4`;
+      
+      logToFile(`[VideoDownload] Downloading file ${matchedFile} as ${cleanFilename}`);
+      res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(cleanFilename)}"`);
+      res.setHeader("Content-Type", getMimeType(matchedFile));
+      
+      const fileStream = fs.createReadStream(videoPath);
+      fileStream.pipe(res);
+    } catch (err: any) {
+      logToFile(`[VideoDownload Error] ${err.message}`);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // AI Educational Video Lesson Producer Endpoint (Generates multimodal audio-visual scenes)
+  app.post("/api/videos/generate-lesson-video", async (req, res) => {
+    logToFile(`START /api/videos/generate-lesson-video - Topic: ${req.body.topic}`);
+    try {
+      const { topic, level = 'A2', targetAudience = 'all', lang = 'ar' } = req.body;
+      const isAr = lang === 'ar';
+
+      if (!topic) {
+        return res.status(400).json({ error: "Topic is required for video generation" });
+      }
+
+      if (!initAI() || !aiLive) {
+        logToFile("[Info] Using high-fidelity pre-structured educational video generator fallback");
+        return res.json(getSimulatedLessonVideo(topic, level, isAr));
+      }
+
+      const prompt = `
+You are the Executive Producer of Interactive Audiovisual Lessons at Basim Alkhalil Academy.
+Create an immersive, interactive, animated educational video lesson with complete scene-by-scene audio narration, dialogue, visual settings, vocabulary cards, and checkpoint quizzes.
+
+Topic/Subject: "${topic}"
+Target CEFR Level: "${level}" (Vocabulary, sentence structure, and speed should match this level)
+Audience: "${targetAudience}"
+
+Requirements:
+1. Create 3-4 rich pedagogical scenes.
+2. In each scene, specify:
+   - "sceneNumber": integer 1..4
+   - "titleEn" & "titleAr": Scene title
+   - "setting": one of ["classroom", "oxford_street", "airport", "coffee_shop", "business_office", "nature_park", "tech_lab", "cozy_home", "library", "doctor_clinic"]
+   - "characters": array of 1-2 characters with { "name": string, "role": string, "position": "left" | "right" | "center" }
+   - "narration": { "en": string, "ar": string, "speaker": string }
+   - "dialogues": array of 2-4 spoken dialogue turns { "speaker": string, "textEn": string, "textAr": string, "phonetics": string, "grammarTip": string }
+   - "visualKeypoints": array of 2-3 key visual concepts { "textEn": string, "textAr": string, "iconType": "star" | "book" | "sparkles" | "check" | "zap", "highlightWord": string }
+   - "quizCheckpoint": 1 multiple-choice question testing comprehension { "questionEn": string, "questionAr": string, "options": string[4], "correctIndex": integer (0..3), "explanationAr": string }
+3. Include overall lesson "vocabulary": array of 4-6 key vocabulary terms with { "word": string, "meaningAr": string, "pronunciation": string, "exampleSentence": string }
+
+Output STRICTLY a JSON object matching this TypeScript structure without any Markdown wrappers:
+{
+  "topic": "${topic}",
+  "level": "${level}",
+  "titleEn": string,
+  "titleAr": string,
+  "summaryEn": string,
+  "summaryAr": string,
+  "estimatedDuration": string,
+  "scenes": [
+    {
+      "sceneNumber": number,
+      "titleEn": string,
+      "titleAr": string,
+      "setting": string,
+      "characters": [
+        { "name": string, "role": string, "position": "left" | "right" | "center" }
+      ],
+      "narration": { "en": string, "ar": string, "speaker": string },
+      "dialogues": [
+        { "speaker": string, "textEn": string, "textAr": string, "phonetics": string, "grammarTip": string }
+      ],
+      "visualKeypoints": [
+        { "textEn": string, "textAr": string, "iconType": string, "highlightWord": string }
+      ],
+      "quizCheckpoint": {
+        "questionEn": string,
+        "questionAr": string,
+        "options": [string, string, string, string],
+        "correctIndex": number,
+        "explanationAr": string
+      }
+    }
+  ],
+  "vocabulary": [
+    {
+      "word": string,
+      "meaningAr": string,
+      "pronunciation": string,
+      "exampleSentence": string
+    }
+  ]
+}
+`;
+
+      const result = await callAiWithRetry({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        config: {
+          responseMimeType: "application/json"
+        }
+      });
+
+      const responseText = result.text || "{}";
+      let cleanText = responseText.trim();
+      if (cleanText.startsWith("```")) {
+        cleanText = cleanText.replace(/^```json\n?/, "").replace(/\n?```$/, "");
+      }
+      res.json(JSON.parse(cleanText));
+    } catch (error: any) {
+      logToFile(`Video Lesson Generator API error: ${error.message}`);
+      res.json(getSimulatedLessonVideo(req.body.topic || "English Conversation", req.body.level || "A2", req.body.lang === 'ar'));
+    }
+  });
+
+  function getSimulatedLessonVideo(topic: string, level: string, isAr: boolean) {
+    return {
+      topic,
+      level,
+      titleEn: `Mastering ${topic} with Interactive Dialogue`,
+      titleAr: `إتقان ${topic} بالحوار والتطبيق المرئي`,
+      summaryEn: `An interactive, audiovisual video lesson designed to build conversational fluency, native pronunciation, and practical vocabulary.`,
+      summaryAr: `درس مرئي تفاعلي متكامل بالصوت والصورة لترسيخ مهارات المحادثة والنطق السليم والمفردات العملية.`,
+      estimatedDuration: "4:30",
+      scenes: [
+        {
+          sceneNumber: 1,
+          titleEn: "Setting the Scene & Essential Greetings",
+          titleAr: "افتتاح الموقف والترحيب الأساسي",
+          setting: "oxford_street",
+          characters: [
+            { name: "Sarah (Instructor)", role: "Teacher & Guide", position: "left" },
+            { name: "Omar (Learner)", role: "Student", position: "right" }
+          ],
+          narration: {
+            en: "Welcome to our live interactive video lesson! Today we explore practical phrases and real-life scenarios step by step.",
+            ar: "أهلاً بكم في درسنا المرئي التفاعلي المباشر! اليوم نستكشف معاً العبارات العملية والمواقف الحية خطوة بخطوة بالصوت والصورة.",
+            speaker: "Sarah"
+          },
+          dialogues: [
+            {
+              speaker: "Sarah",
+              textEn: "Good morning! Are you ready to practice our conversational English today?",
+              textAr: "صباح الخير! هل أنت مستعد لممارسة محادثتنا الإنجليزية اليوم؟",
+              phonetics: "/ɡʊd ˈmɔː.nɪŋ/ ɑː juː ˈred.i tuː ˈpræk.tɪs/",
+              grammarTip: "نستخدم 'Are you ready' كصيغة سؤال قياسية لتأكيد الاستعداد."
+            },
+            {
+              speaker: "Omar",
+              textEn: "Yes, absolutely! I am eager to learn new expressions.",
+              textAr: "نعم، بالتأكيد! أنا متلهف لتعلم تعابير جديدة.",
+              phonetics: "/jes ˌæb.səˈluːt.li aɪ æm ˈiː.ɡər/",
+              grammarTip: "كلمة 'Absolutely' تعني 'بكل تأكيد' وتعطي انطباعاً مفعماً بالحيوية والثقة."
+            }
+          ],
+          visualKeypoints: [
+            { textEn: "Greeting with confidence", textAr: "التحية بثقة وابتسامة", iconType: "sparkles", highlightWord: "Good morning" },
+            { textEn: "Positive affirmation", textAr: "التأكيد الإيجابي", iconType: "check", highlightWord: "Absolutely" }
+          ],
+          quizCheckpoint: {
+            questionEn: "What is a natural, polite reply to 'Good morning! How are you today?'",
+            questionAr: "ما هو الرد اللبق والطبيعي على 'Good morning! How are you today؟'؟",
+            options: [
+              "Good morning! I'm doing great, thank you! And you?",
+              "No, thank you, I have no money.",
+              "I don't like morning at all.",
+              "Yesterday was Tuesday."
+            ],
+            correctIndex: 0,
+            explanationAr: "الرد بـ 'I'm doing great, thank you! And you?' يعكس أدباً وطلاقة اجتماعية راقية."
+          }
+        },
+        {
+          sceneNumber: 2,
+          titleEn: "Active Dialogue in Context",
+          titleAr: "الحوار النشط في السياق الواقعي",
+          setting: "coffee_shop",
+          characters: [
+            { name: "Barista (David)", role: "Cafe Staff", position: "left" },
+            { name: "Omar", role: "Customer", position: "right" }
+          ],
+          narration: {
+            en: "Let's step into a local cafe to observe how polite ordering works in natural spoken English.",
+            ar: "دعونا ننتقل إلى مقهى محلي لمشاهدة كيف يتم الطلب بلباقة في الإنجليزية المحكية اليومية.",
+            speaker: "Sarah"
+          },
+          dialogues: [
+            {
+              speaker: "David",
+              textEn: "Hello there! What can I get started for you today?",
+              textAr: "أهلاً بك! ماذا تحب أن أبدأ في تحضيره لك اليوم؟",
+              phonetics: "/həˈləʊ ðeər wɒt kæn aɪ ɡet ˈstɑː.tɪd/",
+              grammarTip: "عبارة 'What can I get for you' هي الصياغة الأكثر شيوعاً لدى مقدمي الخدمة."
+            },
+            {
+              speaker: "Omar",
+              textEn: "Could I please have a medium cappuccino with oat milk?",
+              textAr: "هل يمكنني من فضلك الحصول على كابتشينو متوسط بحليب الشوفان؟",
+              phonetics: "/kʊd aɪ pliːz hæv ə ˈmiː.di.əm ˌkæp.əˈtʃiː.nəʊ/",
+              grammarTip: "استخدام 'Could I please have' يعد أرقى وأكثر تهذيباً من قول 'I want'."
+            },
+            {
+              speaker: "David",
+              textEn: "Certainly! Would you like that to stay or take away?",
+              textAr: "بكل سرور! هل ترغب بتناوله هنا أم سفري؟",
+              phonetics: "/ˈsɜː.tən.li wʊd juː laɪk ðæt tuː steɪ ɔː teɪk əˈweɪ/",
+              grammarTip: "'To stay' تعني هنا في المقهى، و'Take away' تعني للأخذ بالخارج."
+            }
+          ],
+          visualKeypoints: [
+            { textEn: "Polite Request: Could I please have...", textAr: "الطلب المهذب: هل يمكنني الحصول على...", iconType: "star", highlightWord: "Could I please" },
+            { textEn: "Dining preference: To stay vs Take away", textAr: "خيار الجلوس أم السفري", iconType: "zap", highlightWord: "Take away" }
+          ],
+          quizCheckpoint: {
+            questionEn: "Why is 'Could I please have...' preferred over 'I want...' in British & American etiquette?",
+            questionAr: "لماذا يُفضل استخدام 'Could I please have...' بدلاً من 'I want...' في الإتيكيت اللغوي؟",
+            options: [
+              "Because it expresses polite courtesy and respect",
+              "Because 'I want' is grammatically forbidden in English",
+              "Because it makes the sentence 10 times longer",
+              "There is no difference at all"
+            ],
+            correctIndex: 0,
+            explanationAr: "صيغة 'Could I please have' تعبر عن اللباقة والتهذيب الاجتماعي العالي في المحادثة."
+          }
+        },
+        {
+          sceneNumber: 3,
+          titleEn: "Summary, Pronunciation & Key Takeaways",
+          titleAr: "الملخص والنطق ومفاتيح الإتقان",
+          setting: "classroom",
+          characters: [
+            { name: "Sarah (Instructor)", role: "Teacher & Guide", position: "center" }
+          ],
+          narration: {
+            en: "Fantastic job! Let's review our pronunciation, key grammar rules, and vocabulary takeaways.",
+            ar: "عمل رائع ومتميز! دعونا نراجع معاً النطق السليم والقواعد الأساسية وأهم المفردات المكتسبة.",
+            speaker: "Sarah"
+          },
+          dialogues: [
+            {
+              speaker: "Sarah",
+              textEn: "Remember: Fluency comes from repeating natural phrases until they become second nature.",
+              textAr: "تذكر دائماً: الطلاقة تأتي من تكرار الجمل الطبيعية حتى تصبح سجية تلقائية في حديثك.",
+              phonetics: "/ˈfluː.ən.si kʌmz frɒm rɪˈpiː.tɪŋ ˈnætʃ.rəl ˈfreɪ.zɪz/",
+              grammarTip: "الممارسة اليومية القصيرة تصنع فارقاً هائلاً في ثقتك بنفسك."
+            }
+          ],
+          visualKeypoints: [
+            { textEn: "Repeat with authentic rhythm", textAr: "كرر بالنبرة الصوتية السليمة", iconType: "book", highlightWord: "Fluency" },
+            { textEn: "Download lesson notes for offline review", textAr: "حمّل ملخص الدرس للمراجعة دون إنترنت", iconType: "check", highlightWord: "Offline" }
+          ],
+          quizCheckpoint: {
+            questionEn: "What is the key factor in acquiring conversational fluency in English?",
+            questionAr: "ما هو العامل الحاسم في اكتساب الطلاقة في المحادثة الإنجليزية؟",
+            options: [
+              "Daily active speaking practice and listening in context",
+              "Memorizing single dictionary words without sample sentences",
+              "Never speaking out loud in front of others",
+              "Avoiding listening to native pronunciation"
+            ],
+            correctIndex: 0,
+            explanationAr: "الممارسة اليومية الفعالة والاستماع في سياق واقعي هما الركيزتان الأساسيتان للوصول للطلاقة."
+          }
+        }
+      ],
+      vocabulary: [
+        { word: "Fluency", meaningAr: "الطلاقة والفصاحة في التعبير", pronunciation: "/ˈfluː.ən.si/", exampleSentence: "She speaks three languages with remarkable fluency." },
+        { word: "Etiquette", meaningAr: "اللباقة وقواعد السلوك المهذب", pronunciation: "/ˈet.ɪ.ket/", exampleSentence: "Polite language etiquette is vital during interviews." },
+        { word: "Take away", meaningAr: "وجبة أو مشروب سفري", pronunciation: "/ˈteɪk.ə.weɪ/", exampleSentence: "I ordered a coffee to take away on my way to work." },
+        { word: "Eager", meaningAr: "متلهف ومتحمس للتعلم", pronunciation: "/ˈiː.ɡər/", exampleSentence: "The academy students are eager to develop their skills." },
+        { word: "Certainly", meaningAr: "بكل تأكيد وبكل سرور", pronunciation: "/ˈsɜː.tən.li/", exampleSentence: "Certainly, I will help you with your grammar practice." }
+      ]
+    };
+  }
+
   // 404 for API routes
   app.all("/api/*", (req, res) => {
     logToFile(`API 404 HIT: ${req.method} ${req.path} (Full URL: ${req.originalUrl})`);

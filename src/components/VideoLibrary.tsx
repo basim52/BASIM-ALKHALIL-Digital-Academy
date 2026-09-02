@@ -26,7 +26,15 @@ import {
   Volume2,
   Settings as SettingsIcon,
   Pause,
-  AlertTriangle
+  AlertTriangle,
+  Download,
+  Film,
+  Wand2,
+  FileText,
+  Layers,
+  HardDriveDownload,
+  BookOpen,
+  Filter
 } from 'lucide-react';
 import { UserProfile, MASTER_ADMINS } from '../types';
 import { db } from '../lib/firebase';
@@ -41,6 +49,9 @@ import {
   onSnapshot, 
   serverTimestamp 
 } from 'firebase/firestore';
+import { PRODUCED_VIDEO_LESSONS, ProducedVideoLesson } from '../data/producedVideoLessons';
+import { ProducedVideoPlayer } from './ProducedVideoPlayer';
+import { AiVideoStudioModal } from './AiVideoStudioModal';
 
 interface VideoLesson {
   id: string;
@@ -140,6 +151,14 @@ export const VideoLibrary = ({
   });
 
   const [selectedVideo, setSelectedVideo] = useState<VideoLesson | null>(null);
+  const [selectedProducedLesson, setSelectedProducedLesson] = useState<ProducedVideoLesson | null>(null);
+  const [libraryTab, setLibraryTab] = useState<'produced' | 'uploads'>('produced');
+  const [producedLessons, setProducedLessons] = useState<ProducedVideoLesson[]>(PRODUCED_VIDEO_LESSONS);
+  const [showAiStudioModal, setShowAiStudioModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedLevelFilter, setSelectedLevelFilter] = useState<string>('all');
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
   const [quizLoading, setQuizLoading] = useState(false);
   const [quizQuestions, setQuizQuestions] = useState<any[]>([]);
   const [quizStarted, setQuizStarted] = useState(false);
@@ -504,6 +523,67 @@ export const VideoLibrary = ({
     }
   };
 
+  const handleDownloadVideo = async (video: VideoLesson, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDownloadingId(video.id);
+    try {
+      if (video.directUrl) {
+        if (video.directUrl.startsWith('http://') || video.directUrl.startsWith('https://')) {
+          const a = document.createElement('a');
+          a.href = video.directUrl;
+          a.target = '_blank';
+          a.download = video.fileName || `${video.titleEn || 'lesson'}.mp4`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        } else {
+          const blob = await getVideoFile(video.id);
+          if (blob) {
+            const url = URL.createObjectURL(blob as Blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${video.fileName || video.titleEn || 'lesson'}.mp4`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          } else {
+            const cleanName = encodeURIComponent(video.fileName || `${video.titleEn}.mp4`);
+            window.location.href = `/api/videos/download/${video.id}?filename=${cleanName}`;
+          }
+        }
+      } else if (video.youtubeId) {
+        const notes = `====================================
+ENGLISH ACADEMY - LESSON STUDY GUIDE
+====================================
+Title: ${video.titleEn}
+Arabic: ${video.titleAr}
+CEFR Level: ${video.level}
+Duration: ${video.duration}
+YouTube Reference: https://www.youtube.com/watch?v=${video.youtubeId}
+====================================
+Key Learning Objectives:
+- Master pronunciation & natural intonation
+- Memorize high-frequency vocabulary
+- Real-life conversational fluency
+====================================`;
+        const blob = new Blob([notes], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${video.titleEn.replace(/\s+/g, '_')}_Study_Guide.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      console.warn("Download error:", err);
+    } finally {
+      setTimeout(() => setDownloadingId(null), 1000);
+    }
+  };
+
   const handleDeleteVideo = async (vidId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!window.confirm(isRtl ? 'هل تريد بالتأكيد حذف درس الفيديو هذا بشكل نهائي؟' : 'Are you sure you want to permanently delete this video lesson?')) {
@@ -512,15 +592,12 @@ export const VideoLibrary = ({
 
     try {
       if (vidId.startsWith('default-')) {
-        // For default pre-loaded videos, we persist the deleted ID locally
         const updated = [...deletedDefaultIds, vidId];
         setDeletedDefaultIds(updated);
         localStorage.setItem('deleted_default_videos', JSON.stringify(updated));
       } else {
-        // Custom videos are deleted directly from Firestore
         await deleteDoc(doc(db, 'videos', vidId));
         await deleteVideoFile(vidId);
-        // Delete physical file from server
         await fetch(`/api/videos/delete/${vidId}`, { method: 'DELETE' }).catch(err => {
           console.warn("Error deleting physical video from server:", String(err));
         });
@@ -533,25 +610,51 @@ export const VideoLibrary = ({
   // Autodetect parsed youtube ID in real-time
   const previewId = extractYoutubeId(inputUrl);
 
+  // If a produced audiovisual lesson is selected -> open the rich audiovisual player!
+  if (selectedProducedLesson) {
+    return (
+      <ProducedVideoPlayer
+        lesson={selectedProducedLesson}
+        onBack={() => setSelectedProducedLesson(null)}
+        isRtl={isRtl}
+      />
+    );
+  }
+
   if (selectedVideo) {
     const isDirect = !!selectedVideo.directUrl;
     return (
       <div className={`p-5 md:p-8 max-w-4xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#F7F7F7]`} dir={isRtl ? 'rtl' : 'ltr'}>
-        <button 
-          onClick={() => {
-            setSelectedVideo(null);
-            setQuizStarted(false);
-            setQuizQuestions([]);
-            setUserAnswers([]);
-            setQuizFinished(false);
-            setSelectedOptionIdx(null);
-            setHasChecked(false);
-          }}
-          className="flex items-center gap-2 text-slate-400 hover:text-[#58cc02] transition-colors mb-8 font-black text-sm uppercase tracking-wider bg-white px-5 py-2.5 rounded-full border border-slate-200/60 shadow-sm w-fit active:scale-95 duration-100"
-        >
-          <ArrowLeft size={16} className={isRtl ? 'rotate-180' : ''} />
-          {isRtl ? 'العودة للمكتبة' : 'Back to Library'}
-        </button>
+        <div className="flex items-center justify-between mb-8">
+          <button 
+            onClick={() => {
+              setSelectedVideo(null);
+              setQuizStarted(false);
+              setQuizQuestions([]);
+              setUserAnswers([]);
+              setQuizFinished(false);
+              setSelectedOptionIdx(null);
+              setHasChecked(false);
+            }}
+            className="flex items-center gap-2 text-slate-400 hover:text-[#58cc02] transition-colors font-black text-sm uppercase tracking-wider bg-white px-5 py-2.5 rounded-full border border-slate-200/60 shadow-sm w-fit active:scale-95 duration-100"
+          >
+            <ArrowLeft size={16} className={isRtl ? 'rotate-180' : ''} />
+            {isRtl ? 'العودة للمكتبة' : 'Back to Library'}
+          </button>
+
+          <button
+            onClick={(e) => handleDownloadVideo(selectedVideo, e)}
+            disabled={downloadingId === selectedVideo.id}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-black rounded-xl border border-slate-200 transition-all active:scale-95"
+          >
+            {downloadingId === selectedVideo.id ? (
+              <div className="w-4 h-4 border-2 border-slate-700 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Download size={15} />
+            )}
+            <span>{isRtl ? 'تحميل الفيديو / الملف' : 'Download Video / Guide'}</span>
+          </button>
+        </div>
 
         <div className="max-w-3xl mx-auto">
           <div className="aspect-video rounded-[2rem] overflow-hidden shadow-md bg-black mb-8 border-4 border-white relative">
@@ -602,14 +705,12 @@ export const VideoLibrary = ({
                             if (file) {
                               setSavingRequiredFile(true);
                               try {
-                                // 1. Cache in IndexedDB
                                 try {
                                   await storeVideoFile(selectedVideo.id, file);
                                 } catch (idbErr) {
                                   console.warn("IndexedDB store fail within sandboxed iframe", String(idbErr));
                                 }
 
-                                // 2. Upload to server
                                 const fd = new FormData();
                                 fd.append('videoId', selectedVideo.id);
                                 fd.append('video', file);
@@ -636,7 +737,6 @@ export const VideoLibrary = ({
                       <button 
                         onClick={() => {
                           setHasVideoPlayError(false);
-                          // Force a retry with a URL reset fallback helper
                           const originalUrl = activePlayUrl;
                           setActivePlayUrl('');
                           setTimeout(() => setActivePlayUrl(originalUrl), 50);
@@ -657,7 +757,6 @@ export const VideoLibrary = ({
                 )}
               </div>
             ) : (
-              // Youtube Player
               <iframe 
                 width="100%" 
                 height="100%" 
@@ -704,11 +803,18 @@ export const VideoLibrary = ({
     );
   }
 
+  // Filter produced video lessons
+  const filteredProducedLessons = producedLessons.filter(lesson => {
+    const matchesCategory = selectedCategory === 'all' || lesson.category === selectedCategory;
+    const matchesLevel = selectedLevelFilter === 'all' || lesson.level === selectedLevelFilter;
+    return matchesCategory && matchesLevel;
+  });
+
   return (
     <div className={`p-4 md:p-8 max-w-7xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#F7F7F7]`} dir={isRtl ? 'rtl' : 'ltr'}>
       
       {/* HEADER SECTION */}
-      <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <button 
             onClick={onBack}
@@ -718,30 +824,41 @@ export const VideoLibrary = ({
             {isRtl ? 'العودة للرئيسية' : 'Back to Dashboard'}
           </button>
           <div className="flex items-center gap-3">
-            <h2 className="text-3xl font-black text-slate-800 leading-none">{t.videoLibrary}</h2>
-            <div className="bg-[#58cc02] text-white px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider animate-pulse leading-none shadow-sm shrink-0">
-              {isRtl ? 'مباشر + تفاعلي 🎬' : 'Direct + Interactive 🎬'}
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-800 leading-none">{t.videoLibrary}</h2>
+            <div className="bg-gradient-to-r from-[#58cc02] to-[#1cb0f6] text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider animate-pulse leading-none shadow-sm shrink-0">
+              {isRtl ? 'إنتاج بالصوت والصورة 🎬🪄' : 'Audiovisual Production 🎬'}
             </div>
           </div>
           <p className="text-slate-400 mt-2 font-bold text-xs">
-            {isRtl ? 'تصفح فيديوهاتك المفضلة وسجل واجبات تفاعلية مباشرة بدون روابط وبأعلى سعة ودقة!' : 'Upload direct high-definition videos with spacious local buffering and zero latency!'}
+            {isRtl 
+              ? 'دروس مرئية ناطقة بالصوت والصورة وحركة الشخصيات، مع إمكانية إنتاج فيديوهات جديدة وتحميل الفيديوهات والملخصات' 
+              : 'Interactive narrated video lessons with audio, animation, AI production, and instant video downloading'}
           </p>
         </div>
 
-        {/* Action Controls for Admin or simulating Admin */}
+        {/* Action Controls */}
         <div className="flex flex-wrap items-center gap-3 shrink-0">
+          {/* AI VIDEO GENERATOR BUTTON */}
+          <button
+            onClick={() => setShowAiStudioModal(true)}
+            className="px-5 py-3.5 bg-gradient-to-r from-[#58cc02] to-[#22c55e] hover:brightness-105 text-white font-black text-xs uppercase tracking-wider rounded-2xl border-b-4 border-[#3a8402] active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-[#58cc02]/25"
+          >
+            <Wand2 size={16} />
+            <span>{isRtl ? 'إنتاج فيديو بالذكاء الاصطناعي 🪄' : 'AI Video Producer Studio 🪄'}</span>
+          </button>
+
           {/* SIMULATION SWITCH */}
           {!isAdminUser && (
             <button 
               onClick={() => setForceAdminMode(!forceAdminMode)}
-              className={`px-3 py-1.5 rounded-xl text-[10px] font-black border uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-2 rounded-xl text-[10px] font-black border uppercase tracking-wider transition-all flex items-center gap-1.5 ${
                 forceAdminMode 
                   ? 'bg-amber-100 text-amber-700 border-amber-300' 
                   : 'bg-white text-slate-400 border-slate-200 hover:text-slate-600'
               }`}
             >
               <Sparkle size={12} className={forceAdminMode ? 'animate-spin-slow text-amber-600' : ''} />
-              <span>{forceAdminMode ? (isRtl ? 'وضع المدير نشط' : 'Admin Simulation ON') : (isRtl ? 'محاكاة وضع المدير' : 'Simulate Admin Mode')}</span>
+              <span>{forceAdminMode ? (isRtl ? 'وضع المدير نشط' : 'Admin Mode') : (isRtl ? 'محاكاة وضع المدير' : 'Simulate Admin')}</span>
             </button>
           )}
 
@@ -752,385 +869,608 @@ export const VideoLibrary = ({
                 setErrorText('');
                 setSuccessText('');
               }}
-              className="px-4 py-3 duo-btn-green flex items-center justify-center gap-2 text-xs uppercase"
+              className="px-4 py-3 duo-btn-white border-2 border-slate-200 flex items-center justify-center gap-2 text-xs uppercase font-black"
             >
               <Plus size={16} strokeWidth={3} />
-              <span>{isRtl ? 'إضافة فيديو مباشر' : 'Add Direct Video'}</span>
+              <span>{isRtl ? 'إضافة فيديو يدوي' : 'Upload Manual Video'}</span>
             </button>
           )}
         </div>
       </header>
 
-      {/* DYNAMIC UPLOAD FORM (Direct Video Support) */}
-      <AnimatePresence>
-        {isEffectiveAdmin && showAddForm && (
-          <motion.div 
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden mb-10"
-          >
-            <div className="bg-white rounded-[2rem] p-6 border-2 border-b-[6px] border-[#58cc02] shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-6 border-b-2 border-slate-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#58cc02]/10 text-[#58cc02] rounded-xl flex items-center justify-center">
-                    <Video size={20} />
+      {/* TOP TABS SELECTOR (Produced Audiovisual vs Direct Uploads) */}
+      <div className="flex flex-wrap items-center gap-3 mb-8 bg-white p-2 rounded-2xl border-2 border-slate-200 shadow-sm">
+        <button
+          onClick={() => setLibraryTab('produced')}
+          className={`flex-1 py-3 px-4 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all ${
+            libraryTab === 'produced'
+              ? 'bg-[#58cc02] text-white shadow-md shadow-[#58cc02]/20'
+              : 'text-slate-500 hover:bg-slate-100'
+          }`}
+        >
+          <Film size={18} />
+          <span>{isRtl ? 'الدروس المرئية المنتجة (بالصوت والصورة) 🎬' : 'Produced Audiovisual Video Lessons 🎬'}</span>
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
+            libraryTab === 'produced' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
+          }`}>
+            {producedLessons.length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setLibraryTab('uploads')}
+          className={`flex-1 py-3 px-4 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all ${
+            libraryTab === 'uploads'
+              ? 'bg-[#1cb0f6] text-white shadow-md shadow-[#1cb0f6]/20'
+              : 'text-slate-500 hover:bg-slate-100'
+          }`}
+        >
+          <HardDriveDownload size={18} />
+          <span>{isRtl ? 'مكتبة التحميل المباشر واليوتيوب 📁' : 'Direct Uploads & YouTube Library 📁'}</span>
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
+            libraryTab === 'uploads' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
+          }`}>
+            {allVideos.length}
+          </span>
+        </button>
+      </div>
+
+      {/* ================= PRODUCED AUDIOVISUAL LESSONS TAB ================= */}
+      {libraryTab === 'produced' && (
+        <div className="space-y-6">
+          {/* Filters Bar */}
+          <div className="bg-white p-4 rounded-2xl border-2 border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* Category Filter */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 text-xs">
+              {[
+                { id: 'all', labelAr: 'الكل 🌟', labelEn: 'All 🌟' },
+                { id: 'conversation', labelAr: 'محادثات 💬', labelEn: 'Conversation 💬' },
+                { id: 'travel', labelAr: 'سفر وسياحة ✈️', labelEn: 'Travel ✈️' },
+                { id: 'business', labelAr: 'بيزنس ومهني 💼', labelEn: 'Business 💼' },
+                { id: 'grammar', labelAr: 'قواعد ومفردات 📚', labelEn: 'Grammar 📚' },
+                { id: 'kids', labelAr: 'أطفال ومرح 🎈', labelEn: 'Kids 🎈' },
+                { id: 'tech', labelAr: 'ذكاء اصطناعي 🤖', labelEn: 'Tech & AI 🤖' },
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`px-3 py-1.5 rounded-xl font-black whitespace-nowrap transition-all ${
+                    selectedCategory === cat.id
+                      ? 'bg-slate-800 text-white shadow-sm'
+                      : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                  }`}
+                >
+                  {isRtl ? cat.labelAr : cat.labelEn}
+                </button>
+              ))}
+            </div>
+
+            {/* Level Filter */}
+            <div className="flex items-center gap-1 shrink-0 bg-slate-100 p-1 rounded-xl">
+              <span className="text-[10px] font-black text-slate-400 px-2 uppercase">{isRtl ? 'المستوى:' : 'Level:'}</span>
+              {['all', 'A1', 'A2', 'B1', 'B2', 'C1'].map((lvl) => (
+                <button
+                  key={`lvl-${lvl}`}
+                  onClick={() => setSelectedLevelFilter(lvl)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all ${
+                    selectedLevelFilter === lvl
+                      ? 'bg-[#58cc02] text-white shadow-sm'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  {lvl === 'all' ? (isRtl ? 'الكل' : 'All') : lvl}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Grid of Produced Video Lessons */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProducedLessons.map((lesson) => (
+              <motion.div
+                key={lesson.id}
+                whileHover={{ y: -6 }}
+                className="bg-white rounded-3xl overflow-hidden border-2 border-b-[6px] border-slate-200 hover:border-[#58cc02] transition-all flex flex-col justify-between group shadow-sm"
+              >
+                <div>
+                  {/* Thumbnail / Header Stage */}
+                  <div className="aspect-video relative overflow-hidden bg-slate-950 flex items-center justify-center">
+                    <img
+                      src={lesson.thumbnail}
+                      alt={lesson.titleEn}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800&auto=format&fit=crop';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                    {/* Badge */}
+                    <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-black flex items-center gap-1 border border-white/20">
+                      <Sparkles size={11} className="text-amber-400" />
+                      <span>{lesson.badge}</span>
+                    </div>
+
+                    {/* Level & Duration */}
+                    <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                      <span className="bg-[#1cb0f6] text-white px-2.5 py-0.5 rounded-full text-[10px] font-black shadow-sm">
+                        {lesson.level}
+                      </span>
+                      <span className="bg-black/60 backdrop-blur-md text-white px-2.5 py-0.5 rounded-full text-[10px] font-black">
+                        {lesson.duration}
+                      </span>
+                    </div>
+
+                    {/* Play Button Overlay */}
+                    <button
+                      onClick={() => setSelectedProducedLesson(lesson)}
+                      className="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform"
+                    >
+                      <div className="w-14 h-14 bg-[#58cc02] text-white rounded-full flex items-center justify-center shadow-xl border-4 border-white">
+                        <Play size={24} fill="currentColor" className="ml-1" />
+                      </div>
+                    </button>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">{isRtl ? 'تحميل مباشر للفيديوهات عالية الجودة' : 'HD Direct Video Upload Engine'}</h3>
-                    <p className="text-[10px] text-slate-400 font-bold">{isRtl ? 'سعة استيعابية كاملة لتحميل أي فيديو .mp4 بدقة عالية جداً!' : 'Zero-compression playback for local highly precise media files'}</p>
+
+                  {/* Content Details */}
+                  <div className="p-5 space-y-3">
+                    <div>
+                      <h3 className="text-base font-black text-slate-800 line-clamp-1 group-hover:text-[#58cc02] transition-colors">
+                        {isRtl ? lesson.titleAr : lesson.titleEn}
+                      </h3>
+                      <p className="text-xs text-slate-400 font-bold line-clamp-1 mt-0.5">
+                        {isRtl ? lesson.titleEn : lesson.titleAr}
+                      </p>
+                    </div>
+
+                    <p className="text-xs text-slate-600 font-medium line-clamp-2 leading-relaxed">
+                      {isRtl ? lesson.summaryAr : lesson.summaryEn}
+                    </p>
+
+                    <div className="flex items-center gap-3 pt-2 text-[11px] text-slate-400 font-bold border-t border-slate-100">
+                      <span className="flex items-center gap-1 text-slate-600">
+                        <Film size={13} className="text-[#58cc02]" />
+                        {lesson.scenes.length} {isRtl ? 'مشاهد مصورة' : 'Scenes'}
+                      </span>
+                      <span className="flex items-center gap-1 text-slate-600">
+                        <BookOpen size={13} className="text-[#1cb0f6]" />
+                        {lesson.vocabulary.length} {isRtl ? 'مفردات أساسية' : 'Vocab'}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                {/* TABS for Upload Source */}
-                <div className="flex items-center bg-slate-100 p-1 rounded-xl">
-                  <button 
-                    type="button"
-                    onClick={() => { setUploadTab('direct'); setErrorText(''); }}
-                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${
-                      uploadTab === 'direct' ? 'bg-white text-[#58cc02] shadow-sm' : 'text-slate-400 hover:text-slate-600'
-                    }`}
+                {/* Card Action Buttons */}
+                <div className="p-5 pt-0 flex items-center gap-2">
+                  <button
+                    onClick={() => setSelectedProducedLesson(lesson)}
+                    className="flex-1 py-3 bg-[#58cc02] hover:bg-[#64e404] text-white font-black text-xs uppercase tracking-wider rounded-xl border-b-3 border-[#3b8702] active:scale-95 transition-all flex items-center justify-center gap-2 shadow-sm"
                   >
-                    {isRtl ? 'فيديو مباشر (لا يحتاج رابط)' : 'Direct Video File'}
+                    <Play size={14} fill="currentColor" />
+                    <span>{isRtl ? 'مشاهدة الدرس بالصوت والصورة' : 'Play Audiovisual Lesson'}</span>
                   </button>
-                  <button 
-                    type="button"
-                    onClick={() => { setUploadTab('youtube'); setErrorText(''); }}
-                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${
-                      uploadTab === 'youtube' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
-                    }`}
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Download structured study sheet
+                      const docContent = `=====================================================
+${lesson.titleEn.toUpperCase()} (${lesson.titleAr})
+Level: ${lesson.level} | Duration: ${lesson.duration}
+Generated by English Academy AI Studio
+=====================================================
+
+SUMMARY:
+${lesson.summaryEn}
+${lesson.summaryAr}
+
+KEY VOCABULARY:
+${lesson.vocabulary.map((v, i) => `${i + 1}. ${v.word} [${v.pronunciation}] = ${v.meaningAr}\n   Example: "${v.exampleSentence}"`).join('\n\n')}
+
+SCENES BREAKDOWN:
+${lesson.scenes.map((s, i) => `--- Scene ${i + 1}: ${s.titleEn} (${s.titleAr}) ---
+Characters: ${s.characters.map(c => `${c.name} (${c.role})`).join(', ')}
+Dialogues:
+${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -> ${d.textAr}${d.grammarTip ? ` (Tip: ${d.grammarTip})` : ''}`).join('\n')}`).join('\n\n')}
+`;
+                      const blob = new Blob([docContent], { type: 'text/plain;charset=utf-8' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `${lesson.titleEn.replace(/\s+/g, '_')}_Lesson_Package.txt`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    }}
+                    title={isRtl ? 'تحميل ملخص الدرس والمفردات' : 'Download Lesson Package'}
+                    className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl border border-slate-200 transition-all active:scale-95 shrink-0"
                   >
-                    YouTube Link
+                    <Download size={16} />
                   </button>
                 </div>
-              </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
 
-              <form onSubmit={handleAddVideo} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    {uploadTab === 'direct' ? (
-                      /* Flexible Direct Video Selection (External persistent Link vs local file upload) */
+      {/* ================= DIRECT UPLOADS & YOUTUBE TAB ================= */}
+      {libraryTab === 'uploads' && (
+        <div className="space-y-8">
+          {/* DYNAMIC UPLOAD FORM (Direct Video Support) */}
+          <AnimatePresence>
+            {isEffectiveAdmin && showAddForm && (
+              <motion.div 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="bg-white rounded-[2rem] p-6 border-2 border-b-[6px] border-[#58cc02] shadow-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-6 border-b-2 border-slate-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-[#58cc02]/10 text-[#58cc02] rounded-xl flex items-center justify-center">
+                        <Video size={20} />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">{isRtl ? 'تحميل مباشر للفيديوهات عالية الجودة' : 'HD Direct Video Upload Engine'}</h3>
+                        <p className="text-[10px] text-slate-400 font-bold">{isRtl ? 'سعة استيعابية كاملة لتحميل أي فيديو .mp4 بدقة عالية جداً!' : 'Zero-compression playback for local highly precise media files'}</p>
+                      </div>
+                    </div>
+
+                    {/* TABS for Upload Source */}
+                    <div className="flex items-center bg-slate-100 p-1 rounded-xl">
+                      <button 
+                        type="button"
+                        onClick={() => { setUploadTab('direct'); setErrorText(''); }}
+                        className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${
+                          uploadTab === 'direct' ? 'bg-white text-[#58cc02] shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                        }`}
+                      >
+                        {isRtl ? 'فيديو مباشر (لا يحتاج رابط)' : 'Direct Video File'}
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => { setUploadTab('youtube'); setErrorText(''); }}
+                        className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${
+                          uploadTab === 'youtube' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                        }`}
+                      >
+                        YouTube Link
+                      </button>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleAddVideo} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-4">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                          {isRtl ? 'مصدر ملف الفيديو لتجنب الحذف الفجائي' : 'Video File Source (Prevents Ephemeral Erasing)'}
-                        </label>
-                        <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
-                          <button
-                            type="button"
-                            onClick={() => { setDirectSourceMode('link'); setErrorText(''); }}
-                            className={`py-1.5 rounded-lg text-[10px] font-black transition-all ${
-                              directSourceMode === 'link' ? 'bg-[#58cc02] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                            }`}
-                          >
-                            {isRtl ? 'رابط ملف مباشر دائم (مستحسن ⚡)' : 'Persistent Direct URL (Recommended ⚡)'}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => { setDirectSourceMode('file'); setErrorText(''); }}
-                            className={`py-1.5 rounded-lg text-[10px] font-black transition-all ${
-                              directSourceMode === 'file' ? 'bg-[#58cc02] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                            }`}
-                          >
-                            {isRtl ? 'رفع ملف فيديو (خادم مؤقت 📁)' : 'Upload Video File (Ephemeral 📁)'}
-                          </button>
-                        </div>
-
-                        {directSourceMode === 'link' ? (
-                          /* Option A: Persistent Direct URL Link input */
-                          <div className="animate-fade-in">
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
-                              {isRtl ? 'رابط الفيديو المباشر المستضاف (تشغيل فوري دائم للجميع)' : 'Persistent Cloud Hosting Direct Link (Permanent Stream)'}
+                        {uploadTab === 'direct' ? (
+                          <div className="space-y-4">
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                              {isRtl ? 'مصدر ملف الفيديو لتجنب الحذف الفجائي' : 'Video File Source (Prevents Ephemeral Erasing)'}
                             </label>
-                            <input
-                              type="text"
-                              required={directSourceMode === 'link'}
-                              value={directLinkUrl}
+                            <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
+                              <button
+                                type="button"
+                                onClick={() => { setDirectSourceMode('link'); setErrorText(''); }}
+                                className={`py-1.5 rounded-lg text-[10px] font-black transition-all ${
+                                  directSourceMode === 'link' ? 'bg-[#58cc02] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                }`}
+                              >
+                                {isRtl ? 'رابط ملف مباشر دائم (مستحسن ⚡)' : 'Persistent Direct URL (Recommended ⚡)'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => { setDirectSourceMode('file'); setErrorText(''); }}
+                                className={`py-1.5 rounded-lg text-[10px] font-black transition-all ${
+                                  directSourceMode === 'file' ? 'bg-[#58cc02] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                }`}
+                              >
+                                {isRtl ? 'رفع ملف فيديو (خادم مؤقت 📁)' : 'Upload Video File (Ephemeral 📁)'}
+                              </button>
+                            </div>
+
+                            {directSourceMode === 'link' ? (
+                              <div className="animate-fade-in">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
+                                  {isRtl ? 'رابط الفيديو المباشر المستضاف (تشغيل فوري دائم للجميع)' : 'Persistent Cloud Hosting Direct Link (Permanent Stream)'}
+                                </label>
+                                <input
+                                  type="text"
+                                  required={directSourceMode === 'link'}
+                                  value={directLinkUrl}
+                                  onChange={(e) => {
+                                    setDirectLinkUrl(e.target.value);
+                                    setErrorText('');
+                                  }}
+                                  placeholder={isRtl ? 'https://example.com/videos/lesson1.mp4 (رابط Dropbox أو Drive أو استضافة خارجية)' : 'e.g., dropbox direct link, static server url, etc'}
+                                  className="w-full text-xs font-semibold border-2 border-slate-200 focus:border-[#58cc02] outline-none rounded-xl p-3.5 transition-colors placeholder-slate-300"
+                                />
+                                <p className="text-[9px] text-amber-600 font-bold mt-2 leading-relaxed">
+                                  {isRtl 
+                                    ? '⚠️ ملاحظة هامة: نظراً لطبيعة الخادم السحابي المؤقت، يُنصح بشدة بوضع الفيديوهات على Dropbox أو Google Drive ووضع الرابط المباشر هنا لضمان تشغيله بشكل دائم وثابت للطلاب دون الخوف من المسح المستقبلي.'
+                                    : '⚠️ Highly recommended: Cloud links ensure steady, zero-touch perpetual views since the ephemeral server resets will not erase external files.'
+                                  }
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="animate-fade-in">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
+                                  {isRtl ? 'اختر ملف الفيديو عالي الدقة (MP4, MOV, WEBM) 📂' : 'Select HD Video File (MP4, MOV, WEBM) 📂'}
+                                </label>
+                                <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-6 bg-slate-50 text-center hover:bg-slate-100/50 transition-colors cursor-pointer group">
+                                  <input 
+                                    type="file" 
+                                    accept="video/*" 
+                                    required={directSourceMode === 'file'}
+                                    onChange={handleFileChange}
+                                    className="absolute inset-0 opacity-0 cursor-pointer"
+                                  />
+                                  <UploadCloud size={32} className="mx-auto text-slate-400 group-hover:text-[#58cc02] transition-colors mb-2" />
+                                  <p className="text-xs font-black text-slate-700">
+                                    {videoFile ? videoFile.name : (isRtl ? 'اسحب ملف الفيديو هنا أو اضغط للتصفح' : 'Drag video file here or browse files')}
+                                  </p>
+                                  <p className="text-[9px] text-slate-400 mt-1 font-bold">
+                                    {videoFile ? `${(videoFile.size / (1024*1024)).toFixed(1)} MB` : (isRtl ? 'ملفات يتم حفظها محلياً ومؤقتاً' : 'No size boundaries - Local & Ephemeral Server Storage')}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">{isRtl ? 'رابط يوتيوب أو رمز الفيديو' : 'YouTube Link or Video ID'}</label>
+                            <input 
+                              type="text" 
+                              required
+                              value={inputUrl}
                               onChange={(e) => {
-                                setDirectLinkUrl(e.target.value);
+                                setInputUrl(e.target.value);
                                 setErrorText('');
                               }}
-                              placeholder={isRtl ? 'https://example.com/videos/lesson1.mp4 (رابط Dropbox أو Drive أو استضافة خارجية)' : 'e.g., dropbox direct link, static server url, etc'}
-                              className="w-full text-xs font-semibold border-2 border-slate-200 focus:border-[#58cc02] outline-none rounded-xl p-3.5 transition-colors placeholder-slate-300"
+                              placeholder={isRtl ? 'مثال: https://www.youtube.com/watch?v=j7u280G6W3E' : 'e.g., https://www.youtube.com/watch?v=j7u280G6W3E'}
+                              className="w-full text-xs font-medium border-2 border-slate-200 focus:border-[#58cc02] outline-none rounded-xl p-3.5 transition-colors placeholder-slate-300"
                             />
-                            <p className="text-[9px] text-amber-600 font-bold mt-2 leading-relaxed">
-                              {isRtl 
-                                ? '⚠️ ملاحظة هامة: نظراً لطبيعة الخادم السحابي المؤقت، يُنصح بشدة بوضع الفيديوهات على Dropbox أو Google Drive ووضع الرابط المباشر هنا لضمان تشغيله بشكل دائم وثابت للطلاب دون الخوف من المسح المستقبلي.'
-                                : '⚠️ Highly recommended: Cloud links ensure steady, zero-touch perpetual views since the ephemeral server resets will not erase external files.'
-                              }
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">{isRtl ? 'العنوان بالإنجليزية' : 'Title (English)'}</label>
+                            <input 
+                              type="text" 
+                              required
+                              value={inputTitleEn}
+                              onChange={(e) => setInputTitleEn(e.target.value)}
+                              placeholder="e.g. Conversation Mastery"
+                              className="w-full text-xs font-bold border-2 border-slate-200 focus:border-[#58cc02] outline-none rounded-xl p-3.5 transition-colors"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">{isRtl ? 'العنوان بالعربية' : 'Title (Arabic)'}</label>
+                            <input 
+                              type="text" 
+                              required
+                              value={inputTitleAr}
+                              onChange={(e) => setInputTitleAr(e.target.value)}
+                              placeholder="مثال: إتقان المحادثات الحيوية"
+                              className="w-full text-xs font-bold border-2 border-slate-200 focus:border-[#58cc02] outline-none rounded-xl p-3.5 transition-colors"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">{isRtl ? 'المستوى التعليمي المستهدف' : 'Target Educational Level'}</label>
+                          <div className="grid grid-cols-6 gap-1 bg-slate-50 border-2 border-slate-200 p-1.5 rounded-xl">
+                            {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((lvl) => (
+                              <button
+                                type="button"
+                                key={lvl}
+                                onClick={() => setInputLevel(lvl)}
+                                className={`py-1 bg-white font-extrabold text-[10px] rounded-lg border transition-all ${
+                                  inputLevel === lvl 
+                                    ? 'border-[#58cc02] text-[#58cc02] scale-105 shadow-sm' 
+                                    : 'border-slate-100 text-slate-400 hover:text-slate-600'
+                                }`}
+                              >
+                                {lvl}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Thumbnail / Video Preview Area */}
+                      <div className="flex flex-col justify-center items-center bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 relative min-h-[160px]">
+                        {uploadTab === 'direct' && videoFileUrl ? (
+                          <div className="w-full text-center space-y-3">
+                            <div className="aspect-video relative rounded-xl overflow-hidden border-2 border-slate-200/50 bg-black shadow-inner">
+                              <video 
+                                src={videoFileUrl}
+                                className="w-full h-full object-contain"
+                                controls
+                              />
+                            </div>
+                            <p className="text-[10px] text-slate-400 font-bold truncate">
+                              {isRtl ? 'جاهز للمشاهدة المباشرة بوضوح فائق 🚀' : 'HD direct playback buffer ready 🚀'}
+                            </p>
+                          </div>
+                        ) : uploadTab === 'youtube' && previewId ? (
+                          <div className="w-full max-w-[280px] text-center space-y-3">
+                            <div className="aspect-video relative rounded-xl overflow-hidden border-2 border-slate-200/50 bg-black">
+                              <img 
+                                src={`https://img.youtube.com/vi/${previewId}/hqdefault.jpg`} 
+                                alt="" 
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <p className="text-[10px] text-slate-400 font-bold truncate">
+                              Detected ID: {previewId}
                             </p>
                           </div>
                         ) : (
-                          /* Option B: Standard File Uploader UI - Direct video */
-                          <div className="animate-fade-in">
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
-                              {isRtl ? 'اختر ملف الفيديو عالي الدقة (MP4, MOV, WEBM) 📂' : 'Select HD Video File (MP4, MOV, WEBM) 📂'}
-                            </label>
-                            <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-6 bg-slate-50 text-center hover:bg-slate-100/50 transition-colors cursor-pointer group">
-                              <input 
-                                type="file" 
-                                accept="video/*"
-                                required={directSourceMode === 'file'}
-                                onChange={handleFileChange}
-                                className="absolute inset-0 opacity-0 cursor-pointer"
-                              />
-                              <UploadCloud size={32} className="mx-auto text-slate-400 group-hover:text-[#58cc02] transition-colors mb-2" />
-                              <p className="text-xs font-black text-slate-700">
-                                {videoFile ? videoFile.name : (isRtl ? 'اسحب ملف الفيديو هنا أو اضغط للتصفح' : 'Drag video file here or browse files')}
-                              </p>
-                              <p className="text-[9px] text-slate-400 mt-1 font-bold">
-                                {videoFile ? `${(videoFile.size / (1024*1024)).toFixed(1)} MB` : (isRtl ? 'ملفات يتم حفظها محلياً ومؤقتاً' : 'No size boundaries - Local & Ephemeral Server Storage')}
-                              </p>
+                          <div className="text-center text-slate-300 space-y-2">
+                            <FileVideo size={44} strokeWidth={1.5} className="mx-auto" />
+                            <div className="text-[10px] text-slate-400 font-bold max-w-[200px] leading-relaxed">
+                              {isRtl ? 'اختر ملف فيديو أو يوتيوب لمعاينة البث والوضوح فائق الدقة تلقائياً ❤️' : 'Select video resources to activate smart direct cover previews instantly ❤️'}
                             </div>
                           </div>
                         )}
                       </div>
-                    ) : (
-                      /* YouTube Link input */
-                      <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">{isRtl ? 'رابط يوتيوب أو رمز الفيديو' : 'YouTube Link or Video ID'}</label>
-                        <input 
-                          type="text" 
-                          required
-                          value={inputUrl}
-                          onChange={(e) => {
-                            setInputUrl(e.target.value);
-                            setErrorText('');
-                          }}
-                          placeholder={isRtl ? 'مثال: https://www.youtube.com/watch?v=j7u280G6W3E' : 'e.g., https://www.youtube.com/watch?v=j7u280G6W3E'}
-                          className="w-full text-xs font-medium border-2 border-slate-200 focus:border-[#58cc02] outline-none rounded-xl p-3.5 transition-colors placeholder-slate-300"
-                        />
+                    </div>
+
+                    {/* Info response statuses */}
+                    {errorText && (
+                      <div className="flex items-center gap-2 p-3.5 bg-rose-50 border-2 border-rose-200 text-rose-600 rounded-xl text-xs font-bold">
+                        <AlertCircle size={16} />
+                        <span>{errorText}</span>
                       </div>
                     )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">{isRtl ? 'العنوان بالإنجليزية' : 'Title (English)'}</label>
-                        <input 
-                          type="text" 
-                          required
-                          value={inputTitleEn}
-                          onChange={(e) => setInputTitleEn(e.target.value)}
-                          placeholder="e.g. Conversation Mastery"
-                          className="w-full text-xs font-bold border-2 border-slate-200 focus:border-[#58cc02] outline-none rounded-xl p-3.5 transition-colors"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">{isRtl ? 'العنوان بالعربية' : 'Title (Arabic)'}</label>
-                        <input 
-                          type="text" 
-                          required
-                          value={inputTitleAr}
-                          onChange={(e) => setInputTitleAr(e.target.value)}
-                          placeholder="مثال: إتقان المحادثات الحيوية"
-                          className="w-full text-xs font-bold border-2 border-slate-200 focus:border-[#58cc02] outline-none rounded-xl p-3.5 transition-colors"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">{isRtl ? 'المستوى التعليمي المستهدف' : 'Target Educational Level'}</label>
-                      <div className="grid grid-cols-6 gap-1 bg-slate-50 border-2 border-slate-200 p-1.5 rounded-xl">
-                        {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((lvl) => (
-                          <button
-                            type="button"
-                            key={lvl}
-                            onClick={() => setInputLevel(lvl)}
-                            className={`py-1 bg-white font-extrabold text-[10px] rounded-lg border transition-all ${
-                              inputLevel === lvl 
-                                ? 'border-[#58cc02] text-[#58cc02] scale-105 shadow-sm' 
-                                : 'border-slate-100 text-slate-400 hover:text-slate-600'
-                            }`}
-                          >
-                            {lvl}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Thumbnail / Video Preview Area */}
-                  <div className="flex flex-col justify-center items-center bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 relative min-h-[160px]">
-                    {uploadTab === 'direct' && videoFileUrl ? (
-                      /* Live direct preview player */
-                      <div className="w-full text-center space-y-3">
-                        <div className="aspect-video relative rounded-xl overflow-hidden border-2 border-slate-200/50 bg-black shadow-inner">
-                          <video 
-                            src={videoFileUrl}
-                            className="w-full h-full object-contain"
-                            controls
-                          />
-                        </div>
-                        <p className="text-[10px] text-slate-400 font-bold truncate">
-                          {isRtl ? 'جاهز للمشاهدة المباشرة بوضوح فائق 🚀' : 'HD direct playback buffer ready 🚀'}
-                        </p>
-                      </div>
-                    ) : uploadTab === 'youtube' && previewId ? (
-                      /* Youtube Cover preview */
-                      <div className="w-full max-w-[280px] text-center space-y-3">
-                        <div className="aspect-video relative rounded-xl overflow-hidden border-2 border-slate-200/50 bg-black">
-                          <img 
-                            src={`https://img.youtube.com/vi/${previewId}/hqdefault.jpg`} 
-                            alt="" 
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <p className="text-[10px] text-slate-400 font-bold truncate">
-                          Detected ID: {previewId}
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="text-center text-slate-300 space-y-2">
-                        <FileVideo size={44} strokeWidth={1.5} className="mx-auto" />
-                        <div className="text-[10px] text-slate-400 font-bold max-w-[200px] leading-relaxed">
-                          {isRtl ? 'اختر ملف فيديو أو يوتيوب لمعاينة البث والوضوح فائق الدقة تلقائياً ❤️' : 'Select video resources to activate smart direct cover previews instantly ❤️'}
-                        </div>
+                    {successText && (
+                      <div className="flex items-center gap-2 p-3.5 bg-[#58cc02]/15 border border-[#58cc02]/30 text-[#46a302] rounded-xl text-xs font-black">
+                         <CheckCircle2 size={16} />
+                         <span>{successText}</span>
                       </div>
                     )}
-                  </div>
-                </div>
 
-                {/* Info response statuses */}
-                {errorText && (
-                  <div className="flex items-center gap-2 p-3.5 bg-rose-50 border-2 border-rose-200 text-rose-600 rounded-xl text-xs font-bold">
-                    <AlertCircle size={16} />
-                    <span>{errorText}</span>
-                  </div>
-                )}
-
-                {successText && (
-                  <div className="flex items-center gap-2 p-3.5 bg-[#58cc02]/15 border border-[#58cc02]/30 text-[#46a302] rounded-xl text-xs font-black">
-                     <CheckCircle2 size={16} />
-                     <span>{successText}</span>
-                  </div>
-                )}
-
-                {/* Form Footer Buttons */}
-                <div className="flex items-center justify-end gap-3 pt-4 border-t-2 border-slate-100">
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      setShowAddForm(false);
-                      setVideoFile(null);
-                      setErrorText('');
-                    }}
-                    className="px-5 py-3.5 duo-btn-white text-xs text-slate-500 uppercase font-black"
-                  >
-                    {isRtl ? 'إلغاء الأمر' : 'Cancel'}
-                  </button>
-                  <button 
-                    type="submit"
-                    disabled={actionLoading}
-                    className="px-6 py-3.5 duo-btn-green text-xs text-white uppercase font-black disabled:opacity-50"
-                  >
-                    {actionLoading ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
-                    ) : (
-                      isRtl ? 'تحميل ونشر الدرس 🚀' : 'Upload & Publish Lesson 🚀'
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* DYNAMIC VIDEOS GRID SECTION */}
-      {dbLoading ? (
-        <div className="py-20 flex flex-col items-center justify-center space-y-4">
-          <div className="w-10 h-10 border-4 border-[#58cc02] border-t-transparent rounded-full animate-spin" />
-          <span className="text-slate-400 font-extrabold text-xs tracking-wider uppercase">{isRtl ? 'جاري الفرز والتحميل من السحابة...' : 'Analyzing and fetching videos...'}</span>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {allVideos.map((video, vIdx) => {
-            const isCustom = !DEFAULT_VIDEOS.some(def => def.youtubeId === video.youtubeId);
-            const isDirectFile = !!video.directUrl;
-            return (
-              <motion.div 
-                key={`video-card-${video.id || vIdx}`}
-                whileHover={enabled || isEffectiveAdmin ? { y: -8 } : {}}
-                className={`bg-white rounded-[2rem] overflow-hidden border-2 border-b-[8px] border-slate-200 hover:border-slate-300 transition-all cursor-pointer relative group flex flex-col justify-between ${
-                  !(enabled || isEffectiveAdmin) ? 'grayscale opacity-70 cursor-not-allowed' : ''
-                }`}
-                onClick={() => handleSelectVideo(video)}
-              >
-                {/* Trash Deletion Button for Admins - works for ALL videos! */}
-                {isEffectiveAdmin && (
-                  <button 
-                    onClick={(e) => handleDeleteVideo(video.id, e)}
-                    className="absolute top-3 right-3 z-30 w-8 h-8 rounded-lg bg-red-500 text-white flex items-center justify-center border-b-2 border-red-700 hover:bg-red-600 active:scale-90 transition-all shadow-md cursor-pointer"
-                    title={isRtl ? 'حذف الدرس' : 'Delete Lesson'}
-                  >
-                    <Trash2 size={14} strokeWidth={2.5} />
-                  </button>
-                )}
-
-                {/* "Direct File" or "Youtube Source" badges */}
-                <span className={`absolute top-3 left-3 z-35 text-white px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider shadow-sm border-b-2 ${
-                  isDirectFile ? 'bg-[#58cc02] border-[#439b02]' : 'bg-[#1cb0f6] border-[#139ddb]'
-                }`}>
-                  {isDirectFile ? (isRtl ? 'مباشر 📁' : 'Direct file 📁') : 'YouTube'}
-                </span>
-
-                {!enabled && !isEffectiveAdmin && (
-                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-900/10 backdrop-blur-[1px]">
-                    <div className="bg-white px-5 py-2 rounded-2xl shadow-md border-2 border-b-4 border-slate-300 transform -rotate-6">
-                       <span className="text-xs font-black text-slate-500 uppercase tracking-tighter">
-                         {isRtl ? 'مغلق مؤقتاً 🔒' : 'Locked 🔒'}
-                       </span>
-                    </div>
-                  </div>
-                )}
-
-                <div className="aspect-[4/3] relative overflow-hidden bg-slate-900 flex items-center justify-center text-slate-300 border-b-2 border-slate-200">
-                  <ImageIcon size={48} className="absolute opacity-20" />
-                  <img 
-                    src={video.thumbnail} 
-                    alt="" 
-                    referrerPolicy="no-referrer"
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 relative z-10" 
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.opacity = '0.3';
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20">
-                     <div className="w-14 h-14 bg-white/25 backdrop-blur-md rounded-full flex items-center justify-center text-white scale-90 group-hover:scale-100 transition-transform">
-                       <Play fill="currentColor" size={24} />
-                     </div>
-                  </div>
-                  <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center z-20">
-                    <span className="bg-black/60 backdrop-blur-[2px] text-white px-2.5 py-0.5 rounded-full text-[9px] font-black">{video.duration}</span>
-                    <span className="bg-[#1cb0f6] border-b-2 border-[#1292ce] text-white px-2.5 py-0.5 rounded-full text-[9px] font-black shadow-sm">{video.level}</span>
-                  </div>
-                </div>
-
-                <div className="p-5 flex flex-col justify-between flex-1">
-                  <div>
-                    <h3 className="font-extrabold text-sm text-slate-800 line-clamp-2 mb-3 leading-snug group-hover:text-[#58cc02] transition-colors">{isRtl ? video.titleAr : video.titleEn}</h3>
-                    {isDirectFile && (
-                      <div className="mb-4 flex items-center gap-1.5 text-[10px] font-black">
-                        {localVideoStatusMap[video.id] ? (
-                          <span className="text-[#58cc02] bg-green-50 px-2.5 py-1 rounded-lg border border-green-200 shadow-sm">
-                            {isRtl ? '⚡ جاهز للتشغيل الفوري' : '⚡ Ready in Cache'}
-                          </span>
+                    {/* Form Footer Buttons */}
+                    <div className="flex items-center justify-end gap-3 pt-4 border-t-2 border-slate-100">
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setShowAddForm(false);
+                          setVideoFile(null);
+                          setErrorText('');
+                        }}
+                        className="px-5 py-3.5 duo-btn-white text-xs text-slate-500 uppercase font-black"
+                      >
+                        {isRtl ? 'إلغاء الأمر' : 'Cancel'}
+                      </button>
+                      <button 
+                        type="submit"
+                        disabled={actionLoading}
+                        className="px-6 py-3.5 duo-btn-green text-xs text-white uppercase font-black disabled:opacity-50"
+                      >
+                        {actionLoading ? (
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
                         ) : (
-                          <span className="text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 shadow-sm animate-pulse">
-                            {isRtl ? '📁 يحتاج ربط ملف الفيديو' : '📁 Needs video file'}
-                          </span>
+                          isRtl ? 'تحميل ونشر الدرس 🚀' : 'Upload & Publish Lesson 🚀'
                         )}
-                      </div>
-                    )}
-                  </div>
-                  <button className="w-full duo-btn-white py-3 text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 font-black">
-                    {t.watchNow}
-                    <ChevronRight size={12} className={isRtl ? 'rotate-180' : ''} />
-                  </button>
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </motion.div>
-            );
-          })}
+            )}
+          </AnimatePresence>
+
+          {/* DYNAMIC VIDEOS GRID SECTION */}
+          {dbLoading ? (
+            <div className="py-20 flex flex-col items-center justify-center space-y-4">
+              <div className="w-10 h-10 border-4 border-[#58cc02] border-t-transparent rounded-full animate-spin" />
+              <span className="text-slate-400 font-extrabold text-xs tracking-wider uppercase">{isRtl ? 'جاري الفرز والتحميل من السحابة...' : 'Analyzing and fetching videos...'}</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {allVideos.map((video, vIdx) => {
+                const isDirectFile = !!video.directUrl;
+                return (
+                  <motion.div 
+                    key={`video-card-${video.id || vIdx}`}
+                    whileHover={enabled || isEffectiveAdmin ? { y: -6 } : {}}
+                    className={`bg-white rounded-[2rem] overflow-hidden border-2 border-b-[6px] border-slate-200 hover:border-slate-300 transition-all cursor-pointer relative group flex flex-col justify-between ${
+                      !(enabled || isEffectiveAdmin) ? 'grayscale opacity-70 cursor-not-allowed' : ''
+                    }`}
+                    onClick={() => handleSelectVideo(video)}
+                  >
+                    {/* Trash Deletion Button for Admins */}
+                    {isEffectiveAdmin && (
+                      <button 
+                        onClick={(e) => handleDeleteVideo(video.id, e)}
+                        className="absolute top-3 right-3 z-30 w-8 h-8 rounded-lg bg-red-500 text-white flex items-center justify-center border-b-2 border-red-700 hover:bg-red-600 active:scale-90 transition-all shadow-md cursor-pointer"
+                        title={isRtl ? 'حذف الدرس' : 'Delete Lesson'}
+                      >
+                        <Trash2 size={14} strokeWidth={2.5} />
+                      </button>
+                    )}
+
+                    {/* Direct File or Youtube Source badge */}
+                    <span className={`absolute top-3 left-3 z-35 text-white px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider shadow-sm border-b-2 ${
+                      isDirectFile ? 'bg-[#58cc02] border-[#439b02]' : 'bg-[#1cb0f6] border-[#139ddb]'
+                    }`}>
+                      {isDirectFile ? (isRtl ? 'مباشر 📁' : 'Direct file 📁') : 'YouTube'}
+                    </span>
+
+                    <div className="aspect-[4/3] relative overflow-hidden bg-slate-900 flex items-center justify-center text-slate-300 border-b-2 border-slate-200">
+                      <ImageIcon size={48} className="absolute opacity-20" />
+                      <img 
+                        src={video.thumbnail} 
+                        alt="" 
+                        referrerPolicy="no-referrer"
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 relative z-10" 
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.opacity = '0.3';
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20">
+                         <div className="w-12 h-12 bg-white/25 backdrop-blur-md rounded-full flex items-center justify-center text-white scale-90 group-hover:scale-100 transition-transform">
+                           <Play fill="currentColor" size={20} />
+                         </div>
+                      </div>
+                      <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center z-20">
+                        <span className="bg-black/60 backdrop-blur-[2px] text-white px-2.5 py-0.5 rounded-full text-[9px] font-black">{video.duration}</span>
+                        <span className="bg-[#1cb0f6] border-b-2 border-[#1292ce] text-white px-2.5 py-0.5 rounded-full text-[9px] font-black shadow-sm">{video.level}</span>
+                      </div>
+                    </div>
+
+                    <div className="p-5 flex flex-col justify-between flex-1">
+                      <div>
+                        <h3 className="font-extrabold text-sm text-slate-800 line-clamp-2 mb-2 leading-snug group-hover:text-[#58cc02] transition-colors">
+                          {isRtl ? video.titleAr : video.titleEn}
+                        </h3>
+                        {isDirectFile && (
+                          <div className="mb-3 flex items-center gap-1.5 text-[10px] font-black">
+                            {localVideoStatusMap[video.id] ? (
+                              <span className="text-[#58cc02] bg-green-50 px-2 py-0.5 rounded-lg border border-green-200 shadow-sm">
+                                {isRtl ? '⚡ جاهز للتشغيل' : '⚡ Cached'}
+                              </span>
+                            ) : (
+                              <span className="text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 shadow-sm">
+                                {isRtl ? '📁 ملف مباشر' : '📁 Direct file'}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2 mt-2">
+                        <button className="flex-1 duo-btn-white py-2.5 text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 font-black">
+                          {t.watchNow}
+                          <ChevronRight size={12} className={isRtl ? 'rotate-180' : ''} />
+                        </button>
+
+                        <button
+                          onClick={(e) => handleDownloadVideo(video, e)}
+                          title={isRtl ? 'تحميل الفيديو' : 'Download Video'}
+                          disabled={downloadingId === video.id}
+                          className="p-2.5 bg-slate-100 hover:bg-[#58cc02] hover:text-white text-slate-600 rounded-xl transition-all border border-slate-200 shrink-0"
+                        >
+                          {downloadingId === video.id ? (
+                            <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Download size={14} />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
@@ -1141,20 +1481,40 @@ export const VideoLibrary = ({
               🦉
             </div>
             <div>
-              <h4 className="text-lg font-black text-slate-800">{isRtl ? 'مسارات تعلم تفاعلية متكاملة دون حدود' : 'Unlimited Immersive Video Curriculums'}</h4>
-              <p className="text-slate-400 text-xs font-bold mt-1 max-w-lg leading-relaxed">{isRtl ? 'ندمج الآن برمجية التحميل المباشر لتوفير جودة مطلقة وسعة دقة تخدمك مجاناً وبأعلى سرعة ممكنة.' : 'Now integrating direct zero-compression file streaming with huge localized buffering speeds.'}</p>
+              <h4 className="text-lg font-black text-slate-800">{isRtl ? 'مسارات تعلم تفاعلية متكاملة بالصوت والصورة' : 'Unlimited Immersive Audiovisual Curriculums'}</h4>
+              <p className="text-slate-400 text-xs font-bold mt-1 max-w-lg leading-relaxed">
+                {isRtl 
+                  ? 'تم ترقية الأكاديمية بالكامل لدعم إنتاج دروس فيديو تعليمية ناطقة بالصوت وحركات الشخصيات مع تصدير الفيديو والملخصات وتحميل الملفات المباشرة دون قيود.' 
+                  : 'Fully upgraded with AI-powered audiovisual character-narrated video production, offline study guides, and instant video download workflows.'}
+              </p>
             </div>
           </div>
           <div className="bg-slate-50 border-2 border-slate-200 px-6 py-4 rounded-2xl relative shrink-0">
              <div className="flex items-center gap-4">
                 <Sparkle className="text-[#ff9600] animate-spin-slow" />
                 <div>
-                  <span className="block text-xl font-black text-slate-800 leading-none">{allVideos.length}</span>
-                  <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest block mt-1">{isRtl ? 'فيديو نشط بالمكتبة' : 'Active Videos'}</span>
+                  <span className="block text-xl font-black text-slate-800 leading-none">
+                    {libraryTab === 'produced' ? producedLessons.length : allVideos.length}
+                  </span>
+                  <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest block mt-1">
+                    {libraryTab === 'produced' ? (isRtl ? 'دروس منتجة ناطقة' : 'Produced Lessons') : (isRtl ? 'فيديوهات بالمكتبة' : 'Library Videos')}
+                  </span>
                 </div>
              </div>
           </div>
       </footer>
+
+      {/* AI VIDEO STUDIO MODAL */}
+      <AiVideoStudioModal
+        isOpen={showAiStudioModal}
+        onClose={() => setShowAiStudioModal(false)}
+        isRtl={isRtl}
+        onLessonCreated={(newLesson) => {
+          setProducedLessons((prev) => [newLesson, ...prev]);
+          setLibraryTab('produced');
+          setSelectedProducedLesson(newLesson);
+        }}
+      />
     </div>
   );
 };
