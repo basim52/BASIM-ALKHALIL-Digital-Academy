@@ -17,8 +17,6 @@ import {
   Globe, 
   Compass, 
   HelpCircle,
-  ShieldCheck,
-  UserCheck,
   Layers
 } from 'lucide-react';
 import { Language } from '../lib/translations';
@@ -192,12 +190,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               className="hover:text-[#002147] transition-colors cursor-pointer"
             >
               {isRtl ? 'كيف يعمل النظام' : 'How It Works'}
-            </button>
-            <button 
-              onClick={() => scrollToSection('trainer')} 
-              className="hover:text-[#002147] transition-colors cursor-pointer"
-            >
-              {isRtl ? 'عن المدرب' : 'About Trainer'}
             </button>
             <button 
               onClick={() => scrollToSection('faq')} 
@@ -519,81 +511,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* ABOUT TRAINER SECTION */}
-      <section id="trainer" className="py-16 sm:py-24 bg-white border-b border-slate-200">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div className="bg-gradient-to-br from-[#002147] via-[#002c5f] to-[#001733] rounded-3xl sm:rounded-[2.5rem] p-8 sm:p-12 text-white shadow-xl relative overflow-hidden border-t-8 border-[#C49E3A]">
-            
-            <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-              
-              {/* Trainer Avatar Badge */}
-              <div className="md:col-span-4 flex flex-col items-center text-center space-y-4">
-                <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-3xl bg-white/10 border-4 border-[#C49E3A] p-2 flex items-center justify-center shadow-2xl relative">
-                  <div className="w-full h-full rounded-2xl bg-[#002147] flex flex-col items-center justify-center text-white">
-                    <span className="text-4xl sm:text-5xl font-black text-[#C49E3A]">B</span>
-                    <span className="text-[10px] font-bold text-slate-300 mt-1 uppercase tracking-widest">Academy</span>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-xl sm:text-2xl font-black text-white">
-                    {isRtl ? 'أ. باسم الخليل' : 'Trainer Basim Al-Khalil'}
-                  </h3>
-                  <p className="text-xs font-bold text-[#C49E3A] mt-0.5">
-                    {isRtl ? 'المشرف العام ومؤسس الأكاديمية' : 'Head of Academy & Founder'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Bio & Credentials */}
-              <div className={`md:col-span-8 space-y-5 ${isRtl ? 'text-right' : 'text-left'}`}>
-                
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-lg text-xs font-black text-[#C49E3A] border border-white/15">
-                  <UserCheck size={14} />
-                  <span>{isRtl ? 'إشراف وتوجيه مباشر' : 'Direct Academic Leadership'}</span>
-                </div>
-
-                {/* Marked Placeholder Bio */}
-                <div className="p-4 sm:p-5 bg-white/10 rounded-2xl border border-white/15 backdrop-blur-sm">
-                  <p className="text-xs sm:text-sm text-white/95 leading-relaxed font-medium">
-                    {isRtl ? (
-                      <>
-                        <span className="font-black text-[#C49E3A] block mb-1">
-                          [نبذة عن المدرب - نص قابل للتخصيص]:
-                        </span>
-                        أ. باسم الخليل - خبير تدريب معتمد في تعليم اللغة الإنجليزية وتطوير المهارات القيادية والتقنية، يمتلك خبرة عملية ممتدة في تمكين الطلاب والمتعلمين من كسر حاجز التحدث والوصول إلى الطلاقة والثقة الكاملة. (يمكنك تعديل هذه الفقرة من هنا وإضافة سيرتك ومؤهلاتك التفصيلية متى شئت).
-                      </>
-                    ) : (
-                      <>
-                        <span className="font-black text-[#C49E3A] block mb-1">
-                          [About the Trainer - Customizable Placeholder Bio]:
-                        </span>
-                        Mr. Basim Al-Khalil - Certified English coach and professional development specialist, dedicated to helping learners conquer spoken language barriers and attain fluent communication and modern digital skills. (Placeholder text: feel free to replace with your detailed bio and credentials).
-                      </>
-                    )}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-bold text-slate-200">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck size={16} className="text-[#C49E3A] shrink-0" />
-                    <span>{isRtl ? 'مناهج أكسفورد المعيارية' : 'Oxford Standard Curricula'}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck size={16} className="text-[#C49E3A] shrink-0" />
-                    <span>{isRtl ? 'تدريب تفاعلي بالذكاء الاصطناعي' : 'Interactive AI Voice Tools'}</span>
-                  </div>
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
       {/* FAQ SECTION */}
       <section id="faq" className="py-16 sm:py-24 bg-[#f8fafc] border-b border-slate-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -702,9 +619,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </button>
               <button onClick={() => scrollToSection('how-it-works')} className="hover:text-white transition-colors cursor-pointer">
                 {isRtl ? 'كيف يعمل' : 'How It Works'}
-              </button>
-              <button onClick={() => scrollToSection('trainer')} className="hover:text-white transition-colors cursor-pointer">
-                {isRtl ? 'عن المدرب' : 'About'}
               </button>
               <button onClick={() => scrollToSection('faq')} className="hover:text-white transition-colors cursor-pointer">
                 {isRtl ? 'الأسئلة الشائعة' : 'FAQ'}
