@@ -85,6 +85,24 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
   const dragConstraintsRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
 
+  // Minimize floating button state with localStorage persistence
+  const [isMinimized, setIsMinimized] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('ai_companion_minimized') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleMinimized = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const next = !isMinimized;
+    setIsMinimized(next);
+    try {
+      localStorage.setItem('ai_companion_minimized', String(next));
+    } catch {}
+  };
+
   useEffect(() => {
     if (isOpen) {
       chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -203,8 +221,8 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
         id: (Date.now() + 1).toString(),
         sender: 'ai',
         text: isRtl 
-          ? 'معك خطوة بخطوة! تذكر أن كل كلمة تمارسها اليوم تبني ثقتك وطلاقتك غداً.'
-          : 'With you step by step! Every sentence practiced brings you closer to effortless fluency.',
+          ? 'تعذر الاتصال بخادم المعلم الذكي مؤقتاً، وتم تفعيل الرد التعليمي المباشر: معك خطوة بخطوة! تذكر أن كل كلمة تمارسها اليوم تبني ثقتك وطلاقتك غداً.'
+          : 'AI server temporarily unavailable, switching to local assistant: With you step by step! Every sentence practiced brings you closer to effortless fluency.',
         timestamp: new Date()
       };
       setMessages(prev => [...prev, fallbackMsg]);
@@ -225,6 +243,7 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phrase: pronouncePhrase.trim() })
       });
+      if (!res.ok) throw new Error('Pronunciation service unreachable');
       const data = await res.json();
       setPronounceResult(data);
       speakText(pronouncePhrase);
@@ -234,7 +253,7 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
         ipa: "/.../",
         syllables: pronouncePhrase,
         stressPattern: "Standard Word Stress",
-        arabicSpeakersTip: "احرص على مد الحروف الصوتية وعدم اختصارها، ونطق الحرف P بنفخة هواء واضحة.",
+        arabicSpeakersTip: "تنبيه: تعذر الاتصال بمحلل النطق السحابي حالياً. نصيحة مدرب الأكاديمية: احرص على مد الحروف الصوتية وعدم اختصارها، ونطق الحرف P بنفخة هواء واضحة.",
         similarSoundingWords: ["practice", "clarity", "fluency"]
       });
     } finally {
@@ -254,6 +273,7 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: transInput.trim(), context: currentContext })
       });
+      if (!res.ok) throw new Error('Translator service unreachable');
       const data = await res.json();
       setTransResult(data);
     } catch (err) {
@@ -262,7 +282,7 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
         formal: transInput,
         casual: transInput,
         phonetics: "",
-        culturalNote: "ملاحظة: الترجمة تعتمد على سياق الجملة والغرض من الحديث."
+        culturalNote: "تنبيه: تعذر الاتصال بمحرك الترجمة السحابي حالياً، تم الاحتفاظ بالنص الأصلي للمراجعة."
       });
     } finally {
       setIsTranslating(false);
@@ -352,46 +372,83 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
           animate={{ scale: 1, opacity: 1 }}
           whileHover={{ scale: 1.05 }}
           whileDrag={{ scale: 1.1, cursor: 'grabbing', filter: 'brightness(1.08)' }}
-          className={`fixed bottom-24 ${isRtl ? 'left-4 sm:left-6' : 'right-4 sm:right-6'} z-[995] touch-none select-none cursor-grab active:cursor-grabbing`}
+          className={`fixed bottom-24 ${isRtl ? 'left-4 sm:left-6' : 'right-4 sm:right-6'} z-[55] touch-none select-none cursor-grab active:cursor-grabbing`}
           dir={isRtl ? 'rtl' : 'ltr'}
-          aria-label={isRtl ? 'المساعد الذكي للأكاديمية - قابل للسحب' : 'AI Academy Companion - Draggable'}
+          aria-label={isRtl ? 'المساعد الذكي للأكاديمية - قابل للسحب والتصغير' : 'AI Academy Companion - Draggable & Minimizable'}
         >
-          <div
-            onClick={() => {
-              if (isDraggingRef.current) return;
-              setIsOpen(true);
-            }}
-            className="flex items-center gap-2 sm:gap-3 px-3.5 py-2.5 sm:px-4 sm:py-3 bg-gradient-to-r from-[#58cc02] via-[#22c55e] to-[#1cb0f6] text-white rounded-full shadow-2xl border-2 border-white/90 backdrop-blur-md group select-none cursor-pointer active:scale-95 transition-transform"
-          >
-            {/* Drag grip handle */}
-            <div 
-              className="text-white/70 group-hover:text-white transition-colors flex items-center justify-center -mr-1"
-              title={isRtl ? 'اسحب لنقل الزر لأي مكان' : 'Drag to move anywhere'}
+          {isMinimized ? (
+            /* Minimized Icon Mode: Takes almost zero screen space */
+            <div
+              onClick={() => {
+                if (isDraggingRef.current) return;
+                setIsOpen(true);
+              }}
+              className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-[#58cc02] via-[#22c55e] to-[#1cb0f6] text-white rounded-full shadow-2xl border-2 border-white/95 backdrop-blur-md group select-none cursor-pointer active:scale-95 transition-all"
+              title={isRtl ? 'المساعد الذكي (انقر للفتح، أو انقر + للتوسيع)' : 'AI Companion (Click to open, or + to expand)'}
             >
-              <GripVertical size={16} />
-            </div>
-
-            {/* AI Avatar with status pulse */}
-            <div className="relative shrink-0">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 bg-white/20 rounded-full flex items-center justify-center shadow-inner">
-                <Bot size={20} className="text-white animate-bounce [animation-duration:2.5s]" />
+              <div className="relative">
+                <Bot size={22} className="text-white animate-bounce [animation-duration:2.5s]" />
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 border-2 border-white rounded-full animate-ping" />
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 border-2 border-white rounded-full" />
               </div>
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 border-2 border-white rounded-full animate-ping" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 border-2 border-white rounded-full" />
-            </div>
 
-            {/* Label & Drag hint */}
-            <div className={`${isRtl ? 'text-right' : 'text-left'}`}>
-              <div className="flex items-center gap-1">
-                <span className="font-black text-xs leading-tight whitespace-nowrap">
-                  {isRtl ? 'المساعد الذكي 🪄' : 'AI Tutor 🪄'}
+              {/* Expand Toggle */}
+              <button
+                onClick={toggleMinimized}
+                className="absolute -top-1 -left-1 w-5 h-5 bg-white text-[#002147] rounded-full shadow-md border border-slate-200 flex items-center justify-center opacity-80 group-hover:opacity-100 hover:scale-110 transition-all cursor-pointer"
+                title={isRtl ? 'توسيع شريط المساعد' : 'Expand Assistant Bar'}
+              >
+                <Maximize2 size={10} />
+              </button>
+            </div>
+          ) : (
+            /* Full Pill Mode */
+            <div
+              onClick={() => {
+                if (isDraggingRef.current) return;
+                setIsOpen(true);
+              }}
+              className="flex items-center gap-2 sm:gap-3 px-3.5 py-2.5 sm:px-4 sm:py-3 bg-gradient-to-r from-[#58cc02] via-[#22c55e] to-[#1cb0f6] text-white rounded-full shadow-2xl border-2 border-white/90 backdrop-blur-md group select-none cursor-pointer active:scale-95 transition-transform"
+            >
+              {/* Drag grip handle */}
+              <div 
+                className="text-white/70 group-hover:text-white transition-colors flex items-center justify-center -mr-1"
+                title={isRtl ? 'اسحب لنقل الزر لأي مكان' : 'Drag to move anywhere'}
+              >
+                <GripVertical size={16} />
+              </div>
+
+              {/* AI Avatar with status pulse */}
+              <div className="relative shrink-0">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 bg-white/20 rounded-full flex items-center justify-center shadow-inner">
+                  <Bot size={20} className="text-white animate-bounce [animation-duration:2.5s]" />
+                </div>
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 border-2 border-white rounded-full animate-ping" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 border-2 border-white rounded-full" />
+              </div>
+
+              {/* Label & Drag hint */}
+              <div className={`${isRtl ? 'text-right' : 'text-left'}`}>
+                <div className="flex items-center gap-1">
+                  <span className="font-black text-xs leading-tight whitespace-nowrap">
+                    {isRtl ? 'المساعد الذكي 🪄' : 'AI Tutor 🪄'}
+                  </span>
+                </div>
+                <span className="text-[9px] text-white/90 font-bold opacity-80 leading-none block whitespace-nowrap">
+                  {isRtl ? 'اسحبني لأي مكان ✋' : 'Drag anywhere ✋'}
                 </span>
               </div>
-              <span className="text-[9px] text-white/90 font-bold opacity-80 leading-none block whitespace-nowrap">
-                {isRtl ? 'اسحبني لأي مكان ✋' : 'Drag anywhere ✋'}
-              </span>
+
+              {/* Minimize button */}
+              <button
+                onClick={toggleMinimized}
+                className="p-1 rounded-full bg-black/15 hover:bg-black/30 text-white/90 hover:text-white transition-colors cursor-pointer mr-0.5"
+                title={isRtl ? 'تصغير إلى أيقونة صغيرة' : 'Minimize to compact icon'}
+              >
+                <Minimize2 size={13} />
+              </button>
             </div>
-          </div>
+          )}
         </motion.div>
       )}
 

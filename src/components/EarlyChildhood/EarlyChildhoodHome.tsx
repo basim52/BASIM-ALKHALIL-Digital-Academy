@@ -21,7 +21,10 @@ import {
   BrainCircuit,
   ArrowLeft,
   X,
-  CheckCircle
+  CheckCircle,
+  ChevronDown,
+  ChevronUp,
+  Lightbulb
 } from 'lucide-react';
 import { Mascot } from './Mascot';
 import { ColorsLesson } from './ColorsLesson';
@@ -254,6 +257,43 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
     { title: isRtl ? 'اكتشف لوناً جديداً' : 'Discover a Color', progress: 1, total: 1, id: 'colors' },
     { title: isRtl ? 'استمع لقصة' : 'Listen to a Story', progress: 0, total: 1, id: 'stories' },
   ];
+
+  // Task panel and tip state with localStorage persistence
+  const [showBasilTip, setShowBasilTip] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('early_childhood_show_tip') !== 'false';
+    } catch {
+      return true;
+    }
+  });
+
+  const [isTasksCollapsed, setIsTasksCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('early_childhood_tasks_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const [isMobileQuestsOpen, setIsMobileQuestsOpen] = useState(false);
+
+  const toggleBasilTip = () => {
+    const next = !showBasilTip;
+    setShowBasilTip(next);
+    try {
+      localStorage.setItem('early_childhood_show_tip', String(next));
+    } catch {}
+  };
+
+  const toggleTasksCollapsed = () => {
+    const next = !isTasksCollapsed;
+    setIsTasksCollapsed(next);
+    try {
+      localStorage.setItem('early_childhood_tasks_collapsed', String(next));
+    } catch {}
+  };
+
+  const completedQuestsCount = quests.filter(q => q.progress >= q.total).length;
 
   const moods = [
     { id: 'happy', emoji: '😊', label: isRtl ? 'سعيد' : 'Happy', color: 'bg-yellow-400' },
@@ -519,50 +559,6 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
            </motion.div>
         )}
       </AnimatePresence>
-      {/* Daily Quests Sidebar (Phase 1) */}
-      <div className="fixed top-32 right-8 hidden lg:block w-72 space-y-4 z-40">
-        <div className="bg-white/80 backdrop-blur-md p-6 rounded-[2.5rem] border border-white shadow-xl">
-           <h3 className="text-lg font-black text-[#002147] mb-4 flex items-center gap-2">
-             <Trophy className="text-yellow-500" size={20} />
-             {isRtl ? 'مهمات اليوم' : 'Daily Quests'}
-           </h3>
-           <div className="space-y-4">
-             {quests.map((q, qIdx) => {
-               const questInfo = DAILY_QUESTS.find(dq => dq.id === q.id);
-               const isDone = q.progress >= q.total;
-               return (
-                 <div key={`d-quest-${q.id}-${qIdx}`} className={`p-4 rounded-3xl border transition-all ${isDone ? 'bg-emerald-50 border-emerald-100 opacity-60' : `${questInfo?.bg} ${questInfo?.border}`}`}>
-                   <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                         {questInfo && <questInfo.icon size={14} className={isDone ? 'text-emerald-500' : questInfo.color} />}
-                         <span className="text-[10px] font-black uppercase tracking-wider text-[#002147]">{q.title}</span>
-                      </div>
-                      {isDone && <CheckCircle size={14} className="text-emerald-500" />}
-                   </div>
-                   <div className="h-2 bg-black/5 rounded-full overflow-hidden">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(q.progress / q.total) * 100}%` }}
-                        className={`h-full ${isDone ? 'bg-emerald-500' : (questInfo?.color.replace('text-', 'bg-') || 'bg-blue-500')}`}
-                      />
-                   </div>
-                 </div>
-               );
-             })}
-           </div>
-        </div>
-
-        {/* Mascot Mini-Preview in Sidebar */}
-        <div className="bg-[#002147] p-6 rounded-[2.5rem] text-white overflow-hidden relative group">
-           <div className="relative z-10">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 mb-2">{isRtl ? 'نصيحة الأسد باسل' : "BASIL'S TIP"}</p>
-              <p className="text-xs font-bold leading-relaxed">
-                {isRtl ? 'هل تعلم أن اللون الأحمر هو لون القوة والنشاط؟ جرب مغامرة الألوان!' : 'Did you know red is the color of energy? Try the Colors adventure!'}
-              </p>
-           </div>
-           <div className="absolute -bottom-4 -right-4 opacity-20 group-hover:scale-110 transition-transform text-6xl">🦁</div>
-        </div>
-      </div>
 
       <AnimatePresence>
         {newSticker && (
@@ -796,6 +792,278 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* TODAY'S QUESTS & BASIL'S TIP (Embedded inside page content area - NEVER fixed over the sidebar) */}
+      <section className="max-w-6xl mx-auto mb-8 px-2 md:px-0" dir={isRtl ? 'rtl' : 'ltr'}>
+        {/* Mobile Trigger Button (Opens Mobile Bottom Sheet) */}
+        <div className="lg:hidden mb-4">
+          <button
+            onClick={() => setIsMobileQuestsOpen(true)}
+            className="w-full flex items-center justify-between p-3.5 bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-indigo-500/10 hover:from-amber-500/20 rounded-2xl border border-amber-200/80 shadow-sm text-[#002147] transition-all cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-400 text-white flex items-center justify-center shadow-sm">
+                <Trophy size={16} />
+              </div>
+              <div className="text-start">
+                <span className="text-xs font-black block text-[#002147]">
+                  {isRtl ? 'مهمات اليوم ونصيحة الأسد باسل 🦁' : "Daily Quests & Basil's Tip 🦁"}
+                </span>
+                <span className="text-[10px] text-slate-500 font-bold">
+                  {isRtl ? `تم إنجاز ${completedQuestsCount} من ${quests.length} مهمات` : `${completedQuestsCount} of ${quests.length} completed`}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black bg-white px-2 py-0.5 rounded-full border border-amber-200 text-amber-800">
+                {completedQuestsCount === quests.length ? (isRtl ? 'مكتملة! 🎉' : 'Done! 🎉') : `${completedQuestsCount}/${quests.length}`}
+              </span>
+              <ChevronDown size={16} className="text-slate-400" />
+            </div>
+          </button>
+        </div>
+
+        {/* Desktop Embedded Panels */}
+        <div className="hidden lg:grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          
+          {/* Daily Quests Box */}
+          <div className={`${showBasilTip ? 'lg:col-span-7' : 'lg:col-span-12'} bg-white/95 backdrop-blur-md p-6 rounded-[2.5rem] border border-slate-200/80 shadow-md transition-all duration-300`}>
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-2xl bg-amber-400/20 text-yellow-600 flex items-center justify-center">
+                  <Trophy size={20} className="text-yellow-500" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-[#002147] flex items-center gap-2">
+                    {isRtl ? 'مهمات اليوم' : 'Daily Quests'}
+                    <span className="text-[10px] font-black px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full">
+                      {completedQuestsCount}/{quests.length} {isRtl ? 'مكتملة' : 'Completed'}
+                    </span>
+                  </h3>
+                  <p className="text-[10px] text-slate-400 font-bold">
+                    {isRtl ? 'أنجز مهماتك اليومية لجمع الأوسمة والملصقات' : 'Complete daily quests to unlock badges & stickers'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {/* Re-open Basil's tip if closed */}
+                {!showBasilTip && (
+                  <button
+                    onClick={toggleBasilTip}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-xl text-xs font-black border border-amber-200 transition-colors cursor-pointer"
+                    title={isRtl ? 'إظهار نصيحة باسل' : "Show Basil's Tip"}
+                  >
+                    <Lightbulb size={13} className="text-amber-500" />
+                    <span>{isRtl ? 'نصيحة باسل 🦁' : "Basil's Tip 🦁"}</span>
+                  </button>
+                )}
+
+                {/* Collapse / Expand Tasks Button */}
+                <button
+                  onClick={toggleTasksCollapsed}
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors cursor-pointer"
+                  title={isTasksCollapsed ? (isRtl ? 'توسيع المهمات' : 'Expand Quests') : (isRtl ? 'طي المهمات' : 'Collapse Quests')}
+                >
+                  {isTasksCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Quests Content: Full or Collapsed */}
+            {!isTasksCollapsed ? (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {quests.map((q, qIdx) => {
+                  const questInfo = DAILY_QUESTS.find(dq => dq.id === q.id);
+                  const isDone = q.progress >= q.total;
+                  return (
+                    <div 
+                      key={`d-quest-${q.id}-${qIdx}`} 
+                      className={`p-3.5 rounded-2xl border transition-all ${
+                        isDone 
+                          ? 'bg-emerald-50/70 border-emerald-200' 
+                          : `${questInfo?.bg} ${questInfo?.border}`
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-1.5">
+                          {questInfo && <questInfo.icon size={14} className={isDone ? 'text-emerald-500' : questInfo.color} />}
+                          <span className="text-[11px] font-black text-[#002147] truncate">{q.title}</span>
+                        </div>
+                        {isDone && <CheckCircle size={14} className="text-emerald-500 shrink-0" />}
+                      </div>
+                      <div className="h-2 bg-black/5 rounded-full overflow-hidden mb-1">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${(q.progress / q.total) * 100}%` }}
+                          className={`h-full ${isDone ? 'bg-emerald-500' : (questInfo?.color.replace('text-', 'bg-') || 'bg-blue-500')}`}
+                        />
+                      </div>
+                      <span className="text-[9px] font-black text-slate-400 block text-end">
+                        {q.progress}/{q.total}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div 
+                onClick={toggleTasksCollapsed}
+                className="flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200 text-xs font-bold text-slate-600 cursor-pointer transition-colors"
+              >
+                <span>
+                  {isRtl ? `تم إنجاز ${completedQuestsCount} من أصل ${quests.length} مهمات اليوم بنجاح` : `Completed ${completedQuestsCount} of ${quests.length} quests today`}
+                </span>
+                <span className="text-[10px] text-[#002147] font-black underline">
+                  {isRtl ? 'اضغط لعرض التفاصيل' : 'Click to expand'}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Basil's Tip Box (with close X button & localStorage persistence) */}
+          {showBasilTip && (
+            <div className="lg:col-span-5 bg-gradient-to-br from-[#002147] via-[#002c5f] to-[#001733] p-6 rounded-[2.5rem] text-white overflow-hidden relative shadow-lg border-2 border-[#C49E3A]/40 transition-all duration-300">
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C49E3A] flex items-center gap-1.5">
+                    <Sparkles size={12} className="text-[#C49E3A]" />
+                    {isRtl ? 'نصيحة الأسد باسل' : "BASIL'S TIP"}
+                  </p>
+                  <button
+                    onClick={toggleBasilTip}
+                    className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                    title={isRtl ? 'إغلاق النصيحة' : 'Dismiss tip'}
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+                <p className="text-xs font-bold leading-relaxed pr-2 text-white/95">
+                  {isRtl 
+                    ? 'هل تعلم أن اللون الأحمر هو لون القوة والنشاط؟ جرب مغامرة الألوان وتحدث مع باسل!' 
+                    : 'Did you know red is the color of energy? Try the Colors adventure and speak with Basil!'}
+                </p>
+              </div>
+              <div className="absolute -bottom-4 -right-4 opacity-15 select-none pointer-events-none text-6xl">
+                🦁
+              </div>
+            </div>
+          )}
+
+        </div>
+      </section>
+
+      {/* MOBILE BOTTOM SHEET FOR QUESTS & BASIL'S TIP (Requirement 4) */}
+      <AnimatePresence>
+        {isMobileQuestsOpen && (
+          <div className="lg:hidden" dir={isRtl ? 'rtl' : 'ltr'}>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileQuestsOpen(false)}
+              className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[1001]"
+            />
+
+            {/* Bottom Sheet Modal */}
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 240 }}
+              className="fixed bottom-0 inset-x-0 bg-white rounded-t-[2.5rem] p-6 z-[1002] max-h-[85vh] overflow-y-auto border-t border-slate-100 shadow-2xl space-y-5"
+            >
+              {/* Drag Handle */}
+              <div 
+                className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto -mt-2 cursor-pointer" 
+                onClick={() => setIsMobileQuestsOpen(false)} 
+              />
+
+              {/* Sheet Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-2xl bg-amber-400 text-white flex items-center justify-center shadow-sm">
+                    <Trophy size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-[#002147]">
+                      {isRtl ? 'مهمات اليوم' : 'Daily Quests'}
+                    </h3>
+                    <span className="text-[10px] text-slate-400 font-bold">
+                      {completedQuestsCount}/{quests.length} {isRtl ? 'مكتملة' : 'Completed'}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsMobileQuestsOpen(false)}
+                  className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Quests List */}
+              <div className="space-y-3">
+                {quests.map((q, qIdx) => {
+                  const questInfo = DAILY_QUESTS.find(dq => dq.id === q.id);
+                  const isDone = q.progress >= q.total;
+                  return (
+                    <div 
+                      key={`mob-quest-${q.id}-${qIdx}`}
+                      className={`p-4 rounded-2xl border transition-all ${
+                        isDone ? 'bg-emerald-50 border-emerald-200' : `${questInfo?.bg} ${questInfo?.border}`
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          {questInfo && <questInfo.icon size={16} className={isDone ? 'text-emerald-500' : questInfo.color} />}
+                          <span className="text-xs font-black text-[#002147]">{q.title}</span>
+                        </div>
+                        {isDone && <CheckCircle size={16} className="text-emerald-500" />}
+                      </div>
+                      <div className="h-2.5 bg-black/5 rounded-full overflow-hidden">
+                        <div 
+                          style={{ width: `${(q.progress / q.total) * 100}%` }}
+                          className={`h-full ${isDone ? 'bg-emerald-500' : (questInfo?.color.replace('text-', 'bg-') || 'bg-blue-500')}`}
+                        />
+                      </div>
+                      <span className="text-[10px] font-black text-slate-400 block text-end mt-1">
+                        {q.progress}/{q.total}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Basil's Tip in Mobile Sheet */}
+              <div className="bg-gradient-to-br from-[#002147] via-[#002c5f] to-[#001733] p-5 rounded-2xl text-white relative overflow-hidden shadow-md border-2 border-[#C49E3A]/40">
+                <div className="relative z-10">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C49E3A] flex items-center gap-1.5 mb-1.5">
+                    <Sparkles size={12} />
+                    {isRtl ? 'نصيحة الأسد باسل' : "BASIL'S TIP"}
+                  </p>
+                  <p className="text-xs font-bold leading-relaxed text-white/95">
+                    {isRtl 
+                      ? 'هل تعلم أن اللون الأحمر هو لون القوة والنشاط؟ جرب مغامرة الألوان وتحدث مع باسل!' 
+                      : 'Did you know red is the color of energy? Try the Colors adventure!'}
+                  </p>
+                </div>
+                <div className="absolute -bottom-3 -right-3 opacity-20 text-5xl pointer-events-none">
+                  🦁
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsMobileQuestsOpen(false)}
+                className="w-full py-3 bg-[#002147] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#001733] transition-colors"
+              >
+                {isRtl ? 'تم، إغلاق' : 'Close'}
+              </button>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 

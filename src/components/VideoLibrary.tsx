@@ -362,6 +362,7 @@ export const VideoLibrary = ({
       setQuizStarted(true);
     } catch (err) {
       console.warn("Error generating quiz:", String(err));
+      setErrorText(isRtl ? 'تعذر إنشاء اختبار الفيديو من الخادم حالياً، يُرجى المحاولة بعد قليل.' : 'Unable to generate video quiz from server, please try again later.');
     } finally {
       setQuizLoading(false);
     }

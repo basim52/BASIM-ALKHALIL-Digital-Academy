@@ -12,12 +12,16 @@ import {
   Sparkles, 
   RefreshCw, 
   Mail,
-  ChevronRight
+  ChevronRight,
+  AlertCircle,
+  RotateCcw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   onAuthStateChanged, 
   signInWithPopup, 
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   User 
 } from 'firebase/auth';
@@ -28,6 +32,29 @@ import { LandingPage } from './components/LandingPage';
 
 // Code splitting: Load the heavy authenticated app only after sign-in
 const AuthenticatedApp = lazy(() => import('./AuthenticatedApp'));
+
+function getFriendlyAuthErrorMessage(errorCode: string, lang: Language): string {
+  const isAr = lang === 'ar';
+  switch (errorCode) {
+    case 'auth/network-request-failed':
+      return isAr 
+        ? 'تعذّر الاتصال، تأكد من الإنترنت وحاول مرة ثانية'
+        : 'Connection failed. Please check your internet connection and try again.';
+    case 'auth/popup-closed-by-user':
+    case 'auth/cancelled-popup-request':
+      return isAr
+        ? 'تم إغلاق نافذة الدخول، حاول مرة ثانية'
+        : 'Sign-in window was closed. Please try again.';
+    case 'auth/popup-blocked':
+      return isAr
+        ? 'المتصفح منع نافذة الدخول، اسمح بالنوافذ المنبثقة أو جرّب مرة ثانية'
+        : 'Browser blocked the popup window. Please allow popups or try again.';
+    default:
+      return isAr
+        ? 'تعذّر تسجيل الدخول، حاول مرة ثانية'
+        : 'Sign-in failed. Please try again.';
+  }
+}
 
 interface LoginScreenProps {
   lang: Language;
@@ -43,20 +70,24 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
   onBackToLanding
 }) => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [authErrorCode, setAuthErrorCode] = useState<string | null>(null);
   const [showCustomEmail, setShowCustomEmail] = useState(false);
   const [customEmail, setCustomEmail] = useState('');
   const t = translations[lang];
   const isRtl = lang === 'ar';
 
+  const authErrorMessage = authErrorCode ? getFriendlyAuthErrorMessage(authErrorCode, lang) : null;
+
   // Primary Google Login Handler:
-  // Tries native Firebase Auth. If domain/popup restrictions occur in the preview environment,
-  // it seamlessly auto-resolves for the founder account (basim5252@gmail.com) without error banners.
+  // Tries native Firebase Auth. If popup is blocked, automatically falls back to signInWithRedirect.
+  // Translates error codes to friendly messages and logs technical code only to console.error.
   const handleGoogleLogin = async () => {
     setIsLoggingIn(true);
+    setAuthErrorCode(null);
     try {
       const result = await signInWithPopup(auth, googleProvider);
       if (result && result.user) {
-        const email = result.user.email || 'basim5252@gmail.com';
+        const email = result.user.email || '';
         const isMaster = email.toLowerCase() === 'basim5252@gmail.com';
         onAuthenticate(
           email, 
@@ -66,9 +97,20 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
         return;
       }
     } catch (error: any) {
-      console.warn("Popup authentication resolved via direct secure channel:", error);
-      // Auto-resolve directly for Basim Al-Khalil (Master Admin) with 0 friction
-      onAuthenticate('basim5252@gmail.com', UserRole.ADMIN, 'أ. باسم الخليل');
+      console.error("Firebase Google sign-in error:", error?.code, error?.message, error);
+      const errorCode = error?.code || 'unknown';
+
+      // If the popup is blocked, fall back to signInWithRedirect automatically
+      if (errorCode === 'auth/popup-blocked') {
+        try {
+          await signInWithRedirect(auth, googleProvider);
+          return;
+        } catch (redirectError: any) {
+          console.error("signInWithRedirect fallback error:", redirectError?.code, redirectError?.message, redirectError);
+        }
+      }
+
+      setAuthErrorCode(errorCode);
     } finally {
       setIsLoggingIn(false);
     }
@@ -120,6 +162,39 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
         <p className={`text-slate-500 font-medium mb-7 text-xs sm:text-sm leading-relaxed ${isRtl ? 'text-right' : 'text-left'}`}>
           {t.academyDescription}
         </p>
+
+        {/* Friendly Auth Error Alert with Retry Action */}
+        <AnimatePresence>
+          {authErrorMessage && (
+            <motion.div 
+              initial={{ opacity: 0, y: -6, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -6, scale: 0.98 }}
+              className="mb-5 p-4 rounded-2xl bg-amber-50/95 border-2 border-amber-200 text-amber-950 text-start shadow-sm"
+              role="alert"
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
+                  <AlertCircle size={18} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold leading-relaxed mb-3 text-amber-900">
+                    {authErrorMessage}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    disabled={isLoggingIn}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#002147] hover:bg-[#001733] active:scale-95 text-white text-xs font-black rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                  >
+                    <RotateCcw size={13} className={isLoggingIn ? 'animate-spin' : ''} />
+                    <span>{isRtl ? 'حاول مرة ثانية' : 'Try Again'}</span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         {/* Google Official Button - 100% Guaranteed Smooth Sign-In */}
         <button 
@@ -236,6 +311,22 @@ export default function App() {
   const [showAuthScreen, setShowAuthScreen] = useState(false);
   const [lang, setLang] = useState<Language>('ar');
 
+  const handleAuthenticate = (email: string, role: UserRole, displayName?: string) => {
+    const isMasterAdmin = role === UserRole.ADMIN || email.toLowerCase() === 'basim5252@gmail.com';
+    const mockUid = isMasterAdmin ? 'sim_admin_basim' : `student_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+    const userSession: any = {
+      uid: mockUid,
+      email: email,
+      displayName: displayName || (isMasterAdmin ? 'أ. باسم الخليل' : 'طالب الأكاديمية'),
+      photoURL: isMasterAdmin 
+        ? 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100' 
+        : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100',
+      emailVerified: true
+    };
+    localStorage.setItem('academy_active_user', JSON.stringify(userSession));
+    setCurrentUser(userSession);
+  };
+
   useEffect(() => {
     // 1. Check local persistent session storage first
     const savedUserRaw = localStorage.getItem('academy_active_user');
@@ -251,7 +342,24 @@ export default function App() {
       }
     }
 
-    // 2. Also subscribe to Firebase Auth
+    // 2. Check redirect result (if signInWithRedirect was used when popup was blocked)
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result && result.user) {
+          const email = result.user.email || '';
+          const isMaster = email.toLowerCase() === 'basim5252@gmail.com';
+          handleAuthenticate(
+            email,
+            isMaster ? UserRole.ADMIN : UserRole.STUDENT,
+            result.user.displayName || (isMaster ? 'أ. باسم الخليل' : undefined)
+          );
+        }
+      })
+      .catch((error) => {
+        console.error("Firebase redirect result error:", error?.code, error?.message, error);
+      });
+
+    // 3. Also subscribe to Firebase Auth state
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUser(user);
@@ -268,22 +376,6 @@ export default function App() {
 
     return () => unsubscribe();
   }, []);
-
-  const handleAuthenticate = (email: string, role: UserRole, displayName?: string) => {
-    const isMasterAdmin = role === UserRole.ADMIN || email.toLowerCase() === 'basim5252@gmail.com';
-    const mockUid = isMasterAdmin ? 'sim_admin_basim' : `student_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
-    const userSession: any = {
-      uid: mockUid,
-      email: email,
-      displayName: displayName || (isMasterAdmin ? 'أ. باسم الخليل' : 'طالب الأكاديمية'),
-      photoURL: isMasterAdmin 
-        ? 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100' 
-        : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100',
-      emailVerified: true
-    };
-    localStorage.setItem('academy_active_user', JSON.stringify(userSession));
-    setCurrentUser(userSession);
-  };
 
   const handleSignOut = async () => {
     try {

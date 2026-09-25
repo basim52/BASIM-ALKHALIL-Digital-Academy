@@ -604,9 +604,9 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Left / Sidebar Controls */}
-        <div className="lg:col-span-1 space-y-6">
+      <div className="flex flex-col lg:flex-row items-start gap-8">
+        {/* Left / Sidebar Controls - Wider panel (at least 320px) without inner scrollbars */}
+        <div className="w-full lg:w-[380px] xl:w-[420px] lg:shrink-0 space-y-6">
           {activeTab === 'planner' ? (
             <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden">
               {/* Generation Mode Selector: Auto AI vs Custom Pick */}
@@ -666,7 +666,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                     </div>
                   </div>
 
-                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                  <div className="space-y-2">
                     {ACADEMIC_SECTION_DEFINITIONS.map(p => {
                       const isSelected = selectedPillars.includes(p.id);
                       return (
@@ -726,58 +726,64 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
 
               {/* General Plan Parameters */}
               <div className="space-y-6">
-                {/* Academic Difficulty */}
+                {/* Academic Difficulty - Horizontal pill buttons without mid-word wrapping */}
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5">
                     {isRtl ? 'المستوى الدراسي المستهدف' : 'Academic Target Level'}
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {[
                       { value: 'beginner', labelAr: 'مبتدئ / براعم 👶', labelEn: 'Beginner / Kids' },
                       { value: 'intermediate', labelAr: 'متوسط / يافعين 🚀', labelEn: 'Intermediate / Junior' },
                       { value: 'advanced', labelAr: 'متقدم / كبار 🔥', labelEn: 'Advanced / Adults' },
                       { value: 'all', labelAr: 'شامل كل المستويات 🌟', labelEn: 'All Levels Comprehensive' }
-                    ].map(item => (
-                      <button
-                        key={item.value}
-                        type="button"
-                        onClick={() => setDifficultyLevel(item.value as any)}
-                        className={`p-3 rounded-2xl border-2 font-black text-xs transition-all text-center ${
-                          difficultyLevel === item.value 
-                            ? 'border-blue-600 bg-[#002147] text-white shadow-md' 
-                            : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200'
-                        }`}
-                      >
-                        {isRtl ? item.labelAr : item.labelEn}
-                      </button>
-                    ))}
+                    ].map(item => {
+                      const isSelected = difficultyLevel === item.value;
+                      return (
+                        <button
+                          key={item.value}
+                          type="button"
+                          onClick={() => setDifficultyLevel(item.value as any)}
+                          className={`px-4 py-2.5 rounded-full border-2 font-black text-xs whitespace-nowrap transition-all text-center cursor-pointer ${
+                            isSelected 
+                              ? 'border-blue-600 bg-[#002147] text-white shadow-md scale-[1.02]' 
+                              : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-slate-100'
+                          }`}
+                        >
+                          {isRtl ? item.labelAr : item.labelEn}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
-                {/* Duration */}
+                {/* Duration - Horizontal pill buttons without mid-word wrapping */}
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5">
                     {isRtl ? 'المدة الزمنية للخطة' : 'Plan Duration'}
                   </label>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {[
                       { value: 4, labelAr: 'شهر واحد (4 أسابيع)', labelEn: '1 Month' },
                       { value: 8, labelAr: 'شهران (8 أسابيع)', labelEn: '2 Months' },
                       { value: 13, labelAr: '3 أشهر (90 يوماً)', labelEn: '3 Months' }
-                    ].map(opt => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => setWeeksToGenerate(opt.value)}
-                        className={`flex-1 py-3 px-1 rounded-2xl border-2 font-black text-[11px] transition-all text-center ${
-                          weeksToGenerate === opt.value 
-                            ? 'border-blue-600 bg-blue-600 text-white shadow-md' 
-                            : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200'
-                        }`}
-                      >
-                        {isRtl ? opt.labelAr : opt.labelEn}
-                      </button>
-                    ))}
+                    ].map(opt => {
+                      const isSelected = weeksToGenerate === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setWeeksToGenerate(opt.value)}
+                          className={`px-4 py-2.5 rounded-full border-2 font-black text-xs whitespace-nowrap transition-all text-center cursor-pointer ${
+                            isSelected 
+                              ? 'border-blue-600 bg-blue-600 text-white shadow-md scale-[1.02]' 
+                              : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-slate-100'
+                          }`}
+                        >
+                          {isRtl ? opt.labelAr : opt.labelEn}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -899,11 +905,11 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                   />
                 </div>
 
-                {/* Generate Action Button */}
+                {/* Generate Action Button - Placed right under options */}
                 <button 
                   onClick={handleGeneratePlan}
                   disabled={isGenerating}
-                  className="w-full bg-[#002147] text-white py-4 rounded-[2rem] font-black flex items-center justify-center gap-3 hover:bg-blue-900 transition-all shadow-xl shadow-blue-100 disabled:opacity-50 active:scale-95 text-sm"
+                  className="w-full bg-[#002147] text-white py-4 px-6 rounded-[2rem] font-black flex items-center justify-center gap-3 hover:bg-blue-900 transition-all shadow-xl shadow-blue-900/10 disabled:opacity-50 active:scale-95 text-sm cursor-pointer"
                 >
                   {isGenerating ? (
                     <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
@@ -912,9 +918,11 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                   ) : (
                     <Sparkles size={18} />
                   )}
-                  {generationMode === 'auto' 
-                    ? (isRtl ? 'توليد الخطة الذكية الآن' : 'Generate Smart Plan Now')
-                    : (isRtl ? `جدولة الدروس المختارة (${customSelectedLessonIds.size})` : `Schedule Selected Lessons (${customSelectedLessonIds.size})`)}
+                  <span>
+                    {generationMode === 'auto' 
+                      ? (isRtl ? 'توليد الخطة الدراسية الآن' : 'Generate Study Plan Now')
+                      : (isRtl ? `جدولة الدروس المختارة (${customSelectedLessonIds.size})` : `Schedule Selected Lessons (${customSelectedLessonIds.size})`)}
+                  </span>
                 </button>
               </div>
             </div>
@@ -982,7 +990,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
         </div>
 
         {/* Main Content Area */}
-        <div className="lg:col-span-3 space-y-8">
+        <div className="w-full flex-1 min-w-0 space-y-8">
           {/* If Mode is CUSTOM and user wants to pick lessons */}
           {generationMode === 'custom' && activeTab === 'planner' && (
             <div className="bg-white p-6 md:p-8 rounded-[3rem] border border-slate-200 shadow-sm">
@@ -1133,26 +1141,20 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
             </div>
           )}
 
-          {/* If No Plan is Generated Yet */}
+          {/* If No Plan is Generated Yet - Compact preview with short hint */}
           {!generatedPlan && !isGenerating && (
-            <div className="h-full flex flex-col items-center justify-center text-center p-12 md:p-20 bg-slate-50/60 border-2 border-dashed border-slate-200 rounded-[3.5rem] relative overflow-hidden">
-              <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center text-slate-300 shadow-xl mb-6">
-                <CalendarDays size={48} />
+            <div className="p-8 md:p-12 bg-white border border-slate-200 rounded-[2.5rem] shadow-sm flex flex-col items-center justify-center text-center">
+              <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
+                <CalendarDays size={28} />
               </div>
-              <h3 className="text-2xl md:text-3xl font-black text-[#002147] mb-3">
-                {isRtl ? 'ابدأ رحلة التعلم الذكي المنظم' : 'Start Your Structured Learning Journey'}
+              <h3 className="text-lg md:text-xl font-black text-[#002147] mb-2">
+                {isRtl ? 'مساحة عرض الخطة الدراسية' : 'Study Plan Preview Area'}
               </h3>
-              <p className="text-slate-400 max-w-md font-bold text-sm leading-relaxed mb-8">
+              <p className="text-slate-400 font-bold text-xs max-w-md leading-relaxed">
                 {isRtl 
-                  ? 'اختر الأقسام والمستويات المرغوبة ودع المحرك الأكاديمي يبني لك جدولاً متوازناً يضمن أعلى درجات الاستيعاب والطلاقة.' 
-                  : 'Select your preferred curriculums and let our AI engine orchestrate an optimal schedule for mastery.'}
+                  ? 'اختر معايير خطتك من القائمة الجانبية ثم اضغط على زر "توليد الخطة الدراسية الآن" لعرض جدولك الأكاديمي المتكامل هنا.' 
+                  : 'Configure your preferences in the options panel and click "Generate Study Plan Now" to build your personalized roadmap.'}
               </p>
-              <button
-                onClick={handleGeneratePlan}
-                className="px-8 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
-              >
-                {isRtl ? 'توليد الخطة الدراسية الآن' : 'Generate Study Plan Now'}
-              </button>
             </div>
           )}
 

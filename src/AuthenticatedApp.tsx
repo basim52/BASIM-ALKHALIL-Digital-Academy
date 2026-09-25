@@ -5942,7 +5942,7 @@ export default function AuthenticatedApp({
               </header>
 
               {/* Desktop/Tablet Sidebar */}
-              <aside className={`hidden md:flex ${isRtl ? 'right-0 border-l-2' : 'left-0 border-r-2'} w-20 lg:w-56 bg-white text-slate-800 flex-col p-4 lg:p-5 fixed h-full z-40 transition-all border-slate-200`}>
+              <aside className={`hidden md:flex ${isRtl ? 'right-0 border-l-2' : 'left-0 border-r-2'} w-20 lg:w-56 bg-white text-slate-800 flex-col p-4 lg:p-5 fixed h-full z-[60] transition-all border-slate-200 pointer-events-auto`}>
                 <div className="flex items-center gap-3 px-1 mb-6 overflow-hidden">
                   <div className="w-10 h-10 lg:w-11 lg:h-11 bg-[#58cc02] rounded-xl flex shrink-0 items-center justify-center text-white shadow-md font-black text-xl lg:text-2xl relative animate-bounce-slow">
                     🦉
@@ -6043,7 +6043,7 @@ export default function AuthenticatedApp({
               </aside>
 
               {/* Sleek Mobile Bottom Navigation Bar */}
-              <nav className="md:hidden fixed bottom-4 left-4 right-4 bg-white text-slate-700 rounded-[2rem] p-2 flex justify-around items-center z-50 shadow-xl border-2 border-b-4 border-slate-200 h-16">
+              <nav className="md:hidden fixed bottom-4 left-4 right-4 bg-white text-slate-700 rounded-[2rem] p-2 flex justify-around items-center z-[60] shadow-xl border-2 border-b-4 border-slate-200 h-16 pointer-events-auto">
                 {[
                   { id: 'dashboard', label: isRtl ? 'الرئيسية' : 'Home', icon: LayoutDashboard },
                   { id: 'ai-curriculum', label: isRtl ? 'الذكاء' : 'AI Unit', icon: Brain },
@@ -6309,7 +6309,7 @@ export default function AuthenticatedApp({
             </>
           )}
 
-          <main className={`flex-1 transition-all ${view !== 'placement-test' ? (isRtl ? 'md:mr-20 lg:mr-56 mb-32 md:mb-0 pt-20 md:pt-0' : 'md:ml-20 lg:ml-56 mb-32 md:mb-0 pt-20 md:pt-0') : ''}`}>
+          <main className={`flex-1 transition-all ${view !== 'placement-test' ? (isRtl ? 'md:mr-20 lg:mr-56 mb-36 md:mb-12 pt-20 md:pt-4 pb-36 md:pb-28' : 'md:ml-20 lg:ml-56 mb-36 md:mb-12 pt-20 md:pt-4 pb-36 md:pb-28') : ''}`}>
             {renderContent()}
 
             {/* Global Notification Toast */}
