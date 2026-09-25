@@ -57,17 +57,21 @@ import {
   Compass,
   Filter,
   Check,
-  Copy
+  Copy,
+  Ticket,
+  ArrowRight,
+  ArrowLeft
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'motion/react';
+import { LandingPage } from './components/LandingPage';
 import { UserRole, CurriculumCategory, proficiencyLevel, UserProfile, ScheduleItem, ParentNote, LearningModule, Lesson, AppView, StudentProfile, MASTER_ADMINS } from './types';
 import { MASTER_CURRICULUM } from './data/masterCurriculum';
 import { generateWhatsAppLink, NOTIFICATION_TEMPLATES } from './lib/whatsapp';
 import { ShareableNotification } from './components/ShareableNotification';
 import { AIConversation } from './components/AIConversation';
 import { PlacementTest } from './components/PlacementTest';
-import { auth, googleProvider, db, handleFirestoreError, OperationType, testConnection } from './lib/firebase';
+import { auth, googleProvider, db, handleFirestoreError, OperationType, testConnection, redeemVoucherTransaction } from './lib/firebase';
 import firebaseConfig from '../firebase-applet-config.json';
 import { onAuthStateChanged, signInWithPopup, signOut, User } from 'firebase/auth';
 import { doc, getDoc, setDoc, addDoc, serverTimestamp, collection, query, where, onSnapshot, deleteDoc, orderBy, getDocs, updateDoc, limit, writeBatch } from 'firebase/firestore';
@@ -286,11 +290,13 @@ import { BranchingStoryEngine } from './components/BranchingStoryEngine';
 const LoginScreen = ({ 
   lang, 
   onToggleLang, 
-  onSimulateLogin 
+  onSimulateLogin,
+  onBackToLanding
 }: { 
   lang: Language, 
   onToggleLang: () => void, 
-  onSimulateLogin: (email: string, role: UserRole) => void 
+  onSimulateLogin: (email: string, role: UserRole) => void,
+  onBackToLanding?: () => void
 }) => {
   const [authError, setAuthError] = useState<any>(null);
   const t = translations[lang];
@@ -314,10 +320,19 @@ const LoginScreen = ({
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-4 md:p-6 relative overflow-hidden" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-      <div className="absolute top-4 right-4 z-20">
+      <div className="absolute top-4 inset-x-4 z-20 flex items-center justify-between pointer-events-auto">
+        {onBackToLanding ? (
+          <button 
+            onClick={onBackToLanding}
+            className="bg-white px-4 py-2 rounded-xl shadow-md border border-slate-100 font-bold text-xs text-[#002147] hover:bg-slate-50 transition-all flex items-center gap-2 cursor-pointer"
+          >
+            {lang === 'ar' ? <ArrowRight size={15} className="text-[#C49E3A]" /> : <ArrowLeft size={15} className="text-[#C49E3A]" />}
+            <span>{lang === 'ar' ? 'الصفحة التعريفية' : 'Landing Page'}</span>
+          </button>
+        ) : <div />}
         <button 
           onClick={onToggleLang}
-          className="bg-white px-4 py-2 rounded-xl shadow-lg border border-slate-100 font-bold text-[#002147] hover:bg-slate-50 transition-all cursor-pointer"
+          className="bg-white px-4 py-2 rounded-xl shadow-md border border-slate-100 font-bold text-xs text-[#002147] hover:bg-slate-50 transition-all cursor-pointer"
         >
           {t.languageToggle}
         </button>
@@ -340,7 +355,12 @@ const LoginScreen = ({
           onClick={handleLogin}
           className="w-full flex items-center justify-center gap-4 py-4 bg-white border-2 border-slate-100 rounded-2xl font-bold text-[#002147] hover:border-[#002147] hover:bg-slate-50 transition-all shadow-sm cursor-pointer"
         >
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/component/google_signin_buttons/google_favicon.svg" alt="google" className="w-6 h-6" />
+          <svg className="w-6 h-6 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3h3.88c2.27-2.09 3.665-5.17 3.665-9.09z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.27v3.09C3.3 21.43 7.37 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.32c-.25-.72-.38-1.49-.38-2.32s.13-1.6.38-2.32V6.59H1.27C.46 8.21 0 10.05 0 12s.46 3.79 1.27 5.41l4.01-3.09z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.37 0 3.3 2.57 1.27 6.59l4.01 3.09c.95-2.83 3.6-4.93 6.72-4.93z"/>
+          </svg>
           <span>{t.googleLogin}</span>
         </button>
 
@@ -405,12 +425,10 @@ const LoginScreen = ({
 
         {/* Dynamic Sandbox Simulator Mode Bypass removed completely as per request */}
         
-        <div className="mt-6 pt-6 border-t border-slate-100 flex flex-wrap justify-center gap-4 opacity-50 grayscale transition-all hover:grayscale-0">
-          <span className="text-[10px] font-bold text-[#002147]">BASIM ALKHALIL DIGITAL ACADEMY</span>
-          <div className="flex items-center gap-2 bg-[#002147] text-white px-3 py-1 rounded-full">
-            <Sparkles size={10} className="animate-pulse text-amber-400" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#C49E3A]">Gemini 3 Flash ACTIVE</span>
-          </div>
+        <div className="mt-6 pt-6 border-t border-slate-100 flex items-center justify-center opacity-60">
+          <span className="text-[11px] font-bold text-[#002147] tracking-wider uppercase">
+            {lang === 'ar' ? 'أكاديمية باسم الخليل' : 'Basim Al Khalil Digital Academy'}
+          </span>
         </div>
       </motion.div>
     </div>
@@ -1029,6 +1047,37 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [copiedCode, setCopiedCode] = useState(false);
+  const [showVoucherModal, setShowVoucherModal] = useState(false);
+  const [voucherInput, setVoucherInput] = useState('');
+  const [redeemingVoucher, setRedeemingVoucher] = useState(false);
+  const [voucherFeedback, setVoucherFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const handleRedeemVoucher = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!voucherInput.trim() || !profile?.uid) return;
+    setRedeemingVoucher(true);
+    setVoucherFeedback(null);
+    try {
+      const res = await redeemVoucherTransaction(voucherInput.trim(), profile.uid);
+      setVoucherFeedback({
+        type: 'success',
+        message: isRtl 
+          ? `🎉 تم تفعيل القسيمة بنجاح! تم شحن ${res.addedPoints} نقطة تعليمية إلى رصيد حسابك.`
+          : `🎉 Voucher activated successfully! ${res.addedPoints} learning points credited to your account.`
+      });
+      setVoucherInput('');
+    } catch (err: any) {
+      let msg = isRtl ? 'تعذر تفعيل الكود، يرجى التحقق من صحته.' : 'Failed to redeem voucher. Please check the code.';
+      if (err.message === 'VOUCHER_ALREADY_USED') {
+        msg = isRtl ? '⚠️ تم استخدام رمز هذه القسيمة مسبقاً.' : '⚠️ This voucher code has already been redeemed.';
+      } else if (err.message === 'VOUCHER_NOT_FOUND') {
+        msg = isRtl ? '❌ كود القسيمة غير موجود أو غير صالح.' : '❌ Invalid or non-existent voucher code.';
+      }
+      setVoucherFeedback({ type: 'error', message: msg });
+    } finally {
+      setRedeemingVoucher(false);
+    }
+  };
 
   const handleCopyCode = () => {
     const code = profile.studentCode ? `AK${profile.studentCode}` : profile.uid;
@@ -1424,6 +1473,19 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
                     {hasCompletedTest ? ((profile as any).level || 'A1') : (isRtl ? 'بانتظار الاختبار ⚠️' : 'Pending ⚠️')}
                   </span>
                 </div>
+
+                {/* Redeem Voucher Button */}
+                <button
+                  onClick={() => {
+                    setShowVoucherModal(true);
+                    setVoucherFeedback(null);
+                  }}
+                  className="flex items-center gap-1.5 bg-[#ffc800] hover:bg-[#e6b400] active:scale-95 text-slate-900 font-black text-xs px-3 py-1.5 rounded-xl shadow-sm transition-all cursor-pointer"
+                  title={isRtl ? 'شحن قسيمة دراسية' : 'Redeem voucher'}
+                >
+                  <Ticket size={13} />
+                  <span>{isRtl ? 'شحن قسيمة 🎫' : 'Redeem 🎫'}</span>
+                </button>
               </div>
             </div>
             
@@ -1822,10 +1884,99 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             </div>
           )}
         </AnimatePresence>
+
+        {/* VOUCHER REDEMPTION MODAL */}
+        <AnimatePresence>
+          {showVoucherModal && (
+            <div
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+              onClick={() => setShowVoucherModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0, y: 15 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 15 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 text-slate-900 relative"
+                dir={isRtl ? 'rtl' : 'ltr'}
+              >
+                <button
+                  onClick={() => setShowVoucherModal(false)}
+                  className="absolute top-4 sm:top-5 end-4 sm:end-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl shrink-0">
+                    🎫
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-slate-900">
+                      {isRtl ? 'شحن قسيمة دراسية' : 'Redeem Voucher Code'}
+                    </h3>
+                    <p className="text-xs text-slate-500 font-medium">
+                      {isRtl ? 'أدخل رمز القسيمة الذي حصلت عليه لتفعيل نقاطك فورياً' : 'Enter your voucher code to activate credits instantly'}
+                    </p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleRedeemVoucher} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                      {isRtl ? 'رمز القسيمة (مثال: AK-1234-56789)' : 'Voucher Code (e.g. AK-1234-56789)'}
+                    </label>
+                    <input
+                      type="text"
+                      value={voucherInput}
+                      onChange={(e) => setVoucherInput(e.target.value.toUpperCase())}
+                      placeholder="AK-XXXX-XXXXX"
+                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-2xl font-mono font-black text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#58cc02] transition-colors"
+                      required
+                    />
+                  </div>
+
+                  {voucherFeedback && (
+                    <div
+                      className={`p-3.5 rounded-2xl text-xs font-bold leading-relaxed ${
+                        voucherFeedback.type === 'success'
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                          : 'bg-rose-50 text-rose-800 border border-rose-200'
+                      }`}
+                    >
+                      {voucherFeedback.message}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowVoucherModal(false)}
+                      className="flex-1 py-3 px-4 rounded-xl border border-slate-200 font-black text-xs text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+                    >
+                      {isRtl ? 'إغلاق' : 'Cancel'}
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={redeemingVoucher || !voucherInput.trim()}
+                      className="flex-1 py-3 px-4 rounded-xl bg-[#58cc02] hover:bg-[#46a302] disabled:opacity-50 text-white font-black text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      {redeemingVoucher ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <span>{isRtl ? 'تفعيل الكود 🚀' : 'Redeem Now 🚀'}</span>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
-}
+};
 
 const RoleSelector = ({ onSelect, lang }: { onSelect: (role: UserRole) => void, lang: Language }) => {
   const t = translations[lang];
@@ -3744,6 +3895,7 @@ const LessonPlayer = ({ lang, lesson, onBack, onComplete, category, level }: { l
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [showAuthScreen, setShowAuthScreen] = useState(false);
   const [view, setView] = useState<AppView>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
@@ -4321,7 +4473,25 @@ export default function App() {
     );
   }
 
-  if (!currentUser) return <LoginScreen lang={lang} onToggleLang={() => setLang(lang === 'ar' ? 'en' : 'ar')} onSimulateLogin={handleSimulateLogin} />;
+  if (!currentUser) {
+    if (!showAuthScreen) {
+      return (
+        <LandingPage 
+          lang={lang} 
+          onToggleLang={() => setLang(lang === 'ar' ? 'en' : 'ar')} 
+          onGetStarted={() => setShowAuthScreen(true)} 
+        />
+      );
+    }
+    return (
+      <LoginScreen 
+        lang={lang} 
+        onToggleLang={() => setLang(lang === 'ar' ? 'en' : 'ar')} 
+        onBackToLanding={() => setShowAuthScreen(false)}
+        onSimulateLogin={handleSimulateLogin} 
+      />
+    );
+  }
 
   if (!userProfile) return <RoleSelector lang={lang} onSelect={handleRoleSelect} />;
 

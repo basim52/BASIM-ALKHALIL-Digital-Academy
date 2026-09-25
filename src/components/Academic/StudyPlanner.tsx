@@ -1534,7 +1534,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-2xl font-black text-amber-400 mb-1">
-                      {isRtl ? 'أكاديمية باسم آل خليل للغات الرقمية' : 'Basim Al Khalil Digital Academy'}
+                      {isRtl ? 'أكاديمية باسم الخليل' : 'Basim Al Khalil Digital Academy'}
                     </h2>
                     <h1 className="text-4xl font-black text-white">
                       {isRtl ? `الخطة الدراسية الذكية: ${studentName}` : `Academic Roadmap: ${studentName}`}

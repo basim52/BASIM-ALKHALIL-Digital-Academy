@@ -1,12 +1,12 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Default deny
+    // Default deny all access unless explicitly granted below
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // --- Helpers ---
+    // --- Core Security Helpers ---
     function isSignedIn() {
       return request.auth != null;
     }
@@ -23,28 +23,39 @@ service cloud.firestore {
       );
     }
 
-    // New helper to check if current user is a linked parent of the student
+    // Validates whether the current authenticated user is a linked parent of the student
     function isParentOf(studentId) {
-      return isSignedIn() && 
-             exists(/databases/$(database)/documents/users/$(studentId)) && (
-               (
-                 "linkedParentIds" in get(/databases/$(database)/documents/users/$(studentId)).data &&
-                 request.auth.uid in get(/databases/$(database)/documents/users/$(studentId)).data.linkedParentIds
-               ) ||
-               (
-                 "parentIds" in get(/databases/$(database)/documents/users/$(studentId)).data &&
-                 request.auth.uid in get(/databases/$(database)/documents/users/$(studentId)).data.parentIds
-               )
-             );
+      return isSignedIn() && (
+        (
+          exists(/databases/$(database)/documents/users/$(studentId)) && (
+            (
+              "linkedParentIds" in get(/databases/$(database)/documents/users/$(studentId)).data &&
+              request.auth.uid in get(/databases/$(database)/documents/users/$(studentId)).data.linkedParentIds
+            ) ||
+            (
+              "parentIds" in get(/databases/$(database)/documents/users/$(studentId)).data &&
+              request.auth.uid in get(/databases/$(database)/documents/users/$(studentId)).data.parentIds
+            )
+          )
+        ) ||
+        (
+          exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          "linkedStudentIds" in get(/databases/$(database)/documents/users/$(request.auth.uid)).data &&
+          studentId in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.linkedStudentIds
+        )
+      );
     }
 
     function isValidId(id) {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
-    // --- Collections ---
+    function hasNoForbiddenUserFields() {
+      return !('credits' in request.resource.data) &&
+             !('balance' in request.resource.data);
+    }
 
-    // Global Settings - Explicitly public
+    // --- 1. Global Settings (settings/global explicitly public read) ---
     match /settings/global {
       allow read: if true;
       allow write: if isAdmin();
@@ -55,7 +66,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Curriculum
+    // --- 2. Interactive Video Lessons (videos explicitly public read) ---
+    match /videos/{videoId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // --- 3. Curriculum & Educational Material ---
     match /modules/{moduleId} {
       allow read: if isSignedIn();
       allow write: if isAdmin();
@@ -66,68 +83,187 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Interactive Video Lessons
-    match /videos/{videoId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // Users & Students
+    // --- 4. Users Collection (Protected Roles, Credits & Balance) ---
     match /users/{userId} {
-      allow read: if isSignedIn();
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId) || isAdmin();
+      // Read: Owner, linked parent, or admin ONLY (no blanket read for all signed-in users)
+      allow get: if isOwner(userId) || isParentOf(userId) || isAdmin();
+      allow list: if isAdmin();
 
+      // Create: Owner cannot self-assign admin role or set credit/balance fields. Only student/parent or no role.
+      allow create: if isOwner(userId) && (
+        isAdmin() || (
+          hasNoForbiddenUserFields() &&
+          (!('role' in request.resource.data) || (request.resource.data.role in ['student', 'parent'] && request.resource.data.role != 'admin'))
+        )
+      );
+
+      // Update: User cannot change their role, credits, or balance. Only admin can change role/credits/balance.
+      allow update: if (
+        isAdmin() || (
+          isOwner(userId) &&
+          hasNoForbiddenUserFields() &&
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'credits', 'balance'])
+        )
+      );
+
+      allow delete: if isAdmin();
+
+      // Early childhood subcollection
       match /earlyChildhood/{document=**} {
         allow read: if isOwner(userId) || isParentOf(userId) || isAdmin();
         allow write: if isOwner(userId) || isAdmin();
       }
     }
 
+    // --- 5. Students Collection ---
     match /students/{studentId} {
-      allow read: if isSignedIn();
-      allow write: if isOwner(studentId) || isAdmin();
+      allow read: if isOwner(studentId) || isParentOf(studentId) || isAdmin();
+      allow write: if isOwner(studentId) || isParentOf(studentId) || isAdmin();
     }
 
-    // Schedules & Notes
+    // --- 6. Legacy / Misc Student Profiles ---
+    match /student_profiles/{profileId} {
+      allow read: if isOwner(profileId) || isParentOf(profileId) || isAdmin();
+      allow write: if isOwner(profileId) || isParentOf(profileId) || isAdmin();
+    }
+
+    // --- 7. Schedules & Timetables ---
     match /schedules/{scheduleId} {
-      allow read: if isSignedIn(); 
-      allow write: if isSignedIn();
+      allow read: if isSignedIn() && (
+        resource.data.studentId == request.auth.uid ||
+        isParentOf(resource.data.studentId) ||
+        isAdmin()
+      );
+      allow create: if isSignedIn() && (
+        request.resource.data.studentId == request.auth.uid ||
+        isParentOf(request.resource.data.studentId) ||
+        isAdmin()
+      );
+      allow update: if isSignedIn() && (
+        (resource.data.studentId == request.auth.uid && request.resource.data.studentId == resource.data.studentId) ||
+        isParentOf(resource.data.studentId) ||
+        isAdmin()
+      );
+      allow delete: if isSignedIn() && (
+        resource.data.studentId == request.auth.uid ||
+        isParentOf(resource.data.studentId) ||
+        isAdmin()
+      );
     }
 
+    // --- 8. Parent Notes & Direct AI/Teacher Inquiries ---
     match /parentNotes/{noteId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow read: if isSignedIn() && (
+        resource.data.parentId == request.auth.uid ||
+        resource.data.studentId == request.auth.uid ||
+        isParentOf(resource.data.studentId) ||
+        isAdmin()
+      );
+      allow create: if isSignedIn() && (
+        request.resource.data.parentId == request.auth.uid ||
+        isAdmin()
+      );
+      allow update, delete: if isSignedIn() && (
+        resource.data.parentId == request.auth.uid ||
+        isAdmin()
+      );
     }
 
-    // Homework & Grades
+    // --- 9. Homework Tasks & Assignments ---
     match /homework/{homeworkId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow read: if isSignedIn() && (
+        resource.data.studentId == request.auth.uid ||
+        isParentOf(resource.data.studentId) ||
+        isAdmin()
+      );
+      allow create: if isSignedIn() && (
+        request.resource.data.studentId == request.auth.uid ||
+        isParentOf(request.resource.data.studentId) ||
+        isAdmin()
+      );
+      allow update: if isSignedIn() && (
+        resource.data.studentId == request.auth.uid ||
+        isParentOf(resource.data.studentId) ||
+        isAdmin()
+      );
+      allow delete: if isAdmin();
     }
 
-    match /grades/{gradeId} {
-      allow read: if isSignedIn();
+    // --- 10. AI Conversation Logs ---
+    match /conversations/{convId} {
+      allow read: if isSignedIn() && (
+        resource.data.studentId == request.auth.uid ||
+        isParentOf(resource.data.studentId) ||
+        isAdmin()
+      );
+      allow create: if isSignedIn() && (
+        request.resource.data.studentId == request.auth.uid ||
+        isAdmin()
+      );
+      allow update, delete: if isSignedIn() && (
+        resource.data.studentId == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
+    // --- 11. Vouchers System (Safe Individual Get & Atomic Redemption) ---
+    match /vouchers/{code} {
+      // Signed-in users can only 'get' a single code they typed. They CANNOT list all codes.
+      allow get: if isSignedIn();
+      allow list: if isAdmin();
+      allow create, delete: if isAdmin();
+      // Redemption: safe transaction or update strictly requiring unused code,
+      // moving to status: 'redeemed', recording redeemedBy: request.auth.uid
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        resource.data.status == 'active' &&
+        request.resource.data.status == 'redeemed' &&
+        request.resource.data.redeemedBy == request.auth.uid &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'redeemedBy', 'redeemedAt'])
+      );
+    }
+
+    // --- 12. Credit Transactions (Admin/Server write only, User reads own) ---
+    match /transactions/{transId} {
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
       allow write: if isAdmin();
     }
 
-    // Progress & History
-    match /user_progress/{progressId} {
-      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow write: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isAdmin());
+    // --- 13. Grades & Reports ---
+    match /grades/{gradeId} {
+      allow read: if isSignedIn() && (
+        resource.data.studentId == request.auth.uid ||
+        resource.data.userId == request.auth.uid ||
+        isParentOf(resource.data.studentId) ||
+        isAdmin()
+      );
+      allow write: if isAdmin();
     }
 
-    // Chat & Conversations
+    // --- 14. Progress Tracking ---
+    match /user_progress/{progressId} {
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        isParentOf(resource.data.userId) ||
+        isAdmin()
+      );
+      allow write: if isSignedIn() && (
+        request.resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
+    // --- 15. Community Global Chat ---
     match /global_chat/{chatId} {
       allow read: if isSignedIn();
       allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
     }
 
-    match /conversations/{convId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn();
-    }
-
+    // --- 16. Study Plans & Lesson Results ---
     function isValidStudyPlan(data) {
       return data.userId is string && 
              data.studentName is string && 
@@ -144,38 +280,46 @@ service cloud.firestore {
     }
 
     match /studyPlans/{planId} {
-      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || request.auth.uid in resource.data.parentIds || isParentOf(resource.data.userId) || isAdmin());
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid && isValidStudyPlan(request.resource.data);
-      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin()) && isValidStudyPlan(request.resource.data);
-      allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        request.auth.uid in resource.data.parentIds ||
+        isParentOf(resource.data.userId) ||
+        isAdmin()
+      );
+      allow create: if isSignedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        isValidStudyPlan(request.resource.data);
+      allow update: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      ) && isValidStudyPlan(request.resource.data);
+      allow delete: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
     }
 
     match /lessonResults/{resultId} {
-      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || request.auth.uid in resource.data.parentIds || isParentOf(resource.data.userId) || isAdmin());
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid && isValidLessonResult(request.resource.data);
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        request.auth.uid in resource.data.parentIds ||
+        isParentOf(resource.data.userId) ||
+        isAdmin()
+      );
+      allow create: if isSignedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        isValidLessonResult(request.resource.data);
       allow update, delete: if isAdmin();
     }
 
-    // Credit System
-    match /vouchers/{code} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin();
-    }
-
-    match /transactions/{transId} {
-      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow write: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isAdmin());
-    }
-
+    // --- 17. System Notifications ---
     match /notifications/{notifId} {
-      allow read: if isSignedIn();
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.recipientId == request.auth.uid ||
+        isAdmin()
+      );
       allow write: if isAdmin();
-    }
-
-    // Legacy support or misc
-    match /student_profiles/{profileId} {
-      allow read: if isSignedIn();
-      allow write: if isOwner(profileId) || isParentOf(profileId) || isAdmin();
     }
   }
 }

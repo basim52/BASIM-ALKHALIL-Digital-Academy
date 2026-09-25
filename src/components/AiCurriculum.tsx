@@ -13510,7 +13510,7 @@ Output Summary for [${topic}]:
           {/* Premium Academy Branding Header */}
           <div className="flex justify-between items-center border-b border-white/10 pb-5 mb-6" dir="rtl">
             <div className="text-right font-tajawal">
-              <span className="text-sm font-black text-[#C49E3A] tracking-wide block mb-0.5">أكاديمية باسم آل خليل الرقمية</span>
+              <span className="text-sm font-black text-[#C49E3A] tracking-wide block mb-0.5">أكاديمية باسم الخليل</span>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest font-sans">Basim Al Khalil Digital Academy</p>
             </div>
             <div className="text-left font-sans">

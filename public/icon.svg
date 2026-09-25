@@ -1,39 +1,36 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#030712" />
-      <stop offset="50%" stop-color="#0f172a" />
-      <stop offset="100%" stop-color="#1e3a8a" />
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#001833" />
+      <stop offset="100%" stop-color="#002147" />
     </linearGradient>
-    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#fbbf24" />
-      <stop offset="100%" stop-color="#d97706" />
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5D061" />
+      <stop offset="50%" stop-color="#C49E3A" />
+      <stop offset="100%" stop-color="#9A7B20" />
+    </linearGradient>
+    <linearGradient id="tileGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#002b5c" />
+      <stop offset="100%" stop-color="#001a38" />
     </linearGradient>
   </defs>
-  
-  <!-- Background Card -->
-  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <rect x="16" y="16" width="480" height="480" rx="96" fill="none" stroke="url(#gold)" stroke-width="6" opacity="0.4" />
 
-  <!-- Graduation Cap & Neural Emblem -->
-  <g transform="translate(256, 230)">
-    <!-- Cap Diamond -->
-    <polygon points="0,-100 160,-20 0,60 -160,-20" fill="url(#gold)" />
-    <polygon points="0,-80 130,-15 0,50 -130,-15" fill="#1e3a8a" opacity="0.6" />
-    
-    <!-- Cap Base -->
-    <path d="M -80,10 C -80,60 80,60 80,10 L 80,50 C 80,90 -80,90 -80,50 Z" fill="url(#gold)" />
-    
-    <!-- Tassel -->
-    <path d="M 160,-20 L 180,40 L 175,110" stroke="#fbbf24" stroke-width="8" stroke-linecap="round" fill="none" />
-    <circle cx="175" cy="115" r="10" fill="#fbbf24" />
+  <!-- Outer background -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="none" stroke="url(#goldGrad)" stroke-width="6" opacity="0.8" />
 
-    <!-- AI Sparkle Nodes -->
-    <circle cx="0" cy="-100" r="12" fill="#60a5fa" />
-    <circle cx="-160" cy="-20" r="10" fill="#60a5fa" />
-    <circle cx="160" cy="-20" r="10" fill="#60a5fa" />
+  <!-- Center Logo Tile -->
+  <g transform="translate(136, 120)">
+    <rect width="240" height="240" rx="60" fill="url(#tileGrad)" stroke="url(#goldGrad)" stroke-width="8" />
+    <!-- Letter B with Serif / Elegant Academy styling -->
+    <text x="120" y="172" font-family="'Liberation Serif', 'Georgia', serif" font-weight="900" font-size="160" fill="#FFFFFF" text-anchor="middle">B</text>
   </g>
 
-  <!-- Arabic Typography / Subtitle Emblem -->
-  <text x="256" y="430" text-anchor="middle" fill="#f59e0b" font-family="sans-serif" font-weight="900" font-size="38" letter-spacing="2">الأكاديمية</text>
+  <!-- Accent stars/dots -->
+  <circle cx="256" cy="405" r="7" fill="#C49E3A" />
+  <circle cx="230" cy="405" r="4" fill="#C49E3A" opacity="0.6" />
+  <circle cx="282" cy="405" r="4" fill="#C49E3A" opacity="0.6" />
+
+  <!-- Arabic Branding -->
+  <text x="256" y="445" font-family="'KacstTitle', 'KacstBook', sans-serif" font-weight="bold" font-size="30" fill="#E5C76B" text-anchor="middle">أكاديمية باسم الخليل</text>
 </svg>

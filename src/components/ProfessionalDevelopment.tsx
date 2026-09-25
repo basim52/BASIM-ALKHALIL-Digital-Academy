@@ -545,7 +545,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
               <div className="bg-[#002147] text-white -mx-6 md:-mx-10 -mt-6 md:-mt-10 px-6 md:px-10 py-5 mb-5 select-none relative z-10 flex justify-between items-center flex-row-reverse border-b-4 border-[#b48e56] rounded-t-xl">
                 <div className="text-right">
                   <span className="font-extrabold text-white text-sm md:text-base leading-none block font-sans">
-                    {isRtl ? 'أكاديمية باسم آل خليل الرقمية' : 'Basim Al Khalil Digital Academy'}
+                    {isRtl ? 'أكاديمية باسم الخليل' : 'Basim Al Khalil Digital Academy'}
                   </span>
                   <span className="text-[9px] md:text-[10px] text-amber-400 font-semibold mt-1 block">
                     {isRtl ? 'الهيئة العالمية للجودة وتدقيق معايير النخبة المهنية' : 'International Board of Quality & Professional Elite Standards'}
@@ -615,7 +615,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
                 {/* Signatures 1 */}
                 <div className="text-right space-y-1 z-10">
                   <span className="text-[10px] text-slate-400 block font-serif font-semibold">{isRtl ? 'رئيس الأكاديمية والعميد:' : 'Academy President & Dean:'}</span>
-                  <p className="font-serif italic text-slate-800 font-bold text-xs">{isRtl ? 'د. باسم آل خليل' : 'Dr. Basim Al Khalil'}</p>
+                  <p className="font-serif italic text-slate-800 font-bold text-xs">{isRtl ? 'أ. باسم الخليل' : 'Basim Al Khalil'}</p>
                   <div className="w-24 h-5 border-b border-dashed border-slate-300 relative inline-block">
                     <span className="font-mono text-[9px] text-slate-300 absolute left-4 bottom-0 select-none">Basim@KhalilAcademy</span>
                   </div>
@@ -2211,7 +2211,7 @@ It confirms that successful modern learners prioritize dynamic continuous action
                               </h3>
                               <p className="text-slate-300 text-xs font-serif mt-1 max-w-xl">
                                 {isRtl 
-                                  ? 'لقد اجتزت بنجاح كافة اختبارات الفصول بتقدير ممتاز. شهادتك المعتمدة صادرة وموثقة مباشرة من أكاديمية باسم آل خليل الرقمية.' 
+                                  ? 'لقد اجتزت بنجاح كافة اختبارات الفصول بتقدير ممتاز. شهادتك المعتمدة صادرة وموثقة مباشرة من أكاديمية باسم الخليل.' 
                                   : 'You have passed all chapter audits with high standing. Your credential is authenticated and ready.'}
                               </p>
                             </div>

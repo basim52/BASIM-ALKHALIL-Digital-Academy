@@ -51,7 +51,7 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
       id: 'welcome',
       sender: 'ai',
       text: isRtl 
-        ? 'أهلاً بك يا بطل في أكاديمية باسم آل خليل! 🌟 أنا رفيقك الذكي. كيف يمكنني مساعدتك في تعلم الإنجليزية اليوم؟'
+        ? 'أهلاً بك يا بطل في أكاديمية باسم الخليل! 🌟 أنا رفيقك الذكي. كيف يمكنني مساعدتك في تعلم الإنجليزية اليوم؟'
         : 'Welcome champion to Basim Alkhalil Academy! 🌟 I am your AI co-pilot. How can I assist your English journey today?',
       timestamp: new Date()
     }
@@ -426,7 +426,7 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
                 </div>
                 <div>
                   <h3 className="font-black text-sm leading-none flex items-center gap-2">
-                    <span>{isRtl ? 'رفيق أكاديمية باسم آل خليل الذكي' : 'Alkhalil AI Companion'}</span>
+                    <span>{isRtl ? 'رفيق أكاديمية باسم الخليل الذكي' : 'Alkhalil AI Companion'}</span>
                     <Sparkles size={14} className="text-amber-300" />
                   </h3>
                   <p className="text-[10px] text-white/80 font-bold mt-1">

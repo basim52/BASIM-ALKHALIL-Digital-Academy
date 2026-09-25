@@ -1,6 +1,13 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { initializeFirestore, doc, getDocFromServer, writeBatch, increment, serverTimestamp, getDoc, updateDoc } from 'firebase/firestore';
+import { 
+  initializeFirestore, 
+  doc, 
+  getDocFromServer, 
+  serverTimestamp, 
+  updateDoc,
+  runTransaction
+} from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
@@ -19,26 +26,65 @@ export enum OperationType {
   WRITE = 'write',
 }
 
+/**
+ * Securely redeems a voucher code using an atomic Firestore transaction.
+ * Enforces that:
+ * 1. The voucher exists.
+ * 2. The voucher status is 'active' (unused).
+ * 3. Atomic status transition to 'redeemed' with redeemedBy and redeemedAt metadata.
+ * 4. Credit / points allocated to student account atomically.
+ */
+export async function redeemVoucherTransaction(code: string, userId: string) {
+  const cleanCode = code.trim().toUpperCase();
+  if (!cleanCode) throw new Error("EMPTY_CODE");
+
+  const voucherRef = doc(db, 'vouchers', cleanCode);
+  const studentRef = doc(db, 'students', userId);
+
+  return await runTransaction(db, async (transaction) => {
+    const vSnap = await transaction.get(voucherRef);
+    if (!vSnap.exists()) {
+      throw new Error("VOUCHER_NOT_FOUND");
+    }
+    const vData = vSnap.data();
+    if (vData.status !== 'active') {
+      throw new Error("VOUCHER_ALREADY_USED");
+    }
+    const credits = Number(vData.credits) || 0;
+    if (credits <= 0) {
+      throw new Error("INVALID_CREDITS");
+    }
+
+    // Atomically mark voucher as redeemed
+    transaction.update(voucherRef, {
+      status: 'redeemed',
+      redeemedBy: userId,
+      redeemedAt: serverTimestamp(),
+    });
+
+    // Credit student points (50 learning points per voucher credit)
+    const sSnap = await transaction.get(studentRef);
+    const currentPoints = sSnap.exists() ? (sSnap.data().points || 0) : 0;
+    transaction.set(studentRef, {
+      points: currentPoints + (credits * 50)
+    }, { merge: true });
+
+    return { 
+      success: true, 
+      code: cleanCode, 
+      credits, 
+      addedPoints: credits * 50 
+    };
+  });
+}
+
 export async function buyChildhoodSubscription(userId: string, pkg: any) {
   try {
-    const batch = writeBatch(db);
-    const timestamp = new Date().getTime();
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + (pkg.durationDays || 30));
     
-    const transactionId = `${userId}_childsub_${timestamp}`;
-    const transRef = doc(db, 'transactions', transactionId);
-    batch.set(transRef, {
-      id: transactionId,
-      userId,
-      amount: -pkg.priceSAR,
-      type: 'childhood_subscription',
-      description: `Subscription: ${pkg.label}`,
-      timestamp: serverTimestamp()
-    });
-
     const userRef = doc(db, 'users', userId);
-    batch.update(userRef, {
+    await updateDoc(userRef, {
       childhoodSubscriptionType: pkg.id.split('_')[0],
       dailyMinutesLimit: pkg.dailyMinutes,
       remainingMinutesToday: pkg.dailyMinutes,
@@ -46,8 +92,6 @@ export async function buyChildhoodSubscription(userId: string, pkg: any) {
       subscriptionExpiryDate: expiryDate,
       lastSeen: serverTimestamp()
     });
-
-    await batch.commit();
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, 'users/subscriptions');
   }

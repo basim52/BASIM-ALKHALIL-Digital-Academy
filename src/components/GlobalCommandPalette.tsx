@@ -408,7 +408,7 @@ export const GlobalCommandPalette: React.FC<GlobalCommandPaletteProps> = ({
 
           {/* FOOTER */}
           <div className="p-3 bg-slate-50 border-t border-slate-200 text-[10px] text-slate-400 font-bold flex items-center justify-between px-4">
-            <span>{isRtl ? 'أكاديمية باسم آل خليل الذكية - التحديث الشامل' : 'Basim Alkhalil Digital Academy'}</span>
+            <span>{isRtl ? 'أكاديمية باسم الخليل - التحديث الشامل' : 'Basim Alkhalil Digital Academy'}</span>
             <span>{isRtl ? 'اضغط ↵ للانتقال المباشر' : 'Press ↵ to jump'}</span>
           </div>
         </motion.div>
