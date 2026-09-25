@@ -4087,124 +4087,113 @@ export default function AuthenticatedApp({
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let isMounted = true;
+
+    const processUser = async (user: User | any) => {
+      if (!isMounted) return;
+      if (!user) {
+        if (!propUser) {
+          setUserProfile(null);
+          setLoading(false);
+        }
+        return;
+      }
+
       setCurrentUser(user);
-      if (user) {
-        setActiveStudentId(user.uid); // Default to own UID
+      setActiveStudentId(user.uid);
+
+      const userEmail = (user.email || '').toLowerCase();
+      const isMasterAdmin = MASTER_ADMINS.includes(userEmail);
+
+      // If simulated user
+      if (user.uid && user.uid.startsWith('sim_')) {
+        const simProfile: UserProfile = {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName || (isMasterAdmin ? 'أ. باسم الخليل' : 'طالب تجريبي'),
+          role: isMasterAdmin ? UserRole.ADMIN : UserRole.STUDENT,
+          avatarUrl: user.photoURL || undefined,
+          createdAt: new Date().toISOString(),
+        };
+        if (isMounted) {
+          setUserProfile(simProfile);
+          setLoading(false);
+        }
+        return;
+      }
+
+      // If Master Admin, set admin profile immediately to prevent ANY waiting
+      if (isMasterAdmin) {
+        const adminProfile: UserProfile = {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName || 'أ. باسم الخليل',
+          role: UserRole.ADMIN,
+          avatarUrl: user.photoURL || undefined,
+          createdAt: serverTimestamp(),
+        };
+        if (isMounted) {
+          setUserProfile(adminProfile);
+          setLoading(false);
+        }
+
+        // Async background sync with Firestore (with 3s timeout to never lock the UI)
         try {
-          // Special case for the master admin: ensure they have admin profile even if fetch fails
-          const userEmail = (user.email || '').toLowerCase();
-          
-          if (MASTER_ADMINS.includes(userEmail)) {
-            const adminProfile: UserProfile = {
-              uid: user.uid,
-              email: user.email,
-              displayName: user.displayName || 'Master Admin',
-              role: UserRole.ADMIN,
-              avatarUrl: user.photoURL || undefined,
-              createdAt: serverTimestamp(),
-            };
-            
-            // Try to fetch existing profile to keep it updated, but don't let error block entry
-            try {
-              const userDoc = await getDoc(doc(db, 'users', user.uid));
-              if (userDoc.exists()) {
-                const profile = userDoc.data() as UserProfile;
-                if (profile.role !== UserRole.ADMIN) {
-                  await setDoc(doc(db, 'users', user.uid), { role: UserRole.ADMIN }, { merge: true });
-                  setUserProfile({ ...profile, role: UserRole.ADMIN });
-                } else {
-                  setUserProfile(profile);
-                }
-              } else {
-                await setDoc(doc(db, 'users', user.uid), adminProfile, { merge: true });
-                setUserProfile(adminProfile);
-              }
-            } catch (e) {
-              console.warn("Permission issue fetching admin profile, using local fallback", e);
-              setUserProfile(adminProfile);
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000));
+          const docPromise = getDoc(doc(db, 'users', user.uid));
+          const userDoc = (await Promise.race([docPromise, timeoutPromise])) as any;
+          if (userDoc && userDoc.exists()) {
+            const profile = userDoc.data() as UserProfile;
+            if (profile.role !== UserRole.ADMIN) {
+              setDoc(doc(db, 'users', user.uid), { role: UserRole.ADMIN }, { merge: true }).catch(console.warn);
+            } else if (isMounted) {
+              setUserProfile(profile);
             }
           } else {
-            // Normal user flow with offline/error cache fallback to prevent locking users on RoleSelector
-            try {
-              const userDoc = await getDoc(doc(db, 'users', user.uid));
-              if (userDoc.exists()) {
-                const profileData = userDoc.data() as UserProfile;
-                // Automatically demote if they were admins but are no longer in MASTER_ADMINS
-                if (profileData.role === UserRole.ADMIN) {
-                  try {
-                    await updateDoc(doc(db, 'users', user.uid), { role: UserRole.STUDENT });
-                  } catch (e) {
-                    console.warn("Could not demote on server, will continue with local demotion", e);
-                  }
-                  const demotedProfile = { ...profileData, role: UserRole.STUDENT };
-                  setUserProfile(demotedProfile);
-                  localStorage.setItem(`cached_profile_${user.uid}`, JSON.stringify(demotedProfile));
-                  setActiveStudentId(demotedProfile.uid);
-                } else {
-                  setUserProfile(profileData);
-                  localStorage.setItem(`cached_profile_${user.uid}`, JSON.stringify(profileData));
-                  if (profileData.role === UserRole.STUDENT) {
-                    setActiveStudentId(profileData.uid);
-                  }
-                }
-              } else {
-                // Check if we have a locally cached profile even if document doesn't exist on server (offline situation)
-                const cachedRaw = localStorage.getItem(`cached_profile_${user.uid}`);
-                if (cachedRaw) {
-                  try {
-                    const cachedUser = JSON.parse(cachedRaw) as UserProfile;
-                    setUserProfile(cachedUser);
-                    if (cachedUser.role === UserRole.STUDENT) {
-                      setActiveStudentId(cachedUser.uid);
-                    }
-                  } catch (_) {
-                    // Let RoleSelector handle it
-                  }
-                } else {
-                  // RoleSelector will handle new non-admin users
-                }
-              }
-            } catch (innerError) {
-              console.warn("Firestore user profile getDoc threw error. Checking cached profile fallback...", innerError);
-              const cachedRaw = localStorage.getItem(`cached_profile_${user.uid}`);
-              if (cachedRaw) {
-                try {
-                  const cachedUser = JSON.parse(cachedRaw) as UserProfile;
-                  setUserProfile(cachedUser);
-                  if (cachedUser.role === UserRole.STUDENT) {
-                    setActiveStudentId(cachedUser.uid);
-                  }
-                  console.log("Successfully resolved user profile with offline cache:", cachedUser);
-                } catch (_) {
-                  // Fallback to guest student
-                  const fallbackData: UserProfile = {
-                    uid: user.uid,
-                    email: user.email || '',
-                    displayName: user.displayName || 'Academy Student',
-                    role: UserRole.STUDENT,
-                    createdAt: serverTimestamp(),
-                  };
-                  setUserProfile(fallbackData);
-                  setActiveStudentId(user.uid);
-                }
-              } else {
-                // If there's no cache and we are offline, auto-resolve as Student so the app is NOT broken
-                const fallbackData: UserProfile = {
-                  uid: user.uid,
-                  email: user.email || '',
-                  displayName: user.displayName || 'Academy Student',
-                  role: UserRole.STUDENT,
-                  createdAt: serverTimestamp(),
-                };
-                setUserProfile(fallbackData);
-                setActiveStudentId(user.uid);
-              }
-            }
+            setDoc(doc(db, 'users', user.uid), adminProfile, { merge: true }).catch(console.warn);
           }
-        } catch (error) {
-          console.error("Auth profile fetch error:", error);
-          // Fallback to guest profile instead of raising a red-screen error or crashing on offline startup
+        } catch (e) {
+          console.warn("Admin Firestore background sync skipped or timed out:", e);
+        }
+        return;
+      }
+
+      // Normal user flow:
+      try {
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3500));
+        const docPromise = getDoc(doc(db, 'users', user.uid));
+        const userDoc = (await Promise.race([docPromise, timeoutPromise])) as any;
+        
+        if (userDoc && userDoc.exists()) {
+          const profileData = userDoc.data() as UserProfile;
+          if (profileData.role === UserRole.ADMIN && !isMasterAdmin) {
+            const demotedProfile = { ...profileData, role: UserRole.STUDENT };
+            if (isMounted) {
+              setUserProfile(demotedProfile);
+              localStorage.setItem(`cached_profile_${user.uid}`, JSON.stringify(demotedProfile));
+            }
+          } else if (isMounted) {
+            setUserProfile(profileData);
+            localStorage.setItem(`cached_profile_${user.uid}`, JSON.stringify(profileData));
+          }
+        } else {
+          // Check cached profile
+          const cachedRaw = localStorage.getItem(`cached_profile_${user.uid}`);
+          if (cachedRaw && isMounted) {
+            try {
+              const cachedUser = JSON.parse(cachedRaw) as UserProfile;
+              setUserProfile(cachedUser);
+            } catch (_) {}
+          }
+        }
+      } catch (err) {
+        console.warn("Firestore user profile fetch timed out or error:", err);
+        const cachedRaw = localStorage.getItem(`cached_profile_${user.uid}`);
+        if (cachedRaw && isMounted) {
+          try {
+            setUserProfile(JSON.parse(cachedRaw));
+          } catch (_) {}
+        } else if (isMounted && !userProfile) {
           const fallbackData: UserProfile = {
             uid: user.uid,
             email: user.email || '',
@@ -4213,18 +4202,35 @@ export default function AuthenticatedApp({
             createdAt: serverTimestamp(),
           };
           setUserProfile(fallbackData);
-          setActiveStudentId(user.uid);
-        } finally {
+        }
+      } finally {
+        if (isMounted) {
           setLoading(false);
         }
-      } else {
-        setUserProfile(null);
-        setView('dashboard');
-        setLoading(false);
+      }
+    };
+
+    if (propUser) {
+      processUser(propUser);
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        processUser(user);
+      } else if (!propUser) {
+        if (isMounted) {
+          setUserProfile(null);
+          setView('dashboard');
+          setLoading(false);
+        }
       }
     });
-    return () => unsubscribe();
-  }, []);
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [propUser]);
 
   const handleRoleSelect = async (role: UserRole) => {
     if (!currentUser) return;
