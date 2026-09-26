@@ -661,6 +661,234 @@ Looking forward to your reply. Tell me what we're tackling first!`;
     }
   });
 
+  // Generate a one-time 6-character parent invite code (student only)
+  app.post("/api/parent-link/code", async (req: express.Request, res: express.Response) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Missing or invalid authorization token" });
+      }
+
+      const idToken = authHeader.split("Bearer ")[1]?.trim();
+      if (!idToken) {
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Missing Bearer token" });
+      }
+
+      const adminAuth = getAdminAuth();
+      const adminDb = getAdminDb();
+      if (!adminAuth || !adminDb) {
+        return res.status(503).json({ error: "SERVICE_UNAVAILABLE", message: "Firebase Admin is not configured on the server" });
+      }
+
+      let decodedToken;
+      try {
+        decodedToken = await adminAuth.verifyIdToken(idToken);
+      } catch (authErr: any) {
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Invalid or expired Firebase ID token" });
+      }
+
+      const studentUid = decodedToken.uid;
+      const userDoc = await adminDb.collection("users").doc(studentUid).get();
+      const userData = userDoc.data();
+
+      // Only students can generate invite codes
+      if (userData?.role === "parent") {
+        return res.status(403).json({ error: "FORBIDDEN", message: "Only students can generate a parent link code" });
+      }
+
+      // Generate random 6-character code (uppercase letters + digits, omitting 0, O, 1, I)
+      const alphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+      let code = "";
+      for (let i = 0; i < 6; i++) {
+        code += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+      }
+
+      const now = Date.now();
+      const expiresAtMs = now + 24 * 60 * 60 * 1000; // 24 hours
+      const expiresAt = new Date(expiresAtMs).toISOString();
+
+      await adminDb.collection("parentLinkCodes").doc(code).set({
+        code,
+        studentId: studentUid,
+        studentName: userData?.displayName || decodedToken.name || "Student",
+        createdAt: FieldValue.serverTimestamp(),
+        expiresAt,
+        expiresAtMs,
+        used: false
+      });
+
+      logToFile(`[ParentLink] Generated code ${code} for student ${studentUid}`);
+      return res.json({ ok: true, code, expiresAt });
+    } catch (err: any) {
+      logToFile(`[ParentLink] Error in /api/parent-link/code: ${err.message}`);
+      return res.status(500).json({ error: "INTERNAL_ERROR", message: err.message });
+    }
+  });
+
+  // Redeem a parent link code (parent only)
+  app.post("/api/parent-link/redeem", async (req: express.Request, res: express.Response) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Missing or invalid authorization token" });
+      }
+
+      const idToken = authHeader.split("Bearer ")[1]?.trim();
+      if (!idToken) {
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Missing Bearer token" });
+      }
+
+      const { code } = req.body;
+      const cleanCode = (code || "").toString().trim().toUpperCase();
+      if (!cleanCode) {
+        return res.status(400).json({ error: "EMPTY_CODE", message: "Invite code cannot be empty" });
+      }
+
+      const adminAuth = getAdminAuth();
+      const adminDb = getAdminDb();
+      if (!adminAuth || !adminDb) {
+        return res.status(503).json({ error: "SERVICE_UNAVAILABLE", message: "Firebase Admin is not configured on the server" });
+      }
+
+      let decodedToken;
+      try {
+        decodedToken = await adminAuth.verifyIdToken(idToken);
+      } catch (authErr: any) {
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Invalid or expired Firebase ID token" });
+      }
+
+      const parentUid = decodedToken.uid;
+
+      // In ONE transaction (all reads first, then writes)
+      const result = await adminDb.runTransaction(async (transaction) => {
+        const codeRef = adminDb.collection("parentLinkCodes").doc(cleanCode);
+        const parentRef = adminDb.collection("users").doc(parentUid);
+
+        // 1. ALL READS FIRST
+        const codeSnap = await transaction.get(codeRef);
+        if (!codeSnap.exists) {
+          throw new Error("INVALID_CODE");
+        }
+
+        const codeData = codeSnap.data();
+        if (codeData?.used) {
+          throw new Error("CODE_ALREADY_USED");
+        }
+
+        const now = Date.now();
+        if ((codeData?.expiresAtMs && codeData.expiresAtMs < now) || (codeData?.expiresAt && new Date(codeData.expiresAt).getTime() < now)) {
+          throw new Error("CODE_EXPIRED");
+        }
+
+        const studentId = codeData?.studentId;
+        if (!studentId) {
+          throw new Error("INVALID_CODE");
+        }
+        if (studentId === parentUid) {
+          throw new Error("CANNOT_LINK_SELF");
+        }
+
+        const studentRef = adminDb.collection("users").doc(studentId);
+        const studentSnap = await transaction.get(studentRef);
+        const parentSnap = await transaction.get(parentRef);
+
+        if (!studentSnap.exists) {
+          throw new Error("STUDENT_NOT_FOUND");
+        }
+
+        const parentData = parentSnap.data();
+        if (!parentData || (parentData.role !== "parent" && parentData.role !== "admin")) {
+          throw new Error("NOT_PARENT_ROLE");
+        }
+
+        const studentDisplayName = studentSnap.data()?.displayName || codeData?.studentName || "Student";
+
+        // 2. ALL WRITES AFTER READS
+        transaction.update(codeRef, {
+          used: true,
+          usedBy: parentUid,
+          redeemedAt: FieldValue.serverTimestamp()
+        });
+
+        transaction.set(studentRef, {
+          linkedParentIds: FieldValue.arrayUnion(parentUid),
+          parentIds: FieldValue.arrayUnion(parentUid)
+        }, { merge: true });
+
+        transaction.set(parentRef, {
+          role: "parent",
+          linkedStudentIds: FieldValue.arrayUnion(studentId),
+          linkedStudentId: studentId
+        }, { merge: true });
+
+        return {
+          studentName: studentDisplayName
+        };
+      });
+
+      logToFile(`[ParentLink] Parent ${parentUid} redeemed code ${cleanCode} -> Student ${result.studentName}`);
+      return res.json({ ok: true, studentName: result.studentName });
+    } catch (err: any) {
+      logToFile(`[ParentLink] Error in /api/parent-link/redeem: ${err.message}`);
+      if (err.message === "INVALID_CODE") {
+        return res.status(404).json({ error: "INVALID_CODE", message: "Invalid invite code" });
+      }
+      if (err.message === "CODE_ALREADY_USED") {
+        return res.status(400).json({ error: "CODE_ALREADY_USED", message: "This invite code has already been used" });
+      }
+      if (err.message === "CODE_EXPIRED") {
+        return res.status(400).json({ error: "CODE_EXPIRED", message: "This invite code has expired" });
+      }
+      if (err.message === "STUDENT_NOT_FOUND") {
+        return res.status(404).json({ error: "STUDENT_NOT_FOUND", message: "Student account not found" });
+      }
+      if (err.message === "NOT_PARENT_ROLE") {
+        return res.status(403).json({ error: "NOT_PARENT_ROLE", message: "Caller must have role 'parent'" });
+      }
+      if (err.message === "CANNOT_LINK_SELF") {
+        return res.status(400).json({ error: "CANNOT_LINK_SELF", message: "Cannot link to yourself" });
+      }
+      return res.status(500).json({ error: "INTERNAL_ERROR", message: err.message });
+    }
+  });
+
+  // Unlink a student (parent only)
+  app.post("/api/parent-link/unlink", async (req: express.Request, res: express.Response) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Missing authorization token" });
+      }
+
+      const idToken = authHeader.split("Bearer ")[1]?.trim();
+      const adminAuth = getAdminAuth();
+      const adminDb = getAdminDb();
+      if (!adminAuth || !adminDb) {
+        return res.status(503).json({ error: "SERVICE_UNAVAILABLE" });
+      }
+
+      const decodedToken = await adminAuth.verifyIdToken(idToken);
+      const parentUid = decodedToken.uid;
+      const { studentId } = req.body;
+      if (!studentId) {
+        return res.status(400).json({ error: "MISSING_STUDENT_ID" });
+      }
+
+      await adminDb.collection("users").doc(parentUid).set({
+        linkedStudentIds: FieldValue.arrayRemove(studentId)
+      }, { merge: true });
+
+      await adminDb.collection("users").doc(studentId).set({
+        linkedParentIds: FieldValue.arrayRemove(parentUid),
+        parentIds: FieldValue.arrayRemove(parentUid)
+      }, { merge: true });
+
+      return res.json({ ok: true });
+    } catch (err: any) {
+      return res.status(500).json({ error: "INTERNAL_ERROR", message: err.message });
+    }
+  });
+
   // API Routes
   app.get("/api/health", (req, res) => {
     const key = getApiKey();

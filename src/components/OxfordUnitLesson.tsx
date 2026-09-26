@@ -8,6 +8,7 @@ import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { OXFORD_LESSONS } from '../data/oxfordLessonsData';
 import { AILessonCompanion } from './AILessonCompanion';
+import { saveEarnedCertificate } from '../services/certificateService';
 
 interface OxfordUnitLessonProps {
   lang: Language;

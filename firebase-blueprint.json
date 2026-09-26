@@ -171,6 +171,10 @@
     "/grades/{gradeId}": {
       "schema": "object",
       "description": "Student grades tracking"
+    },
+    "/parentLinkCodes/{code}": {
+      "schema": "object",
+      "description": "Secure one-time student to parent invite link codes"
     }
   }
 }

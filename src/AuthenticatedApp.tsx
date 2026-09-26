@@ -58,6 +58,7 @@ import {
   Filter,
   Check,
   Copy,
+  MessageCircle,
   Ticket,
   ArrowRight,
   ArrowLeft
@@ -936,6 +937,61 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
+  const [parentLinkCode, setParentLinkCode] = useState<string | null>(null);
+  const [parentLinkExpiresAt, setParentLinkExpiresAt] = useState<string | null>(null);
+  const [generatingParentCode, setGeneratingParentCode] = useState(false);
+  const [parentCodeError, setParentCodeError] = useState<string | null>(null);
+  const [copiedParentCode, setCopiedParentCode] = useState(false);
+  const [showParentLinkModal, setShowParentLinkModal] = useState(false);
+
+  const handleGenerateParentCode = async () => {
+    setGeneratingParentCode(true);
+    setParentCodeError(null);
+    try {
+      if (profile.uid.startsWith('sim_') || !auth.currentUser) {
+        const sampleAlphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+        let demo = "";
+        for (let i = 0; i < 6; i++) demo += sampleAlphabet.charAt(Math.floor(Math.random() * sampleAlphabet.length));
+        setParentLinkCode(demo);
+        setParentLinkExpiresAt(new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString());
+        return;
+      }
+
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) throw new Error("AUTH_REQUIRED");
+
+      const resp = await fetch('/api/parent-link/code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        }
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data.message || data.error || 'Failed to generate code');
+      }
+      setParentLinkCode(data.code);
+      setParentLinkExpiresAt(data.expiresAt);
+    } catch (e: any) {
+      console.error("Error generating parent link code:", e);
+      setParentCodeError(isRtl ? 'تعذر توليد كود الربط حالياً، يرجى المحاولة لاحقاً.' : 'Failed to generate link code. Please try again.');
+    } finally {
+      setGeneratingParentCode(false);
+    }
+  };
+
+  const handleCopyParentCode = () => {
+    if (!parentLinkCode) return;
+    navigator.clipboard?.writeText(parentLinkCode);
+    setCopiedParentCode(true);
+    setTimeout(() => setCopiedParentCode(false), 2500);
+  };
+
+  const parentLinkWaUrl = parentLinkCode ? `https://wa.me/?text=${encodeURIComponent(
+    `مرحباً يا غالي 🌹\nهذا هو كود ربط حسابي في أكاديمية باسم الخليل التفاعلية لمتابعة دروسي وتقاريري الأكاديمية:\n\n🔑 كود الربط: *${parentLinkCode}*\n(الكود صالح لمدة 24 ساعة)\n\n🌐 رابط الأكاديمية للدخول وإدخال الكود:\n${typeof window !== 'undefined' ? window.location.origin : 'https://basim-academy.com'}`
+  )}` : '#';
+
   useEffect(() => {
     const getRec = async () => {
       setLoadingRec(true);
@@ -1336,6 +1392,16 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
                   <Ticket size={13} />
                   <span>{isRtl ? 'شحن قسيمة 🎫' : 'Redeem 🎫'}</span>
                 </button>
+
+                {/* Link Parent Button */}
+                <button
+                  onClick={() => setShowParentLinkModal(true)}
+                  className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black text-xs px-3 py-1.5 rounded-xl shadow-sm transition-all cursor-pointer"
+                  title={isRtl ? 'ربط ولي الأمر' : 'Link a parent'}
+                >
+                  <Users size={13} />
+                  <span>{isRtl ? 'ربط ولي الأمر 👨‍👧‍👦' : 'Link Parent 👨‍👧‍👦'}</span>
+                </button>
               </div>
             </div>
             
@@ -1376,6 +1442,115 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             </div>
           </motion.div>
         )}
+
+        {/* SECURE PARENT LINKING CARD */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-5 sm:p-6 bg-gradient-to-br from-white to-blue-50/50 border-2 border-b-4 border-blue-200 rounded-2xl sm:rounded-[2rem] text-slate-800 shadow-sm relative overflow-hidden"
+        >
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#002147] text-white rounded-2xl flex items-center justify-center shrink-0 shadow-md shadow-blue-900/20">
+                <Users size={28} />
+              </div>
+              <div className={isRtl ? 'text-right' : 'text-left'}>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                    {isRtl ? 'كود آمن لمرة واحدة 🔒' : 'One-Time Secure Code 🔒'}
+                  </span>
+                  <span className="text-xs font-bold text-slate-400">
+                    {isRtl ? 'صلاحية 24 ساعة' : '24h Validity'}
+                  </span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-black text-[#002147]">
+                  {isRtl ? 'ربط ولي الأمر / Link a parent' : 'Link a parent / ربط ولي الأمر'}
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-xl mt-0.5 leading-relaxed">
+                  {isRtl
+                    ? 'ولد كود ربط مؤمن وشاركه مع ولي أمرك لربط حسابه ومتابعة دروسك وتقاريرك الأكاديمية.'
+                    : 'Generate a secure 6-character code and share it with your parent to link their dashboard.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              {!parentLinkCode ? (
+                <button
+                  onClick={handleGenerateParentCode}
+                  disabled={generatingParentCode}
+                  className="flex items-center gap-2 bg-[#002147] hover:bg-[#C49E3A] active:scale-95 text-white font-black text-xs sm:text-sm px-5 py-3 rounded-xl sm:rounded-2xl shadow-md transition-all cursor-pointer disabled:opacity-50"
+                >
+                  <Key size={16} />
+                  <span>{generatingParentCode ? (isRtl ? 'جاري التوليد...' : 'Generating...') : (isRtl ? 'توليد كود الربط 🔑' : 'Generate Code 🔑')}</span>
+                </button>
+              ) : (
+                <button
+                  onClick={handleGenerateParentCode}
+                  disabled={generatingParentCode}
+                  className="text-xs font-bold text-blue-700 hover:text-blue-900 underline px-2 py-1 cursor-pointer"
+                >
+                  {isRtl ? 'توليد كود جديد 🔄' : 'Generate New 🔄'}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {parentCodeError && (
+            <div className="mt-3 p-3 bg-red-50 text-red-700 border border-red-200 rounded-xl text-xs font-bold">
+              {parentCodeError}
+            </div>
+          )}
+
+          {parentLinkCode && (
+            <div className="mt-4 pt-4 border-t border-blue-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <div className="px-6 py-2.5 bg-white border-2 border-dashed border-[#C49E3A] rounded-2xl shadow-inner flex items-center justify-center">
+                  <span className="font-mono text-2xl sm:text-3xl font-black tracking-widest text-[#002147]">
+                    {parentLinkCode}
+                  </span>
+                </div>
+                <div className={`text-xs text-slate-500 ${isRtl ? 'text-right' : 'text-left'}`}>
+                  <p className="font-bold text-emerald-600 flex items-center gap-1">
+                    <Check size={14} /> {isRtl ? 'جاهز للمشاركة (صالح لمدة 24 ساعة)' : 'Ready to share (Valid for 24 hours)'}
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    {isRtl ? 'يستخدم لمرة واحدة فقط لربط حساب ولي أمرك' : 'One-time link for your parent account'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleCopyParentCode}
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-black text-xs px-4 py-2.5 rounded-xl border border-slate-300 transition-all cursor-pointer"
+                >
+                  {copiedParentCode ? (
+                    <>
+                      <Check size={14} className="text-emerald-600" />
+                      <span className="text-emerald-700">{isRtl ? 'تم النسخ!' : 'Copied!'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={14} />
+                      <span>{isRtl ? 'نسخ الكود' : 'Copy'}</span>
+                    </>
+                  )}
+                </button>
+
+                <a
+                  href={parentLinkWaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba5a] active:scale-95 text-white font-black text-xs px-4 py-2.5 rounded-xl shadow-sm transition-all cursor-pointer"
+                >
+                  <MessageCircle size={15} />
+                  <span>{isRtl ? 'مشاركة عبر واتساب' : 'WhatsApp'}</span>
+                </a>
+              </div>
+            </div>
+          )}
+        </motion.div>
 
         {/* MODERN MOBILE FILTER & SEARCH CONTROLS */}
         <div className="space-y-4">
@@ -1822,6 +1997,131 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
               </motion.div>
             </div>
           )}
+
+          {/* PARENT LINK MODAL */}
+          {showParentLinkModal && (
+            <div
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+              onClick={() => setShowParentLinkModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0, y: 15 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 15 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 text-slate-900 relative"
+                dir={isRtl ? 'rtl' : 'ltr'}
+              >
+                <button
+                  onClick={() => setShowParentLinkModal(false)}
+                  className="absolute top-4 sm:top-5 end-4 sm:end-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center text-2xl shrink-0">
+                    <Users size={26} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-[#002147]">
+                      {isRtl ? 'ربط ولي الأمر / Link a parent' : 'Link a parent / ربط ولي الأمر'}
+                    </h3>
+                    <p className="text-xs text-slate-500 font-medium">
+                      {isRtl ? 'شارك كود الربط مع ولي أمرك لمتابعة خطتك وتقاريرك' : 'Share your invite code with your parent to connect their account'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                    {isRtl
+                      ? 'عند توليد الكود، ستحصل على رمز سري مؤقت من 6 خانات صالح لمدة 24 ساعة. يمكن لولي أمرك إدخاله في لوحة تحكمه للربط المباشر.'
+                      : 'When generated, you will receive a secure 6-character code valid for 24 hours. Your parent can enter this in their dashboard.'}
+                  </p>
+
+                  {!parentLinkCode ? (
+                    <button
+                      onClick={handleGenerateParentCode}
+                      disabled={generatingParentCode}
+                      className="w-full py-4 rounded-2xl bg-[#002147] hover:bg-[#C49E3A] active:scale-95 text-white font-black text-sm shadow-lg shadow-blue-900/15 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    >
+                      {generatingParentCode ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>{isRtl ? 'جاري توليد الكود...' : 'Generating code...'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Key size={18} />
+                          <span>{isRtl ? 'توليد كود الربط الآن 🔑' : 'Generate Link Code Now 🔑'}</span>
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <div className="space-y-4 pt-2">
+                      <div className="p-6 bg-slate-50 border-2 border-dashed border-[#C49E3A] rounded-2xl text-center">
+                        <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-1">
+                          {isRtl ? 'كود الربط المؤقت' : 'Temporary Link Code'}
+                        </span>
+                        <span className="font-mono text-4xl font-black tracking-widest text-[#002147] select-all">
+                          {parentLinkCode}
+                        </span>
+                        <span className="text-[11px] text-emerald-600 font-bold block mt-2">
+                          {isRtl ? '⏳ صالح لمدة 24 ساعة لمرة واحدة' : '⏳ Valid for 24 hours (one-time link)'}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={handleCopyParentCode}
+                          className="py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-800 font-black text-xs border border-slate-300 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                          {copiedParentCode ? (
+                            <>
+                              <Check size={16} className="text-emerald-600" />
+                              <span className="text-emerald-700">{isRtl ? 'تم النسخ!' : 'Copied!'}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy size={16} />
+                              <span>{isRtl ? 'نسخ الكود' : 'Copy Code'}</span>
+                            </>
+                          )}
+                        </button>
+
+                        <a
+                          href={parentLinkWaUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] active:scale-95 text-white font-black text-xs shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                          <MessageCircle size={16} />
+                          <span>{isRtl ? 'إرسال عبر واتساب' : 'Send via WhatsApp'}</span>
+                        </a>
+                      </div>
+
+                      <div className="text-center pt-2">
+                        <button
+                          onClick={handleGenerateParentCode}
+                          disabled={generatingParentCode}
+                          className="text-xs font-bold text-slate-500 hover:text-[#002147] underline cursor-pointer"
+                        >
+                          {isRtl ? 'توليد كود آخر جديد' : 'Generate another code'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {parentCodeError && (
+                    <div className="p-3 bg-red-50 text-red-700 border border-red-200 rounded-xl text-xs font-bold">
+                      {parentCodeError}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          )}
         </AnimatePresence>
       </div>
     </div>
@@ -1892,6 +2192,7 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
   const [selectedStudentIndex, setSelectedStudentIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [linking, setLinking] = useState(false);
   const [showAddStudent, setShowAddStudent] = useState(false);
   
@@ -2004,197 +2305,193 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
     }
   }, [selectedStudentIndex, linkedStudents, onStudentSelect]);
 
-  useEffect(() => {
-    const fetchStudentsData = async () => {
-      let userData: any = {};
-      const isSimulated = profile.uid.startsWith('sim_') || !auth.currentUser;
+  const fetchStudentsData = async () => {
+    let userData: any = {};
+    const isSimulated = profile.uid.startsWith('sim_') || !auth.currentUser;
 
-      if (isSimulated) {
-        const selfStudent = {
-          uid: profile.uid,
-          displayName: isRtl 
-            ? `${profile.displayName || 'ولي الأمر / المشرف'} (ملفي الدراسي الشخصي)` 
-            : `${profile.displayName || 'Parent/Admin'} (My Personal Study Profile)`,
-          role: profile.role,
-          avatarUrl: profile.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.displayName || 'BK'}`,
-          points: profile.points || 1250,
-          level: profile.level || 'A2',
-          isSelf: true
-        };
-        const demoStudent = {
-          uid: 'sim_student_noor',
-          displayName: isRtl ? 'نور الخليل' : 'Noor Al-Khalil',
-          role: UserRole.STUDENT,
-          avatarUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=100',
-          points: 840,
-          level: 'A1',
-          studentCode: '102938'
-        };
-        setLinkedStudents([selfStudent, demoStudent]);
-        setSelectedStudentIndex(0);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const userDoc = await getDoc(doc(db, 'users', profile.uid));
-        if (userDoc.exists()) {
-          userData = userDoc.data() as any;
-        }
-      } catch (e) {
-        console.warn("Notice: reading user doc skipped or unavailable:", e);
-      }
-      
-      const studentIds: string[] = [];
-      if (userData?.linkedStudentIds && Array.isArray(userData.linkedStudentIds)) {
-        studentIds.push(...userData.linkedStudentIds);
-      } else if (userData?.linkedStudentId) {
-        // Migration: convert single ID to array
-        studentIds.push(userData.linkedStudentId);
-      }
-
-      const students: any[] = [];
-      if (studentIds.length > 0) {
-        const fetched = await Promise.all(studentIds.map(async (id) => {
-          try {
-            const sDoc = await getDoc(doc(db, 'users', id));
-            const sMeta = await getDoc(doc(db, 'students', id));
-            if (sDoc.exists() && sMeta.exists()) {
-              return { 
-                uid: id,
-                ...sDoc.data(), 
-                ...sMeta.data(), 
-                phoneNumber: userData.phoneNumber, 
-                studentPhoneNumber: userData.studentPhoneNumber 
-              };
-            }
-          } catch (err) {
-            console.warn(`Notice: student ${id} fetch unavailable:`, err);
-          }
-          return null;
-        }));
-        students.push(...fetched.filter(s => s !== null));
-      }
-
-      // Always prepend the parent/admin themselves as a student study profile
+    if (isSimulated) {
       const selfStudent = {
         uid: profile.uid,
         displayName: isRtl 
-          ? `${profile.displayName || 'ولي الأمر / الأدمن'} (ملفي الدراسي الشخصي)` 
+          ? `${profile.displayName || 'ولي الأمر / المشرف'} (ملفي الدراسي الشخصي)` 
           : `${profile.displayName || 'Parent/Admin'} (My Personal Study Profile)`,
         role: profile.role,
         avatarUrl: profile.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.displayName || 'BK'}`,
-        points: profile.points || userData?.points || 0,
-        level: profile.level || userData?.level || 'A1',
+        points: profile.points || 1250,
+        level: profile.level || 'A2',
         isSelf: true
       };
-
-      const allStudentsInList = [selfStudent, ...students];
-      setLinkedStudents(allStudentsInList);
-      setSelectedStudentIndex(0);
-      setLoading(false);
-    };
-    fetchStudentsData();
-  }, [profile.uid, isRtl]);
-
-  const handleLink = async () => {
-    let inputId = studentIdInput.trim();
-    if (!inputId) return;
-    
-    // Support "AK123456" format by stripping "AK"
-    if (inputId.toUpperCase().startsWith('AK')) {
-      inputId = inputId.substring(2);
-    }
-    
-    setLinking(true);
-    setError('');
-
-    const isSimulated = profile.uid.startsWith('sim_') || !auth.currentUser;
-    if (isSimulated) {
-      const mockStudent = {
-        uid: `sim_student_${inputId}`,
-        displayName: isRtl ? `طالب (${inputId})` : `Student (${inputId})`,
+      const demoStudent = {
+        uid: 'sim_student_noor',
+        displayName: isRtl ? 'نور الخليل' : 'Noor Al-Khalil',
         role: UserRole.STUDENT,
         avatarUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=100',
-        points: 500,
+        points: 840,
         level: 'A1',
-        studentCode: inputId
+        studentCode: '102938'
       };
-      setLinkedStudents(prev => [...prev, mockStudent]);
-      setSelectedStudentIndex(linkedStudents.length);
-      setStudentIdInput('');
-      setShowAddStudent(false);
-      setLinking(false);
+      setLinkedStudents([selfStudent, demoStudent]);
+      setSelectedStudentIndex(0);
+      setLoading(false);
       return;
     }
 
     try {
-      // First try by UID (legacy)
-      let sDoc = await getDoc(doc(db, 'users', inputId));
-      let studentId = inputId;
-
-      // If not found by UID, try by studentCode
-      if (!sDoc.exists() || sDoc.data()?.role !== UserRole.STUDENT) {
-        const q = query(collection(db, 'users'), where('studentCode', '==', inputId), limit(1));
-        const qSnap = await getDocs(q);
-        if (!qSnap.empty) {
-          sDoc = qSnap.docs[0];
-          studentId = sDoc.id;
-        } else {
-          // One more try: maybe they entered the full UID but it wasn't found in the first check
-          // (actually the first check covers it, so if we're here it's really not found)
-          setError(t.invalidStudentId);
-          setLinking(false);
-          return;
-        }
+      const userDoc = await getDoc(doc(db, 'users', profile.uid));
+      if (userDoc.exists()) {
+        userData = userDoc.data() as any;
       }
-
-      if (sDoc.exists() && sDoc.data().role === UserRole.STUDENT) {
-        const userDoc = await getDoc(doc(db, 'users', profile.uid));
-        const userData = userDoc.data() as any;
-        const currentIds = userData?.linkedStudentIds || (userData?.linkedStudentId ? [userData.linkedStudentId] : []);
-        
-        if (currentIds.includes(studentId)) {
-          setError(isRtl ? 'هذا الطالب مربوط بالفعل.' : 'This student is already linked.');
-          setLinking(false);
-          return;
-        }
-
-        const nextIds = [...currentIds, studentId];
-        await setDoc(doc(db, 'users', profile.uid), { 
-          linkedStudentIds: nextIds,
-          linkedStudentId: nextIds[0] // Backward compatibility
-        }, { merge: true });
-
-        // Add parent to student's record for security rules optimization
-        const sDocData = sDoc.data() || {};
-        const sParentIds = sDocData.linkedParentIds || [];
-        if (!sParentIds.includes(profile.uid)) {
-          await updateDoc(doc(db, 'users', studentId), {
-            linkedParentIds: [...sParentIds, profile.uid]
-          });
-        }
-        
-        const sMeta = await getDoc(doc(db, 'students', studentId));
-        const newStudent = { 
-          ...sDoc.data(), 
-          ...sMeta.data(), 
-          phoneNumber: userData?.phoneNumber, 
-          studentPhoneNumber: userData?.studentPhoneNumber 
-        };
-
-        setLinkedStudents(prev => [...prev, newStudent]);
-        setSelectedStudentIndex(linkedStudents.length);
-        setStudentIdInput('');
-        setShowAddStudent(false);
-      } else {
-        setError(t.invalidStudentId);
-      }
-    } catch (err) {
-      console.error("Linking error:", err);
-      setError(t.invalidStudentId);
+    } catch (e) {
+      console.warn("Notice: reading user doc skipped or unavailable:", e);
     }
-    setLinking(false);
+    
+    const studentIds: string[] = [];
+    if (userData?.linkedStudentIds && Array.isArray(userData.linkedStudentIds)) {
+      studentIds.push(...userData.linkedStudentIds);
+    } else if (userData?.linkedStudentId) {
+      // Migration: convert single ID to array
+      studentIds.push(userData.linkedStudentId);
+    }
+
+    const students: any[] = [];
+    if (studentIds.length > 0) {
+      const fetched = await Promise.all(studentIds.map(async (id) => {
+        try {
+          const sDoc = await getDoc(doc(db, 'users', id));
+          const sMeta = await getDoc(doc(db, 'students', id));
+          if (sDoc.exists() || sMeta.exists()) {
+            return { 
+              uid: id,
+              ...(sDoc.exists() ? sDoc.data() : {}), 
+              ...(sMeta.exists() ? sMeta.data() : {}), 
+              phoneNumber: userData.phoneNumber, 
+              studentPhoneNumber: userData.studentPhoneNumber 
+            };
+          }
+        } catch (err) {
+          console.warn(`Notice: student ${id} fetch unavailable:`, err);
+        }
+        return null;
+      }));
+      students.push(...fetched.filter(s => s !== null));
+    }
+
+    // Always prepend the parent/admin themselves as a student study profile
+    const selfStudent = {
+      uid: profile.uid,
+      displayName: isRtl 
+        ? `${profile.displayName || 'ولي الأمر / الأدمن'} (ملفي الدراسي الشخصي)` 
+        : `${profile.displayName || 'Parent/Admin'} (My Personal Study Profile)`,
+      role: profile.role,
+      avatarUrl: profile.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.displayName || 'BK'}`,
+      points: profile.points || userData?.points || 0,
+      level: profile.level || userData?.level || 'A1',
+      isSelf: true
+    };
+
+    const allStudentsInList = [selfStudent, ...students];
+    setLinkedStudents(allStudentsInList);
+    setSelectedStudentIndex(prev => (prev === null ? 0 : Math.min(prev, allStudentsInList.length - 1)));
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchStudentsData();
+  }, [profile.uid, isRtl]);
+
+  const handleLink = async () => {
+    let cleanCode = studentIdInput.trim().toUpperCase();
+    if (!cleanCode) {
+      setError(isRtl ? 'يرجى إدخال كود الطالب المكون من 6 خانات.' : 'Please enter the 6-character student code.');
+      return;
+    }
+    
+    // Support "AK123456" legacy input by stripping "AK"
+    if (cleanCode.startsWith('AK') && cleanCode.length > 2) {
+      cleanCode = cleanCode.substring(2);
+    }
+    
+    setLinking(true);
+    setError('');
+    setSuccessMsg('');
+
+    const isSimulated = profile.uid.startsWith('sim_') || !auth.currentUser;
+    if (isSimulated) {
+      const mockStudent = {
+        uid: `sim_student_${cleanCode}`,
+        displayName: isRtl ? `طالب تجريبي (${cleanCode})` : `Demo Student (${cleanCode})`,
+        role: UserRole.STUDENT,
+        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${cleanCode}`,
+        points: 500,
+        level: 'A1',
+        studentCode: cleanCode
+      };
+      setLinkedStudents(prev => [...prev, mockStudent]);
+      setSelectedStudentIndex(linkedStudents.length);
+      setSuccessMsg(isRtl ? `🎉 تم ربط حساب الطالب (${mockStudent.displayName}) بنجاح!` : `🎉 Successfully linked student (${mockStudent.displayName})!`);
+      setStudentIdInput('');
+      setLinking(false);
+      setTimeout(() => {
+        setShowAddStudent(false);
+        setSuccessMsg('');
+      }, 1500);
+      return;
+    }
+
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) {
+        throw new Error('AUTH_REQUIRED');
+      }
+
+      const res = await fetch('/api/parent-link/redeem', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ code: cleanCode })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        const errCode = data.error;
+        let msg = isRtl ? 'حدث خطأ أثناء محاولة ربط الحساب. يرجى المحاولة مرة أخرى.' : 'Error linking student. Please try again.';
+        if (errCode === 'INVALID_CODE') {
+          msg = isRtl ? '❌ كود الربط غير صحيح أو غير موجود. يرجى التأكد من الكود المكون من 6 خانات.' : '❌ Invalid or non-existent link code. Please check the 6-character code.';
+        } else if (errCode === 'CODE_ALREADY_USED') {
+          msg = isRtl ? '⚠️ تم استخدام رمز هذا الكود مسبقاً. يرجى من الطالب توليد كود جديد.' : '⚠️ This code has already been used. Please ask the student for a new code.';
+        } else if (errCode === 'CODE_EXPIRED') {
+          msg = isRtl ? '⏱️ انتهت صلاحية هذا الكود (صلاحية الكود 24 ساعة). يرجى طلب كود جديد من الطالب.' : '⏱️ This code has expired (24h validity). Please request a new code from the student.';
+        } else if (errCode === 'NOT_PARENT_ROLE') {
+          msg = isRtl ? '⛔ عذراً، يجب أن يكون حسابك مسجلاً كولي أمر لإتمام عملية الربط.' : '⛔ Only parent accounts can link a student.';
+        } else if (errCode === 'CANNOT_LINK_SELF') {
+          msg = isRtl ? 'لا يمكنك ربط حسابك بحسابك الشخصي.' : 'You cannot link to your own account.';
+        } else if (errCode === 'STUDENT_NOT_FOUND') {
+          msg = isRtl ? '❌ حساب الطالب غير موجود في النظام.' : '❌ Student account not found.';
+        }
+        setError(msg);
+        setLinking(false);
+        return;
+      }
+
+      const studentName = data.studentName || 'Student';
+      setSuccessMsg(isRtl ? `🎉 تم ربط حساب الطالب (${studentName}) بنجاح!` : `🎉 Successfully linked to student (${studentName})!`);
+      setStudentIdInput('');
+      
+      // Reload linked students from server
+      await fetchStudentsData();
+      
+      setTimeout(() => {
+        setShowAddStudent(false);
+        setSuccessMsg('');
+      }, 1500);
+    } catch (err: any) {
+      console.error('Error redeeming code:', err);
+      setError(isRtl ? 'تعذر الاتصال بالخادم. يرجى التحقق من اتصال الإنترنت.' : 'Could not connect to server. Please check your connection.');
+    } finally {
+      setLinking(false);
+    }
   };
 
   const handleDelete = async (id: string, index: number) => {
@@ -2219,14 +2516,17 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
     }
 
     try {
-      const userDoc = await getDoc(doc(db, 'users', profile.uid));
-      const userData = userDoc.data() as any;
-      const nextIds = (userData?.linkedStudentIds || []).filter((sid: string) => sid !== id);
-      
-      await setDoc(doc(db, 'users', profile.uid), { 
-        linkedStudentIds: nextIds,
-        linkedStudentId: nextIds.length > 0 ? nextIds[0] : null
-      }, { merge: true });
+      const idToken = await auth.currentUser?.getIdToken();
+      if (idToken) {
+        await fetch('/api/parent-link/unlink', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+          },
+          body: JSON.stringify({ studentId: id })
+        });
+      }
 
       const nextStudents = linkedStudents.filter((_, i) => i !== index);
       setLinkedStudents(nextStudents);
@@ -2437,43 +2737,92 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-[2.5rem] p-10 shadow-xl border border-slate-100 text-center"
+          className="bg-white rounded-[2.5rem] p-8 sm:p-10 shadow-xl border border-slate-100 text-center relative"
         >
           {linkedStudents.length > 0 && (
             <button 
-              onClick={() => setShowAddStudent(false)}
-              className="absolute top-6 right-6 text-slate-400 hover:text-[#002147] transition-colors"
+              onClick={() => {
+                setShowAddStudent(false);
+                setError('');
+                setSuccessMsg('');
+              }}
+              className={`absolute top-6 ${isRtl ? 'left-6' : 'right-6'} w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors cursor-pointer`}
             >
-              ×
+              <X size={18} />
             </button>
           )}
-          <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-8">
+          <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
             <Users size={40} />
           </div>
-          <h2 className="text-3xl font-black text-[#002147] mb-4">{t.linkStudent}</h2>
-          <p className="text-slate-500 mb-10 leading-relaxed">{t.enterStudentId}</p>
+          <h2 className="text-2xl sm:text-3xl font-black text-[#002147] mb-3">
+            {isRtl ? "أدخل كود ابنك / ربط حساب الطالب" : "Enter Your Child's Code / Link Student"}
+          </h2>
+          <p className="text-slate-500 mb-8 leading-relaxed text-xs sm:text-sm max-w-md mx-auto">
+            {isRtl 
+              ? "اطلب من ابنك الدخول إلى حسابه والضغط على 'ربط ولي الأمر' لإنشاء كود مكون من 6 خانات، ثم أدخله هنا لمتابعة خطته ودروسه لحظة بلحظة."
+              : "Ask your child to click 'Link a Parent' in their account to generate a 6-character code, then enter it here to link."}
+          </p>
           
-          <div className="space-y-4">
-            <input 
-              type="text" 
-              value={studentIdInput}
-              onChange={(e) => setStudentIdInput(e.target.value)}
-              placeholder={t.studentIdPlaceholder}
-              className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 focus:outline-none focus:border-[#002147] transition-all font-mono"
-            />
-            {error && <p className="text-red-500 text-sm font-bold">{error}</p>}
+          <div className="space-y-4 max-w-md mx-auto">
+            <div className="relative">
+              <input 
+                type="text" 
+                maxLength={8}
+                value={studentIdInput}
+                onChange={(e) => {
+                  setStudentIdInput(e.target.value.toUpperCase());
+                  setError('');
+                }}
+                placeholder={isRtl ? "مثال: 7K9X2M" : "e.g. 7K9X2M"}
+                className="w-full bg-slate-50 border-2 border-slate-200 focus:border-[#002147] rounded-2xl px-6 py-4 text-center font-mono font-black text-2xl tracking-widest uppercase focus:outline-none transition-all shadow-inner"
+              />
+            </div>
+
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-3.5 bg-red-50 text-red-700 border border-red-200 rounded-2xl text-xs sm:text-sm font-bold text-center leading-relaxed"
+              >
+                {error}
+              </motion.div>
+            )}
+
+            {successMsg && (
+              <motion.div 
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-3.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-2xl text-xs sm:text-sm font-bold text-center leading-relaxed flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+                <span>{successMsg}</span>
+              </motion.div>
+            )}
+
             <button 
               onClick={handleLink}
-              disabled={linking}
-              className="w-full bg-[#002147] text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-blue-900/20 hover:bg-[#C49E3A] transition-all disabled:opacity-50"
+              disabled={linking || !studentIdInput.trim()}
+              className="w-full bg-[#002147] hover:bg-[#C49E3A] active:scale-95 text-white py-4 sm:py-5 rounded-2xl font-black text-base sm:text-lg shadow-xl shadow-blue-900/15 transition-all disabled:opacity-40 cursor-pointer flex items-center justify-center gap-2"
             >
-              {linking ? t.loadingText : t.verifyAndLink}
+              {linking ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>{isRtl ? 'جاري التحقق والربط...' : 'Verifying and linking...'}</span>
+                </>
+              ) : (
+                <>
+                  <Key size={18} />
+                  <span>{isRtl ? 'ربط الحساب الآن' : 'Link Student Account'}</span>
+                </>
+              )}
             </button>
           </div>
           
-          <div className="mt-12 p-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-            <p className="text-xs text-slate-400 font-medium">
-              {isRtl ? 'لا تمتلك كود الطالب؟ اطلب من الطالب نسخ الكود (6 أرقام مع AK) من أعلى صفحة بروفايله.' : 'Don\'t have the student code? Ask the student to copy their 6-digit code (with AK) from the top of their profile page.'}
+          <div className="mt-8 p-4 sm:p-5 bg-slate-50 rounded-2xl border border-dashed border-slate-200 max-w-md mx-auto">
+            <p className="text-xs text-slate-500 font-medium leading-relaxed">
+              💡 {isRtl 
+                ? 'أكواد الربط مؤمنة بالكامل وصالحة لمدة 24 ساعة فقط للاستخدام لمرة واحدة من قِبل ولي الأمر.' 
+                : 'Invite codes are fully secure and valid for 24 hours for one-time redemption by a parent.'}
             </p>
           </div>
         </motion.div>

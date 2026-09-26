@@ -55,7 +55,11 @@ service cloud.firestore {
              !('balance' in request.resource.data) &&
              !('points' in request.resource.data) &&
              !('xp' in request.resource.data) &&
-             !('level' in request.resource.data);
+             !('level' in request.resource.data) &&
+             !('linkedStudentIds' in request.resource.data) &&
+             !('linkedStudentId' in request.resource.data) &&
+             !('linkedParentIds' in request.resource.data) &&
+             !('parentIds' in request.resource.data);
     }
 
     // --- 1. Global Settings (settings/global explicitly public read) ---
@@ -86,15 +90,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // --- 4. Users Collection (Protected Roles, Credits, Balance & Points) ---
+    // --- 4. Users Collection (Protected Roles, Credits, Balance, Points & Link IDs) ---
     match /users/{userId} {
-      // Read: Owner, linked parent, admin, or signed-in looking up a student profile
-      allow get: if isOwner(userId) || isParentOf(userId) || isAdmin() || (
-        isSignedIn() && resource != null && 'role' in resource.data && resource.data.role == 'student'
-      );
+      // Read: Owner, linked parent, or admin ONLY (no blanket read for all signed-in users)
+      allow get: if isOwner(userId) || isParentOf(userId) || isAdmin();
       allow list: if isAdmin();
 
-      // Create: Owner cannot self-assign admin role or set credit/balance/points fields. Only student/parent or no role.
+      // Create: Owner cannot self-assign admin role or set credit/balance/points/link fields. Only student/parent or no role.
       allow create: if isOwner(userId) && (
         isAdmin() || (
           hasNoForbiddenUserFields() &&
@@ -102,14 +104,17 @@ service cloud.firestore {
         )
       );
 
-      // Update: User cannot change their role, credits, balance, points, xp, or level. Only admin/server can change these.
+      // Update: User cannot change their role, credits, balance, points, xp, level, or linking fields. Only admin/server can change these.
       // Notice: We deliberately do NOT check hasNoForbiddenUserFields() here because if an admin previously granted
       // credits or balance, request.resource.data contains existing fields on the document, which would block normal profile edits.
       // Checking affectedKeys().hasAny(...) guarantees the user cannot modify, add, or delete protected fields.
       allow update: if (
         isAdmin() || (
           isOwner(userId) &&
-          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'credits', 'balance', 'points', 'xp', 'level'])
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+            'role', 'credits', 'balance', 'points', 'xp', 'level',
+            'linkedStudentIds', 'linkedStudentId', 'linkedParentIds', 'parentIds'
+          ])
         )
       );
 
@@ -120,24 +125,35 @@ service cloud.firestore {
         allow read: if isOwner(userId) || isParentOf(userId) || isAdmin();
         allow write: if isOwner(userId) || isAdmin();
       }
+
+      // Earned Completion Certificates (users/{userId}/certificates/{unitId})
+      match /certificates/{unitId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && request.auth.uid == userId;
+        allow update, delete: if isAdmin();
+      }
     }
 
     // --- 5. Students Collection (Protected Economy & Gamification Fields) ---
     match /students/{studentId} {
-      allow read: if isOwner(studentId) || isParentOf(studentId) || isAdmin() || (
-        isSignedIn() && exists(/databases/$(database)/documents/users/$(studentId))
-      );
+      allow read: if isOwner(studentId) || isParentOf(studentId) || isAdmin();
 
-      // Create: Students and parents cannot initialize points, xp, level, credits, or balance
+      // Create: Students and parents cannot initialize points, xp, level, credits, balance, or link IDs
       allow create: if isAdmin() || (
         (isOwner(studentId) || isParentOf(studentId)) &&
-        !request.resource.data.keys().hasAny(['points', 'xp', 'level', 'credits', 'balance'])
+        !request.resource.data.keys().hasAny([
+          'points', 'xp', 'level', 'credits', 'balance',
+          'linkedStudentIds', 'linkedStudentId', 'linkedParentIds', 'parentIds'
+        ])
       );
 
-      // Update: Students and parents cannot change points, xp, level, credits, or balance (only admin/server can)
+      // Update: Students and parents cannot change points, xp, level, credits, balance, or link IDs (only admin/server can)
       allow update: if isAdmin() || (
         (isOwner(studentId) || isParentOf(studentId)) &&
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['points', 'xp', 'level', 'credits', 'balance'])
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'points', 'xp', 'level', 'credits', 'balance',
+          'linkedStudentIds', 'linkedStudentId', 'linkedParentIds', 'parentIds'
+        ])
       );
 
       allow delete: if isAdmin();
@@ -147,19 +163,30 @@ service cloud.firestore {
     match /student_profiles/{profileId} {
       allow read: if isOwner(profileId) || isParentOf(profileId) || isAdmin();
 
-      // Create: Students and parents cannot initialize points, xp, level, credits, or balance
+      // Create: Students and parents cannot initialize points, xp, level, credits, balance, or link IDs
       allow create: if isAdmin() || (
         (isOwner(profileId) || isParentOf(profileId)) &&
-        !request.resource.data.keys().hasAny(['points', 'xp', 'level', 'credits', 'balance'])
+        !request.resource.data.keys().hasAny([
+          'points', 'xp', 'level', 'credits', 'balance',
+          'linkedStudentIds', 'linkedStudentId', 'linkedParentIds', 'parentIds'
+        ])
       );
 
-      // Update: Students and parents cannot change points, xp, level, credits, or balance (only admin/server can)
+      // Update: Students and parents cannot change points, xp, level, credits, balance, or link IDs (only admin/server can)
       allow update: if isAdmin() || (
         (isOwner(profileId) || isParentOf(profileId)) &&
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['points', 'xp', 'level', 'credits', 'balance'])
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'points', 'xp', 'level', 'credits', 'balance',
+          'linkedStudentIds', 'linkedStudentId', 'linkedParentIds', 'parentIds'
+        ])
       );
 
       allow delete: if isAdmin();
+    }
+
+    // --- One-Time Parent Link Codes (Server-Admin Only, Deny All Client Read/Write) ---
+    match /parentLinkCodes/{code} {
+      allow read, write: if false;
     }
 
     // --- 7. Schedules & Timetables ---
@@ -285,8 +312,12 @@ service cloud.firestore {
         isParentOf(resource.data.userId) ||
         isAdmin()
       );
-      allow write: if isSignedIn() && (
+      allow create: if isSignedIn() && (
         request.resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+      allow update, delete: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
         isAdmin()
       );
     }
@@ -294,7 +325,7 @@ service cloud.firestore {
     // --- 15. Community Global Chat ---
     match /global_chat/{chatId} {
       allow read: if isSignedIn();
-      allow create: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.senderId == request.auth.uid;
       allow update, delete: if isAdmin();
     }
 

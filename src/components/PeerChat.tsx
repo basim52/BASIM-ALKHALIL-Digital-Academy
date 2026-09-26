@@ -53,6 +53,7 @@ export const PeerChat = ({ lang, profile }: { lang: Language, profile: UserProfi
     try {
       await addDoc(collection(db, 'global_chat'), {
         text,
+        senderId: profile.uid,
         userId: profile.uid,
         userName: profile.displayName,
         avatar: profile.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.displayName}`,
