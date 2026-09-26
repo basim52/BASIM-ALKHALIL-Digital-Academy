@@ -556,7 +556,7 @@ Looking forward to your reply. Tell me what we're tackling first!`;
   });
 
   // Root test route
-  app.get("/ping", (req, res) => {
+  app.get(["/ping", "/api/ping"], (req, res) => {
     res.json({ ok: true });
   });
 
@@ -662,29 +662,11 @@ Looking forward to your reply. Tell me what we're tackling first!`;
   });
 
   // API Routes
-  app.get("/api/debug/env", (req, res) => {
-    const keys = Object.keys(process.env).filter(k => 
-      k.includes('API') || k.includes('KEY') || k.includes('GOOGLE') || k.includes('GEMINI')
-    );
-    res.json({ keys, nodeEnv: process.env.NODE_ENV });
-  });
-
   app.get("/api/health", (req, res) => {
     const key = getApiKey();
-    const envKeys = Object.keys(process.env).filter(k => 
-      k.toLowerCase().includes('key') || 
-      k.toLowerCase().includes('api') || 
-      k.toLowerCase().includes('gemini') || 
-      k.toLowerCase().includes('secret') ||
-      k.toLowerCase().includes('token')
-    );
     res.json({ 
-      status: "ok", 
-      geminiKeySet: !!key,
-      keyPrefix: key ? `${key.substring(0, 4)}...` : 'none',
-      nodeEnv: process.env.NODE_ENV || 'undefined',
-      availableKeyNames: envKeys,
-      time: new Date().toISOString()
+      ok: true, 
+      geminiKeySet: !!key 
     });
   });
 

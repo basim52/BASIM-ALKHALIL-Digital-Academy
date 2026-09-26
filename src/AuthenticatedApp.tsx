@@ -1906,15 +1906,42 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
       
       const student = linkedStudents[selectedStudentIndex];
       const studentId = student.uid;
+      const isSimulated = studentId.startsWith('sim_') || profile.uid.startsWith('sim_') || !auth.currentUser;
+
+      if (isSimulated) {
+        setCurrentPlan({
+          id: `sim_plan_${studentId}`,
+          userId: studentId,
+          studentName: student.displayName,
+          planItems: [
+            { id: 1, title: isRtl ? 'مقدمة في المحادثة والتواصل التفاعلي' : 'Intro to English Conversation', dateLabel: new Date().toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }), score: 95 },
+            { id: 2, title: isRtl ? 'القواعد التأسيسية والمفردات اليومية' : 'Core Grammar & Everyday Vocabulary', dateLabel: 'Tomorrow', score: 88 }
+          ]
+        });
+        setCurrentPlanResults([
+          { id: 'res_1', lessonId: 'l1', score: 95, total: 100, timestamp: Date.now() },
+          { id: 'res_2', lessonId: 'l2', score: 88, total: 100, timestamp: Date.now() - 86400000 }
+        ]);
+        return;
+      }
       
       try {
         // Fetch Study Plan
-        const plansQ = query(
-          collection(db, 'studyPlans'), 
-          where('userId', '==', studentId),
-          orderBy('createdAt', 'desc'),
-          limit(1)
-        );
+        const isSelf = studentId === profile.uid;
+        const plansQ = isSelf || profile.role === UserRole.ADMIN
+          ? query(
+              collection(db, 'studyPlans'), 
+              where('userId', '==', studentId),
+              orderBy('createdAt', 'desc'),
+              limit(1)
+            )
+          : query(
+              collection(db, 'studyPlans'), 
+              where('userId', '==', studentId),
+              where('parentIds', 'array-contains', profile.uid),
+              orderBy('createdAt', 'desc'),
+              limit(1)
+            );
         const snap = await getDocs(plansQ);
         if (!snap.empty) {
           const docPlan = snap.docs[0];
@@ -1924,23 +1951,31 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
         }
 
         // Fetch Results
-        const resultsQ = query(
-          collection(db, 'lessonResults'), 
-          where('userId', '==', studentId),
-          orderBy('timestamp', 'desc'),
-          limit(20)
-        );
+        const resultsQ = isSelf || profile.role === UserRole.ADMIN
+          ? query(
+              collection(db, 'lessonResults'), 
+              where('userId', '==', studentId),
+              orderBy('timestamp', 'desc'),
+              limit(20)
+            )
+          : query(
+              collection(db, 'lessonResults'), 
+              where('userId', '==', studentId),
+              where('parentIds', 'array-contains', profile.uid),
+              orderBy('timestamp', 'desc'),
+              limit(20)
+            );
         const resultsSnapshot = await getDocs(resultsQ);
         const results: any[] = [];
         resultsSnapshot.forEach(doc => results.push({ id: doc.id, ...doc.data() }));
         setCurrentPlanResults(results);
       } catch (e) {
-        console.error("Error fetching student data for parent:", e);
+        console.warn("Notice: student data fetch unavailable:", e);
       }
     };
 
     fetchStudentSpecificData();
-  }, [selectedStudentIndex, linkedStudents]);
+  }, [selectedStudentIndex, linkedStudents, profile.uid, profile.role, isRtl]);
 
   const getTodayLesson = () => {
     if (!currentPlan || !currentPlan.planItems || currentPlan.planItems.length === 0) return { topic: 'N/A' };
@@ -1954,10 +1989,12 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
     if (!currentPlan?.id) return;
     if (!window.confirm(isRtl ? 'هل أنت متأكد من حذف هذه الخطة؟' : 'Are you sure you want to delete this plan?')) return;
     try {
-      await deleteDoc(doc(db, 'studyPlans', currentPlan.id));
+      if (!currentPlan.id.startsWith('sim_') && auth.currentUser) {
+        await deleteDoc(doc(db, 'studyPlans', currentPlan.id));
+      }
       setCurrentPlan(null);
     } catch (e) {
-      console.error(e);
+      console.warn("Delete plan error:", e);
     }
   };
 
@@ -1970,13 +2007,42 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
   useEffect(() => {
     const fetchStudentsData = async () => {
       let userData: any = {};
+      const isSimulated = profile.uid.startsWith('sim_') || !auth.currentUser;
+
+      if (isSimulated) {
+        const selfStudent = {
+          uid: profile.uid,
+          displayName: isRtl 
+            ? `${profile.displayName || 'ولي الأمر / المشرف'} (ملفي الدراسي الشخصي)` 
+            : `${profile.displayName || 'Parent/Admin'} (My Personal Study Profile)`,
+          role: profile.role,
+          avatarUrl: profile.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.displayName || 'BK'}`,
+          points: profile.points || 1250,
+          level: profile.level || 'A2',
+          isSelf: true
+        };
+        const demoStudent = {
+          uid: 'sim_student_noor',
+          displayName: isRtl ? 'نور الخليل' : 'Noor Al-Khalil',
+          role: UserRole.STUDENT,
+          avatarUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=100',
+          points: 840,
+          level: 'A1',
+          studentCode: '102938'
+        };
+        setLinkedStudents([selfStudent, demoStudent]);
+        setSelectedStudentIndex(0);
+        setLoading(false);
+        return;
+      }
+
       try {
         const userDoc = await getDoc(doc(db, 'users', profile.uid));
         if (userDoc.exists()) {
           userData = userDoc.data() as any;
         }
       } catch (e) {
-        console.error("Error reading user doc:", e);
+        console.warn("Notice: reading user doc skipped or unavailable:", e);
       }
       
       const studentIds: string[] = [];
@@ -2003,7 +2069,7 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
               };
             }
           } catch (err) {
-            console.error(`Error fetching student ${id}:`, err);
+            console.warn(`Notice: student ${id} fetch unavailable:`, err);
           }
           return null;
         }));
@@ -2042,6 +2108,26 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
     
     setLinking(true);
     setError('');
+
+    const isSimulated = profile.uid.startsWith('sim_') || !auth.currentUser;
+    if (isSimulated) {
+      const mockStudent = {
+        uid: `sim_student_${inputId}`,
+        displayName: isRtl ? `طالب (${inputId})` : `Student (${inputId})`,
+        role: UserRole.STUDENT,
+        avatarUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=100',
+        points: 500,
+        level: 'A1',
+        studentCode: inputId
+      };
+      setLinkedStudents(prev => [...prev, mockStudent]);
+      setSelectedStudentIndex(linkedStudents.length);
+      setStudentIdInput('');
+      setShowAddStudent(false);
+      setLinking(false);
+      return;
+    }
+
     try {
       // First try by UID (legacy)
       let sDoc = await getDoc(doc(db, 'users', inputId));
@@ -2118,6 +2204,20 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
     }
     if (!confirm(t.confirmDeleteStudent)) return;
     
+    const isSimulated = profile.uid.startsWith('sim_') || !auth.currentUser;
+    if (isSimulated) {
+      const nextStudents = linkedStudents.filter((_, i) => i !== index);
+      setLinkedStudents(nextStudents);
+      if (nextStudents.length === 0) {
+        setSelectedStudentIndex(null);
+      } else if (selectedStudentIndex === index) {
+        setSelectedStudentIndex(0);
+      } else if (selectedStudentIndex !== null && selectedStudentIndex > index) {
+        setSelectedStudentIndex(selectedStudentIndex - 1);
+      }
+      return;
+    }
+
     try {
       const userDoc = await getDoc(doc(db, 'users', profile.uid));
       const userData = userDoc.data() as any;
@@ -3803,6 +3903,23 @@ export default function AuthenticatedApp({
       setActiveStudentProfile(null);
       return;
     }
+    const isSimulated = activeStudentId.startsWith('sim_') || !auth.currentUser;
+    if (isSimulated) {
+      if (activeStudentId === currentUser?.uid && userProfile) {
+        setActiveStudentProfile(userProfile);
+      } else {
+        setActiveStudentProfile({
+          uid: activeStudentId,
+          displayName: lang === 'ar' ? 'نور الخليل' : 'Noor Al-Khalil',
+          role: UserRole.STUDENT,
+          level: 'A1',
+          points: 840,
+          avatarUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=100'
+        } as UserProfile);
+      }
+      return;
+    }
+
     const fetchStudentProfile = async () => {
       try {
         const studentDoc = await getDoc(doc(db, 'users', activeStudentId));
@@ -3810,11 +3927,11 @@ export default function AuthenticatedApp({
           setActiveStudentProfile({ uid: activeStudentId, ...studentDoc.data() } as UserProfile);
         }
       } catch (err) {
-        console.error("Error fetching active student profile:", err);
+        console.warn("Notice: active student profile fetch unavailable:", err);
       }
     };
     fetchStudentProfile();
-  }, [activeStudentId]);
+  }, [activeStudentId, currentUser?.uid, userProfile, lang]);
 
   const t = translations[lang];
   const isRtl = lang === 'ar';

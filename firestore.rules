@@ -88,8 +88,10 @@ service cloud.firestore {
 
     // --- 4. Users Collection (Protected Roles, Credits, Balance & Points) ---
     match /users/{userId} {
-      // Read: Owner, linked parent, or admin ONLY (no blanket read for all signed-in users)
-      allow get: if isOwner(userId) || isParentOf(userId) || isAdmin();
+      // Read: Owner, linked parent, admin, or signed-in looking up a student profile
+      allow get: if isOwner(userId) || isParentOf(userId) || isAdmin() || (
+        isSignedIn() && resource != null && 'role' in resource.data && resource.data.role == 'student'
+      );
       allow list: if isAdmin();
 
       // Create: Owner cannot self-assign admin role or set credit/balance/points fields. Only student/parent or no role.
@@ -122,7 +124,9 @@ service cloud.firestore {
 
     // --- 5. Students Collection (Protected Economy & Gamification Fields) ---
     match /students/{studentId} {
-      allow read: if isOwner(studentId) || isParentOf(studentId) || isAdmin();
+      allow read: if isOwner(studentId) || isParentOf(studentId) || isAdmin() || (
+        isSignedIn() && exists(/databases/$(database)/documents/users/$(studentId))
+      );
 
       // Create: Students and parents cannot initialize points, xp, level, credits, or balance
       allow create: if isAdmin() || (
@@ -311,10 +315,15 @@ service cloud.firestore {
     }
 
     match /studyPlans/{planId} {
-      allow read: if isSignedIn() && (
+      allow get: if isSignedIn() && (
         resource.data.userId == request.auth.uid ||
-        request.auth.uid in resource.data.parentIds ||
+        (resource.data.parentIds != null && request.auth.uid in resource.data.parentIds) ||
         isParentOf(resource.data.userId) ||
+        isAdmin()
+      );
+      allow list: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        (resource.data.parentIds != null && request.auth.uid in resource.data.parentIds) ||
         isAdmin()
       );
       allow create: if isSignedIn() &&
@@ -331,10 +340,15 @@ service cloud.firestore {
     }
 
     match /lessonResults/{resultId} {
-      allow read: if isSignedIn() && (
+      allow get: if isSignedIn() && (
         resource.data.userId == request.auth.uid ||
-        request.auth.uid in resource.data.parentIds ||
+        (resource.data.parentIds != null && request.auth.uid in resource.data.parentIds) ||
         isParentOf(resource.data.userId) ||
+        isAdmin()
+      );
+      allow list: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        (resource.data.parentIds != null && request.auth.uid in resource.data.parentIds) ||
         isAdmin()
       );
       allow create: if isSignedIn() &&

@@ -60,6 +60,7 @@ interface LoginScreenProps {
   lang: Language;
   onToggleLang: () => void;
   onAuthenticate: (email: string, role: UserRole, displayName?: string) => void;
+  onGoogleSuccess: (user: User) => void;
   onBackToLanding?: () => void;
 }
 
@@ -67,6 +68,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
   lang, 
   onToggleLang, 
   onAuthenticate,
+  onGoogleSuccess,
   onBackToLanding
 }) => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -87,13 +89,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
     try {
       const result = await signInWithPopup(auth, googleProvider);
       if (result && result.user) {
-        const email = result.user.email || '';
-        const isMaster = email.toLowerCase() === 'basim5252@gmail.com';
-        onAuthenticate(
-          email, 
-          isMaster ? UserRole.ADMIN : UserRole.STUDENT, 
-          result.user.displayName || (isMaster ? 'أ. باسم الخليل' : undefined)
-        );
+        onGoogleSuccess(result.user);
         return;
       }
     } catch (error: any) {
@@ -311,9 +307,20 @@ export default function App() {
   const [showAuthScreen, setShowAuthScreen] = useState(false);
   const [lang, setLang] = useState<Language>('ar');
 
+  const handleGoogleSuccess = (user: User) => {
+    setCurrentUser(user);
+    localStorage.setItem('academy_active_user', JSON.stringify({
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName || user.email,
+      photoURL: user.photoURL,
+      emailVerified: user.emailVerified
+    }));
+  };
+
   const handleAuthenticate = (email: string, role: UserRole, displayName?: string) => {
     const isMasterAdmin = role === UserRole.ADMIN || email.toLowerCase() === 'basim5252@gmail.com';
-    const mockUid = isMasterAdmin ? 'sim_admin_basim' : `student_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+    const mockUid = isMasterAdmin ? 'sim_admin_basim' : `sim_student_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
     const userSession: any = {
       uid: mockUid,
       email: email,
@@ -346,13 +353,7 @@ export default function App() {
     getRedirectResult(auth)
       .then((result) => {
         if (result && result.user) {
-          const email = result.user.email || '';
-          const isMaster = email.toLowerCase() === 'basim5252@gmail.com';
-          handleAuthenticate(
-            email,
-            isMaster ? UserRole.ADMIN : UserRole.STUDENT,
-            result.user.displayName || (isMaster ? 'أ. باسم الخليل' : undefined)
-          );
+          handleGoogleSuccess(result.user);
         }
       })
       .catch((error) => {
@@ -418,6 +419,7 @@ export default function App() {
         onToggleLang={() => setLang(l => l === 'ar' ? 'en' : 'ar')} 
         onBackToLanding={() => setShowAuthScreen(false)}
         onAuthenticate={handleAuthenticate} 
+        onGoogleSuccess={handleGoogleSuccess}
       />
     );
   }
