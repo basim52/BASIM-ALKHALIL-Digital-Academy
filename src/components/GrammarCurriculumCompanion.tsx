@@ -464,7 +464,7 @@ export const GrammarCurriculumCompanion = ({
                     </p>
                     <div className="flex items-center justify-between">
                        <div className="px-4 py-2 bg-slate-50 rounded-full text-[10px] font-black text-slate-400 group-hover:bg-[#002147] group-hover:text-white transition-all uppercase tracking-widest">
-                          Analyze Logic
+                          {isRtl ? 'تحليل المنطق' : 'Analyze Logic'}
                        </div>
                        <ChevronRight size={20} className={`${isRtl ? 'rotate-180' : ''} text-slate-300 group-hover:text-[#C49E3A] transition-colors`} />
                     </div>
@@ -531,14 +531,14 @@ export const GrammarCurriculumCompanion = ({
                       </p>
                       
                       <div className="space-y-3 pt-4 border-t border-white/10 relative z-10">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-2">Example Logic</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-2">{isRtl ? 'أمثلة منطقية' : 'Example Logic'}</p>
                         {selectedUnit.examples.slice(0, 2).map((ex) => (
                           <div key={ex.id} className="bg-white/5 p-4 rounded-xl hover:bg-white/10 transition-all border border-white/5">
                             <p className="text-xs font-black leading-relaxed">{ex.en}</p>
                             {speakingId === ex.id ? (
-                               <button onClick={handleStopSpeech} className="mt-2 text-[10px] text-rose-400 font-black uppercase tracking-widest">Stop</button>
+                               <button onClick={handleStopSpeech} className="mt-2 text-[10px] text-rose-400 font-black uppercase tracking-widest">{isRtl ? 'إيقاف' : 'Stop'}</button>
                             ) : (
-                               <button onClick={() => handleSpeech(ex.en, 'en-US', ex.id)} className="mt-2 text-[10px] text-[#C49E3A] font-black uppercase tracking-widest hover:underline">Listen Logic</button>
+                               <button onClick={() => handleSpeech(ex.en, 'en-US', ex.id)} className="mt-2 text-[10px] text-[#C49E3A] font-black uppercase tracking-widest hover:underline">{isRtl ? 'استمع للمثال' : 'Listen Logic'}</button>
                             )}
                           </div>
                         ))}

@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { ProducedVideoLesson, ProducedVideoScene, VideoDialogueLine } from '../data/producedVideoLessons';
 import { storeVideoFile } from '../lib/videoDb';
+import { getTranslatedBadge } from './VideoLibrary';
 
 interface ProducedVideoPlayerProps {
   lesson: ProducedVideoLesson;
@@ -525,7 +526,7 @@ export const ProducedVideoPlayer: React.FC<ProducedVideoPlayerProps> = ({
   );
 
   return (
-    <div className={`p-4 md:p-8 max-w-5xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#F7F7F7]`} dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className={`p-4 md:p-8 pb-32 md:pb-40 max-w-5xl mx-auto w-full min-w-0 ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#F7F7F7] overflow-x-hidden`} dir={isRtl ? 'rtl' : 'ltr'}>
       {/* TOP NAVIGATION BAR */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <button
@@ -568,7 +569,7 @@ export const ProducedVideoPlayer: React.FC<ProducedVideoPlayerProps> = ({
         <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-none">
           <div className="flex items-center gap-2">
             <span className="bg-[#58cc02] text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-md pointer-events-auto">
-              {lesson.badge || 'درس مرئي 🎬'}
+              {getTranslatedBadge(lesson.badge, !!isRtl)}
             </span>
             <span className="bg-black/60 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-bold border border-white/10">
               {lesson.level}

@@ -45,6 +45,8 @@ interface PronunciationLesson {
   title_en: string;
   sound1: string; // e.g., "/p/"
   sound2: string; // e.g., "/b/"
+  sound1_ar?: string;
+  sound2_ar?: string;
   difficulty: 'A1' | 'A2' | 'B1' | 'B2';
   explanation_ar: string;
   explanation_en: string;
@@ -493,6 +495,8 @@ const PRONUNCIATION_LESSONS: PronunciationLesson[] = [
     title_en: 'Silent letters (k, w, g, b) 🤫',
     sound1: 'Silent',
     sound2: 'Spelled Only',
+    sound1_ar: 'حرف صامت',
+    sound2_ar: 'يُكتب فقط',
     difficulty: 'A2',
     explanation_ar: 'في اللغة الإنجليزية، الكثير من الحروف تُكتب ولكنها لا تُلفظ على الإطلاق! مثل حرف K لو جاء وراءه n (knee / knife)، أو W لو جاء وراءه r (write / wrong)، أو B لو جاء بعد m (climb / comb).',
     explanation_en: "Silent letters are written but completely unpronounced, e.g., 'k' before 'n' (knee), 'w' before 'r' (write), or 'b' after 'm' (climb).",
@@ -521,6 +525,8 @@ const PRONUNCIATION_LESSONS: PronunciationLesson[] = [
     title_en: '-ed endings (t, d, id) ⏳',
     sound1: 'Past Tense ed',
     sound2: 'Three sounds',
+    sound1_ar: 'الماضي -ed',
+    sound2_ar: '3 أصوات',
     difficulty: 'B1',
     explanation_ar: 'نهاية الماضي البسيط -ed تنطق بثلاث طرق مختلفة حسب الحرف الأخير قبلها: إما "t" (مثل walked -> walk-t)، أو "d" (مثل played -> play-d)، أو "id" (مثل wanted -> want-id).',
     explanation_en: '-ed has three pronunciations based on the preceding sound: /t/ after voiceless, /d/ after voiced, and /ɪd/ after t or d.',
@@ -546,6 +552,8 @@ const PRONUNCIATION_LESSONS: PronunciationLesson[] = [
     title_en: '-s/-es endings (s, z, iz) 📦',
     sound1: 'Plural / Present s',
     sound2: 'Three sounds',
+    sound1_ar: 'الجمع والمضارع',
+    sound2_ar: '3 أصوات',
     difficulty: 'B1',
     explanation_ar: 'تماماً مثل الماضي، فإن s أو es في نهاية الجمع أو الفعل للمفرد الغائب تلفظ بثلاث طرق: إما "s" (مثل cats)، أو "z" (مثل dogs)، أو "iz" (مثل boxes) التي تزيد مقطعاً لفظياً كاملاً.',
     explanation_en: 'The suffix -s/es is spoken in three ways: /s/ after voiceless sounds, /z/ after voiced sounds, and /ɪz/ after sibilant sounds.',
@@ -571,6 +579,8 @@ const PRONUNCIATION_LESSONS: PronunciationLesson[] = [
     title_en: 'Word Stress (REcord vs reCORD) ⚡',
     sound1: 'Noun stress',
     sound2: 'Verb stress',
+    sound1_ar: 'نبر الأسماء',
+    sound2_ar: 'نبر الأفعال',
     difficulty: 'B2',
     explanation_ar: 'النبرة (Word Stress) هي الضغط على مقطع صوتي معين ليصبح أعلى وأطول. في الإنجليزية، نفس الكلمة تلفظ بشكل مختلف! لو كانت اسماً تنبأ بالنبرة في المقطع الأول (REcord)، ولو كانت فعلاً ننطقها بالنبرة في المقطع الثاني (reCORD) 🎬.',
     explanation_en: 'Many multi-syllable English words change meaning via stress: nouns are typically stressed on the first syllable (REcord), while verbs are stressed on the second (reCORD).',
@@ -596,6 +606,8 @@ const PRONUNCIATION_LESSONS: PronunciationLesson[] = [
     title_en: 'Sentence Stress & Rhythm 🎙️',
     sound1: 'Content Words',
     sound2: 'Function Words',
+    sound1_ar: 'كلمات المعنى',
+    sound2_ar: 'كلمات القواعد',
     difficulty: 'B2',
     explanation_ar: 'في الجمل الإنجليزية، لا ننطق كل الكلمات بنفس القوة والاهتمام. ننبر (نشدد) فقط على "كلمات المحتوى" الهامة (الأسماء والأفعال والصفات)، ونخفف ونطمس "كلمات الوظيفة" (مثل أدوات الجر والتعريف والمساعدة) لسرعة انسيابية مذهلة.',
     explanation_en: 'English is a stress-timed language. We emphasize content words (nouns, action verbs, adjectives) and slide over function words (pronouns, prepositions, auxiliary verbs).',
@@ -1062,10 +1074,10 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
                 } ${isRtl ? 'flex-row-reverse text-right' : 'flex-row text-left'}`}
               >
                 {/* Visual side Badge */}
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-black text-sm shrink-0 ${
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-black text-xs shrink-0 text-center px-1 ${
                   isSelected ? 'bg-[#C49E3A] text-[#002147]' : 'bg-[#002147]/5 text-[#002147]'
                 }`}>
-                  {item.sound1}
+                  {isRtl ? (item.sound1_ar || item.sound1) : item.sound1}
                 </div>
 
                 <div className={`mx-3 flex-1 ${isRtl ? 'text-right' : 'text-left'}`}>
@@ -1188,7 +1200,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
                               {isRtl ? 'الأول (مهموس)' : 'Unvoiced / Soft'}
                             </span>
                             <h4 className="text-4xl font-extrabold text-[#C49E3A] mt-3">
-                              {lesson.sound1}
+                              {isRtl ? (lesson.sound1_ar || lesson.sound1) : lesson.sound1}
                             </h4>
                             <p className="text-xs text-slate-600 leading-relaxed mt-2 text-justify">
                               {isRtl 
@@ -1212,7 +1224,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
                               {isRtl ? 'الثاني (جهري)' : 'Voiced / Heavy'}
                             </span>
                             <h4 className="text-4xl font-extrabold text-[#002147] mt-3">
-                              {lesson.sound2}
+                              {isRtl ? (lesson.sound2_ar || lesson.sound2) : lesson.sound2}
                             </h4>
                             <p className="text-xs text-slate-600 leading-relaxed mt-2 text-justify">
                               {isRtl 
@@ -1273,7 +1285,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
                           <div className="flex-1 flex justify-between items-center bg-white border border-slate-100 p-2.5 rounded-xl w-full">
                             <div className={`flex flex-col ${isRtl ? 'items-end text-right' : 'items-start text-left'}`}>
                               <span className="text-[9px] uppercase tracking-widest font-black text-[#C49E3A]">
-                                {lesson.sound1} Sound
+                                {isRtl ? `صوت ${lesson.sound1_ar || lesson.sound1}` : `${lesson.sound1} Sound`}
                               </span>
                               <span className="font-sans font-black text-lg text-slate-800">
                                 {pair.word1}
@@ -1309,7 +1321,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
                           <div className="flex-1 flex justify-between items-center bg-white border border-slate-100 p-2.5 rounded-xl w-full">
                             <div className={`flex flex-col ${isRtl ? 'items-end text-right' : 'items-start text-left'}`}>
                               <span className="text-[9px] uppercase tracking-widest font-black text-[#002147]">
-                                {lesson.sound2} Sound
+                                {isRtl ? `صوت ${lesson.sound2_ar || lesson.sound2}` : `${lesson.sound2} Sound`}
                               </span>
                               <span className="font-sans font-black text-lg text-slate-800">
                                 {pair.word2}

@@ -751,7 +751,7 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
                     </button>
                     
                     <p className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide tracking-widest mt-3 text-center">
-                      Basim Alkhalil Interactive London Adventures • Series Complete
+                      {isRtl ? 'أكاديمية باسم الخليل • مغامرات لندن التفاعلية • اكتملت السلسلة بنجاح 🌟' : 'Basim Alkhalil Interactive London Adventures • Series Complete 🌟'}
                     </p>
                   </div>
 

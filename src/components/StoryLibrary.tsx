@@ -40,7 +40,7 @@ export const STORIES: Story[] = [
     titleEn: 'Noor Arrives in London',
     titleAr: 'نور تصل إلى لندن',
     level: 'A1',
-    image: 'https://images.unsplash.com/photo-1548625361-155deee223d5?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=800&q=80',
     content: 'Follow Noor as she lands at Heathrow Airport in London, meets a security officer, buys a ticket, and sets off on her very first interactive adventure!',
     isKidsStory: true
   },
@@ -73,7 +73,7 @@ export const STORIES: Story[] = [
     titleEn: 'The Brave Firefighter',
     titleAr: 'الإطفائي الشجاع',
     level: 'A1',
-    image: 'https://images.unsplash.com/photo-1582213726894-85816995642d?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=800&q=80',
     content: 'Jack is a firefighter. He is very brave. Every day, he wears a red uniform and a big helmet. When the bell rings, Jack jumps into the red fire truck. He drives quickly to help people. Jack loves his job because he helps save lives.'
   },
   {
@@ -105,7 +105,7 @@ export const STORIES: Story[] = [
     titleEn: 'Exploring the Amazon',
     titleAr: 'استكشاف الأمازون',
     level: 'B2',
-    image: 'https://images.unsplash.com/photo-1516026672322-bc52d61a5c25?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1516214104703-d870798883c5?auto=format&fit=crop&w=800&q=80',
     content: 'The Amazon rainforest is the largest tropical forest in the world. It is home to millions of species of plants and animals. Scientists explore this jungle to discover new medicines. However, deforestation is a serious threat to this diverse ecosystem. We must protect it to maintain the balance of our planet.'
   },
   {
@@ -137,7 +137,7 @@ export const STORIES: Story[] = [
     titleEn: 'The Philosophy of Happiness',
     titleAr: 'فلسفة السعادة',
     level: 'C2',
-    image: 'https://images.unsplash.com/photo-1499209974431-9dac3adaf471?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=800&q=80',
     content: 'Philosophical inquiries into the nature of happiness have shifted from purely hedonistic interpretations to eudaimonic perspectives. Eudaimonia emphasizes long-term fulfillment through the realization of one\'s potential and virtuous living. Modern psychology aligns with these ancient concepts, suggesting that purpose and social connection are fundamental pillars of well-being. Ultimately, happiness is a subjective construct influenced by internal and external variables.'
   },
   {
@@ -145,7 +145,7 @@ export const STORIES: Story[] = [
     titleEn: 'Global Economic Trends',
     titleAr: 'الاتجاهات الاقتصادية العالمية',
     level: 'C2',
-    image: 'https://images.unsplash.com/photo-1611974717482-48216694665a?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80',
     content: 'The contemporary global economic landscape is characterized by increasing volatility and the rise of decentralized financial systems. Traditional monetary policies are being challenged by the emergence of digital currencies and cross-border trade complexities. Structural shifts in labor markets, driven by automation, necessitate comprehensive policy reforms. Sustaining equitable growth requires a balanced approach between innovation and social safety nets.'
   },
   {
@@ -153,7 +153,7 @@ export const STORIES: Story[] = [
     titleEn: 'The Golden Treasure',
     titleAr: 'الكنز الذهبي',
     level: 'A1',
-    image: 'https://images.unsplash.com/photo-1594462364741-94993cb3310f?auto=format&fit=crop&w=400&q=80',
+    image: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80',
     content: 'Deep in the heart of the forest, a group of friends found an old wooden box. Inside the box, there were gold coins and beautiful jewelry. They decided to give the treasure to the village museum. Everyone celebrated the discovery of the golden treasure.'
   },
   {
@@ -176,6 +176,53 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
     }
     return null;
   });
+
+  const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
+
+  const getCoverGradient = (level: string) => {
+    switch (level) {
+      case 'A1': return 'from-[#002147] via-[#083b70] to-[#1cb0f6]';
+      case 'A2': return 'from-[#004d40] via-[#00695c] to-[#00897b]';
+      case 'B1': return 'from-[#4a148c] via-[#6a1b9a] to-[#8e24aa]';
+      case 'B2': return 'from-[#b71c1c] via-[#c62828] to-[#e53935]';
+      case 'C1': return 'from-[#1b5e20] via-[#2e7d32] to-[#388e3c]';
+      case 'C2': default: return 'from-[#002147] via-[#1a237e] to-[#C49E3A]';
+    }
+  };
+
+  const renderFallbackCover = (story: Story) => (
+    <div className={`w-full h-full bg-gradient-to-br ${getCoverGradient(story.level)} flex flex-col justify-between p-4 text-white select-none relative overflow-hidden shadow-inner`}>
+      {/* Decorative Book Spine & Shapes */}
+      <div className="absolute top-0 bottom-0 left-0 w-2.5 bg-black/25 border-r border-white/20" />
+      <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none" />
+      <div className="absolute right-3 top-3 opacity-15 text-white">
+        <BookOpen size={44} />
+      </div>
+
+      <div className="flex items-center justify-between z-10 pl-2">
+        <span className="bg-[#C49E3A] text-white px-2.5 py-0.5 rounded-full text-[9px] font-black shadow-md uppercase tracking-wider">
+          {story.level}
+        </span>
+        <span className="bg-black/30 backdrop-blur-sm text-white/90 text-[9px] font-bold px-2 py-0.5 rounded-md">
+          {story.content.split(' ').length} {isRtl ? 'كلمة' : 'words'}
+        </span>
+      </div>
+
+      <div className="z-10 pl-2 pr-1 my-auto text-center py-1">
+        <h3 className="font-black text-base md:text-lg leading-snug drop-shadow-md text-amber-100">
+          {isRtl ? story.titleAr : story.titleEn}
+        </h3>
+        <p className="text-[10px] text-white/80 font-bold mt-1 line-clamp-1 italic">
+          {isRtl ? story.titleEn : story.titleAr}
+        </p>
+      </div>
+
+      <div className="z-10 pl-2 flex items-center justify-between text-[8px] text-white/70 font-mono tracking-widest uppercase border-t border-white/10 pt-1.5">
+        <span>Alkhalil Audio</span>
+        <span>📖 Audio Story</span>
+      </div>
+    </div>
+  );
 
   React.useEffect(() => {
     if (initialStoryId) {
@@ -679,7 +726,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
   }
 
   return (
-    <div className={`p-4 md:p-8 max-w-7xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className={`p-4 md:p-8 pb-32 md:pb-40 max-w-7xl mx-auto w-full min-w-0 ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <header className="mb-12">
         <button 
           onClick={onBack}
@@ -700,27 +747,33 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
             onClick={() => handleSelectStory(story)}
             className="bg-white rounded-[2.5rem] overflow-hidden border border-slate-200 shadow-sm group cursor-pointer relative"
           >
-            <div className="h-48 relative overflow-hidden bg-slate-100 flex items-center justify-center text-slate-300">
-               <ImageIcon size={48} className="absolute opacity-20" />
-               <img 
-                 src={story.image} 
-                 alt="" 
-                 referrerPolicy="no-referrer"
-                 loading="lazy"
-                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 relative z-10" 
-                 onError={(e) => {
-                   (e.target as HTMLImageElement).style.opacity = '0';
-                 }}
-               />
-               <div className="absolute top-4 left-4 z-20">
-                  <span className="bg-[#C49E3A] text-white px-3 py-1 rounded-full text-[10px] font-black shadow-lg">{story.level}</span>
-               </div>
-               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6 z-20">
-                  <div className="text-white">
-                    <h3 className="font-black text-xl mb-1">{isRtl ? story.titleAr : story.titleEn}</h3>
-                    <p className="text-blue-200 text-[10px] font-bold uppercase tracking-widest">{story.content.split(' ').length} {isRtl ? 'كلمة' : 'words'}</p>
-                  </div>
-               </div>
+            <div className="h-48 relative overflow-hidden bg-slate-900 flex items-center justify-center text-slate-300">
+               {!story.image || brokenImages[story.id] ? (
+                 renderFallbackCover(story)
+               ) : (
+                 <>
+                   <ImageIcon size={48} className="absolute opacity-20" />
+                   <img 
+                     src={story.image} 
+                     alt={story.titleEn} 
+                     referrerPolicy="no-referrer"
+                     loading="lazy"
+                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 relative z-10" 
+                     onError={() => {
+                       setBrokenImages(prev => ({ ...prev, [story.id]: true }));
+                     }}
+                   />
+                   <div className="absolute top-4 left-4 z-20">
+                      <span className="bg-[#C49E3A] text-white px-3 py-1 rounded-full text-[10px] font-black shadow-lg">{story.level}</span>
+                   </div>
+                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-6 z-20">
+                      <div className="text-white">
+                        <h3 className="font-black text-xl mb-1 leading-tight">{isRtl ? story.titleAr : story.titleEn}</h3>
+                        <p className="text-blue-200 text-[10px] font-bold uppercase tracking-widest">{story.content.split(' ').length} {isRtl ? 'كلمة' : 'words'}</p>
+                      </div>
+                   </div>
+                 </>
+               )}
             </div>
             <div className="p-6">
               <p className="text-slate-500 text-sm line-clamp-2 mb-6 font-medium leading-relaxed italic">"{story.content}"</p>

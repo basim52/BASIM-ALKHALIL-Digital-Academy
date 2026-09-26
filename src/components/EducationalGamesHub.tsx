@@ -1659,7 +1659,9 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                                 </p>
                               </div>
                               <span className="text-xs font-mono font-bold text-slate-500">
-                                {isUnlocked ? '🔓 OPEN ACCESS' : `🔒 LOCKED (${stg.reqXp - totalXP} XP remaining)`}
+                                {isUnlocked 
+                                  ? (isRtl ? '🔓 متاح للجميع' : '🔓 OPEN ACCESS') 
+                                  : (isRtl ? `🔒 مغلق (متبقي ${stg.reqXp - totalXP} XP)` : `🔒 LOCKED (${stg.reqXp - totalXP} XP remaining)`)}
                               </span>
                             </div>
 

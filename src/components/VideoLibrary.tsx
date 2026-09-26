@@ -98,6 +98,15 @@ const DEFAULT_VIDEOS: VideoLesson[] = [
   {
     id: 'default-4',
     youtubeId: 'h2O3vHhREfA',
+    titleEn: 'Airport & Travel Essentials',
+    titleAr: 'المطار ومحادثات السفر الأساسية',
+    level: 'B1',
+    duration: '7:40',
+    thumbnail: 'https://img.youtube.com/vi/h2O3vHhREfA/hqdefault.jpg'
+  },
+  {
+    id: 'default-5',
+    youtubeId: 'h2O3vHhREfA',
     titleEn: 'Advanced Business English',
     titleAr: 'إنجليزية الأعمال المتقدمة',
     level: 'B2',
@@ -105,6 +114,37 @@ const DEFAULT_VIDEOS: VideoLesson[] = [
     thumbnail: 'https://img.youtube.com/vi/h2O3vHhREfA/hqdefault.jpg'
   }
 ];
+
+export const getTranslatedBadge = (badge: string, isRtl: boolean) => {
+  if (!badge) return isRtl ? 'درس مرئي 🎬' : 'Video Lesson 🎬';
+  if (isRtl) {
+    if (badge.includes('Interactive AI') || badge.includes('AI') || badge.includes('ذكاء')) return 'ذكاء اصطناعي تفاعلي 🤖';
+    if (badge.includes('Oxford') || badge.includes('أوكسفورد')) return 'أوكسفورد واقعي 🇬🇧';
+    if (badge.includes('Vocabulary') || badge.includes('مفردات')) return 'مفردات متقدمة 📚';
+    if (badge.includes('Travel') || badge.includes('سياحة') || badge.includes('سفر')) return 'سياحة وسفر ✈️';
+    if (badge.includes('Business') || badge.includes('بيزنس') || badge.includes('مهني')) return 'بيزنس واحتراف 💼';
+    if (badge.includes('Grammar') || badge.includes('قواعد')) return 'قواعد تفاعلية ⚡';
+    if (badge.includes('Kids') || badge.includes('أطفال')) return 'أطفال ومرح 🎈';
+    if (badge.includes('Conversation') || badge.includes('محادثة')) return 'محادثة حية 💬';
+    if (badge.includes('Health') || badge.includes('Doctor') || badge.includes('صحة')) return 'صحة وحياة 🏥';
+    if (badge.includes('Hotel') || badge.includes('فنادق')) return 'سياحة وفنادق 🏨';
+    if (badge.includes('Food') || badge.includes('مطاعم')) return 'مطاعم وطعام 🍕';
+    return badge;
+  } else {
+    if (badge.includes('ذكاء')) return 'Interactive AI 🤖';
+    if (badge.includes('أوكسفورد')) return 'Oxford Real-world 🇬🇧';
+    if (badge.includes('مفردات')) return 'Advanced Vocab 📚';
+    if (badge.includes('سياحة') || badge.includes('سفر')) return 'Travel & Tourism ✈️';
+    if (badge.includes('بيزنس') || badge.includes('مهني')) return 'Business & Career 💼';
+    if (badge.includes('قواعد')) return 'Interactive Grammar ⚡';
+    if (badge.includes('أطفال')) return 'Kids & Fun 🎈';
+    if (badge.includes('محادثة')) return 'Live Conversation 💬';
+    if (badge.includes('صحة')) return 'Health & Life 🏥';
+    if (badge.includes('فنادق')) return 'Hotels & Tourism 🏨';
+    if (badge.includes('مطاعم') || badge.includes('طعام')) return 'Dining & Food 🍕';
+    return badge;
+  }
+};
 
 // Helper to extract clean youtube ID
 function extractYoutubeId(urlOrId: string): string {
@@ -625,7 +665,7 @@ Key Learning Objectives:
   if (selectedVideo) {
     const isDirect = !!selectedVideo.directUrl;
     return (
-      <div className={`p-5 md:p-8 max-w-4xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#F7F7F7]`} dir={isRtl ? 'rtl' : 'ltr'}>
+      <div className={`p-4 sm:p-6 md:p-8 pb-32 md:pb-40 max-w-4xl mx-auto w-full min-w-0 ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#F7F7F7] overflow-x-hidden`} dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="flex items-center justify-between mb-8">
           <button 
             onClick={() => {
@@ -812,11 +852,11 @@ Key Learning Objectives:
   });
 
   return (
-    <div className={`p-4 md:p-8 max-w-7xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#F7F7F7]`} dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className={`p-4 md:p-8 pb-32 md:pb-40 max-w-7xl mx-auto w-full min-w-0 ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#F7F7F7] overflow-x-hidden`} dir={isRtl ? 'rtl' : 'ltr'}>
       
       {/* HEADER SECTION */}
-      <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
+      <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6 min-w-0">
+        <div className="min-w-0">
           <button 
             onClick={onBack}
             className="flex items-center gap-1.5 text-slate-400 hover:text-slate-600 transition-colors mb-4 font-black text-xs uppercase tracking-wider bg-white px-4 py-2 rounded-full border border-slate-200/60 shadow-sm"
@@ -824,7 +864,7 @@ Key Learning Objectives:
             <ArrowLeft size={16} className={isRtl ? 'rotate-180' : ''} />
             {isRtl ? 'العودة للرئيسية' : 'Back to Dashboard'}
           </button>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-2xl sm:text-3xl font-black text-slate-800 leading-none">{t.videoLibrary}</h2>
             <div className="bg-gradient-to-r from-[#58cc02] to-[#1cb0f6] text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider animate-pulse leading-none shadow-sm shrink-0">
               {isRtl ? 'إنتاج بالصوت والصورة 🎬🪄' : 'Audiovisual Production 🎬'}
@@ -880,18 +920,18 @@ Key Learning Objectives:
       </header>
 
       {/* TOP TABS SELECTOR (Produced Audiovisual vs Direct Uploads) */}
-      <div className="flex flex-wrap items-center gap-3 mb-8 bg-white p-2 rounded-2xl border-2 border-slate-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-8 bg-white p-2 rounded-2xl border-2 border-slate-200 shadow-sm max-w-full min-w-0 overflow-hidden">
         <button
           onClick={() => setLibraryTab('produced')}
-          className={`flex-1 py-3 px-4 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all ${
+          className={`w-full sm:flex-1 min-w-0 py-3 px-3 sm:px-4 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all ${
             libraryTab === 'produced'
               ? 'bg-[#58cc02] text-white shadow-md shadow-[#58cc02]/20'
               : 'text-slate-500 hover:bg-slate-100'
           }`}
         >
           <Film size={18} />
-          <span>{isRtl ? 'الدروس المرئية المنتجة (بالصوت والصورة) 🎬' : 'Produced Audiovisual Video Lessons 🎬'}</span>
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
+          <span className="truncate">{isRtl ? 'الدروس المرئية المنتجة (بالصوت والصورة) 🎬' : 'Produced Audiovisual Video Lessons 🎬'}</span>
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-black shrink-0 ${
             libraryTab === 'produced' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
           }`}>
             {producedLessons.length}
@@ -900,15 +940,15 @@ Key Learning Objectives:
 
         <button
           onClick={() => setLibraryTab('uploads')}
-          className={`flex-1 py-3 px-4 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all ${
+          className={`w-full sm:flex-1 min-w-0 py-3 px-3 sm:px-4 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all ${
             libraryTab === 'uploads'
               ? 'bg-[#1cb0f6] text-white shadow-md shadow-[#1cb0f6]/20'
               : 'text-slate-500 hover:bg-slate-100'
           }`}
         >
           <HardDriveDownload size={18} />
-          <span>{isRtl ? 'مكتبة التحميل المباشر واليوتيوب 📁' : 'Direct Uploads & YouTube Library 📁'}</span>
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
+          <span className="truncate">{isRtl ? 'مكتبة التحميل المباشر واليوتيوب 📁' : 'Direct Uploads & YouTube Library 📁'}</span>
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-black shrink-0 ${
             libraryTab === 'uploads' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
           }`}>
             {allVideos.length}
@@ -918,11 +958,11 @@ Key Learning Objectives:
 
       {/* ================= PRODUCED AUDIOVISUAL LESSONS TAB ================= */}
       {libraryTab === 'produced' && (
-        <div className="space-y-6">
+        <div className="space-y-6 min-w-0">
           {/* Filters Bar */}
-          <div className="bg-white p-4 rounded-2xl border-2 border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="bg-white p-4 rounded-2xl border-2 border-slate-200/80 flex flex-col lg:flex-row lg:items-center justify-between gap-4 min-w-0 max-w-full">
             {/* Category Filter */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 text-xs">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-2 lg:pb-0 text-xs no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden w-full min-w-0 max-w-full">
               {[
                 { id: 'all', labelAr: 'الكل 🌟', labelEn: 'All 🌟' },
                 { id: 'conversation', labelAr: 'محادثات 💬', labelEn: 'Conversation 💬' },
@@ -935,7 +975,7 @@ Key Learning Objectives:
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-3 py-1.5 rounded-xl font-black whitespace-nowrap transition-all ${
+                  className={`px-3 py-1.5 rounded-xl font-black whitespace-nowrap transition-all shrink-0 ${
                     selectedCategory === cat.id
                       ? 'bg-slate-800 text-white shadow-sm'
                       : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
@@ -947,13 +987,13 @@ Key Learning Objectives:
             </div>
 
             {/* Level Filter */}
-            <div className="flex items-center gap-1 shrink-0 bg-slate-100 p-1 rounded-xl">
-              <span className="text-[10px] font-black text-slate-400 px-2 uppercase">{isRtl ? 'المستوى:' : 'Level:'}</span>
+            <div className="flex items-center gap-1 shrink-0 bg-slate-100 p-1 rounded-xl overflow-x-auto max-w-full no-scrollbar">
+              <span className="text-[10px] font-black text-slate-400 px-2 uppercase shrink-0">{isRtl ? 'المستوى:' : 'Level:'}</span>
               {['all', 'A1', 'A2', 'B1', 'B2', 'C1'].map((lvl) => (
                 <button
                   key={`lvl-${lvl}`}
                   onClick={() => setSelectedLevelFilter(lvl)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all shrink-0 ${
                     selectedLevelFilter === lvl
                       ? 'bg-[#58cc02] text-white shadow-sm'
                       : 'text-slate-500 hover:text-slate-800'
@@ -966,12 +1006,12 @@ Key Learning Objectives:
           </div>
 
           {/* Grid of Produced Video Lessons */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-w-0">
             {filteredProducedLessons.map((lesson) => (
               <motion.div
                 key={lesson.id}
                 whileHover={{ y: -6 }}
-                className="bg-white rounded-3xl overflow-hidden border-2 border-b-[6px] border-slate-200 hover:border-[#58cc02] transition-all flex flex-col justify-between group shadow-sm"
+                className="bg-white rounded-3xl overflow-hidden border-2 border-b-[6px] border-slate-200 hover:border-[#58cc02] transition-all flex flex-col justify-between group shadow-sm min-w-0"
               >
                 <div>
                   {/* Thumbnail / Header Stage */}
@@ -989,7 +1029,7 @@ Key Learning Objectives:
                     {/* Badge */}
                     <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-black flex items-center gap-1 border border-white/20">
                       <Sparkles size={11} className="text-amber-400" />
-                      <span>{lesson.badge}</span>
+                      <span>{getTranslatedBadge(lesson.badge, isRtl)}</span>
                     </div>
 
                     {/* Level & Duration */}
@@ -1401,7 +1441,7 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
                     <span className={`absolute top-3 left-3 z-35 text-white px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider shadow-sm border-b-2 ${
                       isDirectFile ? 'bg-[#58cc02] border-[#439b02]' : 'bg-[#1cb0f6] border-[#139ddb]'
                     }`}>
-                      {isDirectFile ? (isRtl ? 'مباشر 📁' : 'Direct file 📁') : 'YouTube'}
+                      {isDirectFile ? (isRtl ? 'مباشر 📁' : 'Direct file 📁') : (isRtl ? 'يوتيوب 📺' : 'YouTube 📺')}
                     </span>
 
                     <div className="aspect-[4/3] relative overflow-hidden bg-slate-900 flex items-center justify-center text-slate-300 border-b-2 border-slate-200">

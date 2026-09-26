@@ -3774,7 +3774,13 @@ export default function AuthenticatedApp({
   const [selectedTestUnitId, setSelectedTestUnitId] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [renderError, setRenderError] = useState<string | null>(null);
-  const [lang, setLang] = useState<Language>('ar');
+  const [lang, setLang] = useState<Language>(initialLang);
+
+  useEffect(() => {
+    if (initialLang) {
+      setLang(initialLang);
+    }
+  }, [initialLang]);
   const [modules, setModules] = useState<LearningModule[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
@@ -6309,7 +6315,7 @@ export default function AuthenticatedApp({
             </>
           )}
 
-          <main className={`flex-1 transition-all ${view !== 'placement-test' ? (isRtl ? 'md:mr-20 lg:mr-56 mb-36 md:mb-12 pt-20 md:pt-4 pb-36 md:pb-28' : 'md:ml-20 lg:ml-56 mb-36 md:mb-12 pt-20 md:pt-4 pb-36 md:pb-28') : ''}`}>
+          <main className={`flex-1 min-w-0 w-full overflow-x-hidden transition-all ${view !== 'placement-test' ? (isRtl ? 'md:mr-20 lg:mr-56 mb-36 md:mb-12 pt-20 md:pt-4 pb-44 md:pb-40' : 'md:ml-20 lg:ml-56 mb-36 md:mb-12 pt-20 md:pt-4 pb-44 md:pb-40') : ''}`}>
             {renderContent()}
 
             {/* Global Notification Toast */}

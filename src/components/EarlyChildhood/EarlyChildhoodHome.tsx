@@ -1080,10 +1080,12 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
               <div className="bg-white/20 backdrop-blur-md p-3 rounded-[1.25rem]">
                 <BrainCircuit className="w-6 h-6 md:w-10 md:h-10 text-white" strokeWidth={2.5} />
               </div>
-              <span className="text-[10px] md:text-sm font-black uppercase tracking-widest bg-white/10 px-4 py-1.5 rounded-full border border-white/10">AI Story Adventure</span>
+              <span className="text-[10px] md:text-sm font-black uppercase tracking-widest bg-white/10 px-4 py-1.5 rounded-full border border-white/10">
+                {t.aiStoryAdventure}
+              </span>
             </div>
             
-            <h2 className="text-3xl md:text-7xl font-black mb-3 tracking-tighter leading-none">{isRtl ? 'اصنع قصتك السحرية' : 'Create Your Magic Story'}</h2>
+            <h2 className="text-3xl md:text-7xl font-black mb-3 tracking-tighter leading-none">{t.createMagicStory}</h2>
             
             <p className="text-blue-100 font-bold max-w-lg text-sm md:text-xl mb-8 leading-relaxed opacity-90">
               {isRtl ? 'سأقوم بتأليف قصة مذهلة باستخدام الكلمات التي تعلمتها اليوم! هيا بنا نبدأ المغامرة.' : 'I\'ll write an amazing story using the words you learned today! Let\'s start the adventure.'}

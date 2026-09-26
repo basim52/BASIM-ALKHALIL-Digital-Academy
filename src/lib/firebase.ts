@@ -41,11 +41,40 @@ export async function redeemVoucherTransaction(code: string, userId: string) {
   const cleanCode = code.trim().toUpperCase();
   if (!cleanCode) throw new Error("EMPTY_CODE");
 
+  // Preferred: Secure server-side redemption using admin transaction
+  if (auth.currentUser) {
+    try {
+      const idToken = await auth.currentUser.getIdToken();
+      const response = await fetch('/api/vouchers/redeem', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ code: cleanCode, userId })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || data.message || "REDEEM_FAILED");
+      }
+      return data;
+    } catch (err: any) {
+      if (['VOUCHER_NOT_FOUND', 'VOUCHER_ALREADY_USED', 'INVALID_CREDITS', 'EMPTY_CODE', 'UNAUTHORIZED', 'FORBIDDEN'].includes(err.message)) {
+        throw err;
+      }
+      console.warn("Server redemption error, falling back to client transaction:", err);
+    }
+  }
+
+  // Client-side transaction with all reads strictly before any writes
   const voucherRef = doc(db, 'vouchers', cleanCode);
   const studentRef = doc(db, 'students', userId);
 
   return await runTransaction(db, async (transaction) => {
+    // 1. ALL READS FIRST (Firestore requirement: all reads before writes)
     const vSnap = await transaction.get(voucherRef);
+    const sSnap = await transaction.get(studentRef);
+
     if (!vSnap.exists()) {
       throw new Error("VOUCHER_NOT_FOUND");
     }
@@ -58,15 +87,13 @@ export async function redeemVoucherTransaction(code: string, userId: string) {
       throw new Error("INVALID_CREDITS");
     }
 
-    // Atomically mark voucher as redeemed
+    // 2. ALL WRITES AFTER READS
     transaction.update(voucherRef, {
       status: 'redeemed',
       redeemedBy: userId,
       redeemedAt: serverTimestamp(),
     });
 
-    // Credit student points (50 learning points per voucher credit)
-    const sSnap = await transaction.get(studentRef);
     const currentPoints = sSnap.exists() ? (sSnap.data().points || 0) : 0;
     transaction.set(studentRef, {
       points: currentPoints + (credits * 50)

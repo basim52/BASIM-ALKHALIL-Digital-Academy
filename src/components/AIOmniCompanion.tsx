@@ -349,7 +349,7 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
       {/* Full-viewport boundary for dragging anywhere */}
       <div 
         ref={dragConstraintsRef} 
-        className="fixed inset-0 pointer-events-none z-[990] overflow-hidden select-none" 
+        className="fixed inset-4 pointer-events-none z-[990] overflow-hidden select-none" 
         aria-hidden="true"
       />
 
@@ -358,7 +358,7 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
         <motion.div
           drag
           dragConstraints={dragConstraintsRef}
-          dragElastic={0.15}
+          dragElastic={0.1}
           dragMomentum={false}
           onDragStart={() => {
             isDraggingRef.current = true;
@@ -370,82 +370,76 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
           }}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          whileHover={{ scale: 1.05 }}
-          whileDrag={{ scale: 1.1, cursor: 'grabbing', filter: 'brightness(1.08)' }}
-          className={`fixed bottom-24 ${isRtl ? 'left-4 sm:left-6' : 'right-4 sm:right-6'} z-[55] touch-none select-none cursor-grab active:cursor-grabbing`}
+          whileHover={{ scale: 1.04 }}
+          whileDrag={{ scale: 1.06, cursor: 'grabbing' }}
+          className={`fixed bottom-5 md:bottom-7 ${isRtl ? 'left-3 sm:left-5' : 'right-3 sm:right-5'} z-[55] touch-none select-none cursor-grab active:cursor-grabbing`}
           dir={isRtl ? 'rtl' : 'ltr'}
           aria-label={isRtl ? 'المساعد الذكي للأكاديمية - قابل للسحب والتصغير' : 'AI Academy Companion - Draggable & Minimizable'}
         >
           {isMinimized ? (
-            /* Minimized Icon Mode: Takes almost zero screen space */
+            /* Minimized Round Icon Mode: Takes negligible space */
             <div
               onClick={() => {
                 if (isDraggingRef.current) return;
                 setIsOpen(true);
               }}
-              className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-[#58cc02] via-[#22c55e] to-[#1cb0f6] text-white rounded-full shadow-2xl border-2 border-white/95 backdrop-blur-md group select-none cursor-pointer active:scale-95 transition-all"
-              title={isRtl ? 'المساعد الذكي (انقر للفتح، أو انقر + للتوسيع)' : 'AI Companion (Click to open, or + to expand)'}
+              className="relative flex items-center justify-center w-10 h-10 md:w-11 md:h-11 bg-gradient-to-r from-[#58cc02] via-[#22c55e] to-[#1cb0f6] text-white rounded-full shadow-lg border-2 border-white/95 backdrop-blur-md group select-none cursor-pointer active:scale-95 transition-all"
+              title={isRtl ? 'المساعد الذكي (انقر للفتح، أو + للتوسيع)' : 'AI Companion (Click to open, or + to expand)'}
             >
               <div className="relative">
-                <Bot size={22} className="text-white animate-bounce [animation-duration:2.5s]" />
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 border-2 border-white rounded-full animate-ping" />
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 border-2 border-white rounded-full" />
+                <Bot size={17} className="text-white animate-bounce [animation-duration:2.5s]" />
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 border border-white rounded-full animate-ping" />
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 border border-white rounded-full" />
               </div>
 
               {/* Expand Toggle */}
               <button
                 onClick={toggleMinimized}
-                className="absolute -top-1 -left-1 w-5 h-5 bg-white text-[#002147] rounded-full shadow-md border border-slate-200 flex items-center justify-center opacity-80 group-hover:opacity-100 hover:scale-110 transition-all cursor-pointer"
-                title={isRtl ? 'توسيع شريط المساعد' : 'Expand Assistant Bar'}
+                className="absolute -top-1 -left-1 w-4 h-4 bg-white text-[#002147] rounded-full shadow border border-slate-200 flex items-center justify-center opacity-80 group-hover:opacity-100 hover:scale-110 transition-all cursor-pointer"
+                title={isRtl ? 'توسيع' : 'Expand'}
               >
-                <Maximize2 size={10} />
+                <Maximize2 size={8} />
               </button>
             </div>
           ) : (
-            /* Full Pill Mode */
+            /* Compact Pill Mode */
             <div
               onClick={() => {
                 if (isDraggingRef.current) return;
                 setIsOpen(true);
               }}
-              className="flex items-center gap-2 sm:gap-3 px-3.5 py-2.5 sm:px-4 sm:py-3 bg-gradient-to-r from-[#58cc02] via-[#22c55e] to-[#1cb0f6] text-white rounded-full shadow-2xl border-2 border-white/90 backdrop-blur-md group select-none cursor-pointer active:scale-95 transition-transform"
+              className="flex items-center gap-1.5 px-2.5 py-1 md:py-1.5 bg-gradient-to-r from-[#58cc02] via-[#22c55e] to-[#1cb0f6] text-white rounded-full shadow-lg border-2 border-white/90 backdrop-blur-md group select-none cursor-pointer active:scale-95 transition-transform"
             >
               {/* Drag grip handle */}
               <div 
-                className="text-white/70 group-hover:text-white transition-colors flex items-center justify-center -mr-1"
-                title={isRtl ? 'اسحب لنقل الزر لأي مكان' : 'Drag to move anywhere'}
+                className="text-white/70 group-hover:text-white transition-colors flex items-center justify-center -mr-0.5"
+                title={isRtl ? 'اسحب لنقل الزر' : 'Drag to move'}
               >
-                <GripVertical size={16} />
+                <GripVertical size={12} />
               </div>
 
-              {/* AI Avatar with status pulse */}
+              {/* AI Avatar */}
               <div className="relative shrink-0">
-                <div className="w-8 h-8 sm:w-9 sm:h-9 bg-white/20 rounded-full flex items-center justify-center shadow-inner">
-                  <Bot size={20} className="text-white animate-bounce [animation-duration:2.5s]" />
+                <div className="w-5 h-5 md:w-6 md:h-6 bg-white/20 rounded-full flex items-center justify-center shadow-inner">
+                  <Bot size={13} className="text-white" />
                 </div>
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 border-2 border-white rounded-full animate-ping" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 border-2 border-white rounded-full" />
+                <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-amber-400 border border-white rounded-full" />
               </div>
 
-              {/* Label & Drag hint */}
-              <div className={`${isRtl ? 'text-right' : 'text-left'}`}>
-                <div className="flex items-center gap-1">
-                  <span className="font-black text-xs leading-tight whitespace-nowrap">
-                    {isRtl ? 'المساعد الذكي 🪄' : 'AI Tutor 🪄'}
-                  </span>
-                </div>
-                <span className="text-[9px] text-white/90 font-bold opacity-80 leading-none block whitespace-nowrap">
-                  {isRtl ? 'اسحبني لأي مكان ✋' : 'Drag anywhere ✋'}
+              {/* Compact Label */}
+              <div className={`${isRtl ? 'text-right' : 'text-left'} leading-tight`}>
+                <span className="font-black text-[10px] md:text-[11px] block whitespace-nowrap">
+                  {isRtl ? 'المساعد الذكي' : 'AI Tutor'}
                 </span>
               </div>
 
               {/* Minimize button */}
               <button
                 onClick={toggleMinimized}
-                className="p-1 rounded-full bg-black/15 hover:bg-black/30 text-white/90 hover:text-white transition-colors cursor-pointer mr-0.5"
-                title={isRtl ? 'تصغير إلى أيقونة صغيرة' : 'Minimize to compact icon'}
+                className="p-0.5 rounded-full bg-black/15 hover:bg-black/30 text-white/90 hover:text-white transition-colors cursor-pointer mr-0.5"
+                title={isRtl ? 'تصغير لأيقونة دائرية' : 'Minimize to circle'}
               >
-                <Minimize2 size={13} />
+                <Minimize2 size={10} />
               </button>
             </div>
           )}
@@ -456,7 +450,7 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
       <AnimatePresence>
         {isOpen && (
           <div 
-            className="fixed inset-0 z-[1050] flex items-center justify-center p-3 sm:p-4 md:p-6" 
+            className="fixed inset-0 z-[1050] flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-x-hidden overflow-y-auto" 
             dir={isRtl ? 'rtl' : 'ltr'}
           >
             {/* Backdrop */}
@@ -473,60 +467,60 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative z-10 w-full max-w-lg md:max-w-xl h-[620px] max-h-[88vh] bg-white rounded-3xl shadow-2xl border-4 border-slate-100 flex flex-col overflow-hidden backdrop-blur-xl"
+              className="relative z-10 w-full min-w-0 max-w-[calc(100vw-1.5rem)] sm:max-w-lg md:max-w-xl h-[620px] max-h-[88vh] bg-white rounded-3xl shadow-2xl border-4 border-slate-100 flex flex-col overflow-hidden backdrop-blur-xl"
             >
             {/* MODAL HEADER */}
-            <div className="bg-gradient-to-r from-[#58cc02] via-[#22c55e] to-[#1cb0f6] p-4 text-white flex items-center justify-between shrink-0 shadow-md">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
-                  <Bot size={22} className="text-white" />
+            <div className="bg-gradient-to-r from-[#58cc02] via-[#22c55e] to-[#1cb0f6] p-3 sm:p-4 text-white flex items-center justify-between shrink-0 shadow-md overflow-x-hidden min-w-0 gap-2">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shrink-0">
+                  <Bot size={18} className="text-white" />
                 </div>
-                <div>
-                  <h3 className="font-black text-sm leading-none flex items-center gap-2">
-                    <span>{isRtl ? 'رفيق أكاديمية باسم الخليل الذكي' : 'Alkhalil AI Companion'}</span>
-                    <Sparkles size={14} className="text-amber-300" />
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-black text-xs sm:text-sm leading-none flex items-center gap-1.5 truncate">
+                    <span className="truncate">{isRtl ? 'رفيق أكاديمية باسم الخليل' : 'Alkhalil AI Companion'}</span>
+                    <Sparkles size={12} className="text-amber-300 shrink-0" />
                   </h3>
-                  <p className="text-[10px] text-white/80 font-bold mt-1">
-                    {isRtl ? 'مدعوم بنموذج Gemini 3.7 Flash فائق الذكاء' : 'Powered by Gemini 3.7 Flash Engine'}
+                  <p className="text-[9px] sm:text-[10px] text-white/80 font-bold mt-1 truncate">
+                    {isRtl ? 'مدعوم بنموذج Gemini 3.7 Flash' : 'Powered by Gemini 3.7 Flash'}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 shrink-0">
                 {onNavigateToView && (
                   <button
                     onClick={() => {
                       setIsOpen(false);
                       onNavigateToView('real-time-voice-call');
                     }}
-                    className="px-2.5 py-1 rounded-xl bg-white/20 hover:bg-white/30 text-white flex items-center gap-1.5 text-[10px] font-black transition-all cursor-pointer border border-white/30"
-                    title={isRtl ? 'فتح المكالمة الصوتية المباشرة' : 'Open Live Voice Call'}
+                    className="px-2 py-1 rounded-xl bg-white/20 hover:bg-white/30 text-white flex items-center gap-1 text-[9px] sm:text-[10px] font-black transition-all cursor-pointer border border-white/30"
+                    title={isRtl ? 'مكالمة صوتية مباشرة' : 'Open Live Voice Call'}
                   >
-                    <Mic size={12} className="animate-pulse" />
-                    <span>{isRtl ? 'مكالمة مباشرة 📞' : 'Live Call 📞'}</span>
+                    <Mic size={11} className="animate-pulse" />
+                    <span>{isRtl ? 'مكالمة 📞' : 'Call 📞'}</span>
                   </button>
                 )}
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
                 >
-                  <X size={18} />
+                  <X size={16} />
                 </button>
               </div>
             </div>
 
             {/* TAB BAR NAVIGATION */}
-            <div className="flex items-center border-b border-slate-200 bg-slate-50 p-1 shrink-0 text-xs font-black">
+            <div className="flex items-center border-b border-slate-200 bg-slate-50 p-1 shrink-0 text-xs font-black overflow-x-hidden min-w-0 max-w-full">
               {[
-                { id: 'chat', labelAr: 'المحادثة 💬', labelEn: 'Tutor Chat 💬' },
-                { id: 'pronounce', labelAr: 'النطق واللفظ 🗣️', labelEn: 'Pronounce 🗣️' },
-                { id: 'translate', labelAr: 'المترجم 🌐', labelEn: 'Translator 🌐' },
-                { id: 'quiz', labelAr: 'اختبار ذكي ⚡', labelEn: 'Adaptive Quiz ⚡' },
+                { id: 'chat', labelAr: 'محادثة 💬', labelEn: 'Chat 💬' },
+                { id: 'pronounce', labelAr: 'نطق 🗣️', labelEn: 'Pronounce 🗣️' },
+                { id: 'translate', labelAr: 'مترجم 🌐', labelEn: 'Translate 🌐' },
+                { id: 'quiz', labelAr: 'اختبار ⚡', labelEn: 'Quiz ⚡' },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex-1 py-2 px-1 text-center rounded-xl transition-all ${
+                  className={`flex-1 min-w-0 py-2 px-1 text-center rounded-xl transition-all truncate text-[10px] sm:text-xs font-black ${
                     activeTab === tab.id
                       ? 'bg-white text-[#58cc02] shadow-sm'
                       : 'text-slate-500 hover:text-slate-800'
@@ -539,9 +533,9 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
 
             {/* TAB 1: INSTANT TUTOR CHAT */}
             {activeTab === 'chat' && (
-              <div className="flex-1 flex flex-col justify-between overflow-hidden p-4 bg-[#F8FAFC]">
+              <div className="flex-1 flex flex-col justify-between overflow-hidden p-3 sm:p-4 bg-[#F8FAFC] w-full min-w-0 max-w-full">
                 {/* Mode Selector Chips */}
-                <div className="flex items-center gap-1.5 pb-2 border-b border-slate-200/80 shrink-0 overflow-x-auto text-[11px] font-black no-scrollbar">
+                <div className="flex flex-wrap items-center gap-1.5 pb-2 border-b border-slate-200/80 shrink-0 text-[10px] sm:text-[11px] font-black w-full min-w-0">
                   {[
                     { id: 'general', labelAr: 'الرفيق العام 🤖', labelEn: 'General AI 🤖' },
                     { id: 'grammar', labelAr: 'تدقيق نحوي ✍️', labelEn: 'Grammar Coach ✍️' },
@@ -552,9 +546,9 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
                       key={m.id}
                       type="button"
                       onClick={() => setTutorMode(m.id as any)}
-                      className={`px-2.5 py-1 rounded-lg border whitespace-nowrap transition-all cursor-pointer ${
+                      className={`px-2 py-1 rounded-lg border whitespace-nowrap transition-all cursor-pointer text-[10px] sm:text-xs ${
                         tutorMode === m.id
-                          ? 'bg-[#58cc02] text-white border-[#58cc02] shadow-sm font-black scale-105'
+                          ? 'bg-[#58cc02] text-white border-[#58cc02] shadow-sm font-black'
                           : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
                       }`}
                     >
@@ -564,20 +558,20 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
                 </div>
 
                 {/* Message Log */}
-                <div className="flex-1 overflow-y-auto space-y-3 pr-1 pt-2">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-3 pr-1 pt-2 w-full min-w-0 max-w-full">
                   {messages.map((m) => (
                     <div
                       key={m.id}
                       className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-[85%] rounded-2xl p-3.5 text-xs font-semibold leading-relaxed shadow-sm ${
+                        className={`max-w-[85%] rounded-2xl p-3.5 text-xs font-semibold leading-relaxed shadow-sm min-w-0 ${
                           m.sender === 'user'
                             ? 'bg-[#58cc02] text-white rounded-br-none'
                             : 'bg-white text-slate-800 border border-slate-200/80 rounded-bl-none'
                         }`}
                       >
-                        <p className="whitespace-pre-wrap">{m.text}</p>
+                        <p className="whitespace-pre-wrap break-words">{m.text}</p>
                         <div className="flex items-center justify-between gap-2 mt-2 pt-1 border-t border-black/5 text-[9px] opacity-75 font-bold">
                           <span>{m.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                           {m.sender === 'ai' && (
@@ -605,15 +599,15 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
                 </div>
 
                 {/* Quick Prompts Suggestions */}
-                <div className="flex items-center gap-1.5 py-2 overflow-x-auto text-[10px] font-bold text-slate-600 no-scrollbar shrink-0">
+                <div className="flex flex-wrap items-center gap-1.5 py-1.5 text-[9px] sm:text-[10px] font-bold text-slate-600 shrink-0 w-full min-w-0">
                   <span className="text-slate-400 shrink-0">{isRtl ? 'اقتراحات سريعة:' : 'Quick:'}</span>
                   {(isRtl ? [
                     'كيف أفرق بين Since و For؟',
-                    'أعطني 3 مصطلحات للاعتذار بلباقة',
-                    'صحح لي: "I am agree with you"',
-                    'كيف أسأل عن الاتجاهات باحترافية؟'
+                    '3 عبارات للاعتذار بلباقة',
+                    'صحح: "I am agree with you"',
+                    'سؤال عن الاتجاهات باحترافية'
                   ] : [
-                    'Difference between Since and For?',
+                    'Difference: Since vs For?',
                     '3 Polite ways to disagree',
                     'Correct: "I am agree with you"',
                     'Asking for directions fluently'
@@ -622,7 +616,7 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
                       key={pIdx}
                       type="button"
                       onClick={() => handleSendMessage(undefined, promptText)}
-                      className="px-2.5 py-1 bg-white border border-slate-200 hover:border-[#58cc02] hover:text-[#58cc02] rounded-lg whitespace-nowrap shadow-xs transition-colors shrink-0 cursor-pointer"
+                      className="px-2 py-0.5 bg-white border border-slate-200 hover:border-[#58cc02] hover:text-[#58cc02] rounded-lg whitespace-nowrap shadow-xs transition-colors shrink-0 cursor-pointer"
                     >
                       {promptText}
                     </button>
@@ -630,11 +624,11 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
                 </div>
 
                 {/* Chat Input Bar */}
-                <form onSubmit={handleSendMessage} className="pt-2 border-t border-slate-200 flex items-center gap-2">
+                <form onSubmit={handleSendMessage} className="pt-2 border-t border-slate-200 flex items-center gap-2 w-full min-w-0">
                   <button
                     type="button"
                     onClick={toggleSpeechRecognition}
-                    className={`p-3 rounded-xl border transition-all ${
+                    className={`p-2.5 sm:p-3 rounded-xl border transition-all shrink-0 ${
                       isListening 
                         ? 'bg-rose-500 text-white animate-pulse border-rose-600' 
                         : 'bg-white text-slate-500 hover:text-[#58cc02] border-slate-200 shadow-sm'
@@ -649,13 +643,13 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     placeholder={isRtl ? 'اطرح سؤالاً، اطلب شرح قاعدة، أو صحح جملة...' : 'Ask grammar questions, explain words...'}
-                    className="flex-1 bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold outline-none focus:border-[#58cc02] transition-colors shadow-sm"
+                    className="flex-1 min-w-0 bg-white border border-slate-200 rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 text-xs font-semibold outline-none focus:border-[#58cc02] transition-colors shadow-sm"
                   />
 
                   <button
                     type="submit"
                     disabled={!inputMessage.trim() || isLoading}
-                    className="p-3 bg-[#58cc02] disabled:opacity-50 text-white rounded-xl shadow-md hover:bg-[#63e104] transition-all active:scale-95"
+                    className="p-2.5 sm:p-3 bg-[#58cc02] disabled:opacity-50 text-white rounded-xl shadow-md hover:bg-[#63e104] transition-all active:scale-95 shrink-0"
                   >
                     <Send size={16} className={isRtl ? 'rotate-180' : ''} />
                   </button>
@@ -665,21 +659,21 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
 
             {/* TAB 2: PRONUNCIATION & ACCENT COACH */}
             {activeTab === 'pronounce' && (
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#F8FAFC]">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4 bg-[#F8FAFC] max-w-full">
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
                   <label className="block text-[11px] font-black text-slate-500 uppercase tracking-wider">
                     {isRtl ? 'اكتب الجملة أو الكلمة لتحليل نطقها ومخارج حروفها:' : 'Enter phrase to analyze pronunciation & phonetics:'}
                   </label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 w-full min-w-0">
                     <input
                       type="text"
                       value={pronouncePhrase}
                       onChange={(e) => setPronouncePhrase(e.target.value)}
-                      className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-[#58cc02]"
+                      className="flex-1 min-w-0 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-[#58cc02]"
                     />
                     <button
                       onClick={toggleSpeechRecognition}
-                      className={`p-2.5 rounded-xl border ${isListening ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600'}`}
+                      className={`p-2.5 rounded-xl border shrink-0 ${isListening ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600'}`}
                     >
                       <Mic size={16} />
                     </button>
@@ -746,7 +740,7 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
 
             {/* TAB 3: SMART CONTEXTUAL TRANSLATOR */}
             {activeTab === 'translate' && (
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#F8FAFC]">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4 bg-[#F8FAFC] max-w-full">
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
                   <label className="block text-[11px] font-black text-slate-500 uppercase tracking-wider">
                     {isRtl ? 'النص المراد ترجمته سياقياً مع درجات الفصاحة:' : 'Text to translate contextually:'}
@@ -809,20 +803,20 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
 
             {/* TAB 4: ADAPTIVE AI QUIZ */}
             {activeTab === 'quiz' && (
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#F8FAFC]">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4 bg-[#F8FAFC] max-w-full">
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full min-w-0">
                     <input
                       type="text"
                       value={quizTopic}
                       onChange={(e) => setQuizTopic(e.target.value)}
                       placeholder="Topic (e.g. Travel, Past Simple, Phrasal Verbs)"
-                      className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-[#58cc02]"
+                      className="flex-1 min-w-0 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-[#58cc02]"
                     />
                     <select
                       value={quizLevel}
                       onChange={(e) => setQuizLevel(e.target.value)}
-                      className="border border-slate-200 rounded-xl px-2 py-2 text-xs font-black bg-white"
+                      className="border border-slate-200 rounded-xl px-2 py-2 text-xs font-black bg-white shrink-0"
                     >
                       {['A1', 'A2', 'B1', 'B2', 'C1'].map((lvl) => (
                         <option key={lvl} value={lvl}>{lvl}</option>

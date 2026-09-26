@@ -6,8 +6,12 @@ import multer from "multer";
 import { WebSocketServer, WebSocket } from "ws";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleGenAI, Modality, Type } from "@google/genai";
+import { getAdminAuth, getAdminDb, FieldValue } from "./firebaseAdmin.js";
 
-const logToFile = (msg: string) => console.log(`[Server] ${msg}`);
+const logToFile = (msg: string) => {
+  // Use console.log directly (no filesystem logging on Vercel or serverless)
+  console.log(`[Server] ${msg}`);
+};
 
 export function registerRoutes(app: any, wss?: WebSocketServer) {
   const getApiKey = () => {
@@ -553,7 +557,108 @@ Looking forward to your reply. Tell me what we're tackling first!`;
 
   // Root test route
   app.get("/ping", (req, res) => {
-    res.send("pong_v4_stable");
+    res.json({ ok: true });
+  });
+
+  // Secure Voucher Redemption Endpoint
+  app.post("/api/vouchers/redeem", async (req: express.Request, res: express.Response) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Missing or invalid authorization token" });
+      }
+
+      const idToken = authHeader.split("Bearer ")[1]?.trim();
+      if (!idToken) {
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Missing Bearer token" });
+      }
+
+      const { code, userId } = req.body;
+      const cleanCode = (code || "").toString().trim().toUpperCase();
+      if (!cleanCode) {
+        return res.status(400).json({ error: "EMPTY_CODE", message: "Voucher code cannot be empty" });
+      }
+
+      const adminAuth = getAdminAuth();
+      const adminDb = getAdminDb();
+
+      if (!adminAuth || !adminDb) {
+        return res.status(503).json({ error: "SERVICE_UNAVAILABLE", message: "Firebase Admin is not configured on the server" });
+      }
+
+      let decodedToken;
+      try {
+        decodedToken = await adminAuth.verifyIdToken(idToken);
+      } catch (authErr: any) {
+        logToFile(`[Vouchers] Token verification failed: ${authErr.message}`);
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Invalid or expired Firebase ID token" });
+      }
+
+      const targetUserId = userId || decodedToken.uid;
+      // Normal users can only redeem for themselves; admins can redeem for any student
+      const isAdminUser = decodedToken.email?.toLowerCase() === "basim5252@gmail.com";
+      if (decodedToken.uid !== targetUserId && !isAdminUser) {
+        return res.status(403).json({ error: "FORBIDDEN", message: "Cannot redeem voucher for another user" });
+      }
+
+      const voucherRef = adminDb.collection("vouchers").doc(cleanCode);
+      const studentRef = adminDb.collection("students").doc(targetUserId);
+
+      const result = await adminDb.runTransaction(async (transaction) => {
+        // 1. ALL READS FIRST
+        const vSnap = await transaction.get(voucherRef);
+        const sSnap = await transaction.get(studentRef);
+
+        if (!vSnap.exists) {
+          throw new Error("VOUCHER_NOT_FOUND");
+        }
+
+        const vData = vSnap.data();
+        if (vData?.status !== "active") {
+          throw new Error("VOUCHER_ALREADY_USED");
+        }
+
+        const credits = Number(vData?.credits) || 0;
+        if (credits <= 0) {
+          throw new Error("INVALID_CREDITS");
+        }
+
+        // 2. ALL WRITES AFTER READS
+        transaction.update(voucherRef, {
+          status: "redeemed",
+          redeemedBy: targetUserId,
+          redeemedAt: FieldValue.serverTimestamp(),
+        });
+
+        const currentPoints = sSnap.exists ? (Number(sSnap.data()?.points) || 0) : 0;
+        const addedPoints = credits * 50;
+        transaction.set(studentRef, {
+          points: currentPoints + addedPoints
+        }, { merge: true });
+
+        return {
+          success: true,
+          code: cleanCode,
+          credits,
+          addedPoints
+        };
+      });
+
+      logToFile(`[Vouchers] Successfully redeemed code ${cleanCode} for user ${targetUserId}: +${result.addedPoints} points`);
+      return res.json(result);
+    } catch (err: any) {
+      logToFile(`[Vouchers] Error in /api/vouchers/redeem: ${err.message}`);
+      if (err.message === "VOUCHER_NOT_FOUND") {
+        return res.status(404).json({ error: "VOUCHER_NOT_FOUND", message: "Voucher not found" });
+      }
+      if (err.message === "VOUCHER_ALREADY_USED") {
+        return res.status(400).json({ error: "VOUCHER_ALREADY_USED", message: "Voucher has already been redeemed" });
+      }
+      if (err.message === "INVALID_CREDITS") {
+        return res.status(400).json({ error: "INVALID_CREDITS", message: "Voucher has invalid credits" });
+      }
+      return res.status(500).json({ error: "INTERNAL_ERROR", message: err.message });
+    }
   });
 
   // API Routes
@@ -3882,8 +3987,8 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
     }
   });
 
-    // WebSocket for Live Audio Chat (Experimental)
-    if (wss) {
+    // WebSocket for Live Audio Chat (Experimental) - disabled on Vercel serverless
+    if (wss && !process.env.VERCEL) {
     wss.on("connection", async (clientWs, req) => {
       const clientIp = req.socket.remoteAddress;
       logToFile(`New WebSocket Client connected from ${clientIp}`);

@@ -52,7 +52,10 @@ service cloud.firestore {
 
     function hasNoForbiddenUserFields() {
       return !('credits' in request.resource.data) &&
-             !('balance' in request.resource.data);
+             !('balance' in request.resource.data) &&
+             !('points' in request.resource.data) &&
+             !('xp' in request.resource.data) &&
+             !('level' in request.resource.data);
     }
 
     // --- 1. Global Settings (settings/global explicitly public read) ---
@@ -83,13 +86,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // --- 4. Users Collection (Protected Roles, Credits & Balance) ---
+    // --- 4. Users Collection (Protected Roles, Credits, Balance & Points) ---
     match /users/{userId} {
       // Read: Owner, linked parent, or admin ONLY (no blanket read for all signed-in users)
       allow get: if isOwner(userId) || isParentOf(userId) || isAdmin();
       allow list: if isAdmin();
 
-      // Create: Owner cannot self-assign admin role or set credit/balance fields. Only student/parent or no role.
+      // Create: Owner cannot self-assign admin role or set credit/balance/points fields. Only student/parent or no role.
       allow create: if isOwner(userId) && (
         isAdmin() || (
           hasNoForbiddenUserFields() &&
@@ -97,12 +100,14 @@ service cloud.firestore {
         )
       );
 
-      // Update: User cannot change their role, credits, or balance. Only admin can change role/credits/balance.
+      // Update: User cannot change their role, credits, balance, points, xp, or level. Only admin/server can change these.
+      // Notice: We deliberately do NOT check hasNoForbiddenUserFields() here because if an admin previously granted
+      // credits or balance, request.resource.data contains existing fields on the document, which would block normal profile edits.
+      // Checking affectedKeys().hasAny(...) guarantees the user cannot modify, add, or delete protected fields.
       allow update: if (
         isAdmin() || (
           isOwner(userId) &&
-          hasNoForbiddenUserFields() &&
-          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'credits', 'balance'])
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'credits', 'balance', 'points', 'xp', 'level'])
         )
       );
 
@@ -115,16 +120,42 @@ service cloud.firestore {
       }
     }
 
-    // --- 5. Students Collection ---
+    // --- 5. Students Collection (Protected Economy & Gamification Fields) ---
     match /students/{studentId} {
       allow read: if isOwner(studentId) || isParentOf(studentId) || isAdmin();
-      allow write: if isOwner(studentId) || isParentOf(studentId) || isAdmin();
+
+      // Create: Students and parents cannot initialize points, xp, level, credits, or balance
+      allow create: if isAdmin() || (
+        (isOwner(studentId) || isParentOf(studentId)) &&
+        !request.resource.data.keys().hasAny(['points', 'xp', 'level', 'credits', 'balance'])
+      );
+
+      // Update: Students and parents cannot change points, xp, level, credits, or balance (only admin/server can)
+      allow update: if isAdmin() || (
+        (isOwner(studentId) || isParentOf(studentId)) &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['points', 'xp', 'level', 'credits', 'balance'])
+      );
+
+      allow delete: if isAdmin();
     }
 
-    // --- 6. Legacy / Misc Student Profiles ---
+    // --- 6. Legacy / Misc Student Profiles (Protected Economy & Gamification Fields) ---
     match /student_profiles/{profileId} {
       allow read: if isOwner(profileId) || isParentOf(profileId) || isAdmin();
-      allow write: if isOwner(profileId) || isParentOf(profileId) || isAdmin();
+
+      // Create: Students and parents cannot initialize points, xp, level, credits, or balance
+      allow create: if isAdmin() || (
+        (isOwner(profileId) || isParentOf(profileId)) &&
+        !request.resource.data.keys().hasAny(['points', 'xp', 'level', 'credits', 'balance'])
+      );
+
+      // Update: Students and parents cannot change points, xp, level, credits, or balance (only admin/server can)
+      allow update: if isAdmin() || (
+        (isOwner(profileId) || isParentOf(profileId)) &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['points', 'xp', 'level', 'credits', 'balance'])
+      );
+
+      allow delete: if isAdmin();
     }
 
     // --- 7. Schedules & Timetables ---
