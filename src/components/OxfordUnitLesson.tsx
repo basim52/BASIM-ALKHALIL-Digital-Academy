@@ -1120,6 +1120,21 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack, userProfile }: OxfordUn
       await updateDoc(userRef, {
         points: (userProfile.points || 0) + extraPoints
       });
+
+      // Save earned certificate and trigger celebration modal
+      try {
+        const arTitle = (data as any)?.bigQuestionAr || title || `الوحدة ${unitId}`;
+        const enTitle = (data as any)?.bigQuestion || (data as any)?.title || title || `Oxford Unit ${unitId}`;
+        await saveEarnedCertificate(
+          userProfile.uid,
+          String(unitId),
+          enTitle,
+          arTitle,
+          userProfile.displayName
+        );
+      } catch (certErr) {
+        console.warn("Could not save completion certificate:", certErr);
+      }
     } catch (e) {
       console.error("Error saving Oxford unit result:", e);
     }
