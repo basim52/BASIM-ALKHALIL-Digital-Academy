@@ -138,6 +138,8 @@ import { EducationalGamesHub } from './components/EducationalGamesHub';
 import { GrammarAcademy } from './components/GrammarAcademy';
 import { ReadingLab } from './components/ReadingLab';
 import { WritingSpellingStudio } from './components/WritingSpellingStudio';
+import { SaraTutor } from './components/SaraTutor';
+import { SaraParentCard } from './components/SaraParentCard';
 import { Layers, Image as OxfordIcon, Library as OxfordClassicIcon, Languages } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { familyConstellationsLesson } from './data/lessons/r_a1_4';
@@ -1230,6 +1232,23 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
 
   const allSections = [
     {
+      id: 'sara-tutor',
+      category: 'core',
+      titleAr: 'سارة – معلمتك الذكية 👩‍🏫',
+      titleEn: 'Teacher Sara AI Tutor 👩‍🏫',
+      descAr: 'جلستك اليومية الممتعة (10-15 دقيقة) مع معلمتك الخليجية سارة: شرح مبسط، سبورة تفاعلية، وتصحيح لطيف دون إحراج.',
+      descEn: 'Your daily 10-15 min interactive session with teacher Sara: warm review, interactive board, gentle corrections & voice!',
+      icon: Sparkles,
+      glowColor: 'bg-amber-400/20',
+      badgeStyle: 'bg-amber-50 text-amber-800 border border-amber-300 font-black',
+      iconBg: 'bg-gradient-to-br from-[#002147] to-[#1a3a60]',
+      iconColor: 'text-amber-300',
+      btnTextColor: 'text-white',
+      btnBg: 'bg-[#002147]',
+      badgeAr: 'جلسة يومية مخصصة ⭐',
+      badgeEn: 'Daily AI Tutor ⭐'
+    },
+    {
       id: 'academic-planner',
       category: 'core',
       titleAr: 'الخطة الأكاديمية والجدول 🗓️',
@@ -1652,6 +1671,52 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             </div>
           </div>
         </div>
+
+        {/* 👩‍🏫 SARA PERSONAL TUTOR HERO ENTRY */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-5 sm:p-7 rounded-3xl sm:rounded-[2.5rem] bg-gradient-to-r from-[#002147] via-[#0d315d] to-[#1a4477] text-white border-2 border-b-6 border-[#C49E3A] shadow-xl relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-80 h-80 bg-[#C49E3A]/15 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-5">
+            <div className="flex items-center gap-4 text-center md:text-right">
+              {/* Sara Avatar Icon */}
+              <div className="relative shrink-0">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-amber-300 via-amber-400 to-[#C49E3A] p-1 shadow-lg flex items-center justify-center">
+                  <div className="w-full h-full rounded-full bg-[#002147] flex items-center justify-center text-3xl sm:text-4xl shadow-inner">
+                    👩‍🏫
+                  </div>
+                </div>
+                <span className="absolute -bottom-1 -right-1 bg-emerald-500 border-2 border-white w-4 h-4 rounded-full" title="Online" />
+              </div>
+
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-400/20 border border-amber-300/30 rounded-xl text-[10px] font-black text-amber-300 uppercase tracking-wider mb-1">
+                  <Sparkles size={12} className="animate-spin-slow text-amber-300" />
+                  <span>{isRtl ? 'المعلمة الشخصية الذكية' : 'Personal AI English Tutor'}</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-white leading-tight">
+                  {isRtl ? 'سارة – جلستك اليومية بالإنجليزية 🌟' : 'Sara – Your Daily English Session 🌟'}
+                </h2>
+                <p className="text-white/80 font-medium text-xs sm:text-sm mt-1 max-w-xl leading-relaxed">
+                  {isRtl
+                    ? 'جلسة تفاعلية 10-15 دقيقة مع معلمتك سارة: مراجعة سريعة، مهارة جديدة، سبورة تفاعلية، وتصحيح لطيف دون إحراج!'
+                    : 'A 10-15 min daily session with teacher Sara: warm review, 1 new skill, interactive board & gentle correction!'}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => onNavigate('sara-tutor')}
+              className="w-full md:w-auto px-6 py-4 bg-gradient-to-r from-[#C49E3A] to-[#d8b049] hover:from-[#b08d32] hover:to-[#c49e3a] active:scale-95 text-slate-900 font-black text-sm rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2.5 shrink-0 cursor-pointer border border-amber-200"
+            >
+              <span>{isRtl ? 'ابدأ جلستك مع سارة الآن ✨' : 'Start Session with Sara ✨'}</span>
+              <Sparkles size={16} />
+            </button>
+          </div>
+        </motion.div>
 
         {/* DAILY LEARNING STREAK & REMINDER CARD */}
         <div id="student-streak-card-section">
@@ -3346,6 +3411,18 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
                 lang={lang}
               />
             </div>
+
+            {/* 👩‍🏫 SARA AI TUTOR SESSIONS REPORT CARD PER LINKED CHILD */}
+            {currentStudent && (
+              <div id="parent-sara-sessions-section">
+                <SaraParentCard
+                  studentId={currentStudent.uid}
+                  studentName={currentStudent.displayName || 'الطالب'}
+                  lang={lang}
+                  isRtl={isRtl}
+                />
+              </div>
+            )}
 
             {/* KPIs VISUAL CARDS GRID */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -6817,6 +6894,17 @@ export default function AuthenticatedApp({
       />;
     }
 
+    if (view === 'sara-tutor' && userProfile) {
+      return (
+        <SaraTutor
+          lang={lang}
+          profile={userProfile}
+          onNavigate={setView}
+          onBack={() => setView('dashboard')}
+        />
+      );
+    }
+
     if (view === 'progress' && userProfile) {
       const isParentOrAdmin = userProfile.role === 'parent' || userProfile.role === 'admin';
       const targetUserId = isParentOrAdmin && activeStudentId ? activeStudentId : userProfile.uid;
@@ -6956,6 +7044,7 @@ export default function AuthenticatedApp({
                 <nav className="flex-1 space-y-2 overflow-y-auto no-scrollbar">
                   {[
                     { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
+                    { id: 'sara-tutor', label: lang === 'ar' ? 'سارة – معلمتك 👩‍🏫' : 'Teacher Sara AI 👩‍🏫', icon: Sparkles },
                     { id: 'pronunciation-lab', label: lang === 'ar' ? 'معمل النطق 🎙️' : 'Pronunciation Lab 🎙️', icon: Mic },
                     { id: 'live-translate', label: lang === 'ar' ? 'مترجم المباشر 🌐' : 'Live Translate 🌐', icon: Languages },
                     { id: 'interactive-learning', label: lang === 'ar' ? 'تعليم تفاعلي ⚡' : 'Interactive Learning ⚡', icon: Gamepad2 },
@@ -7116,6 +7205,7 @@ export default function AuthenticatedApp({
                           <div className="grid grid-cols-2 gap-2.5">
                             {[
                               { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
+                              { id: 'sara-tutor', label: isRtl ? 'سارة – معلمتك 👩‍🏫' : 'Teacher Sara 👩‍🏫', icon: Sparkles },
                               { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
                               { id: 'grammar-academy', label: isRtl ? 'أكاديمية القواعد 📐' : 'Grammar Academy 📐', icon: Brain },
                               { id: 'reading-lab', label: isRtl ? 'مختبر القراءة 📖' : 'Reading Lab 📖', icon: BookOpen },

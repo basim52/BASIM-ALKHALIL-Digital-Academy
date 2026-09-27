@@ -64,7 +64,7 @@ export const CHILDHOOD_PACKAGES = [
 
 export const MASTER_ADMINS = ['basim5252@gmail.com'];
 
-export type AppView = 'dashboard' | 'placement-test' | 'curriculum' | 'lesson' | 'progress' | 'leaderboard' | 'chat' | 'admin' | 'ai-chat' | 'video-library' | 'story-library' | 'early-childhood' | 'oxford-discover' | 'oxford-classic' | 'reading-curriculum' | 'grammar-curriculum' | 'conversation-curriculum' | 'writing-curriculum' | 'expression-curriculum' | 'modern-curriculum' | 'academic-planner' | 'academic-results' | 'academic-analytics' | 'bi-weekly-test' | 'professional-development' | 'adults-daily-dose' | 'kids-story-player' | 'pronunciation-lab' | 'roleplay-challenges' | 'visual-dictionary' | 'english-songs' | 'animated-storyboard' | 'escape-room' | 'family-activities' | 'interactive-learning' | 'ai-curriculum' | 'balance-oasis' | 'flashcards-hub' | 'live-translate' | 'educational-games' | 'real-time-voice-call' | 'adaptive-learning-path' | 'grammar-academy' | 'reading-lab' | 'writing-spelling-studio' | 'dynamic-worksheets' | 'branching-stories';
+export type AppView = 'dashboard' | 'placement-test' | 'curriculum' | 'lesson' | 'progress' | 'leaderboard' | 'chat' | 'admin' | 'ai-chat' | 'video-library' | 'story-library' | 'early-childhood' | 'oxford-discover' | 'oxford-classic' | 'reading-curriculum' | 'grammar-curriculum' | 'conversation-curriculum' | 'writing-curriculum' | 'expression-curriculum' | 'modern-curriculum' | 'academic-planner' | 'academic-results' | 'academic-analytics' | 'bi-weekly-test' | 'professional-development' | 'adults-daily-dose' | 'kids-story-player' | 'pronunciation-lab' | 'roleplay-challenges' | 'visual-dictionary' | 'english-songs' | 'animated-storyboard' | 'escape-room' | 'family-activities' | 'interactive-learning' | 'ai-curriculum' | 'balance-oasis' | 'flashcards-hub' | 'live-translate' | 'educational-games' | 'real-time-voice-call' | 'adaptive-learning-path' | 'grammar-academy' | 'reading-lab' | 'writing-spelling-studio' | 'dynamic-worksheets' | 'branching-stories' | 'sara-tutor';
 
 export interface WhatsAppNotification {
   id: string;
@@ -219,3 +219,70 @@ export interface StudyPlan {
   planItems: any[];
   lessonsPerDay?: number;
 }
+
+// ==========================================
+// 👩‍🏫 Sara AI English Tutor Interfaces
+// ==========================================
+
+export interface SaraBoardCorrection {
+  wrong: string;
+  right: string;
+}
+
+export interface SaraBoardQuiz {
+  question: string;
+  options: string[];
+  answerIndex: number;
+}
+
+export interface SaraBoardData {
+  title?: string;
+  sentence?: string;
+  highlight?: string;
+  correction?: SaraBoardCorrection;
+  quiz?: SaraBoardQuiz;
+}
+
+export interface SaraAction {
+  type: 'open_section';
+  sectionId: string;
+}
+
+export interface SaraMemory {
+  newNotes?: string[];
+  mistakes?: string[];
+  wordsLearned?: string[];
+}
+
+export interface SaraChatResponse {
+  reply: string;
+  board?: SaraBoardData;
+  actions?: SaraAction[];
+  memory?: SaraMemory;
+  sessionDone?: boolean;
+  dailyCapReached?: boolean;
+}
+
+export interface TutorMemoryDoc {
+  age?: number;
+  interests?: string[];
+  goal?: string;
+  level?: string;
+  notes?: string[]; // Keep last 30
+  frequentMistakes?: string[]; // Keep last 20
+  wordsLearned?: string[]; // Keep last 100
+  lastSessionSummary?: string;
+  lastSessionAt?: any;
+  dailyCount?: number;
+  dailyCountDate?: string; // YYYY-MM-DD
+}
+
+export interface TutorSessionDoc {
+  id?: string;
+  startedAt: any;
+  endedAt?: any;
+  summary: string;
+  skill: string;
+  quizScore?: number;
+}
+

@@ -411,5 +411,17 @@ service cloud.firestore {
       allow create, update: if isOwner(uid) && isValidStreak(request.resource.data);
       allow delete: if false;
     }
+
+    // --- 19. Sara AI English Tutor Memory & Sessions ---
+    match /tutorMemory/{uid} {
+      allow read: if isOwner(uid) || isParentOf(uid) || isAdmin();
+      allow write: if isOwner(uid) || isAdmin();
+
+      match /sessions/{sessionId} {
+        allow read: if isOwner(uid) || isParentOf(uid) || isAdmin();
+        allow write: if isOwner(uid) || isAdmin();
+      }
+    }
   }
 }
+

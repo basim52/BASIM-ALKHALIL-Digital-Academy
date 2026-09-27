@@ -1063,6 +1063,284 @@ Looking forward to your reply. Tell me what we're tackling first!`;
     }
   });
 
+  // =========================================================================
+  // 👩‍🏫 Sara AI English Tutor Endpoint (Strict Kid-Safe, Curriculum-Bound)
+  // =========================================================================
+  app.post("/api/sara/chat", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Missing or invalid authorization token" });
+      }
+
+      const idToken = authHeader.split("Bearer ")[1]?.trim();
+      if (!idToken) {
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Missing Bearer token" });
+      }
+
+      const adminAuth = getAdminAuth();
+      const adminDb = getAdminDb();
+      if (!adminAuth || !adminDb) {
+        return res.status(503).json({ error: "SERVICE_UNAVAILABLE", message: "Firebase Admin is not configured on the server" });
+      }
+
+      let decodedToken;
+      try {
+        decodedToken = await adminAuth.verifyIdToken(idToken);
+      } catch (authErr: any) {
+        logToFile(`[Sara] Token verification failed: ${authErr.message}`);
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Invalid or expired Firebase ID token" });
+      }
+
+      const uid = decodedToken.uid;
+      const { message, snapshot, history = [] } = req.body;
+
+      // Determine today's date in Asia/Riyadh timezone for daily count capping
+      const nowRiyadhDate = (() => {
+        try {
+          return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Riyadh' }).format(new Date());
+        } catch {
+          return new Date().toISOString().split('T')[0];
+        }
+      })();
+
+      const memoryRef = adminDb.collection("tutorMemory").doc(uid);
+      const memorySnap = await memoryRef.get().catch((err: any) => {
+        logToFile(`[Sara] Warning reading tutorMemory: ${err.message}`);
+        return null;
+      });
+
+      let currentDailyCount = 0;
+      let lastDailyDate = nowRiyadhDate;
+      if (memorySnap && memorySnap.exists) {
+        const memData = memorySnap.data() || {};
+        lastDailyDate = memData.dailyCountDate || nowRiyadhDate;
+        if (lastDailyDate === nowRiyadhDate) {
+          currentDailyCount = Number(memData.dailyCount) || 0;
+        } else {
+          currentDailyCount = 0;
+        }
+      }
+
+      // Daily cap: max 40 Sara messages per student per day
+      if (currentDailyCount >= 40) {
+        return res.json({
+          reply: "ما شاء الله عليك يا بطل! أبدعت اليوم وأكملت جلساتك الـ 40 المقررة كاملة 🌟! الحين خذ قسط من الراحة، راجع الكلمات اللي تعلمناها مع بعض، وبكرة نلتقي بحماس وطاقة جديدة لنكمل رحلتنا الرائعة! فخورة فيك وايد! 👋✨",
+          board: {
+            title: "اكتملت جلسة اليوم بنجاح 🌟",
+            sentence: "Outstanding effort today! See you tomorrow!",
+            highlight: "Outstanding effort"
+          },
+          actions: [],
+          memory: {
+            newNotes: ["أتم الطالب الحد الأقصى للجلسة اليومية (40 رسالة) بنجاح واجتهاد"],
+            mistakes: [],
+            wordsLearned: []
+          },
+          sessionDone: true,
+          dailyCapReached: true
+        });
+      }
+
+      // Increment daily message count
+      const nextDailyCount = currentDailyCount + 1;
+      try {
+        await memoryRef.set({
+          dailyCount: nextDailyCount,
+          dailyCountDate: nowRiyadhDate,
+          lastSessionAt: FieldValue.serverTimestamp()
+        }, { merge: true });
+      } catch (err: any) {
+        logToFile(`[Sara] Warning updating dailyCount in tutorMemory: ${err.message}`);
+      }
+
+      // Whitelist of valid section IDs from the academy
+      const VALID_SECTIONS = [
+        "grammar-academy",
+        "reading-lab",
+        "writing-spelling-studio",
+        "pronunciation-lab",
+        "flashcards-hub",
+        "story-library",
+        "educational-games",
+        "roleplay-challenges",
+        "visual-dictionary",
+        "english-songs",
+        "interactive-learning",
+        "escape-room",
+        "live-translate",
+        "early-childhood"
+      ];
+
+      // System instruction for Sara
+      const systemInstruction = `You are "Sara" (سارة), a personal AI English tutor inside the "Basim Alkhalil Digital Academy" (أكاديمية باسم الخليل الرقمية).
+
+PERSONA & TONE:
+- Name: Sara (سارة). A friendly, energetic, warm young Gulf English teacher (معلمة خليجية شابة، مفعمة بالحيوية والتشجيع والدفء).
+- Style: Short, warm, encouraging, a little playful, never boring or long. Keep replies concise and lively (2-4 sentences max per turn).
+- Language: Explain in simple Gulf-friendly Arabic (لهجة بيضاء خليجية عفوية ومحببة للصغار واليافعين)، and gradually use more English as the student's level progresses.
+- Corrections: GENTLE CORRECTION. NEVER say "wrong" or "خطأ" or "No". Instead, smile, repeat the correct sentence with praise (e.g. "حلوة محاولتك يا بطل! نقولها كذا: 'She goes to school' شفت كيف سهلة؟").
+- KID-SAFE AT ALL TIMES: The student is a child or teenager. Stay 100% on learning topics. Politely redirect any inappropriate, sensitive, or off-topic conversation back to learning. NEVER ask for, accept, or store personal information (no home address, no phone number, no real school name, no photos, no passwords).
+- CURRICULUM BOUNDARY: Teach ONLY English language skills from the academy (grammar, phonics, reading, vocabulary, conversation, spelling). Do not invent facts or make up untrue rules.
+
+ADAPTIVITY:
+- Student snapshot provided:
+  * Level: ${snapshot?.level || 'unknown'}
+  * Age: ${snapshot?.age || 'unknown'}
+  * Interests: ${JSON.stringify(snapshot?.interests || [])}
+  * Goal: ${snapshot?.goal || 'unknown'}
+  * Recent Mistakes to Review: ${JSON.stringify(snapshot?.frequentMistakes || [])}
+  * Recent Words Learned: ${JSON.stringify(snapshot?.wordsLearned || [])}
+  * Recent Lesson Results Summary: ${JSON.stringify(snapshot?.recentResultsSummary || 'None')}
+  * Last Memory Notes: ${JSON.stringify(snapshot?.lastMemoryNotes || [])}
+- If student's age or level is unknown, use the first session to ask warmly about their age, interests, and English goal, or conduct a quick friendly 5-question chat check.
+
+DAILY SESSION FLOW (10-15 min total, handled step by step over turns):
+1. Warm-up greeting by name + recall of last session / friendly check-in.
+2. 2-minute review of recent mistakes or recently learned words.
+3. ONE new bite-sized skill from the curriculum (a clear rule, sentence pattern, or phrase).
+4. Practice using an existing academy section: invite the student and recommend opening one of the whitelist sections.
+5. 3-question mini quiz (presented interactively on the board, one question at a time).
+6. Summary + tiny homework + tomorrow's exciting plan, then mark sessionDone=true.
+
+SECTION WHITELIST for "actions" (ONLY use these sectionId values):
+${VALID_SECTIONS.map(s => `- "${s}"`).join("\n")}
+
+STRICT JSON OUTPUT REQUIREMENT:
+You MUST respond with a STRICT, VALID JSON object only, with NO surrounding Markdown code fences.
+Output structure:
+{
+  "reply": "Sara's spoken reply in warm Gulf Arabic mixed with English",
+  "board": {
+    "title": "Optional short title for what's being taught or practiced",
+    "sentence": "Optional English target sentence/rule shown on the board",
+    "highlight": "Optional word or phrase inside the sentence to glow/highlight",
+    "correction": {
+      "wrong": "wrong student phrase if correcting gently, otherwise omit",
+      "right": "correct English phrase"
+    },
+    "quiz": {
+      "question": "Quiz question in English or Arabic if testing the skill",
+      "options": ["Option A", "Option B", "Option C"],
+      "answerIndex": 0
+    }
+  },
+  "actions": [
+    { "type": "open_section", "sectionId": "one_of_the_whitelisted_section_ids_above" }
+  ],
+  "memory": {
+    "newNotes": ["Short observation about student progress, preferences, or age/interests if revealed"],
+    "mistakes": ["Grammar or vocabulary mistake to track, e.g., 'Third-person singular -s'"],
+    "wordsLearned": ["New English words the student learned or practiced in this turn"]
+  },
+  "sessionDone": false
+}`;
+
+      // Take last ~12 messages from history
+      const recentHistory = Array.isArray(history) ? history.slice(-12) : [];
+      const userMessage = (message || "").toString().trim();
+
+      // Format conversation contents for Gemini
+      const formattedContents = formatGeminiHistory(recentHistory, userMessage || "مرحباً يا معلمتي سارة!");
+
+      let geminiReplyText = "";
+      if (initAI() && aiLive) {
+        try {
+          const aiRes = await aiLive.models.generateContent({
+            model: "gemini-3.8-flash",
+            contents: formattedContents,
+            config: {
+              systemInstruction: systemInstruction,
+              responseMimeType: "application/json"
+            }
+          });
+          geminiReplyText = aiRes.text || "";
+        } catch (callErr: any) {
+          logToFile(`[Sara] Primary model error: ${callErr.message}, trying fallback...`);
+          try {
+            const fallbackRes = await aiLive.models.generateContent({
+              model: "gemini-2.5-flash",
+              contents: formattedContents,
+              config: {
+                systemInstruction: systemInstruction,
+                responseMimeType: "application/json"
+              }
+            });
+            geminiReplyText = fallbackRes.text || "";
+          } catch (fbErr: any) {
+            logToFile(`[Sara] Fallback model error: ${fbErr.message}`);
+          }
+        }
+      }
+
+      let parsedResult: any = null;
+      if (geminiReplyText) {
+        try {
+          let cleaned = geminiReplyText.trim();
+          if (cleaned.startsWith("```json")) {
+            cleaned = cleaned.replace(/^```json\s*/i, "").replace(/\s*```$/, "");
+          } else if (cleaned.startsWith("```")) {
+            cleaned = cleaned.replace(/^```\s*/i, "").replace(/\s*```$/, "");
+          }
+          parsedResult = JSON.parse(cleaned);
+        } catch (jsonErr: any) {
+          logToFile(`[Sara] JSON parse error: ${jsonErr.message}`);
+        }
+      }
+
+      // Fallback if AI generation failed or wasn't valid JSON
+      if (!parsedResult || !parsedResult.reply) {
+        const studentName = snapshot?.name || "يا بطل";
+        parsedResult = {
+          reply: `هلا والله ${studentName}! أنا معلمتك سارة، وسعيدة جداً بلقائك اليوم 🌟 جاهز نبدأ رحلتنا الممتعة في تعلم الإنجليزية؟ قل لي وش تحب نتعلم اليوم؟`,
+          board: {
+            title: "جلسة التعلم مع سارة 🌟",
+            sentence: "Welcome to your English session with Sara!",
+            highlight: "Welcome"
+          },
+          actions: [
+            { type: "open_section", sectionId: "grammar-academy" }
+          ],
+          memory: {
+            newNotes: ["بدأ الطالب جلسة جديدة مع سارة"],
+            mistakes: [],
+            wordsLearned: ["Welcome", "English"]
+          },
+          sessionDone: false
+        };
+      }
+
+      // Sanitize actions to ONLY allowed whitelisted section IDs
+      if (Array.isArray(parsedResult.actions)) {
+        parsedResult.actions = parsedResult.actions.filter((act: any) => 
+          act && act.type === "open_section" && typeof act.sectionId === "string" && VALID_SECTIONS.includes(act.sectionId)
+        );
+      } else {
+        parsedResult.actions = [];
+      }
+
+      // Ensure memory has correct arrays
+      if (!parsedResult.memory) {
+        parsedResult.memory = { newNotes: [], mistakes: [], wordsLearned: [] };
+      } else {
+        parsedResult.memory.newNotes = Array.isArray(parsedResult.memory.newNotes) ? parsedResult.memory.newNotes : [];
+        parsedResult.memory.mistakes = Array.isArray(parsedResult.memory.mistakes) ? parsedResult.memory.mistakes : [];
+        parsedResult.memory.wordsLearned = Array.isArray(parsedResult.memory.wordsLearned) ? parsedResult.memory.wordsLearned : [];
+      }
+
+      parsedResult.sessionDone = !!parsedResult.sessionDone;
+      parsedResult.dailyCapReached = false;
+
+      return res.json(parsedResult);
+    } catch (globalErr: any) {
+      logToFile(`[Sara] Global error: ${globalErr.message}`);
+      res.status(500).json({
+        error: "SARA_CHAT_ERROR",
+        message: globalErr.message || "Failed to process chat with Sara"
+      });
+    }
+  });
+
 
   // Modern AI Omnipresent Instant Tutor Endpoint
   app.post("/api/ai/instant-tutor", async (req, res) => {
