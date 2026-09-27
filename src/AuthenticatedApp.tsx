@@ -120,6 +120,7 @@ import { subscribeToCertificateTriggers, saveEarnedCertificate } from './service
 import { DailyStreakCard } from './components/DailyStreakCard';
 import { StreakMilestoneModal } from './components/StreakMilestoneModal';
 import { DailyReminderBanner } from './components/DailyReminderBanner';
+import SaraTutor from './components/SaraTutor';
 import {
   StreakData,
   getStudentStreak,
@@ -1667,6 +1668,22 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
             }}
           />
         </div>
+
+        {/* SARA AI TUTOR CARD */}
+        <button
+          type="button"
+          onClick={() => onNavigate('sara')}
+          className="w-full p-4 sm:p-5 bg-white border-2 border-b-4 border-[#58cc02]/40 hover:border-[#58cc02] rounded-2xl sm:rounded-[2rem] text-slate-800 flex items-center gap-4 shadow-sm transition-all active:scale-[0.99] cursor-pointer"
+        >
+          <div className="w-11 h-11 sm:w-13 sm:h-13 bg-[#58cc02] rounded-2xl flex items-center justify-center shrink-0 shadow-sm border-b-4 border-[#46a302] text-2xl">
+            👩‍🏫
+          </div>
+          <div className={`flex-1 min-w-0 ${isRtl ? 'text-right' : 'text-left'}`}>
+            <p className="text-[9px] font-black uppercase tracking-wider mb-0.5 text-[#58cc02]">{isRtl ? 'جديد ✨' : 'NEW ✨'}</p>
+            <p className="font-black text-sm sm:text-base text-slate-800">{isRtl ? 'تعلّم مع سارة – معلمتك الذكية للإنجليزي' : 'Learn with Sara – your AI English tutor'}</p>
+          </div>
+          <span className="px-3 py-2 bg-[#58cc02] text-white font-black text-xs rounded-xl border-b-4 border-[#46a302] shrink-0">{isRtl ? 'ابدأ الدرس' : 'Start'}</span>
+        </button>
 
         {/* AI DAILY RECOMMENDATION CARD */}
         {recommendation && (
@@ -6404,6 +6421,17 @@ export default function AuthenticatedApp({
         />
       );
     }
+    if (view === 'sara') {
+      return (
+        <SaraTutor
+          studentName={userProfile?.displayName}
+          level={userProfile?.level}
+          isRtl={isRtl}
+          onOpenSection={(id) => setView(id as AppView)}
+          onBack={() => setView('dashboard')}
+        />
+      );
+    }
     if (view === 'live-translate') {
       return (
         <LiveTranslate 
@@ -6956,6 +6984,7 @@ export default function AuthenticatedApp({
                 <nav className="flex-1 space-y-2 overflow-y-auto no-scrollbar">
                   {[
                     { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
+                    { id: 'sara', label: lang === 'ar' ? 'سارة – معلمتك 👩‍🏫' : 'Sara – Your Tutor', icon: Sparkles },
                     { id: 'pronunciation-lab', label: lang === 'ar' ? 'معمل النطق 🎙️' : 'Pronunciation Lab 🎙️', icon: Mic },
                     { id: 'live-translate', label: lang === 'ar' ? 'مترجم المباشر 🌐' : 'Live Translate 🌐', icon: Languages },
                     { id: 'interactive-learning', label: lang === 'ar' ? 'تعليم تفاعلي ⚡' : 'Interactive Learning ⚡', icon: Gamepad2 },
@@ -7117,6 +7146,7 @@ export default function AuthenticatedApp({
                             {[
                               { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
                               { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
+                              { id: 'sara', label: isRtl ? 'سارة – معلمتك 👩‍🏫' : 'Sara – Your Tutor', icon: Sparkles },
                               { id: 'grammar-academy', label: isRtl ? 'أكاديمية القواعد 📐' : 'Grammar Academy 📐', icon: Brain },
                               { id: 'reading-lab', label: isRtl ? 'مختبر القراءة 📖' : 'Reading Lab 📖', icon: BookOpen },
                               { id: 'writing-spelling-studio', label: isRtl ? 'استوديو التعبير والإملاء ✍️' : 'Writing & Spelling Studio ✍️', icon: PenTool },

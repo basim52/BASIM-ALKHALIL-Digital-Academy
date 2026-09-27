@@ -7,6 +7,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleGenAI, Modality, Type } from "@google/genai";
 import { getAdminAuth, getAdminDb, FieldValue } from "./firebaseAdmin.js";
+import { sanitizeSaraInput, buildSaraSystemPrompt, saraResponseSchema, parseSaraReply, checkSaraRateLimit } from "./sara.js";
 
 const logToFile = (msg: string) => {
   // Use console.log directly (no filesystem logging on Vercel or serverless)
@@ -1060,6 +1061,79 @@ Looking forward to your reply. Tell me what we're tackling first!`;
       }
     } catch (error: any) {
       res.status(500).json({ error: error.message });
+    }
+  });
+
+
+  app.post("/api/sara/chat", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Missing or invalid authorization token" });
+      }
+
+      const idToken = authHeader.split("Bearer ")[1]?.trim();
+      if (!idToken) {
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Missing Bearer token" });
+      }
+
+      const adminAuth = getAdminAuth();
+      if (!adminAuth) {
+        return res.status(503).json({ error: "SERVICE_UNAVAILABLE", message: "Auth service not available" });
+      }
+
+      let decodedToken;
+      try {
+        decodedToken = await adminAuth.verifyIdToken(idToken);
+      } catch (err) {
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Invalid ID token" });
+      }
+
+      const uid = decodedToken.uid;
+
+      const sanitized = sanitizeSaraInput(req.body);
+      if (typeof sanitized === "string") {
+        return res.status(400).json({ error: "BAD_REQUEST", message: sanitized });
+      }
+
+      // Rate limit check (best effort)
+      if (!checkSaraRateLimit(uid)) {
+        return res.status(429).json({
+          error: "RATE_LIMIT_EXCEEDED",
+          message: "لقد وصلت للحد اليومي من المحادثات مع سارة. غدًا يمكنك المتابعة!"
+        });
+      }
+
+      const { message, history, student } = sanitized;
+
+      // Build contents for Gemini
+      const contents = [
+        ...history.map(h => ({
+          role: h.role,
+          parts: [{ text: h.text }]
+        })),
+        { role: "user", parts: [{ text: message }] }
+      ];
+
+      // Call AI with Sara-specific config
+      const result = await callAiWithRetry({
+        contents,
+        config: {
+          systemInstruction: buildSaraSystemPrompt(student),
+          responseMimeType: "application/json",
+          responseSchema: saraResponseSchema,
+          temperature: 0.7,
+        }
+      });
+
+      const parsedReply = parseSaraReply(result.text || "");
+      res.json(parsedReply);
+    } catch (err: any) {
+      logToFile(`Sara chat error: ${err.message}`);
+      return res.status(500).json({
+        error: "INTERNAL_ERROR",
+        message: "حدث خطأ تقني. دعونا نحاول مرة أخرى بعد لحظات."
+      });
     }
   });
 
