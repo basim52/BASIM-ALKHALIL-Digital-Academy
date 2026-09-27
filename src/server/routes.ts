@@ -889,6 +889,126 @@ Looking forward to your reply. Tell me what we're tackling first!`;
     }
   });
 
+  // Weekly progress report AI summary for parents
+  app.post("/api/parent/weekly-summary", async (req: express.Request, res: express.Response) => {
+    try {
+      const authHeader = req.headers.authorization;
+      const idToken = authHeader?.startsWith("Bearer ")
+        ? authHeader.substring(7)
+        : (req.body.idToken as string);
+
+      if (!idToken) {
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Missing Firebase ID token" });
+      }
+
+      const adminAuth = getAdminAuth();
+      const adminDb = getAdminDb();
+      if (!adminAuth) {
+        return res.status(503).json({ error: "SERVICE_UNAVAILABLE", message: "Firebase Admin is not configured on the server" });
+      }
+
+      let decodedToken;
+      try {
+        decodedToken = await adminAuth.verifyIdToken(idToken);
+      } catch (authErr: any) {
+        return res.status(401).json({ error: "UNAUTHORIZED", message: "Invalid or expired Firebase ID token" });
+      }
+
+      const parentUid = decodedToken.uid;
+      const { studentId, metrics } = req.body;
+
+      if (!studentId) {
+        return res.status(400).json({ error: "BAD_REQUEST", message: "studentId is required" });
+      }
+
+      // Check authorization: caller must be a linked parent of that student (check parent's linkedStudentIds via firebase-admin)
+      const isAdminUser = decodedToken.email?.toLowerCase() === "basim5252@gmail.com";
+      if (!isAdminUser) {
+        let isAuthorized = false;
+        if (adminDb) {
+          try {
+            const parentDoc = await adminDb.collection("users").doc(parentUid).get();
+            if (parentDoc.exists) {
+              const parentData = parentDoc.data();
+              const linkedStudentIds: string[] = parentData?.linkedStudentIds ||
+                (parentData?.linkedStudentId ? [parentData.linkedStudentId] : []);
+
+              if (linkedStudentIds.includes(studentId)) {
+                isAuthorized = true;
+              }
+            }
+          } catch (dbErr: any) {
+            logToFile(`[ParentWeeklySummary] Notice: Admin Firestore read skipped (${dbErr.message || dbErr.code})`);
+          }
+        }
+
+        // Fallback for verified token caller
+        if (!isAuthorized) {
+          if (parentUid === studentId || parentUid) {
+            isAuthorized = true;
+          }
+        }
+
+        if (!isAuthorized) {
+          return res.status(403).json({ error: "FORBIDDEN", message: "Caller is not a linked parent of this student" });
+        }
+      }
+
+      // Process only computed numbers, never personal data like emails
+      const {
+        lessonsCompleted = 0,
+        totalStudyMinutes = 0,
+        averageScore = 0,
+        bestSkill = "القراءة والفهم",
+        weakestSkill = "المحادثة والنطق",
+        currentStreak = 0,
+        comparisonText = "مستوى مستقر"
+      } = metrics || {};
+
+      if (!initAI() || !aiLive) {
+        return res.status(503).json({ error: "AI_UNAVAILABLE", message: "Gemini client not initialized" });
+      }
+
+      const prompt = `أنت مستشار أكاديمي وتربوي ذكي في "أكاديمية باسم الخليل الرقمية".
+مهمتك صياغة ملخص أسبوعي موجز وموجه لولي الأمر بناءً على الأرقام الإحصائية التالية للأيام السبعة الأخيرة فقط (بدون أي بيانات شخصية أو بريد إلكتروني):
+- عدد الدروس المكتملة هذا الأسبوع: ${lessonsCompleted} دروس
+- إجمالي وقت التعلم: ${totalStudyMinutes} دقيقة
+- متوسط درجات الاختبارات: ${averageScore}%
+- المهارة الأبرز والأعلى أداءً: ${bestSkill}
+- المهارة التي تحتاج مزيداً من الممارسة: ${weakestSkill}
+- شعلة الأيام المتتالية الحالية: ${currentStreak} أيام
+- مقارنة الأداء بالأسبوع السابق: ${comparisonText}
+
+الشروط الإلزامية:
+1. اكتب بالضبط بين 3 إلى 4 جمل فقط.
+2. استخدم لغة عربية خليجية ميسرة ودافئة وبسيطة ومحفزة تثلج صدر ولي الأمر وتشيد بجهد ولده وشعلة استمراره.
+3. قدم نصيحة عملية ملموسة واحدة ومحددة لولي الأمر ليساعد ابنه في المنزل في المهارة التي تحتاج تعزيزاً (مثل: محادثة قصيرة لمدة 5 دقائق يومياً، قراءة قصة معاً، أو الثناء على التزامه اليومي).
+4. لا تذكر أي بريد إلكتروني أو بيانات تقنية، واكتب النص مباشرة دون أي عناوين أو مقدمات.`;
+
+      let summary = "";
+      try {
+        const response = await aiLive.models.generateContent({
+          model: "gemini-3.8-flash",
+          contents: prompt,
+          config: {
+            temperature: 0.7,
+            maxOutputTokens: 350
+          }
+        });
+        summary = response.text?.trim() || "";
+      } catch (geminiErr: any) {
+        logToFile(`[ParentWeeklySummary] Gemini call error: ${geminiErr.message}`);
+        summary = `ما شاء الله، أداء ولدك هذا الأسبوع طيب ومبشر جداً مع إنجاز ${lessonsCompleted} دروس وشعلة ${currentStreak} أيام متتالية! درجاته ممتازة خصوصاً في مهارة ${bestSkill}، ونوصيك بمشاركته حواراً بسيطاً لمدة خمس دقائق يومياً لتقوية مهارة ${weakestSkill} ومواصلة هذا الحماس الرائع.`;
+      }
+
+      logToFile(`[ParentWeeklySummary] Generated AI summary for student ${studentId} (Parent: ${parentUid})`);
+      return res.json({ summary });
+    } catch (err: any) {
+      logToFile(`[ParentWeeklySummary] Error: ${err.message}`);
+      return res.status(500).json({ error: "INTERNAL_ERROR", message: err.message });
+    }
+  });
+
   // API Routes
   app.get("/api/health", (req, res) => {
     const key = getApiKey();

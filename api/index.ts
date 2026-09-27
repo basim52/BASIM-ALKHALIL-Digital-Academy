@@ -3,8 +3,8 @@ import express from "express";
 import { registerRoutes } from "../src/server/routes.js";
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "15mb" }));
+app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 
 // Register all shared routes (matching local dev server.ts)
 registerRoutes(app);

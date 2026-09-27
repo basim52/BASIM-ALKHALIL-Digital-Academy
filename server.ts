@@ -10,8 +10,8 @@ const logToFile = (msg: string) => console.log(`[Server] ${msg}`);
 
 async function startServer() {
   const app = express();
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json({ limit: "15mb" }));
+  app.use(express.urlencoded({ extended: true, limit: "15mb" }));
   const server = createServer(app);
   const wss = new WebSocketServer({ noServer: true });
   const PORT = 3000;
@@ -33,6 +33,21 @@ async function startServer() {
 
   // Register all shared routes (shared between server.ts and Vercel api/index.ts)
   registerRoutes(app, wss);
+
+  // Global API error handler ensuring JSON responses for all API calls
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (req.path.startsWith('/api/') || (req.originalUrl && req.originalUrl.startsWith('/api/'))) {
+      logToFile(`[API Error] ${req.method} ${req.originalUrl || req.path}: ${err.message}`);
+      if (res.headersSent) {
+        return next(err);
+      }
+      return res.status(err.status || err.statusCode || 500).json({
+        error: err.name || "SERVER_ERROR",
+        message: err.message || "An unexpected error occurred"
+      });
+    }
+    next(err);
+  });
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {

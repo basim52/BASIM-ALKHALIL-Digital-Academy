@@ -397,5 +397,19 @@ service cloud.firestore {
       );
       allow write: if isAdmin();
     }
+
+    // --- 18. Daily Learning Streaks ---
+    function isValidStreak(data) {
+      return data.current is int && data.current >= 0 &&
+             data.longest is int && data.longest >= 0 &&
+             data.current <= data.longest + 1 &&
+             data.freezesLeft is int && data.freezesLeft >= 0 && data.freezesLeft <= 1;
+    }
+
+    match /streaks/{uid} {
+      allow read: if isOwner(uid) || isParentOf(uid) || isAdmin();
+      allow create, update: if isOwner(uid) && isValidStreak(request.resource.data);
+      allow delete: if false;
+    }
   }
 }

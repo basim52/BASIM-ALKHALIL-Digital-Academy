@@ -58,6 +58,7 @@ import {
   Filter,
   Check,
   Copy,
+  Award,
   MessageCircle,
   Ticket,
   ArrowRight,
@@ -86,6 +87,7 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { VideoLibrary } from './components/VideoLibrary';
 import { StoryLibrary } from './components/StoryLibrary';
 import { ParentAIInsights } from './components/ParentAIInsights';
+import { ParentWeeklyReportCard } from './components/ParentWeeklyReportCard';
 import { ProgressRoadmap } from './components/ProgressRoadmap';
 import { ReadingLesson } from './components/ReadingLesson';
 import { OxfordLesson } from './components/OxfordLesson';
@@ -113,6 +115,19 @@ import { KIDS_STORIES } from './data/kidsStories';
 import { PronunciationLab } from './components/PronunciationLab';
 import { RolePlayChallenges } from './components/RolePlayChallenges';
 import { VisualDictionary } from './components/VisualDictionary';
+import { CompletionCertificateModal, CertificateData } from './components/CompletionCertificateModal';
+import { subscribeToCertificateTriggers, saveEarnedCertificate } from './services/certificateService';
+import { DailyStreakCard } from './components/DailyStreakCard';
+import { StreakMilestoneModal } from './components/StreakMilestoneModal';
+import { DailyReminderBanner } from './components/DailyReminderBanner';
+import {
+  StreakData,
+  getStudentStreak,
+  recordStreakActivity,
+  subscribeToMilestoneCelebrations,
+  getRiyadhDateStr,
+  getRiyadhTimeStr
+} from './services/streakService';
 import { EnglishSongs } from './components/EnglishSongs';
 import { AnimatedStoryboard } from './components/AnimatedStoryboard';
 import { EscapeRoomGrammar } from './components/EscapeRoomGrammar';
@@ -992,6 +1007,191 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
     `مرحباً يا غالي 🌹\nهذا هو كود ربط حسابي في أكاديمية باسم الخليل التفاعلية لمتابعة دروسي وتقاريري الأكاديمية:\n\n🔑 كود الربط: *${parentLinkCode}*\n(الكود صالح لمدة 24 ساعة)\n\n🌐 رابط الأكاديمية للدخول وإدخال الكود:\n${typeof window !== 'undefined' ? window.location.origin : 'https://basim-academy.com'}`
   )}` : '#';
 
+  const [certificates, setCertificates] = useState<CertificateData[]>([]);
+  const [loadingCertificates, setLoadingCertificates] = useState(true);
+  const [activeCertModal, setActiveCertModal] = useState<CertificateData | null>(null);
+
+  useEffect(() => {
+    if (!profile?.uid) return;
+    const isSimulated = profile.uid.startsWith('sim_') || !auth.currentUser;
+    if (isSimulated) {
+      try {
+        const stored = JSON.parse(localStorage.getItem(`certs_${profile.uid}`) || '[]');
+        if (stored.length === 0) {
+          const sampleCert: CertificateData = {
+            unitId: 'unit_a1_foundations',
+            unitTitle: 'Core English Phonemic & Foundations',
+            unitTitleAr: 'الوحدة التأسيسية: الصوتيات والتواصل الفعّال',
+            completedAt: new Date(Date.now() - 86400000).toISOString(),
+            studentName: profile.displayName || 'طالب متميز'
+          };
+          localStorage.setItem(`certs_${profile.uid}`, JSON.stringify([sampleCert]));
+          setCertificates([sampleCert]);
+        } else {
+          setCertificates(stored);
+        }
+      } catch {
+        setCertificates([]);
+      }
+      setLoadingCertificates(false);
+      return;
+    }
+
+    try {
+      const certsRef = collection(db, 'users', profile.uid, 'certificates');
+      const unsubscribe = onSnapshot(certsRef, (snap) => {
+        const items: CertificateData[] = [];
+        snap.forEach((docSnap) => {
+          const d = docSnap.data();
+          items.push({
+            unitId: docSnap.id,
+            unitTitle: d.unitTitle || 'Unit Study',
+            unitTitleAr: d.unitTitleAr || d.unitTitle || 'الوحدة التعليمية',
+            completedAt: d.completedAt || new Date().toISOString(),
+            studentName: d.studentName || profile.displayName
+          });
+        });
+        setCertificates(items);
+        setLoadingCertificates(false);
+      }, (err) => {
+        console.warn("Certificates listener notice:", err);
+        setLoadingCertificates(false);
+      });
+      return () => unsubscribe();
+    } catch (e) {
+      console.warn("Error setting up certificates listener:", e);
+      setLoadingCertificates(false);
+    }
+  }, [profile.uid, profile.displayName]);
+
+  // Subscribe to real-time certificate celebration events across the application
+  useEffect(() => {
+    const unsub = subscribeToCertificateTriggers((cert) => {
+      setActiveCertModal(cert);
+    });
+    return () => unsub();
+  }, []);
+
+  // Daily Learning Streak & Reminder State
+  const [streak, setStreak] = useState<StreakData>({
+    current: 0,
+    longest: 0,
+    lastActiveDate: '',
+    freezesLeft: 1
+  });
+  const [activeDatesSet, setActiveDatesSet] = useState<Set<string>>(new Set());
+  const [activeMilestoneModal, setActiveMilestoneModal] = useState<number | null>(null);
+  const [currentRiyadhTime, setCurrentRiyadhTime] = useState<string>(() => getRiyadhTimeStr());
+
+  // Real-time listener for streaks/{uid}
+  useEffect(() => {
+    if (!profile?.uid) return;
+    const isSimulated = profile.uid.startsWith('sim_') || !auth.currentUser;
+    if (isSimulated) {
+      try {
+        const stored = localStorage.getItem(`streak_${profile.uid}`);
+        if (stored) {
+          setStreak(JSON.parse(stored));
+        } else {
+          const initialStreak: StreakData = {
+            current: 1,
+            longest: 3,
+            lastActiveDate: getRiyadhDateStr(),
+            freezesLeft: 1
+          };
+          localStorage.setItem(`streak_${profile.uid}`, JSON.stringify(initialStreak));
+          setStreak(initialStreak);
+        }
+      } catch {
+        // ignore
+      }
+      return;
+    }
+
+    try {
+      const unsub = onSnapshot(doc(db, 'streaks', profile.uid), (docSnap) => {
+        if (docSnap.exists()) {
+          const d = docSnap.data();
+          setStreak({
+            current: Number(d.current) || 0,
+            longest: Number(d.longest) || 0,
+            lastActiveDate: String(d.lastActiveDate || ''),
+            freezesLeft: Math.min(1, Math.max(0, Number(d.freezesLeft) ?? 1)),
+            lastFreezeWeek: d.lastFreezeWeek ? String(d.lastFreezeWeek) : undefined
+          });
+        }
+      }, (err) => {
+        console.warn("Streaks listener notice:", err);
+      });
+      return () => unsub();
+    } catch (e) {
+      console.warn("Error setting up streaks listener:", e);
+    }
+  }, [profile.uid]);
+
+  // Listener for lessonResults to track completed dates for the 7-day row of dots
+  // and automatically sync streak if user studied today
+  useEffect(() => {
+    if (!profile?.uid) return;
+    const isSimulated = profile.uid.startsWith('sim_') || !auth.currentUser;
+    if (isSimulated) return;
+
+    try {
+      const q = query(
+        collection(db, 'lessonResults'),
+        where('userId', '==', profile.uid)
+      );
+      const unsub = onSnapshot(q, (snap) => {
+        const dates = new Set<string>();
+        snap.forEach((docSnap) => {
+          const d = docSnap.data();
+          if (d.timestamp?.toDate) {
+            dates.add(getRiyadhDateStr(d.timestamp.toDate()));
+          } else if (d.timestamp) {
+            dates.add(getRiyadhDateStr(new Date(d.timestamp)));
+          } else if (d.completedAt?.toDate) {
+            dates.add(getRiyadhDateStr(d.completedAt.toDate()));
+          } else if (d.completedAt) {
+            dates.add(getRiyadhDateStr(new Date(d.completedAt)));
+          } else if (d.createdAt) {
+            dates.add(getRiyadhDateStr(new Date(d.createdAt)));
+          }
+        });
+        setActiveDatesSet(dates);
+
+        const todayRiyadh = getRiyadhDateStr();
+        if (dates.has(todayRiyadh) && streak.lastActiveDate !== todayRiyadh) {
+          recordStreakActivity(profile.uid).then((res) => {
+            if (res.celebratedMilestone) {
+              setActiveMilestoneModal(res.celebratedMilestone);
+            }
+          });
+        }
+      }, (err) => {
+        console.warn("LessonResults listener notice:", err);
+      });
+      return () => unsub();
+    } catch (e) {
+      console.warn("Error querying lessonResults for streak:", e);
+    }
+  }, [profile.uid, streak.lastActiveDate]);
+
+  // Subscribe to real-time milestone celebration events across the application
+  useEffect(() => {
+    const unsub = subscribeToMilestoneCelebrations((milestone) => {
+      setActiveMilestoneModal(milestone);
+    });
+    return () => unsub();
+  }, []);
+
+  // Update Riyadh time every 30 seconds for daily reminder banner
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentRiyadhTime(getRiyadhTimeStr());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     const getRec = async () => {
       setLoadingRec(true);
@@ -1292,9 +1492,29 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
     return matchesCat && matchesSearch;
   });
 
+  const todayRiyadhStr = getRiyadhDateStr();
+  const hasStudiedToday = streak.lastActiveDate === todayRiyadhStr;
+  const userChosenReminderTime = typeof window !== 'undefined'
+    ? localStorage.getItem(`dailyReminderTime_${profile.uid}`) || '18:00'
+    : '18:00';
+  const shouldShowDailyReminderBanner = !hasStudiedToday && currentRiyadhTime >= userChosenReminderTime;
+
   return (
     <div className={`flex-1 p-3.5 sm:p-6 md:p-10 lg:p-12 overflow-y-auto ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#F7F7F7]`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
+
+        {/* IN-APP DAILY BANNER REMINDER */}
+        {shouldShowDailyReminderBanner && (
+          <DailyReminderBanner
+            streakCount={streak.current}
+            reminderTime={userChosenReminderTime}
+            lang={lang}
+            onStartStudy={() => {
+              const el = document.getElementById('student-streak-card-section') || document.getElementById('core-learning-sections');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}
+          />
+        )}
 
         {/* DUOLINGO STATUS STRIP - MOBILE OPTIMIZED */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 bg-white border-2 border-b-4 border-slate-200 rounded-3xl sm:rounded-[2rem] shadow-sm animate-fade-in relative overflow-hidden">
@@ -1315,10 +1535,17 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
 
           {/* Stat indicators (Duolingo style) */}
           <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-2">
-            <div className="flex items-center gap-1 px-3 py-1.5 bg-orange-50 border-2 border-orange-200 rounded-2xl text-[#ff9600] font-black text-xs shadow-sm hover:scale-105 transition-all">
-              <span className="text-base">🔥</span>
-              <span>7 {isRtl ? 'ي' : 'd'}</span>
-            </div>
+            <button
+              onClick={() => {
+                const el = document.getElementById('student-streak-card-section');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 border-2 border-orange-200 rounded-2xl text-[#ff9600] font-black text-xs shadow-sm hover:scale-105 transition-all cursor-pointer"
+              title={isRtl ? `شعلة التعلم اليومية: ${streak.current} يوم` : `Daily Learning Streak: ${streak.current} days`}
+            >
+              <span className="text-base select-none animate-bounce-slow">🔥</span>
+              <span>{streak.current} {isRtl ? 'يوم' : 'days'}</span>
+            </button>
             <div className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 border-2 border-blue-200 rounded-2xl text-[#1cb0f6] font-black text-xs shadow-sm hover:scale-105 transition-all">
               <span className="text-base">💎</span>
               <span>1,240</span>
@@ -1424,6 +1651,21 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
               </button>
             </div>
           </div>
+        </div>
+
+        {/* DAILY LEARNING STREAK & REMINDER CARD */}
+        <div id="student-streak-card-section">
+          <DailyStreakCard
+            userId={profile.uid}
+            streak={streak}
+            activeDatesSet={activeDatesSet}
+            lang={lang}
+            onCelebrateMilestone={(m) => setActiveMilestoneModal(m)}
+            onOpenLessons={() => {
+              const el = document.getElementById('core-learning-sections');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}
+          />
         </div>
 
         {/* AI DAILY RECOMMENDATION CARD */}
@@ -1552,8 +1794,133 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
           )}
         </motion.div>
 
+        {/* CERTIFICATES SECTION: شهاداتي / My Certificates */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-5 sm:p-7 bg-white border-2 border-b-4 border-slate-200 rounded-2xl sm:rounded-[2rem] shadow-sm relative overflow-hidden text-slate-800"
+        >
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4 mb-5">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#C49E3A]/15 text-[#C49E3A] border border-[#C49E3A]/30 flex items-center justify-center text-2xl shadow-sm shrink-0">
+                <Award size={26} />
+              </div>
+              <div className={isRtl ? 'text-right' : 'text-left'}>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg sm:text-xl font-black text-[#002147]">
+                    {isRtl ? 'شهاداتي / My Certificates' : 'My Certificates / شهاداتي'}
+                  </h3>
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#002147] text-[#C49E3A] text-[10px] font-black uppercase tracking-wider">
+                    {certificates.length} {isRtl ? 'شهادة' : 'Certificates'}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">
+                  {isRtl
+                    ? 'سجل إنجازاتك وتفوقك في الوحدات التعليمية - يمكنك معاينة الشهادة أو إعادة تحميلها ومشاركتها في أي وقت'
+                    : 'Your accredited course and unit completion certificates - view, download, or share anytime'}
+                </p>
+              </div>
+            </div>
+
+            {certificates.length > 0 && (
+              <button
+                onClick={() => setActiveCertModal(certificates[0])}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#002147] hover:bg-[#C49E3A] active:scale-95 text-white font-black text-xs shadow-sm transition-all cursor-pointer self-start sm:self-auto"
+              >
+                <Sparkles size={14} className="text-[#ffc800]" />
+                <span>{isRtl ? 'عرض أحدث شهادة 🎓' : 'View Latest Certificate 🎓'}</span>
+              </button>
+            )}
+          </div>
+
+          {loadingCertificates ? (
+            <div className="p-8 text-center text-slate-400">
+              <div className="w-8 h-8 border-2 border-[#002147] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              <p className="text-xs font-bold">{isRtl ? 'جاري تحميل سجل الشهادات...' : 'Loading certificates...'}</p>
+            </div>
+          ) : certificates.length === 0 ? (
+            <div className="p-6 sm:p-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl text-center">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mx-auto mb-3">
+                <Award size={24} />
+              </div>
+              <h4 className="text-sm font-black text-slate-700 mb-1">
+                {isRtl ? 'لا توجد شهادات مسجلة بعد' : 'No certificates earned yet'}
+              </h4>
+              <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+                {isRtl
+                  ? 'عند إتمام دراسة أي وحدة تعليمية واختباراتها، ستُمنح شهادة إنجاز معتمدة تظهر هنا تلقائياً لتتمكن من تحميلها كصورة أو PDF ومشاركتها مع عائلتك! 🌟'
+                  : 'Complete curriculum units and quizzes to earn accredited certificates! They will appear here automatically for download and sharing.'}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {certificates.map((cert, idx) => {
+                const dateStr = cert.completedAt
+                  ? new Date(cert.completedAt).toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
+                    })
+                  : '';
+                return (
+                  <div
+                    key={cert.unitId || idx}
+                    className="p-4 rounded-2xl bg-gradient-to-br from-[#ffffff] via-[#fdfbf7] to-[#fbf8ee] border-2 border-[#C49E3A]/40 hover:border-[#002147] transition-all shadow-sm hover:shadow-md flex flex-col justify-between group relative overflow-hidden"
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <div className="w-10 h-10 rounded-xl bg-[#002147] text-white flex items-center justify-center font-black text-base shadow-sm border border-[#C49E3A]/50">
+                        🦉
+                      </div>
+                      <span className="px-2 py-0.5 rounded-md bg-[#C49E3A]/20 text-[#002147] text-[10px] font-black uppercase tracking-wider">
+                        {isRtl ? 'معتمدة ✨' : 'Verified ✨'}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1 mb-4">
+                      <h4 className="font-black text-sm sm:text-base text-[#002147] line-clamp-2">
+                        {cert.unitTitleAr || cert.unitTitle}
+                      </h4>
+                      {cert.unitTitle && cert.unitTitle !== cert.unitTitleAr && (
+                        <p className="text-[11px] font-bold text-slate-500 line-clamp-1" dir="ltr">
+                          {cert.unitTitle}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium pt-1">
+                        <Calendar size={12} />
+                        <span>{dateStr}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                      <button
+                        onClick={() => setActiveCertModal(cert)}
+                        className="flex-1 py-2 px-3 rounded-xl bg-[#002147] hover:bg-[#C49E3A] active:scale-95 text-white font-black text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                      >
+                        <Download size={13} className="text-[#ffc800]" />
+                        <span>{isRtl ? 'عرض وتحميل' : 'View & Download'}</span>
+                      </button>
+
+                      <a
+                        href={`https://wa.me/?text=${encodeURIComponent(
+                          `🎉 أتممت بنجاح دراسة وحدة "${cert.unitTitleAr || cert.unitTitle}" في أكاديمية باسم الخليل الرقمية 🌟\n📜 شهادة إنجاز معتمدة باسم: ${cert.studentName || profile.displayName}\n🌐 رابط الأكاديمية:\n${typeof window !== 'undefined' ? window.location.origin : 'https://basim-academy.com'}`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] active:scale-95 text-white transition-all cursor-pointer shadow-sm"
+                        title={isRtl ? 'مشاركة عبر واتساب' : 'Share on WhatsApp'}
+                      >
+                        <MessageCircle size={15} />
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </motion.div>
+
         {/* MODERN MOBILE FILTER & SEARCH CONTROLS */}
-        <div className="space-y-4">
+        <div id="core-learning-sections" className="space-y-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-[#002147] tracking-tight">
@@ -2122,6 +2489,27 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
               </motion.div>
             </div>
           )}
+
+          {/* COMPLETION CERTIFICATE MODAL */}
+          {activeCertModal && (
+            <CompletionCertificateModal
+              isOpen={!!activeCertModal}
+              onClose={() => setActiveCertModal(null)}
+              certificate={activeCertModal}
+              isRtl={isRtl}
+            />
+          )}
+
+          {/* DAILY STREAK MILESTONE CELEBRATION MODAL */}
+          {activeMilestoneModal && (
+            <StreakMilestoneModal
+              milestone={activeMilestoneModal}
+              currentStreak={streak.current}
+              isOpen={!!activeMilestoneModal}
+              onClose={() => setActiveMilestoneModal(null)}
+              lang={lang}
+            />
+          )}
         </AnimatePresence>
       </div>
     </div>
@@ -2200,6 +2588,20 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
   const [currentPlanResults, setCurrentPlanResults] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'plan' | 'advisor' | 'notifications'>('overview');
   const [reportLanguage, setReportLanguage] = useState<'ar' | 'en' | 'bilingual'>('ar');
+
+  // Check if today is Friday in Asia/Riyadh timezone for weekly report reminder
+  const isFriday = React.useMemo(() => {
+    try {
+      const weekday = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Riyadh',
+        weekday: 'long'
+      }).format(new Date());
+      return weekday === 'Friday';
+    } catch {
+      return new Date().getDay() === 5;
+    }
+  }, []);
+  const [showFridayBanner, setShowFridayBanner] = useState(true);
 
   useEffect(() => {
     const fetchStudentSpecificData = async () => {
@@ -2733,11 +3135,11 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
 
   if (linkedStudents.length === 0 || showAddStudent) {
     return (
-      <div className={`p-8 max-w-2xl mx-auto w-full ${isRtl ? 'font-arabic' : ''}`} dir={isRtl ? 'rtl' : 'ltr'}>
+      <div className={`p-4 sm:p-8 max-w-3xl mx-auto w-full ${isRtl ? 'font-arabic' : ''}`} dir={isRtl ? 'rtl' : 'ltr'}>
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-[2.5rem] p-8 sm:p-10 shadow-xl border border-slate-100 text-center relative"
+          className="bg-white rounded-[2.5rem] p-6 sm:p-10 shadow-xl border border-slate-100 text-center relative overflow-hidden"
         >
           {linkedStudents.length > 0 && (
             <button 
@@ -2751,17 +3153,50 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
               <X size={18} />
             </button>
           )}
-          <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
-            <Users size={40} />
+          <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-sm">
+            <Users size={38} />
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-[#002147] mb-3">
-            {isRtl ? "أدخل كود ابنك / ربط حساب الطالب" : "Enter Your Child's Code / Link Student"}
+          <h2 className="text-2xl sm:text-3xl font-black text-[#002147] mb-2">
+            {isRtl ? "مرحباً بك في بوابة أولياء الأمور 🌟" : "Welcome to the Parent Companion Portal 🌟"}
           </h2>
-          <p className="text-slate-500 mb-8 leading-relaxed text-xs sm:text-sm max-w-md mx-auto">
+          <p className="text-slate-500 mb-6 leading-relaxed text-xs sm:text-sm max-w-lg mx-auto">
             {isRtl 
-              ? "اطلب من ابنك الدخول إلى حسابه والضغط على 'ربط ولي الأمر' لإنشاء كود مكون من 6 خانات، ثم أدخله هنا لمتابعة خطته ودروسه لحظة بلحظة."
-              : "Ask your child to click 'Link a Parent' in their account to generate a 6-character code, then enter it here to link."}
+              ? "لم يتم ربط أي حساب طالب بعد. اربط حساب ابنك لتفعيل المتابعة الأكاديمية والتقرير الأسبوعي الشامل 📊."
+              : "No student profile is currently linked. Connect your child using their one-time code to view weekly reports and track progress."}
           </p>
+
+          {/* Friendly 3-Step Guide */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-6 text-right max-w-2xl mx-auto" dir={isRtl ? 'rtl' : 'ltr'}>
+            <div className="p-3.5 bg-blue-50/70 border border-blue-100 rounded-2xl">
+              <div className="w-7 h-7 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center mb-2">1</div>
+              <h4 className="text-xs font-black text-[#002147] mb-1">
+                {isRtl ? 'فتح حساب الطالب' : 'Open Student App'}
+              </h4>
+              <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
+                {isRtl ? 'يدخل ابنك لحسابه في أكاديمية باسم الخليل' : 'Your child logs in to their academy account'}
+              </p>
+            </div>
+
+            <div className="p-3.5 bg-amber-50/70 border border-amber-100 rounded-2xl">
+              <div className="w-7 h-7 rounded-xl bg-amber-500 text-white font-black text-xs flex items-center justify-center mb-2">2</div>
+              <h4 className="text-xs font-black text-[#002147] mb-1">
+                {isRtl ? 'توليد كود الربط' : 'Generate Code'}
+              </h4>
+              <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
+                {isRtl ? 'يضغط على "ربط ولي الأمر 👨‍👧‍👦" لإنشاء كود 6 خانات' : 'Click "Link Parent" on home to generate a 6-char code'}
+              </p>
+            </div>
+
+            <div className="p-3.5 bg-emerald-50/70 border border-emerald-100 rounded-2xl">
+              <div className="w-7 h-7 rounded-xl bg-emerald-600 text-white font-black text-xs flex items-center justify-center mb-2">3</div>
+              <h4 className="text-xs font-black text-[#002147] mb-1">
+                {isRtl ? 'إدخال الكود هنا' : 'Enter Code Here'}
+              </h4>
+              <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
+                {isRtl ? 'أدخل الكود أدناه لبدء المتابعة وتفعيل التقارير' : 'Enter the code below to link and activate weekly report'}
+              </p>
+            </div>
+          </div>
           
           <div className="space-y-4 max-w-md mx-auto">
             <div className="relative">
@@ -2902,6 +3337,16 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
             exit={{ opacity: 0, y: -15 }}
             className="space-y-8"
           >
+            {/* 📑 WEEKLY PROGRESS REPORT CARD FOR CURRENT CHILD */}
+            <div id="parent-weekly-report-section">
+              <ParentWeeklyReportCard
+                student={currentStudent}
+                parentUid={profile.uid}
+                isParentAdmin={profile.role === UserRole.ADMIN}
+                lang={lang}
+              />
+            </div>
+
             {/* KPIs VISUAL CARDS GRID */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {[
@@ -3350,6 +3795,55 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
 
   return (
     <div className={`p-4 md:p-8 max-w-7xl mx-auto w-full space-y-8 ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#f8fafc]`} dir={isRtl ? 'rtl' : 'ltr'}>
+      {/* 📊 FRIDAY WEEKLY REPORT BANNER */}
+      {isFriday && showFridayBanner && (
+        <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-3xl p-5 text-white shadow-xl shadow-orange-900/10 border-2 border-amber-300/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in relative overflow-hidden">
+          <div className="flex items-center gap-3.5 relative z-10">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl shadow-inner shrink-0">
+              <span className="select-none animate-bounce-slow">📊</span>
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full bg-white/25 text-[10px] font-black uppercase tracking-wider text-amber-100">
+                  {isRtl ? 'تنبيه يوم الجمعة' : 'Friday Reminder'}
+                </span>
+                <span className="text-xs font-black text-amber-200">
+                  {currentStudent ? currentStudent.displayName : ''}
+                </span>
+              </div>
+              <h4 className="text-base sm:text-lg font-black text-white mt-0.5">
+                {isRtl ? 'تقرير ولدك الأسبوعي جاهز 📊' : 'Your Child\'s Weekly Report is Ready 📊'}
+              </h4>
+              <p className="text-xs text-amber-50 font-medium">
+                {isRtl
+                  ? 'جمعة مباركة! تم استخراج تقرير الأداء للأيام السبعة الأخيرة، تفقد إنجازات ولدك وشعلة تعلمه وملاحظات المستشار الآن.'
+                  : 'Weekly performance metrics for the last 7 days are ready for your review.'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 self-end sm:self-auto shrink-0 relative z-10">
+            <button
+              onClick={() => {
+                setActiveTab('overview');
+                const el = document.getElementById('parent-weekly-report-section');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="px-4 py-2.5 bg-white text-orange-700 hover:bg-amber-50 active:scale-95 font-black text-xs rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap"
+            >
+              {isRtl ? 'عرض التقرير الأسبوعي 👇' : 'View Weekly Report 👇'}
+            </button>
+            <button
+              onClick={() => setShowFridayBanner(false)}
+              className="p-2 text-white/70 hover:text-white rounded-xl hover:bg-white/10 transition-all cursor-pointer"
+              title={isRtl ? 'إغلاق التنبيه' : 'Dismiss'}
+              aria-label="Dismiss"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 🏛️ ACADEMY PREMIUM BANNER HEADER */}
       <div className="bg-gradient-to-r from-[#002147] via-[#003366] to-[#0a4d8c] rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-blue-900/15 relative overflow-hidden border-b-4 border-[#C49E3A]">
         <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full blur-3xl pointer-events-none -mr-16 -mt-16" />
@@ -4875,6 +5369,23 @@ export default function AuthenticatedApp({
           total: activeLesson.quiz?.length || 0,
           timestamp: serverTimestamp()
         });
+        recordStreakActivity(userProfile.uid).catch(console.error);
+
+        // Trigger unit completion certificate and store in users/{uid}/certificates/{unitId}
+        try {
+          const uId = activeLesson.unitId || activeLesson.moduleId || (activeLesson.id ? activeLesson.id.split('_').slice(0, 2).join('_') : 'unit_main');
+          const unitTitle = activeLesson.title || 'Curriculum Unit';
+          const unitTitleAr = activeLesson.titleAr || activeLesson.title || 'الوحدة التعليمية';
+          await saveEarnedCertificate(
+            userProfile.uid,
+            String(uId),
+            unitTitle,
+            unitTitleAr,
+            userProfile.displayName
+          );
+        } catch (certErr) {
+          console.warn("Could not save unit completion certificate:", certErr);
+        }
       }
 
       setUserProfile({ ...userProfile, points: updatedPoints } as UserProfile);
@@ -5274,6 +5785,7 @@ export default function AuthenticatedApp({
                   total: 10,
                   timestamp: serverTimestamp()
                 });
+                recordStreakActivity(currentUser.uid).catch(console.error);
                 setUserProfile({
                   ...userProfile,
                   points: newPoints
@@ -5314,6 +5826,7 @@ export default function AuthenticatedApp({
                     total: 10,
                     timestamp: serverTimestamp()
                   });
+                  recordStreakActivity(currentUser.uid).catch(console.error);
                 }
                 setUserProfile({
                   ...userProfile,

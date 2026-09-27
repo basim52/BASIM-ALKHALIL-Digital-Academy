@@ -49,6 +49,7 @@ import { translations, Language } from '../../lib/translations';
 import { db, handleFirestoreError, OperationType } from '../../lib/firebase';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { UserProfile, StudyPlan } from '../../types';
+import { saveEarnedCertificate } from '../../services/certificateService';
 import { 
   getAllCurriculumLessons, 
   ACADEMIC_SECTION_DEFINITIONS, 
@@ -1286,6 +1287,32 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                       {isExporting ? <Download size={14} className="animate-bounce" /> : <Share2 size={14} />}
                       <span>{isRtl ? 'تصدير للواتساب' : 'WhatsApp Export'}</span>
                     </button>
+
+                    {achievement && achievement.completedCount > 0 && (
+                      <button 
+                        onClick={async () => {
+                          try {
+                            const firstItem = generatedPlan[0];
+                            const planTitleEn = firstItem?.topic || firstItem?.courseLabel || 'Integrated Study Plan';
+                            const planTitleAr = firstItem?.courseLabel || firstItem?.topic || 'الخطة الدراسية المعتمدة';
+                            await saveEarnedCertificate(
+                              userProfile.uid,
+                              `plan_${firstItem?.unitId || 'academic_mastery'}`,
+                              planTitleEn,
+                              planTitleAr,
+                              studentName || userProfile.displayName
+                            );
+                          } catch (e) {
+                            console.warn("Could not trigger certificate:", e);
+                          }
+                        }}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-[#C49E3A] text-white rounded-xl text-xs font-black hover:opacity-90 transition-all shadow-sm cursor-pointer"
+                        title={isRtl ? 'إصدار شهادة إنجاز معتمدة' : 'Issue Certificate of Completion'}
+                      >
+                        <Award size={14} />
+                        <span>{isRtl ? 'شهادة إتمام الخطة 🎓' : 'Plan Certificate 🎓'}</span>
+                      </button>
+                    )}
                   </div>
                 </div>
 

@@ -11,6 +11,8 @@ import { MEGA_PROMPTS_DATA } from './MegaPromptLabData';
 import { CapstoneProjectHub } from './CapstoneProjectHub';
 import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { saveEarnedCertificate } from '../services/certificateService';
+import { recordStreakActivity } from '../services/streakService';
 import { UserProfile } from '../types';
 import { 
   Brain, 
@@ -2927,6 +2929,21 @@ export const AiCurriculum = ({
       };
 
       await addDoc(collection(db, 'lessonResults'), resultObj);
+      recordStreakActivity(currentUid).catch(console.error);
+
+      // Save Completion Certificate
+      try {
+        await saveEarnedCertificate(
+          currentUid,
+          String(quizId),
+          (unit as any)?.title || (unit as any)?.titleEn || 'AI Curriculum Unit',
+          (unit as any)?.titleAr || (unit as any)?.title || 'وحدة الذكاء الاصطناعي التفاعلية',
+          userProfile?.displayName || activeAuth?.displayName
+        );
+      } catch (certErr) {
+        console.warn("Could not save AI certificate:", certErr);
+      }
+
       alert(isRtl 
         ? `رائع! تم تسجيل درجة اختبارك (${score}/3) بنجاح في سجل الدارس ولا يمكن إعادته.` 
         : `Excellent! Your quiz grade (${score}/3) has been successfully recorded in your profile and cannot be retaken.`
@@ -3047,6 +3064,7 @@ export const AiCurriculum = ({
       };
 
       await addDoc(collection(db, 'lessonResults'), resultObj);
+      recordStreakActivity(currentUid).catch(console.error);
 
       alert(isRtl ? 'رائع! تم تسجيل إكمال الدرس بنجاح وسيظهر كمكتمل في جدول مهامك!' : 'Excellent! Lesson marked as completed and will reflect on your task planner!');
       setSelectedCustomUnit(null);

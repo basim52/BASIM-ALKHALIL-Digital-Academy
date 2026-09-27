@@ -97,6 +97,18 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["youtubeId", "titleEn", "titleAr", "level", "duration"]
+    },
+    "Streak": {
+      "title": "Daily Learning Streak",
+      "description": "Student daily learning streak tracking",
+      "type": "object",
+      "properties": {
+        "current": { "type": "number" },
+        "longest": { "type": "number" },
+        "lastActiveDate": { "type": "string" },
+        "freezesLeft": { "type": "number" }
+      },
+      "required": ["current", "longest", "lastActiveDate", "freezesLeft"]
     }
   },
   "firestore": {
@@ -175,6 +187,10 @@
     "/parentLinkCodes/{code}": {
       "schema": "object",
       "description": "Secure one-time student to parent invite link codes"
+    },
+    "/streaks/{uid}": {
+      "schema": "Streak",
+      "description": "Daily learning streak tracking per student"
     }
   }
 }
