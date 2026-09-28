@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { 
   X, 
   RotateCcw, 
+  RotateCw,
   Trash2, 
   Download, 
   PenTool, 
@@ -17,9 +18,11 @@ import {
   Minimize2,
   Palette,
   Camera,
-  Layers,
   Wand2,
-  Info
+  Sliders,
+  Undo2,
+  Redo2,
+  CircleDot
 } from 'lucide-react';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 import { SaraBoardData } from '../types';
@@ -239,11 +242,16 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   const [isDrawing, setIsDrawing] = useState(false);
   const [selectedTool, setSelectedTool] = useState<'pen' | 'highlighter' | 'glow' | 'eraser'>('pen');
   const [selectedColor, setSelectedColor] = useState<string>('#FACC15');
-  const [lineWidth, setLineWidth] = useState<number>(5);
+  const [lineWidth, setLineWidth] = useState<number>(6);
+  
+  // Step-by-Step History (Undo & Redo)
   const [history, setHistory] = useState<ImageData[]>([]);
+  const [redoHistory, setRedoHistory] = useState<ImageData[]>([]);
+  
   const [isMaximized, setIsMaximized] = useState(false);
   const [activeTab, setActiveTab] = useState<'content' | 'draw'>('content');
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
+  const [showBrushSizePopover, setShowBrushSizePopover] = useState(false);
   
   const dragControls = useDragControls();
   const [positionKey, setPositionKey] = useState(0);
@@ -307,6 +315,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
     return () => clearTimeout(timer);
   }, [isOpen, isMaximized, activeTab]);
 
+  // Save state for undo/redo
   const saveState = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -314,25 +323,56 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
     if (!ctx) return;
     try {
       const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      setHistory(prev => [...prev.slice(-12), data]);
+      setHistory(prev => [...prev.slice(-25), data]);
+      // Clear redo history on new action
+      setRedoHistory([]);
     } catch (e) {}
   }, []);
 
+  // Step-by-Step Undo
   const undoLastStroke = () => {
     const canvas = canvasRef.current;
     if (!canvas || history.length === 0) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    try {
+      // Save current state to redoHistory before undoing
+      const currentData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      setRedoHistory(prev => [...prev.slice(-25), currentData]);
+    } catch (e) {}
+
     const newHistory = [...history];
-    newHistory.pop();
-    const previous = newHistory[newHistory.length - 1];
+    const previous = newHistory.pop();
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (previous) {
       ctx.putImageData(previous, 0, 0);
     }
     setHistory(newHistory);
+  };
+
+  // Step-by-Step Redo
+  const redoStroke = () => {
+    const canvas = canvasRef.current;
+    if (!canvas || redoHistory.length === 0) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    try {
+      // Save current state to history before redoing
+      const currentData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      setHistory(prev => [...prev.slice(-25), currentData]);
+    } catch (e) {}
+
+    const newRedo = [...redoHistory];
+    const nextState = newRedo.pop();
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (nextState) {
+      ctx.putImageData(nextState, 0, 0);
+    }
+    setRedoHistory(newRedo);
   };
 
   const clearCanvas = () => {
@@ -378,12 +418,12 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
 
     if (selectedTool === 'eraser') {
       ctx.globalCompositeOperation = 'destination-out';
-      ctx.lineWidth = lineWidth * 5;
+      ctx.lineWidth = Math.max(18, lineWidth * 3.5);
       ctx.shadowBlur = 0;
     } else if (selectedTool === 'highlighter') {
       ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = `${selectedColor}55`; // translucent
-      ctx.lineWidth = lineWidth * 4;
+      ctx.strokeStyle = `${selectedColor}55`; // translucent glow
+      ctx.lineWidth = lineWidth * 3.5;
       ctx.shadowBlur = 0;
     } else if (selectedTool === 'glow') {
       ctx.globalCompositeOperation = 'source-over';
@@ -419,7 +459,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.closePath();
-    ctx.shadowBlur = 0; // reset shadow
+    ctx.shadowBlur = 0;
   };
 
   // ========================================================
@@ -430,7 +470,6 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
       playSnapshotShutterSound();
 
       const exportWidth = 1200;
-      // Calculate dynamic height based on content
       let estimatedHeight = 720;
       if (boardData?.formula) estimatedHeight += 110;
       if (boardData?.sentence) estimatedHeight += 120;
@@ -454,7 +493,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, exportWidth, exportHeight);
 
-      // 2. Draw subtle chalkboard/whiteboard grid
+      // 2. Draw subtle grid
       ctx.strokeStyle = currentTheme.gridColor;
       ctx.lineWidth = 1.5;
       for (let x = 0; x < exportWidth; x += 40) {
@@ -470,7 +509,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
         ctx.stroke();
       }
 
-      // 3. Draw elegant outer frame (Brass / Gold / Theme Accent)
+      // 3. Draw outer frame
       ctx.lineWidth = 14;
       ctx.strokeStyle = currentTheme.borderHex;
       ctx.strokeRect(7, 7, exportWidth - 14, exportHeight - 14);
@@ -483,11 +522,9 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
       ctx.fillStyle = currentTheme.isLight ? '#0F172A' : '#140E06';
       ctx.fillRect(18, 18, exportWidth - 36, 95);
 
-      // Golden line under header
       ctx.fillStyle = currentTheme.borderHex;
       ctx.fillRect(18, 110, exportWidth - 36, 4);
 
-      // Header Texts
       ctx.textAlign = 'right';
       ctx.fillStyle = currentTheme.borderHex;
       ctx.font = 'bold 22px system-ui, -apple-system, sans-serif';
@@ -498,7 +535,6 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
       const title = boardData?.title || 'لوحة الشرح التفاعلية مع المعلمة سارة 👩‍🏫';
       ctx.fillText(title, exportWidth - 50, 92);
 
-      // Timestamp & Date
       ctx.textAlign = 'left';
       ctx.fillStyle = '#94A3B8';
       ctx.font = 'bold 15px monospace';
@@ -514,7 +550,6 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
       const textMainColor = currentTheme.isLight ? '#0F172A' : '#FFFFFF';
       const textSecondaryColor = currentTheme.isLight ? '#334155' : '#CBD5E1';
 
-      // Block A: Grammar Formula (if present)
       if (boardData?.formula) {
         ctx.fillStyle = currentTheme.isLight ? '#EFF6FF' : 'rgba(196, 158, 58, 0.18)';
         ctx.strokeStyle = currentTheme.borderHex;
@@ -537,7 +572,6 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
         curY += 95;
       }
 
-      // Block B: Target Sentence Example
       if (boardData?.sentence) {
         ctx.fillStyle = currentTheme.isLight ? '#FFFFFF' : 'rgba(0, 0, 0, 0.55)';
         ctx.strokeStyle = currentTheme.isLight ? '#CBD5E1' : 'rgba(255, 255, 255, 0.15)';
@@ -560,7 +594,6 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
         curY += 115;
       }
 
-      // Block C: Gentle Correction Card (if present)
       if (boardData?.correction) {
         const cardWidth = exportWidth - 100;
         ctx.fillStyle = currentTheme.isLight ? '#F1F5F9' : 'rgba(0, 0, 0, 0.4)';
@@ -585,7 +618,6 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
         curY += 90;
       }
 
-      // Block D: Teacher Sara's Golden Explanation Points
       if (boardData?.notes && boardData.notes.length > 0) {
         const notesBoxHeight = 45 + boardData.notes.length * 36;
         ctx.fillStyle = currentTheme.isLight ? '#FFFFFF' : 'rgba(0, 0, 0, 0.35)';
@@ -614,7 +646,6 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
         curY += notesBoxHeight + 20;
       }
 
-      // Block E: Vocabulary / Diagram (if present)
       if (boardData?.diagram && boardData.diagram.items.length > 0) {
         ctx.fillStyle = currentTheme.isLight ? '#FFFFFF' : 'rgba(0, 0, 0, 0.35)';
         ctx.strokeStyle = currentTheme.isLight ? '#E2E8F0' : 'rgba(255, 255, 255, 0.12)';
@@ -644,20 +675,13 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
         curY += 115;
       }
 
-      // 6. Draw User Chalk Drawings OVERLAY if any exist on canvasRef
+      // Draw User Chalk Drawings OVERLAY
       const studentCanvas = canvasRef.current;
       if (studentCanvas && studentCanvas.width > 0 && studentCanvas.height > 0) {
-        // If student made drawings on canvas, render them
-        if (activeTab === 'draw') {
-          // Full drawing mode: scale student canvas to fill content area nicely
-          ctx.drawImage(studentCanvas, 50, 140, exportWidth - 100, exportHeight - 220);
-        } else {
-          // Overlay drawing over notes if present
-          ctx.drawImage(studentCanvas, 50, 140, exportWidth - 100, exportHeight - 220);
-        }
+        ctx.drawImage(studentCanvas, 50, 140, exportWidth - 100, exportHeight - 220);
       }
 
-      // 7. Footer Bar & Motivational Stamp
+      // Footer
       ctx.fillStyle = currentTheme.isLight ? '#0F172A' : '#140E06';
       ctx.fillRect(18, exportHeight - 65, exportWidth - 36, 47);
 
@@ -671,7 +695,6 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
       ctx.font = 'bold 14px system-ui, sans-serif';
       ctx.fillText('سارة - رفيقتك الذكية لتعلم الإنجليزية 👩‍🏫', 45, exportHeight - 35);
 
-      // 8. Download PNG
       const cleanTitle = (boardData?.title || 'شرح_سارة')
         .replace(/[^\w\u0600-\u06FF\s-]/g, '')
         .trim()
@@ -684,7 +707,6 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
       link.href = exportCanvas.toDataURL('image/png', 1.0);
       link.click();
 
-      // Show friendly confirmation toast
       setSaveSuccessMessage(isRtl ? 'تم حفظ لوحة الشرح كصورة بنجاح! 📸🎉 يمكنك الآن مراجعتها في أي وقت.' : 'Whiteboard image saved successfully! 📸🎉');
       setTimeout(() => {
         setSaveSuccessMessage(null);
@@ -713,7 +735,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
         className={`fixed z-50 transition-shadow ${
           isMaximized 
             ? 'inset-2 sm:inset-4' 
-            : 'top-14 sm:top-16 inset-x-2 sm:inset-x-auto sm:right-6 sm:w-[740px] max-h-[88vh]'
+            : 'top-14 sm:top-16 inset-x-2 sm:inset-x-auto sm:right-6 sm:w-[760px] max-h-[88vh]'
         } flex flex-col rounded-3xl shadow-2xl overflow-hidden font-sans border-4`}
         style={{
           borderColor: currentTheme.borderHex,
@@ -783,7 +805,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
             </div>
           </div>
 
-          {/* Action buttons */}
+          {/* Action buttons in header */}
           <div className="flex items-center gap-1 sm:gap-1.5">
             {/* Theme Picker Toggle */}
             <div className="relative">
@@ -846,7 +868,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               </AnimatePresence>
             </div>
 
-            {/* Save Board as Image Button (ALWAYS VISIBLE IN HEADER) */}
+            {/* Save Board as Image Button (Header) */}
             <button
               onClick={saveWhiteboardAsImage}
               className="px-2 sm:px-2.5 py-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1 shadow-sm transition-all cursor-pointer active:scale-95"
@@ -882,7 +904,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                   backgroundColor: activeTab === 'draw' ? currentTheme.borderHex : 'transparent'
                 }}
               >
-                {isRtl ? 'الطبشور ✍️' : 'Chalk ✍️'}
+                {isRtl ? 'الرسم ✍️' : 'Draw ✍️'}
               </button>
             </div>
 
@@ -940,7 +962,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               animate={{ opacity: 1, y: 0 }}
               className="space-y-4"
             >
-              {/* Formula Ribbon if available */}
+              {/* Formula Ribbon */}
               {boardData?.formula && (
                 <div 
                   className="rounded-2xl p-3.5 text-center shadow-inner border-2"
@@ -977,7 +999,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                 </div>
               )}
 
-              {/* Target Sentence Display with Glow and Listen button */}
+              {/* Target Sentence Display */}
               {boardData?.sentence && (
                 <div 
                   className="border-2 rounded-2xl p-4 shadow-xl relative group"
@@ -1026,7 +1048,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                 </div>
               )}
 
-              {/* Gentle Correction Display if present (hidden during quiz to prevent cheating) */}
+              {/* Gentle Correction Display */}
               {boardData?.correction && (!boardData.quiz || (quizSelectedOption !== null && quizSelectedOption !== undefined)) && (
                 <div 
                   className="border rounded-2xl p-3.5 flex flex-col sm:flex-row items-center justify-around gap-2 text-xs sm:text-sm"
@@ -1047,7 +1069,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                 </div>
               )}
 
-              {/* Chalk Notes / Bullet points */}
+              {/* Chalk Notes */}
               {boardData?.notes && boardData.notes.length > 0 && (
                 <div 
                   className="border rounded-2xl p-4"
@@ -1074,7 +1096,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                 </div>
               )}
 
-              {/* Diagram / Vocabulary Cards */}
+              {/* Diagram / Vocabulary */}
               {boardData?.diagram && (
                 <div 
                   className="border rounded-2xl p-4"
@@ -1116,7 +1138,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                 </div>
               )}
 
-              {/* Interactive Mini-Quiz on the Whiteboard */}
+              {/* Interactive Mini-Quiz */}
               {boardData?.quiz && (
                 <div 
                   className="border-2 rounded-2xl p-4"
@@ -1198,7 +1220,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                   }}
                 >
                   <PenTool size={14} />
-                  <span>{isRtl ? 'الرسم والكتابة بالطبشور على السبورة ✍️' : 'Draw or write with chalk ✍️'}</span>
+                  <span>{isRtl ? 'فتح شريط أدوات الرسم التفاعلي ✍️' : 'Open Interactive Drawing Tools ✍️'}</span>
                 </button>
 
                 <button
@@ -1224,158 +1246,246 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               onTouchStart={startDrawing}
               onTouchMove={draw}
               onTouchEnd={stopDrawing}
-              className="w-full h-full cursor-crosshair touch-none"
+              className={`w-full h-full touch-none ${
+                selectedTool === 'eraser' ? 'cursor-cell' : 'cursor-crosshair'
+              }`}
             />
           </div>
         </div>
 
         {/* ======================================================== */}
-        {/* BOTTOM WOODEN / BRASS TRAY / TOOLBAR FOR DRAWING */}
+        {/* DEDICATED INTERACTIVE DRAWING TOOLBAR (شريط أدوات الرسم) */}
+        {/* Includes: Brush Size Selector, Eraser, Step-by-Step Undo/Redo */}
         {/* ======================================================== */}
         {activeTab === 'draw' && (
           <div 
-            className={`bg-gradient-to-r ${currentTheme.headerFrom} ${currentTheme.headerVia} ${currentTheme.headerTo} px-3 sm:px-4 py-2.5 border-t-2 flex items-center justify-between flex-wrap gap-2 shrink-0`}
-            style={{ borderColor: `${currentTheme.borderHex}66` }}
+            className={`bg-gradient-to-r ${currentTheme.headerFrom} ${currentTheme.headerVia} ${currentTheme.headerTo} px-3 py-2 border-t-2 flex flex-col gap-2 shrink-0 select-none shadow-xl`}
+            style={{ borderColor: `${currentTheme.borderHex}88` }}
           >
-            {/* 1. Drawing Tool Selector */}
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setSelectedTool('pen')}
-                className={`p-2 rounded-xl border transition-all cursor-pointer ${
-                  selectedTool === 'pen'
-                    ? 'text-slate-900 border-white shadow-sm font-black scale-105'
-                    : 'bg-white/5 text-amber-200/80 border-white/10 hover:bg-white/10'
-                }`}
-                style={{
-                  backgroundColor: selectedTool === 'pen' ? currentTheme.borderHex : undefined
-                }}
-                title={isRtl ? 'قلم ذكي / طبشور' : 'Smart Chalk Pen'}
-              >
-                <PenTool size={15} />
-              </button>
-              <button
-                onClick={() => setSelectedTool('highlighter')}
-                className={`p-2 rounded-xl border transition-all cursor-pointer ${
-                  selectedTool === 'highlighter'
-                    ? 'text-slate-900 border-white shadow-sm font-black scale-105'
-                    : 'bg-white/5 text-amber-200/80 border-white/10 hover:bg-white/10'
-                }`}
-                style={{
-                  backgroundColor: selectedTool === 'highlighter' ? currentTheme.borderHex : undefined
-                }}
-                title={isRtl ? 'تظليل فسفوري شفاف' : 'Highlighter'}
-              >
-                <Highlighter size={15} />
-              </button>
-              <button
-                onClick={() => setSelectedTool('glow')}
-                className={`p-2 rounded-xl border transition-all cursor-pointer ${
-                  selectedTool === 'glow'
-                    ? 'text-slate-900 border-white shadow-sm font-black scale-105'
-                    : 'bg-white/5 text-amber-200/80 border-white/10 hover:bg-white/10'
-                }`}
-                style={{
-                  backgroundColor: selectedTool === 'glow' ? currentTheme.borderHex : undefined
-                }}
-                title={isRtl ? 'قلم النجوم المضيء السحري ✨' : 'Magic Glow Pen ✨'}
-              >
-                <Wand2 size={15} />
-              </button>
-              <button
-                onClick={() => setSelectedTool('eraser')}
-                className={`p-2 rounded-xl border transition-all cursor-pointer ${
-                  selectedTool === 'eraser'
-                    ? 'text-slate-900 border-white shadow-sm font-black scale-105'
-                    : 'bg-white/5 text-amber-200/80 border-white/10 hover:bg-white/10'
-                }`}
-                style={{
-                  backgroundColor: selectedTool === 'eraser' ? currentTheme.borderHex : undefined
-                }}
-                title={isRtl ? 'ممحاة السبورة' : 'Eraser'}
-              >
-                <Eraser size={15} />
-              </button>
-            </div>
-
-            {/* 2. Expanded Kid-Friendly Pen Colors */}
-            <div className="flex items-center gap-1 bg-black/30 p-1 rounded-2xl border border-white/10 overflow-x-auto max-w-[220px] sm:max-w-none">
-              {SMART_PEN_COLORS.map(c => {
-                const isSelected = selectedColor === c.value && selectedTool !== 'eraser';
-                return (
-                  <button
-                    key={`pen-color-${c.name}`}
-                    onClick={() => {
-                      setSelectedColor(c.value);
-                      if (selectedTool === 'eraser') setSelectedTool('pen');
-                    }}
-                    style={{ backgroundColor: c.value }}
-                    className={`w-6 h-6 rounded-full border-2 transition-all cursor-pointer shrink-0 ${
-                      isSelected
-                        ? 'border-white scale-125 shadow-lg shadow-amber-300/40 z-10'
-                        : 'border-black/50 hover:scale-110 opacity-90'
-                    }`}
-                    title={isRtl ? c.labelAr : c.labelEn}
-                  />
-                );
-              })}
-            </div>
-
-            {/* 3. Stroke Thickness (Fine, Medium, Bold, Jumbo) */}
-            <div className="flex items-center gap-1 bg-black/40 px-2 py-1 rounded-xl border border-white/10">
-              <span className="text-[10px] text-amber-200/70 font-bold hidden sm:inline ml-1">
-                {isRtl ? 'الحجم:' : 'Size:'}
-              </span>
-              {[
-                { size: 3, label: 'S' },
-                { size: 6, label: 'M' },
-                { size: 12, label: 'L' },
-                { size: 22, label: 'XL' }
-              ].map(({ size, label }) => (
+            {/* ROW 1: CORE DRAWING TOOLS, ERASER & STEP-BY-STEP UNDO/REDO */}
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              
+              {/* SECTION A: DRAWING TOOLS & ERASER */}
+              <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10">
                 <button
-                  key={`stroke-${size}`}
-                  onClick={() => setLineWidth(size)}
-                  className={`w-6 h-6 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center ${
-                    lineWidth === size 
-                      ? 'text-slate-900' 
-                      : 'text-slate-300 hover:text-white'
+                  onClick={() => setSelectedTool('pen')}
+                  className={`px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                    selectedTool === 'pen'
+                      ? 'text-slate-900 border-white shadow-md scale-105'
+                      : 'bg-white/5 text-amber-200/80 border-transparent hover:bg-white/10'
                   }`}
                   style={{
-                    backgroundColor: lineWidth === size ? currentTheme.borderHex : 'transparent'
+                    backgroundColor: selectedTool === 'pen' ? currentTheme.borderHex : undefined
                   }}
-                  title={label === 'XL' ? (isRtl ? 'تلوين عريض للأطفال' : 'Jumbo Coloring') : undefined}
+                  title={isRtl ? 'قلم ذكي / طبشور ناعم' : 'Smart Chalk Pen'}
                 >
-                  {label}
+                  <PenTool size={14} />
+                  <span>{isRtl ? 'قلم' : 'Pen'}</span>
                 </button>
-              ))}
+
+                <button
+                  onClick={() => setSelectedTool('highlighter')}
+                  className={`px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                    selectedTool === 'highlighter'
+                      ? 'text-slate-900 border-white shadow-md scale-105'
+                      : 'bg-white/5 text-amber-200/80 border-transparent hover:bg-white/10'
+                  }`}
+                  style={{
+                    backgroundColor: selectedTool === 'highlighter' ? currentTheme.borderHex : undefined
+                  }}
+                  title={isRtl ? 'تظليل فسفوري شفاف لتحديد الكلمات' : 'Highlighter'}
+                >
+                  <Highlighter size={14} />
+                  <span>{isRtl ? 'تظليل' : 'Highlight'}</span>
+                </button>
+
+                <button
+                  onClick={() => setSelectedTool('glow')}
+                  className={`px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                    selectedTool === 'glow'
+                      ? 'text-slate-900 border-white shadow-md scale-105'
+                      : 'bg-white/5 text-amber-200/80 border-transparent hover:bg-white/10'
+                  }`}
+                  style={{
+                    backgroundColor: selectedTool === 'glow' ? currentTheme.borderHex : undefined
+                  }}
+                  title={isRtl ? 'قلم النجوم المضيء السحري للأطفال ✨' : 'Magic Glow Pen ✨'}
+                >
+                  <Wand2 size={14} />
+                  <span>{isRtl ? 'سحري ✨' : 'Glow ✨'}</span>
+                </button>
+
+                {/* THE DEDICATED ERASER TOOL */}
+                <button
+                  onClick={() => setSelectedTool('eraser')}
+                  className={`px-3 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                    selectedTool === 'eraser'
+                      ? 'bg-rose-500 text-white border-white shadow-lg ring-2 ring-rose-300 scale-105 animate-pulse'
+                      : 'bg-rose-500/15 text-rose-300 border-rose-500/30 hover:bg-rose-500/30'
+                  }`}
+                  title={isRtl ? 'ممحاة السبورة لمسح أي رسمة أو خط' : 'Whiteboard Eraser'}
+                >
+                  <Eraser size={15} />
+                  <span>{isRtl ? 'ممحاة 🧹' : 'Eraser 🧹'}</span>
+                </button>
+              </div>
+
+              {/* SECTION B: BRUSH SIZE SELECTOR WITH LIVE PREVIEW */}
+              <div className="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-2xl border border-white/10">
+                <span className="text-[10px] text-amber-200/80 font-bold hidden sm:inline">
+                  {isRtl ? 'حجم الفرشاة:' : 'Brush Size:'}
+                </span>
+
+                {/* Live Circle Preview Indicator */}
+                <div 
+                  className="w-6 h-6 rounded-full flex items-center justify-center bg-black/50 border border-white/30 shrink-0"
+                  title={isRtl ? `الحجم الحالي: ${lineWidth}px` : `Size: ${lineWidth}px`}
+                >
+                  <div 
+                    className="rounded-full transition-all"
+                    style={{
+                      width: `${Math.max(4, Math.min(20, lineWidth))}px`,
+                      height: `${Math.max(4, Math.min(20, lineWidth))}px`,
+                      backgroundColor: selectedTool === 'eraser' ? '#F43F5E' : selectedColor,
+                      boxShadow: selectedTool === 'glow' ? `0 0 6px ${selectedColor}` : undefined
+                    }}
+                  />
+                </div>
+
+                {/* Slider */}
+                <input
+                  type="range"
+                  min="2"
+                  max="32"
+                  value={lineWidth}
+                  onChange={(e) => setLineWidth(Number(e.target.value))}
+                  className="w-16 sm:w-24 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400"
+                  title={`${lineWidth}px`}
+                />
+
+                <span className="text-[10px] font-mono font-bold text-amber-200 w-6 text-center">
+                  {lineWidth}p
+                </span>
+
+                {/* Preset Chips */}
+                <div className="hidden sm:flex items-center gap-0.5 border-s border-white/20 ps-1.5">
+                  {[
+                    { size: 3, label: 'S', titleAr: 'ناعم 3px' },
+                    { size: 7, label: 'M', titleAr: 'متوسط 7px' },
+                    { size: 14, label: 'L', titleAr: 'عريض 14px' },
+                    { size: 26, label: 'XL', titleAr: 'تلوين عريض 26px' }
+                  ].map(({ size, label, titleAr }) => (
+                    <button
+                      key={`brush-preset-${size}`}
+                      onClick={() => setLineWidth(size)}
+                      className={`w-5 h-5 rounded-md text-[10px] font-black transition-all cursor-pointer flex items-center justify-center ${
+                        lineWidth === size 
+                          ? 'text-slate-950 font-black shadow-xs' 
+                          : 'text-slate-400 hover:text-white bg-white/5'
+                      }`}
+                      style={{
+                        backgroundColor: lineWidth === size ? currentTheme.borderHex : undefined
+                      }}
+                      title={titleAr}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* SECTION C: STEP-BY-STEP UNDO, REDO & CLEAR */}
+              <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10">
+                {/* STEP-BY-STEP UNDO */}
+                <button
+                  onClick={undoLastStroke}
+                  disabled={history.length === 0}
+                  className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 disabled:opacity-30 disabled:pointer-events-none text-amber-200 border border-white/10 transition-all cursor-pointer flex items-center gap-1 text-xs font-bold"
+                  title={isRtl ? `تراجع عن الخطوة السابقة (${history.length})` : 'Undo Step'}
+                >
+                  <RotateCcw size={14} />
+                  <span>{isRtl ? 'تراجع' : 'Undo'}</span>
+                  {history.length > 0 && (
+                    <span className="text-[9px] px-1 py-0.2 rounded-full bg-amber-400/20 text-amber-300">
+                      {history.length}
+                    </span>
+                  )}
+                </button>
+
+                {/* STEP-BY-STEP REDO */}
+                <button
+                  onClick={redoStroke}
+                  disabled={redoHistory.length === 0}
+                  className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 disabled:opacity-30 disabled:pointer-events-none text-amber-200 border border-white/10 transition-all cursor-pointer flex items-center gap-1 text-xs font-bold"
+                  title={isRtl ? `إعادة الخطوة (${redoHistory.length})` : 'Redo Step'}
+                >
+                  <RotateCw size={14} />
+                  <span className="hidden xs:inline">{isRtl ? 'إعادة' : 'Redo'}</span>
+                </button>
+
+                {/* CLEAR ALL CANVAS */}
+                <button
+                  onClick={clearCanvas}
+                  className="p-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 transition-all cursor-pointer"
+                  title={isRtl ? 'مسح السبورة بالكامل' : 'Clear Whiteboard'}
+                >
+                  <Trash2 size={14} />
+                </button>
+
+                {/* SAVE BOARD AS IMAGE */}
+                <button
+                  onClick={saveWhiteboardAsImage}
+                  className="px-2.5 py-1.5 rounded-xl text-slate-950 shadow-md font-black text-xs flex items-center gap-1 cursor-pointer active:scale-95 transition-all"
+                  style={{ backgroundColor: currentTheme.borderHex }}
+                  title={isRtl ? 'حفظ اللوحة بالكامل كصورة عالية الدقة 📸' : 'Save Whiteboard Image'}
+                >
+                  <Camera size={13} className="text-slate-900" />
+                  <span className="hidden sm:inline">{isRtl ? 'حفظ كصورة 📸' : 'Save 📸'}</span>
+                </button>
+              </div>
+
             </div>
 
-            {/* 4. Undo, Clear, and Save Whiteboard as Image */}
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={undoLastStroke}
-                disabled={history.length === 0}
-                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 disabled:opacity-30 text-amber-200/80 border border-white/10 transition-all cursor-pointer"
-                title={isRtl ? 'تراجع عن آخر خط' : 'Undo'}
-              >
-                <RotateCcw size={15} />
-              </button>
-              <button
-                onClick={clearCanvas}
-                className="p-2 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 transition-all cursor-pointer"
-                title={isRtl ? 'مسح السبورة بالكامل' : 'Clear Whiteboard'}
-              >
-                <Trash2 size={15} />
-              </button>
-              <button
-                onClick={saveWhiteboardAsImage}
-                className="px-2.5 py-1.5 rounded-xl text-slate-950 shadow-md font-black text-xs flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
-                style={{ backgroundColor: currentTheme.borderHex }}
-                title={isRtl ? 'حفظ اللوحة بالكامل كصورة لمراجعتها لاحقاً' : 'Save Board as Image'}
-              >
-                <Camera size={14} className="text-slate-900" />
-                <span>{isRtl ? 'حفظ كصورة 📸' : 'Save Image 📸'}</span>
-              </button>
+            {/* ROW 2: EXPANDED 10 KID-FRIENDLY PEN COLORS */}
+            <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/10 overflow-x-auto">
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="text-[10px] text-amber-200/70 font-bold hidden sm:inline ml-1">
+                  {isRtl ? 'الألوان:' : 'Colors:'}
+                </span>
+
+                {SMART_PEN_COLORS.map(c => {
+                  const isSelected = selectedColor === c.value && selectedTool !== 'eraser';
+                  return (
+                    <button
+                      key={`pen-color-${c.name}`}
+                      onClick={() => {
+                        setSelectedColor(c.value);
+                        if (selectedTool === 'eraser') setSelectedTool('pen');
+                      }}
+                      style={{ backgroundColor: c.value }}
+                      className={`w-6 h-6 rounded-full border-2 transition-all cursor-pointer shrink-0 ${
+                        isSelected
+                          ? 'border-white scale-125 shadow-lg shadow-amber-300/40 z-10 ring-2 ring-white/50'
+                          : 'border-black/50 hover:scale-110 opacity-90'
+                      }`}
+                      title={isRtl ? c.labelAr : c.labelEn}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Status Hint */}
+              <div className="text-[10px] text-amber-200/60 font-medium truncate hidden md:block">
+                {selectedTool === 'eraser' 
+                  ? (isRtl ? '🧹 الممحاة نشطة: مرر فوق أي جزء لمسحه' : '🧹 Eraser Active')
+                  : selectedTool === 'glow'
+                  ? (isRtl ? '✨ قلم النجوم المضيء: خطوط متوهجة للأطفال' : '✨ Magic Glow Pen')
+                  : selectedTool === 'highlighter'
+                  ? (isRtl ? '🖍️ تظليل فوسفوري شفاف' : '🖍️ Highlighter')
+                  : (isRtl ? '✏️ قلم الطبشور الذكي' : '✏️ Smart Chalk')}
+              </div>
             </div>
+
           </div>
         )}
       </motion.div>
