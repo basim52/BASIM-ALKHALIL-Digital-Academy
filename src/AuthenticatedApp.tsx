@@ -139,6 +139,7 @@ import { GrammarAcademy } from './components/GrammarAcademy';
 import { ReadingLab } from './components/ReadingLab';
 import { WritingSpellingStudio } from './components/WritingSpellingStudio';
 import { SaraTutor } from './components/SaraTutor';
+import { cancelAllSpeech } from './lib/audio';
 import { SaraParentCard } from './components/SaraParentCard';
 import { Layers, Image as OxfordIcon, Library as OxfordClassicIcon, Languages } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -1417,23 +1418,6 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
       btnBg: 'bg-pink-50',
       badgeAr: 'تأسيس وبناء لغوي للطفل',
       badgeEn: 'Toddler Phonics'
-    },
-    {
-      id: 'ai-chat',
-      category: 'skills',
-      titleAr: 'شريك المحادثة الذكي 🤖',
-      titleEn: 'Basim AI Dialog Partner 🤖',
-      descAr: 'تحدث بالصوت والرسائل النصية مع باسم في مواضيع تفاعلية واحصل على تصحيحات فورية للأخطاء اللغوية.',
-      descEn: 'Build oral courage and correct grammatical syntax live by talking to your smart buddy Basim.',
-      icon: Mic2,
-      glowColor: 'bg-slate-400/20',
-      badgeStyle: 'bg-slate-100 text-slate-800 border border-slate-200',
-      iconBg: 'bg-slate-50',
-      iconColor: 'text-slate-700',
-      btnTextColor: 'text-slate-700',
-      btnBg: 'bg-slate-50',
-      badgeAr: 'رفيق المحادثة الصوتي',
-      badgeEn: 'Speech Companion'
     },
     {
       id: 'video-library',
@@ -5363,7 +5347,7 @@ export default function AuthenticatedApp({
 
   const handleStartAiChat = async () => {
     if (!userProfile) return;
-    setView('ai-chat');
+    setView('sara-tutor');
   };
 
   if (renderError) {
@@ -6808,8 +6792,22 @@ export default function AuthenticatedApp({
       );
     }
 
-    if (view === 'ai-chat') {
-      return <AIConversation lang={lang} onBack={() => setView('dashboard')} />;
+    if (view === 'ai-chat' && userProfile) {
+      return (
+        <SaraTutor
+          lang={lang}
+          profile={userProfile}
+          onNavigate={(target) => {
+            cancelAllSpeech();
+            setView(target);
+          }}
+          onBack={() => {
+            cancelAllSpeech();
+            setView('dashboard');
+          }}
+          onProfileUpdated={(updated) => setUserProfile(updated)}
+        />
+      );
     }
 
     if (view === 'bi-weekly-test') {
@@ -6899,8 +6897,15 @@ export default function AuthenticatedApp({
         <SaraTutor
           lang={lang}
           profile={userProfile}
-          onNavigate={setView}
-          onBack={() => setView('dashboard')}
+          onNavigate={(target) => {
+            cancelAllSpeech();
+            setView(target);
+          }}
+          onBack={() => {
+            cancelAllSpeech();
+            setView('dashboard');
+          }}
+          onProfileUpdated={(updated) => setUserProfile(updated)}
         />
       );
     }
@@ -7044,7 +7049,7 @@ export default function AuthenticatedApp({
                 <nav className="flex-1 space-y-2 overflow-y-auto no-scrollbar">
                   {[
                     { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
-                    { id: 'sara-tutor', label: lang === 'ar' ? 'سارة – معلمتك 👩‍🏫' : 'Teacher Sara AI 👩‍🏫', icon: Sparkles },
+                    { id: 'sara-tutor', label: lang === 'ar' ? 'سارة – محادثة لايف ومعلمتك 👩‍🏫' : 'Teacher Sara – Live Tutor 👩‍🏫', icon: Sparkles },
                     { id: 'pronunciation-lab', label: lang === 'ar' ? 'معمل النطق 🎙️' : 'Pronunciation Lab 🎙️', icon: Mic },
                     { id: 'live-translate', label: lang === 'ar' ? 'مترجم المباشر 🌐' : 'Live Translate 🌐', icon: Languages },
                     { id: 'interactive-learning', label: lang === 'ar' ? 'تعليم تفاعلي ⚡' : 'Interactive Learning ⚡', icon: Gamepad2 },
@@ -7060,7 +7065,6 @@ export default function AuthenticatedApp({
                     { id: 'professional-development', label: lang === 'ar' ? 'دورات تطويرية' : 'Developmental Courses', icon: GraduationCap },
                     { id: 'early-childhood', label: t.earlyChildhood, icon: Baby },
                     { id: 'story-library', label: t.storyLibrary, icon: BookMarked },
-                    { id: 'ai-chat', label: t.aiPartner, icon: Mic2 },
                     { id: 'progress', label: t.performance, icon: BarChart3 },
                     { id: 'leaderboard', label: t.leaderboard, icon: Trophy },
                     { id: 'chat', label: t.chat, icon: MessageSquare },
@@ -7246,7 +7250,6 @@ export default function AuthenticatedApp({
                               { id: 'educational-games', label: isRtl ? 'واحة الألعاب والآداب 🎮' : 'Games & Manners Hub 🎮', icon: Gamepad2 },
                               { id: 'pronunciation-lab', label: isRtl ? 'معمل النطق' : 'Pronunciation Lab', icon: Mic },
                               { id: 'live-translate', label: isRtl ? 'مترجم المباشر 🌐' : 'Live Translate', icon: Languages },
-                              { id: 'ai-chat', label: t.aiPartner, icon: Mic2, action: handleStartAiChat },
                               { id: 'story-library', label: t.storyLibrary, icon: BookMarked },
                               { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
                               { id: 'professional-development', label: isRtl ? 'دورات التطوير المهني' : 'Professional Courses', icon: GraduationCap },
@@ -7259,11 +7262,7 @@ export default function AuthenticatedApp({
                                   key={`drawer-lab-${item.id}`}
                                   disabled={isDisabled}
                                   onClick={() => {
-                                    if (item.action) {
-                                      item.action();
-                                    } else {
-                                      setView(item.id as AppView);
-                                    }
+                                    setView(item.id as AppView);
                                     setIsMobileMenuOpen(false);
                                   }}
                                   className={`flex items-center gap-3 p-3 rounded-2xl border text-right transition-all cursor-pointer ${

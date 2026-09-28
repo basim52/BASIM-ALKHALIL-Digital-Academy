@@ -160,16 +160,16 @@ export const ACADEMIC_PILLARS: AcademicPillar[] = [
   {
     id: 'conversation',
     key: 'conversation',
-    nameAr: 'المحادثة والذكاء الاصطناعي',
-    nameEn: 'AI Dialogue & Fluency',
-    descAr: 'التحدث الصوتي المباشر مع رفيق المحادثة الذكي وتصحيح الأخطاء التلقائي.',
-    descEn: 'Voice-to-voice interactive conversations with instant feedback and correction.',
-    icon: MessageSquare,
+    nameAr: 'المعلمة سارة – محادثة لايف',
+    nameEn: 'Teacher Sara – Live Chat',
+    descAr: 'التحدث الصوتي المباشر مع المعلمة سارة بنظام رد برد والسبورة الذكية.',
+    descEn: 'Voice-to-voice interactive live conversation with Teacher Sara and smart chalkboard.',
+    icon: Sparkles,
     color: 'bg-cyan-500',
     bgGradient: 'from-cyan-600 to-blue-600',
     borderColor: 'border-cyan-200',
     textColor: 'text-cyan-600',
-    route: 'ai-chat'
+    route: 'sara-tutor'
   },
   {
     id: 'early_childhood',
@@ -659,9 +659,9 @@ export function getRemedialRecommendations(pillarId: string, isRtl = true): {
       },
       {
         stepNum: 3,
-        headline: isRtl ? 'التثبيت عبر رفيق المحادثة الذكي' : 'Reinforce with AI Dialogue Partner',
-        description: isRtl ? 'ناقش موضوع هذا القسم مع باسم لتحويل المعرفة إلى ممارسة حية.' : 'Discuss the topic with the AI tutor to solidify active fluency.',
-        targetRoute: 'ai-chat'
+        headline: isRtl ? 'التثبيت مع المعلمة سارة' : 'Reinforce with Teacher Sara',
+        description: isRtl ? 'ناقش موضوع هذا القسم مع المعلمة سارة لتحويل المعرفة إلى ممارسة حية.' : 'Discuss the topic with Teacher Sara to solidify active fluency.',
+        targetRoute: 'sara-tutor'
       }
     ]
   };

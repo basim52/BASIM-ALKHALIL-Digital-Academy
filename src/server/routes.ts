@@ -94,7 +94,7 @@ export function registerRoutes(app: any, wss?: WebSocketServer) {
       try {
         let modelToUse = PRIMARY_MODEL;
         if (i === 1) modelToUse = "gemini-3.1-pro-preview";
-        if (i === 2) modelToUse = "gemini-2.5-flash";
+        if (i === 2) modelToUse = "gemini-3.8-flash";
         
         logToFile(`AI Call Attempt ${i+1}/${maxRetries+1} using ${modelToUse} (API Key Status: ${!!API_KEY})`);
       
@@ -1022,42 +1022,55 @@ Looking forward to your reply. Tell me what we're tackling first!`;
   // High-fidelity speech synthesizer endpoint
   app.post("/api/tts", async (req, res) => {
     try {
-      const { text, lang = "en" } = req.body;
+      const { text, lang = "en", voiceName } = req.body;
       if (!text) return res.status(400).json({ error: "Text is required" });
 
       if (!initAI() || !aiLive) {
         return res.status(503).json({ error: "Gemini API key not configured for server-side TTS" });
       }
 
-      try {
-        const response = await aiLive.models.generateContent({
-          model: "gemini-2.5-flash",
-          contents: [{
-            role: "user",
-            parts: [{ text: `Speak clearly in ${lang === "ar" ? "Arabic" : "English"}: ${text}` }]
-          }],
-          config: {
-            responseModalities: [Modality.AUDIO],
-            speechConfig: {
-              voiceConfig: {
-                prebuiltVoiceConfig: {
-                  voiceName: lang === "ar" ? "Puck" : "Aoede"
+      // Try designated gemini TTS models
+      const candidateModels = ["gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts"];
+      let lastErr: any = null;
+
+      // Female voice: Kore is a warm, pleasant female voice across Arabic and English
+      const selectedVoice = voiceName || "Kore";
+
+      for (const modelToUse of candidateModels) {
+        try {
+          const response = await aiLive.models.generateContent({
+            model: modelToUse,
+            contents: [{
+              role: "user",
+              parts: [{ 
+                text: text
+              }]
+            }] as any,
+            config: {
+              responseModalities: [Modality.AUDIO],
+              speechConfig: {
+                voiceConfig: {
+                  prebuiltVoiceConfig: {
+                    voiceName: selectedVoice
+                  }
                 }
               }
             }
-          }
-        });
+          });
 
-        const candidates = (response as any).candidates;
-        const audioPart = candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData?.mimeType?.includes("audio") || p.inlineData);
-        if (audioPart && audioPart.inlineData?.data) {
-          return res.json({ audio: audioPart.inlineData.data });
+          const candidates = (response as any).candidates;
+          const audioPart = candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData?.mimeType?.includes("audio") || p.inlineData);
+          if (audioPart && audioPart.inlineData?.data) {
+            return res.json({ audio: audioPart.inlineData.data });
+          }
+        } catch (mErr: any) {
+          logToFile(`TTS attempt with ${modelToUse} failed: ${mErr.message}`);
+          lastErr = mErr;
         }
-        return res.status(500).json({ error: "No audio generated" });
-      } catch (err: any) {
-        logToFile(`TTS generation error: ${err.message}`);
-        return res.status(500).json({ error: err.message });
       }
+
+      logToFile(`TTS generation error: ${lastErr?.message || "No audio generated"}`);
+      return res.status(500).json({ error: lastErr?.message || "No audio generated" });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
@@ -1173,15 +1186,20 @@ Looking forward to your reply. Tell me what we're tackling first!`;
       ];
 
       // System instruction for Sara
-      const systemInstruction = `You are "Sara" (سارة), a personal AI English tutor inside the "Basim Alkhalil Digital Academy" (أكاديمية باسم الخليل الرقمية).
+      const systemInstruction = `You are "Sara" (سارة), a personal female AI English tutor inside the "Basim Alkhalil Digital Academy" (أكاديمية باسم الخليل الرقمية).
 
-PERSONA & TONE:
-- Name: Sara (سارة). A friendly, energetic, warm young Gulf English teacher (معلمة خليجية شابة، مفعمة بالحيوية والتشجيع والدفء).
-- Style: Short, warm, encouraging, a little playful, never boring or long. Keep replies concise and lively (2-4 sentences max per turn).
-- Language: Explain in simple Gulf-friendly Arabic (لهجة بيضاء خليجية عفوية ومحببة للصغار واليافعين)، and gradually use more English as the student's level progresses.
-- Corrections: GENTLE CORRECTION. NEVER say "wrong" or "خطأ" or "No". Instead, smile, repeat the correct sentence with praise (e.g. "حلوة محاولتك يا بطل! نقولها كذا: 'She goes to school' شفت كيف سهلة؟").
-- KID-SAFE AT ALL TIMES: The student is a child or teenager. Stay 100% on learning topics. Politely redirect any inappropriate, sensitive, or off-topic conversation back to learning. NEVER ask for, accept, or store personal information (no home address, no phone number, no real school name, no photos, no passwords).
-- CURRICULUM BOUNDARY: Teach ONLY English language skills from the academy (grammar, phonics, reading, vocabulary, conversation, spelling). Do not invent facts or make up untrue rules.
+FEMALE IDENTITY & TONE:
+- Name: Sara (سارة). A friendly, energetic, warm young female English teacher (معلمة شابة، مفعمة بالحيوية والتشجيع والدفء).
+- ALWAYS FEMALE: You are female. Use feminine Arabic grammar for yourself ("أنا معلمتك سارة"، "أنا سارة").
+- ULTRA CONCISE SPOKEN REPLIES: You are speaking aloud in a real-time live voice conversation. Speak ONLY 1 to 2 short sentences per turn (25 words max). NEVER ramble, lecture, or recite monologues.
+- CRITICAL OPENING RULE: When greeting or starting a new session, DO NOT recite long paragraphs or repeated introductions. Simply say: "أهلاً بك! أنا سارة 🌸 جاهز نبدأ؟" or "Hello! I am Sara. Ready to learn?".
+- NO CODE/MARKUP IN AUDIO: Never speak JSON, markdown stars, board items, or quiz options aloud in the "reply". Speak naturally and concisely as a teacher directly to the student.
+- SMART WHITEBOARD (السبورة الذكية للشرح):
+  The student can summon the smart whiteboard or you can summon it.
+  When explaining a rule, sentence, formula, vocabulary list, or mini-quiz:
+  Put the details in the "board" object, and set "openWhiteboard": true.
+- Corrections: GENTLE CORRECTION. NEVER say "wrong" or "خطأ" or "No". Instead, praise and show the correct phrase (e.g. "حلوة محاولتك يا بطل! نقولها كذا: 'She goes to school'").
+- KID-SAFE AT ALL TIMES: 100% on learning topics. Never request or store personal private info.
 
 ADAPTIVITY:
 - Student snapshot provided:
@@ -1193,15 +1211,6 @@ ADAPTIVITY:
   * Recent Words Learned: ${JSON.stringify(snapshot?.wordsLearned || [])}
   * Recent Lesson Results Summary: ${JSON.stringify(snapshot?.recentResultsSummary || 'None')}
   * Last Memory Notes: ${JSON.stringify(snapshot?.lastMemoryNotes || [])}
-- If student's age or level is unknown, use the first session to ask warmly about their age, interests, and English goal, or conduct a quick friendly 5-question chat check.
-
-DAILY SESSION FLOW (10-15 min total, handled step by step over turns):
-1. Warm-up greeting by name + recall of last session / friendly check-in.
-2. 2-minute review of recent mistakes or recently learned words.
-3. ONE new bite-sized skill from the curriculum (a clear rule, sentence pattern, or phrase).
-4. Practice using an existing academy section: invite the student and recommend opening one of the whitelist sections.
-5. 3-question mini quiz (presented interactively on the board, one question at a time).
-6. Summary + tiny homework + tomorrow's exciting plan, then mark sessionDone=true.
 
 SECTION WHITELIST for "actions" (ONLY use these sectionId values):
 ${VALID_SECTIONS.map(s => `- "${s}"`).join("\n")}
@@ -1210,11 +1219,13 @@ STRICT JSON OUTPUT REQUIREMENT:
 You MUST respond with a STRICT, VALID JSON object only, with NO surrounding Markdown code fences.
 Output structure:
 {
-  "reply": "Sara's spoken reply in warm Gulf Arabic mixed with English",
+  "reply": "Sara's short spoken reply in warm Gulf Arabic mixed with English (1-2 sentences max)",
   "board": {
-    "title": "Optional short title for what's being taught or practiced",
-    "sentence": "Optional English target sentence/rule shown on the board",
-    "highlight": "Optional word or phrase inside the sentence to glow/highlight",
+    "title": "Short title for the whiteboard explanation",
+    "sentence": "Target English sentence or example",
+    "highlight": "Target keyword or grammatical element to highlight",
+    "formula": "Grammar rule formula if applicable (e.g., 'Subject + Verb(s) + Object')",
+    "notes": ["Clear, bullet-point explanation notes to display on the smart chalkboard"],
     "correction": {
       "wrong": "wrong student phrase if correcting gently, otherwise omit",
       "right": "correct English phrase"
@@ -1223,15 +1234,16 @@ Output structure:
       "question": "Quiz question in English or Arabic if testing the skill",
       "options": ["Option A", "Option B", "Option C"],
       "answerIndex": 0
-    }
+    },
+    "openWhiteboard": true
   },
   "actions": [
     { "type": "open_section", "sectionId": "one_of_the_whitelisted_section_ids_above" }
   ],
   "memory": {
-    "newNotes": ["Short observation about student progress, preferences, or age/interests if revealed"],
-    "mistakes": ["Grammar or vocabulary mistake to track, e.g., 'Third-person singular -s'"],
-    "wordsLearned": ["New English words the student learned or practiced in this turn"]
+    "newNotes": ["Short observation about student progress"],
+    "mistakes": ["Grammar or vocabulary mistake to track"],
+    "wordsLearned": ["New English words the student learned in this turn"]
   },
   "sessionDone": false
 }`;
@@ -1259,7 +1271,7 @@ Output structure:
           logToFile(`[Sara] Primary model error: ${callErr.message}, trying fallback...`);
           try {
             const fallbackRes = await aiLive.models.generateContent({
-              model: "gemini-2.5-flash",
+              model: "gemini-3.1-pro-preview",
               contents: formattedContents,
               config: {
                 systemInstruction: systemInstruction,
@@ -1290,13 +1302,13 @@ Output structure:
 
       // Fallback if AI generation failed or wasn't valid JSON
       if (!parsedResult || !parsedResult.reply) {
-        const studentName = snapshot?.name || "يا بطل";
         parsedResult = {
-          reply: `هلا والله ${studentName}! أنا معلمتك سارة، وسعيدة جداً بلقائك اليوم 🌟 جاهز نبدأ رحلتنا الممتعة في تعلم الإنجليزية؟ قل لي وش تحب نتعلم اليوم؟`,
+          reply: `أهلاً بك! أنا سارة 🌸 جاهز نبدأ نتعلم إنجليزي؟`,
           board: {
-            title: "جلسة التعلم مع سارة 🌟",
-            sentence: "Welcome to your English session with Sara!",
-            highlight: "Welcome"
+            title: "سبورة الشرح الذكية 📐",
+            sentence: "Welcome to your English session!",
+            highlight: "Welcome",
+            openWhiteboard: false
           },
           actions: [
             { type: "open_section", sectionId: "grammar-academy" }
@@ -1338,6 +1350,53 @@ Output structure:
         error: "SARA_CHAT_ERROR",
         message: globalErr.message || "Failed to process chat with Sara"
       });
+    }
+  });
+
+  // Sara Tutor Placement Evaluation Result Persistence
+  app.post("/api/sara-tutor/save-placement", async (req, res) => {
+    try {
+      const { uid, level, conversationScore = 0, quizScore = 0, spellingScore = 0, totalScore = 0, details = {} } = req.body;
+      if (!uid || !level) {
+        return res.status(400).json({ error: "Missing required fields (uid, level)" });
+      }
+
+      const adminDb = getAdminDb();
+      if (adminDb) {
+        try {
+          await adminDb.collection("users").doc(uid).set({
+            level,
+            placementCompleted: true,
+            placementScore: totalScore,
+            placementUpdatedAt: FieldValue.serverTimestamp()
+          }, { merge: true });
+
+          await adminDb.collection("students").doc(uid).set({
+            level,
+            placementTestCompleted: true,
+            placementScore: totalScore,
+            conversationScore,
+            quizScore,
+            spellingScore,
+            details,
+            completedAt: new Date().toISOString()
+          }, { merge: true });
+          
+          logToFile(`[Sara Placement] Level ${level} saved for user ${uid}`);
+        } catch (dbErr: any) {
+          logToFile(`[Sara Placement] Firestore admin warning: ${dbErr.message}`);
+        }
+      }
+
+      return res.json({
+        ok: true,
+        uid,
+        level,
+        saved: true
+      });
+    } catch (err: any) {
+      console.error("[Sara Placement] Error:", err);
+      return res.status(500).json({ error: "Failed to save placement result", message: err.message });
     }
   });
 
@@ -3051,7 +3110,7 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
 
         // Initial call to Gemini to see if it generates a tool call
         const response1 = await aiLive.models.generateContent({
-          model: "gemini-3.5-flash",
+          model: "gemini-3.8-flash",
           contents: prompt,
           config: {
             systemInstruction: "You are a logistics and student-records assistant at Basim Alkhalil Academic Platform. Always use available tools if the user is asking about stock/prices of books, or student details. Answer in Arabic if the user asks in Arabic.",
@@ -3108,7 +3167,7 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
           };
 
           const response2 = await aiLive.models.generateContent({
-            model: "gemini-3.5-flash",
+            model: "gemini-3.8-flash",
             contents: [
               { role: "user", parts: [{ text: prompt }] },
               previousContent,
@@ -3155,7 +3214,7 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
         logToFile("Calling Gemini with code execution tool...");
         
         const response = await aiLive.models.generateContent({
-          model: "gemini-3.5-flash",
+          model: "gemini-3.8-flash",
           contents: prompt,
           config: {
             systemInstruction: "You are a scientific data analyst. You possess a built-in Python sandbox environment. When asked to calculate, process statistics, or check math sequences, write and execute python code natively to get the actual results.",
@@ -3209,7 +3268,7 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
         `;
 
         const response = await aiLive.models.generateContent({
-          model: "gemini-3.5-flash",
+          model: "gemini-3.8-flash",
           contents: `دليل سياسات الأكاديمية والمستند المرجعي:\n${standardAcademicContext}\n\nسؤال المستخدم:\n${prompt}`,
           config: {
             systemInstruction: "You are an advanced Document Intelligence Agent. Read the provided academic policy document carefully and extract precise grounded answers. Always output citations or references from the text. Respond in Arabic."
@@ -3231,7 +3290,7 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
         logToFile("Calling Gemini with Academy Educational Assistant configuration...");
         
         const response = await aiLive.models.generateContent({
-          model: "gemini-3.5-flash",
+          model: "gemini-3.8-flash",
           contents: prompt,
           config: {
             systemInstruction: "أنت المساعد الذكي المخصص لأكاديمية باسم ال خليل الرقمية لتعليم اللغة الإنجليزية. مهمتك هي تصميم وتوليد محتوى تعليمي، مناهج مبتكرة، واختبارات تقييمية تفاعلية. احرص على أن يكون الأسلوب تعليمياً، واضحاً، ومباشراً دون أي حشو أو مقدمات تكرارية."
@@ -4611,7 +4670,7 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
           // Start session on first message (which should contain context)
           if (!session && !isConnecting && !isSimulated) {
             isConnecting = true;
-            const modelToUse = "gemini-3.1-flash-live-preview"; 
+            const modelToUse = "gemini-3.8-live"; 
             logToFile(`Initializing Gemini Live session: ${modelToUse}`);
  
             if (!initAI() || !aiLive) {

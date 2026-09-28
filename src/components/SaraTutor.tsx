@@ -15,15 +15,35 @@ import {
   BookOpen, 
   RotateCcw,
   Check,
-  Award
+  Award,
+  Radio,
+  Zap,
+  Play,
+  Pause,
+  PenTool,
+  Target,
+  Trophy,
+  Star,
+  ChevronRight,
+  HelpCircle,
+  Compass,
+  Timer,
+  Clock,
+  Bell,
+  Plus,
+  Camera,
+  Palette
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { UserProfile, AppView, SaraBoardData, SaraChatResponse, TutorMemoryDoc } from '../types';
+import { UserProfile, AppView, SaraBoardData, SaraChatResponse, TutorMemoryDoc, proficiencyLevel, CurriculumCategory } from '../types';
 import { Language, translations } from '../lib/translations';
 import { auth, db } from '../lib/firebase';
-import { doc, getDoc, setDoc, collection, addDoc, serverTimestamp, getDocs, query, orderBy, limit } from 'firebase/firestore';
-import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
+import { doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { speakAcademyText, cancelAllSpeech, playSchoolBellChime } from '../lib/audio';
 import { getStudentStreak, StreakData } from '../services/streakService';
+import { SmartWhiteboard } from './SmartWhiteboard';
+import { Sara3DCharacter } from './Sara3DCharacter';
+import { MASTER_CURRICULUM } from '../data/masterCurriculum';
 
 interface MessageItem {
   id: string;
@@ -34,11 +54,132 @@ interface MessageItem {
   timestamp: number;
 }
 
+export interface DiagnosticQuestion {
+  id: string;
+  levelTarget: proficiencyLevel;
+  questionEn: string;
+  questionAr: string;
+  options: string[];
+  correctIndex: number;
+  explanationAr: string;
+  explanationEn: string;
+}
+
+export const PLACEMENT_5_QUESTIONS: DiagnosticQuestion[] = [
+  {
+    id: 'pq_1',
+    levelTarget: proficiencyLevel.A1,
+    questionEn: 'Sarah and I ______ excited to study English today.',
+    questionAr: 'اختر الفعل المساعد المناسب للجملة (Sarah and I):',
+    options: ['am', 'is', 'are', 'be'],
+    correctIndex: 2,
+    explanationAr: '"Sarah and I" تعني نحن (We)، ولذلك نستخدم صيغة الجمع "are".',
+    explanationEn: '"Sarah and I" functions as "We", which takes the plural verb "are".'
+  },
+  {
+    id: 'pq_2',
+    levelTarget: proficiencyLevel.A2,
+    questionEn: 'Yesterday, we ______ all the vocabulary words for the exam.',
+    questionAr: 'اختر الفعل في صيغة الماضي البسيط المناسبة لكلمة Yesterday:',
+    options: ['study', 'studies', 'studied', 'studying'],
+    correctIndex: 2,
+    explanationAr: 'كلمة Yesterday تدل على الماضي البسيط، لذا نستخدم التصريف الثاني "studied".',
+    explanationEn: 'The time marker "Yesterday" indicates the past simple tense "studied".'
+  },
+  {
+    id: 'pq_3',
+    levelTarget: proficiencyLevel.B1,
+    questionEn: 'Fahad has always been interested ______ learning modern programming.',
+    questionAr: 'ما هو حرف الجر الصحيح الذي يقترن دائماً بكلمة "interested"؟',
+    options: ['at', 'in', 'on', 'with'],
+    correctIndex: 1,
+    explanationAr: 'الصفة "interested" تتطلب حرف الجر "in" (مهتم بـ).',
+    explanationEn: 'The adjective "interested" takes the preposition "in".'
+  },
+  {
+    id: 'pq_4',
+    levelTarget: proficiencyLevel.B2,
+    questionEn: 'Although the lecture was complex, the professor gave a ______ explanation that made it easy to grasp.',
+    questionAr: 'اختر الصفة الأنسب لوصف الشرح الواضح والدقيق:',
+    options: ['vague', 'lucid', 'harsh', 'doubtful'],
+    correctIndex: 1,
+    explanationAr: 'كلمة "lucid" تعني واضح وشديد الجلاء والفهم، وتناسب سياق سهولة الاستيعاب.',
+    explanationEn: '"lucid" means clearly expressed and easy to understand.'
+  },
+  {
+    id: 'pq_5',
+    levelTarget: proficiencyLevel.C1,
+    questionEn: 'Hardly ______ the classroom when the exam started.',
+    questionAr: 'اختر التركيب البلاغي السليم للقلب (Inversion) بعد Hardly:',
+    options: ['had the students entered', 'the students entered', 'did the students entered', 'the students had entered'],
+    correctIndex: 0,
+    explanationAr: 'في أسلوب القلب الأكاديمي، بعد الظرف النافي "Hardly" يأتي الفعل المساعد قبل الفاعل: [Had + Subject + V3].',
+    explanationEn: 'Negative adverbs like "Hardly" trigger subject-auxiliary inversion: [Had + subject + entered].'
+  }
+];
+
+export interface SpellingItem {
+  id: string;
+  word: string;
+  levelTarget: proficiencyLevel;
+  meaningAr: string;
+  meaningEn: string;
+  hintMask: string;
+  sentenceContext: string;
+}
+
+export const PLACEMENT_SPELLING_ITEMS: SpellingItem[] = [
+  {
+    id: 'sp_1',
+    word: 'beautiful',
+    levelTarget: proficiencyLevel.A1,
+    meaningAr: 'جميل / رائع',
+    meaningEn: 'Pleasing the senses or mind aesthetically',
+    hintMask: 'b _ _ _ t _ _ _ l',
+    sentenceContext: 'She painted a ______ picture of the sunrise.'
+  },
+  {
+    id: 'sp_2',
+    word: 'environment',
+    levelTarget: proficiencyLevel.B1,
+    meaningAr: 'البيئة المحيطة الطبيعية',
+    meaningEn: 'The surroundings or conditions in which an organism lives',
+    hintMask: 'e n _ _ _ _ n m _ _ t',
+    sentenceContext: 'We must protect our natural ______ from pollution.'
+  },
+  {
+    id: 'sp_3',
+    word: 'necessary',
+    levelTarget: proficiencyLevel.B2,
+    meaningAr: 'ضروري / لا غنى عنه',
+    meaningEn: 'Required to be done, achieved, or present; essential',
+    hintMask: 'n _ c _ _ s _ _ y',
+    sentenceContext: 'Daily speaking practice is ______ for achieving native fluency.'
+  }
+];
+
+export interface PlacementState {
+  isActive: boolean;
+  stage: 'idle' | 'conversation' | 'quiz' | 'spelling' | 'result';
+  conversationTurn: number; // 0: Question 1, 1: Question 2
+  conversationAnswers: string[];
+  conversationScore: number; // 0-30
+  quizCurrentIndex: number; // 0-4
+  quizAnswers: { selectedIndex: number; isCorrect: boolean }[];
+  quizScore: number; // 0-50
+  spellingCurrentIndex: number; // 0-2
+  spellingAnswers: { input: string; isCorrect: boolean }[];
+  spellingScore: number; // 0-20
+  diagnosedLevel: proficiencyLevel | null;
+  totalScore: number;
+}
+
 interface SaraTutorProps {
   lang: Language;
   profile: UserProfile;
   onNavigate: (view: AppView) => void;
   onBack: () => void;
+  onProfileUpdated?: (updated: UserProfile) => void;
 }
 
 const SECTION_LABELS: Record<string, { ar: string; en: string }> = {
@@ -62,7 +203,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   lang,
   profile,
   onNavigate,
-  onBack
+  onBack,
+  onProfileUpdated
 }) => {
   const isRtl = lang === 'ar';
   const t = translations[lang];
@@ -76,6 +218,17 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
   const [activeBoard, setActiveBoard] = useState<SaraBoardData | null>(null);
+  const [isWhiteboardOpen, setIsWhiteboardOpen] = useState(false);
+  
+  // 3D Sara Character Floating Presence
+  const [isSara3DOpen, setIsSara3DOpen] = useState(true);
+  const [lastSaraSpeech, setLastSaraSpeech] = useState<string>('');
+  
+  // Live Voice Mode state
+  const [isLiveMode, setIsLiveMode] = useState(false);
+  const [speechLang, setSpeechLang] = useState<'en-US' | 'ar-SA'>('en-US');
+  const [liveStatus, setLiveStatus] = useState<'idle' | 'listening' | 'thinking' | 'speaking'>('idle');
+
   const [quizSelectedOption, setQuizSelectedOption] = useState<number | null>(null);
   const [quizFeedback, setQuizFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [quizScoreCount, setQuizScoreCount] = useState<number>(0);
@@ -89,9 +242,105 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [sessionStartTime] = useState<number>(Date.now());
   const [sessionId] = useState<string>(() => `sara_sess_${Date.now()}`);
 
+  // 🎯 Placement Test System State
+  const [placementState, setPlacementState] = useState<PlacementState>({
+    isActive: false,
+    stage: 'idle',
+    conversationTurn: 0,
+    conversationAnswers: [],
+    conversationScore: 0,
+    quizCurrentIndex: 0,
+    quizAnswers: [],
+    quizScore: 0,
+    spellingCurrentIndex: 0,
+    spellingAnswers: [],
+    spellingScore: 0,
+    diagnosedLevel: null,
+    totalScore: 0
+  });
+  const [spellingInputText, setSpellingInputText] = useState('');
+  const [spellingFeedback, setSpellingFeedback] = useState<'correct' | 'wrong' | null>(null);
+  const [placementQuizSelected, setPlacementQuizSelected] = useState<number | null>(null);
+  const [placementQuizFeedback, setPlacementQuizFeedback] = useState<'correct' | 'wrong' | null>(null);
+
+  // Chat Persistence & Unmount Lifecycle Refs
+  const isMountedRef = useRef<boolean>(true);
+  const [isSavedBadgeVisible, setIsSavedBadgeVisible] = useState<boolean>(false);
+  const [isRestoredSession, setIsRestoredSession] = useState<boolean>(false);
+  const [showNewChatConfirm, setShowNewChatConfirm] = useState<boolean>(false);
+  const SARA_STORAGE_KEY = (uid?: string) => `sara_chat_history_${uid || 'guest'}`;
+
+  // Lesson Timer State (5 min, 10 min, 15 min, or custom)
+  const [timerDurationMinutes, setTimerDurationMinutes] = useState<number>(10);
+  const [timerSecondsLeft, setTimerSecondsLeft] = useState<number>(10 * 60);
+  const [isTimerRunning, setIsTimerRunning] = useState<boolean>(true);
+  const [isTimerEnabled, setIsTimerEnabled] = useState<boolean>(true);
+  const [isTimeUpModalOpen, setIsTimeUpModalOpen] = useState<boolean>(false);
+  const [isSessionTimeUp, setIsSessionTimeUp] = useState<boolean>(false);
+  const [showTimerDropdown, setShowTimerDropdown] = useState<boolean>(false);
+  const timerDropdownRef = useRef<HTMLDivElement>(null);
+  const hasTriggeredTimeUpRef = useRef<boolean>(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const currentSpeechControlRef = useRef<{ stop: () => void } | null>(null);
+  const hasInitializedWelcomeRef = useRef<boolean>(false);
+  
+  // Real-time synchronization refs to avoid state closures in event listeners
+  const liveModeRef = useRef<boolean>(false);
+  const isSpeakingRef = useRef<boolean>(false);
+  const isThinkingRef = useRef<boolean>(false);
+  const isListeningRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    liveModeRef.current = isLiveMode;
+  }, [isLiveMode]);
+
+  useEffect(() => {
+    isSpeakingRef.current = isSpeaking;
+  }, [isSpeaking]);
+
+  useEffect(() => {
+    isThinkingRef.current = loading;
+  }, [loading]);
+
+  // Dedicated opener that ensures activeBoard is ready for teaching
+  const openWhiteboardModal = () => {
+    if (!activeBoard) {
+      setActiveBoard({
+        title: isRtl ? 'سبورة الشرح والتطبيق الذكية 📐' : 'Smart Interactive Whiteboard 📐',
+        sentence: 'Welcome! I am Sara, your English teacher.',
+        highlight: 'I am Sara',
+        formula: 'Subject + Verb + Object',
+        notes: [
+          isRtl ? 'طريقة التعريف بالنفس: نقول "I am [اسمك]"' : 'Self-introduction: say "I am [Your Name]"',
+          isRtl ? 'صيغة الترحيب الودية بالإنجليزية: "Welcome to our class!"' : 'Friendly greeting: "Welcome to our class!"'
+        ],
+        openWhiteboard: true
+      });
+    }
+    setIsWhiteboardOpen(true);
+  };
+
+  // Turn-by-turn microphone listening trigger
+  const startListeningTurn = () => {
+    if (!speechSupported || !recognitionRef.current) return;
+    if (isSpeakingRef.current) {
+      cancelAllSpeech();
+      isSpeakingRef.current = false;
+      setIsSpeaking(false);
+    }
+
+    try {
+      recognitionRef.current.lang = speechLang;
+      recognitionRef.current.start();
+      setIsListening(true);
+      isListeningRef.current = true;
+      setLiveStatus('listening');
+    } catch (err: any) {
+      console.debug('Recognition session restart notice:', err.message);
+    }
+  };
 
   // Initialize Speech Recognition
   useEffect(() => {
@@ -101,30 +350,56 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
-      recognition.lang = 'en-US';
+      recognition.lang = speechLang;
 
       recognition.onstart = () => {
         setIsListening(true);
+        isListeningRef.current = true;
+        setLiveStatus('listening');
       };
 
       recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setInputText(prev => (prev ? `${prev} ${transcript}` : transcript));
-        setIsListening(false);
+        // Prevent recording audio echo while Sara is speaking
+        if (isSpeakingRef.current) return;
+
+        const transcript = event.results?.[0]?.[0]?.transcript;
+        if (transcript && transcript.trim()) {
+          const userWords = transcript.trim();
+          setInputText(userWords);
+          setIsListening(false);
+          isListeningRef.current = false;
+
+          // Auto-send immediately in Live Voice Mode
+          if (liveModeRef.current) {
+            setLiveStatus('thinking');
+            handleSendMessage(userWords);
+          }
+        }
       };
 
       recognition.onerror = (err: any) => {
-        console.warn('Speech recognition error:', err);
+        console.warn('Speech recognition status:', err);
         setIsListening(false);
+        isListeningRef.current = false;
+        
+        // If in live mode and user didn't intentionally abort, re-listen smoothly
+        if (liveModeRef.current && err.error !== 'aborted' && !isSpeakingRef.current && !isThinkingRef.current) {
+          setTimeout(() => {
+            if (liveModeRef.current && !isSpeakingRef.current && !isThinkingRef.current) {
+              startListeningTurn();
+            }
+          }, 800);
+        }
       };
 
       recognition.onend = () => {
         setIsListening(false);
+        isListeningRef.current = false;
       };
 
       recognitionRef.current = recognition;
     }
-  }, []);
+  }, [speechLang]);
 
   // Fetch streak & student tutor memory
   useEffect(() => {
@@ -150,136 +425,488 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     loadMemory();
   }, [profile.uid]);
 
-  // Initial welcome message from Sara when opening the session
-  useEffect(() => {
-    const initWelcome = async () => {
-      setLoading(true);
-      try {
-        // Fetch placement test or snapshot info
-        const snapshot = {
-          name: profile.displayName,
-          level: (profile as any).level || tutorMemory.level || 'A1',
-          age: tutorMemory.age,
-          interests: tutorMemory.interests || [],
-          goal: tutorMemory.goal || 'General Fluency & School Success',
-          lastMemoryNotes: tutorMemory.notes?.slice(-5) || [],
-          frequentMistakes: tutorMemory.frequentMistakes || [],
-          wordsLearned: tutorMemory.wordsLearned || []
-        };
+  // ==========================================
+  // 💾 Chat Persistence & Welcome Handlers
+  // ==========================================
 
-        const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : '';
-        const res = await fetch('/api/sara/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(idToken ? { 'Authorization': `Bearer ${idToken}` } : {})
-          },
-          body: JSON.stringify({
-            message: `Hello Teacher Sara! I'm starting our session today. My name is ${profile.displayName}.`,
-            snapshot: snapshot,
-            history: []
-          })
-        });
-
-        if (res.ok) {
-          const data: SaraChatResponse = await res.json();
-          const welcomeMsg: MessageItem = {
-            id: `msg_sara_init`,
-            role: 'sara',
-            text: data.reply,
-            board: data.board,
-            actions: data.actions,
-            timestamp: Date.now()
-          };
-          setMessages([welcomeMsg]);
-          if (data.board) {
-            setActiveBoard(data.board);
-          }
-          if (voiceEnabled && data.reply) {
-            playSaraVoice(data.reply);
-          }
-          if (data.memory) {
-            syncMemoryToFirestore(data.memory, data.sessionDone, data.board?.title || 'Daily Session');
-          }
-        } else {
-          fallbackWelcome();
-        }
-      } catch (e) {
-        console.warn('Welcome call error:', e);
-        fallbackWelcome();
-      } finally {
-        setLoading(false);
-      }
+  const fallbackWelcome = () => {
+    if (!isMountedRef.current) return;
+    const text = isRtl
+      ? 'أهلاً بك! أنا سارة 🌸 جاهز نبدأ نتعلم إنجليزي اليوم؟'
+      : 'Hello! I am Sara 🌸 Ready to learn English today?';
+    
+    const welcomeMsg: MessageItem = {
+      id: `msg_sara_fallback_0`,
+      role: 'sara',
+      text: text,
+      board: {
+        title: isRtl ? 'سبورة الشرح الذكية 📐' : 'Smart Interactive Whiteboard 📐',
+        sentence: 'Welcome! I am Sara, your English teacher.',
+        highlight: 'I am Sara',
+        openWhiteboard: false
+      },
+      actions: [
+        { type: 'open_section', sectionId: 'grammar-academy' }
+      ],
+      timestamp: Date.now()
     };
+    setMessages([welcomeMsg]);
+    setActiveBoard(welcomeMsg.board || null);
+    if (voiceEnabled && isMountedRef.current) {
+      playSaraVoice(text);
+    }
+  };
 
-    const fallbackWelcome = () => {
-      const studentName = profile.displayName.split(' ')[0] || (isRtl ? 'يا بطل' : 'friend');
-      const text = isRtl
-        ? `هلا والله ${studentName}! أنا معلمتك سارة، مستانسة وايد بوجودك معاي اليوم 🌟 جاهز نبدأ رحلتنا الممتعة بالإنجليزية؟ وش تحب نسوي اليوم؟`
-        : `Hello ${studentName}! I'm Sara, your English teacher, and I'm so happy you're here today 🌟 Ready for a fun English lesson?`;
-      
-      const welcomeMsg: MessageItem = {
-        id: `msg_sara_fallback_0`,
-        role: 'sara',
-        text: text,
-        board: {
-          title: isRtl ? 'الترحيب والمراجعة 🌟' : 'Welcome & Warm-up 🌟',
-          sentence: 'Welcome to your daily English session!',
-          highlight: 'Welcome'
-        },
-        actions: [
-          { type: 'open_section', sectionId: 'grammar-academy' }
-        ],
-        timestamp: Date.now()
+  const initWelcome = async () => {
+    if (!isMountedRef.current) return;
+    setLoading(true);
+    isThinkingRef.current = true;
+    try {
+      const snapshot = {
+        name: profile.displayName,
+        level: (profile as any).level || tutorMemory.level || 'A1',
+        age: tutorMemory.age,
+        interests: tutorMemory.interests || [],
+        goal: tutorMemory.goal || 'General Fluency & School Success',
+        lastMemoryNotes: tutorMemory.notes?.slice(-5) || [],
+        frequentMistakes: tutorMemory.frequentMistakes || [],
+        wordsLearned: tutorMemory.wordsLearned || []
       };
-      setMessages([welcomeMsg]);
-      setActiveBoard(welcomeMsg.board || null);
-      if (voiceEnabled) {
-        playSaraVoice(text);
+
+      const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : '';
+      const res = await fetch('/api/sara/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { 'Authorization': `Bearer ${idToken}` } : {})
+        },
+        body: JSON.stringify({
+          message: `Hello Teacher Sara! My name is ${profile.displayName}. Start our session.`,
+          snapshot: snapshot,
+          history: []
+        })
+      });
+
+      if (!isMountedRef.current) return;
+
+      if (res.ok) {
+        const data: SaraChatResponse = await res.json();
+        if (!isMountedRef.current) return;
+
+        const conciseGreeting = data.reply || (isRtl ? 'أهلاً بك! أنا سارة 🌸' : 'Hello! I am Sara 🌸');
+        const welcomeMsg: MessageItem = {
+          id: `msg_sara_init`,
+          role: 'sara',
+          text: conciseGreeting,
+          board: data.board,
+          actions: data.actions,
+          timestamp: Date.now()
+        };
+        setMessages([welcomeMsg]);
+        if (data.board) {
+          setActiveBoard(data.board);
+          if (data.board.openWhiteboard) {
+            setIsWhiteboardOpen(true);
+          }
+        }
+        if (voiceEnabled && isMountedRef.current) {
+          playSaraVoice(conciseGreeting);
+        }
+        if (data.memory) {
+          syncMemoryToFirestore(data.memory, data.sessionDone, data.board?.title || 'Daily Session');
+        }
+      } else {
+        fallbackWelcome();
+      }
+    } catch (e) {
+      console.warn('Welcome call error:', e);
+      if (isMountedRef.current) {
+        fallbackWelcome();
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setLoading(false);
+        isThinkingRef.current = false;
+      }
+    }
+  };
+
+  // Restore chat on mount (LocalStorage first, then Firestore) or initialize fresh
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    const restoreConversation = async () => {
+      let restored = false;
+      const key = SARA_STORAGE_KEY(profile.uid);
+
+      // 1. Check local storage first (instant, works offline if internet is disconnected!)
+      try {
+        const localRaw = localStorage.getItem(key);
+        if (localRaw) {
+          const parsed = JSON.parse(localRaw);
+          if (parsed && Array.isArray(parsed.messages) && parsed.messages.length > 0) {
+            setMessages(parsed.messages);
+            if (parsed.activeBoard) setActiveBoard(parsed.activeBoard);
+            if (parsed.placementState) setPlacementState(parsed.placementState);
+            hasInitializedWelcomeRef.current = true;
+            restored = true;
+            setIsRestoredSession(true);
+            setIsSavedBadgeVisible(true);
+            setTimeout(() => {
+              if (isMountedRef.current) setIsSavedBadgeVisible(false);
+            }, 3000);
+          }
+        }
+      } catch (err) {
+        console.warn('Error reading chat from localStorage:', err);
+      }
+
+      // 2. If no local chat, check Firestore cloud backup
+      if (!restored && profile.uid) {
+        try {
+          const chatDoc = await getDoc(doc(db, 'users', profile.uid, 'saraChat', 'current'));
+          if (chatDoc.exists()) {
+            const data = chatDoc.data();
+            if (data && Array.isArray(data.messages) && data.messages.length > 0) {
+              setMessages(data.messages);
+              if (data.activeBoard) setActiveBoard(data.activeBoard);
+              if (data.placementState) setPlacementState(data.placementState);
+              hasInitializedWelcomeRef.current = true;
+              restored = true;
+              setIsRestoredSession(true);
+              // Save to localStorage for offline readiness
+              localStorage.setItem(key, JSON.stringify({
+                messages: data.messages,
+                activeBoard: data.activeBoard,
+                placementState: data.placementState,
+                savedAt: Date.now()
+              }));
+              setIsSavedBadgeVisible(true);
+              setTimeout(() => {
+                if (isMountedRef.current) setIsSavedBadgeVisible(false);
+              }, 3000);
+            }
+          }
+        } catch (dbErr) {
+          console.warn('Error loading chat from Firestore:', dbErr);
+        }
+      }
+
+      // 3. If no existing chat found anywhere, start fresh welcome session
+      if (!restored && !hasInitializedWelcomeRef.current) {
+        hasInitializedWelcomeRef.current = true;
+        initWelcome();
       }
     };
 
-    initWelcome();
+    restoreConversation();
 
+    // Cleanup: IMMEDIATELY silence all speech, stop recognition, mark unmounted
     return () => {
+      isMountedRef.current = false;
+      liveModeRef.current = false;
       cancelAllSpeech();
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch (e) {}
+      }
     };
-  }, []);
+  }, [profile.uid]);
+
+  // Auto-save conversation to LocalStorage (instant offline resilience) and Firestore
+  useEffect(() => {
+    if (!messages || messages.length === 0) return;
+    const key = SARA_STORAGE_KEY(profile.uid);
+
+    const payload = {
+      messages,
+      activeBoard,
+      placementState,
+      savedAt: Date.now()
+    };
+
+    // 1. Instant LocalStorage save (protects against browser refresh, tab close, or lost wifi!)
+    try {
+      localStorage.setItem(key, JSON.stringify(payload));
+      setIsSavedBadgeVisible(true);
+      const timer = setTimeout(() => {
+        if (isMountedRef.current) setIsSavedBadgeVisible(false);
+      }, 2500);
+    } catch (e) {
+      console.warn('LocalStorage save error:', e);
+    }
+
+    // 2. Debounced cloud backup to Firestore
+    if (profile.uid) {
+      const syncTimer = setTimeout(async () => {
+        if (!isMountedRef.current) return;
+        try {
+          await setDoc(doc(db, 'users', profile.uid, 'saraChat', 'current'), {
+            messages,
+            activeBoard: activeBoard || null,
+            placementState: placementState || null,
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        } catch (err) {
+          console.debug('Firestore auto-save note (offline safe):', err);
+        }
+      }, 1500);
+
+      return () => clearTimeout(syncTimer);
+    }
+  }, [messages, activeBoard, placementState, profile.uid]);
+
+  // Start a fresh new chat session with archive
+  const handleStartNewSession = async () => {
+    cancelAllSpeech();
+    setShowNewChatConfirm(false);
+
+    // Archive current session to Firestore if it has messages
+    if (messages.length > 0 && profile.uid) {
+      try {
+        const archiveDoc = {
+          messages,
+          archivedAt: new Date().toISOString(),
+          summary: tutorMemory.lastSessionSummary || 'Previous tutoring session',
+          messagesCount: messages.length
+        };
+        await addDoc(collection(db, 'users', profile.uid, 'saraSessions'), archiveDoc);
+      } catch (err) {
+        console.warn('Archive session note:', err);
+      }
+    }
+
+    // Clear local storage key
+    localStorage.removeItem(SARA_STORAGE_KEY(profile.uid));
+
+    // Reset messages and states
+    setMessages([]);
+    setActiveBoard(null);
+    setIsRestoredSession(false);
+    setPlacementState({
+      isActive: false,
+      stage: 'idle',
+      conversationTurn: 0,
+      conversationAnswers: [],
+      conversationScore: 0,
+      quizCurrentIndex: 0,
+      quizAnswers: [],
+      quizScore: 0,
+      spellingCurrentIndex: 0,
+      spellingAnswers: [],
+      spellingScore: 0,
+      diagnosedLevel: null,
+      totalScore: 0
+    });
+
+    // Run fresh welcome
+    initWelcome();
+  };
 
   // Scroll to bottom when messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  // Voice playback with Sara's tone
-  const playSaraVoice = async (text: string) => {
+  // Voice playback with Sara's female tone ('Kore')
+  const playSaraVoice = async (text: string, onEndCallback?: () => void, customDisplayText?: string) => {
+    if (!isMountedRef.current) return;
     cancelAllSpeech();
     setIsSpeaking(true);
+    isSpeakingRef.current = true;
+    setLiveStatus('speaking');
+    setLastSaraSpeech(customDisplayText !== undefined ? customDisplayText : text);
+
+    // Auto-detect whether utterance is primarily Arabic or English
+    const hasArabic = /[\u0600-\u06FF]/.test(text);
+    const audioLang: 'ar' | 'en' = hasArabic ? 'ar' : 'en';
+
     try {
       const player = await speakAcademyText(
         text,
-        'ar',
-        () => setIsSpeaking(true),
-        () => setIsSpeaking(false)
+        audioLang,
+        () => {
+          if (!isMountedRef.current) {
+            cancelAllSpeech();
+            return;
+          }
+          setIsSpeaking(true);
+          isSpeakingRef.current = true;
+          setLiveStatus('speaking');
+        },
+        () => {
+          if (!isMountedRef.current) return;
+          setIsSpeaking(false);
+          isSpeakingRef.current = false;
+          if (!liveModeRef.current) {
+            setLiveStatus('idle');
+          }
+          onEndCallback?.();
+        },
+        'Kore' // Female voice explicitly!
       );
+
+      if (!isMountedRef.current) {
+        cancelAllSpeech();
+        player.stop();
+        return;
+      }
       currentSpeechControlRef.current = player;
     } catch (err) {
       console.warn('Sara voice error:', err);
-      setIsSpeaking(false);
+      if (isMountedRef.current) {
+        setIsSpeaking(false);
+        isSpeakingRef.current = false;
+        onEndCallback?.();
+      }
     }
   };
 
-  // Toggle voice recognition
+  // Lesson Timer Countdown Effect
+  useEffect(() => {
+    if (!isTimerEnabled || !isTimerRunning || timerDurationMinutes === 0 || timerSecondsLeft <= 0) return;
+
+    const timerInterval = setInterval(() => {
+      setTimerSecondsLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(timerInterval);
+          if (!hasTriggeredTimeUpRef.current) {
+            hasTriggeredTimeUpRef.current = true;
+            handleSessionTimeUp();
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timerInterval);
+  }, [isTimerEnabled, isTimerRunning, timerDurationMinutes, timerSecondsLeft]);
+
+  // Click outside to close timer dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (timerDropdownRef.current && !timerDropdownRef.current.contains(e.target as Node)) {
+        setShowTimerDropdown(false);
+      }
+    };
+    if (showTimerDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showTimerDropdown]);
+
+  // Trigger when session timer reaches 0
+  const handleSessionTimeUp = () => {
+    if (!isMountedRef.current) return;
+    setIsSessionTimeUp(true);
+    setIsTimerRunning(false);
+    setIsTimeUpModalOpen(true);
+    playSchoolBellChime();
+
+    const timeUpNotice = isRtl
+      ? `🔔 انتهت الحصة التعليمية المقررة (${timerDurationMinutes} دقائق) يا بطل! أبدعت اليوم واستفدت من وقتك بجدارة. فخورة بالتزامك وجهدك الرائع في هذه الجلسة! 🌟 يمكنك تمديد الحصة أو مراجعة ما تعلمناه.`
+      : `🔔 The scheduled lesson time (${timerDurationMinutes} mins) has completed! Outstanding effort today. I am proud of your dedication and progress! 🌟`;
+
+    const timeUpMsg: MessageItem = {
+      id: `msg_time_up_${Date.now()}`,
+      role: 'sara',
+      text: timeUpNotice,
+      board: {
+        title: isRtl ? '🔔 رن جرس نهاية الحصة التعليمية 🎓' : '🔔 Lesson Bell Has Rung 🎓',
+        sentence: 'Great session! Consistency is the secret to mastering English.',
+        highlight: 'Consistency is the secret',
+        formula: 'Effort + Time = Mastery',
+        notes: [
+          isRtl ? `أكملت بنجاح حصة مركزة مدتها ${timerDurationMinutes} دقيقة` : `Completed a ${timerDurationMinutes}-minute focused session`,
+          isRtl ? 'الاستمرار اليومي هو سر الطلاقة الحقيقية والتفوق' : 'Daily practice is the key to true fluency'
+        ],
+        openWhiteboard: true
+      },
+      timestamp: Date.now()
+    };
+
+    setMessages(prev => [...prev, timeUpMsg]);
+    setActiveBoard(timeUpMsg.board || null);
+
+    if (voiceEnabled) {
+      playSaraVoice(timeUpNotice);
+    }
+  };
+
+  const selectTimerDuration = (mins: number) => {
+    setTimerDurationMinutes(mins);
+    setShowTimerDropdown(false);
+    hasTriggeredTimeUpRef.current = false;
+    setIsSessionTimeUp(false);
+    if (mins === 0) {
+      setIsTimerEnabled(false);
+      setIsTimerRunning(false);
+    } else {
+      setIsTimerEnabled(true);
+      setTimerSecondsLeft(mins * 60);
+      setIsTimerRunning(true);
+    }
+  };
+
+  const extendSessionByMinutes = (mins: number = 5) => {
+    hasTriggeredTimeUpRef.current = false;
+    setIsSessionTimeUp(false);
+    setIsTimeUpModalOpen(false);
+    setTimerSecondsLeft(prev => prev + mins * 60);
+    setIsTimerRunning(true);
+    setIsTimerEnabled(true);
+  };
+
+  const restartTimer = () => {
+    hasTriggeredTimeUpRef.current = false;
+    setIsSessionTimeUp(false);
+    setIsTimeUpModalOpen(false);
+    setTimerSecondsLeft(timerDurationMinutes * 60);
+    setIsTimerRunning(true);
+  };
+
+  const toggleTimerPause = () => {
+    setIsTimerRunning(prev => !prev);
+  };
+
+  const formatTimerDisplay = (totalSec: number) => {
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Toggle single turn voice recognition
   const toggleListening = () => {
     if (!speechSupported || !recognitionRef.current) return;
     if (isListening) {
       recognitionRef.current.stop();
+      setIsListening(false);
+      isListeningRef.current = false;
     } else {
       cancelAllSpeech();
-      try {
-        recognitionRef.current.start();
-      } catch (err) {
-        console.warn('Recognition start error:', err);
+      startListeningTurn();
+    }
+  };
+
+  // Toggle Live Turn-by-Turn Voice Mode (رد برد صوتي)
+  const toggleLiveVoiceMode = () => {
+    if (isLiveMode) {
+      liveModeRef.current = false;
+      setIsLiveMode(false);
+      setLiveStatus('idle');
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch (e) {}
+      }
+      cancelAllSpeech();
+    } else {
+      liveModeRef.current = true;
+      setIsLiveMode(true);
+      setVoiceEnabled(true);
+      // If Sara is not talking, start listening right away!
+      if (!isSpeakingRef.current && !loading) {
+        startListeningTurn();
       }
     }
   };
@@ -325,12 +952,507 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     }
   };
 
+  // ==========================================
+  // 🎯 Placement Test Engine (المحادثة + 5 أسئلة + سبلنغ + ربط المناهج)
+  // ==========================================
+
+  const startPlacementTest = () => {
+    cancelAllSpeech();
+    setPlacementState({
+      isActive: true,
+      stage: 'conversation',
+      conversationTurn: 0,
+      conversationAnswers: [],
+      conversationScore: 0,
+      quizCurrentIndex: 0,
+      quizAnswers: [],
+      quizScore: 0,
+      spellingCurrentIndex: 0,
+      spellingAnswers: [],
+      spellingScore: 0,
+      diagnosedLevel: null,
+      totalScore: 0
+    });
+    setSpellingInputText('');
+    setSpellingFeedback(null);
+    setPlacementQuizSelected(null);
+    setPlacementQuizFeedback(null);
+
+    const introText = isRtl
+      ? 'أهلاً بك يا بطل في اختبار تحديد المستوى الشامل مع سارة! 🎯 سنبدأ أولاً بالمحادثة الشفهية. عرّفني بنفسك بالإنجليزية: اسمك، من أين أنت، وما تحب القيام به في وقت فراغك؟ 🎙️ تفضل بالتحدث بالمايك أو الكتابة.'
+      : 'Welcome champion to your comprehensive level placement with Sara! 🎯 We begin with spoken conversation. Tell me about yourself in English: your name, where you are from, and your favorite hobby? 🎙️ Speak via mic or type.';
+
+    const introMsg: MessageItem = {
+      id: `msg_placement_intro_${Date.now()}`,
+      role: 'sara',
+      text: introText,
+      board: {
+        title: isRtl ? 'اختبار تحديد المستوى – المرحلة 1: المحادثة الشفهية 🎙️' : 'Placement Test – Stage 1: Spoken Conversation 🎙️',
+        sentence: 'Tell me about yourself: What is your name and favorite hobby?',
+        highlight: 'Tell me about yourself',
+        formula: 'Speaking Fluency + Vocabulary Usage',
+        notes: [
+          isRtl ? 'المرحلة 1 من 3: محادثة شفهية تفاعلية (سؤالان)' : 'Stage 1 of 3: Interactive Speaking (2 Questions)',
+          isRtl ? 'تحدث بحرية بالمايك أو اكتب إجابتك وسأقيم طلاقتك وتعبيرك' : 'Speak via mic or type your response'
+        ],
+        openWhiteboard: true
+      },
+      timestamp: Date.now()
+    };
+
+    setMessages(prev => [...prev, introMsg]);
+    setActiveBoard(introMsg.board || null);
+    setIsWhiteboardOpen(true);
+    if (voiceEnabled) {
+      playSaraVoice(introText);
+    }
+  };
+
+  const handlePlacementQuizAnswer = (selectedIndex: number) => {
+    if (placementQuizSelected !== null) return;
+    const currentQ = PLACEMENT_5_QUESTIONS[placementState.quizCurrentIndex];
+    if (!currentQ) return;
+
+    setPlacementQuizSelected(selectedIndex);
+    const isCorrect = selectedIndex === currentQ.correctIndex;
+    setPlacementQuizFeedback(isCorrect ? 'correct' : 'wrong');
+
+    // Anti-cheating: Reveal correct answer on active board ONLY after student makes a choice
+    setActiveBoard(prev => prev ? {
+      ...prev,
+      highlight: currentQ.options[currentQ.correctIndex]
+    } : null);
+
+    const addedPoints = isCorrect ? 10 : 0;
+    const updatedQuizScore = placementState.quizScore + addedPoints;
+    const updatedAnswers = [
+      ...placementState.quizAnswers,
+      { selectedIndex, isCorrect }
+    ];
+
+    setTimeout(() => {
+      if (placementState.quizCurrentIndex < 4) {
+        const nextIndex = placementState.quizCurrentIndex + 1;
+        const nextQ = PLACEMENT_5_QUESTIONS[nextIndex];
+        setPlacementState(prev => ({
+          ...prev,
+          quizCurrentIndex: nextIndex,
+          quizScore: updatedQuizScore,
+          quizAnswers: updatedAnswers
+        }));
+        setPlacementQuizSelected(null);
+        setPlacementQuizFeedback(null);
+
+        // Update whiteboard with the next question (highlight undefined until answered)
+        setActiveBoard({
+          title: isRtl ? `اختبار تحديد المستوى – السؤال ${nextIndex + 1} من 5 📝` : `Placement Diagnostic Quiz – Question ${nextIndex + 1}/5 📝`,
+          sentence: nextQ.questionEn,
+          highlight: undefined, // Hidden until student selects option
+          notes: [
+            isRtl ? nextQ.questionAr : 'Select the best grammatical/vocabulary fit:',
+            isRtl ? `المستوى المستهدف: ${nextQ.levelTarget}` : `Target Level: ${nextQ.levelTarget}`
+          ],
+          quiz: {
+            question: nextQ.questionEn,
+            options: nextQ.options,
+            answerIndex: nextQ.correctIndex
+          },
+          openWhiteboard: true
+        });
+      } else {
+        // Transition to Stage 3: Spelling Test
+        const firstSpelling = PLACEMENT_SPELLING_ITEMS[0];
+        setPlacementState(prev => ({
+          ...prev,
+          stage: 'spelling',
+          quizScore: updatedQuizScore,
+          quizAnswers: updatedAnswers,
+          spellingCurrentIndex: 0
+        }));
+        setPlacementQuizSelected(null);
+        setPlacementQuizFeedback(null);
+
+        const spellingIntro = isRtl
+          ? 'كفو يا بطل! أتممت اختبار الـ 5 أسئلة بنجاح 📝👏. ننتقل الآن للمرحلة الثالثة: امتحان كتابة سبلنغ صغير (3 كلمات) لاختبار مهارة التهجئة والإملاء! استمع للكلمة واكتبها في المربع.'
+          : 'Great job! You finished the 5 questions 📝👏. Now moving to Stage 3: Mini Spelling Exam (3 words) to check spelling and orthography! Listen and write the word.';
+
+        const spellingIntroMsg: MessageItem = {
+          id: `msg_spelling_intro_${Date.now()}`,
+          role: 'sara',
+          text: spellingIntro,
+          board: {
+            title: isRtl ? 'اختبار تحديد المستوى – المرحلة 3: امتحان السبلنغ (1 من 3) ✍️' : 'Placement – Stage 3: Spelling Test (1/3) ✍️',
+            sentence: firstSpelling.sentenceContext,
+            highlight: undefined, // Anti-cheating: hidden until student submits
+            notes: [
+              isRtl ? `المعنى: ${firstSpelling.meaningAr}` : `Meaning: ${firstSpelling.meaningEn}`,
+              isRtl ? `تلميح الأحرف: ${firstSpelling.hintMask}` : `Mask: ${firstSpelling.hintMask}`
+            ],
+            openWhiteboard: true
+          },
+          timestamp: Date.now()
+        };
+
+        setMessages(prev => [...prev, spellingIntroMsg]);
+        setActiveBoard(spellingIntroMsg.board || null);
+        if (voiceEnabled) {
+          playSaraVoice(spellingIntro, () => {
+            // Pronounce word after speech, but DO NOT display word in speech bubble
+            setTimeout(() => {
+              playSaraVoice(
+                firstSpelling.word,
+                undefined,
+                isRtl ? '🎧 استمع لنطق الكلمة واكتبها في المربع...' : '🎧 Listen to the word and type the spelling...'
+              );
+            }, 400);
+          });
+        }
+      }
+    }, 1400);
+  };
+
+  const handlePlacementSpellingSubmit = (typedWord: string) => {
+    if (spellingFeedback !== null) return;
+    const currentSp = PLACEMENT_SPELLING_ITEMS[placementState.spellingCurrentIndex];
+    if (!currentSp) return;
+
+    const cleanInput = typedWord.trim().toLowerCase();
+    const isCorrect = cleanInput === currentSp.word.toLowerCase();
+    setSpellingFeedback(isCorrect ? 'correct' : 'wrong');
+
+    // Anti-cheating: Reveal spelling on board ONLY after submit
+    setActiveBoard(prev => prev ? {
+      ...prev,
+      highlight: currentSp.word
+    } : null);
+
+    const addedPoints = isCorrect ? 6.67 : 0;
+    const updatedSpellingScore = placementState.spellingScore + addedPoints;
+    const updatedAnswers = [
+      ...placementState.spellingAnswers,
+      { input: typedWord, isCorrect }
+    ];
+
+    setTimeout(() => {
+      if (placementState.spellingCurrentIndex < 2) {
+        const nextIndex = placementState.spellingCurrentIndex + 1;
+        const nextSp = PLACEMENT_SPELLING_ITEMS[nextIndex];
+        setPlacementState(prev => ({
+          ...prev,
+          spellingCurrentIndex: nextIndex,
+          spellingScore: updatedSpellingScore,
+          spellingAnswers: updatedAnswers
+        }));
+        setSpellingInputText('');
+        setSpellingFeedback(null);
+
+        setActiveBoard({
+          title: isRtl ? `اختبار تحديد المستوى – امتحان السبلنغ (${nextIndex + 1} من 3) ✍️` : `Placement – Spelling Test (${nextIndex + 1}/3) ✍️`,
+          sentence: nextSp.sentenceContext,
+          highlight: undefined, // Hidden until student submits
+          notes: [
+            isRtl ? `المعنى: ${nextSp.meaningAr}` : `Meaning: ${nextSp.meaningEn}`,
+            isRtl ? `تلميح الأحرف: ${nextSp.hintMask}` : `Mask: ${nextSp.hintMask}`
+          ],
+          openWhiteboard: true
+        });
+
+        if (voiceEnabled) {
+          playSaraVoice(
+            nextSp.word,
+            undefined,
+            isRtl ? '🎧 استمع لنطق الكلمة واكتبها في المربع...' : '🎧 Listen to the word and type the spelling...'
+          );
+        }
+      } else {
+        // Complete evaluation!
+        setSpellingInputText('');
+        setSpellingFeedback(null);
+        finalizePlacementEvaluation(
+          placementState.conversationScore,
+          placementState.quizScore,
+          updatedSpellingScore
+        );
+      }
+    }, 1400);
+  };
+
+  const finalizePlacementEvaluation = async (
+    convScore: number,
+    qScore: number,
+    spScore: number
+  ) => {
+    const rawTotal = Math.round(convScore + qScore + spScore);
+    const finalTotal = Math.min(100, Math.max(15, rawTotal));
+
+    // Determine CEFR Level
+    let level: proficiencyLevel = proficiencyLevel.A1;
+    if (finalTotal >= 88) level = proficiencyLevel.C1;
+    else if (finalTotal >= 75) level = proficiencyLevel.B2;
+    else if (finalTotal >= 55) level = proficiencyLevel.B1;
+    else if (finalTotal >= 35) level = proficiencyLevel.A2;
+    else level = proficiencyLevel.A1;
+
+    setPlacementState(prev => ({
+      ...prev,
+      stage: 'result',
+      diagnosedLevel: level,
+      totalScore: finalTotal,
+      conversationScore: convScore,
+      quizScore: qScore,
+      spellingScore: spScore
+    }));
+
+    // Retrieve actual units from MASTER_CURRICULUM for this diagnosed level
+    const readingUnit = MASTER_CURRICULUM[CurriculumCategory.READING]?.[level]?.[0];
+    const writingUnit = MASTER_CURRICULUM[CurriculumCategory.WRITING]?.[level]?.[0];
+    const grammarUnit = MASTER_CURRICULUM[CurriculumCategory.GRAMMAR]?.[level]?.[0];
+    const conversationUnit = MASTER_CURRICULUM[CurriculumCategory.CONVERSATION]?.[level]?.[0];
+
+    const finalBoard: SaraBoardData = {
+      title: isRtl ? `شهادة تحديد المستوى المعتمدة: ${level} 🎓` : `Official Level Placement Certificate: ${level} 🎓`,
+      sentence: `Your Certified English Level is ${level} (Score: ${finalTotal}/100)`,
+      highlight: level,
+      formula: `Speaking: ${Math.round(convScore)}/30 + Quiz: ${Math.round(qScore)}/50 + Spelling: ${Math.round(spScore)}/20 = ${finalTotal}%`,
+      notes: [
+        isRtl ? `مستواك المعتمد في الأكاديمية: [${level}]` : `Accredited Level: [${level}]`,
+        isRtl ? `وحدة القراءة الموصى بها: "${readingUnit?.titleAr || 'القراءة'}"` : `Recommended Reading: "${readingUnit?.title || ''}"`,
+        isRtl ? `وحدة التعبير والكتابة: "${writingUnit?.titleAr || 'الكتابة'}"` : `Recommended Writing: "${writingUnit?.title || ''}"`,
+        isRtl ? `وحدة القواعد والتراكيب: "${grammarUnit?.titleAr || 'القواعد'}"` : `Recommended Grammar: "${grammarUnit?.title || ''}"`,
+        isRtl ? `وحدة المحادثة والطلاقة: "${conversationUnit?.titleAr || 'المحادثة'}"` : `Recommended Conversation: "${conversationUnit?.title || ''}"`
+      ],
+      openWhiteboard: true
+    };
+    setActiveBoard(finalBoard);
+    setIsWhiteboardOpen(true);
+
+    // Save to Firestore & backend
+    try {
+      if (profile.uid) {
+        // Direct update to users doc
+        await updateDoc(doc(db, 'users', profile.uid), {
+          level: level,
+          placementCompleted: true,
+          placementScore: finalTotal,
+          placementTestCompleted: true,
+          updatedAt: serverTimestamp()
+        }).catch(async () => {
+          await setDoc(doc(db, 'users', profile.uid), {
+            level: level,
+            placementCompleted: true,
+            placementScore: finalTotal,
+            placementTestCompleted: true
+          }, { merge: true });
+        });
+
+        // Direct update to students doc
+        await setDoc(doc(db, 'students', profile.uid), {
+          level: level,
+          placementTestCompleted: true,
+          placementScore: finalTotal,
+          conversationScore: convScore,
+          quizScore: qScore,
+          spellingScore: spScore,
+          completedAt: new Date().toISOString()
+        }, { merge: true });
+
+        // API endpoint save
+        const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : '';
+        await fetch('/api/sara-tutor/save-placement', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(idToken ? { 'Authorization': `Bearer ${idToken}` } : {})
+          },
+          body: JSON.stringify({
+            uid: profile.uid,
+            level: level,
+            conversationScore: convScore,
+            quizScore: qScore,
+            spellingScore: spScore,
+            totalScore: finalTotal
+          })
+        }).catch(console.warn);
+
+        // Update memory in Firestore
+        syncMemoryToFirestore({
+          newNotes: [`أتم الطالب اختبار تحديد المستوى بنجاح وحصل على المستوى ${level} بمجموع ${finalTotal}%`],
+          mistakes: [],
+          wordsLearned: ['placement', 'diagnostic', 'curriculum', level]
+        }, true, `Placement Evaluation: Level ${level}`);
+      }
+    } catch (err) {
+      console.warn('Error saving placement evaluation:', err);
+    }
+
+    // Update parent UserProfile state in AuthenticatedApp
+    if (onProfileUpdated) {
+      onProfileUpdated({
+        ...profile,
+        level: level,
+        placementTestCompleted: true
+      } as any);
+    }
+
+    // Sara speaks celebration
+    const resultSpeech = isRtl
+      ? `مبروك يا بطل! تم تحديد مستواك المعتمد في الأكاديمية بنجاح: مستوى ${level}. ربطت لك كل المناهج المعتمدة المناسبة لمستواك، وجاهزة نبدأ الدرس الأول معاً!`
+      : `Congratulations! Your certified English proficiency level is ${level}. I have unlocked and linked your full curriculum roadmap. Let us start!`;
+
+    const resultMsg: MessageItem = {
+      id: `msg_placement_result_${Date.now()}`,
+      role: 'sara',
+      text: resultSpeech,
+      board: finalBoard,
+      actions: [
+        { type: 'open_section', sectionId: 'reading-lab' },
+        { type: 'open_section', sectionId: 'grammar-academy' },
+        { type: 'open_section', sectionId: 'writing-spelling-studio' },
+        { type: 'open_section', sectionId: 'pronunciation-lab' }
+      ],
+      timestamp: Date.now()
+    };
+    setMessages(prev => [...prev, resultMsg]);
+
+    if (voiceEnabled) {
+      playSaraVoice(resultSpeech);
+    }
+  };
+
   // Send message handler
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputText).trim();
     if (!text || loading) return;
 
-    // Add user message to chat
+    // Check if user is triggering placement test verbally or by text
+    const lower = text.toLowerCase();
+    const isPlacementTrigger = 
+      lower.includes('تحديد المستوى') || 
+      lower.includes('حدد مستواي') || 
+      lower.includes('اختبر مستواي') || 
+      lower.includes('placement') || 
+      lower.includes('امتحني لتحديد') || 
+      lower.includes('اختبار المستوى');
+
+    if (isPlacementTrigger && !placementState.isActive) {
+      // Add user's message
+      const userMsg: MessageItem = {
+        id: `msg_user_${Date.now()}`,
+        role: 'user',
+        text: text,
+        timestamp: Date.now()
+      };
+      setMessages(prev => [...prev, userMsg]);
+      setInputText('');
+      startPlacementTest();
+      return;
+    }
+
+    // If currently in conversational placement assessment
+    if (placementState.isActive && placementState.stage === 'conversation') {
+      const userMsg: MessageItem = {
+        id: `msg_user_${Date.now()}`,
+        role: 'user',
+        text: text,
+        timestamp: Date.now()
+      };
+      setMessages(prev => [...prev, userMsg]);
+      setInputText('');
+
+      // Evaluate conversational turn
+      const wordsCount = text.trim().split(/\s+/).length;
+      const hasEnglish = /[a-zA-Z]/.test(text);
+      let turnPoints = 8;
+      if (wordsCount >= 7 && hasEnglish) turnPoints = 15;
+      else if (wordsCount >= 4 && hasEnglish) turnPoints = 12;
+      else if (hasEnglish) turnPoints = 10;
+
+      const currentScore = placementState.conversationScore + turnPoints;
+      const updatedAnswers = [...placementState.conversationAnswers, text];
+
+      if (placementState.conversationTurn === 0) {
+        // Ask Conversation Question 2
+        setPlacementState(prev => ({
+          ...prev,
+          conversationTurn: 1,
+          conversationScore: currentScore,
+          conversationAnswers: updatedAnswers
+        }));
+
+        const q2Text = isRtl
+          ? 'ما شاء الله عليك! أحييك على تعبيرك ومحاولتك الجميلة 👏. والآن سؤال المحادثة الثاني: ما هو هدفك من تعلم اللغة الإنجليزية، أو صف لي يوماً مفضلاً لك أو كيف تقضي عطلتك؟ 🌟 (تفضل بالمايك أو الكتابة).'
+          : 'Great job! I love your speaking attempt 👏. Now question 2: What is your main goal in learning English, or describe your favorite day? 🌟 (Speak via mic or type).';
+
+        const q2Msg: MessageItem = {
+          id: `msg_conv_q2_${Date.now()}`,
+          role: 'sara',
+          text: q2Text,
+          board: {
+            title: isRtl ? 'اختبار تحديد المستوى – محادثة شفهية (سؤال 2 من 2) 🎙️' : 'Placement Test – Conversation (Question 2/2) 🎙️',
+            sentence: 'What is your goal in English, or describe your favorite day?',
+            highlight: 'What is your goal in English?',
+            notes: [
+              isRtl ? 'المحادثة الشفهية: سؤال 2 من 2' : 'Spoken Conversation: Question 2 of 2',
+              isRtl ? 'صف طموحك أو روتينك لتقييم المفردات وصياغة الجمل' : 'Describe your goal or routine'
+            ],
+            openWhiteboard: true
+          },
+          timestamp: Date.now()
+        };
+
+        setMessages(prev => [...prev, q2Msg]);
+        setActiveBoard(q2Msg.board || null);
+        if (voiceEnabled) {
+          playSaraVoice(q2Text);
+        }
+        return;
+      } else {
+        // Conversation stage finished -> Transition to 5-Question Quiz!
+        const firstQ = PLACEMENT_5_QUESTIONS[0];
+        setPlacementState(prev => ({
+          ...prev,
+          stage: 'quiz',
+          conversationScore: currentScore,
+          conversationAnswers: updatedAnswers,
+          quizCurrentIndex: 0
+        }));
+
+        const quizIntroText = isRtl
+          ? 'أبدعت في مرحلة المحادثة الشفهية! 🎙️👏 ننتقل الآن إلى المرحلة الثانية: اختبار مكون من 5 أسئلة ذكية لتشخيص مستواك الدقيق في القواعد والمفردات. تفضل باختيار الإجابة الصحيحة أدناه!'
+          : 'Awesome spoken interaction! 🎙️👏 Now moving to Stage 2: A 5-question diagnostic quiz to check grammar and vocabulary. Pick the correct answers below!';
+
+        const quizIntroMsg: MessageItem = {
+          id: `msg_quiz_intro_${Date.now()}`,
+          role: 'sara',
+          text: quizIntroText,
+          board: {
+            title: isRtl ? 'اختبار تحديد المستوى – السؤال 1 من 5 📝' : 'Placement Diagnostic Quiz – Question 1/5 📝',
+            sentence: firstQ.questionEn,
+            highlight: undefined, // Hidden until student selects answer
+            notes: [
+              isRtl ? firstQ.questionAr : 'Select the best option:',
+              isRtl ? `المستوى المستهدف: ${firstQ.levelTarget}` : `Target: ${firstQ.levelTarget}`
+            ],
+            quiz: {
+              question: firstQ.questionEn,
+              options: firstQ.options,
+              answerIndex: firstQ.correctIndex
+            },
+            openWhiteboard: true
+          },
+          timestamp: Date.now()
+        };
+
+        setMessages(prev => [...prev, quizIntroMsg]);
+        setActiveBoard(quizIntroMsg.board || null);
+        if (voiceEnabled) {
+          playSaraVoice(quizIntroText);
+        }
+        return;
+      }
+    }
+
+    // Add user message to chat for normal conversation
     const userMsg: MessageItem = {
       id: `msg_user_${Date.now()}`,
       role: 'user',
@@ -380,7 +1502,10 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         throw new Error(`Chat error status: ${response.status}`);
       }
 
+      if (!isMountedRef.current) return;
+
       const data: SaraChatResponse = await response.json();
+      if (!isMountedRef.current) return;
 
       const saraMsg: MessageItem = {
         id: `msg_sara_${Date.now()}`,
@@ -398,30 +1523,54 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         setActiveBoard(data.board);
         setQuizSelectedOption(null);
         setQuizFeedback(null);
+        if (data.board.openWhiteboard) {
+          setIsWhiteboardOpen(true);
+        }
       }
 
-      // Voice playback
-      if (voiceEnabled && data.reply) {
-        playSaraVoice(data.reply);
+      // Voice playback & Turn-by-Turn Live loop continuation
+      if ((voiceEnabled || liveModeRef.current) && data.reply && isMountedRef.current) {
+        playSaraVoice(data.reply, () => {
+          if (liveModeRef.current && isMountedRef.current) {
+            setTimeout(() => {
+              if (liveModeRef.current && !isSpeakingRef.current && !isThinkingRef.current && isMountedRef.current) {
+                startListeningTurn();
+              }
+            }, 350);
+          }
+        });
+      } else if (liveModeRef.current && isMountedRef.current) {
+        setTimeout(() => {
+          if (liveModeRef.current && !isSpeakingRef.current && !isThinkingRef.current && isMountedRef.current) {
+            startListeningTurn();
+          }
+        }, 350);
       }
 
       // Sync memory
-      if (data.memory) {
+      if (data.memory && isMountedRef.current) {
         syncMemoryToFirestore(data.memory, data.sessionDone, data.board?.title);
       }
     } catch (err: any) {
+      if (!isMountedRef.current) return;
       console.error('Sara chat error:', err);
+      const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
       const fallbackMsg: MessageItem = {
         id: `msg_sara_err_${Date.now()}`,
         role: 'sara',
         text: isRtl 
-          ? 'أعتذر منك يا بطل! واجهت مشكلة بسيطة في الاتصال. خلنا نحاول مرة ثانية أو اسألني بطريقة ثانية 🌟'
-          : 'Oops, little connection issue! Let us try that again 🌟',
+          ? (isOffline 
+              ? '📶 يبدو أن اتصال الإنترنت ضعيف أو منقطع مؤقتاً. لا تقلق، محادثتك بالكامل محفوظة بأمان على جهازك وستتمكن من إكمالها فور عودة الاتصال! 💾' 
+              : 'أعتذر منك يا بطل! واجهت مشكلة بسيطة في الاتصال، ومحادثتك محفوظة بأمان. تفضل بالمحاولة مرة ثانية 🌟')
+          : 'Network connection issue. Your conversation is safely stored offline and ready to continue anytime! 💾',
         timestamp: Date.now()
       };
       setMessages(prev => [...prev, fallbackMsg]);
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+        isThinkingRef.current = false;
+      }
     }
   };
 
@@ -454,6 +1603,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           <button
             onClick={() => {
               cancelAllSpeech();
+              if (recognitionRef.current) {
+                try { recognitionRef.current.abort(); } catch (e) {}
+              }
               onBack();
             }}
             className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#002147] transition-all cursor-pointer flex items-center gap-1.5"
@@ -466,41 +1618,45 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           {/* Sara Avatar & Identity Card */}
           <div className="flex items-center gap-3 flex-1 justify-center sm:justify-start">
             <div className="relative">
-              {/* Illustrated Avatar in Modest Hijab */}
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-[#002147] via-[#1a3a60] to-[#C49E3A] p-0.5 shadow-md flex items-center justify-center overflow-hidden">
-                <svg viewBox="0 0 100 100" className="w-full h-full rounded-full bg-[#fdfbf7]">
-                  {/* Background Soft Circle */}
-                  <circle cx="50" cy="50" r="48" fill="#eef2f6" />
+              {/* Illustrated Avatar in Warm Modest Style with Pure White Hijab Framing Face */}
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-[#C49E3A] via-[#855B14] to-[#002147] p-0.5 shadow-md flex items-center justify-center overflow-hidden">
+                <svg viewBox="0 0 100 100" className="w-full h-full rounded-full bg-[#002147]">
+                  {/* Background Royal Navy Circle */}
+                  <circle cx="50" cy="50" r="48" fill="#002147" />
                   
-                  {/* Modest Hijab drape */}
-                  <path d="M 22 45 C 22 24 34 14 50 14 C 66 14 78 24 78 45 C 78 68 82 86 85 96 C 75 99 25 99 15 96 C 18 86 22 68 22 45 Z" fill="#002147" />
+                  {/* Outer White Hijab Drape framing the head */}
+                  <path d="M 22 45 C 22 24 34 14 50 14 C 66 14 78 24 78 45 C 78 68 82 86 85 96 C 75 99 25 99 15 96 C 18 86 22 68 22 45 Z" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="0.8" />
                   
-                  {/* Face oval */}
-                  <ellipse cx="50" cy="48" rx="19" ry="22" fill="#FDDFCF" />
+                  {/* Warm Glowing Face Oval */}
+                  <ellipse cx="50" cy="48" rx="19" ry="22" fill="#FFE4D4" />
                   
-                  {/* Inner modest hijab undercap */}
-                  <path d="M 32 37 C 38 31 62 31 68 37 C 62 34 38 34 32 37 Z" fill="#C49E3A" />
+                  {/* Pure White Forehead Undercap Band with Gold Ribbon */}
+                  <path d="M 32 37 C 38 31 62 31 68 37 C 62 34 38 34 32 37 Z" fill="#FFFFFF" />
+                  <path d="M 33 36 Q 50 31 67 36" stroke="#C49E3A" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+
+                  {/* Soft Warm Chestnut Hair Accent Strands */}
+                  <path d="M 35 38 Q 42 41 46 38" stroke="#362013" strokeWidth="2.2" strokeLinecap="round" fill="none" />
                   
                   {/* Eyes */}
-                  <ellipse cx="43" cy="46" rx="2.5" ry="3.2" fill="#2d3748" />
-                  <ellipse cx="57" cy="46" rx="2.5" ry="3.2" fill="#2d3748" />
+                  <ellipse cx="43" cy="46" rx="2.5" ry="3.2" fill="#2d1c12" />
+                  <ellipse cx="57" cy="46" rx="2.5" ry="3.2" fill="#2d1c12" />
                   <circle cx="44.2" cy="45" r="1" fill="#ffffff" />
                   <circle cx="58.2" cy="45" r="1" fill="#ffffff" />
                   
-                  {/* Eyebrows */}
-                  <path d="M 39 41 Q 43 39 47 41" stroke="#4a5568" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-                  <path d="M 53 41 Q 57 39 61 41" stroke="#4a5568" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+                  {/* Eyebrows (Warm Dark Brown) */}
+                  <path d="M 39 41 Q 43 39 47 41" stroke="#362013" strokeWidth="1.6" strokeLinecap="round" fill="none" />
+                  <path d="M 53 41 Q 57 39 61 41" stroke="#362013" strokeWidth="1.6" strokeLinecap="round" fill="none" />
                   
                   {/* Gentle warm smile */}
-                  <path d="M 44 56 Q 50 62 56 56" stroke="#c53030" strokeWidth="2" strokeLinecap="round" fill="none" />
+                  <path d="M 44 56 Q 50 62 56 56" stroke="#DE5264" strokeWidth="2.2" strokeLinecap="round" fill="none" />
                   
-                  {/* Rosy cheeks */}
-                  <circle cx="37" cy="52" r="3" fill="#fca5a5" opacity="0.5" />
-                  <circle cx="63" cy="52" r="3" fill="#fca5a5" opacity="0.5" />
+                  {/* Rosy peach cheeks */}
+                  <circle cx="37" cy="52" r="3.2" fill="#FF8A80" opacity="0.6" />
+                  <circle cx="63" cy="52" r="3.2" fill="#FF8A80" opacity="0.6" />
                   
-                  {/* Hijab wrap around chin */}
-                  <path d="M 31 52 C 34 68 45 74 50 74 C 55 74 66 68 69 52 C 73 66 74 88 74 95 C 62 98 38 98 26 95 C 26 88 27 66 31 52 Z" fill="#002147" />
-                  <path d="M 42 74 Q 50 82 58 74 Q 50 78 42 74" fill="#C49E3A" />
+                  {/* Pure White Scarf Wrap Around Chin and Neck */}
+                  <path d="M 31 56 C 34 68 45 73 50 73 C 55 73 66 68 69 56 C 73 66 74 88 74 95 C 62 98 38 98 26 95 C 26 88 27 66 31 56 Z" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="0.8" />
+                  <path d="M 38 72 Q 50 78 62 72" stroke="#C49E3A" strokeWidth="1.8" strokeLinecap="round" fill="none" />
                 </svg>
               </div>
 
@@ -516,12 +1672,25 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </div>
 
             <div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <h1 className="text-sm sm:text-base font-black text-[#002147] leading-tight">
                   {isRtl ? 'سارة – معلمتك 👩‍🏫' : 'Sara – Your English Tutor 👩‍🏫'}
                 </h1>
-                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[9px] font-black rounded-full border border-emerald-200">
+                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[9px] font-black rounded-full border border-emerald-200 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   {isRtl ? 'متصلة الآن' : 'Online'}
+                </span>
+                {/* Auto-save & offline safety badge */}
+                <span 
+                  className={`px-2 py-0.5 rounded-full border text-[9px] font-bold transition-all flex items-center gap-1 ${
+                    isSavedBadgeVisible
+                      ? 'bg-blue-100 text-blue-900 border-blue-300 ring-2 ring-blue-300/40 font-black'
+                      : 'bg-slate-100 text-slate-500 border-slate-200'
+                  }`}
+                  title={isRtl ? 'محادثتك محفوظة تلقائياً في جهازك والسحابة حتى لو انقطع النت أو أغلقت الصفحة' : 'Chat is automatically saved offline and in the cloud'}
+                >
+                  <span>💾</span>
+                  <span className="hidden xs:inline">{isRtl ? (isSavedBadgeVisible ? 'تم الحفظ 💾' : 'محفوظة تلقائياً') : 'Auto-saved'}</span>
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 font-bold">
@@ -530,10 +1699,195 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </div>
           </div>
 
-          {/* Right Controls: Streak Badge & Voice Toggle */}
-          <div className="flex items-center gap-2">
+          {/* Right Controls: Timer + New Chat + Placement Test + Whiteboard Summon + Live Voice + Streak + Voice Toggle */}
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
+            {/* ⏱️ Lesson Duration Timer Pill & Dropdown */}
+            <div className="relative" ref={timerDropdownRef}>
+              <button
+                onClick={() => setShowTimerDropdown(!showTimerDropdown)}
+                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
+                  !isTimerEnabled || timerDurationMinutes === 0
+                    ? 'bg-slate-50 text-slate-600 border-slate-200'
+                    : timerSecondsLeft === 0
+                    ? 'bg-rose-100 text-rose-900 border-rose-300 ring-2 ring-rose-400/40 animate-pulse'
+                    : timerSecondsLeft < 60
+                    ? 'bg-rose-50 text-rose-700 border-rose-300 animate-pulse'
+                    : timerSecondsLeft < 180
+                    ? 'bg-amber-50 text-amber-800 border-amber-300'
+                    : 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                }`}
+                title={isRtl ? 'مؤقت الحصة (5 د، 10 د، 15 د)' : 'Lesson Timer (5m, 10m, 15m)'}
+              >
+                {timerSecondsLeft === 0 ? (
+                  <Bell size={14} className="text-rose-600 animate-bounce" />
+                ) : (
+                  <Clock size={14} className={isTimerRunning && isTimerEnabled && timerDurationMinutes > 0 ? 'text-[#002147] animate-pulse' : 'text-slate-400'} />
+                )}
+
+                <span className="font-mono text-xs">
+                  {!isTimerEnabled || timerDurationMinutes === 0
+                    ? (isRtl ? 'حر ♾️' : 'Open')
+                    : formatTimerDisplay(timerSecondsLeft)}
+                </span>
+
+                <span className="text-[10px] hidden sm:inline text-slate-500 font-sans">
+                  {timerSecondsLeft === 0
+                    ? (isRtl ? 'انتهت 🔔' : 'Done')
+                    : isRtl
+                    ? `(${timerDurationMinutes} د)`
+                    : `(${timerDurationMinutes}m)`}
+                </span>
+              </button>
+
+              {/* Timer Dropdown Menu */}
+              {showTimerDropdown && (
+                <div className="absolute top-full mt-2 end-0 w-64 bg-white border-2 border-slate-200 rounded-2xl shadow-xl p-3.5 z-50 animate-in fade-in zoom-in-95">
+                  <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-100">
+                    <span className="text-xs font-black text-[#002147] flex items-center gap-1.5">
+                      <Timer size={15} className="text-[#C49E3A]" />
+                      {isRtl ? 'مؤقت الحصة مع سارة' : 'Lesson Timer'}
+                    </span>
+                    <button
+                      onClick={() => setShowTimerDropdown(false)}
+                      className="text-slate-400 hover:text-slate-600 text-xs p-1 rounded-lg hover:bg-slate-100 cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <p className="text-[11px] text-slate-500 font-bold mb-2">
+                    {isRtl ? 'اختر مدة الحصة ليرن الجرس عند انتهائها:' : 'Set lesson duration to ring the bell when finished:'}
+                  </p>
+
+                  {/* Preset Buttons */}
+                  <div className="grid grid-cols-3 gap-1.5 mb-3">
+                    {[5, 10, 15].map(mins => (
+                      <button
+                        key={`preset-${mins}`}
+                        onClick={() => selectTimerDuration(mins)}
+                        className={`p-2 rounded-xl border text-center transition-all cursor-pointer ${
+                          timerDurationMinutes === mins && isTimerEnabled
+                            ? 'bg-[#002147] text-amber-300 border-[#002147] font-black shadow-xs ring-2 ring-amber-300/40'
+                            : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 font-bold'
+                        }`}
+                      >
+                        <div className="text-sm font-black">{mins}</div>
+                        <div className="text-[10px]">{isRtl ? 'دقائق' : 'mins'}</div>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Actions inside Dropdown */}
+                  <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                    {isTimerEnabled && timerDurationMinutes > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={toggleTimerPause}
+                          className="flex-1 py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center gap-1 cursor-pointer"
+                        >
+                          {isTimerRunning ? <Pause size={12} /> : <Play size={12} />}
+                          <span>{isTimerRunning ? (isRtl ? 'إيقاف مؤقت' : 'Pause') : (isRtl ? 'استئناف' : 'Resume')}</span>
+                        </button>
+                        <button
+                          onClick={() => extendSessionByMinutes(5)}
+                          className="py-1.5 px-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-black flex items-center gap-1 cursor-pointer"
+                          title={isRtl ? 'إضافة 5 دقائق إضافية' : 'Add 5 minutes'}
+                        >
+                          <Plus size={12} />
+                          <span>5+ {isRtl ? 'د' : 'm'}</span>
+                        </button>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={() => selectTimerDuration(0)}
+                      className={`w-full py-1.5 px-2 rounded-xl text-xs font-bold text-center transition-all cursor-pointer ${
+                        !isTimerEnabled || timerDurationMinutes === 0
+                          ? 'bg-blue-100 text-blue-900 font-black'
+                          : 'bg-slate-50 hover:bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      {isRtl ? 'محادثة مفتوحة (بدون مؤقت) ♾️' : 'Open session (No timer) ♾️'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Start Fresh Session / Archive Button */}
+            <button
+              onClick={() => setShowNewChatConfirm(true)}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-2xl border-2 text-xs font-bold transition-all cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 hover:border-slate-300 shadow-2xs"
+              title={isRtl ? 'بدء محادثة جديدة (مع أرشفة محادثتك الحالية بأمان)' : 'Start Fresh Chat (archives previous)'}
+            >
+              <RotateCcw size={13} className="text-slate-500" />
+              <span className="hidden sm:inline">{isRtl ? 'محادثة جديدة' : 'New Chat'}</span>
+            </button>
+
+            {/* Placement Test Trigger Button */}
+            <button
+              onClick={startPlacementTest}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
+                placementState.isActive
+                  ? 'bg-[#002147] text-amber-300 border-amber-400 ring-2 ring-amber-300/40 animate-pulse'
+                  : 'bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-[#002147] border-blue-300'
+              }`}
+              title={isRtl ? 'اختبار تحديد المستوى الشامل (محادثة + 5 أسئلة + سبلنغ + ربط المناهج)' : 'Comprehensive Placement Test'}
+            >
+              <Target size={15} className={placementState.isActive ? 'text-amber-300' : 'text-blue-600'} />
+              <span className="hidden xs:inline">{isRtl ? 'تحديد المستوى 🎯' : 'Placement Test 🎯'}</span>
+            </button>
+
+            {/* Sara 3D Floating Character Toggle Button */}
+            <button
+              onClick={() => setIsSara3DOpen(!isSara3DOpen)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
+                isSara3DOpen
+                  ? 'bg-amber-100 text-amber-900 border-[#C49E3A] ring-2 ring-amber-300/40'
+                  : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+              }`}
+              title={isRtl ? 'عرض أو إخفاء شخصية سارة ثلاثية الأبعاد 3D العائمة' : 'Toggle 3D Floating Sara Character'}
+            >
+              <span className="text-sm">👩‍🏫</span>
+              <span className="hidden xs:inline">{isRtl ? (isSara3DOpen ? 'سارة 3D نشطة ✨' : 'سارة 3D 👩‍🏫') : 'Sara 3D'}</span>
+            </button>
+
+            {/* Summon Smart Whiteboard Button */}
+            <button
+              onClick={() => {
+                if (isWhiteboardOpen) {
+                  setIsWhiteboardOpen(false);
+                } else {
+                  openWhiteboardModal();
+                }
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
+                isWhiteboardOpen
+                  ? 'bg-amber-100 text-amber-900 border-[#C49E3A]'
+                  : 'bg-gradient-to-r from-amber-50 to-amber-100/60 hover:from-amber-100 hover:to-amber-200 text-[#855B14] border-[#C49E3A]/40'
+              }`}
+              title={isRtl ? 'استدعاء السبورة الذكية للشرح والكتابة بالطبشور' : 'Summon Smart Whiteboard'}
+            >
+              <Sparkles size={15} className={`text-[#C49E3A] ${isWhiteboardOpen ? 'animate-spin' : 'animate-pulse'}`} />
+              <span className="hidden xs:inline">{isRtl ? 'السبورة الذكية' : 'Whiteboard'}</span>
+            </button>
+
+            {/* Live Turn-by-Turn Voice Mode Button */}
+            <button
+              onClick={toggleLiveVoiceMode}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
+                isLiveMode
+                  ? 'bg-rose-500 border-rose-600 text-white animate-pulse'
+                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
+              }`}
+              title={isRtl ? 'محادثة لايف صوتية مستمرة (رد برد صوتي)' : 'Continuous Live Voice Mode'}
+            >
+              <Radio size={14} className={isLiveMode ? 'animate-spin' : ''} />
+              <span>{isLiveMode ? (isRtl ? 'اللايف نشط 🔴' : 'Live Active 🔴') : (isRtl ? 'محادثة لايف 🎙️' : 'Live Voice 🎙️')}</span>
+            </button>
+
             {/* Streak Badge */}
-            <div className="flex items-center gap-1 px-2.5 py-1.5 bg-orange-50 border-2 border-orange-200 rounded-2xl text-[#ff9600] font-black text-xs shadow-sm">
+            <div className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 bg-orange-50 border-2 border-orange-200 rounded-2xl text-[#ff9600] font-black text-xs shadow-sm">
               <Flame size={15} className="animate-bounce-slow text-orange-500" />
               <span>{streak.current} {isRtl ? 'يوم' : 'd'}</span>
             </div>
@@ -544,17 +1898,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 if (isSpeaking) cancelAllSpeech();
                 setVoiceEnabled(!voiceEnabled);
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer ${
                 voiceEnabled
                   ? 'bg-blue-50 text-[#002147] border-blue-200 shadow-sm'
                   : 'bg-slate-100 text-slate-400 border-slate-200'
               }`}
               title={isRtl ? 'تشغيل أو كتم صوت سارة' : 'Toggle Sara Voice'}
             >
-              {voiceEnabled ? <Volume2 size={16} className="text-[#C49E3A]" /> : <VolumeX size={16} />}
-              <span className="hidden sm:inline">
-                {voiceEnabled ? (isRtl ? 'سارة تتكلم' : 'Voice On') : (isRtl ? 'صامت' : 'Muted')}
-              </span>
+              {voiceEnabled ? <Volume2 size={15} className="text-[#C49E3A]" /> : <VolumeX size={15} />}
             </button>
           </div>
         </div>
@@ -592,38 +1943,64 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   </div>
                 </div>
 
-                {/* Speak button for Board sentence */}
-                {activeBoard.sentence && (
+                {/* Header buttons: Speak + Summon Whiteboard + Save Board */}
+                <div className="flex items-center gap-1.5">
                   <button
-                    onClick={() => playSaraVoice(activeBoard.sentence!)}
-                    className="p-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-[#002147] border border-slate-200 transition-all cursor-pointer"
-                    title={isRtl ? 'استمع لنطق الجملة' : 'Listen to sentence'}
+                    onClick={openWhiteboardModal}
+                    className="p-1.5 px-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 transition-all cursor-pointer flex items-center gap-1 text-xs font-black shadow-2xs active:scale-95"
+                    title={isRtl ? 'حفظ لوحة الشرح وتلوينها كصورة 📸' : 'Save Whiteboard as Image 📸'}
                   >
-                    <Volume2 size={16} className="text-[#C49E3A]" />
+                    <Camera size={13} className="text-slate-900" />
+                    <span className="hidden sm:inline">{isRtl ? 'حفظ اللوحة 📸' : 'Save Board 📸'}</span>
                   </button>
-                )}
+
+                  <button
+                    onClick={openWhiteboardModal}
+                    className="p-1.5 px-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#855B14] border border-amber-200 transition-all cursor-pointer flex items-center gap-1 text-xs font-bold shadow-2xs"
+                    title={isRtl ? 'استدعاء السبورة الذكية للشرح الكامل وتغيير الألوان' : 'Open Whiteboard'}
+                  >
+                    <Sparkles size={13} className="text-[#C49E3A]" />
+                    <span className="hidden sm:inline">{isRtl ? 'السبورة الذكية' : 'Whiteboard'}</span>
+                  </button>
+
+                  {activeBoard.sentence && (
+                    <button
+                      onClick={() => playSaraVoice(activeBoard.sentence!)}
+                      className="p-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-[#002147] border border-slate-200 transition-all cursor-pointer"
+                      title={isRtl ? 'استمع لنطق الجملة' : 'Listen to sentence'}
+                    >
+                      <Volume2 size={16} className="text-[#C49E3A]" />
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Target Sentence Display with Glow Highlight */}
               {activeBoard.sentence && (
                 <div className="bg-[#002147] text-white p-3.5 sm:p-4 rounded-2xl shadow-inner mb-3 text-center">
                   <p className="text-base sm:text-lg font-bold tracking-wide font-sans">
-                    {activeBoard.sentence.split(activeBoard.highlight || '___NON_EXISTENT___').map((part, i, arr) => (
-                      <React.Fragment key={`sentence-part-${i}`}>
-                        <span>{part}</span>
-                        {i < arr.length - 1 && activeBoard.highlight && (
-                          <span className="px-2 py-0.5 bg-[#C49E3A] text-slate-900 rounded-lg font-black shadow-sm mx-1 animate-pulse inline-block">
-                            {activeBoard.highlight}
-                          </span>
-                        )}
-                      </React.Fragment>
-                    ))}
+                    {(() => {
+                      const isAwaitingQuiz = (!!activeBoard.quiz && quizSelectedOption === null) || 
+                        (placementState.isActive && placementState.stage === 'quiz' && placementQuizSelected === null);
+                      const shouldHighlight = !isAwaitingQuiz && !!activeBoard.highlight;
+
+                      return activeBoard.sentence.split(shouldHighlight ? activeBoard.highlight! : '___NON_EXISTENT___').map((part, i, arr) => (
+                        <React.Fragment key={`sentence-part-${i}`}>
+                          <span>{part}</span>
+                          {i < arr.length - 1 && shouldHighlight && (
+                            <span className="px-2 py-0.5 bg-[#C49E3A] text-slate-900 rounded-lg font-black shadow-sm mx-1 animate-pulse inline-block">
+                              {activeBoard.highlight}
+                            </span>
+                          )}
+                        </React.Fragment>
+                      ));
+                    })()}
                   </p>
                 </div>
               )}
 
-              {/* Gentle Correction Card: Red crossed out -> Green correct */}
-              {activeBoard.correction && (
+              {/* Gentle Correction Card: Red crossed out -> Green correct (hidden if awaiting quiz to prevent cheating) */}
+              {activeBoard.correction && (!activeBoard.quiz || quizSelectedOption !== null) && (
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 mb-3 flex flex-col sm:flex-row items-center justify-around gap-2 text-xs sm:text-sm">
                   <div className="flex items-center gap-1.5 text-rose-600 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-200">
                     <XCircle size={15} className="shrink-0" />
@@ -700,6 +2077,69 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         {/* 2B. CHAT HISTORY CONTAINER */}
         {/* ======================================================== */}
         <div className="flex-1 bg-white border-2 border-slate-200 rounded-3xl p-3 sm:p-5 overflow-y-auto space-y-3.5 shadow-sm min-h-[280px]">
+          {/* Active Placement Test Step Indicator */}
+          {placementState.isActive && (
+            <div className="bg-gradient-to-r from-[#002147] via-[#09325e] to-[#002147] text-white p-3 sm:p-4 rounded-2xl border-2 border-amber-300/40 shadow-md mb-2">
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center shadow-xs">🎯</span>
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-black text-[#FDE68A]">
+                      {isRtl ? 'اختبار تحديد المستوى الشامل مع سارة' : 'Comprehensive Placement Test with Sara'}
+                    </h3>
+                    <p className="text-[10px] text-amber-200/80">
+                      {isRtl ? 'محادثة شفهية + 5 أسئلة + سبلنغ + ربط بالمناهج' : 'Speaking + 5 Questions + Spelling + Curriculum Link'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setPlacementState(prev => ({ ...prev, isActive: false }))}
+                  className="text-[10px] text-slate-300 hover:text-white px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 transition-all cursor-pointer font-bold"
+                >
+                  {isRtl ? 'إنهاء الاختبار ✕' : 'Exit Test ✕'}
+                </button>
+              </div>
+
+              {/* 4 Steps Indicator Bar */}
+              <div className="grid grid-cols-4 gap-1.5 text-center text-[10px] font-bold">
+                <div className={`p-1.5 rounded-xl border transition-all ${
+                  placementState.stage === 'conversation'
+                    ? 'bg-amber-400 text-slate-950 border-amber-300 font-black shadow-xs ring-2 ring-amber-300/50'
+                    : placementState.stage !== 'idle'
+                    ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/40 font-bold'
+                    : 'bg-black/30 text-slate-400 border-white/10'
+                }`}>
+                  1. {isRtl ? 'محادثة 🎙️' : 'Speaking 🎙️'}
+                </div>
+                <div className={`p-1.5 rounded-xl border transition-all ${
+                  placementState.stage === 'quiz'
+                    ? 'bg-amber-400 text-slate-950 border-amber-300 font-black shadow-xs ring-2 ring-amber-300/50'
+                    : placementState.stage === 'spelling' || placementState.stage === 'result'
+                    ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/40 font-bold'
+                    : 'bg-black/30 text-slate-400 border-white/10'
+                }`}>
+                  2. {isRtl ? '5 أسئلة 📝' : '5 Quiz 📝'}
+                </div>
+                <div className={`p-1.5 rounded-xl border transition-all ${
+                  placementState.stage === 'spelling'
+                    ? 'bg-amber-400 text-slate-950 border-amber-300 font-black shadow-xs ring-2 ring-amber-300/50'
+                    : placementState.stage === 'result'
+                    ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/40 font-bold'
+                    : 'bg-black/30 text-slate-400 border-white/10'
+                }`}>
+                  3. {isRtl ? 'سبلنغ ✍️' : 'Spelling ✍️'}
+                </div>
+                <div className={`p-1.5 rounded-xl border transition-all ${
+                  placementState.stage === 'result'
+                    ? 'bg-amber-400 text-slate-950 border-amber-300 font-black shadow-xs ring-2 ring-amber-300/50'
+                    : 'bg-black/30 text-slate-400 border-white/10'
+                }`}>
+                  4. {isRtl ? 'المستوى 🎓' : 'Level 🎓'}
+                </div>
+              </div>
+            </div>
+          )}
+
           {messages.map((msg) => {
             const isSara = msg.role === 'sara';
 
@@ -770,6 +2210,360 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             );
           })}
 
+          {/* ======================================================== */}
+          {/* 🎯 PLACEMENT TEST INTERACTIVE CARDS INSIDE CHAT */}
+          {/* ======================================================== */}
+          <AnimatePresence>
+            {/* Conversation Turn Prompt Banner */}
+            {placementState.isActive && placementState.stage === 'conversation' && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="bg-blue-50/80 border-2 border-blue-200 rounded-2xl p-3.5 sm:p-4 text-xs shadow-xs"
+              >
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-blue-600 text-white font-black text-[10px] flex items-center justify-center">🎙️</span>
+                    <span className="font-black text-[#002147]">
+                      {isRtl ? `المرحلة 1: محادثة شفهية (سؤال ${placementState.conversationTurn + 1} من 2)` : `Stage 1: Speaking (Question ${placementState.conversationTurn + 1} of 2)`}
+                    </span>
+                  </div>
+                  <span className="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-lg">
+                    {isRtl ? 'استخدم المايك أو اكتب' : 'Use mic or type'}
+                  </span>
+                </div>
+                <p className="text-slate-600 font-medium leading-relaxed">
+                  {placementState.conversationTurn === 0
+                    ? (isRtl ? 'سارة تنتظر إجابتك للتعريف بنفسك وهواياتك بالإنجليزية. تحدث مباشرة بالمايك أو اكتب في الأسفل 🌟' : 'Sara is waiting for you to introduce yourself. Speak with your mic or type below 🌟')
+                    : (isRtl ? 'سارة تنتظر إجابتك عن طموحك أو روتينك المفضل. تحدث أو اكتب وسننتقل بعدها لاختبار الـ 5 أسئلة 🎯' : 'Sara is waiting for your goal/routine. Speak or type to proceed to the quiz 🎯')}
+                </p>
+              </motion.div>
+            )}
+
+            {/* Stage 2: 5-Question Diagnostic Quiz Card */}
+            {placementState.isActive && placementState.stage === 'quiz' && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="bg-amber-50/70 border-2 border-amber-300 rounded-2xl p-4 shadow-sm"
+              >
+                {(() => {
+                  const currentQ = PLACEMENT_5_QUESTIONS[placementState.quizCurrentIndex];
+                  if (!currentQ) return null;
+
+                  return (
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <span className="text-[11px] font-black text-amber-900 bg-amber-200/80 px-2.5 py-1 rounded-xl">
+                          {isRtl ? `السؤال ${placementState.quizCurrentIndex + 1} من 5` : `Question ${placementState.quizCurrentIndex + 1} of 5`}
+                        </span>
+                        <span className="text-[10px] font-black text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-lg">
+                          {isRtl ? `المستوى: ${currentQ.levelTarget}` : `Level: ${currentQ.levelTarget}`}
+                        </span>
+                      </div>
+
+                      <p className="text-sm sm:text-base font-black text-[#002147] mb-1 leading-snug">
+                        {currentQ.questionEn}
+                      </p>
+                      <p className="text-xs text-slate-600 font-bold mb-3">
+                        {isRtl ? currentQ.questionAr : 'Select the correct option to complete the sentence:'}
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {currentQ.options.map((opt, optIdx) => {
+                          const isSelected = placementQuizSelected === optIdx;
+                          const isCorrect = optIdx === currentQ.correctIndex;
+                          let btnColor = 'bg-white border-slate-200 text-slate-800 hover:border-[#002147] hover:bg-slate-50';
+                          if (placementQuizSelected !== null) {
+                            if (isCorrect) {
+                              btnColor = 'bg-emerald-100 border-emerald-500 text-emerald-900 font-black';
+                            } else if (isSelected && !isCorrect) {
+                              btnColor = 'bg-rose-100 border-rose-500 text-rose-900 line-through';
+                            } else {
+                              btnColor = 'bg-white/60 border-slate-200 text-slate-400 opacity-60';
+                            }
+                          }
+
+                          return (
+                            <button
+                              key={`pq-opt-${optIdx}`}
+                              disabled={placementQuizSelected !== null}
+                              onClick={() => handlePlacementQuizAnswer(optIdx)}
+                              className={`p-2.5 rounded-xl border-2 text-xs font-bold transition-all text-center flex items-center justify-between px-3 cursor-pointer ${btnColor}`}
+                            >
+                              <span>{opt}</span>
+                              {placementQuizSelected !== null && isCorrect && (
+                                <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+                              )}
+                              {placementQuizSelected !== null && isSelected && !isCorrect && (
+                                <XCircle size={16} className="text-rose-600 shrink-0" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {placementQuizFeedback && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 3 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className={`mt-3 p-2.5 rounded-xl text-xs font-bold ${
+                            placementQuizFeedback === 'correct' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-rose-100 text-rose-800 border border-rose-200'
+                          }`}
+                        >
+                          <p>{isRtl ? currentQ.explanationAr : currentQ.explanationEn}</p>
+                        </motion.div>
+                      )}
+                    </div>
+                  );
+                })()}
+              </motion.div>
+            )}
+
+            {/* Stage 3: Mini Spelling Card */}
+            {placementState.isActive && placementState.stage === 'spelling' && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="bg-indigo-50/70 border-2 border-indigo-200 rounded-2xl p-4 shadow-sm"
+              >
+                {(() => {
+                  const currentSp = PLACEMENT_SPELLING_ITEMS[placementState.spellingCurrentIndex];
+                  if (!currentSp) return null;
+
+                  return (
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <span className="text-[11px] font-black text-indigo-900 bg-indigo-100 px-2.5 py-1 rounded-xl">
+                          {isRtl ? `امتحان السبلنغ: الكلمة ${placementState.spellingCurrentIndex + 1} من 3 ✍️` : `Spelling: Word ${placementState.spellingCurrentIndex + 1} of 3 ✍️`}
+                        </span>
+                        <button
+                          onClick={() => playSaraVoice(
+                            currentSp.word,
+                            undefined,
+                            isRtl ? '🎧 استمع لنطق الكلمة واكتبها في المربع...' : '🎧 Listen to the word and type the spelling...'
+                          )}
+                          className="px-2.5 py-1 bg-[#C49E3A] hover:bg-[#d8b045] active:scale-95 text-slate-900 font-black text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                        >
+                          <Volume2 size={14} />
+                          <span>{isRtl ? 'استمع للنطق 🔊' : 'Listen 🔊'}</span>
+                        </button>
+                      </div>
+
+                      <div className="bg-white p-3 rounded-xl border border-indigo-100 mb-3 space-y-1">
+                        <p className="text-xs text-slate-500 font-bold">{isRtl ? 'استمع لنطق سارة واكتب الكلمة بدقة:' : 'Listen to Sara and type the word:'}</p>
+                        <p className="text-sm font-black text-[#002147]">{currentSp.sentenceContext}</p>
+                        <p className="text-xs text-indigo-700 font-bold">{isRtl ? `💡 المعنى: ${currentSp.meaningAr}` : `💡 Meaning: ${currentSp.meaningEn}`}</p>
+                        <div className="pt-1">
+                          <span className="text-[11px] text-slate-400 font-mono tracking-widest">{isRtl ? 'تلميح الأحرف:' : 'Hint:'} {currentSp.hintMask}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={spellingInputText}
+                          onChange={(e) => setSpellingInputText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handlePlacementSpellingSubmit(spellingInputText);
+                            }
+                          }}
+                          disabled={spellingFeedback !== null}
+                          placeholder={isRtl ? 'اكتب تهجئة الكلمة هنا (مثال: word)...' : 'Type the spelling here...'}
+                          className="flex-1 bg-white border-2 border-indigo-200 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs sm:text-sm font-black text-[#002147] tracking-wider focus:outline-none"
+                        />
+                        <button
+                          onClick={() => handlePlacementSpellingSubmit(spellingInputText)}
+                          disabled={spellingFeedback !== null || !spellingInputText.trim()}
+                          className="px-4 py-2 bg-[#002147] hover:bg-[#C49E3A] disabled:opacity-40 text-white rounded-xl font-black text-xs transition-all shadow-sm cursor-pointer"
+                        >
+                          {isRtl ? 'تحقق ↵' : 'Check ↵'}
+                        </button>
+                      </div>
+
+                      {spellingFeedback && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 3 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className={`mt-2.5 p-2 rounded-xl text-xs font-black text-center ${
+                            spellingFeedback === 'correct' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                          }`}
+                        >
+                          {spellingFeedback === 'correct'
+                            ? (isRtl ? '🎉 كفو! تهجئة صحيحة وممتازة 100%!' : '🎉 Perfect spelling!')
+                            : (isRtl ? `👏 التهجئة الصحيحة هي: "${currentSp.word}"` : `👏 The correct spelling is: "${currentSp.word}"`)}
+                        </motion.div>
+                      )}
+                    </div>
+                  );
+                })()}
+              </motion.div>
+            )}
+
+            {/* Stage 4: Official Certificate & Linked Curricula Card */}
+            {placementState.isActive && placementState.stage === 'result' && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                className="bg-gradient-to-br from-[#002147] via-[#08305c] to-[#002147] text-white border-4 border-[#C49E3A] rounded-3xl p-4 sm:p-6 shadow-2xl relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-48 h-48 bg-[#C49E3A]/10 rounded-full blur-3xl pointer-events-none" />
+                
+                <div className="relative z-10 space-y-4">
+                  {/* Header */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-right border-b border-white/10 pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#C49E3A] to-[#a37f26] text-slate-900 font-black text-xl flex items-center justify-center shadow-lg">
+                        🎓
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-300">
+                          {isRtl ? 'الشهادة المعتمدة لأكاديمية باسم الخليل' : 'Basim Alkhalil Academy Placement'}
+                        </span>
+                        <h3 className="text-lg sm:text-xl font-black text-white">
+                          {isRtl ? 'نتيجة تحديد المستوى وخارطة المناهج' : 'Level Diagnostic & Curriculum Pathway'}
+                        </h3>
+                      </div>
+                    </div>
+
+                    {/* Level Badge */}
+                    <div className="px-4 py-2 bg-gradient-to-r from-amber-400 to-amber-300 text-slate-950 font-black text-base sm:text-lg rounded-2xl shadow-md border-2 border-white/30 flex items-center gap-2">
+                      <Trophy size={18} className="text-slate-900" />
+                      <span>{isRtl ? `المستوى المعتمد: ${placementState.diagnosedLevel}` : `Level: ${placementState.diagnosedLevel}`}</span>
+                    </div>
+                  </div>
+
+                  {/* Score Breakdown Pills */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+                    <div className="bg-black/40 p-2.5 rounded-2xl border border-white/10">
+                      <span className="text-slate-400 text-[10px] block">{isRtl ? 'المحادثة الشفهية' : 'Speaking'}</span>
+                      <span className="text-amber-300 font-black text-sm">{Math.round(placementState.conversationScore)}/30</span>
+                    </div>
+                    <div className="bg-black/40 p-2.5 rounded-2xl border border-white/10">
+                      <span className="text-slate-400 text-[10px] block">{isRtl ? 'الاختبار (5 أسئلة)' : 'Quiz'}</span>
+                      <span className="text-amber-300 font-black text-sm">{Math.round(placementState.quizScore)}/50</span>
+                    </div>
+                    <div className="bg-black/40 p-2.5 rounded-2xl border border-white/10">
+                      <span className="text-slate-400 text-[10px] block">{isRtl ? 'امتحان السبلنغ' : 'Spelling'}</span>
+                      <span className="text-amber-300 font-black text-sm">{Math.round(placementState.spellingScore)}/20</span>
+                    </div>
+                    <div className="bg-[#C49E3A]/20 p-2.5 rounded-2xl border border-[#C49E3A]/40">
+                      <span className="text-amber-200 text-[10px] block font-bold">{isRtl ? 'المجموع النهائي' : 'Total Score'}</span>
+                      <span className="text-[#FDE68A] font-black text-sm">{placementState.totalScore}%</span>
+                    </div>
+                  </div>
+
+                  {/* LINKED EXISTING CURRICULA ACCORDING TO DIAGNOSED LEVEL */}
+                  <div className="bg-black/50 border border-white/15 rounded-2xl p-3.5 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Compass size={16} className="text-[#C49E3A]" />
+                      <h4 className="text-xs sm:text-sm font-black text-[#FDE68A]">
+                        {isRtl ? `وحدات المناهج المعتمدة المخصصة لمستواك (${placementState.diagnosedLevel})` : `Curriculum Units Tailored for ${placementState.diagnosedLevel}`}
+                      </h4>
+                    </div>
+
+                    {(() => {
+                      const lvl = placementState.diagnosedLevel || proficiencyLevel.A1;
+                      const rUnit = MASTER_CURRICULUM[CurriculumCategory.READING]?.[lvl]?.[0];
+                      const wUnit = MASTER_CURRICULUM[CurriculumCategory.WRITING]?.[lvl]?.[0];
+                      const gUnit = MASTER_CURRICULUM[CurriculumCategory.GRAMMAR]?.[lvl]?.[0];
+                      const cUnit = MASTER_CURRICULUM[CurriculumCategory.CONVERSATION]?.[lvl]?.[0];
+
+                      return (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                          <div className="bg-white/5 p-2.5 rounded-xl border border-white/10 flex items-start gap-2">
+                            <span className="text-amber-400 text-sm">📖</span>
+                            <div>
+                              <span className="text-[10px] text-slate-400 block">{isRtl ? 'وحدة القراءة والفهم:' : 'Reading Unit:'}</span>
+                              <span className="font-bold text-white">{isRtl ? rUnit?.titleAr : rUnit?.title}</span>
+                            </div>
+                          </div>
+                          <div className="bg-white/5 p-2.5 rounded-xl border border-white/10 flex items-start gap-2">
+                            <span className="text-amber-400 text-sm">📐</span>
+                            <div>
+                              <span className="text-[10px] text-slate-400 block">{isRtl ? 'وحدة القواعد والتراكيب:' : 'Grammar Unit:'}</span>
+                              <span className="font-bold text-white">{isRtl ? gUnit?.titleAr : gUnit?.title}</span>
+                            </div>
+                          </div>
+                          <div className="bg-white/5 p-2.5 rounded-xl border border-white/10 flex items-start gap-2">
+                            <span className="text-amber-400 text-sm">✍️</span>
+                            <div>
+                              <span className="text-[10px] text-slate-400 block">{isRtl ? 'وحدة التعبير والكتابة:' : 'Writing Unit:'}</span>
+                              <span className="font-bold text-white">{isRtl ? wUnit?.titleAr : wUnit?.title}</span>
+                            </div>
+                          </div>
+                          <div className="bg-white/5 p-2.5 rounded-xl border border-white/10 flex items-start gap-2">
+                            <span className="text-amber-400 text-sm">🗣️</span>
+                            <div>
+                              <span className="text-[10px] text-slate-400 block">{isRtl ? 'وحدة المحادثة والطلاقة:' : 'Speaking Unit:'}</span>
+                              <span className="font-bold text-white">{isRtl ? cUnit?.titleAr : cUnit?.title}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Direct Action Navigation Buttons */}
+                  <div className="pt-1 flex flex-wrap gap-2">
+                    <button
+                      onClick={() => {
+                        cancelAllSpeech();
+                        onNavigate('reading-lab');
+                      }}
+                      className="flex-1 min-w-[130px] px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <span>📖 {isRtl ? 'مختبر القراءة' : 'Reading Lab'}</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        cancelAllSpeech();
+                        onNavigate('grammar-academy');
+                      }}
+                      className="flex-1 min-w-[130px] px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <span>📐 {isRtl ? 'أكاديمية القواعد' : 'Grammar Academy'}</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        cancelAllSpeech();
+                        onNavigate('writing-spelling-studio');
+                      }}
+                      className="flex-1 min-w-[130px] px-3 py-2 bg-purple-600 hover:bg-purple-500 text-white font-black text-xs rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <span>✍️ {isRtl ? 'استوديو التعبير' : 'Writing Studio'}</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        cancelAllSpeech();
+                        onNavigate('pronunciation-lab');
+                      }}
+                      className="flex-1 min-w-[130px] px-3 py-2 bg-amber-600 hover:bg-amber-500 text-white font-black text-xs rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <span>🎙️ {isRtl ? 'معمل النطق' : 'Pronunciation'}</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setPlacementState(prev => ({ ...prev, isActive: false }));
+                        handleSendMessage(isRtl ? `أنا جاهز يا سارة لنبدأ درسي الأول في مستوى ${placementState.diagnosedLevel}!` : `Sara, let us start my first lesson in level ${placementState.diagnosedLevel}!`);
+                      }}
+                      className="w-full px-4 py-2.5 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-md hover:scale-[1.01] transition-all cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <Sparkles size={16} className="text-slate-900" />
+                      <span>{isRtl ? `ابدأ درسك الأول في مستوى [${placementState.diagnosedLevel}] مع سارة الآن 🚀` : `Start First Lesson with Sara Now 🚀`}</span>
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Loading indicator */}
           {loading && (
             <motion.div 
@@ -782,27 +2576,134 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </motion.div>
           )}
 
+          {/* ======================================================== */}
+          {/* 2B.1 EMBEDDED LIVE VOICE CONSOLE INSIDE SARA'S CHAT */}
+          {/* ======================================================== */}
+          <AnimatePresence>
+            {isLiveMode && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                className="bg-gradient-to-r from-[#002147] via-[#093566] to-[#002147] text-white p-3.5 sm:p-4 rounded-2xl border-2 border-amber-300/50 shadow-md my-2"
+              >
+                <div className="flex items-center justify-between flex-wrap gap-2.5">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center font-black text-xs border-2 shadow-sm ${
+                        liveStatus === 'listening' ? 'bg-emerald-500 border-emerald-300 animate-pulse text-white' :
+                        liveStatus === 'speaking' ? 'bg-[#C49E3A] border-amber-200 text-slate-900 animate-bounce-slow' :
+                        'bg-sky-600 border-sky-300 text-white'
+                      }`}>
+                        {liveStatus === 'listening' ? <Mic size={17} /> : liveStatus === 'speaking' ? <Volume2 size={17} /> : <Sparkles size={17} />}
+                      </div>
+                      <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                      </span>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black text-amber-300">
+                          {isRtl ? 'المحادثة الصوتية المباشرة (لايف رد برد)' : 'Live Voice Session (Turn-by-Turn):'}
+                        </span>
+                        {/* Soundwave Bars */}
+                        <div className="flex items-center gap-0.5 h-3 px-1">
+                          {[1, 2, 3, 4, 5].map((bar) => (
+                            <motion.span
+                              key={`live-wave-bar-${bar}`}
+                              animate={{
+                                height: (liveStatus === 'listening' || liveStatus === 'speaking') ? [3, 14, 5, 12, 3] : 3
+                              }}
+                              transition={{ duration: 0.5, repeat: Infinity, delay: bar * 0.08 }}
+                              className="w-1 bg-amber-300 rounded-full inline-block"
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      <p className="text-xs font-bold text-slate-100 mt-0.5">
+                        {liveStatus === 'listening' && (isRtl ? '🎙️ سارة تستمع إليك الآن... تفضل بالتحدث' : '🎙️ Sara is listening... speak your sentence')}
+                        {liveStatus === 'thinking' && (isRtl ? '💭 سارة تفكر وتجهّز الرد الصوتي...' : '💭 Sara is thinking...')}
+                        {liveStatus === 'speaking' && (isRtl ? '🗣️ سارة تتحدث معك الآن بصوتها 🔊' : '🗣️ Sara is speaking to you now 🔊')}
+                        {liveStatus === 'idle' && (isRtl ? 'جاهزة لبدء الاستماع...' : 'Ready to listen...')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Integrated Controls */}
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    {/* Speech language selector */}
+                    <div className="flex items-center bg-black/40 rounded-xl p-0.5 border border-white/10 text-[10px]">
+                      <button
+                        onClick={() => setSpeechLang('ar-SA')}
+                        className={`px-2 py-0.5 rounded-lg font-bold transition-all cursor-pointer ${
+                          speechLang === 'ar-SA' ? 'bg-[#C49E3A] text-slate-900 font-black' : 'text-slate-300 hover:text-white'
+                        }`}
+                      >
+                        🇸🇦 عربي
+                      </button>
+                      <button
+                        onClick={() => setSpeechLang('en-US')}
+                        className={`px-2 py-0.5 rounded-lg font-bold transition-all cursor-pointer ${
+                          speechLang === 'en-US' ? 'bg-[#C49E3A] text-slate-900 font-black' : 'text-slate-300 hover:text-white'
+                        }`}
+                      >
+                        🇬🇧 English
+                      </button>
+                    </div>
+
+                    {liveStatus === 'speaking' && (
+                      <button
+                        onClick={() => {
+                          cancelAllSpeech();
+                          startListeningTurn();
+                        }}
+                        className="px-2.5 py-1 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-xl text-xs cursor-pointer shadow-sm transition-all"
+                      >
+                        {isRtl ? 'تحدث الآن 🎙️' : 'Speak Now 🎙️'}
+                      </button>
+                    )}
+
+                    <button
+                      onClick={toggleLiveVoiceMode}
+                      className="px-2.5 py-1 bg-rose-600/90 hover:bg-rose-600 text-white font-bold rounded-xl text-xs cursor-pointer shadow-sm transition-all"
+                    >
+                      {isRtl ? 'إنهاء اللايف ⏹️' : 'Stop Live ⏹️'}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div ref={messagesEndRef} />
         </div>
 
         {/* ======================================================== */}
-        {/* 2C. INPUT CONTROLS (MIC + TEXT INPUT + SEND) */}
+        {/* 2C. INPUT CONTROLS (INTEGRATED LIVE + MIC + TEXT + SEND) */}
         {/* ======================================================== */}
-        <div className="bg-white border-2 border-slate-200 rounded-3xl p-2.5 sm:p-3 shadow-md flex items-center gap-2">
-          {/* Microphone button (Web Speech API) */}
-          {speechSupported && (
-            <button
-              onClick={toggleListening}
-              className={`p-3 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-center shrink-0 ${
-                isListening
-                  ? 'bg-rose-500 border-rose-600 text-white animate-pulse shadow-md shadow-rose-200'
-                  : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-[#002147]'
-              }`}
-              title={isListening ? (isRtl ? 'جارٍ الاستماع... اضغط للإيقاف' : 'Listening... click to stop') : (isRtl ? 'تحدث بالمايك' : 'Speak via mic')}
-            >
-              {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-            </button>
-          )}
+        <div className={`bg-white border-2 rounded-3xl p-2 sm:p-2.5 shadow-md flex items-center gap-1.5 sm:gap-2 transition-all ${
+          isLiveMode ? 'border-amber-400 ring-2 ring-amber-300/40' : 'border-slate-200'
+        }`}>
+          {/* Integrated Live Voice Mode Button directly in the input bar */}
+          <button
+            onClick={toggleLiveVoiceMode}
+            className={`px-3 py-2.5 rounded-2xl border-2 transition-all cursor-pointer flex items-center gap-1.5 shrink-0 text-xs font-black shadow-xs ${
+              isLiveMode
+                ? 'bg-rose-500 border-rose-600 text-white animate-pulse'
+                : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-800'
+            }`}
+            title={isLiveMode ? (isRtl ? 'إيقاف المحادثة اللايف' : 'End Live Voice') : (isRtl ? 'تشغيل المحادثة الصوتية المباشرة (رد برد)' : 'Start Live Voice Mode')}
+          >
+            {isLiveMode ? <Radio size={16} className="animate-spin text-white" /> : <Mic size={16} className="text-emerald-700" />}
+            <span className="hidden sm:inline">
+              {isLiveMode 
+                ? (isRtl ? 'لايف نشط 🔴' : 'Live Active 🔴') 
+                : (isRtl ? 'محادثة لايف 🎙️' : 'Live Voice 🎙️')}
+            </span>
+          </button>
 
           {/* Text Input */}
           <input
@@ -816,11 +2717,11 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               }
             }}
             placeholder={
-              isListening
-                ? (isRtl ? 'تحدث الآن، سارة تستمع لك...' : 'Listening, speak now...')
-                : (isRtl ? 'اكتب لسارة بالعربية أو الإنجليزية...' : 'Type to Sara in Arabic or English...')
+              isLiveMode
+                ? (isRtl ? 'المحادثة اللايف نشطة... تحدث بالمايك وسارة تجيبك، أو اكتب هنا...' : 'Live mode active... speak or type here...')
+                : (isRtl ? 'اكتب لسارة بالعربية أو الإنجليزية، أو اضغط محادثة لايف...' : 'Type to Sara in Arabic or English, or start Live...')
             }
-            className="flex-1 bg-transparent px-3 py-2 text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none"
+            className="flex-1 bg-transparent px-2.5 py-1.5 text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none"
           />
 
           {/* Send Button */}
@@ -837,6 +2738,28 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         {/* Quick Suggestion Chips */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 text-[11px] font-bold text-slate-600 no-scrollbar">
           <span className="text-slate-400 shrink-0 text-[10px]">{isRtl ? 'اقتراحات سريعة:' : 'Quick prompts:'}</span>
+          <button
+            onClick={toggleLiveVoiceMode}
+            className={`px-3 py-1.5 rounded-xl border shrink-0 transition-all cursor-pointer font-black flex items-center gap-1 ${
+              isLiveMode 
+                ? 'bg-rose-50 border-rose-300 text-rose-700' 
+                : 'bg-emerald-50 border-emerald-300 hover:bg-emerald-100 text-emerald-800'
+            }`}
+          >
+            <Radio size={12} className={isLiveMode ? 'animate-spin' : ''} />
+            <span>{isLiveMode ? (isRtl ? '⏹️ إيقاف المحادثة اللايف' : '⏹️ Stop Live') : (isRtl ? '🎙️ تشغيل المحادثة الصوتية اللايف (رد برد)' : '🎙️ Start Live Voice Chat')}</span>
+          </button>
+          <button
+            onClick={startPlacementTest}
+            className={`px-3 py-1.5 rounded-xl border shrink-0 transition-all cursor-pointer font-black flex items-center gap-1 shadow-2xs ${
+              placementState.isActive
+                ? 'bg-[#002147] text-amber-300 border-amber-400 ring-2 ring-amber-300/40 animate-pulse'
+                : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-300 hover:from-blue-100 hover:to-indigo-100 text-[#002147]'
+            }`}
+          >
+            <Target size={12} className={placementState.isActive ? 'text-amber-300' : 'text-blue-600'} />
+            <span>{isRtl ? '🎯 اختبار تحديد المستوى (محادثة + 5 أسئلة + سبلنغ)' : '🎯 Placement Test (Speaking + 5 Questions + Spelling)'}</span>
+          </button>
           {[
             { ar: 'علميني قاعدة جديدة اليوم 📐', en: 'Teach me a new rule 📐' },
             { ar: 'اختبريني بـ 3 أسئلة سريعة 🎯', en: 'Give me a 3-question quiz 🎯' },
@@ -851,8 +2774,191 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               {isRtl ? chip.ar : chip.en}
             </button>
           ))}
+          <button
+            onClick={() => setShowNewChatConfirm(true)}
+            className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-[#002147] hover:bg-slate-100 text-slate-600 shrink-0 transition-all cursor-pointer shadow-2xs flex items-center gap-1 font-bold"
+          >
+            <RotateCcw size={11} />
+            <span>{isRtl ? '🔄 محادثة جديدة' : '🔄 New Chat'}</span>
+          </button>
         </div>
       </main>
+
+      {/* 4. Smart Whiteboard Modal / Chalkboard */}
+      <SmartWhiteboard
+        isOpen={isWhiteboardOpen}
+        onClose={() => setIsWhiteboardOpen(false)}
+        boardData={activeBoard}
+        isRtl={isRtl}
+        onSpeak={(txt) => playSaraVoice(txt)}
+        onQuizAnswer={handleQuizOptionClick}
+        quizSelectedOption={quizSelectedOption}
+        quizFeedback={quizFeedback}
+      />
+
+      {/* 5. 3D Interactive Floating Avatar Character of Sara */}
+      <Sara3DCharacter
+        isOpen={isSara3DOpen}
+        onToggle={() => setIsSara3DOpen(!isSara3DOpen)}
+        isRtl={isRtl}
+        isSpeaking={isSpeaking}
+        isLiveMode={isLiveMode}
+        liveStatus={liveStatus}
+        currentSpeechText={lastSaraSpeech}
+        onCharacterClick={() => {
+          if (!isSpeaking) {
+            const greetings = isRtl
+              ? [
+                  'أنا معك خطوة بخطوة يا بطل! 🌟',
+                  'هل ترغب أن نمارس بعض الجمل الصوتية معاً الآن؟ 🎙️',
+                  'أنا سارة، رفيقتك ومعلمتك الشخصية في الأكاديمية! ✨',
+                  'أحسنت في استمرارك ومثابرتك في التعلم! 👏'
+                ]
+              : [
+                  "I'm here with you step by step! 🌟",
+                  'Ready to practice some English sentences together? 🎙️',
+                  "I'm Sara, your personal mentor at the Academy! ✨",
+                  'Keep up the fantastic momentum! 👏'
+                ];
+            const phrase = greetings[Math.floor(Math.random() * greetings.length)];
+            playSaraVoice(phrase);
+          }
+        }}
+      />
+
+      {/* 6. Start New Chat Confirmation Modal */}
+      <AnimatePresence>
+        {showNewChatConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-3xl p-5 sm:p-6 max-w-sm w-full border-2 border-slate-200 shadow-2xl text-center space-y-4"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center mx-auto text-xl shadow-xs">
+                🔄
+              </div>
+
+              <div>
+                <h3 className="text-base sm:text-lg font-black text-[#002147]">
+                  {isRtl ? 'بدء محادثة جديدة مع سارة؟' : 'Start Fresh Chat with Sara?'}
+                </h3>
+                <p className="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
+                  {isRtl
+                    ? 'سيتم أرشفة وحفظ محادثتك الحالية بأمان حتى لا تفقد أي معلومة، وتبدأ سارة معك جلسة تدريبية جديدة بترحيب ونشاط 🌟'
+                    : 'Your current chat will be safely archived so no progress is lost, and Sara will begin a fresh practice lesson with you 🌟'}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 pt-2">
+                <button
+                  onClick={() => setShowNewChatConfirm(false)}
+                  className="flex-1 py-2.5 px-3 rounded-xl border border-slate-200 text-slate-600 font-black text-xs hover:bg-slate-50 transition-all cursor-pointer"
+                >
+                  {isRtl ? 'إلغاء وإكمال الحالية' : 'Cancel & Continue'}
+                </button>
+                <button
+                  onClick={handleStartNewSession}
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-[#002147] hover:bg-[#C49E3A] text-white font-black text-xs transition-all shadow-md cursor-pointer"
+                >
+                  {isRtl ? 'نعم، ابدأ جديدة 🚀' : 'Yes, Start New 🚀'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 7. End of Lesson Bell & Summary Modal */}
+      <AnimatePresence>
+        {isTimeUpModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl border-4 border-[#C49E3A] relative overflow-hidden text-center"
+            >
+              {/* Background Glow */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl pointer-events-none" />
+
+              <div className="relative z-10 space-y-4">
+                {/* Bell Icon & Animation */}
+                <div className="w-16 h-16 mx-auto rounded-3xl bg-gradient-to-br from-[#002147] to-[#0a3568] border-2 border-amber-300 text-white flex items-center justify-center shadow-lg">
+                  <Bell size={32} className="text-amber-400 animate-bounce" />
+                </div>
+
+                <div>
+                  <span className="text-[11px] font-black uppercase tracking-wider text-[#C49E3A] block mb-1">
+                    {isRtl ? 'أكاديمية باسم الخليل للغة الإنجليزية' : 'Basim Alkhalil Academy'}
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-black text-[#002147]">
+                    {isRtl ? 'انتهت الحصة المقررة! 🔔🎓' : 'Lesson Time Completed! 🔔🎓'}
+                  </h3>
+                  <p className="text-xs text-slate-500 font-bold mt-1">
+                    {isRtl
+                      ? `أتممت ${timerDurationMinutes} دقيقة من التعلم والمحادثة النشطة مع سارة.`
+                      : `You completed ${timerDurationMinutes} minutes of focused practice with Sara.`}
+                  </p>
+                </div>
+
+                {/* Session Highlights Pill Grid */}
+                <div className="grid grid-cols-2 gap-2 bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs">
+                  <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-2xs">
+                    <span className="text-slate-400 block text-[10px] font-bold">{isRtl ? 'مدة الحصة' : 'Duration'}</span>
+                    <span className="font-black text-[#002147] text-sm">{timerDurationMinutes} {isRtl ? 'دقائق ⏱️' : 'mins'}</span>
+                  </div>
+                  <div className="bg-white p-2.5 rounded-xl border border-slate-100 shadow-2xs">
+                    <span className="text-slate-400 block text-[10px] font-bold">{isRtl ? 'الرسائل والمحادثة' : 'Messages'}</span>
+                    <span className="font-black text-[#002147] text-sm">{messages.length} {isRtl ? 'رسالة 💬' : 'msgs'}</span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="space-y-2 pt-2">
+                  <button
+                    onClick={() => extendSessionByMinutes(5)}
+                    className="w-full py-3 bg-[#002147] hover:bg-[#073060] active:scale-98 text-amber-300 rounded-2xl font-black text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer border border-amber-300/40"
+                  >
+                    <Plus size={16} />
+                    <span>{isRtl ? 'تمديد الحصة (+5 دقائق إضافية ⏱️)' : 'Extend +5 minutes ⏱️'}</span>
+                  </button>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={restartTimer}
+                      className="py-2.5 bg-amber-50 hover:bg-amber-100 text-[#855B14] rounded-2xl font-black text-xs border border-amber-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <RotateCcw size={14} />
+                      <span>{isRtl ? 'بدء مؤقت جديد' : 'New Timer'}</span>
+                    </button>
+
+                    <button
+                      onClick={() => setIsTimeUpModalOpen(false)}
+                      className="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-black text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <BookOpen size={14} />
+                      <span>{isRtl ? 'مراجعة المحادثة' : 'Review Chat'}</span>
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      cancelAllSpeech();
+                      setIsTimeUpModalOpen(false);
+                      onNavigate('grammar-academy');
+                    }}
+                    className="w-full py-2 text-slate-500 hover:text-[#002147] text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    {isRtl ? 'الذهاب إلى أقسام الأكاديمية والتمارين ➔' : 'Explore Academy Curriculum ➔'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

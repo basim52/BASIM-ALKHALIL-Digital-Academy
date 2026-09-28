@@ -241,6 +241,13 @@ export interface SaraBoardData {
   highlight?: string;
   correction?: SaraBoardCorrection;
   quiz?: SaraBoardQuiz;
+  notes?: string[];
+  formula?: string;
+  diagram?: {
+    label: string;
+    items: { title: string; desc: string; icon?: string }[];
+  };
+  openWhiteboard?: boolean;
 }
 
 export interface SaraAction {
