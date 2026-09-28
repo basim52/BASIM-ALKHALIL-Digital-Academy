@@ -44,6 +44,7 @@ import {
 } from '../data/interactiveCurriculum';
 
 import { db } from '../lib/firebase';
+import { savePlacementLevel } from '../lib/placement';
 import { collection, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 
 interface Question {
@@ -320,8 +321,9 @@ export const PlacementTest = ({
       else if (scoreVal <= 12) calculatedLvl = proficiencyLevel.B2;
       else calculatedLvl = proficiencyLevel.C1;
 
+      await savePlacementLevel(calculatedLvl, { totalScore: scoreVal });
+
       await setDoc(doc(db, 'students', userProfile.uid), {
-        level: calculatedLvl,
         placementTestCompleted: true,
         placementScore: scoreVal,
         placementAnswers: finalAnswers,
@@ -620,8 +622,9 @@ export const PlacementTest = ({
       await addDoc(collection(db, 'studyPlans'), actualPlanDoc);
 
       // Write completion state to students collection so metadata is kept fully locked
+      await savePlacementLevel(determinedLevel, { totalScore: score });
+
       await setDoc(doc(db, 'students', userProfile.uid), {
-        level: determinedLevel,
         placementTestCompleted: true,
         placementScore: score,
         placementAnswers: answers,

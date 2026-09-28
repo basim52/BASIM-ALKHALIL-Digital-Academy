@@ -1354,51 +1354,67 @@ Output structure:
   });
 
   // Sara Tutor Placement Evaluation Result Persistence
-  app.post("/api/sara-tutor/save-placement", async (req, res) => {
+  // Placement level save (authenticated; the student's uid comes from the ID token, never the body)
+  const handleSavePlacement = async (req: any, res: any) => {
     try {
-      const { uid, level, conversationScore = 0, quizScore = 0, spellingScore = 0, totalScore = 0, details = {} } = req.body;
-      if (!uid || !level) {
-        return res.status(400).json({ error: "Missing required fields (uid, level)" });
+      const authHeader = req.headers.authorization || "";
+      const idToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
+      if (!idToken) {
+        return res.status(401).json({ error: "UNAUTHORIZED" });
       }
 
+      const adminAuth = getAdminAuth();
       const adminDb = getAdminDb();
-      if (adminDb) {
-        try {
-          await adminDb.collection("users").doc(uid).set({
-            level,
-            placementCompleted: true,
-            placementScore: totalScore,
-            placementUpdatedAt: FieldValue.serverTimestamp()
-          }, { merge: true });
-
-          await adminDb.collection("students").doc(uid).set({
-            level,
-            placementTestCompleted: true,
-            placementScore: totalScore,
-            conversationScore,
-            quizScore,
-            spellingScore,
-            details,
-            completedAt: new Date().toISOString()
-          }, { merge: true });
-          
-          logToFile(`[Sara Placement] Level ${level} saved for user ${uid}`);
-        } catch (dbErr: any) {
-          logToFile(`[Sara Placement] Firestore admin warning: ${dbErr.message}`);
-        }
+      if (!adminAuth || !adminDb) {
+        return res.status(503).json({ error: "SERVICE_UNAVAILABLE", message: "Firebase Admin is not configured" });
       }
 
-      return res.json({
-        ok: true,
-        uid,
+      let uid: string;
+      try {
+        uid = (await adminAuth.verifyIdToken(idToken)).uid;
+      } catch {
+        return res.status(401).json({ error: "UNAUTHORIZED" });
+      }
+
+      const { level } = req.body || {};
+      const VALID_LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
+      if (!VALID_LEVELS.includes(level)) {
+        return res.status(400).json({ error: "INVALID_LEVEL" });
+      }
+
+      const num = (v: any) => {
+        const n = Number(v);
+        return Number.isFinite(n) ? Math.max(0, Math.min(1000, Math.round(n))) : 0;
+      };
+      const totalScore = num(req.body.totalScore);
+
+      await adminDb.collection("users").doc(uid).set({
         level,
-        saved: true
-      });
+        placementCompleted: true,
+        placementTestCompleted: true,
+        placementScore: totalScore,
+        placementUpdatedAt: FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      await adminDb.collection("students").doc(uid).set({
+        level,
+        placementTestCompleted: true,
+        placementScore: totalScore,
+        conversationScore: num(req.body.conversationScore),
+        quizScore: num(req.body.quizScore),
+        spellingScore: num(req.body.spellingScore),
+        completedAt: new Date().toISOString()
+      }, { merge: true });
+
+      logToFile(`[Placement] Level ${level} saved for user ${uid}`);
+      return res.json({ ok: true, level });
     } catch (err: any) {
-      console.error("[Sara Placement] Error:", err);
-      return res.status(500).json({ error: "Failed to save placement result", message: err.message });
+      logToFile(`[Placement] Save error: ${err.message}`);
+      return res.status(500).json({ error: "Failed to save placement result" });
     }
-  });
+  };
+  app.post("/api/placement/save", handleSavePlacement);
+  app.post("/api/sara-tutor/save-placement", handleSavePlacement);
 
 
   // Modern AI Omnipresent Instant Tutor Endpoint

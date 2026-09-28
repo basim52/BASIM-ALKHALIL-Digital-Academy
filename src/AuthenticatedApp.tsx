@@ -6779,7 +6779,7 @@ export default function AuthenticatedApp({
           setUserProfile={setUserProfile as any}
           onComplete={async (level) => {
             try {
-              await setDoc(doc(db, 'students', currentUser.uid), { level }, { merge: true });
+              // Level is already saved server-side by PlacementTest (savePlacementLevel)
               if (userProfile) {
                 setUserProfile({ ...userProfile, level } as any);
               }

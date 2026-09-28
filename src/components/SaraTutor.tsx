@@ -38,6 +38,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile, AppView, SaraBoardData, SaraChatResponse, TutorMemoryDoc, proficiencyLevel, CurriculumCategory } from '../types';
 import { Language, translations } from '../lib/translations';
 import { auth, db } from '../lib/firebase';
+import { savePlacementLevel } from '../lib/placement';
 import { doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { speakAcademyText, cancelAllSpeech, playSchoolBellChime } from '../lib/audio';
 import { getStudentStreak, StreakData } from '../services/streakService';
@@ -1229,50 +1230,13 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     // Save to Firestore & backend
     try {
       if (profile.uid) {
-        // Direct update to users doc
-        await updateDoc(doc(db, 'users', profile.uid), {
-          level: level,
-          placementCompleted: true,
-          placementScore: finalTotal,
-          placementTestCompleted: true,
-          updatedAt: serverTimestamp()
-        }).catch(async () => {
-          await setDoc(doc(db, 'users', profile.uid), {
-            level: level,
-            placementCompleted: true,
-            placementScore: finalTotal,
-            placementTestCompleted: true
-          }, { merge: true });
-        });
-
-        // Direct update to students doc
-        await setDoc(doc(db, 'students', profile.uid), {
-          level: level,
-          placementTestCompleted: true,
-          placementScore: finalTotal,
+        // Level is saved by the server (rules block students from writing `level` directly)
+        await savePlacementLevel(level, {
+          totalScore: finalTotal,
           conversationScore: convScore,
           quizScore: qScore,
-          spellingScore: spScore,
-          completedAt: new Date().toISOString()
-        }, { merge: true });
-
-        // API endpoint save
-        const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : '';
-        await fetch('/api/sara-tutor/save-placement', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(idToken ? { 'Authorization': `Bearer ${idToken}` } : {})
-          },
-          body: JSON.stringify({
-            uid: profile.uid,
-            level: level,
-            conversationScore: convScore,
-            quizScore: qScore,
-            spellingScore: spScore,
-            totalScore: finalTotal
-          })
-        }).catch(console.warn);
+          spellingScore: spScore
+        });
 
         // Update memory in Firestore
         syncMemoryToFirestore({
