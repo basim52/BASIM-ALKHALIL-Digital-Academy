@@ -747,6 +747,9 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   };
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if ('touches' in e && e.cancelable) {
+      e.preventDefault();
+    }
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -784,6 +787,9 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return;
+    if ('touches' in e && e.cancelable) {
+      e.preventDefault();
+    }
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -1066,7 +1072,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
     <AnimatePresence>
       <motion.div
         key={`smart-whiteboard-${positionKey}-${isMaximized}-${activeThemeId}`}
-        drag={!isMaximized}
+        drag={!isMaximized && (typeof window !== 'undefined' ? window.innerWidth >= 640 : true)}
         dragListener={false}
         dragControls={dragControls}
         dragMomentum={false}
@@ -1075,11 +1081,11 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
         transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-        className={`fixed z-50 transition-shadow ${
+        className={`fixed z-50 transition-all ${
           isMaximized 
-            ? 'inset-2 sm:inset-4' 
-            : 'top-14 sm:top-16 inset-x-2 sm:inset-x-auto sm:right-6 sm:w-[760px] max-h-[88vh]'
-        } flex flex-col rounded-3xl shadow-2xl overflow-hidden font-sans border-4`}
+            ? 'inset-0 sm:inset-3 md:inset-5 lg:inset-6' 
+            : 'inset-0 sm:inset-auto sm:top-14 md:top-16 sm:right-3 md:right-5 lg:right-6 sm:w-[calc(100vw-1.5rem)] md:w-[700px] lg:w-[840px] xl:w-[920px] max-w-[calc(100vw-1.5rem)] h-full sm:h-auto sm:max-h-[88vh]'
+        } flex flex-col rounded-none sm:rounded-3xl shadow-2xl overflow-hidden font-sans border-0 sm:border-4`}
         style={{
           borderColor: currentTheme.borderHex,
           backgroundColor: currentTheme.bgHex,
@@ -1096,15 +1102,15 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="absolute top-14 left-4 right-4 z-60 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 py-2.5 rounded-2xl shadow-xl border-2 border-emerald-300 flex items-center justify-between text-xs sm:text-sm font-black"
+              className="absolute top-12 left-2 right-2 sm:top-14 sm:left-4 sm:right-4 z-60 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl shadow-xl border-2 border-emerald-300 flex items-center justify-between text-xs sm:text-sm font-black"
             >
-              <div className="flex items-center gap-2">
-                <Camera size={18} className="text-emerald-200 animate-bounce" />
-                <span>{saveSuccessMessage}</span>
+              <div className="flex items-center gap-2 truncate">
+                <Camera size={16} className="text-emerald-200 animate-bounce shrink-0" />
+                <span className="truncate">{saveSuccessMessage}</span>
               </div>
               <button 
                 onClick={() => setSaveSuccessMessage(null)}
-                className="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10"
+                className="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 shrink-0"
               >
                 ✕
               </button>
@@ -1119,46 +1125,48 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
           onPointerDown={(e) => {
             const target = e.target as HTMLElement;
             if (target.closest('button, input, select, a, textarea')) return;
+            if (typeof window !== 'undefined' && window.innerWidth < 640) return;
             dragControls.start(e);
           }}
-          className={`bg-gradient-to-r ${currentTheme.headerFrom} ${currentTheme.headerVia} ${currentTheme.headerTo} px-3 sm:px-4 py-2.5 sm:py-3 border-b-2 flex items-center justify-between shrink-0 shadow-md select-none touch-none ${
-            !isMaximized ? 'cursor-grab active:cursor-grabbing' : ''
+          className={`bg-gradient-to-r ${currentTheme.headerFrom} ${currentTheme.headerVia} ${currentTheme.headerTo} px-2.5 sm:px-4 py-2 sm:py-3 border-b-2 flex items-center justify-between shrink-0 shadow-md select-none touch-none ${
+            !isMaximized ? 'sm:cursor-grab sm:active:cursor-grabbing' : ''
           }`}
           style={{ borderColor: `${currentTheme.borderHex}66` }}
         >
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
             <div 
               className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center text-slate-900 shadow-inner font-black text-xs sm:text-sm shrink-0"
               style={{ backgroundColor: currentTheme.borderHex }}
             >
               {currentTheme.emoji}
             </div>
-            <div>
-              <div className="flex items-center gap-2">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <h3 
-                  className="text-xs sm:text-base font-black tracking-wide"
+                  className="text-xs sm:text-base font-black tracking-wide truncate"
                   style={{ color: currentTheme.accentHex }}
                 >
-                  {isRtl ? 'السبورة الذكية للشرح 📐' : 'Smart Whiteboard 📐'}
+                  <span className="sm:hidden">{isRtl ? 'السبورة 📐' : 'Whiteboard 📐'}</span>
+                  <span className="hidden sm:inline">{isRtl ? 'السبورة الذكية للشرح 📐' : 'Smart Whiteboard 📐'}</span>
                 </h3>
               </div>
-              <p className="text-[10px] sm:text-[11px] text-amber-200/70 font-medium truncate max-w-[180px] sm:max-w-[280px]">
-                {boardData?.title || (isRtl ? 'مساحة الشرح والكتابة التفاعلية' : 'Interactive chalkboard notes')}
+              <p className="text-[9px] sm:text-[11px] text-amber-200/70 font-medium truncate max-w-[120px] xs:max-w-[180px] sm:max-w-[280px]">
+                {boardData?.title || (isRtl ? 'مساحة الشرح والكتابة' : 'Interactive chalkboard')}
               </p>
             </div>
           </div>
 
           {/* Action buttons in header */}
-          <div className="flex items-center gap-1 sm:gap-1.5">
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             {/* Theme Picker Toggle */}
             <div className="relative">
               <button
                 onClick={() => setShowThemePicker(!showThemePicker)}
-                className="px-2 sm:px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-xs font-black flex items-center gap-1 transition-all cursor-pointer text-amber-200"
+                className="p-1.5 sm:px-2.5 sm:py-1 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-xs font-black flex items-center gap-1 transition-all cursor-pointer text-amber-200"
                 title={isRtl ? 'تغيير ألوان وخلفية السبورة للأطفال' : 'Change Whiteboard Theme'}
               >
                 <Palette size={14} />
-                <span className="hidden xs:inline">{isRtl ? 'الخلفية' : 'Theme'}</span>
+                <span className="hidden md:inline">{isRtl ? 'الخلفية' : 'Theme'}</span>
                 <span className="text-xs">{currentTheme.emoji}</span>
               </button>
 
@@ -1214,18 +1222,18 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
             {/* Save Board as Image Button (Header) */}
             <button
               onClick={saveWhiteboardAsImage}
-              className="px-2 sm:px-2.5 py-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1 shadow-sm transition-all cursor-pointer active:scale-95"
+              className="p-1.5 sm:px-2.5 sm:py-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1 shadow-sm transition-all cursor-pointer active:scale-95"
               title={isRtl ? 'حفظ اللوحة بالكامل كصورة للمراجعة لاحقاً 📸' : 'Save Whiteboard as Image 📸'}
             >
               <Camera size={14} className="text-slate-900" />
-              <span className="hidden xs:inline">{isRtl ? 'حفظ اللوحة' : 'Save Image'}</span>
+              <span className="hidden sm:inline">{isRtl ? 'حفظ اللوحة' : 'Save'}</span>
             </button>
 
             {/* Tab switch (Notes vs Chalk) */}
             <div className="flex bg-black/40 p-0.5 rounded-xl border border-white/10 text-xs font-bold">
               <button
                 onClick={() => setActiveTab('content')}
-                className={`px-2 sm:px-2.5 py-1 rounded-lg transition-all cursor-pointer text-xs ${
+                className={`px-2 sm:px-2.5 py-1 rounded-lg transition-all cursor-pointer text-[11px] sm:text-xs ${
                   activeTab === 'content'
                     ? 'text-slate-900 shadow-sm font-black'
                     : 'text-amber-100/70 hover:text-white'
@@ -1238,7 +1246,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               </button>
               <button
                 onClick={() => setActiveTab('draw')}
-                className={`px-2 sm:px-2.5 py-1 rounded-lg transition-all cursor-pointer text-xs ${
+                className={`px-2 sm:px-2.5 py-1 rounded-lg transition-all cursor-pointer text-[11px] sm:text-xs ${
                   activeTab === 'draw'
                     ? 'text-slate-900 shadow-sm font-black'
                     : 'text-amber-100/70 hover:text-white'
@@ -1251,21 +1259,21 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               </button>
             </div>
 
-            {/* Reset position button */}
+            {/* Reset position button (desktop only) */}
             {!isMaximized && (
               <button
                 onClick={resetPosition}
-                className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-amber-200/80 hover:text-amber-200 transition-all cursor-pointer"
+                className="hidden sm:block p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-amber-200/80 hover:text-amber-200 transition-all cursor-pointer"
                 title={isRtl ? 'إعادة للموضع الافتراضي' : 'Reset position'}
               >
                 <RotateCcw size={14} />
               </button>
             )}
 
-            {/* Maximize toggle */}
+            {/* Maximize toggle (desktop only) */}
             <button
               onClick={() => setIsMaximized(!isMaximized)}
-              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-amber-200/80 transition-all cursor-pointer"
+              className="hidden sm:block p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-amber-200/80 transition-all cursor-pointer"
               title={isMaximized ? (isRtl ? 'تصغير' : 'Minimize') : (isRtl ? 'تكبير كامل الشاشة' : 'Maximize')}
             >
               {isMaximized ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
@@ -1274,7 +1282,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
             {/* Close button */}
             <button
               onClick={onClose}
-              className="p-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white transition-all cursor-pointer"
+              className="p-1.5 sm:p-2 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white transition-all cursor-pointer shrink-0"
               title={isRtl ? 'إغلاق السبورة' : 'Close whiteboard'}
             >
               <X size={15} />
@@ -1602,332 +1610,519 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
         {/* ======================================================== */}
         {activeTab === 'draw' && (
           <div 
-            className={`bg-gradient-to-r ${currentTheme.headerFrom} ${currentTheme.headerVia} ${currentTheme.headerTo} px-3 py-2 border-t-2 flex flex-col gap-2 shrink-0 select-none shadow-xl`}
+            className={`bg-gradient-to-r ${currentTheme.headerFrom} ${currentTheme.headerVia} ${currentTheme.headerTo} px-2 sm:px-3 py-1.5 sm:py-2 border-t-2 flex flex-col gap-1.5 sm:gap-2 shrink-0 select-none shadow-xl`}
             style={{ borderColor: `${currentTheme.borderHex}88` }}
           >
-            {/* ROW 1: CORE DRAWING TOOLS, ERASER & STEP-BY-STEP UNDO/REDO */}
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              
-              {/* SECTION A: DRAWING TOOLS & ERASER */}
-              <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10">
-                <button
-                  onClick={() => setSelectedTool('pen')}
-                  className={`px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                    selectedTool === 'pen'
-                      ? 'text-slate-900 border-white shadow-md scale-105'
-                      : 'bg-white/5 text-amber-200/80 border-transparent hover:bg-white/10'
-                  }`}
-                  style={{
-                    backgroundColor: selectedTool === 'pen' ? currentTheme.borderHex : undefined
-                  }}
-                  title={isRtl ? 'قلم ذكي / طبشور ناعم' : 'Smart Chalk Pen'}
-                >
-                  <PenTool size={14} />
-                  <span>{isRtl ? 'قلم' : 'Pen'}</span>
-                </button>
-
-                <button
-                  onClick={() => setSelectedTool('highlighter')}
-                  className={`px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                    selectedTool === 'highlighter'
-                      ? 'text-slate-900 border-white shadow-md scale-105'
-                      : 'bg-white/5 text-amber-200/80 border-transparent hover:bg-white/10'
-                  }`}
-                  style={{
-                    backgroundColor: selectedTool === 'highlighter' ? currentTheme.borderHex : undefined
-                  }}
-                  title={isRtl ? 'تظليل فسفوري شفاف لتحديد الكلمات' : 'Highlighter'}
-                >
-                  <Highlighter size={14} />
-                  <span>{isRtl ? 'تظليل' : 'Highlight'}</span>
-                </button>
-
-                <button
-                  onClick={() => setSelectedTool('glow')}
-                  className={`px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                    selectedTool === 'glow'
-                      ? 'text-slate-900 border-white shadow-md scale-105'
-                      : 'bg-white/5 text-amber-200/80 border-transparent hover:bg-white/10'
-                  }`}
-                  style={{
-                    backgroundColor: selectedTool === 'glow' ? currentTheme.borderHex : undefined
-                  }}
-                  title={isRtl ? 'قلم النجوم المضيء السحري للأطفال ✨' : 'Magic Glow Pen ✨'}
-                >
-                  <Wand2 size={14} />
-                  <span>{isRtl ? 'سحري ✨' : 'Glow ✨'}</span>
-                </button>
-
-                {/* THE DEDICATED ERASER TOOL */}
-                <button
-                  onClick={() => setSelectedTool('eraser')}
-                  className={`px-3 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                    selectedTool === 'eraser'
-                      ? 'bg-rose-500 text-white border-white shadow-lg ring-2 ring-rose-300 scale-105 animate-pulse'
-                      : 'bg-rose-500/15 text-rose-300 border-rose-500/30 hover:bg-rose-500/30'
-                  }`}
-                  title={isRtl ? 'ممحاة السبورة لمسح أي رسمة أو خط' : 'Whiteboard Eraser'}
-                >
-                  <Eraser size={15} />
-                  <span>{isRtl ? 'ممحاة 🧹' : 'Eraser 🧹'}</span>
-                </button>
-              </div>
-
-              {/* SECTION B: BRUSH SIZE SELECTOR WITH LIVE PREVIEW */}
-              <div className="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-2xl border border-white/10">
-                <span className="text-[10px] text-amber-200/80 font-bold hidden sm:inline">
-                  {isRtl ? 'حجم الفرشاة:' : 'Brush Size:'}
-                </span>
-
-                {/* Live Circle Preview Indicator */}
-                <div 
-                  className="w-6 h-6 rounded-full flex items-center justify-center bg-black/50 border border-white/30 shrink-0"
-                  title={isRtl ? `الحجم الحالي: ${lineWidth}px` : `Size: ${lineWidth}px`}
-                >
-                  <div 
-                    className="rounded-full transition-all"
+            {/* ======================================================== */}
+            {/* MOBILE DEDICATED COMPACT TOOLBAR (sm:hidden) */}
+            {/* 2 ultra-compact, swipeable rows - never blocks drawing canvas */}
+            {/* ======================================================== */}
+            <div className="flex flex-col gap-1.5 sm:hidden">
+              {/* Mobile Line 1: Tools + Undo/Redo/Clear + Templates/Stickers */}
+              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 w-full">
+                {/* Tools Selector */}
+                <div className="flex items-center gap-0.5 bg-black/40 p-0.5 rounded-xl border border-white/10 shrink-0">
+                  <button
+                    onClick={() => setSelectedTool('pen')}
+                    className={`px-2 py-1 rounded-lg border text-[11px] font-black transition-all cursor-pointer flex items-center gap-1 ${
+                      selectedTool === 'pen'
+                        ? 'text-slate-900 border-white shadow-xs scale-102'
+                        : 'bg-white/5 text-amber-200/80 border-transparent'
+                    }`}
                     style={{
-                      width: `${Math.max(4, Math.min(20, lineWidth))}px`,
-                      height: `${Math.max(4, Math.min(20, lineWidth))}px`,
-                      backgroundColor: selectedTool === 'eraser' ? '#F43F5E' : selectedColor,
-                      boxShadow: selectedTool === 'glow' ? `0 0 6px ${selectedColor}` : undefined
+                      backgroundColor: selectedTool === 'pen' ? currentTheme.borderHex : undefined
                     }}
-                  />
+                  >
+                    <PenTool size={13} />
+                    <span>{isRtl ? 'قلم' : 'Pen'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => setSelectedTool('highlighter')}
+                    className={`px-2 py-1 rounded-lg border text-[11px] font-black transition-all cursor-pointer flex items-center gap-1 ${
+                      selectedTool === 'highlighter'
+                        ? 'text-slate-900 border-white shadow-xs scale-102'
+                        : 'bg-white/5 text-amber-200/80 border-transparent'
+                    }`}
+                    style={{
+                      backgroundColor: selectedTool === 'highlighter' ? currentTheme.borderHex : undefined
+                    }}
+                  >
+                    <Highlighter size={13} />
+                    <span>{isRtl ? 'تظليل' : 'Highlight'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => setSelectedTool('glow')}
+                    className={`px-2 py-1 rounded-lg border text-[11px] font-black transition-all cursor-pointer flex items-center gap-1 ${
+                      selectedTool === 'glow'
+                        ? 'text-slate-900 border-white shadow-xs scale-102'
+                        : 'bg-white/5 text-amber-200/80 border-transparent'
+                    }`}
+                    style={{
+                      backgroundColor: selectedTool === 'glow' ? currentTheme.borderHex : undefined
+                    }}
+                  >
+                    <Wand2 size={13} />
+                    <span>{isRtl ? 'سحري ✨' : 'Glow'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => setSelectedTool('eraser')}
+                    className={`px-2 py-1 rounded-lg border text-[11px] font-black transition-all cursor-pointer flex items-center gap-1 ${
+                      selectedTool === 'eraser'
+                        ? 'bg-rose-500 text-white border-white shadow-md ring-2 ring-rose-300 scale-102 animate-pulse'
+                        : 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+                    }`}
+                  >
+                    <Eraser size={13} />
+                    <span>{isRtl ? 'ممحاة' : 'Eraser'}</span>
+                  </button>
                 </div>
 
-                {/* Slider */}
-                <input
-                  type="range"
-                  min="2"
-                  max="32"
-                  value={lineWidth}
-                  onChange={(e) => setLineWidth(Number(e.target.value))}
-                  className="w-16 sm:w-24 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400"
-                  title={`${lineWidth}px`}
-                />
+                {/* Undo / Redo / Clear */}
+                <div className="flex items-center gap-0.5 bg-black/40 p-0.5 rounded-xl border border-white/10 shrink-0">
+                  <button
+                    onClick={undoLastStroke}
+                    disabled={history.length === 0}
+                    className="p-1.5 rounded-lg bg-white/5 text-amber-200 disabled:opacity-30 cursor-pointer"
+                    title={isRtl ? 'تراجع' : 'Undo'}
+                  >
+                    <RotateCcw size={13} />
+                  </button>
+                  <button
+                    onClick={redoStroke}
+                    disabled={redoHistory.length === 0}
+                    className="p-1.5 rounded-lg bg-white/5 text-amber-200 disabled:opacity-30 cursor-pointer"
+                    title={isRtl ? 'إعادة' : 'Redo'}
+                  >
+                    <RotateCw size={13} />
+                  </button>
+                  <button
+                    onClick={clearCanvas}
+                    className="p-1.5 rounded-lg bg-rose-500/20 text-rose-300 hover:text-white cursor-pointer"
+                    title={isRtl ? 'مسح الكل' : 'Clear'}
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
 
-                <span className="text-[10px] font-mono font-bold text-amber-200 w-6 text-center">
-                  {lineWidth}p
-                </span>
+                {/* Templates & Stickers & Save */}
+                <div className="flex items-center gap-0.5 bg-black/40 p-0.5 rounded-xl border border-white/10 shrink-0 relative">
+                  <button
+                    onClick={() => {
+                      setShowTemplatePicker(!showTemplatePicker);
+                      setShowStickerPicker(false);
+                    }}
+                    className="px-2 py-1 rounded-lg bg-white/5 text-amber-200 text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                  >
+                    <LayoutTemplate size={13} />
+                    <span>{isRtl ? 'قوالب 📐' : 'Templates'}</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowStickerPicker(!showStickerPicker);
+                      setShowTemplatePicker(false);
+                    }}
+                    className="px-2 py-1 rounded-lg bg-white/5 text-amber-200 text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                  >
+                    <Smile size={13} />
+                    <span>{isRtl ? 'ملصقات ⭐' : 'Stickers'}</span>
+                  </button>
+                  <button
+                    onClick={saveWhiteboardAsImage}
+                    className="p-1.5 rounded-lg text-slate-950 font-black cursor-pointer shadow-xs active:scale-95"
+                    style={{ backgroundColor: currentTheme.borderHex }}
+                    title={isRtl ? 'حفظ كصورة' : 'Save'}
+                  >
+                    <Camera size={13} />
+                  </button>
+                </div>
+              </div>
 
-                {/* Preset Chips */}
-                <div className="hidden sm:flex items-center gap-0.5 border-s border-white/20 ps-1.5">
+              {/* Mobile Line 2: Colors + Brush Presets */}
+              <div className="flex items-center justify-between gap-1.5 pt-0.5 border-t border-white/10">
+                {/* Colors swipe carousel */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 flex-1">
+                  {SMART_PEN_COLORS.map(c => {
+                    const isSelected = selectedColor === c.value && selectedTool !== 'eraser';
+                    return (
+                      <button
+                        key={`mob-pen-color-${c.name}`}
+                        onClick={() => {
+                          setSelectedColor(c.value);
+                          if (selectedTool === 'eraser') setSelectedTool('pen');
+                        }}
+                        style={{ backgroundColor: c.value }}
+                        className={`w-5 h-5 rounded-full border-2 transition-all cursor-pointer shrink-0 ${
+                          isSelected
+                            ? 'border-white scale-120 shadow-md ring-2 ring-white/60'
+                            : 'border-black/50 opacity-90'
+                        }`}
+                        title={isRtl ? c.labelAr : c.labelEn}
+                      />
+                    );
+                  })}
+                </div>
+
+                {/* Compact Brush Size Presets */}
+                <div className="flex items-center gap-0.5 bg-black/40 px-1.5 py-0.5 rounded-xl border border-white/10 shrink-0">
+                  <span className="text-[9px] text-amber-200/80 font-bold px-1">
+                    {lineWidth}p
+                  </span>
                   {[
-                    { size: 3, label: 'S', titleAr: 'ناعم 3px' },
-                    { size: 7, label: 'M', titleAr: 'متوسط 7px' },
-                    { size: 14, label: 'L', titleAr: 'عريض 14px' },
-                    { size: 26, label: 'XL', titleAr: 'تلوين عريض 26px' }
-                  ].map(({ size, label, titleAr }) => (
+                    { size: 3, label: 'S' },
+                    { size: 7, label: 'M' },
+                    { size: 14, label: 'L' },
+                    { size: 26, label: 'XL' }
+                  ].map(({ size, label }) => (
                     <button
-                      key={`brush-preset-${size}`}
+                      key={`mob-brush-preset-${size}`}
                       onClick={() => setLineWidth(size)}
                       className={`w-5 h-5 rounded-md text-[10px] font-black transition-all cursor-pointer flex items-center justify-center ${
                         lineWidth === size 
                           ? 'text-slate-950 font-black shadow-xs' 
-                          : 'text-slate-400 hover:text-white bg-white/5'
+                          : 'text-slate-400 bg-white/5'
                       }`}
                       style={{
                         backgroundColor: lineWidth === size ? currentTheme.borderHex : undefined
                       }}
-                      title={titleAr}
                     >
                       {label}
                     </button>
                   ))}
                 </div>
               </div>
-
-              {/* SECTION C: STEP-BY-STEP UNDO, REDO & CLEAR */}
-              <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10">
-                {/* STEP-BY-STEP UNDO */}
-                <button
-                  onClick={undoLastStroke}
-                  disabled={history.length === 0}
-                  className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 disabled:opacity-30 disabled:pointer-events-none text-amber-200 border border-white/10 transition-all cursor-pointer flex items-center gap-1 text-xs font-bold"
-                  title={isRtl ? `تراجع عن الخطوة السابقة (${history.length})` : 'Undo Step'}
-                >
-                  <RotateCcw size={14} />
-                  <span>{isRtl ? 'تراجع' : 'Undo'}</span>
-                  {history.length > 0 && (
-                    <span className="text-[9px] px-1 py-0.2 rounded-full bg-amber-400/20 text-amber-300">
-                      {history.length}
-                    </span>
-                  )}
-                </button>
-
-                {/* STEP-BY-STEP REDO */}
-                <button
-                  onClick={redoStroke}
-                  disabled={redoHistory.length === 0}
-                  className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 disabled:opacity-30 disabled:pointer-events-none text-amber-200 border border-white/10 transition-all cursor-pointer flex items-center gap-1 text-xs font-bold"
-                  title={isRtl ? `إعادة الخطوة (${redoHistory.length})` : 'Redo Step'}
-                >
-                  <RotateCw size={14} />
-                  <span className="hidden xs:inline">{isRtl ? 'إعادة' : 'Redo'}</span>
-                </button>
-
-                {/* CLEAR ALL CANVAS */}
-                <button
-                  onClick={clearCanvas}
-                  className="p-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 transition-all cursor-pointer"
-                  title={isRtl ? 'مسح السبورة بالكامل' : 'Clear Whiteboard'}
-                >
-                  <Trash2 size={14} />
-                </button>
-
-                {/* SAVE BOARD AS IMAGE */}
-                <button
-                  onClick={saveWhiteboardAsImage}
-                  className="px-2.5 py-1.5 rounded-xl text-slate-950 shadow-md font-black text-xs flex items-center gap-1 cursor-pointer active:scale-95 transition-all"
-                  style={{ backgroundColor: currentTheme.borderHex }}
-                  title={isRtl ? 'حفظ اللوحة بالكامل كصورة عالية الدقة 📸' : 'Save Whiteboard Image'}
-                >
-                  <Camera size={13} className="text-slate-900" />
-                  <span className="hidden sm:inline">{isRtl ? 'حفظ كصورة 📸' : 'Save 📸'}</span>
-                </button>
-              </div>
-
-              {/* SECTION D: READY EDUCATIONAL TEMPLATES & KID STICKERS */}
-              <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10 relative">
-                {/* TEMPLATES POPUP BUTTON */}
-                <button
-                  onClick={() => {
-                    setShowTemplatePicker(!showTemplatePicker);
-                    setShowStickerPicker(false);
-                  }}
-                  className={`px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                    showTemplatePicker
-                      ? 'bg-amber-400 text-slate-950 border-white shadow-md'
-                      : 'bg-white/5 text-amber-200 hover:bg-white/10 border-white/10'
-                  }`}
-                  title={isRtl ? 'قوالب تعليمية جاهزة (مخطط الأزمنة، تسطير كراسة الإنجليزية، جدول المقارنة...)' : 'Ready Educational Templates'}
-                >
-                  <LayoutTemplate size={14} className="text-amber-300" />
-                  <span className="hidden sm:inline">{isRtl ? 'قوالب جاهزة 📐' : 'Templates 📐'}</span>
-                </button>
-
-                {/* STICKERS TRAY BUTTON */}
-                <button
-                  onClick={() => {
-                    setShowStickerPicker(!showStickerPicker);
-                    setShowTemplatePicker(false);
-                  }}
-                  className={`px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                    showStickerPicker
-                      ? 'bg-amber-400 text-slate-950 border-white shadow-md'
-                      : 'bg-white/5 text-amber-200 hover:bg-white/10 border-white/10'
-                  }`}
-                  title={isRtl ? 'ملصقات ونجوم تشجيعية للأطفال ⭐' : 'Fun Kid Stickers ⭐'}
-                >
-                  <Smile size={14} className="text-amber-300" />
-                  <span className="hidden sm:inline">{isRtl ? 'ملصقات ⭐' : 'Stickers ⭐'}</span>
-                </button>
-
-                {/* TEMPLATE PICKER POPOVER */}
-                {showTemplatePicker && (
-                  <div className="absolute bottom-full mb-2 end-0 w-80 bg-slate-900/98 border-2 border-amber-400/80 rounded-2xl p-3 shadow-2xl z-50 text-white backdrop-blur-md animate-in fade-in zoom-in-95">
-                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
-                      <span className="text-xs font-black text-amber-300 flex items-center gap-1">
-                        📐 {isRtl ? 'اختر قالباً جاهزاً للتطبيق:' : 'Select Whiteboard Template:'}
-                      </span>
-                      <button
-                        onClick={() => setShowTemplatePicker(false)}
-                        className="text-slate-400 hover:text-white text-xs p-1 cursor-pointer"
-                      >
-                        ✕
-                      </button>
-                    </div>
-
-                    <div className="space-y-1.5 max-h-60 overflow-y-auto">
-                      {WHITEBOARD_TEMPLATES.map(tpl => (
-                        <button
-                          key={`tpl-${tpl.id}`}
-                          onClick={() => applyWhiteboardTemplate(tpl.id)}
-                          className="w-full text-start p-2 rounded-xl bg-white/5 hover:bg-amber-400 hover:text-slate-950 transition-all cursor-pointer border border-white/10 group flex items-start gap-2.5"
-                        >
-                          <span className="text-xl p-1 bg-black/30 rounded-lg group-hover:bg-slate-900/20">{tpl.icon}</span>
-                          <div className="flex-1">
-                            <span className="text-xs font-black block">{isRtl ? tpl.nameAr : tpl.nameEn}</span>
-                            <span className="text-[10px] text-slate-300 group-hover:text-slate-800 line-clamp-1">
-                              {isRtl ? tpl.descAr : tpl.descEn}
-                            </span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* STICKER PICKER POPOVER */}
-                {showStickerPicker && (
-                  <div className="absolute bottom-full mb-2 end-0 w-64 bg-slate-900/98 border-2 border-amber-400/80 rounded-2xl p-3 shadow-2xl z-50 text-white backdrop-blur-md animate-in fade-in zoom-in-95">
-                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
-                      <span className="text-xs font-black text-amber-300 flex items-center gap-1">
-                        ⭐ {isRtl ? 'ختم ملصق تشجيعي على السبورة:' : 'Stamp Kid Sticker:'}
-                      </span>
-                      <button
-                        onClick={() => setShowStickerPicker(false)}
-                        className="text-slate-400 hover:text-white text-xs p-1 cursor-pointer"
-                      >
-                        ✕
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-4 gap-2">
-                      {KID_STICKERS.map((stk, sIdx) => (
-                        <button
-                          key={`stk-${sIdx}`}
-                          onClick={() => stampStickerOnCanvas(stk)}
-                          className="text-2xl p-2 rounded-xl bg-white/5 hover:bg-white/20 active:scale-125 transition-all cursor-pointer flex items-center justify-center border border-white/10"
-                          title={isRtl ? `ختم ${stk}` : `Stamp ${stk}`}
-                        >
-                          {stk}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
             </div>
 
-            {/* ROW 2: EXPANDED 10 KID-FRIENDLY PEN COLORS */}
-            <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/10 overflow-x-auto">
-              <div className="flex items-center gap-1.5 shrink-0">
-                <span className="text-[10px] text-amber-200/70 font-bold hidden sm:inline ml-1">
-                  {isRtl ? 'الألوان:' : 'Colors:'}
-                </span>
+            {/* ======================================================== */}
+            {/* DESKTOP SPACIOUS TOOLBAR (hidden sm:flex) */}
+            {/* ======================================================== */}
+            <div className="hidden sm:flex flex-col gap-2">
+              {/* ROW 1: CORE DRAWING TOOLS, ERASER & STEP-BY-STEP UNDO/REDO */}
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                
+                {/* SECTION A: DRAWING TOOLS & ERASER */}
+                <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10">
+                  <button
+                    onClick={() => setSelectedTool('pen')}
+                    className={`px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                      selectedTool === 'pen'
+                        ? 'text-slate-900 border-white shadow-md scale-105'
+                        : 'bg-white/5 text-amber-200/80 border-transparent hover:bg-white/10'
+                    }`}
+                    style={{
+                      backgroundColor: selectedTool === 'pen' ? currentTheme.borderHex : undefined
+                    }}
+                    title={isRtl ? 'قلم ذكي / طبشور ناعم' : 'Smart Chalk Pen'}
+                  >
+                    <PenTool size={14} />
+                    <span>{isRtl ? 'قلم' : 'Pen'}</span>
+                  </button>
 
-                {SMART_PEN_COLORS.map(c => {
-                  const isSelected = selectedColor === c.value && selectedTool !== 'eraser';
-                  return (
-                    <button
-                      key={`pen-color-${c.name}`}
-                      onClick={() => {
-                        setSelectedColor(c.value);
-                        if (selectedTool === 'eraser') setSelectedTool('pen');
+                  <button
+                    onClick={() => setSelectedTool('highlighter')}
+                    className={`px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                      selectedTool === 'highlighter'
+                        ? 'text-slate-900 border-white shadow-md scale-105'
+                        : 'bg-white/5 text-amber-200/80 border-transparent hover:bg-white/10'
+                    }`}
+                    style={{
+                      backgroundColor: selectedTool === 'highlighter' ? currentTheme.borderHex : undefined
+                    }}
+                    title={isRtl ? 'تظليل فسفوري شفاف لتحديد الكلمات' : 'Highlighter'}
+                  >
+                    <Highlighter size={14} />
+                    <span>{isRtl ? 'تظليل' : 'Highlight'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => setSelectedTool('glow')}
+                    className={`px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                      selectedTool === 'glow'
+                        ? 'text-slate-900 border-white shadow-md scale-105'
+                        : 'bg-white/5 text-amber-200/80 border-transparent hover:bg-white/10'
+                    }`}
+                    style={{
+                      backgroundColor: selectedTool === 'glow' ? currentTheme.borderHex : undefined
+                    }}
+                    title={isRtl ? 'قلم النجوم المضيء السحري للأطفال ✨' : 'Magic Glow Pen ✨'}
+                  >
+                    <Wand2 size={14} />
+                    <span>{isRtl ? 'سحري ✨' : 'Glow ✨'}</span>
+                  </button>
+
+                  {/* THE DEDICATED ERASER TOOL */}
+                  <button
+                    onClick={() => setSelectedTool('eraser')}
+                    className={`px-3 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                      selectedTool === 'eraser'
+                        ? 'bg-rose-500 text-white border-white shadow-lg ring-2 ring-rose-300 scale-105 animate-pulse'
+                        : 'bg-rose-500/15 text-rose-300 border-rose-500/30 hover:bg-rose-500/30'
+                    }`}
+                    title={isRtl ? 'ممحاة السبورة لمسح أي رسمة أو خط' : 'Whiteboard Eraser'}
+                  >
+                    <Eraser size={15} />
+                    <span>{isRtl ? 'ممحاة 🧹' : 'Eraser 🧹'}</span>
+                  </button>
+                </div>
+
+                {/* SECTION B: BRUSH SIZE SELECTOR WITH LIVE PREVIEW */}
+                <div className="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-2xl border border-white/10">
+                  <span className="text-[10px] text-amber-200/80 font-bold hidden sm:inline">
+                    {isRtl ? 'حجم الفرشاة:' : 'Brush Size:'}
+                  </span>
+
+                  {/* Live Circle Preview Indicator */}
+                  <div 
+                    className="w-6 h-6 rounded-full flex items-center justify-center bg-black/50 border border-white/30 shrink-0"
+                    title={isRtl ? `الحجم الحالي: ${lineWidth}px` : `Size: ${lineWidth}px`}
+                  >
+                    <div 
+                      className="rounded-full transition-all"
+                      style={{
+                        width: `${Math.max(4, Math.min(20, lineWidth))}px`,
+                        height: `${Math.max(4, Math.min(20, lineWidth))}px`,
+                        backgroundColor: selectedTool === 'eraser' ? '#F43F5E' : selectedColor,
+                        boxShadow: selectedTool === 'glow' ? `0 0 6px ${selectedColor}` : undefined
                       }}
-                      style={{ backgroundColor: c.value }}
-                      className={`w-6 h-6 rounded-full border-2 transition-all cursor-pointer shrink-0 ${
-                        isSelected
-                          ? 'border-white scale-125 shadow-lg shadow-amber-300/40 z-10 ring-2 ring-white/50'
-                          : 'border-black/50 hover:scale-110 opacity-90'
-                      }`}
-                      title={isRtl ? c.labelAr : c.labelEn}
                     />
-                  );
-                })}
+                  </div>
+
+                  {/* Slider */}
+                  <input
+                    type="range"
+                    min="2"
+                    max="32"
+                    value={lineWidth}
+                    onChange={(e) => setLineWidth(Number(e.target.value))}
+                    className="w-16 sm:w-24 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400"
+                    title={`${lineWidth}px`}
+                  />
+
+                  <span className="text-[10px] font-mono font-bold text-amber-200 w-6 text-center">
+                    {lineWidth}p
+                  </span>
+
+                  {/* Preset Chips */}
+                  <div className="hidden sm:flex items-center gap-0.5 border-s border-white/20 ps-1.5">
+                    {[
+                      { size: 3, label: 'S', titleAr: 'ناعم 3px' },
+                      { size: 7, label: 'M', titleAr: 'متوسط 7px' },
+                      { size: 14, label: 'L', titleAr: 'عريض 14px' },
+                      { size: 26, label: 'XL', titleAr: 'تلوين عريض 26px' }
+                    ].map(({ size, label, titleAr }) => (
+                      <button
+                        key={`brush-preset-${size}`}
+                        onClick={() => setLineWidth(size)}
+                        className={`w-5 h-5 rounded-md text-[10px] font-black transition-all cursor-pointer flex items-center justify-center ${
+                          lineWidth === size 
+                            ? 'text-slate-950 font-black shadow-xs' 
+                            : 'text-slate-400 hover:text-white bg-white/5'
+                        }`}
+                        style={{
+                          backgroundColor: lineWidth === size ? currentTheme.borderHex : undefined
+                        }}
+                        title={titleAr}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* SECTION C: STEP-BY-STEP UNDO, REDO & CLEAR */}
+                <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10">
+                  {/* STEP-BY-STEP UNDO */}
+                  <button
+                    onClick={undoLastStroke}
+                    disabled={history.length === 0}
+                    className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 disabled:opacity-30 disabled:pointer-events-none text-amber-200 border border-white/10 transition-all cursor-pointer flex items-center gap-1 text-xs font-bold"
+                    title={isRtl ? `تراجع عن الخطوة السابقة (${history.length})` : 'Undo Step'}
+                  >
+                    <RotateCcw size={14} />
+                    <span>{isRtl ? 'تراجع' : 'Undo'}</span>
+                    {history.length > 0 && (
+                      <span className="text-[9px] px-1 py-0.2 rounded-full bg-amber-400/20 text-amber-300">
+                        {history.length}
+                      </span>
+                    )}
+                  </button>
+
+                  {/* STEP-BY-STEP REDO */}
+                  <button
+                    onClick={redoStroke}
+                    disabled={redoHistory.length === 0}
+                    className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 disabled:opacity-30 disabled:pointer-events-none text-amber-200 border border-white/10 transition-all cursor-pointer flex items-center gap-1 text-xs font-bold"
+                    title={isRtl ? `إعادة الخطوة (${redoHistory.length})` : 'Redo Step'}
+                  >
+                    <RotateCw size={14} />
+                    <span className="hidden xs:inline">{isRtl ? 'إعادة' : 'Redo'}</span>
+                  </button>
+
+                  {/* CLEAR ALL CANVAS */}
+                  <button
+                    onClick={clearCanvas}
+                    className="p-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 transition-all cursor-pointer"
+                    title={isRtl ? 'مسح السبورة بالكامل' : 'Clear Whiteboard'}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+
+                  {/* SAVE BOARD AS IMAGE */}
+                  <button
+                    onClick={saveWhiteboardAsImage}
+                    className="px-2.5 py-1.5 rounded-xl text-slate-950 shadow-md font-black text-xs flex items-center gap-1 cursor-pointer active:scale-95 transition-all"
+                    style={{ backgroundColor: currentTheme.borderHex }}
+                    title={isRtl ? 'حفظ اللوحة بالكامل كصورة عالية الدقة 📸' : 'Save Whiteboard Image'}
+                  >
+                    <Camera size={13} className="text-slate-900" />
+                    <span className="hidden sm:inline">{isRtl ? 'حفظ كصورة 📸' : 'Save 📸'}</span>
+                  </button>
+                </div>
+
+                {/* SECTION D: READY EDUCATIONAL TEMPLATES & KID STICKERS */}
+                <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10 relative">
+                  {/* TEMPLATES POPUP BUTTON */}
+                  <button
+                    onClick={() => {
+                      setShowTemplatePicker(!showTemplatePicker);
+                      setShowStickerPicker(false);
+                    }}
+                    className={`px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                      showTemplatePicker
+                        ? 'bg-amber-400 text-slate-950 border-white shadow-md'
+                        : 'bg-white/5 text-amber-200 hover:bg-white/10 border-white/10'
+                    }`}
+                    title={isRtl ? 'قوالب تعليمية جاهزة (مخطط الأزمنة، تسطير كراسة الإنجليزية، جدول المقارنة...)' : 'Ready Educational Templates'}
+                  >
+                    <LayoutTemplate size={14} className="text-amber-300" />
+                    <span className="hidden sm:inline">{isRtl ? 'قوالب جاهزة 📐' : 'Templates 📐'}</span>
+                  </button>
+
+                  {/* STICKERS TRAY BUTTON */}
+                  <button
+                    onClick={() => {
+                      setShowStickerPicker(!showStickerPicker);
+                      setShowTemplatePicker(false);
+                    }}
+                    className={`px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                      showStickerPicker
+                        ? 'bg-amber-400 text-slate-950 border-white shadow-md'
+                        : 'bg-white/5 text-amber-200 hover:bg-white/10 border-white/10'
+                    }`}
+                    title={isRtl ? 'ملصقات ونجوم تشجيعية للأطفال ⭐' : 'Fun Kid Stickers ⭐'}
+                  >
+                    <Smile size={14} className="text-amber-300" />
+                    <span className="hidden sm:inline">{isRtl ? 'ملصقات ⭐' : 'Stickers ⭐'}</span>
+                  </button>
+
+                  {/* TEMPLATE PICKER POPOVER */}
+                  {showTemplatePicker && (
+                    <div className="fixed inset-x-3 bottom-24 sm:absolute sm:inset-auto sm:bottom-full sm:mb-2 sm:end-0 sm:w-80 bg-slate-900/98 border-2 border-amber-400/80 rounded-2xl p-3.5 shadow-2xl z-50 text-white backdrop-blur-md animate-in fade-in zoom-in-95 max-h-[60vh] flex flex-col">
+                      <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10 shrink-0">
+                        <span className="text-xs font-black text-amber-300 flex items-center gap-1">
+                          📐 {isRtl ? 'اختر قالباً جاهزاً للتطبيق:' : 'Select Whiteboard Template:'}
+                        </span>
+                        <button 
+                          onClick={() => setShowTemplatePicker(false)}
+                          className="text-slate-400 hover:text-white text-xs p-1 cursor-pointer"
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      <div className="space-y-1.5 overflow-y-auto flex-1">
+                        {WHITEBOARD_TEMPLATES.map(tpl => (
+                          <button
+                            key={`tpl-${tpl.id}`}
+                            onClick={() => applyWhiteboardTemplate(tpl.id)}
+                            className="w-full text-start p-2 rounded-xl bg-white/5 hover:bg-amber-400 hover:text-slate-950 transition-all cursor-pointer border border-white/10 group flex items-start gap-2.5"
+                          >
+                            <span className="text-xl p-1 bg-black/30 rounded-lg group-hover:bg-slate-900/20">{tpl.icon}</span>
+                            <div className="flex-1">
+                              <span className="text-xs font-black block">{isRtl ? tpl.nameAr : tpl.nameEn}</span>
+                              <span className="text-[10px] text-slate-300 group-hover:text-slate-800 line-clamp-1">
+                                {isRtl ? tpl.descAr : tpl.descEn}
+                              </span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* STICKER PICKER POPOVER */}
+                  {showStickerPicker && (
+                    <div className="fixed inset-x-4 bottom-24 sm:absolute sm:inset-auto sm:bottom-full sm:mb-2 sm:end-0 sm:w-64 bg-slate-900/98 border-2 border-amber-400/80 rounded-2xl p-3.5 shadow-2xl z-50 text-white backdrop-blur-md animate-in fade-in zoom-in-95">
+                      <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+                        <span className="text-xs font-black text-amber-300 flex items-center gap-1">
+                          ⭐ {isRtl ? 'ختم ملصق تشجيعي على السبورة:' : 'Stamp Kid Sticker:'}
+                        </span>
+                        <button 
+                          onClick={() => setShowStickerPicker(false)}
+                          className="text-slate-400 hover:text-white text-xs p-1 cursor-pointer"
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-4 gap-2">
+                        {KID_STICKERS.map((stk, sIdx) => (
+                          <button
+                            key={`stk-${sIdx}`}
+                            onClick={() => stampStickerOnCanvas(stk)}
+                            className="text-2xl p-2 rounded-xl bg-white/5 hover:bg-white/20 active:scale-125 transition-all cursor-pointer flex items-center justify-center border border-white/10"
+                            title={isRtl ? `ختم ${stk}` : `Stamp ${stk}`}
+                          >
+                            {stk}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
               </div>
 
-              {/* Status Hint */}
-              <div className="text-[10px] text-amber-200/60 font-medium truncate hidden md:block">
-                {selectedTool === 'eraser' 
-                  ? (isRtl ? '🧹 الممحاة نشطة: مرر فوق أي جزء لمسحه' : '🧹 Eraser Active')
-                  : selectedTool === 'glow'
-                  ? (isRtl ? '✨ قلم النجوم المضيء: خطوط متوهجة للأطفال' : '✨ Magic Glow Pen')
-                  : selectedTool === 'highlighter'
-                  ? (isRtl ? '🖍️ تظليل فوسفوري شفاف' : '🖍️ Highlighter')
-                  : (isRtl ? '✏️ قلم الطبشور الذكي' : '✏️ Smart Chalk')}
+              {/* ROW 2: EXPANDED 10 KID-FRIENDLY PEN COLORS */}
+              <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/10 overflow-x-auto">
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="text-[10px] text-amber-200/70 font-bold hidden sm:inline ml-1">
+                    {isRtl ? 'الألوان:' : 'Colors:'}
+                  </span>
+
+                  {SMART_PEN_COLORS.map(c => {
+                    const isSelected = selectedColor === c.value && selectedTool !== 'eraser';
+                    return (
+                      <button
+                        key={`pen-color-${c.name}`}
+                        onClick={() => {
+                          setSelectedColor(c.value);
+                          if (selectedTool === 'eraser') setSelectedTool('pen');
+                        }}
+                        style={{ backgroundColor: c.value }}
+                        className={`w-6 h-6 rounded-full border-2 transition-all cursor-pointer shrink-0 ${
+                          isSelected
+                            ? 'border-white scale-125 shadow-lg shadow-amber-300/40 z-10 ring-2 ring-white/50'
+                            : 'border-black/50 hover:scale-110 opacity-90'
+                        }`}
+                        title={isRtl ? c.labelAr : c.labelEn}
+                      />
+                    );
+                  })}
+                </div>
+
+                {/* Status Hint */}
+                <div className="text-[10px] text-amber-200/60 font-medium truncate hidden md:block">
+                  {selectedTool === 'eraser' 
+                    ? (isRtl ? '🧹 الممحاة نشطة: مرر فوق أي جزء لمسحه' : '🧹 Eraser Active')
+                    : selectedTool === 'glow'
+                    ? (isRtl ? '✨ قلم النجوم المضيء: خطوط متوهجة للأطفال' : '✨ Magic Glow Pen')
+                    : selectedTool === 'highlighter'
+                    ? (isRtl ? '🖍️ تظليل فوسفوري شفاف' : '🖍️ Highlighter')
+                    : (isRtl ? '✏️ قلم الطبشور الذكي' : '✏️ Smart Chalk')}
+                </div>
               </div>
             </div>
 

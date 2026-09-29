@@ -1867,8 +1867,70 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </div>
           </div>
 
-          {/* Right Controls: Timer + New Chat + Placement Test + Whiteboard Summon + Live Voice + Streak + Voice Toggle */}
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
+          {/* Mobile Essential Quick Bar (sm:hidden) */}
+          <div className="flex sm:hidden items-center gap-1">
+            {/* Live voice quick button */}
+            <button
+              onClick={toggleLiveVoiceMode}
+              className={`p-2 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-center ${
+                isLiveMode
+                  ? 'bg-rose-500 border-rose-600 text-white animate-pulse'
+                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
+              }`}
+              title={isLiveMode ? (isRtl ? 'إيقاف اللايف' : 'Stop Live') : (isRtl ? 'محادثة لايف' : 'Live Voice')}
+            >
+              <Radio size={15} className={isLiveMode ? 'animate-spin text-white' : ''} />
+            </button>
+
+            {/* Smart Whiteboard Button */}
+            <button
+              onClick={() => {
+                if (isWhiteboardOpen) {
+                  setIsWhiteboardOpen(false);
+                } else {
+                  openWhiteboardModal();
+                }
+              }}
+              className={`p-2 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-center ${
+                isWhiteboardOpen
+                  ? 'bg-amber-100 text-amber-900 border-[#C49E3A]'
+                  : 'bg-amber-50 text-[#855B14] border-amber-300'
+              }`}
+              title={isRtl ? 'السبورة الذكية' : 'Smart Whiteboard'}
+            >
+              <Sparkles size={15} className={`text-[#C49E3A] ${isWhiteboardOpen ? 'animate-spin' : ''}`} />
+            </button>
+
+            {/* Sara 3D Character Button */}
+            <button
+              onClick={() => setIsSara3DOpen(!isSara3DOpen)}
+              className={`p-2 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-center text-xs ${
+                isSara3DOpen
+                  ? 'bg-amber-100 border-[#C49E3A] ring-1 ring-amber-300'
+                  : 'bg-slate-50 border-slate-200'
+              }`}
+              title={isRtl ? 'سارة 3D' : 'Sara 3D'}
+            >
+              <span className="text-sm">👩‍🏫</span>
+            </button>
+
+            {/* Voice Mute/Unmute */}
+            <button
+              onClick={() => {
+                if (isSpeaking) cancelAllSpeech();
+                setVoiceEnabled(!voiceEnabled);
+              }}
+              className={`p-2 rounded-xl border-2 transition-all cursor-pointer ${
+                voiceEnabled ? 'bg-amber-50 text-[#002147] border-amber-200' : 'bg-slate-100 text-slate-400 border-slate-200'
+              }`}
+              title={voiceEnabled ? (isRtl ? 'الصوت مفعّل' : 'Mute') : (isRtl ? 'الصوت مكتوم' : 'Unmute')}
+            >
+              {voiceEnabled ? <Volume2 size={15} className="text-[#C49E3A]" /> : <VolumeX size={15} />}
+            </button>
+          </div>
+
+          {/* Desktop Right Controls (hidden sm:flex) */}
+          <div className="hidden sm:flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
             {/* ⏱️ Lesson Duration Timer Pill & Dropdown */}
             <div className="relative" ref={timerDropdownRef}>
               <button
@@ -1989,13 +2051,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               title={isRtl ? 'بدء محادثة جديدة (مع أرشفة محادثتك الحالية بأمان)' : 'Start Fresh Chat (archives previous)'}
             >
               <RotateCcw size={13} className="text-slate-500" />
-              <span className="hidden sm:inline">{isRtl ? 'محادثة جديدة' : 'New Chat'}</span>
+              <span className="hidden lg:inline">{isRtl ? 'محادثة جديدة' : 'New Chat'}</span>
+              <span className="hidden sm:inline lg:hidden">{isRtl ? 'جديدة' : 'New'}</span>
             </button>
 
             {/* Placement Test Trigger Button */}
             <button
               onClick={startPlacementTest}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
+              className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
                 placementState.isActive
                   ? 'bg-[#002147] text-amber-300 border-amber-400 ring-2 ring-amber-300/40 animate-pulse'
                   : 'bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-[#002147] border-blue-300'
@@ -2003,13 +2066,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               title={isRtl ? 'اختبار تحديد المستوى الشامل (محادثة + 5 أسئلة + سبلنغ + ربط المناهج)' : 'Comprehensive Placement Test'}
             >
               <Target size={15} className={placementState.isActive ? 'text-amber-300' : 'text-blue-600'} />
-              <span className="hidden xs:inline">{isRtl ? 'تحديد المستوى 🎯' : 'Placement Test 🎯'}</span>
+              <span className="hidden lg:inline">{isRtl ? 'تحديد المستوى 🎯' : 'Placement Test 🎯'}</span>
+              <span className="hidden sm:inline lg:hidden">{isRtl ? 'المستوى 🎯' : 'Test 🎯'}</span>
             </button>
 
             {/* Sara 3D Floating Character Toggle Button */}
             <button
               onClick={() => setIsSara3DOpen(!isSara3DOpen)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
+              className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
                 isSara3DOpen
                   ? 'bg-amber-100 text-amber-900 border-[#C49E3A] ring-2 ring-amber-300/40'
                   : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
@@ -2017,7 +2081,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               title={isRtl ? 'عرض أو إخفاء شخصية سارة ثلاثية الأبعاد 3D العائمة' : 'Toggle 3D Floating Sara Character'}
             >
               <span className="text-sm">👩‍🏫</span>
-              <span className="hidden xs:inline">{isRtl ? (isSara3DOpen ? 'سارة 3D نشطة ✨' : 'سارة 3D 👩‍🏫') : 'Sara 3D'}</span>
+              <span className="hidden lg:inline">{isRtl ? (isSara3DOpen ? 'سارة 3D نشطة ✨' : 'سارة 3D 👩‍🏫') : 'Sara 3D'}</span>
+              <span className="hidden sm:inline lg:hidden">{isRtl ? 'سارة 3D' : '3D'}</span>
             </button>
 
             {/* Summon Smart Whiteboard Button */}
@@ -2029,7 +2094,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   openWhiteboardModal();
                 }
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
+              className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
                 isWhiteboardOpen
                   ? 'bg-amber-100 text-amber-900 border-[#C49E3A]'
                   : 'bg-gradient-to-r from-amber-50 to-amber-100/60 hover:from-amber-100 hover:to-amber-200 text-[#855B14] border-[#C49E3A]/40'
@@ -2037,13 +2102,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               title={isRtl ? 'استدعاء السبورة الذكية للشرح والكتابة بالطبشور' : 'Summon Smart Whiteboard'}
             >
               <Sparkles size={15} className={`text-[#C49E3A] ${isWhiteboardOpen ? 'animate-spin' : 'animate-pulse'}`} />
-              <span className="hidden xs:inline">{isRtl ? 'السبورة الذكية' : 'Whiteboard'}</span>
+              <span className="hidden lg:inline">{isRtl ? 'السبورة الذكية' : 'Whiteboard'}</span>
+              <span className="hidden sm:inline lg:hidden">{isRtl ? 'السبورة' : 'Board'}</span>
             </button>
 
             {/* Live Turn-by-Turn Voice Mode Button */}
             <button
               onClick={toggleLiveVoiceMode}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
+              className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
                 isLiveMode
                   ? 'bg-rose-500 border-rose-600 text-white animate-pulse'
                   : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
@@ -2051,7 +2117,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               title={isRtl ? 'محادثة لايف صوتية مستمرة (رد برد صوتي)' : 'Continuous Live Voice Mode'}
             >
               <Radio size={14} className={isLiveMode ? 'animate-spin' : ''} />
-              <span>{isLiveMode ? (isRtl ? 'اللايف نشط 🔴' : 'Live Active 🔴') : (isRtl ? 'محادثة لايف 🎙️' : 'Live Voice 🎙️')}</span>
+              <span className="hidden lg:inline">{isLiveMode ? (isRtl ? 'اللايف نشط 🔴' : 'Live Active 🔴') : (isRtl ? 'محادثة لايف 🎙️' : 'Live Voice 🎙️')}</span>
+              <span className="hidden sm:inline lg:hidden">{isLiveMode ? 'لايف 🔴' : 'لايف 🎙️'}</span>
             </button>
 
             {/* 🎙️ Phonetic Pronunciation Lab Button */}
@@ -2060,17 +2127,18 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Alkhalil Academy');
                 setIsPhoneticModalOpen(true);
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 text-purple-900 border-purple-200"
+              className="flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 text-purple-900 border-purple-200"
               title={isRtl ? 'مختبر مخارج الحروف وتصحيح النطق الصوتي الفوري' : 'Phonetic Pronunciation Lab'}
             >
               <Mic size={14} className="text-purple-600 animate-pulse" />
-              <span className="hidden xs:inline">{isRtl ? 'مختبر النطق 🎙️' : 'Speech Lab 🎙️'}</span>
+              <span className="hidden lg:inline">{isRtl ? 'مختبر النطق 🎙️' : 'Speech Lab 🎙️'}</span>
+              <span className="hidden sm:inline lg:hidden">{isRtl ? 'النطق 🎙️' : 'Lab 🎙️'}</span>
             </button>
 
             {/* 🎭 Role-Play Scenarios Button */}
             <button
               onClick={() => setIsRolePlayModalOpen(true)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
+              className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
                 activeRolePlay
                   ? 'bg-amber-100 text-amber-900 border-amber-400 ring-2 ring-amber-300/40'
                   : 'bg-gradient-to-r from-teal-50 to-emerald-50 hover:from-teal-100 hover:to-emerald-100 text-teal-900 border-teal-200'
@@ -2078,7 +2146,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               title={isRtl ? 'سيناريوهات المحادثة وتقمص الأدوار (المطار، المقهى، الطبيب...)' : 'Real-world Role-play Scenarios'}
             >
               <span className="text-sm">🎭</span>
-              <span className="hidden sm:inline">{isRtl ? (activeRolePlay ? 'السيناريو نشط 🎭' : 'سيناريوهات 🎭') : 'Role Play 🎭'}</span>
+              <span className="hidden lg:inline">{isRtl ? (activeRolePlay ? 'السيناريو نشط 🎭' : 'سيناريوهات 🎭') : 'Role Play 🎭'}</span>
+              <span className="hidden sm:inline lg:hidden">{isRtl ? 'سيناريو' : 'Roles'}</span>
             </button>
 
             {/* ⚡ Sara Speech Speed Controller (0.8x / 1.0x / 1.2x) */}
@@ -2096,11 +2165,12 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             {/* 📓 My Error Notebook & Progress Hub Button */}
             <button
               onClick={() => setIsNotebookModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 text-[#855B14] border-amber-300"
+              className="flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 text-[#855B14] border-amber-300"
               title={isRtl ? 'دفتر الملاحظات والأخطاء الشخصي + بنك المفردات + تقرير ولي الأمر 📓' : 'My Error Notebook & Parent Report 📓'}
             >
               <BookMarked size={14} className="text-[#C49E3A]" />
-              <span className="hidden sm:inline">{isRtl ? 'دفتر الأخطاء والتقرير 📓' : 'Notebook 📓'}</span>
+              <span className="hidden lg:inline">{isRtl ? 'دفتر الأخطاء والتقرير 📓' : 'Notebook 📓'}</span>
+              <span className="hidden sm:inline lg:hidden">{isRtl ? 'دفتر 📓' : 'Notes'}</span>
               {tutorMemory.frequentMistakes && tutorMemory.frequentMistakes.length > 0 && (
                 <span className="w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center">
                   {tutorMemory.frequentMistakes.length}
@@ -2130,6 +2200,112 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               {voiceEnabled ? <Volume2 size={15} className="text-[#C49E3A]" /> : <VolumeX size={15} />}
             </button>
           </div>
+        </div>
+
+        {/* Mobile Swipeable Action Ribbon (sm:hidden) */}
+        <div className="sm:hidden border-t border-slate-100 bg-slate-50/95 backdrop-blur-xs px-3 py-1.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar shadow-2xs">
+          {/* Whiteboard */}
+          <button
+            onClick={() => {
+              if (isWhiteboardOpen) setIsWhiteboardOpen(false);
+              else openWhiteboardModal();
+            }}
+            className={`px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border transition-all flex items-center gap-1 cursor-pointer ${
+              isWhiteboardOpen ? 'bg-amber-400 text-slate-950 border-amber-500 shadow-xs' : 'bg-white text-slate-700 border-slate-200'
+            }`}
+          >
+            <span>📐</span>
+            <span>{isRtl ? 'السبورة' : 'Whiteboard'}</span>
+          </button>
+
+          {/* Sara 3D */}
+          <button
+            onClick={() => setIsSara3DOpen(!isSara3DOpen)}
+            className={`px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border transition-all flex items-center gap-1 cursor-pointer ${
+              isSara3DOpen ? 'bg-amber-400 text-slate-950 border-amber-500 shadow-xs' : 'bg-white text-slate-700 border-slate-200'
+            }`}
+          >
+            <span>👩‍🏫</span>
+            <span>{isRtl ? 'سارة 3D' : 'Sara 3D'}</span>
+          </button>
+
+          {/* Placement Test */}
+          <button
+            onClick={startPlacementTest}
+            className={`px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border transition-all flex items-center gap-1 cursor-pointer ${
+              placementState.isActive ? 'bg-[#002147] text-amber-300 border-amber-400 animate-pulse' : 'bg-blue-50 text-blue-900 border-blue-200'
+            }`}
+          >
+            <Target size={12} className={placementState.isActive ? 'text-amber-300' : 'text-blue-600'} />
+            <span>{isRtl ? 'تحديد المستوى' : 'Placement'}</span>
+          </button>
+
+          {/* Timer */}
+          <button
+            onClick={() => setShowTimerDropdown(!showTimerDropdown)}
+            className={`px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border transition-all flex items-center gap-1 cursor-pointer ${
+              !isTimerEnabled || timerDurationMinutes === 0
+                ? 'bg-white text-slate-600 border-slate-200'
+                : timerSecondsLeft === 0
+                ? 'bg-rose-100 text-rose-900 border-rose-300 animate-pulse'
+                : 'bg-emerald-50 text-emerald-900 border-emerald-300'
+            }`}
+          >
+            <Clock size={12} />
+            <span className="font-mono">
+              {!isTimerEnabled || timerDurationMinutes === 0 ? (isRtl ? 'مؤقت ⏱️' : 'Timer') : formatTimerDisplay(timerSecondsLeft)}
+            </span>
+          </button>
+
+          {/* Pronunciation Lab */}
+          <button
+            onClick={() => {
+              setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Alkhalil Academy');
+              setIsPhoneticModalOpen(true);
+            }}
+            className="px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border bg-purple-50 text-purple-900 border-purple-200 flex items-center gap-1 cursor-pointer"
+          >
+            <Mic size={12} className="text-purple-600" />
+            <span>{isRtl ? 'مختبر النطق' : 'Speech Lab'}</span>
+          </button>
+
+          {/* Role Play */}
+          <button
+            onClick={() => setIsRolePlayModalOpen(true)}
+            className="px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border bg-teal-50 text-teal-900 border-teal-200 flex items-center gap-1 cursor-pointer"
+          >
+            <span>🎭</span>
+            <span>{isRtl ? 'سيناريوهات' : 'Role-Play'}</span>
+          </button>
+
+          {/* Notebook */}
+          <button
+            onClick={() => setIsNotebookModalOpen(true)}
+            className="px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border bg-amber-50 text-[#855B14] border-amber-200 flex items-center gap-1 cursor-pointer"
+          >
+            <span>📓</span>
+            <span>{isRtl ? 'دفتر الأخطاء' : 'Notebook'}</span>
+          </button>
+
+          {/* Speed Toggle */}
+          <button
+            onClick={() => {
+              const nextRate = saraSpeechRate === 1.0 ? 0.8 : saraSpeechRate === 0.8 ? 1.2 : 1.0;
+              setSaraSpeechRate(nextRate);
+            }}
+            className="px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border bg-white text-slate-700 border-slate-200 flex items-center gap-1 cursor-pointer"
+          >
+            <span>{saraSpeechRate === 0.8 ? '🐢 0.8x' : saraSpeechRate === 1.2 ? '🚀 1.2x' : '⚡ 1.0x'}</span>
+          </button>
+
+          {/* New Chat */}
+          <button
+            onClick={() => setShowNewChatConfirm(true)}
+            className="px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border bg-white text-slate-700 border-slate-200 flex items-center gap-1 cursor-pointer"
+          >
+            <RotateCcw size={11} className="text-slate-500" />
+            <span>{isRtl ? 'جديدة' : 'New'}</span>
+          </button>
         </div>
       </header>
 
@@ -3096,103 +3272,105 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         {/* ======================================================== */}
         {/* 2C. INPUT CONTROLS (INTEGRATED LIVE + MIC + TEXT + SEND) */}
         {/* ======================================================== */}
-        <div className={`bg-white border-2 rounded-3xl p-2 sm:p-2.5 shadow-md flex items-center gap-1.5 sm:gap-2 transition-all ${
-          isLiveMode ? 'border-amber-400 ring-2 ring-amber-300/40' : 'border-slate-200'
-        }`}>
-          {/* Integrated Live Voice Mode Button directly in the input bar */}
-          <button
-            onClick={toggleLiveVoiceMode}
-            className={`px-3 py-2.5 rounded-2xl border-2 transition-all cursor-pointer flex items-center gap-1.5 shrink-0 text-xs font-black shadow-xs ${
-              isLiveMode
-                ? 'bg-rose-500 border-rose-600 text-white animate-pulse'
-                : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-800'
-            }`}
-            title={isLiveMode ? (isRtl ? 'إيقاف المحادثة اللايف' : 'End Live Voice') : (isRtl ? 'تشغيل المحادثة الصوتية المباشرة (رد برد)' : 'Start Live Voice Mode')}
-          >
-            {isLiveMode ? <Radio size={16} className="animate-spin text-white" /> : <Mic size={16} className="text-emerald-700" />}
-            <span className="hidden sm:inline">
-              {isLiveMode 
-                ? (isRtl ? 'لايف نشط 🔴' : 'Live Active 🔴') 
-                : (isRtl ? 'محادثة لايف 🎙️' : 'Live Voice 🎙️')}
-            </span>
-          </button>
-
-          {/* Text Input */}
-          <input
-            type="text"
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage();
-              }
-            }}
-            placeholder={
-              isLiveMode
-                ? (isRtl ? 'المحادثة اللايف نشطة... تحدث بالمايك وسارة تجيبك، أو اكتب هنا...' : 'Live mode active... speak or type here...')
-                : (isRtl ? 'اكتب لسارة بالعربية أو الإنجليزية، أو اضغط محادثة لايف...' : 'Type to Sara in Arabic or English, or start Live...')
-            }
-            className="flex-1 bg-transparent px-2.5 py-1.5 text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none"
-          />
-
-          {/* Send Button */}
-          <button
-            onClick={() => handleSendMessage()}
-            disabled={loading || !inputText.trim()}
-            className="p-3 bg-[#002147] hover:bg-[#C49E3A] active:scale-95 disabled:opacity-40 disabled:hover:bg-[#002147] text-white rounded-2xl transition-all shadow-md flex items-center justify-center shrink-0 cursor-pointer"
-            title={isRtl ? 'إرسال' : 'Send'}
-          >
-            <Send size={18} className={isRtl ? 'rotate-180' : ''} />
-          </button>
-        </div>
-
-        {/* Quick Suggestion Chips */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-[11px] font-bold text-slate-600 no-scrollbar">
-          <span className="text-slate-400 shrink-0 text-[10px]">{isRtl ? 'اقتراحات سريعة:' : 'Quick prompts:'}</span>
-          <button
-            onClick={toggleLiveVoiceMode}
-            className={`px-3 py-1.5 rounded-xl border shrink-0 transition-all cursor-pointer font-black flex items-center gap-1 ${
-              isLiveMode 
-                ? 'bg-rose-50 border-rose-300 text-rose-700' 
-                : 'bg-emerald-50 border-emerald-300 hover:bg-emerald-100 text-emerald-800'
-            }`}
-          >
-            <Radio size={12} className={isLiveMode ? 'animate-spin' : ''} />
-            <span>{isLiveMode ? (isRtl ? '⏹️ إيقاف المحادثة اللايف' : '⏹️ Stop Live') : (isRtl ? '🎙️ تشغيل المحادثة الصوتية اللايف (رد برد)' : '🎙️ Start Live Voice Chat')}</span>
-          </button>
-          <button
-            onClick={startPlacementTest}
-            className={`px-3 py-1.5 rounded-xl border shrink-0 transition-all cursor-pointer font-black flex items-center gap-1 shadow-2xs ${
-              placementState.isActive
-                ? 'bg-[#002147] text-amber-300 border-amber-400 ring-2 ring-amber-300/40 animate-pulse'
-                : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-300 hover:from-blue-100 hover:to-indigo-100 text-[#002147]'
-            }`}
-          >
-            <Target size={12} className={placementState.isActive ? 'text-amber-300' : 'text-blue-600'} />
-            <span>{isRtl ? '🎯 اختبار تحديد المستوى (محادثة + 5 أسئلة + سبلنغ)' : '🎯 Placement Test (Speaking + 5 Questions + Spelling)'}</span>
-          </button>
-          {[
-            { ar: 'علميني قاعدة جديدة اليوم 📐', en: 'Teach me a new rule 📐' },
-            { ar: 'اختبريني بـ 3 أسئلة سريعة 🎯', en: 'Give me a 3-question quiz 🎯' },
-            { ar: 'وش أخطائي اللي لازم أعدلها؟ 🔍', en: 'What mistakes should I fix? 🔍' },
-            { ar: 'جاهز أمارس جمل محادثة 🗣️', en: 'Ready to practice conversation 🗣️' }
-          ].map((chip, cIdx) => (
+        <div className="sticky bottom-0 z-30 bg-[#F8FAFC]/95 backdrop-blur-md pt-1 pb-safe space-y-2">
+          <div className={`bg-white border-2 rounded-2xl sm:rounded-3xl p-1.5 sm:p-2.5 shadow-md flex items-center gap-1.5 sm:gap-2 transition-all ${
+            isLiveMode ? 'border-amber-400 ring-2 ring-amber-300/40' : 'border-slate-200'
+          }`}>
+            {/* Integrated Live Voice Mode Button directly in the input bar */}
             <button
-              key={`chip-${cIdx}`}
-              onClick={() => handleSendMessage(isRtl ? chip.ar : chip.en)}
-              className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-[#002147] hover:bg-slate-50 shrink-0 transition-all cursor-pointer shadow-2xs"
+              onClick={toggleLiveVoiceMode}
+              className={`px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border-2 transition-all cursor-pointer flex items-center gap-1.5 shrink-0 text-xs font-black shadow-xs ${
+                isLiveMode
+                  ? 'bg-rose-500 border-rose-600 text-white animate-pulse'
+                  : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-800'
+              }`}
+              title={isLiveMode ? (isRtl ? 'إيقاف المحادثة اللايف' : 'End Live Voice') : (isRtl ? 'تشغيل المحادثة الصوتية المباشرة (رد برد)' : 'Start Live Voice Mode')}
             >
-              {isRtl ? chip.ar : chip.en}
+              {isLiveMode ? <Radio size={16} className="animate-spin text-white" /> : <Mic size={16} className="text-emerald-700" />}
+              <span className="hidden sm:inline">
+                {isLiveMode 
+                  ? (isRtl ? 'لايف نشط 🔴' : 'Live Active 🔴') 
+                  : (isRtl ? 'محادثة لايف 🎙️' : 'Live Voice 🎙️')}
+              </span>
             </button>
-          ))}
-          <button
-            onClick={() => setShowNewChatConfirm(true)}
-            className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-[#002147] hover:bg-slate-100 text-slate-600 shrink-0 transition-all cursor-pointer shadow-2xs flex items-center gap-1 font-bold"
-          >
-            <RotateCcw size={11} />
-            <span>{isRtl ? '🔄 محادثة جديدة' : '🔄 New Chat'}</span>
-          </button>
+
+            {/* Text Input */}
+            <input
+              type="text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
+              placeholder={
+                isLiveMode
+                  ? (isRtl ? 'المحادثة اللايف نشطة... تحدث بالمايك وسارة تجيبك، أو اكتب هنا...' : 'Live mode active... speak or type here...')
+                  : (isRtl ? 'اكتب لسارة بالعربية أو الإنجليزية، أو اضغط محادثة لايف...' : 'Type to Sara in Arabic or English, or start Live...')
+              }
+              className="flex-1 bg-transparent px-2 sm:px-2.5 py-1.5 text-sm sm:text-base font-medium text-slate-800 placeholder-slate-400 focus:outline-none min-w-0"
+            />
+
+            {/* Send Button */}
+            <button
+              onClick={() => handleSendMessage()}
+              disabled={loading || !inputText.trim()}
+              className="p-2.5 sm:p-3 bg-[#002147] hover:bg-[#C49E3A] active:scale-95 disabled:opacity-40 disabled:hover:bg-[#002147] text-white rounded-xl sm:rounded-2xl transition-all shadow-md flex items-center justify-center shrink-0 cursor-pointer"
+              title={isRtl ? 'إرسال' : 'Send'}
+            >
+              <Send size={18} className={isRtl ? 'rotate-180' : ''} />
+            </button>
+          </div>
+
+          {/* Quick Suggestion Chips */}
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 text-[11px] font-bold text-slate-600 no-scrollbar">
+            <span className="text-slate-400 shrink-0 text-[10px]">{isRtl ? 'اقتراحات سريعة:' : 'Quick prompts:'}</span>
+            <button
+              onClick={toggleLiveVoiceMode}
+              className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border shrink-0 transition-all cursor-pointer font-black flex items-center gap-1 text-[10px] sm:text-xs ${
+                isLiveMode 
+                  ? 'bg-rose-50 border-rose-300 text-rose-700' 
+                  : 'bg-emerald-50 border-emerald-300 hover:bg-emerald-100 text-emerald-800'
+              }`}
+            >
+              <Radio size={12} className={isLiveMode ? 'animate-spin' : ''} />
+              <span>{isLiveMode ? (isRtl ? '⏹️ إيقاف اللايف' : '⏹️ Stop Live') : (isRtl ? '🎙️ محادثة لايف (رد برد)' : '🎙️ Start Live Voice Chat')}</span>
+            </button>
+            <button
+              onClick={startPlacementTest}
+              className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border shrink-0 transition-all cursor-pointer font-black flex items-center gap-1 shadow-2xs text-[10px] sm:text-xs ${
+                placementState.isActive
+                  ? 'bg-[#002147] text-amber-300 border-amber-400 ring-2 ring-amber-300/40 animate-pulse'
+                  : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-300 hover:from-blue-100 hover:to-indigo-100 text-[#002147]'
+              }`}
+            >
+              <Target size={12} className={placementState.isActive ? 'text-amber-300' : 'text-blue-600'} />
+              <span>{isRtl ? '🎯 اختبار تحديد المستوى' : '🎯 Placement Test'}</span>
+            </button>
+            {[
+              { ar: 'علميني قاعدة جديدة اليوم 📐', en: 'Teach me a new rule 📐' },
+              { ar: 'اختبريني بـ 3 أسئلة سريعة 🎯', en: 'Give me a 3-question quiz 🎯' },
+              { ar: 'وش أخطائي اللي لازم أعدلها؟ 🔍', en: 'What mistakes should I fix? 🔍' },
+              { ar: 'جاهز أمارس جمل محادثة 🗣️', en: 'Ready to practice conversation 🗣️' }
+            ].map((chip, cIdx) => (
+              <button
+                key={`chip-${cIdx}`}
+                onClick={() => handleSendMessage(isRtl ? chip.ar : chip.en)}
+                className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-white border border-slate-200 hover:border-[#002147] hover:bg-slate-50 shrink-0 transition-all cursor-pointer shadow-2xs text-[10px] sm:text-xs"
+              >
+                {isRtl ? chip.ar : chip.en}
+              </button>
+            ))}
+            <button
+              onClick={() => setShowNewChatConfirm(true)}
+              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-[#002147] hover:bg-slate-100 text-slate-600 shrink-0 transition-all cursor-pointer shadow-2xs flex items-center gap-1 font-bold text-[10px] sm:text-xs"
+            >
+              <RotateCcw size={11} />
+              <span>{isRtl ? '🔄 محادثة جديدة' : '🔄 New Chat'}</span>
+            </button>
+          </div>
         </div>
       </main>
 

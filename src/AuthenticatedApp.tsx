@@ -7105,6 +7105,7 @@ export default function AuthenticatedApp({
                       <button 
                         key={item.id}
                         disabled={isDisabled}
+                        title={item.label}
                         onClick={() => {
                         if (item.id === 'ai-chat') {
                           handleStartAiChat();
@@ -7413,7 +7414,13 @@ export default function AuthenticatedApp({
             </>
           )}
 
-          <main className={`flex-1 min-w-0 w-full overflow-x-hidden transition-all ${view !== 'placement-test' ? (isRtl ? 'md:mr-20 lg:mr-56 mb-36 md:mb-12 pt-20 md:pt-4 pb-44 md:pb-40' : 'md:ml-20 lg:ml-56 mb-36 md:mb-12 pt-20 md:pt-4 pb-44 md:pb-40') : ''}`}>
+          <main className={`flex-1 min-w-0 w-full overflow-x-hidden transition-all ${
+            view === 'placement-test'
+              ? ''
+              : view === 'ai-chat'
+              ? (isRtl ? 'md:mr-20 lg:mr-56 pt-14 md:pt-0' : 'md:ml-20 lg:ml-56 pt-14 md:pt-0')
+              : (isRtl ? 'md:mr-20 lg:mr-56 mb-24 md:mb-6 pt-16 md:pt-4 pb-28 md:pb-16' : 'md:ml-20 lg:ml-56 mb-24 md:mb-6 pt-16 md:pt-4 pb-28 md:pb-16')
+          }`}>
             {renderContent()}
 
             {/* Global Notification Toast */}

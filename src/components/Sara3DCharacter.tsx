@@ -59,7 +59,12 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
   onToggle
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
-  const [isMinimized, setIsMinimized] = useState<boolean>(false);
+  const [isMinimized, setIsMinimized] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 640;
+    }
+    return false;
+  });
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [activeOutfit, setActiveOutfit] = useState<SaraOutfitId>('navy_gold');
@@ -779,12 +784,23 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
     };
   }, [isOpen, isMinimized, currentEmotion, activeGesture, activeOutfit]);
 
-  // Handle Dragging
+  // Handle Dragging (Mouse & Touch for Mobile)
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     dragStartRef.current = {
       mouseX: e.clientX,
       mouseY: e.clientY,
+      posX: position?.x || 0,
+      posY: position?.y || 0
+    };
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 0) return;
+    setIsDragging(true);
+    dragStartRef.current = {
+      mouseX: e.touches[0].clientX,
+      mouseY: e.touches[0].clientY,
       posX: position?.x || 0,
       posY: position?.y || 0
     };
@@ -801,18 +817,36 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
       });
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDragging || e.touches.length === 0) return;
+      const deltaX = e.touches[0].clientX - dragStartRef.current.mouseX;
+      const deltaY = e.touches[0].clientY - dragStartRef.current.mouseY;
+      setPosition({
+        x: dragStartRef.current.posX + deltaX,
+        y: dragStartRef.current.posY + deltaY
+      });
+    };
+
     const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    const handleTouchEnd = () => {
       setIsDragging(false);
     };
 
     if (isDragging) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleTouchMove, { passive: true });
+      window.addEventListener('touchend', handleTouchEnd);
     }
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
     };
   }, [isDragging]);
 
@@ -824,12 +858,12 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
         transform: position ? `translate3d(${position.x}px, ${position.y}px, 0)` : undefined
       }}
       className={`fixed z-40 transition-shadow select-none ${
-        position ? '' : isRtl ? 'bottom-20 left-4 sm:left-6' : 'bottom-20 right-4 sm:right-6'
+        position ? '' : isRtl ? 'bottom-24 left-2 sm:bottom-20 sm:left-6' : 'bottom-24 right-2 sm:bottom-20 sm:right-6'
       }`}
     >
       {/* 3D Floating Avatar Card - Warm Studio Portrait Framing */}
       <div className={`relative bg-gradient-to-b from-slate-900/98 via-[#131d2e]/98 to-slate-950/98 backdrop-blur-md rounded-3xl border-2 border-amber-400/70 shadow-2xl overflow-hidden transition-all duration-300 ${
-        isMinimized ? 'w-16 h-16 sm:w-20 sm:h-20' : 'w-56 sm:w-64'
+        isMinimized ? 'w-14 h-14 sm:w-20 sm:h-20' : 'w-44 xs:w-48 sm:w-64'
       }`}>
         {/* Pure White & Warm Golden Luminous Halo behind Sara's head */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,_rgba(255,255,255,0.45)_0%,_rgba(254,243,199,0.22)_40%,_transparent_75%)] pointer-events-none" />
@@ -837,7 +871,8 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
         {/* Top Control Bar */}
         <div 
           onMouseDown={handleMouseDown}
-          className="flex items-center justify-between px-3 py-1.5 bg-[#001833]/80 border-b border-white/10 cursor-move"
+          onTouchStart={handleTouchStart}
+          className="flex items-center justify-between px-3 py-1.5 bg-[#001833]/80 border-b border-white/10 cursor-move touch-none"
           title={isRtl ? 'اسحب لنقل شخصية سارة' : 'Drag to reposition Sara'}
         >
           <div className="flex items-center gap-1.5">
@@ -920,7 +955,7 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
             <div
               ref={mountRef}
               onClick={onCharacterClick}
-              className="w-full h-56 flex items-center justify-center cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-transform"
+              className="w-full h-36 xs:h-44 sm:h-56 flex items-center justify-center cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-transform"
               title={isRtl ? 'انقر على سارة للتفاعل الصوتي' : 'Click Sara to interact'}
             />
 
