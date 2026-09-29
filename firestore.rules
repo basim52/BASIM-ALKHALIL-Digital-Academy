@@ -126,6 +126,16 @@ service cloud.firestore {
         allow write: if isOwner(userId) || isAdmin();
       }
 
+      // Sara tutor chat state and archived sessions (users/{userId}/saraChat, saraSessions)
+      match /saraChat/{docId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+      match /saraSessions/{sessionId} {
+        allow read: if isOwner(userId) || isParentOf(userId) || isAdmin();
+        allow create: if isOwner(userId) || isAdmin();
+        allow update, delete: if isAdmin();
+      }
+
       // Earned Completion Certificates (users/{userId}/certificates/{unitId})
       match /certificates/{unitId} {
         allow read: if isOwner(userId) || isAdmin();

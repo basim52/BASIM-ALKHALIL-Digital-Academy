@@ -971,7 +971,15 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                         <div className="flex items-center gap-2">
                           <Calendar size={12} className="text-slate-400" />
                           <span className="text-[10px] font-bold text-slate-400">
-                            {plan.planItems?.length || 0} {isRtl ? 'درس ووحدة' : 'lessons'} • {plan.startDate}
+                            {(() => {
+                              const items = plan.planItems || [];
+                              const lessons = items.length;
+                              const units = new Set(items.map((item: any) => item.unitId).filter(Boolean)).size;
+                              const counts = isRtl
+                                ? `${lessons} درس${units ? ` • ${units} وحدة` : ''}`
+                                : `${lessons} lessons${units ? ` • ${units} units` : ''}`;
+                              return plan.startDate ? `${counts} • ${plan.startDate}` : counts;
+                            })()}
                           </span>
                         </div>
                       </button>

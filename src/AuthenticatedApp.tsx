@@ -1656,6 +1656,31 @@ const StudentHome = ({ lang, profile, onStartConversation, onStartChat, onOpenCu
           </div>
         </div>
 
+        {/* TODAY'S STEP: placement, then the lesson, Sara is right under this */}
+        {!(currentPlan && todayLesson) && (
+          <div className="p-5 sm:p-6 bg-white border-2 border-b-4 border-slate-200 rounded-3xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className={isRtl ? 'text-right' : 'text-left'}>
+              <p className="text-[10px] font-black uppercase tracking-widest text-[#1cb0f6]">{isRtl ? 'خطوة اليوم' : 'Today'}</p>
+              <h3 className="text-lg font-black text-slate-800 mt-1">
+                {hasCompletedTest
+                  ? (isRtl ? `درس مستواك ${(profile as any).level || ''}` : `Your ${(profile as any).level || ''} lesson`)
+                  : (isRtl ? 'أول خطوة: اختبار تحديد المستوى' : 'First step: placement test')}
+              </h3>
+              <p className="text-xs text-slate-400 font-bold mt-1">
+                {hasCompletedTest
+                  ? (isRtl ? 'افتح الدرس، وإذا علق شيء اسأل سارة تحت.' : 'Open the lesson. If you get stuck, ask Sara below.')
+                  : (isRtl ? 'بدونه ما ينفتح المنهج، والمستوى ما ينحفظ.' : 'Lessons stay locked until this is done.')}
+              </p>
+            </div>
+            <button
+              onClick={() => onNavigate(hasCompletedTest ? 'curriculum' : 'placement-test')}
+              className="w-full sm:w-auto px-6 py-3.5 bg-[#58cc02] hover:bg-[#46a302] text-white font-black text-sm rounded-2xl cursor-pointer"
+            >
+              {hasCompletedTest ? (isRtl ? 'ابدأ الدرس' : 'Start lesson') : (isRtl ? 'ابدأ الاختبار' : 'Start the test')}
+            </button>
+          </div>
+        )}
+
         {/* 👩‍🏫 SARA PERSONAL TUTOR HERO ENTRY */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -6781,9 +6806,14 @@ export default function AuthenticatedApp({
             try {
               // Level is already saved server-side by PlacementTest (savePlacementLevel)
               if (userProfile) {
-                setUserProfile({ ...userProfile, level } as any);
+                setUserProfile({
+                  ...userProfile,
+                  level,
+                  placementTestCompleted: true,
+                  placementCompleted: true,
+                } as any);
               }
-              setView('dashboard');
+              setView('curriculum');
             } catch (error) {
               handleFirestoreError(error, OperationType.UPDATE, `students/${currentUser.uid}`);
             }
