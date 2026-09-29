@@ -7,6 +7,7 @@ import {
   Award, 
   BookOpen, 
   ArrowLeft, 
+  ArrowRight,
   CalendarDays, 
   Clock, 
   Download, 
@@ -180,9 +181,10 @@ export const PlacementTest = ({
   const t = translations[lang];
   const isRtl = lang === 'ar';
   const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<number[]>([]);
+  const [answers, setAnswers] = useState<(number | undefined)[]>([]);
   const [isFinished, setIsFinished] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const autoAdvanceTimerRef = useRef<any>(null);
 
   // Scheduler & Plan linkage wizard states
   const [wizardStep, setWizardStep] = useState<'report' | 'schedule'>('report');
@@ -193,24 +195,52 @@ export const PlacementTest = ({
 
   const cardRef = useRef<HTMLDivElement>(null);
 
+  const handleNext = (currentAnswers: (number | undefined)[] = answers) => {
+    if (autoAdvanceTimerRef.current) {
+      clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+    setShowFeedback(false);
+
+    if (currentStep < QUESTIONS.length - 1) {
+      setCurrentStep(prev => prev + 1);
+    } else {
+      setIsFinished(true);
+      const finalAnswersClean = QUESTIONS.map((_, i) => currentAnswers[i] ?? -1);
+      savePlacementProgressLocally(finalAnswersClean);
+    }
+  };
+
+  const handlePrev = () => {
+    if (autoAdvanceTimerRef.current) {
+      clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+    setShowFeedback(false);
+    if (currentStep > 0) {
+      setCurrentStep(prev => prev - 1);
+    }
+  };
+
   const handleAnswer = (optionIndex: number) => {
-    const newAnswers = [...answers, optionIndex];
-    setAnswers(newAnswers);
+    const updated = [...answers];
+    updated[currentStep] = optionIndex;
+    setAnswers(updated);
     setShowFeedback(true);
     
-    setTimeout(() => {
-      setShowFeedback(false);
-      if (currentStep < QUESTIONS.length - 1) {
-        setCurrentStep(currentStep + 1);
-      } else {
-        setIsFinished(true);
-        savePlacementProgressLocally(newAnswers);
-      }
-    }, 350);
+    // Clear any previous advance timer
+    if (autoAdvanceTimerRef.current) {
+      clearTimeout(autoAdvanceTimerRef.current);
+    }
+
+    // Smooth auto advance after 650ms, with user able to click Next immediately anytime
+    autoAdvanceTimerRef.current = setTimeout(() => {
+      handleNext(updated);
+    }, 650);
   };
 
   const calculateLevel = (): proficiencyLevel => {
-    const scoreVal = answers.filter((ans, i) => ans === QUESTIONS[i].correct).length;
+    const scoreVal = QUESTIONS.filter((q, i) => answers[i] === q.correct).length;
     if (scoreVal <= 3) return proficiencyLevel.A1;
     if (scoreVal <= 6) return proficiencyLevel.A2;
     if (scoreVal <= 9) return proficiencyLevel.B1;
@@ -219,7 +249,7 @@ export const PlacementTest = ({
   };
 
   const determinedLevel = calculateLevel();
-  const score = answers.filter((ans, i) => ans === QUESTIONS[i].correct).length;
+  const score = QUESTIONS.filter((q, i) => answers[i] === q.correct).length;
 
   const getBilingualBulletPoints = (lvl: string, scoreVal: number) => {
     if (lvl === proficiencyLevel.A1 || scoreVal <= 3) {
@@ -717,10 +747,11 @@ export const PlacementTest = ({
         <AnimatePresence mode="wait">
           {!isFinished ? (
             <motion.div 
-              key="test-questions"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, x: isRtl ? 120 : -120 }}
+              key={`test-question-${currentStep}`}
+              initial={{ opacity: 0, x: isRtl ? -20 : 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: isRtl ? 20 : -20 }}
+              transition={{ duration: 0.2 }}
               className="p-6 md:p-12 pt-16"
               dir={isRtl ? 'rtl' : 'ltr'}
             >
@@ -738,15 +769,15 @@ export const PlacementTest = ({
                 <div className="text-right">
                   <div className="text-xs font-black text-[#002147] flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                    {isRtl ? 'تقييم كفاءة ومفردات' : 'Proficiency Assessment'}
+                    <span>{isRtl ? `السؤال ${currentStep + 1} من ${QUESTIONS.length}` : `Question ${currentStep + 1} of ${QUESTIONS.length}`}</span>
                   </div>
                 </div>
               </div>
 
               {/* Real-time Indicator Bar */}
-              <div className="h-2 bg-slate-100 rounded-full mb-10 overflow-hidden">
+              <div className="h-2.5 bg-slate-100 rounded-full mb-8 overflow-hidden p-0.5">
                 <motion.div 
-                  className="h-full bg-gradient-to-r from-[#002147] to-[#C49E3A]"
+                  className="h-full bg-gradient-to-r from-[#002147] via-[#C49E3A] to-[#002147] rounded-full"
                   initial={{ width: 0 }}
                   animate={{ width: `${((currentStep + 1) / QUESTIONS.length) * 100}%` }}
                   transition={{ type: 'spring', stiffness: 55 }}
@@ -754,7 +785,7 @@ export const PlacementTest = ({
               </div>
 
               {/* Dynamic Sentence Question Area */}
-              <div className="mb-10 min-h-24 flex items-center justify-center bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
+              <div className="mb-8 min-h-24 flex items-center justify-center bg-slate-50/70 p-6 rounded-3xl border border-slate-200/80 shadow-xs">
                 <motion.h3 
                   key={currentStep}
                   initial={{ opacity: 0, y: 6 }}
@@ -765,8 +796,14 @@ export const PlacementTest = ({
                     <React.Fragment key={idx}>
                       {part}
                       {idx === 0 && (
-                        <span className="mx-2 px-5 py-0.5 bg-blue-50 text-blue-600 border-b-4 border-blue-500 rounded-lg inline-block font-black select-none shadow-sm">
-                          ______
+                        <span className={`mx-2 px-4 py-1 rounded-xl inline-block font-black select-none shadow-xs border-b-4 transition-all ${
+                          answers[currentStep] !== undefined
+                            ? 'bg-amber-100 text-[#002147] border-[#C49E3A] scale-105'
+                            : 'bg-blue-50 text-blue-600 border-blue-500'
+                        }`}>
+                          {answers[currentStep] !== undefined
+                            ? QUESTIONS[currentStep].options[answers[currentStep]!]
+                            : '______'}
                         </span>
                       )}
                     </React.Fragment>
@@ -781,25 +818,100 @@ export const PlacementTest = ({
                 animate="show"
                 className="grid grid-cols-1 md:grid-cols-2 gap-4"
               >
-                {QUESTIONS[currentStep].options.map((option, i) => (
-                  <motion.button
-                    key={i}
-                    variants={itemVariants}
-                    whileHover={{ scale: 1.015, y: -2 }}
-                    whileTap={{ scale: 0.985 }}
-                    onClick={() => handleAnswer(i)}
-                    className="w-full p-5 text-left border-2 border-slate-100 bg-white rounded-2xl hover:border-[#C49E3A] hover:bg-slate-50/20 transition-all font-bold text-[#002147] flex justify-between items-center group shadow-sm"
-                    dir={isRtl ? 'rtl' : 'ltr'}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-slate-100 text-[#002147] border border-slate-200 flex items-center justify-center font-black group-hover:bg-[#C49E3A] group-hover:text-white transition-colors">
-                        {String.fromCharCode(65 + i)}
+                {QUESTIONS[currentStep].options.map((option, i) => {
+                  const isSelected = answers[currentStep] === i;
+                  return (
+                    <motion.button
+                      key={i}
+                      variants={itemVariants}
+                      whileHover={{ scale: 1.015, y: -2 }}
+                      whileTap={{ scale: 0.985 }}
+                      onClick={() => handleAnswer(i)}
+                      className={`w-full p-5 text-left border-2 rounded-2xl transition-all font-bold flex justify-between items-center group shadow-xs cursor-pointer ${
+                        isSelected
+                          ? 'border-[#C49E3A] bg-amber-50/80 text-[#002147] ring-2 ring-[#C49E3A]/40 shadow-md'
+                          : 'border-slate-100 bg-white text-[#002147] hover:border-[#C49E3A]/60 hover:bg-slate-50/40'
+                      }`}
+                      dir={isRtl ? 'rtl' : 'ltr'}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-9 h-9 rounded-xl border flex items-center justify-center font-black transition-colors ${
+                          isSelected
+                            ? 'bg-[#C49E3A] text-white border-[#C49E3A]'
+                            : 'bg-slate-100 text-[#002147] border-slate-200 group-hover:bg-[#C49E3A] group-hover:text-white'
+                        }`}>
+                          {String.fromCharCode(65 + i)}
+                        </div>
+                        <span className="text-base" dir="ltr">{option}</span>
                       </div>
-                      <span className="text-md" dir="ltr">{option}</span>
-                    </div>
-                  </motion.button>
-                ))}
+                      {isSelected && (
+                        <CheckCircle2 size={22} className="text-[#C49E3A] shrink-0" />
+                      )}
+                    </motion.button>
+                  );
+                })}
               </motion.div>
+
+              {/* Bottom Navigation & Question Advance Controls */}
+              <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between gap-3">
+                {/* Previous Question Button */}
+                <button
+                  type="button"
+                  onClick={handlePrev}
+                  disabled={currentStep === 0}
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-black text-xs flex items-center gap-1.5 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+                >
+                  {isRtl ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+                  <span>{isRtl ? 'السابق' : 'Previous'}</span>
+                </button>
+
+                {/* Question progress pills */}
+                <div className="hidden sm:flex items-center gap-1.5 py-1">
+                  {QUESTIONS.map((_, qIdx) => {
+                    const isAnswered = answers[qIdx] !== undefined;
+                    const isCurrent = qIdx === currentStep;
+                    return (
+                      <button
+                        key={qIdx}
+                        type="button"
+                        onClick={() => {
+                          if (autoAdvanceTimerRef.current) clearTimeout(autoAdvanceTimerRef.current);
+                          setCurrentStep(qIdx);
+                        }}
+                        className={`w-2.5 h-2.5 rounded-full transition-all cursor-pointer ${
+                          isCurrent 
+                            ? 'bg-[#002147] ring-2 ring-[#C49E3A] scale-125' 
+                            : isAnswered 
+                              ? 'bg-[#C49E3A]' 
+                              : 'bg-slate-200 hover:bg-slate-300'
+                        }`}
+                        title={`${isRtl ? 'سؤال' : 'Question'} ${qIdx + 1}`}
+                      />
+                    );
+                  })}
+                </div>
+
+                {/* Next Question / Finish Button */}
+                <button
+                  type="button"
+                  onClick={() => handleNext()}
+                  disabled={answers[currentStep] === undefined}
+                  className={`px-5 py-2.5 rounded-xl font-black text-xs flex items-center gap-2 transition-all cursor-pointer shadow-md ${
+                    answers[currentStep] !== undefined
+                      ? 'bg-gradient-to-r from-[#002147] to-[#1e3a5f] hover:from-[#C49E3A] hover:to-[#a88226] text-white active:scale-95'
+                      : 'bg-slate-100 text-slate-400 opacity-50 pointer-events-none'
+                  }`}
+                >
+                  <span>
+                    {currentStep < QUESTIONS.length - 1
+                      ? (isRtl ? 'السؤال التالي' : 'Next Question')
+                      : (isRtl ? 'إنهاء الاختبار واحتساب النتيجة 🏆' : 'Submit & View Results 🏆')}
+                  </span>
+                  {currentStep < QUESTIONS.length - 1 && (
+                    isRtl ? <ChevronLeft size={16} /> : <ChevronRight size={16} />
+                  )}
+                </button>
+              </div>
             </motion.div>
           ) : (
             <div className="p-6 md:p-12" dir={isRtl ? 'rtl' : 'ltr'}>

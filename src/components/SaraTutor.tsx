@@ -32,7 +32,8 @@ import {
   Bell,
   Plus,
   Camera,
-  Palette
+  Palette,
+  BookMarked
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile, AppView, SaraBoardData, SaraChatResponse, TutorMemoryDoc, proficiencyLevel, CurriculumCategory } from '../types';
@@ -45,6 +46,9 @@ import { getStudentStreak, StreakData } from '../services/streakService';
 import { SmartWhiteboard } from './SmartWhiteboard';
 import { Sara3DCharacter } from './Sara3DCharacter';
 import { MASTER_CURRICULUM } from '../data/masterCurriculum';
+import { PhoneticAnalyzerModal } from './PhoneticAnalyzerModal';
+import { RolePlayModal, RolePlayScenario, ROLE_PLAY_SCENARIOS } from './RolePlayModal';
+import { SaraPersonalNotebookModal } from './SaraPersonalNotebookModal';
 
 interface MessageItem {
   id: string;
@@ -263,6 +267,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [spellingFeedback, setSpellingFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [placementQuizSelected, setPlacementQuizSelected] = useState<number | null>(null);
   const [placementQuizFeedback, setPlacementQuizFeedback] = useState<'correct' | 'wrong' | null>(null);
+  const placementQuizTimerRef = useRef<any>(null);
+  const placementSpellingTimerRef = useRef<any>(null);
 
   // Chat Persistence & Unmount Lifecycle Refs
   const isMountedRef = useRef<boolean>(true);
@@ -304,6 +310,52 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   useEffect(() => {
     isThinkingRef.current = loading;
   }, [loading]);
+
+  // Plan 1: Voice & Speech Intelligence States (Phonetics, Hesitation, Role-Play)
+  const [isPhoneticModalOpen, setIsPhoneticModalOpen] = useState<boolean>(false);
+  const [phoneticTargetSentence, setPhoneticTargetSentence] = useState<string>('');
+  const [isRolePlayModalOpen, setIsRolePlayModalOpen] = useState<boolean>(false);
+  const [isNotebookModalOpen, setIsNotebookModalOpen] = useState<boolean>(false);
+  const [activeRolePlay, setActiveRolePlay] = useState<RolePlayScenario | null>(null);
+  const [completedMissions, setCompletedMissions] = useState<number[]>([]);
+  const [showHesitationEncouragement, setShowHesitationEncouragement] = useState<boolean>(false);
+  const [hesitationHintText, setHesitationHintText] = useState<string>('');
+  const [saraSpeechRate, setSaraSpeechRate] = useState<number>(1.0);
+  const hesitationTimerRef = useRef<any>(null);
+
+  // Clear silence hesitation timer
+  const clearHesitationTimer = () => {
+    if (hesitationTimerRef.current) {
+      clearTimeout(hesitationTimerRef.current);
+      hesitationTimerRef.current = null;
+    }
+    setShowHesitationEncouragement(false);
+  };
+
+  // Arm silence hesitation timer (triggers gentle reassurance after 7s of hesitation)
+  const armHesitationDetection = () => {
+    clearHesitationTimer();
+    hesitationTimerRef.current = setTimeout(() => {
+      if (isMountedRef.current && !isSpeakingRef.current && !isThinkingRef.current && !placementState.isActive) {
+        setShowHesitationEncouragement(true);
+        const hints = isRtl ? [
+          'خذ وقتك يا بطل! أنا أسمعك بكل هدوء 🌟',
+          'لا تقلق من التردد، المحاولة هي بداية الطلاقة والتميز! 💡',
+          'هل تحب أن أعيد السؤال أو أقدم لك تلميحاً؟ 🌸'
+        ] : [
+          "Take your time! I'm right here with you 🌟",
+          "Don't worry about mistakes, you're doing great! 💡",
+          "Want me to repeat or give you a hint? 🌸"
+        ];
+        const hint = hints[Math.floor(Math.random() * hints.length)];
+        setHesitationHintText(hint);
+
+        setTimeout(() => {
+          if (isMountedRef.current) setShowHesitationEncouragement(false);
+        }, 6000);
+      }
+    }, 7000);
+  };
 
   // Dedicated opener that ensures activeBoard is ready for teaching
   const openWhiteboardModal = () => {
@@ -705,6 +757,56 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     initWelcome();
   };
 
+  // Start Role-Play Scenario
+  const handleStartRolePlayScenario = (scenario: RolePlayScenario) => {
+    setActiveRolePlay(scenario);
+    setCompletedMissions([]);
+    setIsRolePlayModalOpen(false);
+
+    const introText = isRtl
+      ? `🎭 تم تفعيل سيناريو: [${scenario.titleAr}]. سارة بدور (${scenario.roleSaraAr}) وأنت بدور (${scenario.roleStudentAr}).\n\n"${scenario.openingLine}"`
+      : `🎭 Active Scenario: [${scenario.titleEn}]. Sara as (${scenario.roleSaraEn}) and You as (${scenario.roleStudentEn}).\n\n"${scenario.openingLine}"`;
+
+    const introMsg: MessageItem = {
+      id: `msg_rp_init_${Date.now()}`,
+      role: 'sara',
+      text: introText,
+      board: {
+        title: `${scenario.badge} ${isRtl ? scenario.titleAr : scenario.titleEn}`,
+        sentence: scenario.openingLine,
+        highlight: scenario.openingLine.slice(0, 20),
+        notes: [
+          isRtl ? `المكان: ${scenario.location}` : `Location: ${scenario.location}`,
+          isRtl ? `المهمة 1: ${scenario.missionsAr[0]}` : `Mission 1: ${scenario.missionsEn[0]}`
+        ],
+        openWhiteboard: false
+      },
+      timestamp: Date.now()
+    };
+
+    setMessages(prev => [...prev, introMsg]);
+    setActiveBoard(introMsg.board || null);
+
+    if (voiceEnabled) {
+      playSaraVoice(scenario.openingLine);
+    }
+  };
+
+  // Exit Role-Play Scenario
+  const handleEndRolePlay = () => {
+    const summaryMsg: MessageItem = {
+      id: `msg_rp_end_${Date.now()}`,
+      role: 'sara',
+      text: isRtl 
+        ? `🎉 أبدعت يا بطل في محاكاة موقف [${activeRolePlay?.titleAr}]! أتقنت الحديث بثقة واكتسبت تعابير واقعية مهمة. جاهزة لأي محادثة أو تمرين جديد! 🌟`
+        : `🎉 Wonderful performance in [${activeRolePlay?.titleEn}]! You spoke with great confidence. Ready for our next lesson! 🌟`,
+      timestamp: Date.now()
+    };
+    setMessages(prev => [...prev, summaryMsg]);
+    setActiveRolePlay(null);
+    setCompletedMissions([]);
+  };
+
   // Scroll to bottom when messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -743,9 +845,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           if (!liveModeRef.current) {
             setLiveStatus('idle');
           }
+          // Arm hesitation detection after Sara finishes speaking
+          if (liveModeRef.current || activeRolePlay) {
+            armHesitationDetection();
+          }
           onEndCallback?.();
         },
-        'Kore' // Female voice explicitly!
+        'Kore', // Female voice explicitly!
+        saraSpeechRate
       );
 
       if (!isMountedRef.current) {
@@ -1009,42 +1116,22 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     }
   };
 
-  const handlePlacementQuizAnswer = (selectedIndex: number) => {
-    if (placementQuizSelected !== null) return;
-    const currentQ = PLACEMENT_5_QUESTIONS[placementState.quizCurrentIndex];
-    if (!currentQ) return;
+  const advancePlacementQuiz = (targetIndex?: number) => {
+    if (placementQuizTimerRef.current) {
+      clearTimeout(placementQuizTimerRef.current);
+      placementQuizTimerRef.current = null;
+    }
 
-    setPlacementQuizSelected(selectedIndex);
-    const isCorrect = selectedIndex === currentQ.correctIndex;
-    setPlacementQuizFeedback(isCorrect ? 'correct' : 'wrong');
+    setPlacementQuizSelected(null);
+    setPlacementQuizFeedback(null);
+    setQuizSelectedOption(null);
+    setQuizFeedback(null);
 
-    // Anti-cheating: Reveal correct answer on active board ONLY after student makes a choice
-    setActiveBoard(prev => prev ? {
-      ...prev,
-      highlight: currentQ.options[currentQ.correctIndex]
-    } : null);
+    setPlacementState(prev => {
+      const nextIndex = targetIndex !== undefined ? targetIndex : prev.quizCurrentIndex + 1;
 
-    const addedPoints = isCorrect ? 10 : 0;
-    const updatedQuizScore = placementState.quizScore + addedPoints;
-    const updatedAnswers = [
-      ...placementState.quizAnswers,
-      { selectedIndex, isCorrect }
-    ];
-
-    setTimeout(() => {
-      if (placementState.quizCurrentIndex < 4) {
-        const nextIndex = placementState.quizCurrentIndex + 1;
+      if (nextIndex < 5) {
         const nextQ = PLACEMENT_5_QUESTIONS[nextIndex];
-        setPlacementState(prev => ({
-          ...prev,
-          quizCurrentIndex: nextIndex,
-          quizScore: updatedQuizScore,
-          quizAnswers: updatedAnswers
-        }));
-        setPlacementQuizSelected(null);
-        setPlacementQuizFeedback(null);
-
-        // Update whiteboard with the next question (highlight undefined until answered)
         setActiveBoard({
           title: isRtl ? `اختبار تحديد المستوى – السؤال ${nextIndex + 1} من 5 📝` : `Placement Diagnostic Quiz – Question ${nextIndex + 1}/5 📝`,
           sentence: nextQ.questionEn,
@@ -1060,19 +1147,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           },
           openWhiteboard: true
         });
+
+        return {
+          ...prev,
+          quizCurrentIndex: nextIndex
+        };
       } else {
         // Transition to Stage 3: Spelling Test
         const firstSpelling = PLACEMENT_SPELLING_ITEMS[0];
-        setPlacementState(prev => ({
-          ...prev,
-          stage: 'spelling',
-          quizScore: updatedQuizScore,
-          quizAnswers: updatedAnswers,
-          spellingCurrentIndex: 0
-        }));
-        setPlacementQuizSelected(null);
-        setPlacementQuizFeedback(null);
-
         const spellingIntro = isRtl
           ? 'كفو يا بطل! أتممت اختبار الـ 5 أسئلة بنجاح 📝👏. ننتقل الآن للمرحلة الثالثة: امتحان كتابة سبلنغ صغير (3 كلمات) لاختبار مهارة التهجئة والإملاء! استمع للكلمة واكتبها في المربع.'
           : 'Great job! You finished the 5 questions 📝👏. Now moving to Stage 3: Mini Spelling Exam (3 words) to check spelling and orthography! Listen and write the word.';
@@ -1094,11 +1176,10 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           timestamp: Date.now()
         };
 
-        setMessages(prev => [...prev, spellingIntroMsg]);
+        setMessages(mPrev => [...mPrev, spellingIntroMsg]);
         setActiveBoard(spellingIntroMsg.board || null);
         if (voiceEnabled) {
           playSaraVoice(spellingIntro, () => {
-            // Pronounce word after speech, but DO NOT display word in speech bubble
             setTimeout(() => {
               playSaraVoice(
                 firstSpelling.word,
@@ -1108,45 +1189,65 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             }, 400);
           });
         }
+
+        return {
+          ...prev,
+          stage: 'spelling',
+          spellingCurrentIndex: 0
+        };
       }
-    }, 1400);
+    });
   };
 
-  const handlePlacementSpellingSubmit = (typedWord: string) => {
-    if (spellingFeedback !== null) return;
-    const currentSp = PLACEMENT_SPELLING_ITEMS[placementState.spellingCurrentIndex];
-    if (!currentSp) return;
+  const handlePlacementQuizAnswer = (selectedIndex: number) => {
+    if (placementQuizSelected !== null) return;
+    const currentQ = PLACEMENT_5_QUESTIONS[placementState.quizCurrentIndex];
+    if (!currentQ) return;
 
-    const cleanInput = typedWord.trim().toLowerCase();
-    const isCorrect = cleanInput === currentSp.word.toLowerCase();
-    setSpellingFeedback(isCorrect ? 'correct' : 'wrong');
+    if (placementQuizTimerRef.current) {
+      clearTimeout(placementQuizTimerRef.current);
+      placementQuizTimerRef.current = null;
+    }
 
-    // Anti-cheating: Reveal spelling on board ONLY after submit
+    setPlacementQuizSelected(selectedIndex);
+    const isCorrect = selectedIndex === currentQ.correctIndex;
+    setPlacementQuizFeedback(isCorrect ? 'correct' : 'wrong');
+    setQuizSelectedOption(selectedIndex);
+    setQuizFeedback(isCorrect ? 'correct' : 'wrong');
+
+    // Anti-cheating: Reveal correct answer on active board ONLY after student makes a choice
     setActiveBoard(prev => prev ? {
       ...prev,
-      highlight: currentSp.word
+      highlight: currentQ.options[currentQ.correctIndex]
     } : null);
 
-    const addedPoints = isCorrect ? 6.67 : 0;
-    const updatedSpellingScore = placementState.spellingScore + addedPoints;
-    const updatedAnswers = [
-      ...placementState.spellingAnswers,
-      { input: typedWord, isCorrect }
-    ];
+    const addedPoints = isCorrect ? 10 : 0;
+    setPlacementState(prev => ({
+      ...prev,
+      quizScore: prev.quizScore + addedPoints,
+      quizAnswers: [...prev.quizAnswers, { selectedIndex, isCorrect }]
+    }));
 
-    setTimeout(() => {
-      if (placementState.spellingCurrentIndex < 2) {
-        const nextIndex = placementState.spellingCurrentIndex + 1;
+    // Auto advance after 1300ms or student can advance immediately anytime via button
+    placementQuizTimerRef.current = setTimeout(() => {
+      advancePlacementQuiz();
+    }, 1300);
+  };
+
+  const advancePlacementSpelling = (targetIndex?: number) => {
+    if (placementSpellingTimerRef.current) {
+      clearTimeout(placementSpellingTimerRef.current);
+      placementSpellingTimerRef.current = null;
+    }
+
+    setSpellingInputText('');
+    setSpellingFeedback(null);
+
+    setPlacementState(prev => {
+      const nextIndex = targetIndex !== undefined ? targetIndex : prev.spellingCurrentIndex + 1;
+
+      if (nextIndex < 3) {
         const nextSp = PLACEMENT_SPELLING_ITEMS[nextIndex];
-        setPlacementState(prev => ({
-          ...prev,
-          spellingCurrentIndex: nextIndex,
-          spellingScore: updatedSpellingScore,
-          spellingAnswers: updatedAnswers
-        }));
-        setSpellingInputText('');
-        setSpellingFeedback(null);
-
         setActiveBoard({
           title: isRtl ? `اختبار تحديد المستوى – امتحان السبلنغ (${nextIndex + 1} من 3) ✍️` : `Placement – Spelling Test (${nextIndex + 1}/3) ✍️`,
           sentence: nextSp.sentenceContext,
@@ -1165,17 +1266,54 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             isRtl ? '🎧 استمع لنطق الكلمة واكتبها في المربع...' : '🎧 Listen to the word and type the spelling...'
           );
         }
+
+        return {
+          ...prev,
+          spellingCurrentIndex: nextIndex
+        };
       } else {
         // Complete evaluation!
-        setSpellingInputText('');
-        setSpellingFeedback(null);
         finalizePlacementEvaluation(
-          placementState.conversationScore,
-          placementState.quizScore,
-          updatedSpellingScore
+          prev.conversationScore,
+          prev.quizScore,
+          prev.spellingScore
         );
+        return prev;
       }
-    }, 1400);
+    });
+  };
+
+  const handlePlacementSpellingSubmit = (typedWord: string) => {
+    if (spellingFeedback !== null || !typedWord.trim()) return;
+    const currentSp = PLACEMENT_SPELLING_ITEMS[placementState.spellingCurrentIndex];
+    if (!currentSp) return;
+
+    if (placementSpellingTimerRef.current) {
+      clearTimeout(placementSpellingTimerRef.current);
+      placementSpellingTimerRef.current = null;
+    }
+
+    const cleanInput = typedWord.trim().toLowerCase();
+    const isCorrect = cleanInput === currentSp.word.toLowerCase();
+    setSpellingFeedback(isCorrect ? 'correct' : 'wrong');
+
+    // Anti-cheating: Reveal spelling on board ONLY after submit
+    setActiveBoard(prev => prev ? {
+      ...prev,
+      highlight: currentSp.word
+    } : null);
+
+    const addedPoints = isCorrect ? 6.67 : 0;
+    setPlacementState(prev => ({
+      ...prev,
+      spellingScore: prev.spellingScore + addedPoints,
+      spellingAnswers: [...prev.spellingAnswers, { input: typedWord, isCorrect }]
+    }));
+
+    // Auto advance after 1300ms or student can advance immediately anytime via button
+    placementSpellingTimerRef.current = setTimeout(() => {
+      advancePlacementSpelling();
+    }, 1300);
   };
 
   const finalizePlacementEvaluation = async (
@@ -1416,6 +1554,60 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       }
     }
 
+    // Intercept quiz & spelling interactions if placement test is actively running
+    if (placementState.isActive) {
+      if (placementState.stage === 'quiz') {
+        const cleanT = text.trim().toLowerCase();
+        if (cleanT === 'next' || cleanT === 'التالي' || cleanT === 'السؤال التالي' || cleanT === 'بعده') {
+          advancePlacementQuiz();
+          setInputText('');
+          return;
+        }
+
+        const currentQ = PLACEMENT_5_QUESTIONS[placementState.quizCurrentIndex];
+        if (currentQ) {
+          const letterMap: Record<string, number> = { 'a': 0, 'b': 1, 'c': 2, 'd': 3, '1': 0, '2': 1, '3': 2, '4': 3, 'أ': 0, 'ب': 1, 'ج': 2, 'د': 3 };
+          if (letterMap[cleanT] !== undefined) {
+            handlePlacementQuizAnswer(letterMap[cleanT]);
+            setInputText('');
+            return;
+          }
+
+          const optMatch = currentQ.options.findIndex(
+            o => o.toLowerCase() === cleanT || cleanT.includes(o.toLowerCase()) || o.toLowerCase().includes(cleanT)
+          );
+          if (optMatch !== -1) {
+            handlePlacementQuizAnswer(optMatch);
+            setInputText('');
+            return;
+          }
+        }
+      } else if (placementState.stage === 'spelling') {
+        const cleanT = text.trim().toLowerCase();
+        if (cleanT === 'next' || cleanT === 'التالي' || cleanT === 'الكلمة التالية') {
+          advancePlacementSpelling();
+          setInputText('');
+          return;
+        }
+        handlePlacementSpellingSubmit(text);
+        setInputText('');
+        return;
+      }
+    }
+
+    // Clear any hesitation prompt
+    clearHesitationTimer();
+
+    // Advance role-play missions on student interaction
+    if (activeRolePlay) {
+      setCompletedMissions(prev => {
+        if (prev.length < (activeRolePlay.missionsAr?.length || 3)) {
+          return [...prev, prev.length];
+        }
+        return prev;
+      });
+    }
+
     // Add user message to chat for normal conversation
     const userMsg: MessageItem = {
       id: `msg_user_${Date.now()}`,
@@ -1458,7 +1650,15 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         body: JSON.stringify({
           message: text,
           snapshot: snapshot,
-          history: compactHistory
+          history: compactHistory,
+          rolePlay: activeRolePlay ? {
+            id: activeRolePlay.id,
+            title: isRtl ? activeRolePlay.titleAr : activeRolePlay.titleEn,
+            roleSara: isRtl ? activeRolePlay.roleSaraAr : activeRolePlay.roleSaraEn,
+            roleStudent: isRtl ? activeRolePlay.roleStudentAr : activeRolePlay.roleStudentEn,
+            location: activeRolePlay.location,
+            missions: isRtl ? activeRolePlay.missionsAr : activeRolePlay.missionsEn
+          } : undefined
         })
       });
 
@@ -1540,6 +1740,10 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
   // Mini quiz option selection
   const handleQuizOptionClick = (index: number) => {
+    if (placementState.isActive && placementState.stage === 'quiz') {
+      handlePlacementQuizAnswer(index);
+      return;
+    }
     if (!activeBoard?.quiz || quizSelectedOption !== null) return;
     setQuizSelectedOption(index);
     const isCorrect = index === activeBoard.quiz.answerIndex;
@@ -1850,6 +2054,60 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               <span>{isLiveMode ? (isRtl ? 'اللايف نشط 🔴' : 'Live Active 🔴') : (isRtl ? 'محادثة لايف 🎙️' : 'Live Voice 🎙️')}</span>
             </button>
 
+            {/* 🎙️ Phonetic Pronunciation Lab Button */}
+            <button
+              onClick={() => {
+                setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Alkhalil Academy');
+                setIsPhoneticModalOpen(true);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 text-purple-900 border-purple-200"
+              title={isRtl ? 'مختبر مخارج الحروف وتصحيح النطق الصوتي الفوري' : 'Phonetic Pronunciation Lab'}
+            >
+              <Mic size={14} className="text-purple-600 animate-pulse" />
+              <span className="hidden xs:inline">{isRtl ? 'مختبر النطق 🎙️' : 'Speech Lab 🎙️'}</span>
+            </button>
+
+            {/* 🎭 Role-Play Scenarios Button */}
+            <button
+              onClick={() => setIsRolePlayModalOpen(true)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
+                activeRolePlay
+                  ? 'bg-amber-100 text-amber-900 border-amber-400 ring-2 ring-amber-300/40'
+                  : 'bg-gradient-to-r from-teal-50 to-emerald-50 hover:from-teal-100 hover:to-emerald-100 text-teal-900 border-teal-200'
+              }`}
+              title={isRtl ? 'سيناريوهات المحادثة وتقمص الأدوار (المطار، المقهى، الطبيب...)' : 'Real-world Role-play Scenarios'}
+            >
+              <span className="text-sm">🎭</span>
+              <span className="hidden sm:inline">{isRtl ? (activeRolePlay ? 'السيناريو نشط 🎭' : 'سيناريوهات 🎭') : 'Role Play 🎭'}</span>
+            </button>
+
+            {/* ⚡ Sara Speech Speed Controller (0.8x / 1.0x / 1.2x) */}
+            <button
+              onClick={() => {
+                const nextRate = saraSpeechRate === 1.0 ? 0.8 : saraSpeechRate === 0.8 ? 1.2 : 1.0;
+                setSaraSpeechRate(nextRate);
+              }}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+              title={isRtl ? `سرعة صوت سارة: ${saraSpeechRate}x (اضغط للتغيير: 0.8x هادئ، 1.0x طبيعي، 1.2x سريع)` : `Speech Speed: ${saraSpeechRate}x`}
+            >
+              <span className="text-xs">{saraSpeechRate === 0.8 ? '🐢 0.8x' : saraSpeechRate === 1.2 ? '🚀 1.2x' : '⚡ 1.0x'}</span>
+            </button>
+
+            {/* 📓 My Error Notebook & Progress Hub Button */}
+            <button
+              onClick={() => setIsNotebookModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 text-[#855B14] border-amber-300"
+              title={isRtl ? 'دفتر الملاحظات والأخطاء الشخصي + بنك المفردات + تقرير ولي الأمر 📓' : 'My Error Notebook & Parent Report 📓'}
+            >
+              <BookMarked size={14} className="text-[#C49E3A]" />
+              <span className="hidden sm:inline">{isRtl ? 'دفتر الأخطاء والتقرير 📓' : 'Notebook 📓'}</span>
+              {tutorMemory.frequentMistakes && tutorMemory.frequentMistakes.length > 0 && (
+                <span className="w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center">
+                  {tutorMemory.frequentMistakes.length}
+                </span>
+              )}
+            </button>
+
             {/* Streak Badge */}
             <div className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 bg-orange-50 border-2 border-orange-200 rounded-2xl text-[#ff9600] font-black text-xs shadow-sm">
               <Flame size={15} className="animate-bounce-slow text-orange-500" />
@@ -1879,6 +2137,133 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       {/* 2. MAIN CONTENT AREA (BOARD + CHAT) */}
       {/* ======================================================== */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-3 sm:p-5 flex flex-col gap-4 overflow-hidden">
+        
+        {/* ======================================================== */}
+        {/* 2A-0. ROLE-PLAY ACTIVE SCENARIO SIMULATION BANNER */}
+        {/* ======================================================== */}
+        {activeRolePlay && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-r from-slate-900 via-[#002147] to-[#093568] text-white p-3.5 sm:p-4 rounded-3xl shadow-lg border-2 border-[#C49E3A]/40 relative overflow-hidden"
+          >
+            <div className="flex items-center justify-between gap-2 mb-2.5 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl p-1 bg-white/10 rounded-2xl border border-white/10">{activeRolePlay.badge}</span>
+                <div>
+                  <span className="text-[10px] font-black uppercase text-[#C49E3A] tracking-wider block">
+                    {isRtl ? 'محاكاة واقعية جارية 🎭' : 'Active Scenario Simulation 🎭'}
+                  </span>
+                  <h2 className="text-sm sm:text-base font-black text-white">
+                    {isRtl ? activeRolePlay.titleAr : activeRolePlay.titleEn}
+                  </h2>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] bg-white/10 px-2.5 py-1 rounded-xl text-slate-200 font-bold border border-white/10">
+                  📍 {activeRolePlay.location}
+                </span>
+                <button
+                  onClick={handleEndRolePlay}
+                  className="px-2.5 py-1 bg-rose-500/80 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs"
+                >
+                  {isRtl ? 'إنهاء السيناريو ✕' : 'Exit Role-Play ✕'}
+                </button>
+              </div>
+            </div>
+
+            {/* Roles info */}
+            <div className="grid grid-cols-2 gap-2 bg-white/10 rounded-2xl p-2 text-xs mb-3">
+              <div className="text-center py-1">
+                <span className="text-slate-300 text-[10px] block font-bold">{isRtl ? 'دور سارة:' : 'Sara Role:'}</span>
+                <span className="font-black text-[#FDE68A]">{isRtl ? activeRolePlay.roleSaraAr : activeRolePlay.roleSaraEn}</span>
+              </div>
+              <div className="text-center py-1 border-s border-white/15">
+                <span className="text-slate-300 text-[10px] block font-bold">{isRtl ? 'دورك أنت:' : 'Your Role:'}</span>
+                <span className="font-black text-emerald-300">{isRtl ? activeRolePlay.roleStudentAr : activeRolePlay.roleStudentEn}</span>
+              </div>
+            </div>
+
+            {/* Scenario Completion Celebration Banner */}
+            {completedMissions.length >= (activeRolePlay.missionsAr?.length || 3) && (
+              <div className="bg-gradient-to-r from-amber-500/30 via-emerald-500/30 to-amber-500/30 border-2 border-amber-300/80 rounded-2xl p-2.5 mb-3 text-center shadow-lg">
+                <span className="text-xs sm:text-sm font-black text-amber-200 flex items-center justify-center gap-1.5">
+                  <span>🏆</span>
+                  <span>{isRtl ? 'كفو يا بطل! أتممت جميع مهام هذا السيناريو بامتياز وطلاقة! 🌟' : 'Bravo! You mastered all missions in this scenario! 🌟'}</span>
+                </span>
+              </div>
+            )}
+
+            {/* Missions Tracker */}
+            <div className="space-y-1.5 mb-3">
+              <span className="text-[11px] font-black text-amber-200 block">
+                {isRtl ? 'مهام المحادثة المستهدفة:' : 'Target Missions:'}
+              </span>
+              {(isRtl ? activeRolePlay.missionsAr : activeRolePlay.missionsEn).map((mission, mIdx) => {
+                const isDone = completedMissions.includes(mIdx);
+                return (
+                  <div key={`mission-${mIdx}`} className="flex items-center gap-2 text-xs bg-black/25 px-3 py-1.5 rounded-xl border border-white/5">
+                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${isDone ? 'bg-emerald-500 text-white' : 'bg-white/20 text-slate-300'}`}>
+                      {isDone ? '✓' : mIdx + 1}
+                    </span>
+                    <span className={`flex-1 font-bold ${isDone ? 'line-through text-slate-400' : 'text-slate-100'}`}>
+                      {mission}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Starter Suggestions Chips */}
+            {activeRolePlay.starterPrompts && activeRolePlay.starterPrompts.length > 0 && (
+              <div>
+                <span className="text-[10px] text-slate-300 block mb-1 font-bold">
+                  {isRtl ? '💡 جمل مقترحة (اضغط للإرسال والمحادثة فوراً):' : '💡 Suggested phrases (tap to send):'}
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {activeRolePlay.starterPrompts.map((prompt, pIdx) => (
+                    <button
+                      key={`rp-p-${pIdx}`}
+                      onClick={() => handleSendMessage(prompt)}
+                      className="text-[11px] bg-white/15 hover:bg-[#C49E3A] hover:text-slate-950 text-slate-100 px-2.5 py-1 rounded-xl transition-all cursor-pointer font-bold border border-white/10"
+                    >
+                      "{prompt}"
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* ======================================================== */}
+        {/* 2A-1. GENTLE HESITATION REASSURANCE TOAST */}
+        {/* ======================================================== */}
+        <AnimatePresence>
+          {showHesitationEncouragement && (
+            <motion.div
+              initial={{ opacity: 0, y: -6, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -6, scale: 0.98 }}
+              className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 p-3 rounded-2xl shadow-sm flex items-center gap-3"
+            >
+              <div className="w-8 h-8 rounded-full bg-amber-400 text-white flex items-center justify-center text-sm font-black shrink-0 animate-bounce">
+                🌟
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-black text-[#855B14]">
+                  {hesitationHintText}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowHesitationEncouragement(false)}
+                className="text-slate-400 hover:text-slate-600 text-xs px-2 py-1 rounded-lg cursor-pointer"
+              >
+                ✕
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         {/* ======================================================== */}
         {/* 2A. INTERACTIVE "LESSON BOARD" CARD */}
@@ -1928,13 +2313,27 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   </button>
 
                   {activeBoard.sentence && (
-                    <button
-                      onClick={() => playSaraVoice(activeBoard.sentence!)}
-                      className="p-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-[#002147] border border-slate-200 transition-all cursor-pointer"
-                      title={isRtl ? 'استمع لنطق الجملة' : 'Listen to sentence'}
-                    >
-                      <Volume2 size={16} className="text-[#C49E3A]" />
-                    </button>
+                    <>
+                      <button
+                        onClick={() => {
+                          setPhoneticTargetSentence(activeBoard.sentence!);
+                          setIsPhoneticModalOpen(true);
+                        }}
+                        className="p-1.5 px-2.5 rounded-xl bg-violet-50 hover:bg-violet-100 text-violet-800 border border-violet-200 transition-all cursor-pointer flex items-center gap-1 text-xs font-bold shadow-2xs"
+                        title={isRtl ? 'تحليل ومقارنة نطقك الصوتي للجملة مع سارة' : 'Analyze your pronunciation with Sara'}
+                      >
+                        <Mic size={13} className="text-violet-600 animate-pulse" />
+                        <span className="hidden sm:inline">{isRtl ? 'حلّل نطقي 🎙️' : 'Analyze Speech 🎙️'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => playSaraVoice(activeBoard.sentence!)}
+                        className="p-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-[#002147] border border-slate-200 transition-all cursor-pointer"
+                        title={isRtl ? 'استمع لنطق الجملة' : 'Listen to sentence'}
+                      >
+                        <Volume2 size={16} className="text-[#C49E3A]" />
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -2160,13 +2559,34 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                     </span>
 
                     {isSara && (
-                      <button
-                        onClick={() => playSaraVoice(msg.text)}
-                        className="p-1 hover:text-[#C49E3A] transition-colors cursor-pointer"
-                        title={isRtl ? 'إعادة استماع' : 'Replay audio'}
-                      >
-                        <Volume2 size={13} />
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        {/* Quick Pronunciation Practice Button for English text */}
+                        {/[a-zA-Z]{3,}/.test(msg.text) && (
+                          <button
+                            onClick={() => {
+                              const englishMatches = msg.text.match(/[A-Za-z0-9 ,.'!?-]{6,}/g);
+                              const sentenceToPractice = englishMatches && englishMatches.length > 0 
+                                ? englishMatches.sort((a, b) => b.length - a.length)[0].trim() 
+                                : msg.text;
+                              setPhoneticTargetSentence(sentenceToPractice);
+                              setIsPhoneticModalOpen(true);
+                            }}
+                            className="px-2 py-0.5 rounded-lg bg-violet-100 hover:bg-violet-200 text-violet-800 text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer"
+                            title={isRtl ? 'حلل نطقك الصوتي لهذه الجملة وقارنه بسارة' : 'Analyze pronunciation with Sara'}
+                          >
+                            <Mic size={10} className="text-violet-600" />
+                            <span>{isRtl ? 'تمرن على النطق' : 'Speech Lab'}</span>
+                          </button>
+                        )}
+
+                        <button
+                          onClick={() => playSaraVoice(msg.text)}
+                          className="p-1 hover:text-[#C49E3A] transition-colors cursor-pointer"
+                          title={isRtl ? 'إعادة استماع' : 'Replay audio'}
+                        >
+                          <Volume2 size={13} />
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -2280,6 +2700,20 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                           <p>{isRtl ? currentQ.explanationAr : currentQ.explanationEn}</p>
                         </motion.div>
                       )}
+
+                      {placementQuizSelected !== null && (
+                        <button
+                          type="button"
+                          onClick={() => advancePlacementQuiz()}
+                          className="mt-3 w-full py-2.5 px-4 bg-gradient-to-r from-[#002147] to-[#1e3a5f] hover:from-[#C49E3A] hover:to-[#a88226] text-white rounded-xl font-black text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer active:scale-98"
+                        >
+                          <span>
+                            {placementState.quizCurrentIndex < 4
+                              ? (isRtl ? 'السؤال التالي ➡️' : 'Next Question ➡️')
+                              : (isRtl ? 'الانتقال لامتحان السبلنغ ✍️' : 'Proceed to Spelling Exam ✍️')}
+                          </span>
+                        </button>
+                      )}
                     </div>
                   );
                 })()}
@@ -2362,6 +2796,20 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                             ? (isRtl ? '🎉 كفو! تهجئة صحيحة وممتازة 100%!' : '🎉 Perfect spelling!')
                             : (isRtl ? `👏 التهجئة الصحيحة هي: "${currentSp.word}"` : `👏 The correct spelling is: "${currentSp.word}"`)}
                         </motion.div>
+                      )}
+
+                      {spellingFeedback !== null && (
+                        <button
+                          type="button"
+                          onClick={() => advancePlacementSpelling()}
+                          className="mt-3 w-full py-2.5 px-4 bg-gradient-to-r from-[#002147] to-[#1e3a5f] hover:from-[#C49E3A] hover:to-[#a88226] text-white rounded-xl font-black text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer active:scale-98"
+                        >
+                          <span>
+                            {placementState.spellingCurrentIndex < 2
+                              ? (isRtl ? 'الكلمة التالية ➡️' : 'Next Word ➡️')
+                              : (isRtl ? 'عرض النتيجة الشاملة واحتساب المستوى 🏆' : 'View Placement Results 🏆')}
+                          </span>
+                        </button>
                       )}
                     </div>
                   );
@@ -2923,6 +3371,46 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           </div>
         )}
       </AnimatePresence>
+
+      {/* 8. Phonetic Voice Analyzer & Pronunciation Lab Modal */}
+      <PhoneticAnalyzerModal
+        isOpen={isPhoneticModalOpen}
+        onClose={() => setIsPhoneticModalOpen(false)}
+        targetSentence={phoneticTargetSentence || activeBoard?.sentence || 'Welcome to Basim Alkhalil Academy'}
+        isRtl={isRtl}
+        onSuccessXP={(xp) => {
+          setStreak(prev => ({
+            ...prev,
+            totalXP: (prev as any).totalXP ? (prev as any).totalXP + xp : xp
+          }));
+        }}
+      />
+
+      {/* 9. Role-Play Scenarios Hub Modal */}
+      <RolePlayModal
+        isOpen={isRolePlayModalOpen}
+        onClose={() => setIsRolePlayModalOpen(false)}
+        onStartScenario={handleStartRolePlayScenario}
+        isRtl={isRtl}
+      />
+
+      {/* 10. Personal Error Notebook, Vocab Bank & Parent Progress Card Modal */}
+      <SaraPersonalNotebookModal
+        isOpen={isNotebookModalOpen}
+        onClose={() => setIsNotebookModalOpen(false)}
+        tutorMemory={tutorMemory}
+        studentName={profile.displayName || ''}
+        studentLevel={(profile as any).level || tutorMemory.level || 'A1'}
+        studentStreak={streak.current || 1}
+        isRtl={isRtl}
+        onTestMistake={(mistakePrompt) => {
+          const prompt = isRtl
+            ? `سارة، أود أن تختبريني في هذه النقطة اللغوية لأتأكد من إتقاني لها: "${mistakePrompt}". اطرحي علي سؤالاً تدريبياً سريعاً!`
+            : `Sara, please test me on this grammar rule to verify my mastery: "${mistakePrompt}". Give me a quick practice question!`;
+          handleSendMessage(prompt);
+        }}
+        onSpeakText={(text) => playSaraVoice(text)}
+      />
     </div>
   );
 };

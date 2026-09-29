@@ -88,7 +88,8 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
  */
 async function playAudioBuffer(
   base64: string,
-  onEnd?: () => void
+  onEnd?: () => void,
+  playbackRate: number = 1.0
 ): Promise<{ stop: () => void } | null> {
   if (typeof window === "undefined") return null;
 
@@ -126,6 +127,9 @@ async function playAudioBuffer(
   try {
     const source = audioCtx.createBufferSource();
     source.buffer = audioBuffer;
+    if (playbackRate && playbackRate > 0) {
+      source.playbackRate.value = playbackRate;
+    }
     source.connect(audioCtx.destination);
 
     let isFinished = false;
@@ -162,7 +166,8 @@ async function playAudioBuffer(
 function playNativeFallback(
   text: string,
   lang: "en" | "ar",
-  onEnd?: () => void
+  onEnd?: () => void,
+  playbackRate: number = 1.0
 ): { stop: () => void } {
   if (typeof window === "undefined" || !window.speechSynthesis) {
     onEnd?.();
@@ -177,7 +182,7 @@ function playNativeFallback(
   activeUtterances.push(utterance);
 
   utterance.lang = lang === "en" ? "en-US" : "ar-SA";
-  utterance.rate = 0.95;
+  utterance.rate = (lang === "en" ? 0.95 : 0.95) * playbackRate;
   utterance.pitch = 1.15; // Feminine, warm teacher tone
 
   try {
@@ -244,7 +249,8 @@ export const speakAcademyText = async (
   lang: "en" | "ar",
   onStart?: () => void,
   onEnd?: () => void,
-  voiceName: string = "Kore"
+  voiceName: string = "Kore",
+  playbackRate: number = 1.0
 ): Promise<{ stop: () => void }> => {
   // Cancel active playback sessions and record request ID
   cancelAllSpeech();
@@ -291,7 +297,7 @@ export const speakAcademyText = async (
       return { stop: () => {} };
     }
 
-    const player = await playAudioBuffer(data.audio, onEnd);
+    const player = await playAudioBuffer(data.audio, onEnd, playbackRate);
     if (player && requestId === globalSpeechRequestId) {
       currentPlayingNode = player;
       return player;
@@ -305,7 +311,7 @@ export const speakAcademyText = async (
     }
 
     console.warn("Falling back to local browser synthesis:", error);
-    const fallback = playNativeFallback(cleanText, lang, onEnd);
+    const fallback = playNativeFallback(cleanText, lang, onEnd, playbackRate);
     currentPlayingNode = fallback;
     return fallback;
   }

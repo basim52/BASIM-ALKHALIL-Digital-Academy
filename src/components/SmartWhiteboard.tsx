@@ -22,7 +22,9 @@ import {
   Sliders,
   Undo2,
   Redo2,
-  CircleDot
+  CircleDot,
+  LayoutTemplate,
+  Smile
 } from 'lucide-react';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 import { SaraBoardData } from '../types';
@@ -221,6 +223,63 @@ export const SMART_PEN_COLORS: PenColor[] = [
   { name: 'brown', value: '#92400E', labelAr: 'بني شوكولاتة', labelEn: 'Chocolate Brown' }
 ];
 
+// ========================================================
+// 3. READY EDUCATIONAL WHITEBOARD TEMPLATES
+// ========================================================
+export interface WhiteboardTemplate {
+  id: string;
+  nameAr: string;
+  nameEn: string;
+  icon: string;
+  descAr: string;
+  descEn: string;
+}
+
+export const WHITEBOARD_TEMPLATES: WhiteboardTemplate[] = [
+  {
+    id: 'tenses',
+    nameAr: 'مخطط الأزمنة (Tenses Timeline)',
+    nameEn: 'Tenses Timeline',
+    icon: '⏳',
+    descAr: 'خط زمني يقسم: الماضي (Past) ➔ الحاضر (Present) ➔ المستقبل (Future)',
+    descEn: 'Chronological timeline: Past ➔ Present ➔ Future with markers'
+  },
+  {
+    id: 'four_lines',
+    nameAr: 'تسطير كراسة الإنجليزية (4-Lines)',
+    nameEn: '4-Line Handwriting Paper',
+    icon: '📝',
+    descAr: 'المسطرة الكلاسيكية لكتابة الحروف بارتفاعاتها السليمة',
+    descEn: 'English 4-line ruler for perfect letter heights'
+  },
+  {
+    id: 'comparative',
+    nameAr: 'جدول المقارنة والتفضيل',
+    nameEn: 'Comparison Table',
+    icon: '⚖️',
+    descAr: 'جدول بـ 3 أعمدة: الصفة الأصلية | صيغة المقارنة (-er) | صيغة التفضيل (-est)',
+    descEn: '3 columns: Positive | Comparative (-er) | Superlative (-est)'
+  },
+  {
+    id: 'family_tree',
+    nameAr: 'شجرة عائلة الكلمات (Word Family)',
+    nameEn: 'Word Family Tree',
+    icon: '🌳',
+    descAr: 'جذع للكلمة الأصل وفروع للاسم والفعل والصفة والظرف',
+    descEn: 'Root trunk with branches for Noun, Verb, Adjective, Adverb'
+  },
+  {
+    id: 'irregular_verbs',
+    nameAr: 'جدول الأفعال الشاذة (Irregular Verbs)',
+    nameEn: 'Irregular Verbs Matrix',
+    icon: '🔄',
+    descAr: 'جدول لتصريف الأفعال: المصدر (V1) | الماضي (V2) | اسم المفعول (V3)',
+    descEn: 'Verb conjugation table: Base (V1) | Past (V2) | Participle (V3)'
+  }
+];
+
+export const KID_STICKERS = ['⭐', '🏆', '👑', '💖', '👍', '🔥', '💡', '💯', '🚀', '🌈', '🎓', '🌟'];
+
 export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   isOpen,
   onClose,
@@ -252,6 +311,8 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   const [activeTab, setActiveTab] = useState<'content' | 'draw'>('content');
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
   const [showBrushSizePopover, setShowBrushSizePopover] = useState(false);
+  const [showTemplatePicker, setShowTemplatePicker] = useState<boolean>(false);
+  const [showStickerPicker, setShowStickerPicker] = useState<boolean>(false);
   
   const dragControls = useDragControls();
   const [positionKey, setPositionKey] = useState(0);
@@ -382,6 +443,288 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
     if (!ctx) return;
     saveState();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  // Stamp Kid Sticker on Canvas
+  const stampStickerOnCanvas = (emoji: string) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    saveState();
+    const dpr = window.devicePixelRatio || 1;
+    const width = canvas.width / dpr;
+    const height = canvas.height / dpr;
+
+    // Stamp with slight random offset from center
+    const posX = width / 2 + (Math.random() - 0.5) * (width * 0.45);
+    const posY = height / 2 + (Math.random() - 0.5) * (height * 0.4);
+
+    ctx.save();
+    ctx.font = '54px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 10;
+    ctx.fillText(emoji, posX, posY);
+    ctx.restore();
+
+    playSnapshotShutterSound();
+    setShowStickerPicker(false);
+  };
+
+  // Apply Educational Template to Whiteboard
+  const applyWhiteboardTemplate = (templateId: string) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    saveState();
+    const dpr = window.devicePixelRatio || 1;
+    const width = canvas.width / dpr;
+    const height = canvas.height / dpr;
+
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    const textColor = currentTheme.isLight ? '#0F172A' : '#FFFFFF';
+    const accentColor = currentTheme.borderHex || '#FACC15';
+    const gridColor = currentTheme.isLight ? '#94A3B8' : '#64748B';
+
+    if (templateId === 'four_lines') {
+      const lineSpacing = 32;
+      const startY = Math.max(65, (height - (lineSpacing * 3 * 3)) / 2);
+
+      for (let set = 0; set < 3; set++) {
+        const topY = startY + set * (lineSpacing * 3 + 45);
+        if (topY + lineSpacing * 3 > height - 30) break;
+
+        // Top line (Headline) - Solid Blue
+        ctx.strokeStyle = '#38BDF8';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(35, topY);
+        ctx.lineTo(width - 35, topY);
+        ctx.stroke();
+
+        // Midline - Dashed Amber
+        ctx.strokeStyle = '#FBBF24';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([8, 6]);
+        ctx.beginPath();
+        ctx.moveTo(35, topY + lineSpacing);
+        ctx.lineTo(width - 35, topY + lineSpacing);
+        ctx.stroke();
+
+        // Baseline - Solid Emerald
+        ctx.strokeStyle = '#34D399';
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(35, topY + lineSpacing * 2);
+        ctx.lineTo(width - 35, topY + lineSpacing * 2);
+        ctx.stroke();
+
+        // Descender line - Dashed Rose
+        ctx.strokeStyle = '#F43F5E';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.moveTo(35, topY + lineSpacing * 3);
+        ctx.lineTo(width - 35, topY + lineSpacing * 3);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.font = 'bold 12px monospace';
+        ctx.fillStyle = gridColor;
+        ctx.textAlign = 'left';
+        ctx.fillText(`Set ${set + 1}: Practice English alphabet handwriting`, 40, topY - 8);
+      }
+    } else if (templateId === 'tenses') {
+      const midY = height / 2;
+      ctx.strokeStyle = accentColor;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(50, midY);
+      ctx.lineTo(width - 50, midY);
+      ctx.stroke();
+
+      // Arrow tip
+      ctx.fillStyle = accentColor;
+      ctx.beginPath();
+      ctx.moveTo(width - 40, midY);
+      ctx.lineTo(width - 60, midY - 12);
+      ctx.lineTo(width - 60, midY + 12);
+      ctx.closePath();
+      ctx.fill();
+
+      const colWidth = (width - 140) / 3;
+      const stages = [
+        { title: 'PAST (الماضي)', sub: 'Yesterday / -ed / did', emoji: '⏮️', x: 70 + colWidth * 0.5 },
+        { title: 'PRESENT (الحاضر)', sub: 'Now / -s / am, is, are', emoji: '▶️', x: 70 + colWidth * 1.5 },
+        { title: 'FUTURE (المستقبل)', sub: 'Tomorrow / will / going to', emoji: '⏭️', x: 70 + colWidth * 2.5 }
+      ];
+
+      stages.forEach(st => {
+        ctx.fillStyle = accentColor;
+        ctx.beginPath();
+        ctx.arc(st.x, midY, 13, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = currentTheme.isLight ? 'rgba(255,255,255,0.95)' : 'rgba(0,0,0,0.6)';
+        ctx.strokeStyle = currentTheme.borderHex;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(st.x - 85, midY - 95, 170, 72, 14);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.textAlign = 'center';
+        ctx.font = '900 14px system-ui, sans-serif';
+        ctx.fillStyle = textColor;
+        ctx.fillText(`${st.emoji} ${st.title}`, st.x, midY - 65);
+
+        ctx.font = 'bold 11px system-ui, sans-serif';
+        ctx.fillStyle = gridColor;
+        ctx.fillText(st.sub, st.x, midY - 42);
+
+        ctx.strokeStyle = accentColor;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(st.x, midY - 23);
+        ctx.lineTo(st.x, midY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      });
+    } else if (templateId === 'comparative') {
+      const startX = 35;
+      const startY = 65;
+      const tableWidth = width - 70;
+      const colW = tableWidth / 3;
+      const rowH = 50;
+
+      ctx.fillStyle = accentColor;
+      ctx.beginPath();
+      ctx.roundRect(startX, startY, tableWidth, 44, [12, 12, 0, 0]);
+      ctx.fill();
+
+      const headers = [
+        '1. Positive (الصفة الأصلية)',
+        '2. Comparative (المقارنة)',
+        '3. Superlative (التفضيل)'
+      ];
+
+      ctx.font = '900 13px system-ui, sans-serif';
+      ctx.fillStyle = '#0F172A';
+      ctx.textAlign = 'center';
+      headers.forEach((h, idx) => {
+        ctx.fillText(h, startX + colW * idx + colW / 2, startY + 27);
+      });
+
+      for (let r = 0; r < 4; r++) {
+        const y = startY + 44 + r * rowH;
+        ctx.fillStyle = r % 2 === 0 ? (currentTheme.isLight ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.35)') : (currentTheme.isLight ? 'rgba(240,240,240,0.85)' : 'rgba(255,255,255,0.06)');
+        ctx.fillRect(startX, y, tableWidth, rowH);
+
+        ctx.strokeStyle = currentTheme.isLight ? '#CBD5E1' : 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(startX, y, tableWidth, rowH);
+        ctx.strokeRect(startX + colW, y, colW, rowH);
+        ctx.strokeRect(startX + colW * 2, y, colW, rowH);
+      }
+    } else if (templateId === 'family_tree') {
+      const centerX = width / 2;
+      ctx.fillStyle = '#854D0E';
+      ctx.beginPath();
+      ctx.roundRect(centerX - 50, height - 110, 100, 75, 12);
+      ctx.fill();
+
+      ctx.textAlign = 'center';
+      ctx.font = '900 14px system-ui, sans-serif';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText('ROOT WORD', centerX, height - 78);
+      ctx.font = 'bold 11px system-ui, sans-serif';
+      ctx.fillText('(أصل الكلمة)', centerX, height - 58);
+
+      const branches = [
+        { name: 'NOUN (الاسم)', sub: 'e.g. Success', x: centerX - 180, y: height - 230, color: '#38BDF8' },
+        { name: 'VERB (الفعل)', sub: 'e.g. Succeed', x: centerX - 60, y: height - 270, color: '#34D399' },
+        { name: 'ADJECTIVE (الصفة)', sub: 'e.g. Successful', x: centerX + 60, y: height - 270, color: '#FBBF24' },
+        { name: 'ADVERB (الظرف)', sub: 'e.g. Successfully', x: centerX + 180, y: height - 230, color: '#F472B6' }
+      ];
+
+      branches.forEach(b => {
+        ctx.strokeStyle = '#78350F';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(centerX, height - 110);
+        ctx.quadraticCurveTo(centerX, b.y + 40, b.x, b.y + 20);
+        ctx.stroke();
+
+        ctx.fillStyle = b.color;
+        ctx.beginPath();
+        ctx.roundRect(b.x - 65, b.y - 28, 130, 56, 14);
+        ctx.fill();
+
+        ctx.fillStyle = '#0F172A';
+        ctx.font = '900 12px system-ui, sans-serif';
+        ctx.fillText(b.name, b.x, b.y - 7);
+        ctx.font = 'bold 10px system-ui, sans-serif';
+        ctx.fillText(b.sub, b.x, b.y + 12);
+      });
+    } else if (templateId === 'irregular_verbs') {
+      const startX = 35;
+      const startY = 65;
+      const tableWidth = width - 70;
+      const colW = tableWidth / 3;
+      const rowH = 46;
+
+      ctx.fillStyle = accentColor;
+      ctx.beginPath();
+      ctx.roundRect(startX, startY, tableWidth, 42, [12, 12, 0, 0]);
+      ctx.fill();
+
+      ctx.font = '900 13px system-ui, sans-serif';
+      ctx.fillStyle = '#0F172A';
+      ctx.textAlign = 'center';
+      ctx.fillText('Base Form (المصدر V1)', startX + colW * 0.5, startY + 26);
+      ctx.fillText('Past Simple (الماضي V2)', startX + colW * 1.5, startY + 26);
+      ctx.fillText('Past Participle (اسم المفعول V3)', startX + colW * 2.5, startY + 26);
+
+      const sampleRows = [
+        ['go', 'went', 'gone'],
+        ['see', 'saw', 'seen'],
+        ['write', 'wrote', 'written'],
+        ['speak', 'spoke', 'spoken'],
+        ['take', 'took', 'taken']
+      ];
+
+      sampleRows.forEach((row, rIdx) => {
+        const y = startY + 42 + rIdx * rowH;
+        ctx.fillStyle = rIdx % 2 === 0 ? (currentTheme.isLight ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.35)') : (currentTheme.isLight ? 'rgba(240,240,240,0.85)' : 'rgba(255,255,255,0.06)');
+        ctx.fillRect(startX, y, tableWidth, rowH);
+
+        ctx.strokeStyle = currentTheme.isLight ? '#CBD5E1' : 'rgba(255,255,255,0.15)';
+        ctx.strokeRect(startX, y, tableWidth, rowH);
+
+        ctx.font = 'bold 14px monospace';
+        ctx.fillStyle = textColor;
+        ctx.fillText(row[0], startX + colW * 0.5, y + 28);
+        ctx.fillStyle = '#F59E0B';
+        ctx.fillText(row[1], startX + colW * 1.5, y + 28);
+        ctx.fillStyle = '#10B981';
+        ctx.fillText(row[2], startX + colW * 2.5, y + 28);
+      });
+    }
+
+    ctx.restore();
+    playSnapshotShutterSound();
+    setShowTemplatePicker(false);
   };
 
   const getCanvasCoords = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
@@ -1442,6 +1785,108 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                   <Camera size={13} className="text-slate-900" />
                   <span className="hidden sm:inline">{isRtl ? 'حفظ كصورة 📸' : 'Save 📸'}</span>
                 </button>
+              </div>
+
+              {/* SECTION D: READY EDUCATIONAL TEMPLATES & KID STICKERS */}
+              <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10 relative">
+                {/* TEMPLATES POPUP BUTTON */}
+                <button
+                  onClick={() => {
+                    setShowTemplatePicker(!showTemplatePicker);
+                    setShowStickerPicker(false);
+                  }}
+                  className={`px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                    showTemplatePicker
+                      ? 'bg-amber-400 text-slate-950 border-white shadow-md'
+                      : 'bg-white/5 text-amber-200 hover:bg-white/10 border-white/10'
+                  }`}
+                  title={isRtl ? 'قوالب تعليمية جاهزة (مخطط الأزمنة، تسطير كراسة الإنجليزية، جدول المقارنة...)' : 'Ready Educational Templates'}
+                >
+                  <LayoutTemplate size={14} className="text-amber-300" />
+                  <span className="hidden sm:inline">{isRtl ? 'قوالب جاهزة 📐' : 'Templates 📐'}</span>
+                </button>
+
+                {/* STICKERS TRAY BUTTON */}
+                <button
+                  onClick={() => {
+                    setShowStickerPicker(!showStickerPicker);
+                    setShowTemplatePicker(false);
+                  }}
+                  className={`px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                    showStickerPicker
+                      ? 'bg-amber-400 text-slate-950 border-white shadow-md'
+                      : 'bg-white/5 text-amber-200 hover:bg-white/10 border-white/10'
+                  }`}
+                  title={isRtl ? 'ملصقات ونجوم تشجيعية للأطفال ⭐' : 'Fun Kid Stickers ⭐'}
+                >
+                  <Smile size={14} className="text-amber-300" />
+                  <span className="hidden sm:inline">{isRtl ? 'ملصقات ⭐' : 'Stickers ⭐'}</span>
+                </button>
+
+                {/* TEMPLATE PICKER POPOVER */}
+                {showTemplatePicker && (
+                  <div className="absolute bottom-full mb-2 end-0 w-80 bg-slate-900/98 border-2 border-amber-400/80 rounded-2xl p-3 shadow-2xl z-50 text-white backdrop-blur-md animate-in fade-in zoom-in-95">
+                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+                      <span className="text-xs font-black text-amber-300 flex items-center gap-1">
+                        📐 {isRtl ? 'اختر قالباً جاهزاً للتطبيق:' : 'Select Whiteboard Template:'}
+                      </span>
+                      <button
+                        onClick={() => setShowTemplatePicker(false)}
+                        className="text-slate-400 hover:text-white text-xs p-1 cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <div className="space-y-1.5 max-h-60 overflow-y-auto">
+                      {WHITEBOARD_TEMPLATES.map(tpl => (
+                        <button
+                          key={`tpl-${tpl.id}`}
+                          onClick={() => applyWhiteboardTemplate(tpl.id)}
+                          className="w-full text-start p-2 rounded-xl bg-white/5 hover:bg-amber-400 hover:text-slate-950 transition-all cursor-pointer border border-white/10 group flex items-start gap-2.5"
+                        >
+                          <span className="text-xl p-1 bg-black/30 rounded-lg group-hover:bg-slate-900/20">{tpl.icon}</span>
+                          <div className="flex-1">
+                            <span className="text-xs font-black block">{isRtl ? tpl.nameAr : tpl.nameEn}</span>
+                            <span className="text-[10px] text-slate-300 group-hover:text-slate-800 line-clamp-1">
+                              {isRtl ? tpl.descAr : tpl.descEn}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* STICKER PICKER POPOVER */}
+                {showStickerPicker && (
+                  <div className="absolute bottom-full mb-2 end-0 w-64 bg-slate-900/98 border-2 border-amber-400/80 rounded-2xl p-3 shadow-2xl z-50 text-white backdrop-blur-md animate-in fade-in zoom-in-95">
+                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+                      <span className="text-xs font-black text-amber-300 flex items-center gap-1">
+                        ⭐ {isRtl ? 'ختم ملصق تشجيعي على السبورة:' : 'Stamp Kid Sticker:'}
+                      </span>
+                      <button
+                        onClick={() => setShowStickerPicker(false)}
+                        className="text-slate-400 hover:text-white text-xs p-1 cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-2">
+                      {KID_STICKERS.map((stk, sIdx) => (
+                        <button
+                          key={`stk-${sIdx}`}
+                          onClick={() => stampStickerOnCanvas(stk)}
+                          className="text-2xl p-2 rounded-xl bg-white/5 hover:bg-white/20 active:scale-125 transition-all cursor-pointer flex items-center justify-center border border-white/10"
+                          title={isRtl ? `ختم ${stk}` : `Stamp ${stk}`}
+                        >
+                          {stk}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
             </div>

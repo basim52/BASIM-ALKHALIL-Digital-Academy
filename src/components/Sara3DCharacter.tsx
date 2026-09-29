@@ -15,6 +15,26 @@ import {
 
 export type SaraEmotion = 'idle' | 'speaking' | 'listening' | 'thinking' | 'celebrating';
 
+export type SaraGesture = 'idle' | 'waving' | 'clapping' | 'pointing' | 'explaining';
+
+export type SaraOutfitId = 'navy_gold' | 'rose_pink' | 'emerald_green' | 'lavender_purple';
+
+export interface SaraOutfit {
+  id: SaraOutfitId;
+  nameAr: string;
+  nameEn: string;
+  blazerHex: number;
+  trimHex: number;
+  badgeEmoji: string;
+}
+
+export const SARA_OUTFITS: SaraOutfit[] = [
+  { id: 'navy_gold', nameAr: 'كحلي وذهبي ملكي', nameEn: 'Royal Navy & Gold', blazerHex: 0x002147, trimHex: 0xc49e3a, badgeEmoji: '👑' },
+  { id: 'rose_pink', nameAr: 'وردي زهري ولؤلؤي', nameEn: 'Rose Pink & Pearl', blazerHex: 0xbe185d, trimHex: 0xfde047, badgeEmoji: '🌸' },
+  { id: 'emerald_green', nameAr: 'أخضر زمردي فاخر', nameEn: 'Emerald Green', blazerHex: 0x065f46, trimHex: 0xf59e0b, badgeEmoji: '🌲' },
+  { id: 'lavender_purple', nameAr: 'لافندر ملكي وفضي', nameEn: 'Royal Lavender', blazerHex: 0x6d28d9, trimHex: 0xe2e8f0, badgeEmoji: '💜' }
+];
+
 interface Sara3DCharacterProps {
   isRtl?: boolean;
   isSpeaking: boolean;
@@ -42,6 +62,20 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
   const [isMinimized, setIsMinimized] = useState<boolean>(false);
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [activeOutfit, setActiveOutfit] = useState<SaraOutfitId>('navy_gold');
+  const [activeGesture, setActiveGesture] = useState<SaraGesture>('idle');
+  const gestureTimeoutRef = useRef<any>(null);
+
+  const triggerGesture = (g: SaraGesture) => {
+    setActiveGesture(g);
+    if (gestureTimeoutRef.current) clearTimeout(gestureTimeoutRef.current);
+    if (g !== 'idle') {
+      gestureTimeoutRef.current = setTimeout(() => {
+        setActiveGesture('idle');
+      }, 4500);
+    }
+  };
+
   const dragStartRef = useRef<{ mouseX: number; mouseY: number; posX: number; posY: number }>({
     mouseX: 0,
     mouseY: 0,
@@ -74,6 +108,12 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
   const rightPupilRef = useRef<THREE.Mesh | null>(null);
   const haloRingRef = useRef<THREE.Mesh | null>(null);
   const particlesGroupRef = useRef<THREE.Points | null>(null);
+  const leftArmGroupRef = useRef<THREE.Group | null>(null);
+  const rightArmGroupRef = useRef<THREE.Group | null>(null);
+  const leftForearmGroupRef = useRef<THREE.Group | null>(null);
+  const rightForearmGroupRef = useRef<THREE.Group | null>(null);
+  const blazerMaterialsRef = useRef<THREE.MeshStandardMaterial[]>([]);
+  const trimMaterialsRef = useRef<THREE.MeshStandardMaterial[]>([]);
 
   // Mouse tracking in Three.js coordinates
   const mouseCoords = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -233,6 +273,89 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
     pinMesh.position.set(0.18, 0.12, 0.4);
     pinMesh.rotation.x = Math.PI / 2;
     torsoGroup.add(pinMesh);
+
+    // --- ARMS FOR INTERACTIVE GESTURES (Waving, Clapping, Pointing, Explaining) ---
+    const upperArmGeo = new THREE.CylinderGeometry(0.09, 0.08, 0.32, 16);
+    upperArmGeo.translate(0, -0.16, 0);
+
+    const forearmGeo = new THREE.CylinderGeometry(0.08, 0.075, 0.28, 16);
+    forearmGeo.translate(0, -0.14, 0);
+
+    const cuffGeo = new THREE.CylinderGeometry(0.085, 0.085, 0.035, 16);
+    const handGeo = new THREE.SphereGeometry(0.065, 16, 16);
+    handGeo.scale(0.8, 1.2, 0.6);
+
+    // Left Arm
+    const leftArmGroup = new THREE.Group();
+    leftArmGroup.position.set(-0.42, 0.2, 0.02);
+    leftArmGroupRef.current = leftArmGroup;
+
+    const leftUpperArm = new THREE.Mesh(upperArmGeo, academyNavyMat.clone());
+    leftArmGroup.add(leftUpperArm);
+
+    const leftForearmGroup = new THREE.Group();
+    leftForearmGroup.position.set(0, -0.32, 0);
+    leftForearmGroupRef.current = leftForearmGroup;
+
+    const leftForearm = new THREE.Mesh(forearmGeo, academyNavyMat.clone());
+    leftForearmGroup.add(leftForearm);
+
+    const leftCuff = new THREE.Mesh(cuffGeo, academyGoldMat.clone());
+    leftCuff.position.set(0, -0.26, 0);
+    leftForearmGroup.add(leftCuff);
+
+    const leftHand = new THREE.Mesh(handGeo, skinMat);
+    leftHand.position.set(0, -0.32, 0);
+    leftForearmGroup.add(leftHand);
+
+    leftArmGroup.add(leftForearmGroup);
+    torsoGroup.add(leftArmGroup);
+
+    // Right Arm
+    const rightArmGroup = new THREE.Group();
+    rightArmGroup.position.set(0.42, 0.2, 0.02);
+    rightArmGroupRef.current = rightArmGroup;
+
+    const rightUpperArm = new THREE.Mesh(upperArmGeo, academyNavyMat.clone());
+    rightArmGroup.add(rightUpperArm);
+
+    const rightForearmGroup = new THREE.Group();
+    rightForearmGroup.position.set(0, -0.32, 0);
+    rightForearmGroupRef.current = rightForearmGroup;
+
+    const rightForearm = new THREE.Mesh(forearmGeo, academyNavyMat.clone());
+    rightForearmGroup.add(rightForearm);
+
+    const rightCuff = new THREE.Mesh(cuffGeo, academyGoldMat.clone());
+    rightCuff.position.set(0, -0.26, 0);
+    rightForearmGroup.add(rightCuff);
+
+    const rightHand = new THREE.Mesh(handGeo, skinMat);
+    rightHand.position.set(0, -0.32, 0);
+    rightForearmGroup.add(rightHand);
+
+    rightArmGroup.add(rightForearmGroup);
+    torsoGroup.add(rightArmGroup);
+
+    // Store references to update outfit materials
+    blazerMaterialsRef.current = [
+      blazerMesh.material as THREE.MeshStandardMaterial,
+      leftUpperArm.material as THREE.MeshStandardMaterial,
+      leftForearm.material as THREE.MeshStandardMaterial,
+      rightUpperArm.material as THREE.MeshStandardMaterial,
+      rightForearm.material as THREE.MeshStandardMaterial
+    ];
+    trimMaterialsRef.current = [
+      lapelMesh.material as THREE.MeshStandardMaterial,
+      pinMesh.material as THREE.MeshStandardMaterial,
+      leftCuff.material as THREE.MeshStandardMaterial,
+      rightCuff.material as THREE.MeshStandardMaterial
+    ];
+
+    // Apply active outfit initial colors
+    const activeOutfitObj = SARA_OUTFITS.find(o => o.id === activeOutfit) || SARA_OUTFITS[0];
+    blazerMaterialsRef.current.forEach(m => m.color.setHex(activeOutfitObj.blazerHex));
+    trimMaterialsRef.current.forEach(m => m.color.setHex(activeOutfitObj.trimHex));
 
     // Neck
     const neckGeo = new THREE.CylinderGeometry(0.14, 0.16, 0.25, 24);
@@ -597,6 +720,50 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
         }
       }
 
+      // 6. Arms & Dynamic Gestures Animation
+      if (leftArmGroupRef.current && rightArmGroupRef.current && leftForearmGroupRef.current && rightForearmGroupRef.current) {
+        if (activeGesture === 'waving') {
+          // Right arm waving
+          rightArmGroupRef.current.rotation.z = -1.6 + Math.sin(time * 7) * 0.25;
+          rightArmGroupRef.current.rotation.x = -0.3;
+          rightForearmGroupRef.current.rotation.z = -0.5 + Math.cos(time * 7) * 0.3;
+
+          leftArmGroupRef.current.rotation.z = 0.2 + Math.sin(time * 1.5) * 0.04;
+          leftForearmGroupRef.current.rotation.x = -0.1;
+        } else if (activeGesture === 'clapping' || currentEmotion === 'celebrating') {
+          // Clapping hands
+          const clapCycle = Math.sin(time * 12) * 0.2;
+          rightArmGroupRef.current.rotation.set(-0.7, -0.4 + clapCycle, -0.5);
+          leftArmGroupRef.current.rotation.set(-0.7, 0.4 - clapCycle, 0.5);
+          rightForearmGroupRef.current.rotation.set(-0.4, 0, -0.2);
+          leftForearmGroupRef.current.rotation.set(-0.4, 0, 0.2);
+        } else if (activeGesture === 'pointing') {
+          // Right arm points toward board / screen
+          rightArmGroupRef.current.rotation.set(-0.8, -0.5, -0.3);
+          rightForearmGroupRef.current.rotation.set(-0.2, 0, 0.1);
+          leftArmGroupRef.current.rotation.set(0.1, 0, 0.2);
+          leftForearmGroupRef.current.rotation.set(-0.1, 0, 0);
+        } else if (activeGesture === 'explaining' || currentEmotion === 'speaking') {
+          // Explaining hands moving gently
+          rightArmGroupRef.current.rotation.x = -0.35 + Math.sin(time * 3) * 0.15;
+          rightArmGroupRef.current.rotation.z = -0.35 + Math.cos(time * 2.5) * 0.1;
+          rightForearmGroupRef.current.rotation.x = -0.35 + Math.sin(time * 3) * 0.2;
+
+          leftArmGroupRef.current.rotation.x = -0.35 + Math.cos(time * 3) * 0.15;
+          leftArmGroupRef.current.rotation.z = 0.35 + Math.sin(time * 2.5) * 0.1;
+          leftForearmGroupRef.current.rotation.x = -0.35 + Math.cos(time * 3) * 0.2;
+        } else {
+          // Idle natural resting posture with subtle breathing
+          rightArmGroupRef.current.rotation.z = -0.18 + Math.sin(time * 1.2) * 0.03;
+          rightArmGroupRef.current.rotation.x = Math.cos(time * 1.5) * 0.03;
+          rightForearmGroupRef.current.rotation.x = -0.1;
+
+          leftArmGroupRef.current.rotation.z = 0.18 - Math.sin(time * 1.2) * 0.03;
+          leftArmGroupRef.current.rotation.x = Math.cos(time * 1.5) * 0.03;
+          leftForearmGroupRef.current.rotation.x = -0.1;
+        }
+      }
+
       renderer.render(scene, camera);
       animFrameRef.current = requestAnimationFrame(animate);
     };
@@ -610,7 +777,7 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
       }
       renderer.dispose();
     };
-  }, [isOpen, isMinimized, currentEmotion]);
+  }, [isOpen, isMinimized, currentEmotion, activeGesture, activeOutfit]);
 
   // Handle Dragging
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -763,6 +930,63 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
                 <p className="line-clamp-2">{currentSpeechText}</p>
               </div>
             )}
+
+            {/* Interactive Gestures Controls */}
+            <div className="w-full mt-2 bg-black/40 p-1.5 rounded-2xl border border-white/10 flex flex-col gap-1.5">
+              <div className="flex items-center justify-between text-[9px] text-amber-200/80 font-bold px-1">
+                <span>{isRtl ? 'حركات سارة التفاعلية:' : 'Sara Gestures:'}</span>
+                <span className="text-[8px] text-slate-400">
+                  {activeGesture === 'waving' ? '👋 تحية' : activeGesture === 'clapping' ? '👏 تصفيق' : activeGesture === 'pointing' ? '👉 إشارة' : activeGesture === 'explaining' ? '💡 شرح' : '✨ هادئة'}
+                </span>
+              </div>
+              <div className="grid grid-cols-4 gap-1">
+                {[
+                  { id: 'waving' as SaraGesture, label: isRtl ? '👋 تحية' : 'Wave' },
+                  { id: 'clapping' as SaraGesture, label: isRtl ? '👏 تصفيق' : 'Clap' },
+                  { id: 'pointing' as SaraGesture, label: isRtl ? '👉 إشارة' : 'Point' },
+                  { id: 'explaining' as SaraGesture, label: isRtl ? '💡 شرح' : 'Explain' }
+                ].map(g => (
+                  <button
+                    key={`gesture-${g.id}`}
+                    onClick={() => triggerGesture(g.id)}
+                    className={`py-1 rounded-xl text-[10px] font-black transition-all cursor-pointer text-center ${
+                      activeGesture === g.id
+                        ? 'bg-amber-400 text-slate-950 font-black shadow-xs scale-102'
+                        : 'bg-white/10 hover:bg-white/20 text-slate-200'
+                    }`}
+                  >
+                    {g.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Outfits Selector */}
+            <div className="w-full mt-1.5 bg-black/40 p-1.5 rounded-2xl border border-white/10 flex items-center justify-between">
+              <span className="text-[9px] text-amber-200/80 font-bold px-1 shrink-0">
+                {isRtl ? 'أزياء سارة:' : 'Outfits:'}
+              </span>
+              <div className="flex items-center gap-1">
+                {SARA_OUTFITS.map(outfit => (
+                  <button
+                    key={`outfit-${outfit.id}`}
+                    onClick={() => {
+                      setActiveOutfit(outfit.id);
+                      blazerMaterialsRef.current.forEach(m => m.color.setHex(outfit.blazerHex));
+                      trimMaterialsRef.current.forEach(m => m.color.setHex(outfit.trimHex));
+                    }}
+                    className={`px-2 py-0.5 rounded-xl text-xs transition-all cursor-pointer flex items-center gap-1 border ${
+                      activeOutfit === outfit.id
+                        ? 'bg-amber-400 text-slate-950 border-amber-300 font-black shadow-sm scale-105'
+                        : 'bg-white/10 hover:bg-white/20 text-slate-300 border-white/10'
+                    }`}
+                    title={isRtl ? outfit.nameAr : outfit.nameEn}
+                  >
+                    <span>{outfit.badgeEmoji}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* Quick Action Footer */}
             <div className="w-full mt-2 pt-1 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-300 px-1">

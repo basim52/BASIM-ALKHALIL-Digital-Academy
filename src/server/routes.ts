@@ -1106,7 +1106,7 @@ Looking forward to your reply. Tell me what we're tackling first!`;
       }
 
       const uid = decodedToken.uid;
-      const { message, snapshot, history = [] } = req.body;
+      const { message, snapshot, history = [], rolePlay, hesitationDetected } = req.body;
 
       // Determine today's date in Asia/Riyadh timezone for daily count capping
       const nowRiyadhDate = (() => {
@@ -1211,6 +1211,20 @@ ADAPTIVITY:
   * Recent Words Learned: ${JSON.stringify(snapshot?.wordsLearned || [])}
   * Recent Lesson Results Summary: ${JSON.stringify(snapshot?.recentResultsSummary || 'None')}
   * Last Memory Notes: ${JSON.stringify(snapshot?.lastMemoryNotes || [])}
+${rolePlay ? `
+ACTIVE ROLE-PLAY SCENARIO:
+- Scenario: ${rolePlay.titleAr || rolePlay.titleEn || rolePlay.title}
+- Setting: ${rolePlay.location || 'Real life scenario'}
+- Your Character (Sara): ${rolePlay.roleSaraAr || rolePlay.roleSaraEn || rolePlay.roleSara}
+- Student's Character: ${rolePlay.roleStudentAr || rolePlay.roleStudentEn || rolePlay.roleStudent}
+- Student Missions: ${JSON.stringify(rolePlay.missionsEn || rolePlay.missionsAr || rolePlay.missions || [])}
+- Instructions: Stay in character as "${rolePlay.roleSaraAr || rolePlay.roleSaraEn || rolePlay.roleSara}"! Speak in natural conversational English with bilingual encouragement when appropriate. Ask questions that prompt the student to complete their missions. Include key vocabulary on the whiteboard board.
+` : ''}
+${hesitationDetected ? `
+STUDENT HESITATION DETECTED:
+- The student hesitated or paused in silence.
+- Give a gentle, 1-sentence warm reassurance in Arabic & English ("Take your time! Want a hint?" or "خذ وقتك يا بطل!"), then gently give a helpful prompt or starter phrase.
+` : ''}
 
 SECTION WHITELIST for "actions" (ONLY use these sectionId values):
 ${VALID_SECTIONS.map(s => `- "${s}"`).join("\n")}
