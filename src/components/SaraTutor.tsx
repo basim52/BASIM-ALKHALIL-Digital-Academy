@@ -446,9 +446,11 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
     // 4. Save progress note to tutorMemory if student is signed in
     if (profile.uid) {
-      saveTutorMemory({
-        notes: [`درس الطالب منهج: ${lesson.titleAr} (${lesson.courseLabelAr})`]
-      });
+      syncMemoryToFirestore({
+        newNotes: [`درس الطالب منهج: ${lesson.titleAr} (${lesson.courseLabelAr})`],
+        mistakes: [],
+        wordsLearned: []
+      }, false, lesson.titleAr);
     }
   };
 

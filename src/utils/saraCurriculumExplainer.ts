@@ -581,20 +581,16 @@ export function buildSaraCurriculumExplanation(
       ? `القصة المسموعة: ${lesson.titleAr}`
       : `Auditory Story: ${lesson.titleEn}`;
 
-    const sampleText = story?.textEn?.slice(0, 160) || 'Noor arrived in London, eager to explore the city and meet new friends.';
-    const sampleTextAr = story?.textAr?.slice(0, 160) || 'وصلت نور إلى لندن مفعمة بالشغف لاستكشاف المدينة ومقابلة أصدقاء جدد.';
+    const sampleText = story?.content?.slice(0, 160) || 'Noor arrived in London, eager to explore the city and meet new friends.';
+    const sampleTextAr = lesson.descriptionAr || 'وصلت نور إلى لندن مفعمة بالشغف لاستكشاف المدينة ومقابلة أصدقاء جدد.';
 
     const notes = [
-      isRtl ? `🎧 عنوان القصة: ${story?.titleAr}` : `🎧 Story Title: ${story?.titleEn}`,
+      isRtl ? `🎧 عنوان القصة: ${story?.titleAr || lesson.titleAr}` : `🎧 Story Title: ${story?.titleEn || lesson.titleEn}`,
       isRtl ? `📖 أحداث القصة: ${sampleTextAr}` : `📖 Story Arc: ${sampleText}`,
       isRtl ? `🌟 مهارة الاستماع: استمع للصوت وركز على مخارج الكلمات وتسلسل الأحداث` : `🌟 Listening Skill: Focus on word phrasing and chronological narrative`
     ];
 
-    const quizObj = story?.quiz?.[0] ? {
-      question: isRtl ? story.quiz[0].questionAr : story.quiz[0].questionEn,
-      options: isRtl ? story.quiz[0].optionsAr : story.quiz[0].optionsEn,
-      answerIndex: story.quiz[0].correctIndex
-    } : {
+    const quizObj = {
       question: isRtl ? `ما الفكرة الرئيسية لقصة: "${lesson.titleAr}"؟` : `What is the main theme of "${lesson.titleEn}"?`,
       options: [
         isRtl ? 'المغامرة والاستكشاف وبناء الثقة اللغوية' : 'Adventure, exploration and language confidence',
