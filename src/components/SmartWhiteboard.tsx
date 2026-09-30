@@ -31,7 +31,17 @@ import {
   Minus,
   Plus,
   GripHorizontal,
-  Move
+  Move,
+  Mic,
+  MicOff,
+  Send,
+  VolumeX,
+  Bot,
+  RefreshCw,
+  MessageSquarePlus,
+  Play,
+  Pause,
+  AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 import { SaraBoardData } from '../types';
@@ -46,6 +56,15 @@ interface SmartWhiteboardProps {
   onQuizAnswer?: (index: number) => void;
   quizSelectedOption?: number | null;
   quizFeedback?: 'correct' | 'wrong' | null;
+  onRequestOnBoard?: (requestText: string) => Promise<void> | void;
+  isSaraThinking?: boolean;
+  isSaraSpeaking?: boolean;
+  onStopSpeak?: () => void;
+  onToggleSara3D?: () => void;
+  isSara3DOpen?: boolean;
+  onSaraTriggerGesture?: (gesture: string) => void;
+  currentLang?: 'ar' | 'en';
+  onToggleLang?: () => void;
 }
 
 // ========================================================
@@ -313,7 +332,16 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   onSpeak,
   onQuizAnswer,
   quizSelectedOption,
-  quizFeedback
+  quizFeedback,
+  onRequestOnBoard,
+  isSaraThinking = false,
+  isSaraSpeaking = false,
+  onStopSpeak,
+  onToggleSara3D,
+  isSara3DOpen = true,
+  onSaraTriggerGesture,
+  currentLang = 'ar',
+  onToggleLang
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -340,6 +368,320 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   const [showBrushSizePopover, setShowBrushSizePopover] = useState(false);
   const [showTemplatePicker, setShowTemplatePicker] = useState<boolean>(false);
   const [showStickerPicker, setShowStickerPicker] = useState<boolean>(false);
+
+  // Sara Whiteboard Voice Explainer State
+  const [isExplainingAll, setIsExplainingAll] = useState(false);
+  const [activeExplanationSection, setActiveExplanationSection] = useState<'formula' | 'sentence' | 'correction' | 'notes' | 'diagram' | 'quiz' | null>(null);
+  const [currentExplanationText, setCurrentExplanationText] = useState<string>('');
+  const explanationTimeoutRef = useRef<any>(null);
+
+  // Student Whiteboard Requests ("تتفاعل مع الطلب")
+  const [boardRequestInput, setBoardRequestInput] = useState('');
+  const [isListeningRequest, setIsListeningRequest] = useState(false);
+  const [requestNotice, setRequestNotice] = useState<string | null>(null);
+  const requestRecognitionRef = useRef<any>(null);
+
+  // Stop voice explanation if user closes modal or clicks stop
+  const stopVoiceExplanation = useCallback(() => {
+    if (explanationTimeoutRef.current) {
+      clearTimeout(explanationTimeoutRef.current);
+      explanationTimeoutRef.current = null;
+    }
+    setIsExplainingAll(false);
+    setActiveExplanationSection(null);
+    setCurrentExplanationText('');
+    onStopSpeak?.();
+  }, [onStopSpeak]);
+
+  // Clean up timers on unmount
+  useEffect(() => {
+    return () => {
+      if (explanationTimeoutRef.current) clearTimeout(explanationTimeoutRef.current);
+      if (requestRecognitionRef.current) {
+        try { requestRecognitionRef.current.abort(); } catch (_) {}
+      }
+    };
+  }, []);
+
+  // When Sara stops speaking externally, reset active highlight if explanation was running
+  useEffect(() => {
+    if (!isSaraSpeaking && isExplainingAll) {
+      const t = setTimeout(() => {
+        setIsExplainingAll(false);
+        setActiveExplanationSection(null);
+        setCurrentExplanationText('');
+      }, 1200);
+      return () => clearTimeout(t);
+    }
+  }, [isSaraSpeaking, isExplainingAll]);
+
+  // Explain single section
+  const handleExplainSection = (section: 'formula' | 'sentence' | 'correction' | 'notes' | 'diagram' | 'quiz') => {
+    if (!boardData) return;
+    stopVoiceExplanation();
+    setActiveExplanationSection(section);
+    onSaraTriggerGesture?.('pointing');
+
+    let textToSpeak = '';
+    if (section === 'formula' && boardData.formula) {
+      textToSpeak = isRtl
+        ? `هذه هي قاعدة الجملة بالإنجليزية: ${boardData.formula}. تتكون القاعدة من هذه الأركان لتركيب جملة سليمة.`
+        : `Here is the grammar formula: ${boardData.formula}. Follow these components to form correct sentences.`;
+    } else if (section === 'sentence' && boardData.sentence) {
+      textToSpeak = isRtl
+        ? `استمع جيداً لمثالنا على السبورة: "${boardData.sentence}". ${boardData.highlight ? `وركز على نطق: "${boardData.highlight}".` : ''}`
+        : `Listen carefully to our example: "${boardData.sentence}". ${boardData.highlight ? `Pay special attention to "${boardData.highlight}".` : ''}`;
+    } else if (section === 'correction' && boardData.correction) {
+      textToSpeak = isRtl
+        ? `انتبه يا بطل، الصيغة الصحيحة هي "${boardData.correction.right}" بدلاً من "${boardData.correction.wrong}". محاولة رائعة!`
+        : `Notice the natural form is "${boardData.correction.right}" instead of "${boardData.correction.wrong}". Great effort!`;
+    } else if (section === 'notes' && boardData.notes && boardData.notes.length > 0) {
+      textToSpeak = isRtl
+        ? `إليك أهم النقاط الذهبية في درسنا اليوم: ${boardData.notes.join('. ')}`
+        : `Here are the key takeaways for today: ${boardData.notes.join('. ')}`;
+    } else if (section === 'diagram' && boardData.diagram) {
+      const itemsList = boardData.diagram.items.map(it => `${it.title}: ${it.desc}`).join(', ');
+      textToSpeak = isRtl
+        ? `في هذا المخطط التوضيحي، نتعلم: ${itemsList}`
+        : `In this vocabulary diagram, let's learn: ${itemsList}`;
+    } else if (section === 'quiz' && boardData.quiz) {
+      textToSpeak = isRtl
+        ? `سؤال التحدي السريع على السبورة: "${boardData.quiz.question}". والخيارات هي: ${boardData.quiz.options.join('، أو ')}. فكّر واختر الإجابة الصحيحة!`
+        : `Whiteboard challenge question: "${boardData.quiz.question}". Your choices are: ${boardData.quiz.options.join(', or ')}. Pick the right one!`;
+    }
+
+    if (textToSpeak) {
+      setCurrentExplanationText(textToSpeak);
+      onSpeak(textToSpeak);
+    }
+  };
+
+  // Full Whiteboard Walkthrough
+  const handleExplainWholeBoard = () => {
+    if (!boardData) return;
+    setIsExplainingAll(true);
+    onSaraTriggerGesture?.('explaining');
+
+    // If teacher provided custom voice explanation script
+    if (boardData.voiceExplanation) {
+      setCurrentExplanationText(boardData.voiceExplanation);
+      onSpeak(boardData.voiceExplanation);
+      setActiveExplanationSection('formula');
+      return;
+    }
+
+    // Build comprehensive multi-part explanation
+    const parts: string[] = [];
+    parts.push(isRtl 
+      ? `أهلاً يا بطل! انظر معي للسبورة اليوم، موضوعنا هو: ${boardData.title || 'المهارة المستهدفة'}.`
+      : `Welcome! Look at the board today, our lesson is: ${boardData.title || 'Target Skill'}.`);
+
+    if (boardData.formula) {
+      parts.push(isRtl
+        ? `قاعدتنا الأساسية هي: ${boardData.formula}.`
+        : `Our core rule is: ${boardData.formula}.`);
+    }
+
+    if (boardData.sentence) {
+      parts.push(isRtl
+        ? `ومثالنا العملي: "${boardData.sentence}". ${boardData.highlight ? `انتبه خصوصاً لكلمة "${boardData.highlight}".` : ''}`
+        : `And our example is: "${boardData.sentence}". ${boardData.highlight ? `Notice "${boardData.highlight}".` : ''}`);
+    }
+
+    if (boardData.correction) {
+      parts.push(isRtl
+        ? `والصحيح أن نقول: "${boardData.correction.right}" بدلاً من "${boardData.correction.wrong}".`
+        : `And we say "${boardData.correction.right}" instead of "${boardData.correction.wrong}".`);
+    }
+
+    if (boardData.notes && boardData.notes.length > 0) {
+      parts.push(isRtl
+        ? `وأهم الملاحظات الذهبية: ${boardData.notes.slice(0, 2).join('. ')}.`
+        : `Key golden tips: ${boardData.notes.slice(0, 2).join('. ')}.`);
+    }
+
+    if (boardData.quiz) {
+      parts.push(isRtl
+        ? `والآن يا بطل، جرب حل سؤال التحدي في أسفل السبورة!`
+        : `Now, try solving the challenge question at the bottom of the board!`);
+    }
+
+    const fullScript = parts.join(' ');
+    setCurrentExplanationText(fullScript);
+    setActiveExplanationSection('formula');
+    onSpeak(fullScript);
+
+    // Timed progression of active section highlight
+    if (boardData.sentence) {
+      explanationTimeoutRef.current = setTimeout(() => {
+        setActiveExplanationSection('sentence');
+        if (boardData.quiz) {
+          explanationTimeoutRef.current = setTimeout(() => {
+            setActiveExplanationSection('quiz');
+          }, 6000);
+        }
+      }, 5000);
+    }
+  };
+
+  // Student Whiteboard Request Handler ("تتفاعل مع الطلب")
+  const handleSubmitBoardRequest = async (overrideText?: string) => {
+    const text = (overrideText || boardRequestInput).trim();
+    if (!text || isSaraThinking) return;
+
+    setBoardRequestInput('');
+    setRequestNotice(isRtl ? 'سارة تستقبل طلبك وتكتب على السبورة... 🪄✨' : 'Sara is updating the whiteboard for you... 🪄✨');
+    onSaraTriggerGesture?.('explaining');
+
+    try {
+      if (onRequestOnBoard) {
+        await onRequestOnBoard(text);
+      }
+      setTimeout(() => {
+        setRequestNotice(null);
+      }, 4000);
+    } catch (e) {
+      console.warn('Board request error:', e);
+      setRequestNotice(null);
+    }
+  };
+
+  // Speech Recognition on Whiteboard
+  const handleStartVoiceRequest = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert(isRtl ? 'الميكروفون غير مدعوم في متصفحك الحالي، يمكنك كتابة طلبك في المربع' : 'Microphone not supported, please type your request');
+      return;
+    }
+
+    try {
+      if (requestRecognitionRef.current) {
+        try { requestRecognitionRef.current.abort(); } catch (_) {}
+      }
+
+      const rec = new SpeechRecognition();
+      rec.continuous = false;
+      rec.interimResults = false;
+      rec.lang = isRtl ? 'ar-SA' : 'en-US';
+
+      rec.onstart = () => {
+        setIsListeningRequest(true);
+        setRequestNotice(isRtl ? 'تحدث الآن، سارة تستمع لطلبك... 🎙️' : 'Speak now, Sara is listening... 🎙️');
+      };
+
+      rec.onresult = (e: any) => {
+        const transcript = e.results?.[0]?.[0]?.transcript;
+        if (transcript && transcript.trim()) {
+          const userSpeech = transcript.trim();
+          setBoardRequestInput(userSpeech);
+          setIsListeningRequest(false);
+          handleSubmitBoardRequest(userSpeech);
+        }
+      };
+
+      rec.onerror = (err: any) => {
+        console.warn('Whiteboard speech request error:', err);
+        setIsListeningRequest(false);
+        setRequestNotice(null);
+      };
+
+      rec.onend = () => {
+        setIsListeningRequest(false);
+      };
+
+      requestRecognitionRef.current = rec;
+      rec.start();
+    } catch (err) {
+      console.warn('Could not start whiteboard recognition:', err);
+      setIsListeningRequest(false);
+    }
+  };
+
+  const handleStopVoiceRequest = () => {
+    if (requestRecognitionRef.current) {
+      try { requestRecognitionRef.current.stop(); } catch (_) {}
+      setIsListeningRequest(false);
+      setRequestNotice(null);
+    }
+  };
+
+  // Animate Chalk Drawing on Canvas Tab
+  const handleDrawChalkExplanation = () => {
+    setActiveTab('draw');
+    saveState();
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const width = canvas.width / dpr;
+    const height = canvas.height / dpr;
+
+    // Draw realistic teacher chalkboard header and notes
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // Chalk border
+    ctx.strokeStyle = 'rgba(253, 230, 138, 0.45)';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([12, 6]);
+    ctx.strokeRect(20, 20, width - 40, height - 40);
+    ctx.setLineDash([]);
+
+    // Teacher chalkboard title
+    ctx.font = 'bold 22px "Comic Sans MS", "Caveat", cursive, sans-serif';
+    ctx.fillStyle = '#FDE68A';
+    ctx.textAlign = 'center';
+    ctx.shadowColor = 'rgba(253, 230, 138, 0.6)';
+    ctx.shadowBlur = 8;
+    ctx.fillText(`✎ ${boardData?.title || 'Teacher Sara Chalkboard'}`, width / 2, 55);
+
+    // Formula or sentence
+    if (boardData?.formula) {
+      ctx.font = 'bold 18px monospace, sans-serif';
+      ctx.fillStyle = '#67E8F9';
+      ctx.fillText(`[Rule]: ${boardData.formula}`, width / 2, 105);
+    }
+
+    if (boardData?.sentence) {
+      ctx.font = 'bold 20px "Comic Sans MS", "Caveat", cursive, sans-serif';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText(`"${boardData.sentence}"`, width / 2, 155);
+
+      // Chalk underline under highlight
+      if (boardData.highlight) {
+        ctx.strokeStyle = '#FBBF24';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(width / 2 - 120, 172);
+        ctx.lineTo(width / 2 + 120, 172);
+        ctx.stroke();
+      }
+    }
+
+    // Notes
+    if (boardData?.notes && boardData.notes.length > 0) {
+      ctx.font = '15px system-ui, sans-serif';
+      ctx.textAlign = isRtl ? 'right' : 'left';
+      ctx.fillStyle = '#E2E8F0';
+      const textX = isRtl ? width - 50 : 50;
+      let startY = 220;
+      boardData.notes.slice(0, 3).forEach((n, idx) => {
+        ctx.fillText(`★ ${n}`, textX, startY + idx * 36);
+      });
+    }
+
+    ctx.restore();
+    playSnapshotShutterSound();
+    onSaraTriggerGesture?.('pointing');
+
+    if (boardData?.sentence) {
+      onSpeak(boardData.sentence);
+    }
+  };
   
   // Custom Size and Scaling State (التحكم بحجم السبورة تكبيراً وتصغيراً حسب الرغبة)
   const [customSize, setCustomSize] = useState<{ width: number; height: number }>(() => {
@@ -1672,6 +2014,34 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               <Minus size={14} />
             </button>
 
+            {/* Toggle Sara 3D Presence */}
+            {onToggleSara3D && (
+              <button
+                onClick={onToggleSara3D}
+                className={`p-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1 ${
+                  isSara3DOpen
+                    ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm'
+                    : 'bg-white/10 hover:bg-white/20 text-amber-200 border-white/20'
+                }`}
+                title={isRtl ? 'إظهار / إخفاء مجسم سارة 3D بجانب السبورة' : 'Toggle Sara 3D Character'}
+              >
+                <span>👩‍🏫</span>
+                <span className="hidden lg:inline">{isRtl ? 'سارة 3D' : 'Sara 3D'}</span>
+              </button>
+            )}
+
+            {/* Sara Arabic / English Language Toggle on Whiteboard */}
+            {onToggleLang && (
+              <button
+                onClick={onToggleLang}
+                className="px-2 sm:px-2.5 py-1.5 rounded-xl border border-amber-400/40 bg-white/10 hover:bg-white/20 text-amber-300 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+                title={isRtl ? 'تبديل لغة الشرح لسارة بين العربية والإنجليزية' : 'Toggle explanation language (Arabic / English)'}
+              >
+                <span>🌐</span>
+                <span className="text-[11px] font-black">{currentLang === 'ar' ? 'English 🇬🇧' : 'عربي 🇸🇦'}</span>
+              </button>
+            )}
+
             {/* Maximize toggle */}
             <button
               onClick={() => {
@@ -1694,6 +2064,84 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               title={isRtl ? 'إغلاق السبورة' : 'Close whiteboard'}
             >
               <X size={15} />
+            </button>
+          </div>
+        </div>
+
+        {/* ======================================================== */}
+        {/* SARA VOICE EXPLAINER CONTROL RIBBON */}
+        {/* ======================================================== */}
+        <div className="bg-slate-950/60 backdrop-blur-md px-3 sm:px-4 py-2 border-b border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs shrink-0 select-none">
+          {/* Sara Status & Soundwave Indicator */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="relative shrink-0">
+              <div className={`w-8 h-8 rounded-full bg-gradient-to-tr from-[#002147] to-[#0d4a8f] border-2 flex items-center justify-center text-sm shadow-md transition-transform ${
+                isSaraSpeaking ? 'border-amber-400 ring-2 ring-amber-400/50 scale-105' : 'border-white/30'
+              }`}>
+                👩‍🏫
+              </div>
+              {isSaraSpeaking && (
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500" />
+                </span>
+              )}
+            </div>
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 font-black text-amber-200">
+                <span>{isRtl ? 'المعلمة سارة' : 'Teacher Sara'}</span>
+                {isSaraSpeaking ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-400/40 animate-pulse">
+                    <Volume2 size={11} className="text-amber-400" />
+                    <span>{isRtl ? 'تشرح السبورة الآن بالصوت 🎙️' : 'Explaining Whiteboard 🎙️'}</span>
+                  </span>
+                ) : isSaraThinking ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] bg-purple-400/20 text-purple-300 px-2 py-0.5 rounded-full border border-purple-400/40">
+                    <Sparkles size={11} className="animate-spin" />
+                    <span>{isRtl ? 'تجهز السبورة لطلبك... 🪄' : 'Updating whiteboard... 🪄'}</span>
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-emerald-300/90 font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>{isRtl ? 'جاهزة للشرح والتفاعل 🌟' : 'Ready to explain 🌟'}</span>
+                  </span>
+                )}
+              </div>
+              <p className="text-[10px] text-amber-100/70 truncate max-w-[200px] xs:max-w-[280px] sm:max-w-[420px]">
+                {currentExplanationText || (isRtl ? 'انقر "اشرحي بالصوت" أو اطلب أي قاعدة ومثال من سارة' : 'Click "Explain Aloud" or ask Sara to write anything')}
+              </p>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {isSaraSpeaking ? (
+              <button
+                onClick={stopVoiceExplanation}
+                className="px-3 py-1.5 rounded-xl bg-rose-500/25 hover:bg-rose-500/40 border border-rose-500/40 text-rose-200 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+              >
+                <VolumeX size={14} className="text-rose-400" />
+                <span>{isRtl ? 'إيقاف الصوت ⏹️' : 'Stop Audio ⏹️'}</span>
+              </button>
+            ) : (
+              <button
+                onClick={handleExplainWholeBoard}
+                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-md hover:scale-105 active:scale-95"
+                title={isRtl ? 'سارة تشرح كامل السبورة بالصوت وتمر على الأقسام' : 'Sara explains whole whiteboard with voice'}
+              >
+                <Volume2 size={14} className="animate-bounce" />
+                <span>{isRtl ? 'اشرحي لي السبورة بالصوت 🎙️✨' : 'Explain Aloud 🎙️✨'}</span>
+              </button>
+            )}
+
+            <button
+              onClick={handleDrawChalkExplanation}
+              className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-amber-200 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
+              title={isRtl ? 'رسم وشرح تفاعلي بالطبشور على اللوح' : 'Write with chalk on board'}
+            >
+              <PenTool size={13} />
+              <span className="hidden sm:inline">{isRtl ? 'كتابة بالطبشور ✍️' : 'Chalk ✍️'}</span>
             </button>
           </div>
         </div>
@@ -1724,18 +2172,40 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               {/* Formula Ribbon */}
               {boardData?.formula && (
                 <div 
-                  className="rounded-2xl p-3.5 text-center shadow-inner border-2"
+                  className={`rounded-2xl p-3.5 text-center shadow-inner border-2 transition-all relative ${
+                    activeExplanationSection === 'formula'
+                      ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.35)] scale-[1.01]'
+                      : ''
+                  }`}
                   style={{
                     backgroundColor: currentTheme.cardBg,
-                    borderColor: currentTheme.borderHex
+                    borderColor: activeExplanationSection === 'formula' ? '#FACC15' : currentTheme.borderHex
                   }}
                 >
-                  <span 
-                    className="text-[11px] font-black uppercase tracking-wider block mb-1"
-                    style={{ color: currentTheme.accentHex }}
-                  >
-                    {isRtl ? 'قاعدة وتكوين الجملة 📐' : 'Grammar Formula 📐'}
-                  </span>
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    {activeExplanationSection === 'formula' ? (
+                      <span className="animate-bounce bg-amber-400 text-slate-950 font-black px-2 py-0.5 rounded-full text-[10px] flex items-center gap-1 shadow-sm">
+                        👈 {isRtl ? 'سارة تشرح القاعدة الآن 🎙️' : 'Sara is explaining formula 🎙️'}
+                      </span>
+                    ) : (
+                      <span 
+                        className="text-[11px] font-black uppercase tracking-wider block"
+                        style={{ color: currentTheme.accentHex }}
+                      >
+                        {isRtl ? 'قاعدة وتكوين الجملة 📐' : 'Grammar Formula 📐'}
+                      </span>
+                    )}
+
+                    <button
+                      onClick={() => handleExplainSection('formula')}
+                      className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-amber-200 border border-white/15 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                      title={isRtl ? 'استمع لشرح المعلمة سارة لهذه القاعدة بالصوت' : 'Listen to Sara explain this rule'}
+                    >
+                      <Volume2 size={12} className="text-amber-400" />
+                      <span>{isRtl ? 'شرح القاعدة 🎙️' : 'Explain 🎙️'}</span>
+                    </button>
+                  </div>
+
                   <div className="text-base sm:text-xl font-black font-mono tracking-wider flex items-center justify-center flex-wrap gap-2">
                     {boardData.formula.split('+').map((item, idx) => (
                       <React.Fragment key={`formula-${idx}`}>
@@ -1761,27 +2231,49 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               {/* Target Sentence Display */}
               {boardData?.sentence && (
                 <div 
-                  className="border-2 rounded-2xl p-4 shadow-xl relative group"
+                  className={`border-2 rounded-2xl p-4 shadow-xl relative group transition-all ${
+                    activeExplanationSection === 'sentence'
+                      ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.35)] scale-[1.01]'
+                      : ''
+                  }`}
                   style={{
                     backgroundColor: currentTheme.cardBg,
-                    borderColor: currentTheme.cardBorder
+                    borderColor: activeExplanationSection === 'sentence' ? '#FACC15' : currentTheme.cardBorder
                   }}
                 >
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span 
-                      className="text-[11px] font-black uppercase tracking-wider"
-                      style={{ color: currentTheme.accentHex }}
-                    >
-                      {isRtl ? 'الجملة المستهدفة 🎯' : 'Target Example 🎯'}
-                    </span>
-                    <button
-                      onClick={() => onSpeak(boardData.sentence!)}
-                      className="px-2.5 py-1 active:scale-95 text-slate-900 font-black text-xs rounded-xl shadow-md flex items-center gap-1.5 transition-all cursor-pointer"
-                      style={{ backgroundColor: currentTheme.borderHex }}
-                    >
-                      <Volume2 size={14} />
-                      <span>{isRtl ? 'استمع للنطق' : 'Pronounce'}</span>
-                    </button>
+                    {activeExplanationSection === 'sentence' ? (
+                      <span className="animate-bounce bg-amber-400 text-slate-950 font-black px-2 py-0.5 rounded-full text-[10px] flex items-center gap-1 shadow-sm">
+                        👈 {isRtl ? 'سارة تشرح الجملة والنطق 🎙️' : 'Sara explaining example 🎙️'}
+                      </span>
+                    ) : (
+                      <span 
+                        className="text-[11px] font-black uppercase tracking-wider"
+                        style={{ color: currentTheme.accentHex }}
+                      >
+                        {isRtl ? 'الجملة المستهدفة 🎯' : 'Target Example 🎯'}
+                      </span>
+                    )}
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => handleExplainSection('sentence')}
+                        className="px-2 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-amber-200 border border-white/20 text-xs font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                        title={isRtl ? 'سارة تشرح وتفصل هذه الجملة بالصوت' : 'Sara explains this sentence aloud'}
+                      >
+                        <Volume2 size={13} className="text-amber-400" />
+                        <span>{isRtl ? 'شرح الجملة 🎙️' : 'Explain'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => onSpeak(boardData.sentence!)}
+                        className="px-2.5 py-1 active:scale-95 text-slate-900 font-black text-xs rounded-xl shadow-md flex items-center gap-1.5 transition-all cursor-pointer"
+                        style={{ backgroundColor: currentTheme.borderHex }}
+                      >
+                        <Volume2 size={14} />
+                        <span>{isRtl ? 'نطق الجملة' : 'Pronounce'}</span>
+                      </button>
+                    </div>
                   </div>
 
                   <p className={`text-lg sm:text-2xl font-bold tracking-wide text-center leading-relaxed ${currentTheme.textColor}`}>
@@ -1810,40 +2302,69 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               {/* Gentle Correction Display */}
               {boardData?.correction && (!boardData.quiz || (quizSelectedOption !== null && quizSelectedOption !== undefined)) && (
                 <div 
-                  className="border rounded-2xl p-3.5 flex flex-col sm:flex-row items-center justify-around gap-2 text-xs sm:text-sm"
+                  className={`border rounded-2xl p-3.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm transition-all ${
+                    activeExplanationSection === 'correction'
+                      ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.35)]'
+                      : ''
+                  }`}
                   style={{
                     backgroundColor: currentTheme.cardBg,
-                    borderColor: currentTheme.cardBorder
+                    borderColor: activeExplanationSection === 'correction' ? '#FACC15' : currentTheme.cardBorder
                   }}
                 >
-                  <div className="flex items-center gap-2 text-rose-300 bg-rose-950/60 border border-rose-500/30 px-3.5 py-2 rounded-xl">
-                    <XCircle size={16} className="text-rose-400 shrink-0" />
-                    <span className="line-through opacity-80 font-bold">{boardData.correction.wrong}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-rose-300 bg-rose-950/60 border border-rose-500/30 px-3 py-1.5 rounded-xl">
+                      <XCircle size={15} className="text-rose-400 shrink-0" />
+                      <span className="line-through opacity-80 font-bold">{boardData.correction.wrong}</span>
+                    </div>
+                    <span style={{ color: currentTheme.borderHex }} className="font-black text-lg">➔</span>
+                    <div className="flex items-center gap-2 text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 px-3 py-1.5 rounded-xl font-black">
+                      <CheckCircle2 size={15} className="text-emerald-400 shrink-0" />
+                      <span>{boardData.correction.right}</span>
+                    </div>
                   </div>
-                  <span style={{ color: currentTheme.borderHex }} className="font-black text-lg">➔</span>
-                  <div className="flex items-center gap-2 text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 px-3.5 py-2 rounded-xl font-black">
-                    <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
-                    <span>{boardData.correction.right}</span>
-                  </div>
+
+                  <button
+                    onClick={() => handleExplainSection('correction')}
+                    className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-amber-200 border border-white/15 text-[10px] font-bold flex items-center gap-1 cursor-pointer shrink-0"
+                  >
+                    <Volume2 size={12} className="text-amber-400" />
+                    <span>{isRtl ? 'استمع للتصحيح 🎙️' : 'Explain'}</span>
+                  </button>
                 </div>
               )}
 
               {/* Chalk Notes */}
               {boardData?.notes && boardData.notes.length > 0 && (
                 <div 
-                  className="border rounded-2xl p-4"
+                  className={`border rounded-2xl p-4 transition-all ${
+                    activeExplanationSection === 'notes'
+                      ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.35)] scale-[1.01]'
+                      : ''
+                  }`}
                   style={{
                     backgroundColor: currentTheme.cardBg,
-                    borderColor: currentTheme.cardBorder
+                    borderColor: activeExplanationSection === 'notes' ? '#FACC15' : currentTheme.cardBorder
                   }}
                 >
-                  <h4 
-                    className="text-xs font-black mb-2 flex items-center gap-1.5"
-                    style={{ color: currentTheme.accentHex }}
-                  >
-                    <BookOpen size={14} />
-                    <span>{isRtl ? 'نقاط الشرح الذهبية 💡' : 'Key Explanation Points 💡'}</span>
-                  </h4>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 
+                      className="text-xs font-black flex items-center gap-1.5"
+                      style={{ color: currentTheme.accentHex }}
+                    >
+                      <BookOpen size={14} />
+                      <span>{isRtl ? 'نقاط الشرح الذهبية 💡' : 'Key Explanation Points 💡'}</span>
+                    </h4>
+
+                    <button
+                      onClick={() => handleExplainSection('notes')}
+                      className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-amber-200 border border-white/15 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      <Volume2 size={12} className="text-amber-400" />
+                      <span>{isRtl ? 'شرح النقاط 🎙️' : 'Explain'}</span>
+                    </button>
+                  </div>
+
                   <ul className="space-y-2 text-xs sm:text-sm font-medium">
                     {boardData.notes.map((note, nIdx) => (
                       <li key={`note-${nIdx}`} className="flex items-start gap-2">
@@ -1858,19 +2379,34 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               {/* Diagram / Vocabulary */}
               {boardData?.diagram && (
                 <div 
-                  className="border rounded-2xl p-4"
+                  className={`border rounded-2xl p-4 transition-all ${
+                    activeExplanationSection === 'diagram'
+                      ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.35)] scale-[1.01]'
+                      : ''
+                  }`}
                   style={{
                     backgroundColor: currentTheme.cardBg,
-                    borderColor: currentTheme.cardBorder
+                    borderColor: activeExplanationSection === 'diagram' ? '#FACC15' : currentTheme.cardBorder
                   }}
                 >
-                  <h4 
-                    className="text-xs font-black mb-3 flex items-center gap-1.5"
-                    style={{ color: currentTheme.accentHex }}
-                  >
-                    <Sparkles size={14} />
-                    <span>{boardData.diagram.label}</span>
-                  </h4>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 
+                      className="text-xs font-black flex items-center gap-1.5"
+                      style={{ color: currentTheme.accentHex }}
+                    >
+                      <Sparkles size={14} />
+                      <span>{boardData.diagram.label}</span>
+                    </h4>
+
+                    <button
+                      onClick={() => handleExplainSection('diagram')}
+                      className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-amber-200 border border-white/15 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      <Volume2 size={12} className="text-amber-400" />
+                      <span>{isRtl ? 'شرح المخطط 🎙️' : 'Explain'}</span>
+                    </button>
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {boardData.diagram.items.map((item, dIdx) => (
                       <div 
@@ -1900,25 +2436,39 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               {/* Interactive Mini-Quiz */}
               {boardData?.quiz && (
                 <div 
-                  className="border-2 rounded-2xl p-4"
+                  className={`border-2 rounded-2xl p-4 transition-all ${
+                    activeExplanationSection === 'quiz'
+                      ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.35)] scale-[1.01]'
+                      : ''
+                  }`}
                   style={{
                     backgroundColor: currentTheme.cardBg,
-                    borderColor: `${currentTheme.borderHex}66`
+                    borderColor: activeExplanationSection === 'quiz' ? '#FACC15' : `${currentTheme.borderHex}66`
                   }}
                 >
-                  <div className="flex items-center gap-2 mb-3">
-                    <span 
-                      className="w-6 h-6 rounded-full text-slate-900 font-black text-xs flex items-center justify-center"
-                      style={{ backgroundColor: currentTheme.borderHex }}
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2">
+                      <span 
+                        className="w-6 h-6 rounded-full text-slate-900 font-black text-xs flex items-center justify-center"
+                        style={{ backgroundColor: currentTheme.borderHex }}
+                      >
+                        ?
+                      </span>
+                      <p 
+                        className="text-xs sm:text-sm font-black"
+                        style={{ color: currentTheme.accentHex }}
+                      >
+                        {boardData.quiz.question}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => handleExplainSection('quiz')}
+                      className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-amber-200 border border-white/15 text-[10px] font-bold flex items-center gap-1 cursor-pointer shrink-0"
                     >
-                      ?
-                    </span>
-                    <p 
-                      className="text-xs sm:text-sm font-black"
-                      style={{ color: currentTheme.accentHex }}
-                    >
-                      {boardData.quiz.question}
-                    </p>
+                      <Volume2 size={12} className="text-amber-400" />
+                      <span>{isRtl ? 'قراءة السؤال 🎙️' : 'Read'}</span>
+                    </button>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -1968,28 +2518,141 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               )}
 
               {/* Action Buttons: Switch to Drawing OR Save Image */}
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                 <button
                   onClick={() => setActiveTab('draw')}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-black cursor-pointer transition-all active:scale-95"
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-black cursor-pointer transition-all active:scale-95"
                   style={{
                     backgroundColor: currentTheme.isLight ? '#FFFFFF' : 'rgba(255,255,255,0.1)',
                     borderColor: currentTheme.cardBorder,
                     color: currentTheme.accentHex
                   }}
                 >
-                  <PenTool size={14} />
-                  <span>{isRtl ? 'فتح شريط أدوات الرسم التفاعلي ✍️' : 'Open Interactive Drawing Tools ✍️'}</span>
+                  <PenTool size={13} />
+                  <span>{isRtl ? 'شريط أدوات الرسم التفاعلي ✍️' : 'Drawing Tools ✍️'}</span>
                 </button>
 
                 <button
                   onClick={saveWhiteboardAsImage}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-slate-950 text-xs font-black cursor-pointer shadow-md transition-all active:scale-95"
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-slate-950 text-xs font-black cursor-pointer shadow-md transition-all active:scale-95"
                   style={{ backgroundColor: currentTheme.borderHex }}
                 >
-                  <Camera size={15} />
-                  <span>{isRtl ? 'حفظ بطاقة الشرح كصورة لمراجعتها 📸' : 'Save Explanation Card 📸'}</span>
+                  <Camera size={14} />
+                  <span>{isRtl ? 'حفظ بطاقة الشرح كصورة 📸' : 'Save Image 📸'}</span>
                 </button>
+              </div>
+
+              {/* ======================================================== */}
+              {/* 🪄 STUDENT WHITEBOARD REQUEST TRAY (تتفاعل مع الطلب) */}
+              {/* ======================================================== */}
+              <div 
+                className="border-2 rounded-2xl p-3.5 sm:p-4 shadow-xl space-y-2.5 mt-2"
+                style={{
+                  backgroundColor: currentTheme.isLight ? 'rgba(255,255,255,0.95)' : 'rgba(8, 18, 32, 0.85)',
+                  borderColor: `${currentTheme.borderHex}aa`
+                }}
+              >
+                {/* Header & Status Banner */}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-base animate-pulse">🪄</span>
+                    <h4 
+                      className="text-xs sm:text-sm font-black"
+                      style={{ color: currentTheme.accentHex }}
+                    >
+                      {isRtl ? 'اطلب من المعلمة سارة على السبورة:' : 'Ask Teacher Sara on Whiteboard:'}
+                    </h4>
+                  </div>
+                  <span className="text-[10px] text-amber-200/80 font-bold">
+                    {isRtl ? 'بالصوت أو الكتابة 🎙️✍️' : 'Voice or Text 🎙️✍️'}
+                  </span>
+                </div>
+
+                {/* Shimmer Feedback Banner when processing */}
+                <AnimatePresence>
+                  {(requestNotice || isSaraThinking) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      className="p-2 rounded-xl bg-amber-400/25 border border-amber-400/50 text-amber-200 text-xs font-bold flex items-center gap-2 shadow-sm"
+                    >
+                      <Sparkles size={14} className="text-amber-400 animate-spin shrink-0" />
+                      <span className="truncate">{requestNotice || (isRtl ? 'سارة تستقبل طلبك وتكتب على السبورة... 🪄✨' : 'Sara is preparing your whiteboard... 🪄✨')}</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Quick Request Chips */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                  {[
+                    { id: 'explain_all', labelAr: '🎙️ اشرحي السبورة كاملة', labelEn: '🎙️ Explain Whole Board', action: () => handleExplainWholeBoard() },
+                    { id: 'another_example', labelAr: '✍️ مثال إضافي على السبورة', labelEn: '✍️ Give Another Example', action: () => handleSubmitBoardRequest(isRtl ? 'سارة، اعطيني مثالاً إضافياً ومختلفاً على السبورة' : 'Sara, give me another example on the board') },
+                    { id: 'simplify', labelAr: '💡 بسطي الشرح بأسلوب أسهل', labelEn: '💡 Simplify Explanation', action: () => handleSubmitBoardRequest(isRtl ? 'سارة، بسطي لي شرح هذه القاعدة على السبورة بأسلوب أسهل' : 'Sara, simplify this explanation on the board') },
+                    { id: 'new_quiz', labelAr: '❓ اختبرني بسؤال جديد', labelEn: '❓ Test Me With New Quiz', action: () => handleSubmitBoardRequest(isRtl ? 'سارة، اطرحي علي سؤال أو كويز جديد على السبورة' : 'Sara, give me a new quiz on the board') },
+                    { id: 'slow_pronounce', labelAr: '🗣️ انطقي ببطء للممارسة', labelEn: '🗣️ Pronounce Slowly', action: () => { if (boardData?.sentence) onSpeak(boardData.sentence); } },
+                    { id: 'vocab_diagram', labelAr: '🎨 ارسمي خريطة مفردات', labelEn: '🎨 Draw Vocabulary Diagram', action: () => handleSubmitBoardRequest(isRtl ? 'سارة، ارسمي لي مخطط ورسم بياني توضيحي للمفردات على السبورة' : 'Sara, draw a vocabulary diagram on the board') },
+                    { id: 'chalk_write', labelAr: '📝 كتابة بالطبشور على اللوح', labelEn: '📝 Write in Chalk', action: () => handleDrawChalkExplanation() },
+                  ].map(chip => (
+                    <button
+                      key={`req-chip-${chip.id}`}
+                      onClick={chip.action}
+                      disabled={isSaraThinking}
+                      className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 border border-white/15 text-[11px] font-bold text-amber-200 shrink-0 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      {isRtl ? chip.labelAr : chip.labelEn}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Input Bar: Voice Microphone + Text Box + Send */}
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <button
+                    onClick={isListeningRequest ? handleStopVoiceRequest : handleStartVoiceRequest}
+                    className={`p-2 sm:p-2.5 rounded-xl border font-black text-xs transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-md ${
+                      isListeningRequest
+                        ? 'bg-rose-500 text-white border-rose-300 ring-4 ring-rose-500/40 animate-pulse'
+                        : 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 border-amber-300 hover:scale-105 active:scale-95'
+                    }`}
+                    title={isListeningRequest ? (isRtl ? 'إيقاف الاستماع' : 'Stop') : (isRtl ? 'تحدث واطلب من سارة بصوتك 🎙️' : 'Speak to Sara 🎙️')}
+                  >
+                    {isListeningRequest ? <MicOff size={16} /> : <Mic size={16} />}
+                  </button>
+
+                  <input
+                    type="text"
+                    value={boardRequestInput}
+                    onChange={(e) => setBoardRequestInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleSubmitBoardRequest();
+                      }
+                    }}
+                    placeholder={
+                      isListeningRequest
+                        ? (isRtl ? 'سارة تسمعك الآن... تحدث بطلبك 🎙️' : 'Sara is listening... speak now 🎙️')
+                        : (isRtl ? 'اطلب من سارة: اشرحي كذا، اعطيني مثال، اكتبي بالطبشور...' : 'Ask Sara: explain this, give an example, write on board...')
+                    }
+                    disabled={isSaraThinking}
+                    className={`flex-1 px-3 py-2 rounded-xl text-xs font-medium border transition-all outline-hidden ${
+                      currentTheme.isLight 
+                        ? 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-amber-500' 
+                        : 'bg-black/35 border-white/20 text-white placeholder:text-slate-400 focus:border-amber-400'
+                    }`}
+                  />
+
+                  <button
+                    onClick={() => handleSubmitBoardRequest()}
+                    disabled={!boardRequestInput.trim() || isSaraThinking}
+                    className="p-2 sm:px-3 sm:py-2 rounded-xl text-slate-950 font-black text-xs flex items-center gap-1 transition-all cursor-pointer shadow-md disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 active:scale-95 shrink-0"
+                    style={{ backgroundColor: currentTheme.borderHex }}
+                    title={isRtl ? 'إرسال الطلب لسارة' : 'Send request'}
+                  >
+                    <Send size={14} className={isRtl ? 'rotate-180' : ''} />
+                    <span className="hidden sm:inline">{isRtl ? 'إرسال' : 'Send'}</span>
+                  </button>
+                </div>
               </div>
             </motion.div>
           )}

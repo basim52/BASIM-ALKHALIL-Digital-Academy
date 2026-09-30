@@ -185,6 +185,7 @@ interface SaraTutorProps {
   onNavigate: (view: AppView) => void;
   onBack: () => void;
   onProfileUpdated?: (updated: UserProfile) => void;
+  onLangChange?: (newLang: Language) => void;
 }
 
 const SECTION_LABELS: Record<string, { ar: string; en: string }> = {
@@ -209,10 +210,17 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   profile,
   onNavigate,
   onBack,
-  onProfileUpdated
+  onProfileUpdated,
+  onLangChange
 }) => {
-  const isRtl = lang === 'ar';
-  const t = translations[lang];
+  const [activeLang, setActiveLang] = useState<Language>(lang);
+
+  useEffect(() => {
+    setActiveLang(lang);
+  }, [lang]);
+
+  const isRtl = activeLang === 'ar';
+  const t = translations[activeLang];
 
   // State
   const [messages, setMessages] = useState<MessageItem[]>([]);
@@ -231,7 +239,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   
   // Live Voice Mode state
   const [isLiveMode, setIsLiveMode] = useState(false);
-  const [speechLang, setSpeechLang] = useState<'en-US' | 'ar-SA'>('en-US');
+  const [speechLang, setSpeechLang] = useState<'en-US' | 'ar-SA'>(() => lang === 'ar' ? 'ar-SA' : 'en-US');
   const [liveStatus, setLiveStatus] = useState<'idle' | 'listening' | 'thinking' | 'speaking'>('idle');
 
   const [quizSelectedOption, setQuizSelectedOption] = useState<number | null>(null);
@@ -373,6 +381,34 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       });
     }
     setIsWhiteboardOpen(true);
+  };
+
+  // Language Switcher Handler for Sara (Arabic 🇸🇦 / English 🇬🇧)
+  const handleToggleLanguage = (targetLang?: Language) => {
+    const nextLang = targetLang || (activeLang === 'ar' ? 'en' : 'ar');
+    if (nextLang === activeLang && targetLang) return;
+
+    setActiveLang(nextLang);
+    const nextSpeechLang = nextLang === 'ar' ? 'ar-SA' : 'en-US';
+    setSpeechLang(nextSpeechLang);
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.lang = nextSpeechLang;
+      } catch (_) {}
+    }
+
+    if (onLangChange) {
+      onLangChange(nextLang);
+    }
+
+    // Friendly spoken announcement and welcome from Sara in the chosen language
+    if (voiceEnabled) {
+      if (nextLang === 'en') {
+        playSaraVoice("Awesome! I've switched to English immersion mode. Let's practice speaking and learning together! 🌸");
+      } else {
+        playSaraVoice("أهلاً بك! تم التبديل إلى اللغة العربية للشرح والتوضيح خطوة بخطوة 🌸");
+      }
+    }
   };
 
   // Turn-by-turn microphone listening trigger
@@ -536,7 +572,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         body: JSON.stringify({
           message: `Hello Teacher Sara! My name is ${profile.displayName}. Start our session.`,
           snapshot: snapshot,
-          history: []
+          history: [],
+          preferredLang: activeLang
         })
       });
 
@@ -1658,7 +1695,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             roleStudent: isRtl ? activeRolePlay.roleStudentAr : activeRolePlay.roleStudentEn,
             location: activeRolePlay.location,
             missions: isRtl ? activeRolePlay.missionsAr : activeRolePlay.missionsEn
-          } : undefined
+          } : undefined,
+          preferredLang: activeLang
         })
       });
 
@@ -1869,6 +1907,16 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
           {/* Mobile Essential Quick Bar (sm:hidden) */}
           <div className="flex sm:hidden items-center gap-1">
+            {/* Sara Arabic/English Language Toggle Button (Mobile) */}
+            <button
+              onClick={() => handleToggleLanguage()}
+              className="px-2 py-1.5 rounded-xl border-2 transition-all cursor-pointer flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-[#002147] border-amber-300 shadow-2xs active:scale-95"
+              title={activeLang === 'ar' ? 'التبديل إلى English' : 'التبديل إلى عربي'}
+            >
+              <span className="text-xs">🌐</span>
+              <span className="text-[11px] font-black">{activeLang === 'ar' ? 'EN' : 'عربي'}</span>
+            </button>
+
             {/* Live voice quick button */}
             <button
               onClick={toggleLiveVoiceMode}
@@ -1931,6 +1979,38 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
           {/* Desktop Right Controls (hidden sm:flex) */}
           <div className="hidden sm:flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
+            {/* 🌐 Sara Arabic / English Bilingual Dual Toggle Button */}
+            <div className="flex items-center bg-slate-100/90 p-0.5 rounded-2xl border-2 border-slate-200 shadow-xs">
+              <button
+                onClick={() => {
+                  if (activeLang !== 'ar') handleToggleLanguage('ar');
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                  activeLang === 'ar'
+                    ? 'bg-[#002147] text-amber-300 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                }`}
+                title="التبديل إلى الشرح باللغة العربية"
+              >
+                <span>🇸🇦</span>
+                <span>عربي</span>
+              </button>
+              <button
+                onClick={() => {
+                  if (activeLang !== 'en') handleToggleLanguage('en');
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                  activeLang === 'en'
+                    ? 'bg-[#002147] text-amber-300 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                }`}
+                title="Switch to English Immersion Mode"
+              >
+                <span>🇬🇧</span>
+                <span>English</span>
+              </button>
+            </div>
+
             {/* ⏱️ Lesson Duration Timer Pill & Dropdown */}
             <div className="relative" ref={timerDropdownRef}>
               <button
@@ -3327,6 +3407,15 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           {/* Quick Suggestion Chips */}
           <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 text-[11px] font-bold text-slate-600 no-scrollbar">
             <span className="text-slate-400 shrink-0 text-[10px]">{isRtl ? 'اقتراحات سريعة:' : 'Quick prompts:'}</span>
+            {/* Sara Arabic / English Language Toggle Chip */}
+            <button
+              onClick={() => handleToggleLanguage()}
+              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-[#002147] shrink-0 transition-all cursor-pointer font-black flex items-center gap-1.5 text-[10px] sm:text-xs shadow-2xs active:scale-95"
+              title={activeLang === 'ar' ? 'التبديل إلى English' : 'التبديل إلى عربي'}
+            >
+              <span>🌐</span>
+              <span>{activeLang === 'ar' ? 'English 🇬🇧' : 'عربي 🇸🇦'}</span>
+            </button>
             <button
               onClick={toggleLiveVoiceMode}
               className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border shrink-0 transition-all cursor-pointer font-black flex items-center gap-1 text-[10px] sm:text-xs ${
@@ -3348,6 +3437,20 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             >
               <Target size={12} className={placementState.isActive ? 'text-amber-300' : 'text-blue-600'} />
               <span>{isRtl ? '🎯 اختبار تحديد المستوى' : '🎯 Placement Test'}</span>
+            </button>
+            <button
+              onClick={() => {
+                if (!activeBoard) {
+                  openWhiteboardModal();
+                } else {
+                  setIsWhiteboardOpen(true);
+                }
+                handleSendMessage(isRtl ? 'سارة، اشرحي لي الدرس على السبورة الذكية بالصوت بالتفصيل 📐🎙️' : 'Sara, please explain this lesson on the smart whiteboard with voice 📐🎙️');
+              }}
+              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border shrink-0 transition-all cursor-pointer font-black flex items-center gap-1 shadow-2xs text-[10px] sm:text-xs bg-gradient-to-r from-amber-50 to-amber-100 border-amber-300 hover:from-amber-100 hover:to-amber-200 text-slate-900"
+            >
+              <span>📐🎙️</span>
+              <span>{isRtl ? 'اشرحي لي على السبورة بالصوت' : 'Explain on Whiteboard Aloud'}</span>
             </button>
             {[
               { ar: 'علميني قاعدة جديدة اليوم 📐', en: 'Teach me a new rule 📐' },
@@ -3384,6 +3487,20 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         onQuizAnswer={handleQuizOptionClick}
         quizSelectedOption={quizSelectedOption}
         quizFeedback={quizFeedback}
+        onRequestOnBoard={async (reqText) => {
+          await handleSendMessage(reqText);
+        }}
+        isSaraThinking={loading}
+        isSaraSpeaking={isSpeaking}
+        onStopSpeak={() => {
+          cancelAllSpeech();
+          setIsSpeaking(false);
+          isSpeakingRef.current = false;
+        }}
+        onToggleSara3D={() => setIsSara3DOpen(!isSara3DOpen)}
+        isSara3DOpen={isSara3DOpen}
+        currentLang={activeLang}
+        onToggleLang={() => handleToggleLanguage()}
       />
 
       {/* 5. 3D Interactive Floating Avatar Character of Sara */}
@@ -3395,17 +3512,21 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         isLiveMode={isLiveMode}
         liveStatus={liveStatus}
         currentSpeechText={lastSaraSpeech}
+        isWhiteboardOpen={isWhiteboardOpen}
+        isExplainingWhiteboard={isSpeaking && isWhiteboardOpen}
+        currentLang={activeLang}
+        onToggleLang={() => handleToggleLanguage()}
         onCharacterClick={() => {
           if (!isSpeaking) {
             const greetings = isRtl
               ? [
-                  'أنا معك خطوة بخطوة يا بطل! 🌟',
+                  'أنا معك خطوة بخطوة يا بطل! 🌟 انظر للسبورة لنشرح سوا!',
                   'هل ترغب أن نمارس بعض الجمل الصوتية معاً الآن؟ 🎙️',
                   'أنا سارة، رفيقتك ومعلمتك الشخصية في الأكاديمية! ✨',
                   'أحسنت في استمرارك ومثابرتك في التعلم! 👏'
                 ]
               : [
-                  "I'm here with you step by step! 🌟",
+                  "I'm here with you step by step! 🌟 Let's check the board together!",
                   'Ready to practice some English sentences together? 🎙️',
                   "I'm Sara, your personal mentor at the Academy! ✨",
                   'Keep up the fantastic momentum! 👏'

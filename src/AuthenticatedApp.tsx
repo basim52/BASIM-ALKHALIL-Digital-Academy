@@ -6836,6 +6836,7 @@ export default function AuthenticatedApp({
             setView('dashboard');
           }}
           onProfileUpdated={(updated) => setUserProfile(updated)}
+          onLangChange={(newLang) => setLang(newLang)}
         />
       );
     }
@@ -6936,6 +6937,7 @@ export default function AuthenticatedApp({
             setView('dashboard');
           }}
           onProfileUpdated={(updated) => setUserProfile(updated)}
+          onLangChange={(newLang) => setLang(newLang)}
         />
       );
     }

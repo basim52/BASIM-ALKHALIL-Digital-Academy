@@ -247,6 +247,8 @@ export interface SaraBoardData {
     label: string;
     items: { title: string; desc: string; icon?: string }[];
   };
+  voiceExplanation?: string;
+  teacherNote?: string;
   openWhiteboard?: boolean;
 }
 

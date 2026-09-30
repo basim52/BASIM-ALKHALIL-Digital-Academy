@@ -45,6 +45,10 @@ interface Sara3DCharacterProps {
   onCharacterClick?: () => void;
   isOpen: boolean;
   onToggle: () => void;
+  isWhiteboardOpen?: boolean;
+  isExplainingWhiteboard?: boolean;
+  currentLang?: 'ar' | 'en';
+  onToggleLang?: () => void;
 }
 
 export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
@@ -56,7 +60,11 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
   emotion: propEmotion,
   onCharacterClick,
   isOpen,
-  onToggle
+  onToggle,
+  isWhiteboardOpen = false,
+  isExplainingWhiteboard = false,
+  currentLang = 'ar',
+  onToggleLang
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const [isMinimized, setIsMinimized] = useState<boolean>(() => {
@@ -70,6 +78,15 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
   const [activeOutfit, setActiveOutfit] = useState<SaraOutfitId>('navy_gold');
   const [activeGesture, setActiveGesture] = useState<SaraGesture>('idle');
   const gestureTimeoutRef = useRef<any>(null);
+
+  // Synchronize whiteboard explanation gesture
+  useEffect(() => {
+    if (isExplainingWhiteboard) {
+      setActiveGesture('pointing');
+    } else if (activeGesture === 'pointing') {
+      setActiveGesture('idle');
+    }
+  }, [isExplainingWhiteboard]);
 
   const triggerGesture = (g: SaraGesture) => {
     setActiveGesture(g);
@@ -1293,8 +1310,12 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
       style={{
         transform: position ? `translate3d(${position.x}px, ${position.y}px, 0)` : undefined
       }}
-      className={`fixed z-40 select-none ${
-        position ? '' : isRtl ? 'bottom-20 left-4 sm:bottom-16 sm:left-8' : 'bottom-20 right-4 sm:bottom-16 sm:right-8'
+      className={`fixed ${isWhiteboardOpen ? 'z-60' : 'z-40'} select-none transition-[bottom,left,right] ${
+        position
+          ? ''
+          : isWhiteboardOpen
+            ? (isRtl ? 'bottom-6 left-6 sm:bottom-8 sm:left-10' : 'bottom-6 right-6 sm:bottom-8 sm:right-10')
+            : (isRtl ? 'bottom-20 left-4 sm:bottom-16 sm:left-8' : 'bottom-20 right-4 sm:bottom-16 sm:right-8')
       }`}
     >
       {/* Minimized View (Clean Floating Circular 3D Badge) */}
@@ -1318,9 +1339,17 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
       ) : (
         /* Pure 3D Figure View (بدون أي إطار أو خلفية مستطيلة إطلاقاً) */
         <div className="relative flex flex-col items-center group pointer-events-auto">
+
+          {/* Whiteboard Explaining Active Badge */}
+          {isExplainingWhiteboard && (
+            <div className="absolute -top-20 z-40 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 rounded-full font-black text-xs shadow-2xl border-2 border-white flex items-center gap-1.5 animate-bounce">
+              <span>📐</span>
+              <span>{isRtl ? 'سارة تشرح على السبورة 🎙️' : 'Explaining on Whiteboard 🎙️'}</span>
+            </div>
+          )}
           
           {/* Floating Dialogue Speech Balloon (when speaking) */}
-          {currentSpeechText && (
+          {currentSpeechText && !isExplainingWhiteboard && (
             <div className="absolute -top-14 sm:-top-16 inset-x-0 mx-auto max-w-[240px] z-30 p-2.5 bg-slate-900/95 backdrop-blur-md border-2 border-amber-400/80 rounded-2xl shadow-2xl text-center text-xs text-amber-100 font-medium leading-relaxed animate-in fade-in zoom-in-95">
               <p className="line-clamp-2">{currentSpeechText}</p>
               {/* Pointer arrow pointing down towards Sara */}
@@ -1346,6 +1375,21 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
               currentEmotion === 'listening' ? 'bg-emerald-400 animate-ping' :
               'bg-emerald-400'
             }`} />
+
+            {/* Quick Arabic / English Language Toggle Button for Sara */}
+            {onToggleLang && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleLang();
+                }}
+                className="px-1.5 py-0.5 rounded-full bg-white/20 hover:bg-white/35 text-[10px] font-black text-amber-300 border border-amber-300/50 flex items-center gap-1 transition-all cursor-pointer active:scale-95 shadow-xs"
+                title={currentLang === 'ar' ? 'التبديل إلى English' : 'التبديل إلى عربي'}
+              >
+                <span>🌐</span>
+                <span>{currentLang === 'ar' ? 'EN' : 'عربي'}</span>
+              </button>
+            )}
 
             {/* Quick gestures & outfits trigger */}
             <button
@@ -1443,6 +1487,24 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
                   ))}
                 </div>
               </div>
+
+              {/* Sara Arabic / English Language Toggle Row */}
+              {onToggleLang && (
+                <div className="flex items-center justify-between pt-1 border-t border-white/10 text-[10px]">
+                  <span className="text-amber-200/80 font-bold">{isRtl ? 'لغة سارة:' : "Sara's Language:"}</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleLang();
+                    }}
+                    className="px-2 py-0.5 rounded-lg bg-amber-400/20 hover:bg-amber-400/35 text-amber-300 font-black border border-amber-400/30 flex items-center gap-1 transition-all cursor-pointer active:scale-95"
+                    title={isRtl ? 'تبديل لغة سارة إلى الإنجليزية' : 'Switch Sara to Arabic'}
+                  >
+                    <span>🌐</span>
+                    <span>{currentLang === 'ar' ? 'العربية 🇸🇦' : 'English 🇬🇧'}</span>
+                  </button>
+                </div>
+              )}
 
               {/* Gravity & Physics Interactive Poke Button */}
               <div className="flex items-center justify-between pt-1 border-t border-white/10 text-[10px]">
