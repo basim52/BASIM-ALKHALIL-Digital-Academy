@@ -115,6 +115,7 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
   const leftPupilRef = useRef<THREE.Mesh | null>(null);
   const rightPupilRef = useRef<THREE.Mesh | null>(null);
   const haloRingRef = useRef<THREE.Mesh | null>(null);
+  const shadowMeshRef = useRef<THREE.Mesh | null>(null);
   const particlesGroupRef = useRef<THREE.Points | null>(null);
   const leftArmGroupRef = useRef<THREE.Group | null>(null);
   const rightArmGroupRef = useRef<THREE.Group | null>(null);
@@ -125,6 +126,51 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
 
   // Mouse tracking in Three.js coordinates
   const mouseCoords = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  // Touch and click coordination refs
+  const touchTapCoordsRef = useRef<{ clientX: number; clientY: number }>({ clientX: 0, clientY: 0 });
+  const suppressNextClickRef = useRef<boolean>(false);
+
+  // --- GRAVITY & PHYSICS SIMULATION STATE ---
+  // Harmonic spring-damper model for realistic inertia, gravity bounce, and touch response
+  const physicsRef = useRef({
+    // Vertical displacement and velocity (gravity compression & rebound)
+    y: 0,
+    vy: 0,
+    targetY: 0,
+
+    // Pitch tilt (rotation around X axis: nodding / leaning back & forward)
+    pitch: 0,
+    vPitch: 0,
+    targetPitch: 0,
+
+    // Roll tilt (rotation around Z axis: sway / leaning left & right)
+    roll: 0,
+    vRoll: 0,
+    targetRoll: 0,
+
+    // Secondary head follow-through lag (natural neck compliance)
+    headPitchLag: 0,
+    headRollLag: 0,
+
+    // Kinetic energy surge for particles and halo
+    spinBoost: 0,
+
+    // Drag velocity tracking for inertia and fling momentum
+    lastClientX: 0,
+    lastClientY: 0,
+    lastTimestamp: 0,
+    dragVx: 0,
+    dragVy: 0,
+  });
+
+  const applyPhysicsImpulse = (impulseY: number, impulsePitch: number, impulseRoll: number, boost: number = 1.2) => {
+    const p = physicsRef.current;
+    p.vy += impulseY;
+    p.vPitch += impulsePitch;
+    p.vRoll += impulseRoll;
+    p.spinBoost = Math.min(p.spinBoost + boost, 4.0);
+  };
 
   // Initialize Three.js Scene
   useEffect(() => {
@@ -181,57 +227,72 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
     characterGroupRef.current = characterGroup;
     scene.add(characterGroup);
 
-    // --- MATERIALS (Warm, natural, glowing skin & hair) ---
-    const skinMat = new THREE.MeshStandardMaterial({
-      color: 0xffdfcb, // Luminous warm peach-ivory Arabian skin tone
-      roughness: 0.6,
-      metalness: 0.0 // No metallic shine so no blue reflection!
+    // --- MATERIALS (Lifelike Human Skin, Hair, Eyes & Fabric Shaders) ---
+    const skinMat = new THREE.MeshPhysicalMaterial({
+      color: 0xffdfd0, // Warm luminous porcelain-peach Mediterranean/Arabian skin tone
+      roughness: 0.52,
+      metalness: 0.0,
+      clearcoat: 0.08,
+      clearcoatRoughness: 0.35,
+      sheen: 0.45,
+      sheenColor: new THREE.Color(0xffc8ba) // Skin subsurface scattering & peach fuzz glow
     });
 
     const blushMat = new THREE.MeshStandardMaterial({
-      color: 0xff8a80, // Soft vibrant warm rosy-coral blush
-      roughness: 0.5,
+      color: 0xff7568, // Soft rosy coral airbrushed cheek blush
+      roughness: 0.75,
       transparent: true,
-      opacity: 0.42
+      opacity: 0.28
     });
 
-    // Natural Silky Dark Chestnut Hair (Warm, NOT NAVY BLUE!)
+    const lipMat = new THREE.MeshPhysicalMaterial({
+      color: 0xd9576e, // Soft natural rose-coral satin lips
+      roughness: 0.28,
+      metalness: 0.0,
+      clearcoat: 0.35,
+      clearcoatRoughness: 0.2 // Subtle natural lip moisture
+    });
+
+    const teethMat = new THREE.MeshStandardMaterial({
+      color: 0xfffdf7, // Clean pearly ivory enamel
+      roughness: 0.22,
+      metalness: 0.0
+    });
+
     const hairMat = new THREE.MeshStandardMaterial({
-      color: 0x24160d, // Rich dark warm chestnut / espresso
+      color: 0x24150e, // Rich dark warm chestnut / espresso
       roughness: 0.65,
       metalness: 0.05
     });
 
-    // Natural Warm Eyebrows
     const eyebrowMat = new THREE.MeshStandardMaterial({
-      color: 0x331f13, // Warm dark brown
-      roughness: 0.8
+      color: 0x2c1b12, // Natural warm dark brown brows
+      roughness: 0.85
     });
 
-    // Pure Radiant White Silk Hijab / Scarf (Framing face completely in pure white)
+    // Pure Radiant White Chiffon/Silk Hijab
     const whiteHijabMat = new THREE.MeshStandardMaterial({
-      color: 0xffffff, // Pure Radiant White
-      roughness: 0.38,
-      metalness: 0.02
+      color: 0xffffff,
+      roughness: 0.82, // Authentic soft cloth matte weave
+      metalness: 0.01
     });
 
-    // Soft Pearl-Ivory Silk Accent
     const scarfSilkMat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
-      roughness: 0.4,
+      roughness: 0.45,
       metalness: 0.02
     });
 
     const academyNavyMat = new THREE.MeshStandardMaterial({
       color: 0x002147,
-      roughness: 0.4,
-      metalness: 0.15
+      roughness: 0.45,
+      metalness: 0.12
     });
 
     const academyGoldMat = new THREE.MeshStandardMaterial({
       color: 0xc49e3a,
-      roughness: 0.25,
-      metalness: 0.75
+      roughness: 0.22,
+      metalness: 0.85
     });
 
     const whiteMat = new THREE.MeshStandardMaterial({
@@ -239,24 +300,104 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
       roughness: 0.3
     });
 
-    const eyeIrisMat = new THREE.MeshStandardMaterial({
-      color: 0x4e2d14, // Warm hazel brown eyes with golden flecks
+    // Realistic Eye Materials
+    const scleraMat = new THREE.MeshStandardMaterial({
+      color: 0xfaf9f6,
       roughness: 0.1,
-      metalness: 0.15
+      metalness: 0.0
     });
 
-    const pupilMat = new THREE.MeshBasicMaterial({ color: 0x0c0806 });
-    const mouthMat = new THREE.MeshStandardMaterial({
-      color: 0xde5264, // Soft natural rose-coral lips
-      roughness: 0.35
+    const irisLimbalMat = new THREE.MeshBasicMaterial({
+      color: 0x1a0f0a // Dark defined outer limbal ring framing the iris
     });
+
+    const irisMat = new THREE.MeshStandardMaterial({
+      color: 0x5e3518, // Warm hazel-amber with golden flecks
+      roughness: 0.15,
+      metalness: 0.05
+    });
+
+    const pupilMat = new THREE.MeshBasicMaterial({
+      color: 0x0a0604 // Deep black pupil
+    });
+
+    const catchlightMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff
+    });
+
+    const lashMat = new THREE.MeshBasicMaterial({
+      color: 0x160d08 // Deep espresso natural lash line
+    });
+
+    const caruncleMat = new THREE.MeshBasicMaterial({
+      color: 0xefa098 // Soft peach inner eye tear duct
+    });
+
+    // --- ARTICULATED FEMININE HANDS BUILDER ---
+    const createRealisticHand = (isLeft: boolean) => {
+      const handGroup = new THREE.Group();
+      const sign = isLeft ? 1 : -1;
+
+      // 1. Palm (soft tapered rounded volume)
+      const palmGeo = new THREE.BoxGeometry(0.075, 0.085, 0.035);
+      const palmMesh = new THREE.Mesh(palmGeo, skinMat);
+      palmMesh.position.set(0, -0.045, 0);
+      handGroup.add(palmMesh);
+
+      // 2. Thumb (naturally angled inward and forward)
+      const thumbGroup = new THREE.Group();
+      thumbGroup.position.set(sign * 0.042, -0.025, 0.012);
+      thumbGroup.rotation.z = sign * 0.45;
+      thumbGroup.rotation.y = sign * 0.35;
+      
+      const thumbProximalGeo = new THREE.CylinderGeometry(0.014, 0.013, 0.04, 8);
+      const thumbProximal = new THREE.Mesh(thumbProximalGeo, skinMat);
+      thumbProximal.position.y = -0.02;
+      thumbGroup.add(thumbProximal);
+
+      const thumbTipGeo = new THREE.SphereGeometry(0.012, 8, 8);
+      thumbTipGeo.scale(1, 1.3, 0.9);
+      const thumbTip = new THREE.Mesh(thumbTipGeo, skinMat);
+      thumbTip.position.y = -0.042;
+      thumbGroup.add(thumbTip);
+      handGroup.add(thumbGroup);
+
+      // 3. Four Fingers with natural curvature and gentle graduation
+      const fingerParams = [
+        { x: sign * 0.028, len: 0.055, rad: 0.011 },  // Index
+        { x: sign * 0.009, len: 0.062, rad: 0.0115 }, // Middle
+        { x: -sign * 0.01, len: 0.056, rad: 0.0105 }, // Ring
+        { x: -sign * 0.027, len: 0.045, rad: 0.0095 } // Pinky
+      ];
+
+      fingerParams.forEach((f, idx) => {
+        const fingerGroup = new THREE.Group();
+        fingerGroup.position.set(f.x, -0.085, 0);
+        fingerGroup.rotation.x = -0.15 - idx * 0.04; // Natural resting curve
+
+        const phalanxGeo = new THREE.CylinderGeometry(f.rad * 0.9, f.rad, f.len, 8);
+        const phalanx = new THREE.Mesh(phalanxGeo, skinMat);
+        phalanx.position.y = -f.len / 2;
+        fingerGroup.add(phalanx);
+
+        const tipGeo = new THREE.SphereGeometry(f.rad * 0.95, 8, 8);
+        tipGeo.scale(1, 1.2, 0.9);
+        const tip = new THREE.Mesh(tipGeo, skinMat);
+        tip.position.y = -f.len;
+        fingerGroup.add(tip);
+
+        handGroup.add(fingerGroup);
+      });
+
+      return handGroup;
+    };
 
     // --- TORSO / BLAZER ---
     const torsoGroup = new THREE.Group();
     torsoGroup.position.y = -0.55;
 
-    // Main Blazer Body
-    const blazerGeo = new THREE.CylinderGeometry(0.38, 0.48, 0.7, 32);
+    // Main Tailored Blazer Body
+    const blazerGeo = new THREE.CylinderGeometry(0.36, 0.46, 0.7, 32);
     const blazerMesh = new THREE.Mesh(blazerGeo, academyNavyMat);
     torsoGroup.add(blazerMesh);
 
@@ -268,7 +409,7 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
     torsoGroup.add(shirtMesh);
 
     // Gold Lapel Trim
-    const lapelGeo = new THREE.TorusGeometry(0.26, 0.02, 12, 32, Math.PI);
+    const lapelGeo = new THREE.TorusGeometry(0.25, 0.018, 12, 32, Math.PI);
     const lapelMesh = new THREE.Mesh(lapelGeo, academyGoldMat);
     lapelMesh.position.set(0, 0.22, 0.3);
     lapelMesh.rotation.x = Math.PI / 2;
@@ -276,26 +417,24 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
     torsoGroup.add(lapelMesh);
 
     // Academy Gold Pin on Chest
-    const pinGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.015, 16);
+    const pinGeo = new THREE.CylinderGeometry(0.038, 0.038, 0.015, 16);
     const pinMesh = new THREE.Mesh(pinGeo, academyGoldMat);
     pinMesh.position.set(0.18, 0.12, 0.4);
     pinMesh.rotation.x = Math.PI / 2;
     torsoGroup.add(pinMesh);
 
-    // --- ARMS FOR INTERACTIVE GESTURES (Waving, Clapping, Pointing, Explaining) ---
-    const upperArmGeo = new THREE.CylinderGeometry(0.09, 0.08, 0.32, 16);
+    // --- ARMS WITH ARTICULATED REALISTIC HANDS ---
+    const upperArmGeo = new THREE.CylinderGeometry(0.088, 0.078, 0.32, 16);
     upperArmGeo.translate(0, -0.16, 0);
 
-    const forearmGeo = new THREE.CylinderGeometry(0.08, 0.075, 0.28, 16);
+    const forearmGeo = new THREE.CylinderGeometry(0.078, 0.072, 0.28, 16);
     forearmGeo.translate(0, -0.14, 0);
 
-    const cuffGeo = new THREE.CylinderGeometry(0.085, 0.085, 0.035, 16);
-    const handGeo = new THREE.SphereGeometry(0.065, 16, 16);
-    handGeo.scale(0.8, 1.2, 0.6);
+    const cuffGeo = new THREE.CylinderGeometry(0.082, 0.082, 0.032, 16);
 
     // Left Arm
     const leftArmGroup = new THREE.Group();
-    leftArmGroup.position.set(-0.42, 0.2, 0.02);
+    leftArmGroup.position.set(-0.41, 0.2, 0.02);
     leftArmGroupRef.current = leftArmGroup;
 
     const leftUpperArm = new THREE.Mesh(upperArmGeo, academyNavyMat.clone());
@@ -312,8 +451,9 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
     leftCuff.position.set(0, -0.26, 0);
     leftForearmGroup.add(leftCuff);
 
-    const leftHand = new THREE.Mesh(handGeo, skinMat);
-    leftHand.position.set(0, -0.32, 0);
+    // Realistic Sculpted Left Hand
+    const leftHand = createRealisticHand(true);
+    leftHand.position.set(0, -0.28, 0);
     leftForearmGroup.add(leftHand);
 
     leftArmGroup.add(leftForearmGroup);
@@ -321,7 +461,7 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
 
     // Right Arm
     const rightArmGroup = new THREE.Group();
-    rightArmGroup.position.set(0.42, 0.2, 0.02);
+    rightArmGroup.position.set(0.41, 0.2, 0.02);
     rightArmGroupRef.current = rightArmGroup;
 
     const rightUpperArm = new THREE.Mesh(upperArmGeo, academyNavyMat.clone());
@@ -338,8 +478,9 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
     rightCuff.position.set(0, -0.26, 0);
     rightForearmGroup.add(rightCuff);
 
-    const rightHand = new THREE.Mesh(handGeo, skinMat);
-    rightHand.position.set(0, -0.32, 0);
+    // Realistic Sculpted Right Hand
+    const rightHand = createRealisticHand(false);
+    rightHand.position.set(0, -0.28, 0);
     rightForearmGroup.add(rightHand);
 
     rightArmGroup.add(rightForearmGroup);
@@ -365,196 +506,304 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
     blazerMaterialsRef.current.forEach(m => m.color.setHex(activeOutfitObj.blazerHex));
     trimMaterialsRef.current.forEach(m => m.color.setHex(activeOutfitObj.trimHex));
 
-    // Neck
-    const neckGeo = new THREE.CylinderGeometry(0.14, 0.16, 0.25, 24);
+    // Refined Feminine Neck
+    const neckGeo = new THREE.CylinderGeometry(0.125, 0.145, 0.26, 24);
     const neckMesh = new THREE.Mesh(neckGeo, skinMat);
     neckMesh.position.set(0, 0.42, 0);
     torsoGroup.add(neckMesh);
 
     characterGroup.add(torsoGroup);
 
-    // --- HEAD GROUP ---
+    // --- HEAD GROUP WITH ANATOMICAL FACIAL SCULPTING ---
     const headGroup = new THREE.Group();
     headGroup.position.set(0, 0.28, 0);
     headGroupRef.current = headGroup;
 
-    // Head Base (Smooth sphere)
-    const headGeo = new THREE.SphereGeometry(0.42, 32, 32);
-    headGeo.scale(1, 1.15, 1.05);
+    // 1. Cranium (Oval head base)
+    const headGeo = new THREE.SphereGeometry(0.38, 32, 32);
+    headGeo.scale(0.96, 1.14, 1.02);
     const headMesh = new THREE.Mesh(headGeo, skinMat);
     headGroup.add(headMesh);
 
-    // Cute Cheeks Blush (Left & Right)
-    const cheekGeo = new THREE.SphereGeometry(0.08, 16, 16);
-    cheekGeo.scale(1.2, 0.6, 0.5);
+    // 2. Sculpted Feminine Chin & Tapered Jawline
+    const chinGeo = new THREE.SphereGeometry(0.12, 24, 24);
+    chinGeo.scale(1.05, 0.85, 1.1);
+    const chinMesh = new THREE.Mesh(chinGeo, skinMat);
+    chinMesh.position.set(0, -0.24, 0.26);
+    headGroup.add(chinMesh);
+
+    // Left and Right Jaw Contours
+    const jawGeo = new THREE.CylinderGeometry(0.045, 0.035, 0.22, 16);
+    const leftJaw = new THREE.Mesh(jawGeo, skinMat);
+    leftJaw.position.set(-0.16, -0.16, 0.18);
+    leftJaw.rotation.z = -0.55;
+    leftJaw.rotation.x = 0.25;
+    headGroup.add(leftJaw);
+
+    const rightJaw = new THREE.Mesh(jawGeo, skinMat);
+    rightJaw.position.set(0.16, -0.16, 0.18);
+    rightJaw.rotation.z = 0.55;
+    rightJaw.rotation.x = 0.25;
+    headGroup.add(rightJaw);
+
+    // 3. High Cheekbones & Apple-Cheek Contours with Airbrushed Rosy Blush
+    const cheekGeo = new THREE.SphereGeometry(0.09, 16, 16);
+    cheekGeo.scale(1.15, 0.7, 0.55);
 
     const leftCheek = new THREE.Mesh(cheekGeo, blushMat);
-    leftCheek.position.set(-0.25, -0.06, 0.38);
-    leftCheek.rotation.y = -0.3;
+    leftCheek.position.set(-0.21, -0.04, 0.33);
+    leftCheek.rotation.y = -0.35;
     headGroup.add(leftCheek);
 
     const rightCheek = new THREE.Mesh(cheekGeo, blushMat);
-    rightCheek.position.set(0.25, -0.06, 0.38);
-    rightCheek.rotation.y = 0.3;
+    rightCheek.position.set(0.21, -0.04, 0.33);
+    rightCheek.rotation.y = 0.35;
     headGroup.add(rightCheek);
 
-    // Nose
-    const noseGeo = new THREE.SphereGeometry(0.05, 16, 16);
-    noseGeo.scale(0.8, 1, 1.2);
-    const noseMesh = new THREE.Mesh(noseGeo, skinMat);
-    noseMesh.position.set(0, 0.02, 0.44);
-    headGroup.add(noseMesh);
+    // 4. Sculpted Realistic Feminine Nose (Bridge, Rounded Tip, and Nostril Wings)
+    const noseGroup = new THREE.Group();
+    noseGroup.position.set(0, 0, 0);
 
-    // Mouth
-    const mouthGeo = new THREE.SphereGeometry(0.08, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2);
-    mouthGeo.scale(1.3, 0.6, 0.5);
-    const mouthMesh = new THREE.Mesh(mouthGeo, mouthMat);
-    mouthMesh.position.set(0, -0.16, 0.42);
-    mouthMesh.rotation.x = Math.PI / 2;
-    mouthRef.current = mouthMesh;
-    headGroup.add(mouthMesh);
+    // Nasal Bridge
+    const noseBridgeGeo = new THREE.CylinderGeometry(0.022, 0.038, 0.16, 16);
+    const noseBridgeMesh = new THREE.Mesh(noseBridgeGeo, skinMat);
+    noseBridgeMesh.position.set(0, 0.06, 0.43);
+    noseBridgeMesh.rotation.x = -0.22;
+    noseGroup.add(noseBridgeMesh);
 
-    // --- EYES (Interactive tracking & blinking) ---
-    const createEye = (isLeft: boolean) => {
+    // Rounded Nasal Tip (Lobule)
+    const noseTipGeo = new THREE.SphereGeometry(0.034, 16, 16);
+    noseTipGeo.scale(1.1, 0.95, 1.2);
+    const noseTipMesh = new THREE.Mesh(noseTipGeo, skinMat);
+    noseTipMesh.position.set(0, -0.02, 0.44);
+    noseGroup.add(noseTipMesh);
+
+    // Delicate Nostrils (Alar Wings)
+    const nostrilGeo = new THREE.SphereGeometry(0.022, 12, 12);
+    nostrilGeo.scale(0.8, 0.9, 1.2);
+    
+    const leftNostril = new THREE.Mesh(nostrilGeo, skinMat);
+    leftNostril.position.set(-0.032, -0.028, 0.415);
+    noseGroup.add(leftNostril);
+
+    const rightNostril = new THREE.Mesh(nostrilGeo, skinMat);
+    rightNostril.position.set(0.032, -0.028, 0.415);
+    noseGroup.add(rightNostril);
+
+    headGroup.add(noseGroup);
+
+    // 5. Philtrum Groove & Realistic Expressive Lips
+    const philtrumGeo = new THREE.BoxGeometry(0.02, 0.045, 0.015);
+    const philtrumMesh = new THREE.Mesh(philtrumGeo, skinMat);
+    philtrumMesh.position.set(0, -0.085, 0.41);
+    headGroup.add(philtrumMesh);
+
+    // Mouth Group (Upper lip, Lower lip, and Pearly Teeth)
+    const mouthGroup = new THREE.Group();
+    mouthGroup.position.set(0, -0.145, 0.41);
+
+    // Upper Lip with Cupid's Bow Curve
+    const upperLipGeo = new THREE.CylinderGeometry(0.022, 0.028, 0.11, 16);
+    upperLipGeo.scale(1.1, 0.7, 0.7);
+    const upperLipMesh = new THREE.Mesh(upperLipGeo, lipMat);
+    upperLipMesh.position.set(0, 0.016, 0.005);
+    upperLipMesh.rotation.z = Math.PI / 2;
+    mouthGroup.add(upperLipMesh);
+
+    // Pearly Teeth Row (subtly visible during smile and speech)
+    const teethGeo = new THREE.CylinderGeometry(0.016, 0.016, 0.085, 16, 1, false, 0, Math.PI);
+    const teethMesh = new THREE.Mesh(teethGeo, teethMat);
+    teethMesh.position.set(0, 0.004, -0.008);
+    teethMesh.rotation.x = Math.PI / 2;
+    teethMesh.rotation.z = Math.PI;
+    mouthGroup.add(teethMesh);
+
+    // Lower Pillowed Lip
+    const lowerLipGeo = new THREE.CylinderGeometry(0.028, 0.024, 0.115, 16);
+    lowerLipGeo.scale(1.15, 0.85, 0.85);
+    const lowerLipMesh = new THREE.Mesh(lowerLipGeo, lipMat);
+    lowerLipMesh.position.set(0, -0.018, 0.008);
+    lowerLipMesh.rotation.z = Math.PI / 2;
+    mouthGroup.add(lowerLipMesh);
+
+    mouthRef.current = mouthGroup as any;
+    headGroup.add(mouthGroup);
+
+    // 6. SOULFUL HUMAN EYES (Almond contour, Limbal ring, Wet Specular reflections)
+    const createRealisticEye = (isLeft: boolean) => {
       const eyeGroup = new THREE.Group();
-      const xPos = isLeft ? -0.16 : 0.16;
-      eyeGroup.position.set(xPos, 0.1, 0.37);
+      const xPos = isLeft ? -0.155 : 0.155;
+      eyeGroup.position.set(xPos, 0.095, 0.365);
 
-      // Sclera (White)
-      const scleraGeo = new THREE.SphereGeometry(0.085, 24, 24);
-      scleraGeo.scale(1, 1, 0.6);
-      const scleraMesh = new THREE.Mesh(scleraGeo, whiteMat);
+      // Almond Sclera (Eye White with realistic curvature)
+      const scleraGeo = new THREE.SphereGeometry(0.082, 24, 24);
+      scleraGeo.scale(1.1, 0.95, 0.65);
+      const scleraMesh = new THREE.Mesh(scleraGeo, scleraMat);
       eyeGroup.add(scleraMesh);
 
-      // Iris (Warm Hazel)
-      const irisGeo = new THREE.CylinderGeometry(0.045, 0.045, 0.015, 24);
-      const irisMesh = new THREE.Mesh(irisGeo, eyeIrisMat);
-      irisMesh.position.set(0, 0, 0.045);
-      irisMesh.rotation.x = Math.PI / 2;
-      eyeGroup.add(irisMesh);
+      // Inner Corner Tear Duct (Lacrimal Caruncle)
+      const caruncleGeo = new THREE.SphereGeometry(0.016, 8, 8);
+      const caruncle = new THREE.Mesh(caruncleGeo, caruncleMat);
+      caruncle.position.set(isLeft ? 0.065 : -0.065, -0.008, 0.038);
+      eyeGroup.add(caruncle);
 
-      // Pupil (Dark)
-      const pupilGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.016, 16);
+      // Iris Container (with Dark Limbal Ring + Hazel Golden Amber Depth)
+      const irisGroup = new THREE.Group();
+      irisGroup.position.set(0, 0, 0.046);
+
+      // Dark Limbal Ring (Crucial for realistic human eye depth!)
+      const limbalGeo = new THREE.TorusGeometry(0.044, 0.007, 12, 24);
+      const limbalMesh = new THREE.Mesh(limbalGeo, irisLimbalMat);
+      irisGroup.add(limbalMesh);
+
+      // Warm Hazel Amber Center
+      const irisGeo = new THREE.CircleGeometry(0.044, 24);
+      const irisMesh = new THREE.Mesh(irisGeo, irisMat);
+      irisGroup.add(irisMesh);
+
+      // Deep Black Pupil
+      const pupilGeo = new THREE.CircleGeometry(0.024, 16);
       const pupilMesh = new THREE.Mesh(pupilGeo, pupilMat);
-      pupilMesh.position.set(0, 0, 0.047);
-      pupilMesh.rotation.x = Math.PI / 2;
-      eyeGroup.add(pupilMesh);
+      pupilMesh.position.z = 0.002;
+      irisGroup.add(pupilMesh);
 
-      // Catchlight / Specular Highlight Dot
-      const catchlightGeo = new THREE.SphereGeometry(0.012, 8, 8);
-      const catchlightMesh = new THREE.Mesh(catchlightGeo, whiteMat);
-      catchlightMesh.position.set(0.018, 0.018, 0.055);
-      eyeGroup.add(catchlightMesh);
+      // Primary Crisp Specular Catchlight (Gives living human spark!)
+      const catchlight1Geo = new THREE.SphereGeometry(0.009, 8, 8);
+      const catchlight1 = new THREE.Mesh(catchlight1Geo, catchlightMat);
+      catchlight1.position.set(0.016, 0.016, 0.008);
+      irisGroup.add(catchlight1);
 
-      // Eyelid for Blinking
-      const eyelidGeo = new THREE.SphereGeometry(0.09, 20, 20, 0, Math.PI * 2, 0, Math.PI / 2);
-      eyelidGeo.scale(1.05, 1.05, 0.7);
+      // Secondary Soft Bounce Specular Sparkle
+      const catchlight2Geo = new THREE.SphereGeometry(0.0055, 6, 6);
+      const catchlight2 = new THREE.Mesh(catchlight2Geo, catchlightMat);
+      catchlight2.position.set(-0.014, -0.012, 0.006);
+      irisGroup.add(catchlight2);
+
+      eyeGroup.add(irisGroup);
+
+      // Upper Eyelash Eyeliner Line (Gentle winged natural lash line)
+      const lashGeo = new THREE.TorusGeometry(0.082, 0.011, 8, 16, Math.PI * 0.7);
+      const lashMesh = new THREE.Mesh(lashGeo, lashMat);
+      lashMesh.position.set(0, 0.022, 0.035);
+      lashMesh.rotation.z = isLeft ? -0.15 : Math.PI - 0.15;
+      eyeGroup.add(lashMesh);
+
+      // Supratarsal Eyelid Crease (Double-fold crease)
+      const creaseGeo = new THREE.TorusGeometry(0.088, 0.005, 6, 16, Math.PI * 0.6);
+      const creaseMesh = new THREE.Mesh(creaseGeo, lashMat);
+      creaseMesh.position.set(0, 0.05, 0.028);
+      creaseMesh.rotation.z = isLeft ? -0.18 : Math.PI - 0.18;
+      eyeGroup.add(creaseMesh);
+
+      // Eyelid for Blinking Animation
+      const eyelidGeo = new THREE.SphereGeometry(0.086, 20, 20, 0, Math.PI * 2, 0, Math.PI / 2);
+      eyelidGeo.scale(1.12, 1.02, 0.72);
       const eyelidMesh = new THREE.Mesh(eyelidGeo, skinMat);
-      eyelidMesh.position.set(0, 0.01, 0.02);
+      eyelidMesh.position.set(0, 0.01, 0.022);
       eyelidMesh.rotation.x = -Math.PI / 2;
       eyelidMesh.scale.set(1, 0.05, 1); // Start open
       eyeGroup.add(eyelidMesh);
 
-      // Eyebrow (Warm natural dark brown)
-      const browGeo = new THREE.TorusGeometry(0.08, 0.014, 8, 16, Math.PI / 1.5);
+      // Feathered Arched Dark Chestnut Eyebrow
+      const browGeo = new THREE.TorusGeometry(0.084, 0.013, 8, 16, Math.PI / 1.5);
       const browMesh = new THREE.Mesh(browGeo, eyebrowMat);
       browMesh.position.set(0, 0.11, 0.03);
-      browMesh.rotation.z = isLeft ? -0.15 : Math.PI - 0.15;
+      browMesh.rotation.z = isLeft ? -0.16 : Math.PI - 0.16;
       eyeGroup.add(browMesh);
 
-      return { eyeGroup, eyelidMesh, pupilMesh };
+      return { eyeGroup, eyelidMesh, pupilMesh: irisGroup as any };
     };
 
-    const leftEye = createEye(true);
+    const leftEye = createRealisticEye(true);
     leftEyeRef.current = leftEye.eyeGroup;
     leftEyelidRef.current = leftEye.eyelidMesh;
     leftPupilRef.current = leftEye.pupilMesh;
     headGroup.add(leftEye.eyeGroup);
 
-    const rightEye = createEye(false);
+    const rightEye = createRealisticEye(false);
     rightEyeRef.current = rightEye.eyeGroup;
     rightEyelidRef.current = rightEye.eyelidMesh;
     rightPupilRef.current = rightEye.pupilMesh;
     headGroup.add(rightEye.eyeGroup);
 
-    // --- STYLISH SMART GLASSES (Gold frames) ---
+    // 7. ULTRA-SLENDER DELICATE GOLD GLASSES (Intelligent educator framing)
     const glassesGroup = new THREE.Group();
-    glassesGroup.position.set(0, 0.1, 0.44);
+    glassesGroup.position.set(0, 0.095, 0.435);
 
-    const glassRimGeo = new THREE.TorusGeometry(0.095, 0.009, 12, 24);
+    const glassRimGeo = new THREE.TorusGeometry(0.092, 0.006, 12, 24);
     const leftRim = new THREE.Mesh(glassRimGeo, academyGoldMat);
-    leftRim.position.set(-0.16, 0, 0);
+    leftRim.position.set(-0.155, 0, 0);
     glassesGroup.add(leftRim);
 
     const rightRim = new THREE.Mesh(glassRimGeo, academyGoldMat);
-    rightRim.position.set(0.16, 0, 0);
+    rightRim.position.set(0.155, 0, 0);
     glassesGroup.add(rightRim);
 
-    // Glasses Bridge
-    const bridgeGeo = new THREE.CylinderGeometry(0.008, 0.008, 0.08, 8);
+    // Slender Glasses Bridge
+    const bridgeGeo = new THREE.CylinderGeometry(0.0055, 0.0055, 0.075, 8);
     const bridgeMesh = new THREE.Mesh(bridgeGeo, academyGoldMat);
     bridgeMesh.rotation.z = Math.PI / 2;
-    bridgeMesh.position.set(0, 0.015, 0.005);
+    bridgeMesh.position.set(0, 0.012, 0.005);
     glassesGroup.add(bridgeMesh);
 
     headGroup.add(glassesGroup);
 
-    // --- PURE WHITE ELEGANT HIJAB & FACE FRAMING (محيط الوجه أبيض ناصع) ---
+    // --- PURE WHITE ELEGANT HIJAB & NATURAL SOFT DRAPERY ---
     // 1. Soft Radiant White Luminous Halo behind Sara's head
     const headHaloGeo = new THREE.CircleGeometry(0.72, 32);
     const headHaloMat = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       transparent: true,
-      opacity: 0.25,
+      opacity: 0.22,
       blending: THREE.AdditiveBlending
     });
     const headHaloMesh = new THREE.Mesh(headHaloGeo, headHaloMat);
     headHaloMesh.position.set(0, 0.28, -0.25);
     characterGroup.add(headHaloMesh);
 
-    // 2. Main Pure White Hijab Volume covering head & framing face
-    const hijabGeo = new THREE.SphereGeometry(0.48, 32, 32, 0, Math.PI * 2, 0, Math.PI * 0.78);
-    hijabGeo.scale(1.04, 1.18, 1.08);
+    // 2. Main Pure White Hijab Volume covering head & framing face naturally
+    const hijabGeo = new THREE.SphereGeometry(0.46, 32, 32, 0, Math.PI * 2, 0, Math.PI * 0.78);
+    hijabGeo.scale(1.02, 1.16, 1.06);
     const hijabMesh = new THREE.Mesh(hijabGeo, whiteHijabMat);
     hijabMesh.position.set(0, 0.05, -0.05);
     headGroup.add(hijabMesh);
 
-    // 3. Pure White Forehead Undercap Band framing upper face
-    const foreheadBandGeo = new THREE.TorusGeometry(0.44, 0.04, 16, 32);
+    // 3. Pure White Forehead Undercap Band framing upper face cleanly
+    const foreheadBandGeo = new THREE.TorusGeometry(0.42, 0.035, 16, 32);
     const foreheadBandMesh = new THREE.Mesh(foreheadBandGeo, whiteHijabMat);
     foreheadBandMesh.position.set(0, 0.22, 0.08);
     foreheadBandMesh.rotation.x = Math.PI / 4.2;
     headGroup.add(foreheadBandMesh);
 
-    // 4. Elegant Academy Gold Trim ribbon on the white band
-    const goldTrimGeo = new THREE.TorusGeometry(0.45, 0.012, 12, 32);
+    // 4. Subtle Natural Warm Espresso Baby Hair wisps peeking beneath band
+    const fringeGeo = new THREE.SphereGeometry(0.11, 16, 16);
+    fringeGeo.scale(1.2, 0.45, 0.45);
+    const fringeMesh = new THREE.Mesh(fringeGeo, hairMat);
+    fringeMesh.position.set(0, 0.36, 0.33);
+    fringeMesh.rotation.z = 0.08;
+    headGroup.add(fringeMesh);
+
+    // 5. Elegant Academy Gold Trim ribbon on the white band
+    const goldTrimGeo = new THREE.TorusGeometry(0.43, 0.009, 12, 32);
     const goldTrimMesh = new THREE.Mesh(goldTrimGeo, academyGoldMat);
     goldTrimMesh.position.set(0, 0.23, 0.09);
     goldTrimMesh.rotation.x = Math.PI / 4.2;
     headGroup.add(goldTrimMesh);
 
-    // 5. Pure White Chin & Jaw Wrap framing lower face
-    const chinWrapGeo = new THREE.TorusGeometry(0.26, 0.065, 16, 32);
+    // 6. Pure White Chin & Jaw Wrap framing lower face softly
+    const chinWrapGeo = new THREE.TorusGeometry(0.24, 0.055, 16, 32);
     chinWrapGeo.scale(1.05, 0.65, 1.15);
     const chinWrapMesh = new THREE.Mesh(chinWrapGeo, whiteHijabMat);
-    chinWrapMesh.position.set(0, -0.18, 0.22);
+    chinWrapMesh.position.set(0, -0.19, 0.22);
     chinWrapMesh.rotation.x = Math.PI / 3.4;
     headGroup.add(chinWrapMesh);
 
-    // 6. Pure White Neck & Shoulder Drape
-    const shoulderDrapeGeo = new THREE.CylinderGeometry(0.28, 0.44, 0.26, 32, 1, false, 0, Math.PI * 1.4);
+    // 7. Pure White Layered Fabric Drapery over Neck & Shoulders
+    const shoulderDrapeGeo = new THREE.CylinderGeometry(0.26, 0.42, 0.28, 32, 1, false, 0, Math.PI * 1.5);
     const shoulderDrapeMesh = new THREE.Mesh(shoulderDrapeGeo, whiteHijabMat);
     shoulderDrapeMesh.position.set(0, 0.16, 0.06);
     shoulderDrapeMesh.rotation.y = Math.PI * 0.8;
     torsoGroup.add(shoulderDrapeMesh);
-
-    // 7. Subtle natural warm hair peek beneath white band
-    const fringeGeo = new THREE.SphereGeometry(0.12, 16, 16);
-    fringeGeo.scale(1.3, 0.5, 0.5);
-    const fringeMesh = new THREE.Mesh(fringeGeo, hairMat);
-    fringeMesh.position.set(0, 0.38, 0.34);
-    fringeMesh.rotation.z = 0.08;
-    headGroup.add(fringeMesh);
 
     characterGroup.add(headGroup);
 
@@ -571,6 +820,7 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
     });
     const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
     shadowMesh.rotation.x = -Math.PI / 2;
+    shadowMeshRef.current = shadowMesh;
     baseGroup.add(shadowMesh);
 
     // Glowing Holographic Golden Ring
@@ -634,26 +884,70 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
       const delta = clock.getDelta();
       const time = clock.getElapsedTime();
 
-      // 1. Idle Floating Bobbing
+      // --- PHYSICAL SPRING & GRAVITY INTEGRATION ---
+      const dt = Math.min(delta, 0.04);
+      const p = physicsRef.current;
+
+      // Natural harmonic oscillator constants (k = stiffness, c = damping)
+      const springK = 16.0;
+      const damping = 4.2;
+
+      // 1. Vertical axis: gravity displacement & spring recovery
+      const effectiveTargetY = isDragging ? p.targetY : 0;
+      const diffY = p.y - effectiveTargetY;
+      const ay = -springK * diffY - damping * p.vy;
+      p.vy += ay * dt;
+      p.y += p.vy * dt;
+
+      // 2. Pitch axis (rotation X): leaning forward/backward with inertia
+      const effectiveTargetPitch = isDragging ? p.targetPitch : 0;
+      const diffPitch = p.pitch - effectiveTargetPitch;
+      const aPitch = -springK * diffPitch - damping * p.vPitch;
+      p.vPitch += aPitch * dt;
+      p.pitch += p.vPitch * dt;
+
+      // 3. Roll axis (rotation Z): lateral sway & tilt with inertia
+      const effectiveTargetRoll = isDragging ? p.targetRoll : 0;
+      const diffRoll = p.roll - effectiveTargetRoll;
+      const aRoll = -springK * diffRoll - damping * p.vRoll;
+      p.vRoll += aRoll * dt;
+      p.roll += p.vRoll * dt;
+
+      // 4. Secondary organic head lag (elastic neck follow-through)
+      p.headRollLag += (-p.roll * 0.35 - p.headRollLag) * (dt * 10);
+      p.headPitchLag += (-p.pitch * 0.25 - p.headPitchLag) * (dt * 10);
+
+      // 5. Kinetic energy spin boost decay
+      p.spinBoost = Math.max(0, p.spinBoost - dt * 1.4);
+
+      // 1. Idle Floating Bobbing + Physics Gravity displacement
       if (characterGroupRef.current) {
         const floatY = Math.sin(time * 2.2) * 0.045;
-        characterGroupRef.current.position.y = floatY;
+        characterGroupRef.current.position.y = floatY + p.y;
         
-        // Gentle breathing rotation
+        // Gentle breathing rotation combined with physics roll and pitch
         characterGroupRef.current.rotation.y = Math.sin(time * 0.8) * 0.04;
+        characterGroupRef.current.rotation.z = p.roll;
+        characterGroupRef.current.rotation.x = p.pitch;
       }
 
-      // Rotate glowing halo ring
+      // Rotate glowing halo ring (speeds up with touch/movement physics energy)
       if (haloRingRef.current) {
-        haloRingRef.current.rotation.z = time * 0.6;
+        haloRingRef.current.rotation.z = time * 0.6 + p.spinBoost * 1.8;
       }
 
-      // Animate floating sparkles
+      // Dynamic scale of ground contact shadow matching gravity distance
+      if (shadowMeshRef.current) {
+        const shadowScale = Math.max(0.65, Math.min(1.35, 1.0 - p.y * 1.5));
+        shadowMeshRef.current.scale.set(shadowScale, shadowScale, shadowScale);
+      }
+
+      // Animate floating sparkles (speeds up with physics interaction)
       if (particlesGroupRef.current) {
-        particlesGroupRef.current.rotation.y = time * 0.15;
+        particlesGroupRef.current.rotation.y = time * 0.15 + p.spinBoost * 1.2;
       }
 
-      // 2. Eye & Head Tracking Cursor
+      // 2. Eye & Head Tracking Cursor + Secondary Organic Physics Lag
       if (headGroupRef.current) {
         const targetHeadRotY = mouseCoords.current.x * 0.25;
         const targetHeadRotX = -mouseCoords.current.y * 0.18;
@@ -670,6 +964,10 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
         } else {
           headGroupRef.current.rotation.z = Math.sin(time * 1.5) * 0.015;
         }
+
+        // Add secondary inertial head compliance
+        headGroupRef.current.rotation.z += p.headRollLag;
+        headGroupRef.current.rotation.x += p.headPitchLag;
       }
 
       // 3. Eye Pupil Tracking
@@ -707,21 +1005,21 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
         }
       }
 
-      // 5. Mouth Speech Animation (Viseme Phonemes)
+      // 5. Natural Mouth Speech Animation (Viseme Phonemes)
       if (mouthRef.current) {
         if (currentEmotion === 'speaking') {
           // Open/close mouth rhythmically with voice
-          const speechOpen = Math.abs(Math.sin(time * 14)) * 0.9 + Math.abs(Math.cos(time * 7)) * 0.4;
-          mouthRef.current.scale.y = 0.6 + speechOpen * 1.2;
-          mouthRef.current.scale.x = 1.3 - speechOpen * 0.25;
+          const speechOpen = Math.abs(Math.sin(time * 14)) * 0.45 + Math.abs(Math.cos(time * 7)) * 0.25;
+          mouthRef.current.scale.y = 1.0 + speechOpen * 0.85;
+          mouthRef.current.scale.x = 1.0 - speechOpen * 0.1;
 
-          // Enthusiastic head bobbing while speaking
+          // Enthusiastic gentle head movement while speaking
           if (headGroupRef.current) {
-            headGroupRef.current.position.y = 0.28 + Math.sin(time * 12) * 0.015;
+            headGroupRef.current.position.y = 0.28 + Math.sin(time * 12) * 0.01;
           }
         } else {
-          // Warm resting smile
-          mouthRef.current.scale.set(1.3, 0.45, 0.5);
+          // Warm natural resting smile
+          mouthRef.current.scale.set(1.0, 1.0, 1.0);
           if (headGroupRef.current) {
             headGroupRef.current.position.y = 0.28;
           }
@@ -787,7 +1085,7 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
     };
   }, [isOpen, isMinimized, currentEmotion, activeGesture, activeOutfit]);
 
-  // Handle Dragging (Mouse & Touch for Mobile)
+  // Handle Dragging (Mouse & Touch for Mobile / Tablet) with Velocity & Physics
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     hasDraggedRef.current = false;
@@ -797,23 +1095,57 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
       posX: position?.x || 0,
       posY: position?.y || 0
     };
+    const p = physicsRef.current;
+    p.lastClientX = e.clientX;
+    p.lastClientY = e.clientY;
+    p.lastTimestamp = performance.now();
+    p.dragVx = 0;
+    p.dragVy = 0;
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 0) return;
     setIsDragging(true);
     hasDraggedRef.current = false;
+    const touch = e.touches[0];
     dragStartRef.current = {
-      mouseX: e.touches[0].clientX,
-      mouseY: e.touches[0].clientY,
+      mouseX: touch.clientX,
+      mouseY: touch.clientY,
       posX: position?.x || 0,
       posY: position?.y || 0
     };
+    touchTapCoordsRef.current = { clientX: touch.clientX, clientY: touch.clientY };
+    const p = physicsRef.current;
+    p.lastClientX = touch.clientX;
+    p.lastClientY = touch.clientY;
+    p.lastTimestamp = performance.now();
+    p.dragVx = 0;
+    p.dragVy = 0;
   };
 
-  const handleCanvasClick = () => {
-    if (hasDraggedRef.current) return;
-    onCharacterClick();
+  // Click handler on canvas with touch poke physics impulse
+  const handleCanvasClick = (e: React.MouseEvent) => {
+    if (hasDraggedRef.current || suppressNextClickRef.current) return;
+
+    if (mountRef.current) {
+      const rect = mountRef.current.getBoundingClientRect();
+      const normX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const normY = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+
+      // Downward gravity dip + lateral and pitch recoil based on touch location
+      const impulseY = -0.16;
+      const impulsePitch = normY * 0.22;
+      const impulseRoll = -normX * 0.28;
+
+      applyPhysicsImpulse(impulseY, impulsePitch, impulseRoll, 2.0);
+
+      // Subtle haptic response on supported devices
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        try { navigator.vibrate(15); } catch (_) {}
+      }
+    }
+
+    onCharacterClick?.();
   };
 
   useEffect(() => {
@@ -824,6 +1156,25 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
       if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
         hasDraggedRef.current = true;
       }
+
+      // Physics velocity tracking
+      const now = performance.now();
+      const p = physicsRef.current;
+      const dt = Math.max(1, now - p.lastTimestamp);
+      const vx = ((e.clientX - p.lastClientX) / dt) * 1000;
+      const vy = ((e.clientY - p.lastClientY) / dt) * 1000;
+
+      p.dragVx = p.dragVx * 0.6 + vx * 0.4;
+      p.dragVy = p.dragVy * 0.6 + vy * 0.4;
+      p.lastClientX = e.clientX;
+      p.lastClientY = e.clientY;
+      p.lastTimestamp = now;
+
+      // Realistic inertia: lean away from acceleration + compress against gravity
+      p.targetRoll = Math.max(-0.35, Math.min(0.35, -p.dragVx * 0.00035));
+      p.targetPitch = Math.max(-0.35, Math.min(0.35, p.dragVy * 0.00035));
+      p.targetY = Math.max(-0.16, Math.min(0.16, -p.dragVy * 0.00018));
+
       setPosition({
         x: dragStartRef.current.posX + deltaX,
         y: dragStartRef.current.posY + deltaY
@@ -832,11 +1183,30 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
 
     const handleTouchMove = (e: TouchEvent) => {
       if (!isDragging || e.touches.length === 0) return;
-      const deltaX = e.touches[0].clientX - dragStartRef.current.mouseX;
-      const deltaY = e.touches[0].clientY - dragStartRef.current.mouseY;
+      const touch = e.touches[0];
+      const deltaX = touch.clientX - dragStartRef.current.mouseX;
+      const deltaY = touch.clientY - dragStartRef.current.mouseY;
       if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
         hasDraggedRef.current = true;
       }
+
+      // Physics velocity tracking for touch
+      const now = performance.now();
+      const p = physicsRef.current;
+      const dt = Math.max(1, now - p.lastTimestamp);
+      const vx = ((touch.clientX - p.lastClientX) / dt) * 1000;
+      const vy = ((touch.clientY - p.lastClientY) / dt) * 1000;
+
+      p.dragVx = p.dragVx * 0.6 + vx * 0.4;
+      p.dragVy = p.dragVy * 0.6 + vy * 0.4;
+      p.lastClientX = touch.clientX;
+      p.lastClientY = touch.clientY;
+      p.lastTimestamp = now;
+
+      p.targetRoll = Math.max(-0.35, Math.min(0.35, -p.dragVx * 0.00035));
+      p.targetPitch = Math.max(-0.35, Math.min(0.35, p.dragVy * 0.00035));
+      p.targetY = Math.max(-0.16, Math.min(0.16, -p.dragVy * 0.00018));
+
       setPosition({
         x: dragStartRef.current.posX + deltaX,
         y: dragStartRef.current.posY + deltaY
@@ -845,10 +1215,60 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
 
     const handleMouseUp = () => {
       setIsDragging(false);
+      const p = physicsRef.current;
+      p.targetRoll = 0;
+      p.targetPitch = 0;
+      p.targetY = 0;
+
+      // Transfer release momentum into natural spring oscillation
+      const speed = Math.hypot(p.dragVx, p.dragVy);
+      if (speed > 80) {
+        p.vRoll += Math.max(-1.4, Math.min(1.4, -p.dragVx * 0.001));
+        p.vPitch += Math.max(-1.4, Math.min(1.4, p.dragVy * 0.001));
+        p.vy += Math.max(-0.25, Math.min(0.25, -p.dragVy * 0.00035));
+        p.spinBoost = Math.min(3.5, p.spinBoost + speed * 0.0015);
+      }
     };
 
     const handleTouchEnd = () => {
       setIsDragging(false);
+      const p = physicsRef.current;
+      p.targetRoll = 0;
+      p.targetPitch = 0;
+      p.targetY = 0;
+
+      if (!hasDraggedRef.current) {
+        // Touch poke on tablet / mobile without drag movement
+        if (mountRef.current) {
+          const rect = mountRef.current.getBoundingClientRect();
+          const normX = ((touchTapCoordsRef.current.clientX - rect.left) / rect.width) * 2 - 1;
+          const normY = -(((touchTapCoordsRef.current.clientY - rect.top) / rect.height) * 2 - 1);
+
+          const impulseY = -0.16;
+          const impulsePitch = normY * 0.22;
+          const impulseRoll = -normX * 0.28;
+
+          applyPhysicsImpulse(impulseY, impulsePitch, impulseRoll, 2.0);
+
+          if (typeof navigator !== 'undefined' && navigator.vibrate) {
+            try { navigator.vibrate(15); } catch (_) {}
+          }
+        }
+        suppressNextClickRef.current = true;
+        setTimeout(() => {
+          suppressNextClickRef.current = false;
+        }, 350);
+        onCharacterClick?.();
+      } else {
+        // Transfer release momentum
+        const speed = Math.hypot(p.dragVx, p.dragVy);
+        if (speed > 80) {
+          p.vRoll += Math.max(-1.4, Math.min(1.4, -p.dragVx * 0.001));
+          p.vPitch += Math.max(-1.4, Math.min(1.4, p.dragVy * 0.001));
+          p.vy += Math.max(-0.25, Math.min(0.25, -p.dragVy * 0.00035));
+          p.spinBoost = Math.min(3.5, p.spinBoost + speed * 0.0015);
+        }
+      }
     };
 
     if (isDragging) {
@@ -1022,6 +1442,23 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Gravity & Physics Interactive Poke Button */}
+              <div className="flex items-center justify-between pt-1 border-t border-white/10 text-[10px]">
+                <span className="text-amber-200/80 font-bold">{isRtl ? 'تفاعل الجاذبية:' : 'Physics Poke:'}</span>
+                <button
+                  onClick={() => {
+                    applyPhysicsImpulse(-0.18, 0.22, (Math.random() - 0.5) * 0.35, 2.5);
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                      try { navigator.vibrate(15); } catch (_) {}
+                    }
+                  }}
+                  className="px-2 py-0.5 rounded-lg bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 font-bold border border-amber-400/30 transition-all cursor-pointer hover:scale-105 active:scale-95"
+                  title={isRtl ? 'اهتزاز وفيزياء الجاذبية' : 'Trigger gravity bounce'}
+                >
+                  {isRtl ? 'اهتزاز تفاعلي 🎈' : 'Bounce / Jiggle 🎈'}
+                </button>
               </div>
 
               {position && (
