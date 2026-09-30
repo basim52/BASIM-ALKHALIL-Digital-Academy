@@ -1106,7 +1106,7 @@ Looking forward to your reply. Tell me what we're tackling first!`;
       }
 
       const uid = decodedToken.uid;
-      const { message, snapshot, history = [], rolePlay, hesitationDetected, preferredLang = 'ar' } = req.body;
+      const { message, snapshot, history = [], rolePlay, hesitationDetected, preferredLang = 'ar', activeCurriculum } = req.body;
 
       // Determine today's date in Asia/Riyadh timezone for daily count capping
       const nowRiyadhDate = (() => {
@@ -1230,6 +1230,20 @@ ${hesitationDetected ? `
 STUDENT HESITATION DETECTED:
 - The student hesitated or paused in silence.
 - Give a gentle, 1-sentence warm reassurance in Arabic & English ("Take your time! Want a hint?" or "خذ وقتك يا بطل!"), then gently give a helpful prompt or starter phrase.
+` : ''}
+${activeCurriculum ? `
+ACTIVE ACADEMY CURRICULUM LESSON (المنهج الأكاديمي المختار حالياً للشرح):
+- The student is actively learning this specific curriculum lesson from Basim Alkhalil Academy:
+  * Course / Department: "${activeCurriculum.courseLabelAr || activeCurriculum.courseLabelEn || activeCurriculum.pillarId}"
+  * Lesson Title (Ar): "${activeCurriculum.titleAr}"
+  * Lesson Title (En): "${activeCurriculum.titleEn}"
+  * CEFR Level: "${activeCurriculum.level || 'All'}"
+  * Curriculum Topic: "${activeCurriculum.descriptionAr || activeCurriculum.descriptionEn || 'Core Academy Curriculum'}"
+- TEACHING DIRECTIVE:
+  * You are the dedicated personal tutor for THIS SPECIFIC CURRICULUM LESSON.
+  * Answer the student's questions in direct connection with this curriculum lesson.
+  * Populate the "board" with clear rule formulas, illustrative examples, and a quiz testing this exact lesson concept.
+  * In "board.voiceExplanation", give an encouraging spoken teacher explanation walking the student through the chalkboard.
 ` : ''}
 
 SECTION WHITELIST for "actions" (ONLY use these sectionId values):

@@ -43,6 +43,12 @@ import {
   COOKING_CHALLENGES_DATA 
 } from '../data/interactiveCurriculum';
 import { LANGUAGE_LAB_DATA } from '../data/languageLabData';
+import { COURSES } from '../data/courses';
+import { PRODUCED_VIDEO_LESSONS } from '../data/producedVideoLessons';
+import { KIDS_STORIES_EXTRA } from '../data/kidsStories_extra';
+import { ADULTS_DAILY_DOSES_EXTRA } from '../data/adultsDailyDose_extra';
+import { MASTER_CURRICULUM } from '../data/masterCurriculum';
+import { CurriculumCategory, proficiencyLevel } from '../types';
 
 export interface CurriculumLesson {
   id: string;
@@ -217,6 +223,30 @@ export const ACADEMIC_SECTION_DEFINITIONS: PillarCategoryDefinition[] = [
     bgLight: 'bg-teal-50',
     borderColor: 'border-teal-200',
     tagColor: 'bg-teal-100 text-teal-800'
+  },
+  {
+    id: 'book_courses',
+    nameAr: 'مناهج الكتب العالمية وتطوير الذات',
+    nameEn: 'Bestseller Books & Self-Development',
+    descAr: 'دروس مستخلصة من أمهات الكتب العالمية: العادات الذرية، العادات السبع، الأب الغني، فن اللامبالاة، وقوة الآن',
+    descEn: 'Master lessons distilled from bestselling books: Atomic Habits, 7 Habits, Rich Dad Poor Dad, and more',
+    iconName: 'BookMarked',
+    color: 'text-amber-700',
+    bgLight: 'bg-amber-50',
+    borderColor: 'border-amber-300',
+    tagColor: 'bg-amber-100 text-amber-900'
+  },
+  {
+    id: 'video_lessons',
+    nameAr: 'المناهج المرئية والاستوديو المصور',
+    nameEn: 'Cinematic Video Lessons & Storyboards',
+    descAr: 'مشاهد وسيناريوهات مصورة من شوارع لندن، المطار، والمكاتب مع حوارات ومواقف اجتماعية حية',
+    descEn: 'Real-world video lessons from London streets, airports, and workspaces with interactive scenes',
+    iconName: 'Video',
+    color: 'text-rose-600',
+    bgLight: 'bg-rose-50',
+    borderColor: 'border-rose-200',
+    tagColor: 'bg-rose-100 text-rose-800'
   }
 ];
 
@@ -446,7 +476,7 @@ export function getAllCurriculumLessons(): CurriculumLesson[] {
   });
 
   // 9. KIDS & JUNIOR STORIES
-  KIDS_STORIES.forEach(s => {
+  [...KIDS_STORIES, ...KIDS_STORIES_EXTRA].forEach(s => {
     all.push({
       id: s.lesson_id,
       pillarId: 'kids_stories',
@@ -465,7 +495,7 @@ export function getAllCurriculumLessons(): CurriculumLesson[] {
   });
 
   // 10. DAILY DOSE & ERROR CLINIC
-  ADULTS_DAILY_DOSES.forEach(d => {
+  [...ADULTS_DAILY_DOSES, ...ADULTS_DAILY_DOSES_EXTRA].forEach(d => {
     all.push({
       id: d.lesson_id,
       pillarId: 'daily_dose',
@@ -626,6 +656,53 @@ export function getAllCurriculumLessons(): CurriculumLesson[] {
       duration: '30 min',
       categoryTagAr: 'مختبر لغة',
       categoryTagEn: 'Language Lab'
+    });
+  });
+
+  // 13. WORLD BOOK COURSES & SELF-DEVELOPMENT
+  COURSES.forEach(book => {
+    const courseShortAr = book.titleAr.includes(':') ? book.titleAr.split(':')[0] : book.titleAr;
+    const courseShortEn = book.titleEn.includes(':') ? book.titleEn.split(':')[0] : book.titleEn;
+
+    book.chapters.forEach(ch => {
+      ch.lessons.forEach(lesson => {
+        all.push({
+          id: `${book.id}__${lesson.id}`,
+          pillarId: 'book_courses',
+          courseId: book.id,
+          courseLabelAr: courseShortAr,
+          courseLabelEn: courseShortEn,
+          titleAr: `${lesson.titleAr}`,
+          titleEn: `${lesson.titleEn}`,
+          descriptionAr: lesson.contentAr ? lesson.contentAr.slice(0, 160) + '...' : `درس من كتاب ${book.titleAr} للمؤلف ${book.authorAr}`,
+          descriptionEn: lesson.contentEn ? lesson.contentEn.slice(0, 160) + '...' : `Lesson from ${book.titleEn} by ${book.authorEn}`,
+          level: 'B2',
+          duration: lesson.duration || '20 min',
+          categoryTagAr: 'كتب عالمية',
+          categoryTagEn: 'Bestseller Books'
+        });
+      });
+    });
+  });
+
+  // 14. CINEMATIC PRODUCED VIDEO LESSONS & SCENARIOS
+  PRODUCED_VIDEO_LESSONS.forEach(vid => {
+    vid.scenes.forEach(scene => {
+      all.push({
+        id: `${vid.id}__scene_${scene.sceneNumber}`,
+        pillarId: 'video_lessons',
+        courseId: vid.id,
+        courseLabelAr: vid.titleAr,
+        courseLabelEn: vid.titleEn,
+        titleAr: `المشهد ${scene.sceneNumber}: ${scene.titleAr}`,
+        titleEn: `Scene ${scene.sceneNumber}: ${scene.titleEn}`,
+        descriptionAr: scene.narration?.ar || vid.summaryAr,
+        descriptionEn: scene.narration?.en || vid.summaryEn,
+        level: vid.level,
+        duration: vid.duration,
+        categoryTagAr: 'دروس مرئية',
+        categoryTagEn: 'Video Lesson'
+      });
     });
   });
 

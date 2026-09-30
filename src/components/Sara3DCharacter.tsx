@@ -49,6 +49,7 @@ interface Sara3DCharacterProps {
   isExplainingWhiteboard?: boolean;
   currentLang?: 'ar' | 'en';
   onToggleLang?: () => void;
+  onOpenCurriculum?: () => void;
 }
 
 export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
@@ -64,7 +65,8 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
   isWhiteboardOpen = false,
   isExplainingWhiteboard = false,
   currentLang = 'ar',
-  onToggleLang
+  onToggleLang,
+  onOpenCurriculum
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const [isMinimized, setIsMinimized] = useState<boolean>(() => {
@@ -1502,6 +1504,25 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
                   >
                     <span>🌐</span>
                     <span>{currentLang === 'ar' ? 'العربية 🇸🇦' : 'English 🇬🇧'}</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Academy Curriculums Hub Shortcut */}
+              {onOpenCurriculum && (
+                <div className="flex items-center justify-between pt-1 border-t border-white/10 text-[10px]">
+                  <span className="text-amber-200/80 font-bold">{isRtl ? 'المناهج:' : 'Curricula:'}</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowQuickMenu(false);
+                      onOpenCurriculum();
+                    }}
+                    className="px-2 py-0.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-black border border-amber-300 flex items-center gap-1 transition-all cursor-pointer active:scale-95 shadow-xs"
+                    title={isRtl ? 'استعراض واختيار المناهج مع سارة' : 'Browse Curriculums'}
+                  >
+                    <span>📚</span>
+                    <span>{isRtl ? 'مناهج الأكاديمية' : 'Curriculums'}</span>
                   </button>
                 </div>
               )}

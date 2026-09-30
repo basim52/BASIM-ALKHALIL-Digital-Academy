@@ -65,6 +65,7 @@ interface SmartWhiteboardProps {
   onSaraTriggerGesture?: (gesture: string) => void;
   currentLang?: 'ar' | 'en';
   onToggleLang?: () => void;
+  onOpenCurriculum?: () => void;
 }
 
 // ========================================================
@@ -341,7 +342,8 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   isSara3DOpen = true,
   onSaraTriggerGesture,
   currentLang = 'ar',
-  onToggleLang
+  onToggleLang,
+  onOpenCurriculum
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -2039,6 +2041,18 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               >
                 <span>🌐</span>
                 <span className="text-[11px] font-black">{currentLang === 'ar' ? 'English 🇬🇧' : 'عربي 🇸🇦'}</span>
+              </button>
+            )}
+
+            {/* Select / Change Academy Curriculum on Whiteboard */}
+            {onOpenCurriculum && (
+              <button
+                onClick={onOpenCurriculum}
+                className="px-2 sm:px-2.5 py-1.5 rounded-xl border border-amber-400/50 bg-amber-400/20 hover:bg-amber-400/35 text-amber-200 hover:text-white text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+                title={isRtl ? 'استعراض واختيار مناهج الأكاديمية لشرحها على السبورة' : 'Select Academy Curriculum'}
+              >
+                <span>📚</span>
+                <span className="hidden sm:inline">{isRtl ? 'المناهج' : 'Curricula'}</span>
               </button>
             )}
 
