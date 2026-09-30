@@ -24,7 +24,14 @@ import {
   Redo2,
   CircleDot,
   LayoutTemplate,
-  Smile
+  Smile,
+  ZoomIn,
+  ZoomOut,
+  Scaling,
+  Minus,
+  Plus,
+  GripHorizontal,
+  Move
 } from 'lucide-react';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 import { SaraBoardData } from '../types';
@@ -280,6 +287,24 @@ export const WHITEBOARD_TEMPLATES: WhiteboardTemplate[] = [
 
 export const KID_STICKERS = ['⭐', '🏆', '👑', '💖', '👍', '🔥', '💡', '💯', '🚀', '🌈', '🎓', '🌟'];
 
+export interface BoardSizePreset {
+  id: string;
+  nameAr: string;
+  nameEn: string;
+  width: number;
+  height: number;
+  icon: string;
+  descAr: string;
+  descEn: string;
+}
+
+export const BOARD_SIZE_PRESETS: BoardSizePreset[] = [
+  { id: 'compact', nameAr: 'مصغرة (بجانب المحادثة)', nameEn: 'Compact (Side-by-side)', width: 540, height: 480, icon: '📱', descAr: 'صغيرة لا تحجب المحادثة', descEn: 'Small, fits beside chat' },
+  { id: 'standard', nameAr: 'عادية (متوازنة افتراضية)', nameEn: 'Standard (Default)', width: 780, height: 600, icon: '💻', descAr: 'المقاس الكلاسيكي المتوازن', descEn: 'Balanced standard view' },
+  { id: 'large', nameAr: 'مكبرة (مساحة شرح واسعة)', nameEn: 'Large (Spacious)', width: 980, height: 720, icon: '🖥️', descAr: 'مساحة واسعة للرسومات والشرح', descEn: 'Spacious for notes & diagrams' },
+  { id: 'wide', nameAr: 'عريضة جداً (استوديو سبورة)', nameEn: 'Ultra Wide (Studio)', width: 1200, height: 800, icon: '📐', descAr: 'أقصى مساحة للكتابة والتلوين', descEn: 'Maximum room for drawing' },
+];
+
 export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   isOpen,
   onClose,
@@ -308,12 +333,150 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   const [redoHistory, setRedoHistory] = useState<ImageData[]>([]);
   
   const [isMaximized, setIsMaximized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [mobileMode, setMobileMode] = useState<'fullscreen' | 'half'>('fullscreen');
   const [activeTab, setActiveTab] = useState<'content' | 'draw'>('content');
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
   const [showBrushSizePopover, setShowBrushSizePopover] = useState(false);
   const [showTemplatePicker, setShowTemplatePicker] = useState<boolean>(false);
   const [showStickerPicker, setShowStickerPicker] = useState<boolean>(false);
   
+  // Custom Size and Scaling State (التحكم بحجم السبورة تكبيراً وتصغيراً حسب الرغبة)
+  const [customSize, setCustomSize] = useState<{ width: number; height: number }>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('alkhalil_whiteboard_size');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed && typeof parsed.width === 'number' && typeof parsed.height === 'number') {
+            return parsed;
+          }
+        } catch (e) {}
+      }
+    }
+    return { width: 780, height: 600 };
+  });
+  const [showSizeMenu, setShowSizeMenu] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const sizeMenuRef = useRef<HTMLDivElement>(null);
+  const resizeStartRef = useRef<{
+    startX: number;
+    startY: number;
+    startW: number;
+    startH: number;
+    corner: 'bottom-left' | 'bottom-right' | 'bottom' | 'left' | 'right';
+  } | null>(null);
+
+  const updateBoardSize = useCallback((newWidth: number, newHeight: number) => {
+    const maxWidth = typeof window !== 'undefined' ? window.innerWidth - 16 : 1400;
+    const maxHeight = typeof window !== 'undefined' ? window.innerHeight - 24 : 900;
+    const clampedW = Math.round(Math.max(360, Math.min(maxWidth, newWidth)));
+    const clampedH = Math.round(Math.max(360, Math.min(maxHeight, newHeight)));
+    const next = { width: clampedW, height: clampedH };
+    setCustomSize(next);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('alkhalil_whiteboard_size', JSON.stringify(next));
+      } catch (e) {}
+    }
+  }, []);
+
+  const handleScaleUp = () => {
+    if (isMaximized) setIsMaximized(false);
+    updateBoardSize(customSize.width * 1.15, customSize.height * 1.15);
+  };
+
+  const handleScaleDown = () => {
+    if (isMaximized) setIsMaximized(false);
+    updateBoardSize(customSize.width * 0.85, customSize.height * 0.85);
+  };
+
+  const handleResetSize = () => {
+    if (isMaximized) setIsMaximized(false);
+    updateBoardSize(780, 600);
+  };
+
+  const handleApplyPreset = (w: number, h: number) => {
+    if (isMaximized) setIsMaximized(false);
+    updateBoardSize(w, h);
+    setShowSizeMenu(false);
+  };
+
+  const startCornerResize = (e: React.MouseEvent | React.TouchEvent, corner: 'bottom-left' | 'bottom-right' | 'bottom' | 'left' | 'right') => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isMaximized) setIsMaximized(false);
+
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
+    resizeStartRef.current = {
+      startX: clientX,
+      startY: clientY,
+      startW: customSize.width,
+      startH: customSize.height,
+      corner
+    };
+    setIsResizing(true);
+  };
+
+  useEffect(() => {
+    const onPointerMove = (e: MouseEvent | TouchEvent) => {
+      if (!resizeStartRef.current) return;
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+      
+      const deltaY = clientY - resizeStartRef.current.startY;
+      let deltaX = clientX - resizeStartRef.current.startX;
+      
+      if (resizeStartRef.current.corner === 'bottom-left' || resizeStartRef.current.corner === 'left') {
+        deltaX = -deltaX;
+      }
+      
+      const newW = resizeStartRef.current.corner === 'bottom'
+        ? resizeStartRef.current.startW
+        : resizeStartRef.current.startW + deltaX;
+      const newH = (resizeStartRef.current.corner === 'left' || resizeStartRef.current.corner === 'right')
+        ? resizeStartRef.current.startH
+        : resizeStartRef.current.startH + deltaY;
+
+      updateBoardSize(newW, newH);
+    };
+
+    const onPointerUp = () => {
+      if (resizeStartRef.current) {
+        resizeStartRef.current = null;
+        setIsResizing(false);
+      }
+    };
+
+    if (isResizing) {
+      window.addEventListener('mousemove', onPointerMove);
+      window.addEventListener('mouseup', onPointerUp);
+      window.addEventListener('touchmove', onPointerMove, { passive: false });
+      window.addEventListener('touchend', onPointerUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', onPointerMove);
+      window.removeEventListener('mouseup', onPointerUp);
+      window.removeEventListener('touchmove', onPointerMove);
+      window.removeEventListener('touchend', onPointerUp);
+    };
+  }, [isResizing, updateBoardSize]);
+
+  // Click outside to close size menu
+  useEffect(() => {
+    if (!showSizeMenu) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (sizeMenuRef.current && !sizeMenuRef.current.contains(e.target as Node)) {
+        setShowSizeMenu(false);
+      }
+    };
+    window.addEventListener('mousedown', handleClickOutside);
+    return () => window.removeEventListener('mousedown', handleClickOutside);
+  }, [showSizeMenu]);
+
   const dragControls = useDragControls();
   const [positionKey, setPositionKey] = useState(0);
 
@@ -332,7 +495,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
     setPositionKey(prev => prev + 1);
   };
 
-  // Resize canvas when opened, tab changed, or window resized
+  // Resize canvas when opened, tab changed, window resized, or custom size adjusted
   useEffect(() => {
     if (!isOpen) return;
 
@@ -371,10 +534,10 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
           } catch (e) {}
         }
       }
-    }, 150);
+    }, 100);
 
     return () => clearTimeout(timer);
-  }, [isOpen, isMaximized, activeTab]);
+  }, [isOpen, isMaximized, activeTab, customSize.width, customSize.height]);
 
   // Save state for undo/redo
   const saveState = useCallback(() => {
@@ -1068,6 +1231,64 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
 
   if (!isOpen) return null;
 
+  // Minimized floating dock pill (عند تصغير السبورة كشريط عائم)
+  if (isMinimized) {
+    return (
+      <AnimatePresence>
+        <motion.div
+          key="smart-whiteboard-minimized-dock"
+          initial={{ opacity: 0, scale: 0.85, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.85, y: 20 }}
+          className="fixed bottom-5 end-5 z-50 flex items-center gap-2.5 px-3.5 py-2.5 bg-slate-900/98 backdrop-blur-md rounded-2xl border-2 shadow-2xl cursor-pointer hover:scale-105 active:scale-95 transition-all select-none"
+          style={{
+            borderColor: currentTheme.borderHex,
+            boxShadow: `0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px ${currentTheme.borderHex}55`,
+          }}
+          onClick={() => setIsMinimized(false)}
+          dir={isRtl ? 'rtl' : 'ltr'}
+        >
+          <div 
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-950 font-black text-sm shrink-0 shadow-inner"
+            style={{ backgroundColor: currentTheme.borderHex }}
+          >
+            {currentTheme.emoji}
+          </div>
+          <div className="flex flex-col text-start min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-black text-white truncate">
+                {isRtl ? 'السبورة الذكية 📐' : 'Smart Whiteboard 📐'}
+              </span>
+              <span className="text-[10px] text-amber-300 font-black px-1.5 py-0.5 rounded-full bg-amber-400/20 border border-amber-400/40 font-mono">
+                {customSize.width}×{customSize.height}
+              </span>
+            </div>
+            <span className="text-[10px] text-amber-200/80 font-bold truncate">
+              {isRtl ? 'انقر لتكبير السبورة وإعادتها' : 'Click to expand & restore'}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1 ms-1" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setIsMinimized(false)}
+              className="p-1.5 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 hover:text-white transition-all cursor-pointer"
+              title={isRtl ? 'تكبير واستعادة السبورة' : 'Restore whiteboard'}
+            >
+              <Maximize2 size={13} />
+            </button>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white transition-all cursor-pointer"
+              title={isRtl ? 'إغلاق' : 'Close'}
+            >
+              <X size={13} />
+            </button>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+    );
+  }
+
   return (
     <AnimatePresence>
       <motion.div
@@ -1081,15 +1302,25 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
         transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-        className={`fixed z-50 transition-all ${
+        className={`fixed z-50 flex flex-col font-sans transition-[border-radius,box-shadow] select-none ${
           isMaximized 
-            ? 'inset-0 sm:inset-3 md:inset-5 lg:inset-6' 
-            : 'inset-0 sm:inset-auto sm:top-14 md:top-16 sm:right-3 md:right-5 lg:right-6 sm:w-[calc(100vw-1.5rem)] md:w-[700px] lg:w-[840px] xl:w-[920px] max-w-[calc(100vw-1.5rem)] h-full sm:h-auto sm:max-h-[88vh]'
-        } flex flex-col rounded-none sm:rounded-3xl shadow-2xl overflow-hidden font-sans border-0 sm:border-4`}
+            ? 'inset-0 sm:inset-3 md:inset-5 lg:inset-6 rounded-none sm:rounded-3xl border-0 sm:border-4' 
+            : mobileMode === 'half'
+              ? 'inset-x-0 bottom-0 top-auto h-[58dvh] max-h-[75dvh] rounded-t-3xl rounded-b-none border-t-4 border-x-0 border-b-0 sm:hidden'
+              : 'inset-0 sm:inset-auto sm:top-14 md:top-16 sm:right-3 md:right-5 lg:right-6 rounded-none sm:rounded-3xl border-0 sm:border-4'
+        } shadow-2xl overflow-hidden`}
         style={{
           borderColor: currentTheme.borderHex,
           backgroundColor: currentTheme.bgHex,
-          boxShadow: `0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 30px ${currentTheme.borderHex}44`
+          boxShadow: `0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 30px ${currentTheme.borderHex}44`,
+          ...(!isMaximized && typeof window !== 'undefined' && window.innerWidth >= 640
+            ? {
+                width: `${customSize.width}px`,
+                height: `${customSize.height}px`,
+                maxWidth: 'calc(100vw - 16px)',
+                maxHeight: 'calc(100vh - 24px)',
+              }
+            : {}),
         }}
         dir={isRtl ? 'rtl' : 'ltr'}
       >
@@ -1118,6 +1349,14 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
           )}
         </AnimatePresence>
 
+        {/* Mobile Pull Handle Bar */}
+        <div 
+          onClick={() => setMobileMode(prev => prev === 'fullscreen' ? 'half' : 'fullscreen')}
+          className="sm:hidden flex items-center justify-center pt-1.5 pb-0.5 cursor-pointer bg-black/20"
+        >
+          <div className="w-10 h-1 rounded-full bg-white/40" />
+        </div>
+
         {/* ======================================================== */}
         {/* TOP WOODEN / BRASS HEADER BAR (DRAGGABLE HANDLE) */}
         {/* ======================================================== */}
@@ -1127,6 +1366,13 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
             if (target.closest('button, input, select, a, textarea')) return;
             if (typeof window !== 'undefined' && window.innerWidth < 640) return;
             dragControls.start(e);
+          }}
+          onDoubleClick={() => {
+            if (typeof window !== 'undefined' && window.innerWidth < 640) {
+              setMobileMode(prev => prev === 'fullscreen' ? 'half' : 'fullscreen');
+            } else {
+              setIsMaximized(!isMaximized);
+            }
           }}
           className={`bg-gradient-to-r ${currentTheme.headerFrom} ${currentTheme.headerVia} ${currentTheme.headerTo} px-2.5 sm:px-4 py-2 sm:py-3 border-b-2 flex items-center justify-between shrink-0 shadow-md select-none touch-none ${
             !isMaximized ? 'sm:cursor-grab sm:active:cursor-grabbing' : ''
@@ -1259,6 +1505,153 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               </button>
             </div>
 
+            {/* Whiteboard Scale & Size Controller (تكبير وتصغير حسب الرغبة) */}
+            <div className="relative hidden xs:flex items-center bg-black/40 p-0.5 rounded-xl border border-white/10 text-xs font-bold" ref={sizeMenuRef}>
+              {/* Zoom Out Button (-) */}
+              <button
+                onClick={handleScaleDown}
+                className="p-1 sm:px-1.5 sm:py-1 rounded-lg text-amber-200/80 hover:text-white hover:bg-white/15 transition-all cursor-pointer flex items-center justify-center"
+                title={isRtl ? 'تصغير حجم السبورة 15% (-)' : 'Shrink whiteboard 15% (-)'}
+              >
+                <Minus size={13} />
+              </button>
+
+              {/* Current Size / Presets Dropdown Toggle */}
+              <button
+                onClick={() => setShowSizeMenu(!showSizeMenu)}
+                className="px-1.5 sm:px-2 py-1 rounded-lg text-amber-200 hover:text-white hover:bg-white/10 transition-all cursor-pointer flex items-center gap-1 text-[11px] font-black"
+                title={isRtl ? 'التحكم بمقاسات السبورة وتكبيرها/تصغيرها حسب الرغبة 📐' : 'Whiteboard size controls & presets 📐'}
+              >
+                <Scaling size={12} className="text-amber-400" />
+                <span className="hidden md:inline">{customSize.width}×{customSize.height}</span>
+                <span className="hidden sm:inline md:hidden">{isRtl ? 'الحجم' : 'Size'}</span>
+              </button>
+
+              {/* Zoom In Button (+) */}
+              <button
+                onClick={handleScaleUp}
+                className="p-1 sm:px-1.5 sm:py-1 rounded-lg text-amber-200/80 hover:text-white hover:bg-white/15 transition-all cursor-pointer flex items-center justify-center"
+                title={isRtl ? 'تكبير حجم السبورة 15% (+)' : 'Enlarge whiteboard 15% (+)'}
+              >
+                <Plus size={13} />
+              </button>
+
+              {/* Size Menu Dropdown */}
+              <AnimatePresence>
+                {showSizeMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.94, y: 5 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.94, y: 5 }}
+                    className="absolute top-full mt-2 end-0 w-64 sm:w-72 bg-[#0e1726] border-2 border-amber-400/50 rounded-2xl shadow-2xl p-3 z-60 text-white backdrop-blur-md"
+                  >
+                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10 text-xs font-black text-amber-300">
+                      <span className="flex items-center gap-1">
+                        📐 {isRtl ? 'مقاسات وتكبير السبورة:' : 'Whiteboard Size Presets:'}
+                      </span>
+                      <span className="text-[10px] text-amber-400 bg-amber-400/20 px-1.5 py-0.5 rounded-full font-mono">
+                        {customSize.width}×{customSize.height}
+                      </span>
+                    </div>
+
+                    {/* Presets List */}
+                    <div className="space-y-1.5">
+                      <button
+                        onClick={() => handleApplyPreset(560, 460)}
+                        className="w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-slate-200 transition-all cursor-pointer text-start"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">📱</span>
+                          <div>
+                            <div className="font-black text-white">{isRtl ? 'مدمجة صغيرة' : 'Compact (Side)'}</div>
+                            <div className="text-[10px] text-slate-400 font-normal">{isRtl ? 'مناسبة للمحادثة الجانبية' : '560 × 460 px'}</div>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-mono text-amber-300">560×460</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleApplyPreset(780, 600)}
+                        className="w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-slate-200 transition-all cursor-pointer text-start"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">💻</span>
+                          <div>
+                            <div className="font-black text-white">{isRtl ? 'قياسية متوازنة' : 'Standard Balanced'}</div>
+                            <div className="text-[10px] text-slate-400 font-normal">{isRtl ? 'المقاس الأنسب للشرح' : '780 × 600 px'}</div>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-mono text-amber-300">780×600</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleApplyPreset(1040, 720)}
+                        className="w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-slate-200 transition-all cursor-pointer text-start"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">🖥️</span>
+                          <div>
+                            <div className="font-black text-white">{isRtl ? 'كبيرة واسعة' : 'Large Expanded'}</div>
+                            <div className="text-[10px] text-slate-400 font-normal">{isRtl ? 'مساحة واسعة للرسم والقواعد' : '1040 × 720 px'}</div>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-mono text-amber-300">1040×720</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setIsMaximized(true);
+                          setShowSizeMenu(false);
+                        }}
+                        className="w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold bg-amber-400/10 hover:bg-amber-400/20 text-amber-200 border border-amber-400/30 transition-all cursor-pointer text-start"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Maximize2 size={14} className="text-amber-400" />
+                          <span className="font-black">{isRtl ? 'ملء كامل الشاشة' : 'Fullscreen / Maximize'}</span>
+                        </div>
+                        <span className="text-[10px] font-mono text-amber-300">100%</span>
+                      </button>
+                    </div>
+
+                    {/* Fine Adjustment Zoom Buttons */}
+                    <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between gap-1.5 text-xs">
+                      <button
+                        onClick={handleScaleDown}
+                        className="flex-1 py-1.5 px-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-200 font-bold flex items-center justify-center gap-1 cursor-pointer transition-all text-[11px]"
+                      >
+                        <Minus size={12} />
+                        <span>{isRtl ? 'تصغير -15%' : 'Zoom -'}</span>
+                      </button>
+                      <button
+                        onClick={handleResetSize}
+                        className="p-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-amber-300 font-bold flex items-center justify-center cursor-pointer transition-all"
+                        title={isRtl ? 'استعادة الحجم الافتراضي' : 'Reset Size'}
+                      >
+                        <RotateCcw size={12} />
+                      </button>
+                      <button
+                        onClick={handleScaleUp}
+                        className="flex-1 py-1.5 px-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-200 font-bold flex items-center justify-center gap-1 cursor-pointer transition-all text-[11px]"
+                      >
+                        <Plus size={12} />
+                        <span>{isRtl ? 'تكبير +15%' : 'Zoom +'}</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Mobile Half/Full Screen Toggle (sm:hidden) */}
+            <button
+              onClick={() => setMobileMode(prev => prev === 'fullscreen' ? 'half' : 'fullscreen')}
+              className="sm:hidden p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-amber-200 transition-all cursor-pointer text-xs flex items-center gap-1 font-bold"
+              title={mobileMode === 'fullscreen' ? (isRtl ? 'تصغير لنصف الشاشة ◫' : 'Half screen') : (isRtl ? 'تكبير كامل الشاشة ⛶' : 'Full screen')}
+            >
+              <Scaling size={13} />
+              <span className="text-[10px]">{mobileMode === 'fullscreen' ? (isRtl ? 'نصف' : 'Half') : (isRtl ? 'كامل' : 'Full')}</span>
+            </button>
+
             {/* Reset position button (desktop only) */}
             {!isMaximized && (
               <button
@@ -1270,11 +1663,26 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               </button>
             )}
 
-            {/* Maximize toggle (desktop only) */}
+            {/* Minimize to dock pill button */}
             <button
-              onClick={() => setIsMaximized(!isMaximized)}
-              className="hidden sm:block p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-amber-200/80 transition-all cursor-pointer"
-              title={isMaximized ? (isRtl ? 'تصغير' : 'Minimize') : (isRtl ? 'تكبير كامل الشاشة' : 'Maximize')}
+              onClick={() => setIsMinimized(true)}
+              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-amber-200/80 hover:text-amber-200 transition-all cursor-pointer"
+              title={isRtl ? 'تصغير إلى شريط عائم أسفل الشاشة' : 'Minimize to floating dock'}
+            >
+              <Minus size={14} />
+            </button>
+
+            {/* Maximize toggle */}
+            <button
+              onClick={() => {
+                if (typeof window !== 'undefined' && window.innerWidth < 640) {
+                  setMobileMode(prev => prev === 'fullscreen' ? 'half' : 'fullscreen');
+                } else {
+                  setIsMaximized(!isMaximized);
+                }
+              }}
+              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-amber-200/80 transition-all cursor-pointer"
+              title={isMaximized ? (isRtl ? 'استعادة الحجم' : 'Restore') : (isRtl ? 'تكبير كامل الشاشة' : 'Maximize')}
             >
               {isMaximized ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
             </button>
@@ -2127,6 +2535,83 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
             </div>
 
           </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* INTERACTIVE RESIZE HANDLES & DIMENSION BADGE (تكبير وتصغير السبورة بحرية) */}
+        {/* ======================================================== */}
+        {!isMaximized && (
+          <>
+            {/* Active Resizing Floating Dimension Indicator */}
+            {isResizing && (
+              <div className="absolute inset-0 pointer-events-none z-50 flex items-center justify-center">
+                <div className="px-4 py-2 rounded-2xl bg-black/90 backdrop-blur-md border-2 border-amber-400 text-amber-300 font-black text-sm shadow-2xl flex items-center gap-2 animate-pulse">
+                  <Scaling size={16} className="text-amber-400" />
+                  <span className="font-mono">{customSize.width} × {customSize.height} px</span>
+                </div>
+              </div>
+            )}
+
+            {/* Bottom-Right Corner Resize Grip Handle */}
+            <div
+              onMouseDown={(e) => startCornerResize(e, 'bottom-right')}
+              onTouchStart={(e) => startCornerResize(e, 'bottom-right')}
+              className="hidden sm:flex absolute bottom-0 end-0 w-7 h-7 items-center justify-center cursor-nwse-resize touch-none select-none z-40 text-amber-400/80 hover:text-amber-300 hover:scale-125 transition-transform"
+              title={isRtl ? 'اسحب لتكبير وتصغير السبورة بحرية 📐' : 'Drag to resize whiteboard 📐'}
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" className="fill-current rotate-0 rtl:-scale-x-100">
+                <circle cx="10" cy="10" r="1.5" />
+                <circle cx="6" cy="10" r="1.5" />
+                <circle cx="10" cy="6" r="1.5" />
+                <circle cx="2" cy="10" r="1.5" />
+                <circle cx="6" cy="6" r="1.5" />
+                <circle cx="10" cy="2" r="1.5" />
+              </svg>
+            </div>
+
+            {/* Bottom-Left Corner Resize Grip Handle */}
+            <div
+              onMouseDown={(e) => startCornerResize(e, 'bottom-left')}
+              onTouchStart={(e) => startCornerResize(e, 'bottom-left')}
+              className="hidden sm:flex absolute bottom-0 start-0 w-7 h-7 items-center justify-center cursor-nesw-resize touch-none select-none z-40 text-amber-400/80 hover:text-amber-300 hover:scale-125 transition-transform"
+              title={isRtl ? 'اسحب لتكبير وتصغير السبورة بحرية 📐' : 'Drag to resize whiteboard 📐'}
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" className="fill-current -scale-x-100 rtl:rotate-0">
+                <circle cx="10" cy="10" r="1.5" />
+                <circle cx="6" cy="10" r="1.5" />
+                <circle cx="10" cy="6" r="1.5" />
+                <circle cx="2" cy="10" r="1.5" />
+                <circle cx="6" cy="6" r="1.5" />
+                <circle cx="10" cy="2" r="1.5" />
+              </svg>
+            </div>
+
+            {/* Bottom Edge Resize Bar (Adjust Height) */}
+            <div
+              onMouseDown={(e) => startCornerResize(e, 'bottom')}
+              onTouchStart={(e) => startCornerResize(e, 'bottom')}
+              className="hidden sm:flex absolute bottom-0 inset-x-8 h-2 items-center justify-center cursor-ns-resize touch-none select-none z-30 group"
+              title={isRtl ? 'اسحب لضبط ارتفاع السبورة ↕️' : 'Drag to adjust height ↕️'}
+            >
+              <div className="w-16 h-1 rounded-full bg-white/20 group-hover:bg-amber-400/80 transition-colors" />
+            </div>
+
+            {/* Right Edge Resize Zone */}
+            <div
+              onMouseDown={(e) => startCornerResize(e, 'right')}
+              onTouchStart={(e) => startCornerResize(e, 'right')}
+              className="hidden sm:block absolute top-12 bottom-6 end-0 w-2 cursor-ew-resize touch-none select-none z-30 hover:bg-amber-400/40 transition-colors"
+              title={isRtl ? 'اسحب لضبط عرض السبورة ↔️' : 'Drag to adjust width ↔️'}
+            />
+
+            {/* Left Edge Resize Zone */}
+            <div
+              onMouseDown={(e) => startCornerResize(e, 'left')}
+              onTouchStart={(e) => startCornerResize(e, 'left')}
+              className="hidden sm:block absolute top-12 bottom-6 start-0 w-2 cursor-ew-resize touch-none select-none z-30 hover:bg-amber-400/40 transition-colors"
+              title={isRtl ? 'اسحب لضبط عرض السبورة ↔️' : 'Drag to adjust width ↔️'}
+            />
+          </>
         )}
       </motion.div>
     </AnimatePresence>

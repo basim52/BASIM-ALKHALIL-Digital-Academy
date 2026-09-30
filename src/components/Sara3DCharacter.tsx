@@ -81,6 +81,9 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
     }
   };
 
+  const [showQuickMenu, setShowQuickMenu] = useState(false);
+  const hasDraggedRef = useRef(false);
+
   const dragStartRef = useRef<{ mouseX: number; mouseY: number; posX: number; posY: number }>({
     mouseX: 0,
     mouseY: 0,
@@ -787,6 +790,7 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
   // Handle Dragging (Mouse & Touch for Mobile)
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
+    hasDraggedRef.current = false;
     dragStartRef.current = {
       mouseX: e.clientX,
       mouseY: e.clientY,
@@ -798,6 +802,7 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 0) return;
     setIsDragging(true);
+    hasDraggedRef.current = false;
     dragStartRef.current = {
       mouseX: e.touches[0].clientX,
       mouseY: e.touches[0].clientY,
@@ -806,11 +811,19 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
     };
   };
 
+  const handleCanvasClick = () => {
+    if (hasDraggedRef.current) return;
+    onCharacterClick();
+  };
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging) return;
       const deltaX = e.clientX - dragStartRef.current.mouseX;
       const deltaY = e.clientY - dragStartRef.current.mouseY;
+      if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+        hasDraggedRef.current = true;
+      }
       setPosition({
         x: dragStartRef.current.posX + deltaX,
         y: dragStartRef.current.posY + deltaY
@@ -821,6 +834,9 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
       if (!isDragging || e.touches.length === 0) return;
       const deltaX = e.touches[0].clientX - dragStartRef.current.mouseX;
       const deltaY = e.touches[0].clientY - dragStartRef.current.mouseY;
+      if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+        hasDraggedRef.current = true;
+      }
       setPosition({
         x: dragStartRef.current.posX + deltaX,
         y: dragStartRef.current.posY + deltaY
@@ -857,136 +873,125 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
       style={{
         transform: position ? `translate3d(${position.x}px, ${position.y}px, 0)` : undefined
       }}
-      className={`fixed z-40 transition-shadow select-none ${
-        position ? '' : isRtl ? 'bottom-24 left-2 sm:bottom-20 sm:left-6' : 'bottom-24 right-2 sm:bottom-20 sm:right-6'
+      className={`fixed z-40 select-none ${
+        position ? '' : isRtl ? 'bottom-20 left-4 sm:bottom-16 sm:left-8' : 'bottom-20 right-4 sm:bottom-16 sm:right-8'
       }`}
     >
-      {/* 3D Floating Avatar Card - Warm Studio Portrait Framing */}
-      <div className={`relative bg-gradient-to-b from-slate-900/98 via-[#131d2e]/98 to-slate-950/98 backdrop-blur-md rounded-3xl border-2 border-amber-400/70 shadow-2xl overflow-hidden transition-all duration-300 ${
-        isMinimized ? 'w-14 h-14 sm:w-20 sm:h-20' : 'w-44 xs:w-48 sm:w-64'
-      }`}>
-        {/* Pure White & Warm Golden Luminous Halo behind Sara's head */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,_rgba(255,255,255,0.45)_0%,_rgba(254,243,199,0.22)_40%,_transparent_75%)] pointer-events-none" />
-        
-        {/* Top Control Bar */}
-        <div 
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}
-          className="flex items-center justify-between px-3 py-1.5 bg-[#001833]/80 border-b border-white/10 cursor-move touch-none"
-          title={isRtl ? 'اسحب لنقل شخصية سارة' : 'Drag to reposition Sara'}
+      {/* Minimized View (Clean Floating Circular 3D Badge) */}
+      {isMinimized ? (
+        <button
+          onClick={() => setIsMinimized(false)}
+          className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-[#002147] to-[#0a3568] border-2 border-amber-400 shadow-2xl flex flex-col items-center justify-center cursor-pointer hover:scale-110 active:scale-95 transition-all group"
+          title={isRtl ? 'انقر لتكبير مجسم سارة 3D' : 'Click to expand Sara 3D'}
         >
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[11px] font-black text-amber-300 tracking-wide">
-              {isRtl ? 'سارة 3D 👩‍🏫' : 'Sara 3D 👩‍🏫'}
+          <span className="text-2xl filter drop-shadow">👩‍🏫</span>
+          {isSpeaking && (
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500" />
             </span>
-          </div>
+          )}
+          <span className="text-[9px] font-black text-amber-300 mt-0.5 group-hover:scale-105 transition-transform">
+            {isRtl ? 'سارة 3D' : 'Sara 3D'}
+          </span>
+        </button>
+      ) : (
+        /* Pure 3D Figure View (بدون أي إطار أو خلفية مستطيلة إطلاقاً) */
+        <div className="relative flex flex-col items-center group pointer-events-auto">
+          
+          {/* Floating Dialogue Speech Balloon (when speaking) */}
+          {currentSpeechText && (
+            <div className="absolute -top-14 sm:-top-16 inset-x-0 mx-auto max-w-[240px] z-30 p-2.5 bg-slate-900/95 backdrop-blur-md border-2 border-amber-400/80 rounded-2xl shadow-2xl text-center text-xs text-amber-100 font-medium leading-relaxed animate-in fade-in zoom-in-95">
+              <p className="line-clamp-2">{currentSpeechText}</p>
+              {/* Pointer arrow pointing down towards Sara */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-x-6 border-x-transparent border-t-8 border-t-amber-400/80" />
+            </div>
+          )}
 
-          <div className="flex items-center gap-1">
+          {/* Discreet Floating Action Micro-Bar on Hover / Touch */}
+          <div 
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
+            className="absolute -top-4 flex items-center gap-1.5 bg-slate-950/85 backdrop-blur-md px-2.5 py-1 rounded-full border border-amber-400/50 shadow-xl opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity z-30 cursor-move text-white"
+            title={isRtl ? 'اسحب لنقل سارة في أي مكان بالشاشة' : 'Drag to reposition Sara'}
+          >
+            <Move size={11} className="text-amber-400" />
+            <span className="text-[10px] font-black text-amber-300 pe-1">
+              {isRtl ? 'سارة 3D' : 'Sara 3D'}
+            </span>
+
+            {/* Speaking/listening status indicator */}
+            <span className={`w-1.5 h-1.5 rounded-full ${
+              currentEmotion === 'speaking' ? 'bg-amber-400 animate-pulse' :
+              currentEmotion === 'listening' ? 'bg-emerald-400 animate-ping' :
+              'bg-emerald-400'
+            }`} />
+
+            {/* Quick gestures & outfits trigger */}
             <button
-              onClick={() => setIsMinimized(!isMinimized)}
-              className="p-1 hover:bg-white/10 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
-              title={isMinimized ? (isRtl ? 'تكبير' : 'Maximize') : (isRtl ? 'تصغير' : 'Minimize')}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowQuickMenu(!showQuickMenu);
+              }}
+              className={`p-1 rounded-lg transition-colors cursor-pointer ${
+                showQuickMenu ? 'bg-amber-400 text-slate-950' : 'hover:bg-white/20 text-amber-300'
+              }`}
+              title={isRtl ? 'حركات وأزياء سارة' : 'Gestures & Outfits'}
             >
-              {isMinimized ? <Maximize2 size={12} /> : <Minimize2 size={12} />}
+              <Sparkles size={11} />
             </button>
+
+            {/* Minimize button */}
             <button
-              onClick={onToggle}
-              className="p-1 hover:bg-rose-500/30 text-slate-300 hover:text-rose-300 rounded-lg transition-colors cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMinimized(true);
+              }}
+              className="p-1 hover:bg-white/20 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
+              title={isRtl ? 'تصغير' : 'Minimize'}
+            >
+              <Minimize2 size={11} />
+            </button>
+
+            {/* Close button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggle();
+              }}
+              className="p-1 hover:bg-rose-500/80 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
               title={isRtl ? 'إغلاق' : 'Close'}
             >
-              <X size={12} />
+              <X size={11} />
             </button>
           </div>
-        </div>
 
-        {/* Minimized View */}
-        {isMinimized ? (
-          <button
-            onClick={() => setIsMinimized(false)}
-            className="w-full h-full flex flex-col items-center justify-center p-1.5 cursor-pointer text-center group"
-          >
-            <div className="relative">
-              <span className="text-xl">👩‍🏫</span>
-              {isSpeaking && (
-                <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500" />
-                </span>
-              )}
-            </div>
-            <span className="text-[9px] font-bold text-amber-200 mt-0.5 group-hover:underline">
-              {isRtl ? 'سارة' : 'Sara'}
-            </span>
-          </button>
-        ) : (
-          /* Expanded Full 3D Canvas View */
-          <div className="p-2 flex flex-col items-center relative">
-            {/* Real-time State Badge */}
-            <div className="w-full flex items-center justify-between text-[10px] font-bold px-2 py-0.5 bg-black/30 rounded-xl mb-1 border border-white/5">
-              <div className="flex items-center gap-1 text-amber-200">
-                {currentEmotion === 'speaking' ? (
-                  <>
-                    <Volume2 size={12} className="text-amber-400 animate-pulse" />
-                    <span>{isRtl ? 'تشرح وتتحدث...' : 'Speaking...'}</span>
-                  </>
-                ) : currentEmotion === 'listening' ? (
-                  <>
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                    <span className="text-emerald-300">{isRtl ? 'تستمع باهتمام 🎙️' : 'Listening 🎙️'}</span>
-                  </>
-                ) : currentEmotion === 'thinking' ? (
-                  <>
-                    <Sparkles size={12} className="text-sky-300 animate-spin" />
-                    <span className="text-sky-200">{isRtl ? 'سارة تفكر...' : 'Thinking...'}</span>
-                  </>
-                ) : (
-                  <>
-                    <Smile size={12} className="text-amber-300" />
-                    <span>{isRtl ? 'جاهزة لخدمتك ✨' : 'Ready ✨'}</span>
-                  </>
-                )}
+          {/* Quick Gestures & Outfits Floating Micro-Menu */}
+          {showQuickMenu && (
+            <div className="absolute top-4 z-40 bg-slate-900/95 backdrop-blur-md border border-amber-400/60 rounded-2xl p-2.5 shadow-2xl text-white text-xs w-52 space-y-2 animate-in fade-in zoom-in-95">
+              <div className="flex items-center justify-between text-[10px] font-black text-amber-300 pb-1 border-b border-white/10">
+                <span>{isRtl ? 'حركات سارة ✨' : 'Gestures ✨'}</span>
+                <button 
+                  onClick={() => setShowQuickMenu(false)}
+                  className="text-slate-400 hover:text-white text-xs cursor-pointer"
+                >
+                  ✕
+                </button>
               </div>
 
-              <span className="text-[9px] text-slate-400 font-mono">Three.js</span>
-            </div>
-
-            {/* Three.js Canvas Mount */}
-            <div
-              ref={mountRef}
-              onClick={onCharacterClick}
-              className="w-full h-36 xs:h-44 sm:h-56 flex items-center justify-center cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-transform"
-              title={isRtl ? 'انقر على سارة للتفاعل الصوتي' : 'Click Sara to interact'}
-            />
-
-            {/* Floating Speech Tooltip Bubble */}
-            {currentSpeechText && (
-              <div className="w-full mt-1 p-2 bg-[#001229]/90 border border-amber-300/40 rounded-xl text-[11px] text-amber-100 font-medium leading-relaxed max-h-16 overflow-y-auto shadow-inner">
-                <p className="line-clamp-2">{currentSpeechText}</p>
-              </div>
-            )}
-
-            {/* Interactive Gestures Controls */}
-            <div className="w-full mt-2 bg-black/40 p-1.5 rounded-2xl border border-white/10 flex flex-col gap-1.5">
-              <div className="flex items-center justify-between text-[9px] text-amber-200/80 font-bold px-1">
-                <span>{isRtl ? 'حركات سارة التفاعلية:' : 'Sara Gestures:'}</span>
-                <span className="text-[8px] text-slate-400">
-                  {activeGesture === 'waving' ? '👋 تحية' : activeGesture === 'clapping' ? '👏 تصفيق' : activeGesture === 'pointing' ? '👉 إشارة' : activeGesture === 'explaining' ? '💡 شرح' : '✨ هادئة'}
-                </span>
-              </div>
               <div className="grid grid-cols-4 gap-1">
                 {[
-                  { id: 'waving' as SaraGesture, label: isRtl ? '👋 تحية' : 'Wave' },
-                  { id: 'clapping' as SaraGesture, label: isRtl ? '👏 تصفيق' : 'Clap' },
-                  { id: 'pointing' as SaraGesture, label: isRtl ? '👉 إشارة' : 'Point' },
-                  { id: 'explaining' as SaraGesture, label: isRtl ? '💡 شرح' : 'Explain' }
+                  { id: 'waving' as SaraGesture, label: '👋' },
+                  { id: 'clapping' as SaraGesture, label: '👏' },
+                  { id: 'pointing' as SaraGesture, label: '👉' },
+                  { id: 'explaining' as SaraGesture, label: '💡' }
                 ].map(g => (
                   <button
                     key={`gesture-${g.id}`}
                     onClick={() => triggerGesture(g.id)}
-                    className={`py-1 rounded-xl text-[10px] font-black transition-all cursor-pointer text-center ${
+                    className={`py-1 rounded-xl text-xs font-black transition-all cursor-pointer text-center ${
                       activeGesture === g.id
-                        ? 'bg-amber-400 text-slate-950 font-black shadow-xs scale-102'
+                        ? 'bg-amber-400 text-slate-950 shadow-xs'
                         : 'bg-white/10 hover:bg-white/20 text-slate-200'
                     }`}
                   >
@@ -994,53 +999,57 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
                   </button>
                 ))}
               </div>
-            </div>
 
-            {/* Outfits Selector */}
-            <div className="w-full mt-1.5 bg-black/40 p-1.5 rounded-2xl border border-white/10 flex items-center justify-between">
-              <span className="text-[9px] text-amber-200/80 font-bold px-1 shrink-0">
-                {isRtl ? 'أزياء سارة:' : 'Outfits:'}
-              </span>
-              <div className="flex items-center gap-1">
-                {SARA_OUTFITS.map(outfit => (
-                  <button
-                    key={`outfit-${outfit.id}`}
-                    onClick={() => {
-                      setActiveOutfit(outfit.id);
-                      blazerMaterialsRef.current.forEach(m => m.color.setHex(outfit.blazerHex));
-                      trimMaterialsRef.current.forEach(m => m.color.setHex(outfit.trimHex));
-                    }}
-                    className={`px-2 py-0.5 rounded-xl text-xs transition-all cursor-pointer flex items-center gap-1 border ${
-                      activeOutfit === outfit.id
-                        ? 'bg-amber-400 text-slate-950 border-amber-300 font-black shadow-sm scale-105'
-                        : 'bg-white/10 hover:bg-white/20 text-slate-300 border-white/10'
-                    }`}
-                    title={isRtl ? outfit.nameAr : outfit.nameEn}
-                  >
-                    <span>{outfit.badgeEmoji}</span>
-                  </button>
-                ))}
+              <div className="flex items-center justify-between pt-1 border-t border-white/10 text-[10px]">
+                <span className="text-amber-200/80 font-bold">{isRtl ? 'الزي:' : 'Outfit:'}</span>
+                <div className="flex items-center gap-1">
+                  {SARA_OUTFITS.map(outfit => (
+                    <button
+                      key={`outfit-${outfit.id}`}
+                      onClick={() => {
+                        setActiveOutfit(outfit.id);
+                        blazerMaterialsRef.current.forEach(m => m.color.setHex(outfit.blazerHex));
+                        trimMaterialsRef.current.forEach(m => m.color.setHex(outfit.trimHex));
+                      }}
+                      className={`w-6 h-6 rounded-lg text-xs transition-all cursor-pointer flex items-center justify-center border ${
+                        activeOutfit === outfit.id
+                          ? 'border-amber-300 scale-110 shadow-sm bg-amber-400/20'
+                          : 'border-white/20 hover:scale-105 bg-white/5'
+                      }`}
+                      title={isRtl ? outfit.nameAr : outfit.nameEn}
+                    >
+                      {outfit.badgeEmoji}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Quick Action Footer */}
-            <div className="w-full mt-2 pt-1 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-300 px-1">
-              <button
-                onClick={() => setPosition(null)}
-                className="hover:text-amber-300 transition-colors flex items-center gap-1 cursor-pointer"
-                title={isRtl ? 'إعادة سارة لموقعها الأساسي' : 'Reset position'}
-              >
-                <RotateCcw size={10} />
-                <span>{isRtl ? 'إعادة الموقع' : 'Reset Pos'}</span>
-              </button>
-
-              <span className="text-slate-400 text-[9px]">
-                {isRtl ? 'تتبع مؤشر الماوس 👁️' : 'Eyes track mouse 👁️'}
-              </span>
+              {position && (
+                <button
+                  onClick={() => setPosition(null)}
+                  className="w-full py-1 text-center text-[10px] text-slate-400 hover:text-amber-300 transition-colors flex items-center justify-center gap-1 cursor-pointer pt-1 border-t border-white/10"
+                >
+                  <RotateCcw size={10} />
+                  <span>{isRtl ? 'إعادة الموقع الأساسي' : 'Reset position'}</span>
+                </button>
+              )}
             </div>
-          </div>
-        )}
-      </div>
+          )}
+
+          {/* Pure 3D Canvas Mount - No Card Box, No Rectangular Borders */}
+          <div
+            ref={mountRef}
+            onClick={handleCanvasClick}
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
+            className="w-48 xs:w-56 sm:w-64 h-56 xs:h-64 sm:h-72 flex items-center justify-center cursor-grab active:cursor-grabbing hover:scale-[1.03] transition-transform select-none filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.45)]"
+            title={isRtl ? 'مجسم سارة 3D: اسحب لنقلها، أو انقر للتفاعل الصوتي ✨' : 'Sara 3D: Drag to move, or click to interact ✨'}
+          />
+
+          {/* Subtle natural 3D contact shadow under Sara's pedestal */}
+          <div className="w-36 h-3 -mt-2 bg-radial from-black/40 via-black/15 to-transparent rounded-full blur-[2px] pointer-events-none" />
+        </div>
+      )}
     </div>
   );
 };
