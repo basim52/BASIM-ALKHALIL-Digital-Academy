@@ -33,7 +33,10 @@ import {
   Plus,
   Camera,
   Palette,
-  BookMarked
+  BookMarked,
+  Sliders,
+  X,
+  Layers
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile, AppView, SaraBoardData, SaraChatResponse, TutorMemoryDoc, proficiencyLevel, CurriculumCategory } from '../types';
@@ -289,6 +292,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [isSavedBadgeVisible, setIsSavedBadgeVisible] = useState<boolean>(false);
   const [isRestoredSession, setIsRestoredSession] = useState<boolean>(false);
   const [showNewChatConfirm, setShowNewChatConfirm] = useState<boolean>(false);
+  const [showMobileToolsDrawer, setShowMobileToolsDrawer] = useState<boolean>(false);
+  const [mobileTab, setMobileTab] = useState<'chat' | 'board' | 'sara3d'>('chat');
   const SARA_STORAGE_KEY = (uid?: string) => `sara_chat_history_${uid || 'guest'}`;
 
   // Lesson Timer State (5 min, 10 min, 15 min, or custom)
@@ -2454,24 +2459,38 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               <span className="hidden sm:inline lg:hidden">{isLiveMode ? 'لايف 🔴' : 'لايف 🎙️'}</span>
             </button>
 
-            {/* 🎙️ Phonetic Pronunciation Lab Button */}
+            {/* Tablet Tools Drawer Opener (sm:flex xl:hidden) */}
+            <button
+              onClick={() => setShowMobileToolsDrawer(true)}
+              className="hidden sm:flex xl:hidden items-center gap-1.5 px-2.5 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-xs bg-amber-50 hover:bg-amber-100 text-[#855B14] border-amber-300"
+              title={isRtl ? 'الأدوات التعليمية الإضافية (النطق، السيناريوهات، التقرير، السرعة)' : 'More Learning Tools'}
+            >
+              <Sliders size={14} className="text-[#C49E3A]" />
+              <span>{isRtl ? 'المزيد ⚡' : 'Tools ⚡'}</span>
+              {tutorMemory.frequentMistakes && tutorMemory.frequentMistakes.length > 0 && (
+                <span className="w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center">
+                  {tutorMemory.frequentMistakes.length}
+                </span>
+              )}
+            </button>
+
+            {/* 🎙️ Phonetic Pronunciation Lab Button (Desktop >= 1280px) */}
             <button
               onClick={() => {
                 setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Alkhalil Academy');
                 setIsPhoneticModalOpen(true);
               }}
-              className="flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 text-purple-900 border-purple-200"
+              className="hidden xl:flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 text-purple-900 border-purple-200"
               title={isRtl ? 'مختبر مخارج الحروف وتصحيح النطق الصوتي الفوري' : 'Phonetic Pronunciation Lab'}
             >
               <Mic size={14} className="text-purple-600 animate-pulse" />
-              <span className="hidden lg:inline">{isRtl ? 'مختبر النطق 🎙️' : 'Speech Lab 🎙️'}</span>
-              <span className="hidden sm:inline lg:hidden">{isRtl ? 'النطق 🎙️' : 'Lab 🎙️'}</span>
+              <span>{isRtl ? 'مختبر النطق 🎙️' : 'Speech Lab 🎙️'}</span>
             </button>
 
-            {/* 🎭 Role-Play Scenarios Button */}
+            {/* 🎭 Role-Play Scenarios Button (Tablet Landscape & Desktop >= 1024px) */}
             <button
               onClick={() => setIsRolePlayModalOpen(true)}
-              className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
+              className={`hidden lg:flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
                 activeRolePlay
                   ? 'bg-amber-100 text-amber-900 border-amber-400 ring-2 ring-amber-300/40'
                   : 'bg-gradient-to-r from-teal-50 to-emerald-50 hover:from-teal-100 hover:to-emerald-100 text-teal-900 border-teal-200'
@@ -2479,31 +2498,29 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               title={isRtl ? 'سيناريوهات المحادثة وتقمص الأدوار (المطار، المقهى، الطبيب...)' : 'Real-world Role-play Scenarios'}
             >
               <span className="text-sm">🎭</span>
-              <span className="hidden lg:inline">{isRtl ? (activeRolePlay ? 'السيناريو نشط 🎭' : 'سيناريوهات 🎭') : 'Role Play 🎭'}</span>
-              <span className="hidden sm:inline lg:hidden">{isRtl ? 'سيناريو' : 'Roles'}</span>
+              <span>{isRtl ? (activeRolePlay ? 'السيناريو نشط 🎭' : 'سيناريوهات 🎭') : 'Role Play 🎭'}</span>
             </button>
 
-            {/* ⚡ Sara Speech Speed Controller (0.8x / 1.0x / 1.2x) */}
+            {/* ⚡ Sara Speech Speed Controller (Desktop >= 1280px) */}
             <button
               onClick={() => {
                 const nextRate = saraSpeechRate === 1.0 ? 0.8 : saraSpeechRate === 0.8 ? 1.2 : 1.0;
                 setSaraSpeechRate(nextRate);
               }}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+              className="hidden xl:flex items-center gap-1 px-2.5 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
               title={isRtl ? `سرعة صوت سارة: ${saraSpeechRate}x (اضغط للتغيير: 0.8x هادئ، 1.0x طبيعي، 1.2x سريع)` : `Speech Speed: ${saraSpeechRate}x`}
             >
               <span className="text-xs">{saraSpeechRate === 0.8 ? '🐢 0.8x' : saraSpeechRate === 1.2 ? '🚀 1.2x' : '⚡ 1.0x'}</span>
             </button>
 
-            {/* 📓 My Error Notebook & Progress Hub Button */}
+            {/* 📓 My Error Notebook & Progress Hub Button (Tablet Landscape & Desktop >= 1024px) */}
             <button
               onClick={() => setIsNotebookModalOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 text-[#855B14] border-amber-300"
+              className="hidden lg:flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 text-[#855B14] border-amber-300"
               title={isRtl ? 'دفتر الملاحظات والأخطاء الشخصي + بنك المفردات + تقرير ولي الأمر 📓' : 'My Error Notebook & Parent Report 📓'}
             >
               <BookMarked size={14} className="text-[#C49E3A]" />
-              <span className="hidden lg:inline">{isRtl ? 'دفتر الأخطاء والتقرير 📓' : 'Notebook 📓'}</span>
-              <span className="hidden sm:inline lg:hidden">{isRtl ? 'دفتر 📓' : 'Notes'}</span>
+              <span>{isRtl ? 'دفتر الأخطاء 📓' : 'Notebook 📓'}</span>
               {tutorMemory.frequentMistakes && tutorMemory.frequentMistakes.length > 0 && (
                 <span className="w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center">
                   {tutorMemory.frequentMistakes.length}
@@ -2535,109 +2552,76 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           </div>
         </div>
 
-        {/* Mobile Swipeable Action Ribbon (sm:hidden) */}
-        <div className="sm:hidden border-t border-slate-100 bg-slate-50/95 backdrop-blur-xs px-3 py-1.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar shadow-2xs">
-          {/* Whiteboard */}
-          <button
-            onClick={() => {
-              if (isWhiteboardOpen) setIsWhiteboardOpen(false);
-              else openWhiteboardModal();
-            }}
-            className={`px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border transition-all flex items-center gap-1 cursor-pointer ${
-              isWhiteboardOpen ? 'bg-amber-400 text-slate-950 border-amber-500 shadow-xs' : 'bg-white text-slate-700 border-slate-200'
-            }`}
-          >
-            <span>📐</span>
-            <span>{isRtl ? 'السبورة' : 'Whiteboard'}</span>
-          </button>
+        {/* Mobile Segmented Navigation & Tools Bar (sm:hidden) */}
+        <div className="sm:hidden border-t border-slate-200/80 bg-white/95 backdrop-blur-md px-2.5 py-1.5 flex items-center justify-between gap-1.5 shadow-2xs">
+          {/* Main 3 Segmented Tabs */}
+          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-2xl border border-slate-200/80 flex-1">
+            {/* Chat Tab */}
+            <button
+              onClick={() => {
+                setMobileTab('chat');
+                setIsWhiteboardOpen(false);
+              }}
+              className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                mobileTab === 'chat' && !isWhiteboardOpen
+                  ? 'bg-[#002147] text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <span>💬</span>
+              <span>{isRtl ? 'المحادثة' : 'Chat'}</span>
+            </button>
 
-          {/* Sara 3D */}
-          <button
-            onClick={() => setIsSara3DOpen(!isSara3DOpen)}
-            className={`px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border transition-all flex items-center gap-1 cursor-pointer ${
-              isSara3DOpen ? 'bg-amber-400 text-slate-950 border-amber-500 shadow-xs' : 'bg-white text-slate-700 border-slate-200'
-            }`}
-          >
-            <span>👩‍🏫</span>
-            <span>{isRtl ? 'سارة 3D' : 'Sara 3D'}</span>
-          </button>
+            {/* Whiteboard Tab */}
+            <button
+              onClick={() => {
+                setMobileTab('board');
+                if (!activeBoard) {
+                  openWhiteboardModal();
+                } else {
+                  setIsWhiteboardOpen(true);
+                }
+              }}
+              className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                isWhiteboardOpen
+                  ? 'bg-amber-400 text-slate-950 font-black shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <span>📐</span>
+              <span>{isRtl ? 'السبورة' : 'Board'}</span>
+            </button>
 
-          {/* Placement Test */}
-          <button
-            onClick={startPlacementTest}
-            className={`px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border transition-all flex items-center gap-1 cursor-pointer ${
-              placementState.isActive ? 'bg-[#002147] text-amber-300 border-amber-400 animate-pulse' : 'bg-blue-50 text-blue-900 border-blue-200'
-            }`}
-          >
-            <Target size={12} className={placementState.isActive ? 'text-amber-300' : 'text-blue-600'} />
-            <span>{isRtl ? 'تحديد المستوى' : 'Placement'}</span>
-          </button>
+            {/* Sara 3D Tab */}
+            <button
+              onClick={() => {
+                setMobileTab('sara3d');
+                setIsSara3DOpen(!isSara3DOpen);
+              }}
+              className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                isSara3DOpen
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <span>👩‍🏫</span>
+              <span>{isRtl ? 'سارة 3D' : 'Sara 3D'}</span>
+            </button>
+          </div>
 
-          {/* Timer */}
+          {/* Quick Action Sheet Opener (⚡ المزيد من الأدوات) */}
           <button
-            onClick={() => setShowTimerDropdown(!showTimerDropdown)}
-            className={`px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border transition-all flex items-center gap-1 cursor-pointer ${
-              !isTimerEnabled || timerDurationMinutes === 0
-                ? 'bg-white text-slate-600 border-slate-200'
-                : timerSecondsLeft === 0
-                ? 'bg-rose-100 text-rose-900 border-rose-300 animate-pulse'
-                : 'bg-emerald-50 text-emerald-900 border-emerald-300'
-            }`}
+            onClick={() => setShowMobileToolsDrawer(true)}
+            className="py-1.5 px-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#855B14] border border-amber-300 font-black text-xs flex items-center gap-1 cursor-pointer shrink-0 transition-all shadow-2xs active:scale-95"
+            title={isRtl ? 'الأدوات والأنشطة الإضافية (النطق، السيناريوهات، التقرير...)' : 'More Learning Tools'}
           >
-            <Clock size={12} />
-            <span className="font-mono">
-              {!isTimerEnabled || timerDurationMinutes === 0 ? (isRtl ? 'مؤقت ⏱️' : 'Timer') : formatTimerDisplay(timerSecondsLeft)}
-            </span>
-          </button>
-
-          {/* Pronunciation Lab */}
-          <button
-            onClick={() => {
-              setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Alkhalil Academy');
-              setIsPhoneticModalOpen(true);
-            }}
-            className="px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border bg-purple-50 text-purple-900 border-purple-200 flex items-center gap-1 cursor-pointer"
-          >
-            <Mic size={12} className="text-purple-600" />
-            <span>{isRtl ? 'مختبر النطق' : 'Speech Lab'}</span>
-          </button>
-
-          {/* Role Play */}
-          <button
-            onClick={() => setIsRolePlayModalOpen(true)}
-            className="px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border bg-teal-50 text-teal-900 border-teal-200 flex items-center gap-1 cursor-pointer"
-          >
-            <span>🎭</span>
-            <span>{isRtl ? 'سيناريوهات' : 'Role-Play'}</span>
-          </button>
-
-          {/* Notebook */}
-          <button
-            onClick={() => setIsNotebookModalOpen(true)}
-            className="px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border bg-amber-50 text-[#855B14] border-amber-200 flex items-center gap-1 cursor-pointer"
-          >
-            <span>📓</span>
-            <span>{isRtl ? 'دفتر الأخطاء' : 'Notebook'}</span>
-          </button>
-
-          {/* Speed Toggle */}
-          <button
-            onClick={() => {
-              const nextRate = saraSpeechRate === 1.0 ? 0.8 : saraSpeechRate === 0.8 ? 1.2 : 1.0;
-              setSaraSpeechRate(nextRate);
-            }}
-            className="px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border bg-white text-slate-700 border-slate-200 flex items-center gap-1 cursor-pointer"
-          >
-            <span>{saraSpeechRate === 0.8 ? '🐢 0.8x' : saraSpeechRate === 1.2 ? '🚀 1.2x' : '⚡ 1.0x'}</span>
-          </button>
-
-          {/* New Chat */}
-          <button
-            onClick={() => setShowNewChatConfirm(true)}
-            className="px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border bg-white text-slate-700 border-slate-200 flex items-center gap-1 cursor-pointer"
-          >
-            <RotateCcw size={11} className="text-slate-500" />
-            <span>{isRtl ? 'جديدة' : 'New'}</span>
+            <Sliders size={13} className="text-[#C49E3A]" />
+            <span className="text-[11px] font-black">{isRtl ? 'الأدوات' : 'Tools'}</span>
+            {tutorMemory.frequentMistakes && tutorMemory.frequentMistakes.length > 0 && (
+              <span className="w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center">
+                {tutorMemory.frequentMistakes.length}
+              </span>
+            )}
           </button>
         </div>
       </header>
@@ -2760,24 +2744,26 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               </div>
             )}
 
-            {/* Missions Tracker */}
-            <div className="space-y-1.5 mb-3">
-              <span className="text-[11px] font-black text-amber-200 block">
+            {/* Missions Tracker (Responsive 2-column Grid on Tablets/Desktop) */}
+            <div className="mb-3">
+              <span className="text-[11px] font-black text-amber-200 block mb-1.5">
                 {isRtl ? 'مهام المحادثة المستهدفة:' : 'Target Missions:'}
               </span>
-              {(isRtl ? activeRolePlay.missionsAr : activeRolePlay.missionsEn).map((mission, mIdx) => {
-                const isDone = completedMissions.includes(mIdx);
-                return (
-                  <div key={`mission-${mIdx}`} className="flex items-center gap-2 text-xs bg-black/25 px-3 py-1.5 rounded-xl border border-white/5">
-                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${isDone ? 'bg-emerald-500 text-white' : 'bg-white/20 text-slate-300'}`}>
-                      {isDone ? '✓' : mIdx + 1}
-                    </span>
-                    <span className={`flex-1 font-bold ${isDone ? 'line-through text-slate-400' : 'text-slate-100'}`}>
-                      {mission}
-                    </span>
-                  </div>
-                );
-              })}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                {(isRtl ? activeRolePlay.missionsAr : activeRolePlay.missionsEn).map((mission, mIdx) => {
+                  const isDone = completedMissions.includes(mIdx);
+                  return (
+                    <div key={`mission-${mIdx}`} className="flex items-center gap-2 text-xs bg-black/25 px-3 py-1.5 rounded-xl border border-white/5">
+                      <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${isDone ? 'bg-emerald-500 text-white' : 'bg-white/20 text-slate-300'}`}>
+                        {isDone ? '✓' : mIdx + 1}
+                      </span>
+                      <span className={`flex-1 font-bold ${isDone ? 'line-through text-slate-400' : 'text-slate-100'}`}>
+                        {mission}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Starter Suggestions Chips */}
@@ -3740,10 +3726,41 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               placeholder={
                 isLiveMode
                   ? (isRtl ? 'المحادثة اللايف نشطة... تحدث بالمايك وسارة تجيبك، أو اكتب هنا...' : 'Live mode active... speak or type here...')
-                  : (isRtl ? 'اكتب لسارة بالعربية أو الإنجليزية، أو اضغط محادثة لايف...' : 'Type to Sara in Arabic or English, or start Live...')
+                  : (isRtl ? 'اكتب لسارة بالعربية أو الإنجليزية، أو اضغط المايك للإملاء...' : 'Type to Sara in Arabic or English, or tap mic...')
               }
               className="flex-1 bg-transparent px-2 sm:px-2.5 py-1.5 text-sm sm:text-base font-medium text-slate-800 placeholder-slate-400 focus:outline-none min-w-0"
             />
+
+            {/* Quick Speech Dictation Mic (إملاء صوتي بالمايك للتابلت والجوال) */}
+            {!isLiveMode && speechSupported && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (isListening) {
+                    recognitionRef.current?.stop();
+                    setIsListening(false);
+                    isListeningRef.current = false;
+                  } else {
+                    if (isSpeaking) cancelAllSpeech();
+                    try {
+                      recognitionRef.current?.start();
+                      setIsListening(true);
+                      isListeningRef.current = true;
+                    } catch (e) {
+                      console.warn('Speech recognition start failed:', e);
+                    }
+                  }
+                }}
+                className={`p-2 sm:p-2.5 rounded-xl sm:rounded-2xl border transition-all cursor-pointer flex items-center justify-center shrink-0 active:scale-95 ${
+                  isListening
+                    ? 'bg-amber-400 border-amber-500 text-slate-950 shadow-md animate-bounce'
+                    : 'bg-slate-100 hover:bg-amber-50 border-slate-200 text-slate-600 hover:text-amber-800'
+                }`}
+                title={isRtl ? (isListening ? 'جارٍ الاستماع لإملائك... انقر للإيقاف' : 'إملاء صوتي فوري بالمايك 🎙️') : 'Quick Voice Dictation 🎙️'}
+              >
+                <Mic size={18} className={isListening ? 'text-slate-950 animate-pulse' : 'text-slate-600'} />
+              </button>
+            )}
 
             {/* Send Button */}
             <button
@@ -3939,6 +3956,231 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 >
                   {isRtl ? 'نعم، ابدأ جديدة 🚀' : 'Yes, Start New 🚀'}
                 </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 6B. Mobile & Tablet Quick Actions Drawer Modal */}
+      <AnimatePresence>
+        {showMobileToolsDrawer && (
+          <div className="fixed inset-0 z-50 flex flex-col justify-end md:justify-center items-center p-0 md:p-4 bg-slate-950/70 backdrop-blur-xs xl:hidden">
+            {/* Backdrop click to dismiss */}
+            <div 
+              className="absolute inset-0" 
+              onClick={() => setShowMobileToolsDrawer(false)} 
+            />
+
+            <motion.div
+              initial={{ y: '100%', opacity: 0.5 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              className="bg-white rounded-t-3xl md:rounded-3xl border-t-2 md:border-2 border-slate-200 shadow-2xl p-4 sm:p-6 max-h-[88dvh] max-w-lg w-full flex flex-col overflow-hidden relative z-10"
+              dir={isRtl ? 'rtl' : 'ltr'}
+            >
+              {/* Drag handle & Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-amber-100 text-[#855B14] flex items-center justify-center text-sm font-black shadow-xs">
+                    ⚡
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-[#002147]">
+                      {isRtl ? 'أدوات وأنشطة سارة التعليمية' : 'Sara Learning Hub'}
+                    </h3>
+                    <p className="text-[11px] text-slate-500 font-medium">
+                      {isRtl ? 'اختر النشاط أو الأداة التي ترغب بها' : 'Select an activity or tool'}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setShowMobileToolsDrawer(false)}
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center cursor-pointer transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Tools Grid */}
+              <div className="grid grid-cols-2 gap-2.5 py-3 overflow-y-auto max-h-[60dvh] no-scrollbar">
+                {/* 1. Placement Test */}
+                <button
+                  onClick={() => {
+                    setShowMobileToolsDrawer(false);
+                    startPlacementTest();
+                  }}
+                  className={`p-3 rounded-2xl border-2 text-start flex flex-col justify-between gap-2 transition-all cursor-pointer ${
+                    placementState.isActive
+                      ? 'bg-[#002147] text-white border-amber-400 ring-2 ring-amber-300'
+                      : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 text-blue-950 hover:bg-blue-100'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">🎯</span>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-blue-600 text-white">
+                      {isRtl ? 'مستواك' : 'Level'}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="text-xs font-black">{isRtl ? 'تحديد المستوى' : 'Placement Test'}</div>
+                    <div className="text-[10px] text-slate-500 font-medium">{isRtl ? 'تشخيص دقيق للقدرات' : 'Accurate test'}</div>
+                  </div>
+                </button>
+
+                {/* 2. Phonetic Speech Lab */}
+                <button
+                  onClick={() => {
+                    setShowMobileToolsDrawer(false);
+                    setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Alkhalil Academy');
+                    setIsPhoneticModalOpen(true);
+                  }}
+                  className="p-3 rounded-2xl border-2 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200 text-purple-950 hover:bg-purple-100 text-start flex flex-col justify-between gap-2 transition-all cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">🎙️</span>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-purple-600 text-white">
+                      {isRtl ? 'فوري' : 'Live'}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="text-xs font-black">{isRtl ? 'مختبر مخارج النطق' : 'Pronunciation Lab'}</div>
+                    <div className="text-[10px] text-slate-500 font-medium">{isRtl ? 'تصحيح صوتي مباشر' : 'Voice correction'}</div>
+                  </div>
+                </button>
+
+                {/* 3. Real-world Role-Play */}
+                <button
+                  onClick={() => {
+                    setShowMobileToolsDrawer(false);
+                    setIsRolePlayModalOpen(true);
+                  }}
+                  className={`p-3 rounded-2xl border-2 text-start flex flex-col justify-between gap-2 transition-all cursor-pointer ${
+                    activeRolePlay
+                      ? 'bg-amber-100 text-amber-950 border-amber-400 ring-2 ring-amber-300'
+                      : 'bg-gradient-to-br from-teal-50 to-emerald-50 border-teal-200 text-teal-950 hover:bg-teal-100'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">🎭</span>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-teal-600 text-white">
+                      {isRtl ? 'محاكاة' : 'Roles'}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="text-xs font-black">{isRtl ? 'سيناريوهات المحادثة' : 'Role-Play'}</div>
+                    <div className="text-[10px] text-slate-500 font-medium">{isRtl ? 'مطار، مقهى، فندق...' : 'Airport, Cafe...'}</div>
+                  </div>
+                </button>
+
+                {/* 4. Notebook & Parent Report */}
+                <button
+                  onClick={() => {
+                    setShowMobileToolsDrawer(false);
+                    setIsNotebookModalOpen(true);
+                  }}
+                  className="p-3 rounded-2xl border-2 bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 text-[#855B14] hover:bg-amber-100 text-start flex flex-col justify-between gap-2 transition-all cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">📓</span>
+                    {tutorMemory.frequentMistakes && tutorMemory.frequentMistakes.length > 0 && (
+                      <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-rose-500 text-white">
+                        {tutorMemory.frequentMistakes.length} {isRtl ? 'أخطاء' : 'errors'}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <div className="text-xs font-black">{isRtl ? 'دفتر الأخطاء والتقرير' : 'Error Notebook'}</div>
+                    <div className="text-[10px] text-slate-500 font-medium">{isRtl ? 'مفردات وتقارير الإتقان' : 'Mistakes & vocab'}</div>
+                  </div>
+                </button>
+
+                {/* 5. Academy Curricula Selection */}
+                <button
+                  onClick={() => {
+                    setShowMobileToolsDrawer(false);
+                    setIsCurriculumModalOpen(true);
+                  }}
+                  className="p-3 rounded-2xl border-2 bg-gradient-to-br from-amber-100/70 to-yellow-50 border-amber-300 text-[#002147] hover:bg-amber-100 text-start flex flex-col justify-between gap-2 transition-all cursor-pointer col-span-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">📚</span>
+                      <div>
+                        <div className="text-xs font-black">{isRtl ? 'مناهج الأكاديمية التفاعلية' : 'Academy Curriculums'}</div>
+                        <div className="text-[10px] text-slate-600 font-medium">
+                          {isRtl ? 'دروس القواعد، الصوتيات، المحادثة والقصص' : 'Grammar, Phonics, Speaking & Stories'}
+                        </div>
+                      </div>
+                    </div>
+                    <ChevronRight size={16} className={`text-slate-400 ${isRtl ? 'rotate-180' : ''}`} />
+                  </div>
+                </button>
+              </div>
+
+              {/* Bottom Quick Preferences (Speed + Timer + Language + New Chat) */}
+              <div className="pt-3 border-t border-slate-100 space-y-2 pb-safe">
+                <div className="flex items-center justify-between gap-2">
+                  {/* Speed toggle */}
+                  <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl flex-1 justify-between">
+                    <span className="text-[10px] font-black text-slate-500 ps-1">{isRtl ? 'السرعة:' : 'Speed:'}</span>
+                    <div className="flex items-center gap-0.5">
+                      {[
+                        { r: 0.8, l: '🐢 0.8x' },
+                        { r: 1.0, l: '⚡ 1.0x' },
+                        { r: 1.2, l: '🚀 1.2x' }
+                      ].map(sp => (
+                        <button
+                          key={`mob-sp-${sp.r}`}
+                          onClick={() => setSaraSpeechRate(sp.r)}
+                          className={`px-2 py-1 rounded-lg text-[10px] font-black transition-all cursor-pointer ${
+                            saraSpeechRate === sp.r ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500'
+                          }`}
+                        >
+                          {sp.l}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Language Toggle */}
+                  <button
+                    onClick={() => handleToggleLanguage()}
+                    className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#002147] text-xs font-black flex items-center gap-1 cursor-pointer transition-all shrink-0"
+                  >
+                    <span>🌐</span>
+                    <span>{activeLang === 'ar' ? 'English' : 'عربي'}</span>
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {/* Timer selection */}
+                  <button
+                    onClick={() => {
+                      setShowMobileToolsDrawer(false);
+                      setShowTimerDropdown(true);
+                    }}
+                    className="flex-1 py-2 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Clock size={13} className="text-amber-500" />
+                    <span>{isRtl ? 'مؤقت الجلسة:' : 'Session Timer:'}</span>
+                    <span className="font-mono font-black">{formatTimerDisplay(timerSecondsLeft)}</span>
+                  </button>
+
+                  {/* New Chat */}
+                  <button
+                    onClick={() => {
+                      setShowMobileToolsDrawer(false);
+                      setShowNewChatConfirm(true);
+                    }}
+                    className="py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-black flex items-center gap-1 cursor-pointer shrink-0 transition-all"
+                  >
+                    <RotateCcw size={12} />
+                    <span>{isRtl ? 'جديدة' : 'New'}</span>
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>

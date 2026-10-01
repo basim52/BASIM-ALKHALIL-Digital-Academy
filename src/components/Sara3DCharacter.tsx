@@ -17,7 +17,7 @@ export type SaraEmotion = 'idle' | 'speaking' | 'listening' | 'thinking' | 'cele
 
 export type SaraGesture = 'idle' | 'waving' | 'clapping' | 'pointing' | 'explaining';
 
-export type SaraOutfitId = 'navy_gold' | 'rose_pink' | 'emerald_green' | 'lavender_purple';
+export type SaraOutfitId = 'navy_gold' | 'rose_pink' | 'emerald_green' | 'lavender_purple' | 'summer_turquoise' | 'sunshine_coral';
 
 export interface SaraOutfit {
   id: SaraOutfitId;
@@ -29,6 +29,8 @@ export interface SaraOutfit {
 }
 
 export const SARA_OUTFITS: SaraOutfit[] = [
+  { id: 'summer_turquoise', nameAr: 'فيروزي صيفي منعش', nameEn: 'Summer Turquoise', blazerHex: 0x0891b2, trimHex: 0x5eead4, badgeEmoji: '🏖️' },
+  { id: 'sunshine_coral', nameAr: 'مرجاني شمسي صيفي', nameEn: 'Sunshine Coral', blazerHex: 0xbe123c, trimHex: 0xfde047, badgeEmoji: '☀️' },
   { id: 'navy_gold', nameAr: 'كحلي وذهبي ملكي', nameEn: 'Royal Navy & Gold', blazerHex: 0x002147, trimHex: 0xc49e3a, badgeEmoji: '👑' },
   { id: 'rose_pink', nameAr: 'وردي زهري ولؤلؤي', nameEn: 'Rose Pink & Pearl', blazerHex: 0xbe185d, trimHex: 0xfde047, badgeEmoji: '🌸' },
   { id: 'emerald_green', nameAr: 'أخضر زمردي فاخر', nameEn: 'Emerald Green', blazerHex: 0x065f46, trimHex: 0xf59e0b, badgeEmoji: '🌲' },
@@ -89,6 +91,13 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
       setActiveGesture('idle');
     }
   }, [isExplainingWhiteboard]);
+
+  // Auto-minimize on tablet / mobile (<1024px) when whiteboard opens to keep drawing canvas and chalk tray 100% visible
+  useEffect(() => {
+    if (isWhiteboardOpen && typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setIsMinimized(true);
+    }
+  }, [isWhiteboardOpen]);
 
   const triggerGesture = (g: SaraGesture) => {
     setActiveGesture(g);
@@ -1316,7 +1325,7 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
         position
           ? ''
           : isWhiteboardOpen
-            ? (isRtl ? 'bottom-6 left-6 sm:bottom-8 sm:left-10' : 'bottom-6 right-6 sm:bottom-8 sm:right-10')
+            ? (isRtl ? 'bottom-4 left-4 sm:bottom-4 sm:left-4 lg:bottom-8 lg:left-10' : 'bottom-4 right-4 sm:bottom-4 sm:right-4 lg:bottom-8 lg:right-10')
             : (isRtl ? 'bottom-20 left-4 sm:bottom-16 sm:left-8' : 'bottom-20 right-4 sm:bottom-16 sm:right-8')
       }`}
     >

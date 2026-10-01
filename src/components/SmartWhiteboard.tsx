@@ -47,7 +47,8 @@ import {
   Layers,
   Target,
   Timer,
-  Trophy
+  Trophy,
+  MoreVertical
 } from 'lucide-react';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 import { SaraBoardData, SaraBoardQuiz } from '../types';
@@ -100,136 +101,155 @@ export interface WhiteboardTheme {
 
 export const WHITEBOARD_THEMES: WhiteboardTheme[] = [
   {
-    id: 'green',
-    nameAr: 'أخضر مدرسي زمردي',
-    nameEn: 'Classroom Green',
-    emoji: '🌲',
-    bgHex: '#072F2B',
-    gradientToHex: '#0D3E39',
-    borderHex: '#C49E3A',
-    headerFrom: '#1c1810',
-    headerVia: '#2d2417',
-    headerTo: '#1c1810',
+    id: 'maldives_turquoise',
+    nameAr: 'شاطئ المالديف الفيروزي',
+    nameEn: 'Maldives Turquoise',
+    emoji: '🏖️',
+    bgHex: '#083344',
+    gradientToHex: '#0e7490',
+    borderHex: '#2DD4BF',
+    headerFrom: '#04212c',
+    headerVia: '#083b48',
+    headerTo: '#04212c',
     textColor: 'text-white',
-    textSecondary: 'text-amber-100/70',
-    accentHex: '#FDE68A',
-    cardBg: 'rgba(0, 0, 0, 0.45)',
-    cardBorder: 'rgba(255, 255, 255, 0.12)',
-    gridColor: 'rgba(255, 255, 255, 0.04)',
+    textSecondary: 'text-teal-100/80',
+    accentHex: '#5EEAD4',
+    cardBg: 'rgba(4, 33, 44, 0.65)',
+    cardBorder: 'rgba(45, 212, 191, 0.28)',
+    gridColor: 'rgba(45, 212, 191, 0.07)',
     isLight: false
   },
   {
-    id: 'blue',
-    nameAr: 'أزرق فضائي مرح',
-    nameEn: 'Cosmic Blue',
-    emoji: '🚀',
-    bgHex: '#0B2038',
-    gradientToHex: '#123154',
+    id: 'summer_peach_sunrise',
+    nameAr: 'شروق الصيف الخوخي والذهبي',
+    nameEn: 'Summer Peach Sunrise',
+    emoji: '🌅',
+    bgHex: '#451a03',
+    gradientToHex: '#78350f',
+    borderHex: '#FB923C',
+    headerFrom: '#270e02',
+    headerVia: '#3d1604',
+    headerTo: '#270e02',
+    textColor: 'text-white',
+    textSecondary: 'text-amber-100/80',
+    accentHex: '#FDBA74',
+    cardBg: 'rgba(40, 15, 3, 0.65)',
+    cardBorder: 'rgba(251, 146, 60, 0.28)',
+    gridColor: 'rgba(251, 146, 60, 0.07)',
+    isLight: false
+  },
+  {
+    id: 'lemon_mint',
+    nameAr: 'ليمون ونعناع صيفي مثلج',
+    nameEn: 'Icy Lemon & Mint',
+    emoji: '🍋',
+    bgHex: '#022c22',
+    gradientToHex: '#064e3b',
+    borderHex: '#FACC15',
+    headerFrom: '#011a14',
+    headerVia: '#032c21',
+    headerTo: '#011a14',
+    textColor: 'text-white',
+    textSecondary: 'text-emerald-100/80',
+    accentHex: '#FEF08A',
+    cardBg: 'rgba(2, 35, 27, 0.65)',
+    cardBorder: 'rgba(250, 204, 21, 0.28)',
+    gridColor: 'rgba(163, 230, 53, 0.07)',
+    isLight: false
+  },
+  {
+    id: 'azure_ocean',
+    nameAr: 'أمواج المحيط الصيفية',
+    nameEn: 'Azure Ocean Waves',
+    emoji: '🌊',
+    bgHex: '#082f49',
+    gradientToHex: '#0369a1',
     borderHex: '#38BDF8',
-    headerFrom: '#0A1828',
-    headerVia: '#102742',
-    headerTo: '#0A1828',
+    headerFrom: '#041c2c',
+    headerVia: '#072e48',
+    headerTo: '#041c2c',
     textColor: 'text-white',
-    textSecondary: 'text-sky-200/80',
+    textSecondary: 'text-sky-100/80',
     accentHex: '#7DD3FC',
-    cardBg: 'rgba(5, 15, 30, 0.55)',
-    cardBorder: 'rgba(56, 189, 248, 0.2)',
-    gridColor: 'rgba(56, 189, 248, 0.05)',
+    cardBg: 'rgba(5, 30, 48, 0.65)',
+    cardBorder: 'rgba(56, 189, 248, 0.28)',
+    gridColor: 'rgba(56, 189, 248, 0.07)',
     isLight: false
   },
   {
-    id: 'pink',
-    nameAr: 'وردي كاندي مبهج',
-    nameEn: 'Candy Pink',
-    emoji: '🌸',
-    bgHex: '#3D0E25',
-    gradientToHex: '#581636',
+    id: 'tropical_hibiscus',
+    nameAr: 'غروب استوائي وزهور الهيبيسكس',
+    nameEn: 'Tropical Hibiscus',
+    emoji: '🌺',
+    bgHex: '#4c0519',
+    gradientToHex: '#831843',
     borderHex: '#F472B6',
-    headerFrom: '#2B0819',
-    headerVia: '#3F0D27',
-    headerTo: '#2B0819',
+    headerFrom: '#2c030e',
+    headerVia: '#430617',
+    headerTo: '#2c030e',
     textColor: 'text-white',
-    textSecondary: 'text-pink-200/80',
+    textSecondary: 'text-pink-100/80',
     accentHex: '#FBCFE8',
-    cardBg: 'rgba(30, 5, 18, 0.55)',
-    cardBorder: 'rgba(244, 114, 182, 0.22)',
-    gridColor: 'rgba(244, 114, 182, 0.05)',
+    cardBg: 'rgba(38, 4, 13, 0.65)',
+    cardBorder: 'rgba(244, 114, 182, 0.28)',
+    gridColor: 'rgba(244, 114, 182, 0.07)',
     isLight: false
   },
   {
-    id: 'purple',
-    nameAr: 'بنفسجي سحري',
-    nameEn: 'Magic Purple',
-    emoji: '🦄',
-    bgHex: '#230E3D',
-    gradientToHex: '#36155E',
-    borderHex: '#C084FC',
-    headerFrom: '#18082B',
-    headerVia: '#270C46',
-    headerTo: '#18082B',
+    id: 'caribbean_palm',
+    nameAr: 'جزر الكاريبي والنخيل الاستوائي',
+    nameEn: 'Caribbean Island Palms',
+    emoji: '🌴',
+    bgHex: '#064e3b',
+    gradientToHex: '#047857',
+    borderHex: '#34D399',
+    headerFrom: '#032a20',
+    headerVia: '#053f30',
+    headerTo: '#032a20',
     textColor: 'text-white',
-    textSecondary: 'text-purple-200/80',
-    accentHex: '#E9D5FF',
-    cardBg: 'rgba(20, 5, 35, 0.55)',
-    cardBorder: 'rgba(192, 132, 252, 0.22)',
-    gridColor: 'rgba(192, 132, 252, 0.05)',
+    textSecondary: 'text-emerald-100/80',
+    accentHex: '#6EE7B7',
+    cardBg: 'rgba(3, 35, 27, 0.65)',
+    cardBorder: 'rgba(52, 211, 153, 0.28)',
+    gridColor: 'rgba(52, 211, 153, 0.07)',
     isLight: false
   },
   {
-    id: 'white',
-    nameAr: 'سبورة بيضاء مدرسية',
-    nameEn: 'Clean Whiteboard',
-    emoji: '📄',
-    bgHex: '#F8FAFC',
-    gradientToHex: '#FFFFFF',
+    id: 'white_sand_beach',
+    nameAr: 'رمال الشاطئ البيضاء واللؤلؤ',
+    nameEn: 'Pristine White Beach',
+    emoji: '🐚',
+    bgHex: '#F0FDF4',
+    gradientToHex: '#E0F2FE',
     borderHex: '#0284C7',
     headerFrom: '#0F172A',
     headerVia: '#1E293B',
     headerTo: '#0F172A',
     textColor: 'text-slate-900',
     textSecondary: 'text-slate-600',
-    accentHex: '#0284C7',
-    cardBg: 'rgba(255, 255, 255, 0.95)',
-    cardBorder: 'rgba(15, 23, 42, 0.12)',
-    gridColor: 'rgba(15, 23, 42, 0.06)',
+    accentHex: '#0369A1',
+    cardBg: 'rgba(255, 255, 255, 0.94)',
+    cardBorder: 'rgba(2, 132, 199, 0.22)',
+    gridColor: 'rgba(2, 132, 199, 0.06)',
     isLight: true
   },
   {
-    id: 'navy',
-    nameAr: 'كحلي ليلي كلاسيكي',
-    nameEn: 'Midnight Navy',
-    emoji: '🌙',
-    bgHex: '#090F1C',
-    gradientToHex: '#121C30',
-    borderHex: '#E2B857',
-    headerFrom: '#050912',
-    headerVia: '#0E1729',
-    headerTo: '#050912',
+    id: 'summer_mango_berry',
+    nameAr: 'آيس كريم المانجو والتوت المنعش',
+    nameEn: 'Mango & Berry Gelato',
+    emoji: '🍧',
+    bgHex: '#3b0764',
+    gradientToHex: '#581c87',
+    borderHex: '#FACC15',
+    headerFrom: '#200336',
+    headerVia: '#320655',
+    headerTo: '#200336',
     textColor: 'text-white',
-    textSecondary: 'text-slate-300',
-    accentHex: '#FCD34D',
-    cardBg: 'rgba(0, 0, 0, 0.55)',
-    cardBorder: 'rgba(255, 255, 255, 0.1)',
-    gridColor: 'rgba(255, 255, 255, 0.03)',
-    isLight: false
-  },
-  {
-    id: 'warm',
-    nameAr: 'عسلي دافئ',
-    nameEn: 'Warm Honey',
-    emoji: '🍯',
-    bgHex: '#331F08',
-    gradientToHex: '#472B0B',
-    borderHex: '#F59E0B',
-    headerFrom: '#241403',
-    headerVia: '#361E06',
-    headerTo: '#241403',
-    textColor: 'text-white',
-    textSecondary: 'text-amber-100/70',
-    accentHex: '#FDE68A',
-    cardBg: 'rgba(25, 12, 2, 0.55)',
-    cardBorder: 'rgba(245, 158, 11, 0.22)',
-    gridColor: 'rgba(245, 158, 11, 0.05)',
+    textSecondary: 'text-purple-100/80',
+    accentHex: '#FDE047',
+    cardBg: 'rgba(27, 4, 45, 0.65)',
+    cardBorder: 'rgba(250, 204, 21, 0.28)',
+    gridColor: 'rgba(250, 204, 21, 0.07)',
     isLight: false
   }
 ];
@@ -355,8 +375,16 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   
-  // Whiteboard Appearance State
-  const [activeThemeId, setActiveThemeId] = useState<string>('green');
+  // Whiteboard Appearance State (Default: Fresh Summer Maldives Turquoise)
+  const [activeThemeId, setActiveThemeId] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('alkhalil_whiteboard_theme');
+      if (saved && WHITEBOARD_THEMES.some(t => t.id === saved)) {
+        return saved;
+      }
+    }
+    return 'maldives_turquoise';
+  });
   const [showThemePicker, setShowThemePicker] = useState<boolean>(false);
   
   // Drawing Tools State
@@ -378,6 +406,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   const [showBrushSizePopover, setShowBrushSizePopover] = useState(false);
   const [showTemplatePicker, setShowTemplatePicker] = useState<boolean>(false);
   const [showStickerPicker, setShowStickerPicker] = useState<boolean>(false);
+  const [showMobileMoreMenu, setShowMobileMoreMenu] = useState<boolean>(false);
 
   // Limited 5-Question Lesson Quiz & Floating 30s Countdown Timer
   const [quizQuestionIndex, setQuizQuestionIndex] = useState<number>(0);
@@ -803,12 +832,25 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
         try {
           const parsed = JSON.parse(saved);
           if (parsed && typeof parsed.width === 'number' && typeof parsed.height === 'number') {
-            return parsed;
+            const maxW = window.innerWidth - 24;
+            const maxH = window.innerHeight - 32;
+            return {
+              width: Math.min(maxW, parsed.width),
+              height: Math.min(maxH, parsed.height)
+            };
           }
         } catch (e) {}
       }
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      if (w < 1024) {
+        return {
+          width: Math.min(840, Math.round(w * 0.92)),
+          height: Math.min(700, Math.round(h * 0.86))
+        };
+      }
     }
-    return { width: 780, height: 600 };
+    return { width: 840, height: 620 };
   });
   const [showSizeMenu, setShowSizeMenu] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -822,8 +864,8 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   } | null>(null);
 
   const updateBoardSize = useCallback((newWidth: number, newHeight: number) => {
-    const maxWidth = typeof window !== 'undefined' ? window.innerWidth - 16 : 1400;
-    const maxHeight = typeof window !== 'undefined' ? window.innerHeight - 24 : 900;
+    const maxWidth = typeof window !== 'undefined' ? window.innerWidth - 24 : 1400;
+    const maxHeight = typeof window !== 'undefined' ? window.innerHeight - 32 : 900;
     const clampedW = Math.round(Math.max(360, Math.min(maxWidth, newWidth)));
     const clampedH = Math.round(Math.max(360, Math.min(maxHeight, newHeight)));
     const next = { width: clampedW, height: clampedH };
@@ -1747,7 +1789,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
     <AnimatePresence>
       <motion.div
         key={`smart-whiteboard-${positionKey}-${isMaximized}-${activeThemeId}`}
-        drag={!isMaximized && (typeof window !== 'undefined' ? window.innerWidth >= 640 : true)}
+        drag={!isMaximized && (typeof window !== 'undefined' ? window.innerWidth >= 1024 : false)}
         dragListener={false}
         dragControls={dragControls}
         dragMomentum={false}
@@ -1758,10 +1800,10 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
         transition={{ type: 'spring', damping: 25, stiffness: 280 }}
         className={`fixed z-50 flex flex-col font-sans transition-[border-radius,box-shadow] select-none ${
           isMaximized 
-            ? 'inset-0 sm:inset-3 md:inset-5 lg:inset-6 rounded-none sm:rounded-3xl border-0 sm:border-4' 
+            ? 'inset-0 sm:inset-3 md:inset-4 lg:inset-6 rounded-none sm:rounded-3xl border-0 sm:border-4' 
             : mobileMode === 'half'
               ? 'inset-x-0 bottom-0 top-auto h-[58dvh] max-h-[75dvh] rounded-t-3xl rounded-b-none border-t-4 border-x-0 border-b-0 sm:hidden'
-              : 'inset-0 sm:inset-auto sm:top-14 md:top-16 sm:right-3 md:right-5 lg:right-6 rounded-none sm:rounded-3xl border-0 sm:border-4'
+              : 'inset-0 sm:inset-auto sm:top-8 md:top-10 sm:left-1/2 sm:-translate-x-1/2 lg:left-auto lg:translate-x-0 lg:right-6 rounded-none sm:rounded-3xl border-0 sm:border-4'
         } shadow-2xl overflow-hidden`}
         style={{
           borderColor: currentTheme.borderHex,
@@ -1769,10 +1811,10 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
           boxShadow: `0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 30px ${currentTheme.borderHex}44`,
           ...(!isMaximized && typeof window !== 'undefined' && window.innerWidth >= 640
             ? {
-                width: `${customSize.width}px`,
-                height: `${customSize.height}px`,
-                maxWidth: 'calc(100vw - 16px)',
-                maxHeight: 'calc(100vh - 24px)',
+                width: `${Math.min(window.innerWidth - 24, customSize.width)}px`,
+                height: `${Math.min(window.innerHeight - 32, customSize.height)}px`,
+                maxWidth: 'calc(100vw - 24px)',
+                maxHeight: 'calc(100vh - 32px)',
               }
             : {}),
         }}
@@ -1803,12 +1845,17 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
           )}
         </AnimatePresence>
 
-        {/* Mobile Pull Handle Bar */}
+        {/* Mobile Pull Handle Bar & Mode Switcher */}
         <div 
           onClick={() => setMobileMode(prev => prev === 'fullscreen' ? 'half' : 'fullscreen')}
-          className="sm:hidden flex items-center justify-center pt-1.5 pb-0.5 cursor-pointer bg-black/20"
+          className="sm:hidden flex items-center justify-between px-4 py-1.5 cursor-pointer bg-black/30 text-[10px] font-black text-amber-200/90 border-b border-white/5 active:bg-black/40"
         >
-          <div className="w-10 h-1 rounded-full bg-white/40" />
+          <div className="flex items-center gap-1">
+            <span>{mobileMode === 'fullscreen' ? '◫' : '⛶'}</span>
+            <span>{mobileMode === 'fullscreen' ? (isRtl ? 'عرض نصف الشاشة' : 'Half View') : (isRtl ? 'ملء كامل الشاشة' : 'Full Screen')}</span>
+          </div>
+          <div className="w-12 h-1.5 rounded-full bg-white/40" />
+          <span className="text-[9px] text-amber-300/80">{isRtl ? 'اضغط للتبديل' : 'Tap to toggle'}</span>
         </div>
 
         {/* ======================================================== */}
@@ -1828,7 +1875,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               setIsMaximized(!isMaximized);
             }
           }}
-          className={`bg-gradient-to-r ${currentTheme.headerFrom} ${currentTheme.headerVia} ${currentTheme.headerTo} px-2.5 sm:px-4 py-2 sm:py-3 border-b-2 flex items-center justify-between shrink-0 shadow-md select-none touch-none ${
+          className={`bg-gradient-to-r ${currentTheme.headerFrom} ${currentTheme.headerVia} ${currentTheme.headerTo} px-2.5 sm:px-4 py-2 sm:py-3 border-b-2 flex items-center justify-between shrink-0 shadow-md select-none sm:touch-none ${
             !isMaximized ? 'sm:cursor-grab sm:active:cursor-grabbing' : ''
           }`}
           style={{ borderColor: `${currentTheme.borderHex}66` }}
@@ -1855,17 +1902,20 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               </p>
             </div>
 
-            {/* Mode Switch Tabs (الشرح vs الرسم) */}
+            {/* Mode Switch Tabs (الشرح vs الرسم vs التحدي) */}
             <div className="flex bg-black/40 p-0.5 rounded-xl border border-white/10 text-xs font-bold shrink-0">
               <button
-                onClick={() => setActiveTab('content')}
-                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer text-[11px] sm:text-xs flex items-center gap-1 ${
-                  activeTab === 'content'
+                onClick={() => {
+                  setActiveTab('content');
+                  if (contentViewFilter === 'practice') setContentViewFilter('all');
+                }}
+                className={`px-2 sm:px-2.5 py-1 rounded-lg transition-all cursor-pointer text-[11px] sm:text-xs flex items-center gap-1 ${
+                  activeTab === 'content' && contentViewFilter !== 'practice'
                     ? 'text-slate-900 shadow-sm font-black'
                     : 'text-amber-100/70 hover:text-white'
                 }`}
                 style={{
-                  backgroundColor: activeTab === 'content' ? currentTheme.borderHex : 'transparent'
+                  backgroundColor: activeTab === 'content' && contentViewFilter !== 'practice' ? currentTheme.borderHex : 'transparent'
                 }}
               >
                 <span>📋</span>
@@ -1873,7 +1923,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               </button>
               <button
                 onClick={() => setActiveTab('draw')}
-                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer text-[11px] sm:text-xs flex items-center gap-1 ${
+                className={`px-2 sm:px-2.5 py-1 rounded-lg transition-all cursor-pointer text-[11px] sm:text-xs flex items-center gap-1 ${
                   activeTab === 'draw'
                     ? 'text-slate-900 shadow-sm font-black'
                     : 'text-amber-100/70 hover:text-white'
@@ -1885,6 +1935,25 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                 <span>✍️</span>
                 <span>{isRtl ? 'الرسم' : 'Draw'}</span>
               </button>
+              {(boardData?.quiz || (boardData?.quizzes && boardData.quizzes.length > 0)) && (
+                <button
+                  onClick={() => {
+                    setActiveTab('content');
+                    setContentViewFilter('practice');
+                  }}
+                  className={`px-2 sm:px-2.5 py-1 rounded-lg transition-all cursor-pointer text-[11px] sm:text-xs flex items-center gap-1 ${
+                    activeTab === 'content' && contentViewFilter === 'practice'
+                      ? 'text-slate-900 shadow-sm font-black'
+                      : 'text-amber-300 hover:text-white'
+                  }`}
+                  style={{
+                    backgroundColor: activeTab === 'content' && contentViewFilter === 'practice' ? currentTheme.borderHex : 'transparent'
+                  }}
+                >
+                  <span>🎯</span>
+                  <span>{isRtl ? 'التحدي' : 'Quiz'}</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -1952,40 +2021,65 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                     initial={{ opacity: 0, scale: 0.92, y: 5 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.92, y: 5 }}
-                    className="absolute top-full mt-2 end-0 w-64 bg-[#111827] border-2 border-amber-400/40 rounded-2xl shadow-2xl p-3 z-60 text-white"
+                    className="absolute top-full mt-2 end-0 w-72 sm:w-80 bg-[#0f172a]/95 backdrop-blur-xl border-2 border-amber-400/60 rounded-3xl shadow-2xl p-3.5 z-60 text-white animate-in fade-in"
                   >
-                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10 text-xs font-black text-amber-300">
-                      <span>{isRtl ? '🎨 اختر خلفية السبورة للأطفال:' : '🎨 Select Whiteboard Theme:'}</span>
+                    <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-white/10 text-xs font-black text-amber-300">
+                      <span className="flex items-center gap-1.5 text-sm">
+                        <span>🏖️</span>
+                        <span>{isRtl ? 'ثيمات صيفية منعشة للسبورة:' : 'Summer Whiteboard Themes:'}</span>
+                      </span>
                       <button 
                         onClick={() => setShowThemePicker(false)}
-                        className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                        className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 cursor-pointer text-xs"
                       >
                         ✕
                       </button>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-1.5 max-h-56 overflow-y-auto">
+                    <div className="grid grid-cols-1 gap-1.5 max-h-64 overflow-y-auto pe-1">
                       {WHITEBOARD_THEMES.map(theme => (
                         <button
                           key={`theme-${theme.id}`}
                           onClick={() => {
                             setActiveThemeId(theme.id);
+                            if (typeof window !== 'undefined') {
+                              try {
+                                localStorage.setItem('alkhalil_whiteboard_theme', theme.id);
+                              } catch (e) {}
+                            }
                             setShowThemePicker(false);
                           }}
-                          className={`flex items-center justify-between p-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          className={`flex items-center justify-between p-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer border ${
                             activeThemeId === theme.id
-                              ? 'bg-amber-400 text-slate-950 font-black shadow-md'
-                              : 'bg-white/5 hover:bg-white/10 text-slate-200'
+                              ? 'bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-slate-950 font-black shadow-lg border-white scale-[1.02]'
+                              : 'bg-white/5 hover:bg-white/15 text-slate-100 border-white/10 hover:border-white/20'
                           }`}
                         >
-                          <div className="flex items-center gap-2">
-                            <span className="text-base">{theme.emoji}</span>
-                            <span>{isRtl ? theme.nameAr : theme.nameEn}</span>
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span className="text-xl filter drop-shadow-sm shrink-0">{theme.emoji}</span>
+                            <div className="text-start truncate">
+                              <div className={`font-black text-xs truncate ${activeThemeId === theme.id ? 'text-slate-950' : 'text-white'}`}>
+                                {isRtl ? theme.nameAr : theme.nameEn}
+                              </div>
+                              <div className={`text-[10px] truncate ${activeThemeId === theme.id ? 'text-slate-800 font-bold' : 'text-amber-200/70'}`}>
+                                {isRtl ? theme.nameEn : theme.nameAr}
+                              </div>
+                            </div>
                           </div>
-                          <div 
-                            className="w-5 h-5 rounded-full border border-white/40 shadow-inner"
-                            style={{ backgroundColor: theme.bgHex }}
-                          />
+
+                          {/* Dual-color preview pill (Border + Canvas background) */}
+                          <div className="flex items-center -space-x-1.5 rtl:space-x-reverse shrink-0 ms-2">
+                            <div 
+                              className="w-4 h-4 rounded-full border border-white/70 shadow-sm"
+                              style={{ backgroundColor: theme.borderHex }}
+                              title="Border Accent"
+                            />
+                            <div 
+                              className="w-5 h-5 rounded-full border-2 border-white/90 shadow-md ring-1 ring-black/40"
+                              style={{ backgroundColor: theme.bgHex }}
+                              title="Canvas Surface"
+                            />
+                          </div>
                         </button>
                       ))}
                     </div>
@@ -2081,6 +2175,20 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                           </div>
                         </div>
                         <span className="text-[10px] font-mono text-amber-300">780×600</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleApplyPreset(880, 660)}
+                        className="w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-slate-200 transition-all cursor-pointer text-start"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">📟</span>
+                          <div>
+                            <div className="font-black text-white">{isRtl ? 'تابلت وآيباد (iPad / Tablet)' : 'iPad & Tablet'}</div>
+                            <div className="text-[10px] text-slate-400 font-normal">{isRtl ? 'المقاس المثالي للشاشات اللمسية وقلم أبل' : '880 × 660 px'}</div>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-mono text-amber-300">880×660</span>
                       </button>
 
                       <button
@@ -2750,50 +2858,6 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                             borderColor: activeExplanationSection === 'quiz' ? '#FACC15' : `${currentTheme.borderHex}88`
                           }}
                         >
-                          {/* ⏱️ FLOATING 30-SECOND COUNTDOWN TIMER (المؤقت العائم بجانب السؤال) */}
-                          {!quizCompleted && (
-                            <div className="absolute -top-3.5 sm:-top-4 end-3 sm:end-5 z-20">
-                              {!hasTimerStarted ? (
-                                <button
-                                  onClick={() => {
-                                    setHasTimerStarted(true);
-                                    setIsTimerRunning(true);
-                                  }}
-                                  className="flex items-center gap-1.5 px-3.5 py-1 rounded-full border-2 border-amber-300 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-slate-950 font-black text-xs shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer animate-pulse"
-                                  title={isRtl ? 'بدء العد التنازلي للمؤقت (30 ثانية)' : 'Start 30s Timer'}
-                                >
-                                  <Play size={11} className="fill-slate-950 text-slate-950" />
-                                  <span>{isRtl ? 'ابدأ المؤقت ▶️ (30ث)' : 'Start Timer ▶️ (30s)'}</span>
-                                </button>
-                              ) : (
-                                <div className="flex items-center gap-1.5">
-                                  <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border-2 shadow-lg backdrop-blur-md font-mono font-black text-xs transition-all ${
-                                    quizTimeUp 
-                                      ? 'bg-rose-600 text-white border-rose-300 animate-bounce shadow-rose-600/50' 
-                                      : quizTimeLeft <= 5 
-                                        ? 'bg-rose-500 text-white border-rose-300 animate-pulse shadow-rose-500/50' 
-                                        : quizTimeLeft <= 10 
-                                          ? 'bg-amber-400 text-slate-950 border-amber-200 shadow-amber-400/40' 
-                                          : 'bg-indigo-600/90 text-white border-indigo-400/60 shadow-indigo-600/30'
-                                  }`}>
-                                    <Timer size={13} className={isTimerRunning && quizTimeLeft <= 10 ? 'animate-spin' : ''} />
-                                    <span>{quizTimeUp ? (isRtl ? 'انتهى الوقت ⏱️' : 'Time Up! ⏱️') : `${quizTimeLeft} ثانية`}</span>
-                                  </div>
-
-                                  {!quizTimeUp && localQuizSelectedOption === null && (
-                                    <button
-                                      onClick={() => setIsTimerRunning(prev => !prev)}
-                                      className="w-6 h-6 rounded-full bg-black/40 hover:bg-black/60 text-white border border-white/20 flex items-center justify-center transition-all cursor-pointer text-[10px]"
-                                      title={isTimerRunning ? (isRtl ? 'إيقاف مؤقت' : 'Pause') : (isRtl ? 'استئناف' : 'Resume')}
-                                    >
-                                      {isTimerRunning ? <Pause size={10} /> : <Play size={10} className="fill-white" />}
-                                    </button>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          )}
-
                           {quizCompleted ? (
                             /* 🏆 LESSON QUIZ COMPLETION SUMMARY CARD */
                             <div className="text-center py-4 space-y-4">
@@ -2841,17 +2905,17 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                           ) : (
                             /* 📝 ACTIVE QUESTION VIEW */
                             <div>
-                              {/* Header with question count and read aloud */}
-                              <div className="flex items-center justify-between gap-2 pb-2 mb-3 border-b border-white/10">
-                                <div className="flex items-center gap-2">
+                              {/* Header with question count, read aloud, and 30s countdown timer */}
+                              <div className="flex items-center justify-between gap-2 pb-2.5 mb-3 border-b border-white/10 flex-wrap">
+                                <div className="flex items-center gap-2 min-w-0">
                                   <span 
-                                    className="w-6 h-6 rounded-xl text-slate-900 font-black text-xs flex items-center justify-center shadow-xs"
+                                    className="w-7 h-7 rounded-xl text-slate-900 font-black text-xs flex items-center justify-center shadow-xs shrink-0"
                                     style={{ backgroundColor: currentTheme.borderHex }}
                                   >
                                     ?
                                   </span>
-                                  <div>
-                                    <span className="text-xs font-black uppercase tracking-wider block" style={{ color: currentTheme.accentHex }}>
+                                  <div className="min-w-0">
+                                    <span className="text-xs font-black uppercase tracking-wider block truncate" style={{ color: currentTheme.accentHex }}>
                                       {isRtl ? 'تحدي الدرس السريع 🎯' : 'Lesson Quiz Challenge 🎯'}
                                     </span>
                                     <span className="text-[10px] font-mono text-amber-300/90 font-bold">
@@ -2860,21 +2924,64 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                                   </div>
                                 </div>
 
-                                <button
-                                  onClick={() => {
-                                    if (activeQuestion?.question) {
-                                      onSpeak(activeQuestion.question);
-                                      // Start timer countdown as Sara asks / reads the question
-                                      setHasTimerStarted(true);
-                                      setIsTimerRunning(true);
-                                    }
-                                  }}
-                                  className="px-2.5 py-1 rounded-lg bg-amber-400/20 hover:bg-amber-400/30 text-amber-200 border border-amber-400/30 text-[10px] font-bold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shadow-2xs"
-                                  title={isRtl ? 'سارة تقرأ السؤال بصوتها ويبدأ التوقيت فوراً' : 'Sara reads question and timer starts'}
-                                >
-                                  <Volume2 size={12} className="text-amber-400" />
-                                  <span>{isRtl ? 'طرح السؤال 🎙️' : 'Read Question 🎙️'}</span>
-                                </button>
+                                {/* Timer & Read Controls (Never clipped on mobile) */}
+                                <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+                                  <button
+                                    onClick={() => {
+                                      if (activeQuestion?.question) {
+                                        onSpeak(activeQuestion.question);
+                                        // Start timer countdown as Sara asks / reads the question
+                                        setHasTimerStarted(true);
+                                        setIsTimerRunning(true);
+                                      }
+                                    }}
+                                    className="px-2.5 py-1 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 text-amber-200 border border-amber-400/30 text-[10px] sm:text-xs font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
+                                    title={isRtl ? 'سارة تقرأ السؤال بصوتها ويبدأ التوقيت فوراً' : 'Sara reads question and timer starts'}
+                                  >
+                                    <Volume2 size={12} className="text-amber-400" />
+                                    <span>{isRtl ? 'طرح السؤال 🎙️' : 'Read 🎙️'}</span>
+                                  </button>
+
+                                  {/* 30-Second Countdown Timer Badge */}
+                                  {!hasTimerStarted ? (
+                                    <button
+                                      onClick={() => {
+                                        setHasTimerStarted(true);
+                                        setIsTimerRunning(true);
+                                      }}
+                                      className="flex items-center gap-1 px-2.5 sm:px-3 py-1 rounded-xl border-2 border-amber-300 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-slate-950 font-black text-[11px] sm:text-xs shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer animate-pulse"
+                                      title={isRtl ? 'بدء العد التنازلي للمؤقت (30 ثانية)' : 'Start 30s Timer'}
+                                    >
+                                      <Play size={11} className="fill-slate-950 text-slate-950" />
+                                      <span>{isRtl ? 'ابدأ المؤقت ▶️ (30ث)' : 'Start (30s)'}</span>
+                                    </button>
+                                  ) : (
+                                    <div className="flex items-center gap-1">
+                                      <div className={`flex items-center gap-1 px-2.5 py-1 rounded-xl border-2 shadow-sm font-mono font-black text-[11px] sm:text-xs transition-all ${
+                                        quizTimeUp 
+                                          ? 'bg-rose-600 text-white border-rose-300 animate-bounce shadow-rose-600/50' 
+                                          : quizTimeLeft <= 5 
+                                            ? 'bg-rose-500 text-white border-rose-300 animate-pulse shadow-rose-500/50' 
+                                            : quizTimeLeft <= 10 
+                                              ? 'bg-amber-400 text-slate-950 border-amber-200 shadow-amber-400/40' 
+                                              : 'bg-indigo-600/90 text-white border-indigo-400/60 shadow-indigo-600/30'
+                                      }`}>
+                                        <Timer size={12} className={isTimerRunning && quizTimeLeft <= 10 ? 'animate-spin' : ''} />
+                                        <span>{quizTimeUp ? (isRtl ? 'انتهى الوقت ⏱️' : 'Time Up!') : `${quizTimeLeft} ث`}</span>
+                                      </div>
+
+                                      {!quizTimeUp && localQuizSelectedOption === null && (
+                                        <button
+                                          onClick={() => setIsTimerRunning(prev => !prev)}
+                                          className="w-6 h-6 rounded-lg bg-black/40 hover:bg-black/60 text-white border border-white/20 flex items-center justify-center transition-all cursor-pointer text-[10px]"
+                                          title={isTimerRunning ? (isRtl ? 'إيقاف مؤقت' : 'Pause') : (isRtl ? 'استئناف' : 'Resume')}
+                                        >
+                                          {isTimerRunning ? <Pause size={10} /> : <Play size={10} className="fill-white" />}
+                                        </button>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
 
                               {/* Progress bar across question card */}
@@ -2890,8 +2997,8 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                                 {activeQuestion.question}
                               </p>
 
-                              {/* Options */}
-                              <div className="space-y-2">
+                              {/* Options: Full-width, multi-line, touch-friendly, 2x2 grid on tablets/desktop */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
                                 {activeQuestion.options.map((opt, oIdx) => {
                                   const isSelected = localQuizSelectedOption === oIdx;
                                   const isCorrect = oIdx === activeQuestion.answerIndex;
@@ -2918,16 +3025,16 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                                       key={`wb-opt-${quizQuestionIndex}-${oIdx}`}
                                       disabled={localQuizSelectedOption !== null || quizTimeUp}
                                       onClick={() => handleAnswerQuestion(oIdx)}
-                                      className={`w-full p-2.5 sm:p-3 rounded-xl border-2 text-xs font-bold transition-all text-start flex items-center justify-between gap-2 cursor-pointer ${btnClass}`}
+                                      className={`w-full min-h-[46px] p-3 rounded-2xl border-2 text-xs sm:text-sm font-bold transition-all text-start flex items-center justify-between gap-3 cursor-pointer ${btnClass}`}
                                     >
-                                      <div className="flex items-center gap-2 min-w-0">
-                                        <span className="w-5 h-5 rounded-lg bg-black/30 border border-white/20 text-[10px] font-mono flex items-center justify-center shrink-0">
+                                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                        <span className="w-6 h-6 rounded-xl bg-black/30 border border-white/20 text-xs font-mono font-black flex items-center justify-center shrink-0">
                                           {optionLetters[oIdx] || oIdx + 1}
                                         </span>
-                                        <span className="truncate">{opt}</span>
+                                        <span className="break-words leading-relaxed whitespace-normal flex-1">{opt}</span>
                                       </div>
                                       {(localQuizSelectedOption !== null || quizTimeUp) && isCorrect && (
-                                        <Check size={16} className="text-emerald-300 shrink-0 animate-bounce" />
+                                        <Check size={18} className="text-emerald-300 shrink-0 animate-bounce" />
                                       )}
                                     </button>
                                   );
@@ -3143,109 +3250,111 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
             style={{ borderColor: `${currentTheme.borderHex}88` }}
           >
             {/* ======================================================== */}
-            {/* MOBILE DEDICATED COMPACT TOOLBAR (sm:hidden) */}
-            {/* 2 ultra-compact, swipeable rows - never blocks drawing canvas */}
+            {/* MOBILE DEDICATED TOUCH-FRIENDLY TOOLBAR (sm:hidden) */}
+            {/* Optimized for finger drawing, kids, and small mobile viewports */}
             {/* ======================================================== */}
-            <div className="flex flex-col gap-1.5 sm:hidden">
-              {/* Mobile Line 1: Tools + Undo/Redo/Clear + Templates/Stickers */}
-              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 w-full">
+            <div className="flex flex-col gap-2 sm:hidden pb-safe">
+              {/* Mobile Line 1: Primary Tools + Undo/Redo/Clear + Templates/Stickers */}
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 w-full">
                 {/* Tools Selector */}
-                <div className="flex items-center gap-0.5 bg-black/40 p-0.5 rounded-xl border border-white/10 shrink-0">
+                <div className="flex items-center gap-1 bg-black/45 p-1 rounded-2xl border border-white/10 shrink-0">
                   <button
                     onClick={() => setSelectedTool('pen')}
-                    className={`px-2 py-1 rounded-lg border text-[11px] font-black transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`min-h-[38px] px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
                       selectedTool === 'pen'
-                        ? 'text-slate-900 border-white shadow-xs scale-102'
-                        : 'bg-white/5 text-amber-200/80 border-transparent'
+                        ? 'text-slate-900 border-white shadow-sm scale-102 font-black'
+                        : 'bg-white/5 text-amber-200/80 border-transparent hover:bg-white/10'
                     }`}
                     style={{
                       backgroundColor: selectedTool === 'pen' ? currentTheme.borderHex : undefined
                     }}
                   >
-                    <PenTool size={13} />
+                    <PenTool size={14} />
                     <span>{isRtl ? 'قلم' : 'Pen'}</span>
                   </button>
 
                   <button
                     onClick={() => setSelectedTool('highlighter')}
-                    className={`px-2 py-1 rounded-lg border text-[11px] font-black transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`min-h-[38px] px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
                       selectedTool === 'highlighter'
-                        ? 'text-slate-900 border-white shadow-xs scale-102'
-                        : 'bg-white/5 text-amber-200/80 border-transparent'
+                        ? 'text-slate-900 border-white shadow-sm scale-102 font-black'
+                        : 'bg-white/5 text-amber-200/80 border-transparent hover:bg-white/10'
                     }`}
                     style={{
                       backgroundColor: selectedTool === 'highlighter' ? currentTheme.borderHex : undefined
                     }}
                   >
-                    <Highlighter size={13} />
+                    <Highlighter size={14} />
                     <span>{isRtl ? 'تظليل' : 'Highlight'}</span>
                   </button>
 
                   <button
                     onClick={() => setSelectedTool('glow')}
-                    className={`px-2 py-1 rounded-lg border text-[11px] font-black transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`min-h-[38px] px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
                       selectedTool === 'glow'
-                        ? 'text-slate-900 border-white shadow-xs scale-102'
-                        : 'bg-white/5 text-amber-200/80 border-transparent'
+                        ? 'text-slate-900 border-white shadow-sm scale-102 font-black'
+                        : 'bg-white/5 text-amber-200/80 border-transparent hover:bg-white/10'
                     }`}
                     style={{
                       backgroundColor: selectedTool === 'glow' ? currentTheme.borderHex : undefined
                     }}
                   >
-                    <Wand2 size={13} />
+                    <Wand2 size={14} />
                     <span>{isRtl ? 'سحري ✨' : 'Glow'}</span>
                   </button>
 
                   <button
                     onClick={() => setSelectedTool('eraser')}
-                    className={`px-2 py-1 rounded-lg border text-[11px] font-black transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`min-h-[38px] px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
                       selectedTool === 'eraser'
                         ? 'bg-rose-500 text-white border-white shadow-md ring-2 ring-rose-300 scale-102 animate-pulse'
                         : 'bg-rose-500/15 text-rose-300 border-rose-500/30'
                     }`}
                   >
-                    <Eraser size={13} />
+                    <Eraser size={14} />
                     <span>{isRtl ? 'ممحاة' : 'Eraser'}</span>
                   </button>
                 </div>
 
                 {/* Undo / Redo / Clear */}
-                <div className="flex items-center gap-0.5 bg-black/40 p-0.5 rounded-xl border border-white/10 shrink-0">
+                <div className="flex items-center gap-1 bg-black/45 p-1 rounded-2xl border border-white/10 shrink-0">
                   <button
                     onClick={undoLastStroke}
                     disabled={history.length === 0}
-                    className="p-1.5 rounded-lg bg-white/5 text-amber-200 disabled:opacity-30 cursor-pointer"
+                    className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/15 text-amber-200 disabled:opacity-30 cursor-pointer flex items-center justify-center transition-all"
                     title={isRtl ? 'تراجع' : 'Undo'}
                   >
-                    <RotateCcw size={13} />
+                    <RotateCcw size={15} />
                   </button>
                   <button
                     onClick={redoStroke}
                     disabled={redoHistory.length === 0}
-                    className="p-1.5 rounded-lg bg-white/5 text-amber-200 disabled:opacity-30 cursor-pointer"
+                    className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/15 text-amber-200 disabled:opacity-30 cursor-pointer flex items-center justify-center transition-all"
                     title={isRtl ? 'إعادة' : 'Redo'}
                   >
-                    <RotateCw size={13} />
+                    <RotateCw size={15} />
                   </button>
                   <button
                     onClick={clearCanvas}
-                    className="p-1.5 rounded-lg bg-rose-500/20 text-rose-300 hover:text-white cursor-pointer"
+                    className="w-9 h-9 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white cursor-pointer flex items-center justify-center transition-all"
                     title={isRtl ? 'مسح الكل' : 'Clear'}
                   >
-                    <Trash2 size={13} />
+                    <Trash2 size={15} />
                   </button>
                 </div>
 
                 {/* Templates & Stickers & Save */}
-                <div className="flex items-center gap-0.5 bg-black/40 p-0.5 rounded-xl border border-white/10 shrink-0 relative">
+                <div className="flex items-center gap-1 bg-black/45 p-1 rounded-2xl border border-white/10 shrink-0 relative">
                   <button
                     onClick={() => {
                       setShowTemplatePicker(!showTemplatePicker);
                       setShowStickerPicker(false);
                     }}
-                    className="px-2 py-1 rounded-lg bg-white/5 text-amber-200 text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                    className={`min-h-[38px] px-2.5 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 cursor-pointer transition-all border ${
+                      showTemplatePicker ? 'bg-amber-400 text-slate-950 border-white' : 'bg-white/5 text-amber-200 border-transparent hover:bg-white/10'
+                    }`}
                   >
-                    <LayoutTemplate size={13} />
+                    <LayoutTemplate size={14} />
                     <span>{isRtl ? 'قوالب 📐' : 'Templates'}</span>
                   </button>
                   <button
@@ -3253,26 +3362,29 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                       setShowStickerPicker(!showStickerPicker);
                       setShowTemplatePicker(false);
                     }}
-                    className="px-2 py-1 rounded-lg bg-white/5 text-amber-200 text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                    className={`min-h-[38px] px-2.5 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 cursor-pointer transition-all border ${
+                      showStickerPicker ? 'bg-amber-400 text-slate-950 border-white' : 'bg-white/5 text-amber-200 border-transparent hover:bg-white/10'
+                    }`}
                   >
-                    <Smile size={13} />
+                    <Smile size={14} />
                     <span>{isRtl ? 'ملصقات ⭐' : 'Stickers'}</span>
                   </button>
                   <button
                     onClick={saveWhiteboardAsImage}
-                    className="p-1.5 rounded-lg text-slate-950 font-black cursor-pointer shadow-xs active:scale-95"
+                    className="min-h-[38px] px-2.5 py-1.5 rounded-xl text-slate-950 font-black cursor-pointer shadow-xs active:scale-95 flex items-center gap-1"
                     style={{ backgroundColor: currentTheme.borderHex }}
                     title={isRtl ? 'حفظ كصورة' : 'Save'}
                   >
-                    <Camera size={13} />
+                    <Camera size={14} />
+                    <span>{isRtl ? 'حفظ' : 'Save'}</span>
                   </button>
                 </div>
               </div>
 
-              {/* Mobile Line 2: Colors + Brush Presets */}
-              <div className="flex items-center justify-between gap-1.5 pt-0.5 border-t border-white/10">
-                {/* Colors swipe carousel */}
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 flex-1">
+              {/* Mobile Line 2: Colors Carousel + Touch-Friendly Brush Sizes */}
+              <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/10">
+                {/* Generous Color circles */}
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 flex-1">
                   {SMART_PEN_COLORS.map(c => {
                     const isSelected = selectedColor === c.value && selectedTool !== 'eraser';
                     return (
@@ -3283,10 +3395,10 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                           if (selectedTool === 'eraser') setSelectedTool('pen');
                         }}
                         style={{ backgroundColor: c.value }}
-                        className={`w-5 h-5 rounded-full border-2 transition-all cursor-pointer shrink-0 ${
+                        className={`w-7 h-7 rounded-full border-2 transition-all cursor-pointer shrink-0 ${
                           isSelected
-                            ? 'border-white scale-120 shadow-md ring-2 ring-white/60'
-                            : 'border-black/50 opacity-90'
+                            ? 'border-white scale-115 shadow-md ring-2 ring-white/70'
+                            : 'border-black/50 opacity-90 hover:opacity-100'
                         }`}
                         title={isRtl ? c.labelAr : c.labelEn}
                       />
@@ -3294,30 +3406,26 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                   })}
                 </div>
 
-                {/* Compact Brush Size Presets */}
-                <div className="flex items-center gap-0.5 bg-black/40 px-1.5 py-0.5 rounded-xl border border-white/10 shrink-0">
-                  <span className="text-[9px] text-amber-200/80 font-bold px-1">
-                    {lineWidth}p
-                  </span>
+                {/* 3 Clear Brush Size Pills */}
+                <div className="flex items-center gap-1 bg-black/45 px-2 py-1 rounded-2xl border border-white/10 shrink-0">
                   {[
-                    { size: 3, label: 'S' },
-                    { size: 7, label: 'M' },
-                    { size: 14, label: 'L' },
-                    { size: 26, label: 'XL' }
-                  ].map(({ size, label }) => (
+                    { size: 3, labelAr: 'رفيع', labelEn: 'S' },
+                    { size: 8, labelAr: 'وسط', labelEn: 'M' },
+                    { size: 18, labelAr: 'عريض', labelEn: 'L' }
+                  ].map(({ size, labelAr, labelEn }) => (
                     <button
                       key={`mob-brush-preset-${size}`}
                       onClick={() => setLineWidth(size)}
-                      className={`w-5 h-5 rounded-md text-[10px] font-black transition-all cursor-pointer flex items-center justify-center ${
+                      className={`min-h-[32px] px-2.5 py-0.5 rounded-xl text-[11px] font-black transition-all cursor-pointer flex items-center justify-center ${
                         lineWidth === size 
                           ? 'text-slate-950 font-black shadow-xs' 
-                          : 'text-slate-400 bg-white/5'
+                          : 'text-slate-300 hover:text-white bg-white/5'
                       }`}
                       style={{
                         backgroundColor: lineWidth === size ? currentTheme.borderHex : undefined
                       }}
                     >
-                      {label}
+                      {isRtl ? labelAr : labelEn}
                     </button>
                   ))}
                 </div>
@@ -3461,7 +3569,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                 </div>
 
                 {/* SECTION C: STEP-BY-STEP UNDO, REDO & CLEAR */}
-                <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10">
+                <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10 shrink-0">
                   {/* STEP-BY-STEP UNDO */}
                   <button
                     onClick={undoLastStroke}
@@ -3509,9 +3617,39 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                     <span className="hidden sm:inline">{isRtl ? 'حفظ كصورة 📸' : 'Save 📸'}</span>
                   </button>
                 </div>
+              </div>
 
-                {/* SECTION D: READY EDUCATIONAL TEMPLATES & KID STICKERS */}
-                <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10 relative">
+              {/* ROW 2: EXPANDED 10 PEN COLORS + TEMPLATES & STICKERS (BALANCED FOR IPAD & TABLETS) */}
+              <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/10 flex-wrap">
+                {/* 10 Kid-Friendly Colors */}
+                <div className="flex items-center gap-1.5 shrink-0 overflow-x-auto py-0.5">
+                  <span className="text-[10px] text-amber-200/70 font-bold hidden sm:inline ml-1">
+                    {isRtl ? 'الألوان:' : 'Colors:'}
+                  </span>
+
+                  {SMART_PEN_COLORS.map(c => {
+                    const isSelected = selectedColor === c.value && selectedTool !== 'eraser';
+                    return (
+                      <button
+                        key={`pen-color-${c.name}`}
+                        onClick={() => {
+                          setSelectedColor(c.value);
+                          if (selectedTool === 'eraser') setSelectedTool('pen');
+                        }}
+                        style={{ backgroundColor: c.value }}
+                        className={`w-7 h-7 rounded-full border-2 transition-all cursor-pointer shrink-0 ${
+                          isSelected
+                            ? 'border-white scale-125 shadow-lg shadow-amber-300/40 z-10 ring-2 ring-white/50'
+                            : 'border-black/50 hover:scale-110 opacity-90'
+                        }`}
+                        title={isRtl ? c.labelAr : c.labelEn}
+                      />
+                    );
+                  })}
+                </div>
+
+                {/* Templates & Stickers Buttons */}
+                <div className="flex items-center gap-1.5 shrink-0 relative">
                   {/* TEMPLATES POPUP BUTTON */}
                   <button
                     onClick={() => {
@@ -3526,7 +3664,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                     title={isRtl ? 'قوالب تعليمية جاهزة (مخطط الأزمنة، تسطير كراسة الإنجليزية، جدول المقارنة...)' : 'Ready Educational Templates'}
                   >
                     <LayoutTemplate size={14} className="text-amber-300" />
-                    <span className="hidden sm:inline">{isRtl ? 'قوالب جاهزة 📐' : 'Templates 📐'}</span>
+                    <span>{isRtl ? 'قوالب جاهزة 📐' : 'Templates 📐'}</span>
                   </button>
 
                   {/* STICKERS TRAY BUTTON */}
@@ -3543,7 +3681,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                     title={isRtl ? 'ملصقات ونجوم تشجيعية للأطفال ⭐' : 'Fun Kid Stickers ⭐'}
                   >
                     <Smile size={14} className="text-amber-300" />
-                    <span className="hidden sm:inline">{isRtl ? 'ملصقات ⭐' : 'Stickers ⭐'}</span>
+                    <span>{isRtl ? 'ملصقات ⭐' : 'Stickers ⭐'}</span>
                   </button>
 
                   {/* TEMPLATE PICKER POPOVER */}
@@ -3612,38 +3750,8 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                   )}
                 </div>
 
-              </div>
-
-              {/* ROW 2: EXPANDED 10 KID-FRIENDLY PEN COLORS */}
-              <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/10 overflow-x-auto">
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="text-[10px] text-amber-200/70 font-bold hidden sm:inline ml-1">
-                    {isRtl ? 'الألوان:' : 'Colors:'}
-                  </span>
-
-                  {SMART_PEN_COLORS.map(c => {
-                    const isSelected = selectedColor === c.value && selectedTool !== 'eraser';
-                    return (
-                      <button
-                        key={`pen-color-${c.name}`}
-                        onClick={() => {
-                          setSelectedColor(c.value);
-                          if (selectedTool === 'eraser') setSelectedTool('pen');
-                        }}
-                        style={{ backgroundColor: c.value }}
-                        className={`w-6 h-6 rounded-full border-2 transition-all cursor-pointer shrink-0 ${
-                          isSelected
-                            ? 'border-white scale-125 shadow-lg shadow-amber-300/40 z-10 ring-2 ring-white/50'
-                            : 'border-black/50 hover:scale-110 opacity-90'
-                        }`}
-                        title={isRtl ? c.labelAr : c.labelEn}
-                      />
-                    );
-                  })}
-                </div>
-
                 {/* Status Hint */}
-                <div className="text-[10px] text-amber-200/60 font-medium truncate hidden md:block">
+                <div className="text-[10px] text-amber-200/60 font-medium truncate hidden xl:block">
                   {selectedTool === 'eraser' 
                     ? (isRtl ? '🧹 الممحاة نشطة: مرر فوق أي جزء لمسحه' : '🧹 Eraser Active')
                     : selectedTool === 'glow'
