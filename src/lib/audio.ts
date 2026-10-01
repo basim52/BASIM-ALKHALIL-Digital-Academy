@@ -95,6 +95,11 @@ async function playAudioBuffer(
 
   const audioCtx = getAudioContext();
   if (!audioCtx) return null;
+  if (audioCtx.state === 'suspended') {
+    try {
+      await audioCtx.resume();
+    } catch (_) {}
+  }
 
   const buffer = base64ToArrayBuffer(base64);
   let audioBuffer: AudioBuffer | null = null;
@@ -315,6 +320,32 @@ export const speakAcademyText = async (
     currentPlayingNode = fallback;
     return fallback;
   }
+};
+
+/**
+ * Instant Audio Player: Plays pre-rendered studio base64 audio directly (zero network latency)
+ */
+export const playDirectSaraAudio = async (
+  base64Audio: string,
+  onStart?: () => void,
+  onEnd?: () => void,
+  playbackRate: number = 1.0
+): Promise<{ stop: () => void }> => {
+  cancelAllSpeech();
+  const requestId = ++globalSpeechRequestId;
+  onStart?.();
+
+  try {
+    const player = await playAudioBuffer(base64Audio, onEnd, playbackRate);
+    if (player && requestId === globalSpeechRequestId) {
+      currentPlayingNode = player;
+      return player;
+    }
+  } catch (err) {
+    console.warn("Direct audio buffer playback error:", err);
+  }
+  onEnd?.();
+  return { stop: () => {} };
 };
 
 /**

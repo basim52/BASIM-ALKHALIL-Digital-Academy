@@ -233,6 +233,10 @@ export interface SaraBoardQuiz {
   question: string;
   options: string[];
   answerIndex: number;
+  questionNumber?: number;
+  totalQuestions?: number;
+  timeLimitSeconds?: number;
+  explanation?: string;
 }
 
 export interface SaraBoardData {
@@ -241,6 +245,7 @@ export interface SaraBoardData {
   highlight?: string;
   correction?: SaraBoardCorrection;
   quiz?: SaraBoardQuiz;
+  quizzes?: SaraBoardQuiz[];
   notes?: string[];
   formula?: string;
   diagram?: {
@@ -268,6 +273,7 @@ export interface SaraChatResponse {
   board?: SaraBoardData;
   actions?: SaraAction[];
   memory?: SaraMemory;
+  audio?: string;
   sessionDone?: boolean;
   dailyCapReached?: boolean;
 }

@@ -15,11 +15,12 @@ import { STORIES } from '../components/StoryLibrary';
 import { KIDS_STORIES } from '../data/kidsStories';
 import { KIDS_STORIES_EXTRA } from '../data/kidsStories_extra';
 import { LANGUAGE_LAB_DATA } from '../data/languageLabData';
+import { shuffleQuiz, buildLimitedLessonQuizSet } from './quizUtils';
 
 /**
  * Builds rich, pedagogical Sara Whiteboard data and spoken audio script for any Academy Curriculum Lesson.
  */
-export function buildSaraCurriculumExplanation(
+function buildSaraCurriculumExplanationInternal(
   lesson: CurriculumLesson,
   lang: 'ar' | 'en' = 'ar'
 ): {
@@ -804,3 +805,37 @@ export function buildSaraCurriculumExplanation(
       : `📚 **Selected Curriculum Lesson: ${lesson.titleEn} (${level})**\n\nI have arranged the lesson concepts and interactive quiz on the smart whiteboard 📐. Let us begin!`
   };
 }
+
+/**
+ * Public function: Builds rich pedagogical explanation with randomized quiz positions
+ * and a limited 5-question timed lesson quiz set.
+ */
+export function buildSaraCurriculumExplanation(
+  lesson: CurriculumLesson,
+  lang: 'ar' | 'en' = 'ar'
+): {
+  boardData: SaraBoardData;
+  spokenIntro: string;
+  chatMessage: string;
+} {
+  const result = buildSaraCurriculumExplanationInternal(lesson, lang);
+  const isRtl = lang === 'ar';
+
+  if (result.boardData.quiz) {
+    result.boardData.quiz = shuffleQuiz(result.boardData.quiz, true);
+    result.boardData.quiz.questionNumber = 1;
+    result.boardData.quiz.totalQuestions = 5;
+    result.boardData.quiz.timeLimitSeconds = 30;
+  }
+
+  result.boardData.quizzes = buildLimitedLessonQuizSet(
+    lesson.titleAr || lesson.titleEn || result.boardData.title || 'Lesson',
+    result.boardData.sentence,
+    result.boardData.formula,
+    result.boardData.quiz,
+    isRtl
+  );
+
+  return result;
+}
+

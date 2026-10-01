@@ -41,11 +41,18 @@ import {
   MessageSquarePlus,
   Play,
   Pause,
-  AlertCircle
+  AlertCircle,
+  GraduationCap,
+  Lightbulb,
+  Layers,
+  Target,
+  Timer,
+  Trophy
 } from 'lucide-react';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
-import { SaraBoardData } from '../types';
+import { SaraBoardData, SaraBoardQuiz } from '../types';
 import { playSnapshotShutterSound } from '../lib/audio';
+import { buildLimitedLessonQuizSet, shuffleQuiz } from '../utils/quizUtils';
 
 interface SmartWhiteboardProps {
   isOpen: boolean;
@@ -366,10 +373,113 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   const [isMinimized, setIsMinimized] = useState(false);
   const [mobileMode, setMobileMode] = useState<'fullscreen' | 'half'>('fullscreen');
   const [activeTab, setActiveTab] = useState<'content' | 'draw'>('content');
+  const [contentViewFilter, setContentViewFilter] = useState<'all' | 'focus' | 'notes' | 'practice'>('all');
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
   const [showBrushSizePopover, setShowBrushSizePopover] = useState(false);
   const [showTemplatePicker, setShowTemplatePicker] = useState<boolean>(false);
   const [showStickerPicker, setShowStickerPicker] = useState<boolean>(false);
+
+  // Limited 5-Question Lesson Quiz & Floating 30s Countdown Timer
+  const [quizQuestionIndex, setQuizQuestionIndex] = useState<number>(0);
+  const [localQuizSelectedOption, setLocalQuizSelectedOption] = useState<number | null>(null);
+  const [localQuizFeedback, setLocalQuizFeedback] = useState<'correct' | 'wrong' | null>(null);
+  const [quizScore, setQuizScore] = useState<number>(0);
+  const [quizCompleted, setQuizCompleted] = useState<boolean>(false);
+  const [quizTimeLeft, setQuizTimeLeft] = useState<number>(30);
+  const [hasTimerStarted, setHasTimerStarted] = useState<boolean>(false);
+  const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
+  const [quizTimeUp, setQuizTimeUp] = useState<boolean>(false);
+
+  // Capped at 5 questions maximum per lesson
+  const currentQuizList = React.useMemo(() => {
+    if (boardData?.quizzes && boardData.quizzes.length > 0) {
+      return boardData.quizzes.slice(0, 5).map(q => shuffleQuiz(q, false));
+    }
+    if (boardData) {
+      return buildLimitedLessonQuizSet(
+        boardData.title || (isRtl ? 'الدرس الحالي' : 'Current Lesson'),
+        boardData.sentence,
+        boardData.formula,
+        boardData.quiz,
+        isRtl
+      );
+    }
+    return [];
+  }, [boardData, isRtl]);
+
+  const activeQuestion: SaraBoardQuiz | undefined = currentQuizList[quizQuestionIndex] || boardData?.quiz;
+  const totalQuestions = currentQuizList.length || 1;
+
+  // Sync / Reset on question change or new boardData
+  useEffect(() => {
+    setQuizTimeLeft(activeQuestion?.timeLimitSeconds || 30);
+    setHasTimerStarted(false);
+    setIsTimerRunning(false);
+    setQuizTimeUp(false);
+    setLocalQuizSelectedOption(null);
+    setLocalQuizFeedback(null);
+  }, [quizQuestionIndex, boardData]);
+
+  // Floating 30s Countdown Timer Effect (Starts after Sara reads question or student clicks Start)
+  useEffect(() => {
+    if (!isOpen || activeTab !== 'content' || !activeQuestion || quizCompleted || !hasTimerStarted || !isTimerRunning) {
+      return;
+    }
+    if (localQuizSelectedOption !== null) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setQuizTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setQuizTimeUp(true);
+          setIsTimerRunning(false);
+          setLocalQuizFeedback('wrong');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isOpen, activeTab, activeQuestion, quizCompleted, hasTimerStarted, isTimerRunning, localQuizSelectedOption]);
+
+  const handleAnswerQuestion = (optionIndex: number) => {
+    if (localQuizSelectedOption !== null || quizTimeUp) return;
+    setIsTimerRunning(false);
+    setLocalQuizSelectedOption(optionIndex);
+
+    const isCorrect = optionIndex === activeQuestion?.answerIndex;
+    setLocalQuizFeedback(isCorrect ? 'correct' : 'wrong');
+    if (isCorrect) {
+      setQuizScore(prev => prev + 1);
+    }
+
+    if (onQuizAnswer) {
+      onQuizAnswer(optionIndex);
+    }
+  };
+
+  const handleNextQuestion = () => {
+    if (quizQuestionIndex < totalQuestions - 1) {
+      setQuizQuestionIndex(prev => prev + 1);
+    } else {
+      setQuizCompleted(true);
+    }
+  };
+
+  const handleRestartQuiz = () => {
+    setQuizQuestionIndex(0);
+    setQuizScore(0);
+    setQuizCompleted(false);
+    setQuizTimeLeft(30);
+    setQuizTimeUp(false);
+    setHasTimerStarted(false);
+    setIsTimerRunning(false);
+    setLocalQuizSelectedOption(null);
+    setLocalQuizFeedback(null);
+  };
 
   // Sara Whiteboard Voice Explainer State
   const [isExplainingAll, setIsExplainingAll] = useState(false);
@@ -1744,9 +1854,84 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                 {boardData?.title || (isRtl ? 'مساحة الشرح والكتابة' : 'Interactive chalkboard')}
               </p>
             </div>
+
+            {/* Mode Switch Tabs (الشرح vs الرسم) */}
+            <div className="flex bg-black/40 p-0.5 rounded-xl border border-white/10 text-xs font-bold shrink-0">
+              <button
+                onClick={() => setActiveTab('content')}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer text-[11px] sm:text-xs flex items-center gap-1 ${
+                  activeTab === 'content'
+                    ? 'text-slate-900 shadow-sm font-black'
+                    : 'text-amber-100/70 hover:text-white'
+                }`}
+                style={{
+                  backgroundColor: activeTab === 'content' ? currentTheme.borderHex : 'transparent'
+                }}
+              >
+                <span>📋</span>
+                <span>{isRtl ? 'الشرح' : 'Notes'}</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('draw')}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer text-[11px] sm:text-xs flex items-center gap-1 ${
+                  activeTab === 'draw'
+                    ? 'text-slate-900 shadow-sm font-black'
+                    : 'text-amber-100/70 hover:text-white'
+                }`}
+                style={{
+                  backgroundColor: activeTab === 'draw' ? currentTheme.borderHex : 'transparent'
+                }}
+              >
+                <span>✍️</span>
+                <span>{isRtl ? 'الرسم' : 'Draw'}</span>
+              </button>
+            </div>
           </div>
 
-          {/* Action buttons in header */}
+          {/* SECTION 2: CONTEXTUAL ACTIONS (CENTER) */}
+          <div className="hidden md:flex items-center gap-1 sm:gap-1.5 shrink-0">
+            {/* Select Curriculum on Whiteboard */}
+            {onOpenCurriculum && (
+              <button
+                onClick={onOpenCurriculum}
+                className="px-2.5 py-1 rounded-xl border border-amber-400/50 bg-amber-400/20 hover:bg-amber-400/35 text-amber-200 hover:text-white text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+                title={isRtl ? 'استعراض واختيار مناهج الأكاديمية لشرحها على السبورة' : 'Select Academy Curriculum'}
+              >
+                <span>📚</span>
+                <span className="text-[11px]">{isRtl ? 'المناهج' : 'Curricula'}</span>
+              </button>
+            )}
+
+            {/* Sara Arabic / English Language Toggle */}
+            {onToggleLang && (
+              <button
+                onClick={onToggleLang}
+                className="px-2 sm:px-2.5 py-1 rounded-xl border border-amber-400/40 bg-white/10 hover:bg-white/20 text-amber-300 text-xs font-black flex items-center gap-1 transition-all cursor-pointer shadow-xs active:scale-95"
+                title={isRtl ? 'تبديل لغة الشرح لسارة بين العربية والإنجليزية' : 'Toggle explanation language (Arabic / English)'}
+              >
+                <span className="text-[11px]">🌐</span>
+                <span className="text-[10px] sm:text-[11px] font-black">{currentLang === 'ar' ? 'English' : 'عربي'}</span>
+              </button>
+            )}
+
+            {/* Toggle Sara 3D Presence */}
+            {onToggleSara3D && (
+              <button
+                onClick={onToggleSara3D}
+                className={`px-2 py-1 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1 ${
+                  isSara3DOpen
+                    ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm'
+                    : 'bg-white/10 hover:bg-white/20 text-amber-200 border-white/20'
+                }`}
+                title={isRtl ? 'إظهار / إخفاء مجسم سارة 3D بجانب السبورة' : 'Toggle Sara 3D Character'}
+              >
+                <span className="text-[11px]">👩‍🏫</span>
+                <span className="text-[11px]">{isRtl ? 'سارة 3D' : 'Sara 3D'}</span>
+              </button>
+            )}
+          </div>
+
+          {/* SECTION 3: TOOLS & WINDOW CONTROLS (RIGHT) */}
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             {/* Theme Picker Toggle */}
             <div className="relative">
@@ -1818,36 +2003,6 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               <Camera size={14} className="text-slate-900" />
               <span className="hidden sm:inline">{isRtl ? 'حفظ اللوحة' : 'Save'}</span>
             </button>
-
-            {/* Tab switch (Notes vs Chalk) */}
-            <div className="flex bg-black/40 p-0.5 rounded-xl border border-white/10 text-xs font-bold">
-              <button
-                onClick={() => setActiveTab('content')}
-                className={`px-2 sm:px-2.5 py-1 rounded-lg transition-all cursor-pointer text-[11px] sm:text-xs ${
-                  activeTab === 'content'
-                    ? 'text-slate-900 shadow-sm font-black'
-                    : 'text-amber-100/70 hover:text-white'
-                }`}
-                style={{
-                  backgroundColor: activeTab === 'content' ? currentTheme.borderHex : 'transparent'
-                }}
-              >
-                {isRtl ? 'الشرح 📋' : 'Notes 📋'}
-              </button>
-              <button
-                onClick={() => setActiveTab('draw')}
-                className={`px-2 sm:px-2.5 py-1 rounded-lg transition-all cursor-pointer text-[11px] sm:text-xs ${
-                  activeTab === 'draw'
-                    ? 'text-slate-900 shadow-sm font-black'
-                    : 'text-amber-100/70 hover:text-white'
-                }`}
-                style={{
-                  backgroundColor: activeTab === 'draw' ? currentTheme.borderHex : 'transparent'
-                }}
-              >
-                {isRtl ? 'الرسم ✍️' : 'Draw ✍️'}
-              </button>
-            </div>
 
             {/* Whiteboard Scale & Size Controller (تكبير وتصغير حسب الرغبة) */}
             <div className="relative hidden xs:flex items-center bg-black/40 p-0.5 rounded-xl border border-white/10 text-xs font-bold" ref={sizeMenuRef}>
@@ -2016,46 +2171,6 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               <Minus size={14} />
             </button>
 
-            {/* Toggle Sara 3D Presence */}
-            {onToggleSara3D && (
-              <button
-                onClick={onToggleSara3D}
-                className={`p-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1 ${
-                  isSara3DOpen
-                    ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm'
-                    : 'bg-white/10 hover:bg-white/20 text-amber-200 border-white/20'
-                }`}
-                title={isRtl ? 'إظهار / إخفاء مجسم سارة 3D بجانب السبورة' : 'Toggle Sara 3D Character'}
-              >
-                <span>👩‍🏫</span>
-                <span className="hidden lg:inline">{isRtl ? 'سارة 3D' : 'Sara 3D'}</span>
-              </button>
-            )}
-
-            {/* Sara Arabic / English Language Toggle on Whiteboard */}
-            {onToggleLang && (
-              <button
-                onClick={onToggleLang}
-                className="px-2 sm:px-2.5 py-1.5 rounded-xl border border-amber-400/40 bg-white/10 hover:bg-white/20 text-amber-300 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
-                title={isRtl ? 'تبديل لغة الشرح لسارة بين العربية والإنجليزية' : 'Toggle explanation language (Arabic / English)'}
-              >
-                <span>🌐</span>
-                <span className="text-[11px] font-black">{currentLang === 'ar' ? 'English 🇬🇧' : 'عربي 🇸🇦'}</span>
-              </button>
-            )}
-
-            {/* Select / Change Academy Curriculum on Whiteboard */}
-            {onOpenCurriculum && (
-              <button
-                onClick={onOpenCurriculum}
-                className="px-2 sm:px-2.5 py-1.5 rounded-xl border border-amber-400/50 bg-amber-400/20 hover:bg-amber-400/35 text-amber-200 hover:text-white text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
-                title={isRtl ? 'استعراض واختيار مناهج الأكاديمية لشرحها على السبورة' : 'Select Academy Curriculum'}
-              >
-                <span>📚</span>
-                <span className="hidden sm:inline">{isRtl ? 'المناهج' : 'Curricula'}</span>
-              </button>
-            )}
-
             {/* Maximize toggle */}
             <button
               onClick={() => {
@@ -2181,405 +2296,734 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
             <motion.div 
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
-              className="space-y-4"
+              className="space-y-4 max-w-6xl mx-auto"
             >
-              {/* Formula Ribbon */}
-              {boardData?.formula && (
-                <div 
-                  className={`rounded-2xl p-3.5 text-center shadow-inner border-2 transition-all relative ${
-                    activeExplanationSection === 'formula'
-                      ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.35)] scale-[1.01]'
-                      : ''
-                  }`}
-                  style={{
-                    backgroundColor: currentTheme.cardBg,
-                    borderColor: activeExplanationSection === 'formula' ? '#FACC15' : currentTheme.borderHex
-                  }}
-                >
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    {activeExplanationSection === 'formula' ? (
-                      <span className="animate-bounce bg-amber-400 text-slate-950 font-black px-2 py-0.5 rounded-full text-[10px] flex items-center gap-1 shadow-sm">
-                        👈 {isRtl ? 'سارة تشرح القاعدة الآن 🎙️' : 'Sara is explaining formula 🎙️'}
-                      </span>
-                    ) : (
-                      <span 
-                        className="text-[11px] font-black uppercase tracking-wider block"
-                        style={{ color: currentTheme.accentHex }}
-                      >
-                        {isRtl ? 'قاعدة وتكوين الجملة 📐' : 'Grammar Formula 📐'}
-                      </span>
-                    )}
-
-                    <button
-                      onClick={() => handleExplainSection('formula')}
-                      className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-amber-200 border border-white/15 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
-                      title={isRtl ? 'استمع لشرح المعلمة سارة لهذه القاعدة بالصوت' : 'Listen to Sara explain this rule'}
-                    >
-                      <Volume2 size={12} className="text-amber-400" />
-                      <span>{isRtl ? 'شرح القاعدة 🎙️' : 'Explain 🎙️'}</span>
-                    </button>
-                  </div>
-
-                  <div className="text-base sm:text-xl font-black font-mono tracking-wider flex items-center justify-center flex-wrap gap-2">
-                    {boardData.formula.split('+').map((item, idx) => (
-                      <React.Fragment key={`formula-${idx}`}>
-                        <span 
-                          className="px-2.5 py-1 rounded-xl border shadow-sm"
-                          style={{
-                            backgroundColor: currentTheme.isLight ? '#F1F5F9' : 'rgba(0,0,0,0.5)',
-                            borderColor: currentTheme.borderHex,
-                            color: currentTheme.isLight ? '#0F172A' : '#FDE68A'
-                          }}
-                        >
-                          {item.trim()}
-                        </span>
-                        {idx < boardData.formula!.split('+').length - 1 && (
-                          <span style={{ color: currentTheme.borderHex }} className="font-bold">+</span>
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Target Sentence Display */}
-              {boardData?.sentence && (
-                <div 
-                  className={`border-2 rounded-2xl p-4 shadow-xl relative group transition-all ${
-                    activeExplanationSection === 'sentence'
-                      ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.35)] scale-[1.01]'
-                      : ''
-                  }`}
-                  style={{
-                    backgroundColor: currentTheme.cardBg,
-                    borderColor: activeExplanationSection === 'sentence' ? '#FACC15' : currentTheme.cardBorder
-                  }}
-                >
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    {activeExplanationSection === 'sentence' ? (
-                      <span className="animate-bounce bg-amber-400 text-slate-950 font-black px-2 py-0.5 rounded-full text-[10px] flex items-center gap-1 shadow-sm">
-                        👈 {isRtl ? 'سارة تشرح الجملة والنطق 🎙️' : 'Sara explaining example 🎙️'}
-                      </span>
-                    ) : (
-                      <span 
-                        className="text-[11px] font-black uppercase tracking-wider"
-                        style={{ color: currentTheme.accentHex }}
-                      >
-                        {isRtl ? 'الجملة المستهدفة 🎯' : 'Target Example 🎯'}
-                      </span>
-                    )}
-
-                    <div className="flex items-center gap-1.5">
+              {/* ======================================================== */}
+              {/* 🌟 1. SECTION FILTER NAVIGATION BAR (تنظيم وترتيب محتوى السبورة) */}
+              {/* ======================================================== */}
+              <div className="flex flex-wrap items-center justify-between gap-2 bg-black/40 p-1.5 rounded-2xl border border-white/10 backdrop-blur-md">
+                <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
+                  {[
+                    { id: 'all', labelAr: '🌟 عرض شامل', labelEn: '🌟 Master View' },
+                    { id: 'focus', labelAr: '📐 القاعدة والمثال', labelEn: '📐 Formula & Sentence' },
+                    { id: 'notes', labelAr: '💡 النقاط والمفردات', labelEn: '💡 Notes & Vocab' },
+                    { id: 'practice', labelAr: '🎯 التصحيح والكويز', labelEn: '🎯 Practice & Quiz' },
+                  ].map(tab => {
+                    const isSelected = contentViewFilter === tab.id;
+                    return (
                       <button
-                        onClick={() => handleExplainSection('sentence')}
-                        className="px-2 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-amber-200 border border-white/20 text-xs font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
-                        title={isRtl ? 'سارة تشرح وتفصل هذه الجملة بالصوت' : 'Sara explains this sentence aloud'}
-                      >
-                        <Volume2 size={13} className="text-amber-400" />
-                        <span>{isRtl ? 'شرح الجملة 🎙️' : 'Explain'}</span>
-                      </button>
-
-                      <button
-                        onClick={() => onSpeak(boardData.sentence!)}
-                        className="px-2.5 py-1 active:scale-95 text-slate-900 font-black text-xs rounded-xl shadow-md flex items-center gap-1.5 transition-all cursor-pointer"
-                        style={{ backgroundColor: currentTheme.borderHex }}
-                      >
-                        <Volume2 size={14} />
-                        <span>{isRtl ? 'نطق الجملة' : 'Pronounce'}</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <p className={`text-lg sm:text-2xl font-bold tracking-wide text-center leading-relaxed ${currentTheme.textColor}`}>
-                    {(() => {
-                      const isAwaitingQuiz = !!boardData?.quiz && (quizSelectedOption === null || quizSelectedOption === undefined);
-                      const shouldShowHighlight = !isAwaitingQuiz && !!boardData?.highlight;
-
-                      return boardData.sentence.split(shouldShowHighlight ? boardData.highlight! : '___NON_EXISTENT___').map((part, i, arr) => (
-                        <React.Fragment key={`sent-piece-${i}`}>
-                          <span>{part}</span>
-                          {i < arr.length - 1 && shouldShowHighlight && (
-                            <span 
-                              className="px-2.5 py-1 mx-1.5 rounded-xl font-black shadow-lg animate-pulse inline-block text-slate-950 border border-amber-200"
-                              style={{ backgroundColor: currentTheme.borderHex }}
-                            >
-                              {boardData.highlight}
-                            </span>
-                          )}
-                        </React.Fragment>
-                      ));
-                    })()}
-                  </p>
-                </div>
-              )}
-
-              {/* Gentle Correction Display */}
-              {boardData?.correction && (!boardData.quiz || (quizSelectedOption !== null && quizSelectedOption !== undefined)) && (
-                <div 
-                  className={`border rounded-2xl p-3.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm transition-all ${
-                    activeExplanationSection === 'correction'
-                      ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.35)]'
-                      : ''
-                  }`}
-                  style={{
-                    backgroundColor: currentTheme.cardBg,
-                    borderColor: activeExplanationSection === 'correction' ? '#FACC15' : currentTheme.cardBorder
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2 text-rose-300 bg-rose-950/60 border border-rose-500/30 px-3 py-1.5 rounded-xl">
-                      <XCircle size={15} className="text-rose-400 shrink-0" />
-                      <span className="line-through opacity-80 font-bold">{boardData.correction.wrong}</span>
-                    </div>
-                    <span style={{ color: currentTheme.borderHex }} className="font-black text-lg">➔</span>
-                    <div className="flex items-center gap-2 text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 px-3 py-1.5 rounded-xl font-black">
-                      <CheckCircle2 size={15} className="text-emerald-400 shrink-0" />
-                      <span>{boardData.correction.right}</span>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => handleExplainSection('correction')}
-                    className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-amber-200 border border-white/15 text-[10px] font-bold flex items-center gap-1 cursor-pointer shrink-0"
-                  >
-                    <Volume2 size={12} className="text-amber-400" />
-                    <span>{isRtl ? 'استمع للتصحيح 🎙️' : 'Explain'}</span>
-                  </button>
-                </div>
-              )}
-
-              {/* Chalk Notes */}
-              {boardData?.notes && boardData.notes.length > 0 && (
-                <div 
-                  className={`border rounded-2xl p-4 transition-all ${
-                    activeExplanationSection === 'notes'
-                      ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.35)] scale-[1.01]'
-                      : ''
-                  }`}
-                  style={{
-                    backgroundColor: currentTheme.cardBg,
-                    borderColor: activeExplanationSection === 'notes' ? '#FACC15' : currentTheme.cardBorder
-                  }}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 
-                      className="text-xs font-black flex items-center gap-1.5"
-                      style={{ color: currentTheme.accentHex }}
-                    >
-                      <BookOpen size={14} />
-                      <span>{isRtl ? 'نقاط الشرح الذهبية 💡' : 'Key Explanation Points 💡'}</span>
-                    </h4>
-
-                    <button
-                      onClick={() => handleExplainSection('notes')}
-                      className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-amber-200 border border-white/15 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
-                    >
-                      <Volume2 size={12} className="text-amber-400" />
-                      <span>{isRtl ? 'شرح النقاط 🎙️' : 'Explain'}</span>
-                    </button>
-                  </div>
-
-                  <ul className="space-y-2 text-xs sm:text-sm font-medium">
-                    {boardData.notes.map((note, nIdx) => (
-                      <li key={`note-${nIdx}`} className="flex items-start gap-2">
-                        <span style={{ color: currentTheme.borderHex }} className="font-black text-sm shrink-0">✦</span>
-                        <span>{note}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Diagram / Vocabulary */}
-              {boardData?.diagram && (
-                <div 
-                  className={`border rounded-2xl p-4 transition-all ${
-                    activeExplanationSection === 'diagram'
-                      ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.35)] scale-[1.01]'
-                      : ''
-                  }`}
-                  style={{
-                    backgroundColor: currentTheme.cardBg,
-                    borderColor: activeExplanationSection === 'diagram' ? '#FACC15' : currentTheme.cardBorder
-                  }}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 
-                      className="text-xs font-black flex items-center gap-1.5"
-                      style={{ color: currentTheme.accentHex }}
-                    >
-                      <Sparkles size={14} />
-                      <span>{boardData.diagram.label}</span>
-                    </h4>
-
-                    <button
-                      onClick={() => handleExplainSection('diagram')}
-                      className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-amber-200 border border-white/15 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
-                    >
-                      <Volume2 size={12} className="text-amber-400" />
-                      <span>{isRtl ? 'شرح المخطط 🎙️' : 'Explain'}</span>
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {boardData.diagram.items.map((item, dIdx) => (
-                      <div 
-                        key={`diag-${dIdx}`} 
-                        className="border rounded-xl p-3 hover:border-amber-400/50 transition-all"
+                        key={`tab-filter-${tab.id}`}
+                        onClick={() => setContentViewFilter(tab.id as any)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                          isSelected
+                            ? 'text-slate-950 shadow-md scale-102 font-black'
+                            : 'text-amber-100/70 hover:text-white hover:bg-white/10'
+                        }`}
                         style={{
-                          backgroundColor: currentTheme.isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.06)',
+                          backgroundColor: isSelected ? currentTheme.borderHex : 'transparent'
+                        }}
+                      >
+                        <span>{isRtl ? tab.labelAr : tab.labelEn}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Status Badges summary */}
+                <div className="flex items-center gap-1.5 text-[11px] text-amber-200/80 font-bold px-2">
+                  <span className="hidden sm:inline">
+                    {boardData?.title ? `📌 ${boardData.title}` : (isRtl ? '📐 سبورة تفاعلية مرتبة' : '📐 Organized Smart Board')}
+                  </span>
+                </div>
+              </div>
+
+              {/* ======================================================== */}
+              {/* 🌟 2. EMPTY STATE WHEN BOARD HAS NO LESSON YET */}
+              {/* ======================================================== */}
+              {(!boardData || (!boardData.formula && !boardData.sentence && !boardData.notes && !boardData.diagram && !boardData.quiz)) && (
+                <div 
+                  className="rounded-3xl border-2 border-dashed p-6 sm:p-10 text-center space-y-4 shadow-xl"
+                  style={{
+                    backgroundColor: currentTheme.cardBg,
+                    borderColor: `${currentTheme.borderHex}66`
+                  }}
+                >
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-400/20 to-amber-500/30 border-2 border-amber-400 mx-auto flex items-center justify-center text-3xl shadow-inner animate-bounce">
+                    👩‍🏫
+                  </div>
+                  <div className="space-y-1 max-w-md mx-auto">
+                    <h3 className="text-base sm:text-lg font-black" style={{ color: currentTheme.accentHex }}>
+                      {isRtl ? 'أهلاً بك في السبورة الذكية مع المعلمة سارة! 🌟' : 'Welcome to Teacher Sara’s Smartboard! 🌟'}
+                    </h3>
+                    <p className={`text-xs ${currentTheme.isLight ? 'text-slate-600' : 'text-amber-100/70'}`}>
+                      {isRtl 
+                        ? 'السبورة جاهزة لشرح أي قاعدة، استعراض المناهج، أو الإجابة على أي استفسار بالصوت والكتابة.' 
+                        : 'Whiteboard is ready to explain grammar, explore curricula, or test your skills.'}
+                    </p>
+                  </div>
+
+                  {/* Ready Action Starter Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-xl mx-auto pt-2">
+                    {[
+                      { 
+                        icon: '📘', 
+                        titleAr: 'شرح قاعدة زمن المضارع البسيط', 
+                        titleEn: 'Explain Present Simple Rule',
+                        prompt: isRtl ? 'سارة، اشرحي لي قاعدة زمن المضارع البسيط (Present Simple) على السبورة مع أمثلة وكويز' : 'Sara, explain Present Simple on the whiteboard with formula and quiz'
+                      },
+                      { 
+                        icon: '❓', 
+                        titleAr: 'كيف أفرق بين Do و Does في السؤال؟', 
+                        titleEn: 'How to use Do vs Does in questions?',
+                        prompt: isRtl ? 'سارة، وضحي لي على السبورة الفرق بين Do و Does في تكوين السؤال مع تصحيح الأخطاء' : 'Sara, show me the difference between Do and Does on the whiteboard'
+                      },
+                      { 
+                        icon: '🎯', 
+                        titleAr: 'كويز تفاعلي سريع لاختبار القواعد', 
+                        titleEn: 'Quick Interactive Grammar Quiz',
+                        prompt: isRtl ? 'سارة، ضعي لي كويز وسؤال تحدي على السبورة لاختبار مستواي' : 'Sara, give me a quick quiz challenge on the board'
+                      },
+                      { 
+                        icon: '🎨', 
+                        titleAr: 'خريطة مفردات ورسم بياني توضيحي', 
+                        titleEn: 'Vocabulary Diagram & Mind Map',
+                        prompt: isRtl ? 'سارة، ارسمي لي خريطة مفردات ومخطط توضيحي لكلمات يومية شائعة' : 'Sara, draw a vocabulary diagram on the whiteboard'
+                      }
+                    ].map((starter, sIdx) => (
+                      <button
+                        key={`starter-card-${sIdx}`}
+                        onClick={() => handleSubmitBoardRequest(starter.prompt)}
+                        disabled={isSaraThinking}
+                        className="p-3 rounded-2xl border text-start flex items-start gap-2.5 hover:scale-102 transition-all cursor-pointer group shadow-sm"
+                        style={{
+                          backgroundColor: currentTheme.isLight ? '#FFFFFF' : 'rgba(255,255,255,0.06)',
                           borderColor: currentTheme.cardBorder
                         }}
                       >
-                        <div className="flex items-center gap-2 mb-1">
-                          {item.icon && <span className="text-base">{item.icon}</span>}
-                          <span 
-                            className="text-sm font-black"
-                            style={{ color: currentTheme.accentHex }}
-                          >
-                            {item.title}
+                        <span className="text-xl shrink-0 p-1.5 rounded-xl bg-black/20 group-hover:scale-110 transition-transform">
+                          {starter.icon}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <span className="text-xs font-black block group-hover:text-amber-300 transition-colors" style={{ color: currentTheme.accentHex }}>
+                            {isRtl ? starter.titleAr : starter.titleEn}
+                          </span>
+                          <span className="text-[10px] text-amber-200/60 font-medium">
+                            {isRtl ? 'انقر للشرح المباشر على السبورة 🪄' : 'Click to explain on board'}
                           </span>
                         </div>
-                        <p className={`text-xs ${currentTheme.isLight ? 'text-slate-600' : 'text-slate-300'}`}>{item.desc}</p>
-                      </div>
+                      </button>
                     ))}
                   </div>
-                </div>
-              )}
 
-              {/* Interactive Mini-Quiz */}
-              {boardData?.quiz && (
-                <div 
-                  className={`border-2 rounded-2xl p-4 transition-all ${
-                    activeExplanationSection === 'quiz'
-                      ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.35)] scale-[1.01]'
-                      : ''
-                  }`}
-                  style={{
-                    backgroundColor: currentTheme.cardBg,
-                    borderColor: activeExplanationSection === 'quiz' ? '#FACC15' : `${currentTheme.borderHex}66`
-                  }}
-                >
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-2">
-                      <span 
-                        className="w-6 h-6 rounded-full text-slate-900 font-black text-xs flex items-center justify-center"
+                  {onOpenCurriculum && (
+                    <div className="pt-2">
+                      <button
+                        onClick={onOpenCurriculum}
+                        className="px-4 py-2 rounded-xl text-slate-950 font-black text-xs inline-flex items-center gap-2 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
                         style={{ backgroundColor: currentTheme.borderHex }}
                       >
-                        ?
-                      </span>
-                      <p 
-                        className="text-xs sm:text-sm font-black"
-                        style={{ color: currentTheme.accentHex }}
-                      >
-                        {boardData.quiz.question}
-                      </p>
+                        <BookOpen size={14} />
+                        <span>{isRtl ? 'استعراض واختيار منهج من الأكاديمية (14 مساراً) 📚' : 'Browse Academy Curricula 📚'}</span>
+                      </button>
                     </div>
-
-                    <button
-                      onClick={() => handleExplainSection('quiz')}
-                      className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-amber-200 border border-white/15 text-[10px] font-bold flex items-center gap-1 cursor-pointer shrink-0"
-                    >
-                      <Volume2 size={12} className="text-amber-400" />
-                      <span>{isRtl ? 'قراءة السؤال 🎙️' : 'Read'}</span>
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {boardData.quiz.options.map((opt, oIdx) => {
-                      const isSelected = quizSelectedOption === oIdx;
-                      const isCorrect = oIdx === boardData.quiz?.answerIndex;
-
-                      let btnClass = 'bg-white/10 border-white/15 text-slate-200 hover:bg-white/20 hover:border-amber-300';
-                      if (currentTheme.isLight) {
-                        btnClass = 'bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200';
-                      }
-
-                      if (quizSelectedOption !== null && quizSelectedOption !== undefined) {
-                        if (isCorrect) {
-                          btnClass = 'bg-emerald-600/40 border-emerald-400 text-emerald-200 font-black';
-                        } else if (isSelected && !isCorrect) {
-                          btnClass = 'bg-rose-600/40 border-rose-400 text-rose-200 line-through';
-                        } else {
-                          btnClass = 'bg-black/20 border-transparent text-slate-500 opacity-50';
-                        }
-                      }
-
-                      return (
-                        <button
-                          key={`wb-opt-${oIdx}`}
-                          disabled={quizSelectedOption !== null && quizSelectedOption !== undefined}
-                          onClick={() => onQuizAnswer?.(oIdx)}
-                          className={`p-3 rounded-xl border-2 text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${btnClass}`}
-                        >
-                          <span>{opt}</span>
-                          {quizSelectedOption !== null && isCorrect && (
-                            <Check size={14} className="text-emerald-300" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {quizFeedback && (
-                    <p className={`text-xs font-black mt-2.5 text-center ${quizFeedback === 'correct' ? 'text-emerald-400' : 'text-amber-300'}`}>
-                      {quizFeedback === 'correct' 
-                        ? (isRtl ? '🎉 كفو عليك! إجابة صحيحة وممتازة' : '🎉 Excellent! That is correct!')
-                        : (isRtl ? '👏 محاولة جيدة! ركز على الخيار الأخضر' : '👏 Good try! Note the green correct option')}
-                    </p>
                   )}
                 </div>
               )}
 
-              {/* Action Buttons: Switch to Drawing OR Save Image */}
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-                <button
-                  onClick={() => setActiveTab('draw')}
-                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-black cursor-pointer transition-all active:scale-95"
+              {/* ======================================================== */}
+              {/* 🌟 3. HERO CORE BLACKBOARD: FORMULA & TARGET SENTENCE */}
+              {/* ======================================================== */}
+              {(contentViewFilter === 'all' || contentViewFilter === 'focus') && (boardData?.formula || boardData?.sentence) && (
+                <div 
+                  className={`rounded-2xl sm:rounded-3xl p-4 sm:p-5 border-2 shadow-2xl transition-all relative overflow-hidden ${
+                    activeExplanationSection === 'formula' || activeExplanationSection === 'sentence'
+                      ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.35)] scale-[1.008]'
+                      : ''
+                  }`}
                   style={{
-                    backgroundColor: currentTheme.isLight ? '#FFFFFF' : 'rgba(255,255,255,0.1)',
-                    borderColor: currentTheme.cardBorder,
-                    color: currentTheme.accentHex
+                    backgroundColor: currentTheme.cardBg,
+                    borderColor: activeExplanationSection === 'formula' || activeExplanationSection === 'sentence'
+                      ? '#FACC15'
+                      : currentTheme.borderHex
                   }}
                 >
-                  <PenTool size={13} />
-                  <span>{isRtl ? 'شريط أدوات الرسم التفاعلي ✍️' : 'Drawing Tools ✍️'}</span>
-                </button>
+                  {/* Hero Header Ribbon */}
+                  <div className="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-white/10">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span 
+                        className="px-2.5 py-1 rounded-xl text-[10px] sm:text-xs font-black text-slate-950 uppercase tracking-wider shrink-0 flex items-center gap-1 shadow-sm"
+                        style={{ backgroundColor: currentTheme.borderHex }}
+                      >
+                        <GraduationCap size={13} />
+                        <span>{isRtl ? 'اللوحة المركزية للشرح' : 'Core Chalkboard'}</span>
+                      </span>
 
-                <button
-                  onClick={saveWhiteboardAsImage}
-                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-slate-950 text-xs font-black cursor-pointer shadow-md transition-all active:scale-95"
-                  style={{ backgroundColor: currentTheme.borderHex }}
-                >
-                  <Camera size={14} />
-                  <span>{isRtl ? 'حفظ بطاقة الشرح كصورة 📸' : 'Save Image 📸'}</span>
-                </button>
-              </div>
+                      {boardData?.title && (
+                        <h4 className="text-xs sm:text-sm font-black truncate" style={{ color: currentTheme.accentHex }}>
+                          {boardData.title}
+                        </h4>
+                      )}
+                    </div>
+
+                    {/* Quick Voice & Pronounce Controls */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {boardData?.sentence && (
+                        <button
+                          onClick={() => onSpeak(boardData.sentence!)}
+                          className="px-2.5 py-1 rounded-xl text-slate-950 font-black text-[11px] sm:text-xs shadow-sm flex items-center gap-1 transition-all cursor-pointer hover:scale-105 active:scale-95"
+                          style={{ backgroundColor: currentTheme.borderHex }}
+                          title={isRtl ? 'نطق الجملة بالصوت الطبيعي' : 'Pronounce sentence'}
+                        >
+                          <Volume2 size={13} />
+                          <span>{isRtl ? 'نطق الجملة 🗣️' : 'Pronounce'}</span>
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => handleExplainSection(boardData?.formula ? 'formula' : 'sentence')}
+                        className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-amber-200 border border-white/15 text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                        title={isRtl ? 'سارة تشرح القاعدة والمثال بالصوت' : 'Sara explains rule and sentence'}
+                      >
+                        <Volume2 size={12} className="text-amber-400" />
+                        <span className="hidden xs:inline">{isRtl ? 'شرح القاعدة 🎙️' : 'Explain'}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 📐 FORMULA ROW */}
+                  {boardData?.formula && (
+                    <div className="mb-4 text-center">
+                      <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-amber-300/80 block mb-2">
+                        {isRtl ? 'قاعدة وتكوين الجملة (Structure) 📐' : 'Sentence Structure 📐'}
+                      </span>
+                      <div className="text-sm sm:text-lg md:text-xl font-black font-mono tracking-wide flex items-center justify-center flex-wrap gap-1.5 sm:gap-2">
+                        {boardData.formula.split('+').map((item, idx) => (
+                          <React.Fragment key={`formula-token-${idx}`}>
+                            <span 
+                              className="px-3 py-1.5 rounded-xl border shadow-sm transition-transform hover:scale-105"
+                              style={{
+                                backgroundColor: currentTheme.isLight ? '#F1F5F9' : 'rgba(0,0,0,0.55)',
+                                borderColor: currentTheme.borderHex,
+                                color: currentTheme.isLight ? '#0F172A' : '#FDE68A'
+                              }}
+                            >
+                              {item.trim()}
+                            </span>
+                            {idx < boardData.formula!.split('+').length - 1 && (
+                              <span style={{ color: currentTheme.borderHex }} className="font-black text-base sm:text-xl px-0.5">+</span>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 🎯 TARGET EXAMPLE ROW */}
+                  {boardData?.sentence && (
+                    <div className="rounded-2xl bg-black/25 border border-white/10 p-3 sm:p-4 text-center">
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-300/80">
+                          {isRtl ? 'المثال التطبيقي المباشر 🎯' : 'Target Example 🎯'}
+                        </span>
+                        {boardData.highlight && (
+                          <span className="text-[10px] font-bold text-amber-200 bg-amber-400/20 px-2 py-0.5 rounded-full border border-amber-400/40">
+                            {isRtl ? `التركيز على: "${boardData.highlight}"` : `Focus: "${boardData.highlight}"`}
+                          </span>
+                        )}
+                      </div>
+
+                      <p className={`text-lg sm:text-2xl md:text-3xl font-black tracking-wide leading-relaxed ${currentTheme.textColor}`}>
+                        {(() => {
+                          const isAwaitingQuiz = !!boardData?.quiz && (quizSelectedOption === null || quizSelectedOption === undefined);
+                          const shouldShowHighlight = !isAwaitingQuiz && !!boardData?.highlight;
+
+                          return boardData.sentence.split(shouldShowHighlight ? boardData.highlight! : '___NON_EXISTENT___').map((part, i, arr) => (
+                            <React.Fragment key={`sent-piece-${i}`}>
+                              <span>{part}</span>
+                              {i < arr.length - 1 && shouldShowHighlight && (
+                                <span 
+                                  className="px-3 py-1 mx-1.5 rounded-xl font-black shadow-lg animate-pulse inline-block text-slate-950 border border-amber-200"
+                                  style={{ backgroundColor: currentTheme.borderHex }}
+                                >
+                                  {boardData.highlight}
+                                </span>
+                              )}
+                            </React.Fragment>
+                          ));
+                        })()}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* ======================================================== */}
-              {/* 🪄 STUDENT WHITEBOARD REQUEST TRAY (تتفاعل مع الطلب) */}
+              {/* 🌟 4. DUAL-COLUMN ORGANIZED CONTENT GRID */}
+              {/* Column 1: Deep Explanations (Notes & Diagram) */}
+              {/* Column 2: Application & Testing (Correction & Quiz) */}
+              {/* ======================================================== */}
+              {(boardData?.notes || boardData?.diagram || boardData?.correction || boardData?.quiz) && (
+                <div className={`grid gap-4 items-start ${
+                  contentViewFilter === 'all' ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'
+                }`}>
+                  
+                  {/* ==================================================== */}
+                  {/* SIDE A: المفاهيم والشرح الذهبي (Notes & Diagram) */}
+                  {/* ==================================================== */}
+                  {(contentViewFilter === 'all' || contentViewFilter === 'notes') && (
+                    <div className="space-y-4">
+                      {/* 💡 GOLDEN NOTES CARD */}
+                      {boardData?.notes && boardData.notes.length > 0 && (
+                        <div 
+                          className={`border rounded-2xl sm:rounded-3xl p-4 shadow-xl transition-all ${
+                            activeExplanationSection === 'notes'
+                              ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.35)] scale-[1.01]'
+                              : ''
+                          }`}
+                          style={{
+                            backgroundColor: currentTheme.cardBg,
+                            borderColor: activeExplanationSection === 'notes' ? '#FACC15' : currentTheme.cardBorder
+                          }}
+                        >
+                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+                            <h4 
+                              className="text-xs sm:text-sm font-black flex items-center gap-1.5"
+                              style={{ color: currentTheme.accentHex }}
+                            >
+                              <Lightbulb size={15} className="text-amber-400" />
+                              <span>{isRtl ? 'نقاط الشرح الذهبية 💡' : 'Key Golden Takeaways 💡'}</span>
+                            </h4>
+
+                            <button
+                              onClick={() => handleExplainSection('notes')}
+                              className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-amber-200 border border-white/15 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                              title={isRtl ? 'سارة تشرح هذه النقاط بالصوت' : 'Sara explains key notes'}
+                            >
+                              <Volume2 size={12} className="text-amber-400" />
+                              <span>{isRtl ? 'استمع للشرح 🎙️' : 'Explain'}</span>
+                            </button>
+                          </div>
+
+                          <div className="space-y-2.5">
+                            {boardData.notes.map((note, nIdx) => (
+                              <div 
+                                key={`note-${nIdx}`} 
+                                className="flex items-start gap-2.5 p-2 rounded-xl bg-white/5 border border-white/5 hover:border-amber-400/30 transition-colors"
+                              >
+                                <span 
+                                  className="w-5 h-5 rounded-lg text-slate-950 font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5 shadow-xs"
+                                  style={{ backgroundColor: currentTheme.borderHex }}
+                                >
+                                  {nIdx + 1}
+                                </span>
+                                <p className="text-xs sm:text-sm font-medium leading-relaxed flex-1">
+                                  {note}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 🎨 VOCABULARY & CONCEPT DIAGRAM */}
+                      {boardData?.diagram && (
+                        <div 
+                          className={`border rounded-2xl sm:rounded-3xl p-4 shadow-xl transition-all ${
+                            activeExplanationSection === 'diagram'
+                              ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.35)] scale-[1.01]'
+                              : ''
+                          }`}
+                          style={{
+                            backgroundColor: currentTheme.cardBg,
+                            borderColor: activeExplanationSection === 'diagram' ? '#FACC15' : currentTheme.cardBorder
+                          }}
+                        >
+                          <div className="flex items-center justify-between pb-2 mb-3 border-b border-white/10">
+                            <h4 
+                              className="text-xs sm:text-sm font-black flex items-center gap-1.5"
+                              style={{ color: currentTheme.accentHex }}
+                            >
+                              <Layers size={15} className="text-amber-400" />
+                              <span>{boardData.diagram.label || (isRtl ? 'خريطة المفردات والمفاهيم 🎨' : 'Concept Diagram 🎨')}</span>
+                            </h4>
+
+                            <button
+                              onClick={() => handleExplainSection('diagram')}
+                              className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-amber-200 border border-white/15 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                              title={isRtl ? 'سارة تشرح هذا المخطط بالصوت' : 'Sara explains diagram'}
+                            >
+                              <Volume2 size={12} className="text-amber-400" />
+                              <span>{isRtl ? 'استمع للشرح 🎙️' : 'Explain'}</span>
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {boardData.diagram.items.map((item, dIdx) => (
+                              <div 
+                                key={`diag-${dIdx}`} 
+                                className="border rounded-xl p-2.5 hover:border-amber-400/50 transition-all bg-white/5"
+                                style={{ borderColor: currentTheme.cardBorder }}
+                              >
+                                <div className="flex items-center gap-2 mb-1">
+                                  {item.icon && <span className="text-base">{item.icon}</span>}
+                                  <span 
+                                    className="text-xs sm:text-sm font-black truncate"
+                                    style={{ color: currentTheme.accentHex }}
+                                  >
+                                    {item.title}
+                                  </span>
+                                </div>
+                                <p className={`text-[11px] leading-relaxed ${currentTheme.isLight ? 'text-slate-600' : 'text-slate-300'}`}>
+                                  {item.desc}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ==================================================== */}
+                  {/* SIDE B: التطبيق والممارسة (Correction & Quiz) */}
+                  {/* ==================================================== */}
+                  {(contentViewFilter === 'all' || contentViewFilter === 'practice') && (
+                    <div className="space-y-4">
+                      {/* 🔄 MISTAKE CORRECTION CARD */}
+                      {boardData?.correction && (!boardData.quiz || (quizSelectedOption !== null && quizSelectedOption !== undefined)) && (
+                        <div 
+                          className={`border rounded-2xl sm:rounded-3xl p-4 shadow-xl transition-all ${
+                            activeExplanationSection === 'correction'
+                              ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.35)]'
+                              : ''
+                          }`}
+                          style={{
+                            backgroundColor: currentTheme.cardBg,
+                            borderColor: activeExplanationSection === 'correction' ? '#FACC15' : currentTheme.cardBorder
+                          }}
+                        >
+                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+                            <span className="text-xs font-black flex items-center gap-1.5" style={{ color: currentTheme.accentHex }}>
+                              <Target size={14} className="text-emerald-400" />
+                              <span>{isRtl ? 'تصحيح الأخطاء الشائعة 🔄' : 'Natural vs Common Mistake 🔄'}</span>
+                            </span>
+
+                            <button
+                              onClick={() => handleExplainSection('correction')}
+                              className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-amber-200 border border-white/15 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                            >
+                              <Volume2 size={12} className="text-amber-400" />
+                              <span>{isRtl ? 'استمع للتصحيح 🎙️' : 'Explain'}</span>
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
+                            <div className="flex items-center gap-2 text-rose-300 bg-rose-950/60 border border-rose-500/30 p-2.5 rounded-xl">
+                              <XCircle size={16} className="text-rose-400 shrink-0" />
+                              <div className="min-w-0">
+                                <span className="text-[10px] text-rose-400/80 font-bold block">{isRtl ? 'تجنب هذا ✕' : 'Avoid ✕'}</span>
+                                <span className="line-through font-bold">{boardData.correction.wrong}</span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 p-2.5 rounded-xl font-black">
+                              <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+                              <div className="min-w-0">
+                                <span className="text-[10px] text-emerald-400/80 font-bold block">{isRtl ? 'الصحيح الطبيعي ✓' : 'Correct ✓'}</span>
+                                <span>{boardData.correction.right}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 🎯 INTERACTIVE WHITEBOARD QUIZ CHALLENGE (LIMITED 5 QUESTIONS + FLOATING 30s TIMER) */}
+                      {activeQuestion && (
+                        <div 
+                          className={`relative border-2 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xl transition-all ${
+                            activeExplanationSection === 'quiz'
+                              ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.35)] scale-[1.01]'
+                              : ''
+                          }`}
+                          style={{
+                            backgroundColor: currentTheme.cardBg,
+                            borderColor: activeExplanationSection === 'quiz' ? '#FACC15' : `${currentTheme.borderHex}88`
+                          }}
+                        >
+                          {/* ⏱️ FLOATING 30-SECOND COUNTDOWN TIMER (المؤقت العائم بجانب السؤال) */}
+                          {!quizCompleted && (
+                            <div className="absolute -top-3.5 sm:-top-4 end-3 sm:end-5 z-20">
+                              {!hasTimerStarted ? (
+                                <button
+                                  onClick={() => {
+                                    setHasTimerStarted(true);
+                                    setIsTimerRunning(true);
+                                  }}
+                                  className="flex items-center gap-1.5 px-3.5 py-1 rounded-full border-2 border-amber-300 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-slate-950 font-black text-xs shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer animate-pulse"
+                                  title={isRtl ? 'بدء العد التنازلي للمؤقت (30 ثانية)' : 'Start 30s Timer'}
+                                >
+                                  <Play size={11} className="fill-slate-950 text-slate-950" />
+                                  <span>{isRtl ? 'ابدأ المؤقت ▶️ (30ث)' : 'Start Timer ▶️ (30s)'}</span>
+                                </button>
+                              ) : (
+                                <div className="flex items-center gap-1.5">
+                                  <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border-2 shadow-lg backdrop-blur-md font-mono font-black text-xs transition-all ${
+                                    quizTimeUp 
+                                      ? 'bg-rose-600 text-white border-rose-300 animate-bounce shadow-rose-600/50' 
+                                      : quizTimeLeft <= 5 
+                                        ? 'bg-rose-500 text-white border-rose-300 animate-pulse shadow-rose-500/50' 
+                                        : quizTimeLeft <= 10 
+                                          ? 'bg-amber-400 text-slate-950 border-amber-200 shadow-amber-400/40' 
+                                          : 'bg-indigo-600/90 text-white border-indigo-400/60 shadow-indigo-600/30'
+                                  }`}>
+                                    <Timer size={13} className={isTimerRunning && quizTimeLeft <= 10 ? 'animate-spin' : ''} />
+                                    <span>{quizTimeUp ? (isRtl ? 'انتهى الوقت ⏱️' : 'Time Up! ⏱️') : `${quizTimeLeft} ثانية`}</span>
+                                  </div>
+
+                                  {!quizTimeUp && localQuizSelectedOption === null && (
+                                    <button
+                                      onClick={() => setIsTimerRunning(prev => !prev)}
+                                      className="w-6 h-6 rounded-full bg-black/40 hover:bg-black/60 text-white border border-white/20 flex items-center justify-center transition-all cursor-pointer text-[10px]"
+                                      title={isTimerRunning ? (isRtl ? 'إيقاف مؤقت' : 'Pause') : (isRtl ? 'استئناف' : 'Resume')}
+                                    >
+                                      {isTimerRunning ? <Pause size={10} /> : <Play size={10} className="fill-white" />}
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {quizCompleted ? (
+                            /* 🏆 LESSON QUIZ COMPLETION SUMMARY CARD */
+                            <div className="text-center py-4 space-y-4">
+                              <div className="w-16 h-16 rounded-3xl bg-amber-400/20 border-2 border-amber-400/50 flex items-center justify-center mx-auto text-amber-300 shadow-lg">
+                                <Trophy size={36} className="text-amber-400 animate-bounce" />
+                              </div>
+
+                              <div>
+                                <span className="text-[11px] font-black uppercase tracking-wider text-amber-300 block mb-1">
+                                  {isRtl ? 'اكتمل اختبار الدرس بنجاح 🎓' : 'Lesson Quiz Completed 🎓'}
+                                </span>
+                                <h4 className="text-lg sm:text-xl font-black text-white">
+                                  {isRtl ? `درجتك النهائية: ${quizScore} من ${totalQuestions}` : `Your Score: ${quizScore} of ${totalQuestions}`}
+                                </h4>
+                                <p className="text-xs text-slate-300 font-bold mt-1">
+                                  {Math.round((quizScore / totalQuestions) * 100)}% {isRtl ? 'نسبة الإتقان لهذا الدرس' : 'Mastery Rate'}
+                                </p>
+                              </div>
+
+                              <div className="p-3 rounded-2xl bg-white/5 border border-white/10 text-xs text-amber-200 font-medium max-w-md mx-auto">
+                                💬 {quizScore === totalQuestions 
+                                  ? (isRtl ? 'ما شاء الله تبارك الله! إتقان مطلق وعلامة كاملة يا بطل! 🌟' : 'Outstanding! Perfect score on this lesson! 🌟')
+                                  : quizScore >= Math.ceil(totalQuestions / 2)
+                                    ? (isRtl ? 'أداء ممتاز ورائع! استوعبت معظم مفاهيم الدرس ونفخر بتقدمك 👏' : 'Great effort! You mastered key concepts well 👏')
+                                    : (isRtl ? 'محاولة طيبة وبداية للتعلم! راجع الشرح على السبورة وسأساعدك دائماً 🌸' : 'Good practice! Review the whiteboard notes to reinforce 🌸')}
+                              </div>
+
+                              <div className="flex items-center justify-center gap-2 pt-2">
+                                <button
+                                  onClick={handleRestartQuiz}
+                                  className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-95"
+                                >
+                                  <RefreshCw size={13} />
+                                  <span>{isRtl ? 'إعادة التحدي 🔄' : 'Retry Quiz 🔄'}</span>
+                                </button>
+                                <button
+                                  onClick={() => setContentViewFilter('focus')}
+                                  className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                                >
+                                  <BookOpen size={13} />
+                                  <span>{isRtl ? 'مراجعة الشرح 📖' : 'Review Notes 📖'}</span>
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            /* 📝 ACTIVE QUESTION VIEW */
+                            <div>
+                              {/* Header with question count and read aloud */}
+                              <div className="flex items-center justify-between gap-2 pb-2 mb-3 border-b border-white/10">
+                                <div className="flex items-center gap-2">
+                                  <span 
+                                    className="w-6 h-6 rounded-xl text-slate-900 font-black text-xs flex items-center justify-center shadow-xs"
+                                    style={{ backgroundColor: currentTheme.borderHex }}
+                                  >
+                                    ?
+                                  </span>
+                                  <div>
+                                    <span className="text-xs font-black uppercase tracking-wider block" style={{ color: currentTheme.accentHex }}>
+                                      {isRtl ? 'تحدي الدرس السريع 🎯' : 'Lesson Quiz Challenge 🎯'}
+                                    </span>
+                                    <span className="text-[10px] font-mono text-amber-300/90 font-bold">
+                                      {isRtl ? `السؤال ${quizQuestionIndex + 1} من ${totalQuestions}` : `Question ${quizQuestionIndex + 1} of ${totalQuestions}`}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <button
+                                  onClick={() => {
+                                    if (activeQuestion?.question) {
+                                      onSpeak(activeQuestion.question);
+                                      // Start timer countdown as Sara asks / reads the question
+                                      setHasTimerStarted(true);
+                                      setIsTimerRunning(true);
+                                    }
+                                  }}
+                                  className="px-2.5 py-1 rounded-lg bg-amber-400/20 hover:bg-amber-400/30 text-amber-200 border border-amber-400/30 text-[10px] font-bold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shadow-2xs"
+                                  title={isRtl ? 'سارة تقرأ السؤال بصوتها ويبدأ التوقيت فوراً' : 'Sara reads question and timer starts'}
+                                >
+                                  <Volume2 size={12} className="text-amber-400" />
+                                  <span>{isRtl ? 'طرح السؤال 🎙️' : 'Read Question 🎙️'}</span>
+                                </button>
+                              </div>
+
+                              {/* Progress bar across question card */}
+                              <div className="w-full h-1.5 bg-black/30 rounded-full overflow-hidden mb-3">
+                                <div 
+                                  className="h-full bg-gradient-to-r from-amber-400 to-emerald-400 transition-all duration-300"
+                                  style={{ width: `${((quizQuestionIndex + 1) / totalQuestions) * 100}%` }}
+                                />
+                              </div>
+
+                              {/* Question text */}
+                              <p className="text-xs sm:text-sm font-black mb-3 px-1 leading-relaxed" style={{ color: currentTheme.accentHex }}>
+                                {activeQuestion.question}
+                              </p>
+
+                              {/* Options */}
+                              <div className="space-y-2">
+                                {activeQuestion.options.map((opt, oIdx) => {
+                                  const isSelected = localQuizSelectedOption === oIdx;
+                                  const isCorrect = oIdx === activeQuestion.answerIndex;
+
+                                  let btnClass = 'bg-white/10 border-white/15 text-slate-200 hover:bg-white/20 hover:border-amber-300';
+                                  if (currentTheme.isLight) {
+                                    btnClass = 'bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200';
+                                  }
+
+                                  if (localQuizSelectedOption !== null || quizTimeUp) {
+                                    if (isCorrect) {
+                                      btnClass = 'bg-emerald-600/40 border-emerald-400 text-emerald-200 font-black ring-2 ring-emerald-400/50';
+                                    } else if (isSelected && !isCorrect) {
+                                      btnClass = 'bg-rose-600/40 border-rose-400 text-rose-200 line-through';
+                                    } else {
+                                      btnClass = 'bg-black/20 border-transparent text-slate-500 opacity-50';
+                                    }
+                                  }
+
+                                  const optionLetters = ['A', 'B', 'C', 'D'];
+
+                                  return (
+                                    <button
+                                      key={`wb-opt-${quizQuestionIndex}-${oIdx}`}
+                                      disabled={localQuizSelectedOption !== null || quizTimeUp}
+                                      onClick={() => handleAnswerQuestion(oIdx)}
+                                      className={`w-full p-2.5 sm:p-3 rounded-xl border-2 text-xs font-bold transition-all text-start flex items-center justify-between gap-2 cursor-pointer ${btnClass}`}
+                                    >
+                                      <div className="flex items-center gap-2 min-w-0">
+                                        <span className="w-5 h-5 rounded-lg bg-black/30 border border-white/20 text-[10px] font-mono flex items-center justify-center shrink-0">
+                                          {optionLetters[oIdx] || oIdx + 1}
+                                        </span>
+                                        <span className="truncate">{opt}</span>
+                                      </div>
+                                      {(localQuizSelectedOption !== null || quizTimeUp) && isCorrect && (
+                                        <Check size={16} className="text-emerald-300 shrink-0 animate-bounce" />
+                                      )}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+
+                              {/* Feedback / Time Up Indicator */}
+                              {(localQuizFeedback || quizTimeUp) && (
+                                <motion.div 
+                                  initial={{ opacity: 0, y: 4 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  className={`mt-3 p-2.5 rounded-xl text-xs font-black text-center border ${
+                                    quizTimeUp 
+                                      ? 'bg-rose-500/20 text-rose-200 border-rose-400/40'
+                                      : localQuizFeedback === 'correct' 
+                                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40' 
+                                        : 'bg-amber-400/20 text-amber-200 border-amber-400/40'
+                                  }`}
+                                >
+                                  {quizTimeUp 
+                                    ? (isRtl ? '⏱️ انتهى وقت الإجابة (30 ثانية)! تم إظهار الخيار الصحيح بالأخضر' : '⏱️ Time is up (30s)! Correct answer highlighted in green')
+                                    : localQuizFeedback === 'correct' 
+                                      ? (isRtl ? '🎉 كفو عليك يا بطل! إجابة صحيحة وممتازة 🌟' : '🎉 Excellent! That is correct! 🌟')
+                                      : (isRtl ? '👏 محاولة جيدة! ركز على الخيار الأخضر الصحيح' : '👏 Good try! Note the green correct option')}
+                                </motion.div>
+                              )}
+
+                              {/* Next question / Finish challenge button */}
+                              {(localQuizSelectedOption !== null || quizTimeUp) && (
+                                <motion.div 
+                                  initial={{ opacity: 0, scale: 0.95 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  className="mt-3 flex justify-end"
+                                >
+                                  <button
+                                    onClick={handleNextQuestion}
+                                    className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md transition-all cursor-pointer active:scale-95"
+                                  >
+                                    <span>
+                                      {quizQuestionIndex < totalQuestions - 1
+                                        ? (isRtl ? `السؤال التالي (${quizQuestionIndex + 2} من ${totalQuestions}) ➡️` : `Next Question (${quizQuestionIndex + 2}/${totalQuestions}) ➡️`)
+                                        : (isRtl ? 'عرض النتيجة الإجمالية 🏆' : 'View Final Score 🏆')}
+                                    </span>
+                                  </button>
+                                </motion.div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                </div>
+              )}
+
+              {/* ======================================================== */}
+              {/* 🌟 5. DOCKED INTERACTION CONSOLE WITH TEACHER SARA */}
               {/* ======================================================== */}
               <div 
-                className="border-2 rounded-2xl p-3.5 sm:p-4 shadow-xl space-y-2.5 mt-2"
+                className="border-2 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-2xl space-y-2.5 mt-2 backdrop-blur-md"
                 style={{
-                  backgroundColor: currentTheme.isLight ? 'rgba(255,255,255,0.95)' : 'rgba(8, 18, 32, 0.85)',
+                  backgroundColor: currentTheme.isLight ? 'rgba(255,255,255,0.96)' : 'rgba(8, 18, 32, 0.90)',
                   borderColor: `${currentTheme.borderHex}aa`
                 }}
               >
-                {/* Header & Status Banner */}
+                {/* Console Header */}
                 <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 min-w-0">
                     <span className="text-base animate-pulse">🪄</span>
                     <h4 
-                      className="text-xs sm:text-sm font-black"
+                      className="text-xs sm:text-sm font-black truncate"
                       style={{ color: currentTheme.accentHex }}
                     >
                       {isRtl ? 'اطلب من المعلمة سارة على السبورة:' : 'Ask Teacher Sara on Whiteboard:'}
                     </h4>
                   </div>
-                  <span className="text-[10px] text-amber-200/80 font-bold">
-                    {isRtl ? 'بالصوت أو الكتابة 🎙️✍️' : 'Voice or Text 🎙️✍️'}
-                  </span>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => setActiveTab('draw')}
+                      className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-amber-200 border border-white/15 text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                    >
+                      <PenTool size={12} />
+                      <span className="hidden sm:inline">{isRtl ? 'أدوات الرسم ✍️' : 'Drawing'}</span>
+                    </button>
+
+                    <button
+                      onClick={saveWhiteboardAsImage}
+                      className="px-2.5 py-1 rounded-xl text-slate-950 font-black text-[11px] shadow-sm flex items-center gap-1 transition-all cursor-pointer hover:scale-105 active:scale-95"
+                      style={{ backgroundColor: currentTheme.borderHex }}
+                    >
+                      <Camera size={13} />
+                      <span className="hidden sm:inline">{isRtl ? 'حفظ 📸' : 'Save'}</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Shimmer Feedback Banner when processing */}
@@ -2600,13 +3044,13 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                 {/* Quick Request Chips */}
                 <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
                   {[
-                    { id: 'explain_all', labelAr: '🎙️ اشرحي السبورة كاملة', labelEn: '🎙️ Explain Whole Board', action: () => handleExplainWholeBoard() },
-                    { id: 'another_example', labelAr: '✍️ مثال إضافي على السبورة', labelEn: '✍️ Give Another Example', action: () => handleSubmitBoardRequest(isRtl ? 'سارة، اعطيني مثالاً إضافياً ومختلفاً على السبورة' : 'Sara, give me another example on the board') },
-                    { id: 'simplify', labelAr: '💡 بسطي الشرح بأسلوب أسهل', labelEn: '💡 Simplify Explanation', action: () => handleSubmitBoardRequest(isRtl ? 'سارة، بسطي لي شرح هذه القاعدة على السبورة بأسلوب أسهل' : 'Sara, simplify this explanation on the board') },
-                    { id: 'new_quiz', labelAr: '❓ اختبرني بسؤال جديد', labelEn: '❓ Test Me With New Quiz', action: () => handleSubmitBoardRequest(isRtl ? 'سارة، اطرحي علي سؤال أو كويز جديد على السبورة' : 'Sara, give me a new quiz on the board') },
-                    { id: 'slow_pronounce', labelAr: '🗣️ انطقي ببطء للممارسة', labelEn: '🗣️ Pronounce Slowly', action: () => { if (boardData?.sentence) onSpeak(boardData.sentence); } },
-                    { id: 'vocab_diagram', labelAr: '🎨 ارسمي خريطة مفردات', labelEn: '🎨 Draw Vocabulary Diagram', action: () => handleSubmitBoardRequest(isRtl ? 'سارة، ارسمي لي مخطط ورسم بياني توضيحي للمفردات على السبورة' : 'Sara, draw a vocabulary diagram on the board') },
-                    { id: 'chalk_write', labelAr: '📝 كتابة بالطبشور على اللوح', labelEn: '📝 Write in Chalk', action: () => handleDrawChalkExplanation() },
+                    { id: 'explain_all', labelAr: '🎙️ شرح شامل', labelEn: '🎙️ Explain All', action: () => handleExplainWholeBoard() },
+                    { id: 'another_example', labelAr: '✍️ مثال إضافي', labelEn: '✍️ Another Example', action: () => handleSubmitBoardRequest(isRtl ? 'سارة، اعطيني مثالاً إضافياً ومختلفاً على السبورة' : 'Sara, give me another example on the board') },
+                    { id: 'simplify', labelAr: '💡 بسطي الشرح', labelEn: '💡 Simplify', action: () => handleSubmitBoardRequest(isRtl ? 'سارة، بسطي لي شرح هذه القاعدة على السبورة بأسلوب أسهل' : 'Sara, simplify this explanation on the board') },
+                    { id: 'new_quiz', labelAr: '❓ كويز جديد', labelEn: '❓ New Quiz', action: () => handleSubmitBoardRequest(isRtl ? 'سارة، اطرحي علي سؤال أو كويز جديد على السبورة' : 'Sara, give me a new quiz on the board') },
+                    { id: 'slow_pronounce', labelAr: '🗣️ نطق بطيء', labelEn: '🗣️ Speak Slowly', action: () => { if (boardData?.sentence) onSpeak(boardData.sentence); } },
+                    { id: 'vocab_diagram', labelAr: '🎨 خريطة مفردات', labelEn: '🎨 Vocab Map', action: () => handleSubmitBoardRequest(isRtl ? 'سارة، ارسمي لي مخطط ورسم بياني توضيحي للمفردات على السبورة' : 'Sara, draw a vocabulary diagram on the board') },
+                    { id: 'chalk_write', labelAr: '📝 كتابة بالطبشور', labelEn: '📝 Chalkboard', action: () => handleDrawChalkExplanation() },
                   ].map(chip => (
                     <button
                       key={`req-chip-${chip.id}`}

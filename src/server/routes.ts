@@ -1019,58 +1019,65 @@ Looking forward to your reply. Tell me what we're tackling first!`;
   });
 
 
+  // High-fidelity speech synthesizer in-memory cache & helper (Sara Kore Studio Voice)
+  const ttsAudioCache = new Map<string, string>();
+
+  async function generateSaraSpeechAudio(text: string, voiceName: string = "Kore"): Promise<string | null> {
+    const clean = text.replace(/[*#_`~>]/g, "").replace(/\[.*?\]\(.*?\)/g, "").trim();
+    if (!clean) return null;
+    const cacheKey = `${voiceName || "Kore"}:${clean}`;
+    if (ttsAudioCache.has(cacheKey)) {
+      return ttsAudioCache.get(cacheKey)!;
+    }
+    if (!initAI() || !aiLive) return null;
+
+    try {
+      const response = await aiLive.models.generateContent({
+        model: "gemini-3.8-flash-lite-tts",
+        contents: [{
+          role: "user",
+          parts: [{ text: clean }]
+        }] as any,
+        config: {
+          responseModalities: [Modality.AUDIO],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: {
+                voiceName: voiceName || "Kore"
+              }
+            }
+          }
+        }
+      });
+
+      const candidates = (response as any).candidates;
+      const audioPart = candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData?.mimeType?.includes("audio") || p.inlineData);
+      if (audioPart && audioPart.inlineData?.data) {
+        const audioData = audioPart.inlineData.data;
+        if (ttsAudioCache.size > 250) {
+          const firstKey = ttsAudioCache.keys().next().value;
+          if (firstKey) ttsAudioCache.delete(firstKey);
+        }
+        ttsAudioCache.set(cacheKey, audioData);
+        return audioData;
+      }
+    } catch (err: any) {
+      logToFile(`[TTS] Error generating audio with gemini-3.8-flash-lite-tts: ${err.message}`);
+    }
+    return null;
+  }
+
   // High-fidelity speech synthesizer endpoint
   app.post("/api/tts", async (req, res) => {
     try {
-      const { text, lang = "en", voiceName } = req.body;
+      const { text, voiceName } = req.body;
       if (!text) return res.status(400).json({ error: "Text is required" });
 
-      if (!initAI() || !aiLive) {
-        return res.status(503).json({ error: "Gemini API key not configured for server-side TTS" });
+      const audio = await generateSaraSpeechAudio(text, voiceName || "Kore");
+      if (audio) {
+        return res.json({ audio });
       }
-
-      // Try designated gemini TTS models
-      const candidateModels = ["gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts"];
-      let lastErr: any = null;
-
-      // Female voice: Kore is a warm, pleasant female voice across Arabic and English
-      const selectedVoice = voiceName || "Kore";
-
-      for (const modelToUse of candidateModels) {
-        try {
-          const response = await aiLive.models.generateContent({
-            model: modelToUse,
-            contents: [{
-              role: "user",
-              parts: [{ 
-                text: text
-              }]
-            }] as any,
-            config: {
-              responseModalities: [Modality.AUDIO],
-              speechConfig: {
-                voiceConfig: {
-                  prebuiltVoiceConfig: {
-                    voiceName: selectedVoice
-                  }
-                }
-              }
-            }
-          });
-
-          const candidates = (response as any).candidates;
-          const audioPart = candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData?.mimeType?.includes("audio") || p.inlineData);
-          if (audioPart && audioPart.inlineData?.data) {
-            return res.json({ audio: audioPart.inlineData.data });
-          }
-        } catch (mErr: any) {
-          logToFile(`TTS attempt with ${modelToUse} failed: ${mErr.message}`);
-          lastErr = mErr;
-        }
-      }
-
-      logToFile(`TTS generation error: ${lastErr?.message || "No audio generated"}`);
-      return res.status(500).json({ error: lastErr?.message || "No audio generated" });
+      return res.status(500).json({ error: "No audio generated" });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
@@ -1266,8 +1273,8 @@ Output structure:
     },
     "quiz": {
       "question": "Quiz question in English or Arabic if testing the skill",
-      "options": ["Option A", "Option B", "Option C"],
-      "answerIndex": 0
+      "options": ["Distractor A", "Correct Answer B", "Distractor C", "Distractor D"],
+      "answerIndex": 1
     },
     "voiceExplanation": "Pedagogical spoken explanation script in warm Arabic/English for Sara to explain what is written on the board aloud",
     "openWhiteboard": true
@@ -1281,7 +1288,11 @@ Output structure:
     "wordsLearned": ["New English words the student learned in this turn"]
   },
   "sessionDone": false
-}`;
+}
+IMPORTANT QUIZ RULES:
+- NEVER always place the correct answer as the first option (index 0)!
+- Randomly vary "answerIndex" across 0, 1, 2, or 3.
+- Shuffle options so the student cannot guess based on position.`;
 
       // Take last ~12 messages from history
       const recentHistory = Array.isArray(history) ? history.slice(-12) : [];
@@ -1298,7 +1309,10 @@ Output structure:
             contents: formattedContents,
             config: {
               systemInstruction: systemInstruction,
-              responseMimeType: "application/json"
+              responseMimeType: "application/json",
+              // Zero thinking budget for immediate real-time conversational response!
+              thinkingConfig: { thinkingBudget: 0 },
+              maxOutputTokens: 600
             }
           });
           geminiReplyText = aiRes.text || "";
@@ -1377,6 +1391,48 @@ Output structure:
 
       parsedResult.sessionDone = !!parsedResult.sessionDone;
       parsedResult.dailyCapReached = false;
+
+      // Ensure quiz options are randomized so the correct answer is never perpetually option 0
+      if (parsedResult.board && parsedResult.board.quiz) {
+        const q = parsedResult.board.quiz;
+        if (Array.isArray(q.options) && q.options.length > 1) {
+          const rawIndex = typeof q.answerIndex === 'number' ? q.answerIndex : 0;
+          const safeIndex = (rawIndex >= 0 && rawIndex < q.options.length) ? rawIndex : 0;
+          const indexed = q.options.map((opt: string, i: number) => ({ opt, isCorrect: i === safeIndex }));
+          for (let i = indexed.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const t = indexed[i];
+            indexed[i] = indexed[j];
+            indexed[j] = t;
+          }
+          let newAnswerIndex = indexed.findIndex(item => item.isCorrect);
+          if (newAnswerIndex === 0 && indexed.length > 1) {
+            const swapTarget = 1 + Math.floor(Math.random() * (indexed.length - 1));
+            const t = indexed[0];
+            indexed[0] = indexed[swapTarget];
+            indexed[swapTarget] = t;
+            newAnswerIndex = swapTarget;
+          }
+          q.options = indexed.map(item => item.opt);
+          q.answerIndex = newAnswerIndex;
+        }
+        q.questionNumber = 1;
+        q.totalQuestions = 5;
+        q.timeLimitSeconds = 30;
+      }
+
+      // Server-side Studio Voice Co-generation:
+      // Pre-renders Sara's 'Kore' audio directly on the backend, eliminating the secondary /api/tts HTTP round-trip!
+      if (parsedResult.reply) {
+        try {
+          const directAudio = await generateSaraSpeechAudio(parsedResult.reply, "Kore");
+          if (directAudio) {
+            parsedResult.audio = directAudio;
+          }
+        } catch (audioErr: any) {
+          logToFile(`[Sara] Audio co-generation skipped: ${audioErr.message}`);
+        }
+      }
 
       return res.json(parsedResult);
     } catch (globalErr: any) {
@@ -3953,34 +4009,34 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
         {
           question: `ما هو المفهوم الأساسي الذي تدور حوله دراستنا لـ "${title}"؟`,
           options: [
-            "تطبيق المبادئ النظرية في سيناريوهات عملية تفاعلية",
             "حفظ المصطلحات والتعريفات غيباً دون فهم عميق",
+            "تطبيق المبادئ النظرية في سيناريوهات عملية تفاعلية",
             "التركيز على المشاهدة السلبية وإهمال التمارين التطبيقية",
             "تجاهل التطور المستمر للأدوات التقنية والذكية"
           ],
-          correctIndex: 0,
+          correctIndex: 1,
           explanation: "التطبيق العملي التفاعلي هو حجر الأساس لفهم التكنولوجيا والذكاء الاصطناعي بشكل مستدام وعميق."
         },
         {
           question: `كيف يساهم إكمال الأنشطة التفاعلية والعملية في تحسين كفاءة الطالب في "${title}"؟`,
           options: [
             "يزيد من تعقيد المادة الدراسية ويقلل الفهم العام",
-            "يمنح الطالب مهارات تحليلية وتجريبية لحل المشكلات المعقدة",
             "لا يوجد أي تأثير يذكر للتدريب العملي على الطالب",
+            "يمنح الطالب مهارات تحليلية وتجريبية لحل المشكلات المعقدة",
             "يؤدي إلى الاعتماد الكلي على الآلة دون تفكير بشري مستقل"
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation: "المحاكاة والتجارب التفاعلية تطور المهارات التحليلية والقدرة على ابتكار حلول ذكية للمشكلات."
         },
         {
           question: `ما هي الخطوة الأفضل بعد الانتهاء من استيعاب المفاهيم النظرية لـ "${title}"؟`,
           options: [
-            "الانتقال إلى الممارسات العملية والتحديات الذاتية واختبار الذات",
             "التوقف التام عن مراجعة المادة لعدة شهور متواصلة",
             "البحث عن موضوع مختلف كلياً وتجاهل التطبيق العملي",
-            "افتراض الفهم الكامل دون خوض أي تقييم أو اختبار قياسي"
+            "افتراض الفهم الكامل دون خوض أي تقييم أو اختبار قياسي",
+            "الانتقال إلى الممارسات العملية والتحديات الذاتية واختبار الذات"
           ],
-          correctIndex: 0,
+          correctIndex: 3,
           explanation: "اختبار معلوماتك ذاتياً وحل المسائل العملية يعزز تثبيت المعلومة وتصحيح المفاهيم المغلوطة فوراً."
         }
       ];
@@ -3989,34 +4045,34 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
         {
           question: `What is the main learning objective of our study of "${title}"?`,
           options: [
-            "Applying theoretical principles to interactive, practical scenarios",
             "Rote memorization of terminology without deep understanding",
+            "Applying theoretical principles to interactive, practical scenarios",
             "Passive viewing and avoiding hands-on practice",
             "Ignoring the continuous development of intelligent tools"
           ],
-          correctIndex: 0,
+          correctIndex: 1,
           explanation: "Hands-on application is the cornerstone of understanding technology and AI sustainably and deeply."
         },
         {
           question: `How does completing the practical activities improve the student's competence in "${title}"?`,
           options: [
             "It unnecessarily complicates the subject matter",
-            "It equips the student with analytical and experimental problem-solving skills",
             "It has no measurable impact on the student's learning outcome",
+            "It equips the student with analytical and experimental problem-solving skills",
             "It leads to total dependency on machines without independent human logic"
           ],
-          correctIndex: 1,
+          correctIndex: 2,
           explanation: "Simulation and interactive experiments build critical thinking and the ability to formulate smart solutions."
         },
         {
           question: `What is the most recommended next step after absorbing the theoretical concepts of "${title}"?`,
           options: [
-            "Engaging with practical sandboxes and self-assessing via quizzes",
             "Ceasing all studies on the topic for several months",
             "Moving onto a completely unrelated topic immediately",
-            "Assuming full comprehension without ever testing your knowledge"
+            "Assuming full comprehension without ever testing your knowledge",
+            "Engaging with practical sandboxes and self-assessing via quizzes"
           ],
-          correctIndex: 0,
+          correctIndex: 3,
           explanation: "Self-assessment and interactive quizzes solidify concepts and correct any misunderstandings immediately."
         }
       ];
@@ -4050,6 +4106,10 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
         - "correctIndex": The integer index (0-indexed, i.e., 0, 1, 2, or 3) of the correct option in the options array.
         - "explanation": A brief, highly encouraging explanation (in ${isAr ? 'Arabic' : 'English'}) of why that option is correct.
         
+        CRITICAL RULE:
+        - DO NOT put the correct answer as the first option (index 0) for every question!
+        - Randomly assign correctIndex across 0, 1, 2, and 3.
+        
         Do not output any markdown formatting other than raw JSON.
         
         Example JSON output structure:
@@ -4069,7 +4129,7 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
           {
             "question": "...",
             "options": ["...", "...", "...", "..."],
-            "correctIndex": 0,
+            "correctIndex": 3,
             "explanation": "..."
           }
         ]
@@ -4085,7 +4145,36 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
       if (cleanText.startsWith("```")) {
         cleanText = cleanText.replace(/^```json\n?/, "").replace(/\n?```$/, "");
       }
-      res.json(JSON.parse(cleanText));
+      const rawParsed = JSON.parse(cleanText);
+      const randomizedQuizzes = Array.isArray(rawParsed) ? rawParsed.map((q: any) => {
+        if (Array.isArray(q.options) && q.options.length > 1) {
+          const rawIndex = typeof q.correctIndex === 'number' ? q.correctIndex : 0;
+          const safeIndex = (rawIndex >= 0 && rawIndex < q.options.length) ? rawIndex : 0;
+          const indexed = q.options.map((opt: string, i: number) => ({ opt, isCorrect: i === safeIndex }));
+          for (let i = indexed.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const t = indexed[i];
+            indexed[i] = indexed[j];
+            indexed[j] = t;
+          }
+          let newCorrectIndex = indexed.findIndex(item => item.isCorrect);
+          if (newCorrectIndex === 0 && indexed.length > 1) {
+            const swapTarget = 1 + Math.floor(Math.random() * (indexed.length - 1));
+            const t = indexed[0];
+            indexed[0] = indexed[swapTarget];
+            indexed[swapTarget] = t;
+            newCorrectIndex = swapTarget;
+          }
+          return {
+            ...q,
+            options: indexed.map(item => item.opt),
+            correctIndex: newCorrectIndex
+          };
+        }
+        return q;
+      }) : rawParsed;
+
+      res.json(randomizedQuizzes);
     } catch (error: any) {
       logToFile(`[Error] 3-Question Lesson Quiz generation failed: ${error.message}. Returning fallback.`);
       try {
