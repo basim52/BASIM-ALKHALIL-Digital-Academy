@@ -832,8 +832,8 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
         try {
           const parsed = JSON.parse(saved);
           if (parsed && typeof parsed.width === 'number' && typeof parsed.height === 'number') {
-            const maxW = window.innerWidth - 24;
-            const maxH = window.innerHeight - 32;
+            const maxW = window.innerWidth - 20;
+            const maxH = window.innerHeight - 24;
             return {
               width: Math.min(maxW, parsed.width),
               height: Math.min(maxH, parsed.height)
@@ -843,14 +843,23 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
       }
       const w = window.innerWidth;
       const h = window.innerHeight;
-      if (w < 1024) {
+      const isTablet = w >= 640 && w <= 1200;
+      if (isTablet) {
+        const isLandscape = w >= h;
+        // Perfect proportions for iPad Mini, iPad 10.2", iPad Air 10.9", iPad Pro 11", and Android tablets
         return {
-          width: Math.min(840, Math.round(w * 0.92)),
-          height: Math.min(700, Math.round(h * 0.86))
+          width: Math.min(isLandscape ? 1040 : 820, Math.round(w * 0.94)),
+          height: Math.min(isLandscape ? 740 : 920, Math.round(h * 0.88))
+        };
+      }
+      if (w < 640) {
+        return {
+          width: Math.round(w * 0.96),
+          height: Math.round(h * 0.84)
         };
       }
     }
-    return { width: 840, height: 620 };
+    return { width: 880, height: 640 };
   });
   const [showSizeMenu, setShowSizeMenu] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -1386,26 +1395,41 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
     setShowTemplatePicker(false);
   };
 
-  const getCanvasCoords = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+  const activePointerTypeRef = useRef<string | null>(null);
+
+  const getCanvasCoords = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement> | React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
+    if (!canvas) return { x: 0, y: 0, pressure: 0.5, pointerType: 'mouse' };
     const rect = canvas.getBoundingClientRect();
     
-    if ('touches' in e && e.touches.length > 0) {
+    if ('pointerType' in e) {
+      const pe = e as React.PointerEvent;
+      const pressure = pe.pressure && pe.pressure > 0 ? pe.pressure : 0.5;
+      return {
+        x: pe.clientX - rect.left,
+        y: pe.clientY - rect.top,
+        pressure,
+        pointerType: pe.pointerType
+      };
+    } else if ('touches' in e && e.touches.length > 0) {
       return {
         x: e.touches[0].clientX - rect.left,
-        y: e.touches[0].clientY - rect.top
+        y: e.touches[0].clientY - rect.top,
+        pressure: 0.5,
+        pointerType: 'touch'
       };
     } else if ('clientX' in e) {
       return {
         x: e.clientX - rect.left,
-        y: e.clientY - rect.top
+        y: e.clientY - rect.top,
+        pressure: 0.5,
+        pointerType: 'mouse'
       };
     }
-    return { x: 0, y: 0 };
+    return { x: 0, y: 0, pressure: 0.5, pointerType: 'mouse' };
   };
 
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement> | React.PointerEvent<HTMLCanvasElement>) => {
     if ('touches' in e && e.cancelable) {
       e.preventDefault();
     }
@@ -1414,37 +1438,51 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const { x, y, pressure, pointerType } = getCanvasCoords(e);
+
+    // Palm rejection on tablets: If student is drawing with an Apple Pencil or stylus, ignore inadvertent palm touches
+    if (activePointerTypeRef.current === 'pen' && pointerType === 'touch') {
+      return;
+    }
+    if (pointerType === 'pen') {
+      activePointerTypeRef.current = 'pen';
+    }
+
     saveState();
     setIsDrawing(true);
 
-    const { x, y } = getCanvasCoords(e);
     ctx.beginPath();
     ctx.moveTo(x, y);
 
+    // Dynamic width calculation based on Apple Pencil / Stylus pressure
+    const dynamicWidth = pointerType === 'pen' && pressure > 0 
+      ? lineWidth * (0.65 + pressure * 0.7) 
+      : lineWidth;
+
     if (selectedTool === 'eraser') {
       ctx.globalCompositeOperation = 'destination-out';
-      ctx.lineWidth = Math.max(18, lineWidth * 3.5);
+      ctx.lineWidth = Math.max(18, dynamicWidth * 3.5);
       ctx.shadowBlur = 0;
     } else if (selectedTool === 'highlighter') {
       ctx.globalCompositeOperation = 'source-over';
       ctx.strokeStyle = `${selectedColor}55`; // translucent glow
-      ctx.lineWidth = lineWidth * 3.5;
+      ctx.lineWidth = dynamicWidth * 3.5;
       ctx.shadowBlur = 0;
     } else if (selectedTool === 'glow') {
       ctx.globalCompositeOperation = 'source-over';
       ctx.strokeStyle = selectedColor;
-      ctx.lineWidth = lineWidth;
+      ctx.lineWidth = dynamicWidth;
       ctx.shadowColor = selectedColor;
       ctx.shadowBlur = 14;
     } else {
       ctx.globalCompositeOperation = 'source-over';
       ctx.strokeStyle = selectedColor;
-      ctx.lineWidth = lineWidth;
+      ctx.lineWidth = dynamicWidth;
       ctx.shadowBlur = 0;
     }
   };
 
-  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement> | React.PointerEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return;
     if ('touches' in e && e.cancelable) {
       e.preventDefault();
@@ -1454,7 +1492,21 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const { x, y } = getCanvasCoords(e);
+    const { x, y, pressure, pointerType } = getCanvasCoords(e);
+
+    // Ignore palm touches while pen is active
+    if (activePointerTypeRef.current === 'pen' && pointerType === 'touch') {
+      return;
+    }
+
+    // Dynamic pressure responsiveness for Apple Pencil / Stylus
+    if (pointerType === 'pen' && pressure > 0 && selectedTool !== 'highlighter') {
+      const dynamicWidth = selectedTool === 'eraser' 
+        ? Math.max(18, lineWidth * (0.65 + pressure * 0.7) * 3.5)
+        : lineWidth * (0.65 + pressure * 0.7);
+      ctx.lineWidth = dynamicWidth;
+    }
+
     ctx.lineTo(x, y);
     ctx.stroke();
   };
@@ -1462,6 +1514,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   const stopDrawing = () => {
     if (!isDrawing) return;
     setIsDrawing(false);
+    activePointerTypeRef.current = null;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -1800,10 +1853,10 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
         transition={{ type: 'spring', damping: 25, stiffness: 280 }}
         className={`fixed z-50 flex flex-col font-sans transition-[border-radius,box-shadow] select-none ${
           isMaximized 
-            ? 'inset-0 sm:inset-3 md:inset-4 lg:inset-6 rounded-none sm:rounded-3xl border-0 sm:border-4' 
+            ? 'inset-0 sm:inset-2 md:inset-3 lg:inset-4 xl:inset-6 rounded-none sm:rounded-3xl border-0 sm:border-4' 
             : mobileMode === 'half'
               ? 'inset-x-0 bottom-0 top-auto h-[58dvh] max-h-[75dvh] rounded-t-3xl rounded-b-none border-t-4 border-x-0 border-b-0 sm:hidden'
-              : 'inset-0 sm:inset-auto sm:top-8 md:top-10 sm:left-1/2 sm:-translate-x-1/2 lg:left-auto lg:translate-x-0 lg:right-6 rounded-none sm:rounded-3xl border-0 sm:border-4'
+              : 'inset-0 sm:inset-auto sm:top-4 md:top-6 lg:top-6 sm:left-1/2 sm:-translate-x-1/2 lg:left-1/2 lg:-translate-x-1/2 xl:left-auto xl:translate-x-0 xl:right-6 rounded-none sm:rounded-3xl border-0 sm:border-4'
         } shadow-2xl overflow-hidden`}
         style={{
           borderColor: currentTheme.borderHex,
@@ -1811,10 +1864,10 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
           boxShadow: `0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 30px ${currentTheme.borderHex}44`,
           ...(!isMaximized && typeof window !== 'undefined' && window.innerWidth >= 640
             ? {
-                width: `${Math.min(window.innerWidth - 24, customSize.width)}px`,
-                height: `${Math.min(window.innerHeight - 32, customSize.height)}px`,
-                maxWidth: 'calc(100vw - 24px)',
-                maxHeight: 'calc(100vh - 32px)',
+                width: `${Math.min(window.innerWidth - 20, customSize.width)}px`,
+                height: `${Math.min(window.innerHeight - 24, customSize.height)}px`,
+                maxWidth: 'calc(100vw - 20px)',
+                maxHeight: 'calc(100vh - 24px)',
               }
             : {}),
         }}
@@ -2185,24 +2238,38 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                           <span className="text-base">📟</span>
                           <div>
                             <div className="font-black text-white">{isRtl ? 'تابلت وآيباد (iPad / Tablet)' : 'iPad & Tablet'}</div>
-                            <div className="text-[10px] text-slate-400 font-normal">{isRtl ? 'المقاس المثالي للشاشات اللمسية وقلم أبل' : '880 × 660 px'}</div>
+                            <div className="text-[10px] text-slate-400 font-normal">{isRtl ? 'المقاس القياسي لأجهزة الآيباد وقلم أبل' : '880 × 660 px'}</div>
                           </div>
                         </div>
                         <span className="text-[10px] font-mono text-amber-300">880×660</span>
                       </button>
 
                       <button
-                        onClick={() => handleApplyPreset(1040, 720)}
+                        onClick={() => handleApplyPreset(980, 720)}
+                        className="w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-slate-200 transition-all cursor-pointer text-start"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">📱</span>
+                          <div>
+                            <div className="font-black text-white">{isRtl ? 'آيباد برو / شاشة لمس واسعة' : 'iPad Pro / Touch Expanded'}</div>
+                            <div className="text-[10px] text-slate-400 font-normal">{isRtl ? 'مساحة عريضة فائقة ومريحة للرسم' : '980 × 720 px'}</div>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-mono text-amber-300">980×720</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleApplyPreset(1060, 750)}
                         className="w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-slate-200 transition-all cursor-pointer text-start"
                       >
                         <div className="flex items-center gap-2">
                           <span className="text-base">🖥️</span>
                           <div>
                             <div className="font-black text-white">{isRtl ? 'كبيرة واسعة' : 'Large Expanded'}</div>
-                            <div className="text-[10px] text-slate-400 font-normal">{isRtl ? 'مساحة واسعة للرسم والقواعد' : '1040 × 720 px'}</div>
+                            <div className="text-[10px] text-slate-400 font-normal">{isRtl ? 'مساحة واسعة للرسم والقواعد' : '1060 × 750 px'}</div>
                           </div>
                         </div>
-                        <span className="text-[10px] font-mono text-amber-300">1040×720</span>
+                        <span className="text-[10px] font-mono text-amber-300">1060×750</span>
                       </button>
 
                       <button
@@ -3226,6 +3293,10 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
           <div className={`${activeTab === 'draw' ? 'block' : 'hidden'} absolute inset-0`}>
             <canvas
               ref={canvasRef}
+              onPointerDown={startDrawing}
+              onPointerMove={draw}
+              onPointerUp={stopDrawing}
+              onPointerCancel={stopDrawing}
               onMouseDown={startDrawing}
               onMouseMove={draw}
               onMouseUp={stopDrawing}
@@ -3233,7 +3304,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               onTouchStart={startDrawing}
               onTouchMove={draw}
               onTouchEnd={stopDrawing}
-              className={`w-full h-full touch-none ${
+              className={`w-full h-full touch-none select-none ${
                 selectedTool === 'eraser' ? 'cursor-cell' : 'cursor-crosshair'
               }`}
             />

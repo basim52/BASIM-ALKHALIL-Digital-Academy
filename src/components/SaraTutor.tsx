@@ -2474,23 +2474,23 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               )}
             </button>
 
-            {/* 🎙️ Phonetic Pronunciation Lab Button (Desktop >= 1280px) */}
+            {/* 🎙️ Phonetic Pronunciation Lab Button (Tablets md: >= 768px & Desktop) */}
             <button
               onClick={() => {
                 setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Alkhalil Academy');
                 setIsPhoneticModalOpen(true);
               }}
-              className="hidden xl:flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 text-purple-900 border-purple-200"
+              className="hidden md:flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 text-purple-900 border-purple-200"
               title={isRtl ? 'مختبر مخارج الحروف وتصحيح النطق الصوتي الفوري' : 'Phonetic Pronunciation Lab'}
             >
               <Mic size={14} className="text-purple-600 animate-pulse" />
               <span>{isRtl ? 'مختبر النطق 🎙️' : 'Speech Lab 🎙️'}</span>
             </button>
 
-            {/* 🎭 Role-Play Scenarios Button (Tablet Landscape & Desktop >= 1024px) */}
+            {/* 🎭 Role-Play Scenarios Button (Tablets md: >= 768px & Desktop) */}
             <button
               onClick={() => setIsRolePlayModalOpen(true)}
-              className={`hidden lg:flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
+              className={`hidden md:flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
                 activeRolePlay
                   ? 'bg-amber-100 text-amber-900 border-amber-400 ring-2 ring-amber-300/40'
                   : 'bg-gradient-to-r from-teal-50 to-emerald-50 hover:from-teal-100 hover:to-emerald-100 text-teal-900 border-teal-200'
