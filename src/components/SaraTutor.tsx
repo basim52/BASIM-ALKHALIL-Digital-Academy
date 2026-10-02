@@ -43,9 +43,9 @@ import { UserProfile, AppView, SaraBoardData, SaraChatResponse, TutorMemoryDoc, 
 import { Language, translations } from '../lib/translations';
 import { auth, db } from '../lib/firebase';
 import { savePlacementLevel } from '../lib/placement';
-import { doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, getDocs, query, orderBy, limit, increment } from 'firebase/firestore';
 import { speakAcademyText, playDirectSaraAudio, cancelAllSpeech, playSchoolBellChime } from '../lib/audio';
-import { getStudentStreak, StreakData } from '../services/streakService';
+import { getStudentStreak, recordStreakActivity, StreakData } from '../services/streakService';
 import { SmartWhiteboard } from './SmartWhiteboard';
 import { Sara3DCharacter } from './Sara3DCharacter';
 import { MASTER_CURRICULUM } from '../data/masterCurriculum';
@@ -345,6 +345,22 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [hesitationHintText, setHesitationHintText] = useState<string>('');
   const [saraSpeechRate, setSaraSpeechRate] = useState<number>(1.0);
   const hesitationTimerRef = useRef<any>(null);
+
+  // Lesson Completion & Result Tracking States
+  const [isLessonCompletedModalOpen, setIsLessonCompletedModalOpen] = useState<boolean>(false);
+  const [isSavingLessonResult, setIsSavingLessonResult] = useState<boolean>(false);
+  const [lastSavedLessonResult, setLastSavedLessonResult] = useState<{
+    lessonTitle: string;
+    level: string;
+    courseLabel: string;
+    score: number;
+    total: number;
+    percentage: number;
+    pointsEarned: number;
+    durationMins: number;
+    savedAt: string;
+  } | null>(null);
+  const [showSavedToast, setShowSavedToast] = useState<boolean>(false);
 
   // Clear silence hesitation timer
   const clearHesitationTimer = () => {
@@ -1066,42 +1082,178 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showTimerDropdown]);
 
+  // ==========================================
+  // 🎓 Complete & Save Lesson Engine (تسجيل النتيجة وحفظها ونطق انتهى الدرس)
+  // ==========================================
+  const handleCompleteAndSaveLesson = async (customScore?: number, customTotal?: number) => {
+    if (isSavingLessonResult) return;
+    setIsSavingLessonResult(true);
+
+    try {
+      // 1. Determine lesson metadata
+      const lessonTitle = activeCurriculumLesson
+        ? (isRtl ? activeCurriculumLesson.titleAr : activeCurriculumLesson.titleEn)
+        : (activeBoard?.title || (isRtl ? 'حصة محادثة وتطبيق مع سارة' : 'Interactive Lesson with Sara'));
+
+      const level = activeCurriculumLesson?.level || (profile as any).level || 'A1';
+      const courseId = activeCurriculumLesson?.pillarId || 'sara_tutor';
+      const courseLabel = activeCurriculumLesson
+        ? (isRtl ? activeCurriculumLesson.courseLabelAr : activeCurriculumLesson.courseLabelEn)
+        : (isRtl ? 'أكاديمية اللغة الإنجليزية' : 'English Academy');
+      const lessonId = activeCurriculumLesson?.id || `sara_lesson_${Date.now()}`;
+
+      // 2. Score calculation
+      const totalQuestions = customTotal ?? (activeBoard?.quiz ? 1 : Math.max(1, Math.min(5, Math.floor(messages.length / 3))));
+      const correctAnswers = customScore ?? Math.max(1, quizScoreCount || 1);
+      const boundedScore = Math.min(correctAnswers, totalQuestions);
+      const percentage = Math.round((boundedScore / totalQuestions) * 100);
+      const durationMins = Math.max(1, Math.round((Date.now() - sessionStartTime) / 60000));
+      const pointsEarned = Math.max(30, (boundedScore * 15) + (messages.length >= 6 ? 20 : 10));
+
+      const resultSummary = {
+        lessonTitle,
+        level,
+        courseLabel,
+        score: boundedScore,
+        total: totalQuestions,
+        percentage,
+        pointsEarned,
+        durationMins,
+        savedAt: new Date().toLocaleTimeString(isRtl ? 'ar-SA' : 'en-US', { hour: '2-digit', minute: '2-digit' })
+      };
+
+      setLastSavedLessonResult(resultSummary);
+
+      // 3. Sara Speaks Out Loud (The Exact Words requested: "انتهى الدرس!...")
+      const spokenCelebration = isRtl
+        ? `انتهى الدرس! مبارك يا بطل، أتممت درس اليوم بنجاح وحققت نتيجة ${percentage} بالمئة. تم تسجيل نتيجتك وحفظ تقدمك في ملفك الأكاديمي بجدارة! 🌟🎓`
+        : `The lesson has ended! Congratulations champion, you completed today's lesson successfully with a score of ${percentage} percent. Your results and progress have been recorded! 🌟🎓`;
+
+      if (voiceEnabled) {
+        playSaraVoice(spokenCelebration);
+      }
+
+      // 4. Save to Firestore if student is logged in
+      if (profile.uid) {
+        // A. Add to 'lessonResults' (feeds StudyPlanner, ResultsChart, ParentWeeklyReportCard, Badges, etc.)
+        await addDoc(collection(db, 'lessonResults'), {
+          userId: profile.uid,
+          parentIds: (profile as any).linkedParentIds || [],
+          lessonId: lessonId,
+          courseId: courseId,
+          level: level,
+          lessonTitle: lessonTitle,
+          score: boundedScore,
+          total: totalQuestions,
+          percentage: percentage,
+          xpEarned: pointsEarned,
+          timestamp: serverTimestamp(),
+          source: 'sara_tutor'
+        });
+
+        // B. Add to 'user_progress'
+        const progressRef = doc(db, 'user_progress', `${profile.uid}_sara_${lessonId}`);
+        await setDoc(progressRef, {
+          userId: profile.uid,
+          lessonId: `sara_${lessonId}`,
+          title: lessonTitle,
+          score: boundedScore,
+          total: totalQuestions,
+          percentage: percentage,
+          completed: true,
+          updatedAt: new Date(),
+          level: level
+        }, { merge: true });
+
+        // C. Increment XP points on users collection
+        try {
+          await updateDoc(doc(db, 'users', profile.uid), {
+            points: increment(pointsEarned)
+          });
+        } catch (e) {
+          console.warn('Could not increment user points doc:', e);
+        }
+
+        // D. Daily streak activity
+        try {
+          await recordStreakActivity(profile.uid);
+        } catch (e) {
+          console.warn('Could not record streak:', e);
+        }
+
+        // E. Sync to tutorMemory & session log
+        await syncMemoryToFirestore({
+          newNotes: [`أتم الطالب بنجاح درس: ${lessonTitle} (${level}) بنتيجة ${percentage}% وحصل على +${pointsEarned} نقطة 🌟`],
+          mistakes: [],
+          wordsLearned: activeBoard?.sentence ? [activeBoard.highlight || 'lesson'].filter(Boolean) : []
+        }, true, `Lesson Completed: ${lessonTitle}`);
+
+        // F. Update parent AuthenticatedApp state
+        if (onProfileUpdated) {
+          onProfileUpdated({
+            ...profile,
+            points: ((profile as any).points || 0) + pointsEarned
+          } as any);
+        }
+      }
+
+      // 5. LocalStorage backup
+      try {
+        const localKey = `sara_completed_lessons_${profile.uid || 'guest'}`;
+        const prevSaved = JSON.parse(localStorage.getItem(localKey) || '[]');
+        prevSaved.unshift({
+          ...resultSummary,
+          id: lessonId,
+          timestamp: Date.now()
+        });
+        localStorage.setItem(localKey, JSON.stringify(prevSaved.slice(0, 30)));
+      } catch (e) {}
+
+      // 6. Append completion card to chat stream
+      const completionMsg: MessageItem = {
+        id: `msg_lesson_complete_${Date.now()}`,
+        role: 'sara',
+        text: isRtl
+          ? `🎓 **انتهى الدرس وسُجلت النتيجة بنجاح!** 🌟\n\nكفو عليك يا بطل! أتممت بنجاح درس: **${lessonTitle}** (${courseLabel})\n• 📊 **الدرجة المحققة:** ${percentage}% (${boundedScore}/${totalQuestions})\n• ⚡ **نقاط التميز المكتسبة:** +${pointsEarned} XP\n• ⏱️ **وقت التعلم:** ${durationMins} دقيقة\n• 💾 **حالة الحفظ:** تم التوثيق في سجل درجاتك ودفتر المتابعة بنجاح ✅`
+          : `🎓 **Lesson Completed & Result Recorded!** 🌟\n\nOutstanding work! You finished: **${lessonTitle}** (${courseLabel})\n• 📊 **Score:** ${percentage}% (${boundedScore}/${totalQuestions})\n• ⚡ **XP Earned:** +${pointsEarned} XP\n• ⏱️ **Duration:** ${durationMins} mins\n• 💾 **Status:** Recorded & saved to your academic gradebook ✅`,
+        board: {
+          title: isRtl ? `🎓 نتيجة إتمام درس: ${lessonTitle}` : `🎓 Result: ${lessonTitle}`,
+          sentence: `Great job mastering: "${lessonTitle}"!`,
+          highlight: `${percentage}% Score`,
+          formula: `Score: ${boundedScore}/${totalQuestions} • +${pointsEarned} XP`,
+          notes: [
+            isRtl ? `تم حفظ الدرجة (${percentage}%) بنجاح في سجل الأكاديمية.` : `Score (${percentage}%) successfully recorded in academy database.`,
+            isRtl ? 'الاستمرار اليومي والممارسة هما أساس الوصول إلى الطلاقة التامة.' : 'Daily consistency is the foundation of true fluency.'
+          ],
+          openWhiteboard: true
+        },
+        timestamp: Date.now()
+      };
+
+      setMessages(prev => [...prev, completionMsg]);
+      setActiveBoard(completionMsg.board || null);
+
+      // 7. Open Celebratory Modal & Trigger Toast
+      setIsLessonCompletedModalOpen(true);
+      setShowSavedToast(true);
+      setTimeout(() => setShowSavedToast(false), 5000);
+
+    } catch (err) {
+      console.error('Error completing and saving lesson:', err);
+    } finally {
+      setIsSavingLessonResult(false);
+    }
+  };
+
   // Trigger when session timer reaches 0
   const handleSessionTimeUp = () => {
     if (!isMountedRef.current) return;
     setIsSessionTimeUp(true);
     setIsTimerRunning(false);
-    setIsTimeUpModalOpen(true);
     playSchoolBellChime();
 
-    const timeUpNotice = isRtl
-      ? `🔔 انتهت الحصة التعليمية المقررة (${timerDurationMinutes} دقائق) يا بطل! أبدعت اليوم واستفدت من وقتك بجدارة. فخورة بالتزامك وجهدك الرائع في هذه الجلسة! 🌟 يمكنك تمديد الحصة أو مراجعة ما تعلمناه.`
-      : `🔔 The scheduled lesson time (${timerDurationMinutes} mins) has completed! Outstanding effort today. I am proud of your dedication and progress! 🌟`;
-
-    const timeUpMsg: MessageItem = {
-      id: `msg_time_up_${Date.now()}`,
-      role: 'sara',
-      text: timeUpNotice,
-      board: {
-        title: isRtl ? '🔔 رن جرس نهاية الحصة التعليمية 🎓' : '🔔 Lesson Bell Has Rung 🎓',
-        sentence: 'Great session! Consistency is the secret to mastering English.',
-        highlight: 'Consistency is the secret',
-        formula: 'Effort + Time = Mastery',
-        notes: [
-          isRtl ? `أكملت بنجاح حصة مركزة مدتها ${timerDurationMinutes} دقيقة` : `Completed a ${timerDurationMinutes}-minute focused session`,
-          isRtl ? 'الاستمرار اليومي هو سر الطلاقة الحقيقية والتفوق' : 'Daily practice is the key to true fluency'
-        ],
-        openWhiteboard: true
-      },
-      timestamp: Date.now()
-    };
-
-    setMessages(prev => [...prev, timeUpMsg]);
-    setActiveBoard(timeUpMsg.board || null);
-
-    if (voiceEnabled) {
-      playSaraVoice(timeUpNotice);
-    }
+    // Automatically complete & record lesson results, and speak out loud
+    handleCompleteAndSaveLesson();
   };
 
   const selectTimerDuration = (mins: number) => {
@@ -1611,6 +1763,39 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       return;
     }
 
+    // 0. Detect "End Lesson / Finish Lesson" intent from voice or chat
+    const isFinishLessonIntent = 
+      lower.includes('انتهى الدرس') ||
+      lower.includes('انتهت الحصة') ||
+      lower.includes('أنهيت الدرس') ||
+      lower.includes('أنهينا الدرس') ||
+      lower.includes('خلصت الدرس') ||
+      lower.includes('خلصنا الدرس') ||
+      lower.includes('تم إنهاء الدرس') ||
+      lower.includes('أكملت الدرس') ||
+      lower.includes('انتهينا') ||
+      lower.includes('إنهاء الدرس') ||
+      lower.includes('انهاء الدرس') ||
+      lower.includes('finish lesson') ||
+      lower.includes('end lesson') ||
+      lower.includes('finished the lesson') ||
+      lower.includes('lesson finished') ||
+      lower.includes('lesson done') ||
+      lower.includes('complete lesson');
+
+    if (isFinishLessonIntent) {
+      const userMsg: MessageItem = {
+        id: `msg_user_${Date.now()}`,
+        role: 'user',
+        text: text,
+        timestamp: Date.now()
+      };
+      setMessages(prev => [...prev, userMsg]);
+      setInputText('');
+      handleCompleteAndSaveLesson();
+      return;
+    }
+
     // Check if user is asking to browse/link to curriculums or explain a specific curriculum
     const isCurriculumIntent = 
       lower.includes('مناهج') ||
@@ -2019,8 +2204,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     // Immediate enthusiastic vocal feedback from Sara without delay
     if (voiceEnabled) {
       const immediateAudio = isCorrect 
-        ? (isRtl ? 'كفو عليك يا بطل! إجابة صحيحة وممتازة 🌟' : 'Awesome job! That is correct! 🌟')
-        : (isRtl ? 'محاولة جيدة يا بطل! لاحظ الخيار الصحيح المظلل بالأخضر 👏' : 'Good try! Notice the correct green option 👏');
+        ? (isRtl ? 'كفو عليك يا بطل! إجابة صحيحة وممتازة 🌟 يمكنك الآن إنهاء الدرس لتسجيل النتيجة وحفظ تقدمك.' : 'Awesome job! That is correct! 🌟 You can now finish the lesson to save your result.')
+        : (isRtl ? 'محاولة جيدة يا بطل! لاحظ الخيار الصحيح المظلل بالأخضر 👏 يمكنك الآن إنهاء الدرس لحفظ النتيجة.' : 'Good try! Notice the correct green option 👏 You can now finish the lesson to save your result.');
       playSaraVoice(immediateAudio);
     }
   };
@@ -2662,7 +2847,16 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+              <button
+                onClick={() => handleCompleteAndSaveLesson()}
+                disabled={isSavingLessonResult}
+                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:brightness-110 text-white font-black text-xs transition-all cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95 border border-emerald-400/50"
+                title={isRtl ? 'إنهاء الدرس وتسجيل النتيجة وحفظ التقدم 🎓' : 'Finish Lesson & Record Result 🎓'}
+              >
+                <Trophy size={14} className="text-amber-300 animate-bounce" />
+                <span>{isRtl ? 'إنهاء الدرس وحفظ النتيجة 🎓' : 'Finish & Save Result 🎓'}</span>
+              </button>
               <button
                 onClick={() => {
                   setIsWhiteboardOpen(true);
@@ -3023,6 +3217,27 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                         ? (isRtl ? '🎉 كفو عليك! إجابة ممتازة وصحيحة 100%' : '🎉 Awesome job! That is correct!')
                         : (isRtl ? '👏 محاولة حلوة! لاحظ الإجابة الصحيحة الخضراء أعلاه' : '👏 Good try! Notice the correct green answer above')}
                     </motion.p>
+                  )}
+
+                  {quizSelectedOption !== null && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="mt-3 pt-2.5 border-t border-amber-200/60 flex items-center justify-between gap-2 flex-wrap"
+                    >
+                      <div className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                        <span>🎯</span>
+                        <span>{isRtl ? 'أنهيت هذا التمرين؟' : 'Finished this exercise?'}</span>
+                      </div>
+                      <button
+                        onClick={() => handleCompleteAndSaveLesson()}
+                        disabled={isSavingLessonResult}
+                        className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:brightness-110 text-white font-black text-xs shadow-md flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 border border-emerald-400/50"
+                      >
+                        <Trophy size={14} className="text-amber-300 animate-bounce" />
+                        <span>{isRtl ? 'إنهاء الدرس وحفظ النتيجة 🎓' : 'Finish & Record Result 🎓'}</span>
+                      </button>
+                    </motion.div>
                   )}
                 </div>
               )}
@@ -3866,6 +4081,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         onQuizAnswer={handleQuizOptionClick}
         quizSelectedOption={quizSelectedOption}
         quizFeedback={quizFeedback}
+        onFinishLesson={(score, total) => handleCompleteAndSaveLesson(score, total)}
+        isLessonActive={!!activeCurriculumLesson}
         onRequestOnBoard={async (reqText) => {
           await handleSendMessage(reqText);
         }}
@@ -4274,6 +4491,134 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* 7B. Celebration Lesson Completion & Saved Result Modal */}
+      <AnimatePresence>
+        {isLessonCompletedModalOpen && lastSavedLessonResult && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 15 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 15 }}
+              className="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border-4 border-[#C49E3A] relative overflow-hidden text-center"
+            >
+              {/* Background celebration glow */}
+              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-amber-400/30 to-emerald-400/20 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-36 h-36 bg-gradient-to-tr from-teal-400/20 to-blue-400/20 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="relative z-10 space-y-4">
+                {/* Trophy & Sparkles Avatar */}
+                <div className="w-16 h-16 mx-auto rounded-3xl bg-gradient-to-br from-[#002147] via-[#093568] to-[#002147] border-2 border-amber-300 text-white flex items-center justify-center shadow-xl">
+                  <Trophy size={36} className="text-amber-400 animate-bounce" />
+                </div>
+
+                <div>
+                  <span className="text-[11px] font-black uppercase tracking-wider text-[#C49E3A] block mb-1">
+                    {isRtl ? 'أكاديمية باسم الخليل للغة الإنجليزية • توثيق النتيجة 🎓' : 'Basim Alkhalil Academy • Recorded Result 🎓'}
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-black text-[#002147]">
+                    {isRtl ? 'انتهى الدرس وسُجلت النتيجة بنجاح! 🏆' : 'Lesson Finished & Result Saved! 🏆'}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 font-bold mt-1">
+                    {isRtl
+                      ? `كفو عليك يا بطل! أتممت بنجاح دراسة: "${lastSavedLessonResult.lessonTitle}"`
+                      : `Great achievement! You completed: "${lastSavedLessonResult.lessonTitle}"`}
+                  </p>
+                </div>
+
+                {/* Score & Highlights Metric Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs">
+                  <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-2xs">
+                    <span className="text-slate-400 block text-[10px] font-bold">{isRtl ? 'الدرجة المحققة' : 'Final Score'}</span>
+                    <span className="font-black text-emerald-600 text-base sm:text-lg">{lastSavedLessonResult.percentage}%</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-2xs">
+                    <span className="text-slate-400 block text-[10px] font-bold">{isRtl ? 'نقاط التميز' : 'XP Points'}</span>
+                    <span className="font-black text-amber-500 text-base sm:text-lg">+{lastSavedLessonResult.pointsEarned} XP</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-2xs">
+                    <span className="text-slate-400 block text-[10px] font-bold">{isRtl ? 'المستوى' : 'Level'}</span>
+                    <span className="font-black text-[#002147] text-base">{lastSavedLessonResult.level}</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-2xs">
+                    <span className="text-slate-400 block text-[10px] font-bold">{isRtl ? 'مدة الحصة' : 'Duration'}</span>
+                    <span className="font-black text-[#002147] text-base">{lastSavedLessonResult.durationMins} {isRtl ? 'د' : 'm'}</span>
+                  </div>
+                </div>
+
+                {/* Verified Saved to Database Badge */}
+                <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border-2 border-emerald-400/80 rounded-2xl p-3 text-xs text-emerald-950 font-bold flex items-center justify-center gap-2 shadow-xs">
+                  <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+                  <span>
+                    {isRtl
+                      ? 'تم توثيق النتيجة وحفظها في قاعدة بيانات الأكاديمية وسجل درجاتك بنجاح 💾✅'
+                      : 'Result recorded & saved to academy database & your gradebook ✅'}
+                  </span>
+                </div>
+
+                {/* Action Navigation Buttons */}
+                <div className="space-y-2 pt-1">
+                  <button
+                    onClick={() => {
+                      setIsLessonCompletedModalOpen(false);
+                      setIsCurriculumModalOpen(true);
+                    }}
+                    className="w-full py-3 bg-[#002147] hover:bg-[#073060] active:scale-98 text-amber-300 rounded-2xl font-black text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer border border-amber-300/40"
+                  >
+                    <BookOpen size={16} />
+                    <span>{isRtl ? 'اختيار الدرس التالي من المناهج 📚' : 'Pick Next Curriculum Lesson 📚'}</span>
+                  </button>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => {
+                        setIsLessonCompletedModalOpen(false);
+                        setIsNotebookModalOpen(true);
+                      }}
+                      className="py-2.5 bg-amber-50 hover:bg-amber-100 text-[#855B14] rounded-2xl font-black text-xs border border-amber-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Sparkles size={14} className="text-amber-500" />
+                      <span>{isRtl ? 'دفتر الملاحظات 📓' : 'Personal Notebook'}</span>
+                    </button>
+                    <button
+                      onClick={() => setIsLessonCompletedModalOpen(false)}
+                      className="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-black text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <span>{isRtl ? 'متابعة المحادثة 💬' : 'Keep Chatting 💬'}</span>
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      cancelAllSpeech();
+                      setIsLessonCompletedModalOpen(false);
+                      onNavigate('grammar-academy');
+                    }}
+                    className="w-full py-2 text-slate-500 hover:text-[#002147] text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    {isRtl ? 'الذهاب إلى أقسام الأكاديمية والتمارين ➔' : 'Explore Academy Curriculum ➔'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Save Confirmation Toast */}
+      <AnimatePresence>
+        {showSavedToast && (
+          <motion.div
+            initial={{ opacity: 0, y: -25, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -25, scale: 0.95 }}
+            className="fixed top-16 left-1/2 -translate-x-1/2 z-60 bg-emerald-600 text-white px-4 py-2 rounded-2xl shadow-xl flex items-center gap-2 border-2 border-emerald-300 font-black text-xs sm:text-sm pointer-events-none"
+          >
+            <CheckCircle2 size={16} className="text-amber-300" />
+            <span>{isRtl ? 'تم تسجيل النتيجة وحفظ تقدم الدرس بنجاح! 🎓💾' : 'Lesson result recorded and saved successfully! 🎓💾'}</span>
+          </motion.div>
         )}
       </AnimatePresence>
 

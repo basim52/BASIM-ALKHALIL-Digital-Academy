@@ -74,6 +74,8 @@ interface SmartWhiteboardProps {
   currentLang?: 'ar' | 'en';
   onToggleLang?: () => void;
   onOpenCurriculum?: () => void;
+  onFinishLesson?: (score?: number, total?: number) => void;
+  isLessonActive?: boolean;
 }
 
 // ========================================================
@@ -370,7 +372,9 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   onSaraTriggerGesture,
   currentLang = 'ar',
   onToggleLang,
-  onOpenCurriculum
+  onOpenCurriculum,
+  onFinishLesson,
+  isLessonActive
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -2151,6 +2155,19 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               <span className="hidden sm:inline">{isRtl ? 'حفظ اللوحة' : 'Save'}</span>
             </button>
 
+            {/* Finish Lesson & Save Result Button */}
+            {onFinishLesson && (
+              <button
+                onClick={() => onFinishLesson(quizScore, totalQuestions)}
+                className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:brightness-110 text-white font-black text-xs flex items-center gap-1.5 shadow-md transition-all cursor-pointer active:scale-95 border border-emerald-300/40"
+                title={isRtl ? 'إنهاء الدرس وتسجيل النتيجة وحفظ التقدم 🎓' : 'Finish Lesson & Record Result 🎓'}
+              >
+                <Trophy size={14} className="text-amber-300" />
+                <span className="hidden sm:inline">{isRtl ? 'إنهاء الدرس وحفظ النتيجة 🎓' : 'Finish & Save 🎓'}</span>
+                <span className="sm:hidden">{isRtl ? 'إنهاء' : 'Finish'}</span>
+              </button>
+            )}
+
             {/* Whiteboard Scale & Size Controller (تكبير وتصغير حسب الرغبة) */}
             <div className="relative hidden xs:flex items-center bg-black/40 p-0.5 rounded-xl border border-white/10 text-xs font-bold" ref={sizeMenuRef}>
               {/* Zoom Out Button (-) */}
@@ -2952,7 +2969,17 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                                     : (isRtl ? 'محاولة طيبة وبداية للتعلم! راجع الشرح على السبورة وسأساعدك دائماً 🌸' : 'Good practice! Review the whiteboard notes to reinforce 🌸')}
                               </div>
 
-                              <div className="flex items-center justify-center gap-2 pt-2">
+                              <div className="flex items-center justify-center gap-2 pt-2 flex-wrap">
+                                {onFinishLesson && (
+                                  <button
+                                    onClick={() => onFinishLesson(quizScore, totalQuestions)}
+                                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:brightness-110 text-white font-black text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-lg active:scale-95 border border-emerald-300/40"
+                                    title={isRtl ? 'إنهاء الدرس وتسجيل النتيجة وحفظ التقدم في ملفك 🎓' : 'Finish Lesson & Save Result in Profile 🎓'}
+                                  >
+                                    <Trophy size={16} className="text-amber-300 animate-bounce" />
+                                    <span>{isRtl ? '🎓 إنهاء الدرس وتسجيل النتيجة في حسابي' : '🎓 Finish Lesson & Save Result'}</span>
+                                  </button>
+                                )}
                                 <button
                                   onClick={handleRestartQuiz}
                                   className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-95"
