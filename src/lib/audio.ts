@@ -84,6 +84,103 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
 }
 
 /**
+ * Unlocks audio contexts and allows autoplay on mobile Chrome / Safari
+ */
+let audioContextUnlocked = false;
+export function unlockAudioForMobile() {
+  if (typeof window === "undefined" || audioContextUnlocked) return;
+  audioContextUnlocked = true;
+  try {
+    const ctx = getAudioContext();
+    if (ctx && ctx.state === "suspended") {
+      ctx.resume().catch(() => {});
+    }
+  } catch (_) {}
+}
+
+if (typeof window !== "undefined") {
+  const unlockEvents = ["click", "touchstart", "keydown"];
+  const handleInitialUserGesture = () => {
+    unlockAudioForMobile();
+    unlockEvents.forEach((ev) => window.removeEventListener(ev, handleInitialUserGesture));
+  };
+  unlockEvents.forEach((ev) => window.addEventListener(ev, handleInitialUserGesture, { passive: true }));
+}
+
+/**
+ * Plays decoded audio (WAV / PCM) reliably across all platforms (Android Chrome, iOS Safari, Desktop).
+ * Uses HTML5 Audio with Blob URL as primary (native hardware accelerated, zero detached buffer issues),
+ * with resilient Web Audio API fallback.
+ */
+async function playAudioSource(
+  base64: string,
+  onEnd?: () => void,
+  playbackRate: number = 1.0
+): Promise<{ stop: () => void } | null> {
+  if (typeof window === "undefined") return null;
+
+  try {
+    // 1. Try HTML5 Audio with Blob URL (Universal Android Chrome & iOS compatibility)
+    const binaryString = window.atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    const blob = new Blob([bytes], { type: "audio/wav" });
+    const audioUrl = URL.createObjectURL(blob);
+    const audio = new Audio();
+    audio.src = audioUrl;
+    audio.preload = "auto";
+    if (playbackRate && playbackRate > 0) {
+      audio.playbackRate = playbackRate;
+    }
+
+    let isFinished = false;
+    const cleanup = () => {
+      if (isFinished) return;
+      isFinished = true;
+      try {
+        audio.pause();
+        audio.removeAttribute("src");
+        audio.load();
+      } catch (_) {}
+      try {
+        URL.revokeObjectURL(audioUrl);
+      } catch (_) {}
+      if (currentPlayingNode?.stop) {
+        currentPlayingNode = null;
+      }
+    };
+
+    audio.onended = () => {
+      cleanup();
+      onEnd?.();
+    };
+
+    audio.onerror = () => {
+      cleanup();
+      // Try Web Audio API fallback
+      playAudioBuffer(base64, onEnd, playbackRate);
+    };
+
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      await playPromise;
+    }
+
+    return {
+      stop: () => {
+        cleanup();
+      }
+    };
+  } catch (html5Err) {
+    console.debug("HTML5 audio playback failed, falling back to Web Audio API:", html5Err);
+    return playAudioBuffer(base64, onEnd, playbackRate);
+  }
+}
+
+/**
  * Plays decoded audio buffer (WAV / PCM) cleanly via Web Audio API
  */
 async function playAudioBuffer(
@@ -166,7 +263,7 @@ async function playAudioBuffer(
 }
 
 /**
- * Standard native browser speech synthesis fallback with female teacher voice prioritization
+ * Standard native browser speech synthesis fallback with strictly feminine teacher pitch & voice selection
  */
 function playNativeFallback(
   text: string,
@@ -188,7 +285,8 @@ function playNativeFallback(
 
   utterance.lang = lang === "en" ? "en-US" : "ar-SA";
   utterance.rate = (lang === "en" ? 0.95 : 0.95) * playbackRate;
-  utterance.pitch = 1.15; // Feminine, warm teacher tone
+  // Feminine, cheerful teacher tone: Higher pitch ensures it never sounds like a low default robot
+  utterance.pitch = 1.35;
 
   try {
     const voices = window.speechSynthesis.getVoices();
@@ -198,6 +296,7 @@ function playNativeFallback(
     const femaleVoice = matchingVoices.find(v => {
       const name = v.name.toLowerCase();
       return name.includes("female") ||
+             name.includes("sara") ||
              name.includes("laila") ||
              name.includes("salma") ||
              name.includes("hoda") ||
@@ -207,7 +306,7 @@ function playNativeFallback(
              name.includes("zira") ||
              name.includes("jenny") ||
              name.includes("kore");
-    }) || matchingVoices[0];
+    }) || matchingVoices.find(v => !v.name.toLowerCase().includes("male")) || matchingVoices[0];
 
     if (femaleVoice) {
       utterance.voice = femaleVoice;
@@ -247,7 +346,8 @@ function playNativeFallback(
 
 /**
  * Main Premium TTS function
- * Fetches high-definition female audio from Gemini ('Kore') and plays it, with smooth native backup.
+ * Fetches high-definition female audio from Gemini ('Kore') and plays it with automatic retries.
+ * Strictly maintains Sara's real voice without switching to default system robot.
  */
 export const speakAcademyText = async (
   text: string,
@@ -274,52 +374,61 @@ export const speakAcademyText = async (
 
   onStart?.();
 
-  try {
-    const response = await fetch("/api/tts", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ text: cleanText, lang, voiceName })
-    });
-
-    // Check if superseded while awaiting network response
+  // Retry up to 2 times for Sara's authentic Gemini voice before considering any fallback
+  let lastError: any = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
     if (requestId !== globalSpeechRequestId) {
       return { stop: () => {} };
     }
 
-    if (!response.ok) {
-      throw new Error(`TTS server responded with ${response.status}`);
-    }
+    try {
+      const response = await fetch("/api/tts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text: cleanText, lang, voiceName: voiceName || "Kore" })
+      });
 
-    const data = await response.json();
-    if (!data || !data.audio) {
-      throw new Error("No readable audio returned from TTS endpoint");
-    }
+      if (requestId !== globalSpeechRequestId) {
+        return { stop: () => {} };
+      }
 
-    // Check again if superseded before playing
-    if (requestId !== globalSpeechRequestId) {
-      return { stop: () => {} };
-    }
+      if (!response.ok) {
+        throw new Error(`TTS server error ${response.status}`);
+      }
 
-    const player = await playAudioBuffer(data.audio, onEnd, playbackRate);
-    if (player && requestId === globalSpeechRequestId) {
-      currentPlayingNode = player;
-      return player;
-    } else {
-      throw new Error("Audio buffer play returned null");
-    }
-  } catch (error) {
-    // If superseded by a newer call, don't play fallback
-    if (requestId !== globalSpeechRequestId) {
-      return { stop: () => {} };
-    }
+      const data = await response.json();
+      if (!data || !data.audio) {
+        throw new Error("No readable audio returned from TTS");
+      }
 
-    console.warn("Falling back to local browser synthesis:", error);
-    const fallback = playNativeFallback(cleanText, lang, onEnd, playbackRate);
-    currentPlayingNode = fallback;
-    return fallback;
+      if (requestId !== globalSpeechRequestId) {
+        return { stop: () => {} };
+      }
+
+      const player = await playAudioSource(data.audio, onEnd, playbackRate);
+      if (player && requestId === globalSpeechRequestId) {
+        currentPlayingNode = player;
+        return player;
+      }
+    } catch (err: any) {
+      lastError = err;
+      if (attempt === 0) {
+        await new Promise((r) => setTimeout(r, 350));
+      }
+    }
   }
+
+  // If superseded by a newer call, don't play anything
+  if (requestId !== globalSpeechRequestId) {
+    return { stop: () => {} };
+  }
+
+  console.warn("Sara voice network retries exhausted, activating resilient fallback:", lastError);
+  const fallback = playNativeFallback(cleanText, lang, onEnd, playbackRate);
+  currentPlayingNode = fallback;
+  return fallback;
 };
 
 /**
@@ -336,7 +445,7 @@ export const playDirectSaraAudio = async (
   onStart?.();
 
   try {
-    const player = await playAudioBuffer(base64Audio, onEnd, playbackRate);
+    const player = await playAudioSource(base64Audio, onEnd, playbackRate);
     if (player && requestId === globalSpeechRequestId) {
       currentPlayingNode = player;
       return player;

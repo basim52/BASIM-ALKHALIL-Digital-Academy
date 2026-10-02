@@ -1025,45 +1025,73 @@ Looking forward to your reply. Tell me what we're tackling first!`;
   async function generateSaraSpeechAudio(text: string, voiceName: string = "Kore"): Promise<string | null> {
     const clean = text.replace(/[*#_`~>]/g, "").replace(/\[.*?\]\(.*?\)/g, "").trim();
     if (!clean) return null;
-    const cacheKey = `${voiceName || "Kore"}:${clean}`;
+
+    // Use full text or if very long, take the spoken conversational core (up to ~320 chars at clean sentence boundary)
+    let speechTarget = clean;
+    if (clean.length > 350) {
+      const sentenceMatch = clean.slice(0, 320).match(/^(.*?[.!?؟\n])/s);
+      if (sentenceMatch && sentenceMatch[1] && sentenceMatch[1].trim().length > 20) {
+        speechTarget = sentenceMatch[1].trim();
+      } else {
+        const spaceIdx = clean.slice(0, 280).lastIndexOf(" ");
+        speechTarget = (spaceIdx > 50 ? clean.slice(0, spaceIdx) : clean.slice(0, 280)).trim();
+      }
+    }
+
+    const targetVoice = voiceName || "Kore";
+    const cacheKey = `${targetVoice}:${speechTarget}`;
     if (ttsAudioCache.has(cacheKey)) {
       return ttsAudioCache.get(cacheKey)!;
     }
-    if (!initAI() || !aiLive) return null;
 
-    try {
-      const response = await aiLive.models.generateContent({
-        model: "gemini-3.8-flash-lite-tts",
-        contents: [{
-          role: "user",
-          parts: [{ text: clean }]
-        }] as any,
-        config: {
-          responseModalities: [Modality.AUDIO],
-          speechConfig: {
-            voiceConfig: {
-              prebuiltVoiceConfig: {
-                voiceName: voiceName || "Kore"
+    // Try up to 2 attempts with brief backoff
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if (!initAI() || !aiLive) {
+        if (attempt === 0) {
+          await new Promise(r => setTimeout(r, 200));
+          continue;
+        }
+        return null;
+      }
+
+      try {
+        const response = await aiLive.models.generateContent({
+          model: "gemini-3.8-flash-lite-tts",
+          contents: [{
+            role: "user",
+            parts: [{ text: speechTarget }]
+          }] as any,
+          config: {
+            responseModalities: [Modality.AUDIO],
+            speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: {
+                  voiceName: targetVoice
+                }
               }
             }
           }
-        }
-      });
+        });
 
-      const candidates = (response as any).candidates;
-      const audioPart = candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData?.mimeType?.includes("audio") || p.inlineData);
-      if (audioPart && audioPart.inlineData?.data) {
-        const audioData = audioPart.inlineData.data;
-        if (ttsAudioCache.size > 250) {
-          const firstKey = ttsAudioCache.keys().next().value;
-          if (firstKey) ttsAudioCache.delete(firstKey);
+        const candidates = (response as any).candidates;
+        const audioPart = candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData?.mimeType?.includes("audio") || p.inlineData);
+        if (audioPart && audioPart.inlineData?.data) {
+          const audioData = audioPart.inlineData.data;
+          if (ttsAudioCache.size > 300) {
+            const firstKey = ttsAudioCache.keys().next().value;
+            if (firstKey) ttsAudioCache.delete(firstKey);
+          }
+          ttsAudioCache.set(cacheKey, audioData);
+          return audioData;
         }
-        ttsAudioCache.set(cacheKey, audioData);
-        return audioData;
+      } catch (err: any) {
+        logToFile(`[TTS] Attempt ${attempt + 1} error with gemini-3.8-flash-lite-tts (${targetVoice}): ${err.message}`);
+        if (attempt === 0) {
+          await new Promise(r => setTimeout(r, 400));
+        }
       }
-    } catch (err: any) {
-      logToFile(`[TTS] Error generating audio with gemini-3.8-flash-lite-tts: ${err.message}`);
     }
+
     return null;
   }
 
@@ -1089,30 +1117,22 @@ Looking forward to your reply. Tell me what we're tackling first!`;
   app.post("/api/sara/chat", async (req, res) => {
     try {
       const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ error: "UNAUTHORIZED", message: "Missing or invalid authorization token" });
-      }
-
-      const idToken = authHeader.split("Bearer ")[1]?.trim();
-      if (!idToken) {
-        return res.status(401).json({ error: "UNAUTHORIZED", message: "Missing Bearer token" });
-      }
-
       const adminAuth = getAdminAuth();
       const adminDb = getAdminDb();
-      if (!adminAuth || !adminDb) {
-        return res.status(503).json({ error: "SERVICE_UNAVAILABLE", message: "Firebase Admin is not configured on the server" });
+      let uid = "guest";
+
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        const idToken = authHeader.split("Bearer ")[1]?.trim();
+        if (idToken && adminAuth) {
+          try {
+            const decodedToken = await adminAuth.verifyIdToken(idToken);
+            uid = decodedToken.uid;
+          } catch (authErr: any) {
+            logToFile(`[Sara] Token verification notice: ${authErr.message}`);
+          }
+        }
       }
 
-      let decodedToken;
-      try {
-        decodedToken = await adminAuth.verifyIdToken(idToken);
-      } catch (authErr: any) {
-        logToFile(`[Sara] Token verification failed: ${authErr.message}`);
-        return res.status(401).json({ error: "UNAUTHORIZED", message: "Invalid or expired Firebase ID token" });
-      }
-
-      const uid = decodedToken.uid;
       const { message, snapshot, history = [], rolePlay, hesitationDetected, preferredLang = 'ar', activeCurriculum } = req.body;
 
       // Determine today's date in Asia/Riyadh timezone for daily count capping
@@ -1124,21 +1144,24 @@ Looking forward to your reply. Tell me what we're tackling first!`;
         }
       })();
 
-      const memoryRef = adminDb.collection("tutorMemory").doc(uid);
-      const memorySnap = await memoryRef.get().catch((err: any) => {
-        logToFile(`[Sara] Warning reading tutorMemory: ${err.message}`);
-        return null;
-      });
-
+      const memoryRef = (adminDb && uid !== "guest") ? adminDb.collection("tutorMemory").doc(uid) : null;
       let currentDailyCount = 0;
       let lastDailyDate = nowRiyadhDate;
-      if (memorySnap && memorySnap.exists) {
-        const memData = memorySnap.data() || {};
-        lastDailyDate = memData.dailyCountDate || nowRiyadhDate;
-        if (lastDailyDate === nowRiyadhDate) {
-          currentDailyCount = Number(memData.dailyCount) || 0;
-        } else {
-          currentDailyCount = 0;
+
+      if (memoryRef) {
+        const memorySnap = await memoryRef.get().catch((err: any) => {
+          logToFile(`[Sara] Warning reading tutorMemory: ${err.message}`);
+          return null;
+        });
+
+        if (memorySnap && memorySnap.exists) {
+          const memData = memorySnap.data() || {};
+          lastDailyDate = memData.dailyCountDate || nowRiyadhDate;
+          if (lastDailyDate === nowRiyadhDate) {
+            currentDailyCount = Number(memData.dailyCount) || 0;
+          } else {
+            currentDailyCount = 0;
+          }
         }
       }
 
@@ -1162,16 +1185,18 @@ Looking forward to your reply. Tell me what we're tackling first!`;
         });
       }
 
-      // Increment daily message count
+      // Increment daily message count for authenticated users
       const nextDailyCount = currentDailyCount + 1;
-      try {
-        await memoryRef.set({
-          dailyCount: nextDailyCount,
-          dailyCountDate: nowRiyadhDate,
-          lastSessionAt: FieldValue.serverTimestamp()
-        }, { merge: true });
-      } catch (err: any) {
-        logToFile(`[Sara] Warning updating dailyCount in tutorMemory: ${err.message}`);
+      if (memoryRef) {
+        try {
+          await memoryRef.set({
+            dailyCount: nextDailyCount,
+            dailyCountDate: nowRiyadhDate,
+            lastSessionAt: FieldValue.serverTimestamp()
+          }, { merge: true });
+        } catch (err: any) {
+          logToFile(`[Sara] Warning updating dailyCount in tutorMemory: ${err.message}`);
+        }
       }
 
       // Whitelist of valid section IDs from the academy

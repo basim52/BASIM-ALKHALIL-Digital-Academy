@@ -129,6 +129,12 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
     currentEmotion = 'thinking';
   }
 
+  // Refs for continuous 60fps render loop access without re-instantiating Three.js
+  const emotionRef = useRef<SaraEmotion>(currentEmotion);
+  emotionRef.current = currentEmotion;
+  const gestureRef = useRef<SaraGesture>(activeGesture);
+  gestureRef.current = activeGesture;
+
   // Three.js animation and object references
   const animFrameRef = useRef<number | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -208,6 +214,14 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
     const width = container.clientWidth || 220;
     const height = container.clientHeight || 280;
 
+    // Detect Android, mobile, or low-memory devices to prevent battery brownouts and GPU watchdog kernel panics
+    const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+    const isLowPowerDevice = isAndroid || (typeof navigator !== 'undefined' && (
+      Boolean((navigator as any).deviceMemory && (navigator as any).deviceMemory <= 4) ||
+      Boolean(navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
+      (/iPhone|iPad|iPod/i.test(navigator.userAgent) && window.innerWidth < 768)
+    ));
+
     // 1. Scene
     const scene = new THREE.Scene();
     sceneRef.current = scene;
@@ -217,38 +231,75 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
     camera.position.set(0, 0.4, 3.2);
     camera.lookAt(0, 0.25, 0);
 
-    // 3. Renderer with antialiasing and alpha
-    const renderer = new THREE.WebGLRenderer({
-      alpha: true,
-      antialias: true,
-      powerPreference: 'high-performance'
-    });
+    // 3. Renderer with safe power preference and pixel ratio to prevent Android PMIC brownout or kernel watchdog hang
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: !isLowPowerDevice,
+        powerPreference: isLowPowerDevice ? 'low-power' : 'default',
+        precision: isLowPowerDevice ? 'mediump' : 'highp'
+      });
+    } catch (e) {
+      console.warn("Primary WebGL initialization failed, using low-power fallback:", e);
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: false,
+        powerPreference: 'low-power'
+      });
+    }
+
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.setPixelRatio(isLowPowerDevice ? 1.0 : Math.min(window.devicePixelRatio, 1.5));
+    if (!isLowPowerDevice) {
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.15;
+    }
     rendererRef.current = renderer;
 
-    container.replaceChildren(renderer.domElement);
+    const canvas = renderer.domElement;
+    let isContextLost = false;
+
+    const onContextLost = (event: Event) => {
+      event.preventDefault();
+      isContextLost = true;
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = null;
+      }
+      console.warn("Sara 3D WebGL context lost; gracefully paused to protect device.");
+    };
+
+    const onContextRestored = () => {
+      isContextLost = false;
+      console.info("Sara 3D WebGL context restored.");
+    };
+
+    canvas.addEventListener('webglcontextlost', onContextLost, false);
+    canvas.addEventListener('webglcontextrestored', onContextRestored, false);
+
+    container.replaceChildren(canvas);
 
     // 4. Lighting setup - WARM STUDIO PORTRAIT (Zero blue tint!)
-    const ambientLight = new THREE.AmbientLight(0xfff8f0, 1.8);
+    const ambientLight = new THREE.AmbientLight(0xfff8f0, isLowPowerDevice ? 2.0 : 1.8);
     scene.add(ambientLight);
 
     // Main key light (Warm flattering studio light)
-    const keyLight = new THREE.DirectionalLight(0xfffdf6, 2.4);
+    const keyLight = new THREE.DirectionalLight(0xfffdf6, isLowPowerDevice ? 2.2 : 2.4);
     keyLight.position.set(2, 3.5, 3);
     scene.add(keyLight);
 
-    // Golden Rim Light (Academy Gold #C49E3A)
-    const rimLight = new THREE.DirectionalLight(0xffc83b, 1.8);
-    rimLight.position.set(-2.5, 3, -2);
-    scene.add(rimLight);
+    if (!isLowPowerDevice) {
+      // Golden Rim Light (Academy Gold #C49E3A)
+      const rimLight = new THREE.DirectionalLight(0xffc83b, 1.8);
+      rimLight.position.set(-2.5, 3, -2);
+      scene.add(rimLight);
 
-    // Soft Warm Peach Fill Light from front-bottom (Natural skin glow - NO BLUE)
-    const fillLight = new THREE.DirectionalLight(0xffede0, 1.5);
-    fillLight.position.set(0, 0.5, 2.5);
-    scene.add(fillLight);
+      // Soft Warm Peach Fill Light from front-bottom (Natural skin glow - NO BLUE)
+      const fillLight = new THREE.DirectionalLight(0xffede0, 1.5);
+      fillLight.position.set(0, 0.5, 2.5);
+      scene.add(fillLight);
+    }
 
     // 5. Build Sara Character
     const characterGroup = new THREE.Group();
@@ -256,15 +307,22 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
     scene.add(characterGroup);
 
     // --- MATERIALS (Lifelike Human Skin, Hair, Eyes & Fabric Shaders) ---
-    const skinMat = new THREE.MeshPhysicalMaterial({
-      color: 0xffdfd0, // Warm luminous porcelain-peach Mediterranean/Arabian skin tone
-      roughness: 0.52,
-      metalness: 0.0,
-      clearcoat: 0.08,
-      clearcoatRoughness: 0.35,
-      sheen: 0.45,
-      sheenColor: new THREE.Color(0xffc8ba) // Skin subsurface scattering & peach fuzz glow
-    });
+    // On low-power/Android devices, use MeshStandardMaterial to avoid heavy physical clearcoat/sheen shader compiler hangs
+    const skinMat = isLowPowerDevice
+      ? new THREE.MeshStandardMaterial({
+          color: 0xffdfd0,
+          roughness: 0.6,
+          metalness: 0.0
+        })
+      : new THREE.MeshPhysicalMaterial({
+          color: 0xffdfd0,
+          roughness: 0.52,
+          metalness: 0.0,
+          clearcoat: 0.08,
+          clearcoatRoughness: 0.35,
+          sheen: 0.45,
+          sheenColor: new THREE.Color(0xffc8ba)
+        });
 
     const blushMat = new THREE.MeshStandardMaterial({
       color: 0xff7568, // Soft rosy coral airbrushed cheek blush
@@ -273,13 +331,19 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
       opacity: 0.28
     });
 
-    const lipMat = new THREE.MeshPhysicalMaterial({
-      color: 0xd9576e, // Soft natural rose-coral satin lips
-      roughness: 0.28,
-      metalness: 0.0,
-      clearcoat: 0.35,
-      clearcoatRoughness: 0.2 // Subtle natural lip moisture
-    });
+    const lipMat = isLowPowerDevice
+      ? new THREE.MeshStandardMaterial({
+          color: 0xd9576e,
+          roughness: 0.35,
+          metalness: 0.0
+        })
+      : new THREE.MeshPhysicalMaterial({
+          color: 0xd9576e,
+          roughness: 0.28,
+          metalness: 0.0,
+          clearcoat: 0.35,
+          clearcoatRoughness: 0.2
+        });
 
     const teethMat = new THREE.MeshStandardMaterial({
       color: 0xfffdf7, // Clean pearly ivory enamel
@@ -1035,7 +1099,7 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
 
       // 5. Natural Mouth Speech Animation (Viseme Phonemes)
       if (mouthRef.current) {
-        if (currentEmotion === 'speaking') {
+        if (emotionRef.current === 'speaking') {
           // Open/close mouth rhythmically with voice
           const speechOpen = Math.abs(Math.sin(time * 14)) * 0.45 + Math.abs(Math.cos(time * 7)) * 0.25;
           mouthRef.current.scale.y = 1.0 + speechOpen * 0.85;
@@ -1056,7 +1120,7 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
 
       // 6. Arms & Dynamic Gestures Animation
       if (leftArmGroupRef.current && rightArmGroupRef.current && leftForearmGroupRef.current && rightForearmGroupRef.current) {
-        if (activeGesture === 'waving') {
+        if (gestureRef.current === 'waving') {
           // Right arm waving
           rightArmGroupRef.current.rotation.z = -1.6 + Math.sin(time * 7) * 0.25;
           rightArmGroupRef.current.rotation.x = -0.3;
@@ -1064,20 +1128,20 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
 
           leftArmGroupRef.current.rotation.z = 0.2 + Math.sin(time * 1.5) * 0.04;
           leftForearmGroupRef.current.rotation.x = -0.1;
-        } else if (activeGesture === 'clapping' || currentEmotion === 'celebrating') {
+        } else if (gestureRef.current === 'clapping' || emotionRef.current === 'celebrating') {
           // Clapping hands
           const clapCycle = Math.sin(time * 12) * 0.2;
           rightArmGroupRef.current.rotation.set(-0.7, -0.4 + clapCycle, -0.5);
           leftArmGroupRef.current.rotation.set(-0.7, 0.4 - clapCycle, 0.5);
           rightForearmGroupRef.current.rotation.set(-0.4, 0, -0.2);
           leftForearmGroupRef.current.rotation.set(-0.4, 0, 0.2);
-        } else if (activeGesture === 'pointing') {
+        } else if (gestureRef.current === 'pointing') {
           // Right arm points toward board / screen
           rightArmGroupRef.current.rotation.set(-0.8, -0.5, -0.3);
           rightForearmGroupRef.current.rotation.set(-0.2, 0, 0.1);
           leftArmGroupRef.current.rotation.set(0.1, 0, 0.2);
           leftForearmGroupRef.current.rotation.set(-0.1, 0, 0);
-        } else if (activeGesture === 'explaining' || currentEmotion === 'speaking') {
+        } else if (gestureRef.current === 'explaining' || emotionRef.current === 'speaking') {
           // Explaining hands moving gently
           rightArmGroupRef.current.rotation.x = -0.35 + Math.sin(time * 3) * 0.15;
           rightArmGroupRef.current.rotation.z = -0.35 + Math.cos(time * 2.5) * 0.1;
@@ -1102,16 +1166,92 @@ export const Sara3DCharacter: React.FC<Sara3DCharacterProps> = ({
       animFrameRef.current = requestAnimationFrame(animate);
     };
 
-    animate();
+    // Frame rate throttle configuration (35fps on Android/low-power prevents thermal throttling and PMIC shutdown)
+    let lastRenderTimestamp = performance.now();
+    const frameIntervalMs = isLowPowerDevice ? 1000 / 34 : 1000 / 60;
+
+    const throttledAnimate = () => {
+      if (isContextLost) return;
+      if (document.hidden) {
+        animFrameRef.current = requestAnimationFrame(throttledAnimate);
+        return;
+      }
+
+      const now = performance.now();
+      const deltaElapsed = now - lastRenderTimestamp;
+
+      if (deltaElapsed < frameIntervalMs) {
+        animFrameRef.current = requestAnimationFrame(throttledAnimate);
+        return;
+      }
+
+      lastRenderTimestamp = now - (deltaElapsed % frameIntervalMs);
+      animate();
+    };
+
+    throttledAnimate();
+
+    // Pause Three.js completely when tab is hidden or phone screen is locked
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        if (animFrameRef.current) {
+          cancelAnimationFrame(animFrameRef.current);
+          animFrameRef.current = null;
+        }
+      } else {
+        if (!animFrameRef.current && !isContextLost) {
+          lastRenderTimestamp = performance.now();
+          throttledAnimate();
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      canvas.removeEventListener('webglcontextlost', onContextLost);
+      canvas.removeEventListener('webglcontextrestored', onContextRestored);
       if (animFrameRef.current) {
         cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = null;
       }
-      renderer.dispose();
+
+      // Complete GPU memory disposal (geometries & materials) to prevent Android VRAM leaks
+      scene.traverse((obj: any) => {
+        if (obj.geometry) {
+          try { obj.geometry.dispose(); } catch (_) {}
+        }
+        if (obj.material) {
+          try {
+            if (Array.isArray(obj.material)) {
+              obj.material.forEach((m: any) => m.dispose());
+            } else {
+              obj.material.dispose();
+            }
+          } catch (_) {}
+        }
+      });
+
+      try {
+        renderer.forceContextLoss();
+      } catch (_) {}
+      try {
+        renderer.dispose();
+      } catch (_) {}
     };
-  }, [isOpen, isMinimized, currentEmotion, activeGesture, activeOutfit]);
+  }, [isOpen, isMinimized]);
+
+  // Synchronize dynamic outfit changes without re-creating WebGL canvas
+  useEffect(() => {
+    const activeOutfitObj = SARA_OUTFITS.find(o => o.id === activeOutfit) || SARA_OUTFITS[0];
+    if (blazerMaterialsRef.current && blazerMaterialsRef.current.length > 0) {
+      blazerMaterialsRef.current.forEach(m => m.color.setHex(activeOutfitObj.blazerHex));
+    }
+    if (trimMaterialsRef.current && trimMaterialsRef.current.length > 0) {
+      trimMaterialsRef.current.forEach(m => m.color.setHex(activeOutfitObj.trimHex));
+    }
+  }, [activeOutfit]);
 
   // Handle Dragging (Mouse & Touch for Mobile / Tablet) with Velocity & Physics
   const handleMouseDown = (e: React.MouseEvent) => {
