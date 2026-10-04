@@ -36,7 +36,12 @@ import {
   BookMarked,
   Sliders,
   X,
-  Layers
+  Layers,
+  Archive,
+  History,
+  Calendar,
+  Eye,
+  MessageSquare
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile, AppView, SaraBoardData, SaraChatResponse, TutorMemoryDoc, proficiencyLevel, CurriculumCategory } from '../types';
@@ -295,6 +300,13 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [showMobileToolsDrawer, setShowMobileToolsDrawer] = useState<boolean>(false);
   const [mobileTab, setMobileTab] = useState<'chat' | 'board' | 'sara3d'>('chat');
   const SARA_STORAGE_KEY = (uid?: string) => `sara_chat_history_${uid || 'guest'}`;
+
+  // Session Archive States
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState<boolean>(false);
+  const [isArchiveModalOpen, setIsArchiveModalOpen] = useState<boolean>(false);
+  const [archivedSessions, setArchivedSessions] = useState<any[]>([]);
+  const [isLoadingArchive, setIsLoadingArchive] = useState<boolean>(false);
+  const [viewingSession, setViewingSession] = useState<any | null>(null);
 
   // Lesson Timer State (5 min, 10 min, 15 min, or custom)
   const [timerDurationMinutes, setTimerDurationMinutes] = useState<number>(10);
@@ -814,51 +826,203 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     }
   }, [messages, activeBoard, placementState, profile.uid]);
 
-  // Start a fresh new chat session with archive
-  const handleStartNewSession = async () => {
+  // Confirm Archiving Current Session
+  const handleConfirmArchiveSession = async () => {
     cancelAllSpeech();
+    setShowArchiveConfirm(false);
     setShowNewChatConfirm(false);
+    setIsLessonCompletedModalOpen(false);
 
-    // Archive current session to Firestore if it has messages
-    if (messages.length > 0 && profile.uid) {
+    if (messages.length > 0) {
+      const now = new Date();
+      const formattedDate = now.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      // Find lesson name if present
+      const detectedLessonTitle = 
+        activeCurriculumLesson?.titleAr ||
+        activeCurriculumLesson?.titleEn ||
+        (activeCurriculumLesson as any)?.title || 
+        lastSavedLessonResult?.lessonTitle || 
+        activeRolePlay?.titleAr || 
+        activeRolePlay?.titleEn || 
+        (activeRolePlay as any)?.title || 
+        (placementState?.stage && placementState.stage !== 'idle' ? (isRtl ? 'اختبار تحديد المستوى' : 'Placement Test') : null);
+
+      // Extract brief snippet (نص مختصر)
+      const userMsg = messages.find(m => m.role === 'user' && m.text?.trim());
+      const firstSaraMsg = messages.find(m => m.role === 'sara' && m.text?.trim());
+      const rawText = userMsg?.text || firstSaraMsg?.text || tutorMemory.lastSessionSummary || (isRtl ? 'جلسة تدريب مع سارة' : 'Sara Tutoring Session');
+      const snippet = rawText.replace(/[*#_`]/g, '').trim().slice(0, 140);
+
+      const sessionData = {
+        date: formattedDate,
+        dateYmd: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`,
+        archivedAt: now.toISOString(),
+        lessonTitle: detectedLessonTitle || null,
+        lessonName: detectedLessonTitle || null,
+        messagesCount: messages.length,
+        snippet: snippet,
+        messages: messages,
+        activeBoard: activeBoard || null
+      };
+
+      // 1. Save to users/{userId}/saraSessions in Firestore
+      const targetUid = auth.currentUser?.uid || profile.uid;
+      if (targetUid && !targetUid.startsWith('sim_')) {
+        try {
+          await addDoc(collection(db, 'users', targetUid, 'saraSessions'), {
+            ...sessionData,
+            createdAt: serverTimestamp()
+          });
+        } catch (err) {
+          console.warn('Error archiving session in Firestore:', err);
+        }
+      }
+
+      // 2. Local storage backup for offline/simulated students
       try {
-        const archiveDoc = {
-          messages,
-          archivedAt: new Date().toISOString(),
-          summary: tutorMemory.lastSessionSummary || 'Previous tutoring session',
-          messagesCount: messages.length
-        };
-        await addDoc(collection(db, 'users', profile.uid, 'saraSessions'), archiveDoc);
-      } catch (err) {
-        console.warn('Archive session note:', err);
+        const storageKey = `sara_archived_sessions_${targetUid || 'guest'}`;
+        const existing: any[] = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        existing.unshift({
+          id: `sess_${Date.now()}`,
+          ...sessionData
+        });
+        localStorage.setItem(storageKey, JSON.stringify(existing.slice(0, 100)));
+      } catch (e) {
+        console.warn('LocalStorage archive error:', e);
       }
     }
 
-    // Clear local storage key
-    localStorage.removeItem(SARA_STORAGE_KEY(profile.uid));
-
-    // Reset messages and states
+    // 3. Clear live chat & local storage (امسح الدردشة الحية)
     setMessages([]);
     setActiveBoard(null);
     setIsRestoredSession(false);
-    setPlacementState({
-      isActive: false,
-      stage: 'idle',
-      conversationTurn: 0,
-      conversationAnswers: [],
-      conversationScore: 0,
-      quizCurrentIndex: 0,
-      quizAnswers: [],
-      quizScore: 0,
-      spellingCurrentIndex: 0,
-      spellingAnswers: [],
-      spellingScore: 0,
-      diagnosedLevel: null,
-      totalScore: 0
-    });
+    localStorage.removeItem(SARA_STORAGE_KEY(profile.uid));
 
-    // Run fresh welcome
-    initWelcome();
+    const targetUid = auth.currentUser?.uid || profile.uid;
+    if (targetUid && !targetUid.startsWith('sim_')) {
+      try {
+        await setDoc(doc(db, 'users', targetUid, 'saraChat', 'current'), {
+          messages: [],
+          activeBoard: null,
+          updatedAt: serverTimestamp()
+        });
+      } catch (e) {
+        console.debug('Error clearing live chat:', e);
+      }
+    }
+
+    // Notice: Do NOT delete tutorMemory! (Keep tutorMemory intact)
+
+    // 4. Start short greeting ("وابدأ تحية قصيرة")
+    const shortGreeting = isRtl
+      ? `مرحباً يا بطل! 🌟 تم أرشفة جلستك السابقة بنجاح. أنا سارة، جاهزة لجلسة تدريب جديدة معك!`
+      : `Welcome back, champ! 🌟 Your previous session was archived safely. I'm Sara, ready for a fresh lesson!`;
+
+    const welcomeMsg: MessageItem = {
+      id: `msg_welcome_${Date.now()}`,
+      role: 'sara',
+      text: shortGreeting,
+      timestamp: Date.now()
+    };
+
+    setMessages([welcomeMsg]);
+    setShowSavedToast(true);
+  };
+
+  const handleCancelArchiveSession = () => {
+    setShowArchiveConfirm(false);
+    // إذا قال لا: خل الدردشة كما هي (leave chat as is)
+  };
+
+  const fetchArchivedSessions = async () => {
+    setIsLoadingArchive(true);
+    try {
+      const list: any[] = [];
+      const targetUid = auth.currentUser?.uid || profile.uid;
+      if (targetUid && !targetUid.startsWith('sim_')) {
+        try {
+          const q = query(
+            collection(db, 'users', targetUid, 'saraSessions'),
+            orderBy('createdAt', 'desc'),
+            limit(100)
+          );
+          const snap = await getDocs(q);
+          snap.forEach(docSnap => {
+            list.push({ id: docSnap.id, ...docSnap.data() });
+          });
+        } catch {
+          // Fallback query without orderBy if index is building or composite
+          const snap = await getDocs(collection(db, 'users', targetUid, 'saraSessions'));
+          snap.forEach(docSnap => {
+            list.push({ id: docSnap.id, ...docSnap.data() });
+          });
+          list.sort((a, b) => new Date(b.archivedAt || 0).getTime() - new Date(a.archivedAt || 0).getTime());
+        }
+      }
+
+      // Merge with localStorage backup for offline/simulated students
+      try {
+        const storageKey = `sara_archived_sessions_${targetUid || 'guest'}`;
+        const localList: any[] = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        localList.forEach(localItem => {
+          if (!list.some(item => item.id === localItem.id || (item.archivedAt && item.archivedAt === localItem.archivedAt))) {
+            list.push(localItem);
+          }
+        });
+        list.sort((a, b) => new Date(b.archivedAt || 0).getTime() - new Date(a.archivedAt || 0).getTime());
+      } catch (e) {}
+
+      setArchivedSessions(list);
+    } catch (err) {
+      console.warn('Error fetching archived sessions:', err);
+    } finally {
+      setIsLoadingArchive(false);
+    }
+  };
+
+  const handleRestoreSessionToLive = (session: any) => {
+    if (!session || !session.messages) return;
+    cancelAllSpeech();
+    setMessages(session.messages);
+    if (session.activeBoard) {
+      setActiveBoard(session.activeBoard);
+    }
+    setIsRestoredSession(true);
+
+    // Sync to Firestore saraChat/current
+    const targetUid = auth.currentUser?.uid || profile.uid;
+    if (targetUid && !targetUid.startsWith('sim_')) {
+      setDoc(doc(db, 'users', targetUid, 'saraChat', 'current'), {
+        messages: session.messages,
+        activeBoard: session.activeBoard || null,
+        updatedAt: serverTimestamp()
+      }, { merge: true }).catch(console.warn);
+    }
+
+    // Sync to local storage
+    try {
+      localStorage.setItem(SARA_STORAGE_KEY(profile.uid), JSON.stringify({
+        messages: session.messages,
+        activeBoard: session.activeBoard || null,
+        timestamp: Date.now()
+      }));
+    } catch (e) {}
+
+    setIsArchiveModalOpen(false);
+    setViewingSession(null);
+    setShowSavedToast(true);
+  };
+
+  // Start a fresh new chat session with archive
+  const handleStartNewSession = async () => {
+    handleConfirmArchiveSession();
   };
 
   // Start Role-Play Scenario
@@ -2549,15 +2713,29 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               )}
             </div>
 
-            {/* Start Fresh Session / Archive Button */}
+            {/* Archive Session Button */}
             <button
-              onClick={() => setShowNewChatConfirm(true)}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-2xl border-2 text-xs font-bold transition-all cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 hover:border-slate-300 shadow-2xs"
-              title={isRtl ? 'بدء محادثة جديدة (مع أرشفة محادثتك الحالية بأمان)' : 'Start Fresh Chat (archives previous)'}
+              onClick={() => setShowArchiveConfirm(true)}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300 shadow-2xs"
+              title={isRtl ? 'أرشف الجلسة الحالية وبدء محادثة جديدة' : 'Archive current session & start fresh'}
             >
-              <RotateCcw size={13} className="text-slate-500" />
-              <span className="hidden lg:inline">{isRtl ? 'محادثة جديدة' : 'New Chat'}</span>
-              <span className="hidden sm:inline lg:hidden">{isRtl ? 'جديدة' : 'New'}</span>
+              <Archive size={13} className="text-amber-700" />
+              <span className="hidden lg:inline">{isRtl ? 'أرشف الجلسة 📦' : 'Archive Session 📦'}</span>
+              <span className="hidden sm:inline lg:hidden">{isRtl ? 'أرشف 📦' : 'Archive 📦'}</span>
+            </button>
+
+            {/* Sessions Archive Viewer Button */}
+            <button
+              onClick={() => {
+                fetchArchivedSessions();
+                setIsArchiveModalOpen(true);
+              }}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-2xl border-2 text-xs font-bold transition-all cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 hover:border-slate-300 shadow-2xs"
+              title={isRtl ? 'استعراض أرشيف جلسات سارة واسترجاعها' : 'View past sessions archive & restore'}
+            >
+              <History size={13} className="text-slate-500" />
+              <span className="hidden lg:inline">{isRtl ? 'الأرشيف 🗂️' : 'Archive 🗂️'}</span>
+              <span className="hidden sm:inline lg:hidden">{isRtl ? 'الأرشيف' : 'Archive'}</span>
             </button>
 
             {/* 📚 Academy Curriculums Hub Button */}
@@ -2677,13 +2855,13 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               onClick={() => setIsRolePlayModalOpen(true)}
               className={`hidden md:flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
                 activeRolePlay
-                  ? 'bg-amber-100 text-amber-900 border-amber-400 ring-2 ring-amber-300/40'
-                  : 'bg-gradient-to-r from-teal-50 to-emerald-50 hover:from-teal-100 hover:to-emerald-100 text-teal-900 border-teal-200'
+                  ? 'bg-gradient-to-r from-amber-400 to-amber-300 text-slate-950 border-amber-300 ring-2 ring-amber-300/40 shadow-md'
+                  : 'bg-gradient-to-r from-indigo-50 via-purple-50 to-blue-50 hover:from-indigo-100 hover:to-blue-100 text-[#002147] border-indigo-200 hover:border-indigo-300'
               }`}
-              title={isRtl ? 'سيناريوهات المحادثة وتقمص الأدوار (المطار، المقهى، الطبيب...)' : 'Real-world Role-play Scenarios'}
+              title={isRtl ? 'سيناريوهات ومغامرات سارة لسن 12 سنة (ألعاب، كورة، روبوت، فضاء...)' : 'Sara 12YO Role-Play & Adventures'}
             >
-              <span className="text-sm">🎭</span>
-              <span>{isRtl ? (activeRolePlay ? 'السيناريو نشط 🎭' : 'سيناريوهات 🎭') : 'Role Play 🎭'}</span>
+              <span className="text-sm">🎮</span>
+              <span>{isRtl ? (activeRolePlay ? 'المغامرة نشطة 🎮' : 'سيناريوهات 12 سنة 🎮') : '12Y Adventures 🎮'}</span>
             </button>
 
             {/* ⚡ Sara Speech Speed Controller (Desktop >= 1280px) */}
@@ -2883,54 +3061,80 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         )}
 
         {/* ======================================================== */}
-        {/* 2A-0. ROLE-PLAY ACTIVE SCENARIO SIMULATION BANNER */}
+        {/* 2A-0. ROLE-PLAY ACTIVE SCENARIO SIMULATION BANNER (12Y GAMING HUD) */}
         {/* ======================================================== */}
         {activeRolePlay && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-r from-slate-900 via-[#002147] to-[#093568] text-white p-3.5 sm:p-4 rounded-3xl shadow-lg border-2 border-[#C49E3A]/40 relative overflow-hidden"
+            className="bg-gradient-to-r from-slate-950 via-[#002147] to-slate-950 text-white p-3.5 sm:p-4 rounded-3xl shadow-xl border-2 border-amber-400/50 relative overflow-hidden ring-1 ring-amber-400/20"
           >
+            {/* Top Bar: Title & Exit */}
             <div className="flex items-center justify-between gap-2 mb-2.5 flex-wrap">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl p-1 bg-white/10 rounded-2xl border border-white/10">{activeRolePlay.badge}</span>
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl p-1.5 bg-amber-400 text-slate-950 rounded-2xl border border-amber-300 shadow-md">
+                  {activeRolePlay.badge}
+                </span>
                 <div>
-                  <span className="text-[10px] font-black uppercase text-[#C49E3A] tracking-wider block">
-                    {isRtl ? 'محاكاة واقعية جارية 🎭' : 'Active Scenario Simulation 🎭'}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-black uppercase text-amber-300 tracking-wider">
+                      {isRtl ? 'مغامرة ومحاكاة حية 🎮' : 'Live Scenario Quest 🎮'}
+                    </span>
+                    <span className="px-1.5 py-0.2 rounded-md bg-emerald-500/20 text-emerald-300 text-[9px] font-black border border-emerald-400/30">
+                      12Y
+                    </span>
+                  </div>
                   <h2 className="text-sm sm:text-base font-black text-white">
                     {isRtl ? activeRolePlay.titleAr : activeRolePlay.titleEn}
                   </h2>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] bg-white/10 px-2.5 py-1 rounded-xl text-slate-200 font-bold border border-white/10">
-                  📍 {activeRolePlay.location}
+                <span className="text-[11px] bg-white/10 px-2.5 py-1 rounded-xl text-slate-200 font-bold border border-white/10 flex items-center gap-1">
+                  <span>📍</span>
+                  <span>{activeRolePlay.location}</span>
                 </span>
                 <button
                   onClick={handleEndRolePlay}
                   className="px-2.5 py-1 bg-rose-500/80 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs"
                 >
-                  {isRtl ? 'إنهاء السيناريو ✕' : 'Exit Role-Play ✕'}
+                  {isRtl ? 'إنهاء السيناريو ✕' : 'Exit Quest ✕'}
                 </button>
               </div>
             </div>
 
             {/* Roles info */}
-            <div className="grid grid-cols-2 gap-2 bg-white/10 rounded-2xl p-2 text-xs mb-3">
+            <div className="grid grid-cols-2 gap-2 bg-black/40 border border-white/10 rounded-2xl p-2 text-xs mb-3">
               <div className="text-center py-1">
-                <span className="text-slate-300 text-[10px] block font-bold">{isRtl ? 'دور سارة:' : 'Sara Role:'}</span>
-                <span className="font-black text-[#FDE68A]">{isRtl ? activeRolePlay.roleSaraAr : activeRolePlay.roleSaraEn}</span>
+                <span className="text-slate-400 text-[10px] block font-bold">{isRtl ? 'دورك أنت:' : 'Your Role:'}</span>
+                <span className="font-black text-emerald-300">{isRtl ? activeRolePlay.roleStudentAr : activeRolePlay.roleStudentEn}</span>
               </div>
               <div className="text-center py-1 border-s border-white/15">
-                <span className="text-slate-300 text-[10px] block font-bold">{isRtl ? 'دورك أنت:' : 'Your Role:'}</span>
-                <span className="font-black text-emerald-300">{isRtl ? activeRolePlay.roleStudentAr : activeRolePlay.roleStudentEn}</span>
+                <span className="text-slate-400 text-[10px] block font-bold">{isRtl ? 'دور سارة:' : 'Sara Role:'}</span>
+                <span className="font-black text-amber-300">{isRtl ? activeRolePlay.roleSaraAr : activeRolePlay.roleSaraEn}</span>
+              </div>
+            </div>
+
+            {/* Mission Completion Progress Bar */}
+            <div className="mb-2.5">
+              <div className="flex items-center justify-between text-[11px] font-black text-amber-200 mb-1">
+                <span>{isRtl ? 'مهام المحادثة المستهدفة:' : 'Target Missions:'}</span>
+                <span className="text-[10px] text-slate-300 font-bold">
+                  {completedMissions.length} / {activeRolePlay.missionsAr?.length || 3} {isRtl ? 'مكتملة' : 'Completed'}
+                </span>
+              </div>
+              {/* Progress track */}
+              <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-amber-400 to-emerald-400 transition-all duration-500"
+                  style={{ width: `${Math.min(100, (completedMissions.length / (activeRolePlay.missionsAr?.length || 3)) * 100)}%` }}
+                />
               </div>
             </div>
 
             {/* Scenario Completion Celebration Banner */}
             {completedMissions.length >= (activeRolePlay.missionsAr?.length || 3) && (
-              <div className="bg-gradient-to-r from-amber-500/30 via-emerald-500/30 to-amber-500/30 border-2 border-amber-300/80 rounded-2xl p-2.5 mb-3 text-center shadow-lg">
+              <div className="bg-gradient-to-r from-amber-500/30 via-emerald-500/30 to-amber-500/30 border-2 border-amber-300/80 rounded-2xl p-2.5 mb-3 text-center shadow-lg animate-pulse">
                 <span className="text-xs sm:text-sm font-black text-amber-200 flex items-center justify-center gap-1.5">
                   <span>🏆</span>
                   <span>{isRtl ? 'كفو يا بطل! أتممت جميع مهام هذا السيناريو بامتياز وطلاقة! 🌟' : 'Bravo! You mastered all missions in this scenario! 🌟'}</span>
@@ -2938,40 +3142,41 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               </div>
             )}
 
-            {/* Missions Tracker (Responsive 2-column Grid on Tablets/Desktop) */}
-            <div className="mb-3">
-              <span className="text-[11px] font-black text-amber-200 block mb-1.5">
-                {isRtl ? 'مهام المحادثة المستهدفة:' : 'Target Missions:'}
-              </span>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
-                {(isRtl ? activeRolePlay.missionsAr : activeRolePlay.missionsEn).map((mission, mIdx) => {
-                  const isDone = completedMissions.includes(mIdx);
-                  return (
-                    <div key={`mission-${mIdx}`} className="flex items-center gap-2 text-xs bg-black/25 px-3 py-1.5 rounded-xl border border-white/5">
-                      <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${isDone ? 'bg-emerald-500 text-white' : 'bg-white/20 text-slate-300'}`}>
-                        {isDone ? '✓' : mIdx + 1}
-                      </span>
-                      <span className={`flex-1 font-bold ${isDone ? 'line-through text-slate-400' : 'text-slate-100'}`}>
-                        {mission}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
+            {/* Missions List */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5 mb-3">
+              {(isRtl ? activeRolePlay.missionsAr : activeRolePlay.missionsEn).map((mission, mIdx) => {
+                const isDone = completedMissions.includes(mIdx);
+                return (
+                  <div key={`mission-${mIdx}`} className={`flex items-center gap-2 text-xs px-2.5 py-1.5 rounded-xl border transition-all ${
+                    isDone 
+                      ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200' 
+                      : 'bg-black/30 border-white/5 text-slate-200'
+                  }`}>
+                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
+                      isDone ? 'bg-emerald-400 text-slate-950' : 'bg-white/20 text-slate-300'
+                    }`}>
+                      {isDone ? '✓' : mIdx + 1}
+                    </span>
+                    <span className={`flex-1 font-bold truncate ${isDone ? 'line-through opacity-80' : ''}`} title={mission}>
+                      {mission}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Starter Suggestions Chips */}
             {activeRolePlay.starterPrompts && activeRolePlay.starterPrompts.length > 0 && (
               <div>
                 <span className="text-[10px] text-slate-300 block mb-1 font-bold">
-                  {isRtl ? '💡 جمل مقترحة (اضغط للإرسال والمحادثة فوراً):' : '💡 Suggested phrases (tap to send):'}
+                  {isRtl ? '💡 جمل مقترحة للرد فوراً (اضغط للإرسال والمحادثة):' : '💡 Suggested quick replies (tap to speak):'}
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {activeRolePlay.starterPrompts.map((prompt, pIdx) => (
                     <button
                       key={`rp-p-${pIdx}`}
                       onClick={() => handleSendMessage(prompt)}
-                      className="text-[11px] bg-white/15 hover:bg-[#C49E3A] hover:text-slate-950 text-slate-100 px-2.5 py-1 rounded-xl transition-all cursor-pointer font-bold border border-white/10"
+                      className="text-[11px] bg-white/10 hover:bg-amber-400 hover:text-slate-950 text-slate-100 px-2.5 py-1 rounded-xl transition-all cursor-pointer font-bold border border-white/10"
                     >
                       "{prompt}"
                     </button>
@@ -4061,11 +4266,31 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               </button>
             ))}
             <button
-              onClick={() => setShowNewChatConfirm(true)}
-              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-[#002147] hover:bg-slate-100 text-slate-600 shrink-0 transition-all cursor-pointer shadow-2xs flex items-center gap-1 font-bold text-[10px] sm:text-xs"
+              onClick={() => setIsRolePlayModalOpen(true)}
+              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-300 hover:border-indigo-400 hover:from-indigo-100 hover:to-purple-100 text-[#002147] shrink-0 transition-all cursor-pointer shadow-2xs flex items-center gap-1 font-black text-[10px] sm:text-xs"
+              title={isRtl ? 'استوديو سيناريوهات ومغامرات سارة لسن 12 سنة' : 'Sara 12Y Adventures & Scenarios'}
             >
-              <RotateCcw size={11} />
-              <span>{isRtl ? '🔄 محادثة جديدة' : '🔄 New Chat'}</span>
+              <span>🎮</span>
+              <span>{isRtl ? 'مغامرات وسيناريوهات 12 سنة' : '12Y Scenarios Hub'}</span>
+            </button>
+            <button
+              onClick={() => setShowArchiveConfirm(true)}
+              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-amber-50 border border-amber-300 hover:border-amber-400 hover:bg-amber-100 text-amber-900 shrink-0 transition-all cursor-pointer shadow-2xs flex items-center gap-1 font-bold text-[10px] sm:text-xs"
+              title={isRtl ? 'أرشف الجلسة' : 'Archive Session'}
+            >
+              <Archive size={11} className="text-amber-700" />
+              <span>{isRtl ? '📦 أرشف الجلسة' : '📦 Archive'}</span>
+            </button>
+            <button
+              onClick={() => {
+                fetchArchivedSessions();
+                setIsArchiveModalOpen(true);
+              }}
+              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-[#002147] hover:bg-slate-100 text-slate-600 shrink-0 transition-all cursor-pointer shadow-2xs flex items-center gap-1 font-bold text-[10px] sm:text-xs"
+              title={isRtl ? 'الأرشيف' : 'Archive'}
+            >
+              <History size={11} className="text-slate-500" />
+              <span>{isRtl ? '🗂️ الأرشيف' : '🗂️ Archive'}</span>
             </button>
           </div>
         </div>
@@ -4135,9 +4360,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         }}
       />
 
-      {/* 6. Start New Chat Confirmation Modal */}
+      {/* 6. Archive Session Confirmation Modal («أرشف هالجلسة؟») */}
       <AnimatePresence>
-        {showNewChatConfirm && (
+        {(showArchiveConfirm || showNewChatConfirm) && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -4145,33 +4370,33 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               exit={{ opacity: 0, scale: 0.95 }}
               className="bg-white rounded-3xl p-5 sm:p-6 max-w-sm w-full border-2 border-slate-200 shadow-2xl text-center space-y-4"
             >
-              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center mx-auto text-xl shadow-xs">
-                🔄
+              <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center mx-auto text-2xl shadow-xs">
+                📦
               </div>
 
               <div>
-                <h3 className="text-base sm:text-lg font-black text-[#002147]">
-                  {isRtl ? 'بدء محادثة جديدة مع سارة؟' : 'Start Fresh Chat with Sara?'}
+                <h3 className="text-lg font-black text-[#002147]">
+                  {isRtl ? 'أرشف هالجلسة؟' : 'Archive this session?'}
                 </h3>
                 <p className="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
                   {isRtl
-                    ? 'سيتم أرشفة وحفظ محادثتك الحالية بأمان حتى لا تفقد أي معلومة، وتبدأ سارة معك جلسة تدريبية جديدة بترحيب ونشاط 🌟'
-                    : 'Your current chat will be safely archived so no progress is lost, and Sara will begin a fresh practice lesson with you 🌟'}
+                    ? 'سيتم نقل محادثة الجلسة الحالية إلى مستند جديد في أرشيف جلساتك بأمان، ومسح الدردشة الحية لتبدأ سارة معك بتحية جديدة 🌟'
+                    : 'Current session chat will be transferred to your archive, and live chat will be cleared with a fresh greeting 🌟'}
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 pt-2">
+              <div className="flex items-center gap-3 pt-2">
                 <button
-                  onClick={() => setShowNewChatConfirm(false)}
-                  className="flex-1 py-2.5 px-3 rounded-xl border border-slate-200 text-slate-600 font-black text-xs hover:bg-slate-50 transition-all cursor-pointer"
+                  onClick={handleCancelArchiveSession}
+                  className="flex-1 py-3 px-4 rounded-xl border-2 border-slate-200 text-slate-700 font-black text-sm hover:bg-slate-100 transition-all cursor-pointer"
                 >
-                  {isRtl ? 'إلغاء وإكمال الحالية' : 'Cancel & Continue'}
+                  {isRtl ? 'لا' : 'No'}
                 </button>
                 <button
-                  onClick={handleStartNewSession}
-                  className="flex-1 py-2.5 px-3 rounded-xl bg-[#002147] hover:bg-[#C49E3A] text-white font-black text-xs transition-all shadow-md cursor-pointer"
+                  onClick={handleConfirmArchiveSession}
+                  className="flex-1 py-3 px-4 rounded-xl bg-[#002147] hover:bg-[#073060] text-amber-300 font-black text-sm transition-all shadow-md cursor-pointer border border-amber-300/40"
                 >
-                  {isRtl ? 'نعم، ابدأ جديدة 🚀' : 'Yes, Start New 🚀'}
+                  {isRtl ? 'نعم' : 'Yes'}
                 </button>
               </div>
             </motion.div>
@@ -4276,19 +4501,19 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   }}
                   className={`p-3 rounded-2xl border-2 text-start flex flex-col justify-between gap-2 transition-all cursor-pointer ${
                     activeRolePlay
-                      ? 'bg-amber-100 text-amber-950 border-amber-400 ring-2 ring-amber-300'
-                      : 'bg-gradient-to-br from-teal-50 to-emerald-50 border-teal-200 text-teal-950 hover:bg-teal-100'
+                      ? 'bg-gradient-to-r from-amber-400 to-amber-300 text-slate-950 border-amber-300 ring-2 ring-amber-300'
+                      : 'bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 border-indigo-200 text-[#002147] hover:bg-indigo-100'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xl">🎭</span>
-                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-teal-600 text-white">
-                      {isRtl ? 'محاكاة' : 'Roles'}
+                    <span className="text-xl">🎮</span>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-indigo-600 text-white">
+                      {isRtl ? '12 سنة' : '12Y'}
                     </span>
                   </div>
                   <div>
-                    <div className="text-xs font-black">{isRtl ? 'سيناريوهات المحادثة' : 'Role-Play'}</div>
-                    <div className="text-[10px] text-slate-500 font-medium">{isRtl ? 'مطار، مقهى، فندق...' : 'Airport, Cafe...'}</div>
+                    <div className="text-xs font-black">{isRtl ? 'سيناريوهات ومغامرات 12 سنة' : '12Y Role-Play Hub'}</div>
+                    <div className="text-[10px] text-slate-500 font-medium">{isRtl ? 'ألعاب، كورة، روبوت، فضاء...' : 'Gaming, Football, STEM...'}</div>
                   </div>
                 </button>
 
@@ -4386,16 +4611,31 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                     <span className="font-mono font-black">{formatTimerDisplay(timerSecondsLeft)}</span>
                   </button>
 
-                  {/* New Chat */}
+                  {/* Archive Session */}
                   <button
                     onClick={() => {
                       setShowMobileToolsDrawer(false);
-                      setShowNewChatConfirm(true);
+                      setShowArchiveConfirm(true);
                     }}
-                    className="py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-black flex items-center gap-1 cursor-pointer shrink-0 transition-all"
+                    className="py-2 px-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-black flex items-center gap-1 cursor-pointer shrink-0 transition-all"
+                    title={isRtl ? 'أرشف الجلسة' : 'Archive'}
                   >
-                    <RotateCcw size={12} />
-                    <span>{isRtl ? 'جديدة' : 'New'}</span>
+                    <Archive size={12} className="text-amber-700" />
+                    <span>{isRtl ? 'أرشف' : 'Archive'}</span>
+                  </button>
+
+                  {/* View Archive */}
+                  <button
+                    onClick={() => {
+                      setShowMobileToolsDrawer(false);
+                      fetchArchivedSessions();
+                      setIsArchiveModalOpen(true);
+                    }}
+                    className="py-2 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-black flex items-center gap-1 cursor-pointer shrink-0 transition-all"
+                    title={isRtl ? 'الأرشيف' : 'Archive'}
+                  >
+                    <History size={12} className="text-slate-500" />
+                    <span>{isRtl ? 'الأرشيف' : 'Archive'}</span>
                   </button>
                 </div>
               </div>
@@ -4558,6 +4798,35 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   </span>
                 </div>
 
+                {/* Archive Prompt: «أرشف هالجلسة؟» */}
+                <div className="bg-amber-50/90 border-2 border-amber-300 rounded-2xl p-3.5 text-center space-y-2">
+                  <div className="flex items-center justify-center gap-1.5 text-[#002147] font-black text-sm">
+                    <Archive size={16} className="text-amber-700" />
+                    <span>{isRtl ? 'أرشف هالجلسة؟' : 'Archive this session?'}</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 font-medium">
+                    {isRtl
+                      ? 'حفظ رسائل هذا الدرس في مستند منفصل بالأرشيف وبدء جلسة جديدة بتحية قصيرة؟'
+                      : 'Save this lesson to archive document and start a fresh session with a short greeting?'}
+                  </p>
+                  <div className="flex items-center gap-2.5 pt-1">
+                    <button
+                      onClick={() => {
+                        setIsLessonCompletedModalOpen(false);
+                      }}
+                      className="flex-1 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-black text-xs transition-all cursor-pointer"
+                    >
+                      {isRtl ? 'لا' : 'No'}
+                    </button>
+                    <button
+                      onClick={handleConfirmArchiveSession}
+                      className="flex-1 py-2 rounded-xl bg-[#002147] hover:bg-[#073060] text-amber-300 font-black text-xs transition-all shadow-md cursor-pointer border border-amber-300/40"
+                    >
+                      {isRtl ? 'نعم' : 'Yes'}
+                    </button>
+                  </div>
+                </div>
+
                 {/* Action Navigation Buttons */}
                 <div className="space-y-2 pt-1">
                   <button
@@ -4670,6 +4939,206 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         activeLessonId={activeCurriculumLesson?.id}
         isRtl={isRtl}
       />
+
+      {/* 12. Sara Sessions Archive Modal & Read-Only Viewer */}
+      <AnimatePresence>
+        {isArchiveModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden border-2 border-slate-200 shadow-2xl"
+            >
+              {/* Header */}
+              <div className="bg-gradient-to-r from-[#002147] via-[#093568] to-[#002147] p-4 sm:p-5 text-white flex items-center justify-between border-b-2 border-amber-400/40">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-400/20 text-amber-300 border border-amber-300/40 flex items-center justify-center text-xl shadow-inner">
+                    🗂️
+                  </div>
+                  <div>
+                    <h3 className="font-black text-base sm:text-lg">
+                      {isRtl ? 'أرشيف جلسات سارة 🗂️' : "Sara's Sessions Archive 🗂️"}
+                    </h3>
+                    <p className="text-[11px] text-amber-200/80 font-medium">
+                      {isRtl 
+                        ? 'جلساتك السابقة مسجلة ومحفوظة للقراءة فقط، ويمكنك إرجاع أي جلسة للدردشة الحية' 
+                        : 'Past sessions saved read-only. You can restore any session to live chat anytime.'}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setIsArchiveModalOpen(false);
+                    setViewingSession(null);
+                  }}
+                  className="p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+                  title={isRtl ? 'إغلاق' : 'Close'}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+                {viewingSession ? (
+                  /* READ-ONLY SESSION VIEWER */
+                  <div className="space-y-4">
+                    {/* Read-Only Banner & Action Bar */}
+                    <div className="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border-2 border-amber-300 rounded-2xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                      <div>
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-200 text-amber-950 font-black text-[10px] uppercase mb-1">
+                          <span>🔒</span>
+                          <span>{isRtl ? 'وضع القراءة فقط' : 'Read-Only Mode'}</span>
+                        </div>
+                        <h4 className="font-black text-xs sm:text-sm text-[#002147]">
+                          {viewingSession.lessonTitle || viewingSession.lessonName
+                            ? (isRtl ? `درس: ${viewingSession.lessonTitle || viewingSession.lessonName}` : `Lesson: ${viewingSession.lessonTitle || viewingSession.lessonName}`)
+                            : (isRtl ? 'جلسة محادثة عامة' : 'General Practice Session')}
+                        </h4>
+                        <p className="text-[10px] text-slate-500 font-bold mt-0.5">
+                          📅 {viewingSession.date || (viewingSession.archivedAt ? new Date(viewingSession.archivedAt).toLocaleDateString(isRtl ? 'ar-EG' : 'en-US') : '---')} • 💬 {viewingSession.messagesCount || viewingSession.messages?.length || 0} {isRtl ? 'رسالة' : 'messages'}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <button
+                          onClick={() => setViewingSession(null)}
+                          className="flex-1 sm:flex-none px-3 py-2 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-white transition-all cursor-pointer"
+                        >
+                          {isRtl ? 'العودة للأرشيف ➔' : 'Back to List ➔'}
+                        </button>
+                        <button
+                          onClick={() => handleRestoreSessionToLive(viewingSession)}
+                          className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-[#002147] hover:bg-[#C49E3A] text-white font-black text-xs transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <RotateCcw size={13} />
+                          <span>{isRtl ? 'إرجاع للدردشة الحية 💬' : 'Restore to Live Chat 💬'}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Messages Stream (Read-Only) */}
+                    <div className="bg-slate-50 rounded-2xl border border-slate-200 p-4 space-y-3 max-h-[50vh] overflow-y-auto">
+                      {viewingSession.messages && viewingSession.messages.length > 0 ? (
+                        viewingSession.messages.map((m: any, mIdx: number) => {
+                          const isSara = m.role === 'sara';
+                          return (
+                            <div
+                              key={m.id || `view_msg_${mIdx}`}
+                              className={`flex items-start gap-2.5 ${isSara ? '' : (isRtl ? 'flex-row-reverse text-right' : 'flex-row-reverse text-left')}`}
+                            >
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm shadow-xs ${
+                                isSara ? 'bg-[#002147] text-amber-300' : 'bg-[#58cc02] text-white'
+                              }`}>
+                                {isSara ? '👩‍🏫' : '🧑‍🎓'}
+                              </div>
+                              <div className={`max-w-[85%] rounded-2xl p-3 text-xs sm:text-sm font-medium leading-relaxed shadow-2xs ${
+                                isSara 
+                                  ? 'bg-white text-slate-800 border border-slate-200' 
+                                  : 'bg-[#58cc02] text-white'
+                              }`}>
+                                <p className="whitespace-pre-wrap">{m.text}</p>
+                                {m.board && (
+                                  <div className="mt-2 p-2 rounded-xl bg-amber-50 border border-amber-200 text-xs text-[#002147]">
+                                    <span className="font-bold block">📐 {m.board.title || 'لوحة السبورة'}</span>
+                                    {m.board.sentence && <span className="italic block mt-0.5 text-slate-600">"{m.board.sentence}"</span>}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <p className="text-center text-xs text-slate-400 py-6">
+                          {isRtl ? 'لا توجد رسائل مسجلة في هذه الجلسة' : 'No messages found in this session'}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Bottom Restore Call-To-Action */}
+                    <button
+                      onClick={() => handleRestoreSessionToLive(viewingSession)}
+                      className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#002147] via-[#0a3669] to-[#002147] hover:brightness-110 text-amber-300 font-black text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2 cursor-pointer border border-amber-300/40"
+                    >
+                      <RotateCcw size={15} />
+                      <span>{isRtl ? 'استرجاع هذه الجلسة إلى الدردشة الحية لمتابعتها الآن 🚀' : 'Restore this session to live chat now 🚀'}</span>
+                    </button>
+                  </div>
+                ) : (
+                  /* ARCHIVED SESSIONS LIST */
+                  <div className="space-y-3">
+                    {isLoadingArchive ? (
+                      <div className="py-12 text-center space-y-2">
+                        <div className="w-8 h-8 border-3 border-amber-400 border-t-transparent rounded-full animate-spin mx-auto" />
+                        <p className="text-xs text-slate-400 font-bold">{isRtl ? 'جاري تحميل الأرشيف...' : 'Loading sessions archive...'}</p>
+                      </div>
+                    ) : archivedSessions.length === 0 ? (
+                      <div className="py-12 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 p-6 space-y-2">
+                        <div className="text-4xl">📦</div>
+                        <h4 className="font-black text-sm text-[#002147]">
+                          {isRtl ? 'لا توجد جلسات مؤرشفة بعد' : 'No Archived Sessions Yet'}
+                        </h4>
+                        <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+                          {isRtl
+                            ? 'كل جلسة درس تُحفظ لوحدها. عند نهاية أي درس أو عند ضغط زر «أرشف الجلسة»، سيتم حفظ رسائل الجلسة هنا للقراءة أو الاسترجاع.'
+                            : 'Each lesson session is archived separately. When you complete a lesson or click Archive Session, it will appear here.'}
+                        </p>
+                      </div>
+                    ) : (
+                      archivedSessions.map((session, sIdx) => (
+                        <div
+                          key={session.id || `sess_${sIdx}`}
+                          className="bg-white rounded-2xl border-2 border-slate-200 hover:border-amber-300/80 p-4 transition-all shadow-xs hover:shadow-md space-y-2.5"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-xs text-slate-700 flex items-center gap-1">
+                                <Calendar size={13} className="text-amber-500" />
+                                <span>{session.date || (session.archivedAt ? new Date(session.archivedAt).toLocaleDateString(isRtl ? 'ar-EG' : 'en-US') : '---')}</span>
+                              </span>
+                              {(session.lessonTitle || session.lessonName) && (
+                                <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200 font-black text-[10px]">
+                                  📚 {session.lessonTitle || session.lessonName}
+                                </span>
+                              )}
+                            </div>
+                            <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold text-[10px]">
+                              💬 {session.messagesCount || session.messages?.length || 0} {isRtl ? 'رسالة' : 'msgs'}
+                            </span>
+                          </div>
+
+                          <p className="text-xs text-slate-600 font-medium line-clamp-2 leading-relaxed bg-slate-50/70 p-2 rounded-xl border border-slate-100 italic">
+                            "{session.snippet || (session.messages?.[0]?.text?.slice(0, 100)) || 'جلسة تدريبية'}"
+                          </p>
+
+                          <div className="flex items-center justify-end gap-2 pt-1">
+                            <button
+                              onClick={() => setViewingSession(session)}
+                              className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 font-black text-xs flex items-center gap-1 transition-all cursor-pointer"
+                            >
+                              <Eye size={12} className="text-slate-500" />
+                              <span>{isRtl ? 'استعراض (قراءة فقط)' : 'View (Read-Only)'}</span>
+                            </button>
+                            <button
+                              onClick={() => handleRestoreSessionToLive(session)}
+                              className="px-3 py-1.5 rounded-xl bg-[#002147] hover:bg-[#C49E3A] text-white font-black text-xs flex items-center gap-1 transition-all shadow-xs cursor-pointer"
+                            >
+                              <RotateCcw size={12} className="text-amber-300" />
+                              <span>{isRtl ? 'إرجاع للدردشة الحية 💬' : 'Restore to Live'}</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

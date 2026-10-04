@@ -561,6 +561,13 @@ export const PlacementTest = ({
       let dateCursor = new Date();
       const startStr = dateCursor.toISOString().split('T')[0];
 
+      const formatLocalDateYmd = (d: Date): string => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      };
+
       for (let w = 1; w <= weeksToGenerate; w++) {
         const monthNum = Math.ceil(w / 4);
         const seqWeek = ((w - 1) % 4) + 1;
@@ -574,6 +581,7 @@ export const PlacementTest = ({
             const baseScheduled = new Date(dateCursor);
             const [h, m] = preferredTime.split(':').map(Number);
             baseScheduled.setHours(h, m, 0, 0);
+            const lessonDateYmd = formatLocalDateYmd(dateCursor);
 
             for (let lessonIndex = 1; lessonIndex <= lessonsPerDay; lessonIndex++) {
               if (lp < allAvailableLessons.length) {
@@ -594,6 +602,8 @@ export const PlacementTest = ({
                   duration: '45 min',
                   level: pickedLesson.level,
                   unitId: pickedLesson.unitId,
+                  date: lessonDateYmd,
+                  dateString: lessonDateYmd,
                   dateLabel: dateCursor.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
                   timeLabel: `${String(finalScheduled.getHours()).padStart(2, '0')}:${String(finalScheduled.getMinutes()).padStart(2, '0')}`,
                   scheduledAt: finalScheduled.toISOString()
@@ -610,6 +620,7 @@ export const PlacementTest = ({
           const testScheduled = new Date(lastStudyInWeek);
           const [h, m] = preferredTime.split(':').map(Number);
           testScheduled.setHours(h + lessonsPerDay, m, 0, 0);
+          const testDateYmd = formatLocalDateYmd(lastStudyInWeek);
 
           mockPlan.push({
             id: `test-w${w}`,
@@ -622,6 +633,8 @@ export const PlacementTest = ({
             duration: '60 min',
             level: determinedLevel,
             unitId: `test-${w}`,
+            date: testDateYmd,
+            dateString: testDateYmd,
             dateLabel: lastStudyInWeek.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
             timeLabel: `${String(testScheduled.getHours()).padStart(2, '0')}:${String(testScheduledAtHourStr(testScheduled.getHours()))}`,
             scheduledAt: testScheduled.toISOString(),
