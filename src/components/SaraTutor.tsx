@@ -373,6 +373,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     savedAt: string;
   } | null>(null);
   const [showSavedToast, setShowSavedToast] = useState<boolean>(false);
+  const [archiveErrorToast, setArchiveErrorToast] = useState<string | null>(null);
 
   // Clear silence hesitation timer
   const clearHesitationTimer = () => {
@@ -833,79 +834,93 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     setShowNewChatConfirm(false);
     setIsLessonCompletedModalOpen(false);
 
-    if (messages.length > 0) {
-      const now = new Date();
-      const formattedDate = now.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-
-      // Find lesson name if present
-      const detectedLessonTitle = 
-        activeCurriculumLesson?.titleAr ||
-        activeCurriculumLesson?.titleEn ||
-        (activeCurriculumLesson as any)?.title || 
-        lastSavedLessonResult?.lessonTitle || 
-        activeRolePlay?.titleAr || 
-        activeRolePlay?.titleEn || 
-        (activeRolePlay as any)?.title || 
-        (placementState?.stage && placementState.stage !== 'idle' ? (isRtl ? 'اختبار تحديد المستوى' : 'Placement Test') : null);
-
-      // Extract brief snippet (نص مختصر)
-      const userMsg = messages.find(m => m.role === 'user' && m.text?.trim());
-      const firstSaraMsg = messages.find(m => m.role === 'sara' && m.text?.trim());
-      const rawText = userMsg?.text || firstSaraMsg?.text || tutorMemory.lastSessionSummary || (isRtl ? 'جلسة تدريب مع سارة' : 'Sara Tutoring Session');
-      const snippet = rawText.replace(/[*#_`]/g, '').trim().slice(0, 140);
-
-      const sessionData = {
-        date: formattedDate,
-        dateYmd: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`,
-        archivedAt: now.toISOString(),
-        lessonTitle: detectedLessonTitle || null,
-        lessonName: detectedLessonTitle || null,
-        messagesCount: messages.length,
-        snippet: snippet,
-        messages: messages,
-        activeBoard: activeBoard || null
-      };
-
-      // 1. Save to users/{userId}/saraSessions in Firestore
-      const targetUid = auth.currentUser?.uid || profile.uid;
-      if (targetUid && !targetUid.startsWith('sim_')) {
-        try {
-          await addDoc(collection(db, 'users', targetUid, 'saraSessions'), {
-            ...sessionData,
-            createdAt: serverTimestamp()
-          });
-        } catch (err) {
-          console.warn('Error archiving session in Firestore:', err);
-        }
-      }
-
-      // 2. Local storage backup for offline/simulated students
-      try {
-        const storageKey = `sara_archived_sessions_${targetUid || 'guest'}`;
-        const existing: any[] = JSON.parse(localStorage.getItem(storageKey) || '[]');
-        existing.unshift({
-          id: `sess_${Date.now()}`,
-          ...sessionData
-        });
-        localStorage.setItem(storageKey, JSON.stringify(existing.slice(0, 100)));
-      } catch (e) {
-        console.warn('LocalStorage archive error:', e);
-      }
+    if (!messages || messages.length === 0) {
+      return;
     }
 
-    // 3. Clear live chat & local storage (امسح الدردشة الحية)
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    // Find lesson name if present
+    const detectedLessonTitle = 
+      activeCurriculumLesson?.titleAr ||
+      activeCurriculumLesson?.titleEn ||
+      (activeCurriculumLesson as any)?.title || 
+      lastSavedLessonResult?.lessonTitle || 
+      activeRolePlay?.titleAr || 
+      activeRolePlay?.titleEn || 
+      (activeRolePlay as any)?.title || 
+      (placementState?.stage && placementState.stage !== 'idle' ? (isRtl ? 'اختبار تحديد المستوى' : 'Placement Test') : null);
+
+    // Extract brief snippet (نص مختصر)
+    const userMsg = messages.find(m => m.role === 'user' && m.text?.trim());
+    const firstSaraMsg = messages.find(m => m.role === 'sara' && m.text?.trim());
+    const rawText = userMsg?.text || firstSaraMsg?.text || tutorMemory.lastSessionSummary || (isRtl ? 'جلسة تدريب مع سارة' : 'Sara Tutoring Session');
+    const snippet = rawText.replace(/[*#_`]/g, '').trim().slice(0, 140);
+
+    const sessionData = {
+      date: formattedDate,
+      dateYmd: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`,
+      archivedAt: now.toISOString(),
+      lessonTitle: detectedLessonTitle || null,
+      lessonName: detectedLessonTitle || null,
+      messagesCount: messages.length,
+      snippet: snippet,
+      messages: messages,
+      activeBoard: activeBoard || null
+    };
+
+    // 1. Save to users/{userId}/saraSessions in Firestore
+    const targetUid = auth.currentUser?.uid || profile.uid;
+    let archiveSuccess = false;
+
+    if (targetUid) {
+      try {
+        await addDoc(collection(db, 'users', targetUid, 'saraSessions'), {
+          ...sessionData,
+          createdAt: serverTimestamp()
+        });
+        archiveSuccess = true;
+      } catch (err) {
+        console.warn('Error archiving session in Firestore:', err);
+        archiveSuccess = false;
+      }
+    } else {
+      archiveSuccess = false;
+    }
+
+    // إذا فشل addDoc: لا تمسح saraChat ولا الدردشة على الشاشة، خل الدردشة كما هي وأظهر رسالة قصيرة: «ما انحفظت الجلسة، حاول مرة ثانية»
+    if (!archiveSuccess) {
+      setArchiveErrorToast('ما انحفظت الجلسة، حاول مرة ثانية');
+      setTimeout(() => setArchiveErrorToast(null), 4000);
+      return;
+    }
+
+    // 2. Local storage backup only after addDoc success
+    try {
+      const storageKey = `sara_archived_sessions_${targetUid || 'guest'}`;
+      const existing: any[] = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      existing.unshift({
+        id: `sess_${Date.now()}`,
+        ...sessionData
+      });
+      localStorage.setItem(storageKey, JSON.stringify(existing.slice(0, 100)));
+    } catch (e) {
+      console.warn('LocalStorage archive error:', e);
+    }
+
+    // 3. Clear live chat & local storage ONLY AFTER addDoc SUCCESS (امسح الدردشة الحية)
     setMessages([]);
     setActiveBoard(null);
     setIsRestoredSession(false);
     localStorage.removeItem(SARA_STORAGE_KEY(profile.uid));
 
-    const targetUid = auth.currentUser?.uid || profile.uid;
     if (targetUid && !targetUid.startsWith('sim_')) {
       try {
         await setDoc(doc(db, 'users', targetUid, 'saraChat', 'current'), {
@@ -4887,6 +4902,22 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           >
             <CheckCircle2 size={16} className="text-amber-300" />
             <span>{isRtl ? 'تم تسجيل النتيجة وحفظ تقدم الدرس بنجاح! 🎓💾' : 'Lesson result recorded and saved successfully! 🎓💾'}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Archive Error Toast */}
+      <AnimatePresence>
+        {archiveErrorToast && (
+          <motion.div
+            initial={{ opacity: 0, y: -25, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -25, scale: 0.95 }}
+            className="fixed top-16 left-1/2 -translate-x-1/2 z-[100] bg-rose-600 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 border-2 border-rose-300 font-black text-xs sm:text-sm pointer-events-none"
+            dir={isRtl ? 'rtl' : 'ltr'}
+          >
+            <XCircle size={18} className="text-white shrink-0" />
+            <span>{archiveErrorToast}</span>
           </motion.div>
         )}
       </AnimatePresence>
