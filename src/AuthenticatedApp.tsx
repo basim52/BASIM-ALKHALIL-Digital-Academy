@@ -62,7 +62,9 @@ import {
   MessageCircle,
   Ticket,
   ArrowRight,
-  ArrowLeft
+  ArrowLeft,
+  PanelLeftClose,
+  PanelLeftOpen
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'motion/react';
@@ -4794,6 +4796,7 @@ export default function AuthenticatedApp({
   const [view, setView] = useState<AppView>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isTabletSidebarExpanded, setIsTabletSidebarExpanded] = useState<boolean>(false);
   const [selectedReadingLevel, setSelectedReadingLevel] = useState<ReadingLevel>('A1');
   const [selectedGrammarLevel, setSelectedGrammarLevel] = useState<GrammarLevel>('A1');
   const [selectedConversationLevel, setSelectedConversationLevel] = useState<ConversationLevel>('A1');
@@ -7008,7 +7011,7 @@ export default function AuthenticatedApp({
           className={`flex min-h-screen bg-[#f8fafc] ${isRtl ? 'flex-row' : 'flex-row-reverse'}`}
         >
           {/* Navigation - Responsive Strategy */}
-          {view !== 'placement-test' && (
+          {view !== 'placement-test' && view !== 'sara-tutor' && (
             <>
               {/* Mobile Top Header */}
               <header className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-slate-100 z-50 px-4 py-2.5 flex justify-between items-center shadow-sm">
@@ -7019,7 +7022,6 @@ export default function AuthenticatedApp({
                     <p className="text-[7px] text-[#C49E3A] font-bold uppercase tracking-widest leading-none">{t.academySubName}</p>
                   </div>
                 </div>
-
                 {/* Quick Access Pills for Newly Added Sections */}
                 <div className="flex items-center gap-1.5">
                   <button 
@@ -7029,7 +7031,6 @@ export default function AuthenticatedApp({
                   >
                     <Search size={14} className="text-[#58cc02]" />
                   </button>
-
                   <button 
                     onClick={() => setView('interactive-learning')}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[10px] font-black transition-all cursor-pointer ${
@@ -7042,7 +7043,6 @@ export default function AuthenticatedApp({
                     <span>{isRtl ? 'تعليم تفاعلي ⚡' : 'Interactive Play ⚡'}</span>
                   </button>
                 </div>
-
                 <button 
                   onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
                   className="bg-slate-50 p-2 rounded-lg border border-slate-100 text-[#002147] font-black text-[9px]"
@@ -7051,104 +7051,282 @@ export default function AuthenticatedApp({
                 </button>
               </header>
 
-              {/* Desktop/Tablet Sidebar */}
-              <aside className={`hidden md:flex ${isRtl ? 'right-0 border-l-2' : 'left-0 border-r-2'} w-20 lg:w-56 bg-white text-slate-800 flex-col p-4 lg:p-5 fixed h-full z-[60] transition-all border-slate-200 pointer-events-auto`}>
-                <div className="flex items-center gap-3 px-1 mb-6 overflow-hidden">
-                  <div className="w-10 h-10 lg:w-11 lg:h-11 bg-[#58cc02] rounded-xl flex shrink-0 items-center justify-center text-white shadow-md font-black text-xl lg:text-2xl relative animate-bounce-slow">
-                    🦉
+              {/* Dedicated Tablet Top Navigation Bar (Clean, Functional & Conflict-Free for iPads & Tablets) */}
+              <header className={`hidden md:flex lg:hidden fixed top-0 ${isRtl ? 'right-20 left-0' : 'left-20 right-0'} h-16 bg-white/95 backdrop-blur-md border-b-2 border-slate-200 z-40 px-3.5 items-center justify-between select-none shadow-xs transition-all`}>
+                {/* Left: Active View Badge */}
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-[#002147]/5 border border-[#002147]/10 text-[#002147] font-black text-xs truncate max-w-[210px]">
+                    <span className="w-2 h-2 rounded-full bg-[#58cc02] animate-pulse shrink-0" />
+                    <span className="truncate">
+                      {(() => {
+                        switch (view as string) {
+                          case 'dashboard': return isRtl ? 'لوحة التحكم الرئيسية' : 'Dashboard';
+                          case 'sara-tutor': return isRtl ? 'سارة – معلمتك الذكية 👩‍🏫' : 'Teacher Sara 👩‍🏫';
+                          case 'grammar-academy': return isRtl ? 'أكاديمية القواعد 📐' : 'Grammar Academy 📐';
+                          case 'reading-lab': return isRtl ? 'مختبر القراءة 📖' : 'Reading Lab 📖';
+                          case 'writing-spelling-studio': return isRtl ? 'استوديو التعبير والإملاء ✍️' : 'Writing Studio ✍️';
+                          case 'pronunciation-lab': return isRtl ? 'معمل النطق 🎙️' : 'Speech Lab 🎙️';
+                          case 'interactive-learning': return isRtl ? 'تعليم تفاعلي ⚡' : 'Interactive Learning ⚡';
+                          case 'educational-games': return isRtl ? 'واحة الألعاب والآداب 🎮' : 'Games Hub 🎮';
+                          case 'academic-planner': return isRtl ? 'الجدول الدراسي الذكي 📅' : 'Smart Planner 📅';
+                          case 'ai-curriculum': return isRtl ? 'منهج الذكاء الاصطناعي 🧠' : 'AI Curriculum 🧠';
+                          case 'story-library': return isRtl ? 'مكتبة القصص المصورة 📚' : 'Stories 📚';
+                          case 'video-library': return isRtl ? 'مكتبة الفيديو 🎬' : 'Videos 🎬';
+                          case 'progress': return isRtl ? 'تقارير الإنجاز والتقدم 📊' : 'Progress 📊';
+                          case 'leaderboard': return isRtl ? 'لوحة المتصدرين 🏆' : 'Leaderboard 🏆';
+                          case 'early-childhood': return isRtl ? 'قسم الطفولة المبكرة 👶' : 'Early Childhood 👶';
+                          case 'balance-oasis': return isRtl ? 'واحة التوازن النفسي 🌊' : 'Balance Oasis 🌊';
+                          default: return t.academyName;
+                        }
+                      })()}
+                    </span>
                   </div>
-                  <h1 className={`font-black text-sm lg:text-lg tracking-tight hidden lg:block leading-tight ${isRtl ? 'text-right' : 'text-left'} text-slate-800`}>
-                    {t.academyName}<br/><span className="text-[#58cc02] text-[10px] font-bold tracking-widest">{t.academySubName}</span>
-                    {userProfile?.role === UserRole.ADMIN && (
-                      <span className="block mt-1 text-[9px] bg-red-500 text-white px-2 py-0.5 rounded-full w-fit uppercase font-black tracking-widest">Admin</span>
+                </div>
+
+                {/* Center: Tablet Quick-Access Learning Dock */}
+                <div className="hidden sm:flex items-center gap-1 bg-slate-100/90 p-1 rounded-2xl border border-slate-200/80">
+                  {[
+                    { id: 'dashboard', label: isRtl ? 'الرئيسية' : 'Home', icon: LayoutDashboard },
+                    { id: 'sara-tutor', label: isRtl ? 'سارة 👩‍🏫' : 'Sara', icon: Sparkles },
+                    { id: 'grammar-academy', label: isRtl ? 'القواعد 📐' : 'Grammar', icon: Brain },
+                    { id: 'interactive-learning', label: isRtl ? 'ألعاب ⚡' : 'Play', icon: Gamepad2 },
+                    { id: 'academic-planner', label: isRtl ? 'الجدول 📅' : 'Planner', icon: Sparkles },
+                  ].map((dockItem) => {
+                    const isDockActive = view === dockItem.id;
+                    const DockIcon = dockItem.icon;
+                    return (
+                      <button
+                        key={`tablet-dock-${dockItem.id}`}
+                        onClick={() => setView(dockItem.id as AppView)}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                          isDockActive
+                            ? 'bg-[#58cc02] text-white shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+                        }`}
+                      >
+                        <DockIcon size={14} className={isDockActive ? 'text-white' : 'text-slate-500'} />
+                        <span>{dockItem.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Right: Search, Streak, Lang & Full Menu Drawer Toggle */}
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setIsCommandPaletteOpen(true)}
+                    className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 cursor-pointer active:scale-95 transition-all"
+                    title={isRtl ? 'بحث سريع (Ctrl + K)' : 'Quick Search (Ctrl + K)'}
+                  >
+                    <Search size={15} className="text-[#58cc02]" />
+                  </button>
+                  <div className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] font-black">
+                    <Flame size={14} className="text-amber-500 fill-amber-500" />
+                    <span>{userProfile?.points ? `${userProfile.points} XP` : '0 XP'}</span>
+                  </div>
+                  <button
+                    onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
+                    className="px-2.5 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[#002147] font-black text-xs cursor-pointer active:scale-95 transition-all"
+                  >
+                    {lang === 'ar' ? 'EN' : 'عربي'}
+                  </button>
+                  <button
+                    onClick={() => setIsTabletSidebarExpanded(!isTabletSidebarExpanded)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#002147] hover:bg-[#002147]/90 text-white text-xs font-black shadow-xs cursor-pointer active:scale-95 transition-all"
+                    title={isRtl ? 'عرض جميع أقسام الأكاديمية' : 'All Sections'}
+                  >
+                    {isTabletSidebarExpanded ? <PanelLeftClose size={15} /> : <PanelLeftOpen size={15} />}
+                    <span className="hidden md:inline">{isTabletSidebarExpanded ? (isRtl ? 'إغلاق' : 'Close') : (isRtl ? 'الأقسام' : 'Sections')}</span>
+                  </button>
+                </div>
+              </header>
+
+              {/* Tablet Sidebar Backdrop Overlay */}
+              <AnimatePresence>
+                {isTabletSidebarExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setIsTabletSidebarExpanded(false)}
+                    className="hidden md:block lg:hidden fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-[65]"
+                  />
+                )}
+              </AnimatePresence>
+
+              {/* Desktop/Tablet Sidebar (Touch-Optimized Rail on Tablet, Full Bar on Desktop) */}
+              <aside className={`hidden md:flex ${isRtl ? 'right-0 border-l-2' : 'left-0 border-r-2'} ${
+                isTabletSidebarExpanded ? 'w-72 md:w-80 shadow-2xl z-[70]' : 'w-20 lg:w-64 shadow-xs z-[45]'
+              } bg-white text-slate-800 flex-col p-2 lg:p-4 fixed h-full transition-all duration-300 border-slate-200 pointer-events-auto select-none`}>
+                <div className="flex items-center justify-between gap-2 px-1 mb-4 overflow-hidden">
+                  <div className="flex items-center gap-2.5 overflow-hidden">
+                    <div className="w-10 h-10 lg:w-11 lg:h-11 bg-[#58cc02] rounded-2xl flex shrink-0 items-center justify-center text-white shadow-md font-black text-xl lg:text-2xl relative animate-bounce-slow">
+                      🦉
+                    </div>
+                    <div className={`leading-tight ${isTabletSidebarExpanded ? 'block' : 'hidden lg:block'} truncate`}>
+                      <h1 className={`font-black text-xs lg:text-sm tracking-tight ${isRtl ? 'text-right' : 'text-left'} text-slate-800 truncate`}>
+                        {t.academyName}
+                      </h1>
+                      <span className="text-[#58cc02] text-[9px] lg:text-[10px] font-black tracking-widest block truncate">
+                        {t.academySubName}
+                      </span>
+                      {userProfile?.role === UserRole.ADMIN && (
+                        <span className="inline-block mt-0.5 text-[8px] bg-red-500 text-white px-2 py-0.5 rounded-full uppercase font-black tracking-widest">Admin</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Tablet Sidebar Expand/Collapse Toggle Button */}
+                  <button
+                    onClick={() => setIsTabletSidebarExpanded(!isTabletSidebarExpanded)}
+                    className="hidden md:flex lg:hidden p-2 rounded-xl bg-slate-100 hover:bg-[#58cc02]/10 text-slate-600 hover:text-[#58cc02] transition-all cursor-pointer items-center justify-center shrink-0 border border-slate-200 active:scale-95"
+                    title={isTabletSidebarExpanded ? (isRtl ? 'تصغير الشريط الجانبي' : 'Collapse sidebar') : (isRtl ? 'توسيع القائمة بالكامل' : 'Expand sidebar')}
+                  >
+                    {isTabletSidebarExpanded ? (
+                      <PanelLeftClose size={18} />
+                    ) : (
+                      <PanelLeftOpen size={18} />
                     )}
-                  </h1>
+                  </button>
                 </div>
 
                 {/* Quick Command Palette Launcher */}
                 <button
                   onClick={() => setIsCommandPaletteOpen(true)}
-                  className="w-full mb-4 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl border border-slate-200 flex items-center justify-between transition-all group cursor-pointer"
+                  className={`mb-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl border border-slate-200 flex items-center transition-all group cursor-pointer ${
+                    isTabletSidebarExpanded ? 'w-full px-3 justify-between' : 'w-full px-2 justify-center lg:justify-between lg:px-3'
+                  }`}
                   title={isRtl ? 'بحث سريع (Ctrl + K)' : 'Quick Search (Ctrl + K)'}
                 >
                   <div className="flex items-center gap-2">
-                    <Search size={16} className="text-[#58cc02]" />
-                    <span className="text-[11px] font-bold hidden lg:block">{isRtl ? 'بحث في المناهج...' : 'Search academy...'}</span>
+                    <Search size={16} className="text-[#58cc02] shrink-0" />
+                    <span className={`text-[11px] font-bold ${isTabletSidebarExpanded ? 'block' : 'hidden lg:block'}`}>
+                      {isRtl ? 'بحث في المناهج...' : 'Search academy...'}
+                    </span>
                   </div>
-                  <span className="hidden lg:inline-block text-[9px] font-black bg-white px-1.5 py-0.5 rounded border text-slate-400">Ctrl+K</span>
+                  <span className={`text-[9px] font-black bg-white px-1.5 py-0.5 rounded border text-slate-400 ${isTabletSidebarExpanded ? 'block' : 'hidden lg:inline-block'}`}>
+                    Ctrl+K
+                  </span>
                 </button>
-                
-                <nav className="flex-1 space-y-2 overflow-y-auto no-scrollbar">
+
+                {/* Main Navigation List with Touch-Friendly Tablet Rail */}
+                <nav className="flex-1 space-y-1 overflow-y-auto no-scrollbar py-1">
                   {[
-                    { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
-                    { id: 'sara-tutor', label: lang === 'ar' ? 'سارة – محادثة لايف ومعلمتك 👩‍🏫' : 'Teacher Sara – Live Tutor 👩‍🏫', icon: Sparkles },
-                    { id: 'pronunciation-lab', label: lang === 'ar' ? 'معمل النطق 🎙️' : 'Pronunciation Lab 🎙️', icon: Mic },
-                    { id: 'live-translate', label: lang === 'ar' ? 'مترجم المباشر 🌐' : 'Live Translate 🌐', icon: Languages },
-                    { id: 'interactive-learning', label: lang === 'ar' ? 'تعليم تفاعلي ⚡' : 'Interactive Learning ⚡', icon: Gamepad2 },
-                    { id: 'educational-games', label: lang === 'ar' ? 'واحة الألعاب والآداب 🎮' : 'Games & Manners Hub 🎮', icon: Gamepad2 },
-                    { id: 'academic-planner', label: t.academicPlanner, icon: Sparkles },
-                    { id: 'grammar-academy', label: lang === 'ar' ? 'أكاديمية القواعد 📐' : 'Grammar Academy 📐', icon: Brain },
-                    { id: 'reading-lab', label: lang === 'ar' ? 'مختبر القراءة 📖' : 'Reading Lab 📖', icon: BookOpen },
-                    { id: 'writing-spelling-studio', label: lang === 'ar' ? 'استوديو التعبير والإملاء ✍️' : 'Writing & Spelling Studio ✍️', icon: PenTool },
-                    { id: 'admin', label: t.adminCommandCenter, icon: ShieldAlert, show: isAdmin },
-                    { id: 'video-library', label: t.videoLibrary, icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
-                    { id: 'ai-curriculum', label: lang === 'ar' ? 'منهج الذكاء الاصطناعي 🧠' : 'AI Curriculum 🧠', icon: Brain },
-                    { id: 'balance-oasis', label: lang === 'ar' ? 'واحة التوازن 🌊' : 'Balance Oasis 🌊', icon: Smile },
-                    { id: 'professional-development', label: lang === 'ar' ? 'دورات تطويرية' : 'Developmental Courses', icon: GraduationCap },
-                    { id: 'early-childhood', label: t.earlyChildhood, icon: Baby },
-                    { id: 'story-library', label: t.storyLibrary, icon: BookMarked },
-                    { id: 'progress', label: t.performance, icon: BarChart3 },
-                    { id: 'leaderboard', label: t.leaderboard, icon: Trophy },
-                    { id: 'chat', label: t.chat, icon: MessageSquare },
+                    { id: 'dashboard', label: t.dashboard, shortLabel: isRtl ? 'الرئيسية' : 'Home', icon: LayoutDashboard },
+                    { id: 'sara-tutor', label: lang === 'ar' ? 'سارة – معلمتك 👩‍🏫' : 'Teacher Sara 👩‍🏫', shortLabel: isRtl ? 'سارة 👩‍🏫' : 'Sara', icon: Sparkles },
+                    { id: 'grammar-academy', label: lang === 'ar' ? 'أكاديمية القواعد 📐' : 'Grammar Academy 📐', shortLabel: isRtl ? 'القواعد 📐' : 'Grammar', icon: Brain },
+                    { id: 'reading-lab', label: lang === 'ar' ? 'مختبر القراءة 📖' : 'Reading Lab 📖', shortLabel: isRtl ? 'القراءة 📖' : 'Reading', icon: BookOpen },
+                    { id: 'writing-spelling-studio', label: lang === 'ar' ? 'استوديو التعبير والإملاء ✍️' : 'Writing & Spelling Studio ✍️', shortLabel: isRtl ? 'التعبير ✍️' : 'Writing', icon: PenTool },
+                    { id: 'pronunciation-lab', label: lang === 'ar' ? 'معمل النطق 🎙️' : 'Pronunciation Lab 🎙️', shortLabel: isRtl ? 'النطق 🎙️' : 'Speech', icon: Mic },
+                    { id: 'live-translate', label: lang === 'ar' ? 'مترجم المباشر 🌐' : 'Live Translate 🌐', shortLabel: isRtl ? 'الترجمة 🌐' : 'Translate', icon: Languages },
+                    { id: 'interactive-learning', label: lang === 'ar' ? 'تعليم تفاعلي ⚡' : 'Interactive Learning ⚡', shortLabel: isRtl ? 'تفاعلي ⚡' : 'Interactive', icon: Gamepad2 },
+                    { id: 'educational-games', label: lang === 'ar' ? 'واحة الألعاب والآداب 🎮' : 'Games & Manners Hub 🎮', shortLabel: isRtl ? 'الألعاب 🎮' : 'Games', icon: Gamepad2 },
+                    { id: 'academic-planner', label: t.academicPlanner, shortLabel: isRtl ? 'الجدول 📅' : 'Planner', icon: Sparkles },
+                    { id: 'ai-curriculum', label: lang === 'ar' ? 'منهج الذكاء الاصطناعي 🧠' : 'AI Curriculum 🧠', shortLabel: isRtl ? 'المنهج 🧠' : 'Curriculum', icon: Brain },
+                    { id: 'story-library', label: t.storyLibrary, shortLabel: isRtl ? 'القصص 📚' : 'Stories', icon: BookMarked },
+                    { id: 'video-library', label: t.videoLibrary, shortLabel: isRtl ? 'الفيديو 🎬' : 'Videos', icon: Play, disabled: !videoLessonsEnabled && !isAdmin },
+                    { id: 'progress', label: t.performance, shortLabel: isRtl ? 'التقدم 📊' : 'Progress', icon: BarChart3 },
+                    { id: 'leaderboard', label: t.leaderboard, shortLabel: isRtl ? 'المتصدرين 🏆' : 'Ranks', icon: Trophy },
+                    { id: 'early-childhood', label: t.earlyChildhood, shortLabel: isRtl ? 'الطفولة 👶' : 'Kids', icon: Baby },
+                    { id: 'professional-development', label: lang === 'ar' ? 'دورات تطويرية' : 'Developmental Courses', shortLabel: isRtl ? 'الدورات 🎓' : 'Courses', icon: GraduationCap },
+                    { id: 'balance-oasis', label: lang === 'ar' ? 'واحة التوازن 🌊' : 'Balance Oasis 🌊', shortLabel: isRtl ? 'الواحة 🌊' : 'Oasis', icon: Smile },
+                    { id: 'chat', label: t.chat, shortLabel: isRtl ? 'المحادثة 💬' : 'Chat', icon: MessageSquare },
+                    { id: 'admin', label: t.adminCommandCenter, shortLabel: isRtl ? 'الإدارة 🛡️' : 'Admin', icon: ShieldAlert, show: isAdmin },
                   ].filter(item => item.show !== false).map((item) => {
                     const isDisabled = (item as any).disabled;
                     const isActive = view === item.id;
                     return (
-                      <button 
-                        key={item.id}
-                        disabled={isDisabled}
-                        title={item.label}
-                        onClick={() => {
-                        if (item.id === 'ai-chat') {
-                          handleStartAiChat();
-                        } else {
-                          setView(item.id as AppView);
-                        }
-                      }}
-                        className={`w-full flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-3 lg:py-3.5 rounded-xl lg:rounded-2xl transition-all group relative overflow-hidden text-slate-600 ${
-                          isActive 
-                          ? 'bg-[#58cc02]/10 text-[#58cc02] border-2 border-b-4 border-[#58cc02] font-black' 
-                          : 'hover:bg-slate-100/80 border-2 border-transparent text-slate-500 hover:text-slate-800'
-                        } ${isDisabled ? 'opacity-30 cursor-not-allowed grayscale' : ''}`}
-                      >
-                        <item.icon size={innerWidth < 1024 ? 22 : 20} className={`shrink-0 group-hover:scale-110 transition-transform ${isActive ? 'text-[#58cc02]' : 'text-slate-400'}`} />
-                        <span className={`text-[11px] lg:text-xs font-bold hidden lg:block uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'} w-full truncate`}>
-                          {item.label}
-                          {isDisabled && (
-                            <span className={`block text-[7px] font-black tracking-widest ${isRtl ? 'mt-0.5' : 'mt-0.5'} opacity-60`}>
-                              ({t.comingSoon})
-                            </span>
+                      <div key={item.id} className="relative group/nav w-full">
+                        <button 
+                          disabled={isDisabled}
+                          title={item.label}
+                          onClick={() => {
+                            if (item.id === 'ai-chat') {
+                              handleStartAiChat();
+                            } else {
+                              setView(item.id as AppView);
+                              setIsTabletSidebarExpanded(false);
+                            }
+                          }}
+                          className={`w-full flex ${
+                            isTabletSidebarExpanded 
+                              ? 'flex-row items-center gap-3 px-3 py-2.5 justify-start' 
+                              : 'flex-col items-center justify-center p-2 lg:flex-row lg:items-center lg:gap-3 lg:px-3 lg:py-2.5 lg:justify-start'
+                          } rounded-xl lg:rounded-2xl transition-all group relative overflow-hidden text-slate-600 ${
+                            isActive 
+                              ? 'bg-[#58cc02]/15 text-[#58cc02] border-2 border-[#58cc02] font-black shadow-xs' 
+                              : 'hover:bg-slate-100/80 border-2 border-transparent text-slate-500 hover:text-slate-800'
+                          } ${isDisabled ? 'opacity-30 cursor-not-allowed grayscale' : ''}`}
+                        >
+                          <item.icon size={20} className={`shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-[#58cc02]' : 'text-slate-400'}`} />
+                          
+                          {/* Tablet Rail Touch Label: clearly visible under icon */}
+                          <span className={`text-[9px] font-black tracking-tight text-center leading-tight truncate max-w-[66px] mt-1 transition-colors ${
+                            isActive ? 'text-[#58cc02]' : 'text-slate-600 group-hover:text-slate-900'
+                          } ${isTabletSidebarExpanded ? 'hidden' : 'block lg:hidden'}`}>
+                            {item.shortLabel}
+                          </span>
+
+                          {/* Desktop / Expanded Label */}
+                          <span className={`text-[11px] lg:text-xs font-bold uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'} truncate ${
+                            isTabletSidebarExpanded ? 'block' : 'hidden lg:block'
+                          }`}>
+                            {item.label}
+                            {isDisabled && (
+                              <span className={`block text-[7px] font-black tracking-widest mt-0.5 opacity-60`}>
+                                ({t.comingSoon})
+                              </span>
+                            )}
+                          </span>
+
+                          {/* Active indicator bar for tablet collapsed mode */}
+                          {isActive && !isTabletSidebarExpanded && (
+                            <span className={`hidden md:block lg:hidden absolute ${isRtl ? 'left-0.5' : 'right-0.5'} top-2 bottom-2 w-1 bg-[#58cc02] rounded-full`} />
                           )}
-                        </span>
-                      </button>
+                        </button>
+                      </div>
                     );
                   })}
                 </nav>
 
-                <div className="pt-6 mt-6 border-t border-slate-100 space-y-2">
+                <div className="pt-2 mt-1 border-t border-slate-100 space-y-1">
                   <button 
                     onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-                    className="w-full flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition-all group"
+                    className={`w-full flex ${
+                      isTabletSidebarExpanded ? 'flex-row items-center gap-3 px-3 py-2 justify-start' : 'flex-col items-center justify-center p-2 lg:flex-row lg:items-center lg:gap-3 lg:px-3 lg:py-2 lg:justify-start'
+                    } rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition-all group`}
+                    title={t.languageToggle}
                   >
-                    <Settings size={20} className="shrink-0 text-slate-400" />
-                    <span className={`text-[10px] lg:text-[11px] font-bold hidden lg:block uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'} w-full truncate`}>{t.languageToggle}</span>
+                    <Settings size={18} className="shrink-0 text-slate-400 group-hover:rotate-45 transition-transform" />
+                    <span className={`text-[9px] font-black tracking-tight text-center leading-tight truncate max-w-[66px] mt-0.5 ${
+                      isTabletSidebarExpanded ? 'hidden' : 'block lg:hidden'
+                    }`}>
+                      {lang === 'ar' ? 'اللغة' : 'Lang'}
+                    </span>
+                    <span className={`text-[10px] lg:text-[11px] font-bold uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'} truncate ${
+                      isTabletSidebarExpanded ? 'block' : 'hidden lg:block'
+                    }`}>
+                      {t.languageToggle}
+                    </span>
                   </button>
                   <button 
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-3 rounded-xl hover:bg-rose-50/80 text-rose-600 transition-all group"
+                    className={`w-full flex ${
+                      isTabletSidebarExpanded ? 'flex-row items-center gap-3 px-3 py-2 justify-start' : 'flex-col items-center justify-center p-2 lg:flex-row lg:items-center lg:gap-3 lg:px-3 lg:py-2 lg:justify-start'
+                    } rounded-xl hover:bg-rose-50/80 text-rose-600 transition-all group`}
+                    title={t.logout}
                   >
-                    <LogOut size={20} className="shrink-0 text-rose-400" />
-                    <span className={`text-[10px] lg:text-[11px] font-bold hidden lg:block uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'} w-full truncate`}>{t.logout}</span>
+                    <LogOut size={18} className="shrink-0 text-rose-400 group-hover:translate-x-1 transition-transform" />
+                    <span className={`text-[9px] font-black tracking-tight text-center leading-tight truncate max-w-[66px] mt-0.5 ${
+                      isTabletSidebarExpanded ? 'hidden' : 'block lg:hidden'
+                    }`}>
+                      {lang === 'ar' ? 'خروج' : 'Exit'}
+                    </span>
+                    <span className={`text-[10px] lg:text-[11px] font-bold uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'} truncate ${
+                      isTabletSidebarExpanded ? 'block' : 'hidden lg:block'
+                    }`}>
+                      {t.logout}
+                    </span>
                   </button>
                 </div>
               </aside>
@@ -7420,8 +7598,8 @@ export default function AuthenticatedApp({
             view === 'placement-test'
               ? ''
               : view === 'ai-chat'
-              ? (isRtl ? 'md:mr-20 lg:mr-56 pt-14 md:pt-0' : 'md:ml-20 lg:ml-56 pt-14 md:pt-0')
-              : (isRtl ? 'md:mr-20 lg:mr-56 mb-24 md:mb-6 pt-16 md:pt-4 pb-28 md:pb-16' : 'md:ml-20 lg:ml-56 mb-24 md:mb-6 pt-16 md:pt-4 pb-28 md:pb-16')
+              ? (isRtl ? 'md:mr-20 lg:mr-64 pt-14 md:pt-20 lg:pt-0' : 'md:ml-20 lg:ml-64 pt-14 md:pt-20 lg:pt-0')
+              : (isRtl ? 'md:mr-20 lg:mr-64 mb-24 md:mb-6 pt-16 md:pt-20 lg:pt-4 pb-28 md:pb-12' : 'md:ml-20 lg:ml-64 mb-24 md:mb-6 pt-16 md:pt-20 lg:pt-4 pb-28 md:pb-12')
           }`}>
             {renderContent()}
 

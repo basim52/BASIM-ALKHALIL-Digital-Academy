@@ -149,6 +149,32 @@
   transform: translateY(2px);
 }
 
+/* No Scrollbar Utility for clean tablet & mobile docks */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* Tablet Sleek Touch Scrollbar */
+.tablet-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.tablet-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.tablet-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 9999px;
+}
+.tablet-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.45);
+}
+
 /* Custom Scrollbar for gradebook list */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;

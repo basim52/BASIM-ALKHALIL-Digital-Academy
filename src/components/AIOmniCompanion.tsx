@@ -372,7 +372,7 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
           animate={{ scale: 1, opacity: 1 }}
           whileHover={{ scale: 1.04 }}
           whileDrag={{ scale: 1.06, cursor: 'grabbing' }}
-          className={`fixed bottom-5 md:bottom-7 ${isRtl ? 'left-3 sm:left-5' : 'right-3 sm:right-5'} z-[55] touch-none select-none cursor-grab active:cursor-grabbing`}
+          className={`fixed bottom-5 md:bottom-8 ${isRtl ? 'left-3 sm:left-5 md:left-24 lg:left-6' : 'right-3 sm:right-5 md:right-24 lg:right-6'} z-[55] touch-none select-none cursor-grab active:cursor-grabbing`}
           dir={isRtl ? 'rtl' : 'ltr'}
           aria-label={isRtl ? 'المساعد الذكي للأكاديمية - قابل للسحب والتصغير' : 'AI Academy Companion - Draggable & Minimizable'}
         >

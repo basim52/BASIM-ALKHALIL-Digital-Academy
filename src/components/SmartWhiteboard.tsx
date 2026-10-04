@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   X, 
   RotateCcw, 
@@ -108,36 +108,36 @@ export const WHITEBOARD_THEMES: WhiteboardTheme[] = [
     nameEn: 'Maldives Turquoise',
     emoji: '🏖️',
     bgHex: '#083344',
-    gradientToHex: '#0e7490',
+    gradientToHex: '#0E7490',
     borderHex: '#2DD4BF',
     headerFrom: '#04212c',
     headerVia: '#083b48',
     headerTo: '#04212c',
     textColor: 'text-white',
     textSecondary: 'text-teal-100/80',
-    accentHex: '#5EEAD4',
-    cardBg: 'rgba(4, 33, 44, 0.65)',
-    cardBorder: 'rgba(45, 212, 191, 0.28)',
-    gridColor: 'rgba(45, 212, 191, 0.07)',
+    accentHex: '#2DD4BF',
+    cardBg: 'rgba(4, 33, 44, 0.75)',
+    cardBorder: 'rgba(45, 212, 191, 0.35)',
+    gridColor: 'rgba(45, 212, 191, 0.08)',
     isLight: false
   },
   {
-    id: 'summer_peach_sunrise',
+    id: 'summer_peach',
     nameAr: 'شروق الصيف الخوخي والذهبي',
     nameEn: 'Summer Peach Sunrise',
     emoji: '🌅',
-    bgHex: '#451a03',
-    gradientToHex: '#78350f',
-    borderHex: '#FB923C',
+    bgHex: '#431407',
+    gradientToHex: '#EA580C',
+    borderHex: '#FDBA74',
     headerFrom: '#270e02',
-    headerVia: '#3d1604',
+    headerVia: '#431407',
     headerTo: '#270e02',
     textColor: 'text-white',
-    textSecondary: 'text-amber-100/80',
+    textSecondary: 'text-orange-100/80',
     accentHex: '#FDBA74',
-    cardBg: 'rgba(40, 15, 3, 0.65)',
-    cardBorder: 'rgba(251, 146, 60, 0.28)',
-    gridColor: 'rgba(251, 146, 60, 0.07)',
+    cardBg: 'rgba(67, 20, 7, 0.75)',
+    cardBorder: 'rgba(253, 186, 116, 0.35)',
+    gridColor: 'rgba(253, 186, 116, 0.08)',
     isLight: false
   },
   {
@@ -146,55 +146,55 @@ export const WHITEBOARD_THEMES: WhiteboardTheme[] = [
     nameEn: 'Icy Lemon & Mint',
     emoji: '🍋',
     bgHex: '#022c22',
-    gradientToHex: '#064e3b',
+    gradientToHex: '#047857',
     borderHex: '#FACC15',
     headerFrom: '#011a14',
     headerVia: '#032c21',
     headerTo: '#011a14',
     textColor: 'text-white',
     textSecondary: 'text-emerald-100/80',
-    accentHex: '#FEF08A',
-    cardBg: 'rgba(2, 35, 27, 0.65)',
-    cardBorder: 'rgba(250, 204, 21, 0.28)',
-    gridColor: 'rgba(163, 230, 53, 0.07)',
+    accentHex: '#FACC15',
+    cardBg: 'rgba(2, 44, 34, 0.75)',
+    cardBorder: 'rgba(250, 204, 21, 0.35)',
+    gridColor: 'rgba(250, 204, 21, 0.08)',
     isLight: false
   },
   {
-    id: 'azure_ocean',
+    id: 'ocean_waves',
     nameAr: 'أمواج المحيط الصيفية',
     nameEn: 'Azure Ocean Waves',
     emoji: '🌊',
-    bgHex: '#082f49',
-    gradientToHex: '#0369a1',
+    bgHex: '#0b192c',
+    gradientToHex: '#1D4ED8',
     borderHex: '#38BDF8',
-    headerFrom: '#041c2c',
-    headerVia: '#072e48',
-    headerTo: '#041c2c',
+    headerFrom: '#040d1a',
+    headerVia: '#0c2340',
+    headerTo: '#040d1a',
     textColor: 'text-white',
     textSecondary: 'text-sky-100/80',
-    accentHex: '#7DD3FC',
-    cardBg: 'rgba(5, 30, 48, 0.65)',
-    cardBorder: 'rgba(56, 189, 248, 0.28)',
-    gridColor: 'rgba(56, 189, 248, 0.07)',
+    accentHex: '#38BDF8',
+    cardBg: 'rgba(11, 25, 44, 0.75)',
+    cardBorder: 'rgba(56, 189, 248, 0.35)',
+    gridColor: 'rgba(56, 189, 248, 0.08)',
     isLight: false
   },
   {
-    id: 'tropical_hibiscus',
-    nameAr: 'غروب استوائي وزهور الهيبيسكس',
-    nameEn: 'Tropical Hibiscus',
+    id: 'tropical_sunset',
+    nameAr: 'غروب استوائي وزهور الهيبسكس',
+    nameEn: 'Tropical Sunset Hibiscus',
     emoji: '🌺',
     bgHex: '#4c0519',
-    gradientToHex: '#831843',
-    borderHex: '#F472B6',
+    gradientToHex: '#BE185D',
+    borderHex: '#FB7185',
     headerFrom: '#2c030e',
     headerVia: '#430617',
     headerTo: '#2c030e',
     textColor: 'text-white',
     textSecondary: 'text-pink-100/80',
-    accentHex: '#FBCFE8',
-    cardBg: 'rgba(38, 4, 13, 0.65)',
-    cardBorder: 'rgba(244, 114, 182, 0.28)',
-    gridColor: 'rgba(244, 114, 182, 0.07)',
+    accentHex: '#FB7185',
+    cardBg: 'rgba(76, 5, 25, 0.75)',
+    cardBorder: 'rgba(251, 113, 133, 0.35)',
+    gridColor: 'rgba(251, 113, 133, 0.08)',
     isLight: false
   },
   {
@@ -383,8 +383,13 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   const [activeThemeId, setActiveThemeId] = useState<string>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('alkhalil_whiteboard_theme');
-      if (saved && WHITEBOARD_THEMES.some(t => t.id === saved)) {
-        return saved;
+      if (saved) {
+        if (saved === 'summer_peach_sunrise') return 'summer_peach';
+        if (saved === 'azure_ocean') return 'ocean_waves';
+        if (saved === 'tropical_hibiscus') return 'tropical_sunset';
+        if (WHITEBOARD_THEMES.some(t => t.id === saved)) {
+          return saved;
+        }
       }
     }
     return 'maldives_turquoise';
@@ -851,9 +856,11 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
       if (isTablet) {
         const isLandscape = w >= h;
         // Perfect proportions for iPad Mini, iPad 10.2", iPad Air 10.9", iPad Pro 11", and Android tablets
+        const availW = w - 96; // accounts for 80px tablet rail + margins
+        const availH = h - 84; // accounts for 64px tablet top bar + margins
         return {
-          width: Math.min(isLandscape ? 1040 : 820, Math.round(w * 0.94)),
-          height: Math.min(isLandscape ? 740 : 920, Math.round(h * 0.88))
+          width: Math.min(isLandscape ? 980 : 700, Math.round(availW * 0.98)),
+          height: Math.min(isLandscape ? 680 : 860, Math.round(availH * 0.95))
         };
       }
       if (w < 640) {
@@ -909,6 +916,19 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
     if (isMaximized) setIsMaximized(false);
     updateBoardSize(w, h);
     setShowSizeMenu(false);
+  };
+
+  const handleApplyTabletPreset = () => {
+    if (typeof window !== 'undefined') {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const isLandscape = w >= h;
+      const targetW = Math.min(isLandscape ? 980 : 700, Math.round((w - 96) * 0.98));
+      const targetH = Math.min(isLandscape ? 680 : 860, Math.round((h - 84) * 0.95));
+      handleApplyPreset(targetW, targetH);
+    } else {
+      handleApplyPreset(880, 660);
+    }
   };
 
   const startCornerResize = (e: React.MouseEvent | React.TouchEvent, corner: 'bottom-left' | 'bottom-right' | 'bottom' | 'left' | 'right') => {
@@ -989,7 +1009,13 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   const dragControls = useDragControls();
   const [positionKey, setPositionKey] = useState(0);
 
-  const currentTheme = WHITEBOARD_THEMES.find(t => t.id === activeThemeId) || WHITEBOARD_THEMES[0];
+  const currentTheme = useMemo(() => {
+    let resolvedId = activeThemeId;
+    if (resolvedId === 'summer_peach_sunrise') resolvedId = 'summer_peach';
+    if (resolvedId === 'azure_ocean') resolvedId = 'ocean_waves';
+    if (resolvedId === 'tropical_hibiscus') resolvedId = 'tropical_sunset';
+    return WHITEBOARD_THEMES.find(t => t.id === resolvedId) || WHITEBOARD_THEMES[0];
+  }, [activeThemeId]);
 
   // Auto-adapt pen color if user selects white theme and current pen is white
   useEffect(() => {
@@ -1855,18 +1881,18 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
         transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-        className={`fixed z-50 flex flex-col font-sans transition-[border-radius,box-shadow] select-none ${
+        className={`fixed z-[75] flex flex-col font-sans transition-[border-radius,box-shadow] select-none ${
           isMaximized 
             ? 'inset-0 sm:inset-2 md:inset-3 lg:inset-4 xl:inset-6 rounded-none sm:rounded-3xl border-0 sm:border-4' 
             : mobileMode === 'half'
               ? 'inset-x-0 bottom-0 top-auto h-[58dvh] max-h-[75dvh] rounded-t-3xl rounded-b-none border-t-4 border-x-0 border-b-0 sm:hidden'
-              : 'inset-0 sm:inset-auto sm:top-4 md:top-6 lg:top-6 sm:left-1/2 sm:-translate-x-1/2 lg:left-1/2 lg:-translate-x-1/2 xl:left-auto xl:translate-x-0 xl:right-6 rounded-none sm:rounded-3xl border-0 sm:border-4'
+              : 'inset-0 sm:inset-auto sm:top-4 md:top-[74px] md:bottom-3 md:start-[88px] md:end-3 md:left-auto md:right-auto md:translate-x-0 lg:top-6 lg:left-1/2 lg:-translate-x-1/2 lg:start-auto lg:end-auto xl:left-auto xl:translate-x-0 xl:right-6 rounded-none sm:rounded-3xl border-0 sm:border-4'
         } shadow-2xl overflow-hidden`}
         style={{
           borderColor: currentTheme.borderHex,
           backgroundColor: currentTheme.bgHex,
           boxShadow: `0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 30px ${currentTheme.borderHex}44`,
-          ...(!isMaximized && typeof window !== 'undefined' && window.innerWidth >= 640
+          ...(!isMaximized && typeof window !== 'undefined' && window.innerWidth >= 1024
             ? {
                 width: `${Math.min(window.innerWidth - 20, customSize.width)}px`,
                 height: `${Math.min(window.innerHeight - 24, customSize.height)}px`,
@@ -1947,14 +1973,15 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <h3 
-                  className="text-xs sm:text-base font-black tracking-wide truncate"
+                  className="text-xs sm:text-sm lg:text-base font-black tracking-wide truncate"
                   style={{ color: currentTheme.accentHex }}
                 >
                   <span className="sm:hidden">{isRtl ? 'السبورة 📐' : 'Whiteboard 📐'}</span>
-                  <span className="hidden sm:inline">{isRtl ? 'السبورة الذكية للشرح 📐' : 'Smart Whiteboard 📐'}</span>
+                  <span className="hidden sm:inline lg:hidden">{isRtl ? 'السبورة الذكية 📐' : 'Smartboard 📐'}</span>
+                  <span className="hidden lg:inline">{isRtl ? 'السبورة الذكية للشرح 📐' : 'Smart Whiteboard 📐'}</span>
                 </h3>
               </div>
-              <p className="text-[9px] sm:text-[11px] text-amber-200/70 font-medium truncate max-w-[120px] xs:max-w-[180px] sm:max-w-[280px]">
+              <p className="hidden md:block text-[9px] sm:text-[10px] lg:text-[11px] text-amber-200/70 font-medium truncate max-w-[100px] lg:max-w-[240px]">
                 {boardData?.title || (isRtl ? 'مساحة الشرح والكتابة' : 'Interactive chalkboard')}
               </p>
             </div>
@@ -2014,50 +2041,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
             </div>
           </div>
 
-          {/* SECTION 2: CONTEXTUAL ACTIONS (CENTER) */}
-          <div className="hidden md:flex items-center gap-1 sm:gap-1.5 shrink-0">
-            {/* Select Curriculum on Whiteboard */}
-            {onOpenCurriculum && (
-              <button
-                onClick={onOpenCurriculum}
-                className="px-2.5 py-1 rounded-xl border border-amber-400/50 bg-amber-400/20 hover:bg-amber-400/35 text-amber-200 hover:text-white text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
-                title={isRtl ? 'استعراض واختيار مناهج الأكاديمية لشرحها على السبورة' : 'Select Academy Curriculum'}
-              >
-                <span>📚</span>
-                <span className="text-[11px]">{isRtl ? 'المناهج' : 'Curricula'}</span>
-              </button>
-            )}
-
-            {/* Sara Arabic / English Language Toggle */}
-            {onToggleLang && (
-              <button
-                onClick={onToggleLang}
-                className="px-2 sm:px-2.5 py-1 rounded-xl border border-amber-400/40 bg-white/10 hover:bg-white/20 text-amber-300 text-xs font-black flex items-center gap-1 transition-all cursor-pointer shadow-xs active:scale-95"
-                title={isRtl ? 'تبديل لغة الشرح لسارة بين العربية والإنجليزية' : 'Toggle explanation language (Arabic / English)'}
-              >
-                <span className="text-[11px]">🌐</span>
-                <span className="text-[10px] sm:text-[11px] font-black">{currentLang === 'ar' ? 'English' : 'عربي'}</span>
-              </button>
-            )}
-
-            {/* Toggle Sara 3D Presence */}
-            {onToggleSara3D && (
-              <button
-                onClick={onToggleSara3D}
-                className={`px-2 py-1 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1 ${
-                  isSara3DOpen
-                    ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm'
-                    : 'bg-white/10 hover:bg-white/20 text-amber-200 border-white/20'
-                }`}
-                title={isRtl ? 'إظهار / إخفاء مجسم سارة 3D بجانب السبورة' : 'Toggle Sara 3D Character'}
-              >
-                <span className="text-[11px]">👩‍🏫</span>
-                <span className="text-[11px]">{isRtl ? 'سارة 3D' : 'Sara 3D'}</span>
-              </button>
-            )}
-          </div>
-
-          {/* SECTION 3: TOOLS & WINDOW CONTROLS (RIGHT) */}
+          {/* SECTION 2: TOOLS & WINDOW CONTROLS (RIGHT) */}
           <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             {/* Theme Picker Toggle */}
             <div className="relative">
@@ -2148,28 +2132,28 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
             {/* Save Board as Image Button (Header) */}
             <button
               onClick={saveWhiteboardAsImage}
-              className="p-1.5 sm:px-2.5 sm:py-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1 shadow-sm transition-all cursor-pointer active:scale-95"
+              className="p-1.5 sm:px-2 sm:py-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1 shadow-sm transition-all cursor-pointer active:scale-95 shrink-0"
               title={isRtl ? 'حفظ اللوحة بالكامل كصورة للمراجعة لاحقاً 📸' : 'Save Whiteboard as Image 📸'}
             >
               <Camera size={14} className="text-slate-900" />
-              <span className="hidden sm:inline">{isRtl ? 'حفظ اللوحة' : 'Save'}</span>
+              <span className="hidden lg:inline">{isRtl ? 'حفظ اللوحة' : 'Save'}</span>
             </button>
 
             {/* Finish Lesson & Save Result Button */}
             {onFinishLesson && (
               <button
                 onClick={() => onFinishLesson(quizScore, totalQuestions)}
-                className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:brightness-110 text-white font-black text-xs flex items-center gap-1.5 shadow-md transition-all cursor-pointer active:scale-95 border border-emerald-300/40"
+                className="p-1.5 sm:px-2.5 sm:py-1 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:brightness-110 text-white font-black text-xs flex items-center gap-1.5 shadow-md transition-all cursor-pointer active:scale-95 border border-emerald-300/40 shrink-0"
                 title={isRtl ? 'إنهاء الدرس وتسجيل النتيجة وحفظ التقدم 🎓' : 'Finish Lesson & Record Result 🎓'}
               >
                 <Trophy size={14} className="text-amber-300" />
-                <span className="hidden sm:inline">{isRtl ? 'إنهاء الدرس وحفظ النتيجة 🎓' : 'Finish & Save 🎓'}</span>
-                <span className="sm:hidden">{isRtl ? 'إنهاء' : 'Finish'}</span>
+                <span className="hidden lg:inline">{isRtl ? 'إنهاء وحفظ 🎓' : 'Finish & Save 🎓'}</span>
+                <span className="lg:hidden">{isRtl ? 'إنهاء' : 'Finish'}</span>
               </button>
             )}
 
             {/* Whiteboard Scale & Size Controller (تكبير وتصغير حسب الرغبة) */}
-            <div className="relative hidden xs:flex items-center bg-black/40 p-0.5 rounded-xl border border-white/10 text-xs font-bold" ref={sizeMenuRef}>
+            <div className="relative hidden lg:flex items-center bg-black/40 p-0.5 rounded-xl border border-white/10 text-xs font-bold" ref={sizeMenuRef}>
               {/* Zoom Out Button (-) */}
               <button
                 onClick={handleScaleDown}
@@ -2186,8 +2170,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                 title={isRtl ? 'التحكم بمقاسات السبورة وتكبيرها/تصغيرها حسب الرغبة 📐' : 'Whiteboard size controls & presets 📐'}
               >
                 <Scaling size={12} className="text-amber-400" />
-                <span className="hidden md:inline">{customSize.width}×{customSize.height}</span>
-                <span className="hidden sm:inline md:hidden">{isRtl ? 'الحجم' : 'Size'}</span>
+                <span>{customSize.width}×{customSize.height}</span>
               </button>
 
               {/* Zoom In Button (+) */}
@@ -2248,17 +2231,17 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                       </button>
 
                       <button
-                        onClick={() => handleApplyPreset(880, 660)}
+                        onClick={handleApplyTabletPreset}
                         className="w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-slate-200 transition-all cursor-pointer text-start"
                       >
                         <div className="flex items-center gap-2">
                           <span className="text-base">📟</span>
                           <div>
-                            <div className="font-black text-white">{isRtl ? 'تابلت وآيباد (iPad / Tablet)' : 'iPad & Tablet'}</div>
-                            <div className="text-[10px] text-slate-400 font-normal">{isRtl ? 'المقاس القياسي لأجهزة الآيباد وقلم أبل' : '880 × 660 px'}</div>
+                            <div className="font-black text-white">{isRtl ? 'تابلت وآيباد ذكي (iPad / Tablet)' : 'Smart iPad & Tablet'}</div>
+                            <div className="text-[10px] text-slate-400 font-normal">{isRtl ? 'مقاس متجاوب ومثالي للتابلت وقلم أبل' : 'Optimized touch & stylus ratio'}</div>
                           </div>
                         </div>
-                        <span className="text-[10px] font-mono text-amber-300">880×660</span>
+                        <span className="text-[10px] font-mono text-amber-300">Tablet Fit</span>
                       </button>
 
                       <button
@@ -2336,65 +2319,68 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
             {/* Mobile Half/Full Screen Toggle (sm:hidden) */}
             <button
               onClick={() => setMobileMode(prev => prev === 'fullscreen' ? 'half' : 'fullscreen')}
-              className="sm:hidden p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-amber-200 transition-all cursor-pointer text-xs flex items-center gap-1 font-bold"
+              className="sm:hidden p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-amber-200 transition-all cursor-pointer text-xs flex items-center gap-1 font-bold shrink-0"
               title={mobileMode === 'fullscreen' ? (isRtl ? 'تصغير لنصف الشاشة ◫' : 'Half screen') : (isRtl ? 'تكبير كامل الشاشة ⛶' : 'Full screen')}
             >
               <Scaling size={13} />
               <span className="text-[10px]">{mobileMode === 'fullscreen' ? (isRtl ? 'نصف' : 'Half') : (isRtl ? 'كامل' : 'Full')}</span>
             </button>
 
-            {/* Reset position button (desktop only) */}
-            {!isMaximized && (
+            {/* Grouped Window Controls Pill (Tidy & Consistent across tablet & desktop) */}
+            <div className="flex items-center gap-1 bg-black/35 p-0.5 rounded-xl border border-white/10 shrink-0">
+              {/* Reset position button (desktop only) */}
+              {!isMaximized && (
+                <button
+                  onClick={resetPosition}
+                  className="hidden lg:block p-1.5 rounded-lg text-amber-200/80 hover:text-amber-200 hover:bg-white/10 transition-all cursor-pointer"
+                  title={isRtl ? 'إعادة للموضع الافتراضي' : 'Reset position'}
+                >
+                  <RotateCcw size={13} />
+                </button>
+              )}
+
+              {/* Minimize to dock pill button */}
               <button
-                onClick={resetPosition}
-                className="hidden sm:block p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-amber-200/80 hover:text-amber-200 transition-all cursor-pointer"
-                title={isRtl ? 'إعادة للموضع الافتراضي' : 'Reset position'}
+                onClick={() => setIsMinimized(true)}
+                className="p-1.5 rounded-lg text-amber-200/80 hover:text-amber-200 hover:bg-white/10 transition-all cursor-pointer"
+                title={isRtl ? 'تصغير إلى شريط عائم أسفل الشاشة' : 'Minimize to floating dock'}
               >
-                <RotateCcw size={14} />
+                <Minus size={13} />
               </button>
-            )}
 
-            {/* Minimize to dock pill button */}
-            <button
-              onClick={() => setIsMinimized(true)}
-              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-amber-200/80 hover:text-amber-200 transition-all cursor-pointer"
-              title={isRtl ? 'تصغير إلى شريط عائم أسفل الشاشة' : 'Minimize to floating dock'}
-            >
-              <Minus size={14} />
-            </button>
+              {/* Maximize toggle */}
+              <button
+                onClick={() => {
+                  if (typeof window !== 'undefined' && window.innerWidth < 640) {
+                    setMobileMode(prev => prev === 'fullscreen' ? 'half' : 'fullscreen');
+                  } else {
+                    setIsMaximized(!isMaximized);
+                  }
+                }}
+                className="p-1.5 rounded-lg text-amber-200/80 hover:text-amber-200 hover:bg-white/10 transition-all cursor-pointer"
+                title={isMaximized ? (isRtl ? 'استعادة الحجم' : 'Restore') : (isRtl ? 'تكبير كامل الشاشة' : 'Maximize')}
+              >
+                {isMaximized ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+              </button>
 
-            {/* Maximize toggle */}
-            <button
-              onClick={() => {
-                if (typeof window !== 'undefined' && window.innerWidth < 640) {
-                  setMobileMode(prev => prev === 'fullscreen' ? 'half' : 'fullscreen');
-                } else {
-                  setIsMaximized(!isMaximized);
-                }
-              }}
-              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-amber-200/80 transition-all cursor-pointer"
-              title={isMaximized ? (isRtl ? 'استعادة الحجم' : 'Restore') : (isRtl ? 'تكبير كامل الشاشة' : 'Maximize')}
-            >
-              {isMaximized ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-            </button>
-
-            {/* Close button */}
-            <button
-              onClick={onClose}
-              className="p-1.5 sm:p-2 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white transition-all cursor-pointer shrink-0"
-              title={isRtl ? 'إغلاق السبورة' : 'Close whiteboard'}
-            >
-              <X size={15} />
-            </button>
+              {/* Close button */}
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white transition-all cursor-pointer shrink-0"
+                title={isRtl ? 'إغلاق السبورة' : 'Close whiteboard'}
+              >
+                <X size={14} />
+              </button>
+            </div>
           </div>
         </div>
 
         {/* ======================================================== */}
         {/* SARA VOICE EXPLAINER CONTROL RIBBON */}
         {/* ======================================================== */}
-        <div className="bg-slate-950/60 backdrop-blur-md px-3 sm:px-4 py-2 border-b border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs shrink-0 select-none">
+        <div className="bg-slate-950/60 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 border-b border-white/10 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar text-xs shrink-0 select-none">
           {/* Sara Status & Soundwave Indicator */}
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0 shrink-0">
             <div className="relative shrink-0">
               <div className={`w-8 h-8 rounded-full bg-gradient-to-tr from-[#002147] to-[#0d4a8f] border-2 flex items-center justify-center text-sm shadow-md transition-transform ${
                 isSaraSpeaking ? 'border-amber-400 ring-2 ring-amber-400/50 scale-105' : 'border-white/30'
@@ -2413,23 +2399,23 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               <div className="flex items-center gap-1.5 font-black text-amber-200">
                 <span>{isRtl ? 'المعلمة سارة' : 'Teacher Sara'}</span>
                 {isSaraSpeaking ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-400/40 animate-pulse">
+                  <span className="inline-flex items-center gap-1 text-[10px] bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-400/40 animate-pulse shrink-0">
                     <Volume2 size={11} className="text-amber-400" />
-                    <span>{isRtl ? 'تشرح السبورة الآن بالصوت 🎙️' : 'Explaining Whiteboard 🎙️'}</span>
+                    <span>{isRtl ? 'تشرح بالصوت 🎙️' : 'Explaining 🎙️'}</span>
                   </span>
                 ) : isSaraThinking ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] bg-purple-400/20 text-purple-300 px-2 py-0.5 rounded-full border border-purple-400/40">
+                  <span className="inline-flex items-center gap-1 text-[10px] bg-purple-400/20 text-purple-300 px-2 py-0.5 rounded-full border border-purple-400/40 shrink-0">
                     <Sparkles size={11} className="animate-spin" />
-                    <span>{isRtl ? 'تجهز السبورة لطلبك... 🪄' : 'Updating whiteboard... 🪄'}</span>
+                    <span>{isRtl ? 'تجهز السبورة... 🪄' : 'Updating... 🪄'}</span>
                   </span>
                 ) : (
-                  <span className="text-[10px] text-emerald-300/90 font-bold flex items-center gap-1">
+                  <span className="text-[10px] text-emerald-300/90 font-bold flex items-center gap-1 shrink-0">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>{isRtl ? 'جاهزة للشرح والتفاعل 🌟' : 'Ready to explain 🌟'}</span>
+                    <span>{isRtl ? 'جاهزة للشرح 🌟' : 'Ready 🌟'}</span>
                   </span>
                 )}
               </div>
-              <p className="text-[10px] text-amber-100/70 truncate max-w-[200px] xs:max-w-[280px] sm:max-w-[420px]">
+              <p className="text-[10px] text-amber-100/70 truncate max-w-[160px] xs:max-w-[220px] sm:max-w-[340px]">
                 {currentExplanationText || (isRtl ? 'انقر "اشرحي بالصوت" أو اطلب أي قاعدة ومثال من سارة' : 'Click "Explain Aloud" or ask Sara to write anything')}
               </p>
             </div>
@@ -2437,10 +2423,50 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
 
           {/* Action Buttons */}
           <div className="flex items-center gap-1.5 shrink-0">
+            {/* Select Curriculum on Whiteboard */}
+            {onOpenCurriculum && (
+              <button
+                onClick={onOpenCurriculum}
+                className="px-2 sm:px-2.5 py-1.5 rounded-xl border border-amber-400/40 bg-amber-400/15 hover:bg-amber-400/30 text-amber-200 hover:text-white text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
+                title={isRtl ? 'استعراض واختيار مناهج الأكاديمية لشرحها على السبورة' : 'Select Academy Curriculum'}
+              >
+                <span>📚</span>
+                <span className="text-[11px]">{isRtl ? 'المناهج' : 'Curricula'}</span>
+              </button>
+            )}
+
+            {/* Sara Arabic / English Language Toggle */}
+            {onToggleLang && (
+              <button
+                onClick={onToggleLang}
+                className="px-2 sm:px-2.5 py-1.5 rounded-xl border border-amber-400/40 bg-white/10 hover:bg-white/20 text-amber-300 text-xs font-black flex items-center gap-1 transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
+                title={isRtl ? 'تبديل لغة الشرح لسارة بين العربية والإنجليزية' : 'Toggle explanation language (Arabic / English)'}
+              >
+                <span className="text-[11px]">🌐</span>
+                <span className="text-[11px] font-black">{currentLang === 'ar' ? 'English' : 'عربي'}</span>
+              </button>
+            )}
+
+            {/* Toggle Sara 3D Presence */}
+            {onToggleSara3D && (
+              <button
+                onClick={onToggleSara3D}
+                className={`px-2 sm:px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
+                  isSara3DOpen
+                    ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm'
+                    : 'bg-white/10 hover:bg-white/20 text-amber-200 border-white/20'
+                }`}
+                title={isRtl ? 'إظهار / إخفاء مجسم سارة 3D بجانب السبورة' : 'Toggle Sara 3D Character'}
+              >
+                <span className="text-[11px]">👩‍🏫</span>
+                <span className="text-[11px]">{isRtl ? 'سارة 3D' : 'Sara 3D'}</span>
+              </button>
+            )}
+
             {isSaraSpeaking ? (
               <button
                 onClick={stopVoiceExplanation}
-                className="px-3 py-1.5 rounded-xl bg-rose-500/25 hover:bg-rose-500/40 border border-rose-500/40 text-rose-200 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-rose-500/25 hover:bg-rose-500/40 border border-rose-500/40 text-rose-200 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
               >
                 <VolumeX size={14} className="text-rose-400" />
                 <span>{isRtl ? 'إيقاف الصوت ⏹️' : 'Stop Audio ⏹️'}</span>
@@ -2448,21 +2474,21 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
             ) : (
               <button
                 onClick={handleExplainWholeBoard}
-                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-md hover:scale-105 active:scale-95"
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-md hover:scale-105 active:scale-95 shrink-0"
                 title={isRtl ? 'سارة تشرح كامل السبورة بالصوت وتمر على الأقسام' : 'Sara explains whole whiteboard with voice'}
               >
                 <Volume2 size={14} className="animate-bounce" />
-                <span>{isRtl ? 'اشرحي لي السبورة بالصوت 🎙️✨' : 'Explain Aloud 🎙️✨'}</span>
+                <span>{isRtl ? 'اشرحي لي السبورة 🎙️' : 'Explain Aloud 🎙️'}</span>
               </button>
             )}
 
             <button
               onClick={handleDrawChalkExplanation}
-              className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-amber-200 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
+              className="px-2 sm:px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-amber-200 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer shrink-0"
               title={isRtl ? 'رسم وشرح تفاعلي بالطبشور على اللوح' : 'Write with chalk on board'}
             >
               <PenTool size={13} />
-              <span className="hidden sm:inline">{isRtl ? 'كتابة بالطبشور ✍️' : 'Chalk ✍️'}</span>
+              <span className="hidden sm:inline">{isRtl ? 'طبشور ✍️' : 'Chalk ✍️'}</span>
             </button>
           </div>
         </div>
@@ -3531,14 +3557,15 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
             </div>
 
             {/* ======================================================== */}
-            {/* DESKTOP SPACIOUS TOOLBAR (hidden sm:flex) */}
+            {/* DESKTOP & TABLET SPACIOUS TOOLBAR (hidden sm:flex) */}
+            {/* Optimized for iPads, Stylus/Apple Pencil & Touch Tablets */}
             {/* ======================================================== */}
             <div className="hidden sm:flex flex-col gap-2">
-              {/* ROW 1: CORE DRAWING TOOLS, ERASER & STEP-BY-STEP UNDO/REDO */}
-              <div className="flex items-center justify-between flex-wrap gap-2">
+              {/* ROW 1: CORE DRAWING TOOLS, BRUSH SIZE CHIPS & STEP ACTIONS */}
+              <div className="flex items-center justify-between gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5">
                 
                 {/* SECTION A: DRAWING TOOLS & ERASER */}
-                <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10">
+                <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10 shrink-0">
                   <button
                     onClick={() => setSelectedTool('pen')}
                     className={`px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
@@ -3602,12 +3629,8 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                   </button>
                 </div>
 
-                {/* SECTION B: BRUSH SIZE SELECTOR WITH LIVE PREVIEW */}
-                <div className="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-2xl border border-white/10">
-                  <span className="text-[10px] text-amber-200/80 font-bold hidden sm:inline">
-                    {isRtl ? 'حجم الفرشاة:' : 'Brush Size:'}
-                  </span>
-
+                {/* SECTION B: BRUSH SIZE SELECTOR (TOUCH-OPTIMIZED FOR TABLETS) */}
+                <div className="flex items-center gap-1.5 bg-black/40 px-2 sm:px-2.5 py-1 rounded-2xl border border-white/10 shrink-0">
                   {/* Live Circle Preview Indicator */}
                   <div 
                     className="w-6 h-6 rounded-full flex items-center justify-center bg-black/50 border border-white/30 shrink-0"
@@ -3624,46 +3647,43 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                     />
                   </div>
 
-                  {/* Slider */}
-                  <input
-                    type="range"
-                    min="2"
-                    max="32"
-                    value={lineWidth}
-                    onChange={(e) => setLineWidth(Number(e.target.value))}
-                    className="w-16 sm:w-24 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400"
-                    title={`${lineWidth}px`}
-                  />
-
-                  <span className="text-[10px] font-mono font-bold text-amber-200 w-6 text-center">
-                    {lineWidth}p
-                  </span>
-
-                  {/* Preset Chips */}
-                  <div className="hidden sm:flex items-center gap-0.5 border-s border-white/20 ps-1.5">
+                  {/* Preset Chips (Direct Fast Tap for Stylus / Touch) */}
+                  <div className="flex items-center gap-1">
                     {[
-                      { size: 3, label: 'S', titleAr: 'ناعم 3px' },
-                      { size: 7, label: 'M', titleAr: 'متوسط 7px' },
-                      { size: 14, label: 'L', titleAr: 'عريض 14px' },
-                      { size: 26, label: 'XL', titleAr: 'تلوين عريض 26px' }
-                    ].map(({ size, label, titleAr }) => (
+                      { size: 3, label: 'ناعم 3p', labelEn: 'S', titleAr: 'ناعم 3px' },
+                      { size: 7, label: 'متوسط 7p', labelEn: 'M', titleAr: 'متوسط 7px' },
+                      { size: 14, label: 'عريض 14p', labelEn: 'L', titleAr: 'عريض 14px' },
+                      { size: 26, label: 'XL 26p', labelEn: 'XL', titleAr: 'تلوين عريض 26px' }
+                    ].map(({ size, label, labelEn, titleAr }) => (
                       <button
                         key={`brush-preset-${size}`}
                         onClick={() => setLineWidth(size)}
-                        className={`w-5 h-5 rounded-md text-[10px] font-black transition-all cursor-pointer flex items-center justify-center ${
+                        className={`px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-black transition-all cursor-pointer flex items-center justify-center ${
                           lineWidth === size 
                             ? 'text-slate-950 font-black shadow-xs' 
-                            : 'text-slate-400 hover:text-white bg-white/5'
+                            : 'text-slate-400 hover:text-white bg-white/5 hover:bg-white/10'
                         }`}
                         style={{
                           backgroundColor: lineWidth === size ? currentTheme.borderHex : undefined
                         }}
                         title={titleAr}
                       >
-                        {label}
+                        <span className="hidden md:inline">{isRtl ? label : labelEn}</span>
+                        <span className="md:hidden">{labelEn}</span>
                       </button>
                     ))}
                   </div>
+
+                  {/* Slider for precision (Large Screens) */}
+                  <input
+                    type="range"
+                    min="2"
+                    max="32"
+                    value={lineWidth}
+                    onChange={(e) => setLineWidth(Number(e.target.value))}
+                    className="hidden xl:inline-block w-20 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400"
+                    title={`${lineWidth}px`}
+                  />
                 </div>
 
                 {/* SECTION C: STEP-BY-STEP UNDO, REDO & CLEAR */}
@@ -3712,15 +3732,15 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                     title={isRtl ? 'حفظ اللوحة بالكامل كصورة عالية الدقة 📸' : 'Save Whiteboard Image'}
                   >
                     <Camera size={13} className="text-slate-900" />
-                    <span className="hidden sm:inline">{isRtl ? 'حفظ كصورة 📸' : 'Save 📸'}</span>
+                    <span className="hidden sm:inline">{isRtl ? 'حفظ 📸' : 'Save 📸'}</span>
                   </button>
                 </div>
               </div>
 
               {/* ROW 2: EXPANDED 10 PEN COLORS + TEMPLATES & STICKERS (BALANCED FOR IPAD & TABLETS) */}
-              <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/10 flex-wrap">
-                {/* 10 Kid-Friendly Colors */}
-                <div className="flex items-center gap-1.5 shrink-0 overflow-x-auto py-0.5">
+              <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/10 overflow-x-auto no-scrollbar py-0.5">
+                {/* 10 Kid-Friendly Colors with smooth touch scroll */}
+                <div className="flex items-center gap-1.5 shrink-0 overflow-x-auto no-scrollbar py-0.5">
                   <span className="text-[10px] text-amber-200/70 font-bold hidden sm:inline ml-1">
                     {isRtl ? 'الألوان:' : 'Colors:'}
                   </span>
@@ -3746,8 +3766,14 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                   })}
                 </div>
 
-                {/* Templates & Stickers Buttons */}
+                {/* Templates, Stickers & Stylus Status */}
                 <div className="flex items-center gap-1.5 shrink-0 relative">
+                  {/* Tablet Stylus & Palm Rejection Status Indicator */}
+                  <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-black/40 border border-white/10 text-amber-300 text-[10px] font-black">
+                    <PenTool size={11} className="text-amber-400" />
+                    <span>{isRtl ? 'حساسية القلم واللمس نشطة ✏️' : 'Stylus Active ✏️'}</span>
+                  </div>
+
                   {/* TEMPLATES POPUP BUTTON */}
                   <button
                     onClick={() => {
