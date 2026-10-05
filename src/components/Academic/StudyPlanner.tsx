@@ -62,9 +62,11 @@ import {
 interface StudyPlannerProps {
   lang: Language;
   onBack: () => void;
-  onNavigateToResults: () => void;
+  onNavigateToResults?: () => void;
   onNavigateToLesson: (courseId: string, level: string, unitId: string) => void;
   userProfile: UserProfile | null;
+  isSaraModal?: boolean;
+  onStartWithSara?: (lesson: CurriculumLesson) => void;
 }
 
 export const StudyPlanner: React.FC<StudyPlannerProps> = ({ 
@@ -72,7 +74,9 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
   userProfile,
   onBack, 
   onNavigateToResults,
-  onNavigateToLesson 
+  onNavigateToLesson,
+  isSaraModal = false,
+  onStartWithSara
 }) => {
   const t = translations[lang];
   const isRtl = lang === 'ar';
@@ -556,6 +560,22 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
     return Math.max(...generatedPlan.map(i => i.month), 1);
   }, [generatedPlan]);
 
+  const handleLessonClick = (item: PlanItem) => {
+    if (onStartWithSara) {
+      const match = allCurriculumLessons.find(l => 
+        l.id === item.unitId || 
+        (l.courseId === item.courseId && l.level === item.level) ||
+        (l.titleAr && item.topic && l.titleAr.includes(item.topic)) ||
+        (l.titleEn && item.topic && l.titleEn.includes(item.topic))
+      );
+      if (match) {
+        onStartWithSara(match);
+        return;
+      }
+    }
+    onNavigateToLesson(item.courseId, item.level, item.unitId);
+  };
+
   return (
     <div className={`p-4 md:p-8 max-w-7xl mx-auto ${isRtl ? 'rtl text-right' : 'ltr text-left'}`}>
       {/* Top Header */}
@@ -563,18 +583,24 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
         <div className="flex items-center justify-between w-full mb-6">
           <button 
             onClick={onBack}
-            className="flex items-center gap-2 text-slate-500 hover:text-[#002147] transition-colors p-2 rounded-2xl hover:bg-slate-100"
+            className="flex items-center gap-2 text-slate-500 hover:text-[#002147] transition-colors p-2 rounded-2xl hover:bg-slate-100 cursor-pointer"
           >
             <ArrowLeft size={20} className={isRtl ? 'rotate-180' : ''} />
-            <span className="font-bold text-sm">{isRtl ? 'الرئيسية' : 'Dashboard'}</span>
+            <span className="font-bold text-sm">
+              {isSaraModal ? (isRtl ? 'العودة لسارة 👩‍🏫' : 'Back to Sara 👩‍🏫') : (isRtl ? 'الرئيسية' : 'Dashboard')}
+            </span>
           </button>
           <div className="text-center">
             <h2 className="text-2xl md:text-4xl font-black text-[#002147] flex items-center gap-3 justify-center mb-1">
               <Brain className="text-blue-600" size={36} />
-              {isRtl ? 'الخطة الدراسية الذكية الشاملة' : 'Smart Academic Study Planner'}
+              {isSaraModal 
+                ? (isRtl ? 'الخطة الأكاديمية والجدول الذكي مع سارة 👩‍🏫🗓️' : 'Smart Academic Study Plan with Sara 👩‍🏫🗓️')
+                : (isRtl ? 'الخطة الدراسية الذكية الشاملة' : 'Smart Academic Study Planner')}
             </h2>
             <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">
-              {isRtl ? 'تغطي كافة أقسام ومناهج الأكاديمية الـ 12' : 'Full Integration Across All 12 Academy Pillars'}
+              {isSaraModal
+                ? (isRtl ? 'نفس خطة الأكاديمية تماماً • اضغط على أي درس لتشرحه سارة فوراً بالصوت والسبورة!' : 'Identical to Academy Plan • Click any lesson for Sara to explain on the whiteboard!')
+                : (isRtl ? 'تغطي كافة أقسام ومناهج الأكاديمية الـ 12' : 'Full Integration Across All 12 Academy Pillars')}
             </p>
           </div>
           <div className="w-10" />
@@ -1280,11 +1306,17 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                     </button>
 
                     <button 
-                      onClick={onNavigateToResults}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-[#002147] text-white rounded-xl text-xs font-black hover:bg-blue-900 transition-all"
+                      onClick={() => {
+                        if (onNavigateToResults) {
+                          onNavigateToResults();
+                        } else {
+                          setActiveTab('history');
+                        }
+                      }}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-[#002147] text-white rounded-xl text-xs font-black hover:bg-blue-900 transition-all cursor-pointer"
                     >
                       <BarChart2 size={14} />
-                      <span>{isRtl ? 'النتائج الأكاديمية' : 'Results'}</span>
+                      <span>{isRtl ? 'النتائج والخطط الأكاديمية' : 'Results & Plans'}</span>
                     </button>
 
                     <button 
@@ -1428,7 +1460,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                                       return (
                                         <div
                                           key={item.id}
-                                          onClick={() => onNavigateToLesson(item.courseId, item.level, item.unitId)}
+                                          onClick={() => handleLessonClick(item)}
                                           className={`flex-1 min-w-[280px] p-4 rounded-2xl border transition-all cursor-pointer group/item relative ${
                                             isTest
                                               ? 'bg-indigo-50/70 border-indigo-200 hover:border-indigo-400'
@@ -1470,6 +1502,17 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                                               </span>
                                               <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded" dir="ltr">
                                                 ({res.total > 0 ? `${res.score}/${res.total}` : `${res.score || 0}`})
+                                              </span>
+                                            </div>
+                                          )}
+                                          {isSaraModal && (
+                                            <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
+                                              <span className="text-[10px] font-black px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 flex items-center gap-1 shadow-2xs group-hover/item:scale-102 transition-transform">
+                                                <span>👩‍🏫</span>
+                                                <span>{isRtl ? 'ادرس واشرح مع سارة 🚀' : 'Learn with Sara 🚀'}</span>
+                                              </span>
+                                              <span className="text-[9px] text-slate-400 font-bold">
+                                                {isRtl ? 'سبورة + صوت' : 'Voice & Board'}
                                               </span>
                                             </div>
                                           )}
@@ -1523,7 +1566,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                               weekItems.map(item => (
                                 <div
                                   key={item.id}
-                                  onClick={() => onNavigateToLesson(item.courseId, item.level, item.unitId)}
+                                  onClick={() => handleLessonClick(item)}
                                   className={`p-3 rounded-2xl border transition-all cursor-pointer ${
                                     item.isTest 
                                       ? 'bg-indigo-100/70 border-indigo-300' 
@@ -1537,6 +1580,12 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                                   <p className="text-xs font-black text-[#002147] line-clamp-2">
                                     {item.topic}
                                   </p>
+                                  {isSaraModal && (
+                                    <div className="mt-1.5 flex items-center gap-1 text-[9px] font-black text-amber-900 bg-amber-200/80 px-2 py-0.5 rounded-lg w-fit">
+                                      <span>👩‍🏫</span>
+                                      <span>{isRtl ? 'مع سارة' : 'With Sara'}</span>
+                                    </div>
+                                  )}
                                 </div>
                               ))
                             )}
