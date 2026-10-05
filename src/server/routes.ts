@@ -1021,6 +1021,7 @@ Looking forward to your reply. Tell me what we're tackling first!`;
 
   // High-fidelity speech synthesizer in-memory cache & helper (Sara Kore Studio Voice)
   const ttsAudioCache = new Map<string, string>();
+  let ttsRateLimitCooldownUntil = 0;
 
   async function generateSaraSpeechAudio(text: string, voiceName: string = "Kore"): Promise<string | null> {
     const clean = text.replace(/[*#_`~>]/g, "").replace(/\[.*?\]\(.*?\)/g, "").trim();
@@ -1050,6 +1051,10 @@ Looking forward to your reply. Tell me what we're tackling first!`;
     const cacheKey = `${targetVoice}:${speechTarget}`;
     if (ttsAudioCache.has(cacheKey)) {
       return ttsAudioCache.get(cacheKey)!;
+    }
+
+    if (Date.now() < ttsRateLimitCooldownUntil) {
+      return null;
     }
 
     // Try up to 2 attempts with brief backoff
@@ -1094,6 +1099,11 @@ Looking forward to your reply. Tell me what we're tackling first!`;
         }
       } catch (err: any) {
         logToFile(`[TTS] Attempt ${attempt + 1} error with gemini-3.8-flash-lite-tts (${targetVoice}): ${err.message}`);
+        // If 429 quota exhaustion, immediately trigger backoff cooldown and abort retries
+        if (err.message?.includes("429") || err.message?.includes("RESOURCE_EXHAUSTED") || err.status === 429) {
+          ttsRateLimitCooldownUntil = Date.now() + 50000;
+          return null;
+        }
         if (attempt === 0) {
           await new Promise(r => setTimeout(r, 400));
         }
@@ -1103,19 +1113,23 @@ Looking forward to your reply. Tell me what we're tackling first!`;
     return null;
   }
 
-  // High-fidelity speech synthesizer endpoint
+  // High-fidelity speech synthesizer endpoint with resilient fallback
   app.post("/api/tts", async (req, res) => {
     try {
       const { text, voiceName } = req.body;
       if (!text) return res.status(400).json({ error: "Text is required" });
 
+      if (Date.now() < ttsRateLimitCooldownUntil) {
+        return res.json({ audio: null, fallback: true, rateLimited: true });
+      }
+
       const audio = await generateSaraSpeechAudio(text, voiceName || "Kore");
       if (audio) {
         return res.json({ audio });
       }
-      return res.status(500).json({ error: "No audio generated" });
+      return res.json({ audio: null, fallback: true });
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      res.json({ audio: null, fallback: true });
     }
   });
 

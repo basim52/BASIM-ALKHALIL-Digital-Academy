@@ -347,6 +347,7 @@ function playNativeFallback(
 // Memory cache for TTS audio chunks to provide zero-latency instant speech on page turns
 const ttsAudioCache = new Map<string, string>();
 const inFlightPrefetch = new Map<string, Promise<string | null>>();
+let clientTtsCooldownUntil = 0;
 
 /**
  * Prefetches and caches audio in the background before the student turns the slide page
@@ -356,6 +357,8 @@ export const prefetchAcademyAudio = async (
   lang: "en" | "ar",
   voiceName: string = "Kore"
 ): Promise<string | null> => {
+  if (Date.now() < clientTtsCooldownUntil) return null;
+
   const cleanText = text
     .replace(/[*#_`~>]/g, "")
     .replace(/\[.*?\]\(.*?\)/g, "")
@@ -384,6 +387,11 @@ export const prefetchAcademyAudio = async (
           ttsAudioCache.set(cacheKey, data.audio);
           return data.audio as string;
         }
+        if (data?.rateLimited) {
+          clientTtsCooldownUntil = Date.now() + 50000;
+        }
+      } else if (response.status === 429) {
+        clientTtsCooldownUntil = Date.now() + 50000;
       }
     } catch (_) {}
     return null;
@@ -439,6 +447,13 @@ export const speakAcademyText = async (
     }
   }
 
+  // 1B. If under rate limit cooldown, use seamless feminine browser fallback immediately
+  if (Date.now() < clientTtsCooldownUntil) {
+    const fallback = playNativeFallback(cleanText, lang, onEnd, playbackRate);
+    currentPlayingNode = fallback;
+    return fallback;
+  }
+
   // Retry up to 2 times for Sara's authentic Gemini voice before considering any fallback
   let lastError: any = null;
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -459,11 +474,21 @@ export const speakAcademyText = async (
         return { stop: () => {} };
       }
 
+      if (response.status === 429) {
+        clientTtsCooldownUntil = Date.now() + 50000;
+        break; // Fast failover to native fallback without burning quota
+      }
+
       if (!response.ok) {
         throw new Error(`TTS server error ${response.status}`);
       }
 
       const data = await response.json();
+      if (data?.rateLimited) {
+        clientTtsCooldownUntil = Date.now() + 50000;
+        break;
+      }
+
       if (!data || !data.audio) {
         throw new Error("No readable audio returned from TTS");
       }
@@ -482,6 +507,10 @@ export const speakAcademyText = async (
       }
     } catch (err: any) {
       lastError = err;
+      if (err.message?.includes("429") || err.message?.includes("RESOURCE_EXHAUSTED")) {
+        clientTtsCooldownUntil = Date.now() + 50000;
+        break;
+      }
       if (attempt === 0) {
         await new Promise((r) => setTimeout(r, 200));
       }

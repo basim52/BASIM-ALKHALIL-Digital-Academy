@@ -613,25 +613,17 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
     return list;
   }, [boardData, isRtl]);
 
-  // 🚀 Fast Zero-Latency Audio Prefetcher: Caches all slide page speeches in memory
-  // so when turning pages, Sara speaks immediately without any network or generation delay!
-  useEffect(() => {
-    if (!isOpen || !whiteboardPages || whiteboardPages.length === 0) return;
-    whiteboardPages.forEach((page) => {
-      if (page.speechText) {
-        const hasArabic = /[\u0600-\u06FF]/.test(page.speechText);
-        prefetchAcademyAudio(page.speechText, hasArabic ? 'ar' : 'en');
-      }
-    });
-  }, [isOpen, whiteboardPages]);
-
-  // Actively pre-warm next page audio
+  // 🚀 Rate-Limit Safe Pre-warmer: Gently pre-caches ONLY the immediate next page
+  // after Sara starts speaking current page, never blasting the API with simultaneous calls
   useEffect(() => {
     if (!isOpen || !whiteboardPages) return;
     const nextPage = whiteboardPages[currentPageIndex + 1];
     if (nextPage && nextPage.speechText) {
-      const hasArabic = /[\u0600-\u06FF]/.test(nextPage.speechText);
-      prefetchAcademyAudio(nextPage.speechText, hasArabic ? 'ar' : 'en');
+      const timer = setTimeout(() => {
+        const hasArabic = /[\u0600-\u06FF]/.test(nextPage.speechText);
+        prefetchAcademyAudio(nextPage.speechText, hasArabic ? 'ar' : 'en');
+      }, 3000);
+      return () => clearTimeout(timer);
     }
   }, [isOpen, currentPageIndex, whiteboardPages]);
 
