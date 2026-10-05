@@ -375,6 +375,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   // Lesson Completion & Result Tracking States
   const [isLessonCompletedModalOpen, setIsLessonCompletedModalOpen] = useState<boolean>(false);
   const [isSavingLessonResult, setIsSavingLessonResult] = useState<boolean>(false);
+  /** Prevents duplicate lessonResults / XP / streak writes on archival retry */
+  const lessonRewardsGrantedRef = useRef<Set<string>>(new Set());
   const [lastSavedLessonResult, setLastSavedLessonResult] = useState<{
     lessonTitle: string;
     level: string;
@@ -1628,83 +1630,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         playSaraVoice(spokenCelebration);
       }
 
-      // 4. Save to Firestore if student is logged in
-      if (profile.uid) {
-        // A. Add to 'lessonResults' (feeds StudyPlanner, ResultsChart, ParentWeeklyReportCard, Badges, etc.)
-        await addDoc(collection(db, 'lessonResults'), {
-          userId: profile.uid,
-          parentIds: (profile as any).linkedParentIds || [],
-          lessonId: lessonId,
-          courseId: courseId,
-          level: level,
-          lessonTitle: lessonTitle,
-          score: boundedScore,
-          total: totalQuestions,
-          percentage: percentage,
-          xpEarned: pointsEarned,
-          timestamp: serverTimestamp(),
-          source: 'sara_tutor'
-        });
-
-        // B. Add to 'user_progress'
-        const progressRef = doc(db, 'user_progress', `${profile.uid}_sara_${lessonId}`);
-        await setDoc(progressRef, {
-          userId: profile.uid,
-          lessonId: `sara_${lessonId}`,
-          title: lessonTitle,
-          score: boundedScore,
-          total: totalQuestions,
-          percentage: percentage,
-          completed: true,
-          updatedAt: new Date(),
-          level: level
-        }, { merge: true });
-
-        // C. Increment XP points on users collection
-        try {
-          await updateDoc(doc(db, 'users', profile.uid), {
-            points: increment(pointsEarned)
-          });
-        } catch (e) {
-          console.warn('Could not increment user points doc:', e);
-        }
-
-        // D. Daily streak activity
-        try {
-          await recordStreakActivity(profile.uid);
-        } catch (e) {
-          console.warn('Could not record streak:', e);
-        }
-
-        // E. Sync to tutorMemory & session log
-        await syncMemoryToFirestore({
-          newNotes: [`أتم الطالب بنجاح درس: ${lessonTitle} (${level}) بنتيجة ${percentage}% وحصل على +${pointsEarned} نقطة 🌟`],
-          mistakes: [],
-          wordsLearned: activeBoard?.sentence ? [activeBoard.highlight || 'lesson'].filter(Boolean) : []
-        }, true, `Lesson Completed: ${lessonTitle}`);
-
-        // F. Update parent AuthenticatedApp state
-        if (onProfileUpdated) {
-          onProfileUpdated({
-            ...profile,
-            points: ((profile as any).points || 0) + pointsEarned
-          } as any);
-        }
-      }
-
-      // 5. LocalStorage backup
-      try {
-        const localKey = `sara_completed_lessons_${profile.uid || 'guest'}`;
-        const prevSaved = JSON.parse(localStorage.getItem(localKey) || '[]');
-        prevSaved.unshift({
-          ...resultSummary,
-          id: lessonId,
-          timestamp: Date.now()
-        });
-        localStorage.setItem(localKey, JSON.stringify(prevSaved.slice(0, 30)));
-      } catch (e) {}
-
-      // 6. Append completion card to chat stream
+      // 4. Append completion card to chat stream (snapshot'd into archival; cleared only after addDoc success)
       const completionMsg: MessageItem = {
         id: `msg_lesson_complete_${Date.now()}`,
         role: 'sara',
@@ -1728,16 +1654,97 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       setMessages(prev => [...prev, completionMsg]);
       setActiveBoard(completionMsg.board || null);
 
-      // 7. Migration & 2-Minute Break System Or All-Done Modal
-      // A. Archive and migrate session to Firestore & LocalStorage ("ترحيل الدرس")
+      // 5. Archive FIRST — chat/board/saraChat/current cleared only inside executeLessonArchival after addDoc success
       const archiveOk = await executeLessonArchival(lessonTitle, boundedScore, totalQuestions, percentage, pointsEarned);
       if (!archiveOk) {
+        // Failure toast already shown; do NOT write lessonResults/XP/streak; break does not start
         return;
       }
 
-      // B. Mark lesson in today's completed tracker
+      // 6. Persist results / XP / streak exactly once per lesson+day (only after archival succeeded)
       const now = new Date();
       const todayYmd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const rewardKey = `${lessonId}_${todayYmd}`;
+      if (!lessonRewardsGrantedRef.current.has(rewardKey)) {
+        lessonRewardsGrantedRef.current.add(rewardKey);
+
+        if (profile.uid) {
+          // A. Add to 'lessonResults' (feeds StudyPlanner, ResultsChart, ParentWeeklyReportCard, Badges, etc.)
+          await addDoc(collection(db, 'lessonResults'), {
+            userId: profile.uid,
+            parentIds: (profile as any).linkedParentIds || [],
+            lessonId: lessonId,
+            courseId: courseId,
+            level: level,
+            lessonTitle: lessonTitle,
+            score: boundedScore,
+            total: totalQuestions,
+            percentage: percentage,
+            xpEarned: pointsEarned,
+            timestamp: serverTimestamp(),
+            source: 'sara_tutor'
+          });
+
+          // B. Add to 'user_progress'
+          const progressRef = doc(db, 'user_progress', `${profile.uid}_sara_${lessonId}`);
+          await setDoc(progressRef, {
+            userId: profile.uid,
+            lessonId: `sara_${lessonId}`,
+            title: lessonTitle,
+            score: boundedScore,
+            total: totalQuestions,
+            percentage: percentage,
+            completed: true,
+            updatedAt: new Date(),
+            level: level
+          }, { merge: true });
+
+          // C. Increment XP points on users collection
+          try {
+            await updateDoc(doc(db, 'users', profile.uid), {
+              points: increment(pointsEarned)
+            });
+          } catch (e) {
+            console.warn('Could not increment user points doc:', e);
+          }
+
+          // D. Daily streak activity
+          try {
+            await recordStreakActivity(profile.uid);
+          } catch (e) {
+            console.warn('Could not record streak:', e);
+          }
+
+          // E. Sync to tutorMemory & session log
+          await syncMemoryToFirestore({
+            newNotes: [`أتم الطالب بنجاح درس: ${lessonTitle} (${level}) بنتيجة ${percentage}% وحصل على +${pointsEarned} نقطة 🌟`],
+            mistakes: [],
+            wordsLearned: activeBoard?.sentence ? [activeBoard.highlight || 'lesson'].filter(Boolean) : []
+          }, true, `Lesson Completed: ${lessonTitle}`);
+
+          // F. Update parent AuthenticatedApp state
+          if (onProfileUpdated) {
+            onProfileUpdated({
+              ...profile,
+              points: ((profile as any).points || 0) + pointsEarned
+            } as any);
+          }
+        }
+
+        // LocalStorage backup of completed lessons
+        try {
+          const localKey = `sara_completed_lessons_${profile.uid || 'guest'}`;
+          const prevSaved = JSON.parse(localStorage.getItem(localKey) || '[]');
+          prevSaved.unshift({
+            ...resultSummary,
+            id: lessonId,
+            timestamp: Date.now()
+          });
+          localStorage.setItem(localKey, JSON.stringify(prevSaved.slice(0, 30)));
+        } catch (e) {}
+      }
+
+      // 7. Mark lesson in today's completed tracker
       const newCompleted = Array.from(new Set([...todayCompletedLessonIds, lessonId]));
       setTodayCompletedLessonIds(newCompleted);
       try {

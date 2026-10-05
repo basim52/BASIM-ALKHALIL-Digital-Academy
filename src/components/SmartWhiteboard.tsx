@@ -586,10 +586,10 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
     }
 
     // Page 3: Detailed Rules & Real-World Models
-    if ((boardData.notes && boardData.notes.length > 0) || boardData.diagram) {
+    if ((Array.isArray(boardData.notes) && boardData.notes.length > 0) || boardData.diagram) {
       const p3Speech = isRtl
-        ? `مرحباً بك في الصفحة الثالثة: القواعد التفصيلية والأمثلة الحية 📌. إليك أهم النقاط الذهبية: ${boardData.notes ? boardData.notes.slice(0, 3).join('. ') : ''}. تطبيق هذه النماذج في حياتك اليومية يمنحك ثقة عالية. راجع الأمثلة المكتوبة بالطبشور، واضغط على 'اقلب الصفحة 📄' لنكشف الفخاخ اللغوية الشائعة!`
-        : `Welcome to Page 3: Detailed Rules & Real-World Models 📌. Key takeaways: ${boardData.notes ? boardData.notes.slice(0, 3).join('. ') : ''}. Review these models, then click 'Turn Page 📄' to uncover common traps!`;
+        ? `مرحباً بك في الصفحة الثالثة: القواعد التفصيلية والأمثلة الحية 📌. إليك أهم النقاط الذهبية: ${Array.isArray(boardData.notes) ? boardData.notes.slice(0, 3).join('. ') : ''}. تطبيق هذه النماذج في حياتك اليومية يمنحك ثقة عالية. راجع الأمثلة المكتوبة بالطبشور، واضغط على 'اقلب الصفحة 📄' لنكشف الفخاخ اللغوية الشائعة!`
+        : `Welcome to Page 3: Detailed Rules & Real-World Models 📌. Key takeaways: ${Array.isArray(boardData.notes) ? boardData.notes.slice(0, 3).join('. ') : ''}. Review these models, then click 'Turn Page 📄' to uncover common traps!`;
 
       list.push({
         id: 'page_rules',
@@ -624,10 +624,10 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
     }
 
     // Page 5: Vocabulary Bank & Speaking Challenge
-    if ((boardData.vocabularyBank && boardData.vocabularyBank.length > 0) || boardData.speakingPrompt) {
+    if ((Array.isArray(boardData.vocabularyBank) && boardData.vocabularyBank.length > 0) || boardData.speakingPrompt) {
       const p5Speech = isRtl
-        ? `نحن الآن في الصفحة الخامسة: بنك المفردات وتحدي التحدث الصوتي 🎙️. ${boardData.vocabularyBank && boardData.vocabularyBank.length > 0 ? `كتبت لك أهم الكلمات مع نطقها: ${boardData.vocabularyBank.map(v => v.word).join('، ')}.` : ''} ${boardData.speakingPrompt ? `والآن دورك لتتحدث بالمايك: ${boardData.speakingPrompt.instruction}.` : ''} تدرب على النطق بالصوت، ثم اضغط على 'اقلب الصفحة 📄' لخوض التحدي والاختبار النهائي!`
-        : `We are on Page 5: Vocabulary Bank & Speaking Challenge 🎙️. ${boardData.vocabularyBank && boardData.vocabularyBank.length > 0 ? `Key words: ${boardData.vocabularyBank.map(v => v.word).join(', ')}.` : ''} ${boardData.speakingPrompt ? `Now speak into your mic: ${boardData.speakingPrompt.instruction}.` : ''} Click 'Turn Page 📄' for the final mastery quiz!`;
+        ? `نحن الآن في الصفحة الخامسة: بنك المفردات وتحدي التحدث الصوتي 🎙️. ${Array.isArray(boardData.vocabularyBank) && boardData.vocabularyBank.length > 0 ? `كتبت لك أهم الكلمات مع نطقها: ${boardData.vocabularyBank.map(v => v.word).join('، ')}.` : ''} ${boardData.speakingPrompt ? `والآن دورك لتتحدث بالمايك: ${boardData.speakingPrompt.instruction}.` : ''} تدرب على النطق بالصوت، ثم اضغط على 'اقلب الصفحة 📄' لخوض التحدي والاختبار النهائي!`
+        : `We are on Page 5: Vocabulary Bank & Speaking Challenge 🎙️. ${Array.isArray(boardData.vocabularyBank) && boardData.vocabularyBank.length > 0 ? `Key words: ${boardData.vocabularyBank.map(v => v.word).join(', ')}.` : ''} ${boardData.speakingPrompt ? `Now speak into your mic: ${boardData.speakingPrompt.instruction}.` : ''} Click 'Turn Page 📄' for the final mastery quiz!`;
 
       list.push({
         id: 'page_speaking',
@@ -643,7 +643,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
     }
 
     // Page 6: Mastery Quiz Challenge
-    if (boardData.quiz || (boardData.quizzes && boardData.quizzes.length > 0)) {
+    if (boardData.quiz || (Array.isArray(boardData.quizzes) && boardData.quizzes.length > 0)) {
       const p6Speech = isRtl
         ? `وصلنا إلى الصفحة الختامية: اختبار الإتقان النهائي 🎯! أمامك 5 أسئلة تدريبية لقياس مدى استيعابك للقاعدة، كل سؤال له مؤقت 30 ثانية. اقرأ كل سؤال بتركيز وانطلق لتحقيق العلامة الكاملة!`
         : `We arrived at Page 6: Final Mastery Challenge 🎯! Here is your progressive 5-question test with a 30-second countdown. Read each question carefully and aim for a perfect score!`;
@@ -764,8 +764,15 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
 
   // Capped at 5 questions maximum per lesson
   const currentQuizList = React.useMemo(() => {
-    if (boardData?.quizzes && boardData.quizzes.length > 0) {
-      return boardData.quizzes.slice(0, 5).map(q => shuffleQuiz(q, false));
+    if (Array.isArray(boardData?.quizzes) && boardData.quizzes.length > 0) {
+      return boardData.quizzes.slice(0, 5).map(q => {
+        const safeQuiz = Array.isArray(q?.options) ? q : { ...q, options: [] as string[] };
+        const shuffled = shuffleQuiz(safeQuiz, false);
+        return {
+          ...shuffled,
+          options: Array.isArray(shuffled.options) ? shuffled.options : []
+        };
+      });
     }
     if (boardData) {
       return buildLimitedLessonQuizSet(
@@ -939,19 +946,20 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
       textToSpeak = isRtl
         ? `انتبه يا بطل، الصيغة الصحيحة هي "${boardData.correction.right}" بدلاً من "${boardData.correction.wrong}". محاولة رائعة!`
         : `Notice the natural form is "${boardData.correction.right}" instead of "${boardData.correction.wrong}". Great effort!`;
-    } else if (section === 'notes' && boardData.notes && boardData.notes.length > 0) {
+    } else if (section === 'notes' && Array.isArray(boardData.notes) && boardData.notes.length > 0) {
       textToSpeak = isRtl
         ? `إليك أهم النقاط الذهبية في درسنا اليوم: ${boardData.notes.join('. ')}`
         : `Here are the key takeaways for today: ${boardData.notes.join('. ')}`;
-    } else if (section === 'diagram' && boardData.diagram) {
+    } else if (section === 'diagram' && boardData.diagram && Array.isArray(boardData.diagram.items)) {
       const itemsList = boardData.diagram.items.map(it => `${it.title}: ${it.desc}`).join(', ');
       textToSpeak = isRtl
         ? `في هذا المخطط التوضيحي، نتعلم: ${itemsList}`
         : `In this vocabulary diagram, let's learn: ${itemsList}`;
     } else if (section === 'quiz' && boardData.quiz) {
+      const quizOpts = Array.isArray(boardData.quiz.options) ? boardData.quiz.options : [];
       textToSpeak = isRtl
-        ? `سؤال التحدي السريع على السبورة: "${boardData.quiz.question}". والخيارات هي: ${boardData.quiz.options.join('، أو ')}. فكّر واختر الإجابة الصحيحة!`
-        : `Whiteboard challenge question: "${boardData.quiz.question}". Your choices are: ${boardData.quiz.options.join(', or ')}. Pick the right one!`;
+        ? `سؤال التحدي السريع على السبورة: "${boardData.quiz.question}". والخيارات هي: ${quizOpts.join('، أو ')}. فكّر واختر الإجابة الصحيحة!`
+        : `Whiteboard challenge question: "${boardData.quiz.question}". Your choices are: ${quizOpts.join(', or ')}. Pick the right one!`;
     }
 
     if (textToSpeak) {
@@ -998,7 +1006,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
         : `And we say "${boardData.correction.right}" instead of "${boardData.correction.wrong}".`);
     }
 
-    if (boardData.notes && boardData.notes.length > 0) {
+    if (Array.isArray(boardData.notes) && boardData.notes.length > 0) {
       parts.push(isRtl
         ? `وأهم الملاحظات الذهبية: ${boardData.notes.slice(0, 2).join('. ')}.`
         : `Key golden tips: ${boardData.notes.slice(0, 2).join('. ')}.`);
@@ -1167,7 +1175,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
     }
 
     // Notes
-    if (boardData?.notes && boardData.notes.length > 0) {
+    if (Array.isArray(boardData?.notes) && boardData.notes.length > 0) {
       ctx.font = '15px system-ui, sans-serif';
       ctx.textAlign = isRtl ? 'right' : 'left';
       ctx.fillStyle = '#E2E8F0';
@@ -1919,7 +1927,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
       if (boardData?.formula) estimatedHeight += 110;
       if (boardData?.sentence) estimatedHeight += 120;
       if (boardData?.correction) estimatedHeight += 90;
-      if (boardData?.notes && boardData.notes.length > 0) estimatedHeight += boardData.notes.length * 45 + 50;
+      if (Array.isArray(boardData?.notes) && boardData.notes.length > 0) estimatedHeight += boardData.notes.length * 45 + 50;
       if (boardData?.diagram) estimatedHeight += 140;
       if (boardData?.quiz) estimatedHeight += 140;
 
@@ -2063,7 +2071,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
         curY += 90;
       }
 
-      if (boardData?.notes && boardData.notes.length > 0) {
+      if (Array.isArray(boardData?.notes) && boardData.notes.length > 0) {
         const notesBoxHeight = 45 + boardData.notes.length * 36;
         ctx.fillStyle = currentTheme.isLight ? '#FFFFFF' : 'rgba(0, 0, 0, 0.35)';
         ctx.strokeStyle = currentTheme.isLight ? '#E2E8F0' : 'rgba(255, 255, 255, 0.12)';
@@ -2091,7 +2099,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
         curY += notesBoxHeight + 20;
       }
 
-      if (boardData?.diagram && boardData.diagram.items.length > 0) {
+      if (boardData?.diagram && Array.isArray(boardData.diagram.items) && boardData.diagram.items.length > 0) {
         ctx.fillStyle = currentTheme.isLight ? '#FFFFFF' : 'rgba(0, 0, 0, 0.35)';
         ctx.strokeStyle = currentTheme.isLight ? '#E2E8F0' : 'rgba(255, 255, 255, 0.12)';
         ctx.lineWidth = 1.5;
@@ -2373,7 +2381,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                 <span>✍️</span>
                 <span>{isRtl ? 'الرسم' : 'Draw'}</span>
               </button>
-              {(boardData?.quiz || (boardData?.quizzes && boardData.quizzes.length > 0)) && (
+              {(boardData?.quiz || (Array.isArray(boardData?.quizzes) && boardData.quizzes.length > 0)) && (
                 <button
                   onClick={() => {
                     setActiveTab('content');
@@ -3284,7 +3292,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                         {isRtl ? 'تفكيك عناصر الجملة نحوياً (Syntax Breakdown) 📐' : 'Sentence Syntax Breakdown 📐'}
                       </span>
                       <div className="flex items-center justify-center flex-wrap gap-2">
-                        {boardData.grammarBreakdown.parts.map((p, pIdx) => {
+                        {Array.isArray(boardData.grammarBreakdown.parts) && boardData.grammarBreakdown.parts.map((p, pIdx) => {
                           const colorClass = 
                             p.color === 'blue' ? 'bg-blue-500/20 text-blue-200 border-blue-400/40' :
                             p.color === 'amber' ? 'bg-amber-500/20 text-amber-200 border-amber-400/40' :
@@ -3322,7 +3330,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                       </div>
 
                       <div className="flex items-center justify-center gap-2 flex-wrap py-1">
-                        {boardData.phoneticBreakdown.syllables?.map((syl, sIdx) => (
+                        {Array.isArray(boardData.phoneticBreakdown.syllables) && boardData.phoneticBreakdown.syllables.map((syl, sIdx) => (
                           <React.Fragment key={`syl-${sIdx}`}>
                             <button
                               onClick={() => onSpeak(syl)}
@@ -3407,7 +3415,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                     : (contentViewFilter === 'all' || contentViewFilter === 'notes')) && (
                     <div className="space-y-4">
                       {/* 💡 GOLDEN NOTES CARD */}
-                      {boardData?.notes && boardData.notes.length > 0 && 
+                      {Array.isArray(boardData?.notes) && boardData.notes.length > 0 && 
                         (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'rules' : true) && (
                         <div 
                           className={`border rounded-2xl sm:rounded-3xl p-4 shadow-xl transition-all ${
@@ -3488,7 +3496,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                       )}
 
                       {/* 📚 VOCABULARY BANK CARD */}
-                      {boardData?.vocabularyBank && boardData.vocabularyBank.length > 0 && 
+                      {Array.isArray(boardData?.vocabularyBank) && boardData.vocabularyBank.length > 0 && 
                         (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'speaking' : true) && (
                         <div
                           className={`border rounded-2xl sm:rounded-3xl p-4 shadow-xl transition-all bg-gradient-to-r from-cyan-950/40 via-teal-950/30 to-slate-900/60 ${
@@ -3572,7 +3580,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                           </div>
 
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {boardData.diagram.items.map((item, dIdx) => (
+                            {Array.isArray(boardData.diagram.items) && boardData.diagram.items.map((item, dIdx) => (
                               <div 
                                 key={`diag-${dIdx}`} 
                                 className="border rounded-xl p-2.5 hover:border-amber-400/50 transition-all bg-white/5"
@@ -3728,7 +3736,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                             {boardData.ccq.question}
                           </p>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {boardData.ccq.options.map((opt, oIdx) => {
+                            {Array.isArray(boardData.ccq.options) && boardData.ccq.options.map((opt, oIdx) => {
                               const isSelected = ccqSelectedOption === oIdx;
                               const isCorrect = oIdx === boardData.ccq!.answerIndex;
                               let btnClass = 'bg-white/10 hover:bg-white/20 text-white border-white/15';
@@ -3988,7 +3996,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
 
                               {/* Options: Full-width, multi-line, touch-friendly, 2x2 grid on tablets/desktop */}
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
-                                {activeQuestion.options.map((opt, oIdx) => {
+                                {(Array.isArray(activeQuestion.options) ? activeQuestion.options : []).map((opt, oIdx) => {
                                   const isSelected = localQuizSelectedOption === oIdx;
                                   const isCorrect = oIdx === activeQuestion.answerIndex;
 
