@@ -572,21 +572,39 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     const all = getAllCurriculumLessons();
     const list: CurriculumLesson[] = [];
 
-    // 1. If study plan has lessons for today
-    if (activeStudyPlan?.planItems && activeStudyPlan.planItems.length > 0) {
-      const now = new Date();
-      const todayYmd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-      const todayMonthShort = now.toLocaleDateString('en-US', { month: 'short' });
-      const todayDay = now.getDate();
+    // Helper matching AuthenticatedApp getItemYmd
+    const getItemYmd = (item: any): string | null => {
+      if (item.date && typeof item.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(item.date.trim())) {
+        return item.date.trim();
+      }
+      if (item.dateString && typeof item.dateString === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(item.dateString.trim())) {
+        return item.dateString.trim();
+      }
+      if (item.scheduledAt && typeof item.scheduledAt === 'string') {
+        try {
+          const d = new Date(item.scheduledAt);
+          if (!isNaN(d.getTime())) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+          }
+        } catch {
+          // ignore
+        }
+      }
+      return null;
+    };
 
+    const now = new Date();
+    const todayYmd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+    // 1. If study plan has lessons for today (strictly compare by local YYYY-MM-DD date only)
+    if (activeStudyPlan?.planItems && activeStudyPlan.planItems.length > 0) {
       const matchedPlanItems = activeStudyPlan.planItems.filter((item: any) => {
         if (!item) return false;
-        if (item.scheduledAt && item.scheduledAt.startsWith(todayYmd)) return true;
-        if (item.dateLabel && typeof item.dateLabel === 'string') {
-          if (item.dateLabel.includes(todayYmd)) return true;
-          if (item.dateLabel.includes(String(todayDay)) && (item.dateLabel.includes(todayMonthShort) || item.dateLabel.includes('أكتوبر') || item.dateLabel.includes('Oct'))) return true;
-        }
-        return false;
+        const itemYmd = getItemYmd(item);
+        return itemYmd === todayYmd;
       });
 
       matchedPlanItems.forEach((pi: any) => {
@@ -613,24 +631,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       });
     }
 
-    // 2. If an activeCurriculumLesson is active, sequence it first and append consecutive lessons
-    if (activeCurriculumLesson) {
-      if (!list.some(x => x.id === activeCurriculumLesson.id)) {
-        list.unshift(activeCurriculumLesson);
-      }
-      const sameCourse = all.filter(l => l.courseId === activeCurriculumLesson.courseId || l.pillarId === activeCurriculumLesson.pillarId);
-      const curIdx = sameCourse.findIndex(l => l.id === activeCurriculumLesson.id);
-      let offset = 1;
-      while (list.length < dailyLessonsTarget && curIdx !== -1 && curIdx + offset < sameCourse.length) {
-        const nextInCourse = sameCourse[curIdx + offset];
-        if (!list.some(x => x.id === nextInCourse.id)) {
-          list.push(nextInCourse);
-        }
-        offset++;
-      }
-    }
-
-    // 3. Fallback sequential lessons to ensure queue length matches dailyLessonsTarget
+    // 2. Sequential fallback to ensure queue length matches dailyLessonsTarget
+    // Fixed order, DO NOT reorder from activeCurriculumLesson so lessons never jump
     let fallbackIdx = 0;
     while (list.length < dailyLessonsTarget && fallbackIdx < all.length) {
       const cand = all[fallbackIdx];
@@ -641,7 +643,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     }
 
     return list.slice(0, dailyLessonsTarget);
-  }, [activeStudyPlan, activeCurriculumLesson, dailyLessonsTarget, isRtl]);
+  }, [activeStudyPlan, dailyLessonsTarget, isRtl]);
 
   const todayScheduledLesson = todayScheduledLessons[currentDailyLessonIndex] || todayScheduledLessons[0] || null;
 
@@ -652,7 +654,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     total: number,
     percentage: number,
     points: number
-  ) => {
+  ): Promise<boolean> => {
     const now = new Date();
     const targetUid = auth.currentUser?.uid || profile.uid;
     const todayYmd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -681,17 +683,30 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       status: 'migrated_completed'
     };
 
+    let archiveSuccess = false;
     if (targetUid) {
       try {
         await addDoc(collection(db, 'users', targetUid, 'saraSessions'), {
           ...sessionData,
           createdAt: serverTimestamp()
         });
+        archiveSuccess = true;
       } catch (err) {
         console.warn('Error saving archived session to Firestore:', err);
+        archiveSuccess = false;
       }
+    } else {
+      archiveSuccess = false;
     }
 
+    // إذا فشل addDoc: لا تمسح الرسائل ولا السبورة ولا saraChat/current، أظهر رسالة خطأ ولا تبدأ الاستراحة
+    if (!archiveSuccess) {
+      setArchiveErrorToast('ما انحفظت الجلسة، حاول مرة ثانية');
+      setTimeout(() => setArchiveErrorToast(null), 4000);
+      return false;
+    }
+
+    // 2. Local storage backup only after addDoc success
     try {
       const storageKey = `sara_archived_sessions_${targetUid || 'guest'}`;
       const existing: any[] = JSON.parse(localStorage.getItem(storageKey) || '[]');
@@ -702,9 +717,10 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       localStorage.setItem(storageKey, JSON.stringify(existing.slice(0, 100)));
     } catch (e) {}
 
-    // Reset current live messages and board to present the next lesson cleanly
+    // Reset current live messages and board to present the next lesson cleanly ONLY AFTER SUCCESS
     setMessages([]);
     setActiveBoard(null);
+    localStorage.removeItem(SARA_STORAGE_KEY(profile.uid));
     if (targetUid && !targetUid.startsWith('sim_')) {
       try {
         await setDoc(doc(db, 'users', targetUid, 'saraChat', 'current'), {
@@ -714,6 +730,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         });
       } catch (_) {}
     }
+
+    return true;
   };
 
   // 🚀 Finish 2-minute break and launch the next lesson!
@@ -1712,7 +1730,10 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
       // 7. Migration & 2-Minute Break System Or All-Done Modal
       // A. Archive and migrate session to Firestore & LocalStorage ("ترحيل الدرس")
-      await executeLessonArchival(lessonTitle, boundedScore, totalQuestions, percentage, pointsEarned);
+      const archiveOk = await executeLessonArchival(lessonTitle, boundedScore, totalQuestions, percentage, pointsEarned);
+      if (!archiveOk) {
+        return;
+      }
 
       // B. Mark lesson in today's completed tracker
       const now = new Date();

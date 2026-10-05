@@ -359,7 +359,58 @@ export const BOARD_SIZE_PRESETS: BoardSizePreset[] = [
   { id: 'wide', nameAr: 'عريضة جداً (استوديو سبورة)', nameEn: 'Ultra Wide (Studio)', width: 1200, height: 800, icon: '📐', descAr: 'أقصى مساحة للكتابة والتلوين', descEn: 'Maximum room for drawing' },
 ];
 
-export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
+// 🛡️ Error Boundary to gracefully catch any rendering errors inside the whiteboard
+interface WhiteboardErrorBoundaryProps {
+  children: React.ReactNode;
+  isRtl?: boolean;
+  onClose?: () => void;
+}
+
+interface WhiteboardErrorBoundaryState {
+  hasError: boolean;
+}
+
+class WhiteboardErrorBoundary extends React.Component<WhiteboardErrorBoundaryProps, WhiteboardErrorBoundaryState> {
+  constructor(props: WhiteboardErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error('SmartWhiteboard Error caught by boundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-slate-900 border border-amber-400/40 rounded-2xl p-6 text-center max-w-sm text-white shadow-2xl">
+            <div className="text-3xl mb-2">⚠️</div>
+            <p className="text-sm font-black mb-4">
+              {this.props.isRtl ? 'صار خطأ في السبورة' : 'صار خطأ في السبورة'}
+            </p>
+            <button
+              onClick={() => {
+                this.setState({ hasError: false });
+                this.props.onClose?.();
+              }}
+              className="px-4 py-2 rounded-xl bg-amber-400 text-slate-950 font-black text-xs hover:bg-amber-300 transition-all cursor-pointer"
+            >
+              {this.props.isRtl ? 'إغلاق السبورة' : 'Close Whiteboard'}
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
   isOpen,
   onClose,
   boardData,
@@ -4869,5 +4920,13 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
         )}
       </motion.div>
     </AnimatePresence>
+  );
+};
+
+export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = (props) => {
+  return (
+    <WhiteboardErrorBoundary isRtl={props.isRtl} onClose={props.onClose}>
+      <SmartWhiteboardComponent {...props} />
+    </WhiteboardErrorBoundary>
   );
 };
