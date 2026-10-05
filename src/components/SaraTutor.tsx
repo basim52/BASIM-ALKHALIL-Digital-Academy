@@ -3426,9 +3426,11 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   {todayScheduledLesson ? (
                     <p className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5 flex-wrap">
                       <span className="text-blue-200 font-bold">{isRtl ? 'درس اليوم المحدد:' : "Today's Lesson:"}</span>
-                      <span className="text-amber-300 underline underline-offset-2">{todayScheduledLesson.topic}</span>
+                      <span className="text-amber-300 underline underline-offset-2">
+                        {isRtl ? todayScheduledLesson.titleAr : todayScheduledLesson.titleEn}
+                      </span>
                       <span className="text-[10px] px-2 py-0.2 rounded-md bg-white/10 text-slate-200 font-normal">
-                        {todayScheduledLesson.courseLabel}
+                        {isRtl ? todayScheduledLesson.courseLabelAr : todayScheduledLesson.courseLabelEn}
                       </span>
                     </p>
                   ) : (
@@ -5532,6 +5534,239 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                     className="w-full py-2 text-slate-500 hover:text-[#002147] text-xs font-bold transition-colors cursor-pointer"
                   >
                     {isRtl ? 'الذهاب إلى أقسام الأكاديمية والتمارين ➔' : 'Explore Academy Curriculum ➔'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ======================================================== */}
+      {/* 7C. 2-MINUTE REST BREAK SYSTEM MODAL (استراحة دقيقتين وترحيل الدرس وعرض التالي) */}
+      {/* ======================================================== */}
+      <AnimatePresence>
+        {isDailyBreakActive && nextLessonAfterBreak && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white rounded-3xl max-w-xl w-full p-5 sm:p-7 shadow-2xl border-4 border-amber-400 relative overflow-hidden text-center"
+            >
+              {/* Decorative aura glow */}
+              <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-amber-300/30 to-teal-300/20 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-blue-300/30 to-purple-300/20 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="relative z-10 space-y-4">
+                {/* Coffee & Meditation Avatar */}
+                <div className="w-16 h-16 mx-auto rounded-3xl bg-gradient-to-br from-amber-500 via-amber-400 to-yellow-500 text-slate-950 flex items-center justify-center shadow-xl border-2 border-white ring-4 ring-amber-300/40">
+                  <Coffee size={32} className="animate-bounce" />
+                </div>
+
+                {/* Header Badge */}
+                <div>
+                  <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-black uppercase tracking-wider inline-flex items-center gap-1.5 border border-amber-300">
+                    <Sparkles size={13} className="text-amber-600" />
+                    <span>{isRtl ? 'استراحة محارب ذكية (دقيقتان) ☕🧘‍♂️' : 'Smart 2-Minute Rest Break ☕🧘‍♂️'}</span>
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-black text-[#002147] mt-2">
+                    {isRtl ? `تم ترحيل الدرس ${currentDailyLessonIndex + 1} بنجاح! خذ نفساً عميقاً` : `Lesson ${currentDailyLessonIndex + 1} Archived! Take a Deep Breath`}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 font-bold mt-1">
+                    {isRtl 
+                      ? 'استرح لمدة دقيقتين لتجديد نشاطك وتركيزك، وسنبدأ الدرس التالي تلقائياً فور انتهاء العداد 🌟'
+                      : 'Rest for 2 minutes to refresh your focus. The next lesson will start automatically! 🌟'}
+                  </p>
+                </div>
+
+                {/* Daily Journey Stepper HUD */}
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3">
+                  <div className="flex items-center justify-between text-[11px] font-black text-slate-500 mb-2">
+                    <span>{isRtl ? 'خريطة مسار دروس اليوم' : "Today's Lessons Journey"}</span>
+                    <span className="text-amber-600 font-black">
+                      {isRtl ? `المكتمل: ${currentDailyLessonIndex + 1} من ${todayScheduledLessons.length}` : `Done: ${currentDailyLessonIndex + 1} of ${todayScheduledLessons.length}`}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 flex-wrap text-xs">
+                    {todayScheduledLessons.map((l, idx) => {
+                      const isDone = idx <= currentDailyLessonIndex;
+                      const isNext = idx === currentDailyLessonIndex + 1;
+                      return (
+                        <React.Fragment key={l.id || idx}>
+                          <div className={`flex items-center gap-1 px-2.5 py-1 rounded-xl font-black transition-all ${
+                            isDone 
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs'
+                              : isNext
+                                ? 'bg-amber-100 text-amber-900 border-2 border-amber-400 ring-2 ring-amber-300/30 animate-pulse'
+                                : 'bg-slate-100 text-slate-400 border border-slate-200'
+                          }`}>
+                            <span>{isDone ? '✅' : isNext ? '⏳' : '🔒'}</span>
+                            <span>{isRtl ? `درس ${idx + 1}` : `Lesson ${idx + 1}`}</span>
+                          </div>
+                          {idx < todayScheduledLessons.length - 1 && (
+                            <span className="text-slate-300 font-bold">➔</span>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Big Circular Countdown Display */}
+                <div className="py-2 flex flex-col items-center justify-center">
+                  <div className="relative flex items-center justify-center">
+                    {/* Breathing animated circle pulse */}
+                    <div className="absolute w-32 h-32 rounded-full bg-amber-400/20 animate-ping pointer-events-none" />
+                    <div className="w-28 h-28 rounded-full bg-gradient-to-br from-[#002147] to-[#093568] border-4 border-amber-400 text-white flex flex-col items-center justify-center shadow-xl">
+                      <span className="text-3xl font-black font-mono tracking-tight text-amber-300">
+                        {Math.floor(breakSecondsLeft / 60)}:{(breakSecondsLeft % 60).toString().padStart(2, '0')}
+                      </span>
+                      <span className="text-[10px] text-amber-200 font-bold uppercase mt-0.5">
+                        {isBreakTimerRunning ? (isRtl ? 'شهيق ... زفير 🌸' : 'Inhale ... Exhale 🌸') : (isRtl ? 'مؤقت متوقف ⏸️' : 'Paused ⏸️')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Next Lesson Preview Card */}
+                <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 border-2 border-blue-200 rounded-2xl p-3.5 text-start">
+                  <div className="flex items-center gap-1.5 text-blue-900 font-black text-xs mb-1">
+                    <BookOpen size={14} className="text-blue-600" />
+                    <span>{isRtl ? 'الدرس القادم بعد انتهاء الاستراحة مباشرة:' : 'Up Next Immediately After Break:'}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <div className="font-black text-slate-900 text-sm">
+                        {isRtl ? nextLessonAfterBreak.titleAr : nextLessonAfterBreak.titleEn}
+                      </div>
+                      <div className="text-[11px] text-slate-500 font-medium">
+                        {isRtl ? nextLessonAfterBreak.courseLabelAr : nextLessonAfterBreak.courseLabelEn} • {nextLessonAfterBreak.level}
+                      </div>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-xl bg-blue-600 text-white font-black text-[10px]">
+                      {isRtl ? `الدرس ${currentDailyLessonIndex + 2}` : `Lesson ${currentDailyLessonIndex + 2}`}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Quick Wellness Tips Grid */}
+                <div className="grid grid-cols-3 gap-2 text-[11px] text-slate-600 font-bold">
+                  <div className="bg-slate-50 p-2 rounded-xl border border-slate-200">
+                    <span className="text-base block mb-0.5">💧</span>
+                    <span>{isRtl ? 'اشرب كوب ماء' : 'Drink Water'}</span>
+                  </div>
+                  <div className="bg-slate-50 p-2 rounded-xl border border-slate-200">
+                    <span className="text-base block mb-0.5">🧘‍♂️</span>
+                    <span>{isRtl ? 'خذ نفساً عميقاً' : 'Deep Breaths'}</span>
+                  </div>
+                  <div className="bg-slate-50 p-2 rounded-xl border border-slate-200">
+                    <span className="text-base block mb-0.5">👀</span>
+                    <span>{isRtl ? 'أرح عينيك' : 'Rest Eyes'}</span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 pt-2">
+                  <button
+                    onClick={() => setIsBreakTimerRunning(prev => !prev)}
+                    className="py-3 px-4 rounded-2xl border-2 border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-black text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                    title={isBreakTimerRunning ? 'إيقاف مؤقت للاستراحة' : 'استئناف الاستراحة'}
+                  >
+                    {isBreakTimerRunning ? <Pause size={14} /> : <Play size={14} />}
+                    <span>{isBreakTimerRunning ? (isRtl ? 'إيقاف مؤقت ⏸️' : 'Pause') : (isRtl ? 'استئناف ▶️' : 'Resume')}</span>
+                  </button>
+
+                  <button
+                    onClick={handleFinishBreakAndStartNextLesson}
+                    className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:brightness-105 active:scale-95 text-slate-950 font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg ring-2 ring-amber-300/50"
+                  >
+                    <Zap size={16} className="text-slate-950" />
+                    <span>
+                      {isRtl
+                        ? `تخطي الاستراحة والبدء بالدرس (${currentDailyLessonIndex + 2}) فوراً ⚡`
+                        : `Skip Break & Start Lesson (${currentDailyLessonIndex + 2}) Now ⚡`}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ======================================================== */}
+      {/* 7D. ALL DAILY LESSONS COMPLETED CELEBRATION MODAL */}
+      {/* ======================================================== */}
+      <AnimatePresence>
+        {isAllDailyLessonsCompletedModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border-4 border-emerald-400 relative overflow-hidden text-center"
+            >
+              <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-emerald-400/30 to-amber-400/20 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-teal-400/30 to-blue-400/20 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="relative z-10 space-y-4">
+                <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br from-[#002147] via-[#093568] to-[#002147] border-2 border-emerald-400 text-white flex items-center justify-center shadow-xl">
+                  <Trophy size={42} className="text-amber-400 animate-bounce" />
+                </div>
+
+                <div>
+                  <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-[11px] font-black uppercase tracking-wider inline-flex items-center gap-1.5 border border-emerald-300">
+                    <Sparkles size={13} className="text-emerald-600" />
+                    <span>{isRtl ? 'إنجاز اليوم الأكاديمي مكتمل 100% 🌟' : '100% Daily Academic Target Achieved 🌟'}</span>
+                  </span>
+                  <h3 className="text-2xl font-black text-[#002147] mt-2">
+                    {isRtl ? 'مبارك يا بطل! أتممت جميع دروس اليوم 🏆' : 'Congratulations! All Lessons Completed Today 🏆'}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 font-bold mt-1">
+                    {isRtl
+                      ? `تم ترحيل كافة الدروس (${todayScheduledLessons.length} دروس) وتوثيق نتائجها في ملفك وسجل درجاتك بنجاح!`
+                      : `All ${todayScheduledLessons.length} lessons were completed, archived, and recorded successfully!`}
+                  </p>
+                </div>
+
+                {/* Lessons Completed Summary List */}
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-start space-y-2">
+                  <div className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
+                    {isRtl ? 'الدروس التي تم إنجازها وترحيلها اليوم:' : 'Lessons Completed & Archived Today:'}
+                  </div>
+                  {todayScheduledLessons.map((l, i) => (
+                    <div key={l.id || i} className="flex items-center justify-between bg-white p-2 rounded-xl border border-slate-100 shadow-2xs text-xs">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                        <div>
+                          <div className="font-black text-slate-800">{isRtl ? l.titleAr : l.titleEn}</div>
+                          <div className="text-[10px] text-slate-500">{isRtl ? l.courseLabelAr : l.courseLabelEn}</div>
+                        </div>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-black text-[10px]">
+                        {isRtl ? 'تم الترحيل والأرشفة ✅' : 'Archived ✅'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2 pt-2">
+                  <button
+                    onClick={() => {
+                      setIsAllDailyLessonsCompletedModalOpen(false);
+                      setIsCurriculumModalOpen(true);
+                    }}
+                    className="flex-1 py-3 px-4 rounded-2xl bg-[#002147] hover:bg-[#073060] text-amber-300 font-black text-xs sm:text-sm transition-all shadow-md cursor-pointer border border-amber-300/40"
+                  >
+                    <span>{isRtl ? 'استكشاف دروس إضافية 📚' : 'Explore Extra Lessons 📚'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => setIsAllDailyLessonsCompletedModalOpen(false)}
+                    className="py-3 px-4 rounded-2xl border-2 border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-black text-xs transition-all cursor-pointer"
+                  >
+                    <span>{isRtl ? 'إغلاق ومتابعة' : 'Close'}</span>
                   </button>
                 </div>
               </div>
