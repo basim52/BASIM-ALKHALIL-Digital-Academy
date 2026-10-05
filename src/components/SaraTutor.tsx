@@ -193,6 +193,136 @@ export interface PlacementState {
   totalScore: number;
 }
 
+
+/** Firestore rejects undefined and arrays-of-arrays; docs max ~1 MiB. Slim archive payloads. */
+const SARA_SESSION_MAX_BYTES = 900_000;
+
+function flattenNestedArraysForFirestore(value: unknown): unknown {
+  if (value === null || value === undefined) return value;
+  if (Array.isArray(value)) {
+    return value.map((item) =>
+      Array.isArray(item) ? JSON.stringify(item) : flattenNestedArraysForFirestore(item)
+    );
+  }
+  if (typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      out[k] = flattenNestedArraysForFirestore(v);
+    }
+    return out;
+  }
+  return value;
+}
+
+function trimBoardForSaraArchive(board: SaraBoardData | null | undefined): Record<string, unknown> | null {
+  if (!board) return null;
+  const trimmed: Record<string, unknown> = {
+    title: board.title ?? null,
+    sentence: board.sentence ?? null,
+    highlight: board.highlight ?? null,
+    correction: board.correction ?? null,
+    quiz: board.quiz ?? null,
+    quizzes: board.quizzes ?? null,
+    notes: board.notes ?? null,
+    formula: board.formula ?? null,
+    diagram: board.diagram ?? null,
+    teacherNote: board.teacherNote ?? null,
+    phoneticBreakdown: board.phoneticBreakdown ?? null,
+    grammarBreakdown: board.grammarBreakdown ?? null,
+    drillChallenge: board.drillChallenge ?? null,
+    learningTip: board.learningTip ?? null,
+    commonPitfall: board.commonPitfall ?? null,
+    mnemonic: board.mnemonic ?? null,
+    ccq: board.ccq ?? null,
+    vocabularyBank: board.vocabularyBank ?? null,
+    speakingPrompt: board.speakingPrompt
+      ? {
+          instruction: board.speakingPrompt.instruction,
+          sampleAnswer: board.speakingPrompt.sampleAnswer ?? null,
+        }
+      : null,
+    voiceExplanation: board.voiceExplanation
+      ? String(board.voiceExplanation).slice(0, 2000)
+      : null,
+  };
+  return flattenNestedArraysForFirestore(
+    JSON.parse(JSON.stringify(trimmed))
+  ) as Record<string, unknown>;
+}
+
+function buildSaraSessionArchiveDoc(fields: {
+  date: string;
+  dateYmd: string;
+  archivedAt: string;
+  lessonTitle: string | null;
+  lessonName: string | null;
+  snippet: string;
+  messages: MessageItem[];
+  activeBoard: SaraBoardData | null;
+  score?: number;
+  total?: number;
+  percentage?: number;
+  pointsEarned?: number;
+  status?: string;
+}): Record<string, unknown> {
+  const slimMessages = fields.messages.map((m) => ({
+    role: m.role,
+    text: String(m.text ?? '').slice(0, 4000),
+    timestamp: typeof m.timestamp === 'number' ? m.timestamp : Date.now(),
+  }));
+
+  let docData: Record<string, unknown> = JSON.parse(
+    JSON.stringify({
+      date: fields.date,
+      dateYmd: fields.dateYmd,
+      archivedAt: fields.archivedAt,
+      lessonTitle: fields.lessonTitle,
+      lessonName: fields.lessonName,
+      messagesCount: fields.messages.length,
+      snippet: fields.snippet,
+      messages: slimMessages,
+      activeBoard: trimBoardForSaraArchive(fields.activeBoard),
+      ...(fields.score !== undefined ? { score: fields.score } : {}),
+      ...(fields.total !== undefined ? { total: fields.total } : {}),
+      ...(fields.percentage !== undefined ? { percentage: fields.percentage } : {}),
+      ...(fields.pointsEarned !== undefined ? { pointsEarned: fields.pointsEarned } : {}),
+      ...(fields.status !== undefined ? { status: fields.status } : {}),
+    })
+  );
+  docData = flattenNestedArraysForFirestore(docData) as Record<string, unknown>;
+
+  const byteLen = (v: unknown) => new TextEncoder().encode(JSON.stringify(v)).length;
+  while (byteLen(docData) > SARA_SESSION_MAX_BYTES) {
+    const msgs = docData.messages as unknown[] | undefined;
+    if (Array.isArray(msgs) && msgs.length > 4) {
+      docData = {
+        ...docData,
+        messages: msgs.slice(0, Math.max(4, Math.ceil(msgs.length / 2))),
+        messagesTruncated: true,
+      };
+      continue;
+    }
+    if (docData.activeBoard) {
+      const board = docData.activeBoard as Record<string, unknown>;
+      docData = {
+        ...docData,
+        activeBoard: {
+          title: board.title ?? null,
+          sentence: board.sentence ?? null,
+        },
+        boardTruncated: true,
+      };
+      if (byteLen(docData) > SARA_SESSION_MAX_BYTES) {
+        docData = { ...docData, activeBoard: null };
+      }
+      break;
+    }
+    break;
+  }
+  return docData;
+}
+
+
 interface SaraTutorProps {
   lang: Language;
   profile: UserProfile;
@@ -668,22 +798,21 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       minute: '2-digit'
     });
 
-    const sessionData = {
+    const sessionData = buildSaraSessionArchiveDoc({
       date: formattedDate,
       dateYmd: todayYmd,
       archivedAt: now.toISOString(),
       lessonTitle: lessonTitle,
       lessonName: lessonTitle,
-      messagesCount: messages.length,
       snippet: `إنجاز وترحيل درس: ${lessonTitle} بنتيجة ${percentage}%`,
-      messages: messages,
+      messages,
       activeBoard: activeBoard || null,
       score,
       total,
       percentage,
       pointsEarned: points,
       status: 'migrated_completed'
-    };
+    });
 
     let archiveSuccess = false;
     if (targetUid) {
@@ -1173,17 +1302,16 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     const rawText = userMsg?.text || firstSaraMsg?.text || tutorMemory.lastSessionSummary || (isRtl ? 'جلسة تدريب مع سارة' : 'Sara Tutoring Session');
     const snippet = rawText.replace(/[*#_`]/g, '').trim().slice(0, 140);
 
-    const sessionData = {
+    const sessionData = buildSaraSessionArchiveDoc({
       date: formattedDate,
       dateYmd: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`,
       archivedAt: now.toISOString(),
       lessonTitle: detectedLessonTitle || null,
       lessonName: detectedLessonTitle || null,
-      messagesCount: messages.length,
       snippet: snippet,
-      messages: messages,
+      messages,
       activeBoard: activeBoard || null
-    };
+    });
 
     // 1. Save to users/{userId}/saraSessions in Firestore
     const targetUid = auth.currentUser?.uid || profile.uid;
