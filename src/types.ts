@@ -239,6 +239,52 @@ export interface SaraBoardQuiz {
   explanation?: string;
 }
 
+export interface SaraPhoneticBreakdown {
+  word: string;
+  ipa?: string;
+  syllables?: string[];
+  tip?: string;
+}
+
+export interface SaraGrammarBreakdownPart {
+  label: string;
+  text: string;
+  color?: string;
+}
+
+export interface SaraDrillChallenge {
+  type: 'repeat' | 'translate' | 'transform' | 'fill';
+  instruction: string;
+  targetText: string;
+  hint?: string;
+}
+
+export interface SaraCommonPitfall {
+  bad: string;
+  good: string;
+  explanation: string;
+}
+
+export interface SaraConceptCheckQuestion {
+  question: string;
+  options: string[];
+  answerIndex: number;
+  explanation?: string;
+}
+
+export interface SaraVocabularyItem {
+  word: string;
+  meaning: string;
+  pos?: string;
+  example?: string;
+}
+
+export interface SaraSpeakingPrompt {
+  instruction: string;
+  sampleAnswer?: string;
+  promptAudio?: string;
+}
+
 export interface SaraBoardData {
   title?: string;
   sentence?: string;
@@ -255,6 +301,18 @@ export interface SaraBoardData {
   voiceExplanation?: string;
   teacherNote?: string;
   openWhiteboard?: boolean;
+  phoneticBreakdown?: SaraPhoneticBreakdown;
+  grammarBreakdown?: {
+    label: string;
+    parts: SaraGrammarBreakdownPart[];
+  };
+  drillChallenge?: SaraDrillChallenge;
+  learningTip?: string;
+  commonPitfall?: SaraCommonPitfall;
+  mnemonic?: string;
+  ccq?: SaraConceptCheckQuestion;
+  vocabularyBank?: SaraVocabularyItem[];
+  speakingPrompt?: SaraSpeakingPrompt;
 }
 
 export interface SaraAction {

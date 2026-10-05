@@ -36,43 +36,261 @@ function buildSaraCurriculumExplanationInternal(
     const units = (ALL_GRAMMAR_UNITS as any)[level] || [];
     const unit = units.find((u: any) => String(u.id) === String(lesson.id)) || units[0];
 
+    const isPastSimple = String(lesson.id) === 'g_a2_1' || 
+      lesson.titleAr?.includes('الماضي البسيط') || 
+      lesson.titleEn?.includes('Past Simple');
+
     const title = isRtl
       ? `منهج القواعد (${level}): ${lesson.titleAr}`
       : `Grammar Academy (${level}): ${lesson.titleEn}`;
 
     const mainExample = unit?.examples?.[0];
-    const sentence = mainExample ? mainExample.en : 'She studies English diligently every day.';
-    const formula = unit?.rules?.[0]
-      ? `${unit.rules[0].titleEn}: ${unit.rules[0].contentEn}`
-      : 'Subject + Auxiliary / Modal + Verb + Complement';
+    const sentence = isPastSimple 
+      ? 'I visited London last year.' 
+      : (mainExample ? mainExample.en : 'She studies English diligently every day.');
 
-    const notes = unit?.rules
-      ? unit.rules.map((r: any) => isRtl ? `📌 ${r.titleAr}: ${r.contentAr}` : `📌 ${r.titleEn}: ${r.contentEn}`)
-      : [
-          isRtl ? `شرح القاعدة: ${unit?.explanationAr || lesson.descriptionAr}` : `Rule explanation: ${unit?.explanationEn || lesson.descriptionEn}`,
-          isRtl ? `مثال: ${sentence}` : `Example: ${sentence}`,
-          isRtl ? 'التطبيق العملي: استخدم هذه الصيغة في التحدث اليومي' : 'Usage: Apply this structure in daily conversation'
+    const formula = isPastSimple
+      ? (isRtl 
+          ? 'الإثبات: Subject + Verb(V2/-ed/شاذ) + Time | النفي: Subject + didn\'t + Verb(Base) | السؤال: Did + Subject + Verb(Base)?'
+          : 'Affirmative: Subject + Verb(V2) + Time | Negative: Subject + didn\'t + Verb(Base) | Question: Did + Subject + Verb(Base)?')
+      : (unit?.rules?.[0]
+          ? `${unit.rules[0].titleEn}: ${unit.rules[0].contentEn}`
+          : 'Subject + Auxiliary / Modal + Verb + Complement');
+
+    const grammarBreakdownParts = (() => {
+      if (isPastSimple) {
+        return [
+          { label: 'Subject (الفاعل)', text: 'I', color: 'blue' },
+          { label: 'Past Verb V2 (فعل ماضٍ)', text: 'visited', color: 'amber' },
+          { label: 'Object & Time (المفعول والظرف)', text: 'London last year', color: 'emerald' }
         ];
+      }
+      const words = sentence.replace(/[.,!?]/g, '').split(' ');
+      if (words.length >= 3) {
+        return [
+          { label: 'Subject', text: words[0], color: 'blue' },
+          { label: 'Verb / Action', text: words[1], color: 'amber' },
+          { label: 'Object / Rest', text: words.slice(2).join(' '), color: 'emerald' }
+        ];
+      }
+      return undefined;
+    })();
 
-    const quiz = unit?.quiz?.[0]
+    const commonPitfall = isPastSimple
       ? {
-          question: isRtl ? unit.quiz[0].questionAr : unit.quiz[0].questionEn,
-          options: unit.quiz[0].options,
-          answerIndex: unit.quiz[0].correctIndex ?? 0
+          bad: 'I didn\'t went to school yesterday',
+          good: 'I didn\'t go to school yesterday',
+          explanation: isRtl 
+            ? 'فخ شائع جداً للناطقين بالعربية: بعد didn\'t أو Did نعيد الفعل فوراً لمصدره الأصلي المجرد (go وليس went).' 
+            : 'Crucial Arab learner trap: after "didn\'t" or "Did", always revert the main verb to its base form (go, not went).'
         }
       : {
+          bad: isRtl ? `تجاهل صياغة ${lesson.titleAr} باللغة الإنجليزية` : `Misusing grammar tense in ${lesson.titleEn}`,
+          good: sentence,
+          explanation: isRtl 
+            ? `تذكر دائماً الصيغة الصحيحة: ${formula}. عند النفي أو السؤال، انتبه لتصريف الفعل وإعادته لأصله المجرد.` 
+            : `Make sure to align subject and verb correctly using: ${formula}. In negation or questions, always revert the main verb to its base form.`
+        };
+
+    const mnemonic = isPastSimple
+      ? (isRtl
+          ? '✨ مفتاح الإتقان الذهبي: تذكر أن did تأخذ الماضي لنفسها، فيبقى الفعل بعدها حراً ومجرداً!'
+          : '✨ Golden Rule: "Did" carries the past marker, so the main verb stays free in its bare base form!')
+      : (isRtl
+          ? `✨ مفتاح الإتقان السريع: احفظ هذا النموذج وطبقه في حديثك: "${sentence}"`
+          : `✨ Quick Mastery Key: Anchor your memory to model: "${sentence}"`);
+
+    const drillChallenge = isPastSimple
+      ? {
+          type: 'transform' as const,
+          instruction: isRtl 
+            ? 'حول الجملة: "She bought a new phone" إلى صيغة النفي باستخدام didn\'t' 
+            : 'Transform "She bought a new phone" into negative with didn\'t',
+          targetText: 'She didn\'t buy a new phone',
+          hint: 'didn\'t + buy'
+        }
+      : {
+          type: 'repeat' as const,
+          instruction: isRtl 
+            ? `ردد الجملة النموذجية بصوتك مع سارة لتثبيت القاعدة: "${sentence}"` 
+            : `Repeat the model sentence aloud with Sara: "${sentence}"`,
+          targetText: sentence,
+          hint: formula
+        };
+
+    const vocabularyBank = isPastSimple
+      ? [
+          { word: 'visited', meaning: isRtl ? 'زار (فعل منتظم - V2)' : 'visited (regular past)', pos: 'Verb', example: 'I visited London last year.' },
+          { word: 'went', meaning: isRtl ? 'ذهب (فعل شاذ - V2 من go)' : 'went (irregular past of go)', pos: 'Verb', example: 'They went to the museum yesterday.' },
+          { word: 'didn\'t', meaning: isRtl ? 'أداة نفي الماضي البسيط' : 'did not (past auxiliary)', pos: 'Auxiliary', example: 'She didn\'t watch the movie.' },
+          { word: 'yesterday', meaning: isRtl ? 'أمس (ظرف زمان دال)' : 'the day before today', pos: 'Adverb', example: 'We arrived yesterday.' }
+        ]
+      : undefined;
+
+    const speakingPrompt = isPastSimple
+      ? {
+          instruction: isRtl 
+            ? 'تحدث بالمايك مع سارة: اذكر 3 أنشطة قمت بها أمس مستخدماً صيغة الماضي البسيط.' 
+            : 'Speak into your mic: Tell Sara 3 things you did yesterday using the Past Simple.',
+          sampleAnswer: 'Yesterday, I visited my friends, played football, and studied English.'
+        }
+      : {
+          instruction: isRtl 
+            ? `تحدث بالمايك: كوّن جملة جديدة من إنشائك تطبق فيها درس: ${lesson.titleAr}` 
+            : `Speak now: Create your own original sentence applying: ${lesson.titleEn}`,
+          sampleAnswer: sentence
+        };
+
+    // Construct progressive multi-question quizzes for real deep testing
+    const quizList = (() => {
+      const list: any[] = [];
+      if (unit?.examples && unit.examples.length > 0) {
+        unit.examples.forEach((ex: any, idx: number) => {
+          const words = ex.en.split(' ');
+          const verbWord = words.find((w: string) => w.length > 3) || words[1] || 'learned';
+          list.push({
+            question: isRtl
+              ? `السؤال ${idx + 1}: اختر الجملة الصحيحة لـ: "${ex.ar}"`
+              : `Question ${idx + 1}: Choose the correct sentence for: "${ex.ar || ex.en}"`,
+            options: [
+              ex.en,
+              ex.en.replace(verbWord, verbWord.toLowerCase().replace(/ed$|s$/, '')),
+              `He ${verbWord} yesterday wrongly`
+            ],
+            answerIndex: 0
+          });
+        });
+      }
+      if (list.length === 0) {
+        list.push({
           question: isRtl ? `اختر الصيغة الصحيحة لقاعدة: ${lesson.titleAr}` : `Choose the correct form for: ${lesson.titleEn}`,
           options: [sentence, 'He study English yesterday', 'They was studying now'],
           answerIndex: 0
-        };
+        });
+      }
+      return list;
+    })();
 
-    const voiceExplanation = isRtl
-      ? `أهلاً بك يا بطل في أكاديمية القواعد! اليوم نشرح معاً درس: ${lesson.titleAr}. ${unit?.explanationAr || 'هذه القاعدة أساسية لبناء الجمل بالإنجليزية بشكل صحيح'}. لاحظ معي المثال على السبورة: "${sentence}". جهزت لك تمرين سريع لنختبر فهمك!`
-      : `Welcome to the Grammar Academy! Today we are mastering: ${lesson.titleEn}. ${unit?.explanationEn || 'This structure is essential for clear communication'}. Look at our example on the board: "${sentence}". Let us practice!`;
+    const quiz = quizList[0];
 
+    const examplesAudioText = unit?.examples && unit.examples.length > 0
+      ? unit.examples.map((ex: any, idx: number) => isRtl ? `المثال ${idx + 1}: "${ex.en}" ومعناه: "${ex.ar}"` : `Example ${idx + 1}: "${ex.en}"`).join('، ومثال آخر: ')
+      : `المثال النموذجي: "${sentence}"`;
+
+    const rulesAudioText = unit?.rules && unit.rules.length > 0
+      ? unit.rules.map((r: any) => isRtl ? `${r.titleAr}: ${r.contentAr}` : `${r.titleEn}: ${r.contentEn}`).join(' • ')
+      : formula;
+
+    const prepQuestionAudio = isRtl
+      ? (unit?.prepQuestionAr ? `ولنبدأ بسؤال تفكيري: ${unit.prepQuestionAr}` : 'في هذه الحصة سنبني فهمك النحوي خطوة بخطوة.')
+      : (unit?.prepQuestionEn ? `Let us start with: ${unit.prepQuestionEn}` : 'We will build your structural mastery step-by-step.');
+
+    // Comprehensive, thorough voice explanation that teaches the whole lesson
+    const voiceExplanation = isPastSimple
+      ? (isRtl
+          ? `أهلاً بك يا بطل في حصتنا الشاملة لدرس: ${lesson.titleAr}! 🌸
+دعنا نفهم أولاً جوهر الماضي البسيط: نستخدمه للتحدث عن أحداث بدأت واكتملت تماماً في الماضي في وقت محدد.
+القاعدة الذهبية لصياغة الجملة الإيجابية هي: الفاعل يليه التصريف الثاني للفعل، مثل: I visited London last year أو They went to the museum.
+ولاحظ أن الأفعال تنقسم إلى قسمين:
+أولاً، الأفعال المنتظمة التي نضيف لها ed، مثل: played و visited.
+وثانياً، الأفعال غير المنتظمة الشاذة التي يتغير شكلها بالكامل، مثل: go تصبح went، و see تصبح saw، و buy تصبح bought.
+أما عند النفي، فهناك سر ذهبي مهم جداً: نستخدم didn't ونعيد الفعل فوراً إلى شكله الأصلي المجرد! فنقول: She didn't study، وإياك أن تقول didn't studied.
+وعند السؤال، نبدأ بكلمة Did يليها الفاعل ثم الفعل الأصلي، مثل: Did you visit London?.
+وضعت لك على السبورة الذكية تفكيك الجملة نحوياً، وبنك الأفعال الشاذة الشائعة، والفخاخ لتتجنبها، وسلسلة تمارين وتحدي تحدث بالمايك سنحلها معاً طوال وقت حصتنا المقررة.
+استمع للشرح بتركيز! هل استوعبت هذا النموذج يا بطل؟ اضغط على زر 'اقلب الصفحة 📄' لنشرح الصفحة التالية معاً ونواصل رحلتنا خطوة بخطوة!`
+          : `Welcome champion to our comprehensive masterclass on: ${lesson.titleEn}! 🌸
+Let us first understand the true core of Past Simple: we use it for actions that started and finished completely in the past at a specific time.
+Our golden formula for affirmative sentences is: Subject + Past Verb (V2) + Time marker, such as: "I visited London last year" or "They went to the museum yesterday".
+Notice verbs are divided into two main categories:
+First, regular verbs where we add -ed, like played and visited.
+Second, irregular verbs that change completely, such as go becoming went, see becoming saw, and buy becoming bought.
+When forming negative sentences, remember this crucial rule: we use "didn't" and immediately return the verb to its base form! We say: "She didn't watch", never "didn't watched".
+For questions, we begin with "Did" followed by the subject and base verb: "Did you finish your project?".
+I have set up the full syntax formula, irregular verb bank, common pitfalls, and speaking drills on your smart chalkboard.
+Listen carefully to this model! Did you get it? Click 'Turn Page 📄' so we can unpack the formula together step-by-step!`)
+      : (isRtl
+          ? `أهلاً بك يا بطل في حصتنا الشاملة والمفصلة لدرس: ${lesson.titleAr}! 🌸
+دعنا نتأمل أولاً الهدف الحقيقي من هذه القاعدة: ${unit?.explanationAr || lesson.descriptionAr || 'هذه القاعدة أساسية جداً في اللغة الإنجليزية'}.
+${prepQuestionAudio}
+الصيغة والقاعدة التركيبية التي كتبتها لك بالطبشور على السبورة هي: ${formula}.
+ولكي تتقن استخدامها بدقة في حياتك اليومية، لاحظ القواعد التفصيلية:
+${rulesAudioText}.
+دعنا نطبق ذلك عملياً على الأمثلة الحية المكتوبة على السبورة:
+${examplesAudioText}.
+وانتبه جيداً: عندما ننفي الجملة أو نسأل سؤالاً، يتغير ترتيب الكلمات ونعيد الفعل لأصله المجرد.
+وقد جهزت لك على السبورة الذكية تفكيك الجملة نحوياً، والفخاخ الشائعة لتتجنبها، وبنك المفردات، وسلسلة أسئلة وتحديات تدريبية سنحلها معاً طوال وقت الحصة.
+استمع للشرح بتركيز، واضغط على زر 'اقلب الصفحة 📄' لنشرح الخطوة التالية معاً!`
+          : `Welcome champion to our comprehensive masterclass on: ${lesson.titleEn}! 🌸
+Let us first understand the true purpose: ${unit?.explanationEn || lesson.descriptionEn || 'This structure is essential for clear communication'}.
+${prepQuestionAudio}
+Our master formula on the smart chalkboard is: ${formula}.
+To apply it with complete accuracy, pay close attention to these rules:
+${rulesAudioText}.
+Let us examine the real-world models on the board:
+${examplesAudioText}.
+Notice how negation and question structures operate with base verbs.
+I have outlined the formula, sentence models, common pitfalls, and quick quiz on your smart whiteboard.
+Listen to this first step, then click 'Turn Page 📄' to continue our lesson together!`);
+
+    // Deep structured study guide in chat
     const chatMessage = isRtl
-      ? `📚 **اخترت منهج القواعد: ${lesson.titleAr} (${level})**\n\nكتبت لك القاعدة والأمثلة والشرح بالطبشور على السبورة الذكية 📐، واستمع لشرحي الصوتي يا بطل!`
-      : `📚 **Selected Grammar Module: ${lesson.titleEn} (${level})**\n\nI have outlined the formula, sentence models, and quick quiz on the smart whiteboard 📐. Listen to my spoken walkthrough!`;
+      ? `📚 **حصة دراسية شاملة ومفصلة: ${lesson.titleAr} (${level})**
+
+🌟 **الهدف وسياق الاستخدام في الحياة اليومية:**
+${unit?.explanationAr || lesson.descriptionAr || 'إتقان هذه القاعدة يمنحك ثقة عالية في التحدث والكتابة.'}
+${unit?.prepQuestionAr ? `💡 *سؤال تمهيدي للتفكير:* ${unit.prepQuestionAr}` : ''}
+
+📐 **القاعدة والصيغة التركيبية:**
+\`${formula}\`
+
+📌 **الأركان والقواعد التفصيلية:**
+${unit?.rules ? unit.rules.map((r: any) => `• **${r.titleAr}:** ${r.contentAr}`).join('\n') : `• ${formula}`}
+
+🗣️ **أمثلة حية متعددة من واقع الحياة:**
+${unit?.examples ? unit.examples.map((ex: any) => `• \`${ex.en}\` ➔ ${ex.ar}`).join('\n') : `• \`${sentence}\``}
+
+⚠️ **فخ شائع للناطقين بالعربية:**
+${commonPitfall.bad} ➔ الصواب: \`${commonPitfall.good}\`
+*السبب الأكاديمي:* ${commonPitfall.explanation}
+
+🧠 **حيلة الذاكرة الذكية:**
+${mnemonic}
+
+⏱️ **خطة الحصة المقررة:**
+سنقضي وقت الحصة كاملاً معاً في الشرح والتطبيق وحل التمارين والتحدث الصوتي بالمايك خطوة بخطوة. استمع لشرحي الصوتي المفصل أعلاه، وافتح السبورة الذكية 📐 لنبدأ!`
+      : `📚 **Comprehensive Masterclass: ${lesson.titleEn} (${level})**
+
+🌟 **Context & Purpose:**
+${unit?.explanationEn || lesson.descriptionEn || 'Mastering this rule builds immense confidence in speaking and writing.'}
+${unit?.prepQuestionEn ? `💡 *Concept Starter:* ${unit.prepQuestionEn}` : ''}
+
+📐 **Grammar Formula:**
+\`${formula}\`
+
+📌 **Detailed Structural Rules:**
+${unit?.rules ? unit.rules.map((r: any) => `• **${r.titleEn}:** ${r.contentEn}`).join('\n') : `• ${formula}`}
+
+🗣️ **Real-World Model Sentences:**
+${unit?.examples ? unit.examples.map((ex: any) => `• \`${ex.en}\` ➔ ${ex.ar || ''}`).join('\n') : `• \`${sentence}\``}
+
+⚠️ **Common Pitfall to Avoid:**
+${commonPitfall.bad} ➔ Say: \`${commonPitfall.good}\`
+*Pedagogical Reason:* ${commonPitfall.explanation}
+
+🧠 **Smart Memory Hook:**
+${mnemonic}
+
+⏱️ **Paced Lesson Roadmap:**
+We will spend our full session time practicing, analyzing sentence parts, and drilling speaking and quiz challenges together. Listen to the detailed audio walkthrough above and open the smart whiteboard 📐 to begin!`;
+
+    const notes = [
+      isRtl ? `🎯 الهدف التواصلي: ${unit?.explanationAr || lesson.descriptionAr}` : `🎯 Core Purpose: ${unit?.explanationEn || lesson.descriptionEn}`,
+      isRtl ? `📐 الصيغة التركيبية: ${formula}` : `📐 Syntax Formula: ${formula}`,
+      ...(unit?.rules ? unit.rules.map((r: any) => isRtl ? `📌 ${r.titleAr}: ${r.contentAr}` : `📌 ${r.titleEn}: ${r.contentEn}`) : []),
+      ...(unit?.examples ? unit.examples.map((ex: any) => isRtl ? `💬 نموذج واقعي: "${ex.en}" ➔ ${ex.ar}` : `💬 Model Sentence: "${ex.en}"`) : []),
+      isRtl ? `⚠️ فخ شائع: راجع بطاقة التحذير على السبورة لتجنب خلط الأزمنة وتصريف الأفعال` : `⚠️ Common Trap: Watch auxiliary verb harmony and base forms`,
+      isRtl ? `⏱️ التدريب المستمر: نتدرب ونتفاعل معاً طوال مدة الحصة المقررة خطوة بخطوة` : `⏱️ Continuous Practice: We drill and interact for the full lesson duration`
+    ];
 
     return {
       boardData: {
@@ -80,10 +298,17 @@ function buildSaraCurriculumExplanationInternal(
         sentence,
         formula,
         highlight: mainExample?.en?.split(' ')?.[0] || 'Grammar Rule',
-        notes: notes.slice(0, 4),
+        notes: notes.slice(0, 6),
+        grammarBreakdown: grammarBreakdownParts ? { label: 'Syntax Dissection', parts: grammarBreakdownParts } : undefined,
+        commonPitfall,
+        mnemonic,
+        drillChallenge,
+        vocabularyBank,
+        speakingPrompt,
         quiz,
+        quizzes: quizList,
         voiceExplanation,
-        teacherNote: isRtl ? `المستوى المستهدف: ${level} | المدة: ${lesson.duration}` : `Target: ${level} | Duration: ${lesson.duration}`,
+        teacherNote: isRtl ? `المستوى المستهدف: ${level} | المدة المقررة: ${lesson.duration}` : `Target: ${level} | Duration: ${lesson.duration}`,
         openWhiteboard: true
       },
       spokenIntro: voiceExplanation,
@@ -103,6 +328,13 @@ function buildSaraCurriculumExplanationInternal(
     const sentence = unit?.readingTextEn || 'Reading books expands your imagination and vocabulary.';
     const vocabList = unit?.cards?.map((c: any) => `${c.en} (${c.ar})`).slice(0, 3).join(' • ') || 'Vocabulary • Fluency • Comprehension';
 
+    const vocabularyBank = unit?.cards?.slice(0, 4).map((c: any) => ({
+      word: c.en,
+      meaning: c.ar || 'مفردة أساسية',
+      pos: 'Word',
+      example: sentence
+    }));
+
     const notes = [
       isRtl ? `📖 الفكرة المركزية: ${unit?.descriptionAr || lesson.descriptionAr}` : `📖 Main Idea: ${unit?.descriptionEn || lesson.descriptionEn}`,
       isRtl ? `🔤 أهم المفردات: ${vocabList}` : `🔤 Key Words: ${vocabList}`,
@@ -113,6 +345,13 @@ function buildSaraCurriculumExplanationInternal(
       ? `مرحباً بك في مختبر القراءة والفهم! درسنا اليوم هو: ${lesson.titleAr}. استمع جيداً لقراءة النص على السبورة: "${sentence}". التركيز على مخارج الحروف والربط بين الكلمات هو سر الطلاقة الحقيقية!`
       : `Welcome to the Reading Lab! Today we explore: ${lesson.titleEn}. Listen closely to our key passage on the whiteboard: "${sentence}". Focusing on cadence and rhythm will build your natural fluency!`;
 
+    const speakingPrompt = {
+      instruction: isRtl 
+        ? `اقرأ النص بالمايك بصوت واضح وجهوري مع التركيز على النطق السليم:` 
+        : `Read the passage aloud clearly into your microphone:`,
+      sampleAnswer: sentence
+    };
+
     return {
       boardData: {
         title,
@@ -120,6 +359,13 @@ function buildSaraCurriculumExplanationInternal(
         highlight: unit?.cards?.[0]?.en || 'Reading Comprehension',
         formula: isRtl ? 'مهارة: القراءة الصامتة ثم الجهرية والتحليل' : 'Skill: Phrasing, Rhythm & Comprehension',
         notes,
+        vocabularyBank,
+        speakingPrompt,
+        drillChallenge: {
+          type: 'repeat' as const,
+          instruction: isRtl ? 'تدرب على القراءة الجهرية المتصلة مع سارة' : 'Practice connected speech with Sara',
+          targetText: sentence
+        },
         quiz: {
           question: isRtl ? `ما الكلمة التي تعني: "${unit?.cards?.[0]?.ar || 'المعنى الأساسي'}"؟` : `What word best completes the reading passage?`,
           options: [unit?.cards?.[0]?.en || 'Correct Word', 'Unrelated', 'Incorrect'],
@@ -158,6 +404,21 @@ function buildSaraCurriculumExplanationInternal(
       ? `أهلاً بك يا بطل في استوديو المحادثة الشفهية! درسنا المنهجي هو: ${lesson.titleAr}. في المحادثات الحقيقية، نستخدم عبارات دبلوماسية واثقة مثل: "${mainPhrase}". ردد معي بصوتك بالمايك!`
       : `Welcome to the Conversation Studio! Today we are practicing: ${lesson.titleEn}. In real dialogues, speaking with confidence and warmth makes all the difference: "${mainPhrase}". Repeat after me!`;
 
+    const speakingPrompt = {
+      instruction: isRtl 
+        ? `تحدث بالمايك ورد على سارة مستخدماً عبارة المحادثة: "${mainPhrase}"` 
+        : `Speak into your mic and respond using: "${mainPhrase}"`,
+      sampleAnswer: mainPhrase
+    };
+
+    const commonPitfall = {
+      bad: isRtl ? 'التردد أو الصمت الطويل أثناء المحادثة' : 'Hesitating without a conversational filler',
+      good: isRtl ? 'استخدم جملاً تمهيدية مثل: "Well, let me see..."' : 'Use conversational fillers: "Well, honestly..."',
+      explanation: isRtl 
+        ? 'في المحادثة الإنجليزية الطبيعية، استخدام عبارات ملء الفراغ يعطيك وقتاً للتفكير ويبقيك متحدثاً واثقاً' 
+        : 'Conversational fillers keep dialogue flowing smoothly while you formulate your ideas'
+    };
+
     return {
       boardData: {
         title,
@@ -165,6 +426,13 @@ function buildSaraCurriculumExplanationInternal(
         highlight: mainPhrase.split(' ').slice(0, 3).join(' '),
         formula: isRtl ? 'نمط المحادثة: استماع فعال + رد لبق وسريع' : 'Pattern: Active Listening + Diplomatic Response',
         notes,
+        speakingPrompt,
+        drillChallenge: {
+          type: 'repeat' as const,
+          instruction: isRtl ? 'تحدي النطق الحواري السريع مع سارة' : 'Rapid conversational rhythm challenge',
+          targetText: mainPhrase
+        },
+        commonPitfall,
         quiz: {
           question: isRtl ? `كيف ترد بلباقة في هذا الموقف بالإنجليزية؟` : `Choose the most polite and natural response:`,
           options: [mainPhrase, 'No, I do not want to talk', 'Whatever you say'],
@@ -828,13 +1096,24 @@ export function buildSaraCurriculumExplanation(
     result.boardData.quiz.timeLimitSeconds = 30;
   }
 
-  result.boardData.quizzes = buildLimitedLessonQuizSet(
-    lesson.titleAr || lesson.titleEn || result.boardData.title || 'Lesson',
-    result.boardData.sentence,
-    result.boardData.formula,
-    result.boardData.quiz,
-    isRtl
-  );
+  if (result.boardData.quizzes && result.boardData.quizzes.length >= 3) {
+    const total = Math.min(5, result.boardData.quizzes.length);
+    result.boardData.quizzes = result.boardData.quizzes.slice(0, 5).map((q, idx) => {
+      const sq = shuffleQuiz(q, true);
+      sq.questionNumber = idx + 1;
+      sq.totalQuestions = total;
+      sq.timeLimitSeconds = 30;
+      return sq;
+    });
+  } else {
+    result.boardData.quizzes = buildLimitedLessonQuizSet(
+      lesson.titleAr || lesson.titleEn || result.boardData.title || 'Lesson',
+      result.boardData.sentence,
+      result.boardData.formula,
+      result.boardData.quiz,
+      isRtl
+    );
+  }
 
   return result;
 }

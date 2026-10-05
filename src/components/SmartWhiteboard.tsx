@@ -48,11 +48,13 @@ import {
   Target,
   Timer,
   Trophy,
-  MoreVertical
+  MoreVertical,
+  ChevronRight,
+  ChevronLeft
 } from 'lucide-react';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 import { SaraBoardData, SaraBoardQuiz } from '../types';
-import { playSnapshotShutterSound } from '../lib/audio';
+import { playSnapshotShutterSound, prefetchAcademyAudio } from '../lib/audio';
 import { buildLimitedLessonQuizSet, shuffleQuiz } from '../utils/quizUtils';
 
 interface SmartWhiteboardProps {
@@ -60,7 +62,7 @@ interface SmartWhiteboardProps {
   onClose: () => void;
   boardData: SaraBoardData | null;
   isRtl: boolean;
-  onSpeak: (text: string) => void;
+  onSpeak: (text: string, onEnd?: () => void) => void;
   onQuizAnswer?: (index: number) => void;
   quizSelectedOption?: number | null;
   quizFeedback?: 'correct' | 'wrong' | null;
@@ -76,6 +78,9 @@ interface SmartWhiteboardProps {
   onOpenCurriculum?: () => void;
   onFinishLesson?: (score?: number, total?: number) => void;
   isLessonActive?: boolean;
+  currentPageIndex?: number;
+  onPageIndexChange?: (index: number) => void;
+  dailyLessonInfo?: { current: number; total: number; hasNext?: boolean };
 }
 
 // ========================================================
@@ -374,7 +379,10 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   onToggleLang,
   onOpenCurriculum,
   onFinishLesson,
-  isLessonActive
+  isLessonActive,
+  currentPageIndex: controlledPageIndex,
+  onPageIndexChange,
+  dailyLessonInfo
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -427,6 +435,289 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   const [hasTimerStarted, setHasTimerStarted] = useState<boolean>(false);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
   const [quizTimeUp, setQuizTimeUp] = useState<boolean>(false);
+  // Concept Checking Question (CCQ) State
+  const [ccqSelectedOption, setCcqSelectedOption] = useState<number | null>(null);
+
+  // 📖 Whiteboard Guided Pages System (تقسيم السبورة لصفحات متدرجة تفاعلية وربط الشرح بالصوت خطوة بخطوة)
+  const [whiteboardViewMode, setWhiteboardViewMode] = useState<'paged' | 'scroll'>('paged');
+  const [internalPageIndex, setInternalPageIndex] = useState<number>(0);
+  const currentPageIndex = controlledPageIndex !== undefined ? controlledPageIndex : internalPageIndex;
+  const prevControlledPageRef = useRef<number | undefined>(controlledPageIndex);
+
+  const setCurrentPageIndex = useCallback((idx: number | ((prev: number) => number)) => {
+    const next = typeof idx === 'function' ? idx(currentPageIndex) : idx;
+    prevControlledPageRef.current = next;
+    if (controlledPageIndex === undefined) {
+      setInternalPageIndex(next);
+    }
+    if (onPageIndexChange) {
+      onPageIndexChange(next);
+    }
+  }, [controlledPageIndex, currentPageIndex, onPageIndexChange]);
+
+  const [completedPages, setCompletedPages] = useState<Set<number>>(new Set([0]));
+  const [pageTurnPromptActive, setPageTurnPromptActive] = useState<boolean>(false);
+
+  // ⏩ Auto-advance countdown timer
+  const [autoAdvanceEnabled, setAutoAdvanceEnabled] = useState<boolean>(false);
+  const [autoAdvanceCountdown, setAutoAdvanceCountdown] = useState<number | null>(null);
+  const autoAdvanceIntervalRef = useRef<any>(null);
+
+  // 💡 Sequential highlighting synchronized with Sara's voice
+  const [activeHighlightKey, setActiveHighlightKey] = useState<string | null>(null);
+  const highlightTimeoutsRef = useRef<any[]>([]);
+
+  const cancelAutoAdvance = useCallback(() => {
+    if (autoAdvanceIntervalRef.current) {
+      clearInterval(autoAdvanceIntervalRef.current);
+      autoAdvanceIntervalRef.current = null;
+    }
+    setAutoAdvanceCountdown(null);
+  }, []);
+
+  const clearHighlightTimeouts = useCallback(() => {
+    highlightTimeoutsRef.current.forEach(t => clearTimeout(t));
+    highlightTimeoutsRef.current = [];
+  }, []);
+
+  interface WhiteboardSlidePage {
+    id: string;
+    pageNumber: number;
+    titleAr: string;
+    titleEn: string;
+    icon: string;
+    subtitleAr: string;
+    subtitleEn: string;
+    speechText: string;
+    sectionType: 'objective' | 'formula' | 'rules' | 'pitfalls' | 'speaking' | 'quiz';
+  }
+
+  const whiteboardPages = useMemo<WhiteboardSlidePage[]>(() => {
+    if (!boardData) return [];
+    const list: WhiteboardSlidePage[] = [];
+
+    // Page 1: Objective & Native Model Sentence
+    if (boardData.title || boardData.sentence) {
+      const p1Speech = isRtl
+        ? `أهلاً بك يا بطل في صفحتنا الأولى من درس: ${boardData.title || 'الدرس الأكاديمي'}! 🌸 هدفنا الأساسي اليوم هو إتقان هذا المفهوم والتحدث به بطلاقة. استمع جيداً لجملتنا النموذجية المكتوبة على السبورة: "${boardData.sentence || ''}". ${boardData.highlight ? `ولاحظ التركيز على كلمة: "${boardData.highlight}".` : ''} ${boardData.phoneticBreakdown?.tip ? `ونصيحة النطق: ${boardData.phoneticBreakdown.tip}.` : ''} هل استوعبت هذا النموذج جيداً؟ اضغط على زر 'اقلب الصفحة 📄' لنكتشف القاعدة التركيبية معاً!`
+        : `Welcome champion to Page 1 of our lesson: ${boardData.title || 'Target Lesson'}! 🌸 Our main goal today is mastering this structure for fluent speaking. Listen to our core model: "${boardData.sentence || ''}". ${boardData.highlight ? `Notice: "${boardData.highlight}".` : ''} Got this model? Click 'Turn Page 📄' to discover the grammar formula!`;
+
+      list.push({
+        id: 'page_objective',
+        pageNumber: 1,
+        titleAr: 'الهدف والنموذج',
+        titleEn: 'Model & Target',
+        icon: '🌟',
+        subtitleAr: 'الجملة النموذجية والهدف التواصلي',
+        subtitleEn: 'Native Model Sentence & Objective',
+        speechText: p1Speech,
+        sectionType: 'objective'
+      });
+    }
+
+    // Page 2: Formula & Syntax Breakdown
+    if (boardData.formula || boardData.grammarBreakdown || boardData.drillChallenge) {
+      const p2Speech = isRtl
+        ? `أحسنت! نحن الآن في الصفحة الثانية: القاعدة والصيغة التركيبية 📐. القاعدة التي كتبتها لك على السبورة هي: ${boardData.formula || 'تركيب الجملة السليم'}. ${boardData.grammarBreakdown?.parts ? 'لاحظ تفكيك الجملة بالألوان: الفاعل بالأزرق، والفعل بالأصفر، وبقية الجملة بالأخضر.' : ''} ${boardData.drillChallenge ? `وهناك تحدي تدريبي لتثبيت القاعدة: ${boardData.drillChallenge.instruction}.` : ''} تأمل تفكيك الجملة، وعندما تكون جاهزاً، اضغط على 'اقلب الصفحة 📄' لنرى القواعد التفصيلية والأمثلة!`
+        : `Great! We are now on Page 2: Formula & Syntax Anatomy 📐. Our structural rule is: ${boardData.formula || 'Sentence Formula'}. Study the color-coded syntax. When you're ready, click 'Turn Page 📄' for detailed rules and real models!`;
+
+      list.push({
+        id: 'page_formula',
+        pageNumber: list.length + 1,
+        titleAr: 'القاعدة والتركيب',
+        titleEn: 'Formula & Syntax',
+        icon: '📐',
+        subtitleAr: 'الصيغة التركيبية وتفكيك الجملة',
+        subtitleEn: 'Grammar Formula & Sentence Dissection',
+        speechText: p2Speech,
+        sectionType: 'formula'
+      });
+    }
+
+    // Page 3: Detailed Rules & Real-World Models
+    if ((boardData.notes && boardData.notes.length > 0) || boardData.diagram) {
+      const p3Speech = isRtl
+        ? `مرحباً بك في الصفحة الثالثة: القواعد التفصيلية والأمثلة الحية 📌. إليك أهم النقاط الذهبية: ${boardData.notes ? boardData.notes.slice(0, 3).join('. ') : ''}. تطبيق هذه النماذج في حياتك اليومية يمنحك ثقة عالية. راجع الأمثلة المكتوبة بالطبشور، واضغط على 'اقلب الصفحة 📄' لنكشف الفخاخ اللغوية الشائعة!`
+        : `Welcome to Page 3: Detailed Rules & Real-World Models 📌. Key takeaways: ${boardData.notes ? boardData.notes.slice(0, 3).join('. ') : ''}. Review these models, then click 'Turn Page 📄' to uncover common traps!`;
+
+      list.push({
+        id: 'page_rules',
+        pageNumber: list.length + 1,
+        titleAr: 'الأركان والأمثلة',
+        titleEn: 'Rules & Models',
+        icon: '📌',
+        subtitleAr: 'النقاط الذهبية والنماذج التطبيقية',
+        subtitleEn: 'Golden Takeaways & Real Life Models',
+        speechText: p3Speech,
+        sectionType: 'rules'
+      });
+    }
+
+    // Page 4: Common Pitfalls & Mnemonic Hook
+    if (boardData.commonPitfall || boardData.correction || boardData.mnemonic || boardData.ccq) {
+      const p4Speech = isRtl
+        ? `وصلنا إلى الصفحة الرابعة: تنبيه الفخاخ الشائعة وحيلة الذاكرة الذكية ⚠️! ${boardData.commonPitfall ? `انتبه جيداً: لا تقل "${boardData.commonPitfall.bad}"، بل قل دائماً "${boardData.commonPitfall.good}". والسبب: ${boardData.commonPitfall.explanation}.` : ''} ${boardData.mnemonic ? `وحيلة الذاكرة: ${boardData.mnemonic}.` : ''} أتقنت هذه النقطة؟ اضغط على 'اقلب الصفحة 📄' لننتقل لبنك المفردات وتحدي التحدث!`
+        : `Here is Page 4: Common Pitfalls & Smart Memory Hook ⚠️! ${boardData.commonPitfall ? `Watch out for this trap: avoid saying "${boardData.commonPitfall.bad}", always say "${boardData.commonPitfall.good}".` : ''} ${boardData.mnemonic ? `Memory hook: ${boardData.mnemonic}.` : ''} Mastered this? Click 'Turn Page 📄' for vocabulary and speaking!`;
+
+      list.push({
+        id: 'page_pitfalls',
+        pageNumber: list.length + 1,
+        titleAr: 'الفخاخ والذاكرة',
+        titleEn: 'Traps & Memory',
+        icon: '⚠️',
+        subtitleAr: 'أخطاء شائعة وحيلة الحفظ الذكي',
+        subtitleEn: 'L1 Pitfalls & Mnemonic Key',
+        speechText: p4Speech,
+        sectionType: 'pitfalls'
+      });
+    }
+
+    // Page 5: Vocabulary Bank & Speaking Challenge
+    if ((boardData.vocabularyBank && boardData.vocabularyBank.length > 0) || boardData.speakingPrompt) {
+      const p5Speech = isRtl
+        ? `نحن الآن في الصفحة الخامسة: بنك المفردات وتحدي التحدث الصوتي 🎙️. ${boardData.vocabularyBank && boardData.vocabularyBank.length > 0 ? `كتبت لك أهم الكلمات مع نطقها: ${boardData.vocabularyBank.map(v => v.word).join('، ')}.` : ''} ${boardData.speakingPrompt ? `والآن دورك لتتحدث بالمايك: ${boardData.speakingPrompt.instruction}.` : ''} تدرب على النطق بالصوت، ثم اضغط على 'اقلب الصفحة 📄' لخوض التحدي والاختبار النهائي!`
+        : `We are on Page 5: Vocabulary Bank & Speaking Challenge 🎙️. ${boardData.vocabularyBank && boardData.vocabularyBank.length > 0 ? `Key words: ${boardData.vocabularyBank.map(v => v.word).join(', ')}.` : ''} ${boardData.speakingPrompt ? `Now speak into your mic: ${boardData.speakingPrompt.instruction}.` : ''} Click 'Turn Page 📄' for the final mastery quiz!`;
+
+      list.push({
+        id: 'page_speaking',
+        pageNumber: list.length + 1,
+        titleAr: 'المفردات والتحدث',
+        titleEn: 'Vocab & Speaking',
+        icon: '🎙️',
+        subtitleAr: 'بنك الكلمات وتحدي التحدث بالمايك',
+        subtitleEn: 'Vocabulary Bank & Oral Challenge',
+        speechText: p5Speech,
+        sectionType: 'speaking'
+      });
+    }
+
+    // Page 6: Mastery Quiz Challenge
+    if (boardData.quiz || (boardData.quizzes && boardData.quizzes.length > 0)) {
+      const p6Speech = isRtl
+        ? `وصلنا إلى الصفحة الختامية: اختبار الإتقان النهائي 🎯! أمامك 5 أسئلة تدريبية لقياس مدى استيعابك للقاعدة، كل سؤال له مؤقت 30 ثانية. اقرأ كل سؤال بتركيز وانطلق لتحقيق العلامة الكاملة!`
+        : `We arrived at Page 6: Final Mastery Challenge 🎯! Here is your progressive 5-question test with a 30-second countdown. Read each question carefully and aim for a perfect score!`;
+
+      list.push({
+        id: 'page_quiz',
+        pageNumber: list.length + 1,
+        titleAr: 'اختبار الإتقان',
+        titleEn: 'Mastery Quiz',
+        icon: '🎯',
+        subtitleAr: 'تحدي الأسئلة الخمسة وقياس النتيجة',
+        subtitleEn: '5-Question Timed Challenge',
+        speechText: p6Speech,
+        sectionType: 'quiz'
+      });
+    }
+
+    return list;
+  }, [boardData, isRtl]);
+
+  // 🚀 Fast Zero-Latency Audio Prefetcher: Caches all slide page speeches in memory
+  // so when turning pages, Sara speaks immediately without any network or generation delay!
+  useEffect(() => {
+    if (!isOpen || !whiteboardPages || whiteboardPages.length === 0) return;
+    whiteboardPages.forEach((page) => {
+      if (page.speechText) {
+        const hasArabic = /[\u0600-\u06FF]/.test(page.speechText);
+        prefetchAcademyAudio(page.speechText, hasArabic ? 'ar' : 'en');
+      }
+    });
+  }, [isOpen, whiteboardPages]);
+
+  // Actively pre-warm next page audio
+  useEffect(() => {
+    if (!isOpen || !whiteboardPages) return;
+    const nextPage = whiteboardPages[currentPageIndex + 1];
+    if (nextPage && nextPage.speechText) {
+      const hasArabic = /[\u0600-\u06FF]/.test(nextPage.speechText);
+      prefetchAcademyAudio(nextPage.speechText, hasArabic ? 'ar' : 'en');
+    }
+  }, [isOpen, currentPageIndex, whiteboardPages]);
+
+  const activeSlidePage = whiteboardPages[currentPageIndex] || whiteboardPages[0];
+
+  const explainPage = useCallback((pageIdx: number) => {
+    if (!whiteboardPages || whiteboardPages.length === 0) return;
+    const page = whiteboardPages[pageIdx];
+    if (!page) return;
+
+    cancelAutoAdvance();
+    clearHighlightTimeouts();
+    setIsExplainingAll(true);
+    setActiveExplanationSection(page.sectionType as any);
+    setCurrentExplanationText(page.speechText);
+    setPageTurnPromptActive(false);
+    onSaraTriggerGesture?.('explaining');
+    setCompletedPages(prev => new Set(prev).add(pageIdx));
+
+    // Progressive highlight timings synchronized with what Sara speaks on this page
+    if (page.sectionType === 'objective') {
+      setActiveHighlightKey('sentence');
+      const t1 = setTimeout(() => setActiveHighlightKey('highlight_word'), 4000);
+      const t2 = setTimeout(() => setActiveHighlightKey('phonetic'), 11000);
+      highlightTimeoutsRef.current = [t1, t2];
+    } else if (page.sectionType === 'formula') {
+      setActiveHighlightKey('formula');
+      const t1 = setTimeout(() => setActiveHighlightKey('breakdown'), 5000);
+      const t2 = setTimeout(() => setActiveHighlightKey('drill'), 13000);
+      highlightTimeoutsRef.current = [t1, t2];
+    } else if (page.sectionType === 'rules') {
+      setActiveHighlightKey('notes');
+      const t1 = setTimeout(() => setActiveHighlightKey('diagram'), 9000);
+      highlightTimeoutsRef.current = [t1];
+    } else if (page.sectionType === 'pitfalls') {
+      setActiveHighlightKey('pitfall');
+      const t1 = setTimeout(() => setActiveHighlightKey('correction'), 6000);
+      const t2 = setTimeout(() => setActiveHighlightKey('mnemonic'), 12000);
+      highlightTimeoutsRef.current = [t1, t2];
+    } else if (page.sectionType === 'speaking') {
+      setActiveHighlightKey('vocab');
+      const t1 = setTimeout(() => setActiveHighlightKey('speaking'), 8000);
+      highlightTimeoutsRef.current = [t1];
+    } else if (page.sectionType === 'quiz') {
+      setActiveHighlightKey('quiz');
+    }
+
+    onSpeak(page.speechText, () => {
+      setIsExplainingAll(false);
+      setPageTurnPromptActive(true);
+      if (autoAdvanceEnabled && pageIdx < whiteboardPages.length - 1) {
+        let count = 4;
+        setAutoAdvanceCountdown(count);
+        if (autoAdvanceIntervalRef.current) clearInterval(autoAdvanceIntervalRef.current);
+        autoAdvanceIntervalRef.current = setInterval(() => {
+          count -= 1;
+          if (count <= 0) {
+            cancelAutoAdvance();
+            const nextIdx = pageIdx + 1;
+            setCurrentPageIndex(nextIdx);
+            explainPage(nextIdx);
+          } else {
+            setAutoAdvanceCountdown(count);
+          }
+        }, 1000);
+      }
+    });
+  }, [whiteboardPages, onSpeak, onSaraTriggerGesture, autoAdvanceEnabled, cancelAutoAdvance, clearHighlightTimeouts, setCurrentPageIndex]);
+
+  const handleNextPage = useCallback(() => {
+    cancelAutoAdvance();
+    if (currentPageIndex < whiteboardPages.length - 1) {
+      const nextIdx = currentPageIndex + 1;
+      setCurrentPageIndex(nextIdx);
+      explainPage(nextIdx);
+    }
+  }, [currentPageIndex, whiteboardPages.length, explainPage, cancelAutoAdvance, setCurrentPageIndex]);
+
+  const handlePrevPage = useCallback(() => {
+    cancelAutoAdvance();
+    if (currentPageIndex > 0) {
+      const prevIdx = currentPageIndex - 1;
+      setCurrentPageIndex(prevIdx);
+      explainPage(prevIdx);
+    }
+  }, [currentPageIndex, explainPage, cancelAutoAdvance, setCurrentPageIndex]);
 
   // Capped at 5 questions maximum per lesson
   const currentQuizList = React.useMemo(() => {
@@ -456,6 +747,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
     setQuizTimeUp(false);
     setLocalQuizSelectedOption(null);
     setLocalQuizFeedback(null);
+    setCcqSelectedOption(null);
   }, [quizQuestionIndex, boardData]);
 
   // Floating 30s Countdown Timer Effect (Starts after Sara reads question or student clicks Start)
@@ -546,24 +838,43 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
   // Clean up timers on unmount
   useEffect(() => {
     return () => {
+      cancelAutoAdvance();
+      clearHighlightTimeouts();
       if (explanationTimeoutRef.current) clearTimeout(explanationTimeoutRef.current);
       if (requestRecognitionRef.current) {
         try { requestRecognitionRef.current.abort(); } catch (_) {}
       }
     };
-  }, []);
+  }, [cancelAutoAdvance, clearHighlightTimeouts]);
 
-  // When Sara stops speaking externally, reset active highlight if explanation was running
+  // When Sara stops speaking externally, activate page-turn prompt and keep highlight active immediately
   useEffect(() => {
     if (!isSaraSpeaking && isExplainingAll) {
       const t = setTimeout(() => {
         setIsExplainingAll(false);
-        setActiveExplanationSection(null);
-        setCurrentExplanationText('');
-      }, 1200);
+        setPageTurnPromptActive(true);
+      }, 80);
       return () => clearTimeout(t);
     }
   }, [isSaraSpeaking, isExplainingAll]);
+
+  // Synchronize initial highlight if Sara was already speaking intro on Page 1
+  useEffect(() => {
+    if (isOpen && isSaraSpeaking && currentPageIndex === 0 && !activeHighlightKey) {
+      setActiveHighlightKey('sentence');
+      const t1 = setTimeout(() => setActiveHighlightKey('highlight_word'), 4000);
+      const t2 = setTimeout(() => setActiveHighlightKey('phonetic'), 11000);
+      highlightTimeoutsRef.current = [t1, t2];
+    }
+  }, [isOpen, isSaraSpeaking, currentPageIndex, activeHighlightKey]);
+
+  // When external controlledPageIndex changes while open, automatically explain that page
+  useEffect(() => {
+    if (isOpen && controlledPageIndex !== undefined && controlledPageIndex !== prevControlledPageRef.current) {
+      prevControlledPageRef.current = controlledPageIndex;
+      explainPage(controlledPageIndex);
+    }
+  }, [isOpen, controlledPageIndex, explainPage]);
 
   // Explain single section
   const handleExplainSection = (section: 'formula' | 'sentence' | 'correction' | 'notes' | 'diagram' | 'quiz') => {
@@ -2139,8 +2450,16 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               <span className="hidden lg:inline">{isRtl ? 'حفظ اللوحة' : 'Save'}</span>
             </button>
 
-            {/* Finish Lesson & Save Result Button */}
-            {onFinishLesson && (
+            {/* Daily Lesson Progress Badge (e.g. درس 1 من 3) */}
+            {dailyLessonInfo && (
+              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-500/20 text-blue-200 border border-blue-400/40 text-xs font-black shrink-0">
+                <span>📚</span>
+                <span>{isRtl ? `درس ${dailyLessonInfo.current} من ${dailyLessonInfo.total}` : `Lesson ${dailyLessonInfo.current} of ${dailyLessonInfo.total}`}</span>
+              </div>
+            )}
+
+            {/* Finish Lesson & Save Result Button (Only when quiz is actually completed or as progress badge) */}
+            {onFinishLesson && quizCompleted ? (
               <button
                 onClick={() => onFinishLesson(quizScore, totalQuestions)}
                 className="p-1.5 sm:px-2.5 sm:py-1 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:brightness-110 text-white font-black text-xs flex items-center gap-1.5 shadow-md transition-all cursor-pointer active:scale-95 border border-emerald-300/40 shrink-0"
@@ -2150,7 +2469,12 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                 <span className="hidden lg:inline">{isRtl ? 'إنهاء وحفظ 🎓' : 'Finish & Save 🎓'}</span>
                 <span className="lg:hidden">{isRtl ? 'إنهاء' : 'Finish'}</span>
               </button>
-            )}
+            ) : totalQuestions > 1 ? (
+              <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-400/20 text-amber-200 border border-amber-400/30 text-xs font-bold shrink-0">
+                <span>🎯</span>
+                <span>{isRtl ? `تحدي ${quizQuestionIndex + 1} من ${totalQuestions}` : `Question ${quizQuestionIndex + 1} of ${totalQuestions}`}</span>
+              </div>
+            ) : null}
 
             {/* Whiteboard Scale & Size Controller (تكبير وتصغير حسب الرغبة) */}
             <div className="relative hidden lg:flex items-center bg-black/40 p-0.5 rounded-xl border border-white/10 text-xs font-bold" ref={sizeMenuRef}>
@@ -2517,43 +2841,166 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               className="space-y-4 max-w-6xl mx-auto"
             >
               {/* ======================================================== */}
-              {/* 🌟 1. SECTION FILTER NAVIGATION BAR (تنظيم وترتيب محتوى السبورة) */}
+              {/* 🌟 1. SMART WHITEBOARD SLIDE DECK & VIEW MODE CONTROLLER */}
               {/* ======================================================== */}
-              <div className="flex flex-wrap items-center justify-between gap-2 bg-black/40 p-1.5 rounded-2xl border border-white/10 backdrop-blur-md">
-                <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
-                  {[
-                    { id: 'all', labelAr: '🌟 عرض شامل', labelEn: '🌟 Master View' },
-                    { id: 'focus', labelAr: '📐 القاعدة والمثال', labelEn: '📐 Formula & Sentence' },
-                    { id: 'notes', labelAr: '💡 النقاط والمفردات', labelEn: '💡 Notes & Vocab' },
-                    { id: 'practice', labelAr: '🎯 التصحيح والكويز', labelEn: '🎯 Practice & Quiz' },
-                  ].map(tab => {
-                    const isSelected = contentViewFilter === tab.id;
-                    return (
+              {whiteboardPages && whiteboardPages.length > 0 ? (
+                <div className="flex flex-col gap-2 bg-black/45 p-2 sm:p-2.5 rounded-2xl sm:rounded-3xl border border-white/10 backdrop-blur-md shadow-lg">
+                  {/* Top Bar: Slide Tabs + Navigation Controls */}
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 max-w-full">
+                      {/* Prev Page Button */}
                       <button
-                        key={`tab-filter-${tab.id}`}
-                        onClick={() => setContentViewFilter(tab.id as any)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
-                          isSelected
-                            ? 'text-slate-950 shadow-md scale-102 font-black'
-                            : 'text-amber-100/70 hover:text-white hover:bg-white/10'
-                        }`}
-                        style={{
-                          backgroundColor: isSelected ? currentTheme.borderHex : 'transparent'
-                        }}
+                        onClick={handlePrevPage}
+                        disabled={currentPageIndex === 0}
+                        className="px-2 sm:px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed text-white font-black text-xs flex items-center gap-1 transition-all cursor-pointer shrink-0 active:scale-95"
+                        title={isRtl ? 'الصفحة السابقة' : 'Previous Slide'}
                       >
-                        <span>{isRtl ? tab.labelAr : tab.labelEn}</span>
+                        {isRtl ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+                        <span className="hidden sm:inline">{isRtl ? 'السابق' : 'Prev'}</span>
                       </button>
-                    );
-                  })}
-                </div>
 
-                {/* Status Badges summary */}
-                <div className="flex items-center gap-1.5 text-[11px] text-amber-200/80 font-bold px-2">
-                  <span className="hidden sm:inline">
-                    {boardData?.title ? `📌 ${boardData.title}` : (isRtl ? '📐 سبورة تفاعلية مرتبة' : '📐 Organized Smart Board')}
-                  </span>
+                      {/* Slide Tabs */}
+                      {whiteboardPages.map((page, pIdx) => {
+                        const isCurrent = currentPageIndex === pIdx;
+                        const isDone = completedPages.has(pIdx);
+                        return (
+                          <button
+                            key={`slide-tab-${page.id}`}
+                            onClick={() => {
+                              cancelAutoAdvance();
+                              setCurrentPageIndex(pIdx);
+                              explainPage(pIdx);
+                            }}
+                            className={`px-2.5 py-1 sm:py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95 ${
+                              isCurrent
+                                ? 'bg-amber-400 text-slate-950 font-black shadow-lg scale-102 ring-2 ring-white/60'
+                                : isDone
+                                  ? 'bg-white/10 hover:bg-white/20 text-emerald-300 border border-emerald-400/30'
+                                  : 'bg-white/5 hover:bg-white/10 text-slate-300'
+                            }`}
+                          >
+                            <span>{page.icon}</span>
+                            <span>{isRtl ? page.titleAr : page.titleEn}</span>
+                            {isDone && !isCurrent && <span className="text-[10px] text-emerald-400 font-bold">✓</span>}
+                          </button>
+                        );
+                      })}
+
+                      {/* Next Page Button */}
+                      <button
+                        onClick={handleNextPage}
+                        disabled={currentPageIndex >= whiteboardPages.length - 1}
+                        className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 disabled:opacity-30 disabled:cursor-not-allowed text-slate-950 font-black text-xs flex items-center gap-1 transition-all cursor-pointer shrink-0 shadow-sm active:scale-95"
+                        title={isRtl ? 'الصفحة التالية والشرح' : 'Next Slide'}
+                      >
+                        <span className="hidden sm:inline">{isRtl ? 'التالي ➔' : 'Next ➔'}</span>
+                        {isRtl ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+                      </button>
+                    </div>
+
+                    {/* Secondary Controls: Explain Page + Auto-Advance + View Mode */}
+                    <div className="flex items-center gap-1.5 shrink-0 ms-auto">
+                      <button
+                        onClick={() => explainPage(currentPageIndex)}
+                        className="px-2.5 py-1 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 text-amber-200 border border-amber-400/40 text-xs font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                        title={isRtl ? 'سارة تشرح هذه الصفحة بالصوت' : 'Sara explains this page'}
+                      >
+                        <Volume2 size={13} className="text-amber-400 animate-pulse" />
+                        <span>{isRtl ? 'شرح الصفحة 🎙️' : 'Explain Page 🎙️'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          const newVal = !autoAdvanceEnabled;
+                          setAutoAdvanceEnabled(newVal);
+                          if (!newVal) cancelAutoAdvance();
+                        }}
+                        className={`px-2 sm:px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer border ${
+                          autoAdvanceEnabled
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400 font-black ring-1 ring-emerald-400/40'
+                            : 'bg-white/5 hover:bg-white/10 text-slate-300 border-white/10'
+                        }`}
+                        title={isRtl ? 'تشغيل التقليب التلقائي بين الصفحات بعد انتهاء الشرح' : 'Auto-advance pages'}
+                      >
+                        <span>{autoAdvanceEnabled ? '⏩' : '⏸️'}</span>
+                        <span className="hidden md:inline">{isRtl ? 'الشرح التلقائي' : 'Auto-Advance'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => setWhiteboardViewMode(prev => prev === 'paged' ? 'scroll' : 'paged')}
+                        className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 text-xs font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                        title={isRtl ? 'التبديل بين عرض الصفحات وعرض السبورة الكاملة' : 'Toggle Slide vs Scroll view'}
+                      >
+                        <span>{whiteboardViewMode === 'paged' ? '📜' : '📄'}</span>
+                        <span className="hidden lg:inline">{whiteboardViewMode === 'paged' ? (isRtl ? 'عرض كامل' : 'Scroll View') : (isRtl ? 'عرض الصفحات' : 'Slides View')}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* If in Scroll mode, also show the section filter tabs */}
+                  {whiteboardViewMode === 'scroll' && (
+                    <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pt-1 border-t border-white/10">
+                      {[
+                        { id: 'all', labelAr: '🌟 عرض شامل', labelEn: '🌟 Master View' },
+                        { id: 'focus', labelAr: '📐 القاعدة والمثال', labelEn: '📐 Formula & Sentence' },
+                        { id: 'notes', labelAr: '💡 النقاط والمفردات', labelEn: '💡 Notes & Vocab' },
+                        { id: 'practice', labelAr: '🎯 التصحيح والكويز', labelEn: '🎯 Practice & Quiz' },
+                      ].map(tab => {
+                        const isSelected = contentViewFilter === tab.id;
+                        return (
+                          <button
+                            key={`tab-filter-${tab.id}`}
+                            onClick={() => setContentViewFilter(tab.id as any)}
+                            className={`px-3 py-1 rounded-lg text-xs font-black transition-all cursor-pointer shrink-0 ${
+                              isSelected
+                                ? 'text-slate-950 shadow-md font-black'
+                                : 'text-amber-100/70 hover:text-white hover:bg-white/10'
+                            }`}
+                            style={{
+                              backgroundColor: isSelected ? currentTheme.borderHex : 'transparent'
+                            }}
+                          >
+                            <span>{isRtl ? tab.labelAr : tab.labelEn}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              </div>
+              ) : null}
+
+              {/* Active Audio Walkthrough Banner when Sara is Speaking */}
+              {whiteboardViewMode === 'paged' && (isSaraSpeaking || isExplainingAll) && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-3 sm:p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-amber-600/20 border-2 border-amber-400/60 shadow-lg flex items-center justify-between gap-3 text-amber-200 backdrop-blur-md"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-bold text-sm shrink-0 animate-pulse">
+                      🎙️
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-amber-300 block">
+                        {isRtl ? 'سارة تشرح هذه الصفحة الآن:' : 'Sara is explaining this slide now:'}
+                      </span>
+                      <p className="text-xs sm:text-sm font-bold text-white truncate">
+                        {currentExplanationText || activeSlidePage?.speechText || ''}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      onClick={stopVoiceExplanation}
+                      className="px-2.5 py-1 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-400/40 text-xs font-bold transition-all cursor-pointer active:scale-95"
+                    >
+                      <VolumeX size={13} />
+                      <span className="hidden sm:inline">{isRtl ? 'إيقاف' : 'Stop'}</span>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
 
               {/* ======================================================== */}
               {/* 🌟 2. EMPTY STATE WHEN BOARD HAS NO LESSON YET */}
@@ -2651,16 +3098,18 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
               {/* ======================================================== */}
               {/* 🌟 3. HERO CORE BLACKBOARD: FORMULA & TARGET SENTENCE */}
               {/* ======================================================== */}
-              {(contentViewFilter === 'all' || contentViewFilter === 'focus') && (boardData?.formula || boardData?.sentence) && (
+              {((whiteboardViewMode === 'paged' && (activeSlidePage?.sectionType === 'objective' || activeSlidePage?.sectionType === 'formula')) ||
+                (whiteboardViewMode === 'scroll' && (contentViewFilter === 'all' || contentViewFilter === 'focus'))) &&
+                (boardData?.formula || boardData?.sentence) && (
                 <div 
                   className={`rounded-2xl sm:rounded-3xl p-4 sm:p-5 border-2 shadow-2xl transition-all relative overflow-hidden ${
-                    activeExplanationSection === 'formula' || activeExplanationSection === 'sentence'
+                    activeExplanationSection === 'formula' || activeExplanationSection === 'sentence' || activeHighlightKey === 'formula' || activeHighlightKey === 'sentence'
                       ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.35)] scale-[1.008]'
                       : ''
                   }`}
                   style={{
                     backgroundColor: currentTheme.cardBg,
-                    borderColor: activeExplanationSection === 'formula' || activeExplanationSection === 'sentence'
+                    borderColor: activeExplanationSection === 'formula' || activeExplanationSection === 'sentence' || activeHighlightKey === 'formula' || activeHighlightKey === 'sentence'
                       ? '#FACC15'
                       : currentTheme.borderHex
                   }}
@@ -2673,7 +3122,7 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                         style={{ backgroundColor: currentTheme.borderHex }}
                       >
                         <GraduationCap size={13} />
-                        <span>{isRtl ? 'اللوحة المركزية للشرح' : 'Core Chalkboard'}</span>
+                        <span>{isRtl ? (activeSlidePage?.sectionType === 'formula' ? 'القاعدة والصيغة التركيبية 📐' : 'اللوحة المركزية للشرح 🌟') : 'Core Chalkboard'}</span>
                       </span>
 
                       {boardData?.title && (
@@ -2709,8 +3158,8 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                   </div>
 
                   {/* 📐 FORMULA ROW */}
-                  {boardData?.formula && (
-                    <div className="mb-4 text-center">
+                  {boardData?.formula && (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'formula' : true) && (
+                    <div className={`mb-4 text-center p-3 rounded-2xl transition-all ${activeHighlightKey === 'formula' ? 'ring-2 ring-amber-400 bg-amber-400/10' : ''}`}>
                       <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-amber-300/80 block mb-2">
                         {isRtl ? 'قاعدة وتكوين الجملة (Structure) 📐' : 'Sentence Structure 📐'}
                       </span>
@@ -2737,14 +3186,20 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                   )}
 
                   {/* 🎯 TARGET EXAMPLE ROW */}
-                  {boardData?.sentence && (
-                    <div className="rounded-2xl bg-black/25 border border-white/10 p-3 sm:p-4 text-center">
+                  {boardData?.sentence && (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'objective' : true) && (
+                    <div className={`rounded-2xl bg-black/25 border p-3 sm:p-4 text-center transition-all ${
+                      activeHighlightKey === 'sentence' ? 'border-amber-400 ring-2 ring-amber-400/50 shadow-lg' : 'border-white/10'
+                    }`}>
                       <div className="flex items-center justify-between gap-2 mb-1.5">
                         <span className="text-[10px] font-black uppercase tracking-wider text-amber-300/80">
                           {isRtl ? 'المثال التطبيقي المباشر 🎯' : 'Target Example 🎯'}
                         </span>
                         {boardData.highlight && (
-                          <span className="text-[10px] font-bold text-amber-200 bg-amber-400/20 px-2 py-0.5 rounded-full border border-amber-400/40">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-all ${
+                            activeHighlightKey === 'highlight_word'
+                              ? 'bg-amber-400 text-slate-950 font-black border-white animate-pulse'
+                              : 'text-amber-200 bg-amber-400/20 border-amber-400/40'
+                          }`}>
                             {isRtl ? `التركيز على: "${boardData.highlight}"` : `Focus: "${boardData.highlight}"`}
                           </span>
                         )}
@@ -2760,8 +3215,12 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                               <span>{part}</span>
                               {i < arr.length - 1 && shouldShowHighlight && (
                                 <span 
-                                  className="px-3 py-1 mx-1.5 rounded-xl font-black shadow-lg animate-pulse inline-block text-slate-950 border border-amber-200"
-                                  style={{ backgroundColor: currentTheme.borderHex }}
+                                  className={`px-3 py-1 mx-1.5 rounded-xl font-black shadow-lg transition-all inline-block border ${
+                                    activeHighlightKey === 'highlight_word'
+                                      ? 'bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 ring-4 ring-amber-300 scale-105 border-white animate-pulse'
+                                      : 'text-slate-950 border-amber-200'
+                                  }`}
+                                  style={{ backgroundColor: activeHighlightKey === 'highlight_word' ? undefined : currentTheme.borderHex }}
                                 >
                                   {boardData.highlight}
                                 </span>
@@ -2772,35 +3231,150 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                       </p>
                     </div>
                   )}
+
+                  {/* 📐 GRAMMAR SYNTAX DISSECTION */}
+                  {boardData?.grammarBreakdown && (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'formula' : true) && (
+                    <div className={`mt-3 p-3 rounded-2xl bg-black/30 border text-center transition-all ${
+                      activeHighlightKey === 'breakdown' ? 'border-amber-400 ring-2 ring-amber-400/50' : 'border-white/10'
+                    }`}>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-amber-300/80 block mb-2">
+                        {isRtl ? 'تفكيك عناصر الجملة نحوياً (Syntax Breakdown) 📐' : 'Sentence Syntax Breakdown 📐'}
+                      </span>
+                      <div className="flex items-center justify-center flex-wrap gap-2">
+                        {boardData.grammarBreakdown.parts.map((p, pIdx) => {
+                          const colorClass = 
+                            p.color === 'blue' ? 'bg-blue-500/20 text-blue-200 border-blue-400/40' :
+                            p.color === 'amber' ? 'bg-amber-500/20 text-amber-200 border-amber-400/40' :
+                            p.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40' :
+                            p.color === 'purple' ? 'bg-purple-500/20 text-purple-200 border-purple-400/40' :
+                            'bg-rose-500/20 text-rose-200 border-rose-400/40';
+                          return (
+                            <div key={`gb-${pIdx}`} className={`px-3 py-1.5 rounded-xl border flex flex-col items-center ${colorClass}`}>
+                              <span className="text-[9px] font-bold opacity-80 uppercase">{p.label}</span>
+                              <span className="text-sm sm:text-base font-black font-mono">{p.text}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 🎙️ PHONETICS & SYLLABLES LAB */}
+                  {boardData?.phoneticBreakdown && (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'objective' : true) && (
+                    <div className={`mt-3 p-3 rounded-2xl bg-gradient-to-r from-teal-950/40 to-slate-900/60 border transition-all ${
+                      activeHighlightKey === 'phonetic' ? 'border-teal-400 ring-2 ring-teal-400/60' : 'border-teal-400/30'
+                    }`}>
+                      <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          <span className="p-1 rounded-lg bg-teal-400 text-slate-950 font-black text-xs">🎙️</span>
+                          <span className="text-xs font-black text-teal-200">
+                            {isRtl ? 'معمل النطق الصوتي والمقاطع (Phonetics Lab)' : 'Phonetics & Syllables Lab'}
+                          </span>
+                        </div>
+                        {boardData.phoneticBreakdown.ipa && (
+                          <span className="text-xs font-mono px-2 py-0.5 rounded-md bg-black/40 text-teal-300 border border-teal-400/30" dir="ltr">
+                            {boardData.phoneticBreakdown.ipa}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-center gap-2 flex-wrap py-1">
+                        {boardData.phoneticBreakdown.syllables?.map((syl, sIdx) => (
+                          <React.Fragment key={`syl-${sIdx}`}>
+                            <button
+                              onClick={() => onSpeak(syl)}
+                              className="px-3 py-1.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-100 border border-teal-300/40 font-black text-sm transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-xs"
+                              title={isRtl ? 'استمع لهذا المقطع الصوتي' : 'Hear syllable'}
+                            >
+                              {syl}
+                            </button>
+                            {sIdx < (boardData.phoneticBreakdown?.syllables?.length || 1) - 1 && (
+                              <span className="text-teal-400 font-black text-sm">•</span>
+                            )}
+                          </React.Fragment>
+                        ))}
+
+                        <button
+                          onClick={() => onSpeak(boardData.phoneticBreakdown!.word)}
+                          className="ms-2 px-3 py-1.5 rounded-xl bg-teal-400 hover:bg-teal-300 text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer"
+                          title={isRtl ? 'استمع للكلمة كاملة بنطق نقي' : 'Hear complete word'}
+                        >
+                          <Volume2 size={13} />
+                          <span>{isRtl ? 'انطق الكلمة' : 'Hear Word'}</span>
+                        </button>
+                      </div>
+
+                      {boardData.phoneticBreakdown.tip && (
+                        <p className="text-[11px] text-teal-100/80 font-bold mt-2 pt-1.5 border-t border-teal-500/20 text-center">
+                          💡 {boardData.phoneticBreakdown.tip}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ⚡ INSTANT MASTERY DRILL CHALLENGE */}
+                  {boardData?.drillChallenge && (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'formula' : true) && (
+                    <div className={`mt-3 p-3 rounded-2xl bg-gradient-to-r from-amber-950/40 to-slate-900/60 border transition-all ${
+                      activeHighlightKey === 'drill' ? 'border-amber-400 ring-2 ring-amber-400/60' : 'border-amber-400/40'
+                    }`}>
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <span className="text-[10px] font-black uppercase text-amber-300 flex items-center gap-1.5">
+                          <span>⚡</span>
+                          <span>{isRtl ? 'تحدي الإتقان والتطبيق الفوري (Mastery Drill)' : 'Instant Mastery Drill'}</span>
+                        </span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-200 border border-amber-400/30 font-black">
+                          {boardData.drillChallenge.type}
+                        </span>
+                      </div>
+                      <p className="text-xs sm:text-sm font-black text-white mb-2">
+                        {boardData.drillChallenge.instruction}
+                      </p>
+                      <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-black/40 border border-white/10 flex-wrap">
+                        <span className="text-xs text-amber-200 font-bold font-mono">
+                          {boardData.drillChallenge.hint ? `💡 تلميح: ${boardData.drillChallenge.hint}` : `🎯 الحل: ${boardData.drillChallenge.targetText}`}
+                        </span>
+                        <button
+                          onClick={() => onSpeak(boardData.drillChallenge!.targetText)}
+                          className="px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[11px] flex items-center gap-1 transition-all cursor-pointer shadow-xs active:scale-95"
+                        >
+                          <Volume2 size={12} />
+                          <span>{isRtl ? 'استمع للحل النموذجي' : 'Hear Model Answer'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* ======================================================== */}
               {/* 🌟 4. DUAL-COLUMN ORGANIZED CONTENT GRID */}
-              {/* Column 1: Deep Explanations (Notes & Diagram) */}
-              {/* Column 2: Application & Testing (Correction & Quiz) */}
+              {/* Column 1: Deep Explanations (Notes & Diagram & Mnemonic & Vocab) */}
+              {/* Column 2: Application & Testing (Pitfalls, Correction, CCQ, Speaking, Quiz) */}
               {/* ======================================================== */}
-              {(boardData?.notes || boardData?.diagram || boardData?.correction || boardData?.quiz) && (
+              {(boardData?.notes || boardData?.diagram || boardData?.correction || boardData?.quiz || boardData?.commonPitfall || boardData?.mnemonic || boardData?.ccq || boardData?.vocabularyBank || boardData?.speakingPrompt) && (
                 <div className={`grid gap-4 items-start ${
-                  contentViewFilter === 'all' ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'
+                  whiteboardViewMode === 'paged' ? 'grid-cols-1' : contentViewFilter === 'all' ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'
                 }`}>
                   
                   {/* ==================================================== */}
                   {/* SIDE A: المفاهيم والشرح الذهبي (Notes & Diagram) */}
                   {/* ==================================================== */}
-                  {(contentViewFilter === 'all' || contentViewFilter === 'notes') && (
+                  {(whiteboardViewMode === 'paged' 
+                    ? (activeSlidePage?.sectionType === 'rules' || activeSlidePage?.sectionType === 'speaking')
+                    : (contentViewFilter === 'all' || contentViewFilter === 'notes')) && (
                     <div className="space-y-4">
                       {/* 💡 GOLDEN NOTES CARD */}
-                      {boardData?.notes && boardData.notes.length > 0 && (
+                      {boardData?.notes && boardData.notes.length > 0 && 
+                        (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'rules' : true) && (
                         <div 
                           className={`border rounded-2xl sm:rounded-3xl p-4 shadow-xl transition-all ${
-                            activeExplanationSection === 'notes'
+                            activeExplanationSection === 'notes' || activeHighlightKey === 'notes'
                               ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.35)] scale-[1.01]'
                               : ''
                           }`}
                           style={{
                             backgroundColor: currentTheme.cardBg,
-                            borderColor: activeExplanationSection === 'notes' ? '#FACC15' : currentTheme.cardBorder
+                            borderColor: activeExplanationSection === 'notes' || activeHighlightKey === 'notes' ? '#FACC15' : currentTheme.cardBorder
                           }}
                         >
                           <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
@@ -2843,17 +3417,96 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                         </div>
                       )}
 
+                      {/* 🧠 SMART MNEMONIC HOOK CARD (Rendered on pitfalls page in paged mode or notes in scroll) */}
+                      {boardData?.mnemonic && (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'pitfalls' : true) && (
+                        <div
+                          className={`border rounded-2xl sm:rounded-3xl p-4 shadow-xl transition-all bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-slate-900/60 ${
+                            activeHighlightKey === 'mnemonic' ? 'border-amber-400 ring-4 ring-amber-400/40 shadow-2xl scale-[1.01]' : 'border-purple-400/40'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+                            <h4 className="text-xs sm:text-sm font-black flex items-center gap-1.5 text-purple-200">
+                              <span className="text-base">🧠</span>
+                              <span>{isRtl ? 'حيلة الذاكرة الذكية (Smart Memory Hook) 💡' : 'Smart Memory Hook 💡'}</span>
+                            </h4>
+                            <button
+                              onClick={() => onSpeak(boardData.mnemonic!)}
+                              className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-purple-200 border border-white/15 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                              title={isRtl ? 'سارة تقرأ حيلة الذاكرة' : 'Hear memory hook'}
+                            >
+                              <Volume2 size={12} className="text-purple-300" />
+                              <span>{isRtl ? 'استمع 🎙️' : 'Listen'}</span>
+                            </button>
+                          </div>
+                          <p className="text-xs sm:text-sm font-black text-amber-200 leading-relaxed bg-black/35 p-2.5 rounded-xl border border-purple-400/20">
+                            ✨ {boardData.mnemonic}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* 📚 VOCABULARY BANK CARD */}
+                      {boardData?.vocabularyBank && boardData.vocabularyBank.length > 0 && 
+                        (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'speaking' : true) && (
+                        <div
+                          className={`border rounded-2xl sm:rounded-3xl p-4 shadow-xl transition-all bg-gradient-to-r from-cyan-950/40 via-teal-950/30 to-slate-900/60 ${
+                            activeHighlightKey === 'vocab' ? 'border-cyan-400 ring-4 ring-cyan-400/40 scale-[1.01]' : 'border-cyan-400/40'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-white/10">
+                            <h4 className="text-xs sm:text-sm font-black flex items-center gap-1.5 text-cyan-200">
+                              <BookOpen size={15} className="text-cyan-400" />
+                              <span>{isRtl ? 'بنك مفردات الدرس (Vocabulary Bank) 📚' : 'Lesson Vocabulary Bank 📚'}</span>
+                            </h4>
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-200 border border-cyan-400/30">
+                              {boardData.vocabularyBank.length} {isRtl ? 'كلمات' : 'words'}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {boardData.vocabularyBank.map((vocab, vIdx) => (
+                              <div
+                                key={`vocab-${vIdx}`}
+                                className="p-2.5 rounded-xl bg-black/40 border border-white/10 flex flex-col justify-between gap-1 hover:border-cyan-400/40 transition-all"
+                              >
+                                <div className="flex items-center justify-between gap-1">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-xs sm:text-sm font-black text-white font-mono">{vocab.word}</span>
+                                    {vocab.pos && (
+                                      <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-cyan-400/20 text-cyan-300 font-bold border border-cyan-400/30">
+                                        {vocab.pos}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <button
+                                    onClick={() => onSpeak(vocab.word)}
+                                    className="p-1 rounded-md bg-white/10 hover:bg-cyan-400 hover:text-slate-950 text-cyan-200 transition-all cursor-pointer"
+                                    title={isRtl ? 'نطق الكلمة' : 'Hear pronunciation'}
+                                  >
+                                    <Volume2 size={12} />
+                                  </button>
+                                </div>
+                                <span className="text-xs text-amber-200 font-bold">{vocab.meaning}</span>
+                                {vocab.example && (
+                                  <span className="text-[10px] text-slate-300 italic border-t border-white/10 pt-1 mt-0.5">
+                                    "{vocab.example}"
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       {/* 🎨 VOCABULARY & CONCEPT DIAGRAM */}
-                      {boardData?.diagram && (
+                      {boardData?.diagram && (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'rules' : true) && (
                         <div 
                           className={`border rounded-2xl sm:rounded-3xl p-4 shadow-xl transition-all ${
-                            activeExplanationSection === 'diagram'
+                            activeExplanationSection === 'diagram' || activeHighlightKey === 'diagram'
                               ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.35)] scale-[1.01]'
                               : ''
                           }`}
                           style={{
                             backgroundColor: currentTheme.cardBg,
-                            borderColor: activeExplanationSection === 'diagram' ? '#FACC15' : currentTheme.cardBorder
+                            borderColor: activeExplanationSection === 'diagram' || activeHighlightKey === 'diagram' ? '#FACC15' : currentTheme.cardBorder
                           }}
                         >
                           <div className="flex items-center justify-between pb-2 mb-3 border-b border-white/10">
@@ -2905,25 +3558,80 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                   {/* ==================================================== */}
                   {/* SIDE B: التطبيق والممارسة (Correction & Quiz) */}
                   {/* ==================================================== */}
-                  {(contentViewFilter === 'all' || contentViewFilter === 'practice') && (
+                  {((whiteboardViewMode === 'paged'
+                    ? (activeSlidePage?.sectionType === 'pitfalls' || activeSlidePage?.sectionType === 'speaking' || activeSlidePage?.sectionType === 'quiz')
+                    : (contentViewFilter === 'all' || contentViewFilter === 'practice'))) && (
                     <div className="space-y-4">
+                      {/* ⚠️ COMMON PITFALL ALERT CARD */}
+                      {boardData?.commonPitfall && (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'pitfalls' : true) && (
+                        <div
+                          className={`border rounded-2xl sm:rounded-3xl p-4 shadow-xl transition-all bg-gradient-to-r from-rose-950/40 via-amber-950/30 to-slate-900/60 ${
+                            activeHighlightKey === 'pitfall' ? 'border-amber-400 ring-4 ring-amber-400/50 shadow-[0_0_25px_rgba(251,191,36,0.4)] scale-[1.01]' : 'border-rose-400/40'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+                            <span className="text-xs sm:text-sm font-black flex items-center gap-1.5 text-rose-200">
+                              <AlertCircle size={15} className="text-rose-400" />
+                              <span>{isRtl ? 'احذر هذا الفخ الشائع (Common Pitfall) ⚠️' : 'Common Pitfall Alert ⚠️'}</span>
+                              {activeHighlightKey === 'pitfall' && (
+                                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 animate-pulse ms-1">
+                                  {isRtl ? '🎙️ سارة تشرح الآن' : '🎙️ Sara Explaining'}
+                                </span>
+                              )}
+                            </span>
+                            <button
+                              onClick={() => onSpeak(boardData.commonPitfall!.good)}
+                              className="px-2 py-0.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                              title={isRtl ? 'استمع للصواب' : 'Hear correct phrase'}
+                            >
+                              <Volume2 size={12} className="text-emerald-400" />
+                              <span>{isRtl ? 'انطق الصواب 🎙️' : 'Hear Correct'}</span>
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm mb-2">
+                            <div className="flex items-center gap-2 text-rose-300 bg-rose-950/60 border border-rose-500/30 p-2.5 rounded-xl">
+                              <XCircle size={16} className="text-rose-400 shrink-0" />
+                              <div className="min-w-0">
+                                <span className="text-[10px] text-rose-400/80 font-bold block">{isRtl ? '❌ تجنب هذا:' : '❌ Avoid:'}</span>
+                                <span className="line-through font-bold">{boardData.commonPitfall.bad}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 p-2.5 rounded-xl font-black">
+                              <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+                              <div className="min-w-0">
+                                <span className="text-[10px] text-emerald-400/80 font-bold block">{isRtl ? '✅ الصواب النموذجي:' : '✅ Say this:'}</span>
+                                <span>{boardData.commonPitfall.good}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <p className="text-xs text-amber-100/90 font-medium leading-relaxed bg-black/35 p-2 rounded-xl border border-white/5">
+                            💡 <span className="font-bold">{isRtl ? 'لماذا؟' : 'Why?'}</span> {boardData.commonPitfall.explanation}
+                          </p>
+                        </div>
+                      )}
+
                       {/* 🔄 MISTAKE CORRECTION CARD */}
-                      {boardData?.correction && (!boardData.quiz || (quizSelectedOption !== null && quizSelectedOption !== undefined)) && (
+                      {boardData?.correction && (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'pitfalls' : true) && (!boardData.quiz || (quizSelectedOption !== null && quizSelectedOption !== undefined)) && (
                         <div 
                           className={`border rounded-2xl sm:rounded-3xl p-4 shadow-xl transition-all ${
-                            activeExplanationSection === 'correction'
-                              ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.35)]'
+                            activeExplanationSection === 'correction' || activeHighlightKey === 'correction'
+                              ? 'ring-4 ring-amber-400 border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.35)] scale-[1.01]'
                               : ''
                           }`}
                           style={{
                             backgroundColor: currentTheme.cardBg,
-                            borderColor: activeExplanationSection === 'correction' ? '#FACC15' : currentTheme.cardBorder
+                            borderColor: activeExplanationSection === 'correction' || activeHighlightKey === 'correction' ? '#FACC15' : currentTheme.cardBorder
                           }}
                         >
                           <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
                             <span className="text-xs font-black flex items-center gap-1.5" style={{ color: currentTheme.accentHex }}>
                               <Target size={14} className="text-emerald-400" />
                               <span>{isRtl ? 'تصحيح الأخطاء الشائعة 🔄' : 'Natural vs Common Mistake 🔄'}</span>
+                              {activeHighlightKey === 'correction' && (
+                                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 animate-pulse ms-1">
+                                  {isRtl ? '🎙️ سارة تشرح الآن' : '🎙️ Sara Explaining'}
+                                </span>
+                              )}
                             </span>
 
                             <button
@@ -2955,8 +3663,108 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                         </div>
                       )}
 
+                      {/* ❓ CONCEPT CHECKING QUESTION (CCQ) */}
+                      {boardData?.ccq && (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'pitfalls' : true) && (
+                        <div
+                          className="border rounded-2xl sm:rounded-3xl p-4 shadow-xl transition-all bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-slate-900/60 border-blue-400/40"
+                        >
+                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+                            <h4 className="text-xs sm:text-sm font-black flex items-center gap-1.5 text-blue-200">
+                              <span className="text-base">❓</span>
+                              <span>{isRtl ? 'فحص الفهم السريع (Concept Check) 🔍' : 'Concept Checking Question (CCQ) 🔍'}</span>
+                            </h4>
+                            <button
+                              onClick={() => onSpeak(boardData.ccq!.question)}
+                              className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-blue-200 border border-white/15 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                            >
+                              <Volume2 size={12} className="text-blue-300" />
+                              <span>{isRtl ? 'قراءة 🎙️' : 'Read'}</span>
+                            </button>
+                          </div>
+                          <p className="text-xs sm:text-sm font-bold text-white mb-2.5">
+                            {boardData.ccq.question}
+                          </p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {boardData.ccq.options.map((opt, oIdx) => {
+                              const isSelected = ccqSelectedOption === oIdx;
+                              const isCorrect = oIdx === boardData.ccq!.answerIndex;
+                              let btnClass = 'bg-white/10 hover:bg-white/20 text-white border-white/15';
+                              if (ccqSelectedOption !== null) {
+                                if (isCorrect) {
+                                  btnClass = 'bg-emerald-500/30 border-emerald-400 text-emerald-200 font-black ring-2 ring-emerald-400/50';
+                                } else if (isSelected && !isCorrect) {
+                                  btnClass = 'bg-rose-500/30 border-rose-400 text-rose-200 line-through';
+                                } else {
+                                  btnClass = 'bg-black/20 text-slate-400 border-white/5 opacity-50';
+                                }
+                              }
+                              return (
+                                <button
+                                  key={`ccq-opt-${oIdx}`}
+                                  disabled={ccqSelectedOption !== null}
+                                  onClick={() => setCcqSelectedOption(oIdx)}
+                                  className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${btnClass}`}
+                                >
+                                  <span>{opt}</span>
+                                  {ccqSelectedOption !== null && isCorrect && <Check size={14} className="text-emerald-400" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          {ccqSelectedOption !== null && boardData.ccq.explanation && (
+                            <p className="text-xs text-amber-200 font-medium mt-2 pt-2 border-t border-white/10">
+                              💡 {boardData.ccq.explanation}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* 🎙️ SPEAKING & PRODUCTION CHALLENGE */}
+                      {boardData?.speakingPrompt && (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'speaking' : true) && (
+                        <div
+                          className={`border rounded-2xl sm:rounded-3xl p-4 shadow-xl transition-all bg-gradient-to-r from-emerald-950/40 via-teal-950/30 to-slate-900/60 ${
+                            activeHighlightKey === 'speaking' ? 'border-emerald-400 ring-4 ring-emerald-400/50 shadow-[0_0_25px_rgba(16,185,129,0.4)] scale-[1.01]' : 'border-emerald-400/40'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+                            <span className="text-xs sm:text-sm font-black flex items-center gap-1.5 text-emerald-200">
+                              <Mic size={15} className="text-emerald-400" />
+                              <span>{isRtl ? 'تحدي التحدث الصوتي مع سارة 🎙️' : 'Speaking Production Challenge 🎙️'}</span>
+                              {activeHighlightKey === 'speaking' && (
+                                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-400 text-slate-950 animate-pulse ms-1">
+                                  {isRtl ? '🎙️ سارة تدعوك للحديث الآن' : '🎙️ Sara Speaking Prompt'}
+                                </span>
+                              )}
+                            </span>
+                            {boardData.speakingPrompt.sampleAnswer && (
+                              <button
+                                onClick={() => onSpeak(boardData.speakingPrompt!.sampleAnswer!)}
+                                className="px-2 py-0.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                                title={isRtl ? 'استمع للإجابة النموذجية' : 'Hear sample answer'}
+                              >
+                                <Volume2 size={12} className="text-emerald-400" />
+                                <span>{isRtl ? 'إجابة نموذجية 🎙️' : 'Sample Answer'}</span>
+                              </button>
+                            )}
+                          </div>
+                          <p className="text-xs sm:text-sm font-black text-white mb-2 leading-relaxed">
+                            {boardData.speakingPrompt.instruction}
+                          </p>
+                          {boardData.speakingPrompt.sampleAnswer && (
+                            <div className="p-2.5 rounded-xl bg-black/40 border border-white/10">
+                              <span className="text-[10px] text-emerald-300/80 font-bold block mb-0.5">
+                                {isRtl ? 'نموذج مقترح للحديث:' : 'Suggested speaking model:'}
+                              </span>
+                              <span className="text-xs text-emerald-200 font-bold italic font-mono">
+                                "{boardData.speakingPrompt.sampleAnswer}"
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       {/* 🎯 INTERACTIVE WHITEBOARD QUIZ CHALLENGE (LIMITED 5 QUESTIONS + FLOATING 30s TIMER) */}
-                      {activeQuestion && (
+                      {activeQuestion && (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'quiz' : true) && (
                         <div 
                           className={`relative border-2 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xl transition-all ${
                             activeExplanationSection === 'quiz'
@@ -3003,7 +3811,13 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                                     title={isRtl ? 'إنهاء الدرس وتسجيل النتيجة وحفظ التقدم في ملفك 🎓' : 'Finish Lesson & Save Result in Profile 🎓'}
                                   >
                                     <Trophy size={16} className="text-amber-300 animate-bounce" />
-                                    <span>{isRtl ? '🎓 إنهاء الدرس وتسجيل النتيجة في حسابي' : '🎓 Finish Lesson & Save Result'}</span>
+                                    <span>
+                                      {dailyLessonInfo && dailyLessonInfo.hasNext
+                                        ? (isRtl 
+                                            ? `🎓 إنهاء وترحيل الدرس ${dailyLessonInfo.current} ➔ استراحة دقيقتين ☕ ثم الدرس التالي`
+                                            : `🎓 Archive Lesson ${dailyLessonInfo.current} ➔ 2-Min Break ☕ then Next Lesson`)
+                                        : (isRtl ? '🎓 إنهاء وترحيل الدرس وحفظ النتيجة' : '🎓 Finish, Archive & Save Result')}
+                                    </span>
                                   </button>
                                 )}
                                 <button
@@ -3020,6 +3834,18 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                                   <BookOpen size={13} />
                                   <span>{isRtl ? 'مراجعة الشرح 📖' : 'Review Notes 📖'}</span>
                                 </button>
+                                {onRequestOnBoard && (
+                                  <button
+                                    onClick={() => {
+                                      onRequestOnBoard(isRtl ? 'سارة، أتممت أسئلة التحدي بنجاح! هاتي تدريباً للمحادثة والتحدث الصوتي بالمايك لنكمل وقت الحصة 🎙️' : 'Sara, I finished the quiz! Give me a speaking and conversation challenge to continue our session 🎙️');
+                                      onClose();
+                                    }}
+                                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 hover:brightness-105 text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-95"
+                                  >
+                                    <Mic size={13} />
+                                    <span>{isRtl ? 'مواصلة التدريب الصوتي 🎙️' : 'Continue Speaking 🎙️'}</span>
+                                  </button>
+                                )}
                               </div>
                             </div>
                           ) : (
@@ -3209,6 +4035,89 @@ export const SmartWhiteboard: React.FC<SmartWhiteboardProps> = ({
                   )}
 
                 </div>
+              )}
+
+              {/* ======================================================== */}
+              {/* 🌟 4.5 INTERACTIVE SLIDE PAGE TURNER BANNER */}
+              {/* ======================================================== */}
+              {whiteboardViewMode === 'paged' && whiteboardPages && whiteboardPages.length > 0 && activeSlidePage && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="sticky bottom-2 z-30 mx-auto max-w-4xl w-full p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 text-slate-950 shadow-2xl border-2 border-white ring-4 ring-amber-400/40 backdrop-blur-md transition-all my-3"
+                >
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-10 h-10 rounded-2xl bg-slate-950 text-white flex items-center justify-center text-lg shrink-0 shadow-inner">
+                        👩‍🏫
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-950 text-amber-300">
+                            {isRtl ? `صفحة ${currentPageIndex + 1} من ${whiteboardPages.length}` : `Slide ${currentPageIndex + 1} of ${whiteboardPages.length}`}
+                          </span>
+                          <span className="text-xs font-black text-slate-900 truncate">
+                            {isRtl ? activeSlidePage.titleAr : activeSlidePage.titleEn}
+                          </span>
+                          {autoAdvanceCountdown !== null && (
+                            <span className="text-[11px] font-black font-mono px-2 py-0.5 rounded-full bg-rose-600 text-white animate-pulse">
+                              ⏱️ {autoAdvanceCountdown}s
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs sm:text-sm font-black text-slate-950 mt-0.5">
+                          {currentPageIndex < whiteboardPages.length - 1
+                            ? (isRtl ? 'هل استوعبت هذا يا بطل؟ هل نقلب الصفحة؟ 📄' : 'Did you get this champion? Shall we turn the page? 📄')
+                            : (isRtl ? 'وصلت للصفحة الأخيرة! تفضل بحل كويز الإتقان 🎯' : 'You reached the final slide! Tackle the mastery quiz 🎯')}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0 ms-auto">
+                      {currentPageIndex > 0 && (
+                        <button
+                          onClick={handlePrevPage}
+                          className="px-3 py-2 rounded-xl bg-slate-950/20 hover:bg-slate-950/30 text-slate-950 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer active:scale-95"
+                          title={isRtl ? 'الصفحة السابقة' : 'Previous page'}
+                        >
+                          {isRtl ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+                          <span>{isRtl ? 'السابق' : 'Prev'}</span>
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => explainPage(currentPageIndex)}
+                        className="px-3 py-2 rounded-xl bg-slate-950/15 hover:bg-slate-950/25 text-slate-950 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer active:scale-95"
+                        title={isRtl ? 'إعادة استماع شرح هذه الصفحة' : 'Replay explanation'}
+                      >
+                        <Volume2 size={13} />
+                        <span className="hidden sm:inline">{isRtl ? 'إعادة الشرح 🎙️' : 'Replay 🎙️'}</span>
+                      </button>
+
+                      {currentPageIndex < whiteboardPages.length - 1 ? (
+                        <button
+                          onClick={handleNextPage}
+                          className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-slate-950 hover:bg-slate-900 text-white font-black text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-xl hover:scale-105 active:scale-95 ring-2 ring-white/70 animate-pulse"
+                        >
+                          <span>{isRtl ? 'اقلب الصفحة واشرحي 📄 ➔' : 'Turn Page & Explain 📄 ➔'}</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            if (activeQuestion?.question) {
+                              onSpeak(activeQuestion.question);
+                              setHasTimerStarted(true);
+                              setIsTimerRunning(true);
+                            }
+                          }}
+                          className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-xl hover:scale-105 active:scale-95 ring-2 ring-white/70"
+                        >
+                          <span>{isRtl ? 'ابدأ كويز الإتقان 🎯' : 'Start Mastery Quiz 🎯'}</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
               )}
 
               {/* ======================================================== */}

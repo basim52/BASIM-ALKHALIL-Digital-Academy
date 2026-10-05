@@ -123,22 +123,27 @@ export const ALL_GRAMMAR_UNITS: Record<GrammarLevel, GrammarUnit[]> = {
       id: 'g_a2_1',
       titleEn: 'Past Simple Logic',
       titleAr: 'منطق الماضي البسيط',
-      descriptionEn: 'Chronological anchoring through completed past events.',
-      descriptionAr: 'الاستناد الزمني من خلال الأحداث الماضية المكتملة.',
+      descriptionEn: 'Chronological anchoring through completed past events, regular/irregular verb mastery, negation, and questions.',
+      descriptionAr: 'الاستناد الزمني للأحداث المنتهية، وإتقان تصريف الأفعال المنتظمة والشاذة، وقواعد النفي بـ didn\'t والسؤال بـ Did.',
       color: 'bg-purple-600',
       lightColor: 'bg-purple-50',
-      prepQuestionEn: 'Where were you yesterday at this time?',
-      prepQuestionAr: 'أين كنت أمس في مثل هذا الوقت؟',
-      explanationEn: 'The Past Simple talks about things that finished in the past. Regular verbs end in -ed, but watch out for the irregular ones!',
-      explanationAr: 'يتحدث الماضي البسيط عن أشياء انتهت في الماضي. تنتهي الأفعال المنتظمة بـ -ed، ولكن انتبه للأفعال غير المنتظمة!',
+      prepQuestionEn: 'What are three memorable things you did yesterday?',
+      prepQuestionAr: 'ما هي ثلاثة أشياء لا تُنسى قمت بها بالأمس؟',
+      explanationEn: 'The Past Simple anchors actions that started and finished completely in the past at a specific time. Master affirmative structures (V2), negation (didn\'t + base verb), and question formation (Did + subject + base verb).',
+      explanationAr: 'يُستخدم الماضي البسيط للتعبير عن أحداث بدأت وانتهت تماماً في نقطة زمنية محددة في الماضي. نركز فيه على صياغة الجملة المثبتة بالتصريف الثاني (V2)، وقاعدة النفي بـ didn\'t مع إرجاع الفعل لمصدره، والسؤال بـ Did، والتفريق بين الأفعال المنتظمة (-ed) والشاذة.',
       examples: [
-        { id: 'past-1', en: 'I visited London last year.', ar: 'زرت لندن العام الماضي.' },
-        { id: 'past-2', en: 'They went to the park yesterday.', ar: 'ذهبوا إلى الحديقة أمس.' },
-        { id: 'past-3', en: 'He spoke to the manager.', ar: 'تحدث هو إلى المدير.' }
+        { id: 'past-1', en: 'I visited London last year.', ar: 'زرت لندن العام الماضي (فعل منتظم بإضافة ed).' },
+        { id: 'past-2', en: 'They went to the museum yesterday.', ar: 'ذهبوا إلى المتحف أمس (فعل شاذ: go تحول إلى went).' },
+        { id: 'past-3', en: 'She didn\'t watch the movie last night.', ar: 'هي لم تشاهد الفيلم ليلة البارحة (نفي بـ didn\'t مع إعادة watch لأصلها).' },
+        { id: 'past-4', en: 'Did you finish your project two days ago?', ar: 'هل أنهيت مشروعك منذ يومين؟ (سؤال بـ Did مع بقاء finish في المصدر).' },
+        { id: 'past-5', en: 'We were very happy at the party.', ar: 'كنا سعداء جداً في الحفلة (فعل الكينونة في الماضي were مع الجمع).' }
       ],
       rules: [
-        { titleEn: 'Regular Verbs', titleAr: 'الأفعال المنتظمة', contentEn: 'Add -ed to the base form.', contentAr: 'أضف -ed للمصدر.' },
-        { titleEn: 'Irregular Verbs', titleAr: 'الأفعال غير المنتظمة', contentEn: 'Must be memorized separately.', contentAr: 'يجب حفظها بشكل منفصل.' }
+        { titleEn: '1. Regular Verbs (-ed)', titleAr: '1. الأفعال المنتظمة (-ed)', contentEn: 'Add -ed to the base form (play ➔ played, visit ➔ visited). If ending in consonant+y, change to -ied (study ➔ studied).', contentAr: 'نضيف -ed لمصدر الفعل (play ➔ played). وإذا انتهى بساكن ثم y تتحول إلى -ied مثل study ➔ studied.' },
+        { titleEn: '2. Irregular Verbs (V2)', titleAr: '2. الأفعال الشاذة (V2)', contentEn: 'Irregular verbs change completely and must be acquired (go ➔ went, see ➔ saw, buy ➔ bought, eat ➔ ate, have ➔ had).', contentAr: 'يتغير شكلها تماماً وتحفظ بالتطبيق (go ➔ went، see ➔ saw، buy ➔ bought، have ➔ had).' },
+        { titleEn: '3. Negation with didn\'t', titleAr: '3. قاعدة النفي بـ didn\'t', contentEn: 'Subject + didn\'t + BASE verb. NEVER say "didn\'t went", always say "didn\'t go"!', contentAr: 'الفاعل + didn\'t + الفعل في المصدر المجرد. فخ شائع: لا تقل "didn\'t went" بل قل "didn\'t go"!' },
+        { titleEn: '4. Questions with Did', titleAr: '4. صياغة السؤال بـ Did', contentEn: 'Did + Subject + BASE verb? Example: "Did you see that?" (Revert main verb to base).', contentAr: 'Did + الفاعل + الفعل في المصدر المجرد؟ مثال: "Did you see that?" (يبقى الفعل أصلياً مجرداً).' },
+        { titleEn: '5. Time Markers & Was/Were', titleAr: '5. الكلمات الدالة وفعل الكينونة', contentEn: 'yesterday, last week/year, ago, in 2020. Use "was" for I/he/she/it and "were" for you/we/they.', contentAr: 'yesterday (أمس)، last (الماضي)، ago (منذ). ونستخدم was مع المفرد، و were مع الجمع.' }
       ]
     },
     {

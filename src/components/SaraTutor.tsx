@@ -41,6 +41,7 @@ import {
   History,
   Calendar,
   CalendarDays,
+  Coffee,
   Eye,
   MessageSquare
 } from 'lucide-react';
@@ -245,6 +246,11 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [speechSupported, setSpeechSupported] = useState(false);
   const [activeBoard, setActiveBoard] = useState<SaraBoardData | null>(null);
   const [isWhiteboardOpen, setIsWhiteboardOpen] = useState(false);
+  const [currentWhiteboardPageIndex, setCurrentWhiteboardPageIndex] = useState<number>(0);
+  
+  const handleWhiteboardPageIndexChange = useCallback((idx: number) => {
+    setCurrentWhiteboardPageIndex(idx);
+  }, []);
   
   // 3D Sara Character Floating Presence
   const [isSara3DOpen, setIsSara3DOpen] = useState(true);
@@ -383,6 +389,33 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [showSavedToast, setShowSavedToast] = useState<boolean>(false);
   const [archiveErrorToast, setArchiveErrorToast] = useState<string | null>(null);
 
+  // 🗓️ Daily Multi-Lesson Queue & 2-Minute Rest Break System (نظام استراحة دقيقتين وترحيل الدروس المتتابعة)
+  const [dailyLessonsTarget, setDailyLessonsTarget] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('sara_daily_lessons_target');
+      if (saved) return Math.min(5, Math.max(1, parseInt(saved, 10)));
+    } catch (_) {}
+    return 3; // Default 3 lessons per day, supports 1, 2, or 3!
+  });
+  const [currentDailyLessonIndex, setCurrentDailyLessonIndex] = useState<number>(0);
+  const [todayCompletedLessonIds, setTodayCompletedLessonIds] = useState<string[]>(() => {
+    try {
+      const now = new Date();
+      const todayYmd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const saved = localStorage.getItem(`sara_today_completed_${todayYmd}`);
+      return saved ? JSON.parse(saved) : [];
+    } catch (_) {
+      return [];
+    }
+  });
+
+  // ☕ 2-Minute Break System (استراحة دقيقتين بين كل درس وترحيل الدرس)
+  const [isDailyBreakActive, setIsDailyBreakActive] = useState<boolean>(false);
+  const [breakSecondsLeft, setBreakSecondsLeft] = useState<number>(120); // 120s = 2 mins
+  const [isBreakTimerRunning, setIsBreakTimerRunning] = useState<boolean>(true);
+  const [nextLessonAfterBreak, setNextLessonAfterBreak] = useState<CurriculumLesson | null>(null);
+  const [isAllDailyLessonsCompletedModalOpen, setIsAllDailyLessonsCompletedModalOpen] = useState<boolean>(false);
+
   // Clear silence hesitation timer
   const clearHesitationTimer = () => {
     if (hesitationTimerRef.current) {
@@ -470,6 +503,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     // 1. Build rich pedagogical explanation & board data
     const explanation = buildSaraCurriculumExplanation(lesson, activeLang);
     setActiveBoard(explanation.boardData);
+    setCurrentWhiteboardPageIndex(0);
     setQuizSelectedOption(null);
     setQuizFeedback(null);
     setIsWhiteboardOpen(true);
@@ -533,34 +567,188 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     fetchActiveStudyPlan();
   }, [fetchActiveStudyPlan]);
 
-  // Compute today's scheduled lesson from active plan
-  const todayScheduledLesson = useMemo(() => {
-    if (!activeStudyPlan || !activeStudyPlan.planItems || activeStudyPlan.planItems.length === 0) return null;
-    const now = new Date();
-    const todayYmd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  // Compute today's scheduled lessons queue (supports 1, 2, or 3 lessons per day with automatic sequence!)
+  const todayScheduledLessons = useMemo<CurriculumLesson[]>(() => {
+    const all = getAllCurriculumLessons();
+    const list: CurriculumLesson[] = [];
 
-    // 1. Match by YMD
-    const matchByYmd = activeStudyPlan.planItems.find((item: any) => {
-      if (!item.dateLabel) return false;
-      return item.dateLabel === todayYmd || item.dateLabel.includes(todayYmd);
-    });
-    if (matchByYmd) return matchByYmd;
+    // 1. If study plan has lessons for today
+    if (activeStudyPlan?.planItems && activeStudyPlan.planItems.length > 0) {
+      const now = new Date();
+      const todayYmd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const todayMonthShort = now.toLocaleDateString('en-US', { month: 'short' });
+      const todayDay = now.getDate();
 
-    // 2. Match by legacy date string
-    const matchByDate = activeStudyPlan.planItems.find((item: any) => {
-      if (item.dateLabel && typeof item.dateLabel === 'string') {
-        const parsed = Date.parse(`${item.dateLabel} ${now.getFullYear()}`);
-        if (!isNaN(parsed)) {
-          const pd = new Date(parsed);
-          return pd.getMonth() === now.getMonth() && pd.getDate() === now.getDate();
+      const matchedPlanItems = activeStudyPlan.planItems.filter((item: any) => {
+        if (!item) return false;
+        if (item.scheduledAt && item.scheduledAt.startsWith(todayYmd)) return true;
+        if (item.dateLabel && typeof item.dateLabel === 'string') {
+          if (item.dateLabel.includes(todayYmd)) return true;
+          if (item.dateLabel.includes(String(todayDay)) && (item.dateLabel.includes(todayMonthShort) || item.dateLabel.includes('أكتوبر') || item.dateLabel.includes('Oct'))) return true;
         }
-      }
-      return false;
-    });
-    if (matchByDate) return matchByDate;
+        return false;
+      });
 
-    return activeStudyPlan.planItems[0];
-  }, [activeStudyPlan]);
+      matchedPlanItems.forEach((pi: any) => {
+        const found = all.find(l => 
+          l.id === pi.unitId || 
+          (pi.courseId && l.courseId === pi.courseId && l.level === pi.level) ||
+          (pi.topic && (l.titleAr?.includes(pi.topic) || l.titleEn?.includes(pi.topic)))
+        );
+        if (found && !list.some(x => x.id === found.id)) {
+          list.push(found);
+        } else if (pi.topic) {
+          list.push({
+            id: pi.id || pi.unitId || `plan_lesson_${list.length + 1}`,
+            pillarId: pi.courseId || 'grammar',
+            courseId: pi.courseId || 'general',
+            courseLabelAr: pi.courseLabel || (isRtl ? 'المنهج الأكاديمي' : 'Academic Curriculum'),
+            courseLabelEn: pi.courseLabel || 'Academic Curriculum',
+            titleAr: pi.topic,
+            titleEn: pi.topic,
+            level: pi.level || 'A1',
+            duration: pi.duration || '45 min'
+          });
+        }
+      });
+    }
+
+    // 2. If an activeCurriculumLesson is active, sequence it first and append consecutive lessons
+    if (activeCurriculumLesson) {
+      if (!list.some(x => x.id === activeCurriculumLesson.id)) {
+        list.unshift(activeCurriculumLesson);
+      }
+      const sameCourse = all.filter(l => l.courseId === activeCurriculumLesson.courseId || l.pillarId === activeCurriculumLesson.pillarId);
+      const curIdx = sameCourse.findIndex(l => l.id === activeCurriculumLesson.id);
+      let offset = 1;
+      while (list.length < dailyLessonsTarget && curIdx !== -1 && curIdx + offset < sameCourse.length) {
+        const nextInCourse = sameCourse[curIdx + offset];
+        if (!list.some(x => x.id === nextInCourse.id)) {
+          list.push(nextInCourse);
+        }
+        offset++;
+      }
+    }
+
+    // 3. Fallback sequential lessons to ensure queue length matches dailyLessonsTarget
+    let fallbackIdx = 0;
+    while (list.length < dailyLessonsTarget && fallbackIdx < all.length) {
+      const cand = all[fallbackIdx];
+      if (!list.some(x => x.id === cand.id)) {
+        list.push(cand);
+      }
+      fallbackIdx++;
+    }
+
+    return list.slice(0, dailyLessonsTarget);
+  }, [activeStudyPlan, activeCurriculumLesson, dailyLessonsTarget, isRtl]);
+
+  const todayScheduledLesson = todayScheduledLessons[currentDailyLessonIndex] || todayScheduledLessons[0] || null;
+
+  // 📦 Migrate & Archive Completed Lesson Session (ترحيل الدرس الأول وحفظه بالأرشيف)
+  const executeLessonArchival = async (
+    lessonTitle: string,
+    score: number,
+    total: number,
+    percentage: number,
+    points: number
+  ) => {
+    const now = new Date();
+    const targetUid = auth.currentUser?.uid || profile.uid;
+    const todayYmd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const formattedDate = now.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const sessionData = {
+      date: formattedDate,
+      dateYmd: todayYmd,
+      archivedAt: now.toISOString(),
+      lessonTitle: lessonTitle,
+      lessonName: lessonTitle,
+      messagesCount: messages.length,
+      snippet: `إنجاز وترحيل درس: ${lessonTitle} بنتيجة ${percentage}%`,
+      messages: messages,
+      activeBoard: activeBoard || null,
+      score,
+      total,
+      percentage,
+      pointsEarned: points,
+      status: 'migrated_completed'
+    };
+
+    if (targetUid) {
+      try {
+        await addDoc(collection(db, 'users', targetUid, 'saraSessions'), {
+          ...sessionData,
+          createdAt: serverTimestamp()
+        });
+      } catch (err) {
+        console.warn('Error saving archived session to Firestore:', err);
+      }
+    }
+
+    try {
+      const storageKey = `sara_archived_sessions_${targetUid || 'guest'}`;
+      const existing: any[] = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      existing.unshift({
+        id: `sess_migrated_${Date.now()}`,
+        ...sessionData
+      });
+      localStorage.setItem(storageKey, JSON.stringify(existing.slice(0, 100)));
+    } catch (e) {}
+
+    // Reset current live messages and board to present the next lesson cleanly
+    setMessages([]);
+    setActiveBoard(null);
+    if (targetUid && !targetUid.startsWith('sim_')) {
+      try {
+        await setDoc(doc(db, 'users', targetUid, 'saraChat', 'current'), {
+          messages: [],
+          activeBoard: null,
+          updatedAt: serverTimestamp()
+        });
+      } catch (_) {}
+    }
+  };
+
+  // 🚀 Finish 2-minute break and launch the next lesson!
+  const handleFinishBreakAndStartNextLesson = useCallback(() => {
+    setIsDailyBreakActive(false);
+    setIsBreakTimerRunning(false);
+    playSchoolBellChime();
+
+    const nextIdx = currentDailyLessonIndex + 1;
+    const targetLesson = nextLessonAfterBreak || todayScheduledLessons[nextIdx];
+
+    if (targetLesson) {
+      setCurrentDailyLessonIndex(nextIdx);
+      setNextLessonAfterBreak(null);
+      handleSelectCurriculumLesson(targetLesson);
+    }
+  }, [currentDailyLessonIndex, nextLessonAfterBreak, todayScheduledLessons]);
+
+  // ⏱️ 2-Minute Break Countdown Timer Effect (120 seconds countdown)
+  useEffect(() => {
+    if (!isDailyBreakActive || !isBreakTimerRunning) return;
+
+    const timer = setInterval(() => {
+      setBreakSecondsLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleFinishBreakAndStartNextLesson();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isDailyBreakActive, isBreakTimerRunning, handleFinishBreakAndStartNextLesson]);
 
   // Start lesson from study plan with Sara
   const handleStartPlanLesson = (planItemOrUnitId: any) => {
@@ -1404,10 +1592,19 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
       setLastSavedLessonResult(resultSummary);
 
-      // 3. Sara Speaks Out Loud (The Exact Words requested: "انتهى الدرس!...")
-      const spokenCelebration = isRtl
-        ? `انتهى الدرس! مبارك يا بطل، أتممت درس اليوم بنجاح وحققت نتيجة ${percentage} بالمئة. تم تسجيل نتيجتك وحفظ تقدمك في ملفك الأكاديمي بجدارة! 🌟🎓`
-        : `The lesson has ended! Congratulations champion, you completed today's lesson successfully with a score of ${percentage} percent. Your results and progress have been recorded! 🌟🎓`;
+      // 3. Determine if there is another scheduled lesson for today
+      const nextLessonIndex = currentDailyLessonIndex + 1;
+      const nextLesson = todayScheduledLessons[nextLessonIndex];
+      const hasNextLessonToday = nextLessonIndex < todayScheduledLessons.length && !!nextLesson;
+
+      // 3B. Sara Speaks Out Loud (The Exact Words tailored to 1st, 2nd, or 3rd lesson)
+      const spokenCelebration = hasNextLessonToday
+        ? (isRtl
+            ? `انتهى الدرس! مبارك يا بطل، أتممت الدرس بنجاح وتم ترحيله إلى سجل إنجازاتك. حان وقت استراحة محارب قصيرة لمدة دقيقتين للاسترخاء وشرب الماء، وبعدها سننطلق معاً إلى درسنا التالي!`
+            : `Lesson completed! Congratulations champion, this lesson is archived. Now take a 2-minute break to relax and hydrate, then we will start our next lesson!`)
+        : (isRtl
+            ? `انتهى الدرس! مبارك يا بطل، أتممت جميع دروسك المقررة لهذا اليوم بنجاح وحققت نتيجة ${percentage} بالمئة. تم تسجيل نتيجتك وحفظ تقدمك في ملفك الأكاديمي بجدارة! 🌟🎓`
+            : `The lesson has ended! Congratulations champion, you completed today's scheduled lessons successfully with a score of ${percentage} percent. Your results and progress have been recorded! 🌟🎓`);
 
       if (voiceEnabled) {
         playSaraVoice(spokenCelebration);
@@ -1513,8 +1710,37 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       setMessages(prev => [...prev, completionMsg]);
       setActiveBoard(completionMsg.board || null);
 
-      // 7. Open Celebratory Modal & Trigger Toast
-      setIsLessonCompletedModalOpen(true);
+      // 7. Migration & 2-Minute Break System Or All-Done Modal
+      // A. Archive and migrate session to Firestore & LocalStorage ("ترحيل الدرس")
+      await executeLessonArchival(lessonTitle, boundedScore, totalQuestions, percentage, pointsEarned);
+
+      // B. Mark lesson in today's completed tracker
+      const now = new Date();
+      const todayYmd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const newCompleted = Array.from(new Set([...todayCompletedLessonIds, lessonId]));
+      setTodayCompletedLessonIds(newCompleted);
+      try {
+        localStorage.setItem(`sara_today_completed_${todayYmd}`, JSON.stringify(newCompleted));
+      } catch (_) {}
+
+      if (hasNextLessonToday && nextLesson) {
+        // Close whiteboard
+        setIsWhiteboardOpen(false);
+        setIsLessonCompletedModalOpen(false);
+
+        // Activate 2-minute rest break
+        setNextLessonAfterBreak(nextLesson);
+        setBreakSecondsLeft(120); // 2 minutes (120 seconds)
+        setIsBreakTimerRunning(true);
+        setIsDailyBreakActive(true);
+      } else {
+        // Last lesson of today! Open celebratory modal
+        setIsWhiteboardOpen(false);
+        setIsDailyBreakActive(false);
+        setIsLessonCompletedModalOpen(false);
+        setIsAllDailyLessonsCompletedModalOpen(true);
+      }
+
       setShowSavedToast(true);
       setTimeout(() => setShowSavedToast(false), 5000);
 
@@ -2410,6 +2636,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             missions: isRtl ? activeRolePlay.missionsAr : activeRolePlay.missionsEn
           } : undefined,
           preferredLang: activeLang,
+          timerDurationMinutes: timerDurationMinutes || 10,
+          timerSecondsLeft: timerSecondsLeft,
           activeCurriculum: activeCurriculumLesson ? {
             id: activeCurriculumLesson.id,
             pillarId: activeCurriculumLesson.pillarId,
@@ -2524,8 +2752,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     // Immediate enthusiastic vocal feedback from Sara without delay
     if (voiceEnabled) {
       const immediateAudio = isCorrect 
-        ? (isRtl ? 'كفو عليك يا بطل! إجابة صحيحة وممتازة 🌟 يمكنك الآن إنهاء الدرس لتسجيل النتيجة وحفظ تقدمك.' : 'Awesome job! That is correct! 🌟 You can now finish the lesson to save your result.')
-        : (isRtl ? 'محاولة جيدة يا بطل! لاحظ الخيار الصحيح المظلل بالأخضر 👏 يمكنك الآن إنهاء الدرس لحفظ النتيجة.' : 'Good try! Notice the correct green option 👏 You can now finish the lesson to save your result.');
+        ? (isRtl ? 'كفو عليك يا بطل! إجابة صحيحة وممتازة 🌟 أحسنت، واصل التدريب والتعلم معي!' : 'Awesome job! That is correct! 🌟 Great effort, let us keep practicing and learning!')
+        : (isRtl ? 'محاولة جيدة يا بطل! لاحظ الخيار الصحيح المظلل بالأخضر، ونكمل درسنا معاً 👏' : 'Good try! Notice the correct green option, let us continue our lesson together! 👏');
       playSaraVoice(immediateAudio);
     }
   };
@@ -3266,6 +3494,36 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                     • {isRtl ? activeCurriculumLesson.courseLabelAr : activeCurriculumLesson.courseLabelEn}
                   </span>
                 </div>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#002147] text-amber-300 font-black text-[10px] shadow-2xs">
+                    <span>📚</span>
+                    <span>{isRtl ? `دروس اليوم: درس ${currentDailyLessonIndex + 1} من ${todayScheduledLessons.length}` : `Today: Lesson ${currentDailyLessonIndex + 1} of ${todayScheduledLessons.length}`}</span>
+                  </div>
+
+                  {/* Daily Target Switcher (1, 2, or 3 lessons per day) */}
+                  <div className="flex items-center gap-1 bg-white/80 border border-amber-300/80 rounded-lg p-0.5 text-[10px]">
+                    <span className="text-slate-500 font-bold px-1">{isRtl ? 'المقرر:' : 'Daily:'}</span>
+                    {[1, 2, 3].map((num) => (
+                      <button
+                        key={num}
+                        onClick={() => {
+                          setDailyLessonsTarget(num);
+                          try {
+                            localStorage.setItem('sara_daily_lessons_target', String(num));
+                          } catch (_) {}
+                        }}
+                        className={`px-1.5 py-0.5 rounded font-black transition-all cursor-pointer ${
+                          dailyLessonsTarget === num
+                            ? 'bg-[#002147] text-amber-300 shadow-2xs'
+                            : 'text-slate-600 hover:bg-amber-100'
+                        }`}
+                        title={isRtl ? `تحديد ${num} دروس لليوم` : `${num} lessons per day`}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <p className="text-[11px] text-slate-600 truncate mt-0.5">
                   {isRtl ? 'المنهج المشروح حالياً مع سارة بالصوت والكتابة على السبورة الذكية 👩‍🏫📐' : 'Active curriculum lesson being explained by Sara'}
                 </p>
@@ -3273,28 +3531,59 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </div>
 
             <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+              {isSessionTimeUp || timerSecondsLeft === 0 ? (
+                <button
+                  onClick={() => handleCompleteAndSaveLesson()}
+                  disabled={isSavingLessonResult}
+                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:brightness-110 text-white font-black text-xs transition-all cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95 border border-emerald-400/50"
+                  title={isRtl ? 'اكتمل وقت الحصة! إنهاء وتسجيل النتيجة 🎓' : 'Time is up! Finish Lesson & Record Result 🎓'}
+                >
+                  <Trophy size={14} className="text-amber-300 animate-bounce" />
+                  <span>{isRtl ? 'إنهاء الدرس وحفظ النتيجة 🎓' : 'Finish & Save Result 🎓'}</span>
+                </button>
+              ) : (
+                <>
+                  <div className="px-2.5 py-1 rounded-xl bg-amber-400/20 text-[#002147] font-black text-xs flex items-center gap-1.5 border border-amber-400/50">
+                    <Clock size={13} className="text-amber-600 animate-pulse" />
+                    <span>{isRtl ? `الحصة مستمرة: باقي ${formatTimerDisplay(timerSecondsLeft)}` : `Session in progress: ${formatTimerDisplay(timerSecondsLeft)}`}</span>
+                  </div>
+                  <button
+                    onClick={() => handleCompleteAndSaveLesson()}
+                    disabled={isSavingLessonResult}
+                    className="px-2.5 py-1.5 rounded-xl bg-white/70 hover:bg-white text-slate-600 hover:text-slate-900 font-bold text-xs transition-all cursor-pointer flex items-center gap-1 border border-slate-300/80 active:scale-95"
+                    title={isRtl ? 'إنهاء مبكر وحفظ التقدم' : 'Finish early and save'}
+                  >
+                    <Trophy size={12} className="text-amber-500" />
+                    <span>{isRtl ? 'إنهاء مبكر' : 'Finish early'}</span>
+                  </button>
+                </>
+              )}
+              <div className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 text-slate-800 font-bold text-xs border border-slate-300">
+                <span>📄</span>
+                <span>{isRtl ? `صفحة ${currentWhiteboardPageIndex + 1} من 6` : `Page ${currentWhiteboardPageIndex + 1} of 6`}</span>
+              </div>
               <button
-                onClick={() => handleCompleteAndSaveLesson()}
-                disabled={isSavingLessonResult}
-                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:brightness-110 text-white font-black text-xs transition-all cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95 border border-emerald-400/50"
-                title={isRtl ? 'إنهاء الدرس وتسجيل النتيجة وحفظ التقدم 🎓' : 'Finish Lesson & Record Result 🎓'}
+                onClick={() => {
+                  setIsWhiteboardOpen(true);
+                  if (currentWhiteboardPageIndex < 5) {
+                    setCurrentWhiteboardPageIndex(prev => prev + 1);
+                  }
+                }}
+                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:brightness-105 active:scale-95 text-slate-950 font-black text-xs transition-all cursor-pointer flex items-center gap-1 shadow-sm ring-2 ring-amber-300/40"
+                title={isRtl ? 'اقلب صفحة السبورة للشرح التالي' : 'Turn whiteboard slide'}
               >
-                <Trophy size={14} className="text-amber-300 animate-bounce" />
-                <span>{isRtl ? 'إنهاء الدرس وحفظ النتيجة 🎓' : 'Finish & Save Result 🎓'}</span>
+                <span>📄</span>
+                <span>{isRtl ? 'اقلب الصفحة ➔' : 'Turn Page ➔'}</span>
               </button>
               <button
                 onClick={() => {
                   setIsWhiteboardOpen(true);
-                  if (voiceEnabled) {
-                    const exp = buildSaraCurriculumExplanation(activeCurriculumLesson, activeLang);
-                    playSaraVoice(exp.spokenIntro);
-                  }
                 }}
                 className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs transition-all cursor-pointer flex items-center gap-1 shadow-2xs active:scale-95"
-                title={isRtl ? 'فتح السبورة الذكية وإعادة الشرح الصوتي' : 'Replay audio walkthrough on whiteboard'}
+                title={isRtl ? 'فتح السبورة الذكية والشرح خطوة بخطوة' : 'Open whiteboard step-by-step'}
               >
                 <span>📐🎙️</span>
-                <span>{isRtl ? 'إعادة الشرح' : 'Re-explain'}</span>
+                <span>{isRtl ? 'السبورة خطوة بخطوة' : 'Step-by-step'}</span>
               </button>
               <button
                 onClick={() => setIsCurriculumModalOpen(true)}
@@ -3678,17 +3967,31 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                       className="mt-3 pt-2.5 border-t border-amber-200/60 flex items-center justify-between gap-2 flex-wrap"
                     >
                       <div className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
-                        <span>🎯</span>
-                        <span>{isRtl ? 'أنهيت هذا التمرين؟' : 'Finished this exercise?'}</span>
+                        <Sparkles size={13} className="text-amber-500" />
+                        <span>{isRtl ? 'أحسنت حل التمرين! واصل الدرس:' : 'Great job! Continue your lesson:'}</span>
                       </div>
-                      <button
-                        onClick={() => handleCompleteAndSaveLesson()}
-                        disabled={isSavingLessonResult}
-                        className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:brightness-110 text-white font-black text-xs shadow-md flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 border border-emerald-400/50"
-                      >
-                        <Trophy size={14} className="text-amber-300 animate-bounce" />
-                        <span>{isRtl ? 'إنهاء الدرس وحفظ النتيجة 🎓' : 'Finish & Record Result 🎓'}</span>
-                      </button>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <button
+                          onClick={() => {
+                            handleSendMessage(isRtl ? 'سارة، اعطيني سؤالاً ثانياً أو تمريناً جديداً لنكمل الدرس 🎯' : 'Sara, give me another challenge or question to continue the lesson 🎯');
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 hover:brightness-105 text-slate-950 font-black text-xs shadow-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                        >
+                          <span>{isRtl ? 'سؤال وتحدي جديد 🎯' : 'Next Challenge 🎯'}</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (!activeBoard) {
+                              openWhiteboardModal();
+                            } else {
+                              setIsWhiteboardOpen(true);
+                            }
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-[#002147] border border-slate-300 font-bold text-xs shadow-2xs flex items-center gap-1 transition-all cursor-pointer active:scale-95"
+                        >
+                          <span>{isRtl ? 'السبورة الذكية 📐' : 'Smart Board 📐'}</span>
+                        </button>
+                      </div>
                     </motion.div>
                   )}
                 </div>
@@ -3790,6 +4093,77 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   <p className="leading-relaxed whitespace-pre-wrap font-medium">
                     {msg.text}
                   </p>
+
+                  {/* 📐 Smart Whiteboard Card inside Message Bubble */}
+                  {isSara && msg.board && (
+                    <div className="mt-3 p-3 rounded-2xl bg-gradient-to-r from-amber-50 to-amber-100/60 border border-amber-300 text-xs text-[#002147] shadow-2xs">
+                      <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
+                        <span className="font-black text-amber-950 flex items-center gap-1.5 text-xs sm:text-sm">
+                          <span className="text-base">📐</span>
+                          <span>{msg.board.title || (isRtl ? 'سبورة الشرح والتطبيق' : 'Smart Whiteboard')}</span>
+                        </span>
+                        <div className="flex items-center gap-1">
+                          {msg.board.voiceExplanation && (
+                            <button
+                              onClick={() => {
+                                if (msg.board?.voiceExplanation) {
+                                  playSaraVoice(msg.board.voiceExplanation);
+                                }
+                              }}
+                              className="px-2 py-1 rounded-xl bg-amber-200/80 hover:bg-amber-300 text-amber-900 font-bold text-[10px] flex items-center gap-1 transition-all cursor-pointer shadow-2xs active:scale-95"
+                              title={isRtl ? 'استمع لشرح سارة الصوتي على السبورة' : 'Hear Sara explain'}
+                            >
+                              <Volume2 size={11} className="text-amber-800" />
+                              <span>{isRtl ? 'الشرح 🎙️' : 'Explain'}</span>
+                            </button>
+                          )}
+                          <button
+                            onClick={() => {
+                              if (msg.board) {
+                                setActiveBoard(msg.board);
+                                setIsWhiteboardOpen(true);
+                              }
+                            }}
+                            className="px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-[11px] shadow-xs flex items-center gap-1 transition-all cursor-pointer active:scale-95"
+                            title={isRtl ? 'فتح السبورة التفاعلية لهذا الشرح' : 'Open chalkboard for this explanation'}
+                          >
+                            <Sparkles size={11} className="text-slate-950 animate-pulse" />
+                            <span>{isRtl ? 'افتح السبورة 📐' : 'Open Board 📐'}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {msg.board.sentence && (
+                        <p className="font-mono text-slate-900 font-bold bg-white/80 px-2.5 py-1 rounded-xl border border-amber-200/70 text-[11px] sm:text-xs truncate" dir="ltr">
+                          "{msg.board.sentence}"
+                        </p>
+                      )}
+
+                      {/* Pedagogical Badges inside Bubble */}
+                      <div className="flex items-center gap-1.5 flex-wrap mt-2 pt-1.5 border-t border-amber-200/60">
+                        {msg.board.formula && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-lg bg-white/70 text-[#002147] font-mono font-bold border border-amber-200/60">
+                            📐 {msg.board.formula}
+                          </span>
+                        )}
+                        {msg.board.commonPitfall && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-lg bg-rose-100 text-rose-800 font-black border border-rose-200">
+                            ⚠️ {isRtl ? 'فخ شائع' : 'Pitfall'}
+                          </span>
+                        )}
+                        {msg.board.phoneticBreakdown && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-lg bg-teal-100 text-teal-800 font-black border border-teal-200">
+                            🎙️ {isRtl ? 'نطق صوتي' : 'Phonetics'}
+                          </span>
+                        )}
+                        {msg.board.quiz && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 font-black border border-emerald-200">
+                            🎯 {isRtl ? 'كويز تفاعلي' : 'Quiz'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Actions to open an existing academy section */}
                   {isSara && msg.actions && msg.actions.length > 0 && (
@@ -4562,12 +4936,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         onClose={() => setIsWhiteboardOpen(false)}
         boardData={activeBoard}
         isRtl={isRtl}
-        onSpeak={(txt) => playSaraVoice(txt)}
+        onSpeak={(txt, onEnd) => playSaraVoice(txt, onEnd)}
         onQuizAnswer={handleQuizOptionClick}
         quizSelectedOption={quizSelectedOption}
         quizFeedback={quizFeedback}
         onFinishLesson={(score, total) => handleCompleteAndSaveLesson(score, total)}
         isLessonActive={!!activeCurriculumLesson}
+        currentPageIndex={currentWhiteboardPageIndex}
+        onPageIndexChange={handleWhiteboardPageIndexChange}
         onRequestOnBoard={async (reqText) => {
           await handleSendMessage(reqText);
         }}
@@ -4583,6 +4959,11 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         currentLang={activeLang}
         onToggleLang={() => handleToggleLanguage()}
         onOpenCurriculum={() => setIsCurriculumModalOpen(true)}
+        dailyLessonInfo={{
+          current: currentDailyLessonIndex + 1,
+          total: todayScheduledLessons.length,
+          hasNext: currentDailyLessonIndex < todayScheduledLessons.length - 1
+        }}
       />
 
       {/* 5. 3D Interactive Floating Avatar Character of Sara */}

@@ -344,6 +344,60 @@ function playNativeFallback(
   };
 }
 
+// Memory cache for TTS audio chunks to provide zero-latency instant speech on page turns
+const ttsAudioCache = new Map<string, string>();
+const inFlightPrefetch = new Map<string, Promise<string | null>>();
+
+/**
+ * Prefetches and caches audio in the background before the student turns the slide page
+ */
+export const prefetchAcademyAudio = async (
+  text: string,
+  lang: "en" | "ar",
+  voiceName: string = "Kore"
+): Promise<string | null> => {
+  const cleanText = text
+    .replace(/[*#_`~>]/g, "")
+    .replace(/\[.*?\]\(.*?\)/g, "")
+    .trim();
+
+  if (!cleanText) return null;
+  const cacheKey = `${lang}:${voiceName || "Kore"}:${cleanText}`;
+  if (ttsAudioCache.has(cacheKey)) {
+    return ttsAudioCache.get(cacheKey)!;
+  }
+
+  if (inFlightPrefetch.has(cacheKey)) {
+    return inFlightPrefetch.get(cacheKey)!;
+  }
+
+  const fetchPromise = (async () => {
+    try {
+      const response = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: cleanText, lang, voiceName: voiceName || "Kore" })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.audio) {
+          ttsAudioCache.set(cacheKey, data.audio);
+          return data.audio as string;
+        }
+      }
+    } catch (_) {}
+    return null;
+  })();
+
+  inFlightPrefetch.set(cacheKey, fetchPromise);
+  try {
+    const res = await fetchPromise;
+    return res;
+  } finally {
+    inFlightPrefetch.delete(cacheKey);
+  }
+};
+
 /**
  * Main Premium TTS function
  * Fetches high-definition female audio from Gemini ('Kore') and plays it with automatic retries.
@@ -373,6 +427,17 @@ export const speakAcademyText = async (
   }
 
   onStart?.();
+
+  // 1. Instant Cache Hit: Zero Network Delay
+  const cacheKey = `${lang}:${voiceName || "Kore"}:${cleanText}`;
+  if (ttsAudioCache.has(cacheKey)) {
+    const cachedAudio = ttsAudioCache.get(cacheKey)!;
+    const player = await playAudioSource(cachedAudio, onEnd, playbackRate);
+    if (player && requestId === globalSpeechRequestId) {
+      currentPlayingNode = player;
+      return player;
+    }
+  }
 
   // Retry up to 2 times for Sara's authentic Gemini voice before considering any fallback
   let lastError: any = null;
@@ -407,6 +472,9 @@ export const speakAcademyText = async (
         return { stop: () => {} };
       }
 
+      // Store in memory cache for subsequent instant replays
+      ttsAudioCache.set(cacheKey, data.audio);
+
       const player = await playAudioSource(data.audio, onEnd, playbackRate);
       if (player && requestId === globalSpeechRequestId) {
         currentPlayingNode = player;
@@ -415,7 +483,7 @@ export const speakAcademyText = async (
     } catch (err: any) {
       lastError = err;
       if (attempt === 0) {
-        await new Promise((r) => setTimeout(r, 350));
+        await new Promise((r) => setTimeout(r, 200));
       }
     }
   }
