@@ -1089,13 +1089,6 @@ export function buildSaraCurriculumExplanation(
   const result = buildSaraCurriculumExplanationInternal(lesson, lang);
   const isRtl = lang === 'ar';
 
-  if (result.boardData.quiz) {
-    result.boardData.quiz = shuffleQuiz(result.boardData.quiz, true);
-    result.boardData.quiz.questionNumber = 1;
-    result.boardData.quiz.totalQuestions = 5;
-    result.boardData.quiz.timeLimitSeconds = 30;
-  }
-
   if (result.boardData.quizzes && result.boardData.quizzes.length >= 3) {
     const total = Math.min(5, result.boardData.quizzes.length);
     result.boardData.quizzes = result.boardData.quizzes.slice(0, 5).map((q, idx) => {
@@ -1113,6 +1106,16 @@ export function buildSaraCurriculumExplanation(
       result.boardData.quiz,
       isRtl
     );
+  }
+
+  // Ensure primary quiz is always populated from quizzes[0]
+  if (!result.boardData.quiz && result.boardData.quizzes && result.boardData.quizzes.length > 0) {
+    result.boardData.quiz = result.boardData.quizzes[0];
+  } else if (result.boardData.quiz) {
+    result.boardData.quiz = shuffleQuiz(result.boardData.quiz, true);
+    result.boardData.quiz.questionNumber = 1;
+    result.boardData.quiz.totalQuestions = 5;
+    result.boardData.quiz.timeLimitSeconds = 30;
   }
 
   return result;

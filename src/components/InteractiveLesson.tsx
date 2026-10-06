@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import { Lesson } from '../types';
 import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
 import { AILessonCompanion } from './AILessonCompanion';
+import { buildInteractiveLessonQuiz } from '../utils/academicCurriculumCatalogue';
 
 
 interface InteractiveLessonProps {
@@ -47,6 +48,26 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastQuizResult, setLastQuizResult] = useState<{ correct: boolean, explanation: string } | null>(null);
+
+  // Guarantee verified quiz questions for any curriculum lesson
+  const activeQuiz = React.useMemo(() => {
+    if (Array.isArray(lesson.quiz) && lesson.quiz.length > 0) {
+      return lesson.quiz;
+    }
+    const pillar = lesson.id?.startsWith('r_') ? 'reading' :
+                   lesson.id?.startsWith('g_') ? 'grammar' :
+                   lesson.id?.startsWith('c_') ? 'conversation' :
+                   lesson.id?.startsWith('w_') ? 'writing' :
+                   lesson.id?.startsWith('e_') ? 'expression' : 'general';
+    return buildInteractiveLessonQuiz(pillar, {
+      titleEn: lesson.title,
+      titleAr: lesson.titleAr,
+      readingTextEn: lesson.content,
+      readingTextAr: lesson.contentAr,
+      explanationEn: lesson.content,
+      explanationAr: lesson.contentAr
+    });
+  }, [lesson]);
   
   // Exercise state
   const [exerciseAnswers, setExerciseAnswers] = useState<Record<string, string>>({});
@@ -60,7 +81,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
   ];
 
   const handleNextQuiz = () => {
-    if (lesson.quiz && currentQuizIndex < lesson.quiz.length - 1) {
+    if (activeQuiz && currentQuizIndex < activeQuiz.length - 1) {
       setCurrentQuizIndex(prev => prev + 1);
       setShowFeedback(false);
     } else {
@@ -69,8 +90,8 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
   };
 
   const checkAnswer = (index: number) => {
-    if (!lesson.quiz || showFeedback) return;
-    const q = lesson.quiz[currentQuizIndex];
+    if (!activeQuiz || showFeedback) return;
+    const q = activeQuiz[currentQuizIndex];
     const isCorrect = index === q.correctIndex;
     if (isCorrect) setScore(prev => prev + 1);
     
@@ -425,11 +446,11 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
               exit={{ opacity: 0, y: -20 }}
               className="max-w-3xl mx-auto"
             >
-              {!quizFinished && lesson.quiz ? (
+              {!quizFinished && activeQuiz && activeQuiz.length > 0 ? (
                 <div className="space-y-10">
                   <div className="flex justify-between items-center bg-white/50 p-4 rounded-3xl border border-ink/5">
                     <div className="flex gap-2">
-                      {lesson.quiz.map((_, i) => (
+                      {activeQuiz.map((_, i) => (
                         <div 
                           key={`quiz-indicator-${i}`} 
                           className={`w-3 h-3 rounded-full transition-all duration-500 ${
@@ -440,7 +461,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
                       ))}
                     </div>
                     <span className="font-mono text-sm font-black text-ink/40">
-                      {currentQuizIndex + 1}/{lesson.quiz.length}
+                      {currentQuizIndex + 1}/{activeQuiz.length}
                     </span>
                   </div>
 
@@ -448,30 +469,30 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
                     <div className="absolute top-0 right-0 w-32 h-32 bg-amber-accent/5 blur-3xl group-hover:bg-amber-accent/10 transition-colors" />
                     
                     <h3 className="text-3xl md:text-4xl font-serif font-black mb-12 leading-tight">
-                      {isRtl ? lesson.quiz[currentQuizIndex].questionAr : lesson.quiz[currentQuizIndex].question}
+                      {isRtl ? activeQuiz[currentQuizIndex].questionAr : activeQuiz[currentQuizIndex].question}
                     </h3>
 
                     <div className="grid gap-4">
-                      {(isRtl ? lesson.quiz[currentQuizIndex].optionsAr : lesson.quiz[currentQuizIndex].options).map((opt, i) => (
+                      {(isRtl ? activeQuiz[currentQuizIndex].optionsAr : activeQuiz[currentQuizIndex].options).map((opt, i) => (
                         <button
                           key={`quiz-option-${currentQuizIndex}-${i}`}
                           onClick={() => checkAnswer(i)}
                           disabled={showFeedback}
                           className={`relative group flex items-center justify-between p-6 rounded-3xl border-2 text-lg font-bold transition-all ${
-                            showFeedback && i === lesson.quiz![currentQuizIndex].correctIndex
+                            showFeedback && i === activeQuiz[currentQuizIndex].correctIndex
                               ? 'border-correct bg-correct/5 text-correct shadow-[0_0_20px_rgba(30,122,69,0.1)]'
-                              : showFeedback && lastQuizResult?.correct === false && i === lesson.quiz![currentQuizIndex].correctIndex // Still show correct one if wrong
+                              : showFeedback && lastQuizResult?.correct === false && i === activeQuiz[currentQuizIndex].correctIndex // Still show correct one if wrong
                                 ? 'border-correct bg-correct/5 text-correct'
-                                : showFeedback && i !== lesson.quiz![currentQuizIndex].correctIndex
+                                : showFeedback && i !== activeQuiz[currentQuizIndex].correctIndex
                                   ? 'border-ink/5 bg-ink/5 opacity-50 grayscale'
                                   : 'border-ink/5 bg-cream/30 hover:border-amber-accent hover:bg-cream hover:shadow-lg'
                           }`}
                         >
                           <span className="flex-1 text-right">{opt}</span>
                           <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
-                            showFeedback && i === lesson.quiz![currentQuizIndex].correctIndex ? 'bg-correct border-correct text-cream' : 'border-ink/10 group-hover:border-amber-accent'
+                            showFeedback && i === activeQuiz[currentQuizIndex].correctIndex ? 'bg-correct border-correct text-cream' : 'border-ink/10 group-hover:border-amber-accent'
                           }`}>
-                            {showFeedback && i === lesson.quiz![currentQuizIndex].correctIndex ? <Check size={16} /> : <span className="text-xs font-mono">{String.fromCharCode(65 + i)}</span>}
+                            {showFeedback && i === activeQuiz[currentQuizIndex].correctIndex ? <Check size={16} /> : <span className="text-xs font-mono">{String.fromCharCode(65 + i)}</span>}
                           </div>
                         </button>
                       ))}
@@ -498,7 +519,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
                               onClick={handleNextQuiz}
                               className="mt-6 flex items-center gap-2 py-3 px-8 bg-ink text-cream rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all w-fit"
                             >
-                              {currentQuizIndex < lesson.quiz!.length - 1 ? (isRtl ? 'السؤال التالي' : 'Next Question') : (isRtl ? 'عرض النتيجة' : 'View Score')}
+                              {currentQuizIndex < activeQuiz.length - 1 ? (isRtl ? 'السؤال التالي' : 'Next Question') : (isRtl ? 'عرض النتيجة' : 'View Score')}
                               <ArrowRight size={14} className={isRtl ? "rotate-180" : ""} />
                             </button>
                           </div>
@@ -520,7 +541,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
                   </div>
                   <h2 className="text-4xl md:text-5xl font-serif font-black mb-6">{isRtl ? 'أحسنت يا بطل!' : 'Lesson Mastered!'}</h2>
                   <p className="text-xl text-ink/60 mb-12 max-w-lg mx-auto leading-relaxed">
-                    {isRtl ? `لقد أتممت الدرس بنجاح وحصلت على ${score} من ${lesson.quiz?.length || 0} نقاط. أنت تسير في الطريق الصحيح نحو الإتقان.` : `You've successfully completed the lesson with a score of ${score}/${lesson.quiz?.length || 0}. You are on the fast track to mastery.`}
+                    {isRtl ? `لقد أتممت الدرس واختبار الإتقان بنجاح وحصلت على ${score} من ${activeQuiz?.length || 0} نقاط موثقة.` : `You've successfully completed the lesson and mastery test with a verified score of ${score}/${activeQuiz?.length || 0}.`}
                   </p>
                   <button 
                     onClick={() => onFinish(score)}

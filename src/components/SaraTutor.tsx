@@ -1699,10 +1699,26 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   }, [showTimerDropdown]);
 
   // ==========================================
-  // 🎓 Complete & Save Lesson Engine (تسجيل النتيجة وحفظها ونطق انتهى الدرس)
+  // 🎓 Complete & Save Lesson Engine (تسجيل النتيجة وحفظها بعد خوض الاختبار الحقيقي)
   // ==========================================
   const handleCompleteAndSaveLesson = async (customScore?: number, customTotal?: number) => {
     if (isSavingLessonResult) return;
+
+    // 🛡️ لا يُسمح برصد علامات عشوائية أو إنهاء الدرس دون خوض اختبار الإتقان الحقيقي!
+    if (customScore === undefined || customTotal === undefined) {
+      setIsWhiteboardOpen(true);
+      setCurrentWhiteboardPageIndex(5); // الصفحة 6 هي صفحة اختبار الإتقان
+      
+      const testPrompt = isRtl
+        ? 'عفواً يا بطل! لا يمكن إنهاء الدرس أو رصد الدرجة دون خوض اختبار الإتقان لقياس فهمك الحقيقي 🎯. لقد فتحت لك صفحة الاختبار على السبورة الذكية، أجب عن الأسئلة الآن لتحصل على درجتك الموثقة!'
+        : 'Wait champion! You cannot complete the lesson without taking the mastery quiz to measure your actual understanding 🎯. I opened the quiz page on the whiteboard—answer the questions now to earn your verified score!';
+      
+      if (voiceEnabled) {
+        playSaraVoice(testPrompt);
+      }
+      return;
+    }
+
     setIsSavingLessonResult(true);
 
     try {
@@ -1718,10 +1734,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         : (isRtl ? 'أكاديمية اللغة الإنجليزية' : 'English Academy');
       const lessonId = activeCurriculumLesson?.id || `sara_lesson_${Date.now()}`;
 
-      // 2. Score calculation
-      const totalQuestions = customTotal ?? (activeBoard?.quiz ? 1 : Math.max(1, Math.min(5, Math.floor(messages.length / 3))));
-      const correctAnswers = customScore ?? Math.max(1, quizScoreCount || 1);
-      const boundedScore = Math.min(correctAnswers, totalQuestions);
+      // 2. Score calculation - Strictly from the verified test taken by the student!
+      const totalQuestions = Math.max(1, customTotal);
+      const boundedScore = Math.min(Math.max(0, customScore), totalQuestions);
       const percentage = Math.round((boundedScore / totalQuestions) * 100);
       const durationMins = Math.max(1, Math.round((Date.now() - sessionStartTime) / 60000));
       const pointsEarned = Math.max(30, (boundedScore * 15) + (messages.length >= 6 ? 20 : 10));
@@ -1920,8 +1935,15 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     setIsTimerRunning(false);
     playSchoolBellChime();
 
-    // Automatically complete & record lesson results, and speak out loud
-    handleCompleteAndSaveLesson();
+    // 🔔 لا رصد لدرجات عشوائية عند انتهاء الوقت، بل الانتقال لاختبار الإتقان الحقيقي على السبورة!
+    setIsWhiteboardOpen(true);
+    setCurrentWhiteboardPageIndex(5);
+    const timeUpMsg = isRtl
+      ? 'انتهى وقت الحصة المقررة يا بطل! 🔔 والآن حان وقت اختبار الإتقان النهائي على السبورة لقياس فهمك الحقيقي وتحقيق درجتك الموثقة 🎯!'
+      : 'Session time is up champion! 🔔 Now it is time for the final mastery quiz on the whiteboard to measure your true understanding and record your score 🎯!';
+    if (voiceEnabled) {
+      playSaraVoice(timeUpMsg);
+    }
   };
 
   const selectTimerDuration = (mins: number) => {
@@ -2460,7 +2482,21 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       };
       setMessages(prev => [...prev, userMsg]);
       setInputText('');
-      handleCompleteAndSaveLesson();
+
+      setIsWhiteboardOpen(true);
+      setCurrentWhiteboardPageIndex(5);
+      const testMsg: MessageItem = {
+        id: `msg_sara_quiz_prompt_${Date.now()}`,
+        role: 'sara',
+        text: isRtl
+          ? 'بطلنا الرائع! قبل إنهاء الدرس ورصد النتيجة، يجب خوض اختبار الإتقان على السبورة الذكية لقياس فهمك الحقيقي 🎯. لقد فتحت لك صفحة الاختبار، أجب عن الأسئلة الآن!'
+          : 'Great effort! Before finishing the lesson and recording your grade, please complete the mastery quiz on the whiteboard to measure your true verified score 🎯!',
+        timestamp: Date.now()
+      };
+      setMessages(prev => [...prev, testMsg]);
+      if (voiceEnabled) {
+        playSaraVoice(testMsg.text);
+      }
       return;
     }
 
@@ -3697,13 +3733,21 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
               {isSessionTimeUp || timerSecondsLeft === 0 ? (
                 <button
-                  onClick={() => handleCompleteAndSaveLesson()}
+                  onClick={() => {
+                    setIsWhiteboardOpen(true);
+                    setCurrentWhiteboardPageIndex(5);
+                    if (voiceEnabled) {
+                      playSaraVoice(isRtl
+                        ? 'انطلق الآن إلى اختبار الإتقان على السبورة الذكية لحساب درجتك وتسجيل النتيجة 🎯'
+                        : 'Go to the mastery quiz on the whiteboard now to calculate your score and save results 🎯');
+                    }
+                  }}
                   disabled={isSavingLessonResult}
                   className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:brightness-110 text-white font-black text-xs transition-all cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95 border border-emerald-400/50"
-                  title={isRtl ? 'اكتمل وقت الحصة! إنهاء وتسجيل النتيجة 🎓' : 'Time is up! Finish Lesson & Record Result 🎓'}
+                  title={isRtl ? 'اكتمل وقت الحصة! الانتقال للاختبار وحفظ النتيجة 🎓' : 'Time is up! Go to Quiz & Record Result 🎓'}
                 >
                   <Trophy size={14} className="text-amber-300 animate-bounce" />
-                  <span>{isRtl ? 'إنهاء الدرس وحفظ النتيجة 🎓' : 'Finish & Save Result 🎓'}</span>
+                  <span>{isRtl ? 'اختبار الإتقان وإنهاء الدرس 🎯' : 'Mastery Quiz & Finish 🎯'}</span>
                 </button>
               ) : (
                 <>
@@ -3712,13 +3756,21 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                     <span>{isRtl ? `الحصة مستمرة: باقي ${formatTimerDisplay(timerSecondsLeft)}` : `Session in progress: ${formatTimerDisplay(timerSecondsLeft)}`}</span>
                   </div>
                   <button
-                    onClick={() => handleCompleteAndSaveLesson()}
+                    onClick={() => {
+                      setIsWhiteboardOpen(true);
+                      setCurrentWhiteboardPageIndex(5);
+                      if (voiceEnabled) {
+                        playSaraVoice(isRtl
+                          ? 'لإنهاء الدرس مبكراً، يرجى إكمال اختبار الإتقان على السبورة أولاً لرصد نتيجتك الحقيقية 🎯'
+                          : 'To finish early, please complete the mastery quiz on the whiteboard first to measure your real score 🎯');
+                      }
+                    }}
                     disabled={isSavingLessonResult}
                     className="px-2.5 py-1.5 rounded-xl bg-white/70 hover:bg-white text-slate-600 hover:text-slate-900 font-bold text-xs transition-all cursor-pointer flex items-center gap-1 border border-slate-300/80 active:scale-95"
-                    title={isRtl ? 'إنهاء مبكر وحفظ التقدم' : 'Finish early and save'}
+                    title={isRtl ? 'الانتقال للاختبار وإنهاء الدرس مبكراً' : 'Go to quiz and finish early'}
                   >
                     <Trophy size={12} className="text-amber-500" />
-                    <span>{isRtl ? 'إنهاء مبكر' : 'Finish early'}</span>
+                    <span>{isRtl ? 'اختبار وإنهاء مبكر 🎯' : 'Quiz & finish early 🎯'}</span>
                   </button>
                 </>
               )}

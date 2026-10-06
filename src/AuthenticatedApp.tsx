@@ -133,6 +133,7 @@ import {
 import { EnglishSongs } from './components/EnglishSongs';
 import { AnimatedStoryboard } from './components/AnimatedStoryboard';
 import { EscapeRoomGrammar } from './components/EscapeRoomGrammar';
+import { buildInteractiveLessonQuiz } from './utils/academicCurriculumCatalogue';
 import { FlashcardsHub } from './components/FlashcardsHub';
 import { FamilyActivities } from './components/FamilyActivities';
 import { InteractiveLearningHub } from './components/InteractiveLearningHub';
@@ -6134,8 +6135,8 @@ export default function AuthenticatedApp({
                   courseId: 'adults_daily_dose',
                   level: activeLessonData.level,
                   lessonTitle: activeLessonData.title_en,
-                  score: 10,
-                  total: 10,
+                  score: typeof score === 'number' ? score : (activeLessonData?.sections?.practice?.questions?.length || 5),
+                  total: activeLessonData?.sections?.practice?.questions?.length || 5,
                   timestamp: serverTimestamp()
                 });
                 recordStreakActivity(currentUser.uid).catch(console.error);
@@ -6937,13 +6938,15 @@ export default function AuthenticatedApp({
             onStartLesson={(unitId) => {
               setAutoStartUnitId(null);
               const unit = units.find(u => u.id === unitId);
+              const quizItems = buildInteractiveLessonQuiz('reading', unit);
               const lessonObj = {
                 id: unitId,
                 title: unit?.titleEn || 'New Lesson',
                 titleAr: unit?.titleAr || 'درس جديد',
                 content: unit?.readingTextEn,
                 contentAr: unit?.readingTextAr,
-                proficiencyLevel: selectedReadingLevel as any
+                proficiencyLevel: selectedReadingLevel as any,
+                quiz: quizItems
               } as Lesson;
               setActiveLesson(lessonObj);
               setView('lesson');
@@ -6965,13 +6968,15 @@ export default function AuthenticatedApp({
           onStartLesson={(unitId) => {
             setAutoStartUnitId(null);
             const unit = units.find(u => u.id === unitId);
+            const quizItems = buildInteractiveLessonQuiz('grammar', unit);
             const lessonObj = {
               id: unitId,
               title: unit?.titleEn || 'New Lesson',
               titleAr: unit?.titleAr || 'درس جديد',
               content: unit?.explanationEn,
               contentAr: unit?.explanationAr,
-              proficiencyLevel: selectedGrammarLevel as any
+              proficiencyLevel: selectedGrammarLevel as any,
+              quiz: quizItems
             } as Lesson;
             setActiveLesson(lessonObj);
             setView('lesson');
@@ -6993,13 +6998,15 @@ export default function AuthenticatedApp({
           onStartLesson={(unitId) => {
             setAutoStartUnitId(null);
             const unit = units.find(u => u.id === unitId);
+            const quizItems = buildInteractiveLessonQuiz('conversation', unit);
             const lessonObj = {
               id: unitId,
               title: unit?.titleEn || 'New Lesson',
               titleAr: unit?.titleAr || 'درس جديد',
               content: unit?.contextEn,
               contentAr: unit?.contextAr,
-              proficiencyLevel: selectedConversationLevel as any
+              proficiencyLevel: selectedConversationLevel as any,
+              quiz: quizItems
             } as Lesson;
             setActiveLesson(lessonObj);
             setView('lesson');
@@ -7021,13 +7028,15 @@ export default function AuthenticatedApp({
           onStartLesson={(unitId) => {
             setAutoStartUnitId(null);
             const unit = units.find(u => u.id === unitId);
+            const quizItems = buildInteractiveLessonQuiz('writing', unit);
             const lessonObj = {
               id: unitId,
               title: unit?.titleEn || 'New Lesson',
               titleAr: unit?.titleAr || 'درس جديد',
               content: unit?.conceptEn,
               contentAr: unit?.conceptAr,
-              proficiencyLevel: selectedWritingLevel as any
+              proficiencyLevel: selectedWritingLevel as any,
+              quiz: quizItems
             } as Lesson;
             setActiveLesson(lessonObj);
             setView('lesson');
@@ -7044,13 +7053,15 @@ export default function AuthenticatedApp({
           onBack={() => setView('modern-curriculum')} 
           onStartLesson={(unitId) => {
             const unit = units.find(u => u.id === unitId);
+            const quizItems = buildInteractiveLessonQuiz('expression', unit);
             const lessonObj = {
               id: unitId,
               title: unit?.titleEn || 'New Lesson',
               titleAr: unit?.titleAr || 'درس جديد',
               content: unit?.philosophyEn,
               contentAr: unit?.philosophyAr,
-              proficiencyLevel: selectedExpressionLevel as any
+              proficiencyLevel: selectedExpressionLevel as any,
+              quiz: quizItems
             } as Lesson;
             setActiveLesson(lessonObj);
             setView('lesson');

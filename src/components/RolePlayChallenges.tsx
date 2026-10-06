@@ -576,8 +576,10 @@ export const RolePlayChallenges: React.FC<RolePlayChallengesProps> = ({
           const speechResult = transcribedText || selectedOption || scenario.correct_blank;
           
           // Let's verify how close it matches the correct blank
-          const matched = speechResult.toLowerCase().includes(scenario.correct_blank.toLowerCase());
-          const score = matched ? Math.floor(Math.random() * 11) + 90 : Math.floor(Math.random() * 20) + 70;
+          const targetNorm = scenario.correct_blank.toLowerCase().trim();
+          const speechNorm = speechResult.toLowerCase().trim();
+          const matched = speechNorm.includes(targetNorm);
+          const score = matched ? 96 : Math.max(68, Math.round((Math.min(speechNorm.length, targetNorm.length) / Math.max(1, targetNorm.length)) * 82));
 
           let feedback_ar = "";
           let feedback_en = "";

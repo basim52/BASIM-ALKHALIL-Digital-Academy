@@ -297,11 +297,15 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
         setHasRecorded(false);
         handleSpeechText(isRtl ? "مدة التسجيل قصيرة جداً! يرجى قراءة الجملة بالكامل." : "Recording is too short! Please pronounce the full sentence.", "en");
       } else {
-        const simulatedScore = Math.floor(Math.random() * 15) + 82; // 82 to 96%
+        const targetWords = (lesson.sections.acting_challenge.sentence || '').toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, '').split(/\s+/).filter(Boolean);
+        const spokenWords = (recordedText || '').toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, '').split(/\s+/).filter(Boolean);
+        const matchedCount = targetWords.filter(tw => spokenWords.some(sw => sw.includes(tw) || tw.includes(sw))).length;
+        const matchRatio = targetWords.length > 0 ? (matchedCount / targetWords.length) : 0.85;
+        const accuracyScore = Math.min(98, Math.max(76, Math.round(matchRatio * 100)));
         setSpokeNothingError(false);
-        setPronunciationScore(simulatedScore);
+        setPronunciationScore(accuracyScore);
         setHasRecorded(true);
-        handleSpeechText("Excellent pronunciation logic!", "en");
+        handleSpeechText("Excellent pronunciation delivery!", "en");
       }
     }
   };

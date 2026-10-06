@@ -642,24 +642,22 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
       });
     }
 
-    // Page 6: Mastery Quiz Challenge
-    if (boardData.quiz || (Array.isArray(boardData.quizzes) && boardData.quizzes.length > 0)) {
-      const p6Speech = isRtl
-        ? `وصلنا إلى الصفحة الختامية: اختبار الإتقان النهائي 🎯! أمامك 5 أسئلة تدريبية لقياس مدى استيعابك للقاعدة، كل سؤال له مؤقت 30 ثانية. اقرأ كل سؤال بتركيز وانطلق لتحقيق العلامة الكاملة!`
-        : `We arrived at Page 6: Final Mastery Challenge 🎯! Here is your progressive 5-question test with a 30-second countdown. Read each question carefully and aim for a perfect score!`;
+    // Page 6: Mastery Quiz Challenge (Always guaranteed for every curriculum lesson)
+    const p6Speech = isRtl
+      ? `وصلنا إلى الصفحة الختامية: اختبار الإتقان النهائي 🎯! أمامك 5 أسئلة تدريبية لقياس مدى استيعابك للقاعدة، كل سؤال له مؤقت 30 ثانية. اقرأ كل سؤال بتركيز وانطلق لتحقيق العلامة الكاملة!`
+      : `We arrived at Page 6: Final Mastery Challenge 🎯! Here is your progressive 5-question test with a 30-second countdown. Read each question carefully and aim for a perfect score!`;
 
-      list.push({
-        id: 'page_quiz',
-        pageNumber: list.length + 1,
-        titleAr: 'اختبار الإتقان',
-        titleEn: 'Mastery Quiz',
-        icon: '🎯',
-        subtitleAr: 'تحدي الأسئلة الخمسة وقياس النتيجة',
-        subtitleEn: '5-Question Timed Challenge',
-        speechText: p6Speech,
-        sectionType: 'quiz'
-      });
-    }
+    list.push({
+      id: 'page_quiz',
+      pageNumber: list.length + 1,
+      titleAr: 'اختبار الإتقان',
+      titleEn: 'Mastery Quiz',
+      icon: '🎯',
+      subtitleAr: 'تحدي الأسئلة الخمسة وقياس النتيجة',
+      subtitleEn: '5-Question Timed Challenge',
+      speechText: p6Speech,
+      sectionType: 'quiz'
+    });
 
     return list;
   }, [boardData, isRtl]);
@@ -783,7 +781,13 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
         isRtl
       );
     }
-    return [];
+    return buildLimitedLessonQuizSet(
+      isRtl ? 'الدرس الحالي' : 'Current Lesson',
+      undefined,
+      undefined,
+      undefined,
+      isRtl
+    );
   }, [boardData, isRtl]);
 
   const activeQuestion: SaraBoardQuiz | undefined = currentQuizList[quizQuestionIndex] || boardData?.quiz;
@@ -873,6 +877,13 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
   const [requestNotice, setRequestNotice] = useState<string | null>(null);
   const requestRecognitionRef = useRef<any>(null);
 
+  // 🎙️ Page-specific Voice Question States (سؤال الطالب بالمايك لكل صفحة قبل التقليب)
+  const [isListeningPageQuestion, setIsListeningPageQuestion] = useState(false);
+  const [pageQuestionInput, setPageQuestionInput] = useState('');
+  const [showPageQuestionBox, setShowPageQuestionBox] = useState(false);
+  const [pageQuestionNotice, setPageQuestionNotice] = useState<string | null>(null);
+  const pageQuestionRecognitionRef = useRef<any>(null);
+
   // Stop voice explanation if user closes modal or clicks stop
   const stopVoiceExplanation = useCallback(() => {
     if (explanationTimeoutRef.current) {
@@ -893,6 +904,9 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
       if (explanationTimeoutRef.current) clearTimeout(explanationTimeoutRef.current);
       if (requestRecognitionRef.current) {
         try { requestRecognitionRef.current.abort(); } catch (_) {}
+      }
+      if (pageQuestionRecognitionRef.current) {
+        try { pageQuestionRecognitionRef.current.abort(); } catch (_) {}
       }
     };
   }, [cancelAutoAdvance, clearHighlightTimeouts]);
@@ -1116,6 +1130,193 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
       setRequestNotice(null);
     }
   };
+
+  // 💡 Page-specific Quick Question Suggestions tailored to each of the 6 slide pages
+  const getPageQuickQuestions = useCallback((sectionType?: string, rtl?: boolean): string[] => {
+    if (rtl) {
+      switch (sectionType) {
+        case 'objective':
+          return [
+            'اشرحي لي معنى الجملة بأسلوب آخر 💡',
+            'كيف أنطق هذه الجملة بطلاقة وسرعة؟ 🗣️',
+            'هل تستخدم هذه الجملة في المحادثات اليومية؟ 🌟'
+          ];
+        case 'formula':
+          return [
+            'لماذا رُتِّبت الجملة بهذا الترتيب النحوي؟ 📐',
+            'هل يمكن استخدام زمن أو صيغة أخرى؟ ✍️',
+            'اعطيني تطبيقاً مختلفاً على هذه القاعدة 💡'
+          ];
+        case 'rules':
+          return [
+            'اعطيني مثالاً واقعياً إضافياً على هذه النقطة 📌',
+            'كيف أربط بين هذه القاعدة وما تعلمته سابقاً؟ 🧠',
+            'ما هي أهم نقطة يجب أن أركز عليها هنا؟ 🎯'
+          ];
+        case 'pitfalls':
+          return [
+            'لماذا يقع الكثير في هذا الخطأ الشائع؟ ⚠️',
+            'كيف أثبت الصواب في ذاكرتي ولا أنساه؟ 🧠',
+            'هل هناك فخاخ أخرى مشابهة لهذه النقطة؟ 🔍'
+          ];
+        case 'speaking':
+          return [
+            'انطقي لي هذه الكلمات ببطء وبوضوح 🎙️',
+            'ضعي هذه المفردة في جملة محادثة حية 💬',
+            'كيف أستخدم هذا التعبير في موقف حقيقي؟ 🌟'
+          ];
+        case 'quiz':
+          return [
+            'أعطني تلميحاً ذكياً قبل أن أحل السؤال 🎯',
+            'اشرحي لي فكرة السؤال باختصار ❓',
+            'كيف أفكر في استبعاد الخيارات الخاطئة؟ 💡'
+          ];
+        default:
+          return [
+            'اشرحي لي هذه النقطة بمثال إضافي 💡',
+            'عندي استفسار عن هذه الجزئية 🎙️'
+          ];
+      }
+    } else {
+      switch (sectionType) {
+        case 'objective':
+          return [
+            'Can you explain this model sentence simply? 💡',
+            'How can I pronounce this naturally? 🗣️',
+            'Is this common in daily conversations? 🌟'
+          ];
+        case 'formula':
+          return [
+            'Why is the sentence structured this way? 📐',
+            'Can we use another tense here? ✍️',
+            'Give me another formula example 💡'
+          ];
+        case 'rules':
+          return [
+            'Give me another real-life example 📌',
+            'What is the most important takeaway here? 🎯'
+          ];
+        case 'pitfalls':
+          return [
+            'Why is this mistake so common? ⚠️',
+            'How does the memory hook work? 🧠'
+          ];
+        case 'speaking':
+          return [
+            'Pronounce these words slowly for me 🎙️',
+            'Use this word in a natural sentence 💬'
+          ];
+        case 'quiz':
+          return [
+            'Give me a helpful hint for this question 🎯',
+            'Explain what this question is testing ❓'
+          ];
+        default:
+          return [
+            'Explain this with another example 💡',
+            'I have a question about this part 🎙️'
+          ];
+      }
+    }
+  }, []);
+
+  // 🎙️ Start listening to the student's question on the current page before turning
+  const handleStartPageVoiceQuestion = useCallback((page?: WhiteboardSlidePage) => {
+    cancelAutoAdvance();
+    onStopSpeak?.();
+    setShowPageQuestionBox(true);
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setPageQuestionNotice(isRtl ? 'الميكروفون غير متاح في متصفحك، يمكنك كتابة سؤالك في المربع لسارة' : 'Microphone unavailable, you can type your question here');
+      return;
+    }
+
+    try {
+      if (pageQuestionRecognitionRef.current) {
+        try { pageQuestionRecognitionRef.current.abort(); } catch (_) {}
+      }
+
+      const rec = new SpeechRecognition();
+      rec.continuous = false;
+      rec.interimResults = true;
+      rec.lang = isRtl ? 'ar-SA' : 'en-US';
+
+      const pageTitle = page ? (isRtl ? page.titleAr : page.titleEn) : (isRtl ? 'هذه الصفحة' : 'this page');
+
+      rec.onstart = () => {
+        setIsListeningPageQuestion(true);
+        setPageQuestionNotice(isRtl ? `سارة تستمع لسؤالك عن "${pageTitle}".. تكلّم الآن 🎙️` : `Sara is listening to your question about "${pageTitle}".. Speak now 🎙️`);
+      };
+
+      rec.onresult = (e: any) => {
+        const results = e.results;
+        const transcript = results[results.length - 1][0].transcript;
+        if (transcript && transcript.trim()) {
+          setPageQuestionInput(transcript.trim());
+        }
+      };
+
+      rec.onerror = (err: any) => {
+        console.warn('Page question voice error:', err);
+        setIsListeningPageQuestion(false);
+        if (err.error === 'not-allowed') {
+          setPageQuestionNotice(isRtl ? 'يرجى السماح بالوصول للمايك من إعدادات المتصفح، أو كتابة سؤالك في المربع' : 'Please allow mic access in your browser or type your question');
+        } else {
+          setPageQuestionNotice(isRtl ? 'انتهى الاستماع، راجع سؤالك واضغط إرسال لسارة 🚀' : 'Listening ended, review and send your question to Sara 🚀');
+        }
+      };
+
+      rec.onend = () => {
+        setIsListeningPageQuestion(false);
+      };
+
+      pageQuestionRecognitionRef.current = rec;
+      rec.start();
+    } catch (err) {
+      console.warn('Could not start page question speech recognition:', err);
+      setIsListeningPageQuestion(false);
+    }
+  }, [cancelAutoAdvance, isRtl, onStopSpeak]);
+
+  const handleStopPageVoiceQuestion = useCallback(() => {
+    if (pageQuestionRecognitionRef.current) {
+      try { pageQuestionRecognitionRef.current.stop(); } catch (_) {}
+      setIsListeningPageQuestion(false);
+    }
+  }, []);
+
+  const handleSubmitPageQuestion = useCallback(async (customText?: string) => {
+    const rawQuestion = (customText !== undefined ? customText : pageQuestionInput).trim();
+    if (!rawQuestion) return;
+
+    handleStopPageVoiceQuestion();
+    cancelAutoAdvance();
+
+    const targetPage = whiteboardPages[currentPageIndex];
+    const pageTitle = targetPage ? (isRtl ? targetPage.titleAr : targetPage.titleEn) : (isRtl ? 'هذه الصفحة' : 'this slide');
+    const pageSub = targetPage ? (isRtl ? targetPage.subtitleAr : targetPage.subtitleEn) : '';
+
+    const formattedRequest = isRtl
+      ? `سارة، لدي سؤال عن جزئية صفحة (${pageTitle}${pageSub ? ` - ${pageSub}` : ''}): "${rawQuestion}"`
+      : `Teacher Sara, I have a question about slide (${pageTitle}${pageSub ? ` - ${pageSub}` : ''}): "${rawQuestion}"`;
+
+    setPageQuestionNotice(isRtl ? `سارة تشرح لك الآن إجابة سؤالك عن "${pageTitle}"... 🌸` : `Sara is answering your question about "${pageTitle}"... 🌸`);
+    
+    try {
+      if (onRequestOnBoard) {
+        await onRequestOnBoard(formattedRequest);
+      }
+    } catch (err) {
+      console.warn('Error submitting page question:', err);
+    }
+
+    setPageQuestionInput('');
+    setTimeout(() => {
+      setShowPageQuestionBox(false);
+      setPageQuestionNotice(null);
+    }, 4500);
+  }, [cancelAutoAdvance, currentPageIndex, handleStopPageVoiceQuestion, isRtl, onRequestOnBoard, pageQuestionInput, whiteboardPages]);
 
   // Animate Chalk Drawing on Canvas Tab
   const handleDrawChalkExplanation = () => {
@@ -4145,6 +4346,38 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                         <span className="hidden sm:inline">{isRtl ? 'إعادة الشرح 🎙️' : 'Replay 🎙️'}</span>
                       </button>
 
+                      {/* 🎙️ زر المايك لسؤال الطالب عن هذه الصفحة قبل التقليب (في كل الصفحات الست) */}
+                      <button
+                        onClick={() => {
+                          if (isListeningPageQuestion) {
+                            handleStopPageVoiceQuestion();
+                            if (pageQuestionInput.trim()) {
+                              handleSubmitPageQuestion();
+                            }
+                          } else {
+                            handleStartPageVoiceQuestion(activeSlidePage);
+                          }
+                        }}
+                        className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm flex items-center gap-1.5 transition-all cursor-pointer shadow-md hover:scale-105 active:scale-95 ${
+                          isListeningPageQuestion
+                            ? 'bg-rose-600 hover:bg-rose-700 text-white animate-pulse ring-2 ring-white shadow-rose-500/50'
+                            : 'bg-white hover:bg-slate-50 text-slate-950 border border-slate-950/20 shadow-sm'
+                        }`}
+                        title={isRtl ? `اسأل سارة بالمايك عن جزئية (${activeSlidePage.titleAr}) قبل التقليب 🎙️` : `Ask Sara by mic about (${activeSlidePage.titleEn}) before turning page 🎙️`}
+                      >
+                        {isListeningPageQuestion ? (
+                          <>
+                            <MicOff size={15} className="animate-spin text-white" />
+                            <span>{isRtl ? 'أسمعك.. تكلّم 🔴' : 'Listening.. 🔴'}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Mic size={15} className="text-rose-600 animate-bounce" />
+                            <span>{isRtl ? 'اسأل بالمايك 🎙️' : 'Ask by Mic 🎙️'}</span>
+                          </>
+                        )}
+                      </button>
+
                       {currentPageIndex < whiteboardPages.length - 1 ? (
                         <button
                           onClick={handleNextPage}
@@ -4168,6 +4401,116 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                       )}
                     </div>
                   </div>
+
+                  {/* Interactive Question Drawer for the Current Page */}
+                  <AnimatePresence>
+                    {(showPageQuestionBox || isListeningPageQuestion || pageQuestionNotice || pageQuestionInput) && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mt-3 pt-3 border-t border-slate-950/15 overflow-hidden w-full"
+                      >
+                        <div className="bg-slate-950/95 text-white p-3 rounded-2xl border border-white/20 shadow-xl space-y-2">
+                          <div className="flex items-center justify-between gap-2 text-xs font-black">
+                            <div className="flex items-center gap-1.5 text-amber-300 min-w-0">
+                              <span className="text-sm shrink-0">🎙️</span>
+                              <span className="truncate">
+                                {isRtl 
+                                  ? `سؤالك لسارة عن جزئية: "${activeSlidePage.titleAr}" (${activeSlidePage.subtitleAr})`
+                                  : `Your question to Sara about: "${activeSlidePage.titleEn}" (${activeSlidePage.subtitleEn})`}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => {
+                                handleStopPageVoiceQuestion();
+                                setShowPageQuestionBox(false);
+                                setPageQuestionNotice(null);
+                              }}
+                              className="p-1 rounded-lg hover:bg-white/20 text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+                              title={isRtl ? 'إغلاق' : 'Close'}
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+
+                          {pageQuestionNotice && (
+                            <div className="text-[11px] font-bold text-amber-200 bg-amber-500/20 border border-amber-400/30 p-2 rounded-xl flex items-center gap-1.5">
+                              <Sparkles size={12} className="text-amber-300 shrink-0 animate-spin" />
+                              <span>{pageQuestionNotice}</span>
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={pageQuestionInput}
+                              onChange={(e) => setPageQuestionInput(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  handleSubmitPageQuestion();
+                                }
+                              }}
+                              placeholder={
+                                isListeningPageQuestion
+                                  ? (isRtl ? 'تحدث الآن، سارة تسمعك...' : 'Speak now, Sara is listening...')
+                                  : (isRtl ? `تحدث بالمايك أو اكتب أي سؤال عن (${activeSlidePage.titleAr})...` : `Speak or type your question about (${activeSlidePage.titleEn})...`)
+                              }
+                              className="flex-1 bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400"
+                            />
+
+                            <button
+                              onClick={() => {
+                                if (isListeningPageQuestion) {
+                                  handleStopPageVoiceQuestion();
+                                  if (pageQuestionInput.trim()) handleSubmitPageQuestion();
+                                } else {
+                                  handleStartPageVoiceQuestion(activeSlidePage);
+                                }
+                              }}
+                              className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
+                                isListeningPageQuestion
+                                  ? 'bg-rose-600 hover:bg-rose-700 text-white border-white animate-pulse'
+                                  : 'bg-white/10 hover:bg-white/20 text-amber-300 border-white/20'
+                              }`}
+                              title={isListeningPageQuestion ? (isRtl ? 'إيقاف وإرسال' : 'Stop & Send') : (isRtl ? 'تحدث بالمايك' : 'Speak')}
+                            >
+                              {isListeningPageQuestion ? <MicOff size={15} /> : <Mic size={15} />}
+                            </button>
+
+                            <button
+                              disabled={!pageQuestionInput.trim()}
+                              onClick={() => handleSubmitPageQuestion()}
+                              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-300 hover:from-amber-300 hover:to-yellow-200 text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                            >
+                              <span>{isRtl ? 'إرسال السؤال' : 'Ask Sara'}</span>
+                              <Send size={12} className={isRtl ? 'rotate-180' : ''} />
+                            </button>
+                          </div>
+
+                          {/* Quick Suggestion Chips for this specific page */}
+                          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
+                            <span className="text-[10px] text-slate-400 font-bold shrink-0">
+                              {isRtl ? 'أسئلة سريعة مقترحة:' : 'Quick questions:'}
+                            </span>
+                            {getPageQuickQuestions(activeSlidePage.sectionType, isRtl).map((qq, idx) => (
+                              <button
+                                key={`qq-${activeSlidePage.id}-${idx}`}
+                                onClick={() => {
+                                  setPageQuestionInput(qq);
+                                  handleSubmitPageQuestion(qq);
+                                }}
+                                className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-amber-400/20 text-amber-200 hover:text-amber-100 border border-white/15 text-[10px] font-bold whitespace-nowrap transition-colors cursor-pointer shrink-0"
+                              >
+                                {qq}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               )}
 

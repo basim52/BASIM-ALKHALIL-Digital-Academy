@@ -906,3 +906,458 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
 
   return generatedItems;
 }
+
+export interface InteractiveLessonQuizItem {
+  question: string;
+  questionAr: string;
+  options: string[];
+  optionsAr: string[];
+  correctIndex: number;
+  explanation: string;
+  explanationAr: string;
+}
+
+/**
+ * Builds a verified 5-question interactive quiz for any curriculum unit
+ * (Reading, Grammar, Conversation, Writing, Expression) to ensure no lesson
+ * ever awards marks without an actual test.
+ */
+export function buildInteractiveLessonQuiz(
+  pillarId: 'reading' | 'grammar' | 'conversation' | 'writing' | 'expression' | string,
+  unit: any
+): InteractiveLessonQuizItem[] {
+  const titleEn = unit?.titleEn || 'Lesson';
+  const titleAr = unit?.titleAr || 'الدرس';
+  const questions: InteractiveLessonQuizItem[] = [];
+
+  if (pillarId === 'reading') {
+    const card = unit?.cards?.[0];
+    const readingExcerpt = (unit?.readingTextEn || '').slice(0, 80);
+    questions.push({
+      question: `What is the key linguistic focus in "${titleEn}"?`,
+      questionAr: `ما هو التركيز اللغوي الأساسي في درس: "${titleAr}"؟`,
+      options: [
+        card?.en ? `Understanding vocabulary such as "${card.en}"` : 'Accurate phonetic decoding & phrasing',
+        'Skipping punctuation marks',
+        'Reading words in reverse order',
+        'Translating word by word without context'
+      ],
+      optionsAr: [
+        card?.ar ? `فهم المفردات واستيعاب سياق "${card.ar}"` : 'الوعي الصوتي الدقيق والقراءة المعبرة',
+        'تجاهل علامات الترقيم',
+        'قراءة الكلمات بترتيب عكسي',
+        'الترجمة الحرفية دون فهم السياق'
+      ],
+      correctIndex: 0,
+      explanation: 'Active reading comprehension links vocabulary directly with phonetic accuracy.',
+      explanationAr: 'الفهم القرائي الفعّال يربط بين المفردات الدقيقة واللفظ الصوتي السليم.'
+    });
+
+    questions.push({
+      question: `In the passage: "${readingExcerpt || titleEn}...", how should you approach connected sentences?`,
+      questionAr: `في نص القراءة: كيف يجب التعامل مع الجمل المترابطة؟`,
+      options: [
+        'Pause naturally at breath groups and punctuation',
+        'Read as fast as possible without breathing',
+        'Ignore all conjunction words',
+        'Change word pronunciations randomly'
+      ],
+      optionsAr: [
+        'التوقف الطبيعي عند علامات الترقيم ومجموعات النفس',
+        'القراءة بأقصى سرعة ممكنة دون تنفس',
+        'تجاهل جميع أدوات الربط',
+        'تغيير نطق الكلمات عشوائياً'
+      ],
+      correctIndex: 0,
+      explanation: 'Pacing and cadence determine listening comprehension and fluency.',
+      explanationAr: 'الإيقاع السليم والتنغيم يحددان جودة الفهم القرائي والطلاقة.'
+    });
+
+    questions.push({
+      question: `What does the word "${card?.en || 'fluency'}" mean in this reading context?`,
+      questionAr: `ماذا تعني كلمة "${card?.en || 'fluency'}" في سياق هذا النص؟`,
+      options: [
+        card?.ar || 'المعنى اللغوي السليم في السياق',
+        'معنى غير مرتبط تماماً بالنص',
+        'عكس الدلالة المطلوبة',
+        'كلمة عامية مهملة'
+      ],
+      optionsAr: [
+        card?.ar || 'المعنى اللغوي السليم في السياق',
+        'معنى غير مرتبط تماماً بالنص',
+        'عكس الدلالة المطلوبة',
+        'كلمة عامية مهملة'
+      ],
+      correctIndex: 0,
+      explanation: `"${card?.en || 'The target word'}" conveys ${card?.ar || 'the intended meaning'} in English.`,
+      explanationAr: `المفردة تدل بدقة على المعنى السياقي الصحيح في النص.`
+    });
+
+    questions.push({
+      question: `How does practicing aloud improve your comprehension of "${titleEn}"?`,
+      questionAr: `كيف يساهم التدريب الصوتي المسموع في تعزيز استيعاب درس "${titleAr}"؟`,
+      options: [
+        'It stimulates muscle memory and auditory reinforcement',
+        'It causes you to forget the words faster',
+        'It has no impact on language learning',
+        'It replaces the need to understand grammar'
+      ],
+      optionsAr: [
+        'ينشط الذاكرة العضلية والسمعية لترسيخ التراكيب',
+        'يجعل الذاكرة تنسى الكلمات سريعاً',
+        'ليس له أي أثر في اكتساب اللغة',
+        'يلغي الحاجة لفهم القواعد'
+      ],
+      correctIndex: 0,
+      explanation: 'Vocal repetition strengthens neurological language pathways.',
+      explanationAr: 'التكرار الصوتي المسموع يرسخ الروابط العصبية للغة في الدماغ.'
+    });
+
+    questions.push({
+      question: `Final Mastery: What is the main milestone achieved in "${titleEn}"?`,
+      questionAr: `تحدي الإتقان: ما هو الإنجاز الأساسي المتحقق من إتمام "${titleAr}"؟`,
+      options: [
+        'Fluent reading with full comprehension and correct intonation',
+        'Rushing through text without understanding',
+        'Memorizing text without knowing what it means',
+        'Avoiding English reading in daily life'
+      ],
+      optionsAr: [
+        'القراءة بطلاقة وفهم عميق مع مراعاة نبرة الصوت السليمة',
+        'المرور السريع على النص دون استيعاب',
+        'حفظ النص صماً دون معرفة معناه',
+        'تجنب القراءة بالإنجليزية في الحياة اليومية'
+      ],
+      correctIndex: 0,
+      explanation: 'Mastery is achieved through integrated fluency and deep comprehension.',
+      explanationAr: 'يتحقق الإتقان من خلال الجمع بين الطلاقة اللفظية والاستيعاب العميق.'
+    });
+  } else if (pillarId === 'grammar') {
+    const rule = unit?.rules?.[0];
+    const example = unit?.examples?.[0];
+    questions.push({
+      question: `What is the foundational rule in "${titleEn}"?`,
+      questionAr: `ما هي القاعدة التأسيسية في درس: "${titleAr}"؟`,
+      options: [
+        rule?.titleEn || 'Correct auxiliary verb harmony and base tense structure',
+        'Using random verb tenses in the same sentence',
+        'Omitting helping verbs in all contexts',
+        'Placing adjectives after verbs without agreement'
+      ],
+      optionsAr: [
+        rule?.titleAr || 'توافق الفعل المساعد مع الفاعل وتصريف الزمن السليم',
+        'استخدام أزمنة عشوائية في نفس الجملة',
+        'حذف الأفعال المساعدة في جميع السياقات',
+        'وضع الصفات بعد الأفعال دون مراعاة التوافق'
+      ],
+      correctIndex: 0,
+      explanation: 'Grammar stability requires subject-verb harmony and correct tense usage.',
+      explanationAr: 'سلامة القواعد تتطلب توافق الفاعل مع الفعل واستخدام الزمن المناسب.'
+    });
+
+    questions.push({
+      question: `Which of the following correctly applies "${titleEn}"?`,
+      questionAr: `أي من الخيارات التالية يطبق قاعدة "${titleAr}" بشكل صحيح تماماً؟`,
+      options: [
+        example?.en || 'She always prepares her studies with dedication.',
+        'She always prepare her studies yesterday.',
+        'She is prepare her studies last week.',
+        'She preparing always with wrong verb.'
+      ],
+      optionsAr: [
+        example ? `الجملة: "${example.en}" (${example.ar})` : 'التطبيق السليم للصيغة النحوية',
+        'صياغة غير منضبطة مع زمن غير متوافق',
+        'استخدام فعل مساعد خاطئ',
+        'ترتيب خاطئ للظرف والفاعل'
+      ],
+      correctIndex: 0,
+      explanation: 'Matches the exact grammatical formulation taught in this unit.',
+      explanationAr: 'يطابق تماماً الصيغة النحوية الصحيحة الموضحة في الوحدة.'
+    });
+
+    questions.push({
+      question: `What common mistake should you avoid when applying "${titleEn}"?`,
+      questionAr: `ما هو الخطأ الشائع الذي يجب تجنبه عند تطبيق درس "${titleAr}"؟`,
+      options: [
+        'Confusing base verb forms with irregular past or present inflections',
+        'Speaking in clear, complete sentences',
+        'Practicing with real-world examples',
+        'Reviewing common irregular verbs'
+      ],
+      optionsAr: [
+        'خلط الفعل المجرد بالتصريفات الشاذة أو غير المتطابقة مع الزمن',
+        'التحدث بجمل واضحة ومكتملة الأركان',
+        'التدرب على أمثلة حية من واقع الحياة',
+        'مراجعة الأفعال الشاذة الشائعة'
+      ],
+      correctIndex: 0,
+      explanation: 'Maintaining grammatical consistency prevents communication ambiguity.',
+      explanationAr: 'الحفاظ على الاتساق النحوي يمنع الغموض والخلط في المعنى.'
+    });
+
+    questions.push({
+      question: `When forming questions in "${titleEn}", what is the standard word order?`,
+      questionAr: `عند صياغة السؤال في درس "${titleAr}"، ما هو الترتيب النموذجي للكلمات؟`,
+      options: [
+        'Auxiliary Verb + Subject + Base Main Verb',
+        'Main Verb + Subject + Auxiliary Verb',
+        'Subject + Object + Question Word',
+        'Object + Auxiliary Verb + Subject'
+      ],
+      optionsAr: [
+        'الفعل المساعد + الفاعل + الفعل الرئيسي المجرد',
+        'الفعل الرئيسي + الفاعل + الفعل المساعد',
+        'الفاعل + المفعول به + أداة الاستفهام',
+        'المفعول به + الفعل المساعد + الفاعل'
+      ],
+      correctIndex: 0,
+      explanation: 'Standard English question syntax begins with the auxiliary or question word followed by subject.',
+      explanationAr: 'الترتيب القياسي للسؤال الإنجليزي يبدأ بالفعل المساعد يليه الفاعل ثم الفعل الرئيسي.'
+    });
+
+    questions.push({
+      question: `Final Challenge: How can you demonstrate complete mastery of "${titleEn}"?`,
+      questionAr: `التحدي النهائي: كيف تثبت إتقانك التام لقاعدة "${titleAr}"؟`,
+      options: [
+        'Producing original sentences spontaneously in speaking and writing',
+        'Relying on memorized tables without conversational practice',
+        'Ignoring mistakes during speaking practice',
+        'Never checking verb conjugations'
+      ],
+      optionsAr: [
+        'إنتاج جمل أصلية من إنشائك بطلاقة وتلقائية في التحدث والكتابة',
+        'الاعتماد على الجداول الصماء دون ممارسة حوارية',
+        'تجاهل الأخطاء أثناء التحدث',
+        'عدم مراجعة تصاريف الأفعال'
+      ],
+      correctIndex: 0,
+      explanation: 'Autonomous language production is the gold standard of fluency.',
+      explanationAr: 'الإنتاج اللغوي التلقائي في المحادثة هو المعيار الذهبي للإتقان.'
+    });
+  } else if (pillarId === 'conversation') {
+    const phrase = unit?.phrases?.[0];
+    const scenario = unit?.scenarios?.[0];
+    questions.push({
+      question: `In "${titleEn}", which expression delivers the most natural and polite impact?`,
+      questionAr: `في درس المحادثة "${titleAr}"، أي تعبير يعطي انطباعاً طبيعياً ولبقاً؟`,
+      options: [
+        phrase?.en || 'It is an absolute pleasure to connect with you.',
+        'I do not care about this topic.',
+        'Why are you talking to me?',
+        'Say what you want quickly.'
+      ],
+      optionsAr: [
+        phrase ? `العبارة: "${phrase.en}" (${phrase.ar})` : 'الرد الدبلوماسي المهذب المتناسق مع الموقف',
+        'لا يهمني هذا الموضوع مطلقاً',
+        'لماذا تتحدث معي؟',
+        'قل ما تريده بسرعة'
+      ],
+      correctIndex: 0,
+      explanation: 'Polite social openers foster rapport and open professional dialogue.',
+      explanationAr: 'العبارات الافتتاحية المهذبة تبني جسور التواصل الإيجابي وتفتح آفاق الحوار.'
+    });
+
+    questions.push({
+      question: `How should you respond in the scenario: "${scenario?.titleEn || titleEn}"?`,
+      questionAr: `كيف تتصرف بلباقة في الموقف الحواري: "${scenario?.titleAr || titleAr}"؟`,
+      options: [
+        'Listen actively, acknowledge their point, and contribute with respectful tone',
+        'Interrupt immediately before they finish speaking',
+        'Stay silent and look away awkwardly',
+        'Use harsh words to dominate the conversation'
+      ],
+      optionsAr: [
+        'الاستماع الفعّال، وإظهار التقدير، ثم المشاركة بنبرة صوت محترمة ومتزنة',
+        'المقاطعة الفورية قبل أن يكمل الطرف الآخر كلامه',
+        'الصمت التام والنظر بعيداً بحرج',
+        'استخدام كلمات حادة لفرض السيطرة على الحوار'
+      ],
+      correctIndex: 0,
+      explanation: 'Active listening and emotional intelligence are pillars of elite English communication.',
+      explanationAr: 'الاستماع الفعّال والذكاء العاطفي هما ركيزتا التواصل الإنجليزي الراقي.'
+    });
+
+    questions.push({
+      question: `What conversational filler buys you thinking time without breaking flow?`,
+      questionAr: `أي من عبارات ملء الفراغ تمنحك وقتاً للتفكير دون قطع تدفق الحديث؟`,
+      options: [
+        '"Well, that is an interesting question, let me consider..."',
+        '"Uhhhhh... I forgot all my words."',
+        '"Shut up please while I think."',
+        '"Never mind, I will not answer."'
+      ],
+      optionsAr: [
+        '"حسناً، هذا سؤال ملهم للغاية، دعني أوضح..." ("Well, that is a great point...")',
+        '"آآآآه... لقد نسيت الكلمات."',
+        '"اصمت ريثما أفكر."',
+        '"انسَ الأمر، لن أجيب."'
+      ],
+      correctIndex: 0,
+      explanation: 'Fillers maintain speaking rhythm while allowing cognitive formulation.',
+      explanationAr: 'عبارات الربط تحافظ على تدفق الكلام بينما يصيغ العقل الفكرة التالية.'
+    });
+
+    questions.push({
+      question: `Which intonation pattern should you use for open-ended conversation questions?`,
+      questionAr: `ما هو نمط نبرة الصوت (Intonation) الأنسب للأسئلة المفتوحة في المحادثة؟`,
+      options: [
+        'A warm, falling intonation at the end to show genuine curiosity',
+        'A sharp monotone voice with no pitch variation',
+        'Shouting the final word loudly',
+        'Whispering so the listener cannot hear'
+      ],
+      optionsAr: [
+        'نبرة دافئة منخفضة في نهاية السؤال لإبداء الاهتمام والفضول الإيجابي',
+        'صوت حاد رتيب خالٍ من أي تنوع نغمي',
+        'الصراخ بالكلمة الأخيرة بصوت مرتفع',
+        'الهمس بحيث يتعذر على المستمع الفهم'
+      ],
+      correctIndex: 0,
+      explanation: 'Natural intonation makes English speech engaging and approachable.',
+      explanationAr: 'التنغيم الطبيعي يجعل الكلام الإنجليزي جذاباً وممتعاً للمستمع.'
+    });
+
+    questions.push({
+      question: `Final Speaking Milestone: What is the true goal of "${titleEn}"?`,
+      questionAr: `تحدي المحادثة النهائي: ما هو الهدف الحقيقي لدرس "${titleAr}"؟`,
+      options: [
+        'Speaking confidently, naturally, and connecting meaningfully with others',
+        'Memorizing long monologues without interaction',
+        'Translating in your head for five minutes before every sentence',
+        'Speaking with anxiety and fear of making mistakes'
+      ],
+      optionsAr: [
+        'التحدث بثقة وطلاقة وتلقائية وبناء تواصل إنساني راقٍ وفعّال',
+        'حفظ خطب طويلة دون تفاعل حقيقي',
+        'الترجمة في العقل لعدة دقائق قبل كل جملة',
+        'التحدث بتوتر وخوف دائم من الوقوع في الخطأ'
+      ],
+      correctIndex: 0,
+      explanation: 'Fluency is the freedom to express yourself with confidence.',
+      explanationAr: 'الطلاقة الحقيقية هي القدرة على التعبير عن ذاتك بثقة وأريحية.'
+    });
+  } else {
+    // Writing, Expression & General units
+    questions.push({
+      question: `What is the core takeaway of "${titleEn}"?`,
+      questionAr: `ما هو المفهوم الجوهري المستفاد من درس: "${titleAr}"؟`,
+      options: [
+        'Clear structure, cohesive transitions, and precise expression',
+        'Rambling without logical connection',
+        'Ignoring paragraph development',
+        'Writing without revision or proofreading'
+      ],
+      optionsAr: [
+        'الهيكل الواضح، وروابط الجمل المتناسقة، ودقة التعبير اللغوي',
+        'الاسترسال العشوائي دون تسلسل منطقي',
+        'تجاهل بناء وتطوير الفقرة',
+        'الكتابة دون مراجعة أو تدقيق'
+      ],
+      correctIndex: 0,
+      explanation: 'Cohesion and precision create powerful English expression.',
+      explanationAr: 'الترابط والدقة يصنعان التعبير الإنجليزي المؤثر والاحترافي.'
+    });
+
+    questions.push({
+      question: `Which transition best links two complementary arguments in "${titleEn}"?`,
+      questionAr: `أي أداة ربط هي الأنسب لربط فكرتين متكاملتين في هذا السياق؟`,
+      options: [
+        '"Furthermore" or "In addition"',
+        '"On the contrary, nevertheless"',
+        '"In spite of that"',
+        '"Regardless of the contradiction"'
+      ],
+      optionsAr: [
+        'أدوات الإضافة مثل: "Furthermore" أو "In addition" (علاوة على ذلك)',
+        'أدوات التناقض الحاد',
+        'أدوات الاستدراك غير المتطابقة',
+        'تجاهل الربط تماماً'
+      ],
+      correctIndex: 0,
+      explanation: 'Additive transitions smoothly bridge supporting points.',
+      explanationAr: 'أدوات الإضافة تنقل القارئ بسلاسة بين النقاط التي تدعم الفكرة.'
+    });
+
+    questions.push({
+      question: `How do you avoid literal translation from Arabic in "${titleEn}"?`,
+      questionAr: `كيف تتجنب فخ الترجمة الحرفية من العربية في درس "${titleAr}"؟`,
+      options: [
+        'Think in English idioms and structure thoughts natively',
+        'Translate word for word from Arabic',
+        'Use an Arabic dictionary for every single preposition',
+        'Apply Arabic syntax rules to English sentences'
+      ],
+      optionsAr: [
+        'التفكير في التراكيب الإنجليزية الطبيعية وصياغة المعنى بأسلوب أهل اللغة',
+        'الترجمة كلمة بكلمة من المعاجم الثنائية',
+        'البحث عن معنى كل حرف جر بالعربية',
+        'تطبيق قواعد النحو العربي على الجمل الإنجليزية'
+      ],
+      correctIndex: 0,
+      explanation: 'Native idioms capture nuance that literal translations destroy.',
+      explanationAr: 'التراكيب الإنجليزية الأصيلة تعبر عن المعنى بدقة يعجز عنها النقل الحرفي.'
+    });
+
+    questions.push({
+      question: `What is the role of editing and revising in "${titleEn}"?`,
+      questionAr: `ما هو دور التدقيق والمراجعة في إتقان مهارة "${titleAr}"؟`,
+      options: [
+        'Refining clarity, eliminating redundancy, and polishing tone',
+        'Adding unnecessary complex words to confuse the reader',
+        'Deleting all punctuation marks',
+        'Changing the entire message randomly'
+      ],
+      optionsAr: [
+        'تنقيح الأفكار، وحذف الحشو الزائد، وضبط نبرة النص بما يناسب الهدف',
+        'إضافة كلمات معقدة غير ضرورية لإرباك القارئ',
+        'حذف جميع علامات الترقيم',
+        'تغيير الرسالة الأساسية عشوائياً'
+      ],
+      correctIndex: 0,
+      explanation: 'Polishing is where good communication becomes exceptional.',
+      explanationAr: 'المراجعة والتحرير هما المرحلة التي يتحول فيها النص إلى تحفة لغوية.'
+    });
+
+    questions.push({
+      question: `Final Achievement: How do you know you have mastered "${titleEn}"?`,
+      questionAr: `الإنجاز النهائي: كيف تتأكد من أنك أتقنت درس "${titleAr}" بالكامل؟`,
+      options: [
+        'You can formulate your own text with natural phrasing and high confidence',
+        'You need someone to translate every sentence for you',
+        'You cannot explain the concept in your own words',
+        'You avoid using the skill in real-life communication'
+      ],
+      optionsAr: [
+        'تستطيع صياغة نصوصك الخاصة بتعابير طبيعية وثقة عالية وبلا تردد',
+        'تحتاج إلى شخص يترجم لك كل جملة',
+        'تعجز عن شرح الفكرة بأسلوبك الخاص',
+        'تتجنب استخدام المهارة في التواصل الواقعي'
+      ],
+      correctIndex: 0,
+      explanation: 'Independent application is the ultimate marker of academic mastery.',
+      explanationAr: 'القدرة على التطبيق المستقل هي المعيار الأسمى للإتقان الأكاديمي.'
+    });
+  }
+
+  // Shuffle options for all questions so option 0 is not static
+  return questions.map(q => {
+    const indexed = q.options.map((opt, i) => ({ opt, optAr: q.optionsAr[i], isCorrect: i === q.correctIndex }));
+    for (let i = indexed.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
+    }
+    let newCorrect = indexed.findIndex(item => item.isCorrect);
+    if (newCorrect === 0 && indexed.length > 1) {
+      const swapTarget = 1 + Math.floor(Math.random() * (indexed.length - 1));
+      [indexed[0], indexed[swapTarget]] = [indexed[swapTarget], indexed[0]];
+      newCorrect = swapTarget;
+    }
+    return {
+      ...q,
+      options: indexed.map(item => item.opt),
+      optionsAr: indexed.map(item => item.optAr),
+      correctIndex: newCorrect
+    };
+  });
+}
+
