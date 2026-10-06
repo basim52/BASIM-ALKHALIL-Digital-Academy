@@ -5748,7 +5748,7 @@ export default function AuthenticatedApp({
 
   if (!userProfile) return <RoleSelector lang={lang} onSelect={handleRoleSelect} />;
 
-  const handleLessonComplete = async (score?: number) => {
+  const handleLessonComplete = async (score?: number, total?: number) => {
     if (!userProfile || !activeLesson) return;
     
     // Increment XP and points
@@ -5788,7 +5788,7 @@ export default function AuthenticatedApp({
           level: level,
           lessonTitle: activeLesson.title || '',
           score: score,
-          total: activeLesson.quiz?.length || 0,
+          total: total || activeLesson.quiz?.length || 5,
           timestamp: serverTimestamp()
         });
         recordStreakActivity(userProfile.uid).catch(console.error);

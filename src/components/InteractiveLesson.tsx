@@ -11,7 +11,7 @@ import { buildInteractiveLessonQuiz } from '../utils/academicCurriculumCatalogue
 interface InteractiveLessonProps {
   lesson: Partial<Lesson>;
   isRtl: boolean;
-  onFinish: (score?: number) => void;
+  onFinish: (score?: number, total?: number) => void;
   onBack: () => void;
 }
 
@@ -544,7 +544,7 @@ export const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ lesson, is
                     {isRtl ? `لقد أتممت الدرس واختبار الإتقان بنجاح وحصلت على ${score} من ${activeQuiz?.length || 0} نقاط موثقة.` : `You've successfully completed the lesson and mastery test with a verified score of ${score}/${activeQuiz?.length || 0}.`}
                   </p>
                   <button 
-                    onClick={() => onFinish(score)}
+                    onClick={() => onFinish(score, activeQuiz?.length || 5)}
                     className="group py-6 px-16 bg-amber-accent text-white rounded-3xl font-black text-sm uppercase tracking-[0.2em] shadow-2xl hover:shadow-amber-accent/30 hover:-translate-y-2 active:translate-y-0 transition-all flex items-center gap-3 mx-auto"
                   >
                     {isRtl ? 'إكمال المنهج' : 'Back to Curriculum'}
