@@ -724,21 +724,225 @@ export interface PlanItem {
   timeLabel?: string;
   isTest?: boolean;
   scheduledAt?: string;
+  trackId?: string;
+  trackBadge?: string;
+  phaseLabel?: string;
 }
+
+export interface SpecializedPlanTrack {
+  id: string; // 'comprehensive' | 'ielts_toefl' | 'business_interview' | 'traveler_survival' | 'weakness_recovery' | 'spaced_repetition' | 'micro_10min' | 'weekend_bootcamp' | 'mastery_100day'
+  category: 'goal' | 'adaptive' | 'lifestyle' | 'academic';
+  titleAr: string;
+  titleEn: string;
+  badgeAr: string;
+  badgeEn: string;
+  descAr: string;
+  descEn: string;
+  icon: string;
+  recommendedDurationWeeks: number;
+  recommendedLessonsPerDay: number;
+  recommendedDays: number[];
+  recommendedPillars: string[];
+  difficultyLevel: 'beginner' | 'intermediate' | 'advanced' | 'all';
+  color: string;
+  gradient: string;
+}
+
+export const SPECIALIZED_PLAN_TRACKS: SpecializedPlanTrack[] = [
+  // Academic Default
+  {
+    id: 'comprehensive',
+    category: 'academic',
+    titleAr: 'الخطة الأكاديمية الشاملة',
+    titleEn: 'Comprehensive Academic Plan',
+    badgeAr: '🎓 التأسيس والشمولية',
+    badgeEn: '🎓 Comprehensive Foundation',
+    descAr: 'خطة شاملة ومتوازنة تتنقل بين القواعد، القراءة، المحادثة، والكتابة لبناء أساس لغوي متين ومتكامل.',
+    descEn: 'A balanced track rotating through grammar, reading, conversation, and writing for solid foundation.',
+    icon: '📚',
+    recommendedDurationWeeks: 13,
+    recommendedLessonsPerDay: 2,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: [
+      'grammar', 'reading', 'conversation', 'writing', 'expression',
+      'oxford_discover', 'stories', 'adults_daily_dose', 'interactive_play'
+    ],
+    difficultyLevel: 'intermediate',
+    color: 'blue',
+    gradient: 'from-blue-600 via-indigo-600 to-sky-700'
+  },
+
+  // 1. Goal-Oriented Tracks (خطط الأهداف المتخصصة)
+  {
+    id: 'ielts_toefl',
+    category: 'goal',
+    titleAr: 'مسار اجتياز اختبارات الآيلتس والتوفل الأكاديمي',
+    titleEn: 'IELTS & TOEFL Academic Sprint',
+    badgeAr: '🎯 إعداد أكاديمي وامتحانات',
+    badgeEn: '🎯 Academic Exam Preparation',
+    descAr: 'مكثف يركز على القراءة الأكاديمية، الكتابة التحليلية، الكلمات المتقدمة، ومحاكاة المقابلة الشفهية مع سارة.',
+    descEn: 'Focused intensive on academic reading, analytical writing, high-level vocabulary, and speaking interview simulations.',
+    icon: '🎯',
+    recommendedDurationWeeks: 4,
+    recommendedLessonsPerDay: 2,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: ['reading', 'writing', 'conversation', 'grammar', 'translation_language_lab'],
+    difficultyLevel: 'advanced',
+    color: 'emerald',
+    gradient: 'from-emerald-600 via-teal-600 to-cyan-700'
+  },
+  {
+    id: 'business_interview',
+    category: 'goal',
+    titleAr: 'مسار المقابلات المهنية وإنجليزي الأعمال',
+    titleEn: 'Job Interview & Business English',
+    badgeAr: '💼 سوق العمل والشركات',
+    badgeEn: '💼 Career & Workplace Mastery',
+    descAr: 'تدريب احترافي على أسئلة مقابلات التوظيف، كتابة الإيميلات الرسمية، والتفاوض وعروض الأعمال مع محاكاة حية.',
+    descEn: 'Master HR interview responses, professional emails, negotiation tactics, and business presentations.',
+    icon: '💼',
+    recommendedDurationWeeks: 4,
+    recommendedLessonsPerDay: 2,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: ['conversation', 'expression', 'interactive_play', 'adults_daily_dose'],
+    difficultyLevel: 'intermediate',
+    color: 'amber',
+    gradient: 'from-amber-600 via-orange-600 to-amber-700'
+  },
+  {
+    id: 'traveler_survival',
+    category: 'goal',
+    titleAr: 'مسار السفر والمواقف السريعة (14 يوماً)',
+    titleEn: "Traveler's Survival 14-Day Plan",
+    badgeAr: '✈️ 14 يوماً للمواقف الحية',
+    badgeEn: '✈️ 14-Day Real-Life Scenarios',
+    descAr: 'محاكاة مواقف السفر: المطار، الفنادق، طلب الطعام، التوجيهات والمواقف الطارئة مع حوارات تفاعلية حية على السبورة.',
+    descEn: 'Immersion in airport navigation, hotel check-ins, dining out, asking directions, and emergency dialogues.',
+    icon: '✈️',
+    recommendedDurationWeeks: 2,
+    recommendedLessonsPerDay: 2,
+    recommendedDays: [0, 1, 2, 3, 4, 5, 6],
+    recommendedPillars: ['conversation', 'interactive_play', 'adults_daily_dose', 'stories'],
+    difficultyLevel: 'all',
+    color: 'cyan',
+    gradient: 'from-cyan-600 via-blue-600 to-teal-700'
+  },
+
+  // 2. AI Remedial & Adaptive Plans (خطط تكيّفية لعلاج نقاط الضعف)
+  {
+    id: 'weakness_recovery',
+    category: 'adaptive',
+    titleAr: 'خطة رادار الضعف وسد الفجوات التلقائي',
+    titleEn: 'AI Weakness Recovery Radar Plan',
+    badgeAr: '⚡ علاج فوري وتثبيت القواعد',
+    badgeEn: '⚡ Targeted Remedial & Reinforcement',
+    descAr: 'تحلل سارة نتائج اختباراتك السابقة لتجمع فوراً الدروس والقواعد التي تحتاج تقوية وسد فجواتها بإشراف مباشر.',
+    descEn: 'Sara detects lessons and quizzes where you scored under 80% and builds an agile recovery roadmap.',
+    icon: '⚡',
+    recommendedDurationWeeks: 2,
+    recommendedLessonsPerDay: 2,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: ['grammar', 'reading', 'conversation', 'writing'],
+    difficultyLevel: 'all',
+    color: 'rose',
+    gradient: 'from-rose-600 via-pink-600 to-red-700'
+  },
+  {
+    id: 'spaced_repetition',
+    category: 'adaptive',
+    titleAr: 'خطة التكرار المتباعد والمراجعة الذكية',
+    titleEn: 'Spaced Repetition & Retention Plan',
+    badgeAr: '🧠 تثبيت في الذاكرة الدائمة',
+    badgeEn: '🧠 Long-Term Memory Retention',
+    descAr: 'جدولة مراجعات دورية ذكية بعد 3 أيام وأسبوع وأسبوعين لمنع النسيان وترسيخ المفردات والقواعد للأبد.',
+    descEn: 'Strategic review intervals at 3-day, 7-day, and 14-day marks to cement lessons into long-term recall.',
+    icon: '🧠',
+    recommendedDurationWeeks: 6,
+    recommendedLessonsPerDay: 2,
+    recommendedDays: [0, 2, 4], // Sun, Tue, Thu
+    recommendedPillars: [
+      'grammar', 'reading', 'conversation', 'writing', 'expression', 'oxford_discover'
+    ],
+    difficultyLevel: 'intermediate',
+    color: 'purple',
+    gradient: 'from-purple-600 via-violet-600 to-indigo-700'
+  },
+
+  // 3. Lifestyle & Paced Plans (خطط نمط الحياة والوقت المتاح)
+  {
+    id: 'micro_10min',
+    category: 'lifestyle',
+    titleAr: 'خطة الـ 10 دقائق اليومية للمشغولين',
+    titleEn: '10-Minute Daily Micro-Learning Track',
+    badgeAr: '⏱️ 10 دقائق يومياً بلا ضغط',
+    badgeEn: '⏱️ 10-Minute Daily Habit',
+    descAr: 'درس واحد مركز يومياً مدته 10-15 دقيقة مع كويز سريع، مصمم للمشغولين للحفاظ على الاستمرارية وسلسلة الـ Streak.',
+    descEn: 'One high-impact 10-minute lesson daily with a quick quiz, tailored for busy schedules without breaking streaks.',
+    icon: '⏱️',
+    recommendedDurationWeeks: 4,
+    recommendedLessonsPerDay: 1,
+    recommendedDays: [0, 1, 2, 3, 4, 5, 6],
+    recommendedPillars: ['adults_daily_dose', 'conversation', 'grammar'],
+    difficultyLevel: 'all',
+    color: 'amber',
+    gradient: 'from-amber-500 via-yellow-600 to-orange-600'
+  },
+  {
+    id: 'weekend_bootcamp',
+    category: 'lifestyle',
+    titleAr: 'معسكر عطلة نهاية الأسبوع المكثف',
+    titleEn: 'Weekend Intensive Bootcamp',
+    badgeAr: '🚀 الجمعة والسبت فقط',
+    badgeEn: '🚀 Friday & Saturday Focus',
+    descAr: 'جرعة مكثفة يومي الجمعة والسبت فقط، 3 حصص يومياً مع فترات راحة مبرمجة وجلسات تطبيقية عميقة وممتعة.',
+    descEn: 'Concentrated 3 lessons/day on Fridays and Saturdays only, featuring programmed breaks and deep practice.',
+    icon: '🚀',
+    recommendedDurationWeeks: 8,
+    recommendedLessonsPerDay: 3,
+    recommendedDays: [5, 6], // Fri, Sat
+    recommendedPillars: ['grammar', 'reading', 'conversation', 'writing', 'interactive_play'],
+    difficultyLevel: 'all',
+    color: 'teal',
+    gradient: 'from-teal-600 via-emerald-600 to-cyan-700'
+  },
+  {
+    id: 'mastery_100day',
+    category: 'lifestyle',
+    titleAr: 'رحلة الـ 100 يوم للإتقان الشامل',
+    titleEn: '100-Day Comprehensive Mastery Journey',
+    badgeAr: '🏆 100 يوم نحو الطلاقة التامة',
+    badgeEn: '🏆 100 Days to Full Fluency',
+    descAr: 'رحلة متدرجة عبر 3 محطات رئيسية (تأسيس، طلاقة، تميز) مع اختبارات قياس ونهاية بالشهادة الذهبية المعتمدة.',
+    descEn: 'A 100-day milestone roadmap across 3 progressive phases, concluding with a verified academy diploma.',
+    icon: '🏆',
+    recommendedDurationWeeks: 14,
+    recommendedLessonsPerDay: 1,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: [
+      'grammar', 'reading', 'conversation', 'writing', 'expression',
+      'oxford_discover', 'stories', 'adults_daily_dose', 'interactive_play'
+    ],
+    difficultyLevel: 'all',
+    color: 'indigo',
+    gradient: 'from-indigo-600 via-purple-600 to-pink-600'
+  }
+];
 
 export interface PlanGenerationConfig {
   studentName: string;
   startDate: string;
   preferredTime: string;
   selectedDays: number[]; // 0=Sun, 1=Mon, ..., 6=Sat
-  weeksToGenerate: number; // 4 (1 mo), 8 (2 mos), 13 (3 mos)
+  weeksToGenerate: number; // 4 (1 mo), 8 (2 mos), 13 (3 mos), 14 (100 days)
   lessonsPerDay: number; // 1 to 5
   difficultyLevel: 'beginner' | 'intermediate' | 'advanced' | 'all';
   selectedPillars?: string[];
   manualLessonsQueue?: CurriculumLesson[]; // if student specifically picked lessons
   excludeCoveredKeys?: Set<string>;
+  weaknessLessonKeys?: string[];
   includeBiWeeklyTests?: boolean;
   isRtl?: boolean;
+  trackId?: string; // 'comprehensive' | 'ielts_toefl' | 'business_interview' | 'traveler_survival' | 'weakness_recovery' | 'spaced_repetition' | 'micro_10min' | 'weekend_bootcamp' | 'mastery_100day'
 }
 
 /**
@@ -750,6 +954,9 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
   const daysAr = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
   const daysEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+  const activeTrack = SPECIALIZED_PLAN_TRACKS.find(t => t.id === config.trackId) || SPECIALIZED_PLAN_TRACKS[0];
+  const trackBadge = isRtl ? activeTrack.badgeAr : activeTrack.badgeEn;
+
   let lessonsPool: CurriculumLesson[] = [];
 
   if (config.manualLessonsQueue && config.manualLessonsQueue.length > 0) {
@@ -760,10 +967,10 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
     const allLessons = getAllCurriculumLessons();
     const activePillars = config.selectedPillars && config.selectedPillars.length > 0
       ? new Set(config.selectedPillars)
-      : new Set(ACADEMIC_SECTION_DEFINITIONS.map(p => p.id));
+      : new Set(activeTrack.recommendedPillars || ACADEMIC_SECTION_DEFINITIONS.map(p => p.id));
 
     // Filter by difficulty level
-    lessonsPool = allLessons.filter(lesson => {
+    let filteredLessons = allLessons.filter(lesson => {
       if (!activePillars.has(lesson.pillarId)) return false;
 
       if (config.difficultyLevel === 'beginner') {
@@ -776,8 +983,58 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
       return true; // 'all'
     });
 
-    // Exclude already completed lessons if set
-    if (config.excludeCoveredKeys && config.excludeCoveredKeys.size > 0) {
+    // Track-specific intelligent filtering and prioritization:
+    if (config.trackId === 'ielts_toefl') {
+      // Prioritize academic, reading, analytical writing, advanced grammar, and interview speaking
+      filteredLessons.sort((a, b) => {
+        const textA = `${a.titleEn} ${a.descriptionEn || ''} ${a.pillarId}`.toLowerCase();
+        const textB = `${b.titleEn} ${b.descriptionEn || ''} ${b.pillarId}`.toLowerCase();
+        const ieltsRegex = /(academic|essay|argument|formal|debate|analysis|ielts|toefl|opinion|summary|advanced|presentation)/i;
+        const scoreA = (ieltsRegex.test(textA) ? 10 : 0) + (['B2', 'C1', 'C2'].includes(a.level) ? 5 : 0);
+        const scoreB = (ieltsRegex.test(textB) ? 10 : 0) + (['B2', 'C1', 'C2'].includes(b.level) ? 5 : 0);
+        return scoreB - scoreA;
+      });
+    } else if (config.trackId === 'business_interview') {
+      // Prioritize workplace, business, interview, HR, email, negotiation
+      filteredLessons.sort((a, b) => {
+        const textA = `${a.titleEn} ${a.descriptionEn || ''} ${a.pillarId}`.toLowerCase();
+        const textB = `${b.titleEn} ${b.descriptionEn || ''} ${b.pillarId}`.toLowerCase();
+        const bizRegex = /(interview|business|career|presentation|meeting|email|negotiat|workplace|office|client|professional|job|resume)/i;
+        const scoreA = bizRegex.test(textA) ? 10 : 0;
+        const scoreB = bizRegex.test(textB) ? 10 : 0;
+        return scoreB - scoreA;
+      });
+    } else if (config.trackId === 'traveler_survival') {
+      // Prioritize travel, airport, hotel, restaurant, directions, emergencies
+      filteredLessons.sort((a, b) => {
+        const textA = `${a.titleEn} ${a.descriptionEn || ''} ${a.pillarId}`.toLowerCase();
+        const textB = `${b.titleEn} ${b.descriptionEn || ''} ${b.pillarId}`.toLowerCase();
+        const travelRegex = /(travel|airport|hotel|flight|restaurant|menu|order|direction|taxi|emergency|vacation|passport|shopping|station)/i;
+        const scoreA = travelRegex.test(textA) ? 10 : 0;
+        const scoreB = travelRegex.test(textB) ? 10 : 0;
+        return scoreB - scoreA;
+      });
+    } else if (config.trackId === 'weakness_recovery') {
+      // If student has low-scoring lessons recorded, put those first at index 0!
+      if (config.weaknessLessonKeys && config.weaknessLessonKeys.length > 0) {
+        const weaknessSet = new Set(config.weaknessLessonKeys);
+        filteredLessons.sort((a, b) => {
+          const isAWeak = weaknessSet.has(a.id) || weaknessSet.has(`${a.courseId}:${a.level}:${a.id}`);
+          const isBWeak = weaknessSet.has(b.id) || weaknessSet.has(`${b.courseId}:${b.level}:${b.id}`);
+          if (isAWeak && !isBWeak) return -1;
+          if (!isAWeak && isBWeak) return 1;
+          return 0;
+        });
+      } else {
+        // Fallback: prioritize core grammar and key syntax structures
+        filteredLessons.sort((a, b) => (a.pillarId === 'grammar' ? -1 : 1));
+      }
+    }
+
+    lessonsPool = filteredLessons;
+
+    // Exclude already completed lessons if set (unless weakness recovery track, which deliberately re-targets them)
+    if (config.trackId !== 'weakness_recovery' && config.excludeCoveredKeys && config.excludeCoveredKeys.size > 0) {
       const filtered = lessonsPool.filter(l => {
         const key = `${l.courseId}:${l.level}:${l.id}`;
         return !config.excludeCoveredKeys!.has(key);
@@ -820,7 +1077,7 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
       titleAr: 'المعادلات النحوية الأساسية وبناء الجمل',
       titleEn: 'Basic Sentence Structure & Syntax',
       level: 'A1',
-      duration: '45 min'
+      duration: config.trackId === 'micro_10min' ? '12 min' : '45 min'
     });
   }
 
@@ -833,6 +1090,14 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
     const monthNum = Math.ceil(w / 4);
     const weekInMonth = ((w - 1) % 4) + 1;
     let lastStudyDateThisWeek: Date | null = null;
+
+    // Phase label for 100-day mastery journey
+    let phaseLabel: string | undefined = undefined;
+    if (config.trackId === 'mastery_100day') {
+      if (w <= 4) phaseLabel = isRtl ? 'المرحلة 1: التأسيس وبناء المفردات' : 'Phase 1: Foundation & Core Vocabulary';
+      else if (w <= 9) phaseLabel = isRtl ? 'المرحلة 2: الطلاقة وتطبيقات المحادثة' : 'Phase 2: Conversational Fluency';
+      else phaseLabel = isRtl ? 'المرحلة 3: الإتقان الأكاديمي والتميز' : 'Phase 3: Academic Mastery & Excellence';
+    }
 
     // Loop through 7 days of the week
     for (let i = 0; i < 7; i++) {
@@ -853,6 +1118,27 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
             lessonScheduledAt.setHours(lessonScheduledAt.getHours() + (s - 1));
           }
 
+          let topicLabel = isRtl ? currentLesson.titleAr : currentLesson.titleEn;
+          let durationLabel = currentLesson.duration || '45 min';
+
+          // Micro-learning duration adaptation
+          if (config.trackId === 'micro_10min') {
+            durationLabel = '12 min';
+            topicLabel = isRtl ? `⏱️ [جرعة 10 دقائق] ${topicLabel}` : `⏱️ [10-Min Micro] ${topicLabel}`;
+          } else if (config.trackId === 'spaced_repetition' && w > 1 && (lessonIdx % 3 === 0)) {
+            topicLabel = isRtl ? `🔁 [مراجعة متباعدة] ${topicLabel}` : `🔁 [Spaced Review] ${topicLabel}`;
+          } else if (config.trackId === 'weakness_recovery') {
+            topicLabel = isRtl ? `⚡ [علاج وتثبيت] ${topicLabel}` : `⚡ [Weakness Recovery] ${topicLabel}`;
+          } else if (config.trackId === 'ielts_toefl') {
+            topicLabel = isRtl ? `🎯 [آيلتس أكاديمي] ${topicLabel}` : `🎯 [IELTS Prep] ${topicLabel}`;
+          } else if (config.trackId === 'business_interview') {
+            topicLabel = isRtl ? `💼 [إنجليزي مهني] ${topicLabel}` : `💼 [Business Prep] ${topicLabel}`;
+          } else if (config.trackId === 'traveler_survival') {
+            topicLabel = isRtl ? `✈️ [مواقف سفر] ${topicLabel}` : `✈️ [Traveler Scene] ${topicLabel}`;
+          } else if (config.trackId === 'weekend_bootcamp') {
+            topicLabel = isRtl ? `🚀 [معسكر الويكند] ${topicLabel}` : `🚀 [Weekend Intensive] ${topicLabel}`;
+          }
+
           generatedItems.push({
             id: `plan-w${w}-d${i}-s${s}-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
             month: monthNum,
@@ -860,13 +1146,16 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
             day: isRtl ? daysAr[dayIdx] : daysEn[dayIdx],
             courseId: currentLesson.courseId,
             courseLabel: isRtl ? currentLesson.courseLabelAr : currentLesson.courseLabelEn,
-            topic: isRtl ? currentLesson.titleAr : currentLesson.titleEn,
-            duration: currentLesson.duration || '45 min',
+            topic: topicLabel,
+            duration: durationLabel,
             level: currentLesson.level || 'A1',
             unitId: currentLesson.id,
             dateLabel: currentDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
             timeLabel: `${String(lessonScheduledAt.getHours()).padStart(2, '0')}:${String(lessonScheduledAt.getMinutes()).padStart(2, '0')}`,
-            scheduledAt: lessonScheduledAt.toISOString()
+            scheduledAt: lessonScheduledAt.toISOString(),
+            trackId: config.trackId || activeTrack.id,
+            trackBadge,
+            phaseLabel
           });
 
           lessonIdx++;
@@ -876,12 +1165,23 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    // Add bi-weekly milestone assessment test at the end of every 2nd week
-    if (config.includeBiWeeklyTests !== false && w % 2 === 0 && lastStudyDateThisWeek) {
+    // Add bi-weekly milestone assessment test at the end of every 2nd week (or weekly for IELTS)
+    const shouldAddTest = config.includeBiWeeklyTests !== false && 
+      ((config.trackId === 'ielts_toefl' ? true : w % 2 === 0) && lastStudyDateThisWeek);
+
+    if (shouldAddTest && lastStudyDateThisWeek) {
       const testDate = new Date(lastStudyDateThisWeek);
       const testScheduledAt = new Date(testDate);
       const [h, m] = (config.preferredTime || '16:00').split(':').map(Number);
       testScheduledAt.setHours(h + config.lessonsPerDay, m, 0, 0);
+
+      const testTitle = config.trackId === 'ielts_toefl'
+        ? (isRtl ? `محاكاة اختبار الآيلتس الأكاديمي (الأسبوع ${w}) 🎯` : `IELTS Academic Mock Exam (Week ${w}) 🎯`)
+        : config.trackId === 'business_interview'
+        ? (isRtl ? `تقييم المقابلات وعروض الأعمال (الأسبوع ${w}) 💼` : `Business Interview Assessment (Week ${w}) 💼`)
+        : (isRtl 
+            ? `اختبار المراجعة الشامل والتقييم النصف شهري (الأسبوع ${w - 1}-${w})` 
+            : `Comprehensive Review Milestone Test (Week ${w - 1}-${w})`);
 
       generatedItems.push({
         id: `test-w${w}-${Date.now().toString(36)}`,
@@ -890,16 +1190,17 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
         day: isRtl ? daysAr[testDate.getDay()] : daysEn[testDate.getDay()],
         courseId: 'test',
         courseLabel: isRtl ? 'اختبار تقييمي دوري' : 'Milestone Assessment',
-        topic: isRtl 
-          ? `اختبار المراجعة الشامل والتقييم النصف شهري (الأسبوع ${w - 1}-${w})` 
-          : `Comprehensive Review Milestone Test (Week ${w - 1}-${w})`,
-        duration: '60 min',
+        topic: testTitle,
+        duration: config.trackId === 'micro_10min' ? '15 min' : '60 min',
         level: config.difficultyLevel === 'advanced' ? 'B2' : config.difficultyLevel === 'intermediate' ? 'B1' : 'A1',
         unitId: `test-${w}`,
         dateLabel: testDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
         timeLabel: `${String(testScheduledAt.getHours()).padStart(2, '0')}:${String(testScheduledAt.getMinutes()).padStart(2, '0')}`,
         scheduledAt: testScheduledAt.toISOString(),
-        isTest: true
+        isTest: true,
+        trackId: config.trackId || activeTrack.id,
+        trackBadge,
+        phaseLabel
       });
     }
   }

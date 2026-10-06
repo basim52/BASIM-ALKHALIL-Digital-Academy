@@ -54,6 +54,8 @@ import {
   getAllCurriculumLessons, 
   ACADEMIC_SECTION_DEFINITIONS, 
   buildSmartAcademicPlan, 
+  SPECIALIZED_PLAN_TRACKS,
+  SpecializedPlanTrack,
   CurriculumLesson,
   PlanItem,
   PlanGenerationConfig
@@ -106,6 +108,10 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
   const [preferredTime, setPreferredTime] = useState('16:00');
   const [includeBiWeeklyTests, setIncludeBiWeeklyTests] = useState(true);
   const [bypassTestLock, setBypassTestLock] = useState(true);
+
+  // Specialized Plan Tracks (1. Goal Tracks, 2. AI Remedial & Adaptive, 3. Lifestyle Paced)
+  const [selectedTrackId, setSelectedTrackId] = useState<string>('comprehensive');
+  const [trackCategoryFilter, setTrackCategoryFilter] = useState<'all' | 'goal' | 'adaptive' | 'lifestyle'>('all');
 
   // Operational States
   const [isGenerating, setIsGenerating] = useState(false);
@@ -208,9 +214,36 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
     }
   }, [savedPlans]);
 
+  // Weakness Radar: Identify lesson keys where score was < 80%
+  const weaknessLessonKeys = useMemo(() => {
+    const keys: string[] = [];
+    lessonResults.forEach(r => {
+      const score = Number(r.score) || 0;
+      const total = Number(r.total) || 1;
+      if (score / total < 0.8) {
+        if (r.lessonId) keys.push(r.lessonId);
+        if (r.courseId && r.level && r.lessonId) {
+          keys.push(`${r.courseId}:${r.level}:${r.lessonId}`);
+        }
+      }
+    });
+    return keys;
+  }, [lessonResults]);
+
+  const handleSelectTrack = (track: SpecializedPlanTrack) => {
+    setSelectedTrackId(track.id);
+    if (track.recommendedDurationWeeks) setWeeksToGenerate(track.recommendedDurationWeeks);
+    if (track.recommendedLessonsPerDay) setLessonsPerDay(track.recommendedLessonsPerDay);
+    if (track.recommendedDays) setSelectedDays(track.recommendedDays);
+    if (track.recommendedPillars) setSelectedPillars(track.recommendedPillars);
+    if (track.difficultyLevel) setDifficultyLevel(track.difficultyLevel);
+    showToast(isRtl ? `تم تفعيل مسار: ${track.titleAr} (${track.badgeAr})` : `Selected track: ${track.titleEn}`);
+  };
+
   const handleSelectSavedPlan = (plan: StudyPlan) => {
     setSelectedSavedPlan(plan);
     setGeneratedPlan(plan.planItems || []);
+    if ((plan as any).trackId) setSelectedTrackId((plan as any).trackId);
     if (plan.studentName) setStudentName(plan.studentName);
     if (plan.startDate) setStartDate(plan.startDate);
     if (plan.preferredTime) setPreferredTime(plan.preferredTime);
@@ -313,8 +346,10 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
       selectedPillars,
       manualLessonsQueue: manualQueue,
       excludeCoveredKeys: coveredUnitKeys,
+      weaknessLessonKeys,
       includeBiWeeklyTests,
-      isRtl
+      isRtl,
+      trackId: selectedTrackId
     };
 
     const newPlan = buildSmartAcademicPlan(config);
@@ -340,6 +375,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
 
     setIsSaving(true);
     try {
+      const currentTrack = SPECIALIZED_PLAN_TRACKS.find(t => t.id === selectedTrackId);
       const planData: any = {
         studentName: studentName.trim(),
         startDate,
@@ -349,7 +385,10 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
         lessonsPerDay,
         weeksToGenerate,
         planItems: generatedPlan,
-        generationMode
+        generationMode,
+        trackId: selectedTrackId,
+        trackTitleAr: currentTrack?.titleAr,
+        trackTitleEn: currentTrack?.titleEn
       };
 
       if (selectedSavedPlan && selectedSavedPlan.id) {
@@ -672,6 +711,118 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
               {/* Mode A: Auto AI Multi-Pillars Selection */}
               {generationMode === 'auto' && (
                 <div className="space-y-6 mb-8 border-b border-slate-100 pb-8">
+                  {/* Specialized Plan Tracks (مسارات الأهداف المتخصصة والخطط التكيفية ونمط الحياة) */}
+                  <div className="space-y-3 p-4 bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/30 rounded-3xl border border-blue-100/80 shadow-2xs">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-black text-[#002147] uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="text-sm">🎯</span>
+                        <span>{isRtl ? 'المسار التخصصي الذكي المختار' : 'Smart Track Archetype'}</span>
+                      </label>
+                      <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-blue-600 text-white shadow-2xs">
+                        {isRtl ? 'بناء تلقائي ذكي' : 'Auto-Tuned'}
+                      </span>
+                    </div>
+
+                    {/* Category Filter Tabs */}
+                    <div className="flex items-center gap-1 bg-slate-200/70 p-1 rounded-2xl text-[10px] font-black overflow-x-auto scrollbar-none">
+                      {[
+                        { id: 'all', labelAr: '🌟 الكل', labelEn: 'All' },
+                        { id: 'goal', labelAr: '🎯 1. أهداف وامتحانات', labelEn: '1. Goals' },
+                        { id: 'adaptive', labelAr: '⚡ 2. علاج وتثبيت', labelEn: '2. Remedial' },
+                        { id: 'lifestyle', labelAr: '⏱️ 3. نمط الحياة', labelEn: '3. Lifestyle' },
+                      ].map(tab => (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => setTrackCategoryFilter(tab.id as any)}
+                          className={`px-2.5 py-1.5 rounded-xl whitespace-nowrap transition-all cursor-pointer ${
+                            trackCategoryFilter === tab.id
+                              ? 'bg-white text-blue-700 shadow-xs'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                        >
+                          {isRtl ? tab.labelAr : tab.labelEn}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Track Cards Stack */}
+                    <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+                      {SPECIALIZED_PLAN_TRACKS
+                        .filter(t => (trackCategoryFilter as string) === 'all' || (t.category as string) === trackCategoryFilter)
+                        .map(track => {
+                          const isSelected = selectedTrackId === track.id;
+                          return (
+                            <div
+                              key={track.id}
+                              onClick={() => handleSelectTrack(track)}
+                              className={`p-3 rounded-2xl border-2 transition-all cursor-pointer relative ${
+                                isSelected
+                                  ? 'bg-white border-blue-600 shadow-md ring-2 ring-blue-500/20'
+                                  : 'bg-white/80 border-slate-200/90 hover:border-slate-300 hover:bg-white'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xl shrink-0">{track.icon}</span>
+                                  <div>
+                                    <h4 className="text-xs font-black text-[#002147] flex items-center gap-1.5 flex-wrap">
+                                      <span>{isRtl ? track.titleAr : track.titleEn}</span>
+                                      {isSelected && (
+                                        <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                                      )}
+                                    </h4>
+                                    <span className="text-[9px] font-black px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 mt-1 inline-block">
+                                      {isRtl ? track.badgeAr : track.badgeEn}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border ${
+                                  isSelected ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'
+                                }`}>
+                                  {isSelected && <Check size={12} />}
+                                </div>
+                              </div>
+                              <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed font-medium">
+                                {isRtl ? track.descAr : track.descEn}
+                              </p>
+                              <div className="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9px] font-bold text-slate-400">
+                                <span>
+                                  {isRtl 
+                                    ? `${track.recommendedDurationWeeks} أسابيع • ${track.recommendedLessonsPerDay} حصص/يوم` 
+                                    : `${track.recommendedDurationWeeks} wks • ${track.recommendedLessonsPerDay} lessons/day`}
+                                </span>
+                                <span className={`font-black ${isSelected ? 'text-blue-600' : 'text-slate-500'}`}>
+                                  {isSelected 
+                                    ? (isRtl ? 'المسار المفعّل ✓' : 'Active Track ✓') 
+                                    : (isRtl ? 'اختر المسار ⚡' : 'Select Track ⚡')}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                      })}
+                    </div>
+
+                    {/* Weakness Radar Banner if Weakness Track is selected */}
+                    {selectedTrackId === 'weakness_recovery' && (
+                      <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-[11px] font-bold text-rose-800 space-y-1">
+                        <div className="flex items-center gap-1.5 font-black text-rose-900">
+                          <Sparkles size={14} className="text-rose-600 animate-spin" />
+                          <span>{isRtl ? 'رادار الذكاء الاصطناعي لفحص الفجوات' : 'AI Weakness Radar Active'}</span>
+                        </div>
+                        <p className="text-[10px] leading-relaxed text-rose-700 font-medium">
+                          {weaknessLessonKeys.length > 0 
+                            ? (isRtl 
+                                ? `تم اكتشاف ${weaknessLessonKeys.length} دروس واختبارات سابقة تحتاج لمراجعة ودعم إضافي. وضعتها سارة في مقدمة أولويات خطتك!`
+                                : `Detected ${weaknessLessonKeys.length} previous lessons needing review. Prioritized at the top of your roadmap!`)
+                            : (isRtl 
+                                ? 'سيبدأ المسار فوراً بمراجعة وتثبيت أهم القواعد النحوية والأنماط المعقدة لضمان أساس متين بلا ثغرات.'
+                                : 'Will prioritize core foundational grammar and tricky structures to ensure zero knowledge gaps.')}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex items-center justify-between">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                       {isRtl ? `الأقسام المشمولة (${selectedPillars.length}/12)` : `Included Pillars (${selectedPillars.length}/12)`}
@@ -1468,7 +1619,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                                           }`}
                                         >
                                           <div className="flex items-start justify-between gap-2 mb-2">
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 flex-wrap">
                                               <span className={`text-[10px] font-black px-2 py-0.5 rounded-md uppercase ${
                                                 isTest ? 'bg-indigo-600 text-white' : 'bg-blue-100 text-blue-800'
                                               }`}>
@@ -1477,6 +1628,16 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                                               <span className="text-[10px] font-black text-slate-400">
                                                 {item.duration}
                                               </span>
+                                              {item.trackBadge && (
+                                                <span className="text-[9px] font-black px-2 py-0.5 rounded-md bg-purple-50 border border-purple-200 text-purple-700">
+                                                  {item.trackBadge}
+                                                </span>
+                                              )}
+                                              {item.phaseLabel && (
+                                                <span className="text-[9px] font-black px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700">
+                                                  {item.phaseLabel}
+                                                </span>
+                                              )}
                                             </div>
                                             {!isTest && (
                                               <button

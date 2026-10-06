@@ -640,11 +640,72 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     setQuizFeedback(null);
     setIsWhiteboardOpen(true);
 
-    // 2. Add message to chat history
+    // 2. Add message to chat history with track context if active
+    let spokenIntro = explanation.spokenIntro;
+    let chatMsgText = explanation.chatMessage;
+
+    if (activeStudyPlan?.trackId === 'ielts_toefl') {
+      const prefix = isRtl
+        ? '🎯 مسار الآيلتس والتوفل الأكاديمي: استعد للتحدث والتحليل بطلاقة!'
+        : '🎯 IELTS & TOEFL Academic Sprint: Get ready for academic speech and analysis!';
+      spokenIntro = isRtl
+        ? `أهلاً بك يا بطل في جلسة الآيلتس والتوفل الأكاديمي اليوم! ${spokenIntro}`
+        : `Welcome champion to today's IELTS & TOEFL Academic Sprint session! ${spokenIntro}`;
+      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
+    } else if (activeStudyPlan?.trackId === 'business_interview') {
+      const prefix = isRtl
+        ? '💼 مسار الإنجليزية المهنية والمقابلات: تدريب عملي لسوق العمل والشركات!'
+        : '💼 Business English & Job Interview Track: Real-world workplace mastery!';
+      spokenIntro = isRtl
+        ? `مرحباً بك في جلسة الإنجليزية المهنية وسوق العمل! ${spokenIntro}`
+        : `Welcome to today's Business English & Interview Mastery session! ${spokenIntro}`;
+      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
+    } else if (activeStudyPlan?.trackId === 'traveler_survival') {
+      const prefix = isRtl
+        ? '✈️ مسار السفر والمواقف السريعة: محاكاة حية للمواقف الواقعية!'
+        : '✈️ 14-Day Traveler Survival Track: Real-world immersion!';
+      spokenIntro = isRtl
+        ? `أهلاً بك في جلسة مسار السفر والمواقف الحية السريعة! ${spokenIntro}`
+        : `Welcome to today's Traveler Survival session! ${spokenIntro}`;
+      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
+    } else if (activeStudyPlan?.trackId === 'weakness_recovery') {
+      const prefix = isRtl
+        ? '⚡ رادار الذكاء الاصطناعي لعلاج الضعف: جلسة مركزة لترميم وسد الفجوات وتثبيت القواعد!'
+        : '⚡ AI Weakness Recovery Radar: Targeted session to reinforce challenging points!';
+      spokenIntro = isRtl
+        ? `أهلاً بك يا بطل! هذه جلسة رادار علاج الضعف وسد الفجوات لنضمن إتقانك التام للقاعدة 🎯. ${spokenIntro}`
+        : `Welcome champion! This is your AI Weakness Recovery session to ensure 100% mastery 🎯. ${spokenIntro}`;
+      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
+    } else if (activeStudyPlan?.trackId === 'micro_10min') {
+      const prefix = isRtl
+        ? '⏱️ خطة الـ 10 دقائق اليومية: جرعة سريعة ومكثفة لضمان استمراريتك!'
+        : '⏱️ 10-Minute Daily Micro Track: Rapid high-impact daily dose!';
+      spokenIntro = isRtl
+        ? `مرحباً بك في جرعتك السريعة لليوم! 10 دقائق مركزة لنحافظ على تقدمك. ${spokenIntro}`
+        : `Welcome to today's 10-minute micro-learning dose! Let's stay consistent. ${spokenIntro}`;
+      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
+    } else if (activeStudyPlan?.trackId === 'weekend_bootcamp') {
+      const prefix = isRtl
+        ? '🚀 معسكر عطلة نهاية الأسبوع المكثف: جلسة تطبيقية عميقة مع سارة!'
+        : '🚀 Weekend Intensive Bootcamp: Deep application session with Sara!';
+      spokenIntro = isRtl
+        ? `أهلاً بك في معسكر نهاية الأسبوع المكثف مع سارة! ${spokenIntro}`
+        : `Welcome to the Weekend Intensive Bootcamp with Sara! ${spokenIntro}`;
+      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
+    } else if (activeStudyPlan?.trackId === 'mastery_100day') {
+      const prefix = isRtl
+        ? '🏆 رحلة الـ 100 يوم للإتقان الشامل: خطوة جديدة نحو الطلاقة الكاملة!'
+        : '🏆 100-Day Comprehensive Mastery Journey: Another step toward complete fluency!';
+      spokenIntro = isRtl
+        ? `مرحباً بك في محطتك اليومية من رحلة الـ 100 يوم نحو الطلاقة التامة! ${spokenIntro}`
+        : `Welcome to today's stop on your 100-Day Mastery Journey! ${spokenIntro}`;
+      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
+    }
+
     const curriculumMsg: MessageItem = {
       id: `msg_sara_curriculum_${Date.now()}`,
       role: 'sara',
-      text: explanation.chatMessage,
+      text: chatMsgText,
       board: explanation.boardData,
       timestamp: Date.now()
     };
@@ -652,7 +713,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
     // 3. Play voice explanation from Sara out loud
     if (voiceEnabled) {
-      playSaraVoice(explanation.spokenIntro);
+      playSaraVoice(spokenIntro);
     }
 
     // 4. Save progress note to tutorMemory if student is signed in
@@ -3620,6 +3681,11 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                     <span className="text-[10px] text-blue-200 font-bold hidden sm:inline">
                       {activeStudyPlan.studentName ? (isRtl ? `طالب: ${activeStudyPlan.studentName}` : `Student: ${activeStudyPlan.studentName}`) : ''}
                     </span>
+                    {activeStudyPlan.trackTitleAr && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black shadow-2xs">
+                        {isRtl ? activeStudyPlan.trackTitleAr : (activeStudyPlan.trackTitleEn || activeStudyPlan.trackTitleAr)}
+                      </span>
+                    )}
                   </div>
                   {todayScheduledLesson ? (
                     <p className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5 flex-wrap">

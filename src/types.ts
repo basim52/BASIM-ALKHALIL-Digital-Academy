@@ -218,6 +218,10 @@ export interface StudyPlan {
   selectedCategories: string[];
   planItems: any[];
   lessonsPerDay?: number;
+  weeksToGenerate?: number;
+  trackId?: string;
+  trackTitleAr?: string;
+  trackTitleEn?: string;
 }
 
 // ==========================================
