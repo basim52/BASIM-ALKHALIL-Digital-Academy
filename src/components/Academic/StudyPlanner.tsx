@@ -109,9 +109,12 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
   const [includeBiWeeklyTests, setIncludeBiWeeklyTests] = useState(true);
   const [bypassTestLock, setBypassTestLock] = useState(true);
 
-  // Specialized Plan Tracks (1. Goal Tracks, 2. AI Remedial & Adaptive, 3. Lifestyle Paced)
+  // Specialized Plan Tracks (1. Goal Tracks, 2. AI Remedial & Adaptive, 3. Lifestyle Paced, 4. Kids, 5. Fluency, 6. Habits & Accountability)
   const [selectedTrackId, setSelectedTrackId] = useState<string>('comprehensive');
-  const [trackCategoryFilter, setTrackCategoryFilter] = useState<'all' | 'goal' | 'adaptive' | 'lifestyle'>('all');
+  const [trackCategoryFilter, setTrackCategoryFilter] = useState<'all' | 'goal' | 'adaptive' | 'lifestyle' | 'kids' | 'fluency' | 'accountability'>('all');
+  const [includeCatchUpDay, setIncludeCatchUpDay] = useState<boolean>(true);
+  const [showWeeklyDigestModal, setShowWeeklyDigestModal] = useState<boolean>(false);
+  const [digestWeekNumber, setDigestWeekNumber] = useState<number>(1);
 
   // Operational States
   const [isGenerating, setIsGenerating] = useState(false);
@@ -348,6 +351,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
       excludeCoveredKeys: coveredUnitKeys,
       weaknessLessonKeys,
       includeBiWeeklyTests,
+      includeCatchUpDay,
       isRtl,
       trackId: selectedTrackId
     };
@@ -528,6 +532,35 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
   const getLessonResult = (item: PlanItem) => {
     return lessonResults.find(r => r.lessonId === item.unitId || r.lessonId === `${item.courseId}_${item.unitId}`);
   };
+
+  // Computed stats for the selected week in the Weekly Progress Digest
+  const weeklyDigestData = useMemo(() => {
+    if (!generatedPlan) return null;
+    const weekItems = generatedPlan.filter(i => i.week === digestWeekNumber);
+    const completedItems = weekItems.filter(i => {
+      const res = lessonResults.find(r => r.lessonId === i.unitId || r.lessonId === `${i.courseId}_${i.unitId}`);
+      return !!res;
+    });
+    const scores = completedItems.map(i => {
+      const res = lessonResults.find(r => r.lessonId === i.unitId || r.lessonId === `${i.courseId}_${i.unitId}`);
+      const s = Number(res?.score) || 0;
+      const t = Number(res?.total) || 1;
+      return Math.round((s / t) * 100);
+    });
+    const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+    const estimatedMinutes = completedItems.length * 35;
+    const catchUpItem = weekItems.find(i => i.isCatchUpDay);
+
+    return {
+      total: weekItems.length,
+      completed: completedItems.length,
+      percentage: weekItems.length > 0 ? Math.round((completedItems.length / weekItems.length) * 100) : 0,
+      avgScore,
+      hours: (estimatedMinutes / 60).toFixed(1),
+      hasCatchUp: !!catchUpItem,
+      items: weekItems
+    };
+  }, [generatedPlan, digestWeekNumber, lessonResults]);
 
   const achievement = useMemo(() => {
     if (!generatedPlan || generatedPlan.length === 0) return null;
@@ -730,6 +763,9 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                         { id: 'goal', labelAr: '🎯 1. أهداف وامتحانات', labelEn: '1. Goals' },
                         { id: 'adaptive', labelAr: '⚡ 2. علاج وتثبيت', labelEn: '2. Remedial' },
                         { id: 'lifestyle', labelAr: '⏱️ 3. نمط الحياة', labelEn: '3. Lifestyle' },
+                        { id: 'kids', labelAr: '🦁 4. أطفال وتأسيس', labelEn: '4. Kids' },
+                        { id: 'fluency', labelAr: '🗣️ 5. طلاقة وتحدث', labelEn: '5. Fluency' },
+                        { id: 'accountability', labelAr: '🛡️ 6. التزام واختبارات', labelEn: '6. Habits & Exams' },
                       ].map(tab => (
                         <button
                           key={tab.id}
@@ -1080,6 +1116,27 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                     checked={includeBiWeeklyTests}
                     onChange={(e) => setIncludeBiWeeklyTests(e.target.checked)}
                     className="w-4 h-4 text-indigo-600 rounded cursor-pointer"
+                  />
+                </div>
+
+                {/* Catch-Up / Rest Day toggle (يوم الاستشفاء والتعويض المرن) */}
+                <div className="flex items-center justify-between p-3.5 bg-amber-50/70 rounded-2xl border border-amber-200">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">☕</span>
+                    <div>
+                      <span className="text-xs font-black text-amber-950 block">
+                        {isRtl ? 'يوم الاستشفاء والتعويض المرن' : 'Catch-Up & Rest Day'}
+                      </span>
+                      <span className="text-[10px] text-amber-800/80 font-bold block">
+                        {isRtl ? 'تعويض أي درس فائت دون انقطاع الـ Streak' : 'Flexible review to safeguard streaks'}
+                      </span>
+                    </div>
+                  </div>
+                  <input 
+                    type="checkbox"
+                    checked={includeCatchUpDay}
+                    onChange={(e) => setIncludeCatchUpDay(e.target.checked)}
+                    className="w-4 h-4 text-amber-600 rounded cursor-pointer"
                   />
                 </div>
 
@@ -1473,10 +1530,22 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                     <button 
                       onClick={handleExportImage}
                       disabled={isExporting}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-black hover:bg-emerald-700 transition-all disabled:opacity-50"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-black hover:bg-emerald-700 transition-all disabled:opacity-50 cursor-pointer"
                     >
                       {isExporting ? <Download size={14} className="animate-bounce" /> : <Share2 size={14} />}
                       <span>{isRtl ? 'تصدير للواتساب' : 'WhatsApp Export'}</span>
+                    </button>
+
+                    <button 
+                      onClick={() => {
+                        setDigestWeekNumber(1);
+                        setShowWeeklyDigestModal(true);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white rounded-xl text-xs font-black hover:opacity-95 transition-all cursor-pointer shadow-sm active:scale-95"
+                      title={isRtl ? 'عرض التقرير الأسبوعي الذكي مع سارة' : 'Weekly Progress Digest with Sara'}
+                    >
+                      <Sparkles size={14} className="text-amber-300" />
+                      <span>{isRtl ? 'التقرير الأسبوعي الذكي 📊' : 'Weekly Digest 📊'}</span>
                     </button>
 
                     {achievement && achievement.completedCount > 0 && (
@@ -1924,6 +1993,208 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                     ))
                   )}
                 </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Weekly Progress Digest Modal (التقرير الأسبوعي الذكي مع سارة) */}
+      <AnimatePresence>
+        {showWeeklyDigestModal && weeklyDigestData && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="bg-white rounded-[2.5rem] p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 shadow-2xl relative"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center shadow-md">
+                    <Sparkles size={24} className="text-amber-300" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg md:text-xl font-black text-[#002147] flex items-center gap-2">
+                      <span>{isRtl ? 'التقرير الأسبوعي الذكي مع سارة' : 'Weekly Progress Digest with Sara'}</span>
+                      <span className="text-xs px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-700 font-bold">
+                        {isRtl ? `الأسبوع ${digestWeekNumber}` : `Week ${digestWeekNumber}`}
+                      </span>
+                    </h3>
+                    <p className="text-xs text-slate-400 font-bold">
+                      {isRtl ? `طالب الأكاديمية: ${studentName || userProfile?.displayName || 'البطل'}` : `Student: ${studentName || userProfile?.displayName || 'Champion'}`}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowWeeklyDigestModal(false)}
+                  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Week Selector Chips */}
+              <div className="flex items-center gap-1.5 py-4 overflow-x-auto scrollbar-none border-b border-slate-100">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0">
+                  {isRtl ? 'اختر الأسبوع:' : 'Select Week:'}
+                </span>
+                {Array.from({ length: Math.min(weeksToGenerate, 14) }).map((_, wIdx) => {
+                  const wNum = wIdx + 1;
+                  return (
+                    <button
+                      key={wNum}
+                      onClick={() => setDigestWeekNumber(wNum)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+                        digestWeekNumber === wNum
+                          ? 'bg-purple-600 text-white shadow-sm'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {isRtl ? `أسبوع ${wNum}` : `Wk ${wNum}`}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Weekly Metrics Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-5">
+                <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100 text-center">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 block mb-1">
+                    {isRtl ? 'إنجاز الدروس' : 'Lessons'}
+                  </span>
+                  <span className="text-xl font-black text-[#002147]">
+                    {weeklyDigestData.completed} / {weeklyDigestData.total}
+                  </span>
+                  <span className="text-[10px] font-bold text-blue-500 block mt-0.5">
+                    ({weeklyDigestData.percentage}%)
+                  </span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100 text-center">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 block mb-1">
+                    {isRtl ? 'معدل الاختبارات' : 'Quiz Mastery'}
+                  </span>
+                  <span className="text-xl font-black text-emerald-700">
+                    {weeklyDigestData.avgScore}%
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-600 block mt-0.5">
+                    {weeklyDigestData.avgScore >= 85 ? '🌟 تفوق تام' : weeklyDigestData.avgScore >= 60 ? '👍 جيد جداً' : '🎯 قيد التدريب'}
+                  </span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-100 text-center">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 block mb-1">
+                    {isRtl ? 'التعلم النشط' : 'Active Time'}
+                  </span>
+                  <span className="text-xl font-black text-amber-800">
+                    {weeklyDigestData.hours}
+                  </span>
+                  <span className="text-[10px] font-bold text-amber-600 block mt-0.5">
+                    {isRtl ? 'ساعة تدريب' : 'hours'}
+                  </span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-purple-50 border border-purple-100 text-center">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 block mb-1">
+                    {isRtl ? 'الاستشفاء والـ Streak' : 'Streak & Grace'}
+                  </span>
+                  <span className="text-xl font-black text-purple-800 flex items-center justify-center gap-1">
+                    <span>🔥</span>
+                    <span>{weeklyDigestData.hasCatchUp ? 'مرن' : 'نشط'}</span>
+                  </span>
+                  <span className="text-[10px] font-bold text-purple-600 block mt-0.5">
+                    {weeklyDigestData.hasCatchUp ? (isRtl ? 'يوم تعويض متاح' : 'Grace Day On') : (isRtl ? 'مستمر' : 'Active')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Sara's Pedagogical Review Card */}
+              <div className="p-5 rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white shadow-lg space-y-2.5 my-4">
+                <div className="flex items-center gap-2 text-amber-300 font-black text-xs">
+                  <span className="text-base">👩‍🏫</span>
+                  <span>{isRtl ? 'التقييم التربوي الذكي من سارة' : "Sara's Pedagogical Analysis"}</span>
+                </div>
+                <p className="text-xs text-slate-200 leading-relaxed font-medium">
+                  {weeklyDigestData.percentage >= 80 && weeklyDigestData.avgScore >= 80
+                    ? (isRtl 
+                        ? `ما شاء الله يا ${studentName || 'بطل'}! أداء استثنائي وتفوق ملحوظ في الأسبوع ${digestWeekNumber}. استيعابك للقواعد ومشاركتك في اختبارات الإتقان تدل على التزام عالٍ. استمر على هذا الزخم الرائع!` 
+                        : `Outstanding job ${studentName || 'champion'}! High dedication and near-perfect quiz mastery in Week ${digestWeekNumber}. Keep this winning momentum!`)
+                    : weeklyDigestData.percentage >= 40
+                    ? (isRtl 
+                        ? `بداية طيبة وتقدم متوازن في الأسبوع ${digestWeekNumber}! أنصحك هذا الأسبوع بممارسة النطق الصوتي المباشر معي على السبورة وإكمال ما تبقى من اختبارات الإتقان لتثبيت القواعد.` 
+                        : `Solid progress in Week ${digestWeekNumber}! Practice direct speaking with Sara on the whiteboard to consolidate key rules.`)
+                    : (isRtl 
+                        ? `الأسبوع ${digestWeekNumber} ينتظرك يا ${studentName || 'بطل'}! تذكر أن يوم الاستشفاء والتعويض متاح لك دائماً، فلنبدأ معاً درساً تلو الآخر دون أي ضغط 🌸.` 
+                        : `Week ${digestWeekNumber} is waiting for you! The flex catch-up day is ready to keep your streak safe—let's take it one lesson at a time 🌸.`)}
+                </p>
+                <div className="flex items-center gap-2 pt-1 text-[11px] text-amber-200 font-bold">
+                  <span>💡</span>
+                  <span>
+                    {isRtl ? 'توصية سارة للأسبوع القادم: التركيز على لعب الأدوار ومعمل النطق لتعزيز الطلاقة.' : "Sara's tip: Emphasize speaking roleplay and pronunciation for effortless fluency."}
+                  </span>
+                </div>
+              </div>
+
+              {/* Weekly Lessons Breakdown */}
+              <div className="space-y-2 mt-4">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
+                  {isRtl ? `وحدات الأسبوع ${digestWeekNumber} (${weeklyDigestData.items.length})` : `Week ${digestWeekNumber} Units (${weeklyDigestData.items.length})`}
+                </span>
+                <div className="max-h-40 overflow-y-auto space-y-1.5 pr-1">
+                  {weeklyDigestData.items.map(item => {
+                    const res = getLessonResult(item);
+                    return (
+                      <div
+                        key={item.id}
+                        className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs font-bold"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${res ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                          <span className="text-slate-500 text-[10px]">{item.day}</span>
+                          <span className="text-[#002147] line-clamp-1">{item.topic}</span>
+                        </div>
+                        {res ? (
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-black shrink-0">
+                            ✓ {res.score}/{res.total || 5}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200 text-slate-600 font-normal shrink-0">
+                            {item.isCatchUpDay ? (isRtl ? 'يوم تعويض' : 'Flex Day') : (isRtl ? 'مجدول' : 'Scheduled')}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="flex items-center justify-between gap-3 pt-5 mt-4 border-t border-slate-100">
+                <button
+                  onClick={() => setShowWeeklyDigestModal(false)}
+                  className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-xs transition-colors cursor-pointer"
+                >
+                  {isRtl ? 'إغلاق' : 'Close'}
+                </button>
+                <button
+                  onClick={() => {
+                    const text = isRtl
+                      ? `📊 تقرير الأسبوع ${digestWeekNumber} الأكاديمي مع سارة:\n• الطالب: ${studentName || userProfile?.displayName || 'البطل'}\n• إنجاز الدروس: ${weeklyDigestData.completed}/${weeklyDigestData.total} (${weeklyDigestData.percentage}%)\n• معدل الاختبارات: ${weeklyDigestData.avgScore}%\n• ساعات التعلم: ${weeklyDigestData.hours} ساعة 🔥`
+                      : `📊 Week ${digestWeekNumber} Digest with Sara:\n• Student: ${studentName || userProfile?.displayName || 'Champion'}\n• Completed: ${weeklyDigestData.completed}/${weeklyDigestData.total} (${weeklyDigestData.percentage}%)\n• Quiz Mastery: ${weeklyDigestData.avgScore}%\n• Hours: ${weeklyDigestData.hours}h 🔥`;
+                    if (navigator.share) {
+                      navigator.share({ title: 'Weekly Digest', text }).catch(() => {});
+                    } else {
+                      navigator.clipboard.writeText(text);
+                      showToast(isRtl ? 'تم نسخ التقرير لمشاركته عبر الواتساب!' : 'Copied report to clipboard!');
+                    }
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white font-black text-xs transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Share2 size={14} />
+                  <span>{isRtl ? 'مشاركة التقرير عبر الواتساب 📱' : 'Share via WhatsApp 📱'}</span>
+                </button>
               </div>
             </motion.div>
           </div>

@@ -727,11 +727,12 @@ export interface PlanItem {
   trackId?: string;
   trackBadge?: string;
   phaseLabel?: string;
+  isCatchUpDay?: boolean;
 }
 
 export interface SpecializedPlanTrack {
-  id: string; // 'comprehensive' | 'ielts_toefl' | 'business_interview' | 'traveler_survival' | 'weakness_recovery' | 'spaced_repetition' | 'micro_10min' | 'weekend_bootcamp' | 'mastery_100day'
-  category: 'goal' | 'adaptive' | 'lifestyle' | 'academic';
+  id: string;
+  category: 'goal' | 'adaptive' | 'lifestyle' | 'academic' | 'kids' | 'fluency' | 'accountability';
   titleAr: string;
   titleEn: string;
   badgeAr: string;
@@ -925,6 +926,178 @@ export const SPECIALIZED_PLAN_TRACKS: SpecializedPlanTrack[] = [
     difficultyLevel: 'all',
     color: 'indigo',
     gradient: 'from-indigo-600 via-purple-600 to-pink-600'
+  },
+
+  // 4. Kids & Phonics Adventure (خطط الأطفال والصوتيات التأسيسية)
+  {
+    id: 'phonics_safari',
+    category: 'kids',
+    titleAr: 'مغامرة الصوتيات وقراءة الكلمات (30 يوماً)',
+    titleEn: 'Phonics Safari & Word Reading (30 Days)',
+    badgeAr: '🦁 تأسيس الصوتيات والقراءة',
+    badgeEn: '🦁 Phonics & Word Safari',
+    descAr: 'خطة تأسيسية ممتعة للأطفال: أصوات الحروف، الدمج الصوتي، قراءة الكلمات الثلاثية (CVC)، وتشجيع صوتي حماسي من سارة.',
+    descEn: 'Foundational phonics track for kids: letter sounds, phonetic blending, CVC decoding, and cheerful praise from Sara.',
+    icon: '🦁',
+    recommendedDurationWeeks: 4,
+    recommendedLessonsPerDay: 1,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: ['oxford_discover', 'interactive_play', 'stories', 'translation_language_lab'],
+    difficultyLevel: 'beginner',
+    color: 'amber',
+    gradient: 'from-amber-400 via-orange-500 to-yellow-600'
+  },
+  {
+    id: 'storybook_reader',
+    category: 'kids',
+    titleAr: 'خطة قارئ القصص المصورة الصغير',
+    titleEn: 'Little Storybook Reader Plan',
+    badgeAr: '📖 قصص تفاعلية وخيال',
+    badgeEn: '📖 Interactive Storybook Reader',
+    descAr: 'قصة مصورة يومياً من مكتبة القصص التفاعلية، مع أسئلة فهم ممتعة وتمثيل أصوات شخصيات القصة مع سارة.',
+    descEn: 'One illustrated story daily with fun comprehension quizzes and character voice roleplay with Sara.',
+    icon: '📖',
+    recommendedDurationWeeks: 4,
+    recommendedLessonsPerDay: 1,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: ['stories', 'interactive_play'],
+    difficultyLevel: 'beginner',
+    color: 'emerald',
+    gradient: 'from-emerald-400 via-teal-500 to-green-600'
+  },
+
+  // 5. Fluency & Confidence (خطة الطلاقة والتحدث دون خوف)
+  {
+    id: 'speak_without_fear',
+    category: 'fluency',
+    titleAr: 'تحدي الطلاقة والتحدث دون خوف (30 يوماً)',
+    titleEn: '30-Day "Speak Without Fear" Challenge',
+    badgeAr: '🗣️ كسر حاجز الخجل والطلاقة',
+    badgeEn: '🗣️ Speak Without Fear',
+    descAr: 'جلسات محادثة يومية متدرجة تبدأ من جملة واحدة وتصل إلى 5 دقائق من التحدث الحر، مع تدريب معمل النطق وتحديات تمثيل الأدوار.',
+    descEn: 'Progressive daily speaking sessions scaling from single sentences to uninhibited fluency with pronunciation feedback.',
+    icon: '🗣️',
+    recommendedDurationWeeks: 4,
+    recommendedLessonsPerDay: 2,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: ['conversation', 'interactive_play', 'expression', 'translation_language_lab'],
+    difficultyLevel: 'intermediate',
+    color: 'rose',
+    gradient: 'from-rose-500 via-red-500 to-pink-600'
+  },
+  {
+    id: 'accent_pronunciation',
+    category: 'fluency',
+    titleAr: 'معمل مخارج الحروف واللكنة الواضحة',
+    titleEn: 'Clear Pronunciation & Accent Lab',
+    badgeAr: '🎙️ تصحيح النطق ومخارج الأصوات',
+    badgeEn: '🎙️ Accent & Clear Articulation',
+    descAr: 'تدريب تفصيلي على الفروق الصوتية الصعبة (P vs B, TH, R/L)، التشديد والتنغيم اللغوي، ونطق العبارات بسلاسة تشبه المتحدث الأصلي.',
+    descEn: 'Master tricky English phonemes, syllable stress, intonation patterns, and rhythm for clear, natural speech.',
+    icon: '🎙️',
+    recommendedDurationWeeks: 4,
+    recommendedLessonsPerDay: 2,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: ['translation_language_lab', 'conversation', 'oxford_discover', 'interactive_play'],
+    difficultyLevel: 'all',
+    color: 'violet',
+    gradient: 'from-violet-600 via-purple-600 to-indigo-700'
+  },
+
+  // 1B & 2B Enhancements: Study Abroad & Error Pattern Buster
+  {
+    id: 'study_abroad_readiness',
+    category: 'goal',
+    titleAr: 'مسار الابتعاث والدراسة بالجامعات الدولية',
+    titleEn: 'Study Abroad & Campus English',
+    badgeAr: '🌍 مهارات الحرم الجامعي والغربة',
+    badgeEn: '🌍 Campus & Academic Living',
+    descAr: 'تأهيل متكامل للحياة الجامعية: مناقشات المحاضرات، التواصل مع الأساتذة، تدوين الملاحظات الأكاديمية، والتعاملات الحياتية في السكن.',
+    descEn: 'Comprehensive preparation for campus life: lecture listening, professor office hours, academic notes, and campus community life.',
+    icon: '🌍',
+    recommendedDurationWeeks: 6,
+    recommendedLessonsPerDay: 2,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: ['conversation', 'reading', 'writing', 'interactive_play', 'adults_daily_dose'],
+    difficultyLevel: 'advanced',
+    color: 'sky',
+    gradient: 'from-sky-600 via-blue-700 to-indigo-800'
+  },
+  {
+    id: 'error_pattern_booster',
+    category: 'adaptive',
+    titleAr: 'خطة تفكيك وتصحيح الأخطاء الشائعة',
+    titleEn: 'Common Mistakes Elimination Sprint',
+    badgeAr: '🔍 تصحيح الأخطاء اللغوية المتكررة',
+    badgeEn: '🔍 Common Mistakes Eraser',
+    descAr: 'معالجة متخصصة لأكثر الأخطاء تكراراً في حروف الجر، الأزمنة المركبة، وترتيب الكلمات، مع شروح مقارنة ذكية وتمارين تركيز.',
+    descEn: 'Targeted remediation of the top grammatical and structural pitfalls in tenses, prepositions, and word order.',
+    icon: '🔍',
+    recommendedDurationWeeks: 3,
+    recommendedLessonsPerDay: 2,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: ['grammar', 'writing', 'reading', 'translation_language_lab'],
+    difficultyLevel: 'intermediate',
+    color: 'orange',
+    gradient: 'from-orange-500 via-amber-600 to-red-600'
+  },
+
+  // 6. Habit & Accountability Engine & Exam Prep (محرك الالتزام ومراجعة الامتحانات المدرسية)
+  {
+    id: 'school_exam_cram',
+    category: 'accountability',
+    titleAr: 'خطة الاستعداد للاختبارات والامتحانات المدرسية',
+    titleEn: 'School Exam & Final Test Sprint',
+    badgeAr: '📝 مراجعة مكثفة وبنوك أسئلة',
+    badgeEn: '📝 Exam Sprint & Test Mastery',
+    descAr: 'مراجعة مكثفة قبل الاختبارات: نماذج أسئلة وتلخيص شامل للقواعد والمفردات وكويزات سريعة لضمان العلامة الكاملة.',
+    descEn: 'High-intensity review sprint for school exams: test patterns, speed quizzes, grammar summaries, and targeted practice for top grades.',
+    icon: '📝',
+    recommendedDurationWeeks: 2,
+    recommendedLessonsPerDay: 3,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: ['grammar', 'reading', 'writing', 'translation_language_lab', 'expression'],
+    difficultyLevel: 'all',
+    color: 'emerald',
+    gradient: 'from-emerald-600 via-teal-600 to-green-700'
+  },
+  {
+    id: 'smart_habit_accountability',
+    category: 'accountability',
+    titleAr: 'خطة الالتزام الذكي والتقرير الأسبوعي مع سارة',
+    titleEn: "Sara's Accountability & Habit Coach",
+    badgeAr: '🛡️ انضباط يومي وتقارير أسبوعية',
+    badgeEn: '🛡️ Daily Habits & Weekly Reports',
+    descAr: 'نظام انضباط يومي مدعوم بمرونة تعويض الأيام، متابعة سلسلة الإنجاز (Streak)، وتقارير أداء أسبوعية مفصلة مع تشجيع خاص من سارة.',
+    descEn: 'Daily discipline system with flex catch-up days, streak tracking, detailed weekly report cards, and proactive Sara coaching.',
+    icon: '🛡️',
+    recommendedDurationWeeks: 8,
+    recommendedLessonsPerDay: 1,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: [
+      'grammar', 'reading', 'conversation', 'writing', 'adults_daily_dose', 'stories'
+    ],
+    difficultyLevel: 'all',
+    color: 'blue',
+    gradient: 'from-blue-600 via-indigo-700 to-violet-800'
+  },
+  {
+    id: 'weekly_challenge_league',
+    category: 'accountability',
+    titleAr: 'دوري التحديات الأسبوعية ولوحة الشرف',
+    titleEn: 'Weekly Challenge League & Honor Roll',
+    badgeAr: '🎖️ مهام وتحديات نقاط الخبرة XP',
+    badgeEn: '🎖️ Weekly XP & Milestone Quests',
+    descAr: 'تحديات أسبوعية متجددة ومهام خاصة لكل أسبوع لجمع أوسمة التميز ومضاعفة نقاط الخبرة والتقدم السريع في لوحة المتصدرين.',
+    descEn: 'Gamified weekly quest cycles: complete special missions, earn mastery badges, double XP, and climb the academy honor roll.',
+    icon: '🎖️',
+    recommendedDurationWeeks: 6,
+    recommendedLessonsPerDay: 2,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: ['conversation', 'interactive_play', 'oxford_discover', 'grammar', 'stories'],
+    difficultyLevel: 'intermediate',
+    color: 'amber',
+    gradient: 'from-amber-500 via-yellow-600 to-amber-700'
   }
 ];
 
@@ -941,8 +1114,9 @@ export interface PlanGenerationConfig {
   excludeCoveredKeys?: Set<string>;
   weaknessLessonKeys?: string[];
   includeBiWeeklyTests?: boolean;
+  includeCatchUpDay?: boolean;
   isRtl?: boolean;
-  trackId?: string; // 'comprehensive' | 'ielts_toefl' | 'business_interview' | 'traveler_survival' | 'weakness_recovery' | 'spaced_repetition' | 'micro_10min' | 'weekend_bootcamp' | 'mastery_100day'
+  trackId?: string; // 'comprehensive' | 'ielts_toefl' | 'business_interview' | 'traveler_survival' | 'weakness_recovery' | 'spaced_repetition' | 'micro_10min' | 'weekend_bootcamp' | 'mastery_100day' | 'phonics_safari' | 'storybook_reader' | 'speak_without_fear'
 }
 
 /**
@@ -1029,6 +1203,94 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
         // Fallback: prioritize core grammar and key syntax structures
         filteredLessons.sort((a, b) => (a.pillarId === 'grammar' ? -1 : 1));
       }
+    } else if (config.trackId === 'phonics_safari') {
+      // Prioritize kid-friendly phonics, sounds, letters, visual vocabulary, and Oxford Discover
+      filteredLessons.sort((a, b) => {
+        const textA = `${a.titleEn} ${a.descriptionEn || ''} ${a.pillarId} ${a.level}`.toLowerCase();
+        const textB = `${b.titleEn} ${b.descriptionEn || ''} ${b.pillarId} ${b.level}`.toLowerCase();
+        const phonicsRegex = /(phonics|sound|letter|alphabet|blend|cvc|word|rhyme|kid|child|visual)/i;
+        const scoreA = (phonicsRegex.test(textA) ? 10 : 0) + (a.level === 'Kid' ? 8 : 0);
+        const scoreB = (phonicsRegex.test(textB) ? 10 : 0) + (b.level === 'Kid' ? 8 : 0);
+        return scoreB - scoreA;
+      });
+    } else if (config.trackId === 'storybook_reader') {
+      // Prioritize story-based reading and narrative comprehension
+      filteredLessons.sort((a, b) => {
+        const textA = `${a.titleEn} ${a.descriptionEn || ''} ${a.pillarId}`.toLowerCase();
+        const textB = `${b.titleEn} ${b.descriptionEn || ''} ${b.pillarId}`.toLowerCase();
+        const storyRegex = /(story|stories|reader|tale|adventure|read|comprehension|book)/i;
+        const scoreA = (storyRegex.test(textA) ? 10 : 0) + (a.pillarId === 'stories' ? 8 : 0);
+        const scoreB = (storyRegex.test(textB) ? 10 : 0) + (b.pillarId === 'stories' ? 8 : 0);
+        return scoreB - scoreA;
+      });
+    } else if (config.trackId === 'speak_without_fear') {
+      // Prioritize pronunciation, conversation, roleplay, and confidence
+      filteredLessons.sort((a, b) => {
+        const textA = `${a.titleEn} ${a.descriptionEn || ''} ${a.pillarId}`.toLowerCase();
+        const textB = `${b.titleEn} ${b.descriptionEn || ''} ${b.pillarId}`.toLowerCase();
+        const speechRegex = /(speak|pronounc|conversation|dialogue|roleplay|confiden|fluency|talk)/i;
+        const scoreA = (speechRegex.test(textA) ? 10 : 0) + (['conversation', 'interactive_play'].includes(a.pillarId) ? 5 : 0);
+        const scoreB = (speechRegex.test(textB) ? 10 : 0) + (['conversation', 'interactive_play'].includes(b.pillarId) ? 5 : 0);
+        return scoreB - scoreA;
+      });
+    } else if (config.trackId === 'accent_pronunciation') {
+      // Prioritize phonetic nuances, pronunciation lab, tongue twisters, articulation
+      filteredLessons.sort((a, b) => {
+        const textA = `${a.titleEn} ${a.descriptionEn || ''} ${a.pillarId}`.toLowerCase();
+        const textB = `${b.titleEn} ${b.descriptionEn || ''} ${b.pillarId}`.toLowerCase();
+        const accentRegex = /(pronounc|accent|sound|phonetic|intonation|stress|rhyme|articulation|vowel|consonant)/i;
+        const scoreA = (accentRegex.test(textA) ? 10 : 0) + (a.pillarId === 'translation_language_lab' ? 8 : 0);
+        const scoreB = (accentRegex.test(textB) ? 10 : 0) + (b.pillarId === 'translation_language_lab' ? 8 : 0);
+        return scoreB - scoreA;
+      });
+    } else if (config.trackId === 'study_abroad_readiness') {
+      // Prioritize academic lectures, campus life, university discussion, note-taking
+      filteredLessons.sort((a, b) => {
+        const textA = `${a.titleEn} ${a.descriptionEn || ''} ${a.pillarId}`.toLowerCase();
+        const textB = `${b.titleEn} ${b.descriptionEn || ''} ${b.pillarId}`.toLowerCase();
+        const abroadRegex = /(university|campus|lecture|student|academic|discussion|abroad|presentation|professor|dorm|seminar)/i;
+        const scoreA = abroadRegex.test(textA) ? 10 : 0;
+        const scoreB = abroadRegex.test(textB) ? 10 : 0;
+        return scoreB - scoreA;
+      });
+    } else if (config.trackId === 'error_pattern_booster') {
+      // Prioritize tricky grammar, prepositions, tenses, syntax confusion
+      filteredLessons.sort((a, b) => {
+        const textA = `${a.titleEn} ${a.descriptionEn || ''} ${a.pillarId}`.toLowerCase();
+        const textB = `${b.titleEn} ${b.descriptionEn || ''} ${b.pillarId}`.toLowerCase();
+        const mistakeRegex = /(grammar|preposition|tense|verb|mistake|error|order|syntax|rule|passive|clause)/i;
+        const scoreA = (mistakeRegex.test(textA) ? 10 : 0) + (a.pillarId === 'grammar' ? 7 : 0);
+        const scoreB = (mistakeRegex.test(textB) ? 10 : 0) + (b.pillarId === 'grammar' ? 7 : 0);
+        return scoreB - scoreA;
+      });
+    } else if (config.trackId === 'school_exam_cram') {
+      // Prioritize exam questions, summaries, reading comprehension, grammar tests
+      filteredLessons.sort((a, b) => {
+        const textA = `${a.titleEn} ${a.descriptionEn || ''} ${a.pillarId}`.toLowerCase();
+        const textB = `${b.titleEn} ${b.descriptionEn || ''} ${b.pillarId}`.toLowerCase();
+        const examRegex = /(test|exam|grammar|comprehension|quiz|review|summary|question|structure|cloze)/i;
+        const scoreA = (examRegex.test(textA) ? 10 : 0) + (['grammar', 'reading', 'writing'].includes(a.pillarId) ? 5 : 0);
+        const scoreB = (examRegex.test(textB) ? 10 : 0) + (['grammar', 'reading', 'writing'].includes(b.pillarId) ? 5 : 0);
+        return scoreB - scoreA;
+      });
+    } else if (config.trackId === 'smart_habit_accountability') {
+      // Well-rounded core lessons rotating regularly
+      filteredLessons.sort((a, b) => {
+        const priorityOrder: { [k: string]: number } = { grammar: 1, conversation: 2, reading: 3, writing: 4, adults_daily_dose: 5 };
+        const scoreA = priorityOrder[a.pillarId] || 10;
+        const scoreB = priorityOrder[b.pillarId] || 10;
+        return scoreA - scoreB;
+      });
+    } else if (config.trackId === 'weekly_challenge_league') {
+      // Prioritize interactive roleplay, stories, challenges, and games
+      filteredLessons.sort((a, b) => {
+        const textA = `${a.titleEn} ${a.descriptionEn || ''} ${a.pillarId}`.toLowerCase();
+        const textB = `${b.titleEn} ${b.descriptionEn || ''} ${b.pillarId}`.toLowerCase();
+        const questRegex = /(game|challenge|play|story|roleplay|interactive|quest|dialogue)/i;
+        const scoreA = (questRegex.test(textA) ? 10 : 0) + (['interactive_play', 'stories', 'conversation'].includes(a.pillarId) ? 6 : 0);
+        const scoreB = (questRegex.test(textB) ? 10 : 0) + (['interactive_play', 'stories', 'conversation'].includes(b.pillarId) ? 6 : 0);
+        return scoreB - scoreA;
+      });
     }
 
     lessonsPool = filteredLessons;
@@ -1137,6 +1399,30 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
             topicLabel = isRtl ? `✈️ [مواقف سفر] ${topicLabel}` : `✈️ [Traveler Scene] ${topicLabel}`;
           } else if (config.trackId === 'weekend_bootcamp') {
             topicLabel = isRtl ? `🚀 [معسكر الويكند] ${topicLabel}` : `🚀 [Weekend Intensive] ${topicLabel}`;
+          } else if (config.trackId === 'phonics_safari') {
+            topicLabel = isRtl ? `🦁 [صوتيات وتأسيس] ${topicLabel}` : `🦁 [Phonics Safari] ${topicLabel}`;
+          } else if (config.trackId === 'storybook_reader') {
+            topicLabel = isRtl ? `📖 [قصة وقراءة] ${topicLabel}` : `📖 [Storybook Reader] ${topicLabel}`;
+          } else if (config.trackId === 'speak_without_fear') {
+            topicLabel = isRtl ? `🗣️ [طلاقة وتحدث] ${topicLabel}` : `🗣️ [Speak Without Fear] ${topicLabel}`;
+          } else if (config.trackId === 'accent_pronunciation') {
+            topicLabel = isRtl ? `🎙️ [مخارج ونطق] ${topicLabel}` : `🎙️ [Pronunciation Lab] ${topicLabel}`;
+          } else if (config.trackId === 'study_abroad_readiness') {
+            topicLabel = isRtl ? `🌍 [ابتعاث جامعي] ${topicLabel}` : `🌍 [Study Abroad] ${topicLabel}`;
+          } else if (config.trackId === 'error_pattern_booster') {
+            topicLabel = isRtl ? `🔍 [تصحيح أخطاء] ${topicLabel}` : `🔍 [Mistake Buster] ${topicLabel}`;
+          } else if (config.trackId === 'school_exam_cram') {
+            topicLabel = isRtl ? `📝 [مراجعة امتحانات] ${topicLabel}` : `📝 [Exam Sprint] ${topicLabel}`;
+          } else if (config.trackId === 'smart_habit_accountability') {
+            topicLabel = isRtl ? `🛡️ [التزام يومي] ${topicLabel}` : `🛡️ [Habit Focus] ${topicLabel}`;
+          } else if (config.trackId === 'weekly_challenge_league') {
+            topicLabel = isRtl ? `🎖️ [تحدي الأسبوع] ${topicLabel}` : `🎖️ [Weekly Quest] ${topicLabel}`;
+          }
+
+          // Catch-Up Day (الاستشفاء والتعويض المرن في اليوم الأخير من الأسبوع)
+          const isCatchUp = !!config.includeCatchUpDay && i === 6 && s === config.lessonsPerDay;
+          if (isCatchUp) {
+            topicLabel = isRtl ? `☕ [استشفاء وتعويض مرن] ${topicLabel}` : `☕ [Flex Catch-Up Day] ${topicLabel}`;
           }
 
           generatedItems.push({
@@ -1155,7 +1441,8 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
             scheduledAt: lessonScheduledAt.toISOString(),
             trackId: config.trackId || activeTrack.id,
             trackBadge,
-            phaseLabel
+            phaseLabel,
+            isCatchUpDay: isCatchUp
           });
 
           lessonIdx++;
