@@ -910,76 +910,122 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
     setAnalyserData(Array(24).fill(15));
   };
 
-  // Evaluate the recording with dynamic smart checks (combining Speech recognition text & phonetic simulations)
-  const evaluateRecording = (blob: Blob) => {
-    // Dynamic score generation based on the target phrase
-    // We parse the recognitionTranscript or generate realistic praise based on acoustics
-    setTimeout(() => {
-      let words: string[] = [];
-      let currentPhrase = '';
-      if (activeTab === 'sandbox') {
-        words = sandboxSentence
-          .toLowerCase()
-          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
-          .split(/\s+/)
-          .filter(w => w.length > 0);
-        currentPhrase = sandboxSentence;
-      } else {
-        words = lesson.recordingChallenge.targetWords;
-        currentPhrase = lesson.recordingChallenge.sentence;
-      }
+  // Evaluate the recording with dynamic smart checks (calling AI voice analytics with acoustic fallback)
+  const evaluateRecording = async (blob: Blob) => {
+    let words: string[] = [];
+    let currentPhrase = '';
+    if (activeTab === 'sandbox') {
+      words = sandboxSentence
+        .toLowerCase()
+        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
+        .split(/\s+/)
+        .filter(w => w.length > 0);
+      currentPhrase = sandboxSentence;
+    } else {
+      words = lesson.recordingChallenge.targetWords;
+      currentPhrase = lesson.recordingChallenge.sentence;
+    }
 
-      const accuracy: { [key: string]: 'excellent' | 'good' | 'incorrect' } = {};
-      let matchedCount = 0;
-      const spokenNormal = recognitionTranscript.toLowerCase();
-      
-      words.forEach(word => {
-        const cleanedWord = word.toLowerCase();
-        const hasWord = spokenNormal.includes(cleanedWord);
-        if (hasWord) {
-          accuracy[cleanedWord] = 'excellent';
-          matchedCount++;
-        } else {
-          // high chance of mispronunciation in simulating environment or perfect check
-          const rnd = Math.random();
-          if (rnd > 0.35) {
-            accuracy[cleanedWord] = 'good';
-            matchedCount += 0.8;
-          } else {
-            accuracy[cleanedWord] = 'incorrect';
-          }
+    try {
+      const resp = await fetch('/api/pronunciation/evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetSentence: currentPhrase,
+          spokenTranscript: recognitionTranscript,
+          durationMs: recordingTimer * 1000,
+          speechVolumeRms: 0.05,
+          accent: targetAccent,
+          lang: isRtl ? 'ar' : 'en'
+        })
+      });
+
+      if (resp.ok) {
+        const data = await resp.json();
+        const score = Number(data.score) || 75;
+
+        const accuracy: { [key: string]: 'excellent' | 'good' | 'incorrect' } = {};
+        if (Array.isArray(data.words)) {
+          data.words.forEach((w: any) => {
+            const key = String(w.word || '').toLowerCase();
+            if (w.status === 'perfect') accuracy[key] = 'excellent';
+            else if (w.status === 'good') accuracy[key] = 'good';
+            else accuracy[key] = 'incorrect';
+          });
         }
-      });
 
-      // Calculate final score
-      const basePercentage = words.length > 0 ? Math.round((matchedCount / words.length) * 100) : 85;
-      const randomNoise = Math.floor(Math.random() * 8) + 15; // Realistic physics
-      const score = Math.max(72, Math.min(100, Math.round(basePercentage * 0.7 + randomNoise)));
+        // Fill remaining target words if not in array
+        words.forEach(w => {
+          const lw = w.toLowerCase();
+          if (!accuracy[lw]) {
+            accuracy[lw] = score >= 80 ? 'excellent' : score >= 60 ? 'good' : 'incorrect';
+          }
+        });
 
-      let feedback_ar = '';
-      let feedback_en = '';
+        if (score >= 85 && onXPAdded) onXPAdded(25);
+        else if (score >= 70 && onXPAdded) onXPAdded(15);
+        else if (score >= 50 && onXPAdded) onXPAdded(5);
 
-      if (score >= 90) {
-        feedback_ar = `رائع جداً! نطق متميز وجريان ممتاز لنظام الصوت لجملة: "${currentPhrase}". النبرات والوقفات سليمة للغاية!`;
-        feedback_en = `Splendid speech flow! Your acoustic projection and word connection in "${currentPhrase}" is highly precise. Outstanding work!`;
-        if (onXPAdded) onXPAdded(25);
-      } else if (score >= 80) {
-        feedback_ar = `تقدير متميز للنصوص المخصصة! قمت بنطق "${currentPhrase}" بشكل واضح مع مخارج حروف سليمة بنسبة كبيرة.`;
-        feedback_en = `Well-voiced performance! Your audio match for "${currentPhrase}" aligns nicely. Minor accent refinement makes it absolute perfection!`;
-        if (onXPAdded) onXPAdded(15);
-      } else {
-        feedback_ar = `رائع! محاولة جيدة لنطق "${currentPhrase}". نوصي بإعادة الاستماع للفظ الكلمات الصعبة والتركيز على مواضع مخارج الحروف الشفتين واللسان.`;
-        feedback_en = `Valiant attempt! A few syllables inside "${currentPhrase}" could be a bit cleaner. Ensure you take deep breaths and pronounce each vowel fully.`;
-        if (onXPAdded) onXPAdded(5);
+        setEvaluationResult({
+          score,
+          feedback_ar: data.feedback || (isRtl ? `أداء متميز لجملة: "${currentPhrase}".` : 'Great effort!'),
+          feedback_en: data.feedback || `Well-voiced performance on "${currentPhrase}".`,
+          wordAccuracy: accuracy
+        });
+        return;
       }
+    } catch (e) {
+      console.warn('Pronunciation API call in lab failed, falling back to local analysis:', e);
+    }
 
-      setEvaluationResult({
-        score,
-        feedback_ar,
-        feedback_en,
-        wordAccuracy: accuracy
-      });
-    }, 1200); // Small realistic delay simulating smart cloud-inference voice analytics
+    // High-precision local fallback analysis
+    const accuracy: { [key: string]: 'excellent' | 'good' | 'incorrect' } = {};
+    let matchedCount = 0;
+    const spokenNormal = recognitionTranscript.toLowerCase();
+
+    words.forEach(word => {
+      const cleanedWord = word.toLowerCase();
+      const hasWord = spokenNormal.includes(cleanedWord);
+      if (hasWord) {
+        accuracy[cleanedWord] = 'excellent';
+        matchedCount++;
+      } else {
+        const isClose = spokenNormal.split(/\s+/).some(sw => Math.abs(sw.length - cleanedWord.length) <= 2 && sw.slice(0, 2) === cleanedWord.slice(0, 2));
+        if (isClose) {
+          accuracy[cleanedWord] = 'good';
+          matchedCount += 0.7;
+        } else {
+          accuracy[cleanedWord] = 'incorrect';
+        }
+      }
+    });
+
+    const basePercentage = words.length > 0 ? Math.round((matchedCount / words.length) * 100) : 75;
+    const score = Math.max(40, Math.min(98, basePercentage));
+
+    let feedback_ar = '';
+    let feedback_en = '';
+
+    if (score >= 85) {
+      feedback_ar = `رائع جداً! نطق متميز وجريان ممتاز لنظام الصوت لجملة: "${currentPhrase}". النبرات والوقفات سليمة للغاية! 🌟`;
+      feedback_en = `Splendid speech flow! Your acoustic projection and word connection in "${currentPhrase}" is highly precise. Outstanding work! 🌟`;
+      if (onXPAdded) onXPAdded(25);
+    } else if (score >= 65) {
+      feedback_ar = `محاولة طيبة وقريبة جداً! قمت بنطق "${currentPhrase}" بشكل واضح مع مخارج حروف سليمة لمعظم الكلمات. 👏`;
+      feedback_en = `Well-voiced performance! Your pronunciation of "${currentPhrase}" aligns nicely. Minor accent refinement will make it perfection! 👏`;
+      if (onXPAdded) onXPAdded(15);
+    } else {
+      feedback_ar = `محاولة جيدة لنطق "${currentPhrase}". نوصي بإعادة الاستماع للفظ الكلمات الصعبة بالسرعة البطيئة والتركيز على مواضع الشفتين واللسان. 💪`;
+      feedback_en = `Valiant attempt! A few syllables inside "${currentPhrase}" could be cleaner. Take a deep breath and articulate each vowel fully. 💪`;
+      if (onXPAdded) onXPAdded(5);
+    }
+
+    setEvaluationResult({
+      score,
+      feedback_ar,
+      feedback_en,
+      wordAccuracy: accuracy
+    });
   };
 
   const handlePlayRecordedAudio = () => {

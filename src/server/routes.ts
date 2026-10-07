@@ -1017,6 +1017,205 @@ Looking forward to your reply. Tell me what we're tackling first!`;
     }
   });
 
+  // 🎙️ Phonetic Pronunciation & Voice Evaluation Endpoint
+  app.post("/api/pronunciation/evaluate", async (req: express.Request, res: express.Response) => {
+    try {
+      const {
+        targetSentence,
+        spokenTranscript = "",
+        durationMs = 0,
+        speechVolumeRms = 0,
+        accent = "US",
+        lang = "ar"
+      } = req.body;
+
+      if (!targetSentence || typeof targetSentence !== "string") {
+        return res.status(400).json({ error: "BAD_REQUEST", message: "targetSentence is required" });
+      }
+
+      const cleanTarget = targetSentence.trim();
+      const cleanTranscript = (spokenTranscript || "").trim();
+      const isRtl = lang !== "en";
+
+      // Detect silence / no voice
+      if (speechVolumeRms !== undefined && speechVolumeRms < 0.003 && durationMs < 600 && !cleanTranscript) {
+        return res.json({
+          score: 0,
+          accuracy: 0,
+          fluency: 0,
+          clarity: 0,
+          silenceDetected: true,
+          feedback: isRtl
+            ? "لم يتم التقاط صوت واضح من الميكروفون. يرجى التأكد من صلاحية الميكروفون والتحدث بصوت مسموع وقريب."
+            : "No audible voice captured. Please make sure your microphone is enabled and speak clearly.",
+          coachingAdvice: isRtl
+            ? "💡 نصيحة: اقترب من الميكروفون وتحدث بصوت طبيعي واثق، وتجنب الهمس."
+            : "💡 Tip: Move closer to your microphone and speak in a clear, audible voice.",
+          words: cleanTarget.replace(/[^\w\s']/g, "").split(/\s+/).filter(Boolean).map(w => ({
+            word: w,
+            status: "retry",
+            phoneme: "",
+            tip: isRtl ? "لم يتم التقاط الصوت" : "No audio captured"
+          }))
+        });
+      }
+
+      // If Gemini is available, call Gemini for rich linguistic and articulatory analysis
+      if (initAI() && aiLive) {
+        const prompt = `You are the master English Pronunciation & Phonetics Assessor in Basim Alkhalil Digital Academy.
+Evaluate the learner's spoken attempt against the target English sentence with high phonetic precision.
+
+TARGET SENTENCE: "${cleanTarget}"
+TARGET ACCENT: ${accent}
+RECOGNIZED SPOKEN TRANSCRIPT (from speech engine): "${cleanTranscript || "(User spoke audio - evaluate phonetic target and acoustic parameters)"}"
+RECORDING DURATION: ${durationMs} ms
+AUDIO RMS VOLUME: ${speechVolumeRms}
+
+CRITERIA:
+1. Compare target sentence with spoken transcript and speech pacing (durationMs ~${cleanTarget.split(" ").length * 500}ms is normal tempo).
+2. Assess phonetic challenges (e.g. /p/ vs /b/, /θ/ vs /s/, /r/, /v/, silent letters, vowel reduction, word stress).
+3. If transcript matches closely, grant 85-98 score based on fluency and complexity.
+4. If transcript has minor slips or mispronunciations, score 65-84.
+5. If transcript is partially missing or different, score 40-64.
+6. Provide specific word-by-word status: 'perfect', 'good', or 'retry'.
+7. Provide customized, concrete articulatory advice in ${isRtl ? "Arabic" : "English"} detailing mouth, tongue, lips, breath control, and pace.
+
+RESPOND STRICTLY IN VALID JSON FORMAT with the following schema:
+{
+  "score": number (0-100),
+  "accuracy": number (0-100),
+  "fluency": number (0-100),
+  "clarity": number (0-100),
+  "silenceDetected": boolean,
+  "feedback": "string",
+  "coachingAdvice": "string (practical advice on tongue, lips, breath, and sound projection)",
+  "detectedPhonemes": [
+    { "sound": "string (e.g. /p/)", "issue": "string", "correction": "string" }
+  ],
+  "words": [
+    {
+      "word": "string",
+      "status": "perfect" | "good" | "retry",
+      "phoneme": "string",
+      "tip": "string"
+    }
+  ]
+}`;
+
+        try {
+          const response = await aiLive.models.generateContent({
+            model: "gemini-3.8-flash",
+            contents: prompt,
+            config: {
+              responseMimeType: "application/json",
+              maxOutputTokens: 600
+            }
+          });
+
+          const rawText = response.text?.trim() || "";
+          const parsed = JSON.parse(rawText);
+          if (parsed && typeof parsed.score === "number") {
+            return res.json(parsed);
+          }
+        } catch (geminiErr: any) {
+          logToFile(`[PronunciationEvaluate] Gemini parsing fallback: ${geminiErr.message}`);
+        }
+      }
+
+      // Algorithmic Fallback evaluator if AI call fails or is unavailable
+      const targetWords = cleanTarget.replace(/[^\w\s']/g, "").split(/\s+/).filter(Boolean);
+      const spokenWords = cleanTranscript.toLowerCase().replace(/[^\w\s']/g, "").split(/\s+/).filter(Boolean);
+
+      let matchedCount = 0;
+      const evaluatedWords = targetWords.map(tWord => {
+        const lowerT = tWord.toLowerCase();
+        if (spokenWords.includes(lowerT)) {
+          matchedCount += 1;
+          return {
+            word: tWord,
+            status: "perfect" as const,
+            phoneme: "",
+            tip: isRtl ? "نطق سليم ومخرج صحيح" : "Crisp and accurate articulation"
+          };
+        }
+
+        const closeMatch = spokenWords.some(sWord => {
+          const diff = Math.abs(sWord.length - lowerT.length);
+          return diff <= 2 && (sWord.includes(lowerT.slice(0, 3)) || lowerT.includes(sWord.slice(0, 3)));
+        });
+
+        if (closeMatch) {
+          matchedCount += 0.7;
+          return {
+            word: tWord,
+            status: "good" as const,
+            phoneme: "",
+            tip: isRtl ? "نطق قريب، اضغط الحرف أكثر" : "Close match, emphasize vowels"
+          };
+        }
+
+        // Tricky phoneme tips
+        let wordTip = isRtl ? "كرر الكلمة مع سارة" : "Listen and repeat with Sara";
+        if (/p/i.test(tWord)) wordTip = isRtl ? "ادفع الهواء بقوة في حرف P دون اهتزاز الحنجرة" : "Release a puff of air for /p/";
+        else if (/th/i.test(tWord)) wordTip = isRtl ? "أخرج طرف لسانك بين أسنانك في صوت TH" : "Place tongue tip between teeth for /th/";
+        else if (/r/i.test(tWord)) wordTip = isRtl ? "اثنِ لسانك للخلف دون لمس سقف الحلق" : "Curl tongue back without touching palate";
+        else if (/v/i.test(tWord)) wordTip = isRtl ? "ضع الأسنان العلوية على الشفة السفلية" : "Top teeth on bottom lip for /v/";
+
+        return {
+          word: tWord,
+          status: "retry" as const,
+          phoneme: "",
+          tip: wordTip
+        };
+      });
+
+      const calculatedScore = Math.max(30, Math.min(100, Math.round((matchedCount / Math.max(1, targetWords.length)) * 100)));
+      const accuracy = calculatedScore;
+      const fluency = Math.min(100, Math.max(40, Math.round(calculatedScore * 0.95 + 5)));
+      const clarity = Math.min(100, Math.max(45, Math.round(calculatedScore * 0.9 + (speechVolumeRms > 0.02 ? 10 : 0))));
+
+      let feedback = "";
+      let coachingAdvice = "";
+
+      if (calculatedScore >= 85) {
+        feedback = isRtl
+          ? "أداء صوتي فصيح ومخارج حروف متقنة للغاية! جريان الكلام ونبرة الصوت مطابقة تماماً للمستهدف."
+          : "Superb articulation and native-like tone! Your rhythm and word connections are precise.";
+        coachingAdvice = isRtl
+          ? "💡 حافظ على هذا التناغم الصوتي الرائع، واستمر في ممارسة الجمل السريعة لتعزيز طلاقة المحادثة اليومية."
+          : "💡 Maintain this melodic cadence and practice multi-syllable phrases to solidify fluency.";
+      } else if (calculatedScore >= 65) {
+        feedback = isRtl
+          ? "محاولة طيبة وقريبة جداً! مخارج معظم الكلمات واضحة، مع الحاجة لضبط طفيف في الأصوات الملونة بالأصفر والأحمر."
+          : "Solid effort! Most words are intelligible, but pay extra attention to highlighted syllables.";
+        coachingAdvice = isRtl
+          ? "💡 خذ نفساً عميقاً، ولا تستعجل الإلقاء. اضغط على المقاطع المشددة (Stressed Syllables) وأخرج هواء كافياً مع الأصوات الانفجارية."
+          : "💡 Take a measured breath and pace yourself. Emphasize stressed vowels and release crisp plosives.";
+      } else {
+        feedback = isRtl
+          ? "بداية مشجعة! تم التقاط صوتك لكن بعض مخارج الحروف تداخلت. استمع لنطق سارة المتمهل وأعد المحاولة."
+          : "Encouraging start! Your voice was registered, but phonemes blended. Listen to Sara's slow replay and try again.";
+        coachingAdvice = isRtl
+          ? "💡 استمع لسارة بالسرعة البطيئة (0.7x)، راقب حركة اللسان والشفتين، وكرر كل كلمة منفصلة قبل نطق الجملة كاملة."
+          : "💡 Use the slow audio mode (0.7x), observe lip and tongue positions, and repeat each word individually.";
+      }
+
+      return res.json({
+        score: calculatedScore,
+        accuracy,
+        fluency,
+        clarity,
+        silenceDetected: false,
+        feedback,
+        coachingAdvice,
+        words: evaluatedWords
+      });
+    } catch (err: any) {
+      logToFile(`[PronunciationEvaluate] Error: ${err.message}`);
+      return res.status(500).json({ error: "INTERNAL_ERROR", message: err.message });
+    }
+  });
+
   // API Routes
   app.get("/api/health", (req, res) => {
     const key = getApiKey();
