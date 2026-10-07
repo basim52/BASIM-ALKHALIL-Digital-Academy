@@ -270,13 +270,13 @@ export const SaraCurriculumModal: React.FC<SaraCurriculumModalProps> = ({
                 </button>
               </div>
             ) : (
-              filteredLessons.map(lesson => {
+              filteredLessons.map((lesson, idx) => {
                 const Icon = PILLAR_ICONS[lesson.pillarId] || BookOpen;
                 const isActive = String(activeLessonId) === String(lesson.id);
 
                 return (
                   <div
-                    key={`curriculum-item-${lesson.pillarId}-${lesson.id}`}
+                    key={`curriculum-item-${lesson.pillarId}-${lesson.id}-${idx}`}
                     className={`bg-white border-2 rounded-2xl p-3 sm:p-4 transition-all hover:shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                       isActive
                         ? 'border-amber-400 ring-2 ring-amber-300/40 bg-amber-50/20'

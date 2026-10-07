@@ -7,13 +7,11 @@ import { ALL_WRITING_UNITS } from '../components/WritingCurriculumCompanion';
 import { ALL_EXPRESSION_UNITS } from '../components/ExpressionCurriculumCompanion';
 import { OXFORD_LESSONS } from '../data/oxfordLessonsData';
 import { ADULTS_DAILY_DOSES } from '../data/adultsDailyDose';
-import { ADULTS_DAILY_DOSES_EXTRA } from '../data/adultsDailyDose_extra';
 import { PRONUNCIATION_LAB_DATA, ENGLISH_WITH_SONGS_DATA, ESCAPE_ROOM_PUZZLES_DATA, ROLE_PLAY_CHALLENGES_DATA, VISUAL_DICTIONARY_DATA, FAMILY_GAMES_DATA, COOKING_CHALLENGES_DATA } from '../data/interactiveCurriculum';
 import { COURSES } from '../data/courses';
 import { PRODUCED_VIDEO_LESSONS } from '../data/producedVideoLessons';
 import { STORIES } from '../components/StoryLibrary';
 import { KIDS_STORIES } from '../data/kidsStories';
-import { KIDS_STORIES_EXTRA } from '../data/kidsStories_extra';
 import { LANGUAGE_LAB_DATA } from '../data/languageLabData';
 import { shuffleQuiz, buildLimitedLessonQuizSet } from './quizUtils';
 
@@ -894,8 +892,7 @@ We will spend our full session time practicing, analyzing sentence parts, and dr
 
   // 13. KIDS & JUNIOR STORIES
   if (lesson.pillarId === 'kids_stories') {
-    const allKidsStories = [...KIDS_STORIES, ...KIDS_STORIES_EXTRA];
-    const kStory = allKidsStories.find(s => s.lesson_id === lesson.id) || allKidsStories[0];
+    const kStory = KIDS_STORIES.find(s => s.lesson_id === lesson.id) || KIDS_STORIES[0];
 
     const title = isRtl
       ? `قصة الأطفال: ${lesson.titleAr}`

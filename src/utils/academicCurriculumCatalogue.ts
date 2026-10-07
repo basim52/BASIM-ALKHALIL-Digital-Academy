@@ -45,8 +45,6 @@ import {
 import { LANGUAGE_LAB_DATA } from '../data/languageLabData';
 import { COURSES } from '../data/courses';
 import { PRODUCED_VIDEO_LESSONS } from '../data/producedVideoLessons';
-import { KIDS_STORIES_EXTRA } from '../data/kidsStories_extra';
-import { ADULTS_DAILY_DOSES_EXTRA } from '../data/adultsDailyDose_extra';
 import { MASTER_CURRICULUM } from '../data/masterCurriculum';
 import { CurriculumCategory, proficiencyLevel } from '../types';
 
@@ -476,7 +474,7 @@ export function getAllCurriculumLessons(): CurriculumLesson[] {
   });
 
   // 9. KIDS & JUNIOR STORIES
-  [...KIDS_STORIES, ...KIDS_STORIES_EXTRA].forEach(s => {
+  KIDS_STORIES.forEach(s => {
     all.push({
       id: s.lesson_id,
       pillarId: 'kids_stories',
@@ -495,7 +493,7 @@ export function getAllCurriculumLessons(): CurriculumLesson[] {
   });
 
   // 10. DAILY DOSE & ERROR CLINIC
-  [...ADULTS_DAILY_DOSES, ...ADULTS_DAILY_DOSES_EXTRA].forEach(d => {
+  ADULTS_DAILY_DOSES.forEach(d => {
     all.push({
       id: d.lesson_id,
       pillarId: 'daily_dose',
@@ -706,7 +704,18 @@ export function getAllCurriculumLessons(): CurriculumLesson[] {
     });
   });
 
-  return all;
+  // Deduplicate lessons by composite key to guarantee unique items
+  const seenKeys = new Set<string>();
+  const uniqueLessons: CurriculumLesson[] = [];
+  for (const item of all) {
+    const key = `${item.pillarId}:${item.id}`;
+    if (!seenKeys.has(key)) {
+      seenKeys.add(key);
+      uniqueLessons.push(item);
+    }
+  }
+
+  return uniqueLessons;
 }
 
 export interface PlanItem {

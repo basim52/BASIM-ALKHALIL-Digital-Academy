@@ -1340,7 +1340,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                     const isChecked = customSelectedLessonIds.has(lesson.id);
                     return (
                       <div
-                        key={lesson.id}
+                        key={`${lesson.pillarId}-${lesson.id}`}
                         onClick={() => toggleCustomLesson(lesson.id)}
                         className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-3.5 ${
                           isChecked 
@@ -1973,9 +1973,9 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                       {isRtl ? 'لا توجد دروس تطابق بحثك' : 'No lessons found matching filters'}
                     </div>
                   ) : (
-                    modalAvailableLessons.slice(0, 40).map(lesson => (
+                    modalAvailableLessons.slice(0, 40).map((lesson, mIdx) => (
                       <button
-                        key={lesson.id}
+                        key={`modal-lesson-${lesson.pillarId}-${lesson.id}-${mIdx}`}
                         onClick={() => handleAddLessonFromModal(lesson)}
                         className="w-full text-right p-3.5 bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 rounded-2xl transition-all flex items-center justify-between group"
                       >
