@@ -1030,7 +1030,181 @@ We will spend our full session time practicing, analyzing sentence parts, and dr
     };
   }
 
-  // 10. DEFAULT / GENERAL LESSON EXPLANATION
+  // 16. FOUNDATIONAL AI PROGRAM (البرنامج التأسيسي للذكاء الاصطناعي)
+  if (lesson.pillarId === 'ai_foundational') {
+    const title = isRtl
+      ? `تأسيس الذكاء الاصطناعي: ${lesson.titleAr}`
+      : `Foundational AI: ${lesson.titleEn}`;
+
+    const sentence = 'AI is a powerful pattern-hunting system transforming learning and creativity.';
+    const notes = [
+      isRtl ? `🤖 المفهوم الجوهري: ${lesson.descriptionAr || 'فهم كيفية تفكير النماذج التوليدية وصيد الأنماط'}` : `🤖 Core Concept: ${lesson.descriptionEn || 'Understanding pattern hunting and foundational generative models'}`,
+      isRtl ? '📐 قاعدة الحوار الذهبي (3C): السياق (Context) + التوضيح (Clarification) + القيود (Constraints)' : '📐 The 3C Prompt Rule: Context + Clarification + Constraints',
+      isRtl ? '🛡️ التفكير النقدي والأخلاقيات: الآلة تتنبأ بالأنماط ولا تملك الوعي البشري، دورك هو التوجيه الحكيم' : '🛡️ Critical Thinking: The model predicts tokens statistically; human wisdom guides the outcome'
+    ];
+
+    const voiceExplanation = isRtl
+      ? `أهلاً بك يا بطل في البرنامج التأسيسي للذكاء الاصطناعي! درسنا اليوم: ${lesson.titleAr}. الذكاء الاصطناعي ليس سحراً غامضاً، بل هو صياد أنماط مذهل يتغذى على البيانات. وضعت لك خريطة الدرس والمفاهيم على السبورة، تعال نستكشفها معاً خطوة بخطوة! 🤖✨`
+      : `Welcome champion to the Foundational AI Literacy Program! Today we explore: ${lesson.titleEn}. AI is an extraordinary pattern hunter powered by data. Check the concepts and activities on our smart whiteboard! 🤖✨`;
+
+    return {
+      boardData: {
+        title,
+        sentence,
+        highlight: 'AI Pattern Hunter & Generative Models',
+        formula: isRtl ? 'الذكاء الاصطناعي = بيانات ضخمة + خوارزميات أنماط + هندسة أوامر واعية' : 'AI = Big Data + Neural Patterns + Conscious Prompting',
+        notes,
+        quiz: {
+          question: isRtl ? 'ما هو المحرك الأساسي الذي يعتمد عليه الذكاء الاصطناعي التوليدي في صياغة إجاباته؟' : 'What is the primary engine generative AI relies on to construct responses?',
+          options: [
+            isRtl ? 'صيد الأنماط الإحصائية والتنبؤ بالكلمات التالية بدقة' : 'Statistical pattern recognition and predicting likely tokens',
+            isRtl ? 'حفظ الإنترنت كاملاً عن ظهر قلب كلمة بكلمة' : 'Memorizing the entire internet word-for-word',
+            isRtl ? 'التفكير والشعور البشري المستقل' : 'Conscious emotional human thinking'
+          ],
+          answerIndex: 0
+        },
+        voiceExplanation,
+        teacherNote: isRtl ? 'البرنامج التأسيسي للذكاء الاصطناعي 🤖' : 'Foundational AI Program 🤖',
+        openWhiteboard: true
+      },
+      spokenIntro: voiceExplanation,
+      chatMessage: isRtl
+        ? `🤖 **البرنامج التأسيسي للذكاء الاصطناعي: ${lesson.titleAr}**\n\nكتبت لك خريطة المفهوم وقاعدة الحوار الذهبي على السبورة الذكية 📐. استمع لشرحي ولنبدأ التطبيق!`
+        : `🤖 **Selected Foundational AI Lesson: ${lesson.titleEn}**\n\nI have structured the core pattern principles and guidelines on the whiteboard 📐!`
+    };
+  }
+
+  // 17. ADVANCED SPECIALIZED AI TRACKS (المسارات التخصصية للذكاء الاصطناعي)
+  if (lesson.pillarId === 'ai_specialized') {
+    const title = isRtl
+      ? `المسار التخصصي للذكاء الاصطناعي: ${lesson.titleAr}`
+      : `Specialized AI Track: ${lesson.titleEn}`;
+
+    const sentence = 'Deep architectures, neural embeddings, and autonomous workflows power modern AI solutions.';
+    const notes = [
+      isRtl ? `⚡ التخصص المتقدم: ${lesson.courseLabelAr}` : `⚡ Specialized Domain: ${lesson.courseLabelEn}`,
+      isRtl ? `🔬 التحليل التطبيقي: ${lesson.descriptionAr}` : `🔬 Applied Analysis: ${lesson.descriptionEn}`,
+      isRtl ? '🛠️ المعمارية والإنتاج: ضبط الأوزان، دوال التنشيط، وأتمتة مسارات العمل البرمجية' : '🛠️ Production Architecture: Weights, activation thresholds, and autonomous pipelines'
+    ];
+
+    const voiceExplanation = isRtl
+      ? `مرحباً بك في المسارات التخصصية المتقدمة للذكاء الاصطناعي! جلستنا اليوم حول: ${lesson.titleAr}. هذا المسار ينقلك من مجرد مستخدم للأدوات إلى مهندس فاهم للمعماريات العميقة وتدفقات العمل المؤتمتة. انظر للسبورة لنحلل المكونات معاً! ⚡`
+      : `Welcome to the Advanced Specialized AI Tracks! Today we master: ${lesson.titleEn}. This track elevates you into production-ready architectures and automation. Let's inspect the technical breakdown on the board! ⚡`;
+
+    return {
+      boardData: {
+        title,
+        sentence,
+        highlight: 'Specialized Neural Architecture & Automation',
+        formula: isRtl ? 'المسار التخصصي = نماذج عميقة + معالجة اللغات والرؤية + وكلاء أذكياء' : 'Specialized AI = Deep Architecture + NLP/Vision + Autonomous Agents',
+        notes,
+        quiz: {
+          question: isRtl ? 'ما فائدة دوال التنشيط (Activation Functions) والأوزان في الشبكات العصبية؟' : 'What is the role of activation functions and weights in neural networks?',
+          options: [
+            isRtl ? 'تمكين الشبكة من تعلم العلاقات غير الخطية المعقدة وتعديل قوة الإشارات' : 'Enabling the network to learn non-linear patterns and adjust signal weights',
+            isRtl ? 'حذف البيانات تلقائياً دون معالجة' : 'Deleting data without processing',
+            isRtl ? 'إيقاف تشغيل الخوارزمية فوراً' : 'Immediately halting execution'
+          ],
+          answerIndex: 0
+        },
+        voiceExplanation,
+        teacherNote: isRtl ? 'المسارات التخصصية للذكاء الاصطناعي ⚡' : 'Advanced Specialized AI Tracks ⚡',
+        openWhiteboard: true
+      },
+      spokenIntro: voiceExplanation,
+      chatMessage: isRtl
+        ? `⚡ **المسار التخصصي المتقدم: ${lesson.titleAr}**\n\nأعددت لك التحليل الفني والنمذجة الرياضية على السبورة 📐. استمع للشرح المتقدم وانطلق بالتطبيق!`
+        : `⚡ **Specialized AI Track: ${lesson.titleEn}**\n\nI have detailed the architectural blueprint and core mechanics on the whiteboard 📐!`
+    };
+  }
+
+  // 18. PROMPT ENGINEERING PROFESSIONAL ACADEMY (أكاديمية احترافية المطالبات)
+  if (lesson.pillarId === 'ai_prompt_pro') {
+    const title = isRtl
+      ? `احترافية المطالبات: ${lesson.titleAr}`
+      : `Prompt Engineering Pro: ${lesson.titleEn}`;
+
+    const sentence = 'A Mega-Prompt harmonizes Persona, Context, Detailed Constraints, and Structured Output.';
+    const notes = [
+      isRtl ? `🏆 المستوى الاحترافي: ${lesson.courseLabelAr}` : `🏆 Professional Level: ${lesson.courseLabelEn}`,
+      isRtl ? '🎯 هيكل المطالبة الضخمة (Mega-Prompt): الدور المستهدف + السياق المحدد + التعليمات الصريحة + القيود + هيكل المخرج' : '🎯 Mega-Prompt Anatomy: Role + Context + Step-by-Step Task + Negative Constraints + Output Schema',
+      isRtl ? '🛡️ أمان المطالبات (Security): حماية سياق النظام، منع تسريب الأوامر، ومكافحة هجمات الجيلبريك وحقن المطالبة' : '🛡️ Prompt Defense: System prompt isolation, leak prevention, and jailbreak guardrails'
+    ];
+
+    const voiceExplanation = isRtl
+      ? `أهلاً بك في أكاديمية احترافية المطالبات! محاضرتنا المتقدمة اليوم: ${lesson.titleAr}. هندسة الأوامر ليست مجرد كتابة أسئلة عادية، بل هي لغة توجيه وبرمجة الأنظمة الذكية باللغة الطبيعية. انظر لهيكل الـ Mega-Prompt على السبورة! 🏆`
+      : `Welcome to the Prompt Engineering Professional Academy! Today our masterclass is: ${lesson.titleEn}. Prompting is precision natural language programming. Check the Mega-Prompt architecture and guardrails on our board! 🏆`;
+
+    return {
+      boardData: {
+        title,
+        sentence,
+        highlight: 'Mega-Prompting, CoT & Security Guardrails',
+        formula: isRtl ? 'المطالبة الاحترافية = الدور + السياق المقيد + التفكير المتسلسل + هيكل المخرج + حواجز الأمان' : 'Mega-Prompt = Role + Context + CoT Reasoning + Output Schema + Guardrails',
+        notes,
+        quiz: {
+          question: isRtl ? 'ما هي الركيزة الأهم لمنع هلوسة النموذج والحصول على مخرجات دقيقة للغاية؟' : 'What is the most effective technique to reduce hallucinations and ensure precision?',
+          options: [
+            isRtl ? 'تحديد قيود صارمة (Constraints) وطلب التفكير خطوة بخطوة وتنسيق محدد' : 'Setting strict constraints, chain-of-thought instructions, and schema definitions',
+            isRtl ? 'كتابة كلمة واحدة وترك النموذج يخمن الباقي' : 'Writing a single vague word and letting the model guess',
+            isRtl ? 'تكرار نفس الجملة 100 مرة' : 'Repeating the exact same phrase 100 times'
+          ],
+          answerIndex: 0
+        },
+        voiceExplanation,
+        teacherNote: isRtl ? 'أكاديمية احترافية المطالبات 🏆' : 'Prompt Engineering Pro Academy 🏆',
+        openWhiteboard: true
+      },
+      spokenIntro: voiceExplanation,
+      chatMessage: isRtl
+        ? `🏆 **أكاديمية احترافية المطالبات: ${lesson.titleAr}**\n\nكتبت لك معمارية الأوامر الاحترافية وأطر الحماية على السبورة 📐. استمع للشرح وطبق الصياغة فوراً!`
+        : `🏆 **Prompt Engineering Pro: ${lesson.titleEn}**\n\nI have outlined the advanced prompt anatomy and reasoning triggers on the whiteboard 📐!`
+    };
+  }
+
+  // 19. PROFESSIONAL & PERSONAL DEVELOPMENT COURSES (الدورات التطويرية القيادية)
+  if (lesson.pillarId === 'professional_dev') {
+    const title = isRtl
+      ? `دورة تطويرية: ${lesson.titleAr}`
+      : `Executive Development Course: ${lesson.titleEn}`;
+
+    const sentence = 'True leadership and mastery are built through consistent habits and disciplined systems.';
+    const notes = [
+      isRtl ? `📚 الكتاب والمسار المرجعي: ${lesson.courseLabelAr}` : `📚 Foundational Reference: ${lesson.courseLabelEn}`,
+      isRtl ? `💡 المبدأ القيادي: ${lesson.descriptionAr}` : `💡 Strategic Principle: ${lesson.descriptionEn}`,
+      isRtl ? '🎯 خطة التطبيق العملي: تحويل المفهوم الذهني إلى خطوة إجرائية يومية قابلة للقياس' : '🎯 Actionable Framework: Converting mindset shifts into daily measurable habits'
+    ];
+
+    const voiceExplanation = isRtl
+      ? `مرحباً بك في مسار الدورات التطويرية وبناء المهارات القيادية! درسنا اليوم من: ${lesson.titleAr}. النجاح والتميز لا يأتيان بالصدفة، بل ببناء أنظمة تفكير وعادات يومية قوية. تعال نستعرض الحكمة العملية وخطة التطبيق على السبورة! 📚🌟`
+      : `Welcome to the Professional Development & Executive Growth Course! Today's session is from: ${lesson.titleEn}. Long-term mastery is forged through deliberate systems and daily habits. Let's inspect the principles on our smart whiteboard! 📚🌟`;
+
+    return {
+      boardData: {
+        title,
+        sentence,
+        highlight: 'Executive Habits, Mental Models & Leadership',
+        formula: isRtl ? 'التطوير الشخصي = رؤية واضحة + نظام عادات يومية + تقييم ومراجعة مستمرة' : 'Personal Growth = Clear Vision + Daily Habit System + Continuous Review',
+        notes,
+        quiz: {
+          question: isRtl ? 'ما هو المبدأ الأساسي لبناء العادات القوية والنجاح المستدام؟' : 'What is the primary principle behind building resilient habits and sustained success?',
+          options: [
+            isRtl ? 'التركيز على نظام يومي متدرج وتراكم التحسينات الصغيرة المستمرة' : 'Focusing on daily disciplined systems and continuous compounding growth',
+            isRtl ? 'الاعتماد على الحماس المؤقت فقط دون خطة' : 'Relying exclusively on fleeting motivation without a system',
+            isRtl ? 'الاستسلام عند أول تحدٍ أو صعوبة' : 'Giving up at the first sign of difficulty'
+          ],
+          answerIndex: 0
+        },
+        voiceExplanation,
+        teacherNote: isRtl ? 'الدورات التطويرية وبناء المهارات 📚' : 'Professional Development & Leadership 📚',
+        openWhiteboard: true
+      },
+      spokenIntro: voiceExplanation,
+      chatMessage: isRtl
+        ? `📚 **الدورة التطويرية: ${lesson.titleAr}**\n\nكتبت لك المبدأ القيادي وخطة التطبيق العملي على السبورة الذكية 📐. استمع للدرس ودعنا نطبقه في حياتك اليومية!`
+        : `📚 **Executive Development Lesson: ${lesson.titleEn}**\n\nI have highlighted the strategic mindset shift and actionable system on the whiteboard 📐!`
+    };
+  }
   const title = isRtl
     ? `منهج الأكاديمية: ${lesson.titleAr}`
     : `Academy Curriculum: ${lesson.titleEn}`;

@@ -772,6 +772,46 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         ? `أهلاً بك في تحدي هذا الأسبوع! اليوم لديك فرصة لحصد نقاط تميز ومضاعفة درجاتك لتتصدر لوحة الشرف 🎖️. ${spokenIntro}`
         : `Welcome to this week's league quest! Complete today's mission to boost your XP and climb the leaderboard 🎖️. ${spokenIntro}`;
       chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
+    } else if (activeStudyPlan?.trackId === 'ai_foundational_track') {
+      const prefix = isRtl
+        ? '🤖 البرنامج التأسيسي للذكاء الاصطناعي: رحلة شيقة لفهم أسرار الآلة وصيد الأنماط!'
+        : '🤖 Foundational AI Literacy Track: Explore how AI models think and learn!';
+      spokenIntro = isRtl
+        ? `أهلاً بك يا بطل في جلسة البرنامج التأسيسي للذكاء الاصطناعي! اليوم سنكتشف أسرار الآلة ونبني مفاهيمك التقنية بثقة 🤖✨. ${spokenIntro}`
+        : `Welcome champion to your Foundational AI session! Today we demystify how models think and build smart habits 🤖✨. ${spokenIntro}`;
+      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
+    } else if (activeStudyPlan?.trackId === 'ai_specialized_track') {
+      const prefix = isRtl
+        ? '⚡ المسارات التخصصية المتقدمة للذكاء الاصطناعي: هندسة المعماريات والوكلاء الأذكياء والأتمتة!'
+        : '⚡ Specialized Advanced AI Track: Master deep architectures, vision, and agents!';
+      spokenIntro = isRtl
+        ? `مرحباً بك في جلسة المسار التخصصي المتقدم للذكاء الاصطناعي! سنغوص سوياً في أعماق المعمارية التقنية والتطبيقات الواقعية ⚡. ${spokenIntro}`
+        : `Welcome to your Specialized AI deep-dive session! Let's explore production-ready architectures and automation ⚡. ${spokenIntro}`;
+      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
+    } else if (activeStudyPlan?.trackId === 'ai_prompt_pro_track') {
+      const prefix = isRtl
+        ? '🏆 أكاديمية احترافية المطالبات (Prompt Pro): إتقان معمارية الأوامر المركبة والأمان المتقدم!'
+        : '🏆 Prompt Engineering Pro Academy: Master Mega-Prompts, reasoning & security!';
+      spokenIntro = isRtl
+        ? `أهلاً بك في أكاديمية احترافية المطالبات! اليوم سنصقل مهاراتك في هندسة الأوامر الذكية وتحصين المخرجات ضد الهلوسة 🏆. ${spokenIntro}`
+        : `Welcome to the Prompt Engineering Pro masterclass! Today we engineer precision Mega-Prompts and robust guardrails 🏆. ${spokenIntro}`;
+      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
+    } else if (activeStudyPlan?.trackId === 'professional_dev_track') {
+      const prefix = isRtl
+        ? '📚 مسار الدورات التطويرية وبناء المهارات القيادية: أنظمة العادات والتميز الشخصي!'
+        : '📚 Executive Development Track: Systems, mindset & leadership habits!';
+      spokenIntro = isRtl
+        ? `مرحباً بك في جلستك من مسار الدورات التطويرية! العادات اليومية المنضبطة تصنع الفرق الهائل، ودعنا نستلهم حكمة اليوم معاً 📚🌟. ${spokenIntro}`
+        : `Welcome to today's Executive Development session! Deliberate systems and daily habits create true mastery 📚🌟. ${spokenIntro}`;
+      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
+    } else if (activeStudyPlan?.trackId === 'ai_executive_mastery') {
+      const prefix = isRtl
+        ? '🎓 دبلوم الذكاء الاصطناعي والدورات التطويرية الشامل: صناعة قيادي متمكن من أدوات المستقبل!'
+        : '🎓 Comprehensive AI & Executive Growth Diploma: Future-ready tech & leadership!';
+      spokenIntro = isRtl
+        ? `أهلاً بك يا بطل في دبلوم الذكاء الاصطناعي والدورات التطويرية الشامل! نجمع اليوم بين التقنية المتقدمة وبناء المهارات القيادية 🎓. ${spokenIntro}`
+        : `Welcome champion to your AI & Executive Growth Diploma session! Today we combine cutting-edge tech with leadership wisdom 🎓. ${spokenIntro}`;
+      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
     }
 
     const curriculumMsg: MessageItem = {

@@ -46,6 +46,8 @@ import { LANGUAGE_LAB_DATA } from '../data/languageLabData';
 import { COURSES } from '../data/courses';
 import { PRODUCED_VIDEO_LESSONS } from '../data/producedVideoLessons';
 import { MASTER_CURRICULUM } from '../data/masterCurriculum';
+import { AI_CURRICULUM_DATA, ADVANCED_CURRICULUM_DATA } from '../components/AiCurriculum';
+import { PROMPT_PROFESSIONAL_DATA } from '../components/PromptProData';
 import { CurriculumCategory, proficiencyLevel } from '../types';
 
 export interface CurriculumLesson {
@@ -245,6 +247,54 @@ export const ACADEMIC_SECTION_DEFINITIONS: PillarCategoryDefinition[] = [
     bgLight: 'bg-rose-50',
     borderColor: 'border-rose-200',
     tagColor: 'bg-rose-100 text-rose-800'
+  },
+  {
+    id: 'ai_foundational',
+    nameAr: 'البرنامج التأسيسي للذكاء الاصطناعي',
+    nameEn: 'Foundational AI Literacy Program',
+    descAr: 'المفاهيم الأساسية، كيف يفكر الصديق الرقمي، صيد الأنماط، فن الحوار والأمر الذهبي، والأخلاقيات (20 درساً)',
+    descEn: 'Foundational AI principles, pattern hunting, generative models, golden prompts and ethics (20 lessons)',
+    iconName: 'Cpu',
+    color: 'text-violet-600',
+    bgLight: 'bg-violet-50',
+    borderColor: 'border-violet-200',
+    tagColor: 'bg-violet-100 text-violet-800'
+  },
+  {
+    id: 'ai_specialized',
+    nameAr: 'المسارات التخصصية للذكاء الاصطناعي',
+    nameEn: 'Advanced Specialized AI Tracks',
+    descAr: 'النمذجة الرياضية، معالجة اللغات الطبيعية NLP، الرؤية الحاسوبية، والوكلاء الأذكياء (10 وحدات تخصصية)',
+    descEn: 'Advanced neural modeling, NLP, computer vision, AI agents and workflow automation (10 modules)',
+    iconName: 'Sparkles',
+    color: 'text-cyan-600',
+    bgLight: 'bg-cyan-50',
+    borderColor: 'border-cyan-200',
+    tagColor: 'bg-cyan-100 text-cyan-800'
+  },
+  {
+    id: 'ai_prompt_pro',
+    nameAr: 'أكاديمية احترافية المطالبات (Prompt Pro)',
+    nameEn: 'Prompt Engineering Professional Academy',
+    descAr: 'معمارية الأوامر المركبة Mega-Prompts، التفكير المتسلسل، محاكاة الشخصيات، وأمن المطالبات (24 درساً)',
+    descEn: 'Mega-Prompting architecture, chain of thought reasoning, personas, and prompt security (24 lessons)',
+    iconName: 'Terminal',
+    color: 'text-amber-600',
+    bgLight: 'bg-amber-50',
+    borderColor: 'border-amber-200',
+    tagColor: 'bg-amber-100 text-amber-800'
+  },
+  {
+    id: 'professional_dev',
+    nameAr: 'الدورات التطويرية وبناء المهارات القيادية',
+    nameEn: 'Professional & Personal Development Courses',
+    descAr: 'دورات تطويرية مكثفة من أمهات الكتب: العادات الذرية، العادات السبع، التفكير السريع والبطيء، والأب الغني',
+    descEn: 'Executive development courses: Atomic Habits, 7 Habits, Thinking Fast & Slow, Rich Dad Poor Dad',
+    iconName: 'GraduationCap',
+    color: 'text-emerald-700',
+    bgLight: 'bg-emerald-50',
+    borderColor: 'border-emerald-200',
+    tagColor: 'bg-emerald-100 text-emerald-800'
   }
 ];
 
@@ -704,6 +754,90 @@ export function getAllCurriculumLessons(): CurriculumLesson[] {
     });
   });
 
+  // 15. FOUNDATIONAL AI PROGRAM (البرنامج التأسيسي للذكاء الاصطناعي - 20 درساً)
+  AI_CURRICULUM_DATA.program_levels.forEach(lvl => {
+    lvl.lessons.forEach(l => {
+      all.push({
+        id: `ai_foundational_l${l.lesson_number}`,
+        pillarId: 'ai_foundational',
+        courseId: 'ai_foundational',
+        courseLabelAr: `الذكاء التأسيسي: المستوى ${lvl.level_number}`,
+        courseLabelEn: `Foundational AI: Level ${lvl.level_number}`,
+        titleAr: `الدرس ${l.lesson_number}: ${l.lesson_title}`,
+        titleEn: `Lesson ${l.lesson_number}: ${l.lesson_title}`,
+        descriptionAr: l.core_concept ? l.core_concept.slice(0, 150) : l.detailed_explanation?.slice(0, 150),
+        descriptionEn: `Core AI Literacy lesson #${l.lesson_number}`,
+        level: lvl.level_number <= 2 ? 'A1' : lvl.level_number <= 4 ? 'A2' : 'B1',
+        duration: '25 min',
+        categoryTagAr: 'ذكاء تأسيسي',
+        categoryTagEn: 'AI Foundations'
+      });
+    });
+  });
+
+  // 16. ADVANCED SPECIALIZED AI TRACKS (المسارات التخصصية المتقدمة للذكاء الاصطناعي)
+  ADVANCED_CURRICULUM_DATA.tracks.forEach((track, tIdx) => {
+    track.lessons.forEach(l => {
+      all.push({
+        id: `ai_adv_t${tIdx + 1}_l${l.lesson_number}`,
+        pillarId: 'ai_specialized',
+        courseId: 'ai_specialized',
+        courseLabelAr: track.track_name,
+        courseLabelEn: `Specialized Track: ${track.track_name}`,
+        titleAr: l.lesson_title,
+        titleEn: l.lesson_title,
+        descriptionAr: l.lesson_card?.content ? l.lesson_card.content.slice(0, 150) : track.track_description,
+        descriptionEn: `Specialized AI deep-dive: ${l.lesson_title}`,
+        level: 'B2',
+        duration: '35 min',
+        categoryTagAr: 'ذكاء تخصصي',
+        categoryTagEn: 'Specialized AI'
+      });
+    });
+  });
+
+  // 17. PROMPT ENGINEERING PROFESSIONAL ACADEMY (احترافية المطالبات - 24 درساً)
+  PROMPT_PROFESSIONAL_DATA.levels.forEach(lvl => {
+    lvl.lessons.forEach(l => {
+      all.push({
+        id: `ai_prompt_pro_l${l.lesson_number}`,
+        pillarId: 'ai_prompt_pro',
+        courseId: 'ai_prompt_pro',
+        courseLabelAr: `احترافية المطالبات: ${lvl.level_title}`,
+        courseLabelEn: `Prompt Pro: ${lvl.level_title}`,
+        titleAr: `المحاضرة ${l.lesson_number}: ${l.lesson_title}`,
+        titleEn: `Lecture ${l.lesson_number}: ${l.lesson_title}`,
+        descriptionAr: l.content ? l.content.slice(0, 150) : 'هندسة وصياغة المطالبات المتقدمة',
+        descriptionEn: `Advanced Prompt Engineering lecture #${l.lesson_number}`,
+        level: lvl.level_number <= 2 ? 'B2' : 'C1',
+        duration: '30 min',
+        categoryTagAr: 'احتراف المطالبات',
+        categoryTagEn: 'Prompt Pro'
+      });
+    });
+  });
+
+  // 18. PROFESSIONAL & PERSONAL DEVELOPMENT COURSES (الدورات التطويرية والمهنية)
+  COURSES.forEach(book => {
+    book.chapters.forEach(chap => {
+      all.push({
+        id: `prof_dev_${book.id}_ch_${chap.id}`,
+        pillarId: 'professional_dev',
+        courseId: book.id,
+        courseLabelAr: `دورة تطويرية: ${book.titleAr}`,
+        courseLabelEn: `Professional Course: ${book.titleEn}`,
+        titleAr: `${book.titleAr}: ${chap.titleAr}`,
+        titleEn: `${book.titleEn}: ${chap.titleEn}`,
+        descriptionAr: chap.descriptionAr || book.descriptionAr,
+        descriptionEn: chap.descriptionEn || book.descriptionEn,
+        level: 'B1',
+        duration: '30 min',
+        categoryTagAr: 'دورات تطويرية',
+        categoryTagEn: 'Professional Courses'
+      });
+    });
+  });
+
   // Deduplicate lessons by composite key to guarantee unique items
   const seenKeys = new Set<string>();
   const uniqueLessons: CurriculumLesson[] = [];
@@ -741,7 +875,7 @@ export interface PlanItem {
 
 export interface SpecializedPlanTrack {
   id: string;
-  category: 'goal' | 'adaptive' | 'lifestyle' | 'academic' | 'kids' | 'fluency' | 'accountability';
+  category: 'goal' | 'adaptive' | 'lifestyle' | 'academic' | 'kids' | 'fluency' | 'accountability' | 'ai_professional';
   titleAr: string;
   titleEn: string;
   badgeAr: string;
@@ -1107,6 +1241,98 @@ export const SPECIALIZED_PLAN_TRACKS: SpecializedPlanTrack[] = [
     difficultyLevel: 'intermediate',
     color: 'amber',
     gradient: 'from-amber-500 via-yellow-600 to-amber-700'
+  },
+
+  // 7. AI & Professional Development Tracks (الذكاء الاصطناعي والدورات التطويرية)
+  {
+    id: 'ai_foundational_track',
+    category: 'ai_professional',
+    titleAr: 'البرنامج التأسيسي للذكاء الاصطناعي (20 درساً)',
+    titleEn: 'Foundational AI Literacy Program (20 Lessons)',
+    badgeAr: '🤖 التأسيس وفهم النماذج',
+    badgeEn: '🤖 Core AI Foundations',
+    descAr: 'رحلة متكاملة في فهم كيفية تفكير الآلة وصيد الأنماط، فن الحوار والأمر الذهبي، استوديو الرسم والصوت، وبناء المشاريع والأخلاقيات.',
+    descEn: 'A foundational journey understanding AI patterns, golden prompts, creative tools, mini-projects, and safety.',
+    icon: '🤖',
+    recommendedDurationWeeks: 4,
+    recommendedLessonsPerDay: 1,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: ['ai_foundational', 'conversation', 'interactive_play'],
+    difficultyLevel: 'all',
+    color: 'violet',
+    gradient: 'from-violet-600 via-indigo-600 to-purple-800'
+  },
+  {
+    id: 'ai_specialized_track',
+    category: 'ai_professional',
+    titleAr: 'المسارات التخصصية المتقدمة في الذكاء الاصطناعي',
+    titleEn: 'Specialized Advanced AI Tracks',
+    badgeAr: '⚡ تخصص وتطبيقات عملية',
+    badgeEn: '⚡ Advanced AI Tracks',
+    descAr: 'تعمق في النمذجة الرياضية، معالجة اللغات الطبيعية NLP، الرؤية الحاسوبية، والوكلاء الأذكياء وأتمتة مسارات العمل.',
+    descEn: 'Deep dive into neural networks, NLP, vision architectures, and autonomous AI agents.',
+    icon: '⚡',
+    recommendedDurationWeeks: 6,
+    recommendedLessonsPerDay: 2,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: ['ai_specialized', 'translation_language_lab', 'conversation'],
+    difficultyLevel: 'advanced',
+    color: 'cyan',
+    gradient: 'from-cyan-600 via-blue-600 to-teal-800'
+  },
+  {
+    id: 'ai_prompt_pro_track',
+    category: 'ai_professional',
+    titleAr: 'أكاديمية احترافية وهندسة المطالبات (24 درساً)',
+    titleEn: 'Prompt Engineering Pro Academy (24 Lessons)',
+    badgeAr: '🏆 هندسة الأوامر المتقدمة',
+    badgeEn: '🏆 Prompt Engineering Pro',
+    descAr: 'إتقان صياغة الـ Mega-Prompts، التفكير المتسلسل (Chain of Thought)، محاكاة الخبراء، والتحصين ضد الاختراق والجيلبريك.',
+    descEn: 'Master complex Mega-Prompts, multi-step reasoning, persona prompting, and prompt injection defense.',
+    icon: '🏆',
+    recommendedDurationWeeks: 6,
+    recommendedLessonsPerDay: 2,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: ['ai_prompt_pro', 'writing', 'grammar'],
+    difficultyLevel: 'advanced',
+    color: 'amber',
+    gradient: 'from-amber-500 via-yellow-600 to-orange-700'
+  },
+  {
+    id: 'professional_dev_track',
+    category: 'ai_professional',
+    titleAr: 'مسار الدورات التطويرية وبناء الشخصية القيادية',
+    titleEn: 'Executive & Personal Development Courses',
+    badgeAr: '📚 عادات وقيادة وتفكير',
+    badgeEn: '📚 Executive Leadership & Habits',
+    descAr: 'دروس تطبيقية مستخلصة من أمهات الكتب: العادات الذرية، العادات السبع، التفكير السريع والبطيء، وفن إدارة الأولويات والتفاوض.',
+    descEn: 'Actionable leadership lessons from Atomic Habits, 7 Habits, Thinking Fast and Slow, and executive wisdom.',
+    icon: '📚',
+    recommendedDurationWeeks: 8,
+    recommendedLessonsPerDay: 1,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: ['professional_dev', 'book_courses', 'adults_daily_dose', 'conversation'],
+    difficultyLevel: 'all',
+    color: 'emerald',
+    gradient: 'from-emerald-600 via-teal-600 to-green-700'
+  },
+  {
+    id: 'ai_executive_mastery',
+    category: 'ai_professional',
+    titleAr: 'دبلوم الذكاء الاصطناعي والدورات التطويرية الشامل',
+    titleEn: 'Comprehensive AI & Executive Growth Diploma',
+    badgeAr: '🎓 الذكاء الاصطناعي والتطوير القيادي',
+    badgeEn: '🎓 AI & Executive Diploma',
+    descAr: 'خطة شاملة تجمع البرنامج التأسيسي، واحترافية المطالبات، والدورات التطويرية لصناعة قيادي متمكن من أدوات المستقبل.',
+    descEn: 'An elite hybrid track weaving foundational AI, prompt engineering, and executive growth habits.',
+    icon: '🎓',
+    recommendedDurationWeeks: 12,
+    recommendedLessonsPerDay: 2,
+    recommendedDays: [0, 1, 2, 3, 4],
+    recommendedPillars: ['ai_foundational', 'ai_prompt_pro', 'ai_specialized', 'professional_dev', 'conversation'],
+    difficultyLevel: 'all',
+    color: 'indigo',
+    gradient: 'from-indigo-600 via-purple-700 to-pink-700'
   }
 ];
 
@@ -1300,6 +1526,24 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
         const scoreB = (questRegex.test(textB) ? 10 : 0) + (['interactive_play', 'stories', 'conversation'].includes(b.pillarId) ? 6 : 0);
         return scoreB - scoreA;
       });
+    } else if (config.trackId === 'ai_foundational_track') {
+      // Prioritize foundational AI lessons
+      filteredLessons.sort((a, b) => (a.pillarId === 'ai_foundational' ? -1 : b.pillarId === 'ai_foundational' ? 1 : 0));
+    } else if (config.trackId === 'ai_specialized_track') {
+      // Prioritize advanced specialized AI tracks
+      filteredLessons.sort((a, b) => (a.pillarId === 'ai_specialized' ? -1 : b.pillarId === 'ai_specialized' ? 1 : 0));
+    } else if (config.trackId === 'ai_prompt_pro_track') {
+      // Prioritize prompt engineering pro lessons
+      filteredLessons.sort((a, b) => (a.pillarId === 'ai_prompt_pro' ? -1 : b.pillarId === 'ai_prompt_pro' ? 1 : 0));
+    } else if (config.trackId === 'professional_dev_track') {
+      // Prioritize executive developmental courses and bestselling books
+      filteredLessons.sort((a, b) => (a.pillarId === 'professional_dev' || a.pillarId === 'book_courses' ? -1 : 1));
+    } else if (config.trackId === 'ai_executive_mastery') {
+      // Balanced rotation across all AI & leadership pillars
+      filteredLessons.sort((a, b) => {
+        const order: { [k: string]: number } = { ai_foundational: 1, ai_prompt_pro: 2, ai_specialized: 3, professional_dev: 4 };
+        return (order[a.pillarId] || 10) - (order[b.pillarId] || 10);
+      });
     }
 
     lessonsPool = filteredLessons;
@@ -1426,6 +1670,16 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
             topicLabel = isRtl ? `🛡️ [التزام يومي] ${topicLabel}` : `🛡️ [Habit Focus] ${topicLabel}`;
           } else if (config.trackId === 'weekly_challenge_league') {
             topicLabel = isRtl ? `🎖️ [تحدي الأسبوع] ${topicLabel}` : `🎖️ [Weekly Quest] ${topicLabel}`;
+          } else if (config.trackId === 'ai_foundational_track') {
+            topicLabel = isRtl ? `🤖 [ذكاء تأسيسي] ${topicLabel}` : `🤖 [AI Foundation] ${topicLabel}`;
+          } else if (config.trackId === 'ai_specialized_track') {
+            topicLabel = isRtl ? `⚡ [ذكاء تخصصي] ${topicLabel}` : `⚡ [AI Advanced] ${topicLabel}`;
+          } else if (config.trackId === 'ai_prompt_pro_track') {
+            topicLabel = isRtl ? `🏆 [احتراف مطالبات] ${topicLabel}` : `🏆 [Prompt Pro] ${topicLabel}`;
+          } else if (config.trackId === 'professional_dev_track') {
+            topicLabel = isRtl ? `📚 [دورة تطويرية] ${topicLabel}` : `📚 [Exec Growth] ${topicLabel}`;
+          } else if (config.trackId === 'ai_executive_mastery') {
+            topicLabel = isRtl ? `🎓 [دبلوم شامل] ${topicLabel}` : `🎓 [AI & Growth] ${topicLabel}`;
           }
 
           // Catch-Up Day (الاستشفاء والتعويض المرن في اليوم الأخير من الأسبوع)

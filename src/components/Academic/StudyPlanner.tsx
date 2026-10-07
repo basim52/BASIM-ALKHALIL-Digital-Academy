@@ -109,9 +109,9 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
   const [includeBiWeeklyTests, setIncludeBiWeeklyTests] = useState(true);
   const [bypassTestLock, setBypassTestLock] = useState(true);
 
-  // Specialized Plan Tracks (1. Goal Tracks, 2. AI Remedial & Adaptive, 3. Lifestyle Paced, 4. Kids, 5. Fluency, 6. Habits & Accountability)
+  // Specialized Plan Tracks (1. Goal Tracks, 2. AI Remedial & Adaptive, 3. Lifestyle Paced, 4. Kids, 5. Fluency, 6. Habits & Accountability, 7. AI & Professional)
   const [selectedTrackId, setSelectedTrackId] = useState<string>('comprehensive');
-  const [trackCategoryFilter, setTrackCategoryFilter] = useState<'all' | 'goal' | 'adaptive' | 'lifestyle' | 'kids' | 'fluency' | 'accountability'>('all');
+  const [trackCategoryFilter, setTrackCategoryFilter] = useState<'all' | 'goal' | 'adaptive' | 'lifestyle' | 'kids' | 'fluency' | 'accountability' | 'ai_professional'>('all');
   const [includeCatchUpDay, setIncludeCatchUpDay] = useState<boolean>(true);
   const [showWeeklyDigestModal, setShowWeeklyDigestModal] = useState<boolean>(false);
   const [digestWeekNumber, setDigestWeekNumber] = useState<number>(1);
@@ -766,6 +766,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                         { id: 'kids', labelAr: '🦁 4. أطفال وتأسيس', labelEn: '4. Kids' },
                         { id: 'fluency', labelAr: '🗣️ 5. طلاقة وتحدث', labelEn: '5. Fluency' },
                         { id: 'accountability', labelAr: '🛡️ 6. التزام واختبارات', labelEn: '6. Habits & Exams' },
+                        { id: 'ai_professional', labelAr: '🤖 7. الذكاء الاصطناعي والدورات', labelEn: '7. AI & Professional' },
                       ].map(tab => (
                         <button
                           key={tab.id}

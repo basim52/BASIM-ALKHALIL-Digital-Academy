@@ -19,7 +19,9 @@ import {
   Filter,
   Layers,
   BookMarked,
-  Video
+  Video,
+  Cpu,
+  Terminal
 } from 'lucide-react';
 import {
   CurriculumLesson,
@@ -50,7 +52,11 @@ const PILLAR_ICONS: Record<string, any> = {
   interactive_play: Layers,
   translation_language_lab: Layers,
   book_courses: BookMarked,
-  video_lessons: Video
+  video_lessons: Video,
+  ai_foundational: Cpu,
+  ai_specialized: Sparkles,
+  ai_prompt_pro: Terminal,
+  professional_dev: GraduationCap
 };
 
 export const SaraCurriculumModal: React.FC<SaraCurriculumModalProps> = ({

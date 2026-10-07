@@ -94,7 +94,7 @@ interface Level {
   lessons: Lesson[];
 }
 
-const AI_CURRICULUM_DATA = {
+export const AI_CURRICULUM_DATA = {
   program_name: "تعلم الذكاء الاصطناعي",
   program_subtitle: "البرنامج التأسيسي العائلي - 20 درسًا",
   program_goal: "يخرج الطالب وهو قادر على شرح ماهية الذكاء الاصطناعي التوليدي، كيفية عمله، والفرق بين أنواعه، ويستخدمه بوعي وأخلاق، ويبني مشاريعه الخاصة.",
@@ -478,7 +478,7 @@ const printContent = (html: string) => {
 };
 
 
-const ADVANCED_CURRICULUM_DATA = {
+export const ADVANCED_CURRICULUM_DATA = {
   program_name: "تعلم الذكاء الاصطناعي - المستوى المتقدم الشامل",
   program_subtitle: "عشر وحدات تخصصية في النمذجة، معالجة اللغات، الرؤية الحاسوبية، والوكلاء الذكية مع اختبار بعد كل وحدة",
   tracks: [
