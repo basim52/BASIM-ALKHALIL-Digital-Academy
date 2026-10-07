@@ -991,7 +991,6 @@ Looking forward to your reply. Tell me what we're tackling first!`;
           model: "gemini-3.8-flash",
           contents: prompt,
           config: {
-            temperature: 0.7,
             maxOutputTokens: 350
           }
         });
@@ -1455,7 +1454,7 @@ IMPORTANT QUIZ RULES:
               systemInstruction: systemInstruction,
               responseMimeType: "application/json",
               // Zero thinking budget for immediate real-time conversational response!
-              thinkingConfig: { thinkingBudget: 0 },
+              thinkingConfig: { thinkingLevel: "low" as any },
               maxOutputTokens: 1600
             }
           });
@@ -1717,7 +1716,6 @@ ${modeInstruction}
         contents,
         config: {
           systemInstruction,
-          temperature: 0.7,
         }
       });
 
@@ -4513,8 +4511,7 @@ ${reportEn.replace(`# 📊 Smart Academic Student Report (Student Name: ${name})
       const result = await callAiWithRetry({
         contents: [{ role: 'user', parts: [{ text: promptText }] }],
         config: { 
-          responseMimeType: "application/json",
-          temperature: 0.3 
+          responseMimeType: "application/json"
         }
       });
 
