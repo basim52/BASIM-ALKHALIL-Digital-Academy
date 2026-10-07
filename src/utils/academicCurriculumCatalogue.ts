@@ -1257,7 +1257,7 @@ export const SPECIALIZED_PLAN_TRACKS: SpecializedPlanTrack[] = [
     recommendedDurationWeeks: 4,
     recommendedLessonsPerDay: 1,
     recommendedDays: [0, 1, 2, 3, 4],
-    recommendedPillars: ['ai_foundational', 'conversation', 'interactive_play'],
+    recommendedPillars: ['ai_foundational'],
     difficultyLevel: 'all',
     color: 'violet',
     gradient: 'from-violet-600 via-indigo-600 to-purple-800'
@@ -1275,8 +1275,8 @@ export const SPECIALIZED_PLAN_TRACKS: SpecializedPlanTrack[] = [
     recommendedDurationWeeks: 6,
     recommendedLessonsPerDay: 2,
     recommendedDays: [0, 1, 2, 3, 4],
-    recommendedPillars: ['ai_specialized', 'translation_language_lab', 'conversation'],
-    difficultyLevel: 'advanced',
+    recommendedPillars: ['ai_specialized'],
+    difficultyLevel: 'all',
     color: 'cyan',
     gradient: 'from-cyan-600 via-blue-600 to-teal-800'
   },
@@ -1293,8 +1293,8 @@ export const SPECIALIZED_PLAN_TRACKS: SpecializedPlanTrack[] = [
     recommendedDurationWeeks: 6,
     recommendedLessonsPerDay: 2,
     recommendedDays: [0, 1, 2, 3, 4],
-    recommendedPillars: ['ai_prompt_pro', 'writing', 'grammar'],
-    difficultyLevel: 'advanced',
+    recommendedPillars: ['ai_prompt_pro'],
+    difficultyLevel: 'all',
     color: 'amber',
     gradient: 'from-amber-500 via-yellow-600 to-orange-700'
   },
@@ -1311,7 +1311,7 @@ export const SPECIALIZED_PLAN_TRACKS: SpecializedPlanTrack[] = [
     recommendedDurationWeeks: 8,
     recommendedLessonsPerDay: 1,
     recommendedDays: [0, 1, 2, 3, 4],
-    recommendedPillars: ['professional_dev', 'book_courses', 'adults_daily_dose', 'conversation'],
+    recommendedPillars: ['professional_dev', 'book_courses'],
     difficultyLevel: 'all',
     color: 'emerald',
     gradient: 'from-emerald-600 via-teal-600 to-green-700'
@@ -1381,6 +1381,10 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
     // Filter by difficulty level
     let filteredLessons = allLessons.filter(lesson => {
       if (!activePillars.has(lesson.pillarId)) return false;
+
+      // Do not filter out AI or Professional Development courses by CEFR difficulty
+      const isAiOrDev = lesson.pillarId.startsWith('ai_') || lesson.pillarId === 'professional_dev' || lesson.pillarId === 'book_courses';
+      if (isAiOrDev) return true;
 
       if (config.difficultyLevel === 'beginner') {
         return ['Kid', 'A1', 'General'].includes(lesson.level);
@@ -1526,58 +1530,73 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
         const scoreB = (questRegex.test(textB) ? 10 : 0) + (['interactive_play', 'stories', 'conversation'].includes(b.pillarId) ? 6 : 0);
         return scoreB - scoreA;
       });
-    } else if (config.trackId === 'ai_foundational_track') {
-      // Prioritize foundational AI lessons
-      filteredLessons.sort((a, b) => (a.pillarId === 'ai_foundational' ? -1 : b.pillarId === 'ai_foundational' ? 1 : 0));
+    }
+
+    if (config.trackId === 'ai_foundational_track') {
+      // Direct focus on the 20 foundational AI lessons in sequence
+      const aiLessons = allLessons.filter(l => l.pillarId === 'ai_foundational');
+      lessonsPool = aiLessons.length > 0 ? aiLessons : filteredLessons;
     } else if (config.trackId === 'ai_specialized_track') {
-      // Prioritize advanced specialized AI tracks
-      filteredLessons.sort((a, b) => (a.pillarId === 'ai_specialized' ? -1 : b.pillarId === 'ai_specialized' ? 1 : 0));
+      // Direct focus on advanced specialized AI tracks in sequence
+      const advLessons = allLessons.filter(l => l.pillarId === 'ai_specialized');
+      lessonsPool = advLessons.length > 0 ? advLessons : filteredLessons;
     } else if (config.trackId === 'ai_prompt_pro_track') {
-      // Prioritize prompt engineering pro lessons
-      filteredLessons.sort((a, b) => (a.pillarId === 'ai_prompt_pro' ? -1 : b.pillarId === 'ai_prompt_pro' ? 1 : 0));
+      // Direct focus on the 24 prompt engineering pro sessions in sequence
+      const promptLessons = allLessons.filter(l => l.pillarId === 'ai_prompt_pro');
+      lessonsPool = promptLessons.length > 0 ? promptLessons : filteredLessons;
     } else if (config.trackId === 'professional_dev_track') {
-      // Prioritize executive developmental courses and bestselling books
-      filteredLessons.sort((a, b) => (a.pillarId === 'professional_dev' || a.pillarId === 'book_courses' ? -1 : 1));
+      // Direct focus on executive developmental courses and bestseller books in sequence
+      const devLessons = allLessons.filter(l => l.pillarId === 'professional_dev' || l.pillarId === 'book_courses');
+      lessonsPool = devLessons.length > 0 ? devLessons : filteredLessons;
     } else if (config.trackId === 'ai_executive_mastery') {
-      // Balanced rotation across all AI & leadership pillars
-      filteredLessons.sort((a, b) => {
-        const order: { [k: string]: number } = { ai_foundational: 1, ai_prompt_pro: 2, ai_specialized: 3, professional_dev: 4 };
-        return (order[a.pillarId] || 10) - (order[b.pillarId] || 10);
-      });
-    }
-
-    lessonsPool = filteredLessons;
-
-    // Exclude already completed lessons if set (unless weakness recovery track, which deliberately re-targets them)
-    if (config.trackId !== 'weakness_recovery' && config.excludeCoveredKeys && config.excludeCoveredKeys.size > 0) {
-      const filtered = lessonsPool.filter(l => {
-        const key = `${l.courseId}:${l.level}:${l.id}`;
-        return !config.excludeCoveredKeys!.has(key);
-      });
-      if (filtered.length > 0) {
-        lessonsPool = filtered;
-      }
-    }
-
-    // Interleave across different pillars for maximum variety (Pedagogical Alternation)
-    const groupedByPillar: { [key: string]: CurriculumLesson[] } = {};
-    lessonsPool.forEach(l => {
-      if (!groupedByPillar[l.pillarId]) groupedByPillar[l.pillarId] = [];
-      groupedByPillar[l.pillarId].push(l);
-    });
-
-    const interleaved: CurriculumLesson[] = [];
-    const pillarKeys = Object.keys(groupedByPillar);
-    if (pillarKeys.length > 0) {
-      const maxLen = Math.max(...pillarKeys.map(k => groupedByPillar[k].length));
+      // Balanced master sequence across all 4 pillars
+      const aiFound = allLessons.filter(l => l.pillarId === 'ai_foundational');
+      const aiPrompt = allLessons.filter(l => l.pillarId === 'ai_prompt_pro');
+      const aiSpec = allLessons.filter(l => l.pillarId === 'ai_specialized');
+      const profDev = allLessons.filter(l => l.pillarId === 'professional_dev' || l.pillarId === 'book_courses');
+      const masteryPool: CurriculumLesson[] = [];
+      const maxLen = Math.max(aiFound.length, aiPrompt.length, aiSpec.length, profDev.length);
       for (let i = 0; i < maxLen; i++) {
-        for (const k of pillarKeys) {
-          if (i < groupedByPillar[k].length) {
-            interleaved.push(groupedByPillar[k][i]);
-          }
+        if (i < aiFound.length) masteryPool.push(aiFound[i]);
+        if (i < aiPrompt.length) masteryPool.push(aiPrompt[i]);
+        if (i < profDev.length) masteryPool.push(profDev[i]);
+        if (i < aiSpec.length) masteryPool.push(aiSpec[i]);
+      }
+      lessonsPool = masteryPool.length > 0 ? masteryPool : filteredLessons;
+    } else {
+      lessonsPool = filteredLessons;
+
+      // Exclude already completed lessons if set (unless weakness recovery track, which deliberately re-targets them)
+      if (config.trackId !== 'weakness_recovery' && config.excludeCoveredKeys && config.excludeCoveredKeys.size > 0) {
+        const filtered = lessonsPool.filter(l => {
+          const key = `${l.courseId}:${l.level}:${l.id}`;
+          return !config.excludeCoveredKeys!.has(key);
+        });
+        if (filtered.length > 0) {
+          lessonsPool = filtered;
         }
       }
-      lessonsPool = interleaved;
+
+      // Interleave across different pillars for maximum variety (Pedagogical Alternation)
+      const groupedByPillar: { [key: string]: CurriculumLesson[] } = {};
+      lessonsPool.forEach(l => {
+        if (!groupedByPillar[l.pillarId]) groupedByPillar[l.pillarId] = [];
+        groupedByPillar[l.pillarId].push(l);
+      });
+
+      const interleaved: CurriculumLesson[] = [];
+      const pillarKeys = Object.keys(groupedByPillar);
+      if (pillarKeys.length > 0) {
+        const maxLen = Math.max(...pillarKeys.map(k => groupedByPillar[k].length));
+        for (let i = 0; i < maxLen; i++) {
+          for (const k of pillarKeys) {
+            if (i < groupedByPillar[k].length) {
+              interleaved.push(groupedByPillar[k][i]);
+            }
+          }
+        }
+        lessonsPool = interleaved;
+      }
     }
   }
 
@@ -1729,6 +1748,16 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
         ? (isRtl ? `محاكاة اختبار الآيلتس الأكاديمي (الأسبوع ${w}) 🎯` : `IELTS Academic Mock Exam (Week ${w}) 🎯`)
         : config.trackId === 'business_interview'
         ? (isRtl ? `تقييم المقابلات وعروض الأعمال (الأسبوع ${w}) 💼` : `Business Interview Assessment (Week ${w}) 💼`)
+        : config.trackId === 'ai_foundational_track'
+        ? (isRtl ? `اختبار وتقييم مفاهيم الذكاء التأسيسي (الأسبوع ${w}) 🤖` : `Foundational AI Literacy Milestone Test (Week ${w}) 🤖`)
+        : config.trackId === 'ai_prompt_pro_track'
+        ? (isRtl ? `تقييم هندسة المطالبات والتحصين الأمني (الأسبوع ${w}) 🏆` : `Prompt Engineering & Security Defense Test (Week ${w}) 🏆`)
+        : config.trackId === 'ai_specialized_track'
+        ? (isRtl ? `اختبار المعماريات المتقدمة والنماذج التخصصية (الأسبوع ${w}) ⚡` : `Specialized AI Architecture Assessment (Week ${w}) ⚡`)
+        : config.trackId === 'professional_dev_track'
+        ? (isRtl ? `تقييم استيعاب أمهات الكتب وتطبيقات العادات القيادية (الأسبوع ${w}) 📚` : `Leadership & Habits Milestone Assessment (Week ${w}) 📚`)
+        : config.trackId === 'ai_executive_mastery'
+        ? (isRtl ? `التقييم الشامل لدبلوم الذكاء الاصطناعي والقيادة (الأسبوع ${w}) 🎓` : `Executive AI & Leadership Milestone Test (Week ${w}) 🎓`)
         : (isRtl 
             ? `اختبار المراجعة الشامل والتقييم النصف شهري (الأسبوع ${w - 1}-${w})` 
             : `Comprehensive Review Milestone Test (Week ${w - 1}-${w})`);

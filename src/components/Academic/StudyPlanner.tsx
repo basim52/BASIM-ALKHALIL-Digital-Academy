@@ -766,7 +766,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                         { id: 'kids', labelAr: '🦁 4. أطفال وتأسيس', labelEn: '4. Kids' },
                         { id: 'fluency', labelAr: '🗣️ 5. طلاقة وتحدث', labelEn: '5. Fluency' },
                         { id: 'accountability', labelAr: '🛡️ 6. التزام واختبارات', labelEn: '6. Habits & Exams' },
-                        { id: 'ai_professional', labelAr: '🤖 7. الذكاء الاصطناعي والدورات', labelEn: '7. AI & Professional' },
+                        { id: 'ai_professional', labelAr: '🤖 7. الذكاء الاصطناعي والدورات التطويرية', labelEn: '7. AI & Professional' },
                       ].map(tab => (
                         <button
                           key={tab.id}
@@ -858,11 +858,36 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                         </p>
                       </div>
                     )}
+
+                    {/* AI & Professional Development Focus Banner */}
+                    {(selectedTrackId.startsWith('ai_') || selectedTrackId === 'professional_dev_track') && (
+                      <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-2xl text-[11px] font-bold text-indigo-900 space-y-1">
+                        <div className="flex items-center gap-1.5 font-black text-indigo-950">
+                          <Sparkles size={14} className="text-indigo-600" />
+                          <span>
+                            {selectedTrackId === 'ai_foundational_track'
+                              ? (isRtl ? 'البرنامج التأسيسي للذكاء الاصطناعي (20 درساً متسلسلاً)' : 'Foundational AI Literacy Track (20 Sequential Lessons)')
+                              : selectedTrackId === 'ai_specialized_track'
+                              ? (isRtl ? 'المسارات التخصصية المتقدمة في الذكاء الاصطناعي' : 'Advanced Specialized AI Modules')
+                              : selectedTrackId === 'ai_prompt_pro_track'
+                              ? (isRtl ? 'أكاديمية احترافية وهندسة المطالبات (24 درساً متسلسلاً)' : 'Prompt Engineering Pro Academy (24 Sessions)')
+                              : selectedTrackId === 'professional_dev_track'
+                              ? (isRtl ? 'الدورات التطويرية وبناء المهارات من أمهات الكتب العالمية' : 'Bestseller Executive Courses & Leadership Books')
+                              : (isRtl ? 'دبلوم الذكاء الاصطناعي والدورات التطويرية الشامل' : 'Comprehensive AI & Executive Growth Diploma')}
+                          </span>
+                        </div>
+                        <p className="text-[10px] leading-relaxed text-indigo-700/90 font-medium">
+                          {isRtl
+                            ? 'تمت برمجة هذا المسار ليجدول الدروس التخصصية للمنهج بالترتيب المنطقي السليم، مع شروح سارة المعمقة من صلب المناهج وأمهات الكتب وكويزات قياس الفهم.'
+                            : 'This track schedules full curriculum units in orderly sequence with deep pedagogical insights, authentic book extracts, and quizzes.'}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      {isRtl ? `الأقسام المشمولة (${selectedPillars.length}/12)` : `Included Pillars (${selectedPillars.length}/12)`}
+                      {isRtl ? `الأقسام المشمولة (${selectedPillars.length}/${ACADEMIC_SECTION_DEFINITIONS.length})` : `Included Pillars (${selectedPillars.length}/${ACADEMIC_SECTION_DEFINITIONS.length})`}
                     </label>
                     <div className="flex gap-2">
                       <button 

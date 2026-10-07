@@ -710,45 +710,92 @@ We will spend our full session time practicing, analyzing sentence parts, and dr
     };
   }
 
+// Helper to resolve book, chapter, and microLesson from COURSES
+function resolveBookChapterAndMicroLesson(lesson: CurriculumLesson) {
+  let targetBook = COURSES.find(b => 
+    b.id === lesson.courseId ||
+    lesson.id.includes(b.id) ||
+    (lesson.courseLabelAr && (lesson.courseLabelAr.includes(b.titleAr) || b.titleAr.includes(lesson.courseLabelAr))) ||
+    (lesson.courseLabelEn && (lesson.courseLabelEn.includes(b.titleEn) || b.titleEn.includes(lesson.courseLabelEn))) ||
+    (lesson.titleAr && (lesson.titleAr.includes(b.titleAr) || b.titleAr.includes(lesson.titleAr))) ||
+    (lesson.titleEn && (lesson.titleEn.includes(b.titleEn) || b.titleEn.includes(lesson.titleEn)))
+  );
+
+  if (!targetBook) {
+    if (lesson.id.includes('atomic') || lesson.titleAr?.includes('الذرية')) targetBook = COURSES.find(b => b.id === 'atomic_habits');
+    else if (lesson.id.includes('seven') || lesson.titleAr?.includes('السبع')) targetBook = COURSES.find(b => b.id === 'seven_habits');
+    else if (lesson.id.includes('rich') || lesson.titleAr?.includes('الغني')) targetBook = COURSES.find(b => b.id === 'rich_dad');
+    else if (lesson.id.includes('power') || lesson.titleAr?.includes('الآن')) targetBook = COURSES.find(b => b.id === 'power_of_now');
+    else if (lesson.id.includes('letting') || lesson.titleAr?.includes('الرحيل')) targetBook = COURSES.find(b => b.id === 'letting_go');
+    else if (lesson.id.includes('thinking') || lesson.titleAr?.includes('التفكير')) targetBook = COURSES.find(b => b.id === 'thinking_fast_slow');
+    else if (lesson.id.includes('subtle') || lesson.titleAr?.includes('اللامبالاة')) targetBook = COURSES.find(b => b.id === 'subtle_art');
+    else if (lesson.id.includes('win') || lesson.titleAr?.includes('تفوز')) targetBook = COURSES.find(b => b.id === 'you_can_win');
+  }
+  const book = targetBook || COURSES[0];
+
+  let targetChapter: any = null;
+  let targetLesson: any = null;
+
+  if (book && book.chapters) {
+    for (const ch of book.chapters) {
+      if (
+        lesson.id.includes(ch.id) ||
+        (lesson.titleAr && lesson.titleAr.includes(ch.titleAr)) ||
+        (lesson.titleEn && lesson.titleEn.includes(ch.titleEn))
+      ) {
+        targetChapter = ch;
+      }
+      for (const les of ch.lessons) {
+        if (
+          `${book.id}__${les.id}` === lesson.id ||
+          les.id === lesson.id ||
+          lesson.id.includes(les.id) ||
+          (lesson.titleAr && lesson.titleAr.includes(les.titleAr)) ||
+          (lesson.titleEn && lesson.titleEn.includes(les.titleEn))
+        ) {
+          targetLesson = les;
+          if (!targetChapter) targetChapter = ch;
+          break;
+        }
+      }
+      if (targetLesson && targetChapter) break;
+    }
+  }
+
+  const chapter = targetChapter || book?.chapters?.[0];
+  const microLesson = targetLesson || chapter?.lessons?.[0];
+
+  return { book, chapter, microLesson };
+}
+
   // 10. BESTSELLER BOOK COURSES & SELF-DEVELOPMENT
   if (lesson.pillarId === 'book_courses') {
-    const book = COURSES.find(b => b.id === lesson.courseId) || COURSES[0];
-    let foundLesson: any = null;
-    let foundChapter: any = null;
-
-    if (book && book.chapters) {
-      for (const ch of book.chapters) {
-        for (const les of ch.lessons) {
-          if (`${book.id}__${les.id}` === lesson.id || les.id === lesson.id) {
-            foundLesson = les;
-            foundChapter = ch;
-            break;
-          }
-        }
-        if (foundLesson) break;
-      }
-    }
+    const { book, chapter, microLesson } = resolveBookChapterAndMicroLesson(lesson);
 
     const bookShortAr = book?.titleAr?.includes(':') ? book.titleAr.split(':')[0] : (book?.titleAr || 'الكتب العالمية');
     const bookShortEn = book?.titleEn?.includes(':') ? book.titleEn.split(':')[0] : (book?.titleEn || 'Bestseller Books');
 
     const title = isRtl
-      ? `كتاب ${bookShortAr}: ${lesson.titleAr}`
-      : `${bookShortEn}: ${lesson.titleEn}`;
+      ? `كتاب "${bookShortAr}": ${microLesson?.titleAr || chapter?.titleAr || lesson.titleAr}`
+      : `"${bookShortEn}": ${microLesson?.titleEn || chapter?.titleEn || lesson.titleEn}`;
 
-    const quoteEn = foundLesson?.contentEn?.slice(0, 160) || 'Small habits compound daily into massive life transformations.';
-    const quoteAr = foundLesson?.contentAr?.slice(0, 160) || 'العادات والأنظمة اليومية تصنع الفارق الحقيقي في الإتقان والطلاقة.';
+    const quoteEn = microLesson?.contentEn?.slice(0, 160) || chapter?.descriptionEn || 'Small habits compound daily into massive life transformations.';
+    const quoteAr = microLesson?.contentAr?.slice(0, 160) || chapter?.descriptionAr || 'العادات والأنظمة اليومية تصنع الفارق الحقيقي في الإتقان والطلاقة.';
 
     const notes = [
-      isRtl ? `📖 كتاب: "${book?.titleAr}" (${book?.authorAr})` : `📖 Book: "${book?.titleEn}" by ${book?.authorEn}`,
+      isRtl ? `📖 كتاب: "${book?.titleAr}" للمؤلف (${book?.authorAr})` : `📖 Book: "${book?.titleEn}" by ${book?.authorEn}`,
       isRtl ? `💡 المبدأ المركزي: ${quoteAr}` : `💡 Core Principle: ${quoteEn}`,
-      isRtl ? `🎯 الربط باللغة: استخدم هذه الأفكار والمصطلحات في حديثك اليومي بالإنجليزية` : `🎯 Language Link: Practice articulating this philosophical mindset in English`
+      isRtl ? `🎯 الربط باللغة والتطبيق: استخدم هذه الأفكار والمصطلحات في حديثك اليومي بالإنجليزية` : `🎯 Language Link: Practice articulating this philosophical mindset in English`
     ];
 
-    const quizObj = foundChapter?.quiz?.[0] ? {
-      question: isRtl ? foundChapter.quiz[0].questionAr : (foundChapter.quiz[0].questionEn || foundChapter.quiz[0].questionAr),
-      options: isRtl ? (foundChapter.quiz[0].optionsAr || ['الخيار الصحيح', 'خيار غير صحيح', 'خيار آخر']) : (foundChapter.quiz[0].optionsAr || ['Correct Option', 'Incorrect', 'Other']),
-      answerIndex: 0
+    const rawQuiz = chapter?.quiz?.[0];
+    const quizObj = rawQuiz ? {
+      question: isRtl ? rawQuiz.questionAr : (rawQuiz.questionEn || rawQuiz.questionAr),
+      options: isRtl 
+        ? (rawQuiz.optionsAr || ['الخيار الصحيح', 'خيار غير صحيح', 'خيار آخر']) 
+        : ((rawQuiz.optionsEn && rawQuiz.optionsEn.length > 0) ? rawQuiz.optionsEn : (rawQuiz.optionsAr || ['Correct Option', 'Incorrect', 'Other'])),
+      answerIndex: typeof rawQuiz.correctIndex === 'number' ? rawQuiz.correctIndex : 0,
+      explanation: isRtl ? rawQuiz.explanationAr : (rawQuiz.explanationEn || rawQuiz.explanationAr)
     } : {
       question: isRtl ? `ما الحكمة والهدف الأساسي من درس "${lesson.titleAr}"؟` : `What is the core insight of "${lesson.titleEn}"?`,
       options: [
@@ -760,8 +807,8 @@ We will spend our full session time practicing, analyzing sentence parts, and dr
     };
 
     const voiceExplanation = isRtl
-      ? `مرحباً بك في رحاب الكتب العالمية الملهمة! اليوم سنشرح معاً درساً رائعاً من كتاب "${bookShortAr}" للمؤلف ${book?.authorAr || ''}. الدرس بعنوان: ${lesson.titleAr}. تأمل معي هذا المبدأ الذهبي على السبورة: "${quoteAr}". تعال نناقشه ونربطه باللغة الإنجليزية!`
-      : `Welcome to our Bestselling Books Masterclass! Today we explore a lesson from "${bookShortEn}" by ${book?.authorEn}: "${lesson.titleEn}". Notice the powerful insight on our whiteboard: "${quoteEn}". Let us discuss it!`;
+      ? `مرحباً بك في رحاب الكتب العالمية الملهمة! اليوم سنشرح معاً درساً رائعاً من كتاب "${bookShortAr}" للمؤلف ${book?.authorAr || ''}. الدرس بعنوان: ${microLesson?.titleAr || chapter?.titleAr || lesson.titleAr}. تأمل معي هذا المبدأ الذهبي على السبورة: "${quoteAr}". تعال نناقشه ونربطه باللغة الإنجليزية!`
+      : `Welcome to our Bestselling Books Masterclass! Today we explore a lesson from "${bookShortEn}" by ${book?.authorEn}: "${microLesson?.titleEn || chapter?.titleEn || lesson.titleEn}". Notice the powerful insight on our whiteboard: "${quoteEn}". Let us discuss it!`;
 
     return {
       boardData: {
@@ -772,13 +819,13 @@ We will spend our full session time practicing, analyzing sentence parts, and dr
         notes,
         quiz: quizObj,
         voiceExplanation,
-        teacherNote: isRtl ? `منهج الكتب العالمية وتطوير الذات | مستوى B2` : `Bestseller Books Academy | Level B2`,
+        teacherNote: isRtl ? `منهج الكتب العالمية وتطوير الذات | ${bookShortAr}` : `Bestseller Books Academy | ${bookShortEn}`,
         openWhiteboard: true
       },
       spokenIntro: voiceExplanation,
       chatMessage: isRtl
-        ? `📚 **اخترت منهج الكتب العالمية: ${lesson.titleAr} (${bookShortAr})**\n\nوضعت لك ملخص المبدأ، الحكمة وسؤال التفكير على السبورة الذكية 📐. استمع لشرحي الصوتي وسأساعدك في استيعابه كاملاً!`
-        : `📚 **Selected Bestseller Book Lesson: ${lesson.titleEn}**\n\nI have prepared the core philosophy, vocabulary, and quick quiz on the smart whiteboard 📐!`
+        ? `📚 **اخترت منهج الكتب العالمية: كتاب "${book?.titleAr}" (${book?.authorAr})**\n\n📌 **${microLesson?.titleAr || chapter?.titleAr || lesson.titleAr}**\n\n💡 **المبدأ الجوهري:** ${quoteAr}\n\nوضعت لك ملخص المبدأ، الحكمة وسؤال التفكير على السبورة الذكية 📐. استمع لشرحي الصوتي وسأساعدك في استيعابه كاملاً!`
+        : `📚 **Selected Bestseller Book Lesson: "${book?.titleEn}" by ${book?.authorEn}**\n\n📌 **${microLesson?.titleEn || chapter?.titleEn || lesson.titleEn}**\n\n💡 **Key Takeaway:** ${quoteEn}\n\nI have prepared the core philosophy, vocabulary, and quick quiz on the smart whiteboard 📐!`
     };
   }
 
@@ -1162,47 +1209,67 @@ We will spend our full session time practicing, analyzing sentence parts, and dr
     };
   }
 
-  // 19. PROFESSIONAL & PERSONAL DEVELOPMENT COURSES (الدورات التطويرية القيادية)
+  // 19. PROFESSIONAL & PERSONAL DEVELOPMENT COURSES (الدورات التطويرية والمهنية وبناء القيادة)
   if (lesson.pillarId === 'professional_dev') {
-    const title = isRtl
-      ? `دورة تطويرية: ${lesson.titleAr}`
-      : `Executive Development Course: ${lesson.titleEn}`;
+    const { book, chapter, microLesson } = resolveBookChapterAndMicroLesson(lesson);
 
-    const sentence = 'True leadership and mastery are built through consistent habits and disciplined systems.';
+    const bookShortAr = book?.titleAr?.includes(':') ? book.titleAr.split(':')[0] : (book?.titleAr || 'الدورات التطويرية');
+    const bookShortEn = book?.titleEn?.includes(':') ? book.titleEn.split(':')[0] : (book?.titleEn || 'Executive Development');
+
+    const chapterTitleAr = chapter?.titleAr || lesson.titleAr;
+    const chapterTitleEn = chapter?.titleEn || lesson.titleEn;
+
+    const title = isRtl
+      ? `دورة تطويرية: كتاب "${bookShortAr}" - ${chapterTitleAr}`
+      : `Executive Course: "${bookShortEn}" - ${chapterTitleEn}`;
+
+    const quoteEn = microLesson?.contentEn?.slice(0, 160) || chapter?.descriptionEn || 'True leadership and mastery are built through consistent habits and disciplined systems.';
+    const quoteAr = microLesson?.contentAr?.slice(0, 160) || chapter?.descriptionAr || 'القيادة الحقيقية والتميز يصنعان من خلال أنظمة تفكير وعادات يومية واعية.';
+
     const notes = [
-      isRtl ? `📚 الكتاب والمسار المرجعي: ${lesson.courseLabelAr}` : `📚 Foundational Reference: ${lesson.courseLabelEn}`,
-      isRtl ? `💡 المبدأ القيادي: ${lesson.descriptionAr}` : `💡 Strategic Principle: ${lesson.descriptionEn}`,
-      isRtl ? '🎯 خطة التطبيق العملي: تحويل المفهوم الذهني إلى خطوة إجرائية يومية قابلة للقياس' : '🎯 Actionable Framework: Converting mindset shifts into daily measurable habits'
+      isRtl ? `📚 الكتاب والمرجع المعتمد: "${book?.titleAr}" (${book?.authorAr})` : `📚 Core Reference: "${book?.titleEn}" by ${book?.authorEn}`,
+      isRtl ? `💡 المبدأ القيادي والفكري: ${chapter?.descriptionAr || quoteAr}` : `💡 Strategic Principle: ${chapter?.descriptionEn || quoteEn}`,
+      isRtl ? `🎯 التطبيق العملي واللغوي: تحويل المفهوم إلى ممارسة يومية وصياغته بطلاقة بالإنجليزية` : `🎯 Actionable Application: Converting mindset shifts into daily measurable habits and English articulation`
     ];
 
+    const rawQuiz = chapter?.quiz?.[0];
+    const quizObj = rawQuiz ? {
+      question: isRtl ? rawQuiz.questionAr : (rawQuiz.questionEn || rawQuiz.questionAr),
+      options: isRtl 
+        ? (rawQuiz.optionsAr || ['الخيار الصحيح', 'خيار غير صحيح', 'خيار آخر']) 
+        : ((rawQuiz.optionsEn && rawQuiz.optionsEn.length > 0) ? rawQuiz.optionsEn : (rawQuiz.optionsAr || ['Correct Option', 'Incorrect', 'Other'])),
+      answerIndex: typeof rawQuiz.correctIndex === 'number' ? rawQuiz.correctIndex : 0,
+      explanation: isRtl ? rawQuiz.explanationAr : (rawQuiz.explanationEn || rawQuiz.explanationAr)
+    } : {
+      question: isRtl ? `ما هو المبدأ الأساسي لبناء العادات القوية والنجاح المستدام في "${chapterTitleAr}"؟` : `What is the primary principle behind sustained success in "${chapterTitleEn}"?`,
+      options: [
+        isRtl ? 'التركيز على نظام يومي متدرج وتراكم التحسينات المستمرة' : 'Focusing on daily disciplined systems and continuous compounding growth',
+        isRtl ? 'الاعتماد على الحماس المؤقت فقط دون خطة' : 'Relying exclusively on fleeting motivation without a system',
+        isRtl ? 'الاستسلام عند أول تحدٍ أو صعوبة' : 'Giving up at the first sign of difficulty'
+      ],
+      answerIndex: 0
+    };
+
     const voiceExplanation = isRtl
-      ? `مرحباً بك في مسار الدورات التطويرية وبناء المهارات القيادية! درسنا اليوم من: ${lesson.titleAr}. النجاح والتميز لا يأتيان بالصدفة، بل ببناء أنظمة تفكير وعادات يومية قوية. تعال نستعرض الحكمة العملية وخطة التطبيق على السبورة! 📚🌟`
-      : `Welcome to the Professional Development & Executive Growth Course! Today's session is from: ${lesson.titleEn}. Long-term mastery is forged through deliberate systems and daily habits. Let's inspect the principles on our smart whiteboard! 📚🌟`;
+      ? `مرحباً بك في مسار الدورات التطويرية وبناء المهارات القيادية! اليوم نتعلم من أمهات الكتب: كتاب "${book?.titleAr}" للمؤلف الرائع ${book?.authorAr}. فصلنا اليوم بعنوان: ${chapterTitleAr}. المبدأ الجوهري: "${chapter?.descriptionAr || quoteAr}". تأمل معي الاقتباس الإنجليزي وخطة التطبيق على السبورة الذكية، ودعنا نناقشه ونربطه باللغة الإنجليزية وحياتك العملية! 📚🌟`
+      : `Welcome to our Executive & Personal Development masterclass! Today we learn from "${book?.titleEn}" by ${book?.authorEn}. Our session covers: "${chapterTitleEn}". Strategic principle: "${chapter?.descriptionEn || quoteEn}". Let's inspect the principles on our smart whiteboard! 📚🌟`;
 
     return {
       boardData: {
         title,
-        sentence,
-        highlight: 'Executive Habits, Mental Models & Leadership',
-        formula: isRtl ? 'التطوير الشخصي = رؤية واضحة + نظام عادات يومية + تقييم ومراجعة مستمرة' : 'Personal Growth = Clear Vision + Daily Habit System + Continuous Review',
+        sentence: quoteEn,
+        highlight: chapterTitleEn || 'Executive Habits & Leadership',
+        formula: isRtl ? `📚 كتاب: "${bookShortAr}" | المؤلف: ${book?.authorAr} | ${chapterTitleAr}` : `Executive Curriculum: "${bookShortEn}" by ${book?.authorEn}`,
         notes,
-        quiz: {
-          question: isRtl ? 'ما هو المبدأ الأساسي لبناء العادات القوية والنجاح المستدام؟' : 'What is the primary principle behind building resilient habits and sustained success?',
-          options: [
-            isRtl ? 'التركيز على نظام يومي متدرج وتراكم التحسينات الصغيرة المستمرة' : 'Focusing on daily disciplined systems and continuous compounding growth',
-            isRtl ? 'الاعتماد على الحماس المؤقت فقط دون خطة' : 'Relying exclusively on fleeting motivation without a system',
-            isRtl ? 'الاستسلام عند أول تحدٍ أو صعوبة' : 'Giving up at the first sign of difficulty'
-          ],
-          answerIndex: 0
-        },
+        quiz: quizObj,
         voiceExplanation,
-        teacherNote: isRtl ? 'الدورات التطويرية وبناء المهارات 📚' : 'Professional Development & Leadership 📚',
+        teacherNote: isRtl ? `الدورات التطويرية وبناء المهارات | كتاب "${bookShortAr}"` : `Professional Development & Leadership | "${bookShortEn}"`,
         openWhiteboard: true
       },
       spokenIntro: voiceExplanation,
       chatMessage: isRtl
-        ? `📚 **الدورة التطويرية: ${lesson.titleAr}**\n\nكتبت لك المبدأ القيادي وخطة التطبيق العملي على السبورة الذكية 📐. استمع للدرس ودعنا نطبقه في حياتك اليومية!`
-        : `📚 **Executive Development Lesson: ${lesson.titleEn}**\n\nI have highlighted the strategic mindset shift and actionable system on the whiteboard 📐!`
+        ? `📚 **دورة تطويرية: كتاب "${book?.titleAr}"**\n✍️ **المؤلف:** ${book?.authorAr}\n\n📌 **${chapterTitleAr}**\n\n💡 **المبدأ الجوهري:** ${chapter?.descriptionAr || quoteAr}\n\n📝 **خلاصة الدرس:** ${microLesson?.contentAr || book?.descriptionAr}\n\nكتبت لك المبدأ وخطة التطبيق والتدريب اللغوي على السبورة الذكية 📐. استمع للشرح ودعنا نناقشه!`
+        : `📚 **Executive Development Course: "${book?.titleEn}"**\n✍️ **Author:** ${book?.authorEn}\n\n📌 **${chapterTitleEn}**\n\n💡 **Strategic Principle:** ${chapter?.descriptionEn || quoteEn}\n\nI have highlighted the actionable habits and leadership frameworks on the whiteboard 📐!`
     };
   }
   const title = isRtl
