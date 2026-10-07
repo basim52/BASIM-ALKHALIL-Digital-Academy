@@ -101,8 +101,8 @@ export const ParentWeeklyReportCard: React.FC<ParentWeeklyReportCardProps> = ({
         });
         setAiSummary(
           isRtl
-            ? 'ما شاء الله، أداء ولدك هذا الأسبوع مبهر ومشرّف جداً بإنجازه 6 دروس ومحافظته على شعلة 5 أيام متتالية! مهارته في القراءة وفهم النصوص ممتازة للغاية، وننصحك بتخصيص 5 دقائق يومياً لمحادثته بعبارات إنجليزية بسيطة أثناء العشاء لتعزيز طلاقته الشفوية ومواصلة هذا الحماس الرائع.'
-            : 'Great progress! Your child completed 6 lessons and kept a 5-day streak. Reading is exceptionally strong. We recommend practicing speaking for 5 minutes daily.'
+            ? `📊 [الملخص والتشخيص الأكاديمي]:\nأنجز الطالب هذا الأسبوع 6 دروس دراسية خلال 75 دقيقة تعلم تفاعلي بمعدل استيعاب عام 96% مع الحفاظ على شعلة انضباط بلغت 5 أيام متتالية. أظهر الطالب تفوقاً ملموساً واستقراراً في مهارة القراءة وفهم النصوص واستيعاب التراكيب، بينما تشير المؤشرات إلى أن مهارة المحادثة والنطق تمثل الأولوية التطويرية القادمة لردم الفجوة ورفع الطلاقة الشفوية.\n\n🎯 [التوصيات التربوية والتنفيذية]:\n1. تخصيص 10 دقائق يومياً لمحادثة تفاعلية بأسئلة مفتوحة باللغة الإنجليزية في المنزل وتطبيق العبارات المكتسبة.\n2. تشجيع الطالب على قراءة الجمل المتقنة بصوت مسموع لتعزيز الإيقاع الصوتي والجرأة في النطق.\n3. استهداف إنجاز 3 أنشطة محادثة تفاعلية مع سارة في الأسبوع القادم لرفع مؤشر النطق فوق 90%.`
+            : `📊 [Academic Diagnostic Summary]:\nThe student completed 6 lessons over 75 study minutes with a 96% mastery score and an active 5-day streak. Reading & Comprehension demonstrates standout proficiency, while Speaking & Pronunciation represents the primary growth target.\n\n🎯 [Actionable Advisory Recommendations]:\n1. Dedicate 10 minutes daily to conversational practice using learned phrases at home.\n2. Encourage reading aloud to build spoken rhythm and phonetic confidence.\n3. Target 3 interactive oral sessions with Sara next week to lift speaking mastery beyond 90%.`
         );
         setLoading(false);
         return;
@@ -302,14 +302,17 @@ export const ParentWeeklyReportCard: React.FC<ParentWeeklyReportCardProps> = ({
   }) => {
     setLoadingAiSummary(true);
     try {
+      const generateStructuredFallback = (m: typeof metrics) => {
+        if (isRtl) {
+          return `📊 [الملخص والتشخيص الأكاديمي]:\nأنجز الطالب خلال الأسبوع ${m.lessonsCompleted} دروس دراسية بمجموع ${m.totalStudyMinutes} دقيقة تعلم تفاعلي ومعدل استيعاب عام بلغ ${m.averageScore}%. يُظهر التحليل تفوقاً ملموساً واستقراراً في مهارة (${m.bestSkill})، بينما كشفت الاختبارات التفاعلية عن حاجة مهارة (${m.weakestSkill}) إلى تدريب تطبيقي مكثف لتجسير الفجوة مع بقية المهارات، مع التزام مشجع عبر شعلة تعلم متصلة بلغت ${m.currentStreak} أيام.\n\n🎯 [التوصيات التربوية والتنفيذية]:\n1. تخصيص 10 دقائق يومياً لممارسة تدريبات مركزة في مهارة (${m.weakestSkill}) عبر الحوار التفاعلي والتكرار المتباعد.\n2. استثمار ثقته العالية في (${m.bestSkill}) لربط المفاهيم الصعبة بنقاط قوته وجعل التعلم ممتعاً ومحفزاً.\n3. استهداف إنجاز 3 إلى 4 أنشطة تطبيقية جديدة هذا الأسبوع لرفع مؤشر (${m.weakestSkill}) إلى ما فوق 85%.`;
+        }
+        return `📊 [Academic Diagnostic Summary]:\nThe student completed ${m.lessonsCompleted} lessons (${m.totalStudyMinutes} study minutes) with an overall mastery score of ${m.averageScore}% and an active ${m.currentStreak}-day streak. Strongest proficiency was recorded in ${m.bestSkill}, while ${m.weakestSkill} represents the primary targeted growth area.\n\n🎯 [Actionable Advisory Recommendations]:\n1. Dedicate 10 minutes daily specifically to ${m.weakestSkill} using interactive quizzes and conversational prompts.\n2. Leverage student confidence in ${m.bestSkill} to tackle higher-difficulty lessons.\n3. Complete 3-4 oral/comprehension practices next week to balance overall mastery.`;
+      };
+
       const idToken = await auth.currentUser?.getIdToken();
       if (!idToken) {
         // Fallback friendly message for simulated / offline mode
-        setAiSummary(
-          isRtl
-            ? `ما شاء الله، أداء ولدك هذا الأسبوع طيب ومبشر جداً مع إنجاز ${metrics.lessonsCompleted} دروس وشعلة ${metrics.currentStreak} أيام متتالية! درجاته ممتازة خصوصاً في ${metrics.bestSkill}، ونوصيك بمشاركته حواراً بسيطاً لمدة خمس دقائق يومياً لتقوية ${metrics.weakestSkill} ومواصلة هذا الحماس الرائع.`
-            : `Great weekly performance with ${metrics.lessonsCompleted} lessons completed and a ${metrics.currentStreak}-day streak!`
-        );
+        setAiSummary(generateStructuredFallback(metrics));
         setLoadingAiSummary(false);
         return;
       }
@@ -338,10 +341,11 @@ export const ParentWeeklyReportCard: React.FC<ParentWeeklyReportCardProps> = ({
       }
     } catch (e) {
       console.warn('Failed to fetch AI summary from server, using client fallback:', e);
+      const fallbackMetrics = metrics;
       setAiSummary(
         isRtl
-          ? `ما شاء الله، أداء ولدك هذا الأسبوع طيب ومبشر جداً مع إنجاز ${metrics.lessonsCompleted} دروس وشعلة ${metrics.currentStreak} أيام متتالية! درجاته ممتازة خصوصاً في مهارة ${metrics.bestSkill}، ونوصيك بمشاركته حواراً بسيطاً لمدة خمس دقائق يومياً لتقوية مهارة ${metrics.weakestSkill} ومواصلة هذا الحماس الرائع.`
-          : `Great weekly performance with ${metrics.lessonsCompleted} lessons completed and a ${metrics.currentStreak}-day streak!`
+          ? `📊 [الملخص والتشخيص الأكاديمي]:\nأنجز الطالب خلال الأسبوع ${fallbackMetrics.lessonsCompleted} دروس دراسية بمجموع ${fallbackMetrics.totalStudyMinutes} دقيقة تعلم تفاعلي ومعدل استيعاب عام بلغ ${fallbackMetrics.averageScore}%. يُظهر التحليل تفوقاً ملموساً واستقراراً في مهارة (${fallbackMetrics.bestSkill})، بينما كشفت الاختبارات التفاعلية عن حاجة مهارة (${fallbackMetrics.weakestSkill}) إلى تدريب تطبيقي مكثف لتجسير الفجوة مع بقية المهارات، مع التزام مشجع عبر شعلة تعلم متصلة بلغت ${fallbackMetrics.currentStreak} أيام.\n\n🎯 [التوصيات التربوية والتنفيذية]:\n1. تخصيص 10 دقائق يومياً لممارسة تدريبات مركزة في مهارة (${fallbackMetrics.weakestSkill}) عبر الحوار التفاعلي والتكرار المتباعد.\n2. استثمار ثقته العالية في (${fallbackMetrics.bestSkill}) لربط المفاهيم الصعبة بنقاط قوته وجعل التعلم ممتعاً ومحفزاً.\n3. استهداف إنجاز 3 إلى 4 أنشطة تطبيقية جديدة هذا الأسبوع لرفع مؤشر (${fallbackMetrics.weakestSkill}) إلى ما فوق 85%.`
+          : `📊 [Academic Diagnostic Summary]:\nThe student completed ${fallbackMetrics.lessonsCompleted} lessons (${fallbackMetrics.totalStudyMinutes} study minutes) with an overall mastery score of ${fallbackMetrics.averageScore}% and an active ${fallbackMetrics.currentStreak}-day streak. Highest proficiency is in ${fallbackMetrics.bestSkill}, whereas ${fallbackMetrics.weakestSkill} represents the focus area for growth.\n\n🎯 [Actionable Advisory Recommendations]:\n1. Dedicate 10 minutes daily specifically to ${fallbackMetrics.weakestSkill}.\n2. Leverage strong competence in ${fallbackMetrics.bestSkill} to tackle higher-difficulty tasks.\n3. Target 3-4 interactive sessions next week to lift ${fallbackMetrics.weakestSkill} mastery.`
       );
     } finally {
       setLoadingAiSummary(false);
@@ -641,21 +645,59 @@ export const ParentWeeklyReportCard: React.FC<ParentWeeklyReportCardProps> = ({
           </div>
 
           {loadingAiSummary ? (
-            <div className="py-4 text-center">
-              <div className="w-6 h-6 border-2 border-[#ffc800] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+            <div className="py-6 text-center">
+              <div className="w-7 h-7 border-2 border-[#ffc800] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
               <p className="text-xs text-slate-300 font-bold">
-                {isRtl ? 'جاري صياغة التقرير التربوي الأسبوعي...' : 'Crafting weekly parent summary...'}
+                {isRtl ? 'جاري صياغة التقرير والتشخيص التربوي الموجه لولي الأمر...' : 'Crafting weekly parent diagnostic summary...'}
               </p>
             </div>
           ) : (
-            <p className="text-xs sm:text-sm text-slate-100 font-medium leading-relaxed mt-1">
-              "{aiSummary || (isRtl ? 'لا يتوفر ملخص حالياً' : 'No summary available')}"
-            </p>
+            (() => {
+              const cleaned = (aiSummary || '').trim().replace(/^"(.*)"$/s, '$1').trim();
+              if (!cleaned) {
+                return (
+                  <p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed mt-1">
+                    {isRtl ? 'لا يتوفر ملخص حالياً' : 'No summary available'}
+                  </p>
+                );
+              }
+
+              const sections = cleaned.split(/(?=📊|🎯)/g).filter(s => s.trim().length > 0);
+              if (sections.length > 1) {
+                return (
+                  <div className="space-y-3 mt-2.5">
+                    {sections.map((sec, idx) => {
+                      const isDiagnostic = sec.includes('📊') || sec.includes('الملخص') || sec.toLowerCase().includes('summary');
+                      return (
+                        <div
+                          key={idx}
+                          className={`p-3.5 rounded-xl sm:rounded-2xl border transition-all ${
+                            isDiagnostic
+                              ? 'bg-black/20 border-[#C49E3A]/40 text-slate-100 shadow-inner'
+                              : 'bg-emerald-950/40 border-emerald-400/30 text-emerald-50 shadow-inner'
+                          }`}
+                        >
+                          <div className="whitespace-pre-line text-xs sm:text-[13px] leading-relaxed font-medium">
+                            {sec.trim()}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              }
+
+              return (
+                <div className="p-3.5 rounded-xl sm:rounded-2xl bg-black/20 border border-white/10 mt-2.5 whitespace-pre-line text-xs sm:text-[13px] text-slate-100 font-medium leading-relaxed">
+                  {cleaned}
+                </div>
+              );
+            })()
           )}
 
-          <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between text-[10px] text-white/60 font-bold">
+          <div className="mt-3.5 pt-2.5 border-t border-white/10 flex items-center justify-between text-[10px] text-white/60 font-bold">
             <span>{isRtl ? 'أكاديمية باسم الخليل الرقمية • نظام الذكاء الاصطناعي الأكاديمي' : 'Basim Alkhalil Digital Academy'}</span>
-            <span className="text-[#ffc800]">3-4 جمل موجهة لولي الأمر</span>
+            <span className="text-[#ffc800]">{isRtl ? 'تشخيص تحليلي وتوصيات عملية معتمدة' : 'Diagnostic summary & actionable recommendations'}</span>
           </div>
         </div>
       </div>
