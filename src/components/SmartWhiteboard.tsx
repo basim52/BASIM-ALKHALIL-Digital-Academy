@@ -540,7 +540,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
     subtitleAr: string;
     subtitleEn: string;
     speechText: string;
-    sectionType: 'objective' | 'formula' | 'rules' | 'pitfalls' | 'speaking' | 'quiz';
+    sectionType: 'objective' | 'formula' | 'rules' | 'pitfalls' | 'exercises' | 'speaking' | 'quiz';
   }
 
   const whiteboardPages = useMemo<WhiteboardSlidePage[]>(() => {
@@ -607,8 +607,8 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
     // Page 4: Common Pitfalls & Mnemonic Hook
     if (boardData.commonPitfall || boardData.correction || boardData.mnemonic || boardData.ccq) {
       const p4Speech = isRtl
-        ? `وصلنا إلى الصفحة الرابعة: تنبيه الفخاخ الشائعة وحيلة الذاكرة الذكية ⚠️! ${boardData.commonPitfall ? `انتبه جيداً: لا تقل "${boardData.commonPitfall.bad}"، بل قل دائماً "${boardData.commonPitfall.good}". والسبب: ${boardData.commonPitfall.explanation}.` : ''} ${boardData.mnemonic ? `وحيلة الذاكرة: ${boardData.mnemonic}.` : ''} أتقنت هذه النقطة؟ اضغط على 'اقلب الصفحة 📄' لننتقل لبنك المفردات وتحدي التحدث!`
-        : `Here is Page 4: Common Pitfalls & Smart Memory Hook ⚠️! ${boardData.commonPitfall ? `Watch out for this trap: avoid saying "${boardData.commonPitfall.bad}", always say "${boardData.commonPitfall.good}".` : ''} ${boardData.mnemonic ? `Memory hook: ${boardData.mnemonic}.` : ''} Mastered this? Click 'Turn Page 📄' for vocabulary and speaking!`;
+        ? `وصلنا إلى الصفحة الرابعة: تنبيه الفخاخ الشائعة وحيلة الذاكرة الذكية ⚠️! ${boardData.commonPitfall ? `انتبه جيداً: لا تقل "${boardData.commonPitfall.bad}"، بل قل دائماً "${boardData.commonPitfall.good}". والسبب: ${boardData.commonPitfall.explanation}.` : ''} ${boardData.mnemonic ? `وحيلة الذاكرة: ${boardData.mnemonic}.` : ''} أتقنت هذه النقطة؟ اضغط على 'اقلب الصفحة 📄' لننتقل للتمارين التطبيقية!`
+        : `Here is Page 4: Common Pitfalls & Smart Memory Hook ⚠️! ${boardData.commonPitfall ? `Watch out for this trap: avoid saying "${boardData.commonPitfall.bad}", always say "${boardData.commonPitfall.good}".` : ''} ${boardData.mnemonic ? `Memory hook: ${boardData.mnemonic}.` : ''} Mastered this? Click 'Turn Page 📄' for practice drills!`;
 
       list.push({
         id: 'page_pitfalls',
@@ -623,11 +623,30 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
       });
     }
 
-    // Page 5: Vocabulary Bank & Speaking Challenge
+    // Page 5: Dedicated Interactive Practice & Drills (التمارين التطبيقية ✍️)
+    if (boardData.drillChallenge || boardData.ccq || boardData.correction) {
+      const pExercisesSpeech = isRtl
+        ? `أحسنت يا بطل! نحن الآن في صفحة التمارين التطبيقية التفاعلية ✍️! جهز نفسك لتطبيق ما تعلمته عملياً: أمامك تحدي التدريب الفوري وسؤال التحقق الذكي لتثبيت القاعدة.`
+        : `Well done champion! We are now on the Practice Exercises slide ✍️! Apply the rules with instant interactive drills and concept checking questions!`;
+
+      list.push({
+        id: 'page_exercises',
+        pageNumber: list.length + 1,
+        titleAr: 'التمارين التطبيقية',
+        titleEn: 'Practice Drills',
+        icon: '✍️',
+        subtitleAr: 'التمارين التفاعلية وتحدي الإتقان',
+        subtitleEn: 'Interactive Drills & Concept Checks',
+        speechText: pExercisesSpeech,
+        sectionType: 'exercises'
+      });
+    }
+
+    // Page 6: Vocabulary Bank & Speaking Challenge
     if ((Array.isArray(boardData.vocabularyBank) && boardData.vocabularyBank.length > 0) || boardData.speakingPrompt) {
       const p5Speech = isRtl
-        ? `نحن الآن في الصفحة الخامسة: بنك المفردات وتحدي التحدث الصوتي 🎙️. ${Array.isArray(boardData.vocabularyBank) && boardData.vocabularyBank.length > 0 ? `كتبت لك أهم الكلمات مع نطقها: ${boardData.vocabularyBank.map(v => v.word).join('، ')}.` : ''} ${boardData.speakingPrompt ? `والآن دورك لتتحدث بالمايك: ${boardData.speakingPrompt.instruction}.` : ''} تدرب على النطق بالصوت، ثم اضغط على 'اقلب الصفحة 📄' لخوض التحدي والاختبار النهائي!`
-        : `We are on Page 5: Vocabulary Bank & Speaking Challenge 🎙️. ${Array.isArray(boardData.vocabularyBank) && boardData.vocabularyBank.length > 0 ? `Key words: ${boardData.vocabularyBank.map(v => v.word).join(', ')}.` : ''} ${boardData.speakingPrompt ? `Now speak into your mic: ${boardData.speakingPrompt.instruction}.` : ''} Click 'Turn Page 📄' for the final mastery quiz!`;
+        ? `نحن الآن في صفحة بنك المفردات وتحدي التحدث الصوتي 🎙️. ${Array.isArray(boardData.vocabularyBank) && boardData.vocabularyBank.length > 0 ? `كتبت لك أهم الكلمات مع نطقها: ${boardData.vocabularyBank.map(v => v.word).join('، ')}.` : ''} ${boardData.speakingPrompt ? `والآن دورك لتتحدث بالمايك: ${boardData.speakingPrompt.instruction}.` : ''} تدرب على النطق بالصوت، ثم اضغط على 'اقلب الصفحة 📄' لخوض الامتحان النهائي!`
+        : `We are on Page 6: Vocabulary Bank & Speaking Challenge 🎙️. ${Array.isArray(boardData.vocabularyBank) && boardData.vocabularyBank.length > 0 ? `Key words: ${boardData.vocabularyBank.map(v => v.word).join(', ')}.` : ''} ${boardData.speakingPrompt ? `Now speak into your mic: ${boardData.speakingPrompt.instruction}.` : ''} Click 'Turn Page 📄' for the final mastery exam!`;
 
       list.push({
         id: 'page_speaking',
@@ -642,19 +661,19 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
       });
     }
 
-    // Page 6: Mastery Quiz Challenge (Always guaranteed for every curriculum lesson)
+    // Page 7: Mastery Quiz & Exam Challenge (الامتحان النهائي 🎯)
     const p6Speech = isRtl
-      ? `وصلنا إلى الصفحة الختامية: اختبار الإتقان النهائي 🎯! أمامك 5 أسئلة تدريبية لقياس مدى استيعابك للقاعدة، كل سؤال له مؤقت 30 ثانية. اقرأ كل سؤال بتركيز وانطلق لتحقيق العلامة الكاملة!`
-      : `We arrived at Page 6: Final Mastery Challenge 🎯! Here is your progressive 5-question test with a 30-second countdown. Read each question carefully and aim for a perfect score!`;
+      ? `وصلنا إلى الصفحة الختامية: الامتحان واختبار الإتقان النهائي 🎯! أمامك أسئلة تدريبية لقياس مدى استيعابك للقاعدة مع مؤقت 30 ثانية. اقرأ كل سؤال بتركيز وانطلق لتحقيق الدرجة الكاملة!`
+      : `We arrived at the Final Mastery Exam 🎯! Here is your timed challenge. Read each question carefully and aim for a perfect score!`;
 
     list.push({
       id: 'page_quiz',
       pageNumber: list.length + 1,
-      titleAr: 'اختبار الإتقان',
-      titleEn: 'Mastery Quiz',
+      titleAr: 'الامتحان النهائي',
+      titleEn: 'Mastery Exam',
       icon: '🎯',
-      subtitleAr: 'تحدي الأسئلة الخمسة وقياس النتيجة',
-      subtitleEn: '5-Question Timed Challenge',
+      subtitleAr: 'تحدي الأسئلة المتدرجة وقياس النتيجة',
+      subtitleEn: 'Timed Mastery Challenge',
       speechText: p6Speech,
       sectionType: 'quiz'
     });
@@ -712,6 +731,10 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
       const t1 = setTimeout(() => setActiveHighlightKey('correction'), 6000);
       const t2 = setTimeout(() => setActiveHighlightKey('mnemonic'), 12000);
       highlightTimeoutsRef.current = [t1, t2];
+    } else if (page.sectionType === 'exercises') {
+      setActiveHighlightKey('drill');
+      const t1 = setTimeout(() => setActiveHighlightKey('ccq'), 7000);
+      highlightTimeoutsRef.current = [t1];
     } else if (page.sectionType === 'speaking') {
       setActiveHighlightKey('vocab');
       const t1 = setTimeout(() => setActiveHighlightKey('speaking'), 8000);
@@ -3138,16 +3161,61 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                         );
                       })}
 
-                      {/* Next Page Button */}
+                      {/* Next / Turn Page Button - Prominently always visible */}
                       <button
                         onClick={handleNextPage}
                         disabled={currentPageIndex >= whiteboardPages.length - 1}
-                        className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 disabled:opacity-30 disabled:cursor-not-allowed text-slate-950 font-black text-xs flex items-center gap-1 transition-all cursor-pointer shrink-0 shadow-sm active:scale-95"
+                        className="px-3 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-300 hover:from-amber-300 hover:to-yellow-200 disabled:opacity-30 disabled:cursor-not-allowed text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0 shadow-sm active:scale-95 ring-1 ring-white/60 animate-pulse"
                         title={isRtl ? 'الصفحة التالية والشرح' : 'Next Slide'}
                       >
-                        <span className="hidden sm:inline">{isRtl ? 'التالي ➔' : 'Next ➔'}</span>
-                        {isRtl ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+                        <span>{isRtl ? 'اقلب الصفحة 📄 ➔' : 'Turn Page 📄 ➔'}</span>
                       </button>
+
+                      {/* Direct jump to Exercises */}
+                      {whiteboardPages.some(p => p.sectionType === 'exercises') && (
+                        <button
+                          onClick={() => {
+                            const exIdx = whiteboardPages.findIndex(p => p.sectionType === 'exercises');
+                            if (exIdx >= 0) {
+                              cancelAutoAdvance();
+                              setCurrentPageIndex(exIdx);
+                              explainPage(exIdx);
+                            }
+                          }}
+                          className={`px-2.5 py-1.5 rounded-xl text-xs font-black flex items-center gap-1 transition-all cursor-pointer shrink-0 active:scale-95 ${
+                            activeSlidePage?.sectionType === 'exercises'
+                              ? 'bg-blue-500 text-white shadow-md ring-2 ring-white'
+                              : 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 border border-blue-400/40'
+                          }`}
+                          title={isRtl ? 'الانتقال المباشر للتمارين التطبيقية' : 'Go to Exercises'}
+                        >
+                          <span>✍️</span>
+                          <span>{isRtl ? 'التمارين' : 'Exercises'}</span>
+                        </button>
+                      )}
+
+                      {/* Direct jump to Mastery Exam */}
+                      {whiteboardPages.some(p => p.sectionType === 'quiz') && (
+                        <button
+                          onClick={() => {
+                            const quizIdx = whiteboardPages.findIndex(p => p.sectionType === 'quiz');
+                            if (quizIdx >= 0) {
+                              cancelAutoAdvance();
+                              setCurrentPageIndex(quizIdx);
+                              explainPage(quizIdx);
+                            }
+                          }}
+                          className={`px-2.5 py-1.5 rounded-xl text-xs font-black flex items-center gap-1 transition-all cursor-pointer shrink-0 active:scale-95 ${
+                            activeSlidePage?.sectionType === 'quiz'
+                              ? 'bg-emerald-500 text-white shadow-md ring-2 ring-white'
+                              : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-400/40'
+                          }`}
+                          title={isRtl ? 'الانتقال المباشر للامتحان النهائي' : 'Go to Mastery Exam'}
+                        >
+                          <span>🎯</span>
+                          <span>{isRtl ? 'الامتحان' : 'Exam'}</span>
+                        </button>
+                      )}
                     </div>
 
                     {/* Secondary Controls: Explain Page + Auto-Advance + View Mode */}
@@ -3811,9 +3879,123 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                   {/* SIDE B: التطبيق والممارسة (Correction & Quiz) */}
                   {/* ==================================================== */}
                   {((whiteboardViewMode === 'paged'
-                    ? (activeSlidePage?.sectionType === 'pitfalls' || activeSlidePage?.sectionType === 'speaking' || activeSlidePage?.sectionType === 'quiz')
+                    ? (activeSlidePage?.sectionType === 'pitfalls' || activeSlidePage?.sectionType === 'exercises' || activeSlidePage?.sectionType === 'speaking' || activeSlidePage?.sectionType === 'quiz')
                     : (contentViewFilter === 'all' || contentViewFilter === 'practice'))) && (
                     <div className="space-y-4">
+                      {/* ✍️ DEDICATED INTERACTIVE EXERCISES & DRILLS ARENA */}
+                      {(activeSlidePage?.sectionType === 'exercises' || whiteboardViewMode === 'scroll') && (boardData?.drillChallenge || boardData?.ccq || boardData?.correction) && (
+                        <div className="border-2 border-blue-400/60 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-2xl bg-gradient-to-r from-blue-950/50 via-slate-900/80 to-indigo-950/50 space-y-4">
+                          <div className="flex items-center justify-between pb-3 border-b border-white/10 flex-wrap gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="p-2 rounded-xl bg-blue-500 text-white font-black text-sm shadow-md">
+                                ✍️
+                              </span>
+                              <div>
+                                <h3 className="text-sm sm:text-base font-black text-white">
+                                  {isRtl ? 'ساحة التمارين التطبيقية وتحدي الإتقان' : 'Interactive Practice & Drill Arena'}
+                                </h3>
+                                <p className="text-[11px] text-blue-200">
+                                  {isRtl ? 'طبق ما تعلمته الآن مع سارة خطوة بخطوة' : 'Apply what you learned step-by-step'}
+                                </p>
+                              </div>
+                            </div>
+                            <span className="px-2.5 py-1 rounded-full bg-blue-400/20 text-blue-300 border border-blue-400/30 text-[10px] font-black">
+                              {isRtl ? 'تمارين تفاعلية' : 'Interactive Drills'}
+                            </span>
+                          </div>
+
+                          {/* Exercise 1: Instant Mastery Drill */}
+                          {boardData?.drillChallenge && (
+                            <div className="p-3.5 rounded-2xl bg-black/40 border border-blue-400/30 space-y-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-xs font-black text-amber-300 flex items-center gap-1.5">
+                                  <span>⚡</span>
+                                  <span>{isRtl ? 'التمرين الأول: تحدي الصياغة والتطبيق' : 'Drill 1: Transformation & Application'}</span>
+                                </span>
+                                <span className="text-[10px] px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-200 border border-amber-400/30 font-mono font-bold">
+                                  {boardData.drillChallenge.type}
+                                </span>
+                              </div>
+                              <p className="text-xs sm:text-sm font-black text-white">
+                                {boardData.drillChallenge.instruction}
+                              </p>
+                              <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/10 flex-wrap">
+                                <span className="text-xs text-amber-200 font-bold font-mono">
+                                  {boardData.drillChallenge.hint ? `💡 تلميح: ${boardData.drillChallenge.hint}` : `🎯 الحل: ${boardData.drillChallenge.targetText}`}
+                                </span>
+                                <button
+                                  onClick={() => onSpeak(boardData.drillChallenge!.targetText)}
+                                  className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1 transition-all cursor-pointer shadow-xs active:scale-95"
+                                >
+                                  <Volume2 size={13} />
+                                  <span>{isRtl ? 'استمع للحل النموذجي 🎙️' : 'Hear Model Answer'}</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Exercise 2: Concept Check Question (CCQ) */}
+                          {boardData?.ccq && (
+                            <div className="p-3.5 rounded-2xl bg-black/40 border border-blue-400/30 space-y-2.5">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-xs font-black text-blue-200 flex items-center gap-1.5">
+                                  <span>❓</span>
+                                  <span>{isRtl ? 'التمرين الثاني: فحص الفهم السريع (CCQ)' : 'Drill 2: Concept Check'}</span>
+                                </span>
+                                <button
+                                  onClick={() => onSpeak(boardData.ccq!.question)}
+                                  className="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-blue-200 border border-white/15 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                                >
+                                  <Volume2 size={11} />
+                                  <span>{isRtl ? 'استمع للسؤال' : 'Listen'}</span>
+                                </button>
+                              </div>
+                              <p className="text-xs sm:text-sm font-bold text-white">
+                                {boardData.ccq.question}
+                              </p>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {Array.isArray(boardData.ccq.options) && boardData.ccq.options.map((opt, oIdx) => {
+                                  const isSelected = ccqSelectedOption === oIdx;
+                                  const isCorrect = oIdx === boardData.ccq!.answerIndex;
+                                  let btnClass = 'bg-white/10 hover:bg-white/20 text-white border-white/15';
+                                  if (ccqSelectedOption !== null) {
+                                    if (isCorrect) {
+                                      btnClass = 'bg-emerald-500/30 border-emerald-400 text-emerald-200 font-black ring-2 ring-emerald-400/50';
+                                    } else if (isSelected && !isCorrect) {
+                                      btnClass = 'bg-rose-500/30 border-rose-400 text-rose-200 line-through';
+                                    } else {
+                                      btnClass = 'bg-black/20 text-slate-400 border-white/5 opacity-50';
+                                    }
+                                  }
+                                  return (
+                                    <button
+                                      key={`ex-ccq-${oIdx}`}
+                                      disabled={ccqSelectedOption !== null}
+                                      onClick={() => {
+                                        setCcqSelectedOption(oIdx);
+                                        if (isCorrect) {
+                                          onSpeak(isRtl ? 'إجابة صحيحة وممتازة يا بطل!' : 'Excellent, that is correct!');
+                                        } else {
+                                          onSpeak(isRtl ? 'انتبه وركز، راجع القاعدة على السبورة!' : 'Notice the pattern on the whiteboard!');
+                                        }
+                                      }}
+                                      className={`p-2.5 rounded-xl border text-xs text-start transition-all cursor-pointer flex items-center justify-between gap-2 ${btnClass}`}
+                                    >
+                                      <span>{opt}</span>
+                                      {ccqSelectedOption !== null && isCorrect && <Check size={14} className="text-emerald-300 shrink-0" />}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                              {ccqSelectedOption !== null && (
+                                <p className="text-xs text-emerald-200 bg-emerald-950/40 border border-emerald-500/30 p-2.5 rounded-xl">
+                                  💡 {boardData.ccq.explanation || (isRtl ? 'أحسنت! هذا هو التطبيق السليم للقاعدة.' : 'Great job! Correct usage.')}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
                       {/* ⚠️ COMMON PITFALL ALERT CARD */}
                       {boardData?.commonPitfall && (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'pitfalls' : true) && (
                         <div
@@ -4378,6 +4560,25 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                         )}
                       </button>
 
+                      {/* Direct jump to Exercises */}
+                      {whiteboardPages.some(p => p.sectionType === 'exercises') && (
+                        <button
+                          onClick={() => {
+                            const exIdx = whiteboardPages.findIndex(p => p.sectionType === 'exercises');
+                            if (exIdx >= 0) {
+                              cancelAutoAdvance();
+                              setCurrentPageIndex(exIdx);
+                              explainPage(exIdx);
+                            }
+                          }}
+                          className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-95"
+                          title={isRtl ? 'الذهاب للتمارين التطبيقية' : 'Go to Exercises'}
+                        >
+                          <span>✍️</span>
+                          <span className="hidden sm:inline">{isRtl ? 'التمارين' : 'Drills'}</span>
+                        </button>
+                      )}
+
                       {currentPageIndex < whiteboardPages.length - 1 ? (
                         <button
                           onClick={handleNextPage}
@@ -4396,7 +4597,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                           }}
                           className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-xl hover:scale-105 active:scale-95 ring-2 ring-white/70"
                         >
-                          <span>{isRtl ? 'ابدأ كويز الإتقان 🎯' : 'Start Mastery Quiz 🎯'}</span>
+                          <span>{isRtl ? 'ابدأ الامتحان النهائي 🎯' : 'Start Mastery Exam 🎯'}</span>
                         </button>
                       )}
                     </div>

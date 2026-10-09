@@ -638,7 +638,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   };
 
   // Select and launch a scenario or lesson with Sara
-  const handleSelectCurriculumLesson = (lesson: any) => {
+  const handleSelectCurriculumLesson = (lesson: any, targetMode?: 'slides' | 'exercises' | 'quiz') => {
     setActiveCurriculumLesson(lesson);
 
     // 1. Build rich pedagogical explanation & board data
@@ -648,7 +648,13 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       : buildSaraCurriculumExplanation(lesson, activeLang);
 
     setActiveBoard(explanation.boardData);
-    setCurrentWhiteboardPageIndex(0);
+    let initialPage = 0;
+    if (targetMode === 'exercises') {
+      initialPage = 4; // Practice Drills slide
+    } else if (targetMode === 'quiz') {
+      initialPage = 6; // Mastery Exam slide
+    }
+    setCurrentWhiteboardPageIndex(initialPage);
     setQuizSelectedOption(null);
     setQuizFeedback(null);
     setIsWhiteboardOpen(true);
@@ -3811,6 +3817,94 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         )}
 
         {/* ======================================================== */}
+        {/* 2A-0A. SARA ACTIVE CURRICULUM LESSON HUD BANNER */}
+        {/* ======================================================== */}
+        {activeCurriculumLesson && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-r from-slate-950 via-[#002147] to-[#0d3b66] text-white p-3.5 sm:p-4 rounded-3xl shadow-xl border-2 border-amber-400/60 relative overflow-hidden ring-2 ring-amber-400/20"
+          >
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="text-2xl p-2 bg-amber-400 text-slate-950 rounded-2xl border border-amber-300 shadow-md shrink-0">
+                  {activeCurriculumLesson.pillarIcon || '👩‍🏫'}
+                </span>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[10px] font-black uppercase text-amber-300 tracking-wider px-2 py-0.5 rounded-full bg-black/40 border border-amber-400/30">
+                      {isRtl ? activeCurriculumLesson.pillarNameAr : activeCurriculumLesson.pillarNameEn}
+                    </span>
+                    <span className="px-1.5 py-0.2 rounded-md bg-emerald-500/20 text-emerald-300 text-[9px] font-black border border-emerald-400/30">
+                      {activeCurriculumLesson.levelCode || 'B1-B2'}
+                    </span>
+                  </div>
+                  <h2 className="text-xs sm:text-sm font-black text-white truncate mt-0.5">
+                    {isRtl ? activeCurriculumLesson.titleAr : activeCurriculumLesson.titleEn}
+                  </h2>
+                </div>
+              </div>
+
+              {/* Action Buttons: Turn Page / Exercises / Quiz / Open Board / Close */}
+              <div className="flex items-center gap-1.5 shrink-0 ms-auto flex-wrap">
+                <button
+                  onClick={() => {
+                    setIsWhiteboardOpen(true);
+                    setCurrentWhiteboardPageIndex(prev => prev < 6 ? prev + 1 : 0);
+                  }}
+                  className="px-3 py-1.5 bg-gradient-to-r from-amber-400 to-yellow-300 hover:brightness-105 active:scale-95 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1 shadow-md cursor-pointer animate-pulse"
+                  title={isRtl ? 'اقلب الصفحة واشرحي' : 'Turn Page & Explain'}
+                >
+                  <BookOpen size={13} />
+                  <span>{isRtl ? 'اقلب الصفحة واشرحي 📄' : 'Turn Page 📄'}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsWhiteboardOpen(true);
+                    setCurrentWhiteboardPageIndex(4);
+                  }}
+                  className="px-2.5 py-1.5 bg-blue-500/90 hover:bg-blue-600 text-white font-black rounded-xl text-xs flex items-center gap-1 shadow-xs cursor-pointer active:scale-95"
+                  title={isRtl ? 'التمارين التطبيقية التفاعلية' : 'Practice Exercises'}
+                >
+                  <span>✍️</span>
+                  <span>{isRtl ? 'التمارين ✍️' : 'Exercises'}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsWhiteboardOpen(true);
+                    setCurrentWhiteboardPageIndex(6);
+                  }}
+                  className="px-2.5 py-1.5 bg-emerald-600/90 hover:bg-emerald-700 text-white font-black rounded-xl text-xs flex items-center gap-1 shadow-xs cursor-pointer active:scale-95"
+                  title={isRtl ? 'امتحان الإتقان النهائي' : 'Mastery Quiz'}
+                >
+                  <Trophy size={13} />
+                  <span>{isRtl ? 'الامتحان 🎯' : 'Quiz'}</span>
+                </button>
+
+                <button
+                  onClick={() => setIsWhiteboardOpen(prev => !prev)}
+                  className="px-2.5 py-1.5 bg-white/15 hover:bg-white/25 text-white font-bold rounded-xl text-xs flex items-center gap-1 border border-white/20 cursor-pointer active:scale-95"
+                  title={isRtl ? 'فتح أو إغلاق السبورة الذكية' : 'Toggle Whiteboard'}
+                >
+                  <span>📋</span>
+                  <span className="hidden xs:inline">{isRtl ? 'السبورة' : 'Board'}</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveCurriculumLesson(null)}
+                  className="p-1.5 bg-white/10 hover:bg-rose-600/80 text-slate-300 hover:text-white rounded-xl text-xs transition-colors cursor-pointer"
+                  title={isRtl ? 'إنهاء الدرس' : 'Close Lesson'}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ======================================================== */}
         {/* 2A-0. ROLE-PLAY ACTIVE SCENARIO SIMULATION BANNER (12Y GAMING HUD) */}
         {/* ======================================================== */}
         {activeRolePlay && (
@@ -4424,6 +4518,45 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                             🎯 {isRtl ? 'كويز تفاعلي' : 'Quiz'}
                           </span>
                         )}
+                      </div>
+
+                      {/* Interactive Shortcuts for Lesson Navigation */}
+                      <div className="flex items-center gap-1.5 pt-2 mt-2 border-t border-amber-200/80 flex-wrap">
+                        <button
+                          onClick={() => {
+                            if (msg.board) setActiveBoard(msg.board);
+                            setIsWhiteboardOpen(true);
+                            setCurrentWhiteboardPageIndex(prev => prev < 6 ? prev + 1 : 0);
+                          }}
+                          className="px-2.5 py-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[11px] shadow-2xs flex items-center gap-1 cursor-pointer active:scale-95"
+                        >
+                          <span>📄</span>
+                          <span>{isRtl ? 'اقلب الصفحة واشرحي ➔' : 'Turn Page ➔'}</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            if (msg.board) setActiveBoard(msg.board);
+                            setIsWhiteboardOpen(true);
+                            setCurrentWhiteboardPageIndex(4);
+                          }}
+                          className="px-2.5 py-1 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-[11px] shadow-2xs flex items-center gap-1 cursor-pointer active:scale-95"
+                        >
+                          <span>✍️</span>
+                          <span>{isRtl ? 'التمارين التطبيقية' : 'Exercises'}</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            if (msg.board) setActiveBoard(msg.board);
+                            setIsWhiteboardOpen(true);
+                            setCurrentWhiteboardPageIndex(6);
+                          }}
+                          className="px-2.5 py-1 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-[11px] shadow-2xs flex items-center gap-1 cursor-pointer active:scale-95"
+                        >
+                          <span>🎯</span>
+                          <span>{isRtl ? 'امتحان الإتقان' : 'Mastery Exam'}</span>
+                        </button>
                       </div>
                     </div>
                   )}
@@ -6286,9 +6419,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       <SaraCurriculumModal
         isOpen={isCurriculumModalOpen}
         onClose={() => setIsCurriculumModalOpen(false)}
-        onSelectLesson={(lesson) => {
+        onSelectLesson={(lesson, targetMode) => {
           setIsCurriculumModalOpen(false);
-          handleSelectCurriculumLesson(lesson);
+          handleSelectCurriculumLesson(lesson, targetMode);
         }}
         activeLessonId={activeCurriculumLesson?.id}
         initialPillar={curriculumInitialPillar}

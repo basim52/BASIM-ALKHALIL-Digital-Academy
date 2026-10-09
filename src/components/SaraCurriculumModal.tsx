@@ -25,7 +25,7 @@ import {
 interface SaraCurriculumModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectLesson: (lesson: SaraCurriculumLesson) => void;
+  onSelectLesson: (lesson: SaraCurriculumLesson, targetMode?: 'slides' | 'exercises' | 'quiz') => void;
   activeLessonId?: string | null;
   initialPillar?: string;
   isRtl?: boolean;
@@ -348,19 +348,42 @@ export const SaraCurriculumModal: React.FC<SaraCurriculumModalProps> = ({
                         </div>
                       </div>
 
-                      {/* Action Button */}
-                      <button
-                        onClick={() => onSelectLesson(lesson)}
-                        className="w-full py-2.5 px-4 rounded-2xl font-black text-xs sm:text-sm cursor-pointer transition-all flex items-center justify-center gap-2 shadow-sm active:scale-98 bg-gradient-to-r from-[#002147] to-[#0d3b66] hover:from-[#093568] hover:to-[#002147] text-amber-300 hover:text-yellow-200 border border-amber-400/40"
-                      >
-                        <Sparkles size={15} className="text-amber-300" />
-                        <span>
-                          {isRtl
-                            ? 'ابدأ هذا الدرس مع سارة على السبورة 👩‍🏫'
-                            : 'Start on Smart Board with Sara 👩‍🏫'}
-                        </span>
-                        {isRtl ? <ArrowRight size={14} className="rotate-180" /> : <ChevronRight size={14} />}
-                      </button>
+                      {/* Action Buttons: Explain & Page Turn + Exercises + Mastery Exam */}
+                      <div className="space-y-2 pt-1 border-t border-slate-200/80">
+                        <button
+                          onClick={() => onSelectLesson(lesson, 'slides')}
+                          className="w-full py-2.5 px-3 rounded-2xl font-black text-xs sm:text-sm cursor-pointer transition-all flex items-center justify-center gap-2 shadow-sm active:scale-98 bg-gradient-to-r from-[#002147] to-[#0d3b66] hover:from-[#093568] hover:to-[#002147] text-amber-300 hover:text-yellow-200 border border-amber-400/40"
+                          title={isRtl ? 'ابدأ الدرس واستمع لشرح سارة مع إمكانية قلب الصفحات' : 'Start lesson and turn slides'}
+                        >
+                          <Sparkles size={14} className="text-amber-300" />
+                          <span>
+                            {isRtl
+                              ? '📖 الشرح وقلب الصفحات على السبورة'
+                              : '📖 View Lesson & Turn Slides'}
+                          </span>
+                          {isRtl ? <ArrowRight size={13} className="rotate-180" /> : <ChevronRight size={13} />}
+                        </button>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            onClick={() => onSelectLesson(lesson, 'exercises')}
+                            className="py-2 px-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-2xs"
+                            title={isRtl ? 'الانتقال المباشر للتمارين التطبيقية' : 'Go directly to exercises'}
+                          >
+                            <span>✍️</span>
+                            <span>{isRtl ? 'التمارين التطبيقية' : 'Practice Drills'}</span>
+                          </button>
+
+                          <button
+                            onClick={() => onSelectLesson(lesson, 'quiz')}
+                            className="py-2 px-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-2xs"
+                            title={isRtl ? 'الانتقال المباشر للامتحان النهائي' : 'Go directly to mastery exam'}
+                          >
+                            <span>🎯</span>
+                            <span>{isRtl ? 'امتحان الإتقان' : 'Mastery Exam'}</span>
+                          </button>
+                        </div>
+                      </div>
                     </motion.div>
                   );
                 })}
