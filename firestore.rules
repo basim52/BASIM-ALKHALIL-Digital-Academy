@@ -17,7 +17,10 @@ service cloud.firestore {
 
     function isAdmin() {
       return isSignedIn() && (
-        (request.auth.token != null && "email" in request.auth.token && request.auth.token.email.toLowerCase() == "basim5252@gmail.com") ||
+        (request.auth.token != null && "email" in request.auth.token && (
+          request.auth.token.email == "basim5252@gmail.com" ||
+          request.auth.token.email.matches('(?i)^basim5252@gmail\\.com$')
+        )) ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin")
       );
@@ -342,40 +345,45 @@ service cloud.firestore {
     // --- 16. Study Plans & Lesson Results ---
     function isValidStudyPlan(data) {
       return data.userId is string && 
-             data.studentName is string && 
-             data.planItems is list &&
-             data.parentIds is list;
+             (!('studentName' in data) || data.studentName is string) &&
+             (!('planItems' in data) || data.planItems is list) &&
+             (!('parentIds' in data) || data.parentIds is list);
     }
 
     function isValidLessonResult(data) {
       return data.userId is string && 
              data.lessonId is string && 
-             data.score is number && 
-             data.total is number &&
-             data.parentIds is list;
+             (!('score' in data) || data.score is number) && 
+             (!('total' in data) || data.total is number) &&
+             (!('parentIds' in data) || data.parentIds is list);
     }
 
     match /studyPlans/{planId} {
       allow get: if isSignedIn() && (
         resource.data.userId == request.auth.uid ||
-        (resource.data.parentIds != null && request.auth.uid in resource.data.parentIds) ||
+        ("parentIds" in resource.data && resource.data.parentIds is list && request.auth.uid in resource.data.parentIds) ||
         isParentOf(resource.data.userId) ||
         isAdmin()
       );
       allow list: if isSignedIn() && (
         resource.data.userId == request.auth.uid ||
-        (resource.data.parentIds != null && request.auth.uid in resource.data.parentIds) ||
+        ("parentIds" in resource.data && resource.data.parentIds is list && request.auth.uid in resource.data.parentIds) ||
+        isParentOf(resource.data.userId) ||
         isAdmin()
       );
-      allow create: if isSignedIn() &&
-        request.resource.data.userId == request.auth.uid &&
-        isValidStudyPlan(request.resource.data);
+      allow create: if isSignedIn() && (
+        request.resource.data.userId == request.auth.uid ||
+        isAdmin() ||
+        isParentOf(request.resource.data.userId)
+      ) && isValidStudyPlan(request.resource.data);
       allow update: if isSignedIn() && (
         resource.data.userId == request.auth.uid ||
+        isParentOf(resource.data.userId) ||
         isAdmin()
       ) && isValidStudyPlan(request.resource.data);
       allow delete: if isSignedIn() && (
         resource.data.userId == request.auth.uid ||
+        isParentOf(resource.data.userId) ||
         isAdmin()
       );
     }
@@ -383,18 +391,21 @@ service cloud.firestore {
     match /lessonResults/{resultId} {
       allow get: if isSignedIn() && (
         resource.data.userId == request.auth.uid ||
-        (resource.data.parentIds != null && request.auth.uid in resource.data.parentIds) ||
+        ("parentIds" in resource.data && resource.data.parentIds is list && request.auth.uid in resource.data.parentIds) ||
         isParentOf(resource.data.userId) ||
         isAdmin()
       );
       allow list: if isSignedIn() && (
         resource.data.userId == request.auth.uid ||
-        (resource.data.parentIds != null && request.auth.uid in resource.data.parentIds) ||
+        ("parentIds" in resource.data && resource.data.parentIds is list && request.auth.uid in resource.data.parentIds) ||
+        isParentOf(resource.data.userId) ||
         isAdmin()
       );
-      allow create: if isSignedIn() &&
-        request.resource.data.userId == request.auth.uid &&
-        isValidLessonResult(request.resource.data);
+      allow create: if isSignedIn() && (
+        request.resource.data.userId == request.auth.uid ||
+        isAdmin() ||
+        isParentOf(request.resource.data.userId)
+      ) && isValidLessonResult(request.resource.data);
       allow update, delete: if isAdmin();
     }
 

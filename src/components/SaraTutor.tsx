@@ -60,9 +60,10 @@ import { PhoneticAnalyzerModal } from './PhoneticAnalyzerModal';
 import { RolePlayModal, RolePlayScenario, ROLE_PLAY_SCENARIOS } from './RolePlayModal';
 import { SaraPersonalNotebookModal } from './SaraPersonalNotebookModal';
 import { SaraCurriculumModal } from './SaraCurriculumModal';
-import { StudyPlanner } from './Academic/StudyPlanner';
-import { CurriculumLesson, getAllCurriculumLessons } from '../utils/academicCurriculumCatalogue';
+import { getScenarioEducationalContent } from '../data/saraScenarioCurriculumData';
 import { buildSaraCurriculumExplanation } from '../utils/saraCurriculumExplainer';
+import { buildSaraExclusiveLessonExplanation } from '../utils/saraExclusiveExplainer';
+import { SaraCurriculumLesson } from '../data/saraExclusiveCurriculums';
 
 interface MessageItem {
   id: string;
@@ -484,11 +485,19 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [isPhoneticModalOpen, setIsPhoneticModalOpen] = useState<boolean>(false);
   const [phoneticTargetSentence, setPhoneticTargetSentence] = useState<string>('');
   const [isRolePlayModalOpen, setIsRolePlayModalOpen] = useState<boolean>(false);
+  const [rolePlayInitialTab, setRolePlayInitialTab] = useState<'lesson' | 'exercises' | 'quiz' | 'simulate'>('lesson');
+  const [rolePlayInitialId, setRolePlayInitialId] = useState<string | undefined>(undefined);
   const [isNotebookModalOpen, setIsNotebookModalOpen] = useState<boolean>(false);
 
-  // Academy Curriculums Hub States (Link Sara to all academy curriculums)
+  // Active Curriculum Lesson & Modal States
+  const [activeCurriculumLesson, setActiveCurriculumLesson] = useState<any | null>(null);
   const [isCurriculumModalOpen, setIsCurriculumModalOpen] = useState<boolean>(false);
-  const [activeCurriculumLesson, setActiveCurriculumLesson] = useState<CurriculumLesson | null>(null);
+  const [curriculumInitialPillar, setCurriculumInitialPillar] = useState<string>('all');
+
+  const handleOpenCurriculum = (pillar: string = 'all') => {
+    setCurriculumInitialPillar(pillar);
+    setIsCurriculumModalOpen(true);
+  };
 
   // 🗓️ Smart Academic Study Plan States (Identical to Academy)
   const [isStudyPlanModalOpen, setIsStudyPlanModalOpen] = useState<boolean>(false);
@@ -545,7 +554,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [isDailyBreakActive, setIsDailyBreakActive] = useState<boolean>(false);
   const [breakSecondsLeft, setBreakSecondsLeft] = useState<number>(120); // 120s = 2 mins
   const [isBreakTimerRunning, setIsBreakTimerRunning] = useState<boolean>(true);
-  const [nextLessonAfterBreak, setNextLessonAfterBreak] = useState<CurriculumLesson | null>(null);
+  const [nextLessonAfterBreak, setNextLessonAfterBreak] = useState<any | null>(null);
   const [isAllDailyLessonsCompletedModalOpen, setIsAllDailyLessonsCompletedModalOpen] = useState<boolean>(false);
 
   // Clear silence hesitation timer
@@ -628,12 +637,16 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     }
   };
 
-  // Select and explain an Academy Curriculum Lesson with Sara
-  const handleSelectCurriculumLesson = (lesson: CurriculumLesson) => {
+  // Select and launch a scenario or lesson with Sara
+  const handleSelectCurriculumLesson = (lesson: any) => {
     setActiveCurriculumLesson(lesson);
 
     // 1. Build rich pedagogical explanation & board data
-    const explanation = buildSaraCurriculumExplanation(lesson, activeLang);
+    const isExclusiveLesson = lesson && (lesson.keyPattern || lesson.pillarId === 'grammar' || lesson.pillarId === 'conversation' || lesson.pillarId === 'reading' || lesson.pillarId === 'writing') && lesson.speakingChallenge;
+    const explanation = isExclusiveLesson
+      ? buildSaraExclusiveLessonExplanation(lesson, activeLang)
+      : buildSaraCurriculumExplanation(lesson, activeLang);
+
     setActiveBoard(explanation.boardData);
     setCurrentWhiteboardPageIndex(0);
     setQuizSelectedOption(null);
@@ -872,83 +885,21 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     fetchActiveStudyPlan();
   }, [fetchActiveStudyPlan]);
 
-  // Compute today's scheduled lessons queue (supports 1, 2, or 3 lessons per day with automatic sequence!)
-  const todayScheduledLessons = useMemo<CurriculumLesson[]>(() => {
-    const all = getAllCurriculumLessons();
-    const list: CurriculumLesson[] = [];
-
-    // Helper matching AuthenticatedApp getItemYmd
-    const getItemYmd = (item: any): string | null => {
-      if (item.date && typeof item.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(item.date.trim())) {
-        return item.date.trim();
-      }
-      if (item.dateString && typeof item.dateString === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(item.dateString.trim())) {
-        return item.dateString.trim();
-      }
-      if (item.scheduledAt && typeof item.scheduledAt === 'string') {
-        try {
-          const d = new Date(item.scheduledAt);
-          if (!isNaN(d.getTime())) {
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            return `${y}-${m}-${day}`;
-          }
-        } catch {
-          // ignore
-        }
-      }
-      return null;
-    };
-
-    const now = new Date();
-    const todayYmd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-
-    // 1. If study plan has lessons for today (strictly compare by local YYYY-MM-DD date only)
-    if (activeStudyPlan?.planItems && activeStudyPlan.planItems.length > 0) {
-      const matchedPlanItems = activeStudyPlan.planItems.filter((item: any) => {
-        if (!item) return false;
-        const itemYmd = getItemYmd(item);
-        return itemYmd === todayYmd;
-      });
-
-      matchedPlanItems.forEach((pi: any) => {
-        const found = all.find(l => 
-          l.id === pi.unitId || 
-          (pi.courseId && l.courseId === pi.courseId && l.level === pi.level) ||
-          (pi.topic && (l.titleAr?.includes(pi.topic) || l.titleEn?.includes(pi.topic)))
-        );
-        if (found && !list.some(x => x.id === found.id)) {
-          list.push(found);
-        } else if (pi.topic) {
-          list.push({
-            id: pi.id || pi.unitId || `plan_lesson_${list.length + 1}`,
-            pillarId: pi.courseId || 'grammar',
-            courseId: pi.courseId || 'general',
-            courseLabelAr: pi.courseLabel || (isRtl ? 'المنهج الأكاديمي' : 'Academic Curriculum'),
-            courseLabelEn: pi.courseLabel || 'Academic Curriculum',
-            titleAr: pi.topic,
-            titleEn: pi.topic,
-            level: pi.level || 'A1',
-            duration: pi.duration || '45 min'
-          });
-        }
-      });
-    }
-
-    // 2. Sequential fallback to ensure queue length matches dailyLessonsTarget
-    // Fixed order, DO NOT reorder from activeCurriculumLesson so lessons never jump
-    let fallbackIdx = 0;
-    while (list.length < dailyLessonsTarget && fallbackIdx < all.length) {
-      const cand = all[fallbackIdx];
-      if (!list.some(x => x.id === cand.id)) {
-        list.push(cand);
-      }
-      fallbackIdx++;
-    }
-
-    return list.slice(0, dailyLessonsTarget);
-  }, [activeStudyPlan, dailyLessonsTarget, isRtl]);
+  // Featured Daily Scenario Quests (16 scenarios tailored with lesson explanations, exercises & tests)
+  const todayScheduledLessons = useMemo<any[]>(() => {
+    return ROLE_PLAY_SCENARIOS.slice(0, dailyLessonsTarget).map(sc => ({
+      id: sc.id,
+      pillarId: 'sara_scenarios',
+      courseId: sc.category,
+      courseLabelAr: sc.vibeAr,
+      courseLabelEn: sc.vibeEn,
+      titleAr: sc.titleAr,
+      titleEn: sc.titleEn,
+      level: '12Y',
+      duration: '15 min',
+      scenario: sc
+    }));
+  }, [dailyLessonsTarget]);
 
   const todayScheduledLesson = todayScheduledLessons[currentDailyLessonIndex] || todayScheduledLessons[0] || null;
 
@@ -1072,34 +1023,16 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     return () => clearInterval(timer);
   }, [isDailyBreakActive, isBreakTimerRunning, handleFinishBreakAndStartNextLesson]);
 
-  // Start lesson from study plan with Sara
+  // Start scenario or lesson with Sara
   const handleStartPlanLesson = (planItemOrUnitId: any) => {
-    const unitId = typeof planItemOrUnitId === 'string' ? planItemOrUnitId : planItemOrUnitId?.unitId;
-    const allLessons = getAllCurriculumLessons();
-    const lesson = allLessons.find(l => 
-      l.id === unitId || 
-      (planItemOrUnitId?.courseId && l.courseId === planItemOrUnitId.courseId && l.level === planItemOrUnitId.level) ||
-      (l.titleAr && planItemOrUnitId?.topic && l.titleAr.includes(planItemOrUnitId.topic)) ||
-      (l.titleEn && planItemOrUnitId?.topic && l.titleEn.includes(planItemOrUnitId.topic))
-    );
+    const scId = typeof planItemOrUnitId === 'string' ? planItemOrUnitId : (planItemOrUnitId?.unitId || planItemOrUnitId?.id);
+    const matchedScenario = ROLE_PLAY_SCENARIOS.find(s => s.id === scId) || 
+      ROLE_PLAY_SCENARIOS.find(s => planItemOrUnitId?.topic && (s.titleAr.includes(planItemOrUnitId.topic) || s.titleEn.includes(planItemOrUnitId.topic))) ||
+      ROLE_PLAY_SCENARIOS[0];
 
-    if (lesson) {
-      handleSelectCurriculumLesson(lesson);
-    } else if (planItemOrUnitId?.topic) {
-      const syntheticLesson: CurriculumLesson = {
-        id: planItemOrUnitId.id || `custom_${Date.now()}`,
-        pillarId: planItemOrUnitId.courseId || 'grammar',
-        courseId: planItemOrUnitId.courseId || 'general',
-        courseLabelAr: planItemOrUnitId.courseLabel || 'المنهج الأكاديمي',
-        courseLabelEn: planItemOrUnitId.courseLabel || 'Academic Curriculum',
-        titleAr: planItemOrUnitId.topic,
-        titleEn: planItemOrUnitId.topic,
-        level: planItemOrUnitId.level || 'A1',
-        duration: planItemOrUnitId.duration || '45 min'
-      };
-      handleSelectCurriculumLesson(syntheticLesson);
+    if (matchedScenario) {
+      handleStartRolePlayScenario(matchedScenario);
     }
-    setIsStudyPlanModalOpen(false);
   };
 
   // Turn-by-turn microphone listening trigger
@@ -1460,13 +1393,10 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
     // Find lesson name if present
     const detectedLessonTitle = 
-      activeCurriculumLesson?.titleAr ||
-      activeCurriculumLesson?.titleEn ||
-      (activeCurriculumLesson as any)?.title || 
-      lastSavedLessonResult?.lessonTitle || 
       activeRolePlay?.titleAr || 
       activeRolePlay?.titleEn || 
       (activeRolePlay as any)?.title || 
+      lastSavedLessonResult?.lessonTitle || 
       (placementState?.stage && placementState.stage !== 'idle' ? (isRtl ? 'اختبار تحديد المستوى' : 'Placement Test') : null);
 
     // Extract brief snippet (نص مختصر)
@@ -1650,35 +1580,57 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     handleConfirmArchiveSession();
   };
 
-  // Start Role-Play Scenario
+  // Start Role-Play Scenario with Real Explanation, Vocab, Grammar and Board Data
   const handleStartRolePlayScenario = (scenario: RolePlayScenario) => {
     setActiveRolePlay(scenario);
     setCompletedMissions([]);
     setIsRolePlayModalOpen(false);
 
+    // Fetch deep pedagogical curriculum data for this scenario
+    const edu = getScenarioEducationalContent(scenario.id);
+
     const introText = isRtl
-      ? `🎭 تم تفعيل سيناريو: [${scenario.titleAr}]. سارة بدور (${scenario.roleSaraAr}) وأنت بدور (${scenario.roleStudentAr}).\n\n"${scenario.openingLine}"`
-      : `🎭 Active Scenario: [${scenario.titleEn}]. Sara as (${scenario.roleSaraEn}) and You as (${scenario.roleStudentEn}).\n\n"${scenario.openingLine}"`;
+      ? `🎭 تم تفعيل سيناريو: [${scenario.titleAr}]. سارة بدور (${scenario.roleSaraAr}) وأنت بدور (${scenario.roleStudentAr}).\n\n🎯 الهدف التعليمي: ${edu.conceptTitleAr} - ${edu.conceptAr}\n\n"${scenario.openingLine}"`
+      : `🎭 Active Scenario: [${scenario.titleEn}]. Sara as (${scenario.roleSaraEn}) and You as (${scenario.roleStudentEn}).\n\n🎯 Learning Goal: ${edu.conceptTitleEn} - ${edu.conceptEn}\n\n"${scenario.openingLine}"`;
+
+    // Build rich chalkboard data for the scenario
+    const scenarioBoard: SaraBoardData = {
+      title: `${scenario.badge} ${isRtl ? scenario.titleAr : scenario.titleEn}`,
+      sentence: scenario.openingLine,
+      highlight: scenario.openingLine.slice(0, 24),
+      formula: edu.grammar.formula || undefined,
+      notes: [
+        isRtl ? `المكان: ${scenario.location}` : `Location: ${scenario.location}`,
+        isRtl ? `القاعدة: ${edu.grammar.titleAr} (${edu.grammar.explanationAr})` : `Rule: ${edu.grammar.titleEn}`,
+        isRtl ? `المهمة 1: ${scenario.missionsAr[0]}` : `Mission 1: ${scenario.missionsEn[0]}`,
+        isRtl ? `كلمة مفتاحية: ${edu.vocabulary[0]?.word} = ${edu.vocabulary[0]?.meaningAr}` : `Key Vocab: ${edu.vocabulary[0]?.word} (${edu.vocabulary[0]?.meaningEn})`
+      ],
+      learningTip: isRtl ? edu.grammar.explanationAr : edu.grammar.explanationEn,
+      vocabularyBank: edu.vocabulary.map(v => ({
+        word: v.word,
+        meaning: isRtl ? v.meaningAr : v.meaningEn,
+        pos: 'noun/verb',
+        example: v.exampleEn
+      })),
+      quiz: edu.quiz[0] ? {
+        question: isRtl ? edu.quiz[0].questionAr : edu.quiz[0].questionEn,
+        options: edu.quiz[0].options,
+        answerIndex: edu.quiz[0].correctIndex,
+        explanation: edu.quiz[0].explanationAr
+      } : undefined,
+      openWhiteboard: false
+    };
 
     const introMsg: MessageItem = {
       id: `msg_rp_init_${Date.now()}`,
       role: 'sara',
       text: introText,
-      board: {
-        title: `${scenario.badge} ${isRtl ? scenario.titleAr : scenario.titleEn}`,
-        sentence: scenario.openingLine,
-        highlight: scenario.openingLine.slice(0, 20),
-        notes: [
-          isRtl ? `المكان: ${scenario.location}` : `Location: ${scenario.location}`,
-          isRtl ? `المهمة 1: ${scenario.missionsAr[0]}` : `Mission 1: ${scenario.missionsEn[0]}`
-        ],
-        openWhiteboard: false
-      },
+      board: scenarioBoard,
       timestamp: Date.now()
     };
 
     setMessages(prev => [...prev, introMsg]);
-    setActiveBoard(introMsg.board || null);
+    setActiveBoard(scenarioBoard);
 
     if (voiceEnabled) {
       playSaraVoice(scenario.openingLine);
@@ -1896,16 +1848,16 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
     try {
       // 1. Determine lesson metadata
-      const lessonTitle = activeCurriculumLesson
-        ? (isRtl ? activeCurriculumLesson.titleAr : activeCurriculumLesson.titleEn)
+      const lessonTitle = activeRolePlay
+        ? (isRtl ? activeRolePlay.titleAr : activeRolePlay.titleEn)
         : (activeBoard?.title || (isRtl ? 'حصة محادثة وتطبيق مع سارة' : 'Interactive Lesson with Sara'));
 
-      const level = activeCurriculumLesson?.level || (profile as any).level || 'A1';
-      const courseId = activeCurriculumLesson?.pillarId || 'sara_tutor';
-      const courseLabel = activeCurriculumLesson
-        ? (isRtl ? activeCurriculumLesson.courseLabelAr : activeCurriculumLesson.courseLabelEn)
-        : (isRtl ? 'أكاديمية اللغة الإنجليزية' : 'English Academy');
-      const lessonId = activeCurriculumLesson?.id || `sara_lesson_${Date.now()}`;
+      const level = (profile as any).level || '12Y';
+      const courseId = activeRolePlay ? activeRolePlay.category : 'sara_tutor';
+      const courseLabel = activeRolePlay
+        ? (isRtl ? activeRolePlay.vibeAr : activeRolePlay.vibeEn)
+        : (isRtl ? 'سيناريوهات سارة التفاعلية' : 'Sara Interactive Scenarios');
+      const lessonId = activeRolePlay?.id || `sara_lesson_${Date.now()}`;
 
       // 2. Score calculation - Strictly from the verified test taken by the student!
       const totalQuestions = Math.max(1, customTotal);
@@ -2574,8 +2526,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
     // Sara speaks celebration
     const resultSpeech = isRtl
-      ? `مبروك يا بطل! تم تحديد مستواك المعتمد في الأكاديمية بنجاح: مستوى ${level}. ربطت لك كل المناهج المعتمدة المناسبة لمستواك، وجاهزة نبدأ الدرس الأول معاً!`
-      : `Congratulations! Your certified English proficiency level is ${level}. I have unlocked and linked your full curriculum roadmap. Let us start!`;
+      ? `مبروك يا بطل! تم تحديد مستواك المعتمد في الأكاديمية بنجاح: مستوى ${level}. جاهزة نبدأ رحلتنا التعليمية والدروس معاً!`
+      : `Congratulations! Your certified English proficiency level is ${level}. Let us start our learning journey together!`;
 
     const resultMsg: MessageItem = {
       id: `msg_placement_result_${Date.now()}`,
@@ -2695,11 +2647,10 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       };
       setMessages(prev => [...prev, userMsg]);
       setInputText('');
-      fetchActiveStudyPlan();
-      setIsStudyPlanModalOpen(true);
+      handleOpenCurriculum('all');
       const planGreeting = isRtl
-        ? `أهلاً بك يا بطل! 🌟 فتحت لك الخطة الأكاديمية والجدول الدراسي الذكي 🗓️. يمكنك متابعة جدولك، أو اختيار أي درس لتشرحه لك سارة مباشرة بالصوت والسبورة!`
-        : `Welcome champ! 🌟 I opened your Smart Academic Study Plan 🗓️. You can browse your schedule and click any lesson to study with me on the whiteboard!`;
+        ? `أهلاً بك يا بطل! 🌟 فتحت لك مناهج سارة التخصصية المستقلة للطلاقة 📚. اختر أي مسار من المسارات الأربعة (القواعد التحدثية، المحادثة والطلاقة، القراءة والنطق، الكتابة) لنبدأ التدريب الصوتي والشرح على السبورة الذكية فوراً!`
+        : `Welcome champion! 🌟 I opened Sara's dedicated fluency curriculums for you 📚. Choose any track to begin voice practice and whiteboard learning right away!`;
       const saraMsg: MessageItem = {
         id: `msg_sara_plan_${Date.now()}`,
         role: 'sara',
@@ -2709,90 +2660,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       setMessages(prev => [...prev, saraMsg]);
       if (voiceEnabled) {
         playSaraVoice(planGreeting);
-      }
-      return;
-    }
-
-    // Check if user is asking to browse/link to curriculums or explain a specific curriculum
-    const isCurriculumIntent = 
-      lower.includes('مناهج') ||
-      lower.includes('منهج') ||
-      lower.includes('curriculum') ||
-      lower.includes('curricula') ||
-      lower.includes('العادات الذرية') ||
-      lower.includes('العادات السبع') ||
-      lower.includes('الأب الغني') ||
-      lower.includes('الاب الغني') ||
-      lower.includes('فن اللامبالاة') ||
-      lower.includes('قوة الآن') ||
-      lower.includes('قوة الان') ||
-      lower.includes('السماح بالرحيل') ||
-      lower.includes('أكسفورد') ||
-      lower.includes('oxford');
-
-    if (isCurriculumIntent && !placementState.isActive) {
-      const allCatalogLessons = getAllCurriculumLessons();
-      let matchedLesson: CurriculumLesson | undefined;
-
-      if (lower.includes('عادات ذرية') || lower.includes('العادات الذرية') || lower.includes('atomic')) {
-        matchedLesson = allCatalogLessons.find(l => l.courseId === 'atomic_habits');
-      } else if (lower.includes('عادات السبع') || lower.includes('العادات السبع') || lower.includes('seven habits')) {
-        matchedLesson = allCatalogLessons.find(l => l.courseId === 'seven_habits');
-      } else if (lower.includes('أب غني') || lower.includes('الأب الغني') || lower.includes('rich dad')) {
-        matchedLesson = allCatalogLessons.find(l => l.courseId === 'rich_dad');
-      } else if (lower.includes('فن اللامبالاة') || lower.includes('subtle art')) {
-        matchedLesson = allCatalogLessons.find(l => l.courseId === 'subtle_art');
-      } else if (lower.includes('قوة الآن') || lower.includes('قوة الان') || lower.includes('power of now')) {
-        matchedLesson = allCatalogLessons.find(l => l.courseId === 'power_of_now');
-      } else if (lower.includes('السماح بالرحيل') || lower.includes('letting go')) {
-        matchedLesson = allCatalogLessons.find(l => l.courseId === 'letting_go');
-      } else if (lower.includes('أكسفورد') || lower.includes('oxford')) {
-        matchedLesson = allCatalogLessons.find(l => l.pillarId === 'oxford');
-      } else if (lower.includes('قواعد') || lower.includes('grammar')) {
-        matchedLesson = allCatalogLessons.find(l => l.pillarId === 'grammar');
-      } else if (lower.includes('قراءة') || lower.includes('reading')) {
-        matchedLesson = allCatalogLessons.find(l => l.pillarId === 'reading');
-      } else if (lower.includes('محادثة') || lower.includes('speaking') || lower.includes('conversation')) {
-        matchedLesson = allCatalogLessons.find(l => l.pillarId === 'conversation');
-      } else if (lower.includes('تعبير') || lower.includes('كتابة') || lower.includes('writing')) {
-        matchedLesson = allCatalogLessons.find(l => l.pillarId === 'writing');
-      } else if (lower.includes('نطق') || lower.includes('صوتيات') || lower.includes('pronunciation')) {
-        matchedLesson = allCatalogLessons.find(l => l.pillarId === 'pronunciation');
-      } else if (lower.includes('جرعة') || lower.includes('daily dose')) {
-        matchedLesson = allCatalogLessons.find(l => l.pillarId === 'daily_dose');
-      }
-
-      // Add user message
-      const userMsg: MessageItem = {
-        id: `msg_user_${Date.now()}`,
-        role: 'user',
-        text: text,
-        timestamp: Date.now()
-      };
-      setMessages(prev => [...prev, userMsg]);
-      setInputText('');
-
-      if (matchedLesson) {
-        handleSelectCurriculumLesson(matchedLesson);
-        return;
-      }
-
-      // General curriculum inquiry / linking request
-      setIsCurriculumModalOpen(true);
-      const saraReplyMsg: MessageItem = {
-        id: `msg_sara_${Date.now()}`,
-        role: 'sara',
-        text: isRtl
-          ? 'أهلاً بك يا بطل! 🌟 تم ربط سارة بجميع مناهج الأكاديمية بالكامل (القواعد، القراءة، المحادثة، التعبير، أكسفورد، كتب تطوير الذات العالمية كالعادات الذرية، الصوتيات، والدروس المرئية). فتحت لك نافذة المناهج الآن، اختر أي منهج وسأشرحه لك فوراً بالصوت والسبورة الذكية! 📚👩‍🏫📐'
-          : 'Welcome! I have connected to all academy curriculums (Grammar, Reading, Conversation, Oxford Discover, Bestseller Books like Atomic Habits, Pronunciation, and Video Lessons). I have opened the curriculum catalogue for you—pick any lesson and I will teach it on the whiteboard with audio! 📚👩‍🏫📐',
-        timestamp: Date.now()
-      };
-      setMessages(prev => [...prev, saraReplyMsg]);
-      if (voiceEnabled) {
-        playSaraVoice(isRtl
-          ? 'أهلاً بك! ربطت لك جميع مناهج الأكاديمية، فتحت لك النافذة لتختار أي درس وسأشرحه لك فوراً على السبورة الذكية 🌸'
-          : 'Welcome! I am connected to all academy curriculums. Pick any lesson and let us learn together! 🌸'
-        );
       }
       return;
     }
@@ -3009,16 +2876,12 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           preferredLang: activeLang,
           timerDurationMinutes: timerDurationMinutes || 10,
           timerSecondsLeft: timerSecondsLeft,
-          activeCurriculum: activeCurriculumLesson ? {
-            id: activeCurriculumLesson.id,
-            pillarId: activeCurriculumLesson.pillarId,
-            courseLabelAr: activeCurriculumLesson.courseLabelAr,
-            courseLabelEn: activeCurriculumLesson.courseLabelEn,
-            titleAr: activeCurriculumLesson.titleAr,
-            titleEn: activeCurriculumLesson.titleEn,
-            level: activeCurriculumLesson.level,
-            descriptionAr: activeCurriculumLesson.descriptionAr,
-            descriptionEn: activeCurriculumLesson.descriptionEn
+          scenarioDetails: activeRolePlay ? {
+            id: activeRolePlay.id,
+            title: isRtl ? activeRolePlay.titleAr : activeRolePlay.titleEn,
+            roleSara: isRtl ? activeRolePlay.roleSaraAr : activeRolePlay.roleSaraEn,
+            roleStudent: isRtl ? activeRolePlay.roleStudentAr : activeRolePlay.roleStudentEn,
+            location: activeRolePlay.location
           } : undefined
         })
       });
@@ -3246,19 +3109,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             >
               <span className="text-xs">🌐</span>
               <span className="text-[11px] font-black">{activeLang === 'ar' ? 'EN' : 'عربي'}</span>
-            </button>
-
-            {/* Academy Curriculums Hub Button (Mobile) */}
-            <button
-              onClick={() => setIsCurriculumModalOpen(true)}
-              className={`p-2 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-center ${
-                activeCurriculumLesson
-                  ? 'bg-amber-100 text-amber-950 border-[#C49E3A] ring-1 ring-amber-400'
-                  : 'bg-amber-50 hover:bg-amber-100 text-[#002147] border-amber-300'
-              }`}
-              title={isRtl ? 'مناهج الأكاديمية' : 'Curriculums'}
-            >
-              <BookOpen size={15} className="text-[#C49E3A]" />
             </button>
 
             {/* Live voice quick button */}
@@ -3493,43 +3343,17 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               <span className="hidden sm:inline lg:hidden">{isRtl ? 'الأرشيف' : 'Archive'}</span>
             </button>
 
-            {/* 📚 Academy Curriculums Hub Button */}
+            {/* 📚 SARA EXCLUSIVE CURRICULUMS BUTTON (SUPER PROMINENT) */}
             <button
-              onClick={() => setIsCurriculumModalOpen(true)}
-              className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
-                activeCurriculumLesson
-                  ? 'bg-amber-100 text-amber-950 border-[#C49E3A] ring-2 ring-amber-300/50 shadow-md'
-                  : 'bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 text-[#002147] border-amber-300'
-              }`}
-              title={isRtl ? 'استعراض واختيار مناهج الأكاديمية لتشرحها سارة بالصوت والسبورة 📚' : 'Browse Academy Curriculums'}
+              onClick={() => handleOpenCurriculum('all')}
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-2xl border-2 border-amber-400 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-300 hover:from-amber-300 hover:to-yellow-200 text-slate-950 font-black text-xs sm:text-sm transition-all cursor-pointer shadow-lg active:scale-95 shrink-0 ring-2 ring-amber-300/60"
+              title={isRtl ? 'مناهج سارة التخصصية الجديدة المستقلة: القواعد، المحادثة، القراءة والنطق، الكتابة' : "Sara's Independent Curriculums: Grammar, Speaking, Reading, Writing"}
             >
-              <BookOpen size={14} className="text-[#C49E3A]" />
-              <span className="hidden lg:inline">{isRtl ? 'مناهج الأكاديمية 📚' : 'Curriculums 📚'}</span>
-              <span className="hidden sm:inline lg:hidden">{isRtl ? 'المناهج 📚' : 'Curricula'}</span>
-              {activeCurriculumLesson && (
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-              )}
-            </button>
-
-            {/* 🗓️ Smart Academic Study Plan Button */}
-            <button
-              onClick={() => {
-                fetchActiveStudyPlan();
-                setIsStudyPlanModalOpen(true);
-              }}
-              className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
-                activeStudyPlan
-                  ? 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-950 border-blue-400 ring-2 ring-blue-300/40 shadow-xs'
-                  : 'bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-[#002147] border-blue-300'
-              }`}
-              title={isRtl ? 'الخطة الأكاديمية والجدول الدراسي الذكي 🗓️' : 'Smart Academic Study Plan 🗓️'}
-            >
-              <CalendarDays size={14} className="text-blue-600" />
-              <span className="hidden lg:inline">{isRtl ? 'الخطة الدراسية 🗓️' : 'Study Plan 🗓️'}</span>
-              <span className="hidden sm:inline lg:hidden">{isRtl ? 'الخطة 🗓️' : 'Plan 🗓️'}</span>
-              {activeStudyPlan && (
-                <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-              )}
+              <span className="text-base sm:text-lg animate-bounce">📚</span>
+              <span className="font-black">{isRtl ? 'مناهج سارة الجديدة' : "Sara's Curricula"}</span>
+              <span className="px-2 py-0.5 rounded-full bg-slate-950 text-amber-300 text-[10px] font-black">
+                {isRtl ? '4 مسارات ✨' : '4 Tracks ✨'}
+              </span>
             </button>
 
             {/* Placement Test Trigger Button */}
@@ -3540,7 +3364,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   ? 'bg-[#002147] text-amber-300 border-amber-400 ring-2 ring-amber-300/40 animate-pulse'
                   : 'bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-[#002147] border-blue-300'
               }`}
-              title={isRtl ? 'اختبار تحديد المستوى الشامل (محادثة + 5 أسئلة + سبلنغ + ربط المناهج)' : 'Comprehensive Placement Test'}
+              title={isRtl ? 'اختبار تحديد المستوى الشامل (محادثة + 5 أسئلة + سبلنغ)' : 'Comprehensive Placement Test'}
             >
               <Target size={15} className={placementState.isActive ? 'text-amber-300' : 'text-blue-600'} />
               <span className="hidden lg:inline">{isRtl ? 'تحديد المستوى 🎯' : 'Placement Test 🎯'}</span>
@@ -3731,6 +3555,15 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               <span>{isRtl ? 'السبورة' : 'Board'}</span>
             </button>
 
+            {/* Curriculums Tab on Mobile */}
+            <button
+              onClick={() => handleOpenCurriculum('all')}
+              className="py-1.5 px-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer bg-amber-400 text-slate-950 shadow-xs"
+            >
+              <span>📚</span>
+              <span>{isRtl ? 'المناهج' : 'Curricula'}</span>
+            </button>
+
             {/* Sara 3D Tab */}
             <button
               onClick={() => {
@@ -3769,6 +3602,80 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       {/* 2. MAIN CONTENT AREA (BOARD + CHAT) */}
       {/* ======================================================== */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-3 sm:p-5 flex flex-col gap-4 overflow-hidden">
+        
+        {/* ======================================================== */}
+        {/* SARA'S 4 CORE PILLARS & FLUENCY ACTION BAR (ALWAYS VISIBLE) */}
+        {/* ======================================================== */}
+        <div className="bg-gradient-to-r from-amber-500/15 via-white to-amber-500/15 backdrop-blur-md border-2 border-amber-400 rounded-3xl p-3.5 sm:p-4 shadow-lg flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 flex items-center justify-center text-xl font-black shadow-md shrink-0">
+              📚
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-sm font-black text-[#002147] flex items-center gap-1.5 flex-wrap">
+                <span>{isRtl ? 'مناهج سارة التخصصية المستقلة' : "Sara's Independent Curriculums"}</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black shadow-2xs">
+                  {isRtl ? '4 مسارات للطلاقة ✨' : '4 Fluency Tracks ✨'}
+                </span>
+              </h3>
+              <p className="text-[10px] sm:text-[11px] text-slate-600 font-semibold hidden sm:block">
+                {isRtl ? 'اختر أي مسار تخصصي لتبدأ سارة بشرحه بالصوت والكتابة على السبورة الذكية 👩‍🏫' : 'Choose a track for Sara to teach on the smart whiteboard with voice 👩‍🏫'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar w-full sm:w-auto justify-start sm:justify-end pb-0.5">
+            {/* 1. Grammar */}
+            <button
+              onClick={() => handleOpenCurriculum('grammar')}
+              className="px-3 py-1.5 rounded-xl bg-blue-100 hover:bg-blue-200 text-blue-950 border border-blue-300 font-black text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shadow-xs shrink-0"
+              title={isRtl ? 'منهج القواعد التحدثية السريعة' : 'Spoken Grammar & Fast Patterns'}
+            >
+              <span>🧠</span>
+              <span>{isRtl ? 'القواعد التحدثية' : 'Spoken Grammar'}</span>
+            </button>
+
+            {/* 2. Conversation & Speaking */}
+            <button
+              onClick={() => handleOpenCurriculum('conversation')}
+              className="px-3 py-1.5 rounded-xl bg-cyan-100 hover:bg-cyan-200 text-cyan-950 border border-cyan-300 font-black text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shadow-xs shrink-0"
+              title={isRtl ? 'منهج المحادثة والطلاقة التفاعلية' : 'Active Conversation & Fluency'}
+            >
+              <span>💬</span>
+              <span>{isRtl ? 'المحادثة والطلاقة' : 'Active Fluency'}</span>
+            </button>
+
+            {/* 3. Reading & Phonetics */}
+            <button
+              onClick={() => handleOpenCurriculum('reading')}
+              className="px-3 py-1.5 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-950 border border-emerald-300 font-black text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shadow-xs shrink-0"
+              title={isRtl ? 'منهج القراءة التعبيرية والنطق الصوتي' : 'Expressive Reading & Phonetics'}
+            >
+              <span>📖</span>
+              <span>{isRtl ? 'القراءة والنطق' : 'Reading & Phonetics'}</span>
+            </button>
+
+            {/* 4. Writing */}
+            <button
+              onClick={() => handleOpenCurriculum('writing')}
+              className="px-3 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-950 border border-purple-300 font-black text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shadow-xs shrink-0"
+              title={isRtl ? 'منهج الكتابة التعبيرية الحوارية' : 'Conversational Writing'}
+            >
+              <span>✍️</span>
+              <span>{isRtl ? 'الكتابة التعبيرية' : 'Writing'}</span>
+            </button>
+
+            {/* 5. All Curriculums Hub */}
+            <button
+              onClick={() => handleOpenCurriculum('all')}
+              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#002147] to-[#0d3b66] hover:from-[#093568] hover:to-[#002147] text-amber-300 font-black text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shadow-md shrink-0 border border-amber-400/40"
+              title={isRtl ? 'استعراض كافة مناهج سارة التخصصية' : "Browse all Sara's curricula"}
+            >
+              <span>🌐</span>
+              <span>{isRtl ? 'كل مناهج سارة ➔' : 'All Curriculums ➔'}</span>
+            </button>
+          </div>
+        </div>
         
         {/* ======================================================== */}
         {/* 2A-000. ACTIVE ACADEMIC STUDY PLAN BANNER (HUD) */}
@@ -3848,143 +3755,56 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         )}
 
         {/* ======================================================== */}
-        {/* 2A-00. ACTIVE ACADEMY CURRICULUM LESSON BANNER */}
+        {/* 2A-00. FEATURED DAILY SCENARIO QUEST BANNER */}
         {/* ======================================================== */}
-        {activeCurriculumLesson && (
+        {!activeRolePlay && todayScheduledLesson && !isStudyPlanBannerDismissed && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-r from-amber-500/15 via-amber-400/25 to-amber-500/15 border-2 border-amber-400/70 rounded-3xl p-3 sm:p-4 shadow-xs flex items-center justify-between gap-3 flex-wrap"
+            className="bg-gradient-to-r from-[#002147] via-[#093568] to-[#002147] text-white border-2 border-amber-400/60 rounded-3xl p-3.5 sm:p-4 shadow-lg flex items-center justify-between gap-3 flex-wrap"
           >
-            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-              <div className="w-10 h-10 rounded-2xl bg-[#002147] text-amber-300 flex items-center justify-center text-lg shrink-0 shadow-xs">
-                📚
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="w-11 h-11 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center text-2xl shrink-0 shadow-md border border-white/40">
+                {todayScheduledLesson.scenario?.badge || '🎮'}
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#002147] text-amber-300">
-                    {activeCurriculumLesson.level}
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                    {isRtl ? 'تحدي سيناريو اليوم 🌟' : "Today's Scenario Quest 🌟"}
                   </span>
-                  <span className="text-xs sm:text-sm font-black text-[#002147] truncate">
-                    {isRtl ? activeCurriculumLesson.titleAr : activeCurriculumLesson.titleEn}
-                  </span>
-                  <span className="text-[11px] text-slate-600 font-bold hidden sm:inline">
-                    • {isRtl ? activeCurriculumLesson.courseLabelAr : activeCurriculumLesson.courseLabelEn}
+                  <span className="text-xs sm:text-sm font-black text-white truncate">
+                    {isRtl ? todayScheduledLesson.titleAr : todayScheduledLesson.titleEn}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#002147] text-amber-300 font-black text-[10px] shadow-2xs">
-                    <span>📚</span>
-                    <span>{isRtl ? `دروس اليوم: درس ${currentDailyLessonIndex + 1} من ${todayScheduledLessons.length}` : `Today: Lesson ${currentDailyLessonIndex + 1} of ${todayScheduledLessons.length}`}</span>
-                  </div>
-
-                  {/* Daily Target Switcher (1, 2, or 3 lessons per day) */}
-                  <div className="flex items-center gap-1 bg-white/80 border border-amber-300/80 rounded-lg p-0.5 text-[10px]">
-                    <span className="text-slate-500 font-bold px-1">{isRtl ? 'المقرر:' : 'Daily:'}</span>
-                    {[1, 2, 3].map((num) => (
-                      <button
-                        key={num}
-                        onClick={() => {
-                          setDailyLessonsTarget(num);
-                          try {
-                            localStorage.setItem('sara_daily_lessons_target', String(num));
-                          } catch (_) {}
-                        }}
-                        className={`px-1.5 py-0.5 rounded font-black transition-all cursor-pointer ${
-                          dailyLessonsTarget === num
-                            ? 'bg-[#002147] text-amber-300 shadow-2xs'
-                            : 'text-slate-600 hover:bg-amber-100'
-                        }`}
-                        title={isRtl ? `تحديد ${num} دروس لليوم` : `${num} lessons per day`}
-                      >
-                        {num}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <p className="text-[11px] text-slate-600 truncate mt-0.5">
-                  {isRtl ? 'المنهج المشروح حالياً مع سارة بالصوت والكتابة على السبورة الذكية 👩‍🏫📐' : 'Active curriculum lesson being explained by Sara'}
+                <p className="text-[11px] text-slate-300 truncate mt-0.5">
+                  {isRtl 
+                    ? 'شرح حقيقي + مفردات وقواعد + تمارين واختبار إتقان قبل بدء المحاكاة بالصوت! 🚀' 
+                    : 'Real explanation, vocab & grammar, exercises and mastery quiz before voice role-play! 🚀'}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
-              {isSessionTimeUp || timerSecondsLeft === 0 ? (
-                <button
-                  onClick={() => {
-                    setIsWhiteboardOpen(true);
-                    setCurrentWhiteboardPageIndex(5);
-                    if (voiceEnabled) {
-                      playSaraVoice(isRtl
-                        ? 'انطلق الآن إلى اختبار الإتقان على السبورة الذكية لحساب درجتك وتسجيل النتيجة 🎯'
-                        : 'Go to the mastery quiz on the whiteboard now to calculate your score and save results 🎯');
-                    }
-                  }}
-                  disabled={isSavingLessonResult}
-                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:brightness-110 text-white font-black text-xs transition-all cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95 border border-emerald-400/50"
-                  title={isRtl ? 'اكتمل وقت الحصة! الانتقال للاختبار وحفظ النتيجة 🎓' : 'Time is up! Go to Quiz & Record Result 🎓'}
-                >
-                  <Trophy size={14} className="text-amber-300 animate-bounce" />
-                  <span>{isRtl ? 'اختبار الإتقان وإنهاء الدرس 🎯' : 'Mastery Quiz & Finish 🎯'}</span>
-                </button>
-              ) : (
-                <>
-                  <div className="px-2.5 py-1 rounded-xl bg-amber-400/20 text-[#002147] font-black text-xs flex items-center gap-1.5 border border-amber-400/50">
-                    <Clock size={13} className="text-amber-600 animate-pulse" />
-                    <span>{isRtl ? `الحصة مستمرة: باقي ${formatTimerDisplay(timerSecondsLeft)}` : `Session in progress: ${formatTimerDisplay(timerSecondsLeft)}`}</span>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setIsWhiteboardOpen(true);
-                      setCurrentWhiteboardPageIndex(5);
-                      if (voiceEnabled) {
-                        playSaraVoice(isRtl
-                          ? 'لإنهاء الدرس مبكراً، يرجى إكمال اختبار الإتقان على السبورة أولاً لرصد نتيجتك الحقيقية 🎯'
-                          : 'To finish early, please complete the mastery quiz on the whiteboard first to measure your real score 🎯');
-                      }
-                    }}
-                    disabled={isSavingLessonResult}
-                    className="px-2.5 py-1.5 rounded-xl bg-white/70 hover:bg-white text-slate-600 hover:text-slate-900 font-bold text-xs transition-all cursor-pointer flex items-center gap-1 border border-slate-300/80 active:scale-95"
-                    title={isRtl ? 'الانتقال للاختبار وإنهاء الدرس مبكراً' : 'Go to quiz and finish early'}
-                  >
-                    <Trophy size={12} className="text-amber-500" />
-                    <span>{isRtl ? 'اختبار وإنهاء مبكر 🎯' : 'Quiz & finish early 🎯'}</span>
-                  </button>
-                </>
-              )}
-              <div className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 text-slate-800 font-bold text-xs border border-slate-300">
-                <span>📄</span>
-                <span>{isRtl ? `صفحة ${currentWhiteboardPageIndex + 1} من 6` : `Page ${currentWhiteboardPageIndex + 1} of 6`}</span>
-              </div>
+            <div className="flex items-center gap-2 shrink-0 flex-wrap">
               <button
                 onClick={() => {
-                  setIsWhiteboardOpen(true);
-                  if (currentWhiteboardPageIndex < 5) {
-                    setCurrentWhiteboardPageIndex(prev => prev + 1);
+                  setIsRolePlayModalOpen(true);
+                }}
+                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-300 hover:brightness-105 active:scale-95 text-slate-950 font-black text-xs transition-all cursor-pointer flex items-center gap-1.5 shadow-md"
+              >
+                <BookOpen size={13} className="text-slate-950" />
+                <span>{isRtl ? 'الشرح والتمارين 📖' : 'Lesson & Exercises 📖'}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  if (todayScheduledLesson.scenario) {
+                    handleStartRolePlayScenario(todayScheduledLesson.scenario);
                   }
                 }}
-                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:brightness-105 active:scale-95 text-slate-950 font-black text-xs transition-all cursor-pointer flex items-center gap-1 shadow-sm ring-2 ring-amber-300/40"
-                title={isRtl ? 'اقلب صفحة السبورة للشرح التالي' : 'Turn whiteboard slide'}
+                className="px-3 py-2 rounded-xl bg-emerald-500/80 hover:bg-emerald-600 text-white font-bold text-xs transition-all cursor-pointer flex items-center gap-1 shadow-sm"
               >
-                <span>📄</span>
-                <span>{isRtl ? 'اقلب الصفحة ➔' : 'Turn Page ➔'}</span>
-              </button>
-              <button
-                onClick={() => {
-                  setIsWhiteboardOpen(true);
-                }}
-                className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs transition-all cursor-pointer flex items-center gap-1 shadow-2xs active:scale-95"
-                title={isRtl ? 'فتح السبورة الذكية والشرح خطوة بخطوة' : 'Open whiteboard step-by-step'}
-              >
-                <span>📐🎙️</span>
-                <span>{isRtl ? 'السبورة خطوة بخطوة' : 'Step-by-step'}</span>
-              </button>
-              <button
-                onClick={() => setIsCurriculumModalOpen(true)}
-                className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-[#002147] border border-slate-300 font-black text-xs transition-all cursor-pointer shadow-2xs"
-                title={isRtl ? 'تغيير المنهج واختيار درس آخر' : 'Change curriculum lesson'}
-              >
-                <span>{isRtl ? 'تغيير المنهج 🔄' : 'Change 🔄'}</span>
+                <Play size={13} className="fill-current" />
+                <span>{isRtl ? 'بدء المحاكاة 🚀' : 'Start Simulation'}</span>
               </button>
             </div>
           </motion.div>
@@ -4019,16 +3839,65 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   </h2>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] bg-white/10 px-2.5 py-1 rounded-xl text-slate-200 font-bold border border-white/10 flex items-center gap-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[11px] bg-white/10 px-2 py-1 rounded-xl text-slate-200 font-bold border border-white/10 flex items-center gap-1">
                   <span>📍</span>
                   <span>{activeRolePlay.location}</span>
                 </span>
+
+                <button
+                  onClick={() => {
+                    setRolePlayInitialId(activeRolePlay.id);
+                    setRolePlayInitialTab('lesson');
+                    setIsRolePlayModalOpen(true);
+                  }}
+                  className="px-2.5 py-1 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl text-xs font-black transition-all cursor-pointer shadow-xs flex items-center gap-1"
+                  title={isRtl ? 'عرض الشرح والمفردات والقواعد' : 'View Lesson'}
+                >
+                  <BookOpen size={12} />
+                  <span>{isRtl ? 'الشرح 📖' : 'Lesson'}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setRolePlayInitialId(activeRolePlay.id);
+                    setRolePlayInitialTab('exercises');
+                    setIsRolePlayModalOpen(true);
+                  }}
+                  className="px-2.5 py-1 bg-blue-500/80 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs flex items-center gap-1"
+                  title={isRtl ? 'التمارين التطبيقية التفاعلية' : 'Practice Exercises'}
+                >
+                  <span>✍️</span>
+                  <span>{isRtl ? 'تمارين ✍️' : 'Drills'}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setRolePlayInitialId(activeRolePlay.id);
+                    setRolePlayInitialTab('quiz');
+                    setIsRolePlayModalOpen(true);
+                  }}
+                  className="px-2.5 py-1 bg-emerald-500/80 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs flex items-center gap-1"
+                  title={isRtl ? 'اختبار الإتقان للسيناريو' : 'Mastery Quiz'}
+                >
+                  <Trophy size={12} />
+                  <span>{isRtl ? 'اختبار 🏆' : 'Quiz'}</span>
+                </button>
+
+                <button
+                  onClick={() => setIsWhiteboardOpen(true)}
+                  className="px-2.5 py-1 bg-white/15 hover:bg-white/25 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs flex items-center gap-1 border border-white/15"
+                  title={isRtl ? 'فتح سبورة سارة الذكية' : 'Open Board'}
+                >
+                  <span>📋</span>
+                  <span>{isRtl ? 'السبورة' : 'Board'}</span>
+                </button>
+
                 <button
                   onClick={handleEndRolePlay}
                   className="px-2.5 py-1 bg-rose-500/80 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs"
                 >
-                  {isRtl ? 'إنهاء السيناريو ✕' : 'Exit Quest ✕'}
+                  {isRtl ? 'إنهاء ✕' : 'Exit ✕'}
                 </button>
               </div>
             </div>
@@ -4409,7 +4278,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                       {isRtl ? 'اختبار تحديد المستوى الشامل مع سارة' : 'Comprehensive Placement Test with Sara'}
                     </h3>
                     <p className="text-[10px] text-amber-200/80">
-                      {isRtl ? 'محادثة شفهية + 5 أسئلة + سبلنغ + ربط بالمناهج' : 'Speaking + 5 Questions + Spelling + Curriculum Link'}
+                      {isRtl ? 'محادثة شفهية + 5 أسئلة + سبلنغ' : 'Speaking + 5 Questions + Spelling'}
                     </p>
                   </div>
                 </div>
@@ -4900,55 +4769,45 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                     </div>
                   </div>
 
-                  {/* LINKED EXISTING CURRICULA ACCORDING TO DIAGNOSED LEVEL */}
+                  {/* SARA PERSONALIZED CONVERSATIONAL COACHING ROADMAP */}
                   <div className="bg-black/50 border border-white/15 rounded-2xl p-3.5 space-y-3">
                     <div className="flex items-center gap-2">
-                      <Compass size={16} className="text-[#C49E3A]" />
+                      <Sparkles size={16} className="text-[#C49E3A]" />
                       <h4 className="text-xs sm:text-sm font-black text-[#FDE68A]">
-                        {isRtl ? `وحدات المناهج المعتمدة المخصصة لمستواك (${placementState.diagnosedLevel})` : `Curriculum Units Tailored for ${placementState.diagnosedLevel}`}
+                        {isRtl ? `مسار التدريب الشخصي المعتمد مع سارة (${placementState.diagnosedLevel})` : `Sara's Personalized Coaching Pathway (${placementState.diagnosedLevel})`}
                       </h4>
                     </div>
 
-                    {(() => {
-                      const lvl = placementState.diagnosedLevel || proficiencyLevel.A1;
-                      const rUnit = MASTER_CURRICULUM[CurriculumCategory.READING]?.[lvl]?.[0];
-                      const wUnit = MASTER_CURRICULUM[CurriculumCategory.WRITING]?.[lvl]?.[0];
-                      const gUnit = MASTER_CURRICULUM[CurriculumCategory.GRAMMAR]?.[lvl]?.[0];
-                      const cUnit = MASTER_CURRICULUM[CurriculumCategory.CONVERSATION]?.[lvl]?.[0];
-
-                      return (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                          <div className="bg-white/5 p-2.5 rounded-xl border border-white/10 flex items-start gap-2">
-                            <span className="text-amber-400 text-sm">📖</span>
-                            <div>
-                              <span className="text-[10px] text-slate-400 block">{isRtl ? 'وحدة القراءة والفهم:' : 'Reading Unit:'}</span>
-                              <span className="font-bold text-white">{isRtl ? rUnit?.titleAr : rUnit?.title}</span>
-                            </div>
-                          </div>
-                          <div className="bg-white/5 p-2.5 rounded-xl border border-white/10 flex items-start gap-2">
-                            <span className="text-amber-400 text-sm">📐</span>
-                            <div>
-                              <span className="text-[10px] text-slate-400 block">{isRtl ? 'وحدة القواعد والتراكيب:' : 'Grammar Unit:'}</span>
-                              <span className="font-bold text-white">{isRtl ? gUnit?.titleAr : gUnit?.title}</span>
-                            </div>
-                          </div>
-                          <div className="bg-white/5 p-2.5 rounded-xl border border-white/10 flex items-start gap-2">
-                            <span className="text-amber-400 text-sm">✍️</span>
-                            <div>
-                              <span className="text-[10px] text-slate-400 block">{isRtl ? 'وحدة التعبير والكتابة:' : 'Writing Unit:'}</span>
-                              <span className="font-bold text-white">{isRtl ? wUnit?.titleAr : wUnit?.title}</span>
-                            </div>
-                          </div>
-                          <div className="bg-white/5 p-2.5 rounded-xl border border-white/10 flex items-start gap-2">
-                            <span className="text-amber-400 text-sm">🗣️</span>
-                            <div>
-                              <span className="text-[10px] text-slate-400 block">{isRtl ? 'وحدة المحادثة والطلاقة:' : 'Speaking Unit:'}</span>
-                              <span className="font-bold text-white">{isRtl ? cUnit?.titleAr : cUnit?.title}</span>
-                            </div>
-                          </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                      <div className="bg-white/5 p-2.5 rounded-xl border border-white/10 flex items-start gap-2">
+                        <span className="text-amber-400 text-sm">🎮</span>
+                        <div>
+                          <span className="text-[10px] text-slate-400 block">{isRtl ? 'المحور 1: سيناريوهات المحاكاة الحية' : 'Pillar 1: Interactive Scenarios'}</span>
+                          <span className="font-bold text-white">{isRtl ? '16 سيناريو واقعي يشمل شرح وقواعد وتمارين واختبارات' : '16 real-life quests with lessons, drills & quizzes'}</span>
                         </div>
-                      );
-                    })()}
+                      </div>
+                      <div className="bg-white/5 p-2.5 rounded-xl border border-white/10 flex items-start gap-2">
+                        <span className="text-purple-400 text-sm">🎙️</span>
+                        <div>
+                          <span className="text-[10px] text-slate-400 block">{isRtl ? 'المحور 2: مختبر مخارج الحروف الذكي' : 'Pillar 2: Phonetic Speech Lab'}</span>
+                          <span className="font-bold text-white">{isRtl ? 'تقييم صوتي دقيق، درجات تفصيلية، ونصائح فورية' : 'Real-time AI voice evaluation, scores & phonetic feedback'}</span>
+                        </div>
+                      </div>
+                      <div className="bg-white/5 p-2.5 rounded-xl border border-white/10 flex items-start gap-2">
+                        <span className="text-emerald-400 text-sm">🗣️</span>
+                        <div>
+                          <span className="text-[10px] text-slate-400 block">{isRtl ? 'المحور 3: محادثة الطلاقة وكسر حاجز الخوف' : 'Pillar 3: Fluency & Fearless Speech'}</span>
+                          <span className="font-bold text-white">{isRtl ? 'حوار حر صوتي وكتابي وتصحيح لطيف للأخطاء' : 'Free voice dialog, gentle correction & confidence building'}</span>
+                        </div>
+                      </div>
+                      <div className="bg-white/5 p-2.5 rounded-xl border border-white/10 flex items-start gap-2">
+                        <span className="text-blue-400 text-sm">📚</span>
+                        <div>
+                          <span className="text-[10px] text-slate-400 block">{isRtl ? 'المحور 4: دورات تطوير الذات والمهارات' : 'Pillar 4: Self-Development Courses'}</span>
+                          <span className="font-bold text-white">{isRtl ? 'عادات التميز، الذكاء العاطفي، وتلخيصات الكتب العالمية' : 'Executive habits, mindset growth & bestselling books'}</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Direct Action Navigation Buttons */}
@@ -4956,48 +4815,43 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                     <button
                       onClick={() => {
                         cancelAllSpeech();
-                        onNavigate('reading-lab');
+                        setPlacementState(prev => ({ ...prev, isActive: false }));
+                        setIsRolePlayModalOpen(true);
                       }}
-                      className="flex-1 min-w-[130px] px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                      className="flex-1 min-w-[130px] px-3 py-2 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                      <span>📖 {isRtl ? 'مختبر القراءة' : 'Reading Lab'}</span>
+                      <span>🎮 {isRtl ? 'استعراض السيناريوهات (16)' : 'Scenarios (16)'}</span>
                     </button>
                     <button
                       onClick={() => {
                         cancelAllSpeech();
-                        onNavigate('grammar-academy');
-                      }}
-                      className="flex-1 min-w-[130px] px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                    >
-                      <span>📐 {isRtl ? 'أكاديمية القواعد' : 'Grammar Academy'}</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        cancelAllSpeech();
-                        onNavigate('writing-spelling-studio');
+                        setPlacementState(prev => ({ ...prev, isActive: false }));
+                        setPhoneticTargetSentence('Welcome to Basim Alkhalil Academy');
+                        setIsPhoneticModalOpen(true);
                       }}
                       className="flex-1 min-w-[130px] px-3 py-2 bg-purple-600 hover:bg-purple-500 text-white font-black text-xs rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                      <span>✍️ {isRtl ? 'استوديو التعبير' : 'Writing Studio'}</span>
+                      <span>🎙️ {isRtl ? 'مختبر النطق الصوتي' : 'Speech Lab'}</span>
                     </button>
                     <button
                       onClick={() => {
                         cancelAllSpeech();
-                        onNavigate('pronunciation-lab');
+                        setPlacementState(prev => ({ ...prev, isActive: false }));
+                        setIsNotebookModalOpen(true);
                       }}
                       className="flex-1 min-w-[130px] px-3 py-2 bg-amber-600 hover:bg-amber-500 text-white font-black text-xs rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                      <span>🎙️ {isRtl ? 'معمل النطق' : 'Pronunciation'}</span>
+                      <span>📓 {isRtl ? 'دفتر الأخطاء والملاحظات' : 'My Notebook'}</span>
                     </button>
                     <button
                       onClick={() => {
                         setPlacementState(prev => ({ ...prev, isActive: false }));
-                        handleSendMessage(isRtl ? `أنا جاهز يا سارة لنبدأ درسي الأول في مستوى ${placementState.diagnosedLevel}!` : `Sara, let us start my first lesson in level ${placementState.diagnosedLevel}!`);
+                        handleSendMessage(isRtl ? `أنا جاهز يا سارة لنبدأ تدريبي الشخصي في مستوى ${placementState.diagnosedLevel}!` : `Sara, let us start my coaching session in level ${placementState.diagnosedLevel}!`);
                       }}
                       className="w-full px-4 py-2.5 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-md hover:scale-[1.01] transition-all cursor-pointer flex items-center justify-center gap-2"
                     >
                       <Sparkles size={16} className="text-slate-900" />
-                      <span>{isRtl ? `ابدأ درسك الأول في مستوى [${placementState.diagnosedLevel}] مع سارة الآن 🚀` : `Start First Lesson with Sara Now 🚀`}</span>
+                      <span>{isRtl ? `ابدأ جلستك الأولى في مستوى [${placementState.diagnosedLevel}] مع سارة الآن 🚀` : `Start Coaching with Sara Now 🚀`}</span>
                     </button>
                   </div>
                 </div>
@@ -5221,27 +5075,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               <span>{activeLang === 'ar' ? 'English 🇬🇧' : 'عربي 🇸🇦'}</span>
             </button>
 
-            {/* 📚 Academy Curriculums Selection Chip */}
+            {/* 📚 SARA'S EXCLUSIVE CURRICULUMS CHIP */}
             <button
-              onClick={() => setIsCurriculumModalOpen(true)}
-              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-amber-400 bg-amber-100/70 hover:bg-amber-100 text-[#002147] shrink-0 transition-all cursor-pointer font-black flex items-center gap-1.5 text-[10px] sm:text-xs shadow-xs active:scale-95"
-              title={isRtl ? 'اختر أي منهج لتشرحه سارة' : 'Choose a curriculum for Sara to explain'}
+              onClick={() => handleOpenCurriculum('all')}
+              className="px-3 py-1 sm:py-1.5 rounded-xl border-2 border-amber-400 bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 hover:from-amber-200 hover:to-yellow-200 text-slate-950 shrink-0 transition-all cursor-pointer font-black flex items-center gap-1.5 text-[10px] sm:text-xs shadow-md active:scale-95"
+              title={isRtl ? 'مناهج سارة التخصصية المستقلة للطلاقة' : "Sara's Exclusive Curriculums"}
             >
               <span>📚</span>
-              <span>{isRtl ? 'اختر منهجاً لتشرحه سارة' : 'Choose Curriculum'}</span>
-            </button>
-
-            {/* 🗓️ Smart Academic Study Plan Chip */}
-            <button
-              onClick={() => {
-                fetchActiveStudyPlan();
-                setIsStudyPlanModalOpen(true);
-              }}
-              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-blue-400 bg-blue-100/70 hover:bg-blue-100 text-[#002147] shrink-0 transition-all cursor-pointer font-black flex items-center gap-1.5 text-[10px] sm:text-xs shadow-xs active:scale-95"
-              title={isRtl ? 'الخطة الأكاديمية والجدول الدراسي الذكي' : 'Smart Study Planner'}
-            >
-              <span>🗓️</span>
-              <span>{isRtl ? 'الخطة الدراسية 🗓️' : 'Study Plan 🗓️'}</span>
+              <span>{isRtl ? 'مناهج سارة الجديدة (4 مسارات) ✨' : "Sara's Curricula (4 Tracks) ✨"}</span>
             </button>
             <button
               onClick={toggleLiveVoiceMode}
@@ -5336,6 +5177,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         quizFeedback={quizFeedback}
         onFinishLesson={(score, total) => handleCompleteAndSaveLesson(score, total)}
         isLessonActive={!!activeCurriculumLesson}
+        onOpenCurriculum={() => handleOpenCurriculum('all')}
         currentPageIndex={currentWhiteboardPageIndex}
         onPageIndexChange={handleWhiteboardPageIndexChange}
         onRequestOnBoard={async (reqText) => {
@@ -5352,7 +5194,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         isSara3DOpen={isSara3DOpen}
         currentLang={activeLang}
         onToggleLang={() => handleToggleLanguage()}
-        onOpenCurriculum={() => setIsCurriculumModalOpen(true)}
         dailyLessonInfo={{
           current: currentDailyLessonIndex + 1,
           total: todayScheduledLessons.length,
@@ -5373,7 +5214,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         isExplainingWhiteboard={isSpeaking && isWhiteboardOpen}
         currentLang={activeLang}
         onToggleLang={() => handleToggleLanguage()}
-        onOpenCurriculum={() => setIsCurriculumModalOpen(true)}
         onCharacterClick={() => {
           if (!isSpeaking) {
             const greetings = isRtl
@@ -5483,6 +5323,24 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
               {/* Tools Grid */}
               <div className="grid grid-cols-2 gap-2.5 py-3 overflow-y-auto max-h-[60dvh] no-scrollbar">
+                {/* 0. Featured: Sara Specialized Curriculums (Full width) */}
+                <button
+                  onClick={() => {
+                    setShowMobileToolsDrawer(false);
+                    handleOpenCurriculum('all');
+                  }}
+                  className="col-span-2 p-3.5 rounded-2xl border-2 border-amber-400 bg-gradient-to-r from-amber-400/20 via-amber-100 to-amber-400/20 text-[#002147] text-start flex items-center justify-between gap-3 transition-all cursor-pointer shadow-xs active:scale-98"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl p-2 rounded-xl bg-amber-400 text-slate-950 shadow-xs">📚</span>
+                    <div>
+                      <div className="text-xs font-black text-[#002147]">{isRtl ? 'مناهج سارة التخصصية 📚' : "Sara's Core Curriculums"}</div>
+                      <div className="text-[10px] text-slate-600 font-medium">{isRtl ? 'القواعد، المحادثة، الكتابة، القراءة' : 'Grammar, Speaking, Writing, Reading'}</div>
+                    </div>
+                  </div>
+                  <span className="text-xs font-black text-amber-700">➔</span>
+                </button>
+
                 {/* 1. Placement Test */}
                 <button
                   onClick={() => {
@@ -5574,44 +5432,26 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   </div>
                 </button>
 
-                {/* 5. Academy Curricula Selection */}
+                {/* 6. Sara Independent Fluency Curriculums */}
                 <button
                   onClick={() => {
                     setShowMobileToolsDrawer(false);
-                    setIsCurriculumModalOpen(true);
+                    handleOpenCurriculum('all');
                   }}
-                  className="p-3 rounded-2xl border-2 bg-gradient-to-br from-amber-100/70 to-yellow-50 border-amber-300 text-[#002147] hover:bg-amber-100 text-start flex flex-col justify-between gap-2 transition-all cursor-pointer col-span-2"
+                  className="p-3.5 rounded-2xl border-2 bg-gradient-to-br from-amber-100/90 to-yellow-50 border-amber-400 text-slate-950 hover:bg-amber-100 text-start flex flex-col justify-between gap-2 transition-all cursor-pointer col-span-2 shadow-sm"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">📚</span>
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-2xl p-1.5 rounded-xl bg-amber-400 text-slate-950 shadow-2xs">📚</span>
                       <div>
-                        <div className="text-xs font-black">{isRtl ? 'مناهج الأكاديمية التفاعلية' : 'Academy Curriculums'}</div>
-                        <div className="text-[10px] text-slate-600 font-medium">
-                          {isRtl ? 'دروس القواعد، الصوتيات، المحادثة والقصص' : 'Grammar, Phonics, Speaking & Stories'}
+                        <div className="text-xs font-black text-[#002147] flex items-center gap-1.5">
+                          <span>{isRtl ? 'مناهج سارة التخصصية المستقلة للطلاقة' : "Sara's Independent Fluency Curriculums"}</span>
+                          <span className="px-1.5 py-0.2 rounded-full bg-slate-950 text-amber-300 text-[9px] font-black">
+                            {isRtl ? 'جديد ✨' : 'NEW'}
+                          </span>
                         </div>
-                      </div>
-                    </div>
-                    <ChevronRight size={16} className={`text-slate-400 ${isRtl ? 'rotate-180' : ''}`} />
-                  </div>
-                </button>
-
-                {/* 6. Smart Academic Study Plan */}
-                <button
-                  onClick={() => {
-                    setShowMobileToolsDrawer(false);
-                    fetchActiveStudyPlan();
-                    setIsStudyPlanModalOpen(true);
-                  }}
-                  className="p-3 rounded-2xl border-2 bg-gradient-to-br from-blue-100/70 to-indigo-50 border-blue-300 text-[#002147] hover:bg-blue-100 text-start flex flex-col justify-between gap-2 transition-all cursor-pointer col-span-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">🗓️</span>
-                      <div>
-                        <div className="text-xs font-black">{isRtl ? 'الخطة الأكاديمية والجدول الدراسي الذكي' : 'Smart Study Plan & Schedule'}</div>
                         <div className="text-[10px] text-slate-600 font-medium">
-                          {isRtl ? 'جدول زمني مخصص، أيام الدراسة، ودروسك اليومية مع سارة' : 'Custom schedule, study days, and daily lessons with Sara'}
+                          {isRtl ? '4 مسارات: القواعد التحدثية، المحادثة، القراءة والنطق، الكتابة' : '4 Tracks: Spoken Grammar, Speaking, Reading, Writing'}
                         </div>
                       </div>
                     </div>
@@ -5890,12 +5730,13 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   <button
                     onClick={() => {
                       setIsLessonCompletedModalOpen(false);
-                      setIsCurriculumModalOpen(true);
+                      fetchActiveStudyPlan();
+                      setIsStudyPlanModalOpen(true);
                     }}
                     className="w-full py-3 bg-[#002147] hover:bg-[#073060] active:scale-98 text-amber-300 rounded-2xl font-black text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer border border-amber-300/40"
                   >
-                    <BookOpen size={16} />
-                    <span>{isRtl ? 'اختيار الدرس التالي من المناهج 📚' : 'Pick Next Curriculum Lesson 📚'}</span>
+                    <CalendarDays size={16} />
+                    <span>{isRtl ? 'متابعة الخطة الدراسية 🗓️' : 'Continue Study Plan 🗓️'}</span>
                   </button>
 
                   <div className="grid grid-cols-2 gap-2">
@@ -6147,11 +5988,12 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   <button
                     onClick={() => {
                       setIsAllDailyLessonsCompletedModalOpen(false);
-                      setIsCurriculumModalOpen(true);
+                      fetchActiveStudyPlan();
+                      setIsStudyPlanModalOpen(true);
                     }}
                     className="flex-1 py-3 px-4 rounded-2xl bg-[#002147] hover:bg-[#073060] text-amber-300 font-black text-xs sm:text-sm transition-all shadow-md cursor-pointer border border-amber-300/40"
                   >
-                    <span>{isRtl ? 'استكشاف دروس إضافية 📚' : 'Explore Extra Lessons 📚'}</span>
+                    <span>{isRtl ? 'عرض الخطة الدراسية 🗓️' : 'View Study Plan 🗓️'}</span>
                   </button>
 
                   <button
@@ -6218,6 +6060,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         onClose={() => setIsRolePlayModalOpen(false)}
         onStartScenario={handleStartRolePlayScenario}
         isRtl={isRtl}
+        initialScenarioId={rolePlayInitialId}
+        initialTab={rolePlayInitialTab}
       />
 
       {/* 10. Personal Error Notebook, Vocab Bank & Parent Progress Card Modal */}
@@ -6236,15 +6080,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           handleSendMessage(prompt);
         }}
         onSpeakText={(text) => playSaraVoice(text)}
-      />
-
-      {/* 11. Academy Curriculums Explorer & Linking Modal with Sara */}
-      <SaraCurriculumModal
-        isOpen={isCurriculumModalOpen}
-        onClose={() => setIsCurriculumModalOpen(false)}
-        onSelectLesson={handleSelectCurriculumLesson}
-        activeLessonId={activeCurriculumLesson?.id}
-        isRtl={isRtl}
       />
 
       {/* 12. Sara Sessions Archive Modal & Read-Only Viewer */}
@@ -6447,31 +6282,18 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         )}
       </AnimatePresence>
 
-      {/* 13. Smart Academic Study Planner Modal (Exact same as Academy) */}
-      <AnimatePresence>
-        {isStudyPlanModalOpen && (
-          <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-md flex flex-col">
-            <div className="min-h-full flex flex-col bg-slate-50 relative">
-              <StudyPlanner
-                lang={activeLang}
-                userProfile={profile as any}
-                onBack={() => {
-                  setIsStudyPlanModalOpen(false);
-                  fetchActiveStudyPlan();
-                }}
-                isSaraModal={true}
-                onStartWithSara={(curriculumLesson) => {
-                  setIsStudyPlanModalOpen(false);
-                  handleSelectCurriculumLesson(curriculumLesson);
-                }}
-                onNavigateToLesson={(courseId, level, unitId) => {
-                  handleStartPlanLesson({ courseId, level, unitId });
-                }}
-              />
-            </div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* 13. Sara Independent Fluency Curriculum Modal */}
+      <SaraCurriculumModal
+        isOpen={isCurriculumModalOpen}
+        onClose={() => setIsCurriculumModalOpen(false)}
+        onSelectLesson={(lesson) => {
+          setIsCurriculumModalOpen(false);
+          handleSelectCurriculumLesson(lesson);
+        }}
+        activeLessonId={activeCurriculumLesson?.id}
+        initialPillar={curriculumInitialPillar}
+        isRtl={isRtl}
+      />
     </div>
   );
 };

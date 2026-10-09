@@ -109,6 +109,20 @@
         "freezesLeft": { "type": "number" }
       },
       "required": ["current", "longest", "lastActiveDate", "freezesLeft"]
+    },
+    "LessonResult": {
+      "title": "Lesson Result",
+      "description": "Completed lesson score, timing, and progress data for student",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "lessonId": { "type": "string" },
+        "courseId": { "type": "string" },
+        "level": { "type": "string" },
+        "score": { "type": "number" },
+        "total": { "type": "number" }
+      },
+      "required": ["userId", "lessonId"]
     }
   },
   "firestore": {
@@ -191,6 +205,10 @@
     "/streaks/{uid}": {
       "schema": "Streak",
       "description": "Daily learning streak tracking per student"
+    },
+    "/lessonResults/{resultId}": {
+      "schema": "LessonResult",
+      "description": "Logged lesson completion and quiz score results"
     }
   }
 }

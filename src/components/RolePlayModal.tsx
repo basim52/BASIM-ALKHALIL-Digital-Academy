@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   X, 
   Sparkles, 
@@ -13,9 +13,17 @@ import {
   Search,
   ChevronRight,
   Flame,
-  Volume2
+  Volume2,
+  BookOpen,
+  PenTool,
+  Award,
+  Lightbulb,
+  Check,
+  RotateCcw,
+  HelpCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { getScenarioEducationalContent, ScenarioEducationalContent } from '../data/saraScenarioCurriculumData';
 
 export type ScenarioCategory = 'all' | 'gaming' | 'sports' | 'food' | 'adventure' | 'school';
 
@@ -579,17 +587,66 @@ interface RolePlayModalProps {
   onClose: () => void;
   onStartScenario: (scenario: RolePlayScenario) => void;
   isRtl: boolean;
+  initialScenarioId?: string;
+  initialTab?: 'lesson' | 'exercises' | 'quiz' | 'simulate';
 }
 
 export const RolePlayModal: React.FC<RolePlayModalProps> = ({
   isOpen,
   onClose,
   onStartScenario,
-  isRtl
+  isRtl,
+  initialScenarioId,
+  initialTab = 'lesson'
 }) => {
   const [activeCategory, setActiveCategory] = useState<ScenarioCategory>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedScenario, setSelectedScenario] = useState<RolePlayScenario>(ROLE_PLAY_SCENARIOS[0]);
+  const [selectedScenario, setSelectedScenario] = useState<RolePlayScenario>(() => {
+    if (initialScenarioId) {
+      const found = ROLE_PLAY_SCENARIOS.find(s => s.id === initialScenarioId);
+      if (found) return found;
+    }
+    return ROLE_PLAY_SCENARIOS[0];
+  });
+
+  const [activeTab, setActiveTab] = useState<'lesson' | 'exercises' | 'quiz' | 'simulate'>(initialTab);
+
+  // Exercise states
+  const [exerciseAnswers, setExerciseAnswers] = useState<Record<string, number>>({});
+  const [exerciseChecked, setExerciseChecked] = useState<Record<string, boolean>>({});
+  const [exerciseHints, setExerciseHints] = useState<Record<string, boolean>>({});
+
+  // Quiz states
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
+  const [quizSubmitted, setQuizSubmitted] = useState<boolean>(false);
+  const [quizScore, setQuizScore] = useState<number>(0);
+
+  // Sync if initialScenarioId changes
+  useEffect(() => {
+    if (initialScenarioId) {
+      const found = ROLE_PLAY_SCENARIOS.find(s => s.id === initialScenarioId);
+      if (found) {
+        setSelectedScenario(found);
+      }
+    }
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialScenarioId, initialTab]);
+
+  // Reset exercise/quiz states on scenario change
+  useEffect(() => {
+    setExerciseAnswers({});
+    setExerciseChecked({});
+    setExerciseHints({});
+    setQuizAnswers({});
+    setQuizSubmitted(false);
+    setQuizScore(0);
+  }, [selectedScenario.id]);
+
+  const eduContent: ScenarioEducationalContent = useMemo(() => {
+    return getScenarioEducationalContent(selectedScenario.id);
+  }, [selectedScenario.id]);
 
   const categories = useMemo(() => [
     { id: 'all', labelAr: '🌟 الكل', labelEn: '🌟 All (15+)', icon: Sparkles },
@@ -617,35 +674,66 @@ export const RolePlayModal: React.FC<RolePlayModalProps> = ({
     });
   }, [activeCategory, searchQuery]);
 
+  // Audio helper
+  const playAudio = (text: string) => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.92;
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  // Grade quiz
+  const handleGradeQuiz = () => {
+    let correct = 0;
+    eduContent.quiz.forEach(q => {
+      if (quizAnswers[q.id] === q.correctIndex) {
+        correct++;
+      }
+    });
+    const percentage = Math.round((correct / Math.max(1, eduContent.quiz.length)) * 100);
+    setQuizScore(percentage);
+    setQuizSubmitted(true);
+  };
+
+  // Completed exercises count
+  const completedExercisesCount = useMemo(() => {
+    return eduContent.exercises.filter(ex => {
+      return exerciseChecked[ex.id] && exerciseAnswers[ex.id] === ex.correctIndex;
+    }).length;
+  }, [eduContent.exercises, exerciseChecked, exerciseAnswers]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md" dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md" dir={isRtl ? 'rtl' : 'ltr'}>
       <motion.div
         initial={{ opacity: 0, scale: 0.94, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 15 }}
-        className="bg-slate-900 border-2 border-amber-400/40 rounded-3xl shadow-2xl max-w-4xl w-full overflow-hidden text-white flex flex-col max-h-[92vh]"
+        className="bg-slate-900 border-2 border-amber-400/40 rounded-3xl shadow-2xl max-w-5xl w-full overflow-hidden text-white flex flex-col max-h-[94vh]"
       >
         {/* Top Header */}
-        <div className="bg-gradient-to-r from-[#002147] via-[#093568] to-[#002147] px-4 sm:px-6 py-4 border-b border-amber-400/30 flex items-center justify-between shrink-0">
+        <div className="bg-gradient-to-r from-[#002147] via-[#093568] to-[#002147] px-4 sm:px-6 py-3.5 border-b border-amber-400/30 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-400 to-amber-300 text-slate-950 flex items-center justify-center font-black text-2xl shadow-lg shadow-amber-400/20 shrink-0 border border-white/40">
-              🎮
+              {selectedScenario.badge || '🎮'}
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-base sm:text-lg font-black text-white">
-                  {isRtl ? 'استوديو سيناريوهات ومغامرات سارة 🎮' : "Sara's Adventure & Role-Play Hub 🎮"}
+                  {isRtl ? 'سيناريوهات سارة التفاعلية (شرح حقيقي + تمارين + اختبارات) 🎮' : "Sara's Scenarios Hub (Lessons, Exercises & Tests) 🎮"}
                 </h3>
                 <span className="px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-black border border-amber-400/30">
-                  {isRtl ? 'مُصمم ومثالي لسن 12 سنة 🌟' : 'Tailored for 12 Years Old 🌟'}
+                  {isRtl ? 'شرح + تطبيق واقعي 🌟' : 'Full Pedagogical Experience 🌟'}
                 </span>
               </div>
               <p className="text-[11px] sm:text-xs text-amber-200/80 mt-0.5">
                 {isRtl 
-                  ? 'مواقف وتحديات واقعية ممتعة بالصوت والدردشة (ألعاب، كورة، روبوت، فضاء، ومغامرات شبابية) 🚀'
-                  : 'Live authentic English scenarios for middle schoolers: Gaming, Football, STEM, Space, and Hangouts! 🚀'}
+                  ? 'تعلم المفردات والقواعد الذهبية، حل التمارين واجتز الاختبار، ثم خض المحاكاة الحية مع سارة بالصوت! 🚀'
+                  : 'Master vocabulary and golden grammar, solve exercises, pass the quiz, and jump into live voice role-play with Sara! 🚀'}
               </p>
             </div>
           </div>
@@ -660,9 +748,9 @@ export const RolePlayModal: React.FC<RolePlayModalProps> = ({
         </div>
 
         {/* Category Filter Tabs & Search Bar */}
-        <div className="bg-slate-950/80 px-4 sm:px-6 py-3 border-b border-slate-800 space-y-2.5 shrink-0">
+        <div className="bg-slate-950/90 px-4 sm:px-6 py-2.5 border-b border-slate-800 space-y-2 shrink-0">
           {/* Categories Horizontal Scroll */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <div className="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-none">
             {categories.map(cat => {
               const isActive = activeCategory === cat.id;
               return (
@@ -692,7 +780,7 @@ export const RolePlayModal: React.FC<RolePlayModalProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={isRtl ? 'ابحث عن سيناريو (مثال: ماينكرافت، كورة، بيتزا، فضاء، روبوت)...' : 'Search scenario (e.g. Minecraft, Football, Pizza, Space)...'}
+              placeholder={isRtl ? 'ابحث عن سيناريو (ماينكرافت، كورة، بيتزا، فضاء، روبوت، سنيكرز)...' : 'Search scenario (Minecraft, Football, Pizza, Space, Robotics)...'}
               className="w-full bg-slate-900 border border-slate-700 rounded-xl py-1.5 ps-9 pe-3 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-amber-400 transition-all"
             />
           </div>
@@ -701,18 +789,18 @@ export const RolePlayModal: React.FC<RolePlayModalProps> = ({
         {/* Content Body: Split layout on large screens */}
         <div className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-0">
           {/* Left Column (Scenarios List) */}
-          <div className="lg:col-span-5 p-3 sm:p-4 overflow-y-auto space-y-2 border-b lg:border-b-0 lg:border-e border-slate-800 max-h-[40vh] lg:max-h-none">
+          <div className="lg:col-span-4 p-3 overflow-y-auto space-y-1.5 border-b lg:border-b-0 lg:border-e border-slate-800 max-h-[35vh] lg:max-h-none">
             <div className="flex items-center justify-between text-[11px] text-slate-400 font-bold px-1 mb-1">
-              <span>{isRtl ? `السيناريوهات المتاحة (${filteredScenarios.length})` : `Available Scenarios (${filteredScenarios.length})`}</span>
-              <span className="text-amber-400 flex items-center gap-1">
+              <span>{isRtl ? `السيناريوهات المتاحة (${filteredScenarios.length})` : `Scenarios (${filteredScenarios.length})`}</span>
+              <span className="text-amber-400 flex items-center gap-1 text-[10px]">
                 <Flame size={12} />
-                <span>{isRtl ? 'اختر للبدء' : 'Select to view'}</span>
+                <span>{isRtl ? 'اختر لدراسة الشرح' : 'Select to study'}</span>
               </span>
             </div>
 
             {filteredScenarios.length === 0 ? (
               <div className="py-8 text-center text-xs text-slate-400">
-                {isRtl ? 'لا توجد سيناريوهات مطابقة للبحث' : 'No scenarios found matching your search'}
+                {isRtl ? 'لا توجد سيناريوهات مطابقة للبحث' : 'No scenarios found'}
               </div>
             ) : (
               filteredScenarios.map((sc) => {
@@ -720,14 +808,16 @@ export const RolePlayModal: React.FC<RolePlayModalProps> = ({
                 return (
                   <button
                     key={`sc-card-${sc.id}`}
-                    onClick={() => setSelectedScenario(sc)}
-                    className={`w-full text-start p-3 rounded-2xl border transition-all cursor-pointer flex items-center gap-3 relative ${
+                    onClick={() => {
+                      setSelectedScenario(sc);
+                    }}
+                    className={`w-full text-start p-2.5 rounded-2xl border transition-all cursor-pointer flex items-center gap-2.5 relative ${
                       isSelected
                         ? 'bg-gradient-to-r from-amber-400/20 via-slate-800 to-slate-800 border-amber-400 shadow-md ring-1 ring-amber-400/50'
                         : 'bg-slate-800/60 hover:bg-slate-800 border-slate-700/80 hover:border-slate-600'
                     }`}
                   >
-                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-2xl shrink-0 border ${
+                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-xl shrink-0 border ${
                       isSelected 
                         ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-inner' 
                         : 'bg-slate-900 text-slate-200 border-slate-700'
@@ -736,146 +826,765 @@ export const RolePlayModal: React.FC<RolePlayModalProps> = ({
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 mb-0.5">
+                      <div className="flex items-center gap-1 mb-0.5">
                         <span className="text-[10px] font-black text-amber-300">
                           {isRtl ? sc.vibeAr : sc.vibeEn}
                         </span>
                       </div>
-                      <h4 className="text-xs sm:text-sm font-black text-white truncate">
+                      <h4 className="text-xs font-black text-white truncate">
                         {isRtl ? sc.titleAr : sc.titleEn}
                       </h4>
-                      <p className="text-[10px] text-slate-300 line-clamp-1 mt-0.5">
+                      <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">
                         {isRtl ? sc.descAr : sc.descEn}
                       </p>
                     </div>
 
-                    <ChevronRight size={16} className={`text-slate-500 shrink-0 ${isSelected ? 'text-amber-400 translate-x-0.5' : ''} ${isRtl ? 'rotate-180' : ''}`} />
+                    <ChevronRight size={14} className={`text-slate-500 shrink-0 ${isSelected ? 'text-amber-400 translate-x-0.5' : ''} ${isRtl ? 'rotate-180' : ''}`} />
                   </button>
                 );
               })
             )}
           </div>
 
-          {/* Right Column: Active Scenario Detailed Showcase */}
-          <div className="lg:col-span-7 p-4 sm:p-5 overflow-y-auto space-y-4 bg-slate-900/60">
-            {/* Main Spotlight Header */}
-            <div className="bg-gradient-to-br from-slate-900 via-[#002147] to-slate-900 border-2 border-amber-400/40 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl relative overflow-hidden">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-4xl p-2 rounded-2xl bg-white/10 border border-white/10 shadow-inner">
+          {/* Right Column: 4 Educational Tabs Showcase */}
+          <div className="lg:col-span-8 flex flex-col min-h-0 bg-slate-900/60">
+            {/* Top Scenario Title & 4 Navigation Tabs */}
+            <div className="bg-slate-950/70 p-3 sm:px-5 sm:py-3 border-b border-slate-800 shrink-0 space-y-2.5">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-2xl p-1.5 bg-amber-400 text-slate-950 rounded-xl border border-amber-300 shadow-sm">
                     {selectedScenario.badge}
                   </span>
                   <div>
-                    <span className="text-[10px] font-black uppercase text-amber-300 tracking-wider block">
-                      {isRtl ? selectedScenario.vibeAr : selectedScenario.vibeEn} • 12 Yrs
+                    <span className="text-[10px] font-black uppercase text-amber-300 tracking-wider">
+                      {isRtl ? selectedScenario.vibeAr : selectedScenario.vibeEn} • 12Y
                     </span>
-                    <h3 className="text-base sm:text-lg font-black text-white">
+                    <h3 className="text-sm sm:text-base font-black text-white">
                       {isRtl ? selectedScenario.titleAr : selectedScenario.titleEn}
                     </h3>
-                    <div className="flex items-center gap-1 text-[11px] text-slate-300 mt-0.5">
-                      <Compass size={13} className="text-amber-400 shrink-0" />
-                      <span>{selectedScenario.location}</span>
-                    </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Roles Breakdown Box */}
-              <div className="grid grid-cols-2 gap-2 bg-black/40 border border-white/10 rounded-2xl p-2.5 text-xs">
-                <div className="text-center py-1">
-                  <span className="text-slate-400 text-[10px] block font-bold mb-0.5">
-                    {isRtl ? '🎮 دورك أنت في الموقف:' : '🎮 Your Role:'}
-                  </span>
-                  <span className="font-black text-emerald-300">
-                    {isRtl ? selectedScenario.roleStudentAr : selectedScenario.roleStudentEn}
-                  </span>
-                </div>
-                <div className="text-center py-1 border-s border-white/10">
-                  <span className="text-slate-400 text-[10px] block font-bold mb-0.5">
-                    {isRtl ? '👩‍🏫 دور المعلمة سارة:' : '👩‍🏫 Sara Role:'}
-                  </span>
-                  <span className="font-black text-amber-300">
-                    {isRtl ? selectedScenario.roleSaraAr : selectedScenario.roleSaraEn}
-                  </span>
+                <div className="flex items-center gap-1.5 text-[11px] text-slate-300 bg-white/5 px-2.5 py-1 rounded-xl border border-white/10">
+                  <Compass size={13} className="text-amber-400" />
+                  <span>{selectedScenario.location}</span>
                 </div>
               </div>
 
-              {/* Description */}
-              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-medium">
-                {isRtl ? selectedScenario.descAr : selectedScenario.descEn}
-              </p>
+              {/* 4 Interactive Learning Tabs */}
+              <div className="grid grid-cols-4 gap-1.5 bg-slate-900 p-1 rounded-2xl border border-slate-800">
+                <button
+                  onClick={() => setActiveTab('lesson')}
+                  className={`py-2 px-1 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    activeTab === 'lesson'
+                      ? 'bg-amber-400 text-slate-950 shadow-md scale-101'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-800'
+                  }`}
+                >
+                  <BookOpen size={14} />
+                  <span className="truncate">{isRtl ? '1. الشرح والدرس' : '1. Lesson'}</span>
+                </button>
 
-              {/* Missions Checklist */}
-              <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase text-amber-400 flex items-center gap-1.5">
-                    <CheckCircle2 size={14} />
-                    <span>{isRtl ? '🎯 مهامك الثلاث في المحادثة:' : '🎯 Your 3 Target Missions:'}</span>
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-bold">3 / 3</span>
-                </div>
+                <button
+                  onClick={() => setActiveTab('exercises')}
+                  className={`py-2 px-1 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer relative ${
+                    activeTab === 'exercises'
+                      ? 'bg-amber-400 text-slate-950 shadow-md scale-101'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-800'
+                  }`}
+                >
+                  <PenTool size={14} />
+                  <span className="truncate">{isRtl ? '2. التمارين' : '2. Practice'}</span>
+                  {completedExercisesCount > 0 && (
+                    <span className="w-4 h-4 rounded-full bg-emerald-500 text-white text-[9px] font-black flex items-center justify-center shrink-0">
+                      {completedExercisesCount}
+                    </span>
+                  )}
+                </button>
 
-                <div className="space-y-1.5">
-                  {(isRtl ? selectedScenario.missionsAr : selectedScenario.missionsEn).map((mission, idx) => (
-                    <div key={`spot-m-${idx}`} className="flex items-start gap-2.5 text-xs text-slate-200 bg-white/5 p-2 rounded-xl border border-white/5">
-                      <span className="w-5 h-5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                        {idx + 1}
-                      </span>
-                      <span className="font-bold leading-normal">{mission}</span>
+                <button
+                  onClick={() => setActiveTab('quiz')}
+                  className={`py-2 px-1 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer relative ${
+                    activeTab === 'quiz'
+                      ? 'bg-amber-400 text-slate-950 shadow-md scale-101'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-800'
+                  }`}
+                >
+                  <Award size={14} />
+                  <span className="truncate">{isRtl ? '3. الاختبار' : '3. Quiz'}</span>
+                  {quizSubmitted && (
+                    <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-slate-950 text-[9px] font-black">
+                      {quizScore}%
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('simulate')}
+                  className={`py-2 px-1 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    activeTab === 'simulate'
+                      ? 'bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 shadow-md scale-101'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-800'
+                  }`}
+                >
+                  <Play size={14} />
+                  <span className="truncate">{isRtl ? '4. المحاكاة' : '4. Role-Play'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Tab Body Showcase */}
+            <div className="flex-1 overflow-y-auto p-3.5 sm:p-5 space-y-4">
+              {/* ==================================================== */}
+              {/* TAB 1: REAL LESSON & PEDAGOGICAL EXPLANATION */}
+              {/* ==================================================== */}
+              {activeTab === 'lesson' && (
+                <div className="space-y-4">
+                  {/* Pedagogical Goal Banner */}
+                  <div className="bg-gradient-to-r from-blue-950/60 via-indigo-950/60 to-blue-950/60 border-2 border-indigo-400/40 rounded-2xl p-3.5 space-y-1.5">
+                    <div className="flex items-center gap-2 text-indigo-300 text-xs font-black uppercase">
+                      <Sparkles size={14} className="text-amber-400" />
+                      <span>{isRtl ? '🎯 الهدف التربوي واللغوي من هذا الموقف:' : '🎯 Educational & Linguistic Goal:'}</span>
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <p className="text-xs text-indigo-100 font-semibold leading-relaxed">
+                      {isRtl ? eduContent.pedagogicalGoalAr : eduContent.pedagogicalGoalEn}
+                    </p>
+                    <p className="text-[11px] text-slate-300 border-t border-indigo-400/20 pt-1.5 mt-1 leading-normal">
+                      {isRtl ? eduContent.conceptAr : eduContent.conceptEn}
+                    </p>
+                  </div>
 
-              {/* Sara Opening Voice Preview */}
-              <div className="bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-transparent border border-amber-400/30 rounded-2xl p-3 text-xs space-y-1">
-                <div className="flex items-center gap-1.5 text-amber-300 text-[10px] font-bold">
-                  <Volume2 size={13} className="text-amber-400" />
-                  <span>{isRtl ? 'سارة ستبدأ معك الحوار قائلة بالإنجليزية:' : 'Sara opens the dialogue in English:'}</span>
-                </div>
-                <p className="font-mono text-amber-200 italic font-semibold">
-                  "{selectedScenario.openingLine}"
-                </p>
-              </div>
+                  {/* Core Vocabulary Section */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs sm:text-sm font-black text-amber-300 flex items-center gap-1.5">
+                        <span>📚</span>
+                        <span>{isRtl ? 'المفردات والتراكيب الأساسية للموقف:' : 'Core Situational Vocabulary:'}</span>
+                      </h4>
+                      <span className="text-[10px] text-slate-400 font-bold">
+                        {isRtl ? 'اضغط 🔊 للاستماع للنطق الأمريكي' : 'Tap 🔊 for US Pronunciation'}
+                      </span>
+                    </div>
 
-              {/* Suggested Starter Responses */}
-              {selectedScenario.starterPrompts && selectedScenario.starterPrompts.length > 0 && (
-                <div className="space-y-1.5">
-                  <span className="text-[10px] text-slate-300 font-bold block">
-                    {isRtl ? '💡 اقتراحات لجمل يمكنك الرد بها:' : '💡 Great ways you can reply:'}
-                  </span>
-                  <div className="flex flex-col gap-1">
-                    {selectedScenario.starterPrompts.map((p, pIdx) => (
-                      <div key={`p-ex-${pIdx}`} className="text-[11px] text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded-xl border border-slate-700/60 font-medium">
-                        "{p}"
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {eduContent.vocabulary.map((vocab, vIdx) => (
+                        <div key={`v-${vIdx}`} className="bg-slate-950/70 border border-slate-800 hover:border-amber-400/60 transition-all rounded-2xl p-3 space-y-1.5">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-black text-amber-300 font-mono">
+                                  {vocab.word}
+                                </span>
+                                <span className="text-[10px] text-slate-400 font-mono">
+                                  {vocab.ipa}
+                                </span>
+                              </div>
+                              <span className="text-xs font-bold text-white block mt-0.5">
+                                {vocab.meaningAr}
+                              </span>
+                            </div>
+
+                            <button
+                              onClick={() => playAudio(vocab.word)}
+                              className="p-1.5 rounded-xl bg-white/10 hover:bg-amber-400 hover:text-slate-950 text-slate-300 transition-all cursor-pointer shrink-0"
+                              title={isRtl ? 'استمع للنطق' : 'Listen'}
+                            >
+                              <Volume2 size={14} />
+                            </button>
+                          </div>
+
+                          <div className="bg-white/5 p-2 rounded-xl text-[11px] text-slate-300 space-y-0.5 border border-white/5">
+                            <div className="flex items-center justify-between">
+                              <span className="font-semibold text-amber-200">"{vocab.exampleEn}"</span>
+                              <button
+                                onClick={() => playAudio(vocab.exampleEn)}
+                                className="text-slate-400 hover:text-amber-300 transition-colors p-0.5"
+                                title={isRtl ? 'نطق الجملة' : 'Play sentence'}
+                              >
+                                <Volume2 size={12} />
+                              </button>
+                            </div>
+                            <span className="text-[10px] text-slate-400 block">{vocab.exampleAr}</span>
+                          </div>
+
+                          {vocab.tip && (
+                            <div className="text-[10px] text-emerald-300 bg-emerald-950/30 px-2 py-0.5 rounded-lg border border-emerald-500/20">
+                              💡 {vocab.tip}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Golden Grammar Rule Box */}
+                  <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-[#002147] border-2 border-amber-400/40 rounded-2xl p-4 space-y-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">📐</span>
+                      <div>
+                        <span className="text-[10px] font-black uppercase text-amber-400 tracking-wider block">
+                          {isRtl ? 'القاعدة والتركيب الذهبي لهذا السيناريو:' : 'Golden Grammar Rule:'}
+                        </span>
+                        <h4 className="text-xs sm:text-sm font-black text-white">
+                          {isRtl ? eduContent.grammar.titleAr : eduContent.grammar.titleEn}
+                        </h4>
                       </div>
-                    ))}
+                    </div>
+
+                    <div className="bg-black/50 border border-amber-400/30 rounded-xl p-2.5 font-mono text-xs text-amber-300 font-bold text-center">
+                      {eduContent.grammar.formula}
+                    </div>
+
+                    <p className="text-xs text-slate-200 leading-relaxed">
+                      {isRtl ? eduContent.grammar.explanationAr : eduContent.grammar.explanationEn}
+                    </p>
+
+                    <div className="space-y-1 pt-1">
+                      <span className="text-[10px] text-slate-400 font-bold block">
+                        {isRtl ? 'أمثلة تطبيقية مباشرة:' : 'Direct Examples:'}
+                      </span>
+                      {eduContent.grammar.examples.map((ex, eIdx) => (
+                        <div key={`g-ex-${eIdx}`} className="flex items-center justify-between text-xs text-slate-200 bg-white/5 px-2.5 py-1.5 rounded-xl border border-white/5">
+                          <span>{ex}</span>
+                          <button
+                            onClick={() => playAudio(ex.split('(')[0])}
+                            className="p-1 text-slate-400 hover:text-amber-300 transition-colors"
+                          >
+                            <Volume2 size={13} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Model Dialogue Preview */}
+                  <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+                    <div className="flex items-center gap-2 text-xs font-black text-emerald-300">
+                      <span>🗣️</span>
+                      <span>{isRtl ? 'الحوار النموذجي الواقعي بين سارة والطالب:' : 'Model Conversational Dialogue:'}</span>
+                    </div>
+
+                    <div className="space-y-2">
+                      {eduContent.modelDialogue.map((line, dIdx) => (
+                        <div
+                          key={`diag-${dIdx}`}
+                          className={`p-2.5 rounded-2xl text-xs space-y-1 ${
+                            line.speaker === 'sara'
+                              ? 'bg-[#002147]/70 border border-amber-400/30 ms-0 me-6'
+                              : 'bg-emerald-950/50 border border-emerald-500/30 ms-6 me-0'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-black text-amber-300">
+                              {line.speaker === 'sara' ? (isRtl ? '👩‍🏫 سارة:' : '👩‍🏫 Sara:') : (isRtl ? '👦 أنت (الطالب):' : '👦 You (Student):')}
+                            </span>
+                            <button
+                              onClick={() => playAudio(line.textEn)}
+                              className="text-slate-400 hover:text-amber-300 p-0.5"
+                            >
+                              <Volume2 size={12} />
+                            </button>
+                          </div>
+                          <p className="font-semibold text-white font-mono text-[11px]">{line.textEn}</p>
+                          <p className="text-[10px] text-slate-400">{line.textAr}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
+
+              {/* ==================================================== */}
+              {/* TAB 2: INTERACTIVE PRACTICE EXERCISES */}
+              {/* ==================================================== */}
+              {activeTab === 'exercises' && (
+                <div className="space-y-4">
+                  <div className="bg-gradient-to-r from-amber-500/15 via-amber-400/20 to-amber-500/15 border-2 border-amber-400/50 rounded-2xl p-3 flex items-center justify-between gap-3 flex-wrap">
+                    <div>
+                      <h4 className="text-xs sm:text-sm font-black text-amber-300 flex items-center gap-1.5">
+                        <PenTool size={15} />
+                        <span>{isRtl ? 'تمارين تطبيقية وتحديات تفاعلية ✍️' : 'Interactive Practice Challenges ✍️'}</span>
+                      </h4>
+                      <p className="text-[11px] text-slate-300 mt-0.5">
+                        {isRtl ? 'أجب على الأسئلة الثلاثة لتثبيت المفردات والقواعد واستعد للمحاكاة!' : 'Answer all 3 exercises to lock in the vocabulary and grammar!'}
+                      </p>
+                    </div>
+
+                    <div className="px-3 py-1.5 rounded-xl bg-slate-950/80 border border-amber-400/40 text-xs font-black text-amber-300 flex items-center gap-1.5">
+                      <span>{completedExercisesCount} / {eduContent.exercises.length}</span>
+                      <span>{isRtl ? 'مكتمل' : 'Completed'}</span>
+                    </div>
+                  </div>
+
+                  {/* Exercises List */}
+                  <div className="space-y-3.5">
+                    {eduContent.exercises.map((ex, exIdx) => {
+                      const selectedIdx = exerciseAnswers[ex.id];
+                      const isChecked = exerciseChecked[ex.id];
+                      const isCorrect = isChecked && selectedIdx === ex.correctIndex;
+                      const isWrong = isChecked && selectedIdx !== ex.correctIndex;
+                      const showingHint = exerciseHints[ex.id];
+
+                      return (
+                        <div
+                          key={`ex-${ex.id}`}
+                          className={`bg-slate-950/70 border-2 rounded-2xl p-3.5 sm:p-4 space-y-3 transition-all ${
+                            isCorrect
+                              ? 'border-emerald-500/70 bg-emerald-950/20'
+                              : isWrong
+                              ? 'border-rose-500/60 bg-rose-950/20'
+                              : 'border-slate-800'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <div className="flex items-center gap-2">
+                              <span className="w-6 h-6 rounded-full bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center">
+                                {exIdx + 1}
+                              </span>
+                              <h5 className="text-xs sm:text-sm font-black text-white">
+                                {isRtl ? ex.titleAr : ex.titleEn}
+                              </h5>
+                            </div>
+
+                            <span className="px-2 py-0.5 rounded-lg bg-white/10 text-slate-300 text-[10px] font-bold">
+                              {ex.type === 'vocab' ? (isRtl ? 'مفردات' : 'Vocab') : ex.type === 'grammar' ? (isRtl ? 'قواعد' : 'Grammar') : (isRtl ? 'موقف' : 'Situation')}
+                            </span>
+                          </div>
+
+                          <div className="space-y-1 bg-white/5 p-3 rounded-xl border border-white/5">
+                            <p className="text-xs sm:text-sm font-bold text-amber-200 font-mono">
+                              {ex.promptEn}
+                            </p>
+                            <p className="text-[11px] text-slate-400">
+                              {ex.promptAr}
+                            </p>
+                          </div>
+
+                          {/* Options */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {ex.options.map((opt, optIdx) => {
+                              const isThisSelected = selectedIdx === optIdx;
+                              let btnClass = 'bg-slate-900 border-slate-700 text-slate-200 hover:border-slate-500';
+
+                              if (isChecked) {
+                                if (optIdx === ex.correctIndex) {
+                                  btnClass = 'bg-emerald-900/60 border-emerald-400 text-emerald-100 font-bold';
+                                } else if (isThisSelected) {
+                                  btnClass = 'bg-rose-900/60 border-rose-400 text-rose-100';
+                                } else {
+                                  btnClass = 'bg-slate-900/40 border-slate-800 text-slate-500 opacity-60';
+                                }
+                              } else if (isThisSelected) {
+                                btnClass = 'bg-amber-400/20 border-amber-400 text-amber-200 ring-1 ring-amber-400/50';
+                              }
+
+                              return (
+                                <button
+                                  key={`opt-${optIdx}`}
+                                  disabled={isChecked}
+                                  onClick={() => {
+                                    setExerciseAnswers(prev => ({ ...prev, [ex.id]: optIdx }));
+                                  }}
+                                  className={`p-2.5 rounded-xl border text-xs text-start transition-all cursor-pointer flex items-center justify-between gap-2 ${btnClass}`}
+                                >
+                                  <span>{opt}</span>
+                                  {isChecked && optIdx === ex.correctIndex && (
+                                    <Check size={14} className="text-emerald-400 shrink-0" />
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {/* Action Buttons for this Exercise */}
+                          <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
+                            <div>
+                              {ex.hintAr && (
+                                <button
+                                  onClick={() => setExerciseHints(prev => ({ ...prev, [ex.id]: !prev[ex.id] }))}
+                                  className="text-[10px] text-amber-300 hover:text-amber-200 flex items-center gap-1 font-bold cursor-pointer"
+                                >
+                                  <Lightbulb size={12} />
+                                  <span>{showingHint ? (isRtl ? 'إخفاء التلميح' : 'Hide Hint') : (isRtl ? 'تلميح 💡' : 'Need a Hint?')}</span>
+                                </button>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              {isChecked ? (
+                                <button
+                                  onClick={() => {
+                                    setExerciseChecked(prev => ({ ...prev, [ex.id]: false }));
+                                    setExerciseAnswers(prev => {
+                                      const next = { ...prev };
+                                      delete next[ex.id];
+                                      return next;
+                                    });
+                                  }}
+                                  className="px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                                >
+                                  <RotateCcw size={12} />
+                                  <span>{isRtl ? 'إعادة المحاولة' : 'Retry'}</span>
+                                </button>
+                              ) : (
+                                <button
+                                  disabled={selectedIdx === undefined}
+                                  onClick={() => {
+                                    setExerciseChecked(prev => ({ ...prev, [ex.id]: true }));
+                                  }}
+                                  className={`px-4 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                                    selectedIdx !== undefined
+                                      ? 'bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-sm'
+                                      : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                                  }`}
+                                >
+                                  {isRtl ? 'تحقق من الإجابة ✓' : 'Check Answer ✓'}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Hint Message */}
+                          {showingHint && ex.hintAr && (
+                            <div className="text-[11px] text-amber-200 bg-amber-950/40 border border-amber-400/30 rounded-xl p-2.5">
+                              💡 <strong>{isRtl ? 'تلميح:' : 'Hint:'}</strong> {ex.hintAr}
+                            </div>
+                          )}
+
+                          {/* Feedback Explanation */}
+                          {isChecked && (
+                            <div className={`p-2.5 rounded-xl text-xs space-y-1 border ${
+                              isCorrect
+                                ? 'bg-emerald-950/50 border-emerald-500/40 text-emerald-200'
+                                : 'bg-rose-950/50 border-rose-500/40 text-rose-200'
+                            }`}>
+                              <div className="flex items-center gap-1.5 font-black">
+                                <span>{isCorrect ? '🎉 إجابة صحيحة بامتياز! (+10 XP)' : '❌ إجابة غير دقيقة'}</span>
+                              </div>
+                              <p className="text-[11px] text-slate-200">
+                                {ex.explanationAr}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* ==================================================== */}
+              {/* TAB 3: SCENARIO MASTERY QUIZ */}
+              {/* ==================================================== */}
+              {activeTab === 'quiz' && (
+                <div className="space-y-4">
+                  {/* Quiz Banner */}
+                  <div className="bg-gradient-to-r from-purple-950/60 via-[#002147] to-purple-950/60 border-2 border-purple-400/40 rounded-2xl p-4 flex items-center justify-between gap-3 flex-wrap">
+                    <div>
+                      <h4 className="text-xs sm:text-sm font-black text-amber-300 flex items-center gap-1.5">
+                        <Award size={16} />
+                        <span>{isRtl ? 'اختبار الإتقان الشامل للسيناريو 🏆' : 'Scenario Mastery Quiz 🏆'}</span>
+                      </h4>
+                      <p className="text-[11px] text-slate-300 mt-0.5">
+                        {isRtl ? 'اختبر فهمك الشامل للمفردات والقواعد والتفاعل الشفهي في هذا الموقف!' : 'Test your complete grasp of vocabulary, grammar, and oral readiness!'}
+                      </p>
+                    </div>
+
+                    {quizSubmitted && (
+                      <div className={`px-4 py-2 rounded-2xl border-2 text-center ${
+                        quizScore >= 75
+                          ? 'bg-emerald-500/20 border-emerald-400 text-emerald-200'
+                          : 'bg-amber-500/20 border-amber-400 text-amber-200'
+                      }`}>
+                        <span className="text-[10px] block font-bold">{isRtl ? 'النتيجة النهائية' : 'Final Score'}</span>
+                        <span className="text-lg font-black">{quizScore}%</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Quiz Questions */}
+                  <div className="space-y-3.5">
+                    {eduContent.quiz.map((q, qIdx) => {
+                      const selectedAns = quizAnswers[q.id];
+                      return (
+                        <div key={`qz-${q.id}`} className="bg-slate-950/70 border border-slate-800 rounded-2xl p-3.5 sm:p-4 space-y-2.5">
+                          <div className="flex items-start gap-2.5">
+                            <span className="w-5 h-5 rounded-full bg-purple-500 text-white font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                              {qIdx + 1}
+                            </span>
+                            <div>
+                              <h5 className="text-xs sm:text-sm font-bold text-white">
+                                {q.questionEn}
+                              </h5>
+                              <p className="text-[11px] text-slate-400 mt-0.5">
+                                {q.questionAr}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Quiz Options */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                            {q.options.map((opt, oIdx) => {
+                              const isSelected = selectedAns === oIdx;
+                              let optClass = 'bg-slate-900 border-slate-700 text-slate-200 hover:border-slate-500';
+
+                              if (quizSubmitted) {
+                                if (oIdx === q.correctIndex) {
+                                  optClass = 'bg-emerald-900/60 border-emerald-400 text-emerald-100 font-bold';
+                                } else if (isSelected) {
+                                  optClass = 'bg-rose-900/60 border-rose-400 text-rose-100';
+                                } else {
+                                  optClass = 'bg-slate-900/40 border-slate-800 text-slate-500 opacity-50';
+                                }
+                              } else if (isSelected) {
+                                optClass = 'bg-purple-500/20 border-purple-400 text-purple-200 ring-1 ring-purple-400';
+                              }
+
+                              return (
+                                <button
+                                  key={`qo-${oIdx}`}
+                                  disabled={quizSubmitted}
+                                  onClick={() => {
+                                    setQuizAnswers(prev => ({ ...prev, [q.id]: oIdx }));
+                                  }}
+                                  className={`p-2.5 rounded-xl border text-xs text-start transition-all cursor-pointer flex items-center justify-between gap-2 ${optClass}`}
+                                >
+                                  <span>{opt}</span>
+                                  {quizSubmitted && oIdx === q.correctIndex && (
+                                    <Check size={14} className="text-emerald-400 shrink-0" />
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {/* Detailed Explanation on Submission */}
+                          {quizSubmitted && (
+                            <div className="text-[11px] text-slate-300 bg-white/5 border border-white/5 rounded-xl p-2.5 mt-2">
+                              💡 <strong>{isRtl ? 'التوضيح الأكاديمي:' : 'Explanation:'}</strong> {q.explanationAr}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Quiz Grading Action */}
+                  <div className="pt-2 flex items-center justify-between gap-3 flex-wrap">
+                    {quizSubmitted ? (
+                      <button
+                        onClick={() => {
+                          setQuizSubmitted(false);
+                          setQuizAnswers({});
+                          setQuizScore(0);
+                        }}
+                        className="px-4 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <RotateCcw size={14} />
+                        <span>{isRtl ? 'إعادة الاختبار' : 'Retake Quiz'}</span>
+                      </button>
+                    ) : (
+                      <button
+                        disabled={Object.keys(quizAnswers).length < eduContent.quiz.length}
+                        onClick={handleGradeQuiz}
+                        className={`flex-1 py-3 px-6 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer shadow-lg ${
+                          Object.keys(quizAnswers).length >= eduContent.quiz.length
+                            ? 'bg-gradient-to-r from-amber-400 to-amber-300 text-slate-950 hover:brightness-105'
+                            : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                        }`}
+                      >
+                        {isRtl ? 'تصحيح واعتماد نتيجة الاختبار 🎓' : 'Grade & Submit Quiz 🎓'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* ==================================================== */}
+              {/* TAB 4: LIVE SCENARIO ROLE-PLAY SIMULATION */}
+              {/* ==================================================== */}
+              {activeTab === 'simulate' && (
+                <div className="space-y-4">
+                  {/* Roles Breakdown Box */}
+                  <div className="grid grid-cols-2 gap-2 bg-black/40 border border-white/10 rounded-2xl p-2.5 text-xs">
+                    <div className="text-center py-1">
+                      <span className="text-slate-400 text-[10px] block font-bold mb-0.5">
+                        {isRtl ? '🎮 دورك أنت في الموقف:' : '🎮 Your Role:'}
+                      </span>
+                      <span className="font-black text-emerald-300">
+                        {isRtl ? selectedScenario.roleStudentAr : selectedScenario.roleStudentEn}
+                      </span>
+                    </div>
+                    <div className="text-center py-1 border-s border-white/10">
+                      <span className="text-slate-400 text-[10px] block font-bold mb-0.5">
+                        {isRtl ? '👩‍🏫 دور المعلمة سارة:' : '👩‍🏫 Sara Role:'}
+                      </span>
+                      <span className="font-black text-amber-300">
+                        {isRtl ? selectedScenario.roleSaraAr : selectedScenario.roleSaraEn}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-medium">
+                    {isRtl ? selectedScenario.descAr : selectedScenario.descEn}
+                  </p>
+
+                  {/* Missions Checklist */}
+                  <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black uppercase text-amber-400 flex items-center gap-1.5">
+                        <CheckCircle2 size={14} />
+                        <span>{isRtl ? '🎯 مهامك الثلاث في المحادثة الحية:' : '🎯 Your 3 Live Conversation Missions:'}</span>
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-bold">3 / 3</span>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      {(isRtl ? selectedScenario.missionsAr : selectedScenario.missionsEn).map((mission, idx) => (
+                        <div key={`spot-m-${idx}`} className="flex items-start gap-2.5 text-xs text-slate-200 bg-white/5 p-2 rounded-xl border border-white/5">
+                          <span className="w-5 h-5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                            {idx + 1}
+                          </span>
+                          <span className="font-bold leading-normal">{mission}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Sara Opening Voice Preview */}
+                  <div className="bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-transparent border border-amber-400/30 rounded-2xl p-3 text-xs space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-amber-300 text-[10px] font-bold">
+                        <Volume2 size={13} className="text-amber-400" />
+                        <span>{isRtl ? 'سارة ستبدأ معك الحوار قائلة بالإنجليزية:' : 'Sara opens the dialogue in English:'}</span>
+                      </div>
+                      <button
+                        onClick={() => playAudio(selectedScenario.openingLine)}
+                        className="px-2 py-0.5 rounded-lg bg-amber-400/20 text-amber-300 text-[10px] font-bold hover:bg-amber-400 hover:text-slate-950 transition-all cursor-pointer flex items-center gap-1"
+                      >
+                        <Volume2 size={11} />
+                        <span>{isRtl ? 'استمع' : 'Listen'}</span>
+                      </button>
+                    </div>
+                    <p className="font-mono text-amber-200 italic font-semibold">
+                      "{selectedScenario.openingLine}"
+                    </p>
+                  </div>
+
+                  {/* Suggested Starter Responses */}
+                  {selectedScenario.starterPrompts && selectedScenario.starterPrompts.length > 0 && (
+                    <div className="space-y-1.5">
+                      <span className="text-[10px] text-slate-300 font-bold block">
+                        {isRtl ? '💡 اقتراحات لجمل يمكنك الرد بها فوراً:' : '💡 Great ways you can reply:'}
+                      </span>
+                      <div className="flex flex-col gap-1.5">
+                        {selectedScenario.starterPrompts.map((p, pIdx) => (
+                          <div key={`p-ex-${pIdx}`} className="text-[11px] text-slate-300 bg-slate-800/80 px-2.5 py-1.5 rounded-xl border border-slate-700/60 font-medium flex items-center justify-between gap-2">
+                            <span>"{p}"</span>
+                            <button
+                              onClick={() => playAudio(p)}
+                              className="text-slate-400 hover:text-amber-300 transition-colors p-0.5"
+                            >
+                              <Volume2 size={12} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Floating Step Bar / Next Action */}
+            <div className="bg-slate-950 px-4 sm:px-6 py-3 border-t border-slate-800 flex items-center justify-between gap-3 shrink-0">
+              {activeTab === 'lesson' && (
+                <>
+                  <button
+                    onClick={() => setActiveTab('exercises')}
+                    className="py-2.5 px-4 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
+                  >
+                    <span>{isRtl ? 'الانتقال للتمارين التطبيقية ✍️' : 'Go to Exercises ✍️'}</span>
+                    <ChevronRight size={14} className={isRtl ? 'rotate-180' : ''} />
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      onStartScenario(selectedScenario);
+                      onClose();
+                    }}
+                    className="py-2.5 px-4 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition-all flex items-center gap-1 cursor-pointer"
+                  >
+                    <Play size={13} />
+                    <span>{isRtl ? 'بدء المحاكاة الآن 🚀' : 'Start Simulation'}</span>
+                  </button>
+                </>
+              )}
+
+              {activeTab === 'exercises' && (
+                <>
+                  <button
+                    onClick={() => setActiveTab('lesson')}
+                    className="py-2.5 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all cursor-pointer"
+                  >
+                    {isRtl ? '← مراجعة الشرح' : '← Review Lesson'}
+                  </button>
+
+                  <button
+                    onClick={() => setActiveTab('quiz')}
+                    className="py-2.5 px-5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-300 hover:brightness-105 text-slate-950 font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
+                  >
+                    <span>{isRtl ? 'الانتقال لاختبار الإتقان 🏆' : 'Take Mastery Quiz 🏆'}</span>
+                    <ChevronRight size={14} className={isRtl ? 'rotate-180' : ''} />
+                  </button>
+                </>
+              )}
+
+              {activeTab === 'quiz' && (
+                <>
+                  <button
+                    onClick={() => setActiveTab('exercises')}
+                    className="py-2.5 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all cursor-pointer"
+                  >
+                    {isRtl ? '← مراجعة التمارين' : '← Back to Exercises'}
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      onStartScenario(selectedScenario);
+                      onClose();
+                    }}
+                    className="py-2.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-400 to-teal-400 hover:brightness-105 text-slate-950 font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-lg"
+                  >
+                    <Play size={14} className="fill-current" />
+                    <span>{isRtl ? 'انطلق في المحاكاة الحية مع سارة 🚀' : 'Launch Live Simulation with Sara 🚀'}</span>
+                  </button>
+                </>
+              )}
+
+              {activeTab === 'simulate' && (
+                <>
+                  <button
+                    onClick={() => setActiveTab('lesson')}
+                    className="py-2.5 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all cursor-pointer"
+                  >
+                    {isRtl ? '📖 عرض الشرح والتمارين' : '📖 View Lesson & Exercises'}
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      onStartScenario(selectedScenario);
+                      onClose();
+                    }}
+                    className="flex-1 py-3 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 hover:brightness-105 active:scale-98 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-amber-400/20 transition-all cursor-pointer border-2 border-white/40"
+                  >
+                    <Play size={16} className="text-slate-950 fill-current" />
+                    <span>{isRtl ? `انطلق في سيناريو [${selectedScenario.titleAr}] الآن 🚀` : `Launch [${selectedScenario.titleEn}] Now 🚀`}</span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
-        </div>
-
-        {/* Footer Actions */}
-        <div className="bg-slate-950 px-4 sm:px-6 py-3.5 border-t border-slate-800 flex items-center justify-between gap-3 shrink-0">
-          <button
-            onClick={onClose}
-            className="px-4 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all cursor-pointer"
-          >
-            {isRtl ? 'إغلاق' : 'Close'}
-          </button>
-
-          <button
-            onClick={() => {
-              onStartScenario(selectedScenario);
-              onClose();
-            }}
-            className="flex-1 py-3 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 hover:brightness-105 active:scale-98 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-amber-400/20 transition-all cursor-pointer border-2 border-white/40"
-          >
-            <Play size={16} className="text-slate-950 fill-current" />
-            <span>{isRtl ? `انطلق في سيناريو [${selectedScenario.titleAr}] الآن 🚀` : `Launch [${selectedScenario.titleEn}] Now 🚀`}</span>
-          </button>
         </div>
       </motion.div>
     </div>
