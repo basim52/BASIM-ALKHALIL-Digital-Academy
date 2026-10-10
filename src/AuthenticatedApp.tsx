@@ -7115,6 +7115,7 @@ export default function AuthenticatedApp({
           }}
           onProfileUpdated={(updated) => setUserProfile(updated)}
           onLangChange={(newLang) => setLang(newLang)}
+          onNavigateToLesson={handleNavigateToLesson}
         />
       );
     }
@@ -7216,6 +7217,7 @@ export default function AuthenticatedApp({
           }}
           onProfileUpdated={(updated) => setUserProfile(updated)}
           onLangChange={(newLang) => setLang(newLang)}
+          onNavigateToLesson={handleNavigateToLesson}
         />
       );
     }

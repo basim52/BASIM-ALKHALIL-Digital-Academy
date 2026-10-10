@@ -64,6 +64,7 @@ export interface CurriculumLesson {
   duration: string;
   categoryTagAr?: string;
   categoryTagEn?: string;
+  planItem?: any;
 }
 
 export interface PillarCategoryDefinition {

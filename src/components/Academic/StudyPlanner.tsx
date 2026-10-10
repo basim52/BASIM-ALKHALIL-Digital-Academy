@@ -708,6 +708,19 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
         onStartWithSara(match);
         return;
       }
+      onStartWithSara({
+        id: item.unitId || `plan_item_${item.id}`,
+        pillarId: (item as any).pillarId || item.courseId || 'grammar',
+        courseId: item.courseId || 'general',
+        courseLabelAr: item.courseLabel || 'خطة سارة الذكية',
+        courseLabelEn: item.courseLabel || 'Sara Smart Plan',
+        titleAr: item.topic || 'درس خطة سارة',
+        titleEn: item.topic || 'Sara Plan Lesson',
+        level: item.level || 'A1',
+        duration: item.duration || '20 min',
+        planItem: item
+      });
+      return;
     }
     onNavigateToLesson(item.courseId, item.level, item.unitId);
   };

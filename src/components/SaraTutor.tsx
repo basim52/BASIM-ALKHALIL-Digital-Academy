@@ -334,6 +334,7 @@ interface SaraTutorProps {
   onBack: () => void;
   onProfileUpdated?: (updated: UserProfile) => void;
   onLangChange?: (newLang: Language) => void;
+  onNavigateToLesson?: (courseId: string, level: string, unitId: string) => void;
 }
 
 const SECTION_LABELS: Record<string, { ar: string; en: string }> = {
@@ -359,7 +360,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   onNavigate,
   onBack,
   onProfileUpdated,
-  onLangChange
+  onLangChange,
+  onNavigateToLesson
 }) => {
   const [activeLang, setActiveLang] = useState<Language>(lang);
 
@@ -974,52 +976,46 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       status: 'migrated_completed'
     });
 
-    let archiveSuccess = false;
-    if (targetUid) {
-      try {
-        await addDoc(collection(db, 'users', targetUid, 'saraSessions'), {
-          ...sessionData,
-          createdAt: serverTimestamp()
-        });
-        archiveSuccess = true;
-      } catch (err) {
-        console.warn('Error saving archived session to Firestore:', err);
-        archiveSuccess = false;
-      }
-    } else {
-      archiveSuccess = false;
-    }
+    const newLocalDoc = {
+      id: `sess_migrated_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      ...sessionData,
+      createdAt: now.toISOString()
+    };
 
-    // إذا فشل addDoc: لا تمسح الرسائل ولا السبورة ولا saraChat/current، أظهر رسالة خطأ ولا تبدأ الاستراحة
-    if (!archiveSuccess) {
-      setArchiveErrorToast('ما انحفظت الجلسة، حاول مرة ثانية');
-      setTimeout(() => setArchiveErrorToast(null), 4000);
-      return false;
-    }
-
-    // 2. Local storage backup only after addDoc success
+    // 1. Guaranteed Local Storage Archival First (حفظ فوري ومضمون بالأرشيف)
     try {
       const storageKey = `sara_archived_sessions_${targetUid || 'guest'}`;
       const existing: any[] = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      existing.unshift({
-        id: `sess_migrated_${Date.now()}`,
-        ...sessionData
-      });
+      existing.unshift(newLocalDoc);
       localStorage.setItem(storageKey, JSON.stringify(existing.slice(0, 100)));
-    } catch (e) {}
+    } catch (e) {
+      console.warn('LocalStorage archival error:', e);
+    }
 
-    // Reset current live messages and board to present the next lesson cleanly ONLY AFTER SUCCESS
+    // 2. Immediately update in-memory archivedSessions state so archive viewer reflects it instantly
+    setArchivedSessions(prev => [newLocalDoc, ...prev.filter(s => s.id !== newLocalDoc.id)]);
+
+    // 3. Reset current live messages and board to present next lesson cleanly
     setMessages([]);
     setActiveBoard(null);
     localStorage.removeItem(SARA_STORAGE_KEY(profile.uid));
+
+    // 4. Sync to Firestore (Best-Effort without blocking lesson progression)
     if (targetUid && !targetUid.startsWith('sim_')) {
-      try {
-        await setDoc(doc(db, 'users', targetUid, 'saraChat', 'current'), {
-          messages: [],
-          activeBoard: null,
-          updatedAt: serverTimestamp()
-        });
-      } catch (_) {}
+      addDoc(collection(db, 'users', targetUid, 'saraSessions'), {
+        ...sessionData,
+        createdAt: serverTimestamp()
+      }).catch(err => {
+        console.debug('Firestore session archival sync note:', err);
+      });
+
+      setDoc(doc(db, 'users', targetUid, 'saraChat', 'current'), {
+        messages: [],
+        activeBoard: null,
+        updatedAt: serverTimestamp()
+      }).catch(err => {
+        console.debug('Firestore clear current chat note:', err);
+      });
     }
 
     return true;
@@ -1032,14 +1028,43 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     playSchoolBellChime();
 
     const nextIdx = currentDailyLessonIndex + 1;
-    const targetLesson = nextLessonAfterBreak || todayScheduledLessons[nextIdx];
+    let targetLesson = nextLessonAfterBreak;
+
+    if (!targetLesson) {
+      if (activeStudyPlan?.planItems && activeStudyPlan.planItems.length > 0) {
+        const planItemsNonCatchup = activeStudyPlan.planItems.filter((i: any) => !i.isCatchUpDay);
+        if (nextIdx < planItemsNonCatchup.length) {
+          const targetItem = planItemsNonCatchup[nextIdx];
+          const allLessons = getAllCurriculumLessons();
+          const matched = allLessons.find((l: any) =>
+            l.id === targetItem.unitId ||
+            (l.courseId === targetItem.courseId && l.level === targetItem.level) ||
+            (l.titleAr && targetItem.topic && l.titleAr.includes(targetItem.topic))
+          );
+          targetLesson = matched || {
+            id: targetItem.unitId || `plan_item_${targetItem.id}`,
+            pillarId: targetItem.courseId || 'grammar',
+            courseId: targetItem.courseId || 'general',
+            courseLabelAr: targetItem.courseLabel || 'خطة سارة الذكية',
+            courseLabelEn: targetItem.courseLabel || 'Sara Smart Plan',
+            titleAr: targetItem.topic || 'درس خطة سارة',
+            titleEn: targetItem.topic || 'Sara Plan Lesson',
+            level: targetItem.level || 'A1',
+            duration: targetItem.duration || '20 min',
+            planItem: targetItem
+          };
+        }
+      } else {
+        targetLesson = todayScheduledLessons[nextIdx];
+      }
+    }
 
     if (targetLesson) {
       setCurrentDailyLessonIndex(nextIdx);
       setNextLessonAfterBreak(null);
       handleSelectCurriculumLesson(targetLesson);
     }
-  }, [currentDailyLessonIndex, nextLessonAfterBreak, todayScheduledLessons]);
+  }, [currentDailyLessonIndex, nextLessonAfterBreak, todayScheduledLessons, activeStudyPlan]);
 
   // ⏱️ 2-Minute Break Countdown Timer Effect (120 seconds countdown)
   useEffect(() => {
@@ -1061,16 +1086,63 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
   // Start scenario or lesson with Sara
   const handleStartPlanLesson = (planItemOrUnitId: any) => {
-    // 1. If it's a curriculum plan lesson (has courseId or pillarId or planItem)
-    if (planItemOrUnitId && (planItemOrUnitId.planItem || (planItemOrUnitId.pillarId && planItemOrUnitId.pillarId !== 'sara_scenarios'))) {
-      handleSelectCurriculumLesson(planItemOrUnitId);
+    if (!planItemOrUnitId) {
+      if (todayScheduledPlanLesson) {
+        handleSelectCurriculumLesson(todayScheduledPlanLesson);
+        return;
+      }
+      if (todayScheduledLessons[0]) {
+        handleSelectCurriculumLesson(todayScheduledLessons[0]);
+        return;
+      }
       return;
     }
 
-    // 2. Otherwise check if matched with roleplay scenarios
-    const scId = typeof planItemOrUnitId === 'string' ? planItemOrUnitId : (planItemOrUnitId?.unitId || planItemOrUnitId?.id);
-    const matchedScenario = ROLE_PLAY_SCENARIOS.find(s => s.id === scId) || 
-      ROLE_PLAY_SCENARIOS.find(s => planItemOrUnitId?.topic && (s.titleAr.includes(planItemOrUnitId.topic) || s.titleEn.includes(planItemOrUnitId.topic)));
+    const unitId = typeof planItemOrUnitId === 'string' 
+      ? planItemOrUnitId 
+      : (planItemOrUnitId.unitId || planItemOrUnitId.id);
+    const courseId = typeof planItemOrUnitId === 'object' 
+      ? (planItemOrUnitId.courseId || planItemOrUnitId.pillarId) 
+      : null;
+    const topic = typeof planItemOrUnitId === 'object'
+      ? (planItemOrUnitId.topic || planItemOrUnitId.titleAr || planItemOrUnitId.titleEn)
+      : null;
+    const level = typeof planItemOrUnitId === 'object' ? planItemOrUnitId.level : undefined;
+
+    // 1. Try finding in all unified curriculum lessons
+    const allLessons = getAllCurriculumLessons();
+    const matchedCurriculum = allLessons.find((l: any) =>
+      (unitId && l.id === unitId) ||
+      (courseId && level && l.courseId === courseId && l.level === level) ||
+      (topic && l.titleAr && l.titleAr.includes(topic)) ||
+      (topic && l.titleEn && l.titleEn.includes(topic))
+    );
+
+    if (matchedCurriculum) {
+      handleSelectCurriculumLesson(matchedCurriculum);
+      return;
+    }
+
+    // 2. If it's already a well-formed lesson object
+    if (typeof planItemOrUnitId === 'object' && (planItemOrUnitId.titleAr || planItemOrUnitId.topic || planItemOrUnitId.pillarId || planItemOrUnitId.courseId)) {
+      handleSelectCurriculumLesson({
+        id: unitId || `plan_item_${Date.now()}`,
+        pillarId: courseId || 'grammar',
+        courseId: courseId || 'general',
+        courseLabelAr: planItemOrUnitId.courseLabel || planItemOrUnitId.courseLabelAr || 'خطة سارة الذكية',
+        courseLabelEn: planItemOrUnitId.courseLabel || planItemOrUnitId.courseLabelEn || 'Sara Smart Plan',
+        titleAr: topic || planItemOrUnitId.titleAr || 'درس خطة سارة',
+        titleEn: topic || planItemOrUnitId.titleEn || 'Sara Plan Lesson',
+        level: level || 'A1',
+        duration: planItemOrUnitId.duration || '20 min',
+        planItem: planItemOrUnitId.planItem || planItemOrUnitId
+      });
+      return;
+    }
+
+    // 3. Otherwise check if matched with roleplay scenarios
+    const matchedScenario = ROLE_PLAY_SCENARIOS.find(s => s.id === unitId) || 
+      ROLE_PLAY_SCENARIOS.find(s => topic && (s.titleAr.includes(topic) || s.titleEn.includes(topic)));
 
     if (matchedScenario) {
       handleStartRolePlayScenario(matchedScenario);
@@ -1466,69 +1538,54 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       activeBoard: activeBoard || null
     });
 
-    // 1. Save to users/{userId}/saraSessions in Firestore
     const targetUid = auth.currentUser?.uid || profile.uid;
-    let archiveSuccess = false;
+    const newLocalDoc = {
+      id: `sess_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      ...sessionData,
+      createdAt: now.toISOString()
+    };
 
-    if (targetUid) {
-      try {
-        await addDoc(collection(db, 'users', targetUid, 'saraSessions'), {
-          ...sessionData,
-          createdAt: serverTimestamp()
-        });
-        archiveSuccess = true;
-      } catch (err) {
-        console.warn('Error archiving session in Firestore:', err);
-        archiveSuccess = false;
-      }
-    } else {
-      archiveSuccess = false;
-    }
-
-    // إذا فشل addDoc: لا تمسح saraChat ولا الدردشة على الشاشة، خل الدردشة كما هي وأظهر رسالة قصيرة: «ما انحفظت الجلسة، حاول مرة ثانية»
-    if (!archiveSuccess) {
-      setArchiveErrorToast('ما انحفظت الجلسة، حاول مرة ثانية');
-      setTimeout(() => setArchiveErrorToast(null), 4000);
-      return;
-    }
-
-    // 2. Local storage backup only after addDoc success
+    // 1. Guaranteed Local Storage Archival First (حفظ فوري ومضمون بالأرشيف)
     try {
       const storageKey = `sara_archived_sessions_${targetUid || 'guest'}`;
       const existing: any[] = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      existing.unshift({
-        id: `sess_${Date.now()}`,
-        ...sessionData
-      });
+      existing.unshift(newLocalDoc);
       localStorage.setItem(storageKey, JSON.stringify(existing.slice(0, 100)));
     } catch (e) {
       console.warn('LocalStorage archive error:', e);
     }
 
-    // 3. Clear live chat & local storage ONLY AFTER addDoc SUCCESS (امسح الدردشة الحية)
+    // 2. Immediately update in-memory archivedSessions state
+    setArchivedSessions(prev => [newLocalDoc, ...prev.filter(s => s.id !== newLocalDoc.id)]);
+
+    // 3. Clear live chat & local storage (امسح الدردشة الحية وابدأ محادثة جديدة)
     setMessages([]);
     setActiveBoard(null);
     setIsRestoredSession(false);
     localStorage.removeItem(SARA_STORAGE_KEY(profile.uid));
 
+    // 4. Sync to Firestore (Best-effort cloud backup)
     if (targetUid && !targetUid.startsWith('sim_')) {
-      try {
-        await setDoc(doc(db, 'users', targetUid, 'saraChat', 'current'), {
-          messages: [],
-          activeBoard: null,
-          updatedAt: serverTimestamp()
-        });
-      } catch (e) {
-        console.debug('Error clearing live chat:', e);
-      }
+      addDoc(collection(db, 'users', targetUid, 'saraSessions'), {
+        ...sessionData,
+        createdAt: serverTimestamp()
+      }).catch(err => {
+        console.debug('Firestore session archival note:', err);
+      });
+
+      setDoc(doc(db, 'users', targetUid, 'saraChat', 'current'), {
+        messages: [],
+        activeBoard: null,
+        updatedAt: serverTimestamp()
+      }).catch(err => {
+        console.debug('Firestore clear current chat note:', err);
+      });
     }
 
-    // Notice: Do NOT delete tutorMemory! (Keep tutorMemory intact)
-
-    // 4. Start short greeting ("وابدأ تحية قصيرة")
+    // 5. Start short greeting ("وابدأ تحية قصيرة")
     const shortGreeting = isRtl
-      ? `مرحباً يا بطل! 🌟 تم أرشفة جلستك السابقة بنجاح. أنا سارة، جاهزة لجلسة تدريب جديدة معك!`
-      : `Welcome back, champ! 🌟 Your previous session was archived safely. I'm Sara, ready for a fresh lesson!`;
+      ? `مرحباً يا بطل! 🌟 تم أرشفة جلستك السابقة بنجاح وحفظها في الأرشيف 🗂️. أنا معلمتك سارة، جاهزة لجلسة تدريب جديدة معك!`
+      : `Welcome back, champ! 🌟 Your previous session was archived safely 🗂️. I'm Sara, ready for a fresh lesson!`;
 
     const welcomeMsg: MessageItem = {
       id: `msg_welcome_${Date.now()}`,
@@ -1551,24 +1608,30 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     try {
       const list: any[] = [];
       const targetUid = auth.currentUser?.uid || profile.uid;
+
       if (targetUid && !targetUid.startsWith('sim_')) {
         try {
-          const q = query(
-            collection(db, 'users', targetUid, 'saraSessions'),
-            orderBy('createdAt', 'desc'),
-            limit(100)
-          );
-          const snap = await getDocs(q);
-          snap.forEach(docSnap => {
-            list.push({ id: docSnap.id, ...docSnap.data() });
-          });
-        } catch {
-          // Fallback query without orderBy if index is building or composite
-          const snap = await getDocs(collection(db, 'users', targetUid, 'saraSessions'));
-          snap.forEach(docSnap => {
-            list.push({ id: docSnap.id, ...docSnap.data() });
-          });
-          list.sort((a, b) => new Date(b.archivedAt || 0).getTime() - new Date(a.archivedAt || 0).getTime());
+          let snap;
+          try {
+            const q = query(
+              collection(db, 'users', targetUid, 'saraSessions'),
+              orderBy('createdAt', 'desc'),
+              limit(100)
+            );
+            snap = await getDocs(q);
+          } catch {
+            // Fallback query without orderBy if index is building
+            snap = await getDocs(collection(db, 'users', targetUid, 'saraSessions'));
+          }
+
+          if (snap) {
+            snap.forEach(docSnap => {
+              list.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            list.sort((a, b) => new Date(b.archivedAt || 0).getTime() - new Date(a.archivedAt || 0).getTime());
+          }
+        } catch (firestoreErr) {
+          console.debug('Firestore saraSessions fetch note (using local cache):', firestoreErr);
         }
       }
 
@@ -1582,7 +1645,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           }
         });
         list.sort((a, b) => new Date(b.archivedAt || 0).getTime() - new Date(a.archivedAt || 0).getTime());
-      } catch (e) {}
+      } catch (e) {
+        console.warn('LocalStorage merge note:', e);
+      }
 
       setArchivedSessions(list);
     } catch (err) {
@@ -1898,16 +1963,20 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
     try {
       // 1. Determine lesson metadata
-      const lessonTitle = activeRolePlay
+      const lessonTitle = activeCurriculumLesson
+        ? (isRtl ? (activeCurriculumLesson.titleAr || activeCurriculumLesson.titleEn) : (activeCurriculumLesson.titleEn || activeCurriculumLesson.titleAr))
+        : activeRolePlay
         ? (isRtl ? activeRolePlay.titleAr : activeRolePlay.titleEn)
         : (activeBoard?.title || (isRtl ? 'حصة محادثة وتطبيق مع سارة' : 'Interactive Lesson with Sara'));
 
-      const level = (profile as any).level || '12Y';
-      const courseId = activeRolePlay ? activeRolePlay.category : 'sara_tutor';
-      const courseLabel = activeRolePlay
+      const level = activeCurriculumLesson?.level || (profile as any).level || 'A1';
+      const courseId = activeCurriculumLesson?.courseId || activeCurriculumLesson?.pillarId || (activeRolePlay ? activeRolePlay.category : 'sara_tutor');
+      const courseLabel = activeCurriculumLesson
+        ? (isRtl ? (activeCurriculumLesson.courseLabelAr || activeCurriculumLesson.courseLabelEn) : (activeCurriculumLesson.courseLabelEn || activeCurriculumLesson.courseLabelAr))
+        : activeRolePlay
         ? (isRtl ? activeRolePlay.vibeAr : activeRolePlay.vibeEn)
         : (isRtl ? 'سيناريوهات سارة التفاعلية' : 'Sara Interactive Scenarios');
-      const lessonId = activeRolePlay?.id || `sara_lesson_${Date.now()}`;
+      const lessonId = activeCurriculumLesson?.id || activeRolePlay?.id || `sara_lesson_${Date.now()}`;
 
       // 2. Score calculation - Strictly from the verified test taken by the student!
       const totalQuestions = Math.max(1, customTotal);
@@ -1932,8 +2001,37 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
       // 3. Determine if there is another scheduled lesson for today
       const nextLessonIndex = currentDailyLessonIndex + 1;
-      const nextLesson = todayScheduledLessons[nextLessonIndex];
-      const hasNextLessonToday = nextLessonIndex < todayScheduledLessons.length && !!nextLesson;
+      let nextLesson: any = null;
+      let hasNextLessonToday = false;
+
+      if (activeStudyPlan?.planItems && activeStudyPlan.planItems.length > 0) {
+        const planItemsNonCatchup = activeStudyPlan.planItems.filter((i: any) => !i.isCatchUpDay);
+        if (nextLessonIndex < planItemsNonCatchup.length) {
+          const targetItem = planItemsNonCatchup[nextLessonIndex];
+          const allLessons = getAllCurriculumLessons();
+          const matched = allLessons.find((l: any) =>
+            l.id === targetItem.unitId ||
+            (l.courseId === targetItem.courseId && l.level === targetItem.level) ||
+            (l.titleAr && targetItem.topic && l.titleAr.includes(targetItem.topic))
+          );
+          nextLesson = matched || {
+            id: targetItem.unitId || `plan_item_${targetItem.id}`,
+            pillarId: targetItem.courseId || 'grammar',
+            courseId: targetItem.courseId || 'general',
+            courseLabelAr: targetItem.courseLabel || 'خطة سارة الذكية',
+            courseLabelEn: targetItem.courseLabel || 'Sara Smart Plan',
+            titleAr: targetItem.topic || 'درس خطة سارة',
+            titleEn: targetItem.topic || 'Sara Plan Lesson',
+            level: targetItem.level || 'A1',
+            duration: targetItem.duration || '20 min',
+            planItem: targetItem
+          };
+          hasNextLessonToday = true;
+        }
+      } else {
+        nextLesson = todayScheduledLessons[nextLessonIndex];
+        hasNextLessonToday = nextLessonIndex < todayScheduledLessons.length && !!nextLesson;
+      }
 
       // 3B. Sara Speaks Out Loud (The Exact Words tailored to 1st, 2nd, or 3rd lesson)
       const spokenCelebration = hasNextLessonToday
@@ -2782,6 +2880,87 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         if (voiceEnabled) {
           playSaraVoice(planGreeting);
         }
+      }
+      return;
+    }
+
+    // 0B-3. Detect "Browse / Navigate to Lessons & Curriculums" intent from voice or chat
+    const isLessonsIntent = 
+      lower.includes('الدروس') ||
+      lower.includes('انتقل الى الدروس') ||
+      lower.includes('انتقل للدروس') ||
+      lower.includes('افتح الدروس') ||
+      lower.includes('افتحي الدروس') ||
+      lower.includes('ابي الدروس') ||
+      lower.includes('أبي الدروس') ||
+      lower.includes('ابي دروس') ||
+      lower.includes('أبي دروس') ||
+      lower.includes('مناهج سارة') ||
+      lower.includes('المناهج') ||
+      lower.includes('المنهج') ||
+      lower.includes('قائمة الدروس') ||
+      lower.includes('عرض الدروس') ||
+      lower.includes('ودني للدروس') ||
+      lower.includes('خذني للدروس') ||
+      lower.includes('curriculum') ||
+      lower.includes('lessons') ||
+      lower.includes('open lessons') ||
+      lower.includes('browse lessons');
+
+    if (isLessonsIntent) {
+      const userMsg: MessageItem = {
+        id: `msg_user_${Date.now()}`,
+        role: 'user',
+        text: text,
+        timestamp: Date.now()
+      };
+      setMessages(prev => [...prev, userMsg]);
+      setInputText('');
+      handleOpenCurriculum('all');
+      const lessonsGreeting = isRtl
+        ? `أهلاً بك يا بطل! 🌟 فتحت لك مكتبة مناهج سارة التخصصية والدروس التفاعلية فوراً 📚. اختر أي درس تود تعلمه لننطلق معاً بالشرح على السبورة الذكية والتمارين التطبيقية!`
+        : `Welcome champion! 🌟 I opened Sara's Specialized Curriculums & Lessons library for you 📚. Pick any lesson to begin learning on the smart whiteboard with exercises!`;
+      const saraMsg: MessageItem = {
+        id: `msg_sara_lessons_${Date.now()}`,
+        role: 'sara',
+        text: lessonsGreeting,
+        timestamp: Date.now()
+      };
+      setMessages(prev => [...prev, saraMsg]);
+      if (voiceEnabled) {
+        playSaraVoice(lessonsGreeting);
+      }
+      return;
+    }
+
+    // 0B-4. Detect "Start Lesson / Next Lesson" intent from voice or chat
+    const isStartLessonIntent = 
+      lower.includes('ابدأ الدرس') ||
+      lower.includes('ابدا الدرس') ||
+      lower.includes('ابدأ درس اليوم') ||
+      lower.includes('ابدا درس اليوم') ||
+      lower.includes('درس اليوم') ||
+      lower.includes('الدرس التالي') ||
+      lower.includes('انتقل للدرس التالي') ||
+      lower.includes('start lesson') ||
+      lower.includes('start today lesson') ||
+      lower.includes('start today\'s lesson') ||
+      lower.includes('next lesson');
+
+    if (isStartLessonIntent) {
+      const userMsg: MessageItem = {
+        id: `msg_user_${Date.now()}`,
+        role: 'user',
+        text: text,
+        timestamp: Date.now()
+      };
+      setMessages(prev => [...prev, userMsg]);
+      setInputText('');
+
+      if (isDailyBreakActive) {
+        handleFinishBreakAndStartNextLesson();
+      } else {
+        handleStartPlanLesson(todayScheduledLesson);
       }
       return;
     }
@@ -6663,17 +6842,28 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               onBack={() => setIsStudyPlanModalOpen(false)}
               onNavigateToLesson={(courseId, level, unitId) => {
                 setIsStudyPlanModalOpen(false);
-                handleSelectCurriculumLesson({
-                  id: unitId,
-                  pillarId: courseId,
-                  courseId,
-                  courseLabelAr: courseId,
-                  courseLabelEn: courseId,
-                  titleAr: unitId,
-                  titleEn: unitId,
-                  level,
-                  duration: '25 min'
-                });
+                const allCur = getAllCurriculumLessons();
+                const matched = allCur.find(l => 
+                  l.id === unitId || 
+                  (l.courseId === courseId && l.level === level)
+                );
+                if (matched) {
+                  handleSelectCurriculumLesson(matched);
+                } else if (onNavigateToLesson) {
+                  onNavigateToLesson(courseId, level, unitId);
+                } else {
+                  handleSelectCurriculumLesson({
+                    id: unitId,
+                    pillarId: courseId,
+                    courseId,
+                    courseLabelAr: courseId,
+                    courseLabelEn: courseId,
+                    titleAr: unitId,
+                    titleEn: unitId,
+                    level,
+                    duration: '25 min'
+                  });
+                }
               }}
               onStartWithSara={(curriculumLesson) => {
                 setIsStudyPlanModalOpen(false);
