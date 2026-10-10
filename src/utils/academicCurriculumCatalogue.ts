@@ -1354,6 +1354,27 @@ export interface PlanGenerationConfig {
   trackId?: string; // 'comprehensive' | 'ielts_toefl' | 'business_interview' | 'traveler_survival' | 'weakness_recovery' | 'spaced_repetition' | 'micro_10min' | 'weekend_bootcamp' | 'mastery_100day' | 'phonics_safari' | 'storybook_reader' | 'speak_without_fear'
 }
 
+function parsePreferredTime(preferredTime?: string): { hours: number; minutes: number } {
+  if (!preferredTime) return { hours: 16, minutes: 0 };
+  const clean = String(preferredTime).trim();
+  const isPM = /pm/i.test(clean);
+  const isAM = /am/i.test(clean);
+  const match = clean.match(/^(\d{1,2}):(\d{1,2})/);
+  if (!match) return { hours: 16, minutes: 0 };
+  let hours = parseInt(match[1], 10);
+  let minutes = parseInt(match[2], 10);
+  if (isNaN(hours)) hours = 16;
+  if (isNaN(minutes)) minutes = 0;
+  if (isPM && hours < 12) {
+    hours += 12;
+  } else if (isAM && hours === 12) {
+    hours = 0;
+  }
+  hours = Math.max(0, Math.min(23, hours));
+  minutes = Math.max(0, Math.min(59, minutes));
+  return { hours, minutes };
+}
+
 /**
  * Intelligent Plan Builder & Scheduler that weaves chosen or auto-generated lessons
  * across weeks, months, and days with alternating pedagogical rhythm and review milestones.
@@ -1617,7 +1638,9 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
 
   const generatedItems: PlanItem[] = [];
   let lessonIdx = 0;
-  let currentDate = new Date(config.startDate);
+  let currentDate = (!config.startDate || isNaN(new Date(config.startDate).getTime())) 
+    ? new Date() 
+    : new Date(config.startDate);
 
   // Loop through weeks
   for (let w = 1; w <= config.weeksToGenerate; w++) {
@@ -1641,7 +1664,7 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
         lastStudyDateThisWeek = new Date(currentDate);
 
         const scheduledAt = new Date(currentDate);
-        const [h, m] = (config.preferredTime || '16:00').split(':').map(Number);
+        const { hours: h, minutes: m } = parsePreferredTime(config.preferredTime);
         scheduledAt.setHours(h, m, 0, 0);
 
         // Add lessonsPerDay
@@ -1707,6 +1730,10 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
             topicLabel = isRtl ? `☕ [استشفاء وتعويض مرن] ${topicLabel}` : `☕ [Flex Catch-Up Day] ${topicLabel}`;
           }
 
+          const safeIsoDate = !isNaN(lessonScheduledAt.getTime()) 
+            ? lessonScheduledAt.toISOString() 
+            : new Date().toISOString();
+
           generatedItems.push({
             id: `plan-w${w}-d${i}-s${s}-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
             month: monthNum,
@@ -1718,9 +1745,13 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
             duration: durationLabel,
             level: currentLesson.level || 'A1',
             unitId: currentLesson.id,
-            dateLabel: currentDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
-            timeLabel: `${String(lessonScheduledAt.getHours()).padStart(2, '0')}:${String(lessonScheduledAt.getMinutes()).padStart(2, '0')}`,
-            scheduledAt: lessonScheduledAt.toISOString(),
+            dateLabel: !isNaN(currentDate.getTime()) 
+              ? currentDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' })
+              : '---',
+            timeLabel: !isNaN(lessonScheduledAt.getTime())
+              ? `${String(lessonScheduledAt.getHours()).padStart(2, '0')}:${String(lessonScheduledAt.getMinutes()).padStart(2, '0')}`
+              : '16:00',
+            scheduledAt: safeIsoDate,
             trackId: config.trackId || activeTrack.id,
             trackBadge,
             phaseLabel,
@@ -1741,8 +1772,8 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
     if (shouldAddTest && lastStudyDateThisWeek) {
       const testDate = new Date(lastStudyDateThisWeek);
       const testScheduledAt = new Date(testDate);
-      const [h, m] = (config.preferredTime || '16:00').split(':').map(Number);
-      testScheduledAt.setHours(h + config.lessonsPerDay, m, 0, 0);
+      const { hours: h, minutes: m } = parsePreferredTime(config.preferredTime);
+      testScheduledAt.setHours(Math.min(23, h + config.lessonsPerDay), m, 0, 0);
 
       const testTitle = config.trackId === 'ielts_toefl'
         ? (isRtl ? `محاكاة اختبار الآيلتس الأكاديمي (الأسبوع ${w}) 🎯` : `IELTS Academic Mock Exam (Week ${w}) 🎯`)
@@ -1762,6 +1793,10 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
             ? `اختبار المراجعة الشامل والتقييم النصف شهري (الأسبوع ${w - 1}-${w})` 
             : `Comprehensive Review Milestone Test (Week ${w - 1}-${w})`);
 
+      const safeTestIsoDate = !isNaN(testScheduledAt.getTime()) 
+        ? testScheduledAt.toISOString() 
+        : new Date().toISOString();
+
       generatedItems.push({
         id: `test-w${w}-${Date.now().toString(36)}`,
         month: monthNum,
@@ -1773,9 +1808,13 @@ export function buildSmartAcademicPlan(config: PlanGenerationConfig): PlanItem[]
         duration: config.trackId === 'micro_10min' ? '15 min' : '60 min',
         level: config.difficultyLevel === 'advanced' ? 'B2' : config.difficultyLevel === 'intermediate' ? 'B1' : 'A1',
         unitId: `test-${w}`,
-        dateLabel: testDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }),
-        timeLabel: `${String(testScheduledAt.getHours()).padStart(2, '0')}:${String(testScheduledAt.getMinutes()).padStart(2, '0')}`,
-        scheduledAt: testScheduledAt.toISOString(),
+        dateLabel: !isNaN(testDate.getTime()) 
+          ? testDate.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' })
+          : '---',
+        timeLabel: !isNaN(testScheduledAt.getTime())
+          ? `${String(testScheduledAt.getHours()).padStart(2, '0')}:${String(testScheduledAt.getMinutes()).padStart(2, '0')}`
+          : '17:00',
+        scheduledAt: safeTestIsoDate,
         isTest: true,
         trackId: config.trackId || activeTrack.id,
         trackBadge,

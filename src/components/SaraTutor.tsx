@@ -64,6 +64,9 @@ import { getScenarioEducationalContent } from '../data/saraScenarioCurriculumDat
 import { buildSaraCurriculumExplanation } from '../utils/saraCurriculumExplainer';
 import { buildSaraExclusiveLessonExplanation } from '../utils/saraExclusiveExplainer';
 import { SaraCurriculumLesson } from '../data/saraExclusiveCurriculums';
+import { SaraSmartPlanModal } from './SaraSmartPlanModal';
+import { StudyPlanner } from './Academic/StudyPlanner';
+import { CurriculumLesson, getAllCurriculumLessons } from '../utils/academicCurriculumCatalogue';
 
 interface MessageItem {
   id: string;
@@ -504,6 +507,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [activeStudyPlan, setActiveStudyPlan] = useState<StudyPlan | null>(null);
   const [isLoadingStudyPlan, setIsLoadingStudyPlan] = useState<boolean>(false);
   const [isStudyPlanBannerDismissed, setIsStudyPlanBannerDismissed] = useState<boolean>(false);
+  const [isSmartPlanGeneratorOpen, setIsSmartPlanGeneratorOpen] = useState<boolean>(false);
   const [activeRolePlay, setActiveRolePlay] = useState<RolePlayScenario | null>(null);
   const [completedMissions, setCompletedMissions] = useState<number[]>([]);
   const [showHesitationEncouragement, setShowHesitationEncouragement] = useState<boolean>(false);
@@ -907,7 +911,33 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     }));
   }, [dailyLessonsTarget]);
 
-  const todayScheduledLesson = todayScheduledLessons[currentDailyLessonIndex] || todayScheduledLessons[0] || null;
+  // Priority: Match today's lesson from activeStudyPlan if available
+  const todayScheduledPlanLesson = useMemo<any | null>(() => {
+    if (!activeStudyPlan?.planItems || activeStudyPlan.planItems.length === 0) return null;
+    const items = activeStudyPlan.planItems.filter((i: any) => !i.isCatchUpDay);
+    if (items.length === 0) return null;
+    const targetItem = items[currentDailyLessonIndex % items.length] || items[0];
+    const allLessons = getAllCurriculumLessons();
+    const matched = allLessons.find((l: any) =>
+      l.id === targetItem.unitId ||
+      (l.courseId === targetItem.courseId && l.level === targetItem.level) ||
+      (l.titleAr && targetItem.topic && l.titleAr.includes(targetItem.topic))
+    );
+    return matched || {
+      id: targetItem.unitId || `plan_item_${targetItem.id}`,
+      pillarId: targetItem.courseId || 'grammar',
+      courseId: targetItem.courseId || 'general',
+      courseLabelAr: targetItem.courseLabel || 'خطة سارة الذكية',
+      courseLabelEn: targetItem.courseLabel || 'Sara Smart Plan',
+      titleAr: targetItem.topic || 'درس خطة سارة',
+      titleEn: targetItem.topic || 'Sara Plan Lesson',
+      level: targetItem.level || 'A1',
+      duration: targetItem.duration || '20 min',
+      planItem: targetItem
+    };
+  }, [activeStudyPlan, currentDailyLessonIndex]);
+
+  const todayScheduledLesson = todayScheduledPlanLesson || todayScheduledLessons[currentDailyLessonIndex] || todayScheduledLessons[0] || null;
 
   // 📦 Migrate & Archive Completed Lesson Session (ترحيل الدرس الأول وحفظه بالأرشيف)
   const executeLessonArchival = async (
@@ -1031,14 +1061,28 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
   // Start scenario or lesson with Sara
   const handleStartPlanLesson = (planItemOrUnitId: any) => {
+    // 1. If it's a curriculum plan lesson (has courseId or pillarId or planItem)
+    if (planItemOrUnitId && (planItemOrUnitId.planItem || (planItemOrUnitId.pillarId && planItemOrUnitId.pillarId !== 'sara_scenarios'))) {
+      handleSelectCurriculumLesson(planItemOrUnitId);
+      return;
+    }
+
+    // 2. Otherwise check if matched with roleplay scenarios
     const scId = typeof planItemOrUnitId === 'string' ? planItemOrUnitId : (planItemOrUnitId?.unitId || planItemOrUnitId?.id);
     const matchedScenario = ROLE_PLAY_SCENARIOS.find(s => s.id === scId) || 
-      ROLE_PLAY_SCENARIOS.find(s => planItemOrUnitId?.topic && (s.titleAr.includes(planItemOrUnitId.topic) || s.titleEn.includes(planItemOrUnitId.topic))) ||
-      ROLE_PLAY_SCENARIOS[0];
+      ROLE_PLAY_SCENARIOS.find(s => planItemOrUnitId?.topic && (s.titleAr.includes(planItemOrUnitId.topic) || s.titleEn.includes(planItemOrUnitId.topic)));
 
     if (matchedScenario) {
       handleStartRolePlayScenario(matchedScenario);
+      return;
     }
+
+    if (todayScheduledPlanLesson) {
+      handleSelectCurriculumLesson(todayScheduledPlanLesson);
+      return;
+    }
+
+    handleStartRolePlayScenario(ROLE_PLAY_SCENARIOS[0]);
   };
 
   // Turn-by-turn microphone listening trigger
@@ -2631,14 +2675,69 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       return;
     }
 
-    // 0B. Detect "Study Plan / Academic Schedule" intent from voice or chat
+    // 0B-1. Detect "Generate Smart Study Plan" intent from voice or chat
+    const isPlanGenerationIntent = 
+      lower.includes('توليد خطة') ||
+      lower.includes('توليد خطه') ||
+      lower.includes('توليد خطة ذكية') ||
+      lower.includes('توليد خطه ذكيه') ||
+      lower.includes('ابي خطة') ||
+      lower.includes('أبي خطة') ||
+      lower.includes('ابي خطه') ||
+      lower.includes('أبي خطه') ||
+      lower.includes('سوي لي خطة') ||
+      lower.includes('سوي لي خطه') ||
+      lower.includes('سويلي خطة') ||
+      lower.includes('سويلي خطه') ||
+      lower.includes('ولدي لي خطة') ||
+      lower.includes('ولدي خطة') ||
+      lower.includes('اعملي لي خطة') ||
+      lower.includes('اعمل لي خطة') ||
+      lower.includes('خطة ذكية') ||
+      lower.includes('خطه ذكيه') ||
+      lower.includes('جدول ذكي') ||
+      lower.includes('generate plan') ||
+      lower.includes('create plan') ||
+      lower.includes('make a plan');
+
+    if (isPlanGenerationIntent) {
+      const userMsg: MessageItem = {
+        id: `msg_user_${Date.now()}`,
+        role: 'user',
+        text: text,
+        timestamp: Date.now()
+      };
+      setMessages(prev => [...prev, userMsg]);
+      setInputText('');
+      setIsSmartPlanGeneratorOpen(true);
+      const planGreeting = isRtl
+        ? `أهلاً بك يا بطل! 🌟 فتحت لك أداة توليد الخطة الذكية المخصصة فوراً ⚡. اختر مسارك المفضل والمدة المناسبة وسأصنع لك جدولاً أكاديمياً متكاملاً ندرسه معاً خطوة بخطوة على السبورة الذكية!`
+        : `Welcome champion! 🌟 I opened the Smart Study Plan Generator for you ⚡. Choose your target track and schedule to begin learning step-by-step with me!`;
+      const saraMsg: MessageItem = {
+        id: `msg_sara_plan_gen_${Date.now()}`,
+        role: 'sara',
+        text: planGreeting,
+        timestamp: Date.now()
+      };
+      setMessages(prev => [...prev, saraMsg]);
+      if (voiceEnabled) {
+        playSaraVoice(planGreeting);
+      }
+      return;
+    }
+
+    // 0B-2. Detect "View Study Plan / Academic Schedule" intent from voice or chat
     const isStudyPlanIntent = 
       lower.includes('الخطة الدراسية') ||
+      lower.includes('الخطه الدراسيه') ||
       lower.includes('خطتي الدراسية') ||
+      lower.includes('خطتي الدراسيه') ||
       lower.includes('جدولي الدراسي') ||
       lower.includes('الجدول الدراسي') ||
       lower.includes('افتحي الخطة') ||
+      lower.includes('افتحي الخطه') ||
       lower.includes('افتح الخطة') ||
+      lower.includes('افتح الخطه') ||
       lower.includes('وش درسي اليوم') ||
       lower.includes('ما هو درسي اليوم') ||
       lower.includes('study plan') ||
@@ -2653,19 +2752,36 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       };
       setMessages(prev => [...prev, userMsg]);
       setInputText('');
-      handleOpenCurriculum('all');
-      const planGreeting = isRtl
-        ? `أهلاً بك يا بطل! 🌟 فتحت لك مناهج سارة التخصصية المستقلة للطلاقة 📚. اختر أي مسار من المسارات الأربعة (القواعد التحدثية، المحادثة والطلاقة، القراءة والنطق، الكتابة) لنبدأ التدريب الصوتي والشرح على السبورة الذكية فوراً!`
-        : `Welcome champion! 🌟 I opened Sara's dedicated fluency curriculums for you 📚. Choose any track to begin voice practice and whiteboard learning right away!`;
-      const saraMsg: MessageItem = {
-        id: `msg_sara_plan_${Date.now()}`,
-        role: 'sara',
-        text: planGreeting,
-        timestamp: Date.now()
-      };
-      setMessages(prev => [...prev, saraMsg]);
-      if (voiceEnabled) {
-        playSaraVoice(planGreeting);
+      if (activeStudyPlan) {
+        setIsStudyPlanModalOpen(true);
+        const planGreeting = isRtl
+          ? `أهلاً بك يا بطل! 🌟 فتحت لك جدول خطتك الدراسية النشطة 🗓️ تضم ${activeStudyPlan.planItems?.length || 0} درساً. يمكنك استعراض كافة المحطات أو البدء بالدرس المجدول فوراً!`
+          : `Welcome champion! 🌟 I opened your active study plan 🗓️ containing ${activeStudyPlan.planItems?.length || 0} lessons. Let's study!`;
+        const saraMsg: MessageItem = {
+          id: `msg_sara_plan_active_${Date.now()}`,
+          role: 'sara',
+          text: planGreeting,
+          timestamp: Date.now()
+        };
+        setMessages(prev => [...prev, saraMsg]);
+        if (voiceEnabled) {
+          playSaraVoice(planGreeting);
+        }
+      } else {
+        setIsSmartPlanGeneratorOpen(true);
+        const planGreeting = isRtl
+          ? `أهلاً بك يا بطل! 🌟 لم تبدأ خطة دراسية بعد، لذلك فتحت لك أداة توليد الخطة الذكية المخصصة ⚡. اختر مسارك وسأنسق جدولك الأكاديمي فوراً!`
+          : `Welcome champion! 🌟 You don't have an active study plan yet, so I opened the Smart Plan Generator ⚡. Choose your track to get started!`;
+        const saraMsg: MessageItem = {
+          id: `msg_sara_plan_new_${Date.now()}`,
+          role: 'sara',
+          text: planGreeting,
+          timestamp: Date.now()
+        };
+        setMessages(prev => [...prev, saraMsg]);
+        if (voiceEnabled) {
+          playSaraVoice(planGreeting);
+        }
       }
       return;
     }
@@ -3680,6 +3796,16 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               <span>🌐</span>
               <span>{isRtl ? 'كل مناهج سارة ➔' : 'All Curriculums ➔'}</span>
             </button>
+
+            {/* 6. Smart Plan Generator Button */}
+            <button
+              onClick={() => setIsSmartPlanGeneratorOpen(true)}
+              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shadow-md shrink-0 border border-blue-400/40"
+              title={isRtl ? 'توليد خطة دراسية ذكية مع سارة' : 'Generate Smart Study Plan with Sara'}
+            >
+              <Sparkles size={14} className="text-amber-300 animate-pulse" />
+              <span>{isRtl ? 'توليد خطة ذكية ⚡' : 'Smart Plan ⚡'}</span>
+            </button>
           </div>
         </div>
         
@@ -3749,9 +3875,66 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   <span>{isRtl ? 'عرض الخطة 🗓️' : 'Full Plan'}</span>
                 </button>
                 <button
+                  onClick={() => setIsSmartPlanGeneratorOpen(true)}
+                  className="px-3 py-2 rounded-xl bg-blue-500/25 hover:bg-blue-500/40 text-blue-200 font-bold text-xs transition-all flex items-center justify-center gap-1 cursor-pointer border border-blue-400/25"
+                  title={isRtl ? 'توليد خطة جديدة' : 'Generate New Plan'}
+                >
+                  <Sparkles size={13} className="text-amber-300" />
+                  <span>{isRtl ? 'خطة جديدة ⚡' : 'New Plan'}</span>
+                </button>
+                <button
                   onClick={() => setIsStudyPlanBannerDismissed(true)}
                   className="p-1.5 text-blue-300 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
                   title={isRtl ? 'إخفاء مؤقت' : 'Hide'}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* 2A-000-B. INVITING BANNER IF NO ACTIVE PLAN YET */}
+        {!activeStudyPlan && !isStudyPlanBannerDismissed && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-r from-[#002147] via-blue-950 to-indigo-950 text-white p-3.5 sm:p-4 rounded-3xl shadow-xl border border-blue-400/30 relative overflow-hidden"
+          >
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-400/20 text-amber-300 border border-amber-400/30 flex items-center justify-center text-xl shrink-0">
+                  🗓️
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider">
+                      {isRtl ? 'الخطة الأكاديمية الذكية' : 'Smart Academic Plan'}
+                    </span>
+                    <span className="text-xs text-blue-200 font-bold">
+                      {isRtl ? 'جاهز لتوليد خطتك الدراسية الذكية مع سارة؟' : 'Ready to generate your smart plan?'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-300 font-medium">
+                    {isRtl
+                      ? 'دع سارة تصمم لك جدولاً أكاديمياً ذكياً يربط الدروس بالسبورة التفاعلية واختبارات الإتقان!'
+                      : 'Let Sara design a smart academic schedule connected to the whiteboard and mastery quizzes!'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsSmartPlanGeneratorOpen(true)}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs transition-all shadow-md active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Sparkles size={14} className="text-slate-950" />
+                  <span>{isRtl ? 'توليد خطة ذكية الآن ⚡' : 'Generate Smart Plan Now'}</span>
+                </button>
+                <button
+                  onClick={() => setIsStudyPlanBannerDismissed(true)}
+                  className="p-1.5 text-blue-300 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                  title={isRtl ? 'إخفاء' : 'Dismiss'}
                 >
                   <X size={14} />
                 </button>
@@ -5217,6 +5400,16 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               <span>📚</span>
               <span>{isRtl ? 'مناهج سارة الجديدة (4 مسارات) ✨' : "Sara's Curricula (4 Tracks) ✨"}</span>
             </button>
+
+            {/* 🗓️ SARA'S SMART STUDY PLAN CHIP */}
+            <button
+              onClick={() => setIsSmartPlanGeneratorOpen(true)}
+              className="px-3 py-1 sm:py-1.5 rounded-xl border border-blue-400 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:to-indigo-500 text-white shrink-0 transition-all cursor-pointer font-black flex items-center gap-1.5 text-[10px] sm:text-xs shadow-md active:scale-95"
+              title={isRtl ? 'توليد خطة دراسية ذكية مع سارة' : 'Generate Smart Study Plan'}
+            >
+              <Sparkles size={12} className="text-amber-300 animate-pulse" />
+              <span>{isRtl ? 'توليد خطة ذكية ⚡' : 'Smart Plan ⚡'}</span>
+            </button>
             <button
               onClick={toggleLiveVoiceMode}
               className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border shrink-0 transition-all cursor-pointer font-black flex items-center gap-1 text-[10px] sm:text-xs ${
@@ -6427,6 +6620,69 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         initialPillar={curriculumInitialPillar}
         isRtl={isRtl}
       />
+
+      {/* 14. Sara Smart Plan Generator Modal */}
+      <SaraSmartPlanModal
+        isOpen={isSmartPlanGeneratorOpen}
+        onClose={() => setIsSmartPlanGeneratorOpen(false)}
+        userProfile={profile as any}
+        isRtl={isRtl}
+        onPlanGenerated={(plan) => {
+          setActiveStudyPlan(plan);
+          fetchActiveStudyPlan();
+          const msgText = isRtl
+            ? `رائع يا بطل! تم توليد خطتك الذكية بنجاح 🎉 مسار "${plan.trackTitleAr || 'الخطة الأكاديمية'}" يضم ${plan.planItems?.length || 0} درساً مقسمة بانتظام. درسك الأول جاهز لنبدأ فوراً على السبورة الذكية!`
+            : `Awesome champion! Your smart study plan has been generated 🎉 "${plan.trackTitleEn || 'Academic Plan'}" includes ${plan.planItems?.length || 0} lessons. Your first lesson is ready!`;
+          const saraMsg: MessageItem = {
+            id: `msg_sara_plan_gen_${Date.now()}`,
+            role: 'sara',
+            text: msgText,
+            timestamp: Date.now()
+          };
+          setMessages(prev => [...prev, saraMsg]);
+          if (voiceEnabled) {
+            playSaraVoice(msgText);
+          }
+        }}
+        onStartFirstLesson={(lesson) => {
+          handleSelectCurriculumLesson(lesson);
+        }}
+        onViewFullPlan={() => {
+          setIsStudyPlanModalOpen(true);
+        }}
+      />
+
+      {/* 15. Full Academic Study Planner Modal inside Sara */}
+      {isStudyPlanModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md overflow-y-auto p-2 sm:p-4 flex items-center justify-center">
+          <div className="w-full max-w-7xl max-h-[96vh] bg-slate-50 rounded-3xl overflow-hidden shadow-2xl flex flex-col border border-slate-200 my-auto">
+            <StudyPlanner
+              lang={activeLang as any}
+              userProfile={profile as any}
+              isSaraModal={true}
+              onBack={() => setIsStudyPlanModalOpen(false)}
+              onNavigateToLesson={(courseId, level, unitId) => {
+                setIsStudyPlanModalOpen(false);
+                handleSelectCurriculumLesson({
+                  id: unitId,
+                  pillarId: courseId,
+                  courseId,
+                  courseLabelAr: courseId,
+                  courseLabelEn: courseId,
+                  titleAr: unitId,
+                  titleEn: unitId,
+                  level,
+                  duration: '25 min'
+                });
+              }}
+              onStartWithSara={(curriculumLesson) => {
+                setIsStudyPlanModalOpen(false);
+                handleSelectCurriculumLesson(curriculumLesson);
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
