@@ -28,6 +28,7 @@ import {
 import { auth, googleProvider } from './lib/firebase';
 import { translations, Language } from './lib/translations';
 import { UserRole } from './types';
+import { AcademyIntroSplash } from './components/AcademyIntroSplash';
 import { LandingPage } from './components/LandingPage';
 
 // Code splitting: Load the heavy authenticated app only after sign-in
@@ -390,16 +391,10 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-[#002147] rounded-3xl animate-pulse mx-auto mb-4 border-2 border-[#C49E3A] flex items-center justify-center text-white font-black text-2xl shadow-lg">
-            B
-          </div>
-          <p className="text-slate-500 font-medium whitespace-nowrap">
-            {lang === 'ar' ? 'جارٍ التحقق من الحساب...' : 'Checking session...'}
-          </p>
-        </div>
-      </div>
+      <AcademyIntroSplash 
+        isRtl={lang === 'ar'}
+        loadingMessage={lang === 'ar' ? 'جارٍ افتتاح الأكاديمية والتحقق من الجلسة... 🎓' : 'Opening Academy & verifying session... 🎓'}
+      />
     );
   }
 
@@ -427,16 +422,10 @@ export default function App() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-slate-50" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-          <div className="text-center">
-            <div className="w-16 h-16 bg-[#002147] rounded-3xl animate-pulse mx-auto mb-4 flex items-center justify-center text-white font-black text-2xl border-2 border-[#C49E3A] shadow-xl">
-              B
-            </div>
-            <p className="text-slate-600 font-bold text-sm">
-              {lang === 'ar' ? 'جارٍ تحميل الأكاديمية...' : 'Loading Academy...'}
-            </p>
-          </div>
-        </div>
+        <AcademyIntroSplash 
+          isRtl={lang === 'ar'}
+          loadingMessage={lang === 'ar' ? 'جارٍ تحميل الأكاديمية بالكامل... 🌟' : 'Loading Basim Academy System... 🌟'}
+        />
       }
     >
       <AuthenticatedApp 

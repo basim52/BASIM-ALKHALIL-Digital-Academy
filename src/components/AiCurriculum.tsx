@@ -2906,7 +2906,22 @@ export const AiCurriculum = ({
       }
     }));
 
-    if (!currentUid) {
+    // Always save result locally for offline/instant availability
+    try {
+      const existingResults = JSON.parse(localStorage.getItem(`ai_lesson_results_${currentUid || 'guest'}`) || '{}');
+      existingResults[quizId] = {
+        score,
+        total: 3,
+        completedAt: new Date().toISOString(),
+        questions: activeLessonQuiz,
+        answers: lessonQuizAnswers,
+        difficulty: selectedQuizDifficulty,
+      };
+      localStorage.setItem(`ai_lesson_results_${currentUid || 'guest'}`, JSON.stringify(existingResults));
+    } catch (_) {}
+
+    const isSimulated = !activeAuth || !currentUid || currentUid.startsWith('sim_');
+    if (isSimulated) {
       alert(isRtl 
         ? `رائع! تم تسليم اختبارك بنجاح وحصلت على ${score}/3 محلياً!` 
         : `Well done! Your quiz was submitted successfully with a score of ${score}/3 locally!`
@@ -2949,7 +2964,7 @@ export const AiCurriculum = ({
         : `Excellent! Your quiz grade (${score}/3) has been successfully recorded in your profile and cannot be retaken.`
       );
     } catch (error) {
-      console.error("Error saving lesson quiz result:", error);
+      console.warn("Notice: Cloud sync for quiz result fell back to local storage:", error);
       alert(isRtl 
         ? 'تم حفظ نتيجة اختبارك محلياً بنجاح! سيتم المزامنة مع السحابة لاحقاً.' 
         : 'Your quiz result has been saved locally! Will sync with the cloud later.'
@@ -2967,7 +2982,41 @@ export const AiCurriculum = ({
     const fetchCompletionStatus = async () => {
       const activeAuth = auth.currentUser;
       const currentUid = userProfile?.uid || activeAuth?.uid;
-      if (!currentUid) return;
+      const fallbackUid = currentUid || 'guest';
+      const completedIds = new Set<string>();
+      const resultsMap: Record<string, any> = {};
+
+      // 1. Immediately load local completed items and cached results
+      try {
+        const savedLocal = localStorage.getItem('ai_completed_custom_units');
+        if (savedLocal) {
+          JSON.parse(savedLocal).forEach((id: string) => {
+            completedIds.add(id);
+          });
+        }
+        const savedResultsLocal = localStorage.getItem(`ai_lesson_results_${fallbackUid}`);
+        if (savedResultsLocal) {
+          const parsed = JSON.parse(savedResultsLocal);
+          Object.assign(resultsMap, parsed);
+          Object.keys(parsed).forEach(k => completedIds.add(k));
+        }
+      } catch (e) {
+        console.warn("Local storage parse error in AI completed units:", e);
+      }
+
+      setAiLessonResultsMap({ ...resultsMap });
+      setCompletedCustomUnitIds(new Set(completedIds));
+
+      // 2. Guard against unauthenticated, simulated, or permission-mismatched cloud queries
+      const isSimulated = !activeAuth || !currentUid || currentUid.startsWith('sim_');
+      const isAdmin = (userProfile as any)?.role === 'admin' || activeAuth?.email?.toLowerCase() === 'basim5252@gmail.com';
+      const canQueryCloud = !isSimulated && (activeAuth.uid === currentUid || isAdmin);
+
+      if (!canQueryCloud) {
+        return;
+      }
+
+      // 3. Fetch from Firestore for authorized, active accounts
       try {
         const q = query(
           collection(db, 'lessonResults'), 
@@ -2975,39 +3024,31 @@ export const AiCurriculum = ({
           where('courseId', '==', 'ai-curriculum')
         );
         const querySnapshot = await getDocs(q);
-        const completedIds = new Set<string>();
-        const resultsMap: Record<string, any> = {};
         querySnapshot.forEach(doc => {
           const data = doc.data();
-          completedIds.add(data.lessonId);
-          resultsMap[data.lessonId] = {
-            score: data.score,
-            total: data.total,
-            completedAt: data.completedAt || data.timestamp,
-            questions: data.questions || null,
-            answers: data.answers || null,
-            difficulty: data.difficulty || 'Intermediate',
-          };
-        });
-        setAiLessonResultsMap(resultsMap);
-        
-        // Merge with locally stored completed items
-        try {
-          const savedLocal = localStorage.getItem('ai_completed_custom_units');
-          if (savedLocal) {
-            JSON.parse(savedLocal).forEach((id: string) => {
-              completedIds.add(id);
-            });
+          if (data.lessonId) {
+            completedIds.add(data.lessonId);
+            resultsMap[data.lessonId] = {
+              score: data.score,
+              total: data.total,
+              completedAt: data.completedAt || data.timestamp,
+              questions: data.questions || null,
+              answers: data.answers || null,
+              difficulty: data.difficulty || 'Intermediate',
+            };
           }
-        } catch (e) {
-          console.error("Local storage error parsing completed units:", e);
-        }
-        
-        // Save merged set back to localStorage
-        localStorage.setItem('ai_completed_custom_units', JSON.stringify(Array.from(completedIds)));
-        setCompletedCustomUnitIds(completedIds);
-      } catch (err) {
-        console.error("Error fetching completed AI lessons:", err);
+        });
+        setAiLessonResultsMap({ ...resultsMap });
+        setCompletedCustomUnitIds(new Set(completedIds));
+
+        // Save merged set back to localStorage for resilience
+        try {
+          localStorage.setItem('ai_completed_custom_units', JSON.stringify(Array.from(completedIds)));
+          localStorage.setItem(`ai_lesson_results_${fallbackUid}`, JSON.stringify(resultsMap));
+        } catch (_) {}
+      } catch (err: any) {
+        // Fall back gracefully to the local cache without uncaught error reporting
+        console.warn("Notice: Fetching cloud AI lesson results fell back to local cache:", err?.message || err);
       }
     };
     fetchCompletionStatus();
@@ -3046,8 +3087,9 @@ export const AiCurriculum = ({
       return next;
     });
 
-    if (!currentUid) {
-      alert(isRtl ? 'رائع! تم حفظ إكمال الدرس محلياً بنجاح (سجل الدخول للمزامنة مع السحابة).' : 'Great! Lesson saved successfully locally (sign in to sync with cloud).');
+    const isSimulated = !activeAuth || !currentUid || currentUid.startsWith('sim_');
+    if (isSimulated) {
+      alert(isRtl ? 'رائع! تم حفظ إكمال الدرس محلياً بنجاح في خطتك!' : 'Great! Lesson saved successfully locally in your study plan!');
       setSelectedCustomUnit(null);
       return;
     }
@@ -3069,7 +3111,7 @@ export const AiCurriculum = ({
       alert(isRtl ? 'رائع! تم تسجيل إكمال الدرس بنجاح وسيظهر كمكتمل في جدول مهامك!' : 'Excellent! Lesson marked as completed and will reflect on your task planner!');
       setSelectedCustomUnit(null);
     } catch (error) {
-      console.error("Error saving lesson result completion:", error);
+      console.warn("Notice: Cloud sync for lesson completion fell back to local storage:", error);
       // We still alert success because we successfully saved offline to localStorage
       alert(isRtl ? 'تم الحفظ بنجاح محلياً! سيتم الرفع للسحابة لاحقاً عند استقرار الاتصال.' : 'Saved locally successfully! Will be uploaded to cloud when connection stabilizes.');
       setSelectedCustomUnit(null);
@@ -3080,8 +3122,15 @@ export const AiCurriculum = ({
     if (!customStudyPlan) return;
     const activeAuth = auth.currentUser;
     const currentUid = userProfile?.uid || activeAuth?.uid;
-    if (!currentUid) {
-      alert(isRtl ? 'يرجى تسجيل الدخول أولاً لحفظ الخطة في السحابة!' : 'Please sign in to save your plan to the cloud!');
+    const isSimulated = !activeAuth || !currentUid || currentUid.startsWith('sim_');
+    if (isSimulated) {
+      localStorage.setItem('ai_custom_study_plan', JSON.stringify({
+        plan: customStudyPlan,
+        subject: plannerSubject,
+        focus: plannerFocus
+      }));
+      setCloudSaveSuccess(true);
+      setTimeout(() => setCloudSaveSuccess(false), 4000);
       return;
     }
 

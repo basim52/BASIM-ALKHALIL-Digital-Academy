@@ -5065,6 +5065,7 @@ export default function AuthenticatedApp({
   const [selectedExpressionLevel, setSelectedExpressionLevel] = useState<ExpressionLevel>('A1');
   const [selectedTestLevel, setSelectedTestLevel] = useState<string>('A1');
   const [selectedTestUnitId, setSelectedTestUnitId] = useState<string>('');
+  const [selectedSaraLesson, setSelectedSaraLesson] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [renderError, setRenderError] = useState<string | null>(null);
   const [lang, setLang] = useState<Language>(initialLang);
@@ -5108,8 +5109,11 @@ export default function AuthenticatedApp({
       setSelectedWritingLevel(level as WritingLevel);
       setAutoStartUnitId(unitId);
       setView('writing-curriculum');
-    } else if (courseId === 'conversation') {
-      setView('ai-chat');
+    } else if (courseId === 'conversation' || courseId === 'sara' || courseId === 'sara_tutor' || courseId === 'sara-tutor') {
+      if (unitId) {
+        setSelectedSaraLesson({ id: unitId, courseId, level });
+      }
+      setView('sara-tutor');
     } else if (courseId === 'pronunciation') {
       setView('pronunciation-lab');
     } else if (courseId === 'live_translate' || courseId === 'translation') {
@@ -5924,6 +5928,10 @@ export default function AuthenticatedApp({
           onBack={() => setView('dashboard')} 
           onNavigateToResults={() => setView('academic-results')}
           onNavigateToLesson={handleNavigateToLesson}
+          onStartWithSara={(curriculumLesson) => {
+            setSelectedSaraLesson(curriculumLesson);
+            setView('sara-tutor');
+          }}
         />
       );
     }
@@ -7116,6 +7124,7 @@ export default function AuthenticatedApp({
           onProfileUpdated={(updated) => setUserProfile(updated)}
           onLangChange={(newLang) => setLang(newLang)}
           onNavigateToLesson={handleNavigateToLesson}
+          initialLesson={selectedSaraLesson}
         />
       );
     }
@@ -7218,6 +7227,7 @@ export default function AuthenticatedApp({
           onProfileUpdated={(updated) => setUserProfile(updated)}
           onLangChange={(newLang) => setLang(newLang)}
           onNavigateToLesson={handleNavigateToLesson}
+          initialLesson={selectedSaraLesson}
         />
       );
     }

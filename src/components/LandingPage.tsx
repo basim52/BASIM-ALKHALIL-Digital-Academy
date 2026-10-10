@@ -35,6 +35,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const isRtl = lang === 'ar';
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
+  const handleStart = () => {
+    onGetStarted();
+  };
+
   const toggleFaq = (index: number) => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
   };
@@ -213,7 +217,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             {/* Start Now Button */}
             <button
-              onClick={onGetStarted}
+              onClick={handleStart}
               className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[#002147] hover:bg-[#002c5f] text-white text-xs sm:text-sm font-black shadow-md border-b-3 border-[#C49E3A] active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
             >
               <span>{isRtl ? 'ابدأ الآن' : 'Start Now'}</span>
@@ -260,7 +264,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               {/* CTAs */}
               <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
                 <button
-                  onClick={onGetStarted}
+                  onClick={handleStart}
                   className="px-7 py-4 rounded-2xl bg-[#002147] hover:bg-[#002c5f] text-white text-base font-black shadow-lg shadow-blue-950/20 border-b-4 border-[#C49E3A] active:scale-95 transition-all flex items-center justify-center gap-3 cursor-pointer"
                 >
                   <span>{isRtl ? 'ابدأ الآن مجاناً 🚀' : 'Start Now Free 🚀'}</span>
@@ -500,7 +504,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           <div className="mt-12 text-center">
             <button
-              onClick={onGetStarted}
+              onClick={handleStart}
               className="px-8 py-4 rounded-2xl bg-[#002147] hover:bg-[#002c5f] text-white text-sm sm:text-base font-black shadow-md border-b-4 border-[#C49E3A] active:scale-95 transition-all inline-flex items-center gap-2.5 cursor-pointer"
             >
               <span>{isRtl ? 'ابدأ خطوتك الأولى الآن 🚀' : 'Start Your First Step Now 🚀'}</span>
@@ -582,7 +586,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               : 'Sign in with your Google account now, take the placement test, and begin your personalized learning roadmap.'}
           </p>
           <button
-            onClick={onGetStarted}
+            onClick={handleStart}
             className="px-8 py-4 rounded-2xl bg-[#C49E3A] hover:bg-[#b58f31] text-[#002147] text-base font-black shadow-xl active:scale-95 transition-all inline-flex items-center gap-2 cursor-pointer"
           >
             <span>{isRtl ? 'ابدأ الآن بحساب Google' : 'Start Now with Google'}</span>
@@ -638,7 +642,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 {isRtl ? 'English Version' : 'النسخة العربية'}
               </button>
               <span>·</span>
-              <button onClick={onGetStarted} className="text-[#C49E3A] hover:underline cursor-pointer font-bold">
+              <button onClick={handleStart} className="text-[#C49E3A] hover:underline cursor-pointer font-bold">
                 {isRtl ? 'تسجيل الدخول' : 'Sign In'}
               </button>
             </div>

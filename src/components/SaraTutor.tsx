@@ -335,6 +335,7 @@ interface SaraTutorProps {
   onProfileUpdated?: (updated: UserProfile) => void;
   onLangChange?: (newLang: Language) => void;
   onNavigateToLesson?: (courseId: string, level: string, unitId: string) => void;
+  initialLesson?: any;
 }
 
 const SECTION_LABELS: Record<string, { ar: string; en: string }> = {
@@ -361,7 +362,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   onBack,
   onProfileUpdated,
   onLangChange,
-  onNavigateToLesson
+  onNavigateToLesson,
+  initialLesson
 }) => {
   const [activeLang, setActiveLang] = useState<Language>(lang);
 
@@ -664,6 +666,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     setQuizSelectedOption(null);
     setQuizFeedback(null);
     setIsWhiteboardOpen(true);
+    setMobileTab('board');
+    setIsCurriculumModalOpen(false);
+    setIsStudyPlanModalOpen(false);
 
     // 2. Add message to chat history with track context if active
     let spokenIntro = explanation.spokenIntro;
@@ -984,10 +989,22 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
     // 1. Guaranteed Local Storage Archival First (حفظ فوري ومضمون بالأرشيف)
     try {
-      const storageKey = `sara_archived_sessions_${targetUid || 'guest'}`;
-      const existing: any[] = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      existing.unshift(newLocalDoc);
-      localStorage.setItem(storageKey, JSON.stringify(existing.slice(0, 100)));
+      const keysToSave = Array.from(new Set([
+        `sara_archived_sessions_${profile.uid || 'guest'}`,
+        targetUid ? `sara_archived_sessions_${targetUid}` : null,
+        'sara_archived_sessions_global'
+      ].filter(Boolean))) as string[];
+
+      keysToSave.forEach(k => {
+        try {
+          const existing: any[] = JSON.parse(localStorage.getItem(k) || '[]');
+          const filtered = existing.filter(s => s.id !== newLocalDoc.id);
+          filtered.unshift(newLocalDoc);
+          localStorage.setItem(k, JSON.stringify(filtered.slice(0, 100)));
+        } catch (e) {
+          console.warn(`LocalStorage archival error for ${k}:`, e);
+        }
+      });
     } catch (e) {
       console.warn('LocalStorage archival error:', e);
     }
@@ -1500,7 +1517,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     setShowNewChatConfirm(false);
     setIsLessonCompletedModalOpen(false);
 
-    if (!messages || messages.length === 0) {
+    const userOrLessonMessages = messages.filter(m => m.role === 'user' || (m.role === 'sara' && !m.id?.startsWith('msg_welcome_')));
+    if (userOrLessonMessages.length === 0 && messages.length <= 1) {
+      setShowSavedToast(true);
       return;
     }
 
@@ -1515,6 +1534,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
     // Find lesson name if present
     const detectedLessonTitle = 
+      activeCurriculumLesson?.titleAr ||
+      activeCurriculumLesson?.titleEn ||
       activeRolePlay?.titleAr || 
       activeRolePlay?.titleEn || 
       (activeRolePlay as any)?.title || 
@@ -1545,12 +1566,24 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       createdAt: now.toISOString()
     };
 
-    // 1. Guaranteed Local Storage Archival First (حفظ فوري ومضمون بالأرشيف)
+    // 1. Guaranteed Local Storage Archival First across canonical keys (حفظ فوري ومضمون بالأرشيف)
     try {
-      const storageKey = `sara_archived_sessions_${targetUid || 'guest'}`;
-      const existing: any[] = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      existing.unshift(newLocalDoc);
-      localStorage.setItem(storageKey, JSON.stringify(existing.slice(0, 100)));
+      const keysToSave = Array.from(new Set([
+        `sara_archived_sessions_${profile.uid || 'guest'}`,
+        targetUid ? `sara_archived_sessions_${targetUid}` : null,
+        'sara_archived_sessions_global'
+      ].filter(Boolean))) as string[];
+
+      keysToSave.forEach(k => {
+        try {
+          const existing: any[] = JSON.parse(localStorage.getItem(k) || '[]');
+          const filtered = existing.filter(s => s.id !== newLocalDoc.id);
+          filtered.unshift(newLocalDoc);
+          localStorage.setItem(k, JSON.stringify(filtered.slice(0, 100)));
+        } catch (e) {
+          console.warn(`LocalStorage archive error for ${k}:`, e);
+        }
+      });
     } catch (e) {
       console.warn('LocalStorage archive error:', e);
     }
@@ -1603,7 +1636,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     // إذا قال لا: خل الدردشة كما هي (leave chat as is)
   };
 
-  const fetchArchivedSessions = async () => {
+  const fetchArchivedSessions = useCallback(async () => {
     setIsLoadingArchive(true);
     try {
       const list: any[] = [];
@@ -1635,13 +1668,25 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         }
       }
 
-      // Merge with localStorage backup for offline/simulated students
+      // Merge with localStorage backup across all possible profile keys
       try {
-        const storageKey = `sara_archived_sessions_${targetUid || 'guest'}`;
-        const localList: any[] = JSON.parse(localStorage.getItem(storageKey) || '[]');
-        localList.forEach(localItem => {
-          if (!list.some(item => item.id === localItem.id || (item.archivedAt && item.archivedAt === localItem.archivedAt))) {
-            list.push(localItem);
+        const keysToTry = Array.from(new Set([
+          `sara_archived_sessions_${profile.uid || 'guest'}`,
+          targetUid ? `sara_archived_sessions_${targetUid}` : null,
+          'sara_archived_sessions_guest',
+          'sara_archived_sessions_global'
+        ].filter(Boolean))) as string[];
+
+        keysToTry.forEach(storageKey => {
+          try {
+            const localList: any[] = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            localList.forEach(localItem => {
+              if (!list.some(item => item.id === localItem.id || (item.archivedAt && item.archivedAt === localItem.archivedAt))) {
+                list.push(localItem);
+              }
+            });
+          } catch (e) {
+            console.warn('LocalStorage merge note:', e);
           }
         });
         list.sort((a, b) => new Date(b.archivedAt || 0).getTime() - new Date(a.archivedAt || 0).getTime());
@@ -1655,7 +1700,17 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     } finally {
       setIsLoadingArchive(false);
     }
-  };
+  }, [profile.uid]);
+
+  useEffect(() => {
+    fetchArchivedSessions();
+  }, [fetchArchivedSessions]);
+
+  useEffect(() => {
+    if (initialLesson) {
+      handleSelectCurriculumLesson(initialLesson);
+    }
+  }, [initialLesson]);
 
   const handleRestoreSessionToLive = (session: any) => {
     if (!session || !session.messages) return;
@@ -2726,6 +2781,43 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       return;
     }
 
+    // 0A. Detect "Archive Session / Save Session" intent from voice or chat (أرشف الجلسة)
+    const isArchiveSessionIntent = 
+      lower.includes('أرشف') ||
+      lower.includes('ارشف') ||
+      lower.includes('أرشف الجلسة') ||
+      lower.includes('ارشف الجلسة') ||
+      lower.includes('أرشف الجلسه') ||
+      lower.includes('ارشف الجلسه') ||
+      lower.includes('احفظ الجلسة') ||
+      lower.includes('احفظ الجلسه') ||
+      lower.includes('حفظ الجلسة') ||
+      lower.includes('حفظ الجلسه') ||
+      lower.includes('أرشف المحادثة') ||
+      lower.includes('ارشف المحادثة') ||
+      lower.includes('احفظ المحادثة') ||
+      lower.includes('أرشف محادثتنا') ||
+      lower.includes('ارشف محادثتنا') ||
+      lower.includes('أرشف هالجلسة') ||
+      lower.includes('ارشف هالجلسة') ||
+      lower.includes('أرشف جلستي') ||
+      lower.includes('archive session') ||
+      lower.includes('archive chat') ||
+      lower === 'archive';
+
+    if (isArchiveSessionIntent) {
+      const userMsg: MessageItem = {
+        id: `msg_user_${Date.now()}`,
+        role: 'user',
+        text: text,
+        timestamp: Date.now()
+      };
+      setMessages(prev => [...prev, userMsg]);
+      setInputText('');
+      handleConfirmArchiveSession();
+      return;
+    }
+
     // 0. Detect "End Lesson / Finish Lesson" intent from voice or chat
     const isFinishLessonIntent = 
       lower.includes('انتهى الدرس') ||
@@ -2885,7 +2977,16 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     }
 
     // 0B-3. Detect "Browse / Navigate to Lessons & Curriculums" intent from voice or chat
+    const isGrammarLessonIntent = lower.includes('درس قواعد') || lower.includes('درس القواعد') || lower.includes('قواعد الانجليزي') || lower.includes('grammar lesson');
+    const isConversationLessonIntent = lower.includes('درس محادثة') || lower.includes('درس المحادثة') || lower.includes('محادثة حرة') || lower.includes('speaking lesson') || lower.includes('conversation lesson');
+    const isReadingLessonIntent = lower.includes('درس قراءة') || lower.includes('درس القراءة') || lower.includes('قصة وقراءة') || lower.includes('reading lesson');
+    const isWritingLessonIntent = lower.includes('درس كتابة') || lower.includes('درس الكتابة') || lower.includes('تعبير') || lower.includes('writing lesson');
+
     const isLessonsIntent = 
+      isGrammarLessonIntent ||
+      isConversationLessonIntent ||
+      isReadingLessonIntent ||
+      isWritingLessonIntent ||
       lower.includes('الدروس') ||
       lower.includes('انتقل الى الدروس') ||
       lower.includes('انتقل للدروس') ||
@@ -2916,7 +3017,18 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       };
       setMessages(prev => [...prev, userMsg]);
       setInputText('');
-      handleOpenCurriculum('all');
+
+      const targetPillar = isGrammarLessonIntent 
+        ? 'grammar' 
+        : isConversationLessonIntent 
+        ? 'conversation' 
+        : isReadingLessonIntent 
+        ? 'reading' 
+        : isWritingLessonIntent 
+        ? 'writing' 
+        : 'all';
+
+      handleOpenCurriculum(targetPillar);
       const lessonsGreeting = isRtl
         ? `أهلاً بك يا بطل! 🌟 فتحت لك مكتبة مناهج سارة التخصصية والدروس التفاعلية فوراً 📚. اختر أي درس تود تعلمه لننطلق معاً بالشرح على السبورة الذكية والتمارين التطبيقية!`
         : `Welcome champion! 🌟 I opened Sara's Specialized Curriculums & Lessons library for you 📚. Pick any lesson to begin learning on the smart whiteboard with exercises!`;

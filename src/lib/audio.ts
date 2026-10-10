@@ -653,3 +653,135 @@ export const playSnapshotShutterSound = () => {
   }
 };
 
+/**
+ * 🎬 Basim Al Khalil Digital Academy Intro Theme (موسيقى افتتاح الأكاديمية مثل نتفلكس)
+ * Synthesizes a cinematic "Ta-Dum" orchestral fanfare:
+ * 1. Punchy cinematic transient strike at t=0 ("Ta")
+ * 2. Deep sub-bass cinematic boom at t=0.16s ("DUM")
+ * 3. Blooming royal golden fifth chord (D2, A2, D3, F#3, A3, D4) with resonant filter sweep
+ * 4. Shimmering golden harmonic sparkle tail over ~3 seconds
+ */
+export const playAcademyIntroSound = (volume: number = 0.85): Promise<void> => {
+  return new Promise((resolve) => {
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) {
+        resolve();
+        return;
+      }
+
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+
+      const now = ctx.currentTime;
+      const masterGain = ctx.createGain();
+      masterGain.gain.setValueAtTime(Math.min(1, Math.max(0, volume)), now);
+      masterGain.connect(ctx.destination);
+
+      // --- 1. Strike 1: "Ta" (t = 0.0s) - Crisp percussive attack & mid impact ---
+      const strike1Osc = ctx.createOscillator();
+      const strike1Gain = ctx.createGain();
+      strike1Osc.type = 'triangle';
+      strike1Osc.frequency.setValueAtTime(110, now);
+      strike1Osc.frequency.exponentialRampToValueAtTime(45, now + 0.12);
+      strike1Gain.gain.setValueAtTime(0.45, now);
+      strike1Gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+      strike1Osc.connect(strike1Gain);
+      strike1Gain.connect(masterGain);
+      strike1Osc.start(now);
+      strike1Osc.stop(now + 0.15);
+
+      // --- 2. Strike 2: "DUM" (t = 0.16s) - Powerful sub-bass cinematic boom ---
+      const hitTime = now + 0.16;
+
+      // Sub-bass heavy punch (38Hz -> 75Hz punch, decaying gracefully)
+      const subOsc = ctx.createOscillator();
+      const subGain = ctx.createGain();
+      subOsc.type = 'sine';
+      subOsc.frequency.setValueAtTime(95, hitTime);
+      subOsc.frequency.exponentialRampToValueAtTime(42, hitTime + 0.25);
+      subGain.gain.setValueAtTime(0.7, hitTime);
+      subGain.gain.exponentialRampToValueAtTime(0.001, hitTime + 1.8);
+      subOsc.connect(subGain);
+      subGain.connect(masterGain);
+      subOsc.start(hitTime);
+      subOsc.stop(hitTime + 2.0);
+
+      // Timpani body / warm mid-low presence
+      const timpaniOsc = ctx.createOscillator();
+      const timpaniGain = ctx.createGain();
+      timpaniOsc.type = 'triangle';
+      timpaniOsc.frequency.setValueAtTime(146.83, hitTime); // D3
+      timpaniOsc.frequency.exponentialRampToValueAtTime(73.42, hitTime + 0.4);
+      timpaniGain.gain.setValueAtTime(0.5, hitTime);
+      timpaniGain.gain.exponentialRampToValueAtTime(0.001, hitTime + 1.2);
+      timpaniOsc.connect(timpaniGain);
+      timpaniGain.connect(masterGain);
+      timpaniOsc.start(hitTime);
+      timpaniOsc.stop(hitTime + 1.3);
+
+      // --- 3. Royal Golden Academy Blooming Chord (D Major / Majestic 5th) ---
+      // Notes: D2 (73.4Hz), A2 (110Hz), D3 (146.8Hz), F#3 (185.0Hz), A3 (220Hz), D4 (293.7Hz)
+      const chordFreqs = [73.42, 110.0, 146.83, 185.0, 220.0, 293.66];
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(260, hitTime);
+      filter.frequency.exponentialRampToValueAtTime(3200, hitTime + 0.45);
+      filter.frequency.exponentialRampToValueAtTime(600, hitTime + 2.8);
+      filter.Q.setValueAtTime(2.5, hitTime);
+      filter.connect(masterGain);
+
+      chordFreqs.forEach((freq, idx) => {
+        const chordOsc = ctx.createOscillator();
+        const chordGain = ctx.createGain();
+        chordOsc.type = idx % 2 === 0 ? 'sawtooth' : 'triangle';
+        chordOsc.frequency.setValueAtTime(freq, hitTime);
+
+        // Gentle detuning for lush stereo cinematic thickness
+        chordOsc.detune.setValueAtTime((idx - 2.5) * 4, hitTime);
+
+        const noteGain = 0.18 / Math.sqrt(chordFreqs.length);
+        chordGain.gain.setValueAtTime(0.0001, hitTime);
+        chordGain.gain.linearRampToValueAtTime(noteGain, hitTime + 0.12);
+        chordGain.gain.exponentialRampToValueAtTime(0.0001, hitTime + 2.7);
+
+        chordOsc.connect(chordGain);
+        chordGain.connect(filter);
+
+        chordOsc.start(hitTime);
+        chordOsc.stop(hitTime + 2.8);
+      });
+
+      // --- 4. Golden Sparkle Shimmer (Cinematic magical fairy dust / bells) ---
+      const sparkleTones = [
+        { f: 1174.66, delay: 0.18, dur: 0.9 }, // D6
+        { f: 1479.98, delay: 0.28, dur: 1.1 }, // F#6
+        { f: 1760.00, delay: 0.38, dur: 1.3 }, // A6
+        { f: 2349.32, delay: 0.48, dur: 1.8 }  // D7
+      ];
+
+      sparkleTones.forEach(({ f, delay, dur }) => {
+        const sOsc = ctx.createOscillator();
+        const sGain = ctx.createGain();
+        const t = now + delay;
+        sOsc.type = 'sine';
+        sOsc.frequency.setValueAtTime(f, t);
+        sGain.gain.setValueAtTime(0.0001, t);
+        sGain.gain.exponentialRampToValueAtTime(0.08, t + 0.03);
+        sGain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        sOsc.connect(sGain);
+        sGain.connect(masterGain);
+        sOsc.start(t);
+        sOsc.stop(t + dur + 0.05);
+      });
+
+      setTimeout(() => {
+        resolve();
+      }, 2800);
+    } catch (e) {
+      resolve();
+    }
+  });
+};
+
