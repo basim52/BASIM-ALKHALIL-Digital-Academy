@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, ArrowRight, ArrowLeft } from 'lucide-react';
+import { playAcademyIntroSound } from '../lib/audio';
 
 interface AcademyIntroSplashProps {
   isRtl?: boolean;
@@ -16,15 +17,35 @@ export const AcademyIntroSplash: React.FC<AcademyIntroSplashProps> = ({
   autoDismissDelayMs
 }) => {
   const [stage, setStage] = useState<'initial' | 'boom' | 'glowing'>('initial');
+  const soundTriggeredRef = useRef<boolean>(false);
 
   useEffect(() => {
+    // Play the Netflix-style academy intro theme
+    const triggerAudio = () => {
+      if (soundTriggeredRef.current) return;
+      soundTriggeredRef.current = true;
+      try {
+        playAcademyIntroSound(0.85).catch(() => {});
+      } catch {
+        // Safe catch
+      }
+    };
+
     const entryTimer = setTimeout(() => {
       setStage('boom');
+      triggerAudio();
     }, 120);
 
     const glowTimer = setTimeout(() => {
       setStage('glowing');
     }, 450);
+
+    // If browser autoplay policy requires user interaction, play on first pointerdown
+    const handleInteraction = () => {
+      triggerAudio();
+    };
+    window.addEventListener('pointerdown', handleInteraction, { once: true });
+    window.addEventListener('keydown', handleInteraction, { once: true });
 
     let dismissTimer: NodeJS.Timeout | null = null;
     if (autoDismissDelayMs && onFinish) {
@@ -36,9 +57,25 @@ export const AcademyIntroSplash: React.FC<AcademyIntroSplashProps> = ({
     return () => {
       clearTimeout(entryTimer);
       clearTimeout(glowTimer);
+      window.removeEventListener('pointerdown', handleInteraction);
+      window.removeEventListener('keydown', handleInteraction);
       if (dismissTimer) clearTimeout(dismissTimer);
     };
   }, [autoDismissDelayMs, onFinish]);
+
+  const handleFinish = () => {
+    if (!soundTriggeredRef.current) {
+      soundTriggeredRef.current = true;
+      try {
+        playAcademyIntroSound(0.85).catch(() => {});
+      } catch {
+        // Safe catch
+      }
+    }
+    if (onFinish) {
+      onFinish();
+    }
+  };
 
   const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
 
@@ -134,7 +171,7 @@ export const AcademyIntroSplash: React.FC<AcademyIntroSplashProps> = ({
           >
             <button
               type="button"
-              onClick={onFinish}
+              onClick={handleFinish}
               className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
             >
               <span>{isRtl ? 'دخول الأكاديمية' : 'Enter Academy'}</span>

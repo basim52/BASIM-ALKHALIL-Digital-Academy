@@ -20,6 +20,7 @@ import {
   Layers
 } from 'lucide-react';
 import { Language } from '../lib/translations';
+import { playAcademyIntroSound } from '../lib/audio';
 
 interface LandingPageProps {
   lang: Language;
@@ -36,6 +37,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
   const handleStart = () => {
+    try {
+      playAcademyIntroSound(0.85).catch(() => {});
+    } catch {
+      // Safe fallback
+    }
     onGetStarted();
   };
 
