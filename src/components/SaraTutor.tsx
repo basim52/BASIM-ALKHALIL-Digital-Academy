@@ -43,7 +43,10 @@ import {
   CalendarDays,
   Coffee,
   Eye,
-  MessageSquare
+  MessageSquare,
+  ChevronDown,
+  ChevronUp,
+  Gamepad2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile, AppView, SaraBoardData, SaraChatResponse, TutorMemoryDoc, proficiencyLevel, CurriculumCategory, StudyPlan } from '../types';
@@ -444,7 +447,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [isRestoredSession, setIsRestoredSession] = useState<boolean>(false);
   const [showNewChatConfirm, setShowNewChatConfirm] = useState<boolean>(false);
   const [showMobileToolsDrawer, setShowMobileToolsDrawer] = useState<boolean>(false);
-  const [mobileTab, setMobileTab] = useState<'chat' | 'board' | 'sara3d'>('chat');
+  const [mobileTab, setMobileTab] = useState<'chat' | 'board' | 'curriculum' | 'scenarios' | 'lab'>('chat');
+  const [isMobileActivityCapsuleExpanded, setIsMobileActivityCapsuleExpanded] = useState<boolean>(false);
   const SARA_STORAGE_KEY = (uid?: string) => `sara_chat_history_${uid || 'guest'}`;
 
   // Session Archive States
@@ -3512,54 +3516,54 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </div>
           </div>
 
-          {/* Mobile Essential Quick Bar (sm:hidden) */}
+          {/* Mobile Header Quick Actions (sm:hidden) */}
           <div className="flex sm:hidden items-center gap-1">
             {/* Sara Arabic/English Language Toggle Button (Mobile) */}
             <button
               onClick={() => handleToggleLanguage()}
-              className="px-2 py-1.5 rounded-xl border-2 transition-all cursor-pointer flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-[#002147] border-amber-300 shadow-2xs active:scale-95"
+              className="px-2 py-1 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-[#002147] text-[11px] font-black transition-all cursor-pointer shadow-2xs active:scale-95 flex items-center gap-1"
               title={activeLang === 'ar' ? 'التبديل إلى English' : 'التبديل إلى عربي'}
             >
               <span className="text-xs">🌐</span>
-              <span className="text-[11px] font-black">{activeLang === 'ar' ? 'EN' : 'عربي'}</span>
+              <span>{activeLang === 'ar' ? 'EN' : 'عربي'}</span>
             </button>
 
             {/* Live voice quick button */}
             <button
               onClick={toggleLiveVoiceMode}
-              className={`p-2 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-center ${
+              className={`p-1.5 px-2 rounded-xl border transition-all cursor-pointer flex items-center justify-center gap-1 ${
                 isLiveMode
-                  ? 'bg-rose-500 border-rose-600 text-white animate-pulse'
+                  ? 'bg-rose-500 border-rose-600 text-white animate-pulse shadow-sm'
                   : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
               }`}
               title={isLiveMode ? (isRtl ? 'إيقاف اللايف' : 'Stop Live') : (isRtl ? 'محادثة لايف' : 'Live Voice')}
             >
-              <Radio size={15} className={isLiveMode ? 'animate-spin text-white' : ''} />
+              <Radio size={14} className={isLiveMode ? 'animate-spin text-white' : 'text-emerald-700'} />
+              {isLiveMode && <span className="text-[10px] font-black">{isRtl ? 'لايف' : 'LIVE'}</span>}
             </button>
 
-            {/* Smart Whiteboard Button */}
+            {/* Session Timer Pill */}
             <button
-              onClick={() => {
-                if (isWhiteboardOpen) {
-                  setIsWhiteboardOpen(false);
-                } else {
-                  openWhiteboardModal();
-                }
-              }}
-              className={`p-2 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-center ${
-                isWhiteboardOpen
-                  ? 'bg-amber-100 text-amber-900 border-[#C49E3A]'
-                  : 'bg-amber-50 text-[#855B14] border-amber-300'
+              onClick={() => setShowTimerDropdown(!showTimerDropdown)}
+              className={`px-2 py-1 rounded-xl border text-[11px] font-mono font-black transition-all cursor-pointer flex items-center gap-1 ${
+                !isTimerEnabled || timerDurationMinutes === 0
+                  ? 'bg-slate-50 text-slate-500 border-slate-200'
+                  : timerSecondsLeft === 0
+                  ? 'bg-rose-100 text-rose-800 border-rose-300 animate-pulse'
+                  : timerSecondsLeft < 120
+                  ? 'bg-amber-50 text-amber-800 border-amber-300'
+                  : 'bg-slate-50 text-slate-700 border-slate-200'
               }`}
-              title={isRtl ? 'السبورة الذكية' : 'Smart Whiteboard'}
+              title={isRtl ? 'مؤقت الجلسة' : 'Session Timer'}
             >
-              <Sparkles size={15} className={`text-[#C49E3A] ${isWhiteboardOpen ? 'animate-spin' : ''}`} />
+              <Clock size={12} className="text-amber-600" />
+              <span>{formatTimerDisplay(timerSecondsLeft)}</span>
             </button>
 
             {/* Sara 3D Character Button */}
             <button
               onClick={() => setIsSara3DOpen(!isSara3DOpen)}
-              className={`p-2 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-center text-xs ${
+              className={`p-1.5 rounded-xl border transition-all cursor-pointer flex items-center justify-center text-xs ${
                 isSara3DOpen
                   ? 'bg-amber-100 border-[#C49E3A] ring-1 ring-amber-300'
                   : 'bg-slate-50 border-slate-200'
@@ -3575,7 +3579,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 if (isSpeaking) cancelAllSpeech();
                 setVoiceEnabled(!voiceEnabled);
               }}
-              className={`p-2 rounded-xl border-2 transition-all cursor-pointer ${
+              className={`p-1.5 rounded-xl border transition-all cursor-pointer ${
                 voiceEnabled ? 'bg-amber-50 text-[#002147] border-amber-200' : 'bg-slate-100 text-slate-400 border-slate-200'
               }`}
               title={voiceEnabled ? (isRtl ? 'الصوت مفعّل' : 'Mute') : (isRtl ? 'الصوت مكتوم' : 'Unmute')}
@@ -3928,86 +3932,99 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           </div>
         </div>
 
-        {/* Mobile Segmented Navigation & Tools Bar (sm:hidden) */}
-        <div className="sm:hidden border-t border-slate-200/80 bg-white/95 backdrop-blur-md px-2.5 py-1.5 flex items-center justify-between gap-1.5 shadow-2xs">
-          {/* Main 3 Segmented Tabs */}
-          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-2xl border border-slate-200/80 flex-1">
-            {/* Chat Tab */}
+        {/* Mobile Redesigned 5-Segment Tab Bar (md:hidden) */}
+        <div className="md:hidden border-t border-slate-200/80 bg-white/95 backdrop-blur-md px-2 py-1.5 shadow-2xs">
+          <div className="flex items-center gap-1 bg-slate-100/90 p-1 rounded-2xl border border-slate-200/90">
+            {/* 1. Chat Tab */}
             <button
               onClick={() => {
                 setMobileTab('chat');
                 setIsWhiteboardOpen(false);
               }}
-              className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer ${
-                mobileTab === 'chat' && !isWhiteboardOpen
+              className={`flex-1 py-1.5 px-1 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                mobileTab === 'chat'
                   ? 'bg-[#002147] text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
               <span>💬</span>
-              <span>{isRtl ? 'المحادثة' : 'Chat'}</span>
+              <span className="text-[11px]">{isRtl ? 'المحادثة' : 'Chat'}</span>
             </button>
 
-            {/* Whiteboard Tab */}
+            {/* 2. Whiteboard Tab */}
             <button
               onClick={() => {
                 setMobileTab('board');
-                if (!activeBoard) {
-                  openWhiteboardModal();
-                } else {
-                  setIsWhiteboardOpen(true);
-                }
               }}
-              className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer ${
-                isWhiteboardOpen
+              className={`flex-1 py-1.5 px-1 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer relative ${
+                mobileTab === 'board'
                   ? 'bg-amber-400 text-slate-950 font-black shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
               <span>📐</span>
-              <span>{isRtl ? 'السبورة' : 'Board'}</span>
+              <span className="text-[11px]">{isRtl ? 'السبورة' : 'Board'}</span>
+              {activeBoard && (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse absolute top-1 end-1" />
+              )}
             </button>
 
-            {/* Curriculums Tab on Mobile */}
-            <button
-              onClick={() => handleOpenCurriculum('all')}
-              className="py-1.5 px-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer bg-amber-400 text-slate-950 shadow-xs"
-            >
-              <span>📚</span>
-              <span>{isRtl ? 'المناهج' : 'Curricula'}</span>
-            </button>
-
-            {/* Sara 3D Tab */}
+            {/* 3. Curricula & Smart Plan Tab */}
             <button
               onClick={() => {
-                setMobileTab('sara3d');
-                setIsSara3DOpen(!isSara3DOpen);
+                setMobileTab('curriculum');
               }}
-              className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer ${
-                isSara3DOpen
-                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+              className={`flex-1 py-1.5 px-1 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer relative ${
+                mobileTab === 'curriculum'
+                  ? 'bg-blue-600 text-white font-black shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
-              <span>👩‍🏫</span>
-              <span>{isRtl ? 'سارة 3D' : 'Sara 3D'}</span>
+              <span>📚</span>
+              <span className="text-[11px]">{isRtl ? 'المناهج' : 'Tracks'}</span>
+              {activeStudyPlan && (
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-300 absolute top-1 end-1" />
+              )}
+            </button>
+
+            {/* 4. Scenarios & Adventures Tab */}
+            <button
+              onClick={() => {
+                setMobileTab('scenarios');
+              }}
+              className={`flex-1 py-1.5 px-1 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer relative ${
+                mobileTab === 'scenarios'
+                  ? 'bg-purple-600 text-white font-black shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+              }`}
+            >
+              <span>🎮</span>
+              <span className="text-[11px]">{isRtl ? 'المغامرات' : 'Quests'}</span>
+              {activeRolePlay && (
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse absolute top-1 end-1" />
+              )}
+            </button>
+
+            {/* 5. Learning Lab & Tools Tab */}
+            <button
+              onClick={() => {
+                setMobileTab('lab');
+              }}
+              className={`flex-1 py-1.5 px-1 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer relative ${
+                mobileTab === 'lab'
+                  ? 'bg-emerald-600 text-white font-black shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+              }`}
+            >
+              <span>⚡</span>
+              <span className="text-[11px]">{isRtl ? 'المختبر' : 'Lab'}</span>
+              {tutorMemory.frequentMistakes && tutorMemory.frequentMistakes.length > 0 && (
+                <span className="w-3.5 h-3.5 rounded-full bg-rose-500 text-white text-[8px] font-black flex items-center justify-center absolute -top-1 -end-1">
+                  {tutorMemory.frequentMistakes.length}
+                </span>
+              )}
             </button>
           </div>
-
-          {/* Quick Action Sheet Opener (⚡ المزيد من الأدوات) */}
-          <button
-            onClick={() => setShowMobileToolsDrawer(true)}
-            className="py-1.5 px-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#855B14] border border-amber-300 font-black text-xs flex items-center gap-1 cursor-pointer shrink-0 transition-all shadow-2xs active:scale-95"
-            title={isRtl ? 'الأدوات والأنشطة الإضافية (النطق، السيناريوهات، التقرير...)' : 'More Learning Tools'}
-          >
-            <Sliders size={13} className="text-[#C49E3A]" />
-            <span className="text-[11px] font-black">{isRtl ? 'الأدوات' : 'Tools'}</span>
-            {tutorMemory.frequentMistakes && tutorMemory.frequentMistakes.length > 0 && (
-              <span className="w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center">
-                {tutorMemory.frequentMistakes.length}
-              </span>
-            )}
-          </button>
         </div>
       </header>
 
@@ -4017,9 +4034,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       <main className="flex-1 max-w-4xl w-full mx-auto p-3 sm:p-5 flex flex-col gap-4 overflow-hidden">
         
         {/* ======================================================== */}
-        {/* SARA'S 4 CORE PILLARS & FLUENCY ACTION BAR (ALWAYS VISIBLE) */}
+        {/* SARA'S 4 CORE PILLARS & FLUENCY ACTION BAR (ALWAYS VISIBLE ON DESKTOP) */}
         {/* ======================================================== */}
-        <div className="bg-gradient-to-r from-amber-500/15 via-white to-amber-500/15 backdrop-blur-md border-2 border-amber-400 rounded-3xl p-3.5 sm:p-4 shadow-lg flex items-center justify-between gap-3 flex-wrap">
+        <div className="hidden md:flex bg-gradient-to-r from-amber-500/15 via-white to-amber-500/15 backdrop-blur-md border-2 border-amber-400 rounded-3xl p-3.5 sm:p-4 shadow-lg items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 flex items-center justify-center text-xl font-black shadow-md shrink-0">
               📚
@@ -4107,7 +4124,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-r from-blue-900 via-[#002147] to-indigo-950 text-white p-3.5 sm:p-4 rounded-3xl shadow-xl border-2 border-blue-400/40 relative overflow-hidden"
+            className="hidden md:block bg-gradient-to-r from-blue-900 via-[#002147] to-indigo-950 text-white p-3.5 sm:p-4 rounded-3xl shadow-xl border-2 border-blue-400/40 relative overflow-hidden"
           >
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">
@@ -4190,7 +4207,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-r from-[#002147] via-blue-950 to-indigo-950 text-white p-3.5 sm:p-4 rounded-3xl shadow-xl border border-blue-400/30 relative overflow-hidden"
+            className="hidden md:block bg-gradient-to-r from-[#002147] via-blue-950 to-indigo-950 text-white p-3.5 sm:p-4 rounded-3xl shadow-xl border border-blue-400/30 relative overflow-hidden"
           >
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">
@@ -4241,7 +4258,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-r from-[#002147] via-[#093568] to-[#002147] text-white border-2 border-amber-400/60 rounded-3xl p-3.5 sm:p-4 shadow-lg flex items-center justify-between gap-3 flex-wrap"
+            className="hidden md:flex bg-gradient-to-r from-[#002147] via-[#093568] to-[#002147] text-white border-2 border-amber-400/60 rounded-3xl p-3.5 sm:p-4 shadow-lg items-center justify-between gap-3 flex-wrap"
           >
             <div className="flex items-center gap-3 min-w-0 flex-1">
               <div className="w-11 h-11 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center text-2xl shrink-0 shadow-md border border-white/40">
@@ -4297,7 +4314,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-r from-slate-950 via-[#002147] to-[#0d3b66] text-white p-3.5 sm:p-4 rounded-3xl shadow-xl border-2 border-amber-400/60 relative overflow-hidden ring-2 ring-amber-400/20"
+            className="hidden md:block bg-gradient-to-r from-slate-950 via-[#002147] to-[#0d3b66] text-white p-3.5 sm:p-4 rounded-3xl shadow-xl border-2 border-amber-400/60 relative overflow-hidden ring-2 ring-amber-400/20"
           >
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-2.5 min-w-0">
@@ -4385,7 +4402,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-r from-slate-950 via-[#002147] to-slate-950 text-white p-3.5 sm:p-4 rounded-3xl shadow-xl border-2 border-amber-400/50 relative overflow-hidden ring-1 ring-amber-400/20"
+            className="hidden md:block bg-gradient-to-r from-slate-950 via-[#002147] to-slate-950 text-white p-3.5 sm:p-4 rounded-3xl shadow-xl border-2 border-amber-400/50 relative overflow-hidden ring-1 ring-amber-400/20"
           >
             {/* Top Bar: Title & Exit */}
             <div className="flex items-center justify-between gap-2 mb-2.5 flex-wrap">
@@ -4584,7 +4601,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         </AnimatePresence>
         
         {/* ======================================================== */}
-        {/* 2A. INTERACTIVE "LESSON BOARD" CARD */}
+        {/* 2A. INTERACTIVE "LESSON BOARD" CARD (DESKTOP) */}
         {/* ======================================================== */}
         <AnimatePresence>
           {activeBoard && (
@@ -4592,7 +4609,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white border-2 border-b-4 border-slate-200 rounded-3xl p-4 sm:p-5 shadow-sm relative overflow-hidden"
+              className="hidden md:block bg-white border-2 border-b-4 border-slate-200 rounded-3xl p-4 sm:p-5 shadow-sm relative overflow-hidden"
             >
               {/* Board Header Ribbon */}
               <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5 mb-3">
@@ -4832,9 +4849,819 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         </AnimatePresence>
 
         {/* ======================================================== */}
+        {/* MOBILE REDESIGNED SCREENS & SECTIONS (md:hidden) */}
+        {/* ======================================================== */}
+
+        {/* 1. Mobile Activity Status Capsule (Visible only on chat tab if an active plan, lesson, or roleplay exists) */}
+        {mobileTab === 'chat' && (activeCurriculumLesson || activeRolePlay || (todayScheduledLesson && !isStudyPlanBannerDismissed)) && (
+          <div className="md:hidden bg-gradient-to-r from-[#002147] via-[#093568] to-[#002147] text-white p-2.5 rounded-2xl border-2 border-amber-400/50 shadow-md">
+            <div className="flex items-center justify-between gap-2">
+              <div 
+                className="flex items-center gap-2 min-w-0 flex-1 cursor-pointer"
+                onClick={() => setIsMobileActivityCapsuleExpanded(!isMobileActivityCapsuleExpanded)}
+              >
+                <span className="text-lg shrink-0">
+                  {activeCurriculumLesson ? activeCurriculumLesson.pillarIcon || '📚' : activeRolePlay ? activeRolePlay.badge || '🎮' : '🗓️'}
+                </span>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[9px] font-black uppercase text-amber-300 tracking-wider px-1.5 py-0.2 rounded bg-white/10">
+                      {activeCurriculumLesson ? (isRtl ? 'درس نشط' : 'Active Lesson') : activeRolePlay ? (isRtl ? 'مغامرة 12Y' : 'Quest') : (isRtl ? 'درس اليوم' : "Today's Goal")}
+                    </span>
+                    <span className="text-xs font-black text-white truncate">
+                      {activeCurriculumLesson 
+                        ? (isRtl ? activeCurriculumLesson.titleAr : activeCurriculumLesson.titleEn)
+                        : activeRolePlay 
+                        ? (isRtl ? activeRolePlay.titleAr : activeRolePlay.titleEn)
+                        : todayScheduledLesson
+                        ? (isRtl ? todayScheduledLesson.titleAr : todayScheduledLesson.titleEn)
+                        : ''}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1 shrink-0">
+                {activeCurriculumLesson && (
+                  <button
+                    onClick={() => {
+                      setMobileTab('board');
+                      setCurrentWhiteboardPageIndex(prev => prev < 6 ? prev + 1 : 0);
+                    }}
+                    className="px-2 py-1 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-lg text-[10px] flex items-center gap-1 cursor-pointer active:scale-95 shadow-xs"
+                  >
+                    <span>📄</span>
+                    <span>{isRtl ? 'اقلب' : 'Page'}</span>
+                  </button>
+                )}
+                {todayScheduledLesson && !activeCurriculumLesson && !activeRolePlay && (
+                  <button
+                    onClick={() => handleStartPlanLesson(todayScheduledLesson)}
+                    className="px-2 py-1 bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-black rounded-lg text-[10px] flex items-center gap-1 cursor-pointer active:scale-95 shadow-xs"
+                  >
+                    <span>🚀</span>
+                    <span>{isRtl ? 'ابدأ' : 'Start'}</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => setIsMobileActivityCapsuleExpanded(!isMobileActivityCapsuleExpanded)}
+                  className="p-1 text-slate-300 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  {isMobileActivityCapsuleExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Expanded Details inside Mobile Capsule */}
+            {isMobileActivityCapsuleExpanded && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-2 pt-2 border-t border-white/15 text-xs space-y-2"
+              >
+                {activeCurriculumLesson && (
+                  <div className="flex items-center justify-between gap-1 flex-wrap">
+                    <span className="text-[11px] text-amber-200">
+                      {isRtl ? `المستوى: ${activeCurriculumLesson.levelCode} • القسم: ${activeCurriculumLesson.pillarNameAr}` : `Level: ${activeCurriculumLesson.levelCode}`}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => {
+                          setMobileTab('board');
+                          setCurrentWhiteboardPageIndex(4);
+                        }}
+                        className="px-2 py-1 bg-blue-500 text-white rounded-lg text-[10px] font-bold"
+                      >
+                        ✍️ {isRtl ? 'تمارين' : 'Drills'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setMobileTab('board');
+                          setCurrentWhiteboardPageIndex(6);
+                        }}
+                        className="px-2 py-1 bg-emerald-500 text-white rounded-lg text-[10px] font-bold"
+                      >
+                        🏆 {isRtl ? 'امتحان' : 'Quiz'}
+                      </button>
+                      <button
+                        onClick={() => setMobileTab('board')}
+                        className="px-2 py-1 bg-white/20 text-white rounded-lg text-[10px] font-bold"
+                      >
+                        📐 {isRtl ? 'السبورة' : 'Board'}
+                      </button>
+                      <button
+                        onClick={() => setActiveCurriculumLesson(null)}
+                        className="p-1 bg-white/10 hover:bg-rose-500 text-white rounded-lg text-[10px]"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {activeRolePlay && (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-emerald-300 font-bold">{isRtl ? `دورك: ${activeRolePlay.roleStudentAr}` : `You: ${activeRolePlay.roleStudentEn}`}</span>
+                      <span className="text-amber-300 font-bold">{isRtl ? `سارة: ${activeRolePlay.roleSaraAr}` : `Sara: ${activeRolePlay.roleSaraEn}`}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[10px] text-slate-300">
+                        {isRtl ? `المهام: ${completedMissions.length} من ${activeRolePlay.missionsAr?.length || 3}` : `Missions: ${completedMissions.length}`}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => setMobileTab('scenarios')}
+                          className="px-2 py-1 bg-amber-400 text-slate-950 font-bold text-[10px] rounded-lg"
+                        >
+                          🎮 {isRtl ? 'المهام' : 'Tasks'}
+                        </button>
+                        <button
+                          onClick={handleEndRolePlay}
+                          className="px-2 py-1 bg-rose-500 text-white font-bold text-[10px] rounded-lg"
+                        >
+                          ✕ {isRtl ? 'إنهاء' : 'Exit'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {todayScheduledLesson && !activeCurriculumLesson && !activeRolePlay && (
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] text-blue-200">
+                      {isRtl ? todayScheduledLesson.courseLabelAr : todayScheduledLesson.courseLabelEn}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => handleStartPlanLesson(todayScheduledLesson)}
+                        className="px-2.5 py-1 bg-amber-400 text-slate-950 font-black rounded-lg text-[10px]"
+                      >
+                        🚀 {isRtl ? 'بدء الدرس' : 'Start'}
+                      </button>
+                      <button
+                        onClick={() => setIsStudyPlanModalOpen(true)}
+                        className="px-2 py-1 bg-white/20 text-white font-bold rounded-lg text-[10px]"
+                      >
+                        🗓️ {isRtl ? 'الخطة كاملة' : 'Plan'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </div>
+        )}
+
+        {/* 2. Mobile Dedicated Whiteboard Screen */}
+        {mobileTab === 'board' && (
+          <div className="md:hidden space-y-3 pb-6">
+            <div className="bg-[#002147] border-2 border-amber-400/80 rounded-3xl p-4 text-white shadow-xl space-y-3">
+              {/* Board Header Ribbon */}
+              <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl p-1 bg-amber-400 text-slate-950 rounded-xl shadow-xs">📐</span>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-300">
+                      {isRtl ? 'السبورة الذكية التفاعلية' : 'Smart Whiteboard'}
+                    </span>
+                    <h2 className="text-xs sm:text-sm font-black text-white leading-tight">
+                      {activeBoard?.title || (isRtl ? 'لوحة الشرح والطبشور 👩‍🏫' : 'Sara Blackboard 👩‍🏫')}
+                    </h2>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={openWhiteboardModal}
+                    className="p-1 px-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 transition-all cursor-pointer flex items-center gap-1 text-[11px] font-black shadow-xs active:scale-95"
+                    title={isRtl ? 'حفظ لوحة الشرح' : 'Save'}
+                  >
+                    <Camera size={12} />
+                    <span>{isRtl ? 'حفظ' : 'Save'}</span>
+                  </button>
+
+                  <button
+                    onClick={openWhiteboardModal}
+                    className="p-1 px-2 rounded-xl bg-white/15 hover:bg-white/25 text-white transition-all cursor-pointer flex items-center gap-1 text-[11px] font-bold border border-white/20"
+                    title={isRtl ? 'السبورة الكاملة' : 'Full Board'}
+                  >
+                    <Sparkles size={12} className="text-amber-300" />
+                    <span>{isRtl ? 'كاملة' : 'Full'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Target Sentence Display */}
+              {activeBoard?.sentence ? (
+                <div className="bg-black/40 border border-white/15 text-white p-3.5 rounded-2xl shadow-inner text-center">
+                  <p className="text-sm sm:text-base font-bold tracking-wide font-sans leading-relaxed">
+                    {activeBoard.sentence}
+                  </p>
+                  <div className="mt-2.5 flex items-center justify-center gap-1.5 flex-wrap">
+                    <button
+                      onClick={() => playSaraVoice(activeBoard.sentence!)}
+                      className="px-2.5 py-1 bg-amber-400 text-slate-950 font-black rounded-xl text-[11px] flex items-center gap-1 cursor-pointer active:scale-95"
+                    >
+                      <Volume2 size={12} />
+                      <span>{isRtl ? 'استمع للنطق 🔊' : 'Listen 🔊'}</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setPhoneticTargetSentence(activeBoard.sentence!);
+                        setIsPhoneticModalOpen(true);
+                      }}
+                      className="px-2.5 py-1 bg-violet-600 text-white font-bold rounded-xl text-[11px] flex items-center gap-1 cursor-pointer active:scale-95"
+                    >
+                      <Mic size={12} />
+                      <span>{isRtl ? 'حلّل نطقي 🎙️' : 'Speech Lab'}</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Empty Board Welcome & Instant Launchers */
+                <div className="bg-black/30 border border-white/10 rounded-2xl p-3.5 text-center space-y-2.5">
+                  <span className="text-3xl block">👩‍🏫📐</span>
+                  <h3 className="text-xs font-black text-amber-300">
+                    {isRtl ? 'السبورة جاهزة للشرح بالصوت والطبشور' : 'Board is ready for explanation!'}
+                  </h3>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    {isRtl ? 'اختر أي موضوع أو قاعدة لتبدأ سارة بكتابتها وشرحها صوتياً على السبورة:' : 'Choose a topic for Sara to write and explain on the board:'}
+                  </p>
+                  <div className="grid grid-cols-2 gap-1.5 pt-1 text-start">
+                    {[
+                      { t: isRtl ? 'قاعدة Past Continuous 📐' : 'Past Continuous 📐', q: isRtl ? 'سارة، اشرحي لي قاعدة Past Continuous بالتفصيل على السبورة بالصوت' : 'Explain Past Continuous on the board' },
+                      { t: isRtl ? 'الفرق بين Since و For 🔍' : 'Since vs For 🔍', q: isRtl ? 'سارة، اشرحي لي الفرق بين Since و For مع أمثلة على السبورة' : 'Explain Since vs For on the board' },
+                      { t: isRtl ? 'نطق الحروف الصامتة 🎙️' : 'Silent Letters 🎙️', q: isRtl ? 'سارة، اشرحي لي نطق الحروف الصامتة في الإنجليزية على السبورة' : 'Explain silent letters on the board' },
+                      { t: isRtl ? 'صياغة إيميل رسمي ✍️' : 'Formal Email ✍️', q: isRtl ? 'سارة، اكتبي لي على السبورة هيكل إيميل عمل احترافي مع الشرح' : 'Write a formal email template on the board' }
+                    ].map((launcher, lIdx) => (
+                      <button
+                        key={`mob-board-l-${lIdx}`}
+                        onClick={() => {
+                          handleSendMessage(launcher.q);
+                          setMobileTab('board');
+                        }}
+                        className="p-2 bg-white/10 hover:bg-white/20 rounded-xl border border-white/15 text-[10px] font-bold text-white text-start transition-all cursor-pointer active:scale-95"
+                      >
+                        {launcher.t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Gentle Correction Card */}
+              {activeBoard?.correction && (
+                <div className="bg-black/40 border border-white/10 rounded-2xl p-2.5 flex items-center justify-around gap-2 text-xs">
+                  <div className="flex items-center gap-1 text-rose-400 bg-rose-950/40 px-2.5 py-1 rounded-xl border border-rose-500/30">
+                    <XCircle size={13} className="shrink-0" />
+                    <span className="line-through font-bold opacity-80">{activeBoard.correction.wrong}</span>
+                  </div>
+                  <span className="text-slate-400 font-black">➔</span>
+                  <div className="flex items-center gap-1 text-emerald-300 bg-emerald-950/40 px-2.5 py-1 rounded-xl border border-emerald-500/30 font-black">
+                    <CheckCircle2 size={13} className="shrink-0 text-emerald-400" />
+                    <span>{activeBoard.correction.right}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Pedagogical Formula / Tip */}
+              {(activeBoard?.formula || activeBoard?.commonPitfall) && (
+                <div className="bg-amber-400/10 border border-amber-400/30 rounded-2xl p-2.5 text-[11px] text-amber-200 space-y-1">
+                  {activeBoard.formula && (
+                    <div className="font-mono font-bold flex items-center gap-1.5">
+                      <span>📐</span>
+                      <span>{activeBoard.formula}</span>
+                    </div>
+                  )}
+                  {activeBoard.commonPitfall && (
+                    <div className="text-[10px] text-slate-300 flex items-center gap-1">
+                      <span>⚠️</span>
+                      <span>
+                        {typeof activeBoard.commonPitfall === 'string'
+                          ? activeBoard.commonPitfall
+                          : `${activeBoard.commonPitfall.bad} ➔ ${activeBoard.commonPitfall.good} (${activeBoard.commonPitfall.explanation})`}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Mini-Quiz on Mobile */}
+              {activeBoard?.quiz && (
+                <div className="bg-black/50 border border-amber-300/40 rounded-2xl p-3 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-black text-amber-300">
+                    <span className="flex items-center gap-1">
+                      <span>?</span>
+                      <span>{activeBoard.quiz.question}</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-300">{chatQuizTimeLeft}s</span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-1.5">
+                    {activeBoard.quiz.options.map((opt, oIdx) => {
+                      const isSelected = quizSelectedOption === oIdx;
+                      const isCorrect = oIdx === activeBoard.quiz?.answerIndex;
+                      let optStyle = 'bg-white/10 hover:bg-white/20 text-white border-white/15';
+                      if (quizSelectedOption !== null) {
+                        if (isCorrect) optStyle = 'bg-emerald-500 text-slate-950 font-black border-emerald-400';
+                        else if (isSelected) optStyle = 'bg-rose-500 text-white line-through border-rose-400';
+                        else optStyle = 'opacity-40 bg-white/5 border-white/5 text-slate-400';
+                      }
+                      return (
+                        <button
+                          key={`mob-quiz-${oIdx}`}
+                          disabled={quizSelectedOption !== null}
+                          onClick={() => handleQuizOptionClick(oIdx)}
+                          className={`p-2 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${optStyle}`}
+                        >
+                          {opt}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Bottom Action Strip */}
+              <div className="pt-1 flex items-center gap-2">
+                <button
+                  onClick={() => setMobileTab('chat')}
+                  className="flex-1 py-2 px-3 bg-gradient-to-r from-amber-400 to-amber-300 text-slate-950 font-black text-xs rounded-xl transition-all cursor-pointer shadow-sm flex items-center justify-center gap-1.5 active:scale-95"
+                >
+                  <span>💬</span>
+                  <span>{isRtl ? 'العودة للمحادثة مع سارة' : 'Back to Chat with Sara'}</span>
+                </button>
+                <button
+                  onClick={openWhiteboardModal}
+                  className="py-2 px-3 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-xl border border-white/20 transition-all cursor-pointer flex items-center justify-center gap-1"
+                >
+                  <span>📋</span>
+                  <span>{isRtl ? 'ملء الشاشة' : 'Fullscreen'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 3. Mobile Dedicated Curriculums & Smart Plan Screen */}
+        {mobileTab === 'curriculum' && (
+          <div className="md:hidden space-y-3.5 pb-6">
+            {/* Smart Academic Plan Hero Card */}
+            <div className="bg-gradient-to-br from-[#002147] via-blue-900 to-indigo-950 text-white p-4 rounded-3xl border-2 border-blue-400/50 shadow-xl space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center text-2xl font-black shadow-md shrink-0">
+                  🗓️
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-400 text-slate-950">
+                      {isRtl ? 'الخطة الأكاديمية الذكية' : 'Smart Study Plan'}
+                    </span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  </div>
+                  <h3 className="text-sm font-black text-white mt-0.5">
+                    {activeStudyPlan 
+                      ? (isRtl ? (activeStudyPlan.trackTitleAr || 'خطتك النشطة جاهزة') : (activeStudyPlan.trackTitleEn || 'Active Plan Ready'))
+                      : (isRtl ? 'صمم خطتك الدراسية المخصصة مع سارة' : 'Design your smart study plan')}
+                  </h3>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-blue-100 font-medium leading-relaxed">
+                {activeStudyPlan
+                  ? (isRtl ? `تضم الخطة ${activeStudyPlan.planItems?.length || 0} درساً مرتبطة بالسبورة التفاعلية واختبارات الإتقان اليومية.` : `Plan includes ${activeStudyPlan.planItems?.length || 0} lessons linked to the smartboard.`)
+                  : (isRtl ? 'حدد عدد الحصص، أيام الدراسة، والمناهج المستهدفة لتقوم سارة بتنظيم جدولك الدراسي فوراً!' : 'Select daily lessons, days, and subjects to generate your schedule!')}
+              </p>
+
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  onClick={() => setIsSmartPlanGeneratorOpen(true)}
+                  className="flex-1 py-2.5 px-3 bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
+                >
+                  <Sparkles size={14} className="text-slate-950" />
+                  <span>{isRtl ? 'توليد الخطة الذكية ⚡' : 'Generate Smart Plan ⚡'}</span>
+                </button>
+                {activeStudyPlan && (
+                  <button
+                    onClick={() => setIsStudyPlanModalOpen(true)}
+                    className="py-2.5 px-3 bg-white/15 hover:bg-white/25 text-white font-bold text-xs rounded-xl border border-white/20 transition-all cursor-pointer flex items-center justify-center gap-1"
+                  >
+                    <CalendarDays size={14} />
+                    <span>{isRtl ? 'عرض الخطة' : 'View Plan'}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* The 4 Core Fluency Tracks Cards */}
+            <div className="space-y-2.5">
+              <h3 className="text-xs font-black text-[#002147] flex items-center justify-between px-1">
+                <span>{isRtl ? 'مسارات سارة التخصصية للطلاقة (4 مسارات)' : 'Core Fluency Tracks (4 Tracks)'}</span>
+                <span className="text-[10px] text-slate-500 font-bold">{isRtl ? 'دروس تفاعلية بالصوت والسبورة' : 'Interactive lessons'}</span>
+              </h3>
+
+              {/* 1. Spoken Grammar */}
+              <div 
+                onClick={() => handleOpenCurriculum('grammar')}
+                className="bg-white border-2 border-blue-200 hover:border-blue-400 p-3.5 rounded-2xl shadow-xs transition-all cursor-pointer active:scale-98 flex items-center justify-between gap-3"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 flex items-center justify-center text-xl shrink-0">🧠</span>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="text-xs font-black text-[#002147]">{isRtl ? 'منهج القواعد التحدثية السريعة' : 'Spoken Grammar & Patterns'}</h4>
+                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-blue-100 text-blue-800">10 مستويات</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-0.5">{isRtl ? 'قواعد سريعة للحديث بثقة بدون تردد' : 'Spoken rules for instant fluency'}</p>
+                  </div>
+                </div>
+                <ChevronRight size={16} className={`text-blue-600 shrink-0 ${isRtl ? 'rotate-180' : ''}`} />
+              </div>
+
+              {/* 2. Conversation & Speaking */}
+              <div 
+                onClick={() => handleOpenCurriculum('conversation')}
+                className="bg-white border-2 border-cyan-200 hover:border-cyan-400 p-3.5 rounded-2xl shadow-xs transition-all cursor-pointer active:scale-98 flex items-center justify-between gap-3"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-900 flex items-center justify-center text-xl shrink-0">💬</span>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="text-xs font-black text-[#002147]">{isRtl ? 'منهج المحادثة والطلاقة التفاعلية' : 'Active Conversation & Fluency'}</h4>
+                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-cyan-100 text-cyan-800">12 سيناريو</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-0.5">{isRtl ? 'حوارات يومية وتدريب صوتي على سرعة الرد' : 'Daily conversations & voice speed'}</p>
+                  </div>
+                </div>
+                <ChevronRight size={16} className={`text-cyan-600 shrink-0 ${isRtl ? 'rotate-180' : ''}`} />
+              </div>
+
+              {/* 3. Reading & Phonetics */}
+              <div 
+                onClick={() => handleOpenCurriculum('reading')}
+                className="bg-white border-2 border-emerald-200 hover:border-emerald-400 p-3.5 rounded-2xl shadow-xs transition-all cursor-pointer active:scale-98 flex items-center justify-between gap-3"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-900 flex items-center justify-center text-xl shrink-0">📖</span>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="text-xs font-black text-[#002147]">{isRtl ? 'منهج القراءة التعبيرية والنطق الصوتي' : 'Expressive Reading & Phonetics'}</h4>
+                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800">مخارج الحروف</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-0.5">{isRtl ? 'إتقان نطق الأصوات والكلمات الصعبة' : 'Master phonetics and accents'}</p>
+                  </div>
+                </div>
+                <ChevronRight size={16} className={`text-emerald-600 shrink-0 ${isRtl ? 'rotate-180' : ''}`} />
+              </div>
+
+              {/* 4. Writing */}
+              <div 
+                onClick={() => handleOpenCurriculum('writing')}
+                className="bg-white border-2 border-purple-200 hover:border-purple-400 p-3.5 rounded-2xl shadow-xs transition-all cursor-pointer active:scale-98 flex items-center justify-between gap-3"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="w-10 h-10 rounded-xl bg-purple-100 text-purple-900 flex items-center justify-center text-xl shrink-0">✍️</span>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="text-xs font-black text-[#002147]">{isRtl ? 'منهج الكتابة التعبيرية الحوارية' : 'Conversational Writing'}</h4>
+                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-purple-100 text-purple-800">إيميل ونصوص</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-0.5">{isRtl ? 'كتابة رسائل رسمية وإيميلات احترافية' : 'Formal emails & essay writing'}</p>
+                  </div>
+                </div>
+                <ChevronRight size={16} className={`text-purple-600 shrink-0 ${isRtl ? 'rotate-180' : ''}`} />
+              </div>
+            </div>
+
+            {/* Browse All Curriculums Hub Button */}
+            <button
+              onClick={() => handleOpenCurriculum('all')}
+              className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#002147] to-[#0d3b66] hover:brightness-110 text-amber-300 font-black text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer active:scale-98 border border-amber-400/40"
+            >
+              <span>🌐</span>
+              <span>{isRtl ? 'استعراض كافة مناهج وأقسام الأكاديمية (18 قسماً) ➔' : 'Browse All Academy Curricula (18 Sections) ➔'}</span>
+            </button>
+          </div>
+        )}
+
+        {/* 4. Mobile Dedicated Scenarios & 12Y Adventures Screen */}
+        {mobileTab === 'scenarios' && (
+          <div className="md:hidden space-y-3.5 pb-6">
+            {/* Active Role-Play HUD if one is running */}
+            {activeRolePlay ? (
+              <div className="bg-gradient-to-br from-[#002147] via-slate-900 to-[#002147] text-white p-4 rounded-3xl border-2 border-amber-400/60 shadow-xl space-y-3">
+                <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl p-1 bg-amber-400 text-slate-950 rounded-xl shadow-xs">
+                      {activeRolePlay.badge}
+                    </span>
+                    <div>
+                      <span className="text-[10px] font-black uppercase text-amber-300">
+                        {isRtl ? 'مغامرة نشطة 🎮' : 'Active Quest 🎮'}
+                      </span>
+                      <h3 className="text-xs font-black text-white">
+                        {isRtl ? activeRolePlay.titleAr : activeRolePlay.titleEn}
+                      </h3>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleEndRolePlay}
+                    className="p-1 px-2.5 bg-rose-500 text-white rounded-xl text-[10px] font-bold"
+                  >
+                    {isRtl ? 'إنهاء ✕' : 'Exit ✕'}
+                  </button>
+                </div>
+
+                {/* Roles info */}
+                <div className="grid grid-cols-2 gap-2 bg-black/40 border border-white/10 rounded-2xl p-2 text-xs">
+                  <div className="text-center">
+                    <span className="text-slate-400 text-[10px] block">{isRtl ? 'دورك:' : 'You:'}</span>
+                    <span className="font-black text-emerald-300 text-[11px]">{isRtl ? activeRolePlay.roleStudentAr : activeRolePlay.roleStudentEn}</span>
+                  </div>
+                  <div className="text-center border-s border-white/15">
+                    <span className="text-slate-400 text-[10px] block">{isRtl ? 'دور سارة:' : 'Sara:'}</span>
+                    <span className="font-black text-amber-300 text-[11px]">{isRtl ? activeRolePlay.roleSaraAr : activeRolePlay.roleSaraEn}</span>
+                  </div>
+                </div>
+
+                {/* Missions Checklist */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] text-amber-200 font-bold block">
+                    {isRtl ? `المهام المستهدفة (${completedMissions.length}/${activeRolePlay.missionsAr?.length || 3}):` : 'Target Missions:'}
+                  </span>
+                  {(isRtl ? activeRolePlay.missionsAr : activeRolePlay.missionsEn).map((mission, mIdx) => {
+                    const isDone = completedMissions.includes(mIdx);
+                    return (
+                      <div 
+                        key={`mob-m-${mIdx}`} 
+                        className={`flex items-center gap-2 p-2 rounded-xl text-xs border ${
+                          isDone ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200' : 'bg-black/30 border-white/10 text-slate-200'
+                        }`}
+                      >
+                        <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
+                          isDone ? 'bg-emerald-400 text-slate-950' : 'bg-white/20 text-slate-300'
+                        }`}>
+                          {isDone ? '✓' : mIdx + 1}
+                        </span>
+                        <span className={`truncate text-[11px] ${isDone ? 'line-through opacity-80' : 'font-bold'}`}>{mission}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Suggested Quick Replies */}
+                {activeRolePlay.starterPrompts && activeRolePlay.starterPrompts.length > 0 && (
+                  <div className="space-y-1 pt-1">
+                    <span className="text-[10px] text-slate-300 font-bold block">{isRtl ? '💡 ردود مقترحة (اضغط للإرسال والمحادثة):' : 'Suggested replies:'}</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {activeRolePlay.starterPrompts.map((p, pIdx) => (
+                        <button
+                          key={`mob-rp-p-${pIdx}`}
+                          onClick={() => {
+                            handleSendMessage(p);
+                            setMobileTab('chat');
+                          }}
+                          className="p-1.5 px-2 bg-white/10 hover:bg-amber-400 hover:text-slate-950 text-white rounded-xl text-[10px] font-bold border border-white/10 transition-all cursor-pointer active:scale-95"
+                        >
+                          "{p}"
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  onClick={() => setMobileTab('chat')}
+                  className="w-full py-2.5 bg-gradient-to-r from-amber-400 to-amber-300 text-slate-950 font-black text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md active:scale-95"
+                >
+                  <span>💬</span>
+                  <span>{isRtl ? 'المحادثة الحية في المغامرة ↵' : 'Chat in Quest ↵'}</span>
+                </button>
+              </div>
+            ) : (
+              /* If no active scenario: Showcase 6 Scenarios Cards */
+              <div className="space-y-3">
+                <div className="bg-gradient-to-r from-[#002147] to-[#0a3568] text-white p-3.5 rounded-2xl border-2 border-indigo-400/40 shadow-sm flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl p-1.5 bg-amber-400 text-slate-950 rounded-xl shadow-xs">🎮</span>
+                    <div>
+                      <h3 className="text-xs font-black text-white">{isRtl ? 'مغامرات وسيناريوهات سارة (12 سنة)' : 'Sara 12Y Adventures Hub'}</h3>
+                      <p className="text-[10px] text-blue-200">{isRtl ? 'مواقف ومحادثات حقيقية ممتعة بالصوت رد برد!' : 'Voice interactive simulations!'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {ROLE_PLAY_SCENARIOS.slice(0, 6).map((sc) => (
+                    <div 
+                      key={`mob-sc-${sc.id}`}
+                      onClick={() => {
+                        handleStartRolePlayScenario(sc);
+                        setMobileTab('chat');
+                      }}
+                      className="bg-white border-2 border-slate-200 hover:border-amber-400 p-3 rounded-2xl shadow-2xs hover:shadow-sm transition-all cursor-pointer active:scale-95 flex flex-col justify-between gap-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl">{sc.badge}</span>
+                        <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-indigo-100 text-indigo-900">12Y</span>
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black text-[#002147] leading-snug line-clamp-1">{isRtl ? sc.titleAr : sc.titleEn}</h4>
+                        <p className="text-[9px] text-slate-500 line-clamp-1 mt-0.5">{sc.location}</p>
+                      </div>
+                      <button className="w-full py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-lg text-[10px] font-black flex items-center justify-center gap-1">
+                        <span>🚀</span>
+                        <span>{isRtl ? 'ابدأ المغامرة' : 'Start'}</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setIsRolePlayModalOpen(true)}
+                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-indigo-900 to-[#002147] text-white font-black text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer border border-indigo-400/40"
+                >
+                  <Gamepad2 size={15} className="text-amber-300" />
+                  <span>{isRtl ? 'استعراض كافة السيناريوهات والمغامرات (16) 🎮' : 'Browse All Scenarios (16) 🎮'}</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 5. Mobile Dedicated Learning Lab & Tools Screen */}
+        {mobileTab === 'lab' && (
+          <div className="md:hidden space-y-3 pb-6">
+            <div className="bg-white border-2 border-slate-200 rounded-3xl p-4 shadow-sm space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl p-1 bg-emerald-100 text-emerald-800 rounded-xl">⚡</span>
+                  <div>
+                    <h3 className="text-xs font-black text-[#002147]">{isRtl ? 'مختبر التعلم والأدوات الذكية' : 'Sara Learning Lab'}</h3>
+                    <p className="text-[10px] text-slate-500 font-medium">{isRtl ? 'أدوات النطق، دفتر الأخطاء، والتحكم بالصوت' : 'Speech lab, notebook, voice settings'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Grid of Lab Tools */}
+              <div className="grid grid-cols-2 gap-2">
+                {/* 1. Speech Lab */}
+                <div 
+                  onClick={() => {
+                    setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Alkhalil Academy');
+                    setIsPhoneticModalOpen(true);
+                  }}
+                  className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">🎙️</span>
+                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-purple-600 text-white">فوري</span>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-purple-950">{isRtl ? 'مختبر مخارج النطق' : 'Speech Lab'}</h4>
+                    <p className="text-[9px] text-slate-500">{isRtl ? 'تصحيح ومقارنة نطقك الصوتي' : 'Real-time AI voice evaluation'}</p>
+                  </div>
+                </div>
+
+                {/* 2. Error Notebook */}
+                <div 
+                  onClick={() => setIsNotebookModalOpen(true)}
+                  className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">📓</span>
+                    {tutorMemory.frequentMistakes && tutorMemory.frequentMistakes.length > 0 && (
+                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-rose-500 text-white">
+                        {tutorMemory.frequentMistakes.length} {isRtl ? 'أخطاء' : 'errors'}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-[#855B14]">{isRtl ? 'دفتر الأخطاء والتقرير' : 'Error Notebook'}</h4>
+                    <p className="text-[9px] text-slate-500">{isRtl ? 'مفردات وتقارير الإتقان' : 'Mistakes & parent report'}</p>
+                  </div>
+                </div>
+
+                {/* 3. Placement Test */}
+                <div 
+                  onClick={() => startPlacementTest()}
+                  className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">🎯</span>
+                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-blue-600 text-white">معتمد</span>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-[#002147]">{isRtl ? 'تحديد المستوى الشامل' : 'Placement Test'}</h4>
+                    <p className="text-[9px] text-slate-500">{isRtl ? 'محادثة + 5 أسئلة + سبلنغ' : 'Speaking + quiz + spelling'}</p>
+                  </div>
+                </div>
+
+                {/* 4. Sara 3D Character */}
+                <div 
+                  onClick={() => setIsSara3DOpen(!isSara3DOpen)}
+                  className={`border-2 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2 ${
+                    isSara3DOpen ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-300/40' : 'bg-slate-50 border-slate-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">👩‍🏫</span>
+                    <span className={`text-[9px] font-black px-1.5 py-0.2 rounded ${isSara3DOpen ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-600'}`}>
+                      {isSara3DOpen ? (isRtl ? 'نشطة' : 'ON') : (isRtl ? 'معطلة' : 'OFF')}
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900">{isRtl ? 'سارة 3D التفاعلية' : 'Sara 3D Character'}</h4>
+                    <p className="text-[9px] text-slate-500">{isRtl ? 'شخصية عائمة مرافقة' : 'Interactive companion'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Speed Controller Row */}
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                <span className="text-xs font-black text-[#002147] flex items-center gap-1">
+                  <span>⚡</span>
+                  <span>{isRtl ? 'سرعة صوت سارة:' : 'Sara Speed:'}</span>
+                </span>
+                <div className="flex items-center gap-1">
+                  {[
+                    { r: 0.8, l: '🐢 0.8x' },
+                    { r: 1.0, l: '⚡ 1.0x' },
+                    { r: 1.2, l: '🚀 1.2x' }
+                  ].map(sp => (
+                    <button
+                      key={`mob-sp-lab-${sp.r}`}
+                      onClick={() => setSaraSpeechRate(sp.r)}
+                      className={`px-2.5 py-1 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                        saraSpeechRate === sp.r ? 'bg-[#002147] text-amber-300 shadow-xs' : 'bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      {sp.l}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Session Timer Row */}
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                <span className="text-xs font-black text-[#002147] flex items-center gap-1">
+                  <Clock size={13} className="text-amber-600" />
+                  <span>{isRtl ? 'مؤقت الحصة:' : 'Lesson Timer:'}</span>
+                </span>
+                <div className="flex items-center gap-1">
+                  {[5, 10, 15, 0].map(mins => (
+                    <button
+                      key={`mob-tm-lab-${mins}`}
+                      onClick={() => selectTimerDuration(mins)}
+                      className={`px-2.5 py-1 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                        timerDurationMinutes === mins && isTimerEnabled
+                          ? 'bg-amber-400 text-slate-950 shadow-xs'
+                          : 'bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      {mins === 0 ? 'حر ♾️' : `${mins}د`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Archive Row */}
+              <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
+                <button
+                  onClick={() => setShowArchiveConfirm(true)}
+                  className="flex-1 py-2 px-3 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                >
+                  <Archive size={13} />
+                  <span>{isRtl ? 'أرشفة الجلسة الحالية' : 'Archive Session'}</span>
+                </button>
+                <button
+                  onClick={() => {
+                    fetchArchivedSessions();
+                    setIsArchiveModalOpen(true);
+                  }}
+                  className="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                >
+                  <History size={13} />
+                  <span>{isRtl ? 'استعراض الأرشيف' : 'View Archive'}</span>
+                </button>
+              </div>
+
+              <button
+                onClick={() => setMobileTab('chat')}
+                className="w-full py-2.5 bg-[#002147] text-white font-black text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-95 mt-1"
+              >
+                <span>💬</span>
+                <span>{isRtl ? 'العودة للمحادثة مع سارة' : 'Back to Chat with Sara'}</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
         {/* 2B. CHAT HISTORY CONTAINER */}
         {/* ======================================================== */}
-        <div className="flex-1 bg-white border-2 border-slate-200 rounded-3xl p-3 sm:p-5 overflow-y-auto space-y-3.5 shadow-sm min-h-[280px]">
+        <div className={`flex-1 bg-white border-2 border-slate-200 rounded-3xl p-3 sm:p-5 overflow-y-auto space-y-3.5 shadow-sm min-h-[280px] ${mobileTab === 'chat' ? 'block' : 'hidden md:block'}`}>
           {/* Active Placement Test Step Indicator */}
           {placementState.isActive && (
             <div className="bg-gradient-to-r from-[#002147] via-[#09325e] to-[#002147] text-white p-3 sm:p-4 rounded-2xl border-2 border-amber-300/40 shadow-md mb-2">
@@ -5586,7 +6413,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         {/* ======================================================== */}
         {/* 2C. INPUT CONTROLS (INTEGRATED LIVE + MIC + TEXT + SEND) */}
         {/* ======================================================== */}
-        <div className="sticky bottom-0 z-30 bg-[#F8FAFC]/95 backdrop-blur-md pt-1 pb-safe space-y-2">
+        <div className={`sticky bottom-0 z-30 bg-[#F8FAFC]/95 backdrop-blur-md pt-1 pb-safe space-y-2 ${mobileTab === 'chat' ? 'block' : 'hidden md:block'}`}>
           <div className={`bg-white border-2 rounded-2xl sm:rounded-3xl p-1.5 sm:p-2.5 shadow-md flex items-center gap-1.5 sm:gap-2 transition-all ${
             isLiveMode ? 'border-amber-400 ring-2 ring-amber-300/40' : 'border-slate-200'
           }`}>
