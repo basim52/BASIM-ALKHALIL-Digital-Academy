@@ -46,14 +46,15 @@ import {
   MessageSquare,
   ChevronDown,
   ChevronUp,
-  Gamepad2
+  Gamepad2,
+  Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile, AppView, SaraBoardData, SaraChatResponse, TutorMemoryDoc, proficiencyLevel, CurriculumCategory, StudyPlan } from '../types';
 import { Language, translations } from '../lib/translations';
 import { auth, db } from '../lib/firebase';
 import { savePlacementLevel } from '../lib/placement';
-import { doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, getDocs, query, orderBy, limit, increment, where } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, getDocs, query, orderBy, limit, increment, where, deleteDoc } from 'firebase/firestore';
 import { speakAcademyText, playDirectSaraAudio, cancelAllSpeech, playSchoolBellChime } from '../lib/audio';
 import { getStudentStreak, recordStreakActivity, StreakData } from '../services/streakService';
 import { SmartWhiteboard } from './SmartWhiteboard';
@@ -888,19 +889,61 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           const plans = snap.docs.map(d => ({ id: d.id, ...d.data() } as StudyPlan));
           plans.sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
           setActiveStudyPlan(plans[0]);
+          try {
+            localStorage.setItem(`sara_active_plan_${targetUid}`, JSON.stringify(plans[0]));
+          } catch (_) {}
+          return;
+        } else {
+          // If no plans found in cloud for this real user, clean up stale local storage!
+          localStorage.removeItem(`sara_active_plan_${targetUid}`);
+          localStorage.removeItem(`academic_saved_plans_${targetUid}`);
+          setActiveStudyPlan(null);
           return;
         }
       }
+      // For simulated/guest users
       const local = localStorage.getItem(`sara_active_plan_${targetUid}`);
       if (local) {
         setActiveStudyPlan(JSON.parse(local));
+      } else {
+        setActiveStudyPlan(null);
       }
     } catch (err) {
       console.debug('Active study plan fetch note:', err);
+      // Fallback only if Firestore query errored (e.g. offline)
+      const local = localStorage.getItem(`sara_active_plan_${targetUid}`);
+      if (local) {
+        try {
+          setActiveStudyPlan(JSON.parse(local));
+        } catch (_) {}
+      }
     } finally {
       setIsLoadingStudyPlan(false);
     }
   }, [profile.uid]);
+
+  // Handler to explicitly delete the active plan directly from Sara
+  const handleDeleteActivePlan = useCallback(async () => {
+    if (!window.confirm(isRtl ? 'هل أنت متأكد من حذف هذه الخطة الدراسية نهائياً؟' : 'Are you sure you want to delete this study plan?')) {
+      return;
+    }
+    const targetUid = auth.currentUser?.uid || profile.uid;
+    const planId = activeStudyPlan?.id;
+    try {
+      if (planId && !planId.startsWith('plan_') && !targetUid?.startsWith('sim_')) {
+        await deleteDoc(doc(db, 'studyPlans', planId));
+      }
+    } catch (e) {
+      console.warn('Failed to delete study plan from Firestore:', e);
+    }
+    if (targetUid) {
+      localStorage.removeItem(`sara_active_plan_${targetUid}`);
+      localStorage.removeItem(`academic_saved_plans_${targetUid}`);
+    }
+    localStorage.removeItem('sara_active_plan_guest');
+    localStorage.removeItem('sara_active_plan_default');
+    setActiveStudyPlan(null);
+  }, [activeStudyPlan, isRtl, profile.uid]);
 
   useEffect(() => {
     fetchActiveStudyPlan();
@@ -4191,6 +4234,13 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   <span>{isRtl ? 'خطة جديدة ⚡' : 'New Plan'}</span>
                 </button>
                 <button
+                  onClick={handleDeleteActivePlan}
+                  className="p-2 text-rose-300 hover:text-white rounded-xl hover:bg-rose-500/30 transition-colors cursor-pointer border border-rose-400/20"
+                  title={isRtl ? 'حذف الخطة نهائياً' : 'Delete Plan Permanently'}
+                >
+                  <Trash2 size={14} />
+                </button>
+                <button
                   onClick={() => setIsStudyPlanBannerDismissed(true)}
                   className="p-1.5 text-blue-300 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
                   title={isRtl ? 'إخفاء مؤقت' : 'Hide'}
@@ -5243,13 +5293,22 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   <span>{isRtl ? 'توليد الخطة الذكية ⚡' : 'Generate Smart Plan ⚡'}</span>
                 </button>
                 {activeStudyPlan && (
-                  <button
-                    onClick={() => setIsStudyPlanModalOpen(true)}
-                    className="py-2.5 px-3 bg-white/15 hover:bg-white/25 text-white font-bold text-xs rounded-xl border border-white/20 transition-all cursor-pointer flex items-center justify-center gap-1"
-                  >
-                    <CalendarDays size={14} />
-                    <span>{isRtl ? 'عرض الخطة' : 'View Plan'}</span>
-                  </button>
+                  <>
+                    <button
+                      onClick={() => setIsStudyPlanModalOpen(true)}
+                      className="py-2.5 px-3 bg-white/15 hover:bg-white/25 text-white font-bold text-xs rounded-xl border border-white/20 transition-all cursor-pointer flex items-center justify-center gap-1"
+                    >
+                      <CalendarDays size={14} />
+                      <span>{isRtl ? 'عرض الخطة' : 'View Plan'}</span>
+                    </button>
+                    <button
+                      onClick={handleDeleteActivePlan}
+                      className="py-2.5 px-3 bg-rose-500/20 hover:bg-rose-500/35 text-rose-300 font-bold text-xs rounded-xl border border-rose-400/30 transition-all cursor-pointer flex items-center justify-center gap-1"
+                      title={isRtl ? 'حذف الخطة' : 'Delete Plan'}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </>
                 )}
               </div>
             </div>

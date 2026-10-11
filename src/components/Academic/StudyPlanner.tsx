@@ -491,11 +491,20 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
     if (!window.confirm(isRtl ? 'هل أنت متأكد من حذف هذه الخطة؟' : 'Are you sure you want to delete this plan?')) return;
     
     try {
-      await deleteDoc(doc(db, 'studyPlans', planId));
+      if (planId && !planId.startsWith('sim_') && auth.currentUser) {
+        await deleteDoc(doc(db, 'studyPlans', planId));
+      }
       if (selectedSavedPlan?.id === planId) {
         setSelectedSavedPlan(null);
         setGeneratedPlan(null);
       }
+      const currentUid = userProfile?.uid || auth.currentUser?.uid;
+      if (currentUid) {
+        localStorage.removeItem(`sara_active_plan_${currentUid}`);
+        localStorage.removeItem(`academic_saved_plans_${currentUid}`);
+      }
+      localStorage.removeItem('sara_active_plan_guest');
+      localStorage.removeItem('sara_active_plan_default');
       fetchSavedPlans();
       showToast(isRtl ? 'تم حذف الخطة' : 'Plan deleted', 'error');
     } catch (error) {

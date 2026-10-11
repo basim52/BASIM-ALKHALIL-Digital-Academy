@@ -1006,8 +1006,16 @@ const StudentHome = ({
     if (!currentPlan?.id) return;
     if (!window.confirm(isRtl ? 'هل أنت متأكد من حذف هذه الخطة؟' : 'Are you sure you want to delete this plan?')) return;
     try {
-      await deleteDoc(doc(db, 'studyPlans', currentPlan.id));
+      if (!currentPlan.id.startsWith('sim_') && auth.currentUser) {
+        await deleteDoc(doc(db, 'studyPlans', currentPlan.id));
+      }
       setCurrentPlan(null);
+      if (profile?.uid) {
+        localStorage.removeItem(`sara_active_plan_${profile.uid}`);
+        localStorage.removeItem(`academic_saved_plans_${profile.uid}`);
+      }
+      localStorage.removeItem('sara_active_plan_guest');
+      localStorage.removeItem('sara_active_plan_default');
     } catch (e) {
       console.error(e);
     }
@@ -2939,6 +2947,12 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
         await deleteDoc(doc(db, 'studyPlans', currentPlan.id));
       }
       setCurrentPlan(null);
+      if (profile?.uid) {
+        localStorage.removeItem(`sara_active_plan_${profile.uid}`);
+        localStorage.removeItem(`academic_saved_plans_${profile.uid}`);
+      }
+      localStorage.removeItem('sara_active_plan_guest');
+      localStorage.removeItem('sara_active_plan_default');
     } catch (e) {
       console.warn("Delete plan error:", e);
     }
