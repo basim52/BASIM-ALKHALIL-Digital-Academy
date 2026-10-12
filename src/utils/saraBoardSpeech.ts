@@ -1,5 +1,6 @@
 import type { SaraCurriculumLesson } from '../data/saraExclusiveCurriculums';
 import type { SaraBoardPageSection } from '../types';
+import { boardLinesToSpeech } from './boardToSpeech';
 
 const arr = <T,>(v: T[] | undefined | null): T[] => (Array.isArray(v) ? v : []);
 const clip = (s: string | undefined, n = 220) => {
@@ -17,7 +18,7 @@ export function buildLessonBoardKey(lesson: { pillarId?: string; id?: string | n
  * (objectives, grammarFocus, vocabulary, modelDialogue, pitfalls, exercises, mastery).
  * Falls back to older lesson fields so every lesson still gets distinct text.
  */
-export function buildLessonPageSpeech(
+export function buildLessonPageBoardText(
   lesson: SaraCurriculumLesson,
   lang: 'ar' | 'en'
 ): Partial<Record<SaraBoardPageSection, string>> {
@@ -76,5 +77,34 @@ export function buildLessonPageSpeech(
     ? `اختبار إتقان «${title}»: ${qCount} أسئلة${mastery?.passScore ? `، والنجاح من ${mastery.passScore}` : ''}. ركّز وانطلق!`
     : `Mastery check for "${title}": ${qCount} questions${mastery?.passScore ? `, pass mark ${mastery.passScore}` : ''}. Focus and go!`;
 
+  return out;
+}
+
+/** Board lines per page: one line per sentence, exactly what Sara writes AND says. */
+export function buildLessonPageBoard(
+  lesson: SaraCurriculumLesson,
+  lang: 'ar' | 'en'
+): Partial<Record<SaraBoardPageSection, string[]>> {
+  const text = buildLessonPageBoardText(lesson, lang);
+  const out: Partial<Record<SaraBoardPageSection, string[]>> = {};
+  (Object.keys(text) as SaraBoardPageSection[]).forEach(k => {
+    const lines = splitBoardLines(text[k] || '');
+    if (lines.length) out[k] = lines;
+  });
+  return out;
+}
+
+export function splitBoardLines(t: string): string[] {
+  return t.replace(/\s+/g, ' ').trim().split(/(?<=[.!?؟])\s+(?=[^\s"])/).map(x => x.trim()).filter(Boolean);
+}
+
+/** Speech is derived from the board lines, never written separately. */
+export function buildLessonPageSpeech(
+  lesson: SaraCurriculumLesson,
+  lang: 'ar' | 'en'
+): Partial<Record<SaraBoardPageSection, string>> {
+  const board = buildLessonPageBoard(lesson, lang);
+  const out: Partial<Record<SaraBoardPageSection, string>> = {};
+  (Object.keys(board) as SaraBoardPageSection[]).forEach(k => { out[k] = boardLinesToSpeech(board[k]); });
   return out;
 }

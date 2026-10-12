@@ -1,7 +1,7 @@
 import { SaraCurriculumLesson } from '../data/saraExclusiveCurriculums';
 import { SaraBoardData } from '../types';
 import { getLessonPedagogicalBreakdown } from './saraLessonMethodology';
-import { buildLessonPageSpeech, buildLessonBoardKey } from './saraBoardSpeech';
+import { buildLessonPageBoard, buildLessonBoardKey } from './saraBoardSpeech';
 
 /**
  * Builds rich, teacher-led pedagogical explanation and whiteboard data for any of Sara's exclusive lessons.
@@ -184,7 +184,7 @@ export function buildSaraExclusiveLessonExplanation(
     reviewQuestions: Array.isArray(lesson.reviewOfPrevious) && lesson.reviewOfPrevious.length > 0 ? lesson.reviewOfPrevious : undefined,
     listeningTask: lesson.listeningTask && Array.isArray(lesson.listeningTask.questions) ? lesson.listeningTask : undefined,
     pronunciationFocus: lesson.pronunciationFocus && Array.isArray(lesson.pronunciationFocus.items) ? lesson.pronunciationFocus : undefined,
-    pageSpeech: buildLessonPageSpeech(lesson, lang)
+    pageBoard: buildLessonPageBoard(lesson, lang)
   };
 
   // Build authentic, warm, energetic spoken teacher explanation from Sara

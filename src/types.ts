@@ -321,6 +321,8 @@ export interface SaraBoardData {
   lessonKey?: string;
   /** Lesson-specific narration per whiteboard page; overrides the generic page templates. */
   pageSpeech?: Partial<Record<SaraBoardPageSection, string>>;
+  /** Exact lines Sara writes on each page. Speech is derived from these (single source of truth). */
+  pageBoard?: Partial<Record<SaraBoardPageSection, string[]>>;
   /** Mastery pass mark in percent (e.g. 80). Finishing/unlocking is blocked below it. */
   masteryPassScore?: number;
   /** Lesson's own 3-tier exercises (graded by correctIndex for MC items). */

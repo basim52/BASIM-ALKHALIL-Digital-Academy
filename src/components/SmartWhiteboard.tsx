@@ -55,7 +55,9 @@ import {
   ChevronLeft
 } from 'lucide-react';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
-import { SaraBoardData, SaraBoardQuiz } from '../types';
+import { SaraBoardData, SaraBoardQuiz, SaraBoardPageSection } from '../types';
+import { boardLinesToSpeech } from '../utils/boardToSpeech';
+import { splitBoardLines } from '../utils/saraBoardSpeech';
 import { playSnapshotShutterSound, prefetchAcademyAudio } from '../lib/audio';
 import { buildLimitedLessonQuizSet, shuffleQuiz } from '../utils/quizUtils';
 
@@ -547,12 +549,20 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
     subtitleAr: string;
     subtitleEn: string;
     speechText: string;
+    boardLines: string[];
     sectionType: 'objective' | 'formula' | 'rules' | 'pitfalls' | 'exercises' | 'speaking' | 'quiz';
   }
 
   const whiteboardPages = useMemo<WhiteboardSlidePage[]>(() => {
     if (!boardData) return [];
     const list: WhiteboardSlidePage[] = [];
+    // Single source of truth: board lines -> speech (never authored separately).
+    const pageText = (sec: SaraBoardPageSection, fallback: string) => {
+      const lines = boardData.pageBoard?.[sec]?.length
+        ? boardData.pageBoard[sec]!
+        : splitBoardLines(boardData.pageSpeech?.[sec] || fallback);
+      return { boardLines: lines, speechText: boardLinesToSpeech(lines) };
+    };
 
     // Page 1: Objective & Native Model Sentence
     if (boardData.title || boardData.sentence) {
@@ -568,7 +578,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
         icon: '🌟',
         subtitleAr: 'الجملة النموذجية والهدف التواصلي',
         subtitleEn: 'Native Model Sentence & Objective',
-        speechText: boardData.pageSpeech?.objective || p1Speech,
+        ...pageText('objective', p1Speech),
         sectionType: 'objective'
       });
     }
@@ -587,7 +597,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
         icon: '📐',
         subtitleAr: 'الصيغة التركيبية وتفكيك الجملة',
         subtitleEn: 'Grammar Formula & Sentence Dissection',
-        speechText: boardData.pageSpeech?.formula || p2Speech,
+        ...pageText('formula', p2Speech),
         sectionType: 'formula'
       });
     }
@@ -606,7 +616,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
         icon: '📌',
         subtitleAr: 'النقاط الذهبية والنماذج التطبيقية',
         subtitleEn: 'Golden Takeaways & Real Life Models',
-        speechText: boardData.pageSpeech?.rules || p3Speech,
+        ...pageText('rules', p3Speech),
         sectionType: 'rules'
       });
     }
@@ -625,7 +635,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
         icon: '⚠️',
         subtitleAr: 'أخطاء شائعة وحيلة الحفظ الذكي',
         subtitleEn: 'L1 Pitfalls & Mnemonic Key',
-        speechText: boardData.pageSpeech?.pitfalls || p4Speech,
+        ...pageText('pitfalls', p4Speech),
         sectionType: 'pitfalls'
       });
     }
@@ -644,7 +654,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
         icon: '✍️',
         subtitleAr: 'التمارين التفاعلية وتحدي الإتقان',
         subtitleEn: 'Interactive Drills & Concept Checks',
-        speechText: boardData.pageSpeech?.exercises || pExercisesSpeech,
+        ...pageText('exercises', pExercisesSpeech),
         sectionType: 'exercises'
       });
     }
@@ -663,7 +673,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
         icon: '🎙️',
         subtitleAr: 'بنك الكلمات وتحدي التحدث بالمايك',
         subtitleEn: 'Vocabulary Bank & Oral Challenge',
-        speechText: boardData.pageSpeech?.speaking || p5Speech,
+        ...pageText('speaking', p5Speech),
         sectionType: 'speaking'
       });
     }
@@ -681,7 +691,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
       icon: '🎯',
       subtitleAr: 'تحدي الأسئلة المتدرجة وقياس النتيجة',
       subtitleEn: 'Timed Mastery Challenge',
-      speechText: boardData.pageSpeech?.quiz || p6Speech,
+      ...pageText('quiz', p6Speech),
       sectionType: 'quiz'
     });
 
@@ -1063,6 +1073,15 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
       setCurrentExplanationText(boardData.voiceExplanation);
       onSpeak(boardData.voiceExplanation);
       setActiveExplanationSection('formula');
+      return;
+    }
+
+    // Read the board pages in order — speech derived from what is written.
+    if (whiteboardPages.length > 0) {
+      const script = whiteboardPages.map(p => p.speechText).filter(Boolean).join(' ');
+      setCurrentExplanationText(script);
+      setActiveExplanationSection('objective' as any);
+      onSpeak(script);
       return;
     }
 
@@ -3335,6 +3354,18 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                   )}
                 </div>
               ) : null}
+
+              {/* 📝 Sara's written board text for this page — exactly what she says, in the same order */}
+              {whiteboardViewMode === 'paged' && activeSlidePage && activeSlidePage.boardLines.length > 0 && (
+                <div data-testid="sara-board-script" className="p-3 sm:p-4 rounded-2xl bg-slate-900/70 border-2 border-emerald-400/40 shadow-inner space-y-1.5" dir={isRtl ? 'rtl' : 'ltr'}>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-300 block">
+                    {isRtl ? '📝 مكتوب على السبورة (وتقرؤه سارة):' : '📝 On the board (Sara reads this):'}
+                  </span>
+                  {activeSlidePage.boardLines.map((line, i) => (
+                    <p key={i} className="text-sm sm:text-base font-bold text-white leading-relaxed" dir="auto">{line}</p>
+                  ))}
+                </div>
+              )}
 
               {/* Active Audio Walkthrough Banner when Sara is Speaking */}
               {whiteboardViewMode === 'paged' && (isSaraSpeaking || isExplainingAll) && (
