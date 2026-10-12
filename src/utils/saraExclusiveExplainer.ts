@@ -91,16 +91,23 @@ export function buildSaraExclusiveLessonExplanation(
       : `Correct answer: ${lesson.speakingGoalEn}. Golden rule: ${breakdown.goldenRuleEn}`
   };
 
-  // Build vocabulary bank
-  const vocabularyBank = lesson.practicalExamples.slice(0, 4).map((ex, idx) => {
-    const words = ex.en.split(' ').filter(w => w.length > 2);
-    return {
-      word: words[idx % words.length] || words[0] || 'Pattern',
-      meaning: ex.ar,
-      pos: 'Key Phrase',
-      example: ex.en
-    };
-  });
+  // Build vocabulary bank (real lesson vocabulary when available)
+  const vocabularyBank = lesson.vocabulary && lesson.vocabulary.length > 0
+    ? lesson.vocabulary.map((v) => ({
+        word: v.word,
+        meaning: v.ar,
+        pos: v.ipa,
+        example: v.exampleEn
+      }))
+    : lesson.practicalExamples.slice(0, 4).map((ex, idx) => {
+        const words = ex.en.split(' ').filter(w => w.length > 2);
+        return {
+          word: words[idx % words.length] || words[0] || 'Pattern',
+          meaning: ex.ar,
+          pos: 'Key Phrase',
+          example: ex.en
+        };
+      });
 
   const boardData: SaraBoardData = {
     title: `${lesson.pillarIcon} ${isRtl ? lesson.titleAr : lesson.titleEn}`,
@@ -184,9 +191,41 @@ export function buildSaraExclusiveLessonExplanation(
       `🎙️ **Sara's Live Challenge for You:**\n"${lesson.speakingChallenge.saraQuestionEn}"\n\n` +
       `Speak back to me via microphone 🎙️ or chat, and follow the interactive smart whiteboard!`;
 
+  const curriculumExtras = buildCurriculumExtras(lesson, isRtl);
+
   return {
     boardData,
     spokenIntro,
-    chatMessage
+    chatMessage: curriculumExtras ? `${chatMessage}\n\n${curriculumExtras}` : chatMessage
   };
+}
+
+function buildCurriculumExtras(lesson: SaraCurriculumLesson, isRtl: boolean): string {
+  const parts: string[] = [];
+  if (lesson.cefr || lesson.unit) {
+    parts.push(isRtl
+      ? `📶 **المستوى:** ${lesson.cefr || lesson.levelCode}${lesson.unit ? ` • الوحدة ${lesson.unit}` : ''}`
+      : `📶 **Level:** ${lesson.cefr || lesson.levelCode}${lesson.unit ? ` • Unit ${lesson.unit}` : ''}`);
+  }
+  if (lesson.objectivesAr?.length) {
+    const objs = isRtl ? lesson.objectivesAr : (lesson.objectivesEn || lesson.objectivesAr);
+    parts.push((isRtl ? '✅ **أهداف الدرس:**\n' : '✅ **Objectives:**\n') + objs.map(o => `• ${o}`).join('\n'));
+  }
+  if (lesson.vocabulary?.length) {
+    parts.push((isRtl ? '📚 **كلمات الدرس:**\n' : '📚 **Lesson vocabulary:**\n') +
+      lesson.vocabulary.map(v => `• **${v.word}** ${v.ipa} — ${v.ar}`).join('\n'));
+  }
+  if (lesson.modelDialogue?.length) {
+    parts.push((isRtl ? '🗣️ **الحوار النموذجي:**\n' : '🗣️ **Model dialogue:**\n') +
+      lesson.modelDialogue.map(l => `**${l.speaker}:** ${l.en}${isRtl ? `\n   _${l.ar}_` : ''}`).join('\n'));
+  }
+  if (lesson.pronunciationFocus) {
+    parts.push((isRtl ? '🔊 **تركيز النطق:** ' : '🔊 **Pronunciation focus:** ') +
+      `${lesson.pronunciationFocus.focus}\n${lesson.pronunciationFocus.items.map(i => `• ${i}`).join('\n')}\n💡 ${lesson.pronunciationFocus.tipAr}`);
+  }
+  if (lesson.arabicLearnerPitfalls?.length) {
+    parts.push((isRtl ? '🚩 **أخطاء يقع فيها المتعلم العربي:**\n' : '🚩 **Arabic-speaker pitfalls:**\n') +
+      lesson.arabicLearnerPitfalls.map(p => `❌ ${p.incorrect} ➜ ✅ ${p.correct} (${p.whyAr})`).join('\n'));
+  }
+  return parts.join('\n\n');
 }

@@ -5,6 +5,40 @@
 export type SaraPillarId = 'grammar' | 'conversation' | 'reading' | 'writing';
 export type SaraLessonLevel = 'مبتدئ (Starter)' | 'متوسط (Intermediate)' | 'متقدم (Advanced)';
 
+
+export type SaraCefr = 'Pre-A1' | 'A1' | 'A2' | 'B1' | 'B2';
+
+export interface SaraVocabItem {
+  word: string;
+  ipa: string;
+  ar: string;
+  exampleEn: string;
+  exampleAr: string;
+}
+
+export interface SaraQuestion {
+  questionAr: string;
+  questionEn: string;
+  options: string[];
+  correctIndex: number;
+  explanationAr: string;
+}
+
+export interface SaraExercise {
+  id: string;
+  type: 'meaning' | 'gap' | 'order' | 'translate';
+  promptEn: string;
+  promptAr: string;
+  options?: string[];
+  correctIndex?: number;
+  answer: string;
+  explanationAr: string;
+}
+
+export interface SaraReviewItem extends SaraQuestion {
+  fromLessonId: string;
+}
+
 export interface SaraCurriculumLesson {
   id: string;
   pillarId: SaraPillarId;
@@ -54,5 +88,39 @@ export interface SaraCurriculumLesson {
     pointsAr: string[];
     pointsEn: string[];
     chalkHighlight: string;
+  };
+  // ---- Rebuilt curriculum fields (optional for backward compatibility) ----
+  unit?: number;
+  cefr?: SaraCefr;
+  objectivesAr?: string[];
+  objectivesEn?: string[];
+  vocabulary?: SaraVocabItem[];
+  grammarFocus?: {
+    ruleAr: string;
+    ruleEn: string;
+    formula: string;
+    examples: Array<{ en: string; ar: string }>;
+  };
+  modelDialogue?: Array<{ speaker: string; en: string; ar: string }>;
+  listeningTask?: {
+    instructionsAr: string;
+    script: string;
+    questions: SaraQuestion[];
+  };
+  pronunciationFocus?: {
+    focus: string;
+    items: string[];
+    tipAr: string;
+  };
+  exercises?: {
+    easy: SaraExercise[];
+    medium: SaraExercise[];
+    hard: SaraExercise[];
+  };
+  arabicLearnerPitfalls?: Array<{ incorrect: string; correct: string; whyAr: string }>;
+  reviewOfPrevious?: SaraReviewItem[];
+  masteryCheck?: {
+    passScore: number;
+    questions: SaraQuestion[];
   };
 }

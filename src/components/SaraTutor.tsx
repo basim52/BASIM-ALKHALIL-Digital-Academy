@@ -78,6 +78,7 @@ import { getScenarioEducationalContent } from '../data/saraScenarioCurriculumDat
 import { buildSaraCurriculumExplanation } from '../utils/saraCurriculumExplainer';
 import { buildSaraExclusiveLessonExplanation } from '../utils/saraExclusiveExplainer';
 import { SaraCurriculumLesson } from '../data/saraExclusiveCurriculums';
+import { buildSaraLessonContext } from '../utils/saraLessonContext';
 import { SaraSmartPlanModal } from './SaraSmartPlanModal';
 import { StudyPlanner } from './Academic/StudyPlanner';
 import { CurriculumLesson, getAllCurriculumLessons } from '../utils/academicCurriculumCatalogue';
@@ -3422,6 +3423,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             missions: isRtl ? activeRolePlay.missionsAr : activeRolePlay.missionsEn
           } : undefined,
           preferredLang: activeLang,
+          activeCurriculum: activeCurriculumLesson ? buildSaraLessonContext(activeCurriculumLesson) : undefined,
           timerDurationMinutes: timerDurationMinutes || 10,
           timerSecondsLeft: timerSecondsLeft,
           scenarioDetails: activeRolePlay ? {
