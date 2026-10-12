@@ -321,7 +321,18 @@ export interface SaraBoardData {
   lessonKey?: string;
   /** Lesson-specific narration per whiteboard page; overrides the generic page templates. */
   pageSpeech?: Partial<Record<SaraBoardPageSection, string>>;
+  /** Mastery pass mark in percent (e.g. 80). Finishing/unlocking is blocked below it. */
+  masteryPassScore?: number;
+  /** Lesson's own 3-tier exercises (graded by correctIndex for MC items). */
+  lessonExercises?: { easy: SaraBoardExercise[]; medium: SaraBoardExercise[]; hard: SaraBoardExercise[] };
+  /** Spiral review questions from earlier lessons (section hidden when empty). */
+  reviewQuestions?: SaraBoardQuestion[];
+  listeningTask?: { instructionsAr: string; script: string; questions: SaraBoardQuestion[] };
+  pronunciationFocus?: { focus: string; items: string[]; tipAr: string };
 }
+
+export interface SaraBoardQuestion { questionAr: string; questionEn: string; options: string[]; correctIndex: number; explanationAr: string }
+export interface SaraBoardExercise { id: string; type: 'meaning' | 'gap' | 'order' | 'translate'; promptEn: string; promptAr: string; options?: string[]; correctIndex?: number; answer: string; explanationAr: string }
 
 export type SaraBoardPageSection = 'objective' | 'formula' | 'rules' | 'pitfalls' | 'exercises' | 'speaking' | 'quiz';
 

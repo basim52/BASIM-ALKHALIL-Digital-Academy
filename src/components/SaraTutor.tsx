@@ -2087,6 +2087,17 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       return;
     }
 
+    // 🎯 Mastery gate: lessons with a masteryCheck are only completed/unlocked at or above the pass mark.
+    const masteryPass = Number(activeCurriculumLesson?.masteryCheck?.passScore) || 0;
+    if (masteryPass > 0 && customTotal > 0 && (customScore / customTotal) * 100 < masteryPass) {
+      const pct = Math.round((customScore / customTotal) * 100);
+      const msg = isRtl
+        ? `نتيجتك ${pct}٪ وتحتاج ${masteryPass}٪ لإتقان الدرس وفتح الدرس التالي. راجع السبورة وأعد اختبار الإتقان 💪`
+        : `You scored ${pct}% and need ${masteryPass}% to master this lesson and unlock the next one. Review the board and retry 💪`;
+      if (voiceEnabled) playSaraVoice(msg);
+      return;
+    }
+
     setIsSavingLessonResult(true);
 
     try {

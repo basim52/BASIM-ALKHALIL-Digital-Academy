@@ -512,58 +512,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (أنا فيصل.)",
-          "questionEn": "Complete: I ____ Faisal.",
+          "questionAr": "أكمل الفراغ: (أنت صديقي.)",
+          "questionEn": "Complete: You ____ my friend.",
           "options": [
+            "is",
             "am",
-            "are",
-            "is"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: am. مع I نستخدم am، ومع you نستخدم are. وفي الكلام نختصرها: I'm و you're."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (عمري عشر سنوات.)",
-          "questionEn": "Complete: ____ ten years old.",
-          "options": [
-            "I has",
-            "I",
-            "I'm"
+            "are"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: I'm. مع I نستخدم am، ومع you نستخدم are. وفي الكلام نختصرها: I'm و you're."
+          "explanationAr": "الإجابة: are. مع I نستخدم am، ومع you نستخدم are. وفي الكلام نختصرها: I'm و you're."
         },
         {
-          "questionAr": "أكمل: ___ a student.",
-          "questionEn": "Complete: ___ a student.",
+          "questionAr": "أكمل الفراغ: (أنا من الرياض.)",
+          "questionEn": "Complete: I am ____ Riyadh.",
           "options": [
-            "I'm",
-            "I",
-            "I is"
+            "at",
+            "in",
+            "from"
           ],
-          "correctIndex": 0,
-          "explanationAr": "مع I نستخدم am، واختصارها I'm."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: from. مع I نستخدم am، ومع you نستخدم are. وفي الكلام نختصرها: I'm و you're."
         },
         {
-          "questionAr": "ما الرد المناسب على Nice to meet you؟",
-          "questionEn": "Best reply to 'Nice to meet you'?",
+          "questionAr": "ما معنى \"friend\"؟",
+          "questionEn": "What does \"friend\" mean?",
           "options": [
-            "Nice to meet you too.",
-            "I'm fine.",
-            "Goodbye."
+            "يقابل/يتعرف",
+            "لطيف/جميل",
+            "صديق",
+            "مع السلامة"
           ],
-          "correctIndex": 0,
-          "explanationAr": "نرد على التعارف بـ Nice to meet you too."
+          "correctIndex": 2,
+          "explanationAr": "\"friend\" /frɛnd/ تعني: صديق. مثال: You're my friend."
+        },
+        {
+          "questionAr": "ما معنى \"student\"؟",
+          "questionEn": "What does \"student\" mean?",
+          "options": [
+            "يقابل/يتعرف",
+            "معلم/معلمة",
+            "طالب",
+            "عمر (سنة)"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"student\" /ˈstuːdənt/ تعني: طالب. مثال: I'm a student."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I am Faisal.",
-            "I Faisal."
+            "My name Faisal.",
+            "My name is Faisal."
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: I am Faisal. — في العربي نقول «أنا فيصل» بدون فعل، لكن في الإنجليزي لازم am."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: My name is Faisal. — لا تحذف is/am/are؛ الإنجليزي ما يقبل جملة اسمية بدون فعل."
         }
       ]
     }
@@ -1088,58 +1090,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (هذا أبوي. هو دكتور.)",
-          "questionEn": "Complete: This is my father. ____ a doctor.",
+          "questionAr": "أكمل الفراغ: (أمي طيبة جداً.)",
+          "questionEn": "Complete: My mother ____ very kind.",
           "options": [
-            "He are",
-            "She is",
-            "He is"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: He is. مع he و she و it نستخدم is، واختصارها he's و she's و it's."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (هي أختي نورة.)",
-          "questionEn": "Complete: ____ my sister Noura.",
-          "options": [
-            "He is",
-            "She are",
-            "She is"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: She is. مع he و she و it نستخدم is، واختصارها he's و she's و it's."
-        },
-        {
-          "questionAr": "اختر: ___ is my grandmother.",
-          "questionEn": "Choose: ___ is my grandmother.",
-          "options": [
-            "He",
-            "She",
-            "It"
+            "are",
+            "is",
+            "am"
           ],
           "correctIndex": 1,
-          "explanationAr": "الجدة أنثى ⇐ she."
+          "explanationAr": "الإجابة: is. مع he و she و it نستخدم is، واختصارها he's و she's و it's."
         },
         {
-          "questionAr": "ما اختصار it is؟",
-          "questionEn": "Short form of 'it is'?",
+          "questionAr": "أكمل الفراغ: (إنه بيت كبير.)",
+          "questionEn": "Complete: ____ a big house.",
           "options": [
-            "its",
-            "it's",
-            "it'is"
+            "She's",
+            "He's",
+            "It's"
           ],
-          "correctIndex": 1,
-          "explanationAr": "it's = it is، أما its فتعني «حقه/ها»."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: It's. مع he و she و it نستخدم is، واختصارها he's و she's و it's."
+        },
+        {
+          "questionAr": "ما معنى \"grandfather\"؟",
+          "questionEn": "What does \"grandfather\" mean?",
+          "options": [
+            "جدة",
+            "أخ",
+            "جد",
+            "أخت"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"grandfather\" /ˈɡrænfɑːðər/ تعني: جد. مثال: My grandfather is old."
+        },
+        {
+          "questionAr": "ما معنى \"grandmother\"؟",
+          "questionEn": "What does \"grandmother\" mean?",
+          "options": [
+            "جدة",
+            "قطة",
+            "طيب",
+            "طويل"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"grandmother\" /ˈɡrænmʌðər/ تعني: جدة. مثال: My grandmother is sweet."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "My sister is tall.",
-            "My sister he is tall."
+            "She is my brother.",
+            "He is my brother."
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: My sister is tall. — لا نكرر الضمير بعد الاسم مثل «أختي هي طويلة»."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: He is my brother. — بعض المتعلمين يخلطون he و she في الكلام السريع؛ ركّز: he = هو، she = هي."
         }
       ]
     }
@@ -1674,58 +1678,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (أنت جوعان؟)",
-          "questionEn": "Complete: ____ you hungry?",
+          "questionAr": "أكمل الفراغ: (أنا مو تعبان.)",
+          "questionEn": "Complete: I'm ____ tired.",
           "options": [
-            "Are",
-            "Is",
-            "Do"
+            "not",
+            "no",
+            "don't"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: Are. للسؤال نقدم الفعل: Are you...? Is he...? وللنفي نضيف not: I'm not, he isn't, they aren't."
+          "explanationAr": "الإجابة: not. للسؤال نقدم الفعل: Are you...? Is he...? وللنفي نضيف not: I'm not, he isn't, they aren't."
         },
         {
-          "questionAr": "أكمل الفراغ: (هي معلمتك؟)",
-          "questionEn": "Complete: ____ she your teacher?",
+          "questionAr": "أكمل الفراغ: (هو مو في البيت.)",
+          "questionEn": "Complete: He ____ at home.",
           "options": [
-            "Does",
-            "Is",
-            "Are"
+            "don't",
+            "aren't",
+            "isn't"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: Is. للسؤال نقدم الفعل: Are you...? Is he...? وللنفي نضيف not: I'm not, he isn't, they aren't."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: isn't. للسؤال نقدم الفعل: Are you...? Is he...? وللنفي نضيف not: I'm not, he isn't, they aren't."
         },
         {
-          "questionAr": "أكمل: ___ they at school? — Yes, they are.",
-          "questionEn": "Complete: ___ they at school?",
+          "questionAr": "ما معنى \"sad\"؟",
+          "questionEn": "What does \"sad\" mean?",
           "options": [
-            "Is",
-            "Are",
-            "Am"
+            "جوعان",
+            "جاهز",
+            "حزين",
+            "البيت"
           ],
-          "correctIndex": 1,
-          "explanationAr": "they تأخذ are."
+          "correctIndex": 2,
+          "explanationAr": "\"sad\" /sæd/ تعني: حزين. مثال: I'm not sad."
         },
         {
-          "questionAr": "اختر النفي الصحيح:",
-          "questionEn": "Choose the correct negative:",
+          "questionAr": "ما معنى \"late\"؟",
+          "questionEn": "What does \"late\" mean?",
           "options": [
-            "She aren't busy.",
-            "She isn't busy.",
-            "She no busy."
+            "مبسوط/سعيد",
+            "جاهز",
+            "متأخر",
+            "حزين"
           ],
-          "correctIndex": 1,
-          "explanationAr": "she ⇐ is ⇐ isn't."
+          "correctIndex": 2,
+          "explanationAr": "\"late\" /leɪt/ تعني: متأخر. مثال: Are we late?"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Are you hungry?",
-            "You are hungry?"
+            "He isn't at home.",
+            "He not at home."
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: Are you hungry? — في السؤال المكتوب نقدم are قبل you."
+          "explanationAr": "الصحيح: He isn't at home. — العربي يقول «هو مو في البيت» بدون فعل؛ الإنجليزي يحتاج is + not."
         }
       ]
     }
@@ -2272,58 +2278,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (هذا قلمي الرصاص.)",
-          "questionEn": "Complete: ____ is my pencil.",
-          "options": [
-            "Those",
-            "These",
-            "This"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: This. this للقريب المفرد و these للقريب الجمع، that للبعيد المفرد و those للبعيد الجمع."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (ذاك مكتب المعلم.)",
-          "questionEn": "Complete: ____ is the teacher's desk.",
-          "options": [
-            "These",
-            "Those",
-            "That"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: That. this للقريب المفرد و these للقريب الجمع، that للبعيد المفرد و those للبعيد الجمع."
-        },
-        {
-          "questionAr": "اختر: ___ are my brothers over there.",
-          "questionEn": "Choose: ___ are my brothers over there.",
+          "questionAr": "أكمل الفراغ: (هذي كتبي.)",
+          "questionEn": "Complete: ____ are my books.",
           "options": [
             "This",
-            "Those",
+            "These",
             "That"
           ],
           "correctIndex": 1,
-          "explanationAr": "جمع وبعيد ⇐ those."
+          "explanationAr": "الإجابة: These. this للقريب المفرد و these للقريب الجمع، that للبعيد المفرد و those للبعيد الجمع."
         },
         {
-          "questionAr": "أكمل: It's ___ eraser.",
-          "questionEn": "Complete: It's ___ eraser.",
+          "questionAr": "أكمل الفراغ: (هذيك كراسي جديدة.)",
+          "questionEn": "Complete: ____ are new chairs.",
           "options": [
-            "a",
-            "an",
-            "the"
+            "Those",
+            "This",
+            "That"
           ],
-          "correctIndex": 1,
-          "explanationAr": "eraser تبدأ بصوت متحرك ⇐ an."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: Those. this للقريب المفرد و these للقريب الجمع، that للبعيد المفرد و those للبعيد الجمع."
+        },
+        {
+          "questionAr": "ما معنى \"desk\"؟",
+          "questionEn": "What does \"desk\" mean?",
+          "options": [
+            "مكتب/طاولة",
+            "كرسي",
+            "حذاء/جزمة",
+            "قلم رصاص"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"desk\" /dɛsk/ تعني: مكتب/طاولة. مثال: This is my desk."
+        },
+        {
+          "questionAr": "ما معنى \"chair\"؟",
+          "questionEn": "What does \"chair\" mean?",
+          "options": [
+            "قلم رصاص",
+            "قلم حبر",
+            "كرسي",
+            "شنطة"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"chair\" /tʃɛr/ تعني: كرسي. مثال: Those chairs are new."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "These are my books.",
-            "This are my books."
+            "This is a pencil.",
+            "This is pencil."
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: These are my books. — الجمع يحتاج these و are."
+          "explanationAr": "الصحيح: This is a pencil. — العربي ما فيه أداة نكرة؛ في الإنجليزي لازم a/an مع المفرد."
         }
       ]
     }
@@ -2871,58 +2879,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (في بيتنا مجلس كبير.)",
-          "questionEn": "Complete: ____ a big majlis in my house.",
+          "questionAr": "أكمل الفراغ: (فيه مسجد قريب من بيتكم؟)",
+          "questionEn": "Complete: ____ a mosque near your house?",
           "options": [
-            "It has",
-            "There is",
-            "There are"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: There is. There is + مفرد، There are + جمع. للسؤال: Is there...? Are there...?"
-        },
-        {
-          "questionAr": "أكمل الفراغ: (فيه أربع غرف نوم.)",
-          "questionEn": "Complete: ____ four bedrooms.",
-          "options": [
-            "They are",
-            "There is",
-            "There are"
+            "Has",
+            "Are there",
+            "Is there"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: There are. There is + مفرد، There are + جمع. للسؤال: Is there...? Are there...?"
+          "explanationAr": "الإجابة: Is there. There is + مفرد، There are + جمع. للسؤال: Is there...? Are there...?"
         },
         {
-          "questionAr": "أكمل: ___ a kitchen downstairs.",
-          "questionEn": "Complete: ___ a kitchen downstairs.",
+          "questionAr": "أكمل الفراغ: (ما فيه حديقة.)",
+          "questionEn": "Complete: There ____ a garden.",
           "options": [
-            "There is",
-            "There are",
-            "It is"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "مطبخ واحد ⇐ there is."
-        },
-        {
-          "questionAr": "اختر السؤال الصحيح:",
-          "questionEn": "Choose the correct question:",
-          "options": [
-            "Are there a park?",
-            "Is there a park?",
-            "There is a park?"
+            "aren't",
+            "isn't",
+            "no"
           ],
           "correctIndex": 1,
-          "explanationAr": "مفرد ⇐ Is there...?"
+          "explanationAr": "الإجابة: isn't. There is + مفرد، There are + جمع. للسؤال: Is there...? Are there...?"
+        },
+        {
+          "questionAr": "ما معنى \"majlis\"؟",
+          "questionEn": "What does \"majlis\" mean?",
+          "options": [
+            "مسجد",
+            "حديقة",
+            "مجلس",
+            "غرفة نوم"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"majlis\" /ˈmædʒlɪs/ تعني: مجلس. مثال: Guests sit in the majlis."
+        },
+        {
+          "questionAr": "ما معنى \"garden\"؟",
+          "questionEn": "What does \"garden\" mean?",
+          "options": [
+            "حمام/دورة مياه",
+            "صالة",
+            "حديقة",
+            "سطح"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"garden\" /ˈɡɑːrdən/ تعني: حديقة. مثال: There's a small garden."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "In my house there is four rooms.",
-            "In my house there are four rooms."
+            "My house it has five rooms.",
+            "My house has five rooms. / There are five rooms in my house."
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: In my house there are four rooms. — أكثر من واحد ⇐ there are."
+          "explanationAr": "الصحيح: My house has five rooms. / There are five rooms in my house. — لا تكرر الضمير it بعد الاسم."
         }
       ]
     }
@@ -3470,58 +3480,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (عندي أخوين.)",
-          "questionEn": "Complete: I ____ two brothers.",
+          "questionAr": "أكمل الفراغ: (ما عندنا قطة.)",
+          "questionEn": "Complete: We ____ have a cat.",
+          "options": [
+            "not",
+            "doesn't",
+            "don't"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: don't. I/you/we/they + have، و he/she/it + has. النفي: don't have / doesn't have."
+        },
+        {
+          "questionAr": "أكمل الفراغ: (أبوي عنده سيارة بيضاء.)",
+          "questionEn": "Complete: My father ____ a white car.",
           "options": [
             "has",
             "have",
-            "am"
+            "is have"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: have. I/you/we/they + have، و he/she/it + has. النفي: don't have / doesn't have."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (عندها جوال جديد.)",
-          "questionEn": "Complete: She ____ a new phone.",
-          "options": [
-            "is",
-            "has",
-            "have"
-          ],
-          "correctIndex": 1,
+          "correctIndex": 0,
           "explanationAr": "الإجابة: has. I/you/we/they + have، و he/she/it + has. النفي: don't have / doesn't have."
         },
         {
-          "questionAr": "أكمل: My grandmother ___ ten grandchildren.",
-          "questionEn": "Complete: My grandmother ___ ten grandchildren.",
+          "questionAr": "ما معنى \"uncle\"؟",
+          "questionEn": "What does \"uncle\" mean?",
           "options": [
-            "have",
-            "has",
-            "is"
+            "عمة/خالة",
+            "ابن/بنت العم أو الخال",
+            "جوال",
+            "عم/خال"
           ],
-          "correctIndex": 1,
-          "explanationAr": "grandmother = she ⇐ has."
+          "correctIndex": 3,
+          "explanationAr": "\"uncle\" /ˈʌŋkəl/ تعني: عم/خال. مثال: I have three uncles."
         },
         {
-          "questionAr": "السؤال الصحيح:",
-          "questionEn": "Correct question:",
+          "questionAr": "ما معنى \"aunt\"؟",
+          "questionEn": "What does \"aunt\" mean?",
           "options": [
-            "Have you a pet?",
-            "Do you have a pet?",
-            "You have pet?"
+            "عمة/خالة",
+            "عم/خال",
+            "جديد",
+            "واجب"
           ],
-          "correctIndex": 1,
-          "explanationAr": "نسأل بـ Do you have...?"
+          "correctIndex": 0,
+          "explanationAr": "\"aunt\" /ænt/ تعني: عمة/خالة. مثال: My aunt has a big house."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "She have a phone.",
-            "She has a phone."
+            "I'm 20 years old.",
+            "I have 20 years."
           ],
-          "correctIndex": 1,
-          "explanationAr": "الصحيح: She has a phone. — مع she/he/it نستخدم has."
+          "correctIndex": 0,
+          "explanationAr": "الصحيح: I'm 20 years old. — العمر بالإنجليزي يكون بـ be وليس have (ترجمة حرفية من «لي ٢٠ سنة»)."
         }
       ]
     }
@@ -4080,58 +4092,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (أصحى الساعة ست.)",
-          "questionEn": "Complete: I ____ at six o'clock.",
+          "questionAr": "أكمل الفراغ: (يروحون المدرسة بالباص.)",
+          "questionEn": "Complete: They ____ to school by bus.",
           "options": [
-            "wakes up",
-            "waking up",
-            "wake up"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: wake up. المضارع البسيط للعادات والروتين: الفاعل + الفعل الأصلي. نستخدم at مع الساعة و in مع الصباح/المساء."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (نفطر الساعة سبع.)",
-          "questionEn": "Complete: We have breakfast ____ seven.",
-          "options": [
-            "at",
-            "on",
-            "in"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: at. المضارع البسيط للعادات والروتين: الفاعل + الفعل الأصلي. نستخدم at مع الساعة و in مع الصباح/المساء."
-        },
-        {
-          "questionAr": "أكمل: We ___ lunch at two.",
-          "questionEn": "Complete: We ___ lunch at two.",
-          "options": [
-            "has",
-            "have",
-            "having"
+            "goes",
+            "go",
+            "going"
           ],
           "correctIndex": 1,
-          "explanationAr": "we ⇐ have."
+          "explanationAr": "الإجابة: go. المضارع البسيط للعادات والروتين: الفاعل + الفعل الأصلي. نستخدم at مع الساعة و in مع الصباح/المساء."
         },
         {
-          "questionAr": "الحرف المناسب: ___ the evening",
-          "questionEn": "Preposition: ___ the evening",
+          "questionAr": "أكمل الفراغ: (أسوي واجبي في المساء.)",
+          "questionEn": "Complete: I do my homework ____ the evening.",
           "options": [
             "at",
             "in",
             "on"
           ],
           "correctIndex": 1,
-          "explanationAr": "in the morning/afternoon/evening."
+          "explanationAr": "الإجابة: in. المضارع البسيط للعادات والروتين: الفاعل + الفعل الأصلي. نستخدم at مع الساعة و in مع الصباح/المساء."
+        },
+        {
+          "questionAr": "ما معنى \"lunch\"؟",
+          "questionEn": "What does \"lunch\" mean?",
+          "options": [
+            "يصلي",
+            "عشاء",
+            "غداء",
+            "بدري"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"lunch\" /lʌntʃ/ تعني: غداء. مثال: We have lunch at two."
+        },
+        {
+          "questionAr": "ما معنى \"dinner\"؟",
+          "questionEn": "What does \"dinner\" mean?",
+          "options": [
+            "يصحى من النوم",
+            "يلبس",
+            "عشاء",
+            "ينام (يروح للفراش)"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"dinner\" /ˈdɪnər/ تعني: عشاء. مثال: Dinner is at eight."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I am wake up at six.",
-            "I wake up at six."
+            "I go to the school every day.",
+            "I go to school every day."
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: I wake up at six. — لا نضع am قبل الفعل في المضارع البسيط."
+          "explanationAr": "الصحيح: I go to school every day. — go to school/bed/work بدون the عند الكلام العام."
         }
       ]
     }
@@ -4690,58 +4704,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (أبوي يشتغل في بنك.)",
-          "questionEn": "Complete: My father ____ in a bank.",
+          "questionAr": "أكمل الفراغ: (أخوي يتابع كورة بالليل.)",
+          "questionEn": "Complete: My brother ____ football at night.",
           "options": [
-            "work",
-            "works",
-            "working"
+            "watch",
+            "watches",
+            "watchs"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: works. مع he/she/it نضيف s للفعل: works, plays. ونضيف es بعد ch/sh/o/x: watches, goes. والفعل المنتهي بحرف ساكن + y يصير ies: studies."
+          "explanationAr": "الإجابة: watches. مع he/she/it نضيف s للفعل: works, plays. ونضيف es بعد ch/sh/o/x: watches, goes. والفعل المنتهي بحرف ساكن + y يصير ies: studies."
         },
         {
-          "questionAr": "أكمل الفراغ: (هي تذاكر إنجليزي كل يوم.)",
-          "questionEn": "Complete: She ____ English every day.",
-          "options": [
-            "studies",
-            "studys",
-            "study"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: studies. مع he/she/it نضيف s للفعل: works, plays. ونضيف es بعد ch/sh/o/x: watches, goes. والفعل المنتهي بحرف ساكن + y يصير ies: studies."
-        },
-        {
-          "questionAr": "أكمل: My sister ___ to school by bus.",
-          "questionEn": "Complete: My sister ___ to school by bus.",
+          "questionAr": "أكمل الفراغ: (يروح النادي بعد الدوام.)",
+          "questionEn": "Complete: He ____ to the gym after work.",
           "options": [
             "go",
             "goes",
             "gos"
           ],
           "correctIndex": 1,
-          "explanationAr": "she ⇐ goes."
+          "explanationAr": "الإجابة: goes. مع he/she/it نضيف s للفعل: works, plays. ونضيف es بعد ch/sh/o/x: watches, goes. والفعل المنتهي بحرف ساكن + y يصير ies: studies."
         },
         {
-          "questionAr": "أي فعل مكتوب صح؟",
-          "questionEn": "Which is spelled correctly?",
+          "questionAr": "ما معنى \"drive\"؟",
+          "questionEn": "What does \"drive\" mean?",
           "options": [
-            "flys",
-            "flies",
-            "flyes"
+            "نادي رياضي",
+            "يسوق",
+            "بنك",
+            "يذاكر/يدرس"
           ],
           "correctIndex": 1,
-          "explanationAr": "ساكن + y ⇐ ies."
+          "explanationAr": "\"drive\" /draɪv/ تعني: يسوق. مثال: My uncle drives a truck."
+        },
+        {
+          "questionAr": "ما معنى \"bank\"؟",
+          "questionEn": "What does \"bank\" mean?",
+          "options": [
+            "بنك",
+            "يشاهد",
+            "يسوق",
+            "يطبخ"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"bank\" /bæŋk/ تعني: بنك. مثال: She works at a bank."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "He works in a bank.",
-            "He work in a bank."
+            "My mother cooks.",
+            "My mother she cook."
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: He works in a bank. — مع he لازم s؛ هذا أكثر خطأ عند المتعلمين العرب."
+          "explanationAr": "الصحيح: My mother cooks. — خطآن شائعان: تكرار الضمير ونسيان s."
         }
       ]
     }
@@ -5299,58 +5315,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (تحب التمر؟)",
-          "questionEn": "Complete: ____ you like dates?",
-          "options": [
-            "Do",
-            "Are",
-            "Does"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: Do. السؤال: Do + I/you/we/they + فعل؟ و Does + he/she/it + فعل أصلي؟ النفي: don't/doesn't + فعل أصلي (بدون s)."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (هي تتكلم إنجليزي؟)",
-          "questionEn": "Complete: ____ she speak English?",
-          "options": [
-            "Does",
-            "Is",
-            "Do"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: Does. السؤال: Do + I/you/we/they + فعل؟ و Does + he/she/it + فعل أصلي؟ النفي: don't/doesn't + فعل أصلي (بدون s)."
-        },
-        {
-          "questionAr": "أكمل: ___ your mother work?",
-          "questionEn": "Complete: ___ your mother work?",
-          "options": [
-            "Do",
-            "Does",
-            "Is"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "mother = she ⇐ does."
-        },
-        {
-          "questionAr": "رد قصير: Do you like cats? — No, I ___.",
-          "questionEn": "Short answer: No, I ___.",
+          "questionAr": "أكمل الفراغ: (ما أشرب قهوة.)",
+          "questionEn": "Complete: I ____ drink coffee.",
           "options": [
             "don't",
             "doesn't",
             "not"
           ],
           "correctIndex": 0,
-          "explanationAr": "I ⇐ don't."
+          "explanationAr": "الإجابة: don't. السؤال: Do + I/you/we/they + فعل؟ و Does + he/she/it + فعل أصلي؟ النفي: don't/doesn't + فعل أصلي (بدون s)."
+        },
+        {
+          "questionAr": "أكمل الفراغ: (ما يلعب ألعاب فيديو.)",
+          "questionEn": "Complete: He doesn't ____ video games.",
+          "options": [
+            "play",
+            "playing",
+            "plays"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: play. السؤال: Do + I/you/we/they + فعل؟ و Does + he/she/it + فعل أصلي؟ النفي: don't/doesn't + فعل أصلي (بدون s)."
+        },
+        {
+          "questionAr": "ما معنى \"play\"؟",
+          "questionEn": "What does \"play\" mean?",
+          "options": [
+            "يتكلم",
+            "يشرب",
+            "يلعب",
+            "غالباً/كثيراً"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"play\" /pleɪ/ تعني: يلعب. مثال: Does he play padel?"
+        },
+        {
+          "questionAr": "ما معنى \"drink\"؟",
+          "questionEn": "What does \"drink\" mean?",
+          "options": [
+            "يقرأ",
+            "عطلة نهاية الأسبوع",
+            "تمر",
+            "يشرب"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"drink\" /drɪŋk/ تعني: يشرب. مثال: I don't drink tea."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Does he play football?",
-            "Does he plays football?"
+            "Why you don't come?",
+            "Why don't you come?"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: Does he play football? — بعد does الفعل يرجع لأصله."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: Why don't you come? — في سؤال wh الترتيب: Why + don't + you."
         }
       ]
     }
@@ -5909,58 +5927,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (دايماً أصلي في الوقت.)",
-          "questionEn": "Complete: I ____ pray on time.",
+          "questionAr": "أكمل الفراغ: (هي أبداً ما تتأخر عن المدرسة.)",
+          "questionEn": "Complete: She is ____ late for school.",
           "options": [
-            "sometimes",
-            "always",
-            "never"
+            "not",
+            "never",
+            "ever"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: always. كلمة التكرار تأتي قبل الفعل العادي، وبعد فعل be: I always walk / I'm never late."
+          "explanationAr": "الإجابة: never. كلمة التكرار تأتي قبل الفعل العادي، وبعد فعل be: I always walk / I'm never late."
         },
         {
-          "questionAr": "أكمل الفراغ: (عادةً نتعشى برا يوم الخميس.)",
-          "questionEn": "Complete: We ____ eat out on Thursday.",
+          "questionAr": "أكمل الفراغ: (أحياناً يلعب بلايستيشن.)",
+          "questionEn": "Complete: He ____ plays PlayStation.",
           "options": [
-            "use",
-            "always usually",
-            "usually"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: usually. كلمة التكرار تأتي قبل الفعل العادي، وبعد فعل be: I always walk / I'm never late."
-        },
-        {
-          "questionAr": "رتب: late / is / never / he",
-          "questionEn": "Order: late / is / never / he",
-          "options": [
-            "He never is late.",
-            "He is never late.",
-            "Never he is late."
+            "sometime",
+            "sometimes",
+            "some"
           ],
           "correctIndex": 1,
-          "explanationAr": "بعد be ⇐ He is never late."
+          "explanationAr": "الإجابة: sometimes. كلمة التكرار تأتي قبل الفعل العادي، وبعد فعل be: I always walk / I'm never late."
         },
         {
-          "questionAr": "أي كلمة تعني 0%؟",
-          "questionEn": "Which word means 0%?",
+          "questionAr": "ما معنى \"rarely\"؟",
+          "questionEn": "What does \"rarely\" mean?",
           "options": [
-            "rarely",
-            "sometimes",
-            "never"
+            "ينظف بالفرشاة",
+            "دائماً (100%)",
+            "نادراً (10%)",
+            "شاطئ/بحر"
           ],
           "correctIndex": 2,
-          "explanationAr": "never = أبداً."
+          "explanationAr": "\"rarely\" /ˈrɛrli/ تعني: نادراً (10%). مثال: I rarely watch TV."
+        },
+        {
+          "questionAr": "ما معنى \"never\"؟",
+          "questionEn": "What does \"never\" mean?",
+          "options": [
+            "أبداً (0%)",
+            "عادةً (80%)",
+            "شاطئ/بحر",
+            "ينظف بالفرشاة"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"never\" /ˈnɛvər/ تعني: أبداً (0%). مثال: She never eats meat."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I always go to school by bus.",
-            "I go always to school by bus."
+            "Always I go to the mosque.",
+            "I always go to the mosque."
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: I always go to school by bus. — كلمة التكرار قبل الفعل الأساسي."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: I always go to the mosque. — العربي يقدّم «دائماً»، والإنجليزي يضعها قبل الفعل."
         }
       ]
     }
@@ -6519,58 +6539,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (أقدر أسبح.)",
-          "questionEn": "Complete: I ____ swim.",
+          "questionAr": "أكمل الفراغ: (تقدر تتكلم فرنسي؟)",
+          "questionEn": "Complete: ____ you speak French?",
           "options": [
-            "cans",
-            "can to",
-            "can"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: can. can + فعل أصلي لكل الضمائر، بدون to وبدون s. النفي can't، والسؤال Can you...?"
-        },
-        {
-          "questionAr": "أكمل الفراغ: (أختي ما تقدر تسوق سيكل.)",
-          "questionEn": "Complete: My sister ____ ride a bike.",
-          "options": [
-            "not can",
-            "don't can",
-            "can't"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: can't. can + فعل أصلي لكل الضمائر، بدون to وبدون s. النفي can't، والسؤال Can you...?"
-        },
-        {
-          "questionAr": "أكمل: ___ your brother play chess?",
-          "questionEn": "Complete: ___ your brother play chess?",
-          "options": [
-            "Does",
             "Can",
-            "Is"
+            "Do",
+            "Are"
           ],
-          "correctIndex": 1,
-          "explanationAr": "سؤال القدرة: Can + فاعل + فعل."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: Can. can + فعل أصلي لكل الضمائر، بدون to وبدون s. النفي can't، والسؤال Can you...?"
         },
         {
-          "questionAr": "الجملة الصحيحة:",
-          "questionEn": "Correct sentence:",
+          "questionAr": "أكمل الفراغ: (يقدر يرسم زين مرة.)",
+          "questionEn": "Complete: He can ____ very well.",
           "options": [
-            "She can speaks English.",
-            "She can speak English.",
-            "She cans speak English."
+            "to draw",
+            "draw",
+            "draws"
           ],
           "correctIndex": 1,
-          "explanationAr": "can + فعل أصلي."
+          "explanationAr": "الإجابة: draw. can + فعل أصلي لكل الضمائر، بدون to وبدون s. النفي can't، والسؤال Can you...?"
+        },
+        {
+          "questionAr": "ما معنى \"sing\"؟",
+          "questionEn": "What does \"sing\" mean?",
+          "options": [
+            "حصان",
+            "بسرعة",
+            "يرسم",
+            "يغني/ينشد"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"sing\" /sɪŋ/ تعني: يغني/ينشد. مثال: He can sing nasheeds."
+        },
+        {
+          "questionAr": "ما معنى \"type\"؟",
+          "questionEn": "What does \"type\" mean?",
+          "options": [
+            "يساعد",
+            "بسرعة",
+            "يركب/يسوق (دراجة/خيل)",
+            "يكتب بالكيبورد"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"type\" /taɪp/ تعني: يكتب بالكيبورد. مثال: I can type fast."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I can swim.",
-            "I can to swim."
+            "I can't come.",
+            "I can't to come."
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: I can swim. — لا نضع to بعد can."
+          "explanationAr": "الصحيح: I can't come. — لا to بعد can't."
         }
       ]
     }
@@ -7129,58 +7151,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (أذاكر إنجليزي الحين.)",
-          "questionEn": "Complete: I'm ____ English now.",
+          "questionAr": "أكمل الفراغ: (العيال يلعبون برا.)",
+          "questionEn": "Complete: The kids ____ playing outside.",
           "options": [
-            "studies",
-            "study",
-            "studying"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: studying. للحدث الجاري الآن: am/is/are + فعل+ing. ونستخدم now و right now و at the moment."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (أمي تسوي قهوة.)",
-          "questionEn": "Complete: My mother ____ coffee.",
-          "options": [
-            "is making",
-            "makes",
-            "is make"
+            "are",
+            "is",
+            "am"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: is making. للحدث الجاري الآن: am/is/are + فعل+ing. ونستخدم now و right now و at the moment."
+          "explanationAr": "الإجابة: are. للحدث الجاري الآن: am/is/are + فعل+ing. ونستخدم now و right now و at the moment."
         },
         {
-          "questionAr": "أكمل: Look! The baby ___.",
-          "questionEn": "Complete: Look! The baby ___.",
+          "questionAr": "أكمل الفراغ: (تمطر في أبها اليوم.)",
+          "questionEn": "Complete: It's ____ in Abha today.",
           "options": [
-            "sleeps",
-            "is sleeping",
-            "sleep"
+            "rains",
+            "raining",
+            "rain"
           ],
           "correctIndex": 1,
-          "explanationAr": "Look! تعني الآن ⇐ مستمر."
+          "explanationAr": "الإجابة: raining. للحدث الجاري الآن: am/is/are + فعل+ing. ونستخدم now و right now و at the moment."
         },
         {
-          "questionAr": "أي جملة لعادة؟",
-          "questionEn": "Which sentence is a habit?",
+          "questionAr": "ما معنى \"wait\"؟",
+          "questionEn": "What does \"wait\" mean?",
           "options": [
-            "I'm drinking milk now.",
-            "I drink milk every morning.",
-            "I am drink milk."
+            "ينتظر",
+            "الحين بالضبط",
+            "يمطر/مطر",
+            "يركض"
           ],
-          "correctIndex": 1,
-          "explanationAr": "every morning = عادة ⇐ مضارع بسيط."
+          "correctIndex": 0,
+          "explanationAr": "\"wait\" /weɪt/ تعني: ينتظر. مثال: I'm waiting for the bus."
+        },
+        {
+          "questionAr": "ما معنى \"talk\"؟",
+          "questionEn": "What does \"talk\" mean?",
+          "options": [
+            "يستمع",
+            "يركض",
+            "يصنع/يسوي",
+            "يتكلم"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"talk\" /tɔːk/ تعني: يتكلم. مثال: They're talking on the phone."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I'm studying now.",
-            "I studying now."
+            "I am wanting water.",
+            "I want water."
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: I'm studying now. — لا تنسَ am/is/are قبل ing."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: I want water. — أفعال الحالة مثل want/like/know ما تأخذ ing عادة."
         }
       ]
     }
@@ -7739,58 +7763,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (كنت في بيت جدتي أمس.)",
-          "questionEn": "Complete: I ____ at my grandmother's house yesterday.",
+          "questionAr": "أكمل الفراغ: (الجو ما كان حار.)",
+          "questionEn": "Complete: The weather ____ hot.",
           "options": [
-            "were",
-            "am",
-            "was"
+            "weren't",
+            "didn't",
+            "wasn't"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: was. was مع I/he/she/it، و were مع you/we/they. النفي wasn't/weren't، والسؤال Were you...?"
+          "explanationAr": "الإجابة: wasn't. was مع I/he/she/it، و were مع you/we/they. النفي wasn't/weren't، والسؤال Were you...?"
         },
         {
-          "questionAr": "أكمل الفراغ: (كنا في أبها الصيف الماضي.)",
-          "questionEn": "Complete: We ____ in Abha last summer.",
+          "questionAr": "أكمل الفراغ: (كنت في المدرسة يوم الأحد؟)",
+          "questionEn": "Complete: ____ you at school on Sunday?",
           "options": [
-            "was",
-            "were",
-            "are"
+            "Were",
+            "Was",
+            "Did"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: were. was مع I/he/she/it، و were مع you/we/they. النفي wasn't/weren't، والسؤال Were you...?"
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: Were. was مع I/he/she/it، و were مع you/we/they. النفي wasn't/weren't، والسؤال Were you...?"
         },
         {
-          "questionAr": "أكمل: My friends ___ at the match.",
-          "questionEn": "Complete: My friends ___ at the match.",
+          "questionAr": "ما معنى \"delicious\"؟",
+          "questionEn": "What does \"delicious\" mean?",
           "options": [
-            "was",
-            "were",
-            "are"
+            "لذيذ",
+            "قبل (مدة)",
+            "أمس",
+            "الطقس/الجو"
           ],
-          "correctIndex": 1,
-          "explanationAr": "friends = they ⇐ were."
+          "correctIndex": 0,
+          "explanationAr": "\"delicious\" /dɪˈlɪʃəs/ تعني: لذيذ. مثال: The food was delicious."
         },
         {
-          "questionAr": "ترجمة «قبل أسبوع»:",
-          "questionEn": "Translate «قبل أسبوع»:",
+          "questionAr": "ما معنى \"trip\"؟",
+          "questionEn": "What does \"trip\" mean?",
           "options": [
-            "before a week",
-            "a week ago",
-            "a week before now"
+            "أمس",
+            "مريض",
+            "قبل (مدة)",
+            "رحلة"
           ],
-          "correctIndex": 1,
-          "explanationAr": "a week ago."
+          "correctIndex": 3,
+          "explanationAr": "\"trip\" /trɪp/ تعني: رحلة. مثال: The trip was long."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "We was in Jeddah.",
-            "We were in Jeddah."
+            "I was in the desert two days ago.",
+            "I was in the desert before two days."
           ],
-          "correctIndex": 1,
-          "explanationAr": "الصحيح: We were in Jeddah. — we ⇐ were."
+          "correctIndex": 0,
+          "explanationAr": "الصحيح: I was in the desert two days ago. — «قبل يومين» = two days ago، وليس before two days."
         }
       ]
     }
@@ -8349,58 +8375,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (زرت عمي أمس.)",
-          "questionEn": "Complete: I ____ my uncle yesterday.",
+          "questionAr": "أكمل الفراغ: (أكلت شاورما على العشاء.)",
+          "questionEn": "Complete: She ____ shawarma for dinner.",
           "options": [
-            "visit",
-            "visited",
-            "visits"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: visited. الأفعال المنتظمة نضيف لها ed: played, visited. والشاذة لها شكل خاص لازم يُحفظ: go→went, eat→ate, see→saw."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (رحنا المول بعد العشاء.)",
-          "questionEn": "Complete: We ____ to the mall after Isha.",
-          "options": [
-            "went",
-            "go",
-            "goed"
+            "ate",
+            "eated",
+            "eat"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: went. الأفعال المنتظمة نضيف لها ed: played, visited. والشاذة لها شكل خاص لازم يُحفظ: go→went, eat→ate, see→saw."
+          "explanationAr": "الإجابة: ate. الأفعال المنتظمة نضيف لها ed: played, visited. والشاذة لها شكل خاص لازم يُحفظ: go→went, eat→ate, see→saw."
         },
         {
-          "questionAr": "الماضي من take:",
-          "questionEn": "Past of 'take':",
+          "questionAr": "أكمل الفراغ: (شافوا مباراة قوية.)",
+          "questionEn": "Complete: They ____ a great match.",
           "options": [
-            "taked",
-            "took",
-            "taken"
+            "saw",
+            "seed",
+            "seen"
           ],
-          "correctIndex": 1,
-          "explanationAr": "take ⇐ took."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: saw. الأفعال المنتظمة نضيف لها ed: played, visited. والشاذة لها شكل خاص لازم يُحفظ: go→went, eat→ate, see→saw."
         },
         {
-          "questionAr": "أكمل: Last night we ___ pizza.",
-          "questionEn": "Complete: Last night we ___ pizza.",
+          "questionAr": "ما معنى \"came (come)\"؟",
+          "questionEn": "What does \"came (come)\" mean?",
           "options": [
-            "eat",
-            "ate",
-            "eated"
+            "أكل",
+            "اشترى",
+            "جاء/رجع",
+            "رأى/شاف"
           ],
-          "correctIndex": 1,
-          "explanationAr": "eat ⇐ ate."
+          "correctIndex": 2,
+          "explanationAr": "\"came (come)\" /keɪm/ تعني: جاء/رجع. مثال: She came early."
+        },
+        {
+          "questionAr": "ما معنى \"had (have)\"؟",
+          "questionEn": "What does \"had (have)\" mean?",
+          "options": [
+            "زار",
+            "ذهب",
+            "أخذ",
+            "كان عنده/تناول"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"had (have)\" /hæd/ تعني: كان عنده/تناول. مثال: We had lunch at two."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I went to the mall.",
-            "I goed to the mall."
+            "I was go to the mall.",
+            "I went to the mall."
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: I went to the mall. — go فعل شاذ ⇐ went."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: I went to the mall. — لا نجمع was مع فعل الماضي."
         }
       ]
     }
@@ -8958,58 +8986,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (شفت المباراة؟)",
-          "questionEn": "Complete: ____ you watch the match?",
+          "questionAr": "أكمل الفراغ: (ما شفته.)",
+          "questionEn": "Complete: I ____ see him.",
           "options": [
-            "Do",
-            "Were",
-            "Did"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: Did. السؤال والنفي في الماضي يكون بـ did/didn't، والفعل بعدها يرجع لأصله: Did you go? I didn't eat."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (وين رحت البارحة؟)",
-          "questionEn": "Complete: Where did you ____ last night?",
-          "options": [
-            "went",
-            "go",
-            "goes"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: go. السؤال والنفي في الماضي يكون بـ did/didn't، والفعل بعدها يرجع لأصله: Did you go? I didn't eat."
-        },
-        {
-          "questionAr": "أكمل: What time ___ you wake up?",
-          "questionEn": "Complete: What time ___ you wake up?",
-          "options": [
-            "did",
-            "was",
-            "do"
+            "didn't",
+            "don't",
+            "wasn't"
           ],
           "correctIndex": 0,
-          "explanationAr": "سؤال ماضي ⇐ did (إذا كان عن أمس)."
+          "explanationAr": "الإجابة: didn't. السؤال والنفي في الماضي يكون بـ did/didn't، والفعل بعدها يرجع لأصله: Did you go? I didn't eat."
         },
         {
-          "questionAr": "النفي الصحيح:",
-          "questionEn": "Correct negative:",
+          "questionAr": "أكمل الفراغ: (وش اشترت؟)",
+          "questionEn": "Complete: What did she ____?",
           "options": [
-            "She didn't came.",
-            "She didn't come.",
-            "She not came."
+            "buy",
+            "buys",
+            "bought"
           ],
-          "correctIndex": 1,
-          "explanationAr": "didn't + come."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: buy. السؤال والنفي في الماضي يكون بـ did/didn't، والفعل بعدها يرجع لأصله: Did you go? I didn't eat."
+        },
+        {
+          "questionAr": "ما معنى \"stay\"؟",
+          "questionEn": "What does \"stay\" mean?",
+          "options": [
+            "يبقى/يجلس",
+            "يستمتع",
+            "يسجل هدف",
+            "يسافر"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"stay\" /steɪ/ تعني: يبقى/يجلس. مثال: We stayed at home."
+        },
+        {
+          "questionAr": "ما معنى \"forget\"؟",
+          "questionEn": "What does \"forget\" mean?",
+          "options": [
+            "ينسى",
+            "يفوز",
+            "يتصل",
+            "يخسر"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"forget\" /fərˈɡɛt/ تعني: ينسى. مثال: I didn't forget."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Did you go?",
-            "Did you went?"
+            "Did you go to the mall yesterday?",
+            "You went to the mall yesterday?"
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: Did you go? — بعد did الفعل أصلي."
+          "explanationAr": "الصحيح: Did you go to the mall yesterday? — في الكتابة لا نكتفي بنبرة السؤال كما في العربي."
         }
       ]
     }
@@ -9568,58 +9598,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (نحتاج رز وبيض.)",
-          "questionEn": "Complete: We need ____ rice and some eggs.",
+          "questionAr": "أكمل الفراغ: (كم تفاحة تبي؟)",
+          "questionEn": "Complete: ____ apples do you want?",
           "options": [
-            "any",
-            "a",
-            "some"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: some. المعدود له جمع (apples) ونسأل بـ How many، وغير المعدود ما له جمع (rice, milk) ونسأل بـ How much. some في الإيجاب، و any في النفي والسؤال."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (فيه حليب في الثلاجة؟)",
-          "questionEn": "Complete: Is there ____ milk in the fridge?",
-          "options": [
-            "any",
-            "some",
-            "a"
+            "How many",
+            "How",
+            "How much"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: any. المعدود له جمع (apples) ونسأل بـ How many، وغير المعدود ما له جمع (rice, milk) ونسأل بـ How much. some في الإيجاب، و any في النفي والسؤال."
+          "explanationAr": "الإجابة: How many. المعدود له جمع (apples) ونسأل بـ How many، وغير المعدود ما له جمع (rice, milk) ونسأل بـ How much. some في الإيجاب، و any في النفي والسؤال."
         },
         {
-          "questionAr": "أي كلمة غير معدودة؟",
-          "questionEn": "Which noun is uncountable?",
+          "questionAr": "أكمل الفراغ: (كم عندنا سكر؟)",
+          "questionEn": "Complete: ____ sugar do we have?",
           "options": [
-            "apple",
-            "egg",
-            "sugar"
+            "How much",
+            "How many",
+            "How"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: How much. المعدود له جمع (apples) ونسأل بـ How many، وغير المعدود ما له جمع (rice, milk) ونسأل بـ How much. some في الإيجاب، و any في النفي والسؤال."
+        },
+        {
+          "questionAr": "ما معنى \"sugar\"؟",
+          "questionEn": "What does \"sugar\" mean?",
+          "options": [
+            "خبز",
+            "قارورة",
+            "سكر",
+            "ثلاجة"
           ],
           "correctIndex": 2,
-          "explanationAr": "sugar غير معدود."
+          "explanationAr": "\"sugar\" /ˈʃʊɡər/ تعني: سكر. مثال: No sugar, please."
         },
         {
-          "questionAr": "أكمل: Are there ___ oranges?",
-          "questionEn": "Complete: Are there ___ oranges?",
+          "questionAr": "ما معنى \"chicken\"؟",
+          "questionEn": "What does \"chicken\" mean?",
           "options": [
-            "some",
-            "any",
-            "much"
+            "دجاج",
+            "سكر",
+            "بيض",
+            "ثلاجة"
           ],
-          "correctIndex": 1,
-          "explanationAr": "سؤال ⇐ any."
+          "correctIndex": 0,
+          "explanationAr": "\"chicken\" /ˈtʃɪkɪn/ تعني: دجاج. مثال: We need chicken for kabsa."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I want some rice.",
-            "I want a rice."
+            "I want two loaves of bread. / I want some bread.",
+            "I want two breads."
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: I want some rice. — rice غير معدود؛ ما نقول a rice."
+          "explanationAr": "الصحيح: I want two loaves of bread. / I want some bread. — bread غير معدود بالإنجليزي حتى لو نعده بالعربي."
         }
       ]
     }
@@ -10178,58 +10210,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (الرياض أكبر من أبها.)",
-          "questionEn": "Complete: Riyadh is ____ than Abha.",
+          "questionAr": "أكمل الفراغ: (هالجوال أغلى من ذاك.)",
+          "questionEn": "Complete: This phone is ____ than that one.",
           "options": [
-            "biger",
-            "more big",
-            "bigger"
+            "most expensive",
+            "expensiver",
+            "more expensive"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: bigger. الصفة القصيرة نضيف لها er + than: taller than. الطويلة more + الصفة + than: more expensive than. شواذ: good→better, bad→worse."
+          "explanationAr": "الإجابة: more expensive. الصفة القصيرة نضيف لها er + than: taller than. الطويلة more + الصفة + than: more expensive than. شواذ: good→better, bad→worse."
         },
         {
-          "questionAr": "أكمل الفراغ: (أبها أبرد من الرياض في الصيف.)",
-          "questionEn": "Complete: Abha is cooler ____ Riyadh in summer.",
+          "questionAr": "أكمل الفراغ: (إنجليزيي أحسن من السنة الماضية.)",
+          "questionEn": "Complete: My English is ____ than last year.",
           "options": [
-            "then",
-            "than",
-            "from"
+            "better",
+            "gooder",
+            "more good"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: than. الصفة القصيرة نضيف لها er + than: taller than. الطويلة more + الصفة + than: more expensive than. شواذ: good→better, bad→worse."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: better. الصفة القصيرة نضيف لها er + than: taller than. الطويلة more + الصفة + than: more expensive than. شواذ: good→better, bad→worse."
         },
         {
-          "questionAr": "مقارنة beautiful:",
-          "questionEn": "Comparative of 'beautiful':",
+          "questionAr": "ما معنى \"more expensive\"؟",
+          "questionEn": "What does \"more expensive\" mean?",
           "options": [
-            "beautifuler",
-            "more beautiful",
-            "most beautiful"
+            "أرخص",
+            "زحمة السير",
+            "أغلى",
+            "أفضل"
           ],
-          "correctIndex": 1,
-          "explanationAr": "صفة طويلة ⇐ more."
+          "correctIndex": 2,
+          "explanationAr": "\"more expensive\" /mɔːr ɪkˈspɛnsɪv/ تعني: أغلى. مثال: Gold is more expensive."
         },
         {
-          "questionAr": "مقارنة bad:",
-          "questionEn": "Comparative of 'bad':",
+          "questionAr": "ما معنى \"better\"؟",
+          "questionEn": "What does \"better\" mean?",
           "options": [
-            "badder",
-            "worse",
-            "more bad"
+            "أصغر",
+            "زحمة السير",
+            "أفضل",
+            "أسرع"
           ],
-          "correctIndex": 1,
-          "explanationAr": "bad ⇐ worse."
+          "correctIndex": 2,
+          "explanationAr": "\"better\" /ˈbɛtər/ تعني: أفضل. مثال: This is better."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Riyadh is bigger than Abha.",
-            "Riyadh is bigger from Abha."
+            "My brother is more tall than me.",
+            "My brother is taller than me."
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: Riyadh is bigger than Abha. — «من» في المقارنة = than وليس from."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: My brother is taller than me. — الصفات القصيرة بـ er."
         }
       ]
     }
@@ -10788,58 +10822,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (برج خليفة أطول مبنى في العالم.)",
-          "questionEn": "Complete: Burj Khalifa is ____ building in the world.",
+          "questionAr": "أكمل الفراغ: (هذا أجمل شاطئ في أملج.)",
+          "questionEn": "Complete: This is ____ beach in Umluj.",
           "options": [
-            "taller",
-            "the tallest",
-            "the most tall"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: the tallest. القصيرة: the + est (the tallest). الطويلة: the most + الصفة. شواذ: the best, the worst. وبعدها in للمكان أو of للمجموعة."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (الرياضيات أصعب مادة عندي.)",
-          "questionEn": "Complete: Math is the ____ subject for me.",
-          "options": [
-            "harder",
-            "most hard",
-            "hardest"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: hardest. القصيرة: the + est (the tallest). الطويلة: the most + الصفة. شواذ: the best, the worst. وبعدها in للمكان أو of للمجموعة."
-        },
-        {
-          "questionAr": "أكمل: Everest is ___ mountain in the world.",
-          "questionEn": "Complete: Everest is ___ mountain in the world.",
-          "options": [
-            "the highest",
-            "higher",
-            "the most high"
+            "the most beautiful",
+            "the beautifulest",
+            "more beautiful"
           ],
           "correctIndex": 0,
-          "explanationAr": "صفة قصيرة ⇐ the highest."
+          "explanationAr": "الإجابة: the most beautiful. القصيرة: the + est (the tallest). الطويلة: the most + الصفة. شواذ: the best, the worst. وبعدها in للمكان أو of للمجموعة."
         },
         {
-          "questionAr": "أكمل: She's the smartest girl ___ the class.",
-          "questionEn": "Complete: the smartest girl ___ the class.",
+          "questionAr": "أكمل الفراغ: (مين أفضل لاعب في فريقك؟)",
+          "questionEn": "Complete: Who is ____ player in your team?",
           "options": [
-            "of",
-            "in",
-            "at"
+            "the goodest",
+            "better",
+            "the best"
           ],
-          "correctIndex": 1,
-          "explanationAr": "in the class."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: the best. القصيرة: the + est (the tallest). الطويلة: the most + الصفة. شواذ: the best, the worst. وبعدها in للمكان أو of للمجموعة."
+        },
+        {
+          "questionAr": "ما معنى \"worst\"؟",
+          "questionEn": "What does \"worst\" mean?",
+          "options": [
+            "الأطول",
+            "الأفضل",
+            "الأسوأ",
+            "مادة دراسية"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"worst\" /wɜːrst/ تعني: الأسوأ. مثال: the worst day"
+        },
+        {
+          "questionAr": "ما معنى \"most beautiful\"؟",
+          "questionEn": "What does \"most beautiful\" mean?",
+          "options": [
+            "الأجمل",
+            "مبنى",
+            "الأسهل",
+            "مادة دراسية"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"most beautiful\" /moʊst ˈbjuːtɪfəl/ تعني: الأجمل. مثال: the most beautiful view"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "He is the tallest boy.",
-            "He is the most tall boy."
+            "He is the strongest.",
+            "He is the more strong."
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: He is the tallest boy. — الصفة القصيرة ⇐ est."
+          "explanationAr": "الصحيح: He is the strongest. — خلط المقارنة بالتفضيل."
         }
       ]
     }
@@ -11398,58 +11434,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (بزور جدي وجدتي هالويكند.)",
-          "questionEn": "Complete: I'm ____ visit my grandparents this weekend.",
+          "questionAr": "أكمل الفراغ: (ما راح تجي الليلة.)",
+          "questionEn": "Complete: She ____ going to come tonight.",
           "options": [
-            "go to",
-            "going",
-            "going to"
+            "doesn't",
+            "not",
+            "isn't"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: going to. للخطط المقررة مسبقاً: am/is/are + going to + فعل أصلي. وفي الكلام العامي نسمع gonna (لا تكتبها في الرسمي)."
+          "explanationAr": "الإجابة: isn't. للخطط المقررة مسبقاً: am/is/are + going to + فعل أصلي. وفي الكلام العامي نسمع gonna (لا تكتبها في الرسمي)."
         },
         {
-          "questionAr": "أكمل الفراغ: (بنسافر تركيا في الصيف.)",
-          "questionEn": "Complete: ____ going to travel to Turkey in the summer.",
+          "questionAr": "أكمل الفراغ: (وش بتدرس في الجامعة؟)",
+          "questionEn": "Complete: What ____ you going to study at university?",
           "options": [
-            "We",
-            "We is",
-            "We're"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: We're. للخطط المقررة مسبقاً: am/is/are + going to + فعل أصلي. وفي الكلام العامي نسمع gonna (لا تكتبها في الرسمي)."
-        },
-        {
-          "questionAr": "أكمل: Look at those clouds! It's ___ rain.",
-          "questionEn": "Complete: It's ___ rain.",
-          "options": [
-            "going to",
-            "go to",
-            "will to"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "توقع مبني على دليل ⇐ going to."
-        },
-        {
-          "questionAr": "أكمل: We ___ going to watch a movie.",
-          "questionEn": "Complete: We ___ going to watch a movie.",
-          "options": [
-            "is",
+            "do",
             "are",
-            "am"
+            "is"
           ],
           "correctIndex": 1,
-          "explanationAr": "we ⇐ are."
+          "explanationAr": "الإجابة: are. للخطط المقررة مسبقاً: am/is/are + going to + فعل أصلي. وفي الكلام العامي نسمع gonna (لا تكتبها في الرسمي)."
+        },
+        {
+          "questionAr": "ما معنى \"abroad\"؟",
+          "questionEn": "What does \"abroad\" mean?",
+          "options": [
+            "جامعة",
+            "يرتاح",
+            "خارج البلد",
+            "تخييم/كشتة"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"abroad\" /əˈbrɔːd/ تعني: خارج البلد. مثال: They're going to study abroad."
+        },
+        {
+          "questionAr": "ما معنى \"rest\"؟",
+          "questionEn": "What does \"rest\" mean?",
+          "options": [
+            "يرتاح",
+            "هالويكند",
+            "يدخر فلوس",
+            "خارج البلد"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"rest\" /rɛst/ تعني: يرتاح. مثال: I'm going to rest."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I'm going to travel.",
-            "I going to travel."
+            "I'm going to travel next week.",
+            "I will to travel next week."
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: I'm going to travel. — لا تحذف am."
+          "explanationAr": "الصحيح: I'm going to travel next week. — will لا تأخذ to، والخطة المقررة أفضل بـ going to."
         }
       ]
     }
@@ -12008,58 +12046,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (الجوال يرن. أنا برد!)",
-          "questionEn": "Complete: The phone is ringing. ____ get it!",
+          "questionAr": "أكمل الفراغ: (أتوقع النصر بيفوز.)",
+          "questionEn": "Complete: I think Al-Nassr ____.",
           "options": [
-            "I",
-            "I'm going to",
-            "I'll"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: I'll. will + فعل أصلي للقرار وقت الكلام والوعد والتوقع الشخصي. الاختصار I'll والنفي won't. أما going to فللخطة المسبقة."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (أوعدك ما راح أتأخر.)",
-          "questionEn": "Complete: I promise I ____ be late.",
-          "options": [
-            "won't",
-            "willn't",
-            "don't"
+            "will win",
+            "will wins",
+            "wins"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: won't. will + فعل أصلي للقرار وقت الكلام والوعد والتوقع الشخصي. الاختصار I'll والنفي won't. أما going to فللخطة المسبقة."
+          "explanationAr": "الإجابة: will win. will + فعل أصلي للقرار وقت الكلام والوعد والتوقع الشخصي. الاختصار I'll والنفي won't. أما going to فللخطة المسبقة."
         },
         {
-          "questionAr": "الموقف: الباب يدق. ماذا تقول؟",
-          "questionEn": "Doorbell rings. You say:",
+          "questionAr": "أكمل الفراغ: (لا تشيل هم، بساعدك في الواجب.)",
+          "questionEn": "Complete: Don't worry, ____ you with your homework.",
           "options": [
-            "I'm going to open it.",
-            "I'll open it.",
-            "I open it."
+            "I'll help",
+            "I help",
+            "I'm helping"
           ],
-          "correctIndex": 1,
-          "explanationAr": "قرار لحظي ⇐ I'll."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: I'll help. will + فعل أصلي للقرار وقت الكلام والوعد والتوقع الشخصي. الاختصار I'll والنفي won't. أما going to فللخطة المسبقة."
         },
         {
-          "questionAr": "نفي will:",
-          "questionEn": "Negative of will:",
+          "questionAr": "ما معنى \"carry\"؟",
+          "questionEn": "What does \"carry\" mean?",
           "options": [
-            "willn't",
-            "won't",
-            "don't will"
+            "ينجح (اختبار)",
+            "يشيل/يحمل",
+            "يوعد/وعد",
+            "ينسى"
           ],
           "correctIndex": 1,
-          "explanationAr": "will not = won't."
+          "explanationAr": "\"carry\" /ˈkæri/ تعني: يشيل/يحمل. مثال: I'll carry your bag."
+        },
+        {
+          "questionAr": "ما معنى \"answer\"؟",
+          "questionEn": "What does \"answer\" mean?",
+          "options": [
+            "غالباً",
+            "يرد/يجاوب",
+            "يطلب",
+            "ينجح (اختبار)"
+          ],
+          "correctIndex": 1,
+          "explanationAr": "\"answer\" /ˈænsər/ تعني: يرد/يجاوب. مثال: I'll answer the door."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I'll call you.",
-            "I will to call you."
+            "I will going to travel.",
+            "I'm going to travel. / I'll travel."
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: I'll call you. — لا to بعد will."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: I'm going to travel. / I'll travel. — لا نجمع will مع going to."
         }
       ]
     }
@@ -12247,23 +12287,26 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       {
         "word": "eaten",
         "ipa": "/ˈiːtən/",
-        "ar": "أكل (V3)",
+        "ar": "مأكول",
         "exampleEn": "Have you eaten sushi?",
-        "exampleAr": "قد أكلت سوشي؟"
+        "exampleAr": "قد أكلت سوشي؟",
+        "note": "past participle of eat: eat → ate → eaten"
       },
       {
         "word": "seen",
         "ipa": "/siːn/",
-        "ar": "رأى (V3)",
+        "ar": "مَرئي / شاف",
         "exampleEn": "I've seen snow once.",
-        "exampleAr": "شفت ثلج مرة."
+        "exampleAr": "شفت ثلج مرة.",
+        "note": "past participle of see: see → saw → seen"
       },
       {
         "word": "ridden",
         "ipa": "/ˈrɪdən/",
-        "ar": "ركب (V3)",
+        "ar": "مركوب / ركب",
         "exampleEn": "He's ridden a horse.",
-        "exampleAr": "قد ركب خيل."
+        "exampleAr": "قد ركب خيل.",
+        "note": "past participle of ride: ride → rode → ridden"
       },
       {
         "word": "once",
@@ -12421,7 +12464,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "promptEn": "What does \"ever\" mean?",
           "promptAr": "ما معنى \"ever\"؟",
           "options": [
-            "ركب (V3)",
+            "مركوب / ركب",
             "ذهب (تجربة)",
             "في حياتك/أبداً (سؤال)",
             "أبداً/عمري ما"
@@ -12436,7 +12479,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "promptEn": "What does \"never\" mean?",
           "promptAr": "ما معنى \"never\"؟",
           "options": [
-            "ركب (V3)",
+            "مركوب / ركب",
             "في حياتك/أبداً (سؤال)",
             "تجربة",
             "أبداً/عمري ما"
@@ -12618,58 +12661,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (قد رحت لندن؟)",
-          "questionEn": "Complete: Have you ever ____ to London?",
+          "questionAr": "أكمل الفراغ: (هي قد شافت الشفق القطبي.)",
+          "questionEn": "Complete: She ____ the Northern Lights.",
           "options": [
-            "go",
-            "been",
-            "went"
+            "have seen",
+            "has seen",
+            "has saw"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: been. have/has + التصريف الثالث (been, eaten, seen) للتجربة في أي وقت من الحياة. ever في السؤال، و never للنفي. إذا ذكرنا وقتاً محدداً نرجع للماضي البسيط."
+          "explanationAr": "الإجابة: has seen. have/has + التصريف الثالث (been, eaten, seen) للتجربة في أي وقت من الحياة. ever في السؤال، و never للنفي. إذا ذكرنا وقتاً محدداً نرجع للماضي البسيط."
         },
         {
-          "questionAr": "أكمل الفراغ: (عمري ما أكلت سوشي.)",
-          "questionEn": "Complete: I've ____ eaten sushi.",
+          "questionAr": "أكمل الفراغ: (زرنا العلا مرتين.)",
+          "questionEn": "Complete: ____ visited AlUla twice.",
           "options": [
-            "not",
-            "never",
-            "ever"
+            "We has",
+            "We've",
+            "We"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: never. have/has + التصريف الثالث (been, eaten, seen) للتجربة في أي وقت من الحياة. ever في السؤال، و never للنفي. إذا ذكرنا وقتاً محدداً نرجع للماضي البسيط."
+          "explanationAr": "الإجابة: We've. have/has + التصريف الثالث (been, eaten, seen) للتجربة في أي وقت من الحياة. ever في السؤال، و never للنفي. إذا ذكرنا وقتاً محدداً نرجع للماضي البسيط."
         },
         {
-          "questionAr": "التصريف الثالث من go:",
-          "questionEn": "Past participle of 'go':",
+          "questionAr": "ما معنى \"eaten\"؟",
+          "questionEn": "What does \"eaten\" mean?",
           "options": [
-            "went",
-            "gone/been",
-            "goed"
+            "مرتين",
+            "مَرئي / شاف",
+            "ذهب (تجربة)",
+            "مأكول"
           ],
-          "correctIndex": 1,
-          "explanationAr": "go ⇐ gone (ذهب ولم يرجع)/been (ذهب ورجع)."
+          "correctIndex": 3,
+          "explanationAr": "\"eaten\" /ˈiːtən/ تعني: مأكول. مثال: Have you eaten sushi?"
         },
         {
-          "questionAr": "أكمل: I've ___ flown in a helicopter.",
-          "questionEn": "Complete: I've ___ flown in a helicopter.",
+          "questionAr": "ما معنى \"seen\"؟",
+          "questionEn": "What does \"seen\" mean?",
           "options": [
-            "ever",
-            "never",
-            "yet"
+            "مرة وحدة",
+            "في حياتك/أبداً (سؤال)",
+            "ذهب (تجربة)",
+            "مَرئي / شاف"
           ],
-          "correctIndex": 1,
-          "explanationAr": "نفي التجربة ⇐ never."
+          "correctIndex": 3,
+          "explanationAr": "\"seen\" /siːn/ تعني: مَرئي / شاف. مثال: I've seen snow once."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
             "Have you ever been to Paris?",
-            "Have you ever went to Paris?"
+            "Did you ever go to Paris? (as experience)"
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: Have you ever been to Paris? — بعد have نستخدم التصريف الثالث."
+          "explanationAr": "الصحيح: Have you ever been to Paris? — لسؤال التجربة نستخدم المضارع التام."
         }
       ]
     }
@@ -13228,58 +13273,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (توني خلصت واجبي.)",
-          "questionEn": "Complete: I've ____ finished my homework.",
+          "questionAr": "أكمل الفراغ: (أرسلت الإيميل ولا للحين؟)",
+          "questionEn": "Complete: Have you sent the email ____?",
           "options": [
             "yet",
-            "just",
-            "ever"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: just. المضارع التام لشيء له علاقة بالآن (I've lost my key = ما زال ضائعاً) ومع just/already/yet. الماضي البسيط لحدث في وقت منتهٍ (yesterday, at 5)."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (هي قد أكلت خلاص.)",
-          "questionEn": "Complete: She has ____ eaten.",
-          "options": [
-            "still",
             "already",
-            "yet"
+            "just"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: already. المضارع التام لشيء له علاقة بالآن (I've lost my key = ما زال ضائعاً) ومع just/already/yet. الماضي البسيط لحدث في وقت منتهٍ (yesterday, at 5)."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: yet. المضارع التام لشيء له علاقة بالآن (I've lost my key = ما زال ضائعاً) ومع just/already/yet. الماضي البسيط لحدث في وقت منتهٍ (yesterday, at 5)."
         },
         {
-          "questionAr": "أكمل: I ___ my keys. I can't open the door.",
-          "questionEn": "Complete: I ___ my keys.",
+          "questionAr": "أكمل الفراغ: (خلصته قبل ساعتين.)",
+          "questionEn": "Complete: I ____ it two hours ago.",
           "options": [
-            "lost",
-            "have lost",
-            "lose"
+            "have finished",
+            "finish",
+            "finished"
           ],
-          "correctIndex": 1,
-          "explanationAr": "النتيجة الآن ⇐ have lost."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: finished. المضارع التام لشيء له علاقة بالآن (I've lost my key = ما زال ضائعاً) ومع just/already/yet. الماضي البسيط لحدث في وقت منتهٍ (yesterday, at 5)."
         },
         {
-          "questionAr": "أكمل: We ___ to Dubai last year.",
-          "questionEn": "Complete: We ___ to Dubai last year.",
+          "questionAr": "ما معنى \"send\"؟",
+          "questionEn": "What does \"send\" mean?",
           "options": [
-            "have gone",
-            "went",
-            "have been"
+            "للحين/بعد (نفي وسؤال)",
+            "يخلّص/ينهي",
+            "يضيّع",
+            "يرسل"
           ],
-          "correctIndex": 1,
-          "explanationAr": "last year ⇐ went."
+          "correctIndex": 3,
+          "explanationAr": "\"send\" /sɛnd/ تعني: يرسل. مثال: I've sent it."
+        },
+        {
+          "questionAr": "ما معنى \"lose\"؟",
+          "questionEn": "What does \"lose\" mean?",
+          "options": [
+            "يضيّع",
+            "يرتب الشنطة",
+            "توّ/للتو",
+            "يوصل"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"lose\" /luːz/ تعني: يضيّع. مثال: I've lost my wallet."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I have finished it yesterday.",
-            "I finished it yesterday."
+            "Did you finish yet?",
+            "Have you finished yet?"
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: I finished it yesterday. — yesterday ⇐ ماضي بسيط."
+          "explanationAr": "الصحيح: Have you finished yet? — الإنجليزية الرسمية تفضّل المضارع التام مع yet."
         }
       ]
     }
@@ -13827,7 +13874,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "تجربة",
           "في حياتك/أبداً (سؤال)",
           "مرتين",
-          "أكل (V3)"
+          "مأكول"
         ],
         "correctIndex": 0,
         "explanationAr": "\"experience\" /ɪkˈspɪriəns/ تعني: تجربة. مثال: It was a great experience.",
@@ -13838,58 +13885,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (المفروض تشرب ماء أكثر في الصيف.)",
-          "questionEn": "Complete: You ____ drink more water in summer.",
+          "questionAr": "أكمل الفراغ: (لازم أصحى بدري يوم الأحد.)",
+          "questionEn": "Complete: I ____ wake up early on Sunday.",
           "options": [
+            "must to",
             "should to",
-            "should",
-            "must to"
+            "have to"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: should. should للنصيحة، must للإلزام القوي أو القانون، have to لإلزام خارجي، و don't have to = مو لازم (اختياري)، بينما mustn't = ممنوع."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: have to. should للنصيحة، must للإلزام القوي أو القانون، have to لإلزام خارجي، و don't have to = مو لازم (اختياري)، بينما mustn't = ممنوع."
         },
         {
-          "questionAr": "أكمل الفراغ: (لازم تلبس حزام الأمان.)",
-          "questionEn": "Complete: You ____ wear a seatbelt.",
+          "questionAr": "أكمل الفراغ: (مو لازم تجيب شي.)",
+          "questionEn": "Complete: You ____ bring anything.",
           "options": [
-            "must",
-            "should to",
-            "have"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: must. should للنصيحة، must للإلزام القوي أو القانون، have to لإلزام خارجي، و don't have to = مو لازم (اختياري)، بينما mustn't = ممنوع."
-        },
-        {
-          "questionAr": "مو لازم = ",
-          "questionEn": "'Not necessary' =",
-          "options": [
+            "shouldn't to",
             "mustn't",
-            "don't have to",
-            "shouldn't"
+            "don't have to"
           ],
-          "correctIndex": 1,
-          "explanationAr": "don't have to = غير ضروري."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: don't have to. should للنصيحة، must للإلزام القوي أو القانون، have to لإلزام خارجي، و don't have to = مو لازم (اختياري)، بينما mustn't = ممنوع."
         },
         {
-          "questionAr": "أكمل: You ___ smoke in the hospital.",
-          "questionEn": "Complete: You ___ smoke in the hospital.",
+          "questionAr": "ما معنى \"rule\"؟",
+          "questionEn": "What does \"rule\" mean?",
           "options": [
-            "don't have to",
-            "mustn't",
-            "should"
+            "يجب",
+            "زي رسمي",
+            "قانون/قاعدة",
+            "مضطر/لازم"
           ],
-          "correctIndex": 1,
-          "explanationAr": "ممنوع ⇐ mustn't."
+          "correctIndex": 2,
+          "explanationAr": "\"rule\" /ruːl/ تعني: قانون/قاعدة. مثال: School rules are strict."
+        },
+        {
+          "questionAr": "ما معنى \"uniform\"؟",
+          "questionEn": "What does \"uniform\" mean?",
+          "options": [
+            "حزام الأمان",
+            "في الموعد",
+            "زي رسمي",
+            "مضطر/لازم"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"uniform\" /ˈjuːnɪfɔːrm/ تعني: زي رسمي. مثال: We have to wear a uniform."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "You should sleep early.",
-            "You should to sleep early."
+            "You must go.",
+            "You must to go."
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: You should sleep early. — لا to بعد should."
+          "explanationAr": "الصحيح: You must go. — لا to بعد must."
         }
       ]
     }
@@ -14448,58 +14497,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (إذا مطرت، بنجلس في البيت.)",
-          "questionEn": "Complete: If it ____, we'll stay at home.",
-          "options": [
-            "rains",
-            "rain",
-            "will rain"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: rains. If + مضارع بسيط، will + فعل أصلي. لا نضع will بعد if. ويمكن عكس الترتيب بدون فاصلة."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (إذا ذاكرت زين، بتنجح.)",
-          "questionEn": "Complete: If you study hard, ____.",
-          "options": [
-            "you'll pass",
-            "you passed",
-            "you pass"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: you'll pass. If + مضارع بسيط، will + فعل أصلي. لا نضع will بعد if. ويمكن عكس الترتيب بدون فاصلة."
-        },
-        {
-          "questionAr": "أكمل: If she ___ early, she'll catch the bus.",
-          "questionEn": "Complete: If she ___ early, she'll catch the bus.",
-          "options": [
-            "will leave",
-            "leaves",
-            "left"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "بعد if مضارع بسيط."
-        },
-        {
-          "questionAr": "unless = ",
-          "questionEn": "unless =",
+          "questionAr": "أكمل الفراغ: (بتصل عليك إذا تأخرت.)",
+          "questionEn": "Complete: I'll call you ____ I'm late.",
           "options": [
             "if",
-            "if not",
-            "when"
+            "when will",
+            "unless"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: if. If + مضارع بسيط، will + فعل أصلي. لا نضع will بعد if. ويمكن عكس الترتيب بدون فاصلة."
+        },
+        {
+          "questionAr": "أكمل الفراغ: (ما بنروح إلا إذا وافق أبوي.)",
+          "questionEn": "Complete: We won't go ____ Dad agrees.",
+          "options": [
+            "when",
+            "if",
+            "unless"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: unless. If + مضارع بسيط، will + فعل أصلي. لا نضع will بعد if. ويمكن عكس الترتيب بدون فاصلة."
+        },
+        {
+          "questionAr": "ما معنى \"miss\"؟",
+          "questionEn": "What does \"miss\" mean?",
+          "options": [
+            "يفوّت",
+            "إلا إذا",
+            "ينجح",
+            "جائزة"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"miss\" /mɪs/ تعني: يفوّت. مثال: We'll miss the flight."
+        },
+        {
+          "questionAr": "ما معنى \"hurry\"؟",
+          "questionEn": "What does \"hurry\" mean?",
+          "options": [
+            "جائزة",
+            "يستعجل",
+            "يرسب",
+            "ينجح"
           ],
           "correctIndex": 1,
-          "explanationAr": "unless = if not."
+          "explanationAr": "\"hurry\" /ˈhɜːri/ تعني: يستعجل. مثال: If we don't hurry, we'll be late."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "If it will rain, we'll stay home.",
-            "If it rains, we'll stay home."
+            "If I travel, I'll tell you.",
+            "If I will travel, I will tell you."
           ],
-          "correctIndex": 1,
-          "explanationAr": "الصحيح: If it rains, we'll stay home. — بعد if مضارع بسيط وليس will."
+          "correctIndex": 0,
+          "explanationAr": "الصحيح: If I travel, I'll tell you. — لا تترجم «إذا بسافر» حرفياً."
         }
       ]
     }
@@ -15058,58 +15109,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (كنت ساكن في حائل.)",
-          "questionEn": "Complete: I ____ live in Hail.",
+          "questionAr": "أكمل الفراغ: (ما كنت أحب الخضار.)",
+          "questionEn": "Complete: I didn't ____ to like vegetables.",
           "options": [
-            "was used to",
-            "use to",
-            "used to"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: used to. used to + فعل أصلي لعادة أو حالة في الماضي انتهت. النفي didn't use to، والسؤال Did you use to...؟ لا تخلطها مع be used to (متعود على)."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (كنا نلعب في الشارع بعد العصر.)",
-          "questionEn": "Complete: We used to ____ in the street after Asr.",
-          "options": [
-            "played",
-            "play",
-            "playing"
+            "using",
+            "use",
+            "used"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: play. used to + فعل أصلي لعادة أو حالة في الماضي انتهت. النفي didn't use to، والسؤال Did you use to...؟ لا تخلطها مع be used to (متعود على)."
+          "explanationAr": "الإجابة: use. used to + فعل أصلي لعادة أو حالة في الماضي انتهت. النفي didn't use to، والسؤال Did you use to...؟ لا تخلطها مع be used to (متعود على)."
         },
         {
-          "questionAr": "الجملة الصحيحة:",
-          "questionEn": "Correct sentence:",
+          "questionAr": "أكمل الفراغ: (كنت تشوف كابتن ماجد؟)",
+          "questionEn": "Complete: ____ you use to watch Captain Majid?",
           "options": [
-            "She used to wear glasses.",
-            "She use to wear glasses.",
-            "She used to wearing glasses."
+            "Did",
+            "Were",
+            "Do"
           ],
           "correctIndex": 0,
-          "explanationAr": "used to + فعل أصلي."
+          "explanationAr": "الإجابة: Did. used to + فعل أصلي لعادة أو حالة في الماضي انتهت. النفي didn't use to، والسؤال Did you use to...؟ لا تخلطها مع be used to (متعود على)."
         },
         {
-          "questionAr": "«متعود على الحر» =",
-          "questionEn": "'accustomed to the heat' =",
+          "questionAr": "ما معنى \"shy\"؟",
+          "questionEn": "What does \"shy\" mean?",
           "options": [
-            "I used to the heat.",
-            "I'm used to the heat.",
-            "I use to the heat."
+            "رسوم متحركة",
+            "خجول",
+            "سوق شعبي",
+            "هالأيام"
           ],
           "correctIndex": 1,
-          "explanationAr": "be used to + اسم/ing."
+          "explanationAr": "\"shy\" /ʃaɪ/ تعني: خجول. مثال: I used to be shy."
+        },
+        {
+          "questionAr": "ما معنى \"anymore\"؟",
+          "questionEn": "What does \"anymore\" mean?",
+          "options": [
+            "حي",
+            "الطفولة",
+            "يكبر",
+            "بعد الآن"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"anymore\" /ˌɛniˈmɔːr/ تعني: بعد الآن. مثال: I don't play anymore."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I use to play football.",
-            "I used to play football."
+            "I was used to play football when I was young.",
+            "I used to play football when I was young."
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: I used to play football. — في الإيجاب used بـ d."
+          "explanationAr": "الصحيح: I used to play football when I was young. — was used to معناها متعود، مو كنت أسوي."
         }
       ]
     }
@@ -15283,9 +15336,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       {
         "word": "ring",
         "ipa": "/rɪŋ/",
-        "ar": "يرن (rang)",
+        "ar": "يرن",
         "exampleEn": "The phone rang.",
-        "exampleAr": "رن الجوال."
+        "exampleAr": "رن الجوال.",
+        "note": "irregular: ring → rang → rung"
       },
       {
         "word": "accident",
@@ -15304,9 +15358,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       {
         "word": "fall",
         "ipa": "/fɔːl/",
-        "ar": "يطيح (fell)",
+        "ar": "يطيح",
         "exampleEn": "He fell off his bike.",
-        "exampleAr": "طاح من السيكل."
+        "exampleAr": "طاح من السيكل.",
+        "note": "irregular: fall → fell → fallen"
       },
       {
         "word": "break down",
@@ -15456,7 +15511,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "promptEn": "What does \"suddenly\" mean?",
           "promptAr": "ما معنى \"suddenly\"؟",
           "options": [
-            "يرن (rang)",
+            "يرن",
             "يحدث",
             "حادث",
             "فجأة"
@@ -15473,8 +15528,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "options": [
             "بينما/وأنا",
             "انقطاع كهرباء",
-            "يطيح (fell)",
-            "يرن (rang)"
+            "يطيح",
+            "يرن"
           ],
           "correctIndex": 0,
           "answer": "بينما/وأنا",
@@ -15486,14 +15541,14 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "promptEn": "What does \"ring\" mean?",
           "promptAr": "ما معنى \"ring\"؟",
           "options": [
-            "يطيح (fell)",
-            "يرن (rang)",
+            "يطيح",
+            "يرن",
             "انقطاع كهرباء",
             "بينما/وأنا"
           ],
           "correctIndex": 1,
-          "answer": "يرن (rang)",
-          "explanationAr": "\"ring\" /rɪŋ/ تعني: يرن (rang). مثال: The phone rang."
+          "answer": "يرن",
+          "explanationAr": "\"ring\" /rɪŋ/ تعني: يرن. مثال: The phone rang."
         },
         {
           "id": "sg_126_e4",
@@ -15668,58 +15723,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (كنت أسوق للدوام لما رن جوالي.)",
-          "questionEn": "Complete: I ____ to work when my phone rang.",
+          "questionAr": "أكمل الفراغ: (كانت نايمة لما اتصلت.)",
+          "questionEn": "Complete: She was sleeping ____ I called.",
           "options": [
-            "drove",
-            "was driving",
-            "am driving"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: was driving. was/were + ing للحدث المستمر في لحظة من الماضي، والماضي البسيط للحدث القصير الذي قطعه. while + مستمر، when + بسيط غالباً."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (وإحنا نتعشى طفت الكهرباء.)",
-          "questionEn": "Complete: While we ____ dinner, the lights went out.",
-          "options": [
-            "were having",
-            "was having",
-            "had"
+            "when",
+            "while",
+            "during"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: were having. was/were + ing للحدث المستمر في لحظة من الماضي، والماضي البسيط للحدث القصير الذي قطعه. while + مستمر، when + بسيط غالباً."
+          "explanationAr": "الإجابة: when. was/were + ing للحدث المستمر في لحظة من الماضي، والماضي البسيط للحدث القصير الذي قطعه. while + مستمر، when + بسيط غالباً."
         },
         {
-          "questionAr": "أكمل: I ___ TV when you called.",
-          "questionEn": "Complete: I ___ TV when you called.",
+          "questionAr": "أكمل الفراغ: (وش كنت تسوي الساعة تسع البارحة؟)",
+          "questionEn": "Complete: What ____ you doing at 9 last night?",
           "options": [
-            "watched",
-            "was watching",
-            "am watching"
+            "was",
+            "were",
+            "did"
           ],
           "correctIndex": 1,
-          "explanationAr": "حدث مستمر قطعه الاتصال."
+          "explanationAr": "الإجابة: were. was/were + ing للحدث المستمر في لحظة من الماضي، والماضي البسيط للحدث القصير الذي قطعه. while + مستمر، when + بسيط غالباً."
         },
         {
-          "questionAr": "أكمل: ___ she was cooking, the baby woke up.",
-          "questionEn": "Complete: ___ she was cooking, the baby woke up.",
+          "questionAr": "ما معنى \"power cut\"؟",
+          "questionEn": "What does \"power cut\" mean?",
           "options": [
-            "When",
-            "While",
-            "During"
+            "يحدث",
+            "انقطاع كهرباء",
+            "صوت/إزعاج",
+            "يطيح"
           ],
           "correctIndex": 1,
-          "explanationAr": "while + مستمر."
+          "explanationAr": "\"power cut\" /ˈpaʊər kʌt/ تعني: انقطاع كهرباء. مثال: There was a power cut."
+        },
+        {
+          "questionAr": "ما معنى \"fall\"؟",
+          "questionEn": "What does \"fall\" mean?",
+          "options": [
+            "لحسن الحظ",
+            "بينما/وأنا",
+            "يطيح",
+            "صوت/إزعاج"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"fall\" /fɔːl/ تعني: يطيح. مثال: He fell off his bike."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I was driving when my phone rang.",
-            "I drove when my phone was ringing."
+            "When I was drive, I saw...",
+            "When I was driving, I saw..."
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: I was driving when my phone rang. — الحدث الطويل مستمر، والقصير بسيط."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: When I was driving, I saw... — لا تنسَ ing."
         }
       ]
     }
@@ -16278,58 +16335,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (الطيار شخص يقود الطائرات.)",
-          "questionEn": "Complete: A pilot is a person ____ flies planes.",
+          "questionAr": "أكمل الفراغ: (هذا المطعم اللي تعشينا فيه.)",
+          "questionEn": "Complete: That's the restaurant ____ we had dinner.",
+          "options": [
+            "who",
+            "where",
+            "which"
+          ],
+          "correctIndex": 1,
+          "explanationAr": "الإجابة: where. who للأشخاص، which للأشياء، that للاثنين في الجمل المحددة، where للأماكن. لا نكرر الضمير بعد اسم الوصل."
+        },
+        {
+          "questionAr": "أكمل الفراغ: (الرجال اللي ساكن جنبنا دكتور.)",
+          "questionEn": "Complete: The man ____ lives next door is a doctor.",
           "options": [
             "where",
-            "which",
-            "who"
+            "what",
+            "that"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: who. who للأشخاص، which للأشياء، that للاثنين في الجمل المحددة، where للأماكن. لا نكرر الضمير بعد اسم الوصل."
+          "explanationAr": "الإجابة: that. who للأشخاص، which للأشياء، that للاثنين في الجمل المحددة، where للأماكن. لا نكرر الضمير بعد اسم الوصل."
         },
         {
-          "questionAr": "أكمل الفراغ: (هذا الجوال اللي اشتريته أمس.)",
-          "questionEn": "Complete: This is the phone ____ I bought yesterday.",
+          "questionAr": "ما معنى \"tool\"؟",
+          "questionEn": "What does \"tool\" mean?",
           "options": [
-            "which",
-            "who",
-            "where"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: which. who للأشخاص، which للأشياء، that للاثنين في الجمل المحددة، where للأماكن. لا نكرر الضمير بعد اسم الوصل."
-        },
-        {
-          "questionAr": "أكمل: That's the school ___ I studied.",
-          "questionEn": "Complete: That's the school ___ I studied.",
-          "options": [
-            "which",
-            "where",
-            "who"
+            "الجيران/جنبنا",
+            "أداة",
+            "لغة",
+            "طيار"
           ],
           "correctIndex": 1,
-          "explanationAr": "مكان ⇐ where."
+          "explanationAr": "\"tool\" /tuːl/ تعني: أداة. مثال: a tool which cuts wood"
         },
         {
-          "questionAr": "أكمل: I met a girl ___ plays the oud.",
-          "questionEn": "Complete: I met a girl ___ plays the oud.",
+          "questionAr": "ما معنى \"mechanic\"؟",
+          "questionEn": "What does \"mechanic\" mean?",
           "options": [
-            "which",
-            "who",
-            "where"
+            "مولود",
+            "تطبيق",
+            "ميكانيكي",
+            "يصلح"
           ],
-          "correctIndex": 1,
-          "explanationAr": "شخص ⇐ who."
+          "correctIndex": 2,
+          "explanationAr": "\"mechanic\" /məˈkænɪk/ تعني: ميكانيكي. مثال: a person who fixes cars"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "The man who he lives next door...",
-            "The man who lives next door..."
+            "The book that I read was great.",
+            "The book that I read it was great."
           ],
-          "correctIndex": 1,
-          "explanationAr": "الصحيح: The man who lives next door... — لا نكرر he بعد who."
+          "correctIndex": 0,
+          "explanationAr": "الصحيح: The book that I read was great. — بالعربي نقول «اللي قرأته»، بالإنجليزي ما نكرر it."
         }
       ]
     }
@@ -16489,9 +16548,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       {
         "word": "built",
         "ipa": "/bɪlt/",
-        "ar": "مبني (build)",
+        "ar": "بنى / مبني",
         "exampleEn": "It was built in 1950.",
-        "exampleAr": "بُني عام ١٩٥٠."
+        "exampleAr": "بُني عام ١٩٥٠.",
+        "note": "past of build: build → built → built"
       },
       {
         "word": "made",
@@ -16517,9 +16577,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       {
         "word": "ground",
         "ipa": "/ɡraʊnd/",
-        "ar": "مطحون (grind)",
+        "ar": "طحن / مطحون",
         "exampleEn": "Then they are ground.",
-        "exampleAr": "بعدين يُطحن."
+        "exampleAr": "بعدين يُطحن.",
+        "note": "past of grind: grind → ground → ground"
       },
       {
         "word": "added",
@@ -16679,11 +16740,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
             "مسروق",
             "مخترع",
             "هيل",
-            "مبني (build)"
+            "بنى / مبني"
           ],
           "correctIndex": 3,
-          "answer": "مبني (build)",
-          "explanationAr": "\"built\" /bɪlt/ تعني: مبني (build). مثال: It was built in 1950."
+          "answer": "بنى / مبني",
+          "explanationAr": "\"built\" /bɪlt/ تعني: بنى / مبني. مثال: It was built in 1950."
         },
         {
           "id": "sg_128_e2",
@@ -16692,7 +16753,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "promptAr": "ما معنى \"made\"؟",
           "options": [
             "يُقدَّم",
-            "مبني (build)",
+            "بنى / مبني",
             "مصنوع",
             "هيل"
           ],
@@ -16876,7 +16937,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "options": [
           "لحسن الحظ",
           "يحدث",
-          "يرن (rang)",
+          "يرن",
           "حادث"
         ],
         "correctIndex": 0,
@@ -16888,58 +16949,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (القهوة العربية تُسوّى بالهيل.)",
-          "questionEn": "Complete: Arabic coffee ____ with cardamom.",
+          "questionAr": "أكمل الفراغ: (التمور تُزرع في الأحساء والقصيم.)",
+          "questionEn": "Complete: Dates ____ in Al-Ahsa and Qassim.",
           "options": [
-            "is made",
-            "is make",
-            "makes"
+            "are grown",
+            "grow",
+            "is grown"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: is made. be + التصريف الثالث. المضارع: is/are made. الماضي: was/were built. نضيف by + الفاعل فقط إذا كان مهماً."
+          "explanationAr": "الإجابة: are grown. be + التصريف الثالث. المضارع: is/are made. الماضي: was/were built. نضيف by + الفاعل فقط إذا كان مهماً."
         },
         {
-          "questionAr": "أكمل الفراغ: (قصر المصمك بُني عام ١٨٦٥.)",
-          "questionEn": "Complete: The Masmak Fort ____ in 1865.",
+          "questionAr": "أكمل الفراغ: (الحرامي انمسك من الشرطة.)",
+          "questionEn": "Complete: The thief was caught ____ the police.",
           "options": [
-            "was built",
-            "was build",
-            "built"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: was built. be + التصريف الثالث. المضارع: is/are made. الماضي: was/were built. نضيف by + الفاعل فقط إذا كان مهماً."
-        },
-        {
-          "questionAr": "حوّل: They clean the room every day.",
-          "questionEn": "Passive of: They clean the room every day.",
-          "options": [
-            "The room cleaned every day.",
-            "The room is cleaned every day.",
-            "The room is clean every day."
+            "from",
+            "by",
+            "with"
           ],
           "correctIndex": 1,
-          "explanationAr": "is + cleaned."
+          "explanationAr": "الإجابة: by. be + التصريف الثالث. المضارع: is/are made. الماضي: was/were built. نضيف by + الفاعل فقط إذا كان مهماً."
         },
         {
-          "questionAr": "أكمل: The pyramids ___ thousands of years ago.",
-          "questionEn": "Complete: The pyramids ___ thousands of years ago.",
+          "questionAr": "ما معنى \"ground\"؟",
+          "questionEn": "What does \"ground\" mean?",
           "options": [
-            "were built",
-            "built",
-            "are built"
+            "طحن / مطحون",
+            "بنى / مبني",
+            "مزروع",
+            "مسروق"
           ],
           "correctIndex": 0,
-          "explanationAr": "ماضي مجهول جمع ⇐ were built."
+          "explanationAr": "\"ground\" /ɡraʊnd/ تعني: طحن / مطحون. مثال: Then they are ground."
+        },
+        {
+          "questionAr": "ما معنى \"added\"؟",
+          "questionEn": "What does \"added\" mean?",
+          "options": [
+            "مضاف",
+            "طحن / مطحون",
+            "مسروق",
+            "محمص"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"added\" /ˈædɪd/ تعني: مضاف. مثال: Cardamom is added."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "The fort was built in 1865.",
-            "The fort was build in 1865."
+            "This mosque was built in 1950.",
+            "This mosque built in 1950."
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: The fort was built in 1865. — المجهول يحتاج التصريف الثالث built."
+          "explanationAr": "الصحيح: This mosque was built in 1950. — بدون was تصير الجملة كأن المسجد هو اللي بنى."
         }
       ]
     }
@@ -17498,58 +17561,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (قال إنه تعبان.)",
-          "questionEn": "Complete: He said that he ____ tired.",
+          "questionAr": "أكمل الفراغ: (مديري سألني إذا أقدر أداوم السبت.)",
+          "questionEn": "Complete: My boss asked ____ work on Saturday.",
           "options": [
-            "were",
-            "was",
-            "is"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: was. بعد said/told يرجع الزمن خطوة للوراء غالباً: am→was، will→would، can→could، الماضي→past perfect. told يحتاج مفعولاً (told me). الأسئلة: asked if/where + ترتيب جملة خبرية."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (قالت لي إنها بتتصل بعدين.)",
-          "questionEn": "Complete: She ____ she would call later.",
-          "options": [
-            "told me",
-            "told to me",
-            "said me"
+            "if I could",
+            "could I",
+            "if can I"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: told me. بعد said/told يرجع الزمن خطوة للوراء غالباً: am→was، will→would، can→could، الماضي→past perfect. told يحتاج مفعولاً (told me). الأسئلة: asked if/where + ترتيب جملة خبرية."
+          "explanationAr": "الإجابة: if I could. بعد said/told يرجع الزمن خطوة للوراء غالباً: am→was، will→would، can→could، الماضي→past perfect. told يحتاج مفعولاً (told me). الأسئلة: asked if/where + ترتيب جملة خبرية."
         },
         {
-          "questionAr": "انقل: \"I'm hungry,\" she said.",
-          "questionEn": "Report: 'I'm hungry,' she said.",
+          "questionAr": "أكمل الفراغ: (سألوني وين أسكن.)",
+          "questionEn": "Complete: They asked ____.",
           "options": [
-            "She said she is hungry.",
-            "She said she was hungry.",
-            "She said I was hungry."
+            "where do I live",
+            "where did I live",
+            "where I lived"
           ],
-          "correctIndex": 1,
-          "explanationAr": "am ⇐ was، و I ⇐ she."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: where I lived. بعد said/told يرجع الزمن خطوة للوراء غالباً: am→was، will→would، can→could، الماضي→past perfect. told يحتاج مفعولاً (told me). الأسئلة: asked if/where + ترتيب جملة خبرية."
         },
         {
-          "questionAr": "انقل: \"Where do you live?\" he asked.",
-          "questionEn": "Report: 'Where do you live?'",
+          "questionAr": "ما معنى \"promised\"؟",
+          "questionEn": "What does \"promised\" mean?",
           "options": [
-            "He asked where did I live.",
-            "He asked where I lived.",
-            "He asked where do I live."
+            "وعد",
+            "مدير",
+            "شرح",
+            "إذا/ما إذا"
           ],
-          "correctIndex": 1,
-          "explanationAr": "ترتيب خبري + إرجاع الزمن."
+          "correctIndex": 0,
+          "explanationAr": "\"promised\" /ˈprɑːmɪst/ تعني: وعد. مثال: He promised to help."
+        },
+        {
+          "questionAr": "ما معنى \"warned\"؟",
+          "questionEn": "What does \"warned\" mean?",
+          "options": [
+            "قال لـ/أخبر",
+            "رسالة",
+            "مدير",
+            "حذّر"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"warned\" /wɔːrnd/ تعني: حذّر. مثال: They warned us about the storm."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "She told me that she was busy.",
-            "She said me that she was busy."
+            "He told that he is coming.",
+            "He said that he was coming."
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: She told me that she was busy. — said لا تأخذ مفعولاً مباشرة؛ told me."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: He said that he was coming. — told يحتاج شخصاً بعده؛ واستخدم said بدون مفعول."
         }
       ]
     }
@@ -18097,7 +18162,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "مسروق",
           "هيل",
           "مصنوع",
-          "مطحون (grind)"
+          "طحن / مطحون"
         ],
         "correctIndex": 1,
         "explanationAr": "\"cardamom\" /ˈkɑːrdəməm/ تعني: هيل. مثال: Coffee with cardamom",
@@ -18108,58 +18173,60 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (لو عندي مليون ريال، كان بنيت مدرسة.)",
-          "questionEn": "Complete: If I ____ a million riyals, I would build a school.",
+          "questionAr": "أكمل الفراغ: (أتمنى لو أتكلم إنجليزي بطلاقة.)",
+          "questionEn": "Complete: I wish I ____ English fluently.",
           "options": [
-            "have",
-            "had",
-            "will have"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: had. الشرط الثاني: If + ماضي بسيط، would + فعل أصلي لموقف غير واقعي الآن. نقول If I were (ليس was) في الأسلوب الصحيح. wish + ماضي = أتمنى لو الوضع الحالي مختلف."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (لو كنت مكانك كان اعتذرت.)",
-          "questionEn": "Complete: If I ____ you, I'd apologize.",
-          "options": [
-            "will be",
-            "am",
-            "were"
+            "will speak",
+            "speak",
+            "spoke"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: were. الشرط الثاني: If + ماضي بسيط، would + فعل أصلي لموقف غير واقعي الآن. نقول If I were (ليس was) في الأسلوب الصحيح. wish + ماضي = أتمنى لو الوضع الحالي مختلف."
+          "explanationAr": "الإجابة: spoke. الشرط الثاني: If + ماضي بسيط، would + فعل أصلي لموقف غير واقعي الآن. نقول If I were (ليس was) في الأسلوب الصحيح. wish + ماضي = أتمنى لو الوضع الحالي مختلف."
         },
         {
-          "questionAr": "أكمل: If I ___ rich, I'd travel the world.",
-          "questionEn": "Complete: If I ___ rich, I'd travel the world.",
+          "questionAr": "أكمل الفراغ: (وش بتسوي لو ضاع جوازك؟)",
+          "questionEn": "Complete: What ____ you do if you lost your passport?",
           "options": [
-            "am",
-            "were",
-            "will be"
+            "did",
+            "will",
+            "would"
           ],
-          "correctIndex": 1,
-          "explanationAr": "شرط ثاني ⇐ were."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: would. الشرط الثاني: If + ماضي بسيط، would + فعل أصلي لموقف غير واقعي الآن. نقول If I were (ليس was) في الأسلوب الصحيح. wish + ماضي = أتمنى لو الوضع الحالي مختلف."
         },
         {
-          "questionAr": "أكمل: I wish I ___ swim.",
-          "questionEn": "Complete: I wish I ___ swim.",
+          "questionAr": "ما معنى \"passport\"؟",
+          "questionEn": "What does \"passport\" mean?",
           "options": [
-            "can",
-            "could",
-            "will"
+            "كان سـ (افتراض)",
+            "يندم",
+            "جواز سفر",
+            "جمعية خيرية/صدقة"
           ],
-          "correctIndex": 1,
-          "explanationAr": "wish + could."
+          "correctIndex": 2,
+          "explanationAr": "\"passport\" /ˈpæspɔːrt/ تعني: جواز سفر. مثال: I lost my passport."
+        },
+        {
+          "questionAr": "ما معنى \"million\"؟",
+          "questionEn": "What does \"million\" mean?",
+          "options": [
+            "مليون",
+            "بطلاقة",
+            "يندم",
+            "كان سـ (افتراض)"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"million\" /ˈmɪljən/ تعني: مليون. مثال: a million riyals"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "If I would have money, I would travel.",
-            "If I had money, I would travel."
+            "If I had time, I would come.",
+            "If I have time, I would come."
           ],
-          "correctIndex": 1,
-          "explanationAr": "الصحيح: If I had money, I would travel. — لا would بعد if."
+          "correctIndex": 0,
+          "explanationAr": "الصحيح: If I had time, I would come. — لا تخلط الشرط الأول بالثاني."
         }
       ]
     }

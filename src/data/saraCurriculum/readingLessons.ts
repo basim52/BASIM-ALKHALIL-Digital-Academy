@@ -513,58 +513,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (A لـ apple (تفاحة).)",
-          "questionEn": "Complete: A is for ____.",
+          "questionAr": "أكمل الفراغ: (C لـ cat (قطة).)",
+          "questionEn": "Complete: C is for ____.",
           "options": [
-            "egg",
-            "ice",
-            "apple"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: apple. لكل حرف اسم (bee) وصوت (/b/). في القراءة نستخدم الصوت. الحروف المتحركة القصيرة: a /æ/، e /ɛ/، i /ɪ/."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (B لـ ball (كورة).)",
-          "questionEn": "Complete: B is for ____.",
-          "options": [
-            "doll",
-            "ball",
-            "fall"
+            "hat",
+            "cat",
+            "sat"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: ball. لكل حرف اسم (bee) وصوت (/b/). في القراءة نستخدم الصوت. الحروف المتحركة القصيرة: a /æ/، e /ɛ/، i /ɪ/."
+          "explanationAr": "الإجابة: cat. لكل حرف اسم (bee) وصوت (/b/). في القراءة نستخدم الصوت. الحروف المتحركة القصيرة: a /æ/، e /ɛ/، i /ɪ/."
         },
         {
-          "questionAr": "أي كلمة تبدأ بصوت /k/؟",
-          "questionEn": "Which word starts with /k/?",
+          "questionAr": "أكمل الفراغ: (D لـ dog (كلب).)",
+          "questionEn": "Complete: D is for ____.",
           "options": [
-            "cat",
-            "milk",
-            "goat"
+            "fog",
+            "log",
+            "dog"
           ],
-          "correctIndex": 0,
-          "explanationAr": "c في cat = /k/."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: dog. لكل حرف اسم (bee) وصوت (/b/). في القراءة نستخدم الصوت. الحروف المتحركة القصيرة: a /æ/، e /ɛ/، i /ɪ/."
         },
         {
-          "questionAr": "صوت الحرف j:",
-          "questionEn": "Sound of j:",
+          "questionAr": "ما معنى \"egg\"؟",
+          "questionEn": "What does \"egg\" mean?",
           "options": [
-            "/dʒ/ ج",
-            "/j/ ي",
-            "/ɡ/ ق"
+            "بيضة",
+            "كلب",
+            "عنز",
+            "مربى"
           ],
           "correctIndex": 0,
-          "explanationAr": "j = ج."
+          "explanationAr": "\"egg\" /ɛɡ/ تعني: بيضة. مثال: an egg"
+        },
+        {
+          "questionAr": "ما معنى \"fish\"؟",
+          "questionEn": "What does \"fish\" mean?",
+          "options": [
+            "سمكة",
+            "كورة",
+            "قطة",
+            "تفاحة"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"fish\" /fɪʃ/ تعني: سمكة. مثال: a fish"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "ball read as /bi:/-all",
-            "ball /bɔːl/"
+            "Blend the sounds: /k/ /æ/ /t/ → cat",
+            "Reading 'cat' as «سي-إيه-تي»"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الصحيح: ball /bɔːl/ — نقرأ بصوت الحرف /b/ وليس اسمه «بي»."
+          "correctIndex": 0,
+          "explanationAr": "الصحيح: Blend the sounds: /k/ /æ/ /t/ → cat — التهجئة بأسماء الحروف ما تساعد على القراءة؛ ادمج الأصوات."
         }
       ]
     }
@@ -1089,58 +1091,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (الشمس حارة.)",
-          "questionEn": "Complete: The ____ is hot.",
+          "questionAr": "أكمل الفراغ: (الملكة عندها صدرية حمراء.)",
+          "questionEn": "Complete: The ____ has a red vest.",
           "options": [
-            "sin",
-            "sun",
-            "son"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: sun. o القصيرة /ɑ/ (hot)، u القصيرة /ʌ/ (sun). q تأتي مع u دائماً /kw/. x في آخر الكلمة /ks/. y في البداية «ي»."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (قلم في صندوق.)",
-          "questionEn": "Complete: A pen in a ____.",
-          "options": [
-            "bag",
-            "box",
-            "bus"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: box. o القصيرة /ɑ/ (hot)، u القصيرة /ʌ/ (sun). q تأتي مع u دائماً /kw/. x في آخر الكلمة /ks/. y في البداية «ي»."
-        },
-        {
-          "questionAr": "أي كلمة فيها /ʌ/؟",
-          "questionEn": "Which word has /ʌ/?",
-          "options": [
-            "sun",
-            "pen",
-            "box"
+            "queen",
+            "quilt",
+            "green"
           ],
           "correctIndex": 0,
-          "explanationAr": "sun /sʌn/."
+          "explanationAr": "الإجابة: queen. o القصيرة /ɑ/ (hot)، u القصيرة /ʌ/ (sun). q تأتي مع u دائماً /kw/. x في آخر الكلمة /ks/. y في البداية «ي»."
         },
         {
-          "questionAr": "qu تنطق:",
-          "questionEn": "'qu' sounds:",
+          "questionAr": "أكمل الفراغ: (ست حمير وحشية صفراء.)",
+          "questionEn": "Complete: ____ yellow zebras.",
           "options": [
-            "/k/",
-            "/kw/",
-            "/q/"
+            "Six",
+            "Sick",
+            "Sit"
           ],
-          "correctIndex": 1,
-          "explanationAr": "queen = /kwiːn/."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: Six. o القصيرة /ɑ/ (hot)، u القصيرة /ʌ/ (sun). q تأتي مع u دائماً /kw/. x في آخر الكلمة /ks/. y في البداية «ي»."
+        },
+        {
+          "questionAr": "ما معنى \"sun\"؟",
+          "questionEn": "What does \"sun\" mean?",
+          "options": [
+            "ملكة",
+            "عش",
+            "خيمة",
+            "شمس"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"sun\" /sʌn/ تعني: شمس. مثال: the hot sun"
+        },
+        {
+          "questionAr": "ما معنى \"tent\"؟",
+          "questionEn": "What does \"tent\" mean?",
+          "options": [
+            "ملكة",
+            "عش",
+            "فان",
+            "خيمة"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"tent\" /tɛnt/ تعني: خيمة. مثال: a tent in the desert"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "van /væn/",
-            "van read as «فان» /fæn/"
+            "Inserting a vowel: «إسيكس» for six",
+            "six /sɪks/"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: van /væn/ — v تنطق بالشفة السفلى مع اهتزاز، وليست f."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: six /sɪks/ — لا تضيف «إ» قبل s أو بعد x."
         }
       ]
     }
@@ -1678,58 +1682,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (القطة جلست على حصيرة.)",
-          "questionEn": "Complete: The cat ____ on a mat.",
+          "questionAr": "أكمل الفراغ: (اجلس على السجادة الكبيرة.)",
+          "questionEn": "Complete: Sit on the ____ rug.",
           "options": [
-            "set",
-            "sit",
-            "sat"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: sat. اقرأ الصوت الأول، ثم الحرف المتحرك القصير، ثم الأخير، وادمجهم بسرعة: /b/-/ɛ/-/d/ → bed. غيّر حرفاً واحداً لتصنع كلمة جديدة: bed → bad → bag."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (بن في السرير.)",
-          "questionEn": "Complete: Ben is in ____.",
-          "options": [
-            "bid",
-            "bed",
-            "bad"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: bed. اقرأ الصوت الأول، ثم الحرف المتحرك القصير، ثم الأخير، وادمجهم بسرعة: /b/-/ɛ/-/d/ → bed. غيّر حرفاً واحداً لتصنع كلمة جديدة: bed → bad → bag."
-        },
-        {
-          "questionAr": "غيّر حرفاً: hat → ___ (قبعة→حار)",
-          "questionEn": "Change one letter: hat → ___ (hot)",
-          "options": [
-            "hot",
-            "hit",
-            "hut"
+            "big",
+            "bag",
+            "bug"
           ],
           "correctIndex": 0,
-          "explanationAr": "a ⇐ o: hot."
+          "explanationAr": "الإجابة: big. اقرأ الصوت الأول، ثم الحرف المتحرك القصير، ثم الأخير، وادمجهم بسرعة: /b/-/ɛ/-/d/ → bed. غيّر حرفاً واحداً لتصنع كلمة جديدة: bed → bad → bag."
         },
         {
-          "questionAr": "أي كلمة صوتها /ɪ/؟",
-          "questionEn": "Which has /ɪ/?",
+          "questionAr": "أكمل الفراغ: (القدر حار.)",
+          "questionEn": "Complete: The pot is ____.",
           "options": [
-            "sat",
-            "sit",
-            "set"
+            "hat",
+            "hut",
+            "hot"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: hot. اقرأ الصوت الأول، ثم الحرف المتحرك القصير، ثم الأخير، وادمجهم بسرعة: /b/-/ɛ/-/d/ → bed. غيّر حرفاً واحداً لتصنع كلمة جديدة: bed → bad → bag."
+        },
+        {
+          "questionAr": "ما معنى \"bus\"؟",
+          "questionEn": "What does \"bus\" mean?",
+          "options": [
+            "شنطة",
+            "باص",
+            "قدر",
+            "يجلس"
           ],
           "correctIndex": 1,
-          "explanationAr": "sit."
+          "explanationAr": "\"bus\" /bʌs/ تعني: باص. مثال: the school bus"
+        },
+        {
+          "questionAr": "ما معنى \"cup\"؟",
+          "questionEn": "What does \"cup\" mean?",
+          "options": [
+            "سرير",
+            "باص",
+            "حار",
+            "كوب"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"cup\" /kʌp/ تعني: كوب. مثال: a cup of tea"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "bed read as bad",
-            "bed /bɛd/"
+            "Adding a vowel at the end: «باصّي»",
+            "bus /bʌs/"
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: bed /bɛd/ — e القصيرة «إ» مفتوحة شوي."
+          "explanationAr": "الصحيح: bus /bʌs/ — لا تضيف «ي» أو «ـه» بعد الحرف الأخير."
         }
       ]
     }
@@ -2277,58 +2283,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (السفينة في البحر.)",
-          "questionEn": "Complete: The ____ is on the sea.",
+          "questionAr": "أكمل الفراغ: (شكراً على الهدية.)",
+          "questionEn": "Complete: ____ you for the gift.",
           "options": [
-            "chip",
-            "sip",
-            "ship"
+            "Thank",
+            "Sank",
+            "Tank"
           ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: ship. sh = /ʃ/ (ship)، ch = /tʃ/ (chip)، th = /θ/ (thin) أو /ð/ (this)، ck = /k/ في آخر الكلمة بعد متحرك قصير (duck)."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: Thank. sh = /ʃ/ (ship)، ch = /tʃ/ (chip)، th = /θ/ (thin) أو /ð/ (this)، ck = /k/ في آخر الكلمة بعد متحرك قصير (duck)."
         },
         {
-          "questionAr": "أكمل الفراغ: (أبي بطاطس ودجاج.)",
-          "questionEn": "Complete: I want ____ and chicken.",
+          "questionAr": "أكمل الفراغ: (هالبطة سوداء.)",
+          "questionEn": "Complete: This ____ is black.",
           "options": [
-            "ships",
-            "sips",
-            "chips"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: chips. sh = /ʃ/ (ship)، ch = /tʃ/ (chip)، th = /θ/ (thin) أو /ð/ (this)، ck = /k/ في آخر الكلمة بعد متحرك قصير (duck)."
-        },
-        {
-          "questionAr": "ch في chicken تنطق:",
-          "questionEn": "'ch' in chicken:",
-          "options": [
-            "ش",
-            "تش/چ",
-            "ك"
+            "duk",
+            "duck",
+            "duc"
           ],
           "correctIndex": 1,
-          "explanationAr": "/tʃ/."
+          "explanationAr": "الإجابة: duck. sh = /ʃ/ (ship)، ch = /tʃ/ (chip)، th = /θ/ (thin) أو /ð/ (this)، ck = /k/ في آخر الكلمة بعد متحرك قصير (duck)."
         },
         {
-          "questionAr": "أي كلمة فيها /ð/؟",
-          "questionEn": "Which has /ð/?",
+          "questionAr": "ما معنى \"thank\"؟",
+          "questionEn": "What does \"thank\" mean?",
           "options": [
-            "think",
-            "this",
-            "thank"
+            "هذا",
+            "يشكر",
+            "محل",
+            "غداء"
           ],
           "correctIndex": 1,
-          "explanationAr": "this = ذ."
+          "explanationAr": "\"thank\" /θæŋk/ تعني: يشكر. مثال: Thank you!"
+        },
+        {
+          "questionAr": "ما معنى \"this\"؟",
+          "questionEn": "What does \"this\" mean?",
+          "options": [
+            "سمك",
+            "دجاج",
+            "هذا",
+            "غداء"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"this\" /ðɪs/ تعني: هذا. مثال: this book"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "chip read as «شيب»",
-            "chip /tʃɪp/"
+            "Ship and chip sound the same",
+            "ship /ʃɪp/ vs chip /tʃɪp/"
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: chip /tʃɪp/ — ch فيها «ت» قبل «ش»."
+          "explanationAr": "الصحيح: ship /ʃɪp/ vs chip /tʃɪp/ — في بعض لهجات الخليج «تش» موجودة (چ) — استخدمها في ch."
         }
       ]
     }
@@ -2877,58 +2885,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (أقدر أطيّر طيارة ورق.)",
-          "questionEn": "Complete: I can fly a ____.",
+          "questionAr": "أكمل الفراغ: (سوّ معي كيكة.)",
+          "questionEn": "Complete: Make a ____ with me.",
           "options": [
-            "kitten",
-            "kit",
-            "kite"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: kite. نمط a_e, i_e, o_e, u_e: الحرف المتحرك ينطق باسمه (/eɪ/, /aɪ/, /oʊ/, /juː/) و e الأخيرة صامتة."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (نتمنى نفوز.)",
-          "questionEn": "Complete: We ____ to win.",
-          "options": [
-            "hoop",
-            "hop",
-            "hope"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: hope. نمط a_e, i_e, o_e, u_e: الحرف المتحرك ينطق باسمه (/eɪ/, /aɪ/, /oʊ/, /juː/) و e الأخيرة صامتة."
-        },
-        {
-          "questionAr": "أي كلمة فيها حرف طويل؟",
-          "questionEn": "Which word has a long vowel?",
-          "options": [
-            "not",
-            "note",
-            "net"
+            "cack",
+            "cake",
+            "cak"
           ],
           "correctIndex": 1,
-          "explanationAr": "note: o_e."
+          "explanationAr": "الإجابة: cake. نمط a_e, i_e, o_e, u_e: الحرف المتحرك ينطق باسمه (/eɪ/, /aɪ/, /oʊ/, /juː/) و e الأخيرة صامتة."
         },
         {
-          "questionAr": "e في آخر home:",
-          "questionEn": "The e in 'home' is:",
+          "questionAr": "أكمل الفراغ: (سوق سيكلك للبيت.)",
+          "questionEn": "Complete: Ride your ____ home.",
           "options": [
-            "/i/",
-            "silent",
-            "/ə/"
+            "bike",
+            "back",
+            "bik"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: bike. نمط a_e, i_e, o_e, u_e: الحرف المتحرك ينطق باسمه (/eɪ/, /aɪ/, /oʊ/, /juː/) و e الأخيرة صامتة."
+        },
+        {
+          "questionAr": "ما معنى \"hope\"؟",
+          "questionEn": "What does \"hope\" mean?",
+          "options": [
+            "لعبة/مباراة",
+            "بيت",
+            "يتمنى/أمل",
+            "طيارة ورق"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"hope\" /hoʊp/ تعني: يتمنى/أمل. مثال: I hope so."
+        },
+        {
+          "questionAr": "ما معنى \"cube\"؟",
+          "questionEn": "What does \"cube\" mean?",
+          "options": [
+            "دراجة",
+            "مكعب",
+            "طيارة ورق",
+            "تسعة"
           ],
           "correctIndex": 1,
-          "explanationAr": "صامتة."
+          "explanationAr": "\"cube\" /kjuːb/ تعني: مكعب. مثال: an ice cube"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "cake /keɪk/",
-            "cake read as «كاكي»"
+            "Pronouncing the final e",
+            "cake /keɪk/ (silent e)"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: cake /keɪk/ — e الأخيرة صامتة."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: cake /keɪk/ (silent e) — العربي يقرأ كل حرف مكتوب؛ في الإنجليزي كثير حروف صامتة."
         }
       ]
     }
@@ -3477,58 +3487,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (يوم ماطر.)",
-          "questionEn": "Complete: It's a ____ day.",
+          "questionAr": "أكمل الفراغ: (ثلاث أشجار خضراء.)",
+          "questionEn": "Complete: Three green ____.",
           "options": [
-            "reeny",
-            "ranny",
-            "rainy"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: rainy. ai و ay = /eɪ/ (rain, day)، ee و ea = /iː/ (tree, sea)، oa و ow = /oʊ/ (boat, snow)."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (نبحر بقارب في البحر.)",
-          "questionEn": "Complete: We sail a ____ on the sea.",
-          "options": [
-            "boot",
-            "boat",
-            "bot"
+            "trays",
+            "trees",
+            "tries"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: boat. ai و ay = /eɪ/ (rain, day)، ee و ea = /iː/ (tree, sea)، oa و ow = /oʊ/ (boat, snow)."
+          "explanationAr": "الإجابة: trees. ai و ay = /eɪ/ (rain, day)، ee و ea = /iː/ (tree, sea)، oa و ow = /oʊ/ (boat, snow)."
         },
         {
-          "questionAr": "ai في rain:",
-          "questionEn": "'ai' in rain:",
+          "questionAr": "أكمل الفراغ: (أقرأ وآكل على الشاطئ.)",
+          "questionEn": "Complete: I read and eat at the ____.",
           "options": [
-            "/aɪ/",
-            "/eɪ/",
-            "/æ/"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "/eɪ/."
-        },
-        {
-          "questionAr": "أي كلمة فيها /oʊ/؟",
-          "questionEn": "Which has /oʊ/?",
-          "options": [
-            "boat",
-            "boot",
-            "but"
+            "beach",
+            "batch",
+            "bench"
           ],
           "correctIndex": 0,
-          "explanationAr": "oa = /oʊ/."
+          "explanationAr": "الإجابة: beach. ai و ay = /eɪ/ (rain, day)، ee و ea = /iː/ (tree, sea)، oa و ow = /oʊ/ (boat, snow)."
+        },
+        {
+          "questionAr": "ما معنى \"sea\"؟",
+          "questionEn": "What does \"sea\" mean?",
+          "options": [
+            "أخضر",
+            "بحر",
+            "قارب",
+            "شجرة"
+          ],
+          "correctIndex": 1,
+          "explanationAr": "\"sea\" /siː/ تعني: بحر. مثال: the Red Sea"
+        },
+        {
+          "questionAr": "ما معنى \"beach\"؟",
+          "questionEn": "What does \"beach\" mean?",
+          "options": [
+            "شاطئ",
+            "يوم",
+            "قطار",
+            "بحر"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"beach\" /biːtʃ/ تعني: شاطئ. مثال: on the beach"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "boat read as «بوت» short",
-            "boat /boʊt/"
+            "Reading every vowel separately: «بو-آت»",
+            "boat = one sound /oʊ/"
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: boat /boʊt/ — oa = «أو» منزلقة."
+          "explanationAr": "الصحيح: boat = one sound /oʊ/ — الحرفان صوت واحد."
         }
       ]
     }
@@ -4088,58 +4100,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (اصفّ السيارة لو سمحت.)",
-          "questionEn": "Complete: ____ the car, please.",
+          "questionAr": "أكمل الفراغ: (حط البازلاء في الصحن.)",
+          "questionEn": "Complete: Put the ____ on the plate.",
           "options": [
-            "Park",
-            "Bark",
-            "Pork"
+            "bees",
+            "peas",
+            "pies"
+          ],
+          "correctIndex": 1,
+          "explanationAr": "الإجابة: peas. p و b نفس مكان الشفتين، لكن p مهموسة مع نفخة هواء (aspiration) بدون اهتزاز الحنجرة، و b مجهورة."
+        },
+        {
+          "questionAr": "أكمل الفراغ: (ادفع عند المضخة.)",
+          "questionEn": "Complete: ____ at the pump.",
+          "options": [
+            "Pay",
+            "Bay",
+            "Buy"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: Park. p و b نفس مكان الشفتين، لكن p مهموسة مع نفخة هواء (aspiration) بدون اهتزاز الحنجرة، و b مجهورة."
+          "explanationAr": "الإجابة: Pay. p و b نفس مكان الشفتين، لكن p مهموسة مع نفخة هواء (aspiration) بدون اهتزاز الحنجرة، و b مجهورة."
         },
         {
-          "questionAr": "أكمل الفراغ: (أحتاج قلم مو سلة.)",
-          "questionEn": "Complete: I need a ____, not a bin.",
+          "questionAr": "ما معنى \"plate\"؟",
+          "questionEn": "What does \"plate\" mean?",
           "options": [
-            "bin",
-            "pen",
-            "ben"
+            "قلم",
+            "حيوان أليف",
+            "مسبح",
+            "صحن"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: pen. p و b نفس مكان الشفتين، لكن p مهموسة مع نفخة هواء (aspiration) بدون اهتزاز الحنجرة، و b مجهورة."
+          "correctIndex": 3,
+          "explanationAr": "\"plate\" /pleɪt/ تعني: صحن. مثال: a big plate"
         },
         {
-          "questionAr": "«يصلي» =",
-          "questionEn": "'يصلي' =",
+          "questionAr": "ما معنى \"peas\"؟",
+          "questionEn": "What does \"peas\" mean?",
           "options": [
-            "bray",
-            "pray",
-            "play"
+            "يصف/حديقة",
+            "قلم",
+            "يدفع",
+            "بازلاء"
           ],
-          "correctIndex": 1,
-          "explanationAr": "pray /preɪ/."
-        },
-        {
-          "questionAr": "cap و cab:",
-          "questionEn": "cap vs cab:",
-          "options": [
-            "same",
-            "different",
-            "both mean taxi"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "cap = طاقية، cab = تاكسي."
+          "correctIndex": 3,
+          "explanationAr": "\"peas\" /piːz/ تعني: بازلاء. مثال: rice with peas"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I want to park here.",
-            "I want to bark here."
+            "Bebsi / Bizza",
+            "Pepsi / pizza"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: I want to park here. — bark = ينبح! خطأ p يغير المعنى."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: Pepsi / pizza — لاحظ الأسماء اللي تستخدمها يومياً."
         }
       ]
     }
@@ -4700,58 +4714,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (اجلس في مقعدك لو سمحت.)",
-          "questionEn": "Complete: Please sit in your ____.",
+          "questionAr": "أكمل الفراغ: (عبّ الكوب. حاس بعطش.)",
+          "questionEn": "Complete: Fill the cup. I ____ thirsty.",
           "options": [
-            "set",
-            "sit",
-            "seat"
+            "fall",
+            "fill",
+            "feel"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: seat. /ɪ/ قصير ومسترخي (sit)، و /iː/ طويل والشفاه مبتسمة (seat). الكتابة غالباً: i = قصير، ee/ea = طويل."
+          "explanationAr": "الإجابة: feel. /ɪ/ قصير ومسترخي (sit)، و /iː/ طويل والشفاه مبتسمة (seat). الكتابة غالباً: i = قصير، ee/ea = طويل."
         },
         {
-          "questionAr": "أكمل الفراغ: (أسكن الرياض بس بمشي بكرة.)",
-          "questionEn": "Complete: I live in Riyadh, but I ____ tomorrow.",
+          "questionAr": "أكمل الفراغ: (الخروف على السفينة.)",
+          "questionEn": "Complete: The ____ is on the ship.",
           "options": [
-            "lift",
-            "live",
-            "leave"
+            "sheep",
+            "ship",
+            "shop"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: sheep. /ɪ/ قصير ومسترخي (sit)، و /iː/ طويل والشفاه مبتسمة (seat). الكتابة غالباً: i = قصير، ee/ea = طويل."
+        },
+        {
+          "questionAr": "ما معنى \"ship\"؟",
+          "questionEn": "What does \"ship\" mean?",
+          "options": [
+            "يجلس",
+            "خروف",
+            "رخيص",
+            "سفينة"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"ship\" /ʃɪp/ تعني: سفينة. مثال: a cargo ship"
+        },
+        {
+          "questionAr": "ما معنى \"sheep\"؟",
+          "questionEn": "What does \"sheep\" mean?",
+          "options": [
+            "سفينة",
+            "يحس",
+            "خروف",
+            "مقعد"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: leave. /ɪ/ قصير ومسترخي (sit)، و /iː/ طويل والشفاه مبتسمة (seat). الكتابة غالباً: i = قصير، ee/ea = طويل."
-        },
-        {
-          "questionAr": "«يسكن» =",
-          "questionEn": "'يسكن' =",
-          "options": [
-            "leave",
-            "live",
-            "life"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "live /lɪv/."
-        },
-        {
-          "questionAr": "أي كلمة صوتها طويل؟",
-          "questionEn": "Which has a long sound?",
-          "options": [
-            "fit",
-            "feet",
-            "fist"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "feet /fiːt/."
+          "explanationAr": "\"sheep\" /ʃiːp/ تعني: خروف. مثال: sheep for Eid"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I leave in Jeddah.",
-            "I live in Jeddah."
+            "Everything long: «سييت داون»",
+            "sit down /sɪt daʊn/"
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: I live in Jeddah. — live قصيرة = يسكن؛ leave طويلة = يغادر."
+          "explanationAr": "الصحيح: sit down /sɪt daʊn/ — العربي يميل لتطويل الياء."
         }
       ]
     }
@@ -5310,58 +5326,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (قطتين وثلاث كلاب.)",
-          "questionEn": "Complete: Two cats and three ____.",
+          "questionAr": "أكمل الفراغ: (يشتغل ويلعب كثير.)",
+          "questionEn": "Complete: He works and ____ a lot.",
           "options": [
-            "doges",
-            "dog",
-            "dogs"
+            "plaies",
+            "play",
+            "plays"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: dogs. بعد صوت مهموس (p, t, k, f) = /s/. بعد صوت مجهور أو متحرك = /z/. بعد s, z, sh, ch, j = /ɪz/ ويضيف مقطعاً."
+          "explanationAr": "الإجابة: plays. بعد صوت مهموس (p, t, k, f) = /s/. بعد صوت مجهور أو متحرك = /z/. بعد s, z, sh, ch, j = /ɪz/ ويضيف مقطعاً."
         },
         {
-          "questionAr": "أكمل الفراغ: (تتابع الأخبار.)",
-          "questionEn": "Complete: She ____ the news.",
+          "questionAr": "أكمل الفراغ: (الباصات متأخرة.)",
+          "questionEn": "Complete: The ____ are late.",
           "options": [
-            "watches",
-            "watchs",
-            "watch"
+            "buses",
+            "buss",
+            "bus"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: watches. بعد صوت مهموس (p, t, k, f) = /s/. بعد صوت مجهور أو متحرك = /z/. بعد s, z, sh, ch, j = /ɪz/ ويضيف مقطعاً."
+          "explanationAr": "الإجابة: buses. بعد صوت مهموس (p, t, k, f) = /s/. بعد صوت مجهور أو متحرك = /z/. بعد s, z, sh, ch, j = /ɪz/ ويضيف مقطعاً."
         },
         {
-          "questionAr": "نطق s في toys:",
-          "questionEn": "-s in 'toys':",
+          "questionAr": "ما معنى \"books\"؟",
+          "questionEn": "What does \"books\" mean?",
           "options": [
-            "/s/",
-            "/z/",
-            "/ɪz/"
+            "يشتغل",
+            "صناديق",
+            "باصات",
+            "كتب"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"books\" /bʊks/ تعني: كتب. مثال: new books"
+        },
+        {
+          "questionAr": "ما معنى \"toys\"؟",
+          "questionEn": "What does \"toys\" mean?",
+          "options": [
+            "باصات",
+            "ألعاب",
+            "يشاهد/ساعات",
+            "صحون"
           ],
           "correctIndex": 1,
-          "explanationAr": "بعد صوت متحرك ⇐ /z/."
-        },
-        {
-          "questionAr": "كلمة فيها مقطع إضافي:",
-          "questionEn": "Which adds a syllable?",
-          "options": [
-            "maps",
-            "bags",
-            "glasses"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "glasses /ɪz/."
+          "explanationAr": "\"toys\" /tɔɪz/ تعني: ألعاب. مثال: kids' toys"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "dogs read as /dɒɡs/ with hard s",
-            "dogs /dɔːɡz/"
+            "books /bʊks/",
+            "Adding /ɪz/ everywhere: «بوكِز»"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الصحيح: dogs /dɔːɡz/ — بعد g المجهورة: /z/."
+          "correctIndex": 0,
+          "explanationAr": "الصحيح: books /bʊks/ — المقطع الزائد فقط بعد الأصوات الصفيرية."
         }
       ]
     }
@@ -5922,58 +5940,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (غداك في الثلاجة.)",
-          "questionEn": "Complete: ____ lunch is in the fridge.",
+          "questionAr": "أكمل الفراغ: (أبوك قال تقدر تستخدم الآيباد ساعة.)",
+          "questionEn": "Complete: Dad ____ you can use the iPad for one hour.",
           "options": [
-            "You",
-            "You're",
-            "Your"
+            "sayed",
+            "say",
+            "said"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: Your. بعض الكلمات الشائعة نطقها شاذ: said /sɛd/، was /wʌz/، one /wʌn/، come /kʌm/، do /duː/، you /juː/. احفظها كصورة."
+          "explanationAr": "الإجابة: said. بعض الكلمات الشائعة نطقها شاذ: said /sɛd/، was /wʌz/، one /wʌn/، come /kʌm/، do /duː/، you /juː/. احفظها كصورة."
         },
         {
-          "questionAr": "أكمل الفراغ: (تعال البيت قبل المغرب.)",
-          "questionEn": "Complete: ____ home before Maghrib.",
+          "questionAr": "أكمل الفراغ: (فيه بيضتين على الطاولة.)",
+          "questionEn": "Complete: ____ are two eggs on the table.",
           "options": [
-            "Came",
-            "Come",
-            "Comb"
+            "They",
+            "There",
+            "Their"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: Come. بعض الكلمات الشائعة نطقها شاذ: said /sɛd/، was /wʌz/، one /wʌn/، come /kʌm/، do /duː/، you /juː/. احفظها كصورة."
+          "explanationAr": "الإجابة: There. بعض الكلمات الشائعة نطقها شاذ: said /sɛd/، was /wʌz/، one /wʌn/، come /kʌm/، do /duː/، you /juː/. احفظها كصورة."
         },
         {
-          "questionAr": "نطق said:",
-          "questionEn": "Pronunciation of 'said':",
+          "questionAr": "ما معنى \"come\"؟",
+          "questionEn": "What does \"come\" mean?",
           "options": [
-            "/seɪd/",
-            "/sɛd/",
-            "/siːd/"
+            "قال",
+            "يجي",
+            "ثلاجة",
+            "كان"
           ],
           "correctIndex": 1,
-          "explanationAr": "/sɛd/."
+          "explanationAr": "\"come\" /kʌm/ تعني: يجي. مثال: Come here."
         },
         {
-          "questionAr": "متى يمر الأب؟ (من الرسالة)",
-          "questionEn": "When does Dad come? (note)",
+          "questionAr": "ما معنى \"there\"؟",
+          "questionEn": "What does \"there\" mean?",
           "options": [
-            "at five",
-            "at Maghrib",
-            "after one hour"
+            "قال",
+            "يجي",
+            "الـ",
+            "هناك"
           ],
-          "correctIndex": 0,
-          "explanationAr": "at five."
+          "correctIndex": 3,
+          "explanationAr": "\"there\" /ðɛr/ تعني: هناك. مثال: over there"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "said /sɛd/",
-            "said read as «سيد» /seɪd/"
+            "Reading 'the' as «ذي» always",
+            "the /ðə/ + consonant, /ði/ + vowel"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: said /sɛd/ — said شاذة: «سِد»."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: the /ðə/ + consonant, /ði/ + vowel — the book «ذَ بوك»، the apple «ذي آبل»."
         }
       ]
     }
@@ -6535,58 +6555,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (أعرف الجواب.)",
-          "questionEn": "Complete: I ____ the answer.",
+          "questionAr": "أكمل الفراغ: (نمشي ساعة كل ليلة.)",
+          "questionEn": "Complete: We walk for ____ every night.",
           "options": [
-            "now",
-            "no",
-            "know"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: know. أنماط شائعة: kn = /n/ (know)، wr = /r/ (write)، mb = /m/ (climb)، gh غالباً صامتة (night)، h صامتة في hour, honest، l صامتة في walk, talk, should."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (اكتب اسمك لو سمحت.)",
-          "questionEn": "Complete: Please ____ your name.",
-          "options": [
-            "write",
-            "right",
-            "rite"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: write. أنماط شائعة: kn = /n/ (know)، wr = /r/ (write)، mb = /m/ (climb)، gh غالباً صامتة (night)، h صامتة في hour, honest، l صامتة في walk, talk, should."
-        },
-        {
-          "questionAr": "أي حرف صامت في lamb؟",
-          "questionEn": "Silent letter in 'lamb'?",
-          "options": [
-            "l",
-            "a",
-            "b"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "b صامتة."
-        },
-        {
-          "questionAr": "أكمل: It takes ___ hour.",
-          "questionEn": "Complete: It takes ___ hour.",
-          "options": [
-            "a",
-            "an",
-            "the one"
+            "one hour of",
+            "an hour",
+            "a hour"
           ],
           "correctIndex": 1,
-          "explanationAr": "an hour."
+          "explanationAr": "الإجابة: an hour. أنماط شائعة: kn = /n/ (know)، wr = /r/ (write)، mb = /m/ (climb)، gh غالباً صامتة (night)، h صامتة في hour, honest، l صامتة في walk, talk, should."
+        },
+        {
+          "questionAr": "أكمل الفراغ: (استخدم سكين لقطع الخبز.)",
+          "questionEn": "Complete: Use a ____ to cut the bread.",
+          "options": [
+            "knife",
+            "nife",
+            "life"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: knife. أنماط شائعة: kn = /n/ (know)، wr = /r/ (write)، mb = /m/ (climb)، gh غالباً صامتة (night)، h صامتة في hour, honest، l صامتة في walk, talk, should."
+        },
+        {
+          "questionAr": "ما معنى \"climb\"؟",
+          "questionEn": "What does \"climb\" mean?",
+          "options": [
+            "صادق/أمين",
+            "يكتب",
+            "يتسلق",
+            "لحم خروف صغير"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"climb\" /klaɪm/ تعني: يتسلق. مثال: climb a tree"
+        },
+        {
+          "questionAr": "ما معنى \"lamb\"؟",
+          "questionEn": "What does \"lamb\" mean?",
+          "options": [
+            "صادق/أمين",
+            "لحم خروف صغير",
+            "سكين",
+            "ليل"
+          ],
+          "correctIndex": 1,
+          "explanationAr": "\"lamb\" /læm/ تعني: لحم خروف صغير. مثال: lamb kabsa"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "k-nife with a /k/",
+            "Reading every letter: «كْنايف»",
             "knife /naɪf/"
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: knife /naɪf/ — k قبل n صامتة."
+          "explanationAr": "الصحيح: knife /naɪf/ — عادة العربي إنه ينطق كل حرف مكتوب."
         }
       ]
     }
@@ -7145,58 +7167,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (أقدر أستلف قلمك؟)",
-          "questionEn": "Complete: Can I borrow your ____?",
+          "questionAr": "أكمل الفراغ: (بسويها زين.)",
+          "questionEn": "Complete: I will do it ____.",
           "options": [
-            "pin",
-            "pen",
-            "pan"
+            "will",
+            "well",
+            "wall"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: pen. /ɛ/ الفم مفتوح أكثر والفك نازل (pen, bed, set)، /ɪ/ الفم شبه مغلق واللسان أعلى (pin, bid, sit)."
+          "explanationAr": "الإجابة: well. /ɛ/ الفم مفتوح أكثر والفك نازل (pen, bed, set)، /ɪ/ الفم شبه مغلق واللسان أعلى (pin, bid, sit)."
         },
         {
-          "questionAr": "أكمل الفراغ: (حط دبوس على الخريطة.)",
-          "questionEn": "Complete: Put a ____ on the map.",
+          "questionAr": "أكمل الفراغ: (عشرة رجال في النادي.)",
+          "questionEn": "Complete: Ten ____ in the gym.",
           "options": [
-            "pin",
-            "pan",
-            "pen"
+            "man",
+            "min",
+            "men"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: pin. /ɛ/ الفم مفتوح أكثر والفك نازل (pen, bed, set)، /ɪ/ الفم شبه مغلق واللسان أعلى (pin, bid, sit)."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: men. /ɛ/ الفم مفتوح أكثر والفك نازل (pen, bed, set)، /ɪ/ الفم شبه مغلق واللسان أعلى (pin, bid, sit)."
         },
         {
-          "questionAr": "أداة الكتابة:",
-          "questionEn": "Writing tool:",
+          "questionAr": "ما معنى \"well\"؟",
+          "questionEn": "What does \"well\" mean?",
           "options": [
-            "pin",
-            "pen",
-            "pan"
+            "يرتاح",
+            "سوف",
+            "رجال",
+            "جيداً"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"well\" /wɛl/ تعني: جيداً. مثال: very well"
+        },
+        {
+          "questionAr": "ما معنى \"will\"؟",
+          "questionEn": "What does \"will\" mean?",
+          "options": [
+            "دبوس/رمز سري",
+            "سوف",
+            "سرير",
+            "رجال"
           ],
           "correctIndex": 1,
-          "explanationAr": "pen."
-        },
-        {
-          "questionAr": "أي كلمة فيها /ɛ/؟",
-          "questionEn": "Which has /ɛ/?",
-          "options": [
-            "sit",
-            "set",
-            "seat"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "set."
+          "explanationAr": "\"will\" /wɪl/ تعني: سوف. مثال: I will go."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Give me the pin to write.",
-            "Give me the pen to write."
+            "pen /pɛn/",
+            "Saying pin for pen"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الصحيح: Give me the pen to write. — pen للكتابة، pin دبوس."
+          "correctIndex": 0,
+          "explanationAr": "الصحيح: pen /pɛn/ — مشكلة شائعة في اللهجات؛ ركز على فتح الفم."
         }
       ]
     }
@@ -7755,58 +7779,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (مشيت للمسجد.)",
-          "questionEn": "Complete: I ____ to the mosque.",
+          "questionAr": "أكمل الفراغ: (كانت تبي جوال جديد.)",
+          "questionEn": "Complete: She ____ a new phone.",
           "options": [
-            "walkt",
-            "walk",
-            "walked"
+            "want",
+            "wantd",
+            "wanted"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: walked. بعد صوت مهموس (p, k, s, sh, ch, f) = /t/. بعد صوت مجهور أو متحرك = /d/. بعد t أو d فقط = /ɪd/ (مقطع إضافي)."
+          "explanationAr": "الإجابة: wanted. بعد صوت مهموس (p, k, s, sh, ch, f) = /t/. بعد صوت مجهور أو متحرك = /d/. بعد t أو d فقط = /ɪd/ (مقطع إضافي)."
         },
         {
-          "questionAr": "أكمل الفراغ: (لعبنا كورة بعد المدرسة.)",
-          "questionEn": "Complete: We ____ football after school.",
+          "questionAr": "أكمل الفراغ: (احتاج مساعدة فساعدته.)",
+          "questionEn": "Complete: He ____ help, so I helped him.",
           "options": [
-            "play",
-            "plaied",
-            "played"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: played. بعد صوت مهموس (p, k, s, sh, ch, f) = /t/. بعد صوت مجهور أو متحرك = /d/. بعد t أو d فقط = /ɪd/ (مقطع إضافي)."
-        },
-        {
-          "questionAr": "نطق ed في stopped:",
-          "questionEn": "-ed in 'stopped':",
-          "options": [
-            "/t/",
-            "/d/",
-            "/ɪd/"
+            "needed",
+            "need",
+            "neded"
           ],
           "correctIndex": 0,
-          "explanationAr": "بعد p ⇐ /t/."
+          "explanationAr": "الإجابة: needed. بعد صوت مهموس (p, k, s, sh, ch, f) = /t/. بعد صوت مجهور أو متحرك = /d/. بعد t أو d فقط = /ɪd/ (مقطع إضافي)."
         },
         {
-          "questionAr": "أي فعل يضيف مقطعاً؟",
-          "questionEn": "Which adds a syllable?",
+          "questionAr": "ما معنى \"cleaned\"؟",
+          "questionEn": "What does \"cleaned\" mean?",
           "options": [
-            "opened",
-            "started",
-            "cooked"
+            "ضحك",
+            "لعب",
+            "احتاج",
+            "نظف"
           ],
-          "correctIndex": 1,
-          "explanationAr": "started (بعد t)."
+          "correctIndex": 3,
+          "explanationAr": "\"cleaned\" /kliːnd/ تعني: نظف. مثال: I cleaned it."
+        },
+        {
+          "questionAr": "ما معنى \"called\"؟",
+          "questionEn": "What does \"called\" mean?",
+          "options": [
+            "شاهد",
+            "قرر",
+            "نظف",
+            "اتصل"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"called\" /kɔːld/ تعني: اتصل. مثال: She called me."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "walked as «ووكِد» (2 syllables)",
-            "walked /wɔːkt/ (1 syllable)"
+            "played /pleɪd/, walked /wɔːkt/",
+            "«بلايِد» / «ووكِد»"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الصحيح: walked /wɔːkt/ (1 syllable) — ed بعد k = /t/ بدون مقطع."
+          "correctIndex": 0,
+          "explanationAr": "الصحيح: played /pleɪd/, walked /wɔːkt/ — أكثر خطأ نطق عند المتعلمين العرب."
         }
       ]
     }
@@ -8364,57 +8390,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (أشتغل على كمبيوتر.)",
-          "questionEn": "Complete: I work on a ____.",
+          "questionAr": "أكمل الفراغ: (أحتاج معلومات أكثر.)",
+          "questionEn": "Complete: I need more ____.",
           "options": [
-            "COMputer",
-            "compuTER",
-            "comPUter"
+            "inforMAtion",
+            "INformation",
+            "informaTION"
           ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: comPUter. في كل كلمة مقطع واحد أقوى وأطول وأعلى. أغلب الأسماء من مقطعين ضغطها على الأول (TAble)، وأغلب الأفعال على الثاني (reLAX). الكلمات المنتهية بـ tion/sion الضغط قبلها (inforMAtion)."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: inforMAtion. في كل كلمة مقطع واحد أقوى وأطول وأعلى. أغلب الأسماء من مقطعين ضغطها على الأول (TAble)، وأغلب الأفعال على الثاني (reLAX). الكلمات المنتهية بـ tion/sion الضغط قبلها (inforMAtion)."
         },
         {
-          "questionAr": "أكمل الفراغ: (سكنا في فندق حلو.)",
-          "questionEn": "Complete: We stayed at a nice ____.",
+          "questionAr": "أكمل الفراغ: (خلنا نرتاح هالويكند.)",
+          "questionEn": "Complete: Let's ____ this weekend.",
           "options": [
-            "HOtel",
-            "HOTel",
-            "hoTEL"
+            "reLAX",
+            "REllax",
+            "RElax"
           ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: hoTEL. في كل كلمة مقطع واحد أقوى وأطول وأعلى. أغلب الأسماء من مقطعين ضغطها على الأول (TAble)، وأغلب الأفعال على الثاني (reLAX). الكلمات المنتهية بـ tion/sion الضغط قبلها (inforMAtion)."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: reLAX. في كل كلمة مقطع واحد أقوى وأطول وأعلى. أغلب الأسماء من مقطعين ضغطها على الأول (TAble)، وأغلب الأفعال على الثاني (reLAX). الكلمات المنتهية بـ tion/sion الضغط قبلها (inforMAtion)."
         },
         {
-          "questionAr": "أين الضغط في hotel؟",
-          "questionEn": "Stress in 'hotel'?",
+          "questionAr": "ما معنى \"geography\"؟",
+          "questionEn": "What does \"geography\" mean?",
           "options": [
-            "HO-tel",
-            "ho-TEL"
+            "مصور",
+            "جغرافيا",
+            "هدية",
+            "كمبيوتر"
           ],
           "correctIndex": 1,
-          "explanationAr": "hoTEL."
+          "explanationAr": "\"geography\" /dʒiˈɑːɡrəfi/ تعني: جغرافيا. مثال: a geography test"
         },
         {
-          "questionAr": "أين الضغط في education؟",
-          "questionEn": "Stress in 'education'?",
+          "questionAr": "ما معنى \"banana\"؟",
+          "questionEn": "What does \"banana\" mean?",
           "options": [
-            "EDucation",
-            "eduCAtion",
-            "educaTION"
+            "مصور",
+            "معلومات",
+            "موز",
+            "صورة"
           ],
-          "correctIndex": 1,
-          "explanationAr": "قبل tion."
+          "correctIndex": 2,
+          "explanationAr": "\"banana\" /bəˈnænə/ تعني: موز. مثال: a ripe banana"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "comPUter /kəmˈpjuːtər/",
-            "COMputer"
+            "One strong syllable per word",
+            "Equal stress on all syllables (robotic)"
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: comPUter /kəmˈpjuːtər/ — computer ضغطها على المقطع الثاني PU."
+          "explanationAr": "الصحيح: One strong syllable per word — العربي يعطي كل مقطع وزن؛ الإنجليزي يضغط واحد."
         }
       ]
     }
@@ -8974,58 +9003,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (الشارع مزحوم مرة.)",
-          "questionEn": "Complete: The ____ is very busy.",
+          "questionAr": "أكمل الفراغ: (أذاكر في مكتبة المدرسة.)",
+          "questionEn": "Complete: I ____ in a school library.",
           "options": [
-            "estreet",
-            "sitreet",
-            "street"
+            "estudy",
+            "sitady",
+            "study"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: street. الإنجليزي يسمح بثلاثة سواكن متتالية في البداية (str, spl, spr) وأربعة في النهاية (texts). العربي لا يبدأ بساكنين، فننطقها ببطء: s...treet ثم نسرّع."
+          "explanationAr": "الإجابة: study. الإنجليزي يسمح بثلاثة سواكن متتالية في البداية (str, spl, spr) وأربعة في النهاية (texts). العربي لا يبدأ بساكنين، فننطقها ببطء: s...treet ثم نسرّع."
         },
         {
-          "questionAr": "أكمل الفراغ: (الربيع قصير في الرياض.)",
-          "questionEn": "Complete: ____ is short in Riyadh.",
+          "questionAr": "أكمل الفراغ: (اطبع ثلاث نصوص لو سمحت.)",
+          "questionEn": "Complete: Please print ____ texts.",
           "options": [
-            "Spring",
-            "Sipring",
-            "Espring"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: Spring. الإنجليزي يسمح بثلاثة سواكن متتالية في البداية (str, spl, spr) وأربعة في النهاية (texts). العربي لا يبدأ بساكنين، فننطقها ببطء: s...treet ثم نسرّع."
-        },
-        {
-          "questionAr": "النطق الصحيح لـ school:",
-          "questionEn": "Correct 'school':",
-          "options": [
-            "/ɪˈskuːl/",
-            "/skuːl/",
-            "/sɪˈkuːl/"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "بدون حرف زائد."
-        },
-        {
-          "questionAr": "كم مقطع في street؟",
-          "questionEn": "Syllables in 'street'?",
-          "options": [
-            "one",
-            "two",
+            "tree",
+            "thiree",
             "three"
           ],
-          "correctIndex": 0,
-          "explanationAr": "مقطع واحد."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: three. الإنجليزي يسمح بثلاثة سواكن متتالية في البداية (str, spl, spr) وأربعة في النهاية (texts). العربي لا يبدأ بساكنين، فننطقها ببطء: s...treet ثم نسرّع."
+        },
+        {
+          "questionAr": "ما معنى \"strong\"؟",
+          "questionEn": "What does \"strong\" mean?",
+          "options": [
+            "رسائل/نصوص",
+            "قوي",
+            "يرش/رشة",
+            "ربيع"
+          ],
+          "correctIndex": 1,
+          "explanationAr": "\"strong\" /strɔːŋ/ تعني: قوي. مثال: strong coffee"
+        },
+        {
+          "questionAr": "ما معنى \"splash\"؟",
+          "questionEn": "What does \"splash\" mean?",
+          "options": [
+            "ربيع",
+            "ميدان/مربع",
+            "يرش/رشة",
+            "رسائل/نصوص"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"splash\" /splæʃ/ تعني: يرش/رشة. مثال: a big splash"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "student /ˈstuːdənt/",
-            "estudent"
+            "special /ˈspɛʃəl/",
+            "«إسبيشال» for special"
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: student /ˈstuːdənt/ — لا همزة قبل s."
+          "explanationAr": "الصحيح: special /ˈspɛʃəl/ — نفس المشكلة في كلمات كثيرة."
         }
       ]
     }
@@ -9585,58 +9616,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (برجع بعد دقيقة.)",
-          "questionEn": "Complete: I'll be back in a ____.",
+          "questionAr": "أكمل الفراغ: (اليوم السبت.)",
+          "questionEn": "Complete: ____ is Saturday.",
           "options": [
-            "minnit",
-            "minute",
-            "minoot"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: minute. أي حرف متحرك (a, e, i, o, u) ممكن يصير /ə/ إذا ما كان منبوراً: about /əˈbaʊt/، doctor /ˈdɑːktər/، today /təˈdeɪ/. هذا يعطي الإيقاع الإنجليزي."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (الدكتور في المستشفى.)",
-          "questionEn": "Complete: The ____ is at the hospital.",
-          "options": [
-            "dokter",
-            "doctor",
-            "doktoor"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: doctor. أي حرف متحرك (a, e, i, o, u) ممكن يصير /ə/ إذا ما كان منبوراً: about /əˈbaʊt/، doctor /ˈdɑːktər/، today /təˈdeɪ/. هذا يعطي الإيقاع الإنجليزي."
-        },
-        {
-          "questionAr": "أين schwa في about؟",
-          "questionEn": "Where is the schwa in 'about'?",
-          "options": [
-            "a",
-            "ou",
-            "t"
+            "Today",
+            "Tooday",
+            "Toeday"
           ],
           "correctIndex": 0,
-          "explanationAr": "a الأولى /ə/."
+          "explanationAr": "الإجابة: Today. أي حرف متحرك (a, e, i, o, u) ممكن يصير /ə/ إذا ما كان منبوراً: about /əˈbaʊt/، doctor /ˈdɑːktər/، today /təˈdeɪ/. هذا يعطي الإيقاع الإنجليزي."
         },
         {
-          "questionAr": "كم مقطع منبور في banana؟",
-          "questionEn": "Stressed syllables in 'banana'?",
+          "questionAr": "أكمل الفراغ: (خلنا نتكلم عن المشكلة.)",
+          "questionEn": "Complete: Let's talk ____ the problem.",
           "options": [
-            "one",
-            "two",
-            "three"
+            "abowt",
+            "ebout",
+            "about"
           ],
-          "correctIndex": 0,
-          "explanationAr": "واحد: NA."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: about. أي حرف متحرك (a, e, i, o, u) ممكن يصير /ə/ إذا ما كان منبوراً: about /əˈbaʊt/، doctor /ˈdɑːktər/، today /təˈdeɪ/. هذا يعطي الإيقاع الإنجليزي."
+        },
+        {
+          "questionAr": "ما معنى \"lemon\"؟",
+          "questionEn": "What does \"lemon\" mean?",
+          "options": [
+            "مشكلة",
+            "يدعم",
+            "كاميرا",
+            "ليمون"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"lemon\" /ˈlɛmən/ تعني: ليمون. مثال: lemon juice"
+        },
+        {
+          "questionAr": "ما معنى \"famous\"؟",
+          "questionEn": "What does \"famous\" mean?",
+          "options": [
+            "ليمون",
+            "دكتور",
+            "السبت",
+            "مشهور"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"famous\" /ˈfeɪməs/ تعني: مشهور. مثال: a famous place"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "ba-NA-NA (all full vowels)",
-            "bə-NA-nə /bəˈnænə/"
+            "Reading every vowel fully like Arabic",
+            "Weaken unstressed vowels to /ə/"
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: bə-NA-nə /bəˈnænə/ — أضعف المقطعين الأول والأخير."
+          "explanationAr": "الصحيح: Weaken unstressed vowels to /ə/ — العربي واضح المقاطع؛ الإنجليزي يخفيها."
         }
       ]
     }
@@ -10195,58 +10228,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (انتظر، وين رايح؟)",
-          "questionEn": "Complete: ____ where are you going?",
+          "questionAr": "أكمل الفراغ: (جاهز؟ يلا!)",
+          "questionEn": "Complete: Are you ____ Let's go!",
           "options": [
-            "Wait,",
-            "Wait!",
-            "Wait."
+            "ready?",
+            "ready,",
+            "ready."
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: Wait,. الفاصلة (,) وقفة قصيرة. النقطة (.) وقفة كاملة وصوت نازل. علامة الاستفهام: صوت صاعد لنعم/لا. التعجب (!): حماس. علامات التنصيص: غيّر صوتك للشخصية."
+          "explanationAr": "الإجابة: ready?. الفاصلة (,) وقفة قصيرة. النقطة (.) وقفة كاملة وصوت نازل. علامة الاستفهام: صوت صاعد لنعم/لا. التعجب (!): حماس. علامات التنصيص: غيّر صوتك للشخصية."
         },
         {
-          "questionAr": "أكمل الفراغ: («الحقوا!» صرخ الولد.)",
-          "questionEn": "Complete: \"Help!\" ____ the boy.",
+          "questionAr": "أكمل الفراغ: (أول، افتح الصندوق. بعدين، اقرأ الكرت.)",
+          "questionEn": "Complete: ____ open the box. Then, read the card.",
           "options": [
-            "said quietly",
-            "whispered",
-            "shouted"
+            "First.",
+            "First,",
+            "First!"
+          ],
+          "correctIndex": 1,
+          "explanationAr": "الإجابة: First,. الفاصلة (,) وقفة قصيرة. النقطة (.) وقفة كاملة وصوت نازل. علامة الاستفهام: صوت صاعد لنعم/لا. التعجب (!): حماس. علامات التنصيص: غيّر صوتك للشخصية."
+        },
+        {
+          "questionAr": "ما معنى \"slowly\"؟",
+          "questionEn": "What does \"slowly\" mean?",
+          "options": [
+            "خايف",
+            "ابتسامة/يبتسم",
+            "مفاجأة",
+            "ببطء"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"slowly\" /ˈsloʊli/ تعني: ببطء. مثال: Walk slowly."
+        },
+        {
+          "questionAr": "ما معنى \"suddenly\"؟",
+          "questionEn": "What does \"suddenly\" mean?",
+          "options": [
+            "خايف",
+            "صوت",
+            "فجأة",
+            "ببطء"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: shouted. الفاصلة (,) وقفة قصيرة. النقطة (.) وقفة كاملة وصوت نازل. علامة الاستفهام: صوت صاعد لنعم/لا. التعجب (!): حماس. علامات التنصيص: غيّر صوتك للشخصية."
-        },
-        {
-          "questionAr": "الفاصلة تعني:",
-          "questionEn": "A comma means:",
-          "options": [
-            "full stop",
-            "short pause",
-            "question"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "وقفة قصيرة."
-        },
-        {
-          "questionAr": "\"Who's there?\" he whispered. نقرأها:",
-          "questionEn": "Read it:",
-          "options": [
-            "loudly",
-            "softly",
-            "angrily"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "whispered = بهمس."
+          "explanationAr": "\"suddenly\" /ˈsʌdənli/ تعني: فجأة. مثال: Suddenly, it rained."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Reading without pauses",
-            "Pause at every comma and full stop"
+            "Reading quotes in the narrator's voice",
+            "Change voice for each character"
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: Pause at every comma and full stop — القراءة المتواصلة تضيع المعنى."
+          "explanationAr": "الصحيح: Change voice for each character — القصص تحيا بتغيير الصوت."
         }
       ]
     }
@@ -10805,58 +10840,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (أبي كوب شاي.)",
-          "questionEn": "Complete: I WANT a ____ of TEA.",
+          "questionAr": "أكمل الفراغ: (بنروح البحر يوم الجمعة.)",
+          "questionEn": "Complete: We're GOING to the ____ on FRIDAY.",
           "options": [
-            "cup of",
-            "CUP",
-            "A"
+            "BEACH",
+            "the",
+            "to the"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: CUP. كلمات المحتوى (I WANT a CUP of TEA) قوية. كلمات الوظيفة (a, of, to, the, and, is) ضعيفة وسريعة. وغيّر الضغط لتغيير المعنى: I didn't say HE took it."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: BEACH. كلمات المحتوى (I WANT a CUP of TEA) قوية. كلمات الوظيفة (a, of, to, the, and, is) ضعيفة وسريعة. وغيّر الضغط لتغيير المعنى: I didn't say HE took it."
         },
         {
-          "questionAr": "أكمل الفراغ: (تشتغل في بنك في الرياض.)",
-          "questionEn": "Complete: She ____ in a BANK in RIYADH.",
+          "questionAr": "أكمل الفراغ: (ما أخذت قلمك.)",
+          "questionEn": "Complete: I ____ take your PEN.",
           "options": [
-            "SHE",
-            "works in",
-            "WORKS"
+            "DIDN'T",
+            "your",
+            "I"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: DIDN'T. كلمات المحتوى (I WANT a CUP of TEA) قوية. كلمات الوظيفة (a, of, to, the, and, is) ضعيفة وسريعة. وغيّر الضغط لتغيير المعنى: I didn't say HE took it."
+        },
+        {
+          "questionAr": "ما معنى \"strong\"؟",
+          "questionEn": "What does \"strong\" mean?",
+          "options": [
+            "ضعيف",
+            "تأكيد",
+            "قوي",
+            "جميل"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: WORKS. كلمات المحتوى (I WANT a CUP of TEA) قوية. كلمات الوظيفة (a, of, to, the, and, is) ضعيفة وسريعة. وغيّر الضغط لتغيير المعنى: I didn't say HE took it."
+          "explanationAr": "\"strong\" /strɔːŋ/ تعني: قوي. مثال: strong syllables"
         },
         {
-          "questionAr": "أي كلمة تكون ضعيفة؟",
-          "questionEn": "Which word is usually weak?",
+          "questionAr": "ما معنى \"beautiful\"؟",
+          "questionEn": "What does \"beautiful\" mean?",
           "options": [
-            "CUP",
-            "of",
-            "TEA"
+            "جميل",
+            "نبضة/إيقاع",
+            "معنى",
+            "قوي"
           ],
-          "correctIndex": 1,
-          "explanationAr": "of كلمة وظيفة."
-        },
-        {
-          "questionAr": "لتقول إن شخصاً آخر أخذها، اضغط:",
-          "questionEn": "To say someone else took it, stress:",
-          "options": [
-            "I",
-            "HE",
-            "MONEY"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "HE."
+          "correctIndex": 0,
+          "explanationAr": "\"beautiful\" /ˈbjuːtɪfəl/ تعني: جميل. مثال: a beautiful day"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I-WANT-A-CUP-OF-TEA (all equal)",
-            "I WANT a CUP of TEA"
+            "Every word at the same volume",
+            "Strong content words, weak function words"
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: I WANT a CUP of TEA — التساوي يخلي الكلام آلي."
+          "explanationAr": "الصحيح: Strong content words, weak function words — هذا سر الطلاقة الحقيقي."
         }
       ]
     }
@@ -11414,58 +11451,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (الصياد العجوز عاش وحيد جنب البحر.)",
-          "questionEn": "Complete: The old fisherman lived ____ by the sea.",
+          "questionAr": "أكمل الفراغ: (يوم من الأيام، شبكته كانت ثقيلة مرة ما يقدر يرفعها.)",
+          "questionEn": "Complete: One day, his net was too ____ to lift.",
           "options": [
-            "along",
-            "lonely",
-            "alone"
+            "empty",
+            "happy",
+            "heavy"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: alone. استراتيجية القراءة: ١) اقرأ العنوان وتوقع. ٢) اقرأ مرة للفكرة العامة. ٣) اقرأ مرة ثانية للتفاصيل. ٤) خمّن الكلمات الجديدة من الجملة قبل القاموس."
+          "explanationAr": "الإجابة: heavy. استراتيجية القراءة: ١) اقرأ العنوان وتوقع. ٢) اقرأ مرة للفكرة العامة. ٣) اقرأ مرة ثانية للتفاصيل. ٤) خمّن الكلمات الجديدة من الجملة قبل القاموس."
         },
         {
-          "questionAr": "أكمل الفراغ: (كل صباح يبحر قبل الشروق.)",
-          "questionEn": "Complete: Every morning, he sailed out before ____.",
+          "questionAr": "أكمل الفراغ: (لقى داخلها لؤلؤة ضخمة لامعة.)",
+          "questionEn": "Complete: Inside, he found a huge, shiny ____.",
           "options": [
-            "sunrise",
-            "sunset",
-            "sunshine"
+            "pear",
+            "peel",
+            "pearl"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: pearl. استراتيجية القراءة: ١) اقرأ العنوان وتوقع. ٢) اقرأ مرة للفكرة العامة. ٣) اقرأ مرة ثانية للتفاصيل. ٤) خمّن الكلمات الجديدة من الجملة قبل القاموس."
+        },
+        {
+          "questionAr": "ما معنى \"net\"؟",
+          "questionEn": "What does \"net\" mean?",
+          "options": [
+            "شبكة",
+            "ثقيل",
+            "الفقراء",
+            "لامع"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: sunrise. استراتيجية القراءة: ١) اقرأ العنوان وتوقع. ٢) اقرأ مرة للفكرة العامة. ٣) اقرأ مرة ثانية للتفاصيل. ٤) خمّن الكلمات الجديدة من الجملة قبل القاموس."
+          "explanationAr": "\"net\" /nɛt/ تعني: شبكة. مثال: a fishing net"
         },
         {
-          "questionAr": "الفكرة الرئيسية:",
-          "questionEn": "Main idea:",
+          "questionAr": "ما معنى \"heavy\"؟",
+          "questionEn": "What does \"heavy\" mean?",
           "options": [
-            "Fishing is hard.",
-            "A kind fisherman shared his luck.",
-            "Pearls are expensive."
+            "لؤلؤة",
+            "طيبة/لطف",
+            "ثقيل",
+            "الفقراء"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الكرم والمشاركة."
-        },
-        {
-          "questionAr": "«too heavy to lift» تعني:",
-          "questionEn": "'too heavy to lift' means:",
-          "options": [
-            "خفيف",
-            "ثقيل لدرجة ما ينرفع",
-            "مكسور"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "too + صفة + to."
+          "correctIndex": 2,
+          "explanationAr": "\"heavy\" /ˈhɛvi/ تعني: ثقيل. مثال: too heavy"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Guess from context and keep reading",
-            "Stopping at every new word"
+            "pearl read as «بيرل»",
+            "pearl /pɜːrl/"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: Guess from context and keep reading — التوقف يضيع الفكرة."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: pearl /pɜːrl/ — صوت /ɜːr/ مثل bird."
         }
       ]
     }
@@ -12024,58 +12063,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (ممنوع الوقوف قدام البوابة.)",
-          "questionEn": "Complete: ____ in front of the gate.",
+          "questionAr": "أكمل الفراغ: (يفضل استهلاكه قبل: ١٢/٢٠٢٦.)",
+          "questionEn": "Complete: ____: 12/2026.",
           "options": [
-            "No parking",
-            "Not park",
-            "Don't parking"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: No parking. اللافتات قصيرة بلا أفعال مساعدة: No parking = ممنوع الوقوف. Keep out = ممنوع الدخول. Staff only = للموظفين فقط. Best before = يفضل استهلاكه قبل."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (للموظفين فقط.)",
-          "questionEn": "Complete: Staff ____.",
-          "options": [
-            "just",
-            "alone",
-            "only"
+            "Better before",
+            "Good until after",
+            "Best before"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: only. اللافتات قصيرة بلا أفعال مساعدة: No parking = ممنوع الوقوف. Keep out = ممنوع الدخول. Staff only = للموظفين فقط. Best before = يفضل استهلاكه قبل."
+          "explanationAr": "الإجابة: Best before. اللافتات قصيرة بلا أفعال مساعدة: No parking = ممنوع الوقوف. Keep out = ممنوع الدخول. Staff only = للموظفين فقط. Best before = يفضل استهلاكه قبل."
         },
         {
-          "questionAr": "PULL تعني:",
-          "questionEn": "PULL means:",
+          "questionAr": "أكمل الفراغ: (خذ حبتين يومياً بعد الأكل.)",
+          "questionEn": "Complete: Take two tablets ____ after meals.",
           "options": [
-            "ادفع",
-            "اسحب",
-            "اقفل"
+            "day",
+            "dairy",
+            "daily"
           ],
-          "correctIndex": 1,
-          "explanationAr": "اسحب."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: daily. اللافتات قصيرة بلا أفعال مساعدة: No parking = ممنوع الوقوف. Keep out = ممنوع الدخول. Staff only = للموظفين فقط. Best before = يفضل استهلاكه قبل."
         },
         {
-          "questionAr": "Keep out of reach of children:",
-          "questionEn": "Meaning:",
+          "questionAr": "ما معنى \"staff\"؟",
+          "questionEn": "What does \"staff\" mean?",
           "options": [
-            "أعطه للأطفال",
-            "بعيداً عن متناول الأطفال",
-            "للأطفال فقط"
+            "موظفين",
+            "أرضية مبللة",
+            "مخرج",
+            "متناول"
           ],
-          "correctIndex": 1,
-          "explanationAr": "بعيداً عن الأطفال."
+          "correctIndex": 0,
+          "explanationAr": "\"staff\" /stæf/ تعني: موظفين. مثال: Staff only"
+        },
+        {
+          "questionAr": "ما معنى \"expiry date\"؟",
+          "questionEn": "What does \"expiry date\" mean?",
+          "options": [
+            "تاريخ الانتهاء",
+            "مغلق",
+            "يومياً",
+            "مخرج"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"expiry date\" /ɪkˈspaɪəri deɪt/ تعني: تاريخ الانتهاء. مثال: Check the expiry date."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Exit = entrance",
-            "Exit = مخرج, Entrance = مدخل"
+            "Do not exceed = لا تزيد/لا تتجاوز",
+            "exceed /ɪkˈsiːd/"
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: Exit = مخرج, Entrance = مدخل — لا تخلط."
+          "explanationAr": "الصحيح: exceed /ɪkˈsiːd/ — كلمة مهمة في الأدوية."
         }
       ]
     }
@@ -12636,58 +12677,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (طفّه لو سمحت.)",
-          "questionEn": "Complete: ____, please.",
+          "questionAr": "أكمل الفراغ: (خلنا نطلع الليلة.)",
+          "questionEn": "Complete: Let's ____ tonight.",
           "options": [
-            "Turn it off",
-            "Turn off it",
-            "Turn it of"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: Turn it off. ساكن + متحرك = ربط مباشر (an apple → anapple). متحرك + متحرك = نضيف /j/ أو /w/ خفيفة (I am → I-y-am, go out → go-w-out). نفس الساكن مرتين = ننطقه مرة طويلة (big girl)."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (أقدر آخذ تفاحة؟)",
-          "questionEn": "Complete: Can I have ____?",
-          "options": [
-            "the apple an",
-            "an apple",
-            "a apple"
+            "go outside to",
+            "go out",
+            "out go"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: an apple. ساكن + متحرك = ربط مباشر (an apple → anapple). متحرك + متحرك = نضيف /j/ أو /w/ خفيفة (I am → I-y-am, go out → go-w-out). نفس الساكن مرتين = ننطقه مرة طويلة (big girl)."
+          "explanationAr": "الإجابة: go out. ساكن + متحرك = ربط مباشر (an apple → anapple). متحرك + متحرك = نضيف /j/ أو /w/ خفيفة (I am → I-y-am, go out → go-w-out). نفس الساكن مرتين = ننطقه مرة طويلة (big girl)."
         },
         {
-          "questionAr": "الربط الصحيح لـ an orange:",
-          "questionEn": "Linking 'an orange':",
+          "questionAr": "أكمل الفراغ: (شيله والبسه.)",
+          "questionEn": "Complete: ____ and put it on.",
           "options": [
-            "a-norange",
-            "an ʔorange",
-            "a orange"
+            "Pick it up",
+            "Pick it",
+            "Pick up it"
           ],
           "correctIndex": 0,
-          "explanationAr": "النون تنتقل للكلمة التالية."
+          "explanationAr": "الإجابة: Pick it up. ساكن + متحرك = ربط مباشر (an apple → anapple). متحرك + متحرك = نضيف /j/ أو /w/ خفيفة (I am → I-y-am, go out → go-w-out). نفس الساكن مرتين = ننطقه مرة طويلة (big girl)."
         },
         {
-          "questionAr": "أكمل: Pick ___",
-          "questionEn": "Complete: Pick ___",
+          "questionAr": "ما معنى \"look at\"؟",
+          "questionEn": "What does \"look at\" mean?",
           "options": [
-            "up it",
-            "it up",
-            "it"
+            "يطالع",
+            "ساعة",
+            "يطفي",
+            "يشيل/يرفع"
           ],
-          "correctIndex": 1,
-          "explanationAr": "Pick it up."
+          "correctIndex": 0,
+          "explanationAr": "\"look at\" /lʊk æt/ تعني: يطالع. مثال: Look at it!"
+        },
+        {
+          "questionAr": "ما معنى \"check in\"؟",
+          "questionEn": "What does \"check in\" mean?",
+          "options": [
+            "يطفي",
+            "يطالع",
+            "يسجل دخول",
+            "أول ما"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"check in\" /tʃɛk ɪn/ تعني: يسجل دخول. مثال: Check in online."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Turn / it / off (separated)",
-            "Turn_it_off /tɜːrnɪˈtɔːf/"
+            "Glottal stop before vowels: «إن ءِبِل»",
+            "an apple /əˈnæpəl/"
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: Turn_it_off /tɜːrnɪˈtɔːf/ — الفصل يخلي الكلام متقطع."
+          "explanationAr": "الصحيح: an apple /əˈnæpəl/ — تخلص من الهمزة بين الكلمات."
         }
       ]
     }
@@ -13245,58 +13288,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (سمك وبطاطس لو سمحت.)",
-          "questionEn": "Complete: Fish ____ chips, please.",
+          "questionAr": "أكمل الفراغ: (كوب قهوة لي.)",
+          "questionEn": "Complete: A cup ____ coffee for me.",
           "options": [
-            "end",
-            "and",
-            "an"
+            "of",
+            "for",
+            "off"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: and. في الجملة: and → /ən/ أو /n/، to → /tə/، of → /əv/، for → /fər/، can → /kən/، are → /ər/، was → /wəz/. القوية فقط عند التأكيد أو في آخر الجملة."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: of. في الجملة: and → /ən/ أو /n/، to → /tə/، of → /əv/، for → /fər/، can → /kən/، are → /ər/، was → /wəz/. القوية فقط عند التأكيد أو في آخر الجملة."
         },
         {
-          "questionAr": "أكمل الفراغ: (أبي أروح المدرسة.)",
-          "questionEn": "Complete: I want ____ go to school.",
+          "questionAr": "أكمل الفراغ: (أقدر أسبح. — صدق؟ إيه أقدر.)",
+          "questionEn": "Complete: I ____ swim. — Can you? Yes, I CAN.",
           "options": [
-            "two",
-            "to",
-            "too"
+            "can",
+            "can't",
+            "could"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: to. في الجملة: and → /ən/ أو /n/، to → /tə/، of → /əv/، for → /fər/، can → /kən/، are → /ər/، was → /wəz/. القوية فقط عند التأكيد أو في آخر الجملة."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: can. في الجملة: and → /ən/ أو /n/، to → /tə/، of → /əv/، for → /fər/، can → /kən/، are → /ər/، was → /wəz/. القوية فقط عند التأكيد أو في آخر الجملة."
         },
         {
-          "questionAr": "نطق and في salt and pepper:",
-          "questionEn": "'and' in salt and pepper:",
+          "questionAr": "ما معنى \"for\"؟",
+          "questionEn": "What does \"for\" mean?",
           "options": [
-            "/ænd/",
-            "/ən/",
-            "/ɛnd/"
+            "إلى/لـ",
+            "ملح وفلفل",
+            "من",
+            "لـ"
           ],
-          "correctIndex": 1,
-          "explanationAr": "ضعيفة."
+          "correctIndex": 3,
+          "explanationAr": "\"for\" /fər/ تعني: لـ. مثال: for you"
         },
         {
-          "questionAr": "متى can قوية؟",
-          "questionEn": "When is 'can' strong?",
+          "questionAr": "ما معنى \"can\"؟",
+          "questionEn": "What does \"can\" mean?",
           "options": [
-            "always",
-            "at the end / for emphasis",
-            "never"
+            "يقدر",
+            "و",
+            "صيغة ضعيفة",
+            "إلى/لـ"
           ],
-          "correctIndex": 1,
-          "explanationAr": "Yes, I CAN."
+          "correctIndex": 0,
+          "explanationAr": "\"can\" /kən/ تعني: يقدر. مثال: I can help."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Fish AND chips (strong)",
-            "fish 'n' chips /fɪʃən tʃɪps/"
+            "to /tə/",
+            "Every 'to' as «تو» long"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الصحيح: fish 'n' chips /fɪʃən tʃɪps/ — and ضعيفة."
+          "correctIndex": 0,
+          "explanationAr": "الصحيح: to /tə/ — صيغة قوية دايماً = نطق غير طبيعي."
         }
       ]
     }
@@ -13853,56 +13898,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (وين تسكن؟)",
-          "questionEn": "Complete: Where do you live? ____",
+          "questionAr": "أكمل الفراغ: (أحتاج بيض وحليب وخبز.)",
+          "questionEn": "Complete: I need eggs ↗, milk ↗, and ____.",
           "options": [
-            "↗",
-            "→",
-            "↘"
+            "bread ↘",
+            "bread ↗",
+            "bread →"
           ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: ↘. ↘ نازل: جمل خبرية وأسئلة wh. ↗ صاعد: أسئلة نعم/لا وعدم اكتمال الكلام. ↘↗ نازل-صاعد: تحفظ أو أدب. في القوائم: صاعد ↗ لكل عنصر ونازل ↘ للأخير."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: bread ↘. ↘ نازل: جمل خبرية وأسئلة wh. ↗ صاعد: أسئلة نعم/لا وعدم اكتمال الكلام. ↘↗ نازل-صاعد: تحفظ أو أدب. في القوائم: صاعد ↗ لكل عنصر ونازل ↘ للأخير."
         },
         {
-          "questionAr": "أكمل الفراغ: (تسكن الرياض؟)",
-          "questionEn": "Complete: Do you live in Riyadh? ____",
+          "questionAr": "أكمل الفراغ: (حلو... بس غالي.)",
+          "questionEn": "Complete: It's nice ____... but expensive.",
           "options": [
-            "↘",
-            "→",
-            "↗"
+            "↘↗",
+            "↘↘",
+            "↗↗"
           ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: ↗. ↘ نازل: جمل خبرية وأسئلة wh. ↗ صاعد: أسئلة نعم/لا وعدم اكتمال الكلام. ↘↗ نازل-صاعد: تحفظ أو أدب. في القوائم: صاعد ↗ لكل عنصر ونازل ↘ للأخير."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: ↘↗. ↘ نازل: جمل خبرية وأسئلة wh. ↗ صاعد: أسئلة نعم/لا وعدم اكتمال الكلام. ↘↗ نازل-صاعد: تحفظ أو أدب. في القوائم: صاعد ↗ لكل عنصر ونازل ↘ للأخير."
         },
         {
-          "questionAr": "Where are you going? تنغيمها:",
-          "questionEn": "Intonation of 'Where are you going?':",
+          "questionAr": "ما معنى \"polite\"؟",
+          "questionEn": "What does \"polite\" mean?",
           "options": [
-            "↗",
-            "↘"
+            "مهذب",
+            "شك",
+            "صعود",
+            "متأكد"
           ],
-          "correctIndex": 1,
-          "explanationAr": "wh ⇐ ↘."
+          "correctIndex": 0,
+          "explanationAr": "\"polite\" /pəˈlaɪt/ تعني: مهذب. مثال: a polite request"
         },
         {
-          "questionAr": "آخر عنصر في القائمة:",
-          "questionEn": "Last item in a list:",
+          "questionAr": "ما معنى \"bored\"؟",
+          "questionEn": "What does \"bored\" mean?",
           "options": [
-            "↗",
-            "↘"
+            "ملول",
+            "شك",
+            "نبرة",
+            "مهتم"
           ],
-          "correctIndex": 1,
-          "explanationAr": "↘ يقفل القائمة."
+          "correctIndex": 0,
+          "explanationAr": "\"bored\" /bɔːrd/ تعني: ملول. مثال: You sound bored."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Where do you live? ↘",
-            "Where do you live? ↗ (rising)"
+            "Flat Arabic-style intonation for English questions",
+            "Clear ↗ on yes/no questions"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: Where do you live? ↘ — أسئلة wh نازلة."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: Clear ↗ on yes/no questions — بدون صعود ممكن ينفهم سؤالك كجملة."
         }
       ]
     }
@@ -14461,58 +14510,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (مترو الرياض ينقل مليون راكب في أول شهر.)",
-          "questionEn": "Complete: Riyadh Metro carries one million ____ in first month.",
+          "questionAr": "أكمل الفراغ: (المسؤولون يقولون الزحمة نزلت ١٠٪.)",
+          "questionEn": "Complete: Officials say traffic has ____ by 10%.",
           "options": [
-            "passages",
-            "passports",
-            "passengers"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: passengers. Skimming: اقرأ العنوان، الجملة الأولى من كل فقرة، والأرقام والأسماء. تجاهل التفاصيل. اسأل: من؟ ماذا؟ أين؟ متى؟"
-        },
-        {
-          "questionAr": "أكمل الفراغ: (الخط الجديد افتتح يوم الأحد.)",
-          "questionEn": "Complete: The new line ____ on Sunday.",
-          "options": [
-            "opens",
-            "open",
-            "opened"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: opened. Skimming: اقرأ العنوان، الجملة الأولى من كل فقرة، والأرقام والأسماء. تجاهل التفاصيل. اسأل: من؟ ماذا؟ أين؟ متى؟"
-        },
-        {
-          "questionAr": "أول خطوة في skimming:",
-          "questionEn": "First step in skimming:",
-          "options": [
-            "read every word",
-            "read the headline",
-            "use a dictionary"
+            "droped",
+            "dropped",
+            "dropping"
           ],
           "correctIndex": 1,
-          "explanationAr": "العنوان."
+          "explanationAr": "الإجابة: dropped. Skimming: اقرأ العنوان، الجملة الأولى من كل فقرة، والأرقام والأسماء. تجاهل التفاصيل. اسأل: من؟ ماذا؟ أين؟ متى؟"
         },
         {
-          "questionAr": "ملخص جيد للخبر:",
-          "questionEn": "Good one-sentence summary:",
+          "questionAr": "أكمل الفراغ: (الخبراء يتوقعون العدد يتضاعف السنة الجاية.)",
+          "questionEn": "Complete: Experts expect the number to ____ next year.",
           "options": [
-            "The metro is new.",
-            "In its first month, the Riyadh Metro carried over a million people and reduced traffic.",
-            "Officials say."
+            "doubled",
+            "doubt",
+            "double"
           ],
-          "correctIndex": 1,
-          "explanationAr": "من، ماذا، النتيجة."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: double. Skimming: اقرأ العنوان، الجملة الأولى من كل فقرة، والأرقام والأسماء. تجاهل التفاصيل. اسأل: من؟ ماذا؟ أين؟ متى؟"
+        },
+        {
+          "questionAr": "ما معنى \"drop\"؟",
+          "questionEn": "What does \"drop\" mean?",
+          "options": [
+            "راكب",
+            "ساكن/مقيم",
+            "ينخفض",
+            "يتوقع"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"drop\" /drɑːp/ تعني: ينخفض. مثال: Prices dropped."
+        },
+        {
+          "questionAr": "ما معنى \"expect\"؟",
+          "questionEn": "What does \"expect\" mean?",
+          "options": [
+            "ينخفض",
+            "الفكرة العامة",
+            "يتوقع",
+            "مليار"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"expect\" /ɪkˈspɛkt/ تعني: يتوقع. مثال: We expect rain."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Read headline + first sentences first",
-            "Reading every word slowly"
+            "Translating the whole article first",
+            "Skim in English first, then check details"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: Read headline + first sentences first — الهدف الفكرة العامة مو التفاصيل."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: Skim in English first, then check details — الترجمة الكاملة بطيئة."
         }
       ]
     }
@@ -15071,58 +15122,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (الرحلة SV1023 تقلع ١٤:٣٥ من بوابة B7.)",
-          "questionEn": "Complete: Flight SV1023 ____ at 14:35 from Gate B7.",
+          "questionAr": "أكمل الفراغ: (التذاكر: الكبار ٥٠ ريال والأطفال تحت ١٢ مجاناً.)",
+          "questionEn": "Complete: Tickets: adults 50 SAR, children under 12 ____.",
           "options": [
-            "delays",
-            "departs",
-            "arrives"
+            "three",
+            "free",
+            "fee"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: departs. Scanning: حدد وش تدور (رقم؟ وقت؟ اسم؟)، وخل عينك تمشي بسرعة لين تلقى الشكل المناسب (أرقام، حروف كبيرة). لا تقرأ الباقي."
+          "explanationAr": "الإجابة: free. Scanning: حدد وش تدور (رقم؟ وقت؟ اسم؟)، وخل عينك تمشي بسرعة لين تلقى الشكل المناسب (أرقام، حروف كبيرة). لا تقرأ الباقي."
         },
         {
-          "questionAr": "أكمل الفراغ: (الأبواب تفتح ٧ مساءً والعرض يبدأ ٨.)",
-          "questionEn": "Complete: Doors open at 7 pm; the show ____ at 8.",
+          "questionAr": "أكمل الفراغ: (العرض ساري لين ٣٠ نوفمبر.)",
+          "questionEn": "Complete: Offer ____ until 30 November.",
           "options": [
-            "stars",
-            "starts",
-            "stops"
+            "invalid",
+            "value",
+            "valid"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: starts. Scanning: حدد وش تدور (رقم؟ وقت؟ اسم؟)، وخل عينك تمشي بسرعة لين تلقى الشكل المناسب (أرقام، حروف كبيرة). لا تقرأ الباقي."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: valid. Scanning: حدد وش تدور (رقم؟ وقت؟ اسم؟)، وخل عينك تمشي بسرعة لين تلقى الشكل المناسب (أرقام، حروف كبيرة). لا تقرأ الباقي."
         },
         {
-          "questionAr": "متى قطار المدينة الأول؟",
-          "questionEn": "First Madinah train?",
+          "questionAr": "ما معنى \"adult\"؟",
+          "questionEn": "What does \"adult\" mean?",
           "options": [
-            "09:10",
-            "12:30",
-            "14:00"
+            "بالغ",
+            "حجز",
+            "مجاني",
+            "مغادرة/إقلاع"
           ],
           "correctIndex": 0,
-          "explanationAr": "HHR 52 الساعة ٠٩:١٠."
+          "explanationAr": "\"adult\" /ˈædʌlt/ تعني: بالغ. مثال: adult ticket"
         },
         {
-          "questionAr": "departs تعني:",
-          "questionEn": "'departs' means:",
+          "questionAr": "ما معنى \"free\"؟",
+          "questionEn": "What does \"free\" mean?",
           "options": [
-            "توصل",
-            "تقلع/تغادر",
-            "تتأخر"
+            "مجاني",
+            "في الموعد",
+            "يمسح/يبحث بسرعة",
+            "حجز"
           ],
-          "correctIndex": 1,
-          "explanationAr": "تغادر."
+          "correctIndex": 0,
+          "explanationAr": "\"free\" /friː/ تعني: مجاني. مثال: Entry is free."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Reading the whole timetable top to bottom",
-            "Jump to the line with your flight number"
+            "Reading 24-hour time as 12-hour",
+            "14:00 = 2 pm"
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: Jump to the line with your flight number — ابحث عن المفتاح مباشرة."
+          "explanationAr": "الصحيح: 14:00 = 2 pm — خطأ ممكن يفوتك القطار!"
         }
       ]
     }
@@ -15192,7 +15245,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
     "speakingChallenge": {
       "promptAr": "قل لسارة: A little bit of water is better, get it?",
       "promptEn": "Say: A little bit of water is better, get it?",
-      "saraQuestionAr": "قلها بالأمريكي!",
+      "saraQuestionAr": "قلها بالنطق الأمريكي!",
       "saraQuestionEn": "Say it the American way!",
       "recommendedResponseEn": "A little bit of water is better, get it?"
     },
@@ -15681,58 +15734,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (ممكن ماي؟)",
-          "questionEn": "Complete: Can I have some ____?",
+          "questionAr": "أكمل الفراغ: (الرياض مدينة كبيرة.)",
+          "questionEn": "Complete: Riyadh is a big ____.",
           "options": [
-            "waiter",
-            "wetter",
-            "water"
+            "kitty",
+            "sitty",
+            "city"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: water. إذا جاء t أو tt بين صوتين متحركين والمقطع بعده غير منبور، ينطق /ɾ/ (لمسة سريعة): water, better, city, get it. لا تحصل إذا كان المقطع منبوراً: hoTEL."
+          "explanationAr": "الإجابة: city. إذا جاء t أو tt بين صوتين متحركين والمقطع بعده غير منبور، ينطق /ɾ/ (لمسة سريعة): water, better, city, get it. لا تحصل إذا كان المقطع منبوراً: hoTEL."
         },
         {
-          "questionAr": "أكمل الفراغ: (هذا أحسن.)",
-          "questionEn": "Complete: This one is ____.",
+          "questionAr": "أكمل الفراغ: (خذه! البسه!)",
+          "questionEn": "Complete: ____! Put it on!",
           "options": [
-            "better",
-            "bitter",
-            "butter"
+            "Get it",
+            "Get",
+            "Got"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: better. إذا جاء t أو tt بين صوتين متحركين والمقطع بعده غير منبور، ينطق /ɾ/ (لمسة سريعة): water, better, city, get it. لا تحصل إذا كان المقطع منبوراً: hoTEL."
+          "explanationAr": "الإجابة: Get it. إذا جاء t أو tt بين صوتين متحركين والمقطع بعده غير منبور، ينطق /ɾ/ (لمسة سريعة): water, better, city, get it. لا تحصل إذا كان المقطع منبوراً: hoTEL."
         },
         {
-          "questionAr": "أي كلمة فيها flap T (أمريكي)؟",
-          "questionEn": "Which has a flap T (US)?",
+          "questionAr": "ما معنى \"little\"؟",
+          "questionEn": "What does \"little\" mean?",
           "options": [
-            "hotel",
-            "better",
-            "attack"
+            "أفضل",
+            "ماء",
+            "صغير/قليل",
+            "رسالة/حرف"
           ],
-          "correctIndex": 1,
-          "explanationAr": "better."
+          "correctIndex": 2,
+          "explanationAr": "\"little\" /ˈlɪɾəl/ تعني: صغير/قليل. مثال: a little bit"
         },
         {
-          "questionAr": "Get it? (US) تنسمع:",
-          "questionEn": "'Get it?' (US) sounds like:",
+          "questionAr": "ما معنى \"party\"؟",
+          "questionEn": "What does \"party\" mean?",
           "options": [
-            "/ɡɛt ɪt/ separated",
-            "/ɡɛɾɪt/",
-            "/ɡɪt/"
+            "ماء",
+            "صغير/قليل",
+            "جميل",
+            "حفلة"
           ],
-          "correctIndex": 1,
-          "explanationAr": "flap + ربط."
+          "correctIndex": 3,
+          "explanationAr": "\"party\" /ˈpɑːrɾi/ تعني: حفلة. مثال: a birthday party"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Choose one accent and be consistent",
-            "Hard British T in an American accent mix"
+            "«واتِر» with strong t in US conversation",
+            "Either is fine; but recognise /ˈwɑːɾər/"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: Choose one accent and be consistent — الاثنين صح، بس لا تخلط بشكل غريب."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: Either is fine; but recognise /ˈwɑːɾər/ — مهم للفهم أكثر من النطق."
         }
       ]
     }
@@ -15802,7 +15857,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
     "speakingChallenge": {
       "promptAr": "حوّل حوار الصديق لإنجليزي رسمي كامل.",
       "promptEn": "Convert the friends' chat into full standard English.",
-      "saraQuestionAr": "Whatcha doing? Wanna grab food? I gotta go.",
+      "saraQuestionAr": "وش معنى: Whatcha doing? Wanna grab food? I gotta go؟",
       "saraQuestionEn": "Whatcha doing? Wanna grab food? I gotta go.",
       "recommendedResponseEn": "What are you doing? Do you want to get some food? I have got to go."
     },
@@ -15892,72 +15947,82 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       {
         "word": "gonna",
         "ipa": "/ˈɡʌnə/",
-        "ar": "= going to",
+        "ar": "راح / بـ (للمستقبل)",
         "exampleEn": "I'm gonna eat.",
-        "exampleAr": "باكل."
+        "exampleAr": "باكل.",
+        "note": "= going to"
       },
       {
         "word": "wanna",
         "ipa": "/ˈwɑːnə/",
-        "ar": "= want to",
+        "ar": "يبي",
         "exampleEn": "Wanna play?",
-        "exampleAr": "تبي تلعب؟"
+        "exampleAr": "تبي تلعب؟",
+        "note": "= want to"
       },
       {
         "word": "gotta",
         "ipa": "/ˈɡɑːɾə/",
-        "ar": "= got to (لازم)",
+        "ar": "لازم",
         "exampleEn": "I gotta run.",
-        "exampleAr": "لازم أمشي."
+        "exampleAr": "لازم أمشي.",
+        "note": "= (have) got to"
       },
       {
         "word": "dunno",
         "ipa": "/dəˈnoʊ/",
-        "ar": "= don't know",
+        "ar": "ما أدري",
         "exampleEn": "I dunno.",
-        "exampleAr": "ما أدري."
+        "exampleAr": "ما أدري.",
+        "note": "= I don't know"
       },
       {
         "word": "lemme",
         "ipa": "/ˈlɛmi/",
-        "ar": "= let me",
+        "ar": "خلني",
         "exampleEn": "Lemme help.",
-        "exampleAr": "خلني أساعد."
+        "exampleAr": "خلني أساعد.",
+        "note": "= let me"
       },
       {
         "word": "gimme",
         "ipa": "/ˈɡɪmi/",
-        "ar": "= give me",
+        "ar": "عطني",
         "exampleEn": "Gimme a sec.",
-        "exampleAr": "عطني ثانية."
+        "exampleAr": "عطني ثانية.",
+        "note": "= give me"
       },
       {
         "word": "kinda",
         "ipa": "/ˈkaɪndə/",
-        "ar": "= kind of (نوعاً ما)",
+        "ar": "نوعاً ما / شوي",
         "exampleEn": "It's kinda cold.",
-        "exampleAr": "بارد شوي."
+        "exampleAr": "بارد شوي.",
+        "note": "= kind of"
       },
       {
-        "word": "y'all",
-        "ipa": "/jɔːl/",
-        "ar": "= you all (أمريكي جنوبي)",
-        "exampleEn": "Y'all ready?",
-        "exampleAr": "جاهزين؟"
+        "word": "'cause",
+        "ipa": "/kəz/",
+        "ar": "لأن",
+        "exampleEn": "I'm tired 'cause I slept late.",
+        "exampleAr": "تعبان لأني نمت متأخر.",
+        "note": "= because (casual)"
       },
       {
         "word": "whatcha",
         "ipa": "/ˈwʌtʃə/",
-        "ar": "= what are you / what do you",
+        "ar": "وش (تسوي/تبي)",
         "exampleEn": "Whatcha doing?",
-        "exampleAr": "وش تسوي؟"
+        "exampleAr": "وش تسوي؟",
+        "note": "= what are you / what do you"
       },
       {
-        "word": "outta",
-        "ipa": "/ˈaʊɾə/",
-        "ar": "= out of",
-        "exampleEn": "Get outta here!",
-        "exampleAr": "مستحيل!/اطلع!"
+        "word": "gotcha",
+        "ipa": "/ˈɡɑːtʃə/",
+        "ar": "فهمت عليك",
+        "exampleEn": "Gotcha, see you at five.",
+        "exampleAr": "فهمت، أشوفك الخمسة.",
+        "note": "= (I) got you = I understand"
       }
     ],
     "grammarFocus": {
@@ -16081,14 +16146,14 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "promptEn": "What does \"gonna\" mean?",
           "promptAr": "ما معنى \"gonna\"؟",
           "options": [
-            "= got to (لازم)",
-            "= you all (أمريكي جنوبي)",
-            "= what are you / what do you",
-            "= going to"
+            "لازم",
+            "لأن",
+            "وش (تسوي/تبي)",
+            "راح / بـ (للمستقبل)"
           ],
           "correctIndex": 3,
-          "answer": "= going to",
-          "explanationAr": "\"gonna\" /ˈɡʌnə/ تعني: = going to. مثال: I'm gonna eat."
+          "answer": "راح / بـ (للمستقبل)",
+          "explanationAr": "\"gonna\" /ˈɡʌnə/ تعني: راح / بـ (للمستقبل). مثال: I'm gonna eat."
         },
         {
           "id": "srp_327_e2",
@@ -16096,14 +16161,14 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "promptEn": "What does \"wanna\" mean?",
           "promptAr": "ما معنى \"wanna\"؟",
           "options": [
-            "= what are you / what do you",
-            "= let me",
-            "= kind of (نوعاً ما)",
-            "= want to"
+            "وش (تسوي/تبي)",
+            "خلني",
+            "نوعاً ما / شوي",
+            "يبي"
           ],
           "correctIndex": 3,
-          "answer": "= want to",
-          "explanationAr": "\"wanna\" /ˈwɑːnə/ تعني: = want to. مثال: Wanna play?"
+          "answer": "يبي",
+          "explanationAr": "\"wanna\" /ˈwɑːnə/ تعني: يبي. مثال: Wanna play?"
         },
         {
           "id": "srp_327_e3",
@@ -16111,14 +16176,14 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "promptEn": "What does \"gotta\" mean?",
           "promptAr": "ما معنى \"gotta\"؟",
           "options": [
-            "= give me",
-            "= you all (أمريكي جنوبي)",
-            "= got to (لازم)",
-            "= going to"
+            "عطني",
+            "لأن",
+            "لازم",
+            "راح / بـ (للمستقبل)"
           ],
           "correctIndex": 2,
-          "answer": "= got to (لازم)",
-          "explanationAr": "\"gotta\" /ˈɡɑːɾə/ تعني: = got to (لازم). مثال: I gotta run."
+          "answer": "لازم",
+          "explanationAr": "\"gotta\" /ˈɡɑːɾə/ تعني: لازم. مثال: I gotta run."
         },
         {
           "id": "srp_327_e4",
@@ -16126,14 +16191,14 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "promptEn": "What does \"dunno\" mean?",
           "promptAr": "ما معنى \"dunno\"؟",
           "options": [
-            "= what are you / what do you",
-            "= out of",
-            "= you all (أمريكي جنوبي)",
-            "= don't know"
+            "وش (تسوي/تبي)",
+            "فهمت عليك",
+            "لأن",
+            "ما أدري"
           ],
           "correctIndex": 3,
-          "answer": "= don't know",
-          "explanationAr": "\"dunno\" /dəˈnoʊ/ تعني: = don't know. مثال: I dunno."
+          "answer": "ما أدري",
+          "explanationAr": "\"dunno\" /dəˈnoʊ/ تعني: ما أدري. مثال: I dunno."
         }
       ],
       "medium": [
@@ -16293,58 +16358,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (بتصل عليك بعدين.)",
-          "questionEn": "Complete: I'm ____ call you later.",
+          "questionAr": "أكمل الفراغ: (لازم أمشي، أمي تنتظر.)",
+          "questionEn": "Complete: I ____ go, my mom's waiting.",
           "options": [
-            "going",
-            "gonna",
-            "gona"
+            "goto",
+            "gotta",
+            "got"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: gonna. في الكلام العامي السريع: going to → gonna، want to → wanna، got to → gotta، I don't know → dunno، let me → lemme، give me → gimme. والحذف: t و d تختفي بين سواكن (las(t) night، han(d)bag). هذي للسماع والكلام العفوي فقط، مو للكتابة الرسمية."
+          "explanationAr": "الإجابة: gotta. في الكلام العامي السريع: going to → gonna، want to → wanna، got to → gotta، I don't know → dunno، let me → lemme، give me → gimme. والحذف: t و d تختفي بين سواكن (las(t) night، han(d)bag). هذي للسماع والكلام العفوي فقط، مو للكتابة الرسمية."
         },
         {
-          "questionAr": "أكمل الفراغ: (تبي تجي؟)",
-          "questionEn": "Complete: Do you ____ come?",
+          "questionAr": "أكمل الفراغ: (خلني أشوف جوالك.)",
+          "questionEn": "Complete: ____ see your phone.",
           "options": [
-            "wanna",
-            "want",
-            "wants"
+            "Let",
+            "Leme",
+            "Lemme"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: wanna. في الكلام العامي السريع: going to → gonna، want to → wanna، got to → gotta، I don't know → dunno، let me → lemme، give me → gimme. والحذف: t و d تختفي بين سواكن (las(t) night، han(d)bag). هذي للسماع والكلام العفوي فقط، مو للكتابة الرسمية."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: Lemme. في الكلام العامي السريع: going to → gonna، want to → wanna، got to → gotta، I don't know → dunno، let me → lemme، give me → gimme. والحذف: t و d تختفي بين سواكن (las(t) night، han(d)bag). هذي للسماع والكلام العفوي فقط، مو للكتابة الرسمية."
         },
         {
-          "questionAr": "gotta =",
-          "questionEn": "'gotta' =",
+          "questionAr": "ما معنى \"lemme\"؟",
+          "questionEn": "What does \"lemme\" mean?",
           "options": [
-            "got a",
-            "have got to (لازم)",
-            "go to"
+            "راح / بـ (للمستقبل)",
+            "لأن",
+            "عطني",
+            "خلني"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"lemme\" /ˈlɛmi/ تعني: خلني. مثال: Lemme help."
+        },
+        {
+          "questionAr": "ما معنى \"gimme\"؟",
+          "questionEn": "What does \"gimme\" mean?",
+          "options": [
+            "لازم",
+            "عطني",
+            "لأن",
+            "يبي"
           ],
           "correctIndex": 1,
-          "explanationAr": "لازم."
-        },
-        {
-          "questionAr": "الصيغة الكاملة لـ dunno:",
-          "questionEn": "Full form of 'dunno':",
-          "options": [
-            "don't know",
-            "do not now",
-            "done now"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "I don't know."
+          "explanationAr": "\"gimme\" /ˈɡɪmi/ تعني: عطني. مثال: Gimme a sec."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I'm going to send the report.",
-            "Writing 'gonna' in an email to your boss"
+            "Use full forms in exams",
+            "Using slang in IELTS/formal speaking"
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: I'm going to send the report. — الاختصارات العامية للكلام فقط."
+          "explanationAr": "الصحيح: Use full forms in exams — الممتحن ممكن يعتبرها غير رسمية."
         }
       ]
     }
@@ -16414,7 +16481,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
     "speakingChallenge": {
       "promptAr": "حلل مع سارة نبرة كاتب مقال المهرجان.",
       "promptEn": "Analyse the festival writer's tone with Sara.",
-      "saraQuestionAr": "Is the writer happy with the festival? How do you know?",
+      "saraQuestionAr": "هل الكاتب راضي عن المهرجان؟ وكيف عرفت؟",
       "saraQuestionEn": "Is the writer happy with the festival? How do you know?",
       "recommendedResponseEn": "Not really. The writer is mildly critical. He uses 'claimed' and 'so-called', which show doubt, but he's fair because he praises the food area. He implies the festival should move to winter."
     },
@@ -16903,58 +16970,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (الشركة تدّعي إن المنتج آمن.)",
-          "questionEn": "Complete: The company ____ the product is safe.",
+          "questionAr": "أكمل الفراغ: (يمكن الخطة كانت طموحة زيادة شوي.)",
+          "questionEn": "Complete: ____ the plan was a little too ambitious.",
           "options": [
-            "claims",
-            "proves",
-            "shows"
+            "Perhaps",
+            "Clearly",
+            "Certainly"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: claims. الاستنتاج = دليل من النص + معرفتك. ابحث عن: الصفات (shocking, impressive)، الأفعال الرأيية (claim, admit)، الكلمات المخففة (perhaps, seems)، والمقارنات. اسأل: ليش اختار الكاتب هالكلمة؟"
+          "explanationAr": "الإجابة: Perhaps. الاستنتاج = دليل من النص + معرفتك. ابحث عن: الصفات (shocking, impressive)، الأفعال الرأيية (claim, admit)، الكلمات المخففة (perhaps, seems)، والمقارنات. اسأل: ليش اختار الكاتب هالكلمة؟"
         },
         {
-          "questionAr": "أكمل الفراغ: (المفاجئ إن ناس قليلين لاحظوا التغيير.)",
-          "questionEn": "Complete: ____, few people noticed the change.",
+          "questionAr": "أكمل الفراغ: (اجتماع ثاني انلغى بعد.)",
+          "questionEn": "Complete: ____ meeting was cancelled.",
           "options": [
-            "Naturally",
-            "Surprisingly",
-            "Obviously"
+            "A new",
+            "One",
+            "Yet another"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: Surprisingly. الاستنتاج = دليل من النص + معرفتك. ابحث عن: الصفات (shocking, impressive)، الأفعال الرأيية (claim, admit)، الكلمات المخففة (perhaps, seems)، والمقارنات. اسأل: ليش اختار الكاتب هالكلمة؟"
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: Yet another. الاستنتاج = دليل من النص + معرفتك. ابحث عن: الصفات (shocking, impressive)، الأفعال الرأيية (claim, admit)، الكلمات المخففة (perhaps, seems)، والمقارنات. اسأل: ليش اختار الكاتب هالكلمة؟"
         },
         {
-          "questionAr": "«claimed» توحي بأن الكاتب:",
-          "questionEn": "'claimed' suggests the writer:",
+          "questionAr": "ما معنى \"modest\"؟",
+          "questionEn": "What does \"modest\" mean?",
           "options": [
-            "agrees",
-            "has doubts",
-            "is neutral"
+            "طموح",
+            "ما يسمى",
+            "متشكك",
+            "متواضع"
           ],
-          "correctIndex": 1,
-          "explanationAr": "يشك."
+          "correctIndex": 3,
+          "explanationAr": "\"modest\" /ˈmɑːdɪst/ تعني: متواضع. مثال: modest results"
         },
         {
-          "questionAr": "دليل على الإنصاف في النص:",
-          "questionEn": "Evidence of balance:",
+          "questionAr": "ما معنى \"tone\"؟",
+          "questionEn": "What does \"tone\" mean?",
           "options": [
-            "half empty",
-            "To be fair, the food area was impressive",
-            "45-degree heat"
+            "نبرة",
+            "ما يسمى",
+            "يدّعي",
+            "يعترف"
           ],
-          "correctIndex": 1,
-          "explanationAr": "To be fair."
+          "correctIndex": 0,
+          "explanationAr": "\"tone\" /toʊn/ تعني: نبرة. مثال: a critical tone"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "claims = proves",
-            "claims = يدّعي (الكاتب يشك)"
+            "Taking 'world-class' in quotes literally",
+            "Quotes can signal irony"
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: claims = يدّعي (الكاتب يشك) — اختيار الفعل يبين رأي الكاتب."
+          "explanationAr": "الصحيح: Quotes can signal irony — الكاتب ينقل الكلمة ويشكك فيها."
         }
       ]
     }
@@ -17024,7 +17093,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
     "speakingChallenge": {
       "promptAr": "صحح رسالة سارة.",
       "promptEn": "Correct Sara's message.",
-      "saraQuestionAr": "Your invited! Their will be food, and its free to.",
+      "saraQuestionAr": "صحح: Your invited! Their will be food, and its free to.",
       "saraQuestionEn": "Your invited! Their will be food, and its free to.",
       "recommendedResponseEn": "You're invited! There will be food, and it's free too."
     },
@@ -17128,9 +17197,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       {
         "word": "they're",
         "ipa": "/ðɛr/",
-        "ar": "هم (they are)",
+        "ar": "هم (صيغة مختصرة)",
         "exampleEn": "They're late.",
-        "exampleAr": "هم متأخرين."
+        "exampleAr": "هم متأخرين.",
+        "note": "= they are"
       },
       {
         "word": "your",
@@ -17142,9 +17212,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       {
         "word": "you're",
         "ipa": "/jʊr/",
-        "ar": "أنت (you are)",
+        "ar": "أنت (صيغة مختصرة)",
         "exampleEn": "You're right.",
-        "exampleAr": "معك حق."
+        "exampleAr": "معك حق.",
+        "note": "= you are"
       },
       {
         "word": "its",
@@ -17156,9 +17227,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       {
         "word": "it's",
         "ipa": "/ɪts/",
-        "ar": "هو (it is)",
+        "ar": "هو / هي (صيغة مختصرة)",
         "exampleEn": "It's late.",
-        "exampleAr": "متأخر."
+        "exampleAr": "متأخر.",
+        "note": "= it is / it has"
       },
       {
         "word": "whose",
@@ -17317,7 +17389,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "promptEn": "What does \"their\" mean?",
           "promptAr": "ما معنى \"their\"؟",
           "options": [
-            "هم (they are)",
+            "هم (صيغة مختصرة)",
             "لمن",
             "حقهم",
             "حقك"
@@ -17334,12 +17406,12 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "options": [
             "طقس",
             "هناك/يوجد",
-            "هم (they are)",
+            "هم (صيغة مختصرة)",
             "لمن"
           ],
           "correctIndex": 2,
-          "answer": "هم (they are)",
-          "explanationAr": "\"they're\" /ðɛr/ تعني: هم (they are). مثال: They're late."
+          "answer": "هم (صيغة مختصرة)",
+          "explanationAr": "\"they're\" /ðɛr/ تعني: هم (صيغة مختصرة). مثال: They're late."
         },
         {
           "id": "srp_329_e4",
@@ -17348,7 +17420,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "promptAr": "ما معنى \"your\"؟",
           "options": [
             "حقك",
-            "أنت (you are)",
+            "أنت (صيغة مختصرة)",
             "طقس",
             "حقهم"
           ],
@@ -17497,16 +17569,16 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "fromLessonId": "srp_323"
       },
       {
-        "questionAr": "ما معنى \"outta\"؟",
-        "questionEn": "What does \"outta\" mean?",
+        "questionAr": "ما معنى \"gotcha\"؟",
+        "questionEn": "What does \"gotcha\" mean?",
         "options": [
-          "= kind of (نوعاً ما)",
-          "= going to",
-          "= out of",
-          "= let me"
+          "نوعاً ما / شوي",
+          "راح / بـ (للمستقبل)",
+          "فهمت عليك",
+          "خلني"
         ],
         "correctIndex": 2,
-        "explanationAr": "\"outta\" /ˈaʊɾə/ تعني: = out of. مثال: Get outta here!",
+        "explanationAr": "\"gotcha\" /ˈɡɑːtʃə/ تعني: فهمت عليك. مثال: Gotcha, see you at five.",
         "fromLessonId": "srp_327"
       }
     ],
@@ -17514,58 +17586,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (هم في بيتهم هناك.)",
-          "questionEn": "Complete: They're at ____ house over there.",
-          "options": [
-            "there",
-            "their",
-            "they're"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: their. there = هناك/يوجد، their = حقهم، they're = they are. your = حقك، you're = you are. its = حقه (لغير العاقل)، it's = it is. to = إلى، too = أيضاً/زيادة، two = ٢. اختبار سريع: هل تقدر تقول الصيغة الكاملة (they are / you are / it is)؟"
-        },
-        {
-          "questionAr": "أكمل الفراغ: (بتحب هديتك.)",
-          "questionEn": "Complete: You're going to love ____ gift.",
-          "options": [
-            "yore",
-            "your",
-            "you're"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: your. there = هناك/يوجد، their = حقهم، they're = they are. your = حقك، you're = you are. its = حقه (لغير العاقل)، it's = it is. to = إلى، too = أيضاً/زيادة، two = ٢. اختبار سريع: هل تقدر تقول الصيغة الكاملة (they are / you are / it is)؟"
-        },
-        {
-          "questionAr": "أكمل: ___ going to be late.",
-          "questionEn": "Complete: ___ going to be late.",
-          "options": [
-            "Their",
-            "There",
-            "They're"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "They are going."
-        },
-        {
-          "questionAr": "أكمل: The dog wagged ___ tail.",
-          "questionEn": "Complete: The dog wagged ___ tail.",
+          "questionAr": "أكمل الفراغ: (تمطر والقطة جرحت رجلها.)",
+          "questionEn": "Complete: It's raining and the cat hurt ____ leg.",
           "options": [
             "it's",
-            "its",
-            "its'"
+            "its'",
+            "its"
           ],
-          "correctIndex": 1,
-          "explanationAr": "ملكية ⇐ its."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: its. there = هناك/يوجد، their = حقهم، they're = they are. your = حقك، you're = you are. its = حقه (لغير العاقل)، it's = it is. to = إلى، too = أيضاً/زيادة، two = ٢. اختبار سريع: هل تقدر تقول الصيغة الكاملة (they are / you are / it is)؟"
+        },
+        {
+          "questionAr": "أكمل الفراغ: (عندي تذكرتين بعد.)",
+          "questionEn": "Complete: I have ____ tickets, too.",
+          "options": [
+            "two",
+            "too",
+            "to"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: two. there = هناك/يوجد، their = حقهم، they're = they are. your = حقك، you're = you are. its = حقه (لغير العاقل)، it's = it is. to = إلى، too = أيضاً/زيادة، two = ٢. اختبار سريع: هل تقدر تقول الصيغة الكاملة (they are / you are / it is)؟"
+        },
+        {
+          "questionAr": "ما معنى \"you're\"؟",
+          "questionEn": "What does \"you're\" mean?",
+          "options": [
+            "حقه (لغير العاقل)",
+            "حقك",
+            "أنت (صيغة مختصرة)",
+            "إذا/ما إذا"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"you're\" /jʊr/ تعني: أنت (صيغة مختصرة). مثال: You're right."
+        },
+        {
+          "questionAr": "ما معنى \"its\"؟",
+          "questionEn": "What does \"its\" mean?",
+          "options": [
+            "إذا/ما إذا",
+            "لمن",
+            "حقه (لغير العاقل)",
+            "هم (صيغة مختصرة)"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"its\" /ɪts/ تعني: حقه (لغير العاقل). مثال: its colour"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "You're welcome.",
-            "Your welcome."
+            "Using spell-check as a safety net",
+            "Spell-check misses homophones!"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: You're welcome. — you are welcome."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: Spell-check misses homophones! — المدقق ما يكتشف their بدل there."
         }
       ]
     }
@@ -17635,7 +17709,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
     "speakingChallenge": {
       "promptAr": "ألقِ خطاب التخرج على سارة بالعلامات.",
       "promptEn": "Deliver the graduation speech to Sara using the marks.",
-      "saraQuestionAr": "Ready? The stage is yours!",
+      "saraQuestionAr": "جاهز؟ المسرح لك!",
       "saraQuestionEn": "Ready? The stage is yours!",
       "recommendedResponseEn": "Four years ago, / we walked into this school / as CHILDREN. // Today, / we walk out / ready for the WORLD. // Congratulations, / class of 2026!"
     },
@@ -18124,57 +18198,60 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (اليوم مو النهاية، بل البداية.)",
-          "questionEn": "Complete: Today / is not the END // it is the ____.",
+          "questionAr": "أكمل الفراغ: (شكراً لأهالينا اللي آمنوا فينا.)",
+          "questionEn": "Complete: Thank you / to our PARENTS // who ____ in us.",
           "options": [
-            "BEGINNING",
-            "START of end",
-            "beginning end"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: BEGINNING. ١) قسّم النص لمجموعات فكرية (/) ووقف بينها. ٢) أكّد الكلمة الأهم في كل مجموعة. ٣) وقفة أطول (//) قبل وبعد الجملة المهمة. ٤) أبطئ في الأفكار الرئيسية، وأسرع شوي في التفاصيل. ٥) انزل بالصوت في آخر كل فكرة."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (جينا طلاب، ونطلع قادة.)",
-          "questionEn": "Complete: We came here / as STUDENTS. // We leave / as ____.",
-          "options": [
-            "LEADERS",
-            "STUDENT",
-            "leaders students"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: LEADERS. ١) قسّم النص لمجموعات فكرية (/) ووقف بينها. ٢) أكّد الكلمة الأهم في كل مجموعة. ٣) وقفة أطول (//) قبل وبعد الجملة المهمة. ٤) أبطئ في الأفكار الرئيسية، وأسرع شوي في التفاصيل. ٥) انزل بالصوت في آخر كل فكرة."
-        },
-        {
-          "questionAr": "وين نحط الوقفة الطويلة؟",
-          "questionEn": "Where is a long pause best?",
-          "options": [
-            "in the middle of a word",
-            "before a key idea",
-            "after every word"
+            "BELIEVES",
+            "BELIEVED",
+            "believe"
           ],
           "correctIndex": 1,
-          "explanationAr": "قبل وبعد الفكرة المهمة."
+          "explanationAr": "الإجابة: BELIEVED. ١) قسّم النص لمجموعات فكرية (/) ووقف بينها. ٢) أكّد الكلمة الأهم في كل مجموعة. ٣) وقفة أطول (//) قبل وبعد الجملة المهمة. ٤) أبطئ في الأفكار الرئيسية، وأسرع شوي في التفاصيل. ٥) انزل بالصوت في آخر كل فكرة."
         },
         {
-          "questionAr": "نهاية الجمل في الخطاب:",
-          "questionEn": "Ending sentences in a speech:",
+          "questionAr": "أكمل الفراغ: (المستقبل لمن يعمل له.)",
+          "questionEn": "Complete: The future / belongs to those / who ____ for it.",
           "options": [
-            "↗ rise",
-            "↘ fall"
+            "works",
+            "WORKED",
+            "WORK"
           ],
-          "correctIndex": 1,
-          "explanationAr": "النزول يعطي ثقة."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: WORK. ١) قسّم النص لمجموعات فكرية (/) ووقف بينها. ٢) أكّد الكلمة الأهم في كل مجموعة. ٣) وقفة أطول (//) قبل وبعد الجملة المهمة. ٤) أبطئ في الأفكار الرئيسية، وأسرع شوي في التفاصيل. ٥) انزل بالصوت في آخر كل فكرة."
+        },
+        {
+          "questionAr": "ما معنى \"challenge\"؟",
+          "questionEn": "What does \"challenge\" mean?",
+          "options": [
+            "تحدٍ",
+            "ممتن",
+            "رحلة/مسيرة",
+            "تخرج"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"challenge\" /ˈtʃælɪndʒ/ تعني: تحدٍ. مثال: face the challenge"
+        },
+        {
+          "questionAr": "ما معنى \"future\"؟",
+          "questionEn": "What does \"future\" mean?",
+          "options": [
+            "تخرج",
+            "يؤمن بـ",
+            "مستقبل",
+            "إنجاز"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"future\" /ˈfjuːtʃər/ تعني: مستقبل. مثال: a bright future"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Slow down: about 120–140 words per minute",
-            "Reading too fast to finish quickly"
+            "Look up at the end of each chunk",
+            "Reading with eyes down all the time"
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: Slow down: about 120–140 words per minute — السرعة تضيع التأثير."
+          "explanationAr": "الصحيح: Look up at the end of each chunk — التواصل البصري يزيد التأثير."
         }
       ]
     }

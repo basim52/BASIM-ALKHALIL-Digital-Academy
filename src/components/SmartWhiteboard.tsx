@@ -1,4 +1,5 @@
 import SpeakingDrillCheck from './SpeakingDrillCheck';
+import { LessonExercisesPanel, ListeningPanel, PronunciationPanel, MicCheck } from './LessonPracticePanels';
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   X, 
@@ -832,6 +833,8 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
 
   const activeQuestion: SaraBoardQuiz | undefined = currentQuizList[quizQuestionIndex] || boardData?.quiz;
   const totalQuestions = currentQuizList.length || 1;
+  const masteryPassScore = Number(boardData?.masteryPassScore) || 0;
+  const masteryPassed = masteryPassScore <= 0 || (quizScore / totalQuestions) * 100 >= masteryPassScore;
 
   // Sync / Reset on question change or new boardData
   useEffect(() => {
@@ -2778,7 +2781,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
             )}
 
             {/* Finish Lesson & Save Result Button (Only when quiz is actually completed or as progress badge) */}
-            {onFinishLesson && quizCompleted ? (
+            {onFinishLesson && quizCompleted && masteryPassed ? (
               <button
                 onClick={() => onFinishLesson(quizScore, totalQuestions)}
                 className="p-1.5 sm:px-2.5 sm:py-1 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:brightness-110 text-white font-black text-xs flex items-center gap-1.5 shadow-md transition-all cursor-pointer active:scale-95 border border-emerald-300/40 shrink-0"
@@ -3991,6 +3994,11 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                             </div>
                           )}
 
+                          {/* Lesson's own 3-tier exercises (+ spiral review, hidden when empty) */}
+                          {(boardData?.lessonExercises || boardData?.reviewQuestions) && (
+                            <LessonExercisesPanel exercises={boardData.lessonExercises} review={boardData.reviewQuestions} />
+                          )}
+
                           {/* Exercise 2: Concept Check Question (CCQ) */}
                           {boardData?.ccq && (
                             <div className="p-3.5 rounded-2xl bg-black/40 border border-blue-400/30 space-y-2.5">
@@ -4211,6 +4219,18 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                       )}
 
                       {/* 🎙️ SPEAKING & PRODUCTION CHALLENGE */}
+                      {(whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'speaking' : true) && (boardData?.speakingPrompt?.sampleAnswer || boardData?.listeningTask || boardData?.pronunciationFocus) && (
+                        <div className="mt-3 space-y-2">
+                          {boardData?.speakingPrompt?.sampleAnswer && (
+                            <div className="p-3 rounded-2xl bg-black/40 border border-emerald-400/30">
+                              <span className="text-xs font-black text-emerald-200">🎙️ {isRtl ? 'سجّل إجابتك بالمايك (بالإنجليزي)' : 'Record your answer (English)'}</span>
+                              <MicCheck expected={boardData.speakingPrompt.sampleAnswer} isRtl={isRtl} />
+                            </div>
+                          )}
+                          <ListeningPanel task={boardData?.listeningTask} onSpeak={onSpeak} />
+                          <PronunciationPanel focus={boardData?.pronunciationFocus} onSpeak={onSpeak} isRtl={isRtl} />
+                        </div>
+                      )}
                       {boardData?.speakingPrompt && (whiteboardViewMode === 'paged' ? activeSlidePage?.sectionType === 'speaking' : true) && (
                         <div
                           className={`border rounded-2xl sm:rounded-3xl p-4 shadow-xl transition-all bg-gradient-to-r from-emerald-950/40 via-teal-950/30 to-slate-900/60 ${
@@ -4295,7 +4315,14 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                               </div>
 
                               <div className="flex items-center justify-center gap-2 pt-2 flex-wrap">
-                                {onFinishLesson && (
+                                {!masteryPassed && (
+                                  <p className="w-full text-xs font-black text-rose-200 bg-rose-500/15 border border-rose-400/40 rounded-xl p-2">
+                                    {isRtl
+                                      ? `تحتاج ${masteryPassScore}٪ على الأقل لإتقان الدرس وفتح الدرس التالي. راجع السبورة ثم أعد التحدي 💪`
+                                      : `You need at least ${masteryPassScore}% to master this lesson and unlock the next one. Review and retry 💪`}
+                                  </p>
+                                )}
+                                {onFinishLesson && masteryPassed && (
                                   <button
                                     onClick={() => onFinishLesson(quizScore, totalQuestions)}
                                     className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:brightness-110 text-white font-black text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-lg active:scale-95 border border-emerald-300/40"
@@ -4492,7 +4519,9 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                                   }`}
                                 >
                                   {quizTimeUp 
-                                    ? (isRtl ? '⏱️ انتهى وقت الإجابة (30 ثانية)! تم إظهار الخيار الصحيح بالأخضر' : '⏱️ Time is up (30s)! Correct answer highlighted in green')
+                                    ? (isRtl
+                                        ? `⏱️ انتهى الوقت! الإجابة الصحيحة: ${Array.isArray(activeQuestion?.options) ? activeQuestion!.options[activeQuestion!.answerIndex] ?? '' : ''}${(activeQuestion as any)?.explanation ? ` — ${(activeQuestion as any).explanation}` : ''}`
+                                        : `⏱️ Time is up! Correct answer: ${Array.isArray(activeQuestion?.options) ? activeQuestion!.options[activeQuestion!.answerIndex] ?? '' : ''}`)
                                     : localQuizFeedback === 'correct' 
                                       ? (isRtl ? '🎉 كفو عليك يا بطل! إجابة صحيحة وممتازة 🌟' : '🎉 Excellent! That is correct! 🌟')
                                       : (isRtl ? '👏 محاولة جيدة! ركز على الخيار الأخضر الصحيح' : '👏 Good try! Note the green correct option')}

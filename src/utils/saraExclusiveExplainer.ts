@@ -50,14 +50,19 @@ export function buildSaraExclusiveLessonExplanation(
       ];
 
   // Map quizzes ensuring answerIndex and correctIndex are both set for SmartWhiteboard evaluation
-  const mappedQuizzes = lesson.quiz.map((q, idx) => ({
+  // Final exam = masteryCheck.questions (fallback: lesson quiz). Beginners get a gentler 60s timer.
+  const examSource = Array.isArray(lesson.masteryCheck?.questions) && lesson.masteryCheck!.questions.length > 0
+    ? lesson.masteryCheck!.questions
+    : lesson.quiz;
+  const examSeconds = lesson.cefr === 'Pre-A1' || lesson.cefr === 'A1' ? 60 : 30;
+  const mappedQuizzes = examSource.map((q, idx) => ({
     question: isRtl ? q.questionAr : q.questionEn,
     options: Array.isArray(q.options) ? q.options : [],
     answerIndex: typeof q.correctIndex === 'number' ? q.correctIndex : 0,
     correctIndex: typeof q.correctIndex === 'number' ? q.correctIndex : 0,
     questionNumber: idx + 1,
-    totalQuestions: lesson.quiz.length,
-    timeLimitSeconds: 30,
+    totalQuestions: examSource.length,
+    timeLimitSeconds: examSeconds,
     explanation: q.explanationAr
   }));
 
@@ -121,7 +126,7 @@ export function buildSaraExclusiveLessonExplanation(
     ? lesson.vocabulary.map((v) => ({
         word: v.word,
         meaning: v.ar,
-        pos: v.ipa,
+        pos: v.note ? `${v.ipa} · ${v.note}` : v.ipa,
         example: v.exampleEn
       }))
     : lesson.practicalExamples.slice(0, 4).map((ex, idx) => {
@@ -174,6 +179,11 @@ export function buildSaraExclusiveLessonExplanation(
     quiz: mappedQuizzes[0],
     quizzes: mappedQuizzes,
     lessonKey: buildLessonBoardKey(lesson, lang),
+    masteryPassScore: lesson.masteryCheck?.passScore,
+    lessonExercises: lesson.exercises,
+    reviewQuestions: Array.isArray(lesson.reviewOfPrevious) && lesson.reviewOfPrevious.length > 0 ? lesson.reviewOfPrevious : undefined,
+    listeningTask: lesson.listeningTask && Array.isArray(lesson.listeningTask.questions) ? lesson.listeningTask : undefined,
+    pronunciationFocus: lesson.pronunciationFocus && Array.isArray(lesson.pronunciationFocus.items) ? lesson.pronunciationFocus : undefined,
     pageSpeech: buildLessonPageSpeech(lesson, lang)
   };
 

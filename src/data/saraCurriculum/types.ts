@@ -14,6 +14,8 @@ export interface SaraVocabItem {
   ar: string;
   exampleEn: string;
   exampleAr: string;
+  /** Grammar form / expansion note (English), kept out of the Arabic gloss. */
+  note?: string;
 }
 
 export interface SaraQuestion {

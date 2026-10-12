@@ -512,58 +512,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (صباح الخير يا أستاذة!)",
-          "questionEn": "Complete: Good ____, teacher!",
+          "questionAr": "أكمل الفراغ: (بخير، شكراً. وأنت؟)",
+          "questionEn": "Complete: I'm fine, ____. And you?",
           "options": [
-            "evening",
-            "morning",
-            "night"
+            "thanks",
+            "sorry",
+            "please"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: morning. التحية حسب الوقت: Good morning/afternoon/evening. السؤال How are you? والرد I'm fine, thanks. And you?"
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: thanks. التحية حسب الوقت: Good morning/afternoon/evening. السؤال How are you? والرد I'm fine, thanks. And you?"
         },
         {
-          "questionAr": "أكمل الفراغ: (كيف حالك اليوم؟)",
-          "questionEn": "Complete: ____ are you today?",
+          "questionAr": "أكمل الفراغ: (أشوفك بكرة!)",
+          "questionEn": "Complete: ____ you tomorrow!",
           "options": [
-            "Who",
-            "What",
-            "How"
+            "Look",
+            "Watch",
+            "See"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: How. التحية حسب الوقت: Good morning/afternoon/evening. السؤال How are you? والرد I'm fine, thanks. And you?"
+          "explanationAr": "الإجابة: See. التحية حسب الوقت: Good morning/afternoon/evening. السؤال How are you? والرد I'm fine, thanks. And you?"
         },
         {
-          "questionAr": "الساعة ٨ مساءً ووصلت عزيمة. تقول:",
-          "questionEn": "It's 8 pm and you arrive. You say:",
+          "questionAr": "ما معنى \"good evening\"؟",
+          "questionEn": "What does \"good evening\" mean?",
           "options": [
-            "Good night",
-            "Good evening",
-            "Good morning"
+            "بخير",
+            "مرحبا",
+            "مساء الخير",
+            "مساء الخير (بعد الظهر)"
           ],
-          "correctIndex": 1,
-          "explanationAr": "عند الوصول مساءً ⇐ Good evening."
+          "correctIndex": 2,
+          "explanationAr": "\"good evening\" /ɡʊd ˈiːvnɪŋ/ تعني: مساء الخير. مثال: Good evening!"
         },
         {
-          "questionAr": "رد على How are you?",
-          "questionEn": "Reply to 'How are you?'",
+          "questionAr": "ما معنى \"good night\"؟",
+          "questionEn": "What does \"good night\" mean?",
           "options": [
-            "I'm Ali.",
-            "I'm fine, thanks.",
-            "I'm ten."
+            "باي/مع السلامة",
+            "شكراً",
+            "هلا (غير رسمي)",
+            "تصبح على خير"
           ],
-          "correctIndex": 1,
-          "explanationAr": "نرد عن الحال."
+          "correctIndex": 3,
+          "explanationAr": "\"good night\" /ɡʊd naɪt/ تعني: تصبح على خير. مثال: Good night, sleep well."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Good night! (when arriving in the evening)",
-            "Good evening!"
+            "Good morning! — Good light!",
+            "Good morning! — Good morning!"
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: Good evening! — Good night للوداع أو قبل النوم فقط."
+          "explanationAr": "الصحيح: Good morning! — Good morning! — «صباح النور» ما تترجم حرفياً؛ نرد بنفس التحية."
         }
       ]
     }
@@ -1087,58 +1089,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (وش اسمك؟)",
-          "questionEn": "Complete: ____ your name?",
+          "questionAr": "أكمل الفراغ: (أنا سعودي، من الطائف.)",
+          "questionEn": "Complete: I'm ____. I'm from Taif.",
           "options": [
-            "How's",
-            "What's",
-            "Who's"
+            "Saudi",
+            "Saudi Arabia",
+            "Saudia"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: Saudi. What's your name? / Where are you from? / What do you do? والرد I'm... / I'm from... / I'm a student."
+        },
+        {
+          "questionAr": "أكمل الفراغ: (وش تشتغل؟ مهندس.)",
+          "questionEn": "Complete: What do you do? I'm ____ engineer.",
+          "options": [
+            "the",
+            "a",
+            "an"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: an. What's your name? / Where are you from? / What do you do? والرد I'm... / I'm from... / I'm a student."
+        },
+        {
+          "questionAr": "ما معنى \"Kuwaiti\"؟",
+          "questionEn": "What does \"Kuwaiti\" mean?",
+          "options": [
+            "مهندس",
+            "كويتي",
+            "السعودية",
+            "جامعة"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: What's. What's your name? / Where are you from? / What do you do? والرد I'm... / I'm from... / I'm a student."
+          "explanationAr": "\"Kuwaiti\" /kuːˈweɪti/ تعني: كويتي. مثال: He's Kuwaiti."
         },
         {
-          "questionAr": "أكمل الفراغ: (من وين أنت؟)",
-          "questionEn": "Complete: Where are you ____?",
+          "questionAr": "ما معنى \"engineer\"؟",
+          "questionEn": "What does \"engineer\" mean?",
           "options": [
-            "from",
-            "at",
-            "in"
+            "ممرض/ممرضة",
+            "وظيفة",
+            "إماراتي",
+            "مهندس"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: from. What's your name? / Where are you from? / What do you do? والرد I'm... / I'm from... / I'm a student."
-        },
-        {
-          "questionAr": "السؤال الطبيعي عن الشغل:",
-          "questionEn": "Natural question about job:",
-          "options": [
-            "What do you do?",
-            "What is you work?",
-            "What job you?"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "What do you do?"
-        },
-        {
-          "questionAr": "أكمل: She's ___ Emirati.",
-          "questionEn": "Complete: She's ___.",
-          "options": [
-            "Emirati",
-            "from Emirati",
-            "a Emirates"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الجنسية بدون from."
+          "correctIndex": 3,
+          "explanationAr": "\"engineer\" /ˌɛndʒɪˈnɪr/ تعني: مهندس. مثال: I'm an engineer."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I'm from Saudi Arabia. / I'm Saudi.",
-            "I'm from Saudi."
+            "I am working nurse.",
+            "I work as a nurse. / I'm a nurse."
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: I'm from Saudi Arabia. / I'm Saudi. — Saudi جنسية، و Saudi Arabia البلد."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: I work as a nurse. / I'm a nurse. — ترجمة «أشتغل ممرضة» تحتاج as a."
         }
       ]
     }
@@ -1676,58 +1680,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (ممكن تعيدين لو سمحتي؟)",
-          "questionEn": "Complete: Can you ____ that, please?",
+          "questionAr": "أكمل الفراغ: (كيف تقول «قلم» بالإنجليزي؟)",
+          "questionEn": "Complete: How do you ____ 'قلم' in English?",
           "options": [
-            "again",
-            "repeat",
-            "return"
+            "say",
+            "speak",
+            "tell"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: say. Can you repeat that, please? / What does ... mean? / How do you say ... in English? / How do you spell ...?"
+        },
+        {
+          "questionAr": "أكمل الفراغ: (كيف تتهجى اسمك؟)",
+          "questionEn": "Complete: How do you ____ your name?",
+          "options": [
+            "write letter",
+            "spell",
+            "say"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: repeat. Can you repeat that, please? / What does ... mean? / How do you say ... in English? / How do you spell ...?"
+          "explanationAr": "الإجابة: spell. Can you repeat that, please? / What does ... mean? / How do you say ... in English? / How do you spell ...?"
         },
         {
-          "questionAr": "أكمل الفراغ: (وش معنى busy؟)",
-          "questionEn": "Complete: What ____ 'busy' mean?",
+          "questionAr": "ما معنى \"slowly\"؟",
+          "questionEn": "What does \"slowly\" mean?",
           "options": [
-            "does",
-            "is",
-            "do"
+            "مثال",
+            "ببطء",
+            "يعني",
+            "يفهم"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: does. Can you repeat that, please? / What does ... mean? / How do you say ... in English? / How do you spell ...?"
+          "correctIndex": 1,
+          "explanationAr": "\"slowly\" /ˈsloʊli/ تعني: ببطء. مثال: Speak slowly, please."
         },
         {
-          "questionAr": "ما فهمت. تقول:",
-          "questionEn": "You didn't understand. You say:",
+          "questionAr": "ما معنى \"question\"؟",
+          "questionEn": "What does \"question\" mean?",
           "options": [
-            "I don't understand.",
-            "I not understand.",
-            "No understand."
+            "سؤال",
+            "جواب",
+            "مثال",
+            "يكرر/يعيد"
           ],
           "correctIndex": 0,
-          "explanationAr": "I don't understand."
-        },
-        {
-          "questionAr": "تبي تعرف كتابة كلمة:",
-          "questionEn": "You want the spelling:",
-          "options": [
-            "How do you spell it?",
-            "How you write?",
-            "What spell?"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "How do you spell it?"
+          "explanationAr": "\"question\" /ˈkwɛstʃən/ تعني: سؤال. مثال: I have a question."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "What the meaning busy?",
-            "What does 'busy' mean?"
+            "How I say قلم in English?",
+            "How do you say 'قلم' in English?"
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: What does 'busy' mean? — السؤال عن المعنى بـ What does ... mean?"
+          "explanationAr": "الصحيح: How do you say 'قلم' in English? — السؤال يحتاج do you."
         }
       ]
     }
@@ -2275,58 +2281,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (بكم هالعباية؟)",
-          "questionEn": "Complete: ____ is this abaya?",
+          "questionAr": "أكمل الفراغ: (كم الساعة؟ أربع ونص.)",
+          "questionEn": "Complete: What time is it? It's ____ four.",
           "options": [
-            "How much",
-            "How many",
-            "What much"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: How much. How much is it? It's 25 riyals. / What time is it? It's half past four. لاحظ: thirteen ≠ thirty."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (بثلاث مية ريال.)",
-          "questionEn": "Complete: It's three ____ riyals.",
-          "options": [
-            "hundred",
-            "hundreds",
-            "thousand"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: hundred. How much is it? It's 25 riyals. / What time is it? It's half past four. لاحظ: thirteen ≠ thirty."
-        },
-        {
-          "questionAr": "٤:١٥ =",
-          "questionEn": "4:15 =",
-          "options": [
-            "a quarter past four",
-            "a quarter to four",
-            "four and quarter"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "quarter past = وربع."
-        },
-        {
-          "questionAr": "بكم الجزم؟ (جمع)",
-          "questionEn": "Price of the shoes?",
-          "options": [
-            "How much is the shoes?",
-            "How much are the shoes?",
-            "How many the shoes?"
+            "past half",
+            "half past",
+            "half to"
           ],
           "correctIndex": 1,
-          "explanationAr": "shoes جمع ⇐ are."
+          "explanationAr": "الإجابة: half past. How much is it? It's 25 riyals. / What time is it? It's half past four. لاحظ: thirteen ≠ thirty."
+        },
+        {
+          "questionAr": "أكمل الفراغ: (رقمي ٠٥٥١٢٣٤٥٦٧.)",
+          "questionEn": "Complete: My ____ is 055 123 4567.",
+          "options": [
+            "phone is",
+            "count",
+            "number"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: number. How much is it? It's 25 riyals. / What time is it? It's half past four. لاحظ: thirteen ≠ thirty."
+        },
+        {
+          "questionAr": "ما معنى \"thirteen\"؟",
+          "questionEn": "What does \"thirteen\" mean?",
+          "options": [
+            "ونص",
+            "مية",
+            "ثلاثة عشر",
+            "رخيص"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"thirteen\" /θɜːrˈtiːn/ تعني: ثلاثة عشر. مثال: thirTEEN"
+        },
+        {
+          "questionAr": "ما معنى \"thirty\"؟",
+          "questionEn": "What does \"thirty\" mean?",
+          "options": [
+            "ثلاثة عشر",
+            "ونص",
+            "رخيص",
+            "ثلاثين"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"thirty\" /ˈθɜːrti/ تعني: ثلاثين. مثال: THIRty"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "How much this?",
-            "How much is this?"
+            "How much the price?",
+            "What's the price? / How much is it?"
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: How much is this? — لا تحذف is."
+          "explanationAr": "الصحيح: What's the price? / How much is it? — دمج سؤالين."
         }
       ]
     }
@@ -2873,58 +2881,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (أبي لاتيه كبير لو سمحت.)",
-          "questionEn": "Complete: ____ a large latte, please.",
+          "questionAr": "أكمل الفراغ: (هنا ولا سفري؟ سفري لو سمحت.)",
+          "questionEn": "Complete: For here or ____? — To go, please.",
           "options": [
-            "I want",
-            "Give me",
-            "I'd like"
+            "outside",
+            "for go",
+            "to go"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: I'd like. I'd like + اسم / Can I have + اسم + please? والنادل يسأل: Anything else? For here or to go?"
+          "explanationAr": "الإجابة: to go. I'd like + اسم / Can I have + اسم + please? والنادل يسأل: Anything else? For here or to go?"
         },
         {
-          "questionAr": "أكمل الفراغ: (ممكن برجر دجاج؟)",
-          "questionEn": "Complete: ____ a chicken burger?",
+          "questionAr": "أكمل الفراغ: (أقدر أدفع بالبطاقة؟)",
+          "questionEn": "Complete: Can I pay ____?",
           "options": [
-            "Can I have",
-            "Can I take me",
-            "I can have"
+            "by card",
+            "with cash card",
+            "in card"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: Can I have. I'd like + اسم / Can I have + اسم + please? والنادل يسأل: Anything else? For here or to go?"
+          "explanationAr": "الإجابة: by card. I'd like + اسم / Can I have + اسم + please? والنادل يسأل: Anything else? For here or to go?"
         },
         {
-          "questionAr": "الطلب الأكثر أدباً:",
-          "questionEn": "Most polite order:",
+          "questionAr": "ما معنى \"to go\"؟",
+          "questionEn": "What does \"to go\" mean?",
           "options": [
-            "Give me a tea.",
-            "I'd like a tea, please.",
-            "Tea now."
+            "سفري",
+            "إيصال",
+            "كاش",
+            "حار (طعم)"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"to go\" /tə ɡoʊ/ تعني: سفري. مثال: Two coffees to go."
+        },
+        {
+          "questionAr": "ما معنى \"bill\"؟",
+          "questionEn": "What does \"bill\" mean?",
+          "options": [
+            "حار (طعم)",
+            "فاتورة",
+            "إيصال",
+            "سفري"
           ],
           "correctIndex": 1,
-          "explanationAr": "I'd like ... please."
-        },
-        {
-          "questionAr": "For here or to go? تعني:",
-          "questionEn": "'For here or to go?' means:",
-          "options": [
-            "هنا ولا سفري؟",
-            "حار ولا بارد؟",
-            "كاش ولا بطاقة؟"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "هنا أو سفري."
+          "explanationAr": "\"bill\" /bɪl/ تعني: فاتورة. مثال: The bill, please."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Give me coffee.",
-            "Can I have a coffee, please?"
+            "Could I have some water, please?",
+            "I want water."
           ],
-          "correctIndex": 1,
-          "explanationAr": "الصحيح: Can I have a coffee, please? — Give me تبدو فظة بالإنجليزي."
+          "correctIndex": 0,
+          "explanationAr": "الصحيح: Could I have some water, please? — الإنجليز يعتبرون I want مباشرة زيادة في المطاعم."
         }
       ]
     }
@@ -3472,58 +3482,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (لو سمحت، وين الصيدلية؟)",
-          "questionEn": "Complete: ____, where is the pharmacy?",
+          "questionAr": "أكمل الفراغ: (على يمينك، جنب البنك.)",
+          "questionEn": "Complete: It's on your right, ____ the bank.",
           "options": [
-            "Hey you",
-            "Sorry me",
-            "Excuse me"
+            "beside of",
+            "near to",
+            "next to"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: Excuse me. Excuse me, where is...? / How do I get to...? والاتجاهات أوامر: Go straight, turn left, it's on your right."
+          "explanationAr": "الإجابة: next to. Excuse me, where is...? / How do I get to...? والاتجاهات أوامر: Go straight, turn left, it's on your right."
         },
         {
-          "questionAr": "أكمل الفراغ: (سيدا وبعدين يسار عند الإشارة.)",
-          "questionEn": "Complete: Go straight and ____ at the traffic light.",
+          "questionAr": "أكمل الفراغ: (المسجد مقابل المدرسة.)",
+          "questionEn": "Complete: The mosque is ____ the school.",
           "options": [
-            "turn on left",
-            "turn left",
-            "left turn"
+            "opposite to",
+            "front",
+            "opposite"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: turn left. Excuse me, where is...? / How do I get to...? والاتجاهات أوامر: Go straight, turn left, it's on your right."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: opposite. Excuse me, where is...? / How do I get to...? والاتجاهات أوامر: Go straight, turn left, it's on your right."
         },
         {
-          "questionAr": "مقابل =",
-          "questionEn": "'مقابل' =",
+          "questionAr": "ما معنى \"traffic light\"؟",
+          "questionEn": "What does \"traffic light\" mean?",
           "options": [
-            "next to",
-            "opposite",
-            "behind"
+            "جنب",
+            "مشياً",
+            "إشارة مرور",
+            "سيدا/مستقيم"
           ],
-          "correctIndex": 1,
-          "explanationAr": "opposite."
+          "correctIndex": 2,
+          "explanationAr": "\"traffic light\" /ˈtræfɪk laɪt/ تعني: إشارة مرور. مثال: at the traffic light"
         },
         {
-          "questionAr": "أكمل: ___ left at the corner.",
-          "questionEn": "Complete: ___ left at the corner.",
+          "questionAr": "ما معنى \"roundabout\"؟",
+          "questionEn": "What does \"roundabout\" mean?",
           "options": [
-            "Turn",
-            "Go to",
-            "Make"
+            "مقابل",
+            "سيدا/مستقيم",
+            "إشارة مرور",
+            "دوار"
           ],
-          "correctIndex": 0,
-          "explanationAr": "Turn left."
+          "correctIndex": 3,
+          "explanationAr": "\"roundabout\" /ˈraʊndəbaʊt/ تعني: دوار. مثال: Take the second exit at the roundabout."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Where is the pharmacy, please me?",
-            "Excuse me, where is the pharmacy?"
+            "Go straight until you will see the bank.",
+            "Go straight until you see the bank."
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: Excuse me, where is the pharmacy? — نبدأ بـ Excuse me."
+          "explanationAr": "الصحيح: Go straight until you see the bank. — لا will بعد until."
         }
       ]
     }
@@ -4082,58 +4094,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (عندك هالقميص بالأزرق؟)",
-          "questionEn": "Complete: Do you have this shirt ____?",
+          "questionAr": "أكمل الفراغ: (صغير مرة. عندك لارج؟)",
+          "questionEn": "Complete: It's ____ small. Do you have a large?",
           "options": [
-            "on blue",
-            "in blue",
-            "with blue"
+            "so much",
+            "very",
+            "too"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: in blue. Do you have this in medium? / Can I try it on? / It's too small / It fits well. و too = أكثر من اللازم."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: too. Do you have this in medium? / Can I try it on? / It's too small / It fits well. و too = أكثر من اللازم."
         },
         {
-          "questionAr": "أكمل الفراغ: (أقدر أجربه؟)",
-          "questionEn": "Complete: Can I ____?",
+          "questionAr": "أكمل الفراغ: (وين غرفة القياس؟)",
+          "questionEn": "Complete: Where is the ____?",
           "options": [
-            "try it on",
-            "try on it",
-            "test it"
+            "test room",
+            "change room for",
+            "fitting room"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: try it on. Do you have this in medium? / Can I try it on? / It's too small / It fits well. و too = أكثر من اللازم."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: fitting room. Do you have this in medium? / Can I try it on? / It's too small / It fits well. و too = أكثر من اللازم."
         },
         {
-          "questionAr": "الجزمة ضيقة. تقول:",
-          "questionEn": "Shoes are tight. You say:",
+          "questionAr": "ما معنى \"fitting room\"؟",
+          "questionEn": "What does \"fitting room\" mean?",
           "options": [
-            "They're too tight.",
-            "They're very fit.",
-            "They're loose."
+            "صغير",
+            "خصم",
+            "غرفة القياس",
+            "ضيق"
           ],
-          "correctIndex": 0,
-          "explanationAr": "too tight."
+          "correctIndex": 2,
+          "explanationAr": "\"fitting room\" /ˈfɪtɪŋ ruːm/ تعني: غرفة القياس. مثال: The fitting room is there."
         },
         {
-          "questionAr": "ترتيب صحيح:",
-          "questionEn": "Correct order:",
+          "questionAr": "ما معنى \"return\"؟",
+          "questionEn": "What does \"return\" mean?",
           "options": [
-            "Can I try on it?",
-            "Can I try it on?",
-            "Can I on try it?"
+            "صغير",
+            "مقاس",
+            "يرجّع",
+            "واسع"
           ],
-          "correctIndex": 1,
-          "explanationAr": "try it on."
+          "correctIndex": 2,
+          "explanationAr": "\"return\" /rɪˈtɜːrn/ تعني: يرجّع. مثال: I want to return this."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Can I try it on?",
-            "Can I try on it?"
+            "It's too expensive for me.",
+            "This is very expensive, I don't buy."
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: Can I try it on? — الضمير بين try و on."
+          "explanationAr": "الصحيح: It's too expensive for me. — too تعبر عن المشكلة، و I don't buy ترجمة حرفية."
         }
       ]
     }
@@ -4691,58 +4705,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (أحب ألعب بادل مع ربعي.)",
-          "questionEn": "Complete: I love ____ padel with my friends.",
+          "questionAr": "أكمل الفراغ: (تستمتع بقراءة الروايات.)",
+          "questionEn": "Complete: She ____ novels.",
           "options": [
-            "playing",
-            "play",
-            "to playing"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: playing. like/love/enjoy + فعل ing: I love swimming. وأسئلة: What do you do in your free time? Do you like...?"
-        },
-        {
-          "questionAr": "أكمل الفراغ: (وش تسوي في وقت فراغك؟)",
-          "questionEn": "Complete: What do you do in your ____?",
-          "options": [
-            "free time",
-            "free times",
-            "empty time"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: free time. like/love/enjoy + فعل ing: I love swimming. وأسئلة: What do you do in your free time? Do you like...?"
-        },
-        {
-          "questionAr": "أكمل: I enjoy ___ to music.",
-          "questionEn": "Complete: I enjoy ___ to music.",
-          "options": [
-            "listen",
-            "listening",
-            "to listen"
+            "enjoy read",
+            "enjoys reading",
+            "enjoys to read"
           ],
           "correctIndex": 1,
-          "explanationAr": "enjoy + ing."
+          "explanationAr": "الإجابة: enjoys reading. like/love/enjoy + فعل ing: I love swimming. وأسئلة: What do you do in your free time? Do you like...?"
         },
         {
-          "questionAr": "«مهتم بـ» بالعامية الإنجليزية:",
-          "questionEn": "Informal 'interested in':",
+          "questionAr": "أكمل الفراغ: (أنا مهتم مرة بالتصوير.)",
+          "questionEn": "Complete: I'm really ____ photography.",
           "options": [
+            "on",
             "into",
-            "onto",
-            "in to"
+            "in"
+          ],
+          "correctIndex": 1,
+          "explanationAr": "الإجابة: into. like/love/enjoy + فعل ing: I love swimming. وأسئلة: What do you do in your free time? Do you like...?"
+        },
+        {
+          "questionAr": "ما معنى \"fishing\"؟",
+          "questionEn": "What does \"fishing\" mean?",
+          "options": [
+            "صيد السمك",
+            "التصوير",
+            "يستمتع",
+            "الألعاب الإلكترونية"
           ],
           "correctIndex": 0,
-          "explanationAr": "I'm into..."
+          "explanationAr": "\"fishing\" /ˈfɪʃɪŋ/ تعني: صيد السمك. مثال: We go fishing in Yanbu."
+        },
+        {
+          "questionAr": "ما معنى \"camping\"؟",
+          "questionEn": "What does \"camping\" mean?",
+          "options": [
+            "صيد السمك",
+            "رواية",
+            "التصوير",
+            "التخييم/الكشتة"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"camping\" /ˈkæmpɪŋ/ تعني: التخييم/الكشتة. مثال: I love camping."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I enjoy to swim.",
-            "I enjoy swimming."
+            "I like football.",
+            "I like the football."
           ],
-          "correctIndex": 1,
-          "explanationAr": "الصحيح: I enjoy swimming. — enjoy + ing دائماً."
+          "correctIndex": 0,
+          "explanationAr": "الصحيح: I like football. — الهوايات العامة بدون the."
         }
       ]
     }
@@ -5301,58 +5317,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (تحب تجي بيتنا يوم الجمعة؟)",
-          "questionEn": "Complete: ____ come to my house on Friday?",
+          "questionAr": "أكمل الفراغ: (آسف ما أقدر. لازم أذاكر.)",
+          "questionEn": "Complete: Sorry, I can't. I ____ study.",
           "options": [
-            "Would you like to",
-            "Would you like",
-            "Do you like to"
+            "have to",
+            "should to",
+            "must to"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: Would you like to. Would you like to + فعل؟ / Do you want to...? / How about...? والقبول: I'd love to! والاعتذار: Sorry, I can't. I have to..."
+          "explanationAr": "الإجابة: have to. Would you like to + فعل؟ / Do you want to...? / How about...? والقبول: I'd love to! والاعتذار: Sorry, I can't. I have to..."
         },
         {
-          "questionAr": "أكمل الفراغ: (أكيد! متى؟)",
-          "questionEn": "Complete: ____! What time?",
+          "questionAr": "أكمل الفراغ: (وش رايك السبت بدالها؟)",
+          "questionEn": "Complete: ____ Saturday instead?",
           "options": [
-            "I love to",
-            "I'd love to",
-            "I'd like"
+            "How about",
+            "How is",
+            "What do you"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: I'd love to. Would you like to + فعل؟ / Do you want to...? / How about...? والقبول: I'd love to! والاعتذار: Sorry, I can't. I have to..."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: How about. Would you like to + فعل؟ / Do you want to...? / How about...? والقبول: I'd love to! والاعتذار: Sorry, I can't. I have to..."
         },
         {
-          "questionAr": "دعوة مهذبة:",
-          "questionEn": "Polite invitation:",
+          "questionAr": "ما معنى \"instead\"؟",
+          "questionEn": "What does \"instead\" mean?",
           "options": [
-            "You come?",
-            "Would you like to join us?",
-            "Do you like join?"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "Would you like to..."
-        },
-        {
-          "questionAr": "اعتذار مهذب:",
-          "questionEn": "Polite refusal:",
-          "options": [
-            "No.",
-            "I don't want.",
-            "Sorry, I can't. Maybe next time."
+            "يمكن",
+            "يعزم/يدعو",
+            "بدلاً",
+            "جمعة/تجمع"
           ],
           "correctIndex": 2,
-          "explanationAr": "اعتذار + سبب/اقتراح."
+          "explanationAr": "\"instead\" /ɪnˈstɛd/ تعني: بدلاً. مثال: Let's go Saturday instead."
+        },
+        {
+          "questionAr": "ما معنى \"meet\"؟",
+          "questionEn": "What does \"meet\" mean?",
+          "options": [
+            "دعوة/عزيمة",
+            "يتقابل",
+            "يمكن",
+            "بدلاً"
+          ],
+          "correctIndex": 1,
+          "explanationAr": "\"meet\" /miːt/ تعني: يتقابل. مثال: Let's meet at eight."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Would you like to come with me?",
-            "Do you like to come with me?"
+            "Welcome to come to my house.",
+            "You're welcome to come. / Would you like to come over?"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: Would you like to come with me? — Do you like = هل تحب عادة؛ للدعوة Would you like."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: You're welcome to come. / Would you like to come over? — ترجمة «حياك» تحتاج صيغة طبيعية."
         }
       ]
     }
@@ -5911,58 +5929,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (ألو، معك أحمد من مدرسة النور.)",
-          "questionEn": "Complete: Hello, ____ Ahmed from Al-Noor School.",
+          "questionAr": "أكمل الفراغ: (مو موجود الحين. تبي تترك رسالة؟)",
+          "questionEn": "Complete: He's not here right now. Can I ____?",
           "options": [
-            "this is",
-            "here is",
-            "I am"
+            "do a message",
+            "take message",
+            "take a message"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: this is. Hello, this is... speaking. / Can I speak to...? / Can I leave a message? / I'll call back later. على الجوال نقول This is وليس I am."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: take a message. Hello, this is... speaking. / Can I speak to...? / Can I leave a message? / I'll call back later. على الجوال نقول This is وليس I am."
         },
         {
-          "questionAr": "أكمل الفراغ: (ممكن أكلم الأستاذ صالح؟)",
-          "questionEn": "Complete: Can I ____ Mr. Saleh, please?",
+          "questionAr": "أكمل الفراغ: (بتصل بعدين.)",
+          "questionEn": "Complete: I'll ____ later.",
           "options": [
-            "speak to",
-            "talk him",
-            "speak with me"
+            "return call",
+            "call again back",
+            "call back"
           ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: speak to. Hello, this is... speaking. / Can I speak to...? / Can I leave a message? / I'll call back later. على الجوال نقول This is وليس I am."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: call back. Hello, this is... speaking. / Can I speak to...? / Can I leave a message? / I'll call back later. على الجوال نقول This is وليس I am."
         },
         {
-          "questionAr": "تعرف بنفسك على الهاتف:",
-          "questionEn": "Introduce yourself on the phone:",
+          "questionAr": "ما معنى \"hold on\"؟",
+          "questionEn": "What does \"hold on\" mean?",
           "options": [
-            "I am Sara.",
-            "This is Sara.",
-            "Me Sara."
+            "الخط",
+            "موعد",
+            "متاح/موجود",
+            "انتظر لحظة"
           ],
-          "correctIndex": 1,
-          "explanationAr": "This is..."
+          "correctIndex": 3,
+          "explanationAr": "\"hold on\" /hoʊld ɑːn/ تعني: انتظر لحظة. مثال: Hold on, please."
         },
         {
-          "questionAr": "«لحظة لو سمحت» =",
-          "questionEn": "'One moment' =",
+          "questionAr": "ما معنى \"appointment\"؟",
+          "questionEn": "What does \"appointment\" mean?",
           "options": [
-            "Hold on, please.",
-            "Close please.",
-            "Wait me."
+            "موعد",
+            "بريد صوتي",
+            "يعاود الاتصال",
+            "مكالمة فائتة"
           ],
           "correctIndex": 0,
-          "explanationAr": "Hold on."
+          "explanationAr": "\"appointment\" /əˈpɔɪntmənt/ تعني: موعد. مثال: I'd like an appointment."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Hello, this is Ahmed.",
-            "Hello, I am Ahmed."
+            "Who's speaking? / Who's this?",
+            "Who with me?"
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: Hello, this is Ahmed. — على الهاتف: this is."
+          "explanationAr": "الصحيح: Who's speaking? / Who's this? — ترجمة «مين معي؟»."
         }
       ]
     }
@@ -6520,58 +6540,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (عندي صداع شديد.)",
-          "questionEn": "Complete: I ____ a terrible headache.",
+          "questionAr": "أكمل الفراغ: (عندي حرارة من يومين.)",
+          "questionEn": "Complete: I've had a fever ____ two days.",
           "options": [
-            "feel have",
-            "am",
-            "have"
+            "from",
+            "since",
+            "for"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: have. I have a + اسم المرض (headache, fever). My ... hurts. و I've had it for + مدة. التعليمات: Take one tablet twice a day."
+          "explanationAr": "الإجابة: for. I have a + اسم المرض (headache, fever). My ... hurts. و I've had it for + مدة. التعليمات: Take one tablet twice a day."
         },
         {
-          "questionAr": "أكمل الفراغ: (بطني يعورني.)",
-          "questionEn": "Complete: My stomach ____.",
+          "questionAr": "أكمل الفراغ: (خذ حبة مرتين في اليوم بعد الأكل.)",
+          "questionEn": "Complete: Take one tablet ____ a day after meals.",
           "options": [
-            "hurt",
-            "hurts",
-            "pains"
+            "double",
+            "twice",
+            "two times in"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: hurts. I have a + اسم المرض (headache, fever). My ... hurts. و I've had it for + مدة. التعليمات: Take one tablet twice a day."
+          "explanationAr": "الإجابة: twice. I have a + اسم المرض (headache, fever). My ... hurts. و I've had it for + مدة. التعليمات: Take one tablet twice a day."
         },
         {
-          "questionAr": "«عندي كحة» =",
-          "questionEn": "'عندي كحة' =",
+          "questionAr": "ما معنى \"hurt\"؟",
+          "questionEn": "What does \"hurt\" mean?",
           "options": [
-            "I am cough.",
-            "I have a cough.",
-            "I cough have."
+            "يعوّر/يؤلم",
+            "التهاب حلق",
+            "حرارة/حمى",
+            "حبة دواء"
           ],
-          "correctIndex": 1,
-          "explanationAr": "have a cough."
+          "correctIndex": 0,
+          "explanationAr": "\"hurt\" /hɜːrt/ تعني: يعوّر/يؤلم. مثال: My back hurts."
         },
         {
-          "questionAr": "«من ثلاث أيام» =",
-          "questionEn": "'for three days' or 'since three days'?",
+          "questionAr": "ما معنى \"tablet\"؟",
+          "questionEn": "What does \"tablet\" mean?",
           "options": [
-            "since three days",
-            "for three days",
-            "from three days"
+            "حبة دواء",
+            "يعوّر/يؤلم",
+            "التهاب حلق",
+            "كحة"
           ],
-          "correctIndex": 1,
-          "explanationAr": "for + مدة."
+          "correctIndex": 0,
+          "explanationAr": "\"tablet\" /ˈtæblət/ تعني: حبة دواء. مثال: Take two tablets."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I have pain in my head.",
-            "I have a headache."
+            "My head hurts. / I have a headache.",
+            "My head is paining me."
           ],
-          "correctIndex": 1,
-          "explanationAr": "الصحيح: I have a headache. — تعبير طبيعي أقصر."
+          "correctIndex": 0,
+          "explanationAr": "الصحيح: My head hurts. / I have a headache. — pain ما تستخدم كفعل بهالشكل."
         }
       ]
     }
@@ -7130,58 +7152,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (عندي حجز باسم الحربي.)",
-          "questionEn": "Complete: I have a reservation ____ Al-Harbi.",
+          "questionAr": "أكمل الفراغ: (ممكن أطلع متأخر؟)",
+          "questionEn": "Complete: ____ a late checkout?",
           "options": [
-            "with",
-            "under",
-            "on"
+            "I could have",
+            "Could I have",
+            "Could I has"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: under. I have a reservation under... / Is breakfast included? / Could I have...? / There's a problem with..."
+          "explanationAr": "الإجابة: Could I have. I have a reservation under... / Is breakfast included? / Could I have...? / There's a problem with..."
         },
         {
-          "questionAr": "أكمل الفراغ: (الفطور داخل في السعر؟)",
-          "questionEn": "Complete: Is breakfast ____?",
+          "questionAr": "أكمل الفراغ: (المكيف ما يشتغل.)",
+          "questionEn": "Complete: The air conditioner ____.",
           "options": [
-            "inside",
-            "included",
-            "include"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: included. I have a reservation under... / Is breakfast included? / Could I have...? / There's a problem with..."
-        },
-        {
-          "questionAr": "مكيف لا يعمل:",
-          "questionEn": "The AC is broken:",
-          "options": [
-            "The AC isn't working.",
-            "The AC not work.",
-            "The AC is close."
+            "isn't working",
+            "doesn't working",
+            "not work"
           ],
           "correctIndex": 0,
-          "explanationAr": "isn't working."
+          "explanationAr": "الإجابة: isn't working. I have a reservation under... / Is breakfast included? / Could I have...? / There's a problem with..."
         },
         {
-          "questionAr": "«مشمول» =",
-          "questionEn": "'مشمول' =",
+          "questionAr": "ما معنى \"key card\"؟",
+          "questionEn": "What does \"key card\" mean?",
           "options": [
-            "included",
-            "including",
-            "include"
+            "حجز",
+            "مشمول",
+            "تسجيل الدخول",
+            "كرت الغرفة"
           ],
-          "correctIndex": 0,
-          "explanationAr": "included."
+          "correctIndex": 3,
+          "explanationAr": "\"key card\" /kiː kɑːrd/ تعني: كرت الغرفة. مثال: Here's your key card."
+        },
+        {
+          "questionAr": "ما معنى \"floor\"؟",
+          "questionEn": "What does \"floor\" mean?",
+          "options": [
+            "تسجيل الخروج",
+            "إطلالة",
+            "كرت الغرفة",
+            "دور/طابق"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"floor\" /flɔːr/ تعني: دور/طابق. مثال: You're on the fifth floor."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I have booking with name Al-Harbi.",
-            "I have a reservation under Al-Harbi."
+            "I'd like to check out.",
+            "I want to make check out."
           ],
-          "correctIndex": 1,
-          "explanationAr": "الصحيح: I have a reservation under Al-Harbi. — التعبير الثابت: under + name."
+          "correctIndex": 0,
+          "explanationAr": "الصحيح: I'd like to check out. — check out فعل."
         }
       ]
     }
@@ -7740,58 +7764,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (أبي مقعد جنب الشباك لو سمحت.)",
-          "questionEn": "Complete: I'd like a ____, please.",
+          "questionAr": "أكمل الفراغ: (عندي شنطة وحدة أشحنها.)",
+          "questionEn": "Complete: I have one suitcase to ____.",
           "options": [
-            "seat window",
-            "window chair",
-            "window seat"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: window seat. أسئلة شائعة: Where are you flying to? / What's the purpose of your visit? / How long are you staying? والردود قصيرة وواضحة."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (جاي سياحة لمدة أسبوعين.)",
-          "questionEn": "Complete: I'm here ____ for two weeks.",
-          "options": [
-            "in holiday",
-            "on holiday",
-            "for holiday"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: on holiday. أسئلة شائعة: Where are you flying to? / What's the purpose of your visit? / How long are you staying? والردود قصيرة وواضحة."
-        },
-        {
-          "questionAr": "«مقعد على الممر» =",
-          "questionEn": "aisle or window?",
-          "options": [
-            "window seat",
-            "aisle seat",
-            "door seat"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "aisle."
-        },
-        {
-          "questionAr": "غرض الزيارة سياحة:",
-          "questionEn": "Purpose: tourism:",
-          "options": [
-            "I'm here on holiday.",
-            "I'm on tourist.",
-            "I came for to visit."
+            "check in",
+            "charge",
+            "ship"
           ],
           "correctIndex": 0,
-          "explanationAr": "on holiday."
+          "explanationAr": "الإجابة: check in. أسئلة شائعة: Where are you flying to? / What's the purpose of your visit? / How long are you staying? والردود قصيرة وواضحة."
+        },
+        {
+          "questionAr": "أكمل الفراغ: (أي بوابة؟)",
+          "questionEn": "Complete: Which ____ is it?",
+          "options": [
+            "port",
+            "door",
+            "gate"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: gate. أسئلة شائعة: Where are you flying to? / What's the purpose of your visit? / How long are you staying? والردود قصيرة وواضحة."
+        },
+        {
+          "questionAr": "ما معنى \"carry-on\"؟",
+          "questionEn": "What does \"carry-on\" mean?",
+          "options": [
+            "جواز",
+            "ممر",
+            "شنطة يد",
+            "بطاقة صعود"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"carry-on\" /ˈkæri ɑːn/ تعني: شنطة يد. مثال: Is this your carry-on?"
+        },
+        {
+          "questionAr": "ما معنى \"aisle\"؟",
+          "questionEn": "What does \"aisle\" mean?",
+          "options": [
+            "شنطة سفر",
+            "شنطة يد",
+            "ممر",
+            "الجمارك"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"aisle\" /aɪl/ تعني: ممر. مثال: an aisle seat"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I'm here on holiday. / I'm here for tourism.",
-            "I came for tourism."
+            "I'm going for tourism for two weeks.",
+            "I'm here on holiday for two weeks."
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: I'm here on holiday. / I'm here for tourism. — الصيغة الشائعة: on holiday."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: I'm here on holiday for two weeks. — عند الوصول نستخدم I'm here."
         }
       ]
     }
@@ -8350,58 +8376,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (ممكن توديني مطار الملك خالد؟)",
-          "questionEn": "Complete: Could you ____ King Khalid Airport?",
+          "questionAr": "أكمل الفراغ: (ممكن توقف هنا؟)",
+          "questionEn": "Complete: Can you ____ here, please?",
           "options": [
-            "bring me",
-            "take me to",
-            "go me to"
+            "put",
+            "stop",
+            "down"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: take me to. Could you take me to...? / Please stop here. / How long does it take? / A single/return ticket to..."
+          "explanationAr": "الإجابة: stop. Could you take me to...? / Please stop here. / How long does it take? / A single/return ticket to..."
         },
         {
-          "questionAr": "أكمل الفراغ: (كم ياخذ وقت لين نوصل؟)",
-          "questionEn": "Complete: ____ does it take to get there?",
+          "questionAr": "أكمل الفراغ: (تذكرة ذهاب وعودة لمحطة العليا.)",
+          "questionEn": "Complete: A ____ ticket to Al Olaya station, please.",
           "options": [
-            "How much",
-            "How long",
-            "How far time"
+            "return",
+            "back",
+            "two way"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: How long. Could you take me to...? / Please stop here. / How long does it take? / A single/return ticket to..."
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: return. Could you take me to...? / Please stop here. / How long does it take? / A single/return ticket to..."
         },
         {
-          "questionAr": "«نزلني هنا» =",
-          "questionEn": "'نزلني هنا' =",
+          "questionAr": "ما معنى \"single\"؟",
+          "questionEn": "What does \"single\" mean?",
           "options": [
-            "Down me here.",
-            "Drop me off here.",
-            "Put me here."
+            "خط (مترو)",
+            "زحمة خانقة",
+            "ينزّل",
+            "ذهاب فقط"
           ],
-          "correctIndex": 1,
-          "explanationAr": "drop off."
+          "correctIndex": 3,
+          "explanationAr": "\"single\" /ˈsɪŋɡəl/ تعني: ذهاب فقط. مثال: a single ticket"
         },
         {
-          "questionAr": "سؤال المدة:",
-          "questionEn": "Ask duration:",
+          "questionAr": "ما معنى \"return\"؟",
+          "questionEn": "What does \"return\" mean?",
           "options": [
-            "How much it take?",
-            "How long does it take?",
-            "How time?"
+            "باقي الفلوس/يغيّر",
+            "محطة",
+            "ذهاب وعودة",
+            "ذهاب فقط"
           ],
-          "correctIndex": 1,
-          "explanationAr": "How long."
+          "correctIndex": 2,
+          "explanationAr": "\"return\" /rɪˈtɜːrn/ تعني: ذهاب وعودة. مثال: a return ticket"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Can you stop here, please? / You can drop me here.",
-            "Down me here."
+            "Bring me to the mall.",
+            "Take me to the mall."
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: Can you stop here, please? / You can drop me here. — «نزلني» = drop me off."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: Take me to the mall. — take = يودّي، bring = يجيب لمكان المتكلم."
         }
       ]
     }
@@ -8960,58 +8988,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (الجو حار مرة اليوم، صح؟)",
-          "questionEn": "Complete: It's really hot today, ____?",
+          "questionAr": "أكمل الفراغ: (مو بطال. وأنت؟)",
+          "questionEn": "Complete: Not bad, thanks. ____ you?",
           "options": [
-            "no?",
-            "isn't it",
-            "is it"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: isn't it. ابدأ بتعليق أو سؤال سهل: It's so hot today, isn't it? / How was your weekend? وتابع بسؤال: What about you?"
-        },
-        {
-          "questionAr": "أكمل الفراغ: (كيف كان الويكند؟)",
-          "questionEn": "Complete: How ____ your weekend?",
-          "options": [
-            "is",
-            "were",
-            "was"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: was. ابدأ بتعليق أو سؤال سهل: It's so hot today, isn't it? / How was your weekend? وتابع بسؤال: What about you?"
-        },
-        {
-          "questionAr": "أكمل: It's cold, ___?",
-          "questionEn": "Complete: It's cold, ___?",
-          "options": [
-            "isn't it",
-            "is it",
-            "doesn't it"
+            "What about",
+            "And for",
+            "How about to"
           ],
           "correctIndex": 0,
-          "explanationAr": "إيجاب + isn't it."
+          "explanationAr": "الإجابة: What about. ابدأ بتعليق أو سؤال سهل: It's so hot today, isn't it? / How was your weekend? وتابع بسؤال: What about you?"
         },
         {
-          "questionAr": "رد يكمل الحوار:",
-          "questionEn": "Reply that continues chat:",
+          "questionAr": "أكمل الفراغ: (سمعت يمكن تمطر بكرة.)",
+          "questionEn": "Complete: I heard it ____ rain tomorrow.",
           "options": [
-            "Fine.",
-            "Good, thanks! We had a barbecue. And you?",
-            "Yes."
+            "must",
+            "maybe",
+            "might"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: might. ابدأ بتعليق أو سؤال سهل: It's so hot today, isn't it? / How was your weekend? وتابع بسؤال: What about you?"
+        },
+        {
+          "questionAr": "ما معنى \"forecast\"؟",
+          "questionEn": "What does \"forecast\" mean?",
+          "options": [
+            "الطقس",
+            "توقعات الطقس",
+            "مو بطال",
+            "زين/كويس"
           ],
           "correctIndex": 1,
-          "explanationAr": "اذكر تفصيل واسأل."
+          "explanationAr": "\"forecast\" /ˈfɔːrkæst/ تعني: توقعات الطقس. مثال: The forecast says rain."
+        },
+        {
+          "questionAr": "ما معنى \"not bad\"؟",
+          "questionEn": "What does \"not bad\" mean?",
+          "options": [
+            "رطب",
+            "عاصفة رملية/غبار",
+            "مو بطال",
+            "جميل/لطيف"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"not bad\" /nɑːt bæd/ تعني: مو بطال. مثال: Not bad, thanks."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "It's hot, isn't it?",
-            "It's hot, yes?"
+            "It's really hot today, isn't it?",
+            "The weather today is very hot, no?"
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: It's hot, isn't it? — سؤال الذيل الطبيعي."
+          "explanationAr": "الصحيح: It's really hot today, isn't it? — ترجمة «صح؟» = isn't it."
         }
       ]
     }
@@ -9570,58 +9600,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (كيف شكل أخوك؟)",
-          "questionEn": "Complete: What does your brother ____?",
+          "questionAr": "أكمل الفراغ: (لابسة عباية سوداء ونظارة.)",
+          "questionEn": "Complete: She's ____ a black abaya and glasses.",
           "options": [
-            "looks",
-            "like",
-            "look like"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: look like. What does he look like? للشكل، و What is he like? للشخصية. وترتيب الصفات: long black hair."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (طويل وشعره قصير ومجعد.)",
-          "questionEn": "Complete: He's tall and he ____ short curly hair.",
-          "options": [
-            "have",
-            "is",
-            "has"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: has. What does he look like? للشكل، و What is he like? للشخصية. وترتيب الصفات: long black hair."
-        },
-        {
-          "questionAr": "سؤال عن الشخصية:",
-          "questionEn": "Personality question:",
-          "options": [
-            "What does she look like?",
-            "What is she like?",
-            "How she looks?"
+            "dressing",
+            "wearing",
+            "carrying"
           ],
           "correctIndex": 1,
-          "explanationAr": "What is she like?"
+          "explanationAr": "الإجابة: wearing. What does he look like? للشكل، و What is he like? للشخصية. وترتيب الصفات: long black hair."
         },
         {
-          "questionAr": "ترتيب صحيح:",
-          "questionEn": "Correct order:",
+          "questionAr": "أكمل الفراغ: (كيف معلمتك؟ صبورة ومرحة.)",
+          "questionEn": "Complete: What's your teacher ____? — She's patient and funny.",
           "options": [
-            "black long hair",
-            "long black hair",
-            "hair long black"
+            "as",
+            "look",
+            "like"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الحجم قبل اللون."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: like. What does he look like? للشكل، و What is he like? للشخصية. وترتيب الصفات: long black hair."
+        },
+        {
+          "questionAr": "ما معنى \"beard\"؟",
+          "questionEn": "What does \"beard\" mean?",
+          "options": [
+            "خجول",
+            "ودود",
+            "لحية",
+            "مجعد"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"beard\" /bɪrd/ تعني: لحية. مثال: a long beard"
+        },
+        {
+          "questionAr": "ما معنى \"glasses\"؟",
+          "questionEn": "What does \"glasses\" mean?",
+          "options": [
+            "خجول",
+            "طويل",
+            "نظارة",
+            "كريم"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"glasses\" /ˈɡlæsɪz/ تعني: نظارة. مثال: She wears glasses."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "He has tall.",
-            "He is tall."
+            "He has a beard.",
+            "He is having a beard."
           ],
-          "correctIndex": 1,
-          "explanationAr": "الصحيح: He is tall. — الطول صفة مع is."
+          "correctIndex": 0,
+          "explanationAr": "الصحيح: He has a beard. — have للامتلاك ما تأخذ ing."
         }
       ]
     }
@@ -10180,58 +10212,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (لو سمحت، أخاف هذا مو اللي طلبته.)",
-          "questionEn": "Complete: Excuse me, ____ this isn't what I ordered.",
+          "questionAr": "أكمل الفراغ: (ممكن بدون بصل لو سمحت؟)",
+          "questionEn": "Complete: Could I have it ____ onions, please?",
           "options": [
-            "I'm afraid",
-            "I scare",
-            "I fear"
+            "without",
+            "no with",
+            "minus"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: I'm afraid. Excuse me, I'm afraid... / I ordered X, but this is Y. / Could I have... instead? تبدأ بتلطيف ثم المشكلة ثم الطلب."
+          "explanationAr": "الإجابة: without. Excuse me, I'm afraid... / I ordered X, but this is Y. / Could I have... instead? تبدأ بتلطيف ثم المشكلة ثم الطلب."
         },
         {
-          "questionAr": "أكمل الفراغ: (طلبت الدجاج المشوي مو المقلي.)",
-          "questionEn": "Complete: I ____ the grilled chicken, not the fried one.",
+          "questionAr": "أكمل الفراغ: (الشوربة باردة شوي.)",
+          "questionEn": "Complete: My soup is ____ cold.",
           "options": [
-            "order",
-            "ordered",
-            "requested to"
+            "little",
+            "a few",
+            "a bit"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: ordered. Excuse me, I'm afraid... / I ordered X, but this is Y. / Could I have... instead? تبدأ بتلطيف ثم المشكلة ثم الطلب."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: a bit. Excuse me, I'm afraid... / I ordered X, but this is Y. / Could I have... instead? تبدأ بتلطيف ثم المشكلة ثم الطلب."
         },
         {
-          "questionAr": "بداية مهذبة للشكوى:",
-          "questionEn": "Polite complaint opener:",
+          "questionAr": "ما معنى \"well done\"؟",
+          "questionEn": "What does \"well done\" mean?",
           "options": [
-            "Hey! Problem!",
-            "Excuse me, I'm afraid...",
-            "Listen to me."
+            "للأسف/أخشى (تلطيف)",
+            "نادل/ويتر",
+            "مستوي زين",
+            "بدون"
           ],
-          "correctIndex": 1,
-          "explanationAr": "Excuse me, I'm afraid..."
+          "correctIndex": 2,
+          "explanationAr": "\"well done\" /wɛl dʌn/ تعني: مستوي زين. مثال: Well done, please."
         },
         {
-          "questionAr": "«الحساب» في المطعم:",
-          "questionEn": "'الحساب' in a restaurant:",
+          "questionAr": "ما معنى \"undercooked\"؟",
+          "questionEn": "What does \"undercooked\" mean?",
           "options": [
-            "the account",
-            "the bill",
-            "the calculation"
+            "للأسف/أخشى (تلطيف)",
+            "يقسم",
+            "مو مستوي",
+            "يستبدل"
           ],
-          "correctIndex": 1,
-          "explanationAr": "the bill."
+          "correctIndex": 2,
+          "explanationAr": "\"undercooked\" /ˌʌndərˈkʊkt/ تعني: مو مستوي. مثال: The meat is undercooked."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Excuse me, I'm afraid my food is cold. Could you warm it up, please?",
-            "This food is bad! Change it!"
+            "I'm afraid my food is cold. Could I have a fresh one?",
+            "The food is cold, I want another."
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: Excuse me, I'm afraid my food is cold. Could you warm it up, please? — الشكوى الفظة تخرب الخدمة."
+          "explanationAr": "الصحيح: I'm afraid my food is cold. Could I have a fresh one? — ابدأ بتلطيف."
         }
       ]
     }
@@ -10790,58 +10824,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (أول شي فطرنا في كافيه.)",
-          "questionEn": "Complete: ____, we had breakfast at a café.",
+          "questionAr": "أكمل الفراغ: (بعد كذا وصلوا عيال عمي.)",
+          "questionEn": "Complete: ____, my cousins arrived.",
           "options": [
-            "First",
-            "At first of",
-            "Firstly of"
+            "After",
+            "After that",
+            "Next of"
+          ],
+          "correctIndex": 1,
+          "explanationAr": "الإجابة: After that. استخدم الماضي البسيط وكلمات الترتيب: First, Then, After that, Later, Finally. وتفاعل المستمع: Really? That sounds fun!"
+        },
+        {
+          "questionAr": "أكمل الفراغ: (وآخر شي وصلنا البيت نص الليل. كنت هلكان!)",
+          "questionEn": "Complete: ____, we got home at midnight. I was exhausted!",
+          "options": [
+            "Finally",
+            "End",
+            "At last of"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: First. استخدم الماضي البسيط وكلمات الترتيب: First, Then, After that, Later, Finally. وتفاعل المستمع: Really? That sounds fun!"
+          "explanationAr": "الإجابة: Finally. استخدم الماضي البسيط وكلمات الترتيب: First, Then, After that, Later, Finally. وتفاعل المستمع: Really? That sounds fun!"
         },
         {
-          "questionAr": "أكمل الفراغ: (بعدين سقنا للمزرعة.)",
-          "questionEn": "Complete: ____ we drove to the farm.",
+          "questionAr": "ما معنى \"exhausted\"؟",
+          "questionEn": "What does \"exhausted\" mean?",
           "options": [
-            "Than",
-            "After",
-            "Then"
+            "هلكان",
+            "يحدث",
+            "شواء",
+            "أخيراً"
           ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: Then. استخدم الماضي البسيط وكلمات الترتيب: First, Then, After that, Later, Finally. وتفاعل المستمع: Really? That sounds fun!"
+          "correctIndex": 0,
+          "explanationAr": "\"exhausted\" /ɪɡˈzɔːstɪd/ تعني: هلكان. مثال: I was exhausted."
         },
         {
-          "questionAr": "طفشان =",
-          "questionEn": "'طفشان' =",
+          "questionAr": "ما معنى \"excited\"؟",
+          "questionEn": "What does \"excited\" mean?",
           "options": [
-            "boring",
-            "bored",
-            "bore"
+            "بعد كذا",
+            "أخيراً",
+            "هلكان",
+            "متحمس"
           ],
-          "correctIndex": 1,
-          "explanationAr": "bored."
-        },
-        {
-          "questionAr": "رد مستمع متفاعل:",
-          "questionEn": "Engaged listener reply:",
-          "options": [
-            "OK.",
-            "Really? That sounds amazing!",
-            "And?"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "تفاعل + تشجيع."
+          "correctIndex": 3,
+          "explanationAr": "\"excited\" /ɪkˈsaɪtɪd/ تعني: متحمس. مثال: We were excited."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "After that, we drove to the farm.",
-            "After we drove to the farm."
+            "I was very bored at home.",
+            "I was very boring at home."
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: After that, we drove to the farm. — After وحدها تحتاج جملة بعدها؛ استخدم After that."
+          "explanationAr": "الصحيح: I was very bored at home. — boring = ممل (أنت ممل!)، bored = طفشان."
         }
       ]
     }
@@ -11064,9 +11100,10 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       {
         "word": "rather",
         "ipa": "/ˈræðər/",
-        "ar": "أفضّل (I'd rather)",
+        "ar": "يفضّل",
         "exampleEn": "I'd rather stay home.",
-        "exampleAr": "أفضّل أجلس في البيت."
+        "exampleAr": "أفضّل أجلس في البيت.",
+        "note": "I'd rather = I would rather"
       }
     ],
     "grammarFocus": {
@@ -11188,12 +11225,11 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
           "promptEn": "What does \"suggest\" mean?",
           "promptAr": "ما معنى \"suggest\"؟",
           "options": [
-            "أفضّل (I'd rather)",
-            "يفضّل",
+            "اتفقنا",
             "يقترح",
-            "اتفقنا"
+            "يفضّل"
           ],
-          "correctIndex": 2,
+          "correctIndex": 1,
           "answer": "يقترح",
           "explanationAr": "\"suggest\" /səɡˈdʒɛst/ تعني: يقترح. مثال: I suggest pizza."
         },
@@ -11218,7 +11254,7 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
           "promptEn": "What does \"instead\" mean?",
           "promptAr": "ما معنى \"instead\"؟",
           "options": [
-            "أفضّل (I'd rather)",
+            "يفضّل",
             "يحجز",
             "بدلاً",
             "اتفقنا"
@@ -11400,58 +11436,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (خلنا نطلب بيتزا الليلة.)",
-          "questionEn": "Complete: ____ order pizza tonight.",
+          "questionAr": "أكمل الفراغ: (ليش ما نعزم جدتي؟)",
+          "questionEn": "Complete: ____ invite Grandma?",
           "options": [
-            "Let's",
-            "Let",
-            "Lets to"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: Let's. Let's + فعل / How about + ing؟ / Why don't we + فعل؟ والرد: Good idea! / I'm not sure... How about...?"
-        },
-        {
-          "questionAr": "أكمل الفراغ: (وش رايك نروح البحر؟)",
-          "questionEn": "Complete: How about ____ to the beach?",
-          "options": [
-            "going",
-            "to go",
-            "go"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: going. Let's + فعل / How about + ing؟ / Why don't we + فعل؟ والرد: Good idea! / I'm not sure... How about...?"
-        },
-        {
-          "questionAr": "أكمل: How about ___ a movie?",
-          "questionEn": "Complete: How about ___ a movie?",
-          "options": [
-            "watch",
-            "watching",
-            "to watch"
+            "Why we don't",
+            "Why don't we",
+            "Why not we"
           ],
           "correctIndex": 1,
-          "explanationAr": "How about + ing."
+          "explanationAr": "الإجابة: Why don't we. Let's + فعل / How about + ing؟ / Why don't we + فعل؟ والرد: Good idea! / I'm not sure... How about...?"
         },
         {
-          "questionAr": "رفض مهذب واقتراح:",
-          "questionEn": "Polite counter-suggestion:",
+          "questionAr": "أكمل الفراغ: (فكرة حلوة!)",
+          "questionEn": "Complete: That's a great ____!",
           "options": [
-            "No.",
-            "I'm not sure. How about tomorrow instead?",
-            "Bad idea."
+            "think",
+            "idea",
+            "opinion"
           ],
           "correctIndex": 1,
-          "explanationAr": "تلطيف + بديل."
+          "explanationAr": "الإجابة: idea. Let's + فعل / How about + ing؟ / Why don't we + فعل؟ والرد: Good idea! / I'm not sure... How about...?"
+        },
+        {
+          "questionAr": "ما معنى \"deal\"؟",
+          "questionEn": "What does \"deal\" mean?",
+          "options": [
+            "يقرر",
+            "بدلاً",
+            "يفضّل",
+            "اتفقنا"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"deal\" /diːl/ تعني: اتفقنا. مثال: Seven o'clock? Deal!"
+        },
+        {
+          "questionAr": "ما معنى \"crowded\"؟",
+          "questionEn": "What does \"crowded\" mean?",
+          "options": [
+            "اتفقنا",
+            "يفضّل",
+            "زحمة",
+            "يقرر"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"crowded\" /ˈkraʊdɪd/ تعني: زحمة. مثال: It's crowded on Thursdays."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "How about go to the mall?",
-            "How about going to the mall?"
+            "I suggest to go.",
+            "I suggest going. / Let's go."
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: How about going to the mall? — How about + ing."
+          "explanationAr": "الصحيح: I suggest going. / Let's go. — suggest + ing."
         }
       ]
     }
@@ -12010,58 +12048,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (آسف جداً على التأخير.)",
-          "questionEn": "Complete: I'm so sorry for ____ late.",
+          "questionAr": "أكمل الفراغ: (كانت فيه زحمة مرة.)",
+          "questionEn": "Complete: There was a lot of ____.",
           "options": [
-            "been",
-            "be",
-            "being"
+            "traffic",
+            "a traffic",
+            "traffics"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: traffic. I'm (so) sorry for + ing / I'm sorry I + ماضي. ثم السبب ثم الحل: I'll... والقبول: No worries / That's OK."
+        },
+        {
+          "questionAr": "أكمل الفراغ: (ما راح تتكرر.)",
+          "questionEn": "Complete: It ____ happen again.",
+          "options": [
+            "not will",
+            "don't",
+            "won't"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: being. I'm (so) sorry for + ing / I'm sorry I + ماضي. ثم السبب ثم الحل: I'll... والقبول: No worries / That's OK."
+          "explanationAr": "الإجابة: won't. I'm (so) sorry for + ing / I'm sorry I + ماضي. ثم السبب ثم الحل: I'll... والقبول: No worries / That's OK."
         },
         {
-          "questionAr": "أكمل الفراغ: (آسف نسيت أتصل عليك.)",
-          "questionEn": "Complete: Sorry I ____ to call you.",
+          "questionAr": "ما معنى \"on purpose\"؟",
+          "questionEn": "What does \"on purpose\" mean?",
           "options": [
-            "forgotten",
-            "forget",
-            "forgot"
+            "يعتذر",
+            "غلطة/ذنب",
+            "آسف",
+            "قصداً"
           ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: forgot. I'm (so) sorry for + ing / I'm sorry I + ماضي. ثم السبب ثم الحل: I'll... والقبول: No worries / That's OK."
+          "correctIndex": 3,
+          "explanationAr": "\"on purpose\" /ɑːn ˈpɜːrpəs/ تعني: قصداً. مثال: I didn't do it on purpose."
         },
         {
-          "questionAr": "بعد ما دعست رجل أحد:",
-          "questionEn": "After stepping on someone's foot:",
+          "questionAr": "ما معنى \"make up for\"؟",
+          "questionEn": "What does \"make up for\" mean?",
           "options": [
-            "Excuse me.",
-            "Sorry!",
-            "Pardon?"
+            "يعوّض",
+            "قصداً",
+            "آسف",
+            "يعتذر"
           ],
-          "correctIndex": 1,
-          "explanationAr": "بعد الخطأ ⇐ Sorry."
-        },
-        {
-          "questionAr": "أكمل: Sorry for ___ your birthday.",
-          "questionEn": "Complete: Sorry for ___ your birthday.",
-          "options": [
-            "forget",
-            "forgetting",
-            "forgot"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "for + ing."
+          "correctIndex": 0,
+          "explanationAr": "\"make up for\" /meɪk ʌp fɔːr/ تعني: يعوّض. مثال: I'll make up for it."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Sorry I'm late. / Sorry for being late.",
-            "Sorry for I am late."
+            "Sorry I'm late.",
+            "Sorry, I late."
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: Sorry I'm late. / Sorry for being late. — for + ing، أو جملة كاملة بدون for."
+          "explanationAr": "الصحيح: Sorry I'm late. — لا تحذف am."
         }
       ]
     }
@@ -12606,13 +12646,13 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "ما معنى \"rather\"؟",
         "questionEn": "What does \"rather\" mean?",
         "options": [
-          "أفضّل (I'd rather)",
+          "يفضّل",
           "أي منهما",
           "يحجز",
           "بدلاً"
         ],
         "correctIndex": 0,
-        "explanationAr": "\"rather\" /ˈræðər/ تعني: أفضّل (I'd rather). مثال: I'd rather stay home.",
+        "explanationAr": "\"rather\" /ˈræðər/ تعني: يفضّل. مثال: I'd rather stay home.",
         "fromLessonId": "sc_220"
       }
     ],
@@ -12620,58 +12660,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (برأيي الدراسة عن بعد مفيدة.)",
-          "questionEn": "Complete: ____, online classes are useful.",
+          "questionAr": "أكمل الفراغ: (أتفق معك تماماً.)",
+          "questionEn": "Complete: I totally ____ you.",
           "options": [
-            "For my opinion",
-            "On my opinion",
-            "In my opinion"
+            "am agree",
+            "agree to you",
+            "agree with"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: In my opinion. الرأي: In my opinion / I think / Personally, I feel. الموافقة: I totally agree. الاعتراض بلطف: I see your point, but... ودايماً أضف because."
+          "explanationAr": "الإجابة: agree with. الرأي: In my opinion / I think / Personally, I feel. الموافقة: I totally agree. الاعتراض بلطف: I see your point, but... ودايماً أضف because."
         },
         {
-          "questionAr": "أكمل الفراغ: (فاهم وجهة نظرك، بس أشوف الطلاب يحتاجون معلمين.)",
-          "questionEn": "Complete: I see your point, ____ I think students need teachers.",
+          "questionAr": "أكمل الفراغ: (شخصياً أفضّل الدوام من المكتب.)",
+          "questionEn": "Complete: ____, I prefer working from the office.",
           "options": [
-            "but",
-            "so",
-            "and"
+            "Personally",
+            "Personal",
+            "In person"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: but. الرأي: In my opinion / I think / Personally, I feel. الموافقة: I totally agree. الاعتراض بلطف: I see your point, but... ودايماً أضف because."
+          "explanationAr": "الإجابة: Personally. الرأي: In my opinion / I think / Personally, I feel. الموافقة: I totally agree. الاعتراض بلطف: I see your point, but... ودايماً أضف because."
         },
         {
-          "questionAr": "اعتراض مهذب:",
-          "questionEn": "Polite disagreement:",
+          "questionAr": "ما معنى \"personally\"؟",
+          "questionEn": "What does \"personally\" mean?",
           "options": [
-            "No, you're wrong.",
-            "I see your point, but...",
-            "That's stupid."
+            "عيب",
+            "يعتمد",
+            "يوافق",
+            "شخصياً"
           ],
-          "correctIndex": 1,
-          "explanationAr": "تلطيف قبل الاعتراض."
+          "correctIndex": 3,
+          "explanationAr": "\"personally\" /ˈpɜːrsənəli/ تعني: شخصياً. مثال: Personally, I like it."
         },
         {
-          "questionAr": "الصحيح:",
-          "questionEn": "Correct:",
+          "questionAr": "ما معنى \"benefit\"؟",
+          "questionEn": "What does \"benefit\" mean?",
           "options": [
-            "I am agree.",
-            "I agree.",
-            "I agreeing."
+            "فائدة",
+            "يوافق",
+            "يعتمد",
+            "يقنع"
           ],
-          "correctIndex": 1,
-          "explanationAr": "I agree."
+          "correctIndex": 0,
+          "explanationAr": "\"benefit\" /ˈbɛnɪfɪt/ تعني: فائدة. مثال: the main benefit"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I am agree with you.",
-            "I agree with you."
+            "According to me...",
+            "In my opinion... / As I see it..."
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: I agree with you. — agree فعل؛ ما نحط am."
+          "explanationAr": "الصحيح: In my opinion... / As I see it... — According to للمصادر، مو لنفسك."
         }
       ]
     }
@@ -13230,58 +13272,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (حالياً أشتغل محاسب في شركة لوجستية.)",
-          "questionEn": "Complete: Currently, I work ____ an accountant at a logistics company.",
+          "questionAr": "أكمل الفراغ: (من نقاط قوتي حل المشكلات.)",
+          "questionEn": "Complete: One of my ____ is problem-solving.",
           "options": [
-            "like",
-            "for",
-            "as"
+            "strengths",
+            "power",
+            "strong"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: strengths. هيكل «حاضر–ماضي–مستقبل»: Currently I... / Before that, I... / Now I'm looking for... وللإنجازات: I managed to + فعل."
+        },
+        {
+          "questionAr": "أكمل الفراغ: (قدرت أخفض التكاليف ١٥٪.)",
+          "questionEn": "Complete: I ____ reduce costs by 15%.",
+          "options": [
+            "could to",
+            "succeeded to",
+            "managed to"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: as. هيكل «حاضر–ماضي–مستقبل»: Currently I... / Before that, I... / Now I'm looking for... وللإنجازات: I managed to + فعل."
+          "explanationAr": "الإجابة: managed to. هيكل «حاضر–ماضي–مستقبل»: Currently I... / Before that, I... / Now I'm looking for... وللإنجازات: I managed to + فعل."
         },
         {
-          "questionAr": "أكمل الفراغ: (قبلها تخرجت من جامعة الملك سعود.)",
-          "questionEn": "Complete: Before that, I ____ King Saud University.",
+          "questionAr": "ما معنى \"responsible for\"؟",
+          "questionEn": "What does \"responsible for\" mean?",
           "options": [
-            "graduated",
-            "finished from",
-            "graduated from"
+            "موعد التسليم",
+            "يحقق",
+            "يعمل بروح الفريق",
+            "مسؤول عن"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"responsible for\" /rɪˈspɑːnsəbəl fɔːr/ تعني: مسؤول عن. مثال: I'm responsible for sales."
+        },
+        {
+          "questionAr": "ما معنى \"achieve\"؟",
+          "questionEn": "What does \"achieve\" mean?",
+          "options": [
+            "يتخرج",
+            "راتب",
+            "يحقق",
+            "موعد التسليم"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: graduated from. هيكل «حاضر–ماضي–مستقبل»: Currently I... / Before that, I... / Now I'm looking for... وللإنجازات: I managed to + فعل."
-        },
-        {
-          "questionAr": "بداية جيدة لـ Tell me about yourself:",
-          "questionEn": "Good start for 'Tell me about yourself':",
-          "options": [
-            "I was born in 1999...",
-            "Currently, I work as...",
-            "I like football."
-          ],
-          "correctIndex": 1,
-          "explanationAr": "ابدأ بالحاضر المهني."
-        },
-        {
-          "questionAr": "«قدرت أن» =",
-          "questionEn": "'قدرت أن' =",
-          "options": [
-            "I could to",
-            "I managed to",
-            "I succeeded to"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "managed to + فعل."
+          "explanationAr": "\"achieve\" /əˈtʃiːv/ تعني: يحقق. مثال: I achieved my target."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I graduated from King Saud University.",
-            "I graduated King Saud University."
+            "My name is Ahmed, I am 25 years, I am from Riyadh...",
+            "Currently, I'm a ... Before that, ... I'm looking for ..."
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: I graduated from King Saud University. — graduate from."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: Currently, I'm a ... Before that, ... I'm looking for ... — لا تبدأ بالعمر والمدينة؛ ابدأ بالجانب المهني."
         }
       ]
     }
@@ -13840,58 +13884,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (أتصل بخصوص الطلب رقم ٤٥٢١.)",
-          "questionEn": "Complete: I'm calling ____ order number 4521.",
+          "questionAr": "أكمل الفراغ: (أبي استرجاع كامل المبلغ.)",
+          "questionEn": "Complete: I'd like a full ____, please.",
           "options": [
-            "on",
-            "for about",
-            "about"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: about. هيكل: المشكلة + الدليل + الطلب: I'm calling about order number... It arrived damaged. I'd like a refund, please. وإذا رُفضت: I understand, but..."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (وصل خربان.)",
-          "questionEn": "Complete: It arrived ____.",
-          "options": [
-            "damaged",
-            "damage",
-            "broken down"
+            "refund",
+            "refound",
+            "return money"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: damaged. هيكل: المشكلة + الدليل + الطلب: I'm calling about order number... It arrived damaged. I'd like a refund, please. وإذا رُفضت: I understand, but..."
+          "explanationAr": "الإجابة: refund. هيكل: المشكلة + الدليل + الطلب: I'm calling about order number... It arrived damaged. I'd like a refund, please. وإذا رُفضت: I understand, but..."
         },
         {
-          "questionAr": "أبي فلوسي ترجع =",
-          "questionEn": "'I want my money back' politely:",
+          "questionAr": "أكمل الفراغ: (فاهم، بس هذي ثاني مرة.)",
+          "questionEn": "Complete: ____, but this is the second time.",
           "options": [
-            "Return money!",
-            "I'd like a refund, please.",
-            "Give money."
+            "I know but",
+            "OK but",
+            "I understand"
           ],
-          "correctIndex": 1,
-          "explanationAr": "I'd like a refund."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: I understand. هيكل: المشكلة + الدليل + الطلب: I'm calling about order number... It arrived damaged. I'd like a refund, please. وإذا رُفضت: I understand, but..."
         },
         {
-          "questionAr": "الرد على رفض أول:",
-          "questionEn": "Respond to a first refusal:",
+          "questionAr": "ما معنى \"order number\"؟",
+          "questionEn": "What does \"order number\" mean?",
           "options": [
-            "You're useless.",
-            "I understand, but...",
-            "OK bye."
+            "رقم الطلب",
+            "يصعّد",
+            "سياسة",
+            "تالف"
           ],
-          "correctIndex": 1,
-          "explanationAr": "I understand, but..."
+          "correctIndex": 0,
+          "explanationAr": "\"order number\" /ˈɔːrdər ˈnʌmbər/ تعني: رقم الطلب. مثال: my order number"
+        },
+        {
+          "questionAr": "ما معنى \"receipt\"؟",
+          "questionEn": "What does \"receipt\" mean?",
+          "options": [
+            "رقم الطلب",
+            "ضمان",
+            "استرجاع المبلغ",
+            "إيصال"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"receipt\" /rɪˈsiːt/ تعني: إيصال. مثال: I have the receipt."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I'd like a refund, please.",
-            "I want my money back now!"
+            "I'd like to make a complaint.",
+            "I want to make complaint."
           ],
           "correctIndex": 0,
-          "explanationAr": "الصحيح: I'd like a refund, please. — الحزم بأدب أنجح."
+          "explanationAr": "الصحيح: I'd like to make a complaint. — a + complaint، و I'd like أطيب."
         }
       ]
     }
@@ -14450,58 +14496,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (يناسبك الثلاثاء الساعة عشر؟)",
-          "questionEn": "Complete: Would Tuesday at ten ____?",
+          "questionAr": "أكمل الفراغ: (ممكن نأخره للعصر؟)",
+          "questionEn": "Complete: Could we ____ to the afternoon?",
           "options": [
-            "okay to you",
-            "work for you",
-            "suit for you"
+            "back push it",
+            "push it back",
+            "delay to"
           ],
           "correctIndex": 1,
-          "explanationAr": "الإجابة: work for you. المضارع المستمر للمواعيد المقررة: I'm meeting the client on Monday. والاقتراح: Would Tuesday at 10 work for you? والتغيير: Could we push it back to...?"
+          "explanationAr": "الإجابة: push it back. المضارع المستمر للمواعيد المقررة: I'm meeting the client on Monday. والاقتراح: Would Tuesday at 10 work for you? والتغيير: Could we push it back to...?"
         },
         {
-          "questionAr": "أكمل الفراغ: (عندي اجتماع مع عميل الاثنين الصبح.)",
-          "questionEn": "Complete: ____ a client on Monday morning.",
+          "questionAr": "أكمل الفراغ: (خلنا ننقل الاجتماع للأربعاء.)",
+          "questionEn": "Complete: Let's ____ the meeting to Wednesday.",
           "options": [
-            "I will meeting",
-            "I'm meeting",
-            "I meet"
+            "transfer",
+            "change to",
+            "move"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: I'm meeting. المضارع المستمر للمواعيد المقررة: I'm meeting the client on Monday. والاقتراح: Would Tuesday at 10 work for you? والتغيير: Could we push it back to...?"
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: move. المضارع المستمر للمواعيد المقررة: I'm meeting the client on Monday. والاقتراح: Would Tuesday at 10 work for you? والتغيير: Could we push it back to...?"
         },
         {
-          "questionAr": "«نأجل» =",
-          "questionEn": "'postpone a bit' =",
+          "questionAr": "ما معنى \"bring forward\"؟",
+          "questionEn": "What does \"bring forward\" mean?",
           "options": [
-            "bring forward",
-            "push back",
-            "push front"
+            "يقدّم",
+            "يؤجل",
+            "فترة متاحة",
+            "جدول/يجدول"
           ],
-          "correctIndex": 1,
-          "explanationAr": "push back."
+          "correctIndex": 0,
+          "explanationAr": "\"bring forward\" /brɪŋ ˈfɔːrwərd/ تعني: يقدّم. مثال: Can we bring it forward?"
         },
         {
-          "questionAr": "سؤال مهني عن الموعد:",
-          "questionEn": "Professional time check:",
+          "questionAr": "ما معنى \"agenda\"؟",
+          "questionEn": "What does \"agenda\" mean?",
           "options": [
-            "You can Tuesday?",
-            "Would Tuesday work for you?",
-            "Tuesday good or not?"
+            "جدول الأعمال",
+            "يؤكد",
+            "تعارض مواعيد",
+            "فترة متاحة"
           ],
-          "correctIndex": 1,
-          "explanationAr": "Would ... work for you?"
+          "correctIndex": 0,
+          "explanationAr": "\"agenda\" /əˈdʒɛndə/ تعني: جدول الأعمال. مثال: Here's the agenda."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Does Tuesday work for you?",
-            "Is it suitable for you Tuesday?"
+            "Let's make a meeting.",
+            "Let's have/set up a meeting."
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: Does Tuesday work for you? — صيغة طبيعية مهنية."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: Let's have/set up a meeting. — make a meeting ترجمة حرفية."
         }
       ]
     }
@@ -15060,58 +15108,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (جاتني البعثة! — خبر حلو! مبروك!)",
-          "questionEn": "Complete: I got the scholarship! — That's ____! Congratulations!",
+          "questionAr": "أكمل الفراغ: (قابلت كريستيانو! — مستحيل! جد؟)",
+          "questionEn": "Complete: I met Cristiano Ronaldo! — ____! Seriously?",
           "options": [
-            "great news",
-            "good new",
-            "great new"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: great news. الاهتمام: Really? / Oh, really? الدهشة: No way! / Seriously? التعاطف: Oh no, I'm sorry to hear that. الفرح: That's great news! وأسئلة الصدى: You did? / Did you?"
-        },
-        {
-          "questionAr": "أكمل الفراغ: (سيارتي خربت مرة ثانية. — يا ساتر، آسف أسمع كذا.)",
-          "questionEn": "Complete: My car broke down again. — Oh no, I'm ____ that.",
-          "options": [
-            "sorry to hear",
-            "sad to hear",
-            "sorry for hear"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: sorry to hear. الاهتمام: Really? / Oh, really? الدهشة: No way! / Seriously? التعاطف: Oh no, I'm sorry to hear that. الفرح: That's great news! وأسئلة الصدى: You did? / Did you?"
-        },
-        {
-          "questionAr": "صديقك قال: My dad is in hospital.",
-          "questionEn": "Friend: 'My dad is in hospital.'",
-          "options": [
-            "No way!",
-            "I'm sorry to hear that. I hope he gets better soon.",
-            "Cool."
+            "No how",
+            "No way",
+            "Not way"
           ],
           "correctIndex": 1,
-          "explanationAr": "تعاطف."
+          "explanationAr": "الإجابة: No way. الاهتمام: Really? / Oh, really? الدهشة: No way! / Seriously? التعاطف: Oh no, I'm sorry to hear that. الفرح: That's great news! وأسئلة الصدى: You did? / Did you?"
         },
         {
-          "questionAr": "سؤال صدى لـ I've been to Korea:",
-          "questionEn": "Echo question for 'I've been to Korea':",
+          "questionAr": "أكمل الفراغ: (توني راجع من اليابان. — صدق؟ كيف كانت؟)",
+          "questionEn": "Complete: I've just come back from Japan. — ____? How was it?",
           "options": [
-            "Have you?",
-            "Did you?",
-            "Are you?"
+            "You have",
+            "Did you",
+            "Have you"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: Have you. الاهتمام: Really? / Oh, really? الدهشة: No way! / Seriously? التعاطف: Oh no, I'm sorry to hear that. الفرح: That's great news! وأسئلة الصدى: You did? / Did you?"
+        },
+        {
+          "questionAr": "ما معنى \"sorry to hear\"؟",
+          "questionEn": "What does \"sorry to hear\" mean?",
+          "options": [
+            "محظوظ",
+            "رهيب",
+            "آسف أسمع",
+            "مستحيل!"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"sorry to hear\" /ˈsɑːri tə hɪr/ تعني: آسف أسمع. مثال: Sorry to hear that."
+        },
+        {
+          "questionAr": "ما معنى \"must have been\"؟",
+          "questionEn": "What does \"must have been\" mean?",
+          "options": [
+            "أكيد كان",
+            "محظوظ",
+            "يا خسارة",
+            "مستحيل!"
           ],
           "correctIndex": 0,
-          "explanationAr": "نفس الفعل المساعد: have."
+          "explanationAr": "\"must have been\" /mʌst əv bɪn/ تعني: أكيد كان. مثال: That must have been fun."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I passed! — Good.",
-            "That's fantastic! Well done!"
+            "Mabrook! (in English conversation)",
+            "Congratulations!"
           ],
           "correctIndex": 1,
-          "explanationAr": "الصحيح: That's fantastic! Well done! — الرد الجاف يحبط المتكلم."
+          "explanationAr": "الصحيح: Congratulations! — استخدم الكلمة الإنجليزية مع غير العرب."
         }
       ]
     }
@@ -15670,58 +15720,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (فيه مجال في السعر؟)",
-          "questionEn": "Complete: Is there any ____ on the price?",
+          "questionAr": "أكمل الفراغ: (إذا شملت الصيانة، أدفع كاش اليوم.)",
+          "questionEn": "Complete: If you include the service, ____ cash today.",
           "options": [
-            "discount on",
-            "flexible",
-            "flexibility"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: flexibility. Is there any flexibility on the price? / Would you accept...? / If you..., I'll... / That's my final offer. استخدم الشرط الأول للمساومة."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (تقبل بأربعين ألف؟)",
-          "questionEn": "Complete: Would you ____ forty thousand?",
-          "options": [
-            "accept",
-            "except",
-            "agree"
+            "I'll pay",
+            "I will paying",
+            "I pay"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: accept. Is there any flexibility on the price? / Would you accept...? / If you..., I'll... / That's my final offer. استخدم الشرط الأول للمساومة."
+          "explanationAr": "الإجابة: I'll pay. Is there any flexibility on the price? / Would you accept...? / If you..., I'll... / That's my final offer. استخدم الشرط الأول للمساومة."
         },
         {
-          "questionAr": "طلب مرونة:",
-          "questionEn": "Ask for flexibility:",
+          "questionAr": "أكمل الفراغ: (هذا أكثر شوي من اللي توقعته.)",
+          "questionEn": "Complete: That's a bit more than I ____.",
           "options": [
-            "Cheaper!",
-            "Is there any flexibility on the price?",
-            "Too expensive, no."
+            "expect",
+            "expected",
+            "waited"
           ],
           "correctIndex": 1,
-          "explanationAr": "صيغة مهذبة."
+          "explanationAr": "الإجابة: expected. Is there any flexibility on the price? / Would you accept...? / If you..., I'll... / That's my final offer. استخدم الشرط الأول للمساومة."
         },
         {
-          "questionAr": "«نتقابل في النص» =",
-          "questionEn": "'compromise' phrase:",
+          "questionAr": "ما معنى \"accept\"؟",
+          "questionEn": "What does \"accept\" mean?",
           "options": [
-            "meet halfway",
-            "meet middle",
-            "half meet"
+            "عرض",
+            "الممشى",
+            "يفاوض",
+            "يقبل"
           ],
-          "correctIndex": 0,
-          "explanationAr": "meet halfway."
+          "correctIndex": 3,
+          "explanationAr": "\"accept\" /əkˈsɛpt/ تعني: يقبل. مثال: I accept."
+        },
+        {
+          "questionAr": "ما معنى \"halfway\"؟",
+          "questionEn": "What does \"halfway\" mean?",
+          "options": [
+            "حالة",
+            "في النص",
+            "يفاوض",
+            "صفقة/اتفاق"
+          ],
+          "correctIndex": 1,
+          "explanationAr": "\"halfway\" /ˌhæfˈweɪ/ تعني: في النص. مثال: meet halfway"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Give me discount.",
-            "Is there any discount available?"
+            "What's your best price?",
+            "Last price?"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الصحيح: Is there any discount available? — الأمر المباشر يقفل التفاوض."
+          "correctIndex": 0,
+          "explanationAr": "الصحيح: What's your best price? — «آخر سعر؟» بالإنجليزي: best price."
         }
       ]
     }
@@ -16280,58 +16332,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (نقطة منطقية، لكن الميزانية محدودة.)",
-          "questionEn": "Complete: That's a fair point; ____, the budget is limited.",
+          "questionAr": "أكمل الفراغ: (هل فكرنا في المخاطر؟)",
+          "questionEn": "Complete: Have we ____ the risks?",
           "options": [
-            "however",
-            "although",
-            "but however"
+            "considered",
+            "thought in",
+            "consider"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: however. لطّف بـ: I'm not sure that... / I wonder if... / Have we considered...? / That's a fair point, however... واستخدم would و might لتخفيف الحدة."
+          "explanationAr": "الإجابة: considered. لطّف بـ: I'm not sure that... / I wonder if... / Have we considered...? / That's a fair point, however... واستخدم would و might لتخفيف الحدة."
         },
         {
-          "questionAr": "أكمل الفراغ: (أتساءل إذا ممكن نأجل الإطلاق.)",
-          "questionEn": "Complete: ____ we might delay the launch.",
+          "questionAr": "أكمل الفراغ: (مو متأكد إن هذا أفضل أسلوب.)",
+          "questionEn": "Complete: ____ that's the best approach.",
           "options": [
-            "I wonder if",
-            "I ask if",
-            "I wonder that"
+            "I'm sure not",
+            "No sure",
+            "I'm not sure"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: I'm not sure. لطّف بـ: I'm not sure that... / I wonder if... / Have we considered...? / That's a fair point, however... واستخدم would و might لتخفيف الحدة."
+        },
+        {
+          "questionAr": "ما معنى \"pilot\"؟",
+          "questionEn": "What does \"pilot\" mean?",
+          "options": [
+            "تجربة أولية",
+            "أسلوب/نهج",
+            "ومع ذلك",
+            "نقطة منطقية"
           ],
           "correctIndex": 0,
-          "explanationAr": "الإجابة: I wonder if. لطّف بـ: I'm not sure that... / I wonder if... / Have we considered...? / That's a fair point, however... واستخدم would و might لتخفيف الحدة."
+          "explanationAr": "\"pilot\" /ˈpaɪlət/ تعني: تجربة أولية. مثال: a pilot project"
         },
         {
-          "questionAr": "أكثر عبارة دبلوماسية:",
-          "questionEn": "Most diplomatic:",
+          "questionAr": "ما معنى \"risk\"؟",
+          "questionEn": "What does \"risk\" mean?",
           "options": [
-            "That won't work.",
-            "I wonder if we might try another way.",
-            "No."
+            "تجربة أولية",
+            "مخاطرة",
+            "يأخذ بعين الاعتبار",
+            "أسلوب/نهج"
           ],
           "correctIndex": 1,
-          "explanationAr": "I wonder if..."
-        },
-        {
-          "questionAr": "أكمل: That's a fair point; ___, it's expensive.",
-          "questionEn": "Complete: That's a fair point; ___, it's expensive.",
-          "options": [
-            "but however",
-            "however",
-            "so"
-          ],
-          "correctIndex": 1,
-          "explanationAr": "however."
+          "explanationAr": "\"risk\" /rɪsk/ تعني: مخاطرة. مثال: a big risk"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I'm not sure this is the best option.",
-            "This idea is wrong."
+            "With all respect, you are wrong.",
+            "With respect, I see it a little differently."
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: I'm not sure this is the best option. — التخفيف مهم في بيئة العمل."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: With respect, I see it a little differently. — With all respect + you're wrong تبدو هجومية."
         }
       ]
     }
@@ -16890,58 +16944,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (اليوم ودي أتكلم عن تطبيق التوصيل الجديد.)",
-          "questionEn": "Complete: Today ____ our new delivery app.",
+          "questionAr": "أكمل الفراغ: (اللي نقترحه اشتراك شهري.)",
+          "questionEn": "Complete: ____ is a monthly subscription.",
           "options": [
-            "I'd like to talk about",
-            "I'd like talking",
-            "I want talk about"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: I'd like to talk about. عبارات الانتقال: Today I'd like to talk about... / The problem is... / What we propose is... / This means that... / To sum up..."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (المشكلة إن رسوم التوصيل عالية مرة.)",
-          "questionEn": "Complete: ____ that delivery fees are too high.",
-          "options": [
-            "The problem it is",
-            "Problem is that is",
-            "The problem is"
+            "That we propose",
+            "What we propose it",
+            "What we propose"
           ],
           "correctIndex": 2,
-          "explanationAr": "الإجابة: The problem is. عبارات الانتقال: Today I'd like to talk about... / The problem is... / What we propose is... / This means that... / To sum up..."
+          "explanationAr": "الإجابة: What we propose. عبارات الانتقال: Today I'd like to talk about... / The problem is... / What we propose is... / This means that... / To sum up..."
         },
         {
-          "questionAr": "افتتاح عرض جيد:",
-          "questionEn": "Good presentation opener:",
+          "questionAr": "أكمل الفراغ: (هذا يعني إن العملاء يوفرون لين ٣٠٪.)",
+          "questionEn": "Complete: ____ customers save up to 30%.",
           "options": [
-            "Hello. Idea.",
-            "Today I'd like to talk about...",
-            "I will speak now."
-          ],
-          "correctIndex": 1,
-          "explanationAr": "signposting."
-        },
-        {
-          "questionAr": "عبارة الختام:",
-          "questionEn": "Closing phrase:",
-          "options": [
-            "To sum up, ...",
-            "Firstly, ...",
-            "By the way, ..."
+            "This means",
+            "This mean",
+            "It meaning"
           ],
           "correctIndex": 0,
-          "explanationAr": "To sum up."
+          "explanationAr": "الإجابة: This means. عبارات الانتقال: Today I'd like to talk about... / The problem is... / What we propose is... / This means that... / To sum up..."
+        },
+        {
+          "questionAr": "ما معنى \"target audience\"؟",
+          "questionEn": "What does \"target audience\" mean?",
+          "options": [
+            "اشتراك",
+            "نمو",
+            "الجمهور المستهدف",
+            "فائدة"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"target audience\" /ˈtɑːrɡɪt ˈɔːdiəns/ تعني: الجمهور المستهدف. مثال: Our target audience is students."
+        },
+        {
+          "questionAr": "ما معنى \"to sum up\"؟",
+          "questionEn": "What does \"to sum up\" mean?",
+          "options": [
+            "باختصار",
+            "فائدة",
+            "حل",
+            "يقترح"
+          ],
+          "correctIndex": 0,
+          "explanationAr": "\"to sum up\" /tə sʌm ʌp/ تعني: باختصار. مثال: To sum up..."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "I'd like to talk to you about...",
-            "I will talk you about..."
+            "I will explain you the idea.",
+            "Let me explain the idea to you."
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: I'd like to talk to you about... — talk to someone about something."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: Let me explain the idea to you. — explain something to someone."
         }
       ]
     }
@@ -17500,58 +17556,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (من جهة، الدراسة برا تبني الاستقلالية.)",
-          "questionEn": "Complete: ____, studying abroad builds independence.",
+          "questionAr": "أكمل الفراغ: (مع إنها غالية، تستاهل.)",
+          "questionEn": "Complete: ____ it's expensive, it's worth it.",
           "options": [
-            "On the one hand",
-            "In one hand",
-            "From one side"
-          ],
-          "correctIndex": 0,
-          "explanationAr": "الإجابة: On the one hand. أدوات: On the one hand... on the other hand / Although... / Whereas... / Not only... but also... / Overall, ..."
-        },
-        {
-          "questionAr": "أكمل الفراغ: (ومن جهة ثانية، ممكن تكون وحدة.)",
-          "questionEn": "Complete: ____, it can be lonely.",
-          "options": [
-            "In the other hand",
-            "Other side",
-            "On the other hand"
-          ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: On the other hand. أدوات: On the one hand... on the other hand / Although... / Whereas... / Not only... but also... / Overall, ..."
-        },
-        {
-          "questionAr": "الصحيح:",
-          "questionEn": "Correct:",
-          "options": [
-            "Although it rained, but we went.",
-            "Although it rained, we went.",
-            "Despite it rained, we went."
+            "Despite",
+            "Although",
+            "However"
           ],
           "correctIndex": 1,
-          "explanationAr": "although بدون but."
+          "explanationAr": "الإجابة: Although. أدوات: On the one hand... on the other hand / Although... / Whereas... / Not only... but also... / Overall, ..."
         },
         {
-          "questionAr": "«الفوائد تفوق العيوب» =",
-          "questionEn": "'benefits exceed drawbacks' =",
+          "questionAr": "أكمل الفراغ: (مو بس أرخص، بل أسرع بعد.)",
+          "questionEn": "Complete: ____ cheaper, but it's also faster.",
           "options": [
-            "benefits outweigh drawbacks",
-            "benefits overweight drawbacks",
-            "benefits more drawbacks"
+            "Only not",
+            "Not only it is",
+            "Not only is it"
           ],
-          "correctIndex": 0,
-          "explanationAr": "outweigh."
+          "correctIndex": 2,
+          "explanationAr": "الإجابة: Not only is it. أدوات: On the one hand... on the other hand / Although... / Whereas... / Not only... but also... / Overall, ..."
+        },
+        {
+          "questionAr": "ما معنى \"independence\"؟",
+          "questionEn": "What does \"independence\" mean?",
+          "options": [
+            "ميزة",
+            "عيب",
+            "طويل المدى",
+            "استقلالية"
+          ],
+          "correctIndex": 3,
+          "explanationAr": "\"independence\" /ˌɪndɪˈpɛndəns/ تعني: استقلالية. مثال: It builds independence."
+        },
+        {
+          "questionAr": "ما معنى \"whereas\"؟",
+          "questionEn": "What does \"whereas\" mean?",
+          "options": [
+            "يفوق",
+            "مقايضة/تنازل",
+            "بينما",
+            "عيب"
+          ],
+          "correctIndex": 2,
+          "explanationAr": "\"whereas\" /wɛrˈæz/ تعني: بينما. مثال: whereas the city is noisy"
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "Although it's expensive, it's worth it.",
-            "Although it's expensive, but it's worth it."
+            "Positives: many. Negatives: also many.",
+            "There are several pros and cons. On the one hand..."
           ],
-          "correctIndex": 0,
-          "explanationAr": "الصحيح: Although it's expensive, it's worth it. — لا نجمع although مع but."
+          "correctIndex": 1,
+          "explanationAr": "الصحيح: There are several pros and cons. On the one hand... — جمل كاملة مترابطة."
         }
       ]
     }
@@ -18110,58 +18168,60 @@ export const SARA_ACTIVE_CONVERSATION_LESSONS: SaraCurriculumLesson[] = [
       "passScore": 80,
       "questions": [
         {
-          "questionAr": "أكمل الفراغ: (وش جابك لهالمؤتمر؟)",
-          "questionEn": "Complete: What ____ you to this conference?",
+          "questionAr": "أكمل الفراغ: (هذا يبدو مثير جداً.)",
+          "questionEn": "Complete: That ____ fascinating.",
           "options": [
-            "bring",
-            "brought you",
-            "brings"
+            "sounds",
+            "looks like",
+            "seem"
           ],
-          "correctIndex": 2,
-          "explanationAr": "الإجابة: brings. الافتتاح: Is this your first time at...? / What brings you here? البناء: That sounds interesting—how did you get into that? الختام: It was great talking to you. Shall we connect on LinkedIn?"
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: sounds. الافتتاح: Is this your first time at...? / What brings you here? البناء: That sounds interesting—how did you get into that? الختام: It was great talking to you. Shall we connect on LinkedIn?"
         },
         {
-          "questionAr": "أكمل الفراغ: (كيف دخلت مجال الأمن السيبراني؟)",
-          "questionEn": "Complete: How did you ____ cybersecurity?",
+          "questionAr": "أكمل الفراغ: (سعدت بالحديث معك.)",
+          "questionEn": "Complete: It was great ____ to you.",
           "options": [
-            "go in",
-            "get into",
-            "enter in"
+            "talking",
+            "to talk with",
+            "talk"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الإجابة: get into. الافتتاح: Is this your first time at...? / What brings you here? البناء: That sounds interesting—how did you get into that? الختام: It was great talking to you. Shall we connect on LinkedIn?"
+          "correctIndex": 0,
+          "explanationAr": "الإجابة: talking. الافتتاح: Is this your first time at...? / What brings you here? البناء: That sounds interesting—how did you get into that? الختام: It was great talking to you. Shall we connect on LinkedIn?"
         },
         {
-          "questionAr": "افتتاح نتووركنج طبيعي:",
-          "questionEn": "Natural networking opener:",
+          "questionAr": "ما معنى \"keep in touch\"؟",
+          "questionEn": "What does \"keep in touch\" mean?",
           "options": [
-            "What's your salary?",
-            "What brings you here?",
-            "Give me your number."
+            "جلسة نقاش",
+            "نبقى على تواصل",
+            "مذهل/مثير",
+            "يدخل مجال"
           ],
           "correctIndex": 1,
-          "explanationAr": "What brings you here?"
+          "explanationAr": "\"keep in touch\" /kiːp ɪn tʌtʃ/ تعني: نبقى على تواصل. مثال: Let's keep in touch."
         },
         {
-          "questionAr": "ختام لبق:",
-          "questionEn": "Graceful close:",
+          "questionAr": "ما معنى \"business card\"؟",
+          "questionEn": "What does \"business card\" mean?",
           "options": [
-            "Bye.",
-            "It was great talking to you. Let's keep in touch.",
-            "I go now."
+            "كرت عمل",
+            "يكوّن علاقات/شبكة",
+            "مجال",
+            "جلسة نقاش"
           ],
-          "correctIndex": 1,
-          "explanationAr": "ختام + تواصل."
+          "correctIndex": 0,
+          "explanationAr": "\"business card\" /ˈbɪznəs kɑːrd/ تعني: كرت عمل. مثال: Here's my business card."
         },
         {
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
-            "What is your work and salary?",
-            "What do you do?"
+            "What do you do? Which company are you with?",
+            "Where you work and how much you take?"
           ],
-          "correctIndex": 1,
-          "explanationAr": "الصحيح: What do you do? — لا تسأل عن الراتب في أول لقاء."
+          "correctIndex": 0,
+          "explanationAr": "الصحيح: What do you do? Which company are you with? — سؤال الراتب محرج."
         }
       ]
     }
