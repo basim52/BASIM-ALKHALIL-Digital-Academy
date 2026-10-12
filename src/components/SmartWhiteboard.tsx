@@ -1,3 +1,4 @@
+import SpeakingDrillCheck from './SpeakingDrillCheck';
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   X, 
@@ -508,6 +509,11 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
 
   const [completedPages, setCompletedPages] = useState<Set<number>>(new Set([0]));
   const [pageTurnPromptActive, setPageTurnPromptActive] = useState<boolean>(false);
+  // 🎙️ Speaking drill gate: the exercises page can only be turned after the spoken answer passes
+  // (or after 3 attempts, so no student is ever stuck).
+  const [speakingDrillPassed, setSpeakingDrillPassed] = useState(false);
+  const [speakingDrillAttempts, setSpeakingDrillAttempts] = useState(0);
+  const [speakingGateNotice, setSpeakingGateNotice] = useState<string | null>(null);
 
   // ⏩ Auto-advance countdown timer
   const [autoAdvanceEnabled, setAutoAdvanceEnabled] = useState<boolean>(false);
@@ -746,7 +752,8 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
     onSpeak(page.speechText, () => {
       setIsExplainingAll(false);
       setPageTurnPromptActive(true);
-      if (autoAdvanceEnabled && pageIdx < whiteboardPages.length - 1) {
+      // Never auto-advance off the interactive exercises page (prevents the page looping past the speaking drill).
+      if (autoAdvanceEnabled && page.sectionType !== 'exercises' && pageIdx < whiteboardPages.length - 1) {
         let count = 4;
         setAutoAdvanceCountdown(count);
         if (autoAdvanceIntervalRef.current) clearInterval(autoAdvanceIntervalRef.current);
@@ -765,14 +772,24 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
     });
   }, [whiteboardPages, onSpeak, onSaraTriggerGesture, autoAdvanceEnabled, cancelAutoAdvance, clearHighlightTimeouts, setCurrentPageIndex]);
 
+  const isSpeakingGateActive = !!boardData?.drillChallenge?.targetText
+    && whiteboardPages[currentPageIndex]?.sectionType === 'exercises'
+    && !speakingDrillPassed && speakingDrillAttempts < 3;
+
   const handleNextPage = useCallback(() => {
     cancelAutoAdvance();
+    if (isSpeakingGateActive) {
+      setSpeakingGateNotice(isRtl
+        ? '🎙️ قبل ما نقلب الصفحة: سجّل إجابتك بالمايك في التمرين الأول (أو بعد ٣ محاولات تقدر تكمل).'
+        : '🎙️ Before turning the page, record your answer in Drill 1 (you can continue after 3 attempts).');
+      return;
+    }
     if (currentPageIndex < whiteboardPages.length - 1) {
       const nextIdx = currentPageIndex + 1;
       setCurrentPageIndex(nextIdx);
       explainPage(nextIdx);
     }
-  }, [currentPageIndex, whiteboardPages.length, explainPage, cancelAutoAdvance, setCurrentPageIndex]);
+  }, [currentPageIndex, whiteboardPages.length, explainPage, cancelAutoAdvance, setCurrentPageIndex, isSpeakingGateActive, isRtl]);
 
   const handlePrevPage = useCallback(() => {
     cancelAutoAdvance();
@@ -956,6 +973,9 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
     setQuizQuestionIndex(0);
     setQuizScore(0);
     setQuizCompleted(false);
+    setSpeakingDrillPassed(false);
+    setSpeakingDrillAttempts(0);
+    setSpeakingGateNotice(null);
   }, [boardLessonKey, cancelAutoAdvance, clearHighlightTimeouts]);
 
   // When Sara stops speaking externally, activate page-turn prompt and keep highlight active immediately
@@ -3188,7 +3208,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                       {/* Next / Turn Page Button - Prominently always visible */}
                       <button
                         onClick={handleNextPage}
-                        disabled={currentPageIndex >= whiteboardPages.length - 1}
+                        disabled={currentPageIndex >= whiteboardPages.length - 1 || isSpeakingGateActive}
                         className="px-3 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-300 hover:from-amber-300 hover:to-yellow-200 disabled:opacity-30 disabled:cursor-not-allowed text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0 shadow-sm active:scale-95 ring-1 ring-white/60 animate-pulse"
                         title={isRtl ? 'الصفحة التالية والشرح' : 'Next Slide'}
                       >
@@ -3955,6 +3975,19 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
                                   <span>{isRtl ? 'استمع للحل النموذجي 🎙️' : 'Hear Model Answer'}</span>
                                 </button>
                               </div>
+                              <SpeakingDrillCheck
+                                expected={boardData.drillChallenge.targetText}
+                                isRtl={isRtl}
+                                attempts={speakingDrillAttempts}
+                                passed={speakingDrillPassed}
+                                onResult={(ok) => {
+                                  setSpeakingDrillAttempts(n => n + 1);
+                                  if (ok) { setSpeakingDrillPassed(true); setSpeakingGateNotice(null); }
+                                }}
+                              />
+                              {speakingGateNotice && isSpeakingGateActive && (
+                                <p className="text-[11px] font-black text-amber-200">{speakingGateNotice}</p>
+                              )}
                             </div>
                           )}
 
