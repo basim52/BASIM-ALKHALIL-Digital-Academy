@@ -69,31 +69,52 @@ export function buildSaraExclusiveLessonExplanation(
     color: idx % 3 === 0 ? 'sky' : idx % 3 === 1 ? 'amber' : 'emerald'
   }));
 
-  // Build interactive drill challenge (تحدي الإتقان والتطبيق الفوري)
-  const drillChallenge = {
-    type: 'transform' as const,
-    instruction: isRtl
-      ? `تحدي تدريبي فوري: طبّق القالب [${lesson.keyPattern.formula}] وصِغ جملة للتعبير عن: "${lesson.speakingGoalAr}"`
-      : `Instant Drill: Apply the pattern [${lesson.keyPattern.formula}] to express: "${lesson.speakingGoalEn}"`,
-    targetText: mainEx ? mainEx.en : lesson.keyPattern.formula,
-    hint: lesson.keyPattern.formula
-  };
+  // Build interactive drill challenge from the lesson's own speaking task + model answer
+  // (never from the raw formula string).
+  const tiers = lesson.exercises;
+  const allExercises = tiers
+    ? [...(Array.isArray(tiers.medium) ? tiers.medium : []), ...(Array.isArray(tiers.hard) ? tiers.hard : []), ...(Array.isArray(tiers.easy) ? tiers.easy : [])]
+    : [];
+  const hardEx = (tiers && Array.isArray(tiers.hard) ? tiers.hard : []).find(e => e.type === 'translate' || e.type === 'order');
+  const modelAnswer = lesson.speakingChallenge?.recommendedResponseEn || hardEx?.answer || mainEx?.en || '';
+  const starter = modelAnswer.split(/\s+/).slice(0, 3).join(' ');
+  const drillChallenge = lesson.speakingChallenge && modelAnswer
+    ? {
+        type: 'transform' as const,
+        instruction: isRtl ? `✍️ ${lesson.speakingChallenge.promptAr}` : `✍️ ${lesson.speakingChallenge.promptEn}`,
+        targetText: modelAnswer,
+        hint: isRtl ? `ابدأ هكذا: "${starter}…"` : `Start like this: "${starter}…"`
+      }
+    : hardEx
+      ? {
+          type: (hardEx.type === 'translate' ? 'translate' : 'transform') as 'translate' | 'transform',
+          instruction: isRtl ? hardEx.promptAr : hardEx.promptEn,
+          targetText: hardEx.answer,
+          hint: hardEx.explanationAr
+        }
+      : {
+          type: 'repeat' as const,
+          instruction: isRtl ? `ردّد الجملة النموذجية: "${mainEx?.en || ''}"` : `Repeat the model sentence: "${mainEx?.en || ''}"`,
+          targetText: mainEx?.en || '',
+          hint: mainEx?.ar
+        };
 
-  // Build concept check question (CCQ)
-  const ccq = {
-    question: isRtl
-      ? `سؤال فحص المفهوم (CCQ): ما هو الهدف الأساسي من تطبيق قالب: "${lesson.keyPattern.formula}"؟`
-      : `Concept Check (CCQ): What is the core function of: "${lesson.keyPattern.formula}"?`,
-    options: [
-      isRtl ? lesson.speakingGoalAr : lesson.speakingGoalEn,
-      isRtl ? 'الترجمة الحرفية كلمة بكلمة دون مراعاة السياق' : 'Word-for-word translation without context',
-      isRtl ? 'تجاهل القواعد الطبيعية واستخدام أزمنة عشوائية' : 'Ignoring natural communication rules'
-    ],
-    answerIndex: 0,
-    explanation: isRtl
-      ? `الإجابة الصحيحة: ${lesson.speakingGoalAr}. السر الذهبي: ${breakdown.goldenRuleAr}`
-      : `Correct answer: ${lesson.speakingGoalEn}. Golden rule: ${breakdown.goldenRuleEn}`
-  };
+  // Concept check (CCQ) from a real lesson exercise with options, answer and Arabic explanation.
+  const ccqSource = allExercises.find(e => Array.isArray(e.options) && e.options.length >= 2 && typeof e.correctIndex === 'number');
+  const quizFallback = lesson.quiz[0];
+  const ccq = ccqSource
+    ? {
+        question: isRtl ? ccqSource.promptAr.includes('أكمل') ? `${ccqSource.promptAr} — ${ccqSource.promptEn}` : ccqSource.promptAr : ccqSource.promptEn,
+        options: ccqSource.options as string[],
+        answerIndex: ccqSource.correctIndex as number,
+        explanation: ccqSource.explanationAr
+      }
+    : {
+        question: quizFallback ? (isRtl ? quizFallback.questionAr : quizFallback.questionEn) : (isRtl ? lesson.titleAr : lesson.titleEn),
+        options: quizFallback && Array.isArray(quizFallback.options) ? quizFallback.options : [],
+        answerIndex: quizFallback && typeof quizFallback.correctIndex === 'number' ? quizFallback.correctIndex : 0,
+        explanation: quizFallback?.explanationAr
+      };
 
   // Build vocabulary bank (real lesson vocabulary when available)
   const vocabularyBank = lesson.vocabulary && lesson.vocabulary.length > 0

@@ -63,8 +63,8 @@ export function buildLessonPageSpeech(
   }
 
   out.exercises = isRtl
-    ? `وقت التطبيق على «${title}»! ${exCount ? `عندك ${exCount} تمارين بثلاث مستويات: سهل ومتوسط وصعب.` : ''} ${formula ? `طبّق الصيغة: ${formula}.` : ''}`
-    : `Practice time for "${title}"! ${exCount ? `You have ${exCount} exercises in three levels: easy, medium and hard.` : ''} ${formula ? `Apply the pattern: ${formula}.` : ''}`;
+    ? `وقت التطبيق على «${title}»! ${exCount ? `عندك ${exCount} تمارين بثلاث مستويات: سهل ومتوسط وصعب.` : ''} ${speak ? `التحدي: ${speak.promptAr}` : ''}`
+    : `Practice time for "${title}"! ${exCount ? `You have ${exCount} exercises in three levels: easy, medium and hard.` : ''} ${speak ? `Your challenge: ${speak.promptEn}` : ''}`;
 
   const words = vocab.map(v => (isRtl ? `${v.word} (${v.ar})` : v.word)).join(isRtl ? '، ' : ', ');
   out.speaking = isRtl
