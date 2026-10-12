@@ -561,7 +561,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
         icon: '🌟',
         subtitleAr: 'الجملة النموذجية والهدف التواصلي',
         subtitleEn: 'Native Model Sentence & Objective',
-        speechText: p1Speech,
+        speechText: boardData.pageSpeech?.objective || p1Speech,
         sectionType: 'objective'
       });
     }
@@ -580,7 +580,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
         icon: '📐',
         subtitleAr: 'الصيغة التركيبية وتفكيك الجملة',
         subtitleEn: 'Grammar Formula & Sentence Dissection',
-        speechText: p2Speech,
+        speechText: boardData.pageSpeech?.formula || p2Speech,
         sectionType: 'formula'
       });
     }
@@ -599,7 +599,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
         icon: '📌',
         subtitleAr: 'النقاط الذهبية والنماذج التطبيقية',
         subtitleEn: 'Golden Takeaways & Real Life Models',
-        speechText: p3Speech,
+        speechText: boardData.pageSpeech?.rules || p3Speech,
         sectionType: 'rules'
       });
     }
@@ -618,7 +618,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
         icon: '⚠️',
         subtitleAr: 'أخطاء شائعة وحيلة الحفظ الذكي',
         subtitleEn: 'L1 Pitfalls & Mnemonic Key',
-        speechText: p4Speech,
+        speechText: boardData.pageSpeech?.pitfalls || p4Speech,
         sectionType: 'pitfalls'
       });
     }
@@ -637,7 +637,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
         icon: '✍️',
         subtitleAr: 'التمارين التفاعلية وتحدي الإتقان',
         subtitleEn: 'Interactive Drills & Concept Checks',
-        speechText: pExercisesSpeech,
+        speechText: boardData.pageSpeech?.exercises || pExercisesSpeech,
         sectionType: 'exercises'
       });
     }
@@ -656,7 +656,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
         icon: '🎙️',
         subtitleAr: 'بنك الكلمات وتحدي التحدث بالمايك',
         subtitleEn: 'Vocabulary Bank & Oral Challenge',
-        speechText: p5Speech,
+        speechText: boardData.pageSpeech?.speaking || p5Speech,
         sectionType: 'speaking'
       });
     }
@@ -674,7 +674,7 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
       icon: '🎯',
       subtitleAr: 'تحدي الأسئلة المتدرجة وقياس النتيجة',
       subtitleEn: 'Timed Mastery Challenge',
-      speechText: p6Speech,
+      speechText: boardData.pageSpeech?.quiz || p6Speech,
       sectionType: 'quiz'
     });
 
@@ -933,6 +933,30 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
       }
     };
   }, [cancelAutoAdvance, clearHighlightTimeouts]);
+
+  // 🔄 Lesson switch reset: each lesson owns its board narration. Clear any text/state left over
+  // from the previous lesson so Sara's board lines never carry across lessons or tracks.
+  const boardLessonKey = boardData?.lessonKey || boardData?.title || '';
+  const lastBoardLessonKeyRef = useRef<string>(boardLessonKey);
+  useEffect(() => {
+    if (lastBoardLessonKeyRef.current === boardLessonKey) return;
+    lastBoardLessonKeyRef.current = boardLessonKey;
+    cancelAutoAdvance();
+    clearHighlightTimeouts();
+    if (explanationTimeoutRef.current) {
+      clearTimeout(explanationTimeoutRef.current);
+      explanationTimeoutRef.current = null;
+    }
+    setCurrentExplanationText('');
+    setIsExplainingAll(false);
+    setActiveExplanationSection(null);
+    setActiveHighlightKey(null);
+    setCompletedPages(new Set([0]));
+    setPageTurnPromptActive(false);
+    setQuizQuestionIndex(0);
+    setQuizScore(0);
+    setQuizCompleted(false);
+  }, [boardLessonKey, cancelAutoAdvance, clearHighlightTimeouts]);
 
   // When Sara stops speaking externally, activate page-turn prompt and keep highlight active immediately
   useEffect(() => {

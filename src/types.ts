@@ -317,7 +317,13 @@ export interface SaraBoardData {
   ccq?: SaraConceptCheckQuestion;
   vocabularyBank?: SaraVocabularyItem[];
   speakingPrompt?: SaraSpeakingPrompt;
+  /** Unique key of the lesson that produced this board (pillar:id:lang); used to reset board state on lesson switch. */
+  lessonKey?: string;
+  /** Lesson-specific narration per whiteboard page; overrides the generic page templates. */
+  pageSpeech?: Partial<Record<SaraBoardPageSection, string>>;
 }
+
+export type SaraBoardPageSection = 'objective' | 'formula' | 'rules' | 'pitfalls' | 'exercises' | 'speaking' | 'quiz';
 
 export interface SaraAction {
   type: 'open_section';

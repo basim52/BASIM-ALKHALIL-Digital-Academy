@@ -1326,6 +1326,7 @@ export function buildSaraCurriculumExplanation(
 } {
   const result = buildSaraCurriculumExplanationInternal(lesson, lang);
   const isRtl = lang === 'ar';
+  result.boardData.lessonKey = `${lesson.pillarId || 'lesson'}:${String(lesson.id ?? '')}:${lang}`;
 
   if (result.boardData.quizzes && result.boardData.quizzes.length >= 3) {
     const total = Math.min(5, result.boardData.quizzes.length);

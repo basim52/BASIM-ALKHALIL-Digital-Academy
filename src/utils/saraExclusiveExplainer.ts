@@ -1,6 +1,7 @@
 import { SaraCurriculumLesson } from '../data/saraExclusiveCurriculums';
 import { SaraBoardData } from '../types';
 import { getLessonPedagogicalBreakdown } from './saraLessonMethodology';
+import { buildLessonPageSpeech, buildLessonBoardKey } from './saraBoardSpeech';
 
 /**
  * Builds rich, teacher-led pedagogical explanation and whiteboard data for any of Sara's exclusive lessons.
@@ -29,8 +30,10 @@ export function buildSaraExclusiveLessonExplanation(
   }));
 
   // Build high-impact whiteboard notes that explain HOW to apply the lesson
+  const lessonObjectives = (Array.isArray(isRtl ? lesson.objectivesAr : lesson.objectivesEn) ? (isRtl ? lesson.objectivesAr : lesson.objectivesEn)! : []).slice(0, 3);
   const boardNotes: string[] = isRtl
     ? [
+        ...lessonObjectives.map(o => `🎯 ${o}`),
         `🏆 القاعدة الذهبية: ${breakdown.goldenRuleAr}`,
         `🎯 الهدف التطبيقي: ${lesson.speakingGoalAr}`,
         ...breakdown.steps.map(s => `${s.icon} ${s.titleAr}: ${s.actionAr}`),
@@ -38,6 +41,7 @@ export function buildSaraExclusiveLessonExplanation(
         `🎙️ التحدي الصوتي: ${lesson.speakingChallenge.promptAr}`
       ]
     : [
+        ...lessonObjectives.map(o => `🎯 ${o}`),
         `🏆 Golden Rule: ${breakdown.goldenRuleEn}`,
         `🎯 Applied Goal: ${lesson.speakingGoalEn}`,
         ...breakdown.steps.map(s => `${s.icon} ${s.titleEn}: ${s.actionEn}`),
@@ -147,7 +151,9 @@ export function buildSaraExclusiveLessonExplanation(
       sampleAnswer: lesson.speakingChallenge.recommendedResponseEn
     },
     quiz: mappedQuizzes[0],
-    quizzes: mappedQuizzes
+    quizzes: mappedQuizzes,
+    lessonKey: buildLessonBoardKey(lesson, lang),
+    pageSpeech: buildLessonPageSpeech(lesson, lang)
   };
 
   // Build authentic, warm, energetic spoken teacher explanation from Sara
