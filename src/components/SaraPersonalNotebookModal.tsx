@@ -19,7 +19,8 @@ import {
   Send,
   Camera,
   Star,
-  Trophy
+  Trophy,
+  Brain
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { TutorMemoryDoc } from '../types';
@@ -35,6 +36,7 @@ interface SaraPersonalNotebookModalProps {
   isRtl: boolean;
   onTestMistake: (mistakeText: string) => void;
   onSpeakText: (text: string) => void;
+  onOpenAdaptiveMemory?: () => void;
 }
 
 interface StructuredMistake {
@@ -121,7 +123,8 @@ export const SaraPersonalNotebookModal: React.FC<SaraPersonalNotebookModalProps>
   studentStreak,
   isRtl,
   onTestMistake,
-  onSpeakText
+  onSpeakText,
+  onOpenAdaptiveMemory
 }) => {
   const [activeTab, setActiveTab] = useState<'mistakes' | 'vocab' | 'report'>('mistakes');
   const [masteredIds, setMasteredIds] = useState<string[]>([]);
@@ -367,12 +370,28 @@ export const SaraPersonalNotebookModal: React.FC<SaraPersonalNotebookModalProps>
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-xl bg-white/10 hover:bg-rose-500 text-slate-300 hover:text-white transition-all cursor-pointer"
-          >
-            <X size={16} />
-          </button>
+          <div className="flex items-center gap-2">
+            {onOpenAdaptiveMemory && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenAdaptiveMemory();
+                }}
+                className="px-2.5 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-200 border border-indigo-400/30 text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                title={isRtl ? 'فتح ملف الذاكرة المعرفية وأسلوب التعلم' : 'Open Adaptive Memory & Learning Profile'}
+              >
+                <Brain size={13} className="text-indigo-400 animate-pulse" />
+                <span className="hidden sm:inline">{isRtl ? 'الذاكرة المعرفية 🧠' : 'Adaptive Memory 🧠'}</span>
+              </button>
+            )}
+
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-xl bg-white/10 hover:bg-rose-500 text-slate-300 hover:text-white transition-all cursor-pointer"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
 
         {/* Tab Navigation Ribbon */}

@@ -324,10 +324,18 @@ export interface SaraAction {
   sectionId: string;
 }
 
+export type LearningStyleType = 'visual_interactive' | 'scaffolded_step_by_step' | 'gamified_challenges' | 'conversational_immersive';
+export type LearningPacingType = 'gentle_patient' | 'balanced' | 'fast_challenging';
+
 export interface SaraMemory {
   newNotes?: string[];
   mistakes?: string[];
   wordsLearned?: string[];
+  newStrengths?: string[];
+  masteredTopics?: string[];
+  detectedLearningStyle?: LearningStyleType;
+  sessionTopic?: string;
+  crossSessionHook?: string;
 }
 
 export interface SaraChatResponse {
@@ -352,6 +360,15 @@ export interface TutorMemoryDoc {
   lastSessionAt?: any;
   dailyCount?: number;
   dailyCountDate?: string; // YYYY-MM-DD
+  
+  // 🧠 Adaptive Student Memory & Cognitive Profile
+  strengths?: string[]; // Observed strengths and talents (keep last 25)
+  masteredTopics?: string[]; // Fully mastered concepts & milestones (keep last 25)
+  learningStyle?: LearningStyleType; // Detected or student-chosen learning style
+  learningPacing?: LearningPacingType; // Pacing preference
+  lastSessionTopic?: string; // Specific topic of the last session
+  lastSessionTakeaways?: string[]; // Key takeaways
+  crossSessionHook?: string; // Natural continuity opener question/prompt
 }
 
 export interface TutorSessionDoc {

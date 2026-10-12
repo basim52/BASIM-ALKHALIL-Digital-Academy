@@ -123,6 +123,28 @@
         "total": { "type": "number" }
       },
       "required": ["userId", "lessonId"]
+    },
+    "TutorMemory": {
+      "title": "Sara AI Tutor Adaptive Memory",
+      "description": "Long-term student memory, cognitive profile, strengths, mistakes, and learning style",
+      "type": "object",
+      "properties": {
+        "age": { "type": "number" },
+        "interests": { "type": "array" },
+        "goal": { "type": "string" },
+        "level": { "type": "string" },
+        "notes": { "type": "array" },
+        "frequentMistakes": { "type": "array" },
+        "wordsLearned": { "type": "array" },
+        "strengths": { "type": "array" },
+        "masteredTopics": { "type": "array" },
+        "learningStyle": { "type": "string" },
+        "learningPacing": { "type": "string" },
+        "lastSessionTopic": { "type": "string" },
+        "lastSessionSummary": { "type": "string" },
+        "dailyCount": { "type": "number" },
+        "dailyCountDate": { "type": "string" }
+      }
     }
   },
   "firestore": {
@@ -209,6 +231,10 @@
     "/lessonResults/{resultId}": {
       "schema": "LessonResult",
       "description": "Logged lesson completion and quiz score results"
+    },
+    "/tutorMemory/{uid}": {
+      "schema": "TutorMemory",
+      "description": "Long-term adaptive student memory and cognitive profile"
     }
   }
 }

@@ -1524,16 +1524,39 @@ HIGH-QUALITY TEACHING METHODOLOGY (بيداغوجيا التدريس الفائ�
      ? '* Student has explicitly toggled to ENGLISH mode. Speak primarily in natural, clear, friendly English so the student practices listening and speaking in an English immersion environment. Only use brief Arabic if explaining a difficult vocabulary word or grammar nuance.'
      : '* Student has explicitly toggled to ARABIC mode. Explain grammar rules, concepts, encouragement, and step-by-step guidance in friendly Gulf Arabic while modeling, teaching, and practicing the English vocabulary and sentences.'}
 
-ADAPTIVITY:
+ADAPTIVITY & DEEP COGNITIVE STUDENT PROFILE:
 - Student snapshot provided:
+  * Name: ${snapshot?.name || 'Student'}
   * Level: ${snapshot?.level || 'unknown'}
   * Age: ${snapshot?.age || 'unknown'}
   * Interests: ${JSON.stringify(snapshot?.interests || [])}
   * Goal: ${snapshot?.goal || 'unknown'}
+  * Learning Style Preference: "${snapshot?.learningStyle || 'visual_interactive'}"
+  * Learning Pacing: "${snapshot?.learningPacing || 'balanced'}"
+  * Cumulative Student Strengths: ${JSON.stringify(snapshot?.strengths || [])}
+  * Mastered Topics: ${JSON.stringify(snapshot?.masteredTopics || [])}
   * Recent Mistakes to Review: ${JSON.stringify(snapshot?.frequentMistakes || [])}
   * Recent Words Learned: ${JSON.stringify(snapshot?.wordsLearned || [])}
   * Recent Lesson Results Summary: ${JSON.stringify(snapshot?.recentResultsSummary || 'None')}
   * Last Memory Notes: ${JSON.stringify(snapshot?.lastMemoryNotes || [])}
+  * Previous Session Topic: "${snapshot?.lastSessionTopic || ''}"
+  * Previous Continuity Hook: "${snapshot?.crossSessionHook || ''}"
+
+PEDAGOGICAL LEARNING STYLE & PACING ADAPTATION (التكيف مع أسلوب التعلم والوتيرة):
+- You must dynamically customize your teaching style to match the student's learning style:
+  * "visual_interactive": Focus heavily on the smart chalkboard (board), color-coded syntax formulas, clear phonetic breakdowns, emoji markers, and visual sentence structures.
+  * "scaffolded_step_by_step": Break down every grammar rule into bite-sized, sequential micro-steps. Always use CCQs (Concept Checking Questions) and guided discovery before moving forward.
+  * "gamified_challenges": Frame explanations and drills as quests, missions, mini-puzzles, and rapid score-earning challenges. Use upbeat, game-like enthusiasm!
+  * "conversational_immersive": Keep explanations grounded in natural, everyday conversational situations, roleplaying, and practical fluency rather than dry grammar theory.
+- PACING ADAPTATION:
+  * "gentle_patient": Speak with gentle reassurance, allow plenty of time, provide extra hints, and celebrate every small win.
+  * "balanced": Maintain a smooth, steady progression with balanced explanation and drill.
+  * "fast_challenging": Move rapidly to advanced examples, nuanced exceptions, and higher-order challenges.
+
+CROSS-SESSION CONTEXT CONTINUITY (تذكر السياق واستئناف الجلسات السابقة):
+- If this is a new session or greeting, and the student has a "Previous Session Topic" (${snapshot?.lastSessionTopic ? `"${snapshot?.lastSessionTopic}"` : 'none'}):
+  Warmly welcome them back by referencing what they achieved last time! E.g.: "أهلاً بك يا بطل! في جلستنا السابقة تدربنا على (${snapshot?.lastSessionTopic}) وأبدعت فيها 🌟! هل تحب نسوي تحدي تأكيد سريع عليها، أو ننطلق لموضوع جديد اليوم؟".
+- In every session, track what topic was explored in "memory.sessionTopic" and provide a warm "memory.crossSessionHook" so Sara can seamlessly reconnect in the future!
 ${rolePlay ? `
 ACTIVE SARA SCENARIO & CONVERSATIONAL COACHING (سيناريو سارة التفاعلي والشرح التطبيقي):
 - Scenario: ${rolePlay.titleAr || rolePlay.titleEn || rolePlay.title}
@@ -1642,7 +1665,12 @@ Output structure:
   "memory": {
     "newNotes": ["Short observation about student progress"],
     "mistakes": ["Grammar or vocabulary mistake to track"],
-    "wordsLearned": ["New English words the student learned in this turn"]
+    "wordsLearned": ["New English words the student learned in this turn"],
+    "newStrengths": ["Noticed strengths, e.g. 'Strong intuition for irregular verbs' or 'Expressive speaking'"],
+    "masteredTopics": ["Specific concepts mastered in this turn, e.g. 'Past Simple negation'"],
+    "detectedLearningStyle": "visual_interactive",
+    "sessionTopic": "Current grammar or vocabulary topic discussed",
+    "crossSessionHook": "Question for next session, e.g. 'Ready to test irregular verbs?'"
   },
   "sessionDone": false
 }
@@ -1738,13 +1766,33 @@ IMPORTANT QUIZ RULES:
         parsedResult.actions = [];
       }
 
-      // Ensure memory has correct arrays
+      // Ensure memory has correct arrays and fields
       if (!parsedResult.memory) {
-        parsedResult.memory = { newNotes: [], mistakes: [], wordsLearned: [] };
+        parsedResult.memory = {
+          newNotes: [],
+          mistakes: [],
+          wordsLearned: [],
+          newStrengths: [],
+          masteredTopics: [],
+          detectedLearningStyle: undefined,
+          sessionTopic: undefined,
+          crossSessionHook: undefined
+        };
       } else {
         parsedResult.memory.newNotes = Array.isArray(parsedResult.memory.newNotes) ? parsedResult.memory.newNotes : [];
         parsedResult.memory.mistakes = Array.isArray(parsedResult.memory.mistakes) ? parsedResult.memory.mistakes : [];
         parsedResult.memory.wordsLearned = Array.isArray(parsedResult.memory.wordsLearned) ? parsedResult.memory.wordsLearned : [];
+        parsedResult.memory.newStrengths = Array.isArray(parsedResult.memory.newStrengths) ? parsedResult.memory.newStrengths : [];
+        parsedResult.memory.masteredTopics = Array.isArray(parsedResult.memory.masteredTopics) ? parsedResult.memory.masteredTopics : [];
+        if (typeof parsedResult.memory.detectedLearningStyle !== 'string') {
+          delete parsedResult.memory.detectedLearningStyle;
+        }
+        if (typeof parsedResult.memory.sessionTopic !== 'string') {
+          delete parsedResult.memory.sessionTopic;
+        }
+        if (typeof parsedResult.memory.crossSessionHook !== 'string') {
+          delete parsedResult.memory.crossSessionHook;
+        }
       }
 
       parsedResult.sessionDone = !!parsedResult.sessionDone;

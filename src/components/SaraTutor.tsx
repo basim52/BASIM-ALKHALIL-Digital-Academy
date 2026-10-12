@@ -47,10 +47,13 @@ import {
   ChevronDown,
   ChevronUp,
   Gamepad2,
-  Trash2
+  Trash2,
+  Brain,
+  Phone,
+  FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { UserProfile, AppView, SaraBoardData, SaraChatResponse, TutorMemoryDoc, proficiencyLevel, CurriculumCategory, StudyPlan } from '../types';
+import { UserProfile, AppView, SaraBoardData, SaraChatResponse, TutorMemoryDoc, proficiencyLevel, CurriculumCategory, StudyPlan, LearningStyleType, LearningPacingType } from '../types';
 import { Language, translations } from '../lib/translations';
 import { auth, db } from '../lib/firebase';
 import { savePlacementLevel } from '../lib/placement';
@@ -63,6 +66,13 @@ import { MASTER_CURRICULUM } from '../data/masterCurriculum';
 import { PhoneticAnalyzerModal } from './PhoneticAnalyzerModal';
 import { RolePlayModal, RolePlayScenario, ROLE_PLAY_SCENARIOS } from './RolePlayModal';
 import { SaraPersonalNotebookModal } from './SaraPersonalNotebookModal';
+import { SaraAdaptiveMemoryModal } from './SaraAdaptiveMemoryModal';
+import { SaraVoiceCoachModal } from './SaraVoiceCoachModal';
+import { SaraSpeedDrillModal } from './SaraSpeedDrillModal';
+import { SaraParentInsightsModal } from './SaraParentInsightsModal';
+import { SaraAchievementsModal } from './SaraAchievementsModal';
+import { SaraWorksheetGeneratorModal } from './SaraWorksheetGeneratorModal';
+import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
 import { SaraCurriculumModal } from './SaraCurriculumModal';
 import { getScenarioEducationalContent } from '../data/saraScenarioCurriculumData';
 import { buildSaraCurriculumExplanation } from '../utils/saraCurriculumExplainer';
@@ -500,6 +510,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [rolePlayInitialTab, setRolePlayInitialTab] = useState<'lesson' | 'exercises' | 'quiz' | 'simulate'>('lesson');
   const [rolePlayInitialId, setRolePlayInitialId] = useState<string | undefined>(undefined);
   const [isNotebookModalOpen, setIsNotebookModalOpen] = useState<boolean>(false);
+  const [isAdaptiveMemoryModalOpen, setIsAdaptiveMemoryModalOpen] = useState<boolean>(false);
+  const [isVoiceCoachModalOpen, setIsVoiceCoachModalOpen] = useState<boolean>(false);
+  const [isSpeedDrillModalOpen, setIsSpeedDrillModalOpen] = useState<boolean>(false);
+  const [isParentInsightsModalOpen, setIsParentInsightsModalOpen] = useState<boolean>(false);
+  const [isAchievementsModalOpen, setIsAchievementsModalOpen] = useState<boolean>(false);
+  const [isWorksheetModalOpen, setIsWorksheetModalOpen] = useState<boolean>(false);
+  const [isPhoneCallModalOpen, setIsPhoneCallModalOpen] = useState<boolean>(false);
+  const [isContinuityBannerDismissed, setIsContinuityBannerDismissed] = useState<boolean>(false);
 
   // Active Curriculum Lesson & Modal States
   const [activeCurriculumLesson, setActiveCurriculumLesson] = useState<any | null>(null);
@@ -1367,9 +1385,16 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         age: tutorMemory.age,
         interests: tutorMemory.interests || [],
         goal: tutorMemory.goal || 'General Fluency & School Success',
+        learningStyle: tutorMemory.learningStyle || 'visual_interactive',
+        learningPacing: tutorMemory.learningPacing || 'balanced',
+        strengths: tutorMemory.strengths || [],
+        masteredTopics: tutorMemory.masteredTopics || [],
         lastMemoryNotes: tutorMemory.notes?.slice(-5) || [],
         frequentMistakes: tutorMemory.frequentMistakes || [],
-        wordsLearned: tutorMemory.wordsLearned || []
+        wordsLearned: tutorMemory.wordsLearned || [],
+        lastSessionTopic: tutorMemory.lastSessionTopic || '',
+        lastSessionSummary: tutorMemory.lastSessionSummary || '',
+        crossSessionHook: tutorMemory.crossSessionHook || ''
       };
 
       const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : '';
@@ -2406,14 +2431,28 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       const updatedNotes = Array.from(new Set([...(tutorMemory.notes || []), ...(newMemory.newNotes || [])])).slice(-30);
       const updatedMistakes = Array.from(new Set([...(tutorMemory.frequentMistakes || []), ...(newMemory.mistakes || [])])).slice(-20);
       const updatedWords = Array.from(new Set([...(tutorMemory.wordsLearned || []), ...(newMemory.wordsLearned || [])])).slice(-100);
+      const updatedStrengths = Array.from(new Set([...(tutorMemory.strengths || []), ...(newMemory.newStrengths || [])])).slice(-25);
+      const updatedMastered = Array.from(new Set([...(tutorMemory.masteredTopics || []), ...(newMemory.masteredTopics || [])])).slice(-25);
 
       const memUpdate: any = {
         notes: updatedNotes,
         frequentMistakes: updatedMistakes,
         wordsLearned: updatedWords,
+        strengths: updatedStrengths,
+        masteredTopics: updatedMastered,
         lastSessionAt: serverTimestamp(),
         lastSessionSummary: newMemory.newNotes?.[0] || tutorMemory.lastSessionSummary || 'Daily tutoring session'
       };
+
+      if (newMemory.detectedLearningStyle && !tutorMemory.learningStyle) {
+        memUpdate.learningStyle = newMemory.detectedLearningStyle;
+      }
+      if (newMemory.sessionTopic) {
+        memUpdate.lastSessionTopic = newMemory.sessionTopic;
+      }
+      if (newMemory.crossSessionHook) {
+        memUpdate.crossSessionHook = newMemory.crossSessionHook;
+      }
 
       await setDoc(doc(db, 'tutorMemory', profile.uid), memUpdate, { merge: true });
 
@@ -2428,13 +2467,55 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           startedAt: new Date(sessionStartTime).toISOString(),
           endedAt: new Date().toISOString(),
           summary: newMemory.newNotes?.join('. ') || 'Completed daily English session with Sara',
-          skill: currentSkill || activeBoard?.title || 'Daily English Practice',
+          skill: currentSkill || activeBoard?.title || memUpdate.lastSessionTopic || 'Daily English Practice',
           quizScore: quizScoreCount
         };
         await setDoc(doc(db, 'tutorMemory', profile.uid, 'sessions', sessionId), sessionDoc);
       }
     } catch (err) {
       console.warn('Failed to sync tutor memory to Firestore:', err);
+    }
+  };
+
+  // Update student learning style & pacing preferences
+  const handleUpdateLearningStyle = async (style: LearningStyleType, pacing: LearningPacingType) => {
+    if (!profile.uid) return;
+    try {
+      const updateData = {
+        learningStyle: style,
+        learningPacing: pacing
+      };
+      await setDoc(doc(db, 'tutorMemory', profile.uid), updateData, { merge: true });
+      setTutorMemory(prev => ({
+        ...prev,
+        ...updateData
+      }));
+    } catch (err) {
+      console.error('Failed to update student learning style:', err);
+    }
+  };
+
+  // Clear or reset student memory for fresh start
+  const handleClearMemory = async () => {
+    if (!profile.uid) return;
+    try {
+      const resetData = {
+        notes: [],
+        frequentMistakes: [],
+        wordsLearned: [],
+        strengths: [],
+        masteredTopics: [],
+        lastSessionSummary: '',
+        lastSessionTopic: '',
+        crossSessionHook: ''
+      };
+      await setDoc(doc(db, 'tutorMemory', profile.uid), resetData, { merge: true });
+      setTutorMemory(prev => ({
+        ...prev,
+        ...resetData
+      }));
+    } catch (err) {
+      console.error('Failed to clear student tutor memory:', err);
     }
   };
 
@@ -3303,9 +3384,16 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         age: tutorMemory.age,
         interests: tutorMemory.interests || [],
         goal: tutorMemory.goal || 'General English Fluency',
+        learningStyle: tutorMemory.learningStyle || 'visual_interactive',
+        learningPacing: tutorMemory.learningPacing || 'balanced',
+        strengths: tutorMemory.strengths || [],
+        masteredTopics: tutorMemory.masteredTopics || [],
         lastMemoryNotes: tutorMemory.notes?.slice(-5) || [],
         frequentMistakes: tutorMemory.frequentMistakes || [],
-        wordsLearned: tutorMemory.wordsLearned || []
+        wordsLearned: tutorMemory.wordsLearned || [],
+        lastSessionTopic: tutorMemory.lastSessionTopic || '',
+        lastSessionSummary: tutorMemory.lastSessionSummary || '',
+        crossSessionHook: tutorMemory.crossSessionHook || ''
       };
 
       // Compact history formatted as role + text (last 12)
@@ -3458,7 +3546,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       {/* 1. TOP HEADER & SARA AVATAR CARD */}
       {/* ======================================================== */}
       <header className="bg-white border-b-2 border-slate-200 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-3">
           {/* Back button */}
           <button
             onClick={() => {
@@ -3561,6 +3649,39 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
           {/* Mobile Header Quick Actions (sm:hidden) */}
           <div className="flex sm:hidden items-center gap-1">
+            {/* 1. All Sara Tools Drawer Trigger (⚡) */}
+            <button
+              onClick={() => setShowMobileToolsDrawer(true)}
+              className="w-8 h-8 rounded-full border-2 border-amber-400 bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 flex items-center justify-center font-black text-xs shadow-xs active:scale-90 transition-all cursor-pointer relative"
+              title={isRtl ? 'جميع أدوات وأنشطة سارة ⚡' : 'All Sara Tools ⚡'}
+              aria-label={isRtl ? 'أدوات سارة' : 'Sara Tools'}
+            >
+              <span>⚡</span>
+              <span className="absolute -top-1 -end-1 px-1 py-0.2 rounded-full bg-slate-950 text-amber-300 text-[7px] font-black border border-amber-400">
+                7
+              </span>
+            </button>
+
+            {/* 2. Mobile Live Phone Call Button (📞) */}
+            <button
+              onClick={() => setIsPhoneCallModalOpen(true)}
+              className="w-8 h-8 rounded-full border-2 border-teal-300 bg-teal-50 text-teal-800 flex items-center justify-center shadow-xs active:scale-90 transition-all cursor-pointer animate-pulse"
+              title={isRtl ? 'مكالمة هاتفية مع سارة 📞' : 'Call Sara 📞'}
+              aria-label={isRtl ? 'اتصال بسارة' : 'Call Sara'}
+            >
+              <Phone size={14} className="text-teal-600" />
+            </button>
+
+            {/* 3. Mobile Curriculums Button (📚) */}
+            <button
+              onClick={() => handleOpenCurriculum('all')}
+              className="w-8 h-8 rounded-full border-2 border-amber-400 bg-gradient-to-tr from-amber-300 to-yellow-300 text-slate-950 flex items-center justify-center shadow-xs active:scale-90 transition-all cursor-pointer"
+              title={isRtl ? 'مناهج سارة (4 مسارات) 📚' : "Sara's Curriculums 📚"}
+              aria-label={isRtl ? 'مناهج سارة' : "Sara's Curriculums"}
+            >
+              <span className="text-xs">📚</span>
+            </button>
+
             {/* Sara Arabic/English Language Toggle Button (Mobile) */}
             <button
               onClick={() => handleToggleLanguage()}
@@ -3631,45 +3752,314 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </button>
           </div>
 
-          {/* Desktop Right Controls (hidden sm:flex) */}
-          <div className="hidden sm:flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
-            {/* 🌐 Sara Arabic / English Bilingual Dual Toggle Button */}
-            <div className="flex items-center bg-slate-100/90 p-0.5 rounded-2xl border-2 border-slate-200 shadow-xs">
+          {/* Desktop & Tablet Circular Toolbar Controls (hidden sm:flex - scrollable dock on tablet, wrapping on large screens) */}
+          <div className="hidden sm:flex items-center gap-1.5 sm:gap-2 overflow-x-auto max-w-[58vw] md:max-w-[65vw] lg:max-w-none flex-nowrap lg:flex-wrap justify-start lg:justify-end py-1 no-scrollbar">
+            {/* 📚 SARA EXCLUSIVE CURRICULUMS (Circular with Glowing Badge) */}
+            <div className="relative group/btn">
               <button
-                onClick={() => {
-                  if (activeLang !== 'ar') handleToggleLanguage('ar');
-                }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                  activeLang === 'ar'
-                    ? 'bg-[#002147] text-amber-300 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-                }`}
-                title="التبديل إلى الشرح باللغة العربية"
+                onClick={() => handleOpenCurriculum('all')}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-amber-400 bg-gradient-to-tr from-amber-400 via-yellow-400 to-amber-300 hover:from-amber-300 hover:to-yellow-200 text-slate-950 flex items-center justify-center transition-all cursor-pointer shadow-md hover:scale-110 active:scale-95 shrink-0 ring-2 ring-amber-300/60 relative"
+                aria-label={isRtl ? 'مناهج سارة الجديدة (4 مسارات)' : "Sara's Exclusive Curriculums"}
               >
-                <span>🇸🇦</span>
-                <span>عربي</span>
+                <span className="text-base sm:text-lg animate-bounce">📚</span>
+                <span className="absolute -top-1 -end-1 px-1 py-0.2 rounded-full bg-slate-950 text-amber-300 text-[8px] font-black border border-amber-400">
+                  4
+                </span>
               </button>
-              <button
-                onClick={() => {
-                  if (activeLang !== 'en') handleToggleLanguage('en');
-                }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                  activeLang === 'en'
-                    ? 'bg-[#002147] text-amber-300 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-                }`}
-                title="Switch to English Immersion Mode"
-              >
-                <span>🇬🇧</span>
-                <span>English</span>
-              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-amber-300 text-xs font-black shadow-xl border border-amber-400/40 flex items-center gap-1.5">
+                <span>📚</span>
+                <span>{isRtl ? 'مناهج سارة الجديدة (4 مسارات تخصصية) ✨' : "Sara's Curriculums (4 Tracks) ✨"}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-t border-l border-amber-400/40" />
+              </div>
             </div>
 
-            {/* ⏱️ Lesson Duration Timer Pill & Dropdown */}
-            <div className="relative" ref={timerDropdownRef}>
+            {/* ✨ SMART WHITEBOARD */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => {
+                  if (isWhiteboardOpen) {
+                    setIsWhiteboardOpen(false);
+                  } else {
+                    openWhiteboardModal();
+                  }
+                }}
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
+                  isWhiteboardOpen
+                    ? 'bg-amber-100 text-amber-900 border-[#C49E3A] ring-2 ring-amber-300/40'
+                    : 'bg-gradient-to-r from-amber-50 to-amber-100/60 hover:from-amber-100 hover:to-amber-200 text-[#855B14] border-[#C49E3A]/40'
+                }`}
+                aria-label={isRtl ? 'السبورة الذكية' : 'Whiteboard'}
+              >
+                <Sparkles size={16} className={`text-[#C49E3A] ${isWhiteboardOpen ? 'animate-spin' : 'animate-pulse'}`} />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>✨</span>
+                <span>{isRtl ? 'السبورة الذكية التفاعلية' : 'Smart Whiteboard'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* 🎯 PLACEMENT TEST */}
+            <div className="relative group/btn">
+              <button
+                onClick={startPlacementTest}
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
+                  placementState.isActive
+                    ? 'bg-[#002147] text-amber-300 border-amber-400 ring-2 ring-amber-300/40 animate-pulse'
+                    : 'bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-[#002147] border-blue-300'
+                }`}
+                aria-label={isRtl ? 'تحديد المستوى' : 'Placement Test'}
+              >
+                <Target size={16} className={placementState.isActive ? 'text-amber-300' : 'text-blue-600'} />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🎯</span>
+                <span>{isRtl ? 'اختبار تحديد المستوى الشامل 🎯' : 'Placement Test 🎯'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* 👩‍🏫 SARA 3D CHARACTER */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsSara3DOpen(!isSara3DOpen)}
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
+                  isSara3DOpen
+                    ? 'bg-amber-100 text-amber-900 border-[#C49E3A] ring-2 ring-amber-300/40'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                }`}
+                aria-label={isRtl ? 'سارة 3D' : 'Sara 3D'}
+              >
+                <span className="text-base">👩‍🏫</span>
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>👩‍🏫</span>
+                <span>{isRtl ? (isSara3DOpen ? 'سارة 3D نشطة (اضغط للإخفاء) ✨' : 'عرض سارة 3D 👩‍🏫') : 'Toggle 3D Sara'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* 🎙️ LIVE VOICE MODE */}
+            <div className="relative group/btn">
+              <button
+                onClick={toggleLiveVoiceMode}
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
+                  isLiveMode
+                    ? 'bg-rose-500 border-rose-600 text-white animate-pulse ring-2 ring-rose-400/40'
+                    : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
+                }`}
+                aria-label={isRtl ? 'محادثة لايف' : 'Live Voice'}
+              >
+                <Radio size={16} className={isLiveMode ? 'animate-spin' : 'text-emerald-700'} />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🎙️</span>
+                <span>{isLiveMode ? (isRtl ? 'إيقاف اللايف 🔴' : 'Stop Live Mode 🔴') : (isRtl ? 'محادثة لايف صوتية مستمرة 🎙️' : 'Live Voice Mode 🎙️')}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* 📞 LIVE PHONE CALL */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsPhoneCallModalOpen(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-tr from-teal-50 to-emerald-50 hover:from-teal-100 hover:to-emerald-100 text-teal-900 border-teal-300 ring-2 ring-teal-400/20"
+                aria-label={isRtl ? 'اتصال بسارة' : 'Call Sara'}
+              >
+                <Phone size={16} className="text-teal-600 animate-pulse" />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>📞</span>
+                <span>{isRtl ? 'مكالمة هاتفية حية مع سارة 📞' : 'Live Phone Call with Sara 📞'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* 🎙️ PHONETIC LAB */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => {
+                  setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Alkhalil Academy');
+                  setIsPhoneticModalOpen(true);
+                }}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 text-purple-900 border-purple-200"
+                aria-label={isRtl ? 'مختبر النطق' : 'Speech Lab'}
+              >
+                <Mic size={16} className="text-purple-600 animate-pulse" />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🎙️</span>
+                <span>{isRtl ? 'مختبر مخارج الحروف وتصحيح النطق 🎙️' : 'Phonetic Pronunciation Lab 🎙️'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* 🗣️ VOICE COACH */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsVoiceCoachModalOpen(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 text-purple-900 border-purple-300"
+                aria-label={isRtl ? 'مدرب النطق' : 'Voice Coach'}
+              >
+                <span className="text-sm">🗣️</span>
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🗣️</span>
+                <span>{isRtl ? 'مدرب النطق الصوتي الذكي 🎙️' : 'AI Speech Coach 🎙️'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* 🎮 12Y ROLE-PLAY ADVENTURES */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsRolePlayModalOpen(true)}
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
+                  activeRolePlay
+                    ? 'bg-amber-400 text-slate-950 border-amber-500 ring-2 ring-amber-300/40'
+                    : 'bg-gradient-to-r from-indigo-50 via-purple-50 to-blue-50 hover:from-indigo-100 hover:to-blue-100 text-[#002147] border-indigo-200'
+                }`}
+                aria-label={isRtl ? 'سيناريوهات 12 سنة' : '12Y Adventures'}
+              >
+                <span className="text-base">🎮</span>
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🎮</span>
+                <span>{isRtl ? 'سيناريوهات ومغامرات 12 سنة 🎮' : '12Y Role-Play & Adventures 🎮'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* ⚡ SPEED DRILLS */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsSpeedDrillModalOpen(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 text-amber-900 border-amber-300"
+                aria-label={isRtl ? 'تحديات السرعة' : 'Speed Drills'}
+              >
+                <Zap size={16} className="text-amber-600 animate-pulse" />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>⚡</span>
+                <span>{isRtl ? 'تحديات السرعة المصغرة ضد الوقت ⚡' : 'Speed Drills & Micro-Challenges ⚡'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* 🧠 SMART ADAPTIVE MEMORY */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsAdaptiveMemoryModalOpen(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-indigo-50 via-purple-50 to-indigo-50 hover:from-indigo-100 hover:to-purple-100 text-indigo-900 border-indigo-300 relative"
+                aria-label={isRtl ? 'ذاكرة سارة' : 'Memory'}
+              >
+                <Brain size={16} className="text-indigo-600 animate-pulse" />
+                {((tutorMemory.strengths?.length || 0) + (tutorMemory.masteredTopics?.length || 0)) > 0 && (
+                  <span className="absolute -top-1 -end-1 w-4 h-4 rounded-full bg-indigo-600 text-white text-[9px] font-black flex items-center justify-center shadow-xs">
+                    {(tutorMemory.strengths?.length || 0) + (tutorMemory.masteredTopics?.length || 0)}
+                  </span>
+                )}
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🧠</span>
+                <span>{isRtl ? 'ذاكرة سارة وملف التعلم المعرفي 🧠' : "Sara's Smart Memory & Profile 🧠"}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* 🏆 ACHIEVEMENTS & QUESTS */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsAchievementsModalOpen(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 text-amber-900 border-amber-300"
+                aria-label={isRtl ? 'الإنجازات' : 'Achievements'}
+              >
+                <Trophy size={16} className="text-amber-600" />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🏆</span>
+                <span>{isRtl ? 'الأوسمة والمهام اليومية وجوائز الإتقان 🏆' : 'Achievements & Daily Quests 🏆'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* 📄 PRINTABLE WORKSHEET */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsWorksheetModalOpen(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-900 border-blue-300"
+                aria-label={isRtl ? 'ورقة عمل' : 'Worksheet'}
+              >
+                <FileText size={16} className="text-blue-600" />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>📄</span>
+                <span>{isRtl ? 'توليد ورقة عمل قابلة للطباعة PDF 📄' : 'Printable Worksheet & PDF 📄'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* 📊 PARENT INSIGHTS */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsParentInsightsModalOpen(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 text-emerald-900 border-emerald-300"
+                aria-label={isRtl ? 'تقرير ولي الأمر' : 'Parent Report'}
+              >
+                <Award size={16} className="text-emerald-600" />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>📊</span>
+                <span>{isRtl ? 'تحليلات ورؤى أولياء الأمور 📊' : 'Parent & Mentor Insights 📊'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* 📓 ERROR NOTEBOOK */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsNotebookModalOpen(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 text-[#855B14] border-amber-300 relative"
+                aria-label={isRtl ? 'دفتر الأخطاء' : 'Notebook'}
+              >
+                <BookMarked size={16} className="text-[#C49E3A]" />
+                {tutorMemory.frequentMistakes && tutorMemory.frequentMistakes.length > 0 && (
+                  <span className="absolute -top-1 -end-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center shadow-xs">
+                    {tutorMemory.frequentMistakes.length}
+                  </span>
+                )}
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>📓</span>
+                <span>{isRtl ? 'دفتر الملاحظات والأخطاء الشخصي وبنك المفردات 📓' : 'My Error Notebook & Word Bank 📓'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* ⚡ SPEECH SPEED */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => {
+                  const nextRate = saraSpeechRate === 1.0 ? 0.8 : saraSpeechRate === 0.8 ? 1.2 : 1.0;
+                  setSaraSpeechRate(nextRate);
+                }}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+                aria-label="Speech Speed"
+              >
+                <span className="text-xs font-black">{saraSpeechRate === 0.8 ? '🐢' : saraSpeechRate === 1.2 ? '🚀' : '⚡'}</span>
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>⚡</span>
+                <span>{isRtl ? `سرعة صوت سارة: ${saraSpeechRate}x (اضغط للتغيير) ⚡` : `Speech Speed: ${saraSpeechRate}x ⚡`}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* ⏱️ LESSON DURATION TIMER */}
+            <div className="relative group/btn" ref={timerDropdownRef}>
               <button
                 onClick={() => setShowTimerDropdown(!showTimerDropdown)}
-                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
                   !isTimerEnabled || timerDurationMinutes === 0
                     ? 'bg-slate-50 text-slate-600 border-slate-200'
                     : timerSecondsLeft === 0
@@ -3680,28 +4070,25 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                     ? 'bg-amber-50 text-amber-800 border-amber-300'
                     : 'bg-emerald-50 text-emerald-800 border-emerald-300'
                 }`}
-                title={isRtl ? 'مؤقت الحصة (5 د، 10 د، 15 د)' : 'Lesson Timer (5m, 10m, 15m)'}
+                aria-label={isRtl ? 'مؤقت الحصة' : 'Lesson Timer'}
               >
                 {timerSecondsLeft === 0 ? (
-                  <Bell size={14} className="text-rose-600 animate-bounce" />
+                  <Bell size={16} className="text-rose-600 animate-bounce" />
                 ) : (
-                  <Clock size={14} className={isTimerRunning && isTimerEnabled && timerDurationMinutes > 0 ? 'text-[#002147] animate-pulse' : 'text-slate-400'} />
+                  <Clock size={16} className={isTimerRunning && isTimerEnabled && timerDurationMinutes > 0 ? 'text-[#002147] animate-pulse' : 'text-slate-500'} />
                 )}
-
-                <span className="font-mono text-xs">
-                  {!isTimerEnabled || timerDurationMinutes === 0
-                    ? (isRtl ? 'حر ♾️' : 'Open')
-                    : formatTimerDisplay(timerSecondsLeft)}
-                </span>
-
-                <span className="text-[10px] hidden sm:inline text-slate-500 font-sans">
-                  {timerSecondsLeft === 0
-                    ? (isRtl ? 'انتهت 🔔' : 'Done')
-                    : isRtl
-                    ? `(${timerDurationMinutes} د)`
-                    : `(${timerDurationMinutes}m)`}
-                </span>
               </button>
+
+              {/* Hover Tooltip */}
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>⏱️</span>
+                <span>
+                  {!isTimerEnabled || timerDurationMinutes === 0
+                    ? (isRtl ? 'مؤقت الحصة (حر - اضغط للضبط) ⏱️' : 'Lesson Timer (Open Session) ⏱️')
+                    : (isRtl ? `مؤقت الحصة: ${formatTimerDisplay(timerSecondsLeft)} (${timerDurationMinutes} د) ⏱️` : `Timer: ${formatTimerDisplay(timerSecondsLeft)} ⏱️`)}
+                </span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
 
               {/* Timer Dropdown Menu */}
               {showTimerDropdown && (
@@ -3778,200 +4165,92 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               )}
             </div>
 
-            {/* Archive Session Button */}
-            <button
-              onClick={() => setShowArchiveConfirm(true)}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300 shadow-2xs"
-              title={isRtl ? 'أرشف الجلسة الحالية وبدء محادثة جديدة' : 'Archive current session & start fresh'}
-            >
-              <Archive size={13} className="text-amber-700" />
-              <span className="hidden lg:inline">{isRtl ? 'أرشف الجلسة 📦' : 'Archive Session 📦'}</span>
-              <span className="hidden sm:inline lg:hidden">{isRtl ? 'أرشف 📦' : 'Archive 📦'}</span>
-            </button>
-
-            {/* Sessions Archive Viewer Button */}
-            <button
-              onClick={() => {
-                fetchArchivedSessions();
-                setIsArchiveModalOpen(true);
-              }}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-2xl border-2 text-xs font-bold transition-all cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 hover:border-slate-300 shadow-2xs"
-              title={isRtl ? 'استعراض أرشيف جلسات سارة واسترجاعها' : 'View past sessions archive & restore'}
-            >
-              <History size={13} className="text-slate-500" />
-              <span className="hidden lg:inline">{isRtl ? 'الأرشيف 🗂️' : 'Archive 🗂️'}</span>
-              <span className="hidden sm:inline lg:hidden">{isRtl ? 'الأرشيف' : 'Archive'}</span>
-            </button>
-
-            {/* 📚 SARA EXCLUSIVE CURRICULUMS BUTTON (SUPER PROMINENT) */}
-            <button
-              onClick={() => handleOpenCurriculum('all')}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-2xl border-2 border-amber-400 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-300 hover:from-amber-300 hover:to-yellow-200 text-slate-950 font-black text-xs sm:text-sm transition-all cursor-pointer shadow-lg active:scale-95 shrink-0 ring-2 ring-amber-300/60"
-              title={isRtl ? 'مناهج سارة التخصصية الجديدة المستقلة: القواعد، المحادثة، القراءة والنطق، الكتابة' : "Sara's Independent Curriculums: Grammar, Speaking, Reading, Writing"}
-            >
-              <span className="text-base sm:text-lg animate-bounce">📚</span>
-              <span className="font-black">{isRtl ? 'مناهج سارة الجديدة' : "Sara's Curricula"}</span>
-              <span className="px-2 py-0.5 rounded-full bg-slate-950 text-amber-300 text-[10px] font-black">
-                {isRtl ? '4 مسارات ✨' : '4 Tracks ✨'}
-              </span>
-            </button>
-
-            {/* Placement Test Trigger Button */}
-            <button
-              onClick={startPlacementTest}
-              className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
-                placementState.isActive
-                  ? 'bg-[#002147] text-amber-300 border-amber-400 ring-2 ring-amber-300/40 animate-pulse'
-                  : 'bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-[#002147] border-blue-300'
-              }`}
-              title={isRtl ? 'اختبار تحديد المستوى الشامل (محادثة + 5 أسئلة + سبلنغ)' : 'Comprehensive Placement Test'}
-            >
-              <Target size={15} className={placementState.isActive ? 'text-amber-300' : 'text-blue-600'} />
-              <span className="hidden lg:inline">{isRtl ? 'تحديد المستوى 🎯' : 'Placement Test 🎯'}</span>
-              <span className="hidden sm:inline lg:hidden">{isRtl ? 'المستوى 🎯' : 'Test 🎯'}</span>
-            </button>
-
-            {/* Sara 3D Floating Character Toggle Button */}
-            <button
-              onClick={() => setIsSara3DOpen(!isSara3DOpen)}
-              className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
-                isSara3DOpen
-                  ? 'bg-amber-100 text-amber-900 border-[#C49E3A] ring-2 ring-amber-300/40'
-                  : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
-              }`}
-              title={isRtl ? 'عرض أو إخفاء شخصية سارة ثلاثية الأبعاد 3D العائمة' : 'Toggle 3D Floating Sara Character'}
-            >
-              <span className="text-sm">👩‍🏫</span>
-              <span className="hidden lg:inline">{isRtl ? (isSara3DOpen ? 'سارة 3D نشطة ✨' : 'سارة 3D 👩‍🏫') : 'Sara 3D'}</span>
-              <span className="hidden sm:inline lg:hidden">{isRtl ? 'سارة 3D' : '3D'}</span>
-            </button>
-
-            {/* Summon Smart Whiteboard Button */}
-            <button
-              onClick={() => {
-                if (isWhiteboardOpen) {
-                  setIsWhiteboardOpen(false);
-                } else {
-                  openWhiteboardModal();
-                }
-              }}
-              className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
-                isWhiteboardOpen
-                  ? 'bg-amber-100 text-amber-900 border-[#C49E3A]'
-                  : 'bg-gradient-to-r from-amber-50 to-amber-100/60 hover:from-amber-100 hover:to-amber-200 text-[#855B14] border-[#C49E3A]/40'
-              }`}
-              title={isRtl ? 'استدعاء السبورة الذكية للشرح والكتابة بالطبشور' : 'Summon Smart Whiteboard'}
-            >
-              <Sparkles size={15} className={`text-[#C49E3A] ${isWhiteboardOpen ? 'animate-spin' : 'animate-pulse'}`} />
-              <span className="hidden lg:inline">{isRtl ? 'السبورة الذكية' : 'Whiteboard'}</span>
-              <span className="hidden sm:inline lg:hidden">{isRtl ? 'السبورة' : 'Board'}</span>
-            </button>
-
-            {/* Live Turn-by-Turn Voice Mode Button */}
-            <button
-              onClick={toggleLiveVoiceMode}
-              className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
-                isLiveMode
-                  ? 'bg-rose-500 border-rose-600 text-white animate-pulse'
-                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
-              }`}
-              title={isRtl ? 'محادثة لايف صوتية مستمرة (رد برد صوتي)' : 'Continuous Live Voice Mode'}
-            >
-              <Radio size={14} className={isLiveMode ? 'animate-spin' : ''} />
-              <span className="hidden lg:inline">{isLiveMode ? (isRtl ? 'اللايف نشط 🔴' : 'Live Active 🔴') : (isRtl ? 'محادثة لايف 🎙️' : 'Live Voice 🎙️')}</span>
-              <span className="hidden sm:inline lg:hidden">{isLiveMode ? 'لايف 🔴' : 'لايف 🎙️'}</span>
-            </button>
-
-            {/* Tablet Tools Drawer Opener (sm:flex xl:hidden) */}
-            <button
-              onClick={() => setShowMobileToolsDrawer(true)}
-              className="hidden sm:flex xl:hidden items-center gap-1.5 px-2.5 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-xs bg-amber-50 hover:bg-amber-100 text-[#855B14] border-amber-300"
-              title={isRtl ? 'الأدوات التعليمية الإضافية (النطق، السيناريوهات، التقرير، السرعة)' : 'More Learning Tools'}
-            >
-              <Sliders size={14} className="text-[#C49E3A]" />
-              <span>{isRtl ? 'المزيد ⚡' : 'Tools ⚡'}</span>
-              {tutorMemory.frequentMistakes && tutorMemory.frequentMistakes.length > 0 && (
-                <span className="w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center">
-                  {tutorMemory.frequentMistakes.length}
-                </span>
-              )}
-            </button>
-
-            {/* 🎙️ Phonetic Pronunciation Lab Button (Tablets md: >= 768px & Desktop) */}
-            <button
-              onClick={() => {
-                setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Alkhalil Academy');
-                setIsPhoneticModalOpen(true);
-              }}
-              className="hidden md:flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 text-purple-900 border-purple-200"
-              title={isRtl ? 'مختبر مخارج الحروف وتصحيح النطق الصوتي الفوري' : 'Phonetic Pronunciation Lab'}
-            >
-              <Mic size={14} className="text-purple-600 animate-pulse" />
-              <span>{isRtl ? 'مختبر النطق 🎙️' : 'Speech Lab 🎙️'}</span>
-            </button>
-
-            {/* 🎭 Role-Play Scenarios Button (Tablets md: >= 768px & Desktop) */}
-            <button
-              onClick={() => setIsRolePlayModalOpen(true)}
-              className={`hidden md:flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm ${
-                activeRolePlay
-                  ? 'bg-gradient-to-r from-amber-400 to-amber-300 text-slate-950 border-amber-300 ring-2 ring-amber-300/40 shadow-md'
-                  : 'bg-gradient-to-r from-indigo-50 via-purple-50 to-blue-50 hover:from-indigo-100 hover:to-blue-100 text-[#002147] border-indigo-200 hover:border-indigo-300'
-              }`}
-              title={isRtl ? 'سيناريوهات ومغامرات سارة لسن 12 سنة (ألعاب، كورة، روبوت، فضاء...)' : 'Sara 12YO Role-Play & Adventures'}
-            >
-              <span className="text-sm">🎮</span>
-              <span>{isRtl ? (activeRolePlay ? 'المغامرة نشطة 🎮' : 'سيناريوهات 12 سنة 🎮') : '12Y Adventures 🎮'}</span>
-            </button>
-
-            {/* ⚡ Sara Speech Speed Controller (Desktop >= 1280px) */}
-            <button
-              onClick={() => {
-                const nextRate = saraSpeechRate === 1.0 ? 0.8 : saraSpeechRate === 0.8 ? 1.2 : 1.0;
-                setSaraSpeechRate(nextRate);
-              }}
-              className="hidden xl:flex items-center gap-1 px-2.5 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
-              title={isRtl ? `سرعة صوت سارة: ${saraSpeechRate}x (اضغط للتغيير: 0.8x هادئ، 1.0x طبيعي، 1.2x سريع)` : `Speech Speed: ${saraSpeechRate}x`}
-            >
-              <span className="text-xs">{saraSpeechRate === 0.8 ? '🐢 0.8x' : saraSpeechRate === 1.2 ? '🚀 1.2x' : '⚡ 1.0x'}</span>
-            </button>
-
-            {/* 📓 My Error Notebook & Progress Hub Button (Tablet Landscape & Desktop >= 1024px) */}
-            <button
-              onClick={() => setIsNotebookModalOpen(true)}
-              className="hidden lg:flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer shadow-sm bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 text-[#855B14] border-amber-300"
-              title={isRtl ? 'دفتر الملاحظات والأخطاء الشخصي + بنك المفردات + تقرير ولي الأمر 📓' : 'My Error Notebook & Parent Report 📓'}
-            >
-              <BookMarked size={14} className="text-[#C49E3A]" />
-              <span>{isRtl ? 'دفتر الأخطاء 📓' : 'Notebook 📓'}</span>
-              {tutorMemory.frequentMistakes && tutorMemory.frequentMistakes.length > 0 && (
-                <span className="w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center">
-                  {tutorMemory.frequentMistakes.length}
-                </span>
-              )}
-            </button>
-
-            {/* Streak Badge */}
-            <div className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 bg-orange-50 border-2 border-orange-200 rounded-2xl text-[#ff9600] font-black text-xs shadow-sm">
-              <Flame size={15} className="animate-bounce-slow text-orange-500" />
-              <span>{streak.current} {isRtl ? 'يوم' : 'd'}</span>
+            {/* 📦 ARCHIVE CURRENT SESSION */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setShowArchiveConfirm(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300"
+                aria-label={isRtl ? 'أرشف الجلسة' : 'Archive Session'}
+              >
+                <Archive size={16} className="text-amber-700" />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>📦</span>
+                <span>{isRtl ? 'أرشف الجلسة الحالية وبدء محادثة جديدة 📦' : 'Archive Session & Start Fresh 📦'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
             </div>
 
-            {/* Voice Toggle Button */}
-            <button
-              onClick={() => {
-                if (isSpeaking) cancelAllSpeech();
-                setVoiceEnabled(!voiceEnabled);
-              }}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer ${
-                voiceEnabled
-                  ? 'bg-blue-50 text-[#002147] border-blue-200 shadow-sm'
-                  : 'bg-slate-100 text-slate-400 border-slate-200'
-              }`}
-              title={isRtl ? 'تشغيل أو كتم صوت سارة' : 'Toggle Sara Voice'}
-            >
-              {voiceEnabled ? <Volume2 size={15} className="text-[#C49E3A]" /> : <VolumeX size={15} />}
-            </button>
+            {/* 🗂️ SESSIONS ARCHIVE */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => {
+                  fetchArchivedSessions();
+                  setIsArchiveModalOpen(true);
+                }}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 hover:border-slate-300"
+                aria-label={isRtl ? 'الأرشيف' : 'Archive'}
+              >
+                <History size={16} className="text-slate-500" />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🗂️</span>
+                <span>{isRtl ? 'استعراض واسترجاع أرشيف الجلسات 🗂️' : 'Sessions Archive 🗂️'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* 🌐 BILINGUAL SWITCHER */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => handleToggleLanguage()}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-slate-100 hover:bg-slate-200 border-slate-200 text-[#002147] font-black text-xs"
+                aria-label="Language Toggle"
+              >
+                <span className="text-sm">{activeLang === 'ar' ? '🇸🇦' : '🇬🇧'}</span>
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🌐</span>
+                <span>{activeLang === 'ar' ? 'التبديل إلى English (المحادثة الإنجليزية بالكامل) 🇬🇧' : 'Switch to Arabic Explanation 🇸🇦'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* 🔥 STREAK */}
+            <div className="relative group/btn">
+              <div className="h-9 sm:h-10 px-2.5 rounded-full border-2 border-orange-200 bg-orange-50 text-[#ff9600] font-black text-xs flex items-center justify-center gap-1 shadow-xs cursor-default">
+                <Flame size={15} className="animate-bounce-slow text-orange-500" />
+                <span>{streak.current}</span>
+              </div>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🔥</span>
+                <span>{isRtl ? `سلسلة الأيام المستمرة (${streak.current} يوم) 🔥` : `Daily Streak (${streak.current} days) 🔥`}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* 🔊 VOICE TOGGLE */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => {
+                  if (isSpeaking) cancelAllSpeech();
+                  setVoiceEnabled(!voiceEnabled);
+                }}
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
+                  voiceEnabled
+                    ? 'bg-blue-50 text-[#002147] border-blue-200'
+                    : 'bg-slate-100 text-slate-400 border-slate-200'
+                }`}
+                aria-label="Toggle Voice"
+              >
+                {voiceEnabled ? <Volume2 size={16} className="text-[#C49E3A]" /> : <VolumeX size={16} />}
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>{voiceEnabled ? '🔊' : '🔇'}</span>
+                <span>{voiceEnabled ? (isRtl ? 'صوت سارة مفعّل (اضغط للكتم) 🔊' : 'Voice Enabled 🔊') : (isRtl ? 'صوت سارة مكتوم (اضغط للتشغيل) 🔇' : 'Voice Muted 🔇')}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -4292,6 +4571,79 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <button
                   onClick={() => setIsStudyPlanBannerDismissed(true)}
                   className="p-1.5 text-blue-300 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                  title={isRtl ? 'إخفاء' : 'Dismiss'}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ======================================================== */}
+        {/* 🧠 2A-0. SMART ADAPTIVE CROSS-SESSION CONTINUITY BANNER */}
+        {/* ======================================================== */}
+        {!isContinuityBannerDismissed && (tutorMemory.lastSessionTopic || tutorMemory.lastSessionSummary) && messages.length <= 3 && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-r from-[#0E1E38] via-[#1B2A4A] to-[#0E1E38] text-white border-2 border-indigo-400/50 rounded-3xl p-3.5 sm:p-4 shadow-xl relative overflow-hidden"
+          >
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="w-11 h-11 rounded-2xl bg-indigo-500/20 text-indigo-300 border border-indigo-400/40 flex items-center justify-center text-xl shrink-0 shadow-inner">
+                  <Brain size={22} className="text-indigo-400 animate-pulse" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                    <span className="px-2 py-0.5 rounded-full bg-indigo-500 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">
+                      {isRtl ? 'استئناف من الجلسة السابقة 🔄' : 'Resume Previous Session 🔄'}
+                    </span>
+                    <span className="text-xs sm:text-sm font-black text-indigo-100 truncate">
+                      {tutorMemory.lastSessionTopic || tutorMemory.lastSessionSummary}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 font-medium">
+                    {tutorMemory.crossSessionHook || (isRtl
+                      ? 'تتذكر سارة أين توقفت في جلستك السابقة، هل ترغب في استئناف التحدي أو الانطلاق في موضوع جديد؟'
+                      : 'Sara remembers where you stopped. Would you like to resume or start a fresh topic?')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                <button
+                  onClick={() => {
+                    setIsContinuityBannerDismissed(true);
+                    const topic = tutorMemory.lastSessionTopic || tutorMemory.lastSessionSummary || 'our last lesson';
+                    handleSendMessage(
+                      isRtl
+                        ? `سارة، مرحباً بعودتي! دعينا نستأنف ونتدرب على موضوعنا السابق: "${topic}". اطرحي علي تحدياً سريعاً!`
+                        : `Sara, welcome back! Let's resume and practice our previous topic: "${topic}". Give me a quick challenge!`
+                    );
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-xs transition-all shadow-md active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Zap size={14} />
+                  <span>{isRtl ? 'استئناف التحدي ⚡' : 'Resume Challenge ⚡'}</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setIsContinuityBannerDismissed(true);
+                    handleSendMessage(
+                      isRtl
+                        ? 'سارة، جاهز ننطلق في موضوع جديد وشيق اليوم! اقترحي علي فكرة ممتعة أو درساً جديداً.'
+                        : "Sara, I'm ready for a fresh, exciting topic today! Suggest a fun lesson or challenge."
+                    );
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-black text-xs transition-all border border-white/15 active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Sparkles size={14} className="text-indigo-300" />
+                  <span>{isRtl ? 'موضوع جديد 🚀' : 'New Topic 🚀'}</span>
+                </button>
+                <button
+                  onClick={() => setIsContinuityBannerDismissed(true)}
+                  className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
                   title={isRtl ? 'إخفاء' : 'Dismiss'}
                 >
                   <X size={14} />
@@ -5563,15 +5915,140 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 </div>
               </div>
 
-              {/* Grid of Lab Tools */}
+              {/* Grid of Lab Tools with Full 7 Developments */}
               <div className="grid grid-cols-2 gap-2">
-                {/* 1. Speech Lab */}
+                {/* 1. Live Phone Call with Sara (#7 - Featured Full Width) */}
+                <div 
+                  onClick={() => setIsPhoneCallModalOpen(true)}
+                  className="col-span-2 bg-gradient-to-r from-teal-500 via-teal-600 to-emerald-600 border-2 border-teal-400 p-3.5 rounded-2xl cursor-pointer active:scale-95 transition-all flex items-center justify-between text-white shadow-md relative overflow-hidden"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-xl shrink-0">
+                      📞
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-xs font-black text-white">{isRtl ? 'مكالمة هاتفية حية مع سارة' : 'Live Phone Call with Sara'}</h4>
+                        <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-emerald-400 text-slate-950 animate-pulse">
+                          {isRtl ? 'لايف بدون لمس' : 'Hands-Free'}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-teal-100">{isRtl ? 'محادثة صوتية حرة بـ 6 سيناريوهات واقعية' : 'Voice conversation in 6 real scenarios'}</p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-black text-teal-200">➔</span>
+                </div>
+
+                {/* 2. Achievements & Daily Quests (#5) */}
+                <div 
+                  onClick={() => setIsAchievementsModalOpen(true)}
+                  className="bg-gradient-to-br from-amber-50 to-yellow-100 border-2 border-amber-300 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2 shadow-2xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">🏆</span>
+                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-amber-500 text-slate-950">
+                      {isRtl ? 'جوائز' : 'Quests'}
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-amber-950">{isRtl ? 'الأوسمة والمهام اليومية' : 'Achievements & Quests'}</h4>
+                    <p className="text-[9px] text-slate-600">{isRtl ? 'شارات الإتقان وXP والمهام' : 'Badges, XP & streak'}</p>
+                  </div>
+                </div>
+
+                {/* 3. Printable Worksheet Generator (#6) */}
+                <div 
+                  onClick={() => setIsWorksheetModalOpen(true)}
+                  className="bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-300 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2 shadow-2xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">📄</span>
+                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-blue-600 text-white">
+                      PDF
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-blue-950">{isRtl ? 'توليد ورقة عمل PDF' : 'Printable Worksheet'}</h4>
+                    <p className="text-[9px] text-slate-600">{isRtl ? 'واجبات واختبار الدرس للطباعة' : 'Print homework & quiz'}</p>
+                  </div>
+                </div>
+
+                {/* 4. AI Voice Coach (#2) */}
+                <div 
+                  onClick={() => setIsVoiceCoachModalOpen(true)}
+                  className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2 shadow-2xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">🗣️</span>
+                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-purple-600 text-white">
+                      {isRtl ? 'صوتي' : 'Voice'}
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-purple-950">{isRtl ? 'مدرب النطق الصوتي' : 'AI Speech Coach'}</h4>
+                    <p className="text-[9px] text-slate-600">{isRtl ? 'تحسين مخارج الحروف والطلاقة' : 'Pronunciation & confidence'}</p>
+                  </div>
+                </div>
+
+                {/* 5. Interactive Speed Drills (#3) */}
+                <div 
+                  onClick={() => setIsSpeedDrillModalOpen(true)}
+                  className="bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-300 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2 shadow-2xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">⚡</span>
+                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-amber-500 text-slate-950">
+                      {isRtl ? 'سباق' : 'Drills'}
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-amber-950">{isRtl ? 'تحديات السرعة المصغرة' : 'Speed Drills'}</h4>
+                    <p className="text-[9px] text-slate-600">{isRtl ? 'تركيب جمل وصيد أخطاء' : 'Sentence builder vs time'}</p>
+                  </div>
+                </div>
+
+                {/* 6. Parent & Mentor Insights (#4) */}
+                <div 
+                  onClick={() => setIsParentInsightsModalOpen(true)}
+                  className="col-span-2 bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-300 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex items-center justify-between gap-2 shadow-2xs"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl p-1.5 rounded-xl bg-emerald-100 text-emerald-800 shrink-0">📊</span>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="text-xs font-black text-emerald-950">{isRtl ? 'تحليلات ورؤى أولياء الأمور' : 'Parent & Mentor Insights'}</h4>
+                        <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-emerald-600 text-white">CEFR</span>
+                      </div>
+                      <p className="text-[10px] text-slate-600 font-medium">{isRtl ? 'ملخص أسبوعي، مؤشر الطلاقة، وبطاقة التقرير' : 'Weekly digest, fluency meter & report card'}</p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-black text-emerald-700">➔</span>
+                </div>
+
+                {/* 7. Smart Adaptive Memory */}
+                <div 
+                  onClick={() => setIsAdaptiveMemoryModalOpen(true)}
+                  className="bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2 shadow-2xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">🧠</span>
+                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-indigo-600 text-white">
+                      {isRtl ? 'ذاكرة' : 'Memory'}
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-indigo-950">{isRtl ? 'ذاكرة سارة وملف التعلم' : 'Smart Memory'}</h4>
+                    <p className="text-[9px] text-slate-600">{isRtl ? 'أسلوب التعلم ونقاط القوة' : 'Cognitive learning profile'}</p>
+                  </div>
+                </div>
+
+                {/* 8. Speech Lab */}
                 <div 
                   onClick={() => {
                     setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Alkhalil Academy');
                     setIsPhoneticModalOpen(true);
                   }}
-                  className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2"
+                  className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2 shadow-2xs"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xl">🎙️</span>
@@ -5579,14 +6056,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   </div>
                   <div>
                     <h4 className="text-xs font-black text-purple-950">{isRtl ? 'مختبر مخارج النطق' : 'Speech Lab'}</h4>
-                    <p className="text-[9px] text-slate-500">{isRtl ? 'تصحيح ومقارنة نطقك الصوتي' : 'Real-time AI voice evaluation'}</p>
+                    <p className="text-[9px] text-slate-600">{isRtl ? 'تصحيح ومقارنة نطقك الصوتي' : 'Real-time AI voice evaluation'}</p>
                   </div>
                 </div>
 
-                {/* 2. Error Notebook */}
+                {/* 9. Error Notebook */}
                 <div 
                   onClick={() => setIsNotebookModalOpen(true)}
-                  className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2"
+                  className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2 shadow-2xs"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xl">📓</span>
@@ -5598,14 +6075,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   </div>
                   <div>
                     <h4 className="text-xs font-black text-[#855B14]">{isRtl ? 'دفتر الأخطاء والتقرير' : 'Error Notebook'}</h4>
-                    <p className="text-[9px] text-slate-500">{isRtl ? 'مفردات وتقارير الإتقان' : 'Mistakes & parent report'}</p>
+                    <p className="text-[9px] text-slate-600">{isRtl ? 'مفردات وملاحظات الحصص' : 'Mistakes & personal notes'}</p>
                   </div>
                 </div>
 
-                {/* 3. Placement Test */}
+                {/* 10. Placement Test */}
                 <div 
                   onClick={() => startPlacementTest()}
-                  className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2"
+                  className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2 shadow-2xs"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xl">🎯</span>
@@ -5613,14 +6090,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   </div>
                   <div>
                     <h4 className="text-xs font-black text-[#002147]">{isRtl ? 'تحديد المستوى الشامل' : 'Placement Test'}</h4>
-                    <p className="text-[9px] text-slate-500">{isRtl ? 'محادثة + 5 أسئلة + سبلنغ' : 'Speaking + quiz + spelling'}</p>
+                    <p className="text-[9px] text-slate-600">{isRtl ? 'محادثة + 5 أسئلة + سبلنغ' : 'Speaking + quiz + spelling'}</p>
                   </div>
                 </div>
 
-                {/* 4. Sara 3D Character */}
+                {/* 11. Sara 3D Character */}
                 <div 
                   onClick={() => setIsSara3DOpen(!isSara3DOpen)}
-                  className={`border-2 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2 ${
+                  className={`border-2 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2 shadow-2xs ${
                     isSara3DOpen ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-300/40' : 'bg-slate-50 border-slate-200'
                   }`}
                 >
@@ -5632,7 +6109,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   </div>
                   <div>
                     <h4 className="text-xs font-black text-slate-900">{isRtl ? 'سارة 3D التفاعلية' : 'Sara 3D Character'}</h4>
-                    <p className="text-[9px] text-slate-500">{isRtl ? 'شخصية عائمة مرافقة' : 'Interactive companion'}</p>
+                    <p className="text-[9px] text-slate-600">{isRtl ? 'شخصية عائمة مرافقة' : 'Interactive companion'}</p>
                   </div>
                 </div>
               </div>
@@ -6555,74 +7032,257 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </button>
           </div>
 
-          {/* Quick Suggestion Chips */}
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 text-[11px] font-bold text-slate-600 no-scrollbar">
-            <span className="text-slate-400 shrink-0 text-[10px]">{isRtl ? 'اقتراحات سريعة:' : 'Quick prompts:'}</span>
-            {/* Sara Arabic / English Language Toggle Chip */}
-            <button
-              onClick={() => handleToggleLanguage()}
-              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-[#002147] shrink-0 transition-all cursor-pointer font-black flex items-center gap-1.5 text-[10px] sm:text-xs shadow-2xs active:scale-95"
-              title={activeLang === 'ar' ? 'التبديل إلى English' : 'التبديل إلى عربي'}
-            >
-              <span>🌐</span>
-              <span>{activeLang === 'ar' ? 'English 🇬🇧' : 'عربي 🇸🇦'}</span>
-            </button>
+          {/* Quick Suggestion & Interactive Tools Toolbar (Circular Neat Dock with Hover Tooltips) */}
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 text-[11px] font-bold text-slate-600 no-scrollbar items-center">
+            <span className="text-slate-400 shrink-0 text-[10px] hidden sm:inline">{isRtl ? 'أدوات سارة السريعة:' : 'Quick Tools:'}</span>
 
-            {/* 📚 SARA'S EXCLUSIVE CURRICULUMS CHIP */}
-            <button
-              onClick={() => handleOpenCurriculum('all')}
-              className="px-3 py-1 sm:py-1.5 rounded-xl border-2 border-amber-400 bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 hover:from-amber-200 hover:to-yellow-200 text-slate-950 shrink-0 transition-all cursor-pointer font-black flex items-center gap-1.5 text-[10px] sm:text-xs shadow-md active:scale-95"
-              title={isRtl ? 'مناهج سارة التخصصية المستقلة للطلاقة' : "Sara's Exclusive Curriculums"}
-            >
-              <span>📚</span>
-              <span>{isRtl ? 'مناهج سارة الجديدة (4 مسارات) ✨' : "Sara's Curricula (4 Tracks) ✨"}</span>
-            </button>
+            {/* 1. 📚 SARA'S CURRICULUMS (Circular with Tooltip) */}
+            <div className="relative group/toolchip shrink-0">
+              <button
+                onClick={() => handleOpenCurriculum('all')}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-amber-400 bg-gradient-to-tr from-amber-400 via-yellow-400 to-amber-300 hover:from-amber-300 hover:to-yellow-200 text-slate-950 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110 active:scale-95 shrink-0 ring-1 ring-amber-300/60 relative"
+                aria-label={isRtl ? 'مناهج سارة الجديدة (4 مسارات)' : "Sara's Curriculums"}
+              >
+                <span className="text-sm sm:text-base">📚</span>
+                <span className="absolute -top-1 -end-1 px-1 py-0.2 rounded-full bg-slate-950 text-amber-300 text-[8px] font-black border border-amber-400">
+                  4
+                </span>
+              </button>
+              <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/toolchip:opacity-100 translate-y-1 group-hover/toolchip:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-amber-300 text-xs font-black shadow-xl border border-amber-400/40 flex items-center gap-1.5">
+                <span>📚</span>
+                <span>{isRtl ? 'مناهج سارة الجديدة (4 مسارات تخصصية) ✨' : "Sara's Curriculums (4 Tracks) ✨"}</span>
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-b border-r border-amber-400/40" />
+              </div>
+            </div>
 
-            {/* 🗓️ SARA'S SMART STUDY PLAN CHIP */}
-            <button
-              onClick={() => setIsSmartPlanGeneratorOpen(true)}
-              className="px-3 py-1 sm:py-1.5 rounded-xl border border-blue-400 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:to-indigo-500 text-white shrink-0 transition-all cursor-pointer font-black flex items-center gap-1.5 text-[10px] sm:text-xs shadow-md active:scale-95"
-              title={isRtl ? 'توليد خطة دراسية ذكية مع سارة' : 'Generate Smart Study Plan'}
-            >
-              <Sparkles size={12} className="text-amber-300 animate-pulse" />
-              <span>{isRtl ? 'توليد خطة ذكية ⚡' : 'Smart Plan ⚡'}</span>
-            </button>
-            <button
-              onClick={toggleLiveVoiceMode}
-              className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border shrink-0 transition-all cursor-pointer font-black flex items-center gap-1 text-[10px] sm:text-xs ${
-                isLiveMode 
-                  ? 'bg-rose-50 border-rose-300 text-rose-700' 
-                  : 'bg-emerald-50 border-emerald-300 hover:bg-emerald-100 text-emerald-800'
-              }`}
-            >
-              <Radio size={12} className={isLiveMode ? 'animate-spin' : ''} />
-              <span>{isLiveMode ? (isRtl ? '⏹️ إيقاف اللايف' : '⏹️ Stop Live') : (isRtl ? '🎙️ محادثة لايف (رد برد)' : '🎙️ Start Live Voice Chat')}</span>
-            </button>
-            <button
-              onClick={startPlacementTest}
-              className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border shrink-0 transition-all cursor-pointer font-black flex items-center gap-1 shadow-2xs text-[10px] sm:text-xs ${
-                placementState.isActive
-                  ? 'bg-[#002147] text-amber-300 border-amber-400 ring-2 ring-amber-300/40 animate-pulse'
-                  : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-300 hover:from-blue-100 hover:to-indigo-100 text-[#002147]'
-              }`}
-            >
-              <Target size={12} className={placementState.isActive ? 'text-amber-300' : 'text-blue-600'} />
-              <span>{isRtl ? '🎯 اختبار تحديد المستوى' : '🎯 Placement Test'}</span>
-            </button>
-            <button
-              onClick={() => {
-                if (!activeBoard) {
-                  openWhiteboardModal();
-                } else {
-                  setIsWhiteboardOpen(true);
-                }
-                handleSendMessage(isRtl ? 'سارة، اشرحي لي الدرس على السبورة الذكية بالصوت بالتفصيل 📐🎙️' : 'Sara, please explain this lesson on the smart whiteboard with voice 📐🎙️');
-              }}
-              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border shrink-0 transition-all cursor-pointer font-black flex items-center gap-1 shadow-2xs text-[10px] sm:text-xs bg-gradient-to-r from-amber-50 to-amber-100 border-amber-300 hover:from-amber-100 hover:to-amber-200 text-slate-900"
-            >
-              <span>📐🎙️</span>
-              <span>{isRtl ? 'اشرحي لي على السبورة بالصوت' : 'Explain on Whiteboard Aloud'}</span>
-            </button>
+            {/* 2. 📞 LIVE PHONE CALL WITH SARA (#7) */}
+            <div className="relative group/toolchip shrink-0">
+              <button
+                onClick={() => setIsPhoneCallModalOpen(true)}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-teal-400 bg-gradient-to-tr from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110 active:scale-95 shrink-0 ring-1 ring-teal-300/40 animate-pulse"
+                aria-label={isRtl ? 'مكالمة هاتفية مع سارة' : 'Call Sara'}
+              >
+                <Phone size={15} />
+              </button>
+              <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/toolchip:opacity-100 translate-y-1 group-hover/toolchip:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-teal-300 text-xs font-black shadow-xl border border-teal-400/40 flex items-center gap-1.5">
+                <span>📞</span>
+                <span>{isRtl ? 'مكالمة هاتفية حية ومباشرة مع سارة 📞' : 'Live Phone Call with Sara 📞'}</span>
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-b border-r border-teal-400/40" />
+              </div>
+            </div>
+
+            {/* 3. 🗣️ VOICE COACH (#2) */}
+            <div className="relative group/toolchip shrink-0">
+              <button
+                onClick={() => setIsVoiceCoachModalOpen(true)}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-purple-300 bg-gradient-to-tr from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 text-purple-900 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110 active:scale-95 shrink-0"
+                aria-label={isRtl ? 'مدرب النطق الصوتي' : 'Voice Coach'}
+              >
+                <span className="text-xs sm:text-sm">🗣️</span>
+              </button>
+              <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/toolchip:opacity-100 translate-y-1 group-hover/toolchip:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-purple-300 text-xs font-black shadow-xl border border-purple-400/40 flex items-center gap-1.5">
+                <span>🗣️</span>
+                <span>{isRtl ? 'مدرب النطق الصوتي التفاعلي الذكي 🎙️' : 'AI Speech Coach & Pronunciation 🎙️'}</span>
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-b border-r border-purple-400/40" />
+              </div>
+            </div>
+
+            {/* 4. ⚡ SPEED DRILLS (#3) */}
+            <div className="relative group/toolchip shrink-0">
+              <button
+                onClick={() => setIsSpeedDrillModalOpen(true)}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-amber-300 bg-gradient-to-tr from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 text-amber-900 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110 active:scale-95 shrink-0"
+                aria-label={isRtl ? 'تحديات السرعة' : 'Speed Drills'}
+              >
+                <Zap size={15} className="text-amber-600 animate-pulse" />
+              </button>
+              <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/toolchip:opacity-100 translate-y-1 group-hover/toolchip:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-amber-300 text-xs font-black shadow-xl border border-amber-400/40 flex items-center gap-1.5">
+                <span>⚡</span>
+                <span>{isRtl ? 'تحديات السرعة المصغرة ضد الوقت ⚡' : 'Speed Drills & Micro-Challenges ⚡'}</span>
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-b border-r border-amber-400/40" />
+              </div>
+            </div>
+
+            {/* 5. 🏆 ACHIEVEMENTS & QUESTS (#5) */}
+            <div className="relative group/toolchip shrink-0">
+              <button
+                onClick={() => setIsAchievementsModalOpen(true)}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-amber-300 bg-gradient-to-tr from-amber-50 to-yellow-100 hover:from-amber-100 hover:to-yellow-200 text-amber-900 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110 active:scale-95 shrink-0"
+                aria-label={isRtl ? 'الإنجازات والمهام' : 'Achievements'}
+              >
+                <Trophy size={15} className="text-amber-600" />
+              </button>
+              <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/toolchip:opacity-100 translate-y-1 group-hover/toolchip:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-amber-300 text-xs font-black shadow-xl border border-amber-400/40 flex items-center gap-1.5">
+                <span>🏆</span>
+                <span>{isRtl ? 'منصة الأوسمة والمهام اليومية وجوائز الإتقان 🏆' : 'Achievements & Daily Quests 🏆'}</span>
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-b border-r border-amber-400/40" />
+              </div>
+            </div>
+
+            {/* 6. 📄 PRINTABLE WORKSHEET (#6) */}
+            <div className="relative group/toolchip shrink-0">
+              <button
+                onClick={() => setIsWorksheetModalOpen(true)}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-blue-300 bg-gradient-to-tr from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-900 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110 active:scale-95 shrink-0"
+                aria-label={isRtl ? 'ورقة عمل PDF' : 'Worksheet PDF'}
+              >
+                <FileText size={15} className="text-blue-600" />
+              </button>
+              <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/toolchip:opacity-100 translate-y-1 group-hover/toolchip:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-blue-300 text-xs font-black shadow-xl border border-blue-400/40 flex items-center gap-1.5">
+                <span>📄</span>
+                <span>{isRtl ? 'توليد ورقة عمل قابلة للطباعة وتصدير PDF 📄' : 'Printable Worksheet & PDF 📄'}</span>
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-b border-r border-blue-400/40" />
+              </div>
+            </div>
+
+            {/* 7. 📊 PARENT INSIGHTS (#4) */}
+            <div className="relative group/toolchip shrink-0">
+              <button
+                onClick={() => setIsParentInsightsModalOpen(true)}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-emerald-300 bg-gradient-to-tr from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 text-emerald-900 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110 active:scale-95 shrink-0"
+                aria-label={isRtl ? 'تقرير ولي الأمر' : 'Parent Report'}
+              >
+                <Award size={15} className="text-emerald-600" />
+              </button>
+              <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/toolchip:opacity-100 translate-y-1 group-hover/toolchip:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-emerald-300 text-xs font-black shadow-xl border border-emerald-400/40 flex items-center gap-1.5">
+                <span>📊</span>
+                <span>{isRtl ? 'تحليلات ورؤى أولياء الأمور CEFR 📊' : 'Parent & Mentor Insights 📊'}</span>
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-b border-r border-emerald-400/40" />
+              </div>
+            </div>
+
+            {/* 8. 🧠 SMART MEMORY */}
+            <div className="relative group/toolchip shrink-0">
+              <button
+                onClick={() => setIsAdaptiveMemoryModalOpen(true)}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-indigo-300 bg-gradient-to-tr from-indigo-50 via-purple-50 to-indigo-50 hover:from-indigo-100 text-indigo-900 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110 active:scale-95 shrink-0"
+                aria-label={isRtl ? 'ذاكرة سارة' : 'Smart Memory'}
+              >
+                <Brain size={15} className="text-indigo-600" />
+              </button>
+              <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/toolchip:opacity-100 translate-y-1 group-hover/toolchip:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-indigo-300 text-xs font-black shadow-xl border border-indigo-400/40 flex items-center gap-1.5">
+                <span>🧠</span>
+                <span>{isRtl ? 'ذاكرة سارة الذكية وملف التعلم المعرفي 🧠' : "Sara's Smart Memory & Profile 🧠"}</span>
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-b border-r border-indigo-400/40" />
+              </div>
+            </div>
+
+            {/* 9. ✨ WHITEBOARD EXPLAIN */}
+            <div className="relative group/toolchip shrink-0">
+              <button
+                onClick={() => {
+                  if (!activeBoard) {
+                    openWhiteboardModal();
+                  } else {
+                    setIsWhiteboardOpen(true);
+                  }
+                  handleSendMessage(isRtl ? 'سارة، اشرحي لي الدرس على السبورة الذكية بالصوت بالتفصيل 📐🎙️' : 'Sara, please explain this lesson on the smart whiteboard with voice 📐🎙️');
+                }}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-amber-300 bg-gradient-to-tr from-amber-50 to-yellow-100 hover:from-amber-100 text-amber-950 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110 active:scale-95 shrink-0"
+                aria-label={isRtl ? 'السبورة التفاعلية' : 'Smart Board'}
+              >
+                <Sparkles size={15} className="text-[#C49E3A]" />
+              </button>
+              <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/toolchip:opacity-100 translate-y-1 group-hover/toolchip:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-amber-300 text-xs font-black shadow-xl border border-amber-400/40 flex items-center gap-1.5">
+                <span>📐</span>
+                <span>{isRtl ? 'اشرحي لي على السبورة الذكية بالصوت 📐🎙️' : 'Explain on Smart Whiteboard 📐🎙️'}</span>
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-b border-r border-amber-400/40" />
+              </div>
+            </div>
+
+            {/* 10. 🎯 PLACEMENT TEST */}
+            <div className="relative group/toolchip shrink-0">
+              <button
+                onClick={startPlacementTest}
+                className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110 active:scale-95 shrink-0 ${
+                  placementState.isActive
+                    ? 'bg-[#002147] text-amber-300 border-amber-400 ring-1 ring-amber-300 animate-pulse'
+                    : 'bg-gradient-to-tr from-blue-50 to-indigo-50 border-blue-300 text-blue-900 hover:from-blue-100'
+                }`}
+                aria-label={isRtl ? 'تحديد المستوى' : 'Placement Test'}
+              >
+                <Target size={15} className={placementState.isActive ? 'text-amber-300' : 'text-blue-600'} />
+              </button>
+              <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/toolchip:opacity-100 translate-y-1 group-hover/toolchip:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-blue-300 text-xs font-black shadow-xl border border-blue-400/40 flex items-center gap-1.5">
+                <span>🎯</span>
+                <span>{isRtl ? 'اختبار تحديد المستوى الشامل المعتمد 🎯' : 'Placement Test & CEFR Diagnostic 🎯'}</span>
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-b border-r border-blue-400/40" />
+              </div>
+            </div>
+
+            {/* 11. 🗓️ SMART STUDY PLAN */}
+            <div className="relative group/toolchip shrink-0">
+              <button
+                onClick={() => setIsSmartPlanGeneratorOpen(true)}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-indigo-400 bg-gradient-to-tr from-indigo-500 to-blue-600 hover:from-indigo-400 hover:to-blue-500 text-white flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110 active:scale-95 shrink-0"
+                aria-label={isRtl ? 'خطة دراسية ذكية' : 'Smart Plan'}
+              >
+                <Sparkles size={14} className="text-amber-300 animate-pulse" />
+              </button>
+              <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/toolchip:opacity-100 translate-y-1 group-hover/toolchip:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-amber-300 text-xs font-black shadow-xl border border-indigo-400/40 flex items-center gap-1.5">
+                <span>🗓️</span>
+                <span>{isRtl ? 'توليد خطة دراسية ذكية مخصصة مع سارة ⚡' : 'Generate Smart Study Plan ⚡'}</span>
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-b border-r border-indigo-400/40" />
+              </div>
+            </div>
+
+            {/* 12. 🎮 12Y ADVENTURES */}
+            <div className="relative group/toolchip shrink-0">
+              <button
+                onClick={() => setIsRolePlayModalOpen(true)}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-indigo-300 bg-gradient-to-tr from-indigo-50 via-purple-50 to-blue-50 hover:from-indigo-100 text-[#002147] flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110 active:scale-95 shrink-0"
+                aria-label={isRtl ? 'مغامرات 12 سنة' : '12Y Adventures'}
+              >
+                <Gamepad2 size={15} className="text-indigo-600" />
+              </button>
+              <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/toolchip:opacity-100 translate-y-1 group-hover/toolchip:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-purple-300 text-xs font-black shadow-xl border border-purple-400/40 flex items-center gap-1.5">
+                <span>🎮</span>
+                <span>{isRtl ? 'سيناريوهات ومغامرات سن 12 سنة 🎮' : '12Y Role-Play & Adventures 🎮'}</span>
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-b border-r border-purple-400/40" />
+              </div>
+            </div>
+
+            {/* 13. 🎙️ LIVE VOICE TOGGLE */}
+            <div className="relative group/toolchip shrink-0">
+              <button
+                onClick={toggleLiveVoiceMode}
+                className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110 active:scale-95 shrink-0 ${
+                  isLiveMode 
+                    ? 'bg-rose-500 border-rose-600 text-white animate-pulse' 
+                    : 'bg-emerald-50 border-emerald-300 hover:bg-emerald-100 text-emerald-800'
+                }`}
+                aria-label={isRtl ? 'محادثة صوتية لايف' : 'Live Voice Mode'}
+              >
+                <Radio size={14} className={isLiveMode ? 'animate-spin' : ''} />
+              </button>
+              <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/toolchip:opacity-100 translate-y-1 group-hover/toolchip:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-emerald-300 text-xs font-black shadow-xl border border-emerald-400/40 flex items-center gap-1.5">
+                <span>🎙️</span>
+                <span>{isLiveMode ? (isRtl ? 'إيقاف محادثة اللايف ⏹️' : 'Stop Live Mode ⏹️') : (isRtl ? 'بدء محادثة صوتية لايف (رد برد) 🎙️' : 'Start Live Voice Chat 🎙️')}</span>
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-b border-r border-emerald-400/40" />
+              </div>
+            </div>
+
+            {/* 14. 🌐 LANGUAGE TOGGLE */}
+            <div className="relative group/toolchip shrink-0">
+              <button
+                onClick={() => handleToggleLanguage()}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-slate-300 bg-slate-100 hover:bg-slate-200 text-[#002147] flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110 active:scale-95 shrink-0 font-black text-xs"
+                aria-label="Toggle Language"
+              >
+                <span>{activeLang === 'ar' ? '🇬🇧' : '🇸🇦'}</span>
+              </button>
+              <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/toolchip:opacity-100 translate-y-1 group-hover/toolchip:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🌐</span>
+                <span>{activeLang === 'ar' ? 'التبديل إلى English 🇬🇧' : 'التبديل إلى العربية 🇸🇦'}</span>
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-b border-r border-slate-700/80" />
+              </div>
+            </div>
+
+            {/* Visual separator between circular tools and text prompts */}
+            <div className="h-5 w-px bg-slate-300 shrink-0 mx-1" />
+            <span className="text-slate-400 shrink-0 text-[10px] hidden sm:inline">{isRtl ? 'أسئلة مقترحة:' : 'Prompts:'}</span>
+
+            {/* Conversational prompt chips */}
             {[
               { ar: 'علميني قاعدة جديدة اليوم 📐', en: 'Teach me a new rule 📐' },
               { ar: 'اختبريني بـ 3 أسئلة سريعة 🎯', en: 'Give me a 3-question quiz 🎯' },
@@ -6632,38 +7292,11 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               <button
                 key={`chip-${cIdx}`}
                 onClick={() => handleSendMessage(isRtl ? chip.ar : chip.en)}
-                className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-white border border-slate-200 hover:border-[#002147] hover:bg-slate-50 shrink-0 transition-all cursor-pointer shadow-2xs text-[10px] sm:text-xs"
+                className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-white border border-slate-200 hover:border-[#002147] hover:bg-slate-50 shrink-0 transition-all cursor-pointer shadow-2xs text-[10px] sm:text-xs font-bold whitespace-nowrap"
               >
                 {isRtl ? chip.ar : chip.en}
               </button>
             ))}
-            <button
-              onClick={() => setIsRolePlayModalOpen(true)}
-              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-300 hover:border-indigo-400 hover:from-indigo-100 hover:to-purple-100 text-[#002147] shrink-0 transition-all cursor-pointer shadow-2xs flex items-center gap-1 font-black text-[10px] sm:text-xs"
-              title={isRtl ? 'استوديو سيناريوهات ومغامرات سارة لسن 12 سنة' : 'Sara 12Y Adventures & Scenarios'}
-            >
-              <span>🎮</span>
-              <span>{isRtl ? 'مغامرات وسيناريوهات 12 سنة' : '12Y Scenarios Hub'}</span>
-            </button>
-            <button
-              onClick={() => setShowArchiveConfirm(true)}
-              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-amber-50 border border-amber-300 hover:border-amber-400 hover:bg-amber-100 text-amber-900 shrink-0 transition-all cursor-pointer shadow-2xs flex items-center gap-1 font-bold text-[10px] sm:text-xs"
-              title={isRtl ? 'أرشف الجلسة' : 'Archive Session'}
-            >
-              <Archive size={11} className="text-amber-700" />
-              <span>{isRtl ? '📦 أرشف الجلسة' : '📦 Archive'}</span>
-            </button>
-            <button
-              onClick={() => {
-                fetchArchivedSessions();
-                setIsArchiveModalOpen(true);
-              }}
-              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-[#002147] hover:bg-slate-100 text-slate-600 shrink-0 transition-all cursor-pointer shadow-2xs flex items-center gap-1 font-bold text-[10px] sm:text-xs"
-              title={isRtl ? 'الأرشيف' : 'Archive'}
-            >
-              <History size={11} className="text-slate-500" />
-              <span>{isRtl ? '🗂️ الأرشيف' : '🗂️ Archive'}</span>
-            </button>
           </div>
         </div>
       </main>
@@ -6932,6 +7565,148 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   <div>
                     <div className="text-xs font-black">{isRtl ? 'دفتر الأخطاء والتقرير' : 'Error Notebook'}</div>
                     <div className="text-[10px] text-slate-500 font-medium">{isRtl ? 'مفردات وتقارير الإتقان' : 'Mistakes & vocab'}</div>
+                  </div>
+                </button>
+
+                {/* 5. Smart Adaptive Memory & Learning Profile */}
+                <button
+                  onClick={() => {
+                    setShowMobileToolsDrawer(false);
+                    setIsAdaptiveMemoryModalOpen(true);
+                  }}
+                  className="p-3 rounded-2xl border-2 bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200 text-indigo-950 hover:bg-indigo-100 text-start flex flex-col justify-between gap-2 transition-all cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">🧠</span>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-indigo-600 text-white">
+                      {isRtl ? 'تكيفي' : 'Adaptive'}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="text-xs font-black">{isRtl ? 'ذاكرة سارة الذكية 🧠' : 'Smart Memory 🧠'}</div>
+                    <div className="text-[10px] text-slate-500 font-medium">{isRtl ? 'أسلوب التعلم ونقاط القوة' : 'Learning style & strengths'}</div>
+                  </div>
+                </button>
+
+                {/* 5A. Voice Coach & Pronunciation Diagnostics */}
+                <button
+                  onClick={() => {
+                    setShowMobileToolsDrawer(false);
+                    setIsVoiceCoachModalOpen(true);
+                  }}
+                  className="p-3 rounded-2xl border-2 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200 text-purple-950 hover:bg-purple-100 text-start flex flex-col justify-between gap-2 transition-all cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">🎙️</span>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-purple-600 text-white">
+                      {isRtl ? 'صوتي' : 'Voice'}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="text-xs font-black">{isRtl ? 'مدرب النطق الصوتي 🎙️' : 'Voice Coach 🎙️'}</div>
+                    <div className="text-[10px] text-slate-500 font-medium">{isRtl ? 'مخارج الحروف ودعم الثقة' : 'Pronunciation & Confidence'}</div>
+                  </div>
+                </button>
+
+                {/* 5B. Speed Drills */}
+                <button
+                  onClick={() => {
+                    setShowMobileToolsDrawer(false);
+                    setIsSpeedDrillModalOpen(true);
+                  }}
+                  className="p-3 rounded-2xl border-2 bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200 text-amber-950 hover:bg-amber-100 text-start flex flex-col justify-between gap-2 transition-all cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">⚡</span>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-amber-500 text-slate-950">
+                      {isRtl ? 'سباق' : 'Speed'}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="text-xs font-black">{isRtl ? 'تحديات السرعة ⚡' : 'Speed Drills ⚡'}</div>
+                    <div className="text-[10px] text-slate-500 font-medium">{isRtl ? 'تركيب جمل وصيد أخطاء' : 'Sentence builder & bugs'}</div>
+                  </div>
+                </button>
+
+                {/* 5C. Parent Insights Hub */}
+                <button
+                  onClick={() => {
+                    setShowMobileToolsDrawer(false);
+                    setIsParentInsightsModalOpen(true);
+                  }}
+                  className="p-3 rounded-2xl border-2 bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 text-emerald-950 hover:bg-emerald-100 text-start flex flex-col justify-between gap-2 transition-all cursor-pointer col-span-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">📊</span>
+                      <div className="text-xs font-black">{isRtl ? 'تحليلات التقدم وتقارير أولياء الأمور 📊' : 'Parent & Mentor Insights 📊'}</div>
+                    </div>
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-600 text-white">
+                      CEFR {(profile as any).level || tutorMemory.level || 'A1'}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-medium">{isRtl ? 'ملخص أسبوعي موجه للوالدين • مؤشر الطلاقة • بطاقة تقرير رسمي للتصدير' : 'Weekly digest, CEFR meter, official report card'}</div>
+                </button>
+
+                {/* 5D. Live Phone Call with Sara (#7) */}
+                <button
+                  onClick={() => {
+                    setShowMobileToolsDrawer(false);
+                    setIsPhoneCallModalOpen(true);
+                  }}
+                  className="p-3 rounded-2xl border-2 bg-gradient-to-br from-teal-50 to-emerald-50 border-teal-300 text-teal-950 hover:bg-teal-100 text-start flex flex-col justify-between gap-2 transition-all cursor-pointer col-span-2 shadow-xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">📞</span>
+                      <div className="text-xs font-black">{isRtl ? 'مكالمة هاتفية حية مع سارة 📞' : 'Live Phone Call with Sara 📞'}</div>
+                    </div>
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-teal-600 text-white animate-pulse">
+                      {isRtl ? 'حر اليدين' : 'Hands-Free'}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-medium">
+                    {isRtl ? 'تحدث مع سارة عبر الهاتف مباشرة دون لمس الشاشة في 6 مواقف واقعية' : 'Realistic voice phone conversation in 6 real-world scenarios'}
+                  </div>
+                </button>
+
+                {/* 5E. Achievements & Quests (#5) */}
+                <button
+                  onClick={() => {
+                    setShowMobileToolsDrawer(false);
+                    setIsAchievementsModalOpen(true);
+                  }}
+                  className="p-3 rounded-2xl border-2 bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200 text-amber-950 hover:bg-amber-100 text-start flex flex-col justify-between gap-2 transition-all cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">🏆</span>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-amber-500 text-slate-950">
+                      XP
+                    </span>
+                  </div>
+                  <div>
+                    <div className="text-xs font-black">{isRtl ? 'الأوسمة والمهام 🏆' : 'Achievements 🏆'}</div>
+                    <div className="text-[10px] text-slate-500 font-medium">{isRtl ? 'مهام يومية وشارات إتقان' : 'Daily quests & badges'}</div>
+                  </div>
+                </button>
+
+                {/* 5F. Printable Worksheet (#6) */}
+                <button
+                  onClick={() => {
+                    setShowMobileToolsDrawer(false);
+                    setIsWorksheetModalOpen(true);
+                  }}
+                  className="p-3 rounded-2xl border-2 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 text-blue-950 hover:bg-blue-100 text-start flex flex-col justify-between gap-2 transition-all cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl">📄</span>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-blue-600 text-white">
+                      PDF
+                    </span>
+                  </div>
+                  <div>
+                    <div className="text-xs font-black">{isRtl ? 'ورقة عمل للطباعة 📄' : 'Printable Worksheet 📄'}</div>
+                    <div className="text-[10px] text-slate-500 font-medium">{isRtl ? 'تصدير PDF من الدرس' : 'Export PDF from lesson'}</div>
                   </div>
                 </button>
 
@@ -7583,6 +8358,137 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           handleSendMessage(prompt);
         }}
         onSpeakText={(text) => playSaraVoice(text)}
+        onOpenAdaptiveMemory={() => setIsAdaptiveMemoryModalOpen(true)}
+      />
+
+      {/* 11. Sara Adaptive Memory & Cognitive Profile Modal */}
+      <SaraAdaptiveMemoryModal
+        isOpen={isAdaptiveMemoryModalOpen}
+        onClose={() => setIsAdaptiveMemoryModalOpen(false)}
+        tutorMemory={tutorMemory}
+        studentName={profile.displayName || ''}
+        studentLevel={(profile as any).level || tutorMemory.level || 'A1'}
+        isRtl={isRtl}
+        onUpdateLearningStyle={handleUpdateLearningStyle}
+        onClearMemory={handleClearMemory}
+        onPracticeTopic={(topicPrompt) => {
+          handleSendMessage(topicPrompt);
+        }}
+        onPracticeMistake={(mistakePrompt) => {
+          const prompt = isRtl
+            ? `سارة، أود أن نتدرب معاً على هذه النقطة اللغوية لأتقنها تماماً: "${mistakePrompt}". اشرحيها لي بنمطك الذكي واطرحي علي سؤالاً تطبيقياً!`
+            : `Sara, let's practice this specific grammar point so I master it completely: "${mistakePrompt}". Explain it and give me a practice challenge!`;
+          handleSendMessage(prompt);
+        }}
+      />
+
+      {/* 11B. Sara AI Voice Coach & Pronunciation Diagnostics Modal */}
+      <SaraVoiceCoachModal
+        isOpen={isVoiceCoachModalOpen}
+        onClose={() => setIsVoiceCoachModalOpen(false)}
+        targetSentence={activeBoard?.sentence || 'I am ready to speak English with confidence.'}
+        isRtl={isRtl}
+        studentLevel={(profile as any).level || tutorMemory.level || 'A1'}
+        onSuccessXP={(xp) => {
+          setStreak(prev => ({
+            ...prev,
+            totalXP: (prev as any).totalXP ? (prev as any).totalXP + xp : xp
+          }));
+        }}
+        onSavePronunciationNote={(note) => {
+          syncMemoryToFirestore({ newNotes: [note] }, false, 'AI Voice Coaching');
+        }}
+      />
+
+      {/* 11C. Sara Speed Drills & Micro-Challenges Modal */}
+      <SaraSpeedDrillModal
+        isOpen={isSpeedDrillModalOpen}
+        onClose={() => setIsSpeedDrillModalOpen(false)}
+        isRtl={isRtl}
+        studentLevel={(profile as any).level || tutorMemory.level || 'A1'}
+        onSuccessXP={(xp) => {
+          setStreak(prev => ({
+            ...prev,
+            totalXP: (prev as any).totalXP ? (prev as any).totalXP + xp : xp
+          }));
+        }}
+        onRecordDrillResult={(summary) => {
+          syncMemoryToFirestore({ newNotes: [summary] }, false, 'Speed Drills Challenge');
+        }}
+      />
+
+      {/* 11D. Sara Parent & Mentor Insights Hub Modal */}
+      <SaraParentInsightsModal
+        isOpen={isParentInsightsModalOpen}
+        onClose={() => setIsParentInsightsModalOpen(false)}
+        tutorMemory={tutorMemory}
+        studentName={profile.displayName || ''}
+        studentLevel={(profile as any).level || tutorMemory.level || 'A1'}
+        studentStreak={streak.current || 1}
+        isRtl={isRtl}
+      />
+
+      {/* 11E. Sara Achievements, Quests & Trophy Hub Modal (#5) */}
+      <SaraAchievementsModal
+        isOpen={isAchievementsModalOpen}
+        onClose={() => setIsAchievementsModalOpen(false)}
+        tutorMemory={tutorMemory}
+        studentName={profile.displayName || ''}
+        studentLevel={(profile as any).level || tutorMemory.level || 'A1'}
+        studentStreak={streak.current || 1}
+        totalXP={(streak as any).totalXP || 100}
+        isRtl={isRtl}
+        onClaimQuestXP={(xp, questId) => {
+          setStreak(prev => ({
+            ...prev,
+            totalXP: (prev as any).totalXP ? (prev as any).totalXP + xp : xp
+          }));
+          syncMemoryToFirestore({ newNotes: [`Claimed quest reward +${xp} XP (${questId})`] }, false, 'Quest Reward');
+        }}
+      />
+
+      {/* 11F. Sara Smart Printable Worksheet Generator & PDF Studio (#6) */}
+      <SaraWorksheetGeneratorModal
+        isOpen={isWorksheetModalOpen}
+        onClose={() => setIsWorksheetModalOpen(false)}
+        studentName={profile.displayName || ''}
+        studentLevel={(profile as any).level || tutorMemory.level || 'A1'}
+        currentLessonTopic={activeBoard?.title || activeBoard?.sentence || activeCurriculumLesson?.titleEn || 'Grammar & Spoken English'}
+        isRtl={isRtl}
+        onSendToSara={(prompt) => {
+          handleSendMessage(prompt);
+        }}
+      />
+
+      {/* 11G. Sara Live Interactive Hands-Free Phone Call Modal (#7) */}
+      <SaraLivePhoneCallModal
+        isOpen={isPhoneCallModalOpen}
+        onClose={() => setIsPhoneCallModalOpen(false)}
+        studentName={profile.displayName || ''}
+        studentLevel={(profile as any).level || tutorMemory.level || 'A1'}
+        isRtl={isRtl}
+        onSuccessXP={(xp) => {
+          setStreak(prev => ({
+            ...prev,
+            totalXP: (prev as any).totalXP ? (prev as any).totalXP + xp : xp
+          }));
+        }}
+        onSaveCallSummary={(summary) => {
+          syncMemoryToFirestore({ newNotes: [summary] }, false, 'Live Phone Call');
+        }}
+        onSendTranscriptToChat={(transcript) => {
+          if (transcript.length === 0) return;
+          const phoneDebrief = isRtl
+            ? `📞 ملخص المكالمة الهاتفية الحية مع سارة (${transcript.length} جولات تبادلية). تم تسجيل الأداء بنجاح في سجل الطالب.`
+            : `📞 Live phone call completed with Sara (${transcript.length} turns). Performance recorded successfully.`;
+          const saraMsg: MessageItem = {
+            id: `msg_sara_call_${Date.now()}`,
+            role: 'sara',
+            text: phoneDebrief,
+            timestamp: Date.now()
+          };
+          setMessages(prev => [...prev, saraMsg]);
+        }}
       />
 
       {/* 12. Sara Sessions Archive Modal & Read-Only Viewer */}
