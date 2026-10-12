@@ -1027,34 +1027,22 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
     setActiveExplanationSection(section);
     onSaraTriggerGesture?.('pointing');
 
-    let textToSpeak = '';
+    // Read exactly what the card shows (no added intro/outro), via the same board->speech rule.
+    let cardLines: string[] = [];
     if (section === 'formula' && boardData.formula) {
-      textToSpeak = isRtl
-        ? `هذه هي قاعدة الجملة بالإنجليزية: ${boardData.formula}. تتكون القاعدة من هذه الأركان لتركيب جملة سليمة.`
-        : `Here is the grammar formula: ${boardData.formula}. Follow these components to form correct sentences.`;
+      cardLines = [boardData.formula];
     } else if (section === 'sentence' && boardData.sentence) {
-      textToSpeak = isRtl
-        ? `استمع جيداً لمثالنا على السبورة: "${boardData.sentence}". ${boardData.highlight ? `وركز على نطق: "${boardData.highlight}".` : ''}`
-        : `Listen carefully to our example: "${boardData.sentence}". ${boardData.highlight ? `Pay special attention to "${boardData.highlight}".` : ''}`;
+      cardLines = [boardData.sentence];
     } else if (section === 'correction' && boardData.correction) {
-      textToSpeak = isRtl
-        ? `انتبه يا بطل، الصيغة الصحيحة هي "${boardData.correction.right}" بدلاً من "${boardData.correction.wrong}". محاولة رائعة!`
-        : `Notice the natural form is "${boardData.correction.right}" instead of "${boardData.correction.wrong}". Great effort!`;
+      cardLines = [boardData.correction.wrong, boardData.correction.right];
     } else if (section === 'notes' && Array.isArray(boardData.notes) && boardData.notes.length > 0) {
-      textToSpeak = isRtl
-        ? `إليك أهم النقاط الذهبية في درسنا اليوم: ${boardData.notes.join('. ')}`
-        : `Here are the key takeaways for today: ${boardData.notes.join('. ')}`;
+      cardLines = boardData.notes;
     } else if (section === 'diagram' && boardData.diagram && Array.isArray(boardData.diagram.items)) {
-      const itemsList = boardData.diagram.items.map(it => `${it.title}: ${it.desc}`).join(', ');
-      textToSpeak = isRtl
-        ? `في هذا المخطط التوضيحي، نتعلم: ${itemsList}`
-        : `In this vocabulary diagram, let's learn: ${itemsList}`;
+      cardLines = [boardData.diagram.label || '', ...boardData.diagram.items.map(it => `${it.title}: ${it.desc}`)];
     } else if (section === 'quiz' && boardData.quiz) {
-      const quizOpts = Array.isArray(boardData.quiz.options) ? boardData.quiz.options : [];
-      textToSpeak = isRtl
-        ? `سؤال التحدي السريع على السبورة: "${boardData.quiz.question}". والخيارات هي: ${quizOpts.join('، أو ')}. فكّر واختر الإجابة الصحيحة!`
-        : `Whiteboard challenge question: "${boardData.quiz.question}". Your choices are: ${quizOpts.join(', or ')}. Pick the right one!`;
+      cardLines = [boardData.quiz.question, ...(Array.isArray(boardData.quiz.options) ? boardData.quiz.options : [])];
     }
+    const textToSpeak = boardLinesToSpeech(cardLines);
 
     if (textToSpeak) {
       setCurrentExplanationText(textToSpeak);

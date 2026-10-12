@@ -7,6 +7,8 @@ const EMOJI_RE = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}
 
 export function boardLineToSpeech(line: string): string {
   return String(line || '')
+    // IPA / phonetic transcriptions like /bɪrd/ stay visible on the board but are not read aloud
+    .replace(/(^|[\s(:،,])\/[^\/\s][^\/\n]{0,40}?\/(?=[\s.,،:;!?)]|$)/g, '$1 ')
     .replace(EMOJI_RE, ' ')
     .replace(/[*_`#>|]+/g, ' ')
     .replace(/\s*(➜|➡|→|=>)\s*/g, ', ')
