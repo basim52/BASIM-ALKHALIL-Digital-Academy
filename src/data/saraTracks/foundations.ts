@@ -12,6 +12,8 @@ export interface SaraChoiceQuestion {
 export interface SaraTrackLesson {
   id: string;
   order: number;
+  /** Level id for multi-level tracks (e.g. 'b1'). */
+  levelId?: string;
   titleAr: string;
   titleEn: string;
   /** Built lessons have content; locked placeholders only have titles. */
@@ -30,6 +32,8 @@ export interface SaraTrack {
   id: string;
   titleAr: string;
   titleEn: string;
+  /** Optional level sections; lessons reference them by levelId. Unlocking stays sequential across the whole track. */
+  levels?: { id: string; titleAr: string; titleEn: string }[];
   lessons: SaraTrackLesson[];
 }
 

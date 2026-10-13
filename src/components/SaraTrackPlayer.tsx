@@ -10,6 +10,8 @@ interface Props {
   onClose: () => void;
   track: SaraTrack;
   uid?: string;
+  /** Admin/parent preview: every lesson open. */
+  unlockAll?: boolean;
 }
 
 // ---- Sara narrator: same cloud voice as her chat (Gemini 'Kore' via /api/tts), one primed <audio> element.
@@ -66,8 +68,8 @@ async function narrate(segs: Seg[], onSeg: (i: number) => void, onBlocked: () =>
   if (token === narratorToken) onDone();
 }
 
-const progressKey = (trackId: string, uid?: string) => `sara_track_${trackId}_${uid || 'guest'}`;
-const readUnlocked = (trackId: string, uid?: string) => {
+export const progressKey = (trackId: string, uid?: string) => `sara_track_${trackId}_${uid || 'guest'}`;
+export const readUnlocked = (trackId: string, uid?: string) => {
   try { return Math.max(1, Number(localStorage.getItem(progressKey(trackId, uid))) || 1); } catch { return 1; }
 };
 
@@ -92,8 +94,9 @@ const Choice: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (
   </div>
 );
 
-export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid }) => {
-  const [unlocked, setUnlocked] = useState(() => readUnlocked(track.id, uid));
+export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, unlockAll }) => {
+  const [unlockedRaw, setUnlocked] = useState(() => readUnlocked(track.id, uid));
+  const unlocked = unlockAll ? track.lessons.length : unlockedRaw;
   const [lessonId, setLessonId] = useState<string | null>(null);
   const [useAlt, setUseAlt] = useState(false);
   const [checkPick, setCheckPick] = useState<number | null>(null);
@@ -187,7 +190,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid }
     setCheckPick(i);
     if (i === lesson.content.check.correctIndex) {
       const next = Math.min(track.lessons.length, lesson.order + 1);
-      if (next > unlocked) {
+      if (next > unlockedRaw) {
         setUnlocked(next);
         try { localStorage.setItem(progressKey(track.id, uid), String(next)); } catch { /* ignore */ }
       }
@@ -224,10 +227,14 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid }
         {/* Lesson list */}
         {!lesson && (
           <div className="flex-1 min-h-0 overflow-y-auto p-3 grid gap-1.5 content-start">
-            {track.lessons.map(l => {
+            {track.lessons.map((l, idx) => {
               const open = l.order <= unlocked;
+              const lvl = track.levels?.find(v => v.id === l.levelId);
+              const showLevel = !!lvl && (idx === 0 || track.lessons[idx - 1].levelId !== l.levelId);
               return (
-                <button key={l.id} disabled={!open} onClick={() => openLesson(l)}
+                <React.Fragment key={l.id}>
+                {showLevel && <p className="mt-2 first:mt-0 px-1 text-[12px] font-black text-amber-700">{lvl!.titleAr}</p>}
+                <button disabled={!open} onClick={() => openLesson(l)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-start ${open ? 'bg-white border-amber-300 shadow-sm' : 'bg-slate-100 border-slate-200 opacity-60'}`}>
                   <span className="w-6 h-6 rounded-full bg-[#002147] text-white text-[11px] font-black flex items-center justify-center shrink-0">{l.order}</span>
                   <span className="flex-1 min-w-0">
@@ -236,6 +243,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid }
                   </span>
                   {open ? (l.order < unlocked ? <CheckCircle2 size={16} className="text-emerald-600" /> : null) : <Lock size={14} className="text-slate-400" />}
                 </button>
+                </React.Fragment>
               );
             })}
           </div>

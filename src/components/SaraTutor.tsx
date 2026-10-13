@@ -74,8 +74,8 @@ import { SaraAchievementsModal } from './SaraAchievementsModal';
 import { SaraWorksheetGeneratorModal } from './SaraWorksheetGeneratorModal';
 import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
 import { SaraCurriculumModal } from './SaraCurriculumModal';
-import { SaraTrackPlayer } from './SaraTrackPlayer';
-import { FOUNDATIONS_TRACK } from '../data/saraTracks/foundations';
+import { SaraTracksHub } from './SaraTracksHub';
+import { MASTER_ADMINS, UserRole } from '../types';
 import { getScenarioEducationalContent } from '../data/saraScenarioCurriculumData';
 import { buildSaraLessonContext } from '../utils/saraLessonContext';
 import { SaraSmartPlanModal } from './SaraSmartPlanModal';
@@ -8525,7 +8525,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         )}
       </AnimatePresence>
 
-      <SaraTrackPlayer isOpen={isTrackOpen} onClose={() => setIsTrackOpen(false)} track={FOUNDATIONS_TRACK} uid={profile.uid} />
+      <SaraTracksHub isOpen={isTrackOpen} onClose={() => setIsTrackOpen(false)} uid={profile.uid}
+        unlockAll={MASTER_ADMINS.includes(String((profile as any).email || auth.currentUser?.email || '').trim().toLowerCase()) || (profile as any).role === UserRole.PARENT || (profile as any).role === UserRole.ADMIN} />
 
       {/* 13. Sara Independent Fluency Curriculum Modal */}
       <SaraCurriculumModal
