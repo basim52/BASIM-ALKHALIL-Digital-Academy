@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { 
   BookOpen, 
   BookMarked,
@@ -71,57 +71,57 @@ import { motion, AnimatePresence } from 'motion/react';
 import { UserRole, CurriculumCategory, proficiencyLevel, UserProfile, ScheduleItem, ParentNote, LearningModule, Lesson, AppView, StudentProfile, MASTER_ADMINS } from './types';
 import { MASTER_CURRICULUM } from './data/masterCurriculum';
 import { generateWhatsAppLink, NOTIFICATION_TEMPLATES } from './lib/whatsapp';
-import { ShareableNotification } from './components/ShareableNotification';
-import { AIConversation } from './components/AIConversation';
+const ShareableNotification = lazy(() => import('./components/ShareableNotification').then(m => ({ default: m.ShareableNotification })));
+const AIConversation = lazy(() => import('./components/AIConversation').then(m => ({ default: m.AIConversation })));
 import { PlacementTest } from './components/PlacementTest';
 import { auth, googleProvider, db, handleFirestoreError, OperationType, testConnection, redeemVoucherTransaction } from './lib/firebase';
 import firebaseConfig from '../firebase-applet-config.json';
 import { onAuthStateChanged, signInWithPopup, signOut, User } from 'firebase/auth';
 import { doc, getDoc, setDoc, addDoc, serverTimestamp, collection, query, where, onSnapshot, deleteDoc, orderBy, getDocs, updateDoc, limit, writeBatch } from 'firebase/firestore';
 import { translations, Language } from './lib/translations';
-import { StudentStats } from './components/StudentStats';
+const StudentStats = lazy(() => import('./components/StudentStats').then(m => ({ default: m.StudentStats })));
 import { Leaderboard } from './components/Leaderboard';
-import { PeerChat } from './components/PeerChat';
+const PeerChat = lazy(() => import('./components/PeerChat').then(m => ({ default: m.PeerChat })));
 import { generateLessonContent, generateCurriculumUnits } from './services/curriculumGenerator';
-import { InteractiveLesson } from './components/InteractiveLesson';
-import { WhatsAppNotifications } from './components/WhatsAppNotifications';
-import { AdminDashboard } from './components/AdminDashboard';
-import { VideoLibrary } from './components/VideoLibrary';
-import { StoryLibrary } from './components/StoryLibrary';
-import { ParentAIInsights } from './components/ParentAIInsights';
-import { ParentWeeklyReportCard } from './components/ParentWeeklyReportCard';
-import { ProgressRoadmap } from './components/ProgressRoadmap';
-import { ReadingLesson } from './components/ReadingLesson';
-import { OxfordLesson } from './components/OxfordLesson';
-import { EarlyChildhoodHome } from './components/EarlyChildhood/EarlyChildhoodHome';
-import { StudyPlanner } from './components/Academic/StudyPlanner';
-import { ResultsChart } from './components/Academic/ResultsChart';
-import { SmartAnalytics } from './components/Academic/SmartAnalytics';
-import { BiWeeklyTest } from './components/Academic/BiWeeklyTest';
-import { OxfordDiscoverCompanion } from './components/OxfordDiscoverCompanion';
-import { OxfordClassicCompanion } from './components/OxfordClassicCompanion';
+const InteractiveLesson = lazy(() => import('./components/InteractiveLesson').then(m => ({ default: m.InteractiveLesson })));
+const WhatsAppNotifications = lazy(() => import('./components/WhatsAppNotifications').then(m => ({ default: m.WhatsAppNotifications })));
+const AdminDashboard = lazy(() => import('./components/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const VideoLibrary = lazy(() => import('./components/VideoLibrary').then(m => ({ default: m.VideoLibrary })));
+const StoryLibrary = lazy(() => import('./components/StoryLibrary').then(m => ({ default: m.StoryLibrary })));
+const ParentAIInsights = lazy(() => import('./components/ParentAIInsights').then(m => ({ default: m.ParentAIInsights })));
+const ParentWeeklyReportCard = lazy(() => import('./components/ParentWeeklyReportCard').then(m => ({ default: m.ParentWeeklyReportCard })));
+const ProgressRoadmap = lazy(() => import('./components/ProgressRoadmap').then(m => ({ default: m.ProgressRoadmap })));
+const ReadingLesson = lazy(() => import('./components/ReadingLesson').then(m => ({ default: m.ReadingLesson })));
+const OxfordLesson = lazy(() => import('./components/OxfordLesson').then(m => ({ default: m.OxfordLesson })));
+const EarlyChildhoodHome = lazy(() => import('./components/EarlyChildhood/EarlyChildhoodHome').then(m => ({ default: m.EarlyChildhoodHome })));
+const StudyPlanner = lazy(() => import('./components/Academic/StudyPlanner').then(m => ({ default: m.StudyPlanner })));
+const ResultsChart = lazy(() => import('./components/Academic/ResultsChart').then(m => ({ default: m.ResultsChart })));
+const SmartAnalytics = lazy(() => import('./components/Academic/SmartAnalytics').then(m => ({ default: m.SmartAnalytics })));
+const BiWeeklyTest = lazy(() => import('./components/Academic/BiWeeklyTest').then(m => ({ default: m.BiWeeklyTest })));
+const OxfordDiscoverCompanion = lazy(() => import('./components/OxfordDiscoverCompanion').then(m => ({ default: m.OxfordDiscoverCompanion })));
+const OxfordClassicCompanion = lazy(() => import('./components/OxfordClassicCompanion').then(m => ({ default: m.OxfordClassicCompanion })));
 import { ReadingCurriculumCompanion, ReadingLevel, ALL_READING_UNITS } from './components/ReadingCurriculumCompanion';
 import { GrammarCurriculumCompanion, GrammarLevel, ALL_GRAMMAR_UNITS } from './components/GrammarCurriculumCompanion';
 import { ConversationCurriculumCompanion, ConversationLevel, ALL_CONVERSATION_UNITS } from './components/ConversationCurriculumCompanion';
 import { WritingCurriculumCompanion, WritingLevel, ALL_WRITING_UNITS } from './components/WritingCurriculumCompanion';
 import { ExpressionCurriculumCompanion, ExpressionLevel, ALL_EXPRESSION_UNITS } from './components/ExpressionCurriculumCompanion';
-import { ModernCurriculumHome } from './components/ModernCurriculumHome';
-import { AiCurriculum } from './components/AiCurriculum';
-import { BalanceOasis } from './components/BalanceOasis';
-import { LiveTranslate } from './components/LiveTranslate';
-import { ProfessionalDevelopment } from './components/ProfessionalDevelopment';
-import { AdultsDailyDose } from './components/AdultsDailyDose';
+const ModernCurriculumHome = lazy(() => import('./components/ModernCurriculumHome').then(m => ({ default: m.ModernCurriculumHome })));
+const AiCurriculum = lazy(() => import('./components/AiCurriculum').then(m => ({ default: m.AiCurriculum })));
+const BalanceOasis = lazy(() => import('./components/BalanceOasis').then(m => ({ default: m.BalanceOasis })));
+const LiveTranslate = lazy(() => import('./components/LiveTranslate').then(m => ({ default: m.LiveTranslate })));
+const ProfessionalDevelopment = lazy(() => import('./components/ProfessionalDevelopment').then(m => ({ default: m.ProfessionalDevelopment })));
+const AdultsDailyDose = lazy(() => import('./components/AdultsDailyDose').then(m => ({ default: m.AdultsDailyDose })));
 import { ADULTS_DAILY_DOSES } from './data/adultsDailyDose';
-import { KidsStoryPlayer } from './components/KidsStoryPlayer';
+const KidsStoryPlayer = lazy(() => import('./components/KidsStoryPlayer').then(m => ({ default: m.KidsStoryPlayer })));
 import { KIDS_STORIES } from './data/kidsStories';
-import { PronunciationLab } from './components/PronunciationLab';
-import { RolePlayChallenges } from './components/RolePlayChallenges';
-import { VisualDictionary } from './components/VisualDictionary';
+const PronunciationLab = lazy(() => import('./components/PronunciationLab').then(m => ({ default: m.PronunciationLab })));
+const RolePlayChallenges = lazy(() => import('./components/RolePlayChallenges').then(m => ({ default: m.RolePlayChallenges })));
+const VisualDictionary = lazy(() => import('./components/VisualDictionary').then(m => ({ default: m.VisualDictionary })));
 import { CompletionCertificateModal, CertificateData } from './components/CompletionCertificateModal';
 import { subscribeToCertificateTriggers, saveEarnedCertificate } from './services/certificateService';
-import { DailyStreakCard } from './components/DailyStreakCard';
-import { StreakMilestoneModal } from './components/StreakMilestoneModal';
-import { DailyReminderBanner } from './components/DailyReminderBanner';
+const DailyStreakCard = lazy(() => import('./components/DailyStreakCard').then(m => ({ default: m.DailyStreakCard })));
+const StreakMilestoneModal = lazy(() => import('./components/StreakMilestoneModal').then(m => ({ default: m.StreakMilestoneModal })));
+const DailyReminderBanner = lazy(() => import('./components/DailyReminderBanner').then(m => ({ default: m.DailyReminderBanner })));
 import {
   StreakData,
   getStudentStreak,
@@ -130,21 +130,21 @@ import {
   getRiyadhDateStr,
   getRiyadhTimeStr
 } from './services/streakService';
-import { EnglishSongs } from './components/EnglishSongs';
-import { AnimatedStoryboard } from './components/AnimatedStoryboard';
-import { EscapeRoomGrammar } from './components/EscapeRoomGrammar';
+const EnglishSongs = lazy(() => import('./components/EnglishSongs').then(m => ({ default: m.EnglishSongs })));
+const AnimatedStoryboard = lazy(() => import('./components/AnimatedStoryboard').then(m => ({ default: m.AnimatedStoryboard })));
+const EscapeRoomGrammar = lazy(() => import('./components/EscapeRoomGrammar').then(m => ({ default: m.EscapeRoomGrammar })));
 import { buildInteractiveLessonQuiz } from './utils/academicCurriculumCatalogue';
-import { FlashcardsHub } from './components/FlashcardsHub';
-import { FamilyActivities } from './components/FamilyActivities';
-import { InteractiveLearningHub } from './components/InteractiveLearningHub';
-import { EducationalGamesHub } from './components/EducationalGamesHub';
-import { GrammarAcademy } from './components/GrammarAcademy';
-import { ReadingLab } from './components/ReadingLab';
-import { WritingSpellingStudio } from './components/WritingSpellingStudio';
-import { SaraTutor } from './components/SaraTutor';
+const FlashcardsHub = lazy(() => import('./components/FlashcardsHub').then(m => ({ default: m.FlashcardsHub })));
+const FamilyActivities = lazy(() => import('./components/FamilyActivities').then(m => ({ default: m.FamilyActivities })));
+const InteractiveLearningHub = lazy(() => import('./components/InteractiveLearningHub').then(m => ({ default: m.InteractiveLearningHub })));
+const EducationalGamesHub = lazy(() => import('./components/EducationalGamesHub').then(m => ({ default: m.EducationalGamesHub })));
+const GrammarAcademy = lazy(() => import('./components/GrammarAcademy').then(m => ({ default: m.GrammarAcademy })));
+const ReadingLab = lazy(() => import('./components/ReadingLab').then(m => ({ default: m.ReadingLab })));
+const WritingSpellingStudio = lazy(() => import('./components/WritingSpellingStudio').then(m => ({ default: m.WritingSpellingStudio })));
+const SaraTutor = lazy(() => import('./components/SaraTutor').then(m => ({ default: m.SaraTutor })));
 import { cancelAllSpeech } from './lib/audio';
-import { SaraLevelTestsReport } from './components/SaraLevelTestsReport';
-import { SaraParentCard } from './components/SaraParentCard';
+const SaraLevelTestsReport = lazy(() => import('./components/SaraLevelTestsReport').then(m => ({ default: m.SaraLevelTestsReport })));
+const SaraParentCard = lazy(() => import('./components/SaraParentCard').then(m => ({ default: m.SaraParentCard })));
 import { Layers, Image as OxfordIcon, Library as OxfordClassicIcon, Languages } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { familyConstellationsLesson } from './data/lessons/r_a1_4';
@@ -299,12 +299,12 @@ import { macroeconomicAuditsE1 } from './data/lessons/e_c2_2';
 import { existentialInquiryE1 } from './data/lessons/e_c2_3';
 import { linguisticFluidityE1 } from './data/lessons/e_c2_4';
 import { aestheticSynthesisE1 } from './data/lessons/e_c2_5';
-import { AIOmniCompanion } from './components/AIOmniCompanion';
-import { GlobalCommandPalette } from './components/GlobalCommandPalette';
-import { RealtimeVoiceCall } from './components/RealtimeVoiceCall';
-import { AdaptiveLearningPath } from './components/AdaptiveLearningPath';
-import { DynamicWorksheetGenerator } from './components/DynamicWorksheetGenerator';
-import { BranchingStoryEngine } from './components/BranchingStoryEngine';
+const AIOmniCompanion = lazy(() => import('./components/AIOmniCompanion').then(m => ({ default: m.AIOmniCompanion })));
+const GlobalCommandPalette = lazy(() => import('./components/GlobalCommandPalette').then(m => ({ default: m.GlobalCommandPalette })));
+const RealtimeVoiceCall = lazy(() => import('./components/RealtimeVoiceCall').then(m => ({ default: m.RealtimeVoiceCall })));
+const AdaptiveLearningPath = lazy(() => import('./components/AdaptiveLearningPath').then(m => ({ default: m.AdaptiveLearningPath })));
+const DynamicWorksheetGenerator = lazy(() => import('./components/DynamicWorksheetGenerator').then(m => ({ default: m.DynamicWorksheetGenerator })));
+const BranchingStoryEngine = lazy(() => import('./components/BranchingStoryEngine').then(m => ({ default: m.BranchingStoryEngine })));
 
 // Removed local AppView declaration as it is now imported from ./types
 
@@ -7310,6 +7310,7 @@ export default function AuthenticatedApp({
 
   return (
     <div className={`min-h-screen bg-[#f8fafc] font-sans selection:bg-blue-100 ${isRtl ? 'font-arabic' : ''}`}>
+      <Suspense fallback={null}>
       <AnimatePresence mode="wait">
         <motion.div
           key="academy-main"
@@ -7908,7 +7909,9 @@ export default function AuthenticatedApp({
               ? (isRtl ? 'md:mr-20 lg:mr-64 pt-14 md:pt-20 lg:pt-0' : 'md:ml-20 lg:ml-64 pt-14 md:pt-20 lg:pt-0')
               : (isRtl ? 'md:mr-20 lg:mr-64 mb-24 md:mb-6 pt-16 md:pt-20 lg:pt-4 pb-28 md:pb-12' : 'md:ml-20 lg:ml-64 mb-24 md:mb-6 pt-16 md:pt-20 lg:pt-4 pb-28 md:pb-12')
           }`}>
-            {renderContent()}
+            <Suspense fallback={<div className="min-h-[50vh] flex items-center justify-center"><div className="w-10 h-10 rounded-full border-4 border-[#C49E3A] border-t-transparent animate-spin" aria-label="loading" /></div>}>
+              {renderContent()}
+            </Suspense>
 
             {/* Global Notification Toast */}
             <AnimatePresence>
@@ -7956,7 +7959,7 @@ export default function AuthenticatedApp({
           />
         </motion.div>
       </AnimatePresence>
-
+      </Suspense>
     </div>
   );
 }
