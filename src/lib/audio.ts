@@ -531,6 +531,7 @@ export const speakAcademyText = async (
     }
     // Superseded or failed: never fall through and play the same text a second time.
     try { player?.stop(); } catch (_) {}
+    if (!player && requestId === globalSpeechRequestId) onEnd?.(); // failed (not superseded): let callers continue
     return { stop: () => {} };
   }
 

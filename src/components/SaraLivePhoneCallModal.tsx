@@ -234,10 +234,10 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
     }
     setIsStudentListening(false);
 
-    speakAcademyTextAs('call', text, 'en', () => {
-      setIsSaraSpeaking(false);
-      if (onEnd) onEnd();
-    });
+    // End-of-speech step runs once, after Sara's audio actually ends (or fails), never at start.
+    let finished = false;
+    const finish = () => { if (finished) return; finished = true; setIsSaraSpeaking(false); if (onEnd) onEnd(); };
+    speakAcademyTextAs('call', text, 'en', undefined, finish).catch(finish);
   };
 
   // Speech Recognition Handling
