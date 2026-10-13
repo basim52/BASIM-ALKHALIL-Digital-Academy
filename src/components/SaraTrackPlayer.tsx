@@ -546,3 +546,8 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
 };
 
 export default SaraTrackPlayer;
+
+/** Shared with Sara's tools: same one-request-per-page cached cloud voice (no substitute voice). */
+export const saraNarrate = narrate;
+export const saraStopNarrator = stopNarrator;
+export const saraUnlockNarrator = unlockNarrator;

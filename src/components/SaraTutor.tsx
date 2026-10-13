@@ -75,6 +75,7 @@ import { SaraWorksheetGeneratorModal } from './SaraWorksheetGeneratorModal';
 import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
 import { SaraCurriculumModal } from './SaraCurriculumModal';
 import { SaraTracksHub } from './SaraTracksHub';
+import { SaraTools, type SaraToolId } from './SaraTools';
 import { MASTER_ADMINS, UserRole } from '../types';
 import { getScenarioEducationalContent } from '../data/saraScenarioCurriculumData';
 import { buildSaraLessonContext } from '../utils/saraLessonContext';
@@ -526,29 +527,30 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   }, [loading]);
 
   // Plan 1: Voice & Speech Intelligence States (Phonetics, Hesitation, Role-Play)
+  const [saraTool, setSaraTool] = useState<SaraToolId | null>(null);
   const openCurriculumUnderConstruction = () => { try { setIsCurriculumModalOpen(true); } catch { /* noop */ } };
   const [isPhoneticModalOpen, _raw_setIsPhoneticModalOpen] = useState<boolean>(false);
   // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
-  const setIsPhoneticModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsPhoneticModalOpen(false); if (v === true) openCurriculumUnderConstruction(); };
+  const setIsPhoneticModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsPhoneticModalOpen(false); if (v === true) setSaraTool('pronunciation'); };
   const [phoneticTargetSentence, setPhoneticTargetSentence] = useState<string>('');
   const [isRolePlayModalOpen, _raw_setIsRolePlayModalOpen] = useState<boolean>(false);
   // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
-  const setIsRolePlayModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsRolePlayModalOpen(false); if (v === true) openCurriculumUnderConstruction(); };
+  const setIsRolePlayModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsRolePlayModalOpen(false); if (v === true) setSaraTool('roleplay'); };
   const [rolePlayInitialTab, setRolePlayInitialTab] = useState<'lesson' | 'exercises' | 'quiz' | 'simulate'>('lesson');
   const [rolePlayInitialId, setRolePlayInitialId] = useState<string | undefined>(undefined);
   const [isNotebookModalOpen, setIsNotebookModalOpen] = useState<boolean>(false);
   const [isAdaptiveMemoryModalOpen, setIsAdaptiveMemoryModalOpen] = useState<boolean>(false);
   const [isVoiceCoachModalOpen, _raw_setIsVoiceCoachModalOpen] = useState<boolean>(false);
   // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
-  const setIsVoiceCoachModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsVoiceCoachModalOpen(false); if (v === true) openCurriculumUnderConstruction(); };
+  const setIsVoiceCoachModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsVoiceCoachModalOpen(false); if (v === true) setSaraTool('voicecoach'); };
   const [isSpeedDrillModalOpen, _raw_setIsSpeedDrillModalOpen] = useState<boolean>(false);
   // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
-  const setIsSpeedDrillModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsSpeedDrillModalOpen(false); if (v === true) openCurriculumUnderConstruction(); };
+  const setIsSpeedDrillModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsSpeedDrillModalOpen(false); if (v === true) setSaraTool('speed'); };
   const [isParentInsightsModalOpen, setIsParentInsightsModalOpen] = useState<boolean>(false);
   const [isAchievementsModalOpen, setIsAchievementsModalOpen] = useState<boolean>(false);
   const [isWorksheetModalOpen, _raw_setIsWorksheetModalOpen] = useState<boolean>(false);
   // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
-  const setIsWorksheetModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsWorksheetModalOpen(false); if (v === true) openCurriculumUnderConstruction(); };
+  const setIsWorksheetModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsWorksheetModalOpen(false); if (v === true) setSaraTool('worksheet'); };
   const [isPhoneCallModalOpen, setIsPhoneCallModalOpen] = useState<boolean>(false);
   const [isContinuityBannerDismissed, setIsContinuityBannerDismissed] = useState<boolean>(false);
 
@@ -569,13 +571,13 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   // 🗓️ Smart Academic Study Plan States (Identical to Academy)
   const [isStudyPlanModalOpen, _raw_setIsStudyPlanModalOpen] = useState<boolean>(false);
   // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
-  const setIsStudyPlanModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsStudyPlanModalOpen(false); if (v === true) openCurriculumUnderConstruction(); };
+  const setIsStudyPlanModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsStudyPlanModalOpen(false); if (v === true) setSaraTool('plan'); };
   const [activeStudyPlan, setActiveStudyPlan] = useState<StudyPlan | null>(null);
   const [isLoadingStudyPlan, setIsLoadingStudyPlan] = useState<boolean>(false);
   const [isStudyPlanBannerDismissed, setIsStudyPlanBannerDismissed] = useState<boolean>(false);
   const [isSmartPlanGeneratorOpen, _raw_setIsSmartPlanGeneratorOpen] = useState<boolean>(false);
   // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
-  const setIsSmartPlanGeneratorOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsSmartPlanGeneratorOpen(false); if (v === true) openCurriculumUnderConstruction(); };
+  const setIsSmartPlanGeneratorOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsSmartPlanGeneratorOpen(false); if (v === true) setSaraTool('plan'); };
   const [activeRolePlay, setActiveRolePlay] = useState<RolePlayScenario | null>(null);
   const [completedMissions, setCompletedMissions] = useState<number[]>([]);
   const [showHesitationEncouragement, setShowHesitationEncouragement] = useState<boolean>(false);
@@ -2362,7 +2364,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   // ==========================================
 
   const startPlacementTest = () => {
-    openCurriculumUnderConstruction();
+    setSaraTool('placement');
     if (Date.now() > 0) return;
     cancelAllSpeech();
     setPlacementState({
@@ -8526,6 +8528,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         )}
       </AnimatePresence>
 
+      <SaraTools tool={saraTool} onClose={() => setSaraTool(null)} uid={profile.uid}
+        unlockAll={MASTER_ADMINS.includes(String((profile as any).email || auth.currentUser?.email || '').trim().toLowerCase()) || (profile as any).role === UserRole.PARENT || (profile as any).role === UserRole.ADMIN} />
       <SaraTracksHub key={trackFilter} filter={trackFilter} isOpen={isTrackOpen} onClose={() => setIsTrackOpen(false)} uid={profile.uid}
         unlockAll={MASTER_ADMINS.includes(String((profile as any).email || auth.currentUser?.email || '').trim().toLowerCase()) || (profile as any).role === UserRole.PARENT || (profile as any).role === UserRole.ADMIN} />
 
