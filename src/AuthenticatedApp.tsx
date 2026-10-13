@@ -7902,7 +7902,7 @@ export default function AuthenticatedApp({
           )}
 
           <main className={`flex-1 min-w-0 w-full overflow-x-hidden transition-all ${
-            view === 'placement-test'
+            view === 'placement-test' || view === 'sara-tutor'
               ? ''
               : view === 'ai-chat'
               ? (isRtl ? 'md:mr-20 lg:mr-64 pt-14 md:pt-20 lg:pt-0' : 'md:ml-20 lg:ml-64 pt-14 md:pt-20 lg:pt-0')
@@ -7941,11 +7941,11 @@ export default function AuthenticatedApp({
           </main>
 
           {/* Global Omnipresent AI Companion */}
-          <AIOmniCompanion
+          {view !== 'sara-tutor' && <AIOmniCompanion
             isRtl={isRtl}
             currentContext={`Active Academy Section: ${view}`}
             onNavigateToView={(targetView) => setView(targetView as AppView)}
-          />
+          />}
 
           {/* Global Command Palette (Ctrl+K) */}
           <GlobalCommandPalette

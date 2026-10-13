@@ -428,7 +428,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   }, []);
   
   // 3D Sara Character Floating Presence
-  const [isSara3DOpen, setIsSara3DOpen] = useState(true);
+  const [isSara3DOpen, setIsSara3DOpen] = useState(false);
   const [lastSaraSpeech, setLastSaraSpeech] = useState<string>('');
   
   // Live Voice Mode state
@@ -529,26 +529,26 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   // Plan 1: Voice & Speech Intelligence States (Phonetics, Hesitation, Role-Play)
   const [saraTool, setSaraTool] = useState<SaraToolId | null>(null);
   const [isPhoneticModalOpen, _raw_setIsPhoneticModalOpen] = useState<boolean>(false);
-  // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
+  // Tool icon opens the matching Sara tool page (SaraTools).
   const setIsPhoneticModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsPhoneticModalOpen(false); if (v === true) setSaraTool('pronunciation'); };
   const [phoneticTargetSentence, setPhoneticTargetSentence] = useState<string>('');
   const [isRolePlayModalOpen, _raw_setIsRolePlayModalOpen] = useState<boolean>(false);
-  // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
+  // Tool icon opens the matching Sara tool page (SaraTools).
   const setIsRolePlayModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsRolePlayModalOpen(false); if (v === true) setSaraTool('roleplay'); };
   const [rolePlayInitialTab, setRolePlayInitialTab] = useState<'lesson' | 'exercises' | 'quiz' | 'simulate'>('lesson');
   const [rolePlayInitialId, setRolePlayInitialId] = useState<string | undefined>(undefined);
   const [isNotebookModalOpen, setIsNotebookModalOpen] = useState<boolean>(false);
   const [isAdaptiveMemoryModalOpen, setIsAdaptiveMemoryModalOpen] = useState<boolean>(false);
   const [isVoiceCoachModalOpen, _raw_setIsVoiceCoachModalOpen] = useState<boolean>(false);
-  // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
+  // Tool icon opens the matching Sara tool page (SaraTools).
   const setIsVoiceCoachModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsVoiceCoachModalOpen(false); if (v === true) setSaraTool('voicecoach'); };
   const [isSpeedDrillModalOpen, _raw_setIsSpeedDrillModalOpen] = useState<boolean>(false);
-  // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
+  // Tool icon opens the matching Sara tool page (SaraTools).
   const setIsSpeedDrillModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsSpeedDrillModalOpen(false); if (v === true) setSaraTool('speed'); };
   const [isParentInsightsModalOpen, setIsParentInsightsModalOpen] = useState<boolean>(false);
   const [isAchievementsModalOpen, setIsAchievementsModalOpen] = useState<boolean>(false);
   const [isWorksheetModalOpen, _raw_setIsWorksheetModalOpen] = useState<boolean>(false);
-  // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
+  // Tool icon opens the matching Sara tool page (SaraTools).
   const setIsWorksheetModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsWorksheetModalOpen(false); if (v === true) setSaraTool('worksheet'); };
   const [isPhoneCallModalOpen, setIsPhoneCallModalOpen] = useState<boolean>(false);
   const [isContinuityBannerDismissed, setIsContinuityBannerDismissed] = useState<boolean>(false);
@@ -569,13 +569,13 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
   // 🗓️ Smart Academic Study Plan States (Identical to Academy)
   const [isStudyPlanModalOpen, _raw_setIsStudyPlanModalOpen] = useState<boolean>(false);
-  // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
+  // Tool icon opens the matching Sara tool page (SaraTools).
   const setIsStudyPlanModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsStudyPlanModalOpen(false); if (v === true) setSaraTool('plan'); };
   const [activeStudyPlan, setActiveStudyPlan] = useState<StudyPlan | null>(null);
   const [isLoadingStudyPlan, setIsLoadingStudyPlan] = useState<boolean>(false);
   const [isStudyPlanBannerDismissed, setIsStudyPlanBannerDismissed] = useState<boolean>(false);
   const [isSmartPlanGeneratorOpen, _raw_setIsSmartPlanGeneratorOpen] = useState<boolean>(false);
-  // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
+  // Tool icon opens the matching Sara tool page (SaraTools).
   const setIsSmartPlanGeneratorOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsSmartPlanGeneratorOpen(false); if (v === true) setSaraTool('plan'); };
   const [activeRolePlay, setActiveRolePlay] = useState<RolePlayScenario | null>(null);
   const [completedMissions, setCompletedMissions] = useState<number[]>([]);
@@ -3390,7 +3390,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       {/* 1. TOP HEADER & SARA AVATAR CARD */}
       {/* ======================================================== */}
       <header className="bg-white border-b-2 border-slate-200 sticky top-0 z-40 shadow-sm">
-        <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-3">
+        <div className="w-full px-3 sm:px-5 pt-2.5 pb-2 flex flex-wrap items-center gap-x-3 gap-y-2">
           {/* Back button */}
           <button
             onClick={() => {
@@ -3408,10 +3408,10 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           </button>
 
           {/* Sara Avatar & Identity Card */}
-          <div className="flex items-center gap-3 flex-1 justify-center sm:justify-start">
+          <div className="flex items-center gap-2.5 flex-1 min-w-0">
             <div className="relative">
               {/* Illustrated Avatar in Warm Modest Style with Pure White Hijab Framing Face */}
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-[#C49E3A] via-[#855B14] to-[#002147] p-0.5 shadow-md flex items-center justify-center overflow-hidden">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-[#C49E3A] via-[#855B14] to-[#002147] p-0.5 shadow-md flex items-center justify-center overflow-hidden">
                 <svg viewBox="0 0 100 100" className="w-full h-full rounded-full bg-[#002147]">
                   {/* Background Royal Navy Circle */}
                   <circle cx="50" cy="50" r="48" fill="#002147" />
@@ -3463,18 +3463,18 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               )}
             </div>
 
-            <div>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <h1 className="text-sm sm:text-base font-black text-[#002147] leading-tight">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-nowrap">
+                <h1 className="text-sm sm:text-base font-black text-[#002147] leading-tight whitespace-nowrap">
                   {isRtl ? 'سارة – معلمتك 👩‍🏫' : 'Sara – Your English Tutor 👩‍🏫'}
                 </h1>
-                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[9px] font-black rounded-full border border-emerald-200 flex items-center gap-1">
+                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[9px] font-black rounded-full border border-emerald-200 flex items-center gap-1 whitespace-nowrap shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   {isRtl ? 'متصلة الآن' : 'Online'}
                 </span>
                 {/* Auto-save & offline safety badge */}
                 <span 
-                  className={`px-2 py-0.5 rounded-full border text-[9px] font-bold transition-all flex items-center gap-1 ${
+                  className={`px-2 py-0.5 rounded-full border text-[9px] font-bold transition-all hidden sm:flex items-center gap-1 whitespace-nowrap shrink-0 ${
                     isSavedBadgeVisible
                       ? 'bg-blue-100 text-blue-900 border-blue-300 ring-2 ring-blue-300/40 font-black'
                       : 'bg-slate-100 text-slate-500 border-slate-200'
@@ -3485,14 +3485,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   <span className="hidden xs:inline">{isRtl ? (isSavedBadgeVisible ? 'تم الحفظ 💾' : 'محفوظة تلقائياً') : 'Auto-saved'}</span>
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 font-bold">
+              <p className="text-[11px] text-slate-500 font-bold truncate">
                 {isRtl ? 'معلمتك الخليجية الذكية لتعلم الإنجليزية بمتعة' : 'Your personal smart English tutor'}
               </p>
             </div>
           </div>
 
           {/* Mobile Header Quick Actions (sm:hidden) */}
-          <div className="flex sm:hidden items-center gap-1">
+          <div className="flex sm:hidden items-center gap-1 [&>*:not(:first-child)]:hidden">
             {/* 1. All Sara Tools Drawer Trigger (⚡) */}
             <button
               onClick={() => setShowMobileToolsDrawer(true)}
@@ -3520,7 +3520,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             <button
               onClick={() => handleOpenCurriculum('all')}
               className="w-8 h-8 rounded-full border-2 border-amber-400 bg-gradient-to-tr from-amber-300 to-yellow-300 text-slate-950 flex items-center justify-center shadow-xs active:scale-90 transition-all cursor-pointer"
-              title={isRtl ? 'مناهج سارة (قيد البناء) 🛠️' : "Sara's Curriculums 📚"}
+              title={isRtl ? 'مناهج سارة 📚' : "Sara's Curriculums 📚"}
               aria-label={isRtl ? 'مناهج سارة' : "Sara's Curriculums"}
             >
               <span className="text-xs">📚</span>
@@ -3596,24 +3596,30 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </button>
           </div>
 
-          {/* Desktop & Tablet Circular Toolbar Controls (hidden sm:flex - scrollable dock on tablet, wrapping on large screens) */}
-          <div className="hidden sm:flex items-center gap-1.5 sm:gap-2 overflow-x-auto max-w-[58vw] md:max-w-[65vw] lg:max-w-none flex-nowrap lg:flex-wrap justify-start lg:justify-end py-1 no-scrollbar">
+          {/* Sara tools: labeled sections (scrolls sideways on phone/tablet, wraps on desktop) */}
+          <nav data-testid="sara-toolbar" className="w-full basis-full order-last flex items-stretch gap-2 overflow-x-auto lg:overflow-visible lg:flex-wrap no-scrollbar pb-1 -mx-1 px-1">
+          <section className="shrink-0 rounded-2xl bg-slate-50 border border-slate-200 px-2 pt-1.5 pb-1">
+            <p className="text-[10px] font-black text-[#C49E3A] mb-1 px-0.5">{isRtl ? 'المناهج' : 'Curricula'}</p>
+            <div className="flex items-start gap-1">
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 📚 SARA EXCLUSIVE CURRICULUMS (Circular with Glowing Badge) */}
             <div className="relative group/btn">
               <button
                 onClick={() => handleOpenCurriculum('all')}
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-amber-400 bg-gradient-to-tr from-amber-400 via-yellow-400 to-amber-300 hover:from-amber-300 hover:to-yellow-200 text-slate-950 flex items-center justify-center transition-all cursor-pointer shadow-md hover:scale-110 active:scale-95 shrink-0 ring-2 ring-amber-300/60 relative"
-                aria-label={isRtl ? 'مناهج سارة (قيد البناء)' : "Sara's Exclusive Curriculums"}
+                aria-label={isRtl ? 'مناهج سارة' : "Sara's Exclusive Curriculums"}
               >
                 <span className="text-base sm:text-lg animate-bounce">📚</span>
               </button>
               <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-amber-300 text-xs font-black shadow-xl border border-amber-400/40 flex items-center gap-1.5">
                 <span>📚</span>
-                <span>{isRtl ? 'مناهج سارة (قيد البناء) 🛠️' : "Sara's Curriculum (under construction) 🛠️"}</span>
+                <span>{isRtl ? 'مناهج سارة 📚' : "Sara's Curriculum 📚"}</span>
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-t border-l border-amber-400/40" />
               </div>
             </div>
-
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">المناهج</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* ✨ SMART WHITEBOARD */}
             <div className="relative group/btn">
               <button
@@ -3639,7 +3645,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">السبورة</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🎯 PLACEMENT TEST */}
             <div className="relative group/btn">
               <button
@@ -3659,27 +3667,32 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-
-            {/* 👩‍🏫 SARA 3D CHARACTER */}
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">تحديد المستوى</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 📄 PRINTABLE WORKSHEET */}
             <div className="relative group/btn">
               <button
-                onClick={() => setIsSara3DOpen(!isSara3DOpen)}
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
-                  isSara3DOpen
-                    ? 'bg-amber-100 text-amber-900 border-[#C49E3A] ring-2 ring-amber-300/40'
-                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
-                }`}
-                aria-label={isRtl ? 'سارة 3D' : 'Sara 3D'}
+                onClick={() => setIsWorksheetModalOpen(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-900 border-blue-300"
+                aria-label={isRtl ? 'ورقة عمل' : 'Worksheet'}
               >
-                <span className="text-base">👩‍🏫</span>
+                <FileText size={16} className="text-blue-600" />
               </button>
               <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>👩‍🏫</span>
-                <span>{isRtl ? (isSara3DOpen ? 'سارة 3D نشطة (اضغط للإخفاء) ✨' : 'عرض سارة 3D 👩‍🏫') : 'Toggle 3D Sara'}</span>
+                <span>📄</span>
+                <span>{isRtl ? 'توليد ورقة عمل قابلة للطباعة PDF 📄' : 'Printable Worksheet & PDF 📄'}</span>
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">ورقة عمل</span>
+            </div>
+            </div>
+          </section>
+          <section className="shrink-0 rounded-2xl bg-slate-50 border border-slate-200 px-2 pt-1.5 pb-1">
+            <p className="text-[10px] font-black text-[#C49E3A] mb-1 px-0.5">{isRtl ? 'التدريب' : 'Practice'}</p>
+            <div className="flex items-start gap-1">
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🎙️ LIVE VOICE MODE */}
             <div className="relative group/btn">
               <button
@@ -3699,7 +3712,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">محادثة لايف</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 📞 LIVE PHONE CALL */}
             <div className="relative group/btn">
               <button
@@ -3715,7 +3730,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">اتصال</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🎙️ PHONETIC LAB */}
             <div className="relative group/btn">
               <button
@@ -3734,7 +3751,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">مختبر النطق</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🗣️ VOICE COACH */}
             <div className="relative group/btn">
               <button
@@ -3750,7 +3769,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">مدرب الصوت</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🎮 12Y ROLE-PLAY ADVENTURES */}
             <div className="relative group/btn">
               <button
@@ -3770,7 +3791,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">لعب الأدوار</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* ⚡ SPEED DRILLS */}
             <div className="relative group/btn">
               <button
@@ -3786,7 +3809,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">تحدي السرعة</span>
+            </div>
+            </div>
+          </section>
+          <section className="shrink-0 rounded-2xl bg-slate-50 border border-slate-200 px-2 pt-1.5 pb-1">
+            <p className="text-[10px] font-black text-[#C49E3A] mb-1 px-0.5">{isRtl ? 'التقدّم' : 'Progress'}</p>
+            <div className="flex items-start gap-1">
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🧠 SMART ADAPTIVE MEMORY */}
             <div className="relative group/btn">
               <button
@@ -3807,7 +3837,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">الذاكرة</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🏆 ACHIEVEMENTS & QUESTS */}
             <div className="relative group/btn">
               <button
@@ -3823,23 +3855,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-
-            {/* 📄 PRINTABLE WORKSHEET */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => setIsWorksheetModalOpen(true)}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-900 border-blue-300"
-                aria-label={isRtl ? 'ورقة عمل' : 'Worksheet'}
-              >
-                <FileText size={16} className="text-blue-600" />
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>📄</span>
-                <span>{isRtl ? 'توليد ورقة عمل قابلة للطباعة PDF 📄' : 'Printable Worksheet & PDF 📄'}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">الإنجازات</span>
             </div>
-
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 📊 PARENT INSIGHTS */}
             <div className="relative group/btn">
               <button
@@ -3855,7 +3873,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">تقرير ولي الأمر</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 📓 ERROR NOTEBOOK */}
             <div className="relative group/btn">
               <button
@@ -3876,7 +3896,51 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">دفتر الأخطاء</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 🔥 STREAK */}
+            <div className="relative group/btn">
+              <div className="h-9 sm:h-10 px-2.5 rounded-full border-2 border-orange-200 bg-orange-50 text-[#ff9600] font-black text-xs flex items-center justify-center gap-1 shadow-xs cursor-default">
+                <Flame size={15} className="animate-bounce-slow text-orange-500" />
+                <span>{streak.current}</span>
+              </div>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🔥</span>
+                <span>{isRtl ? `سلسلة الأيام المستمرة (${streak.current} يوم) 🔥` : `Daily Streak (${streak.current} days) 🔥`}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">السلسلة</span>
+            </div>
+            </div>
+          </section>
+          <section className="shrink-0 rounded-2xl bg-slate-50 border border-slate-200 px-2 pt-1.5 pb-1">
+            <p className="text-[10px] font-black text-[#C49E3A] mb-1 px-0.5">{isRtl ? 'الأدوات' : 'Tools'}</p>
+            <div className="flex items-start gap-1">
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 👩‍🏫 SARA 3D CHARACTER */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsSara3DOpen(!isSara3DOpen)}
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
+                  isSara3DOpen
+                    ? 'bg-amber-100 text-amber-900 border-[#C49E3A] ring-2 ring-amber-300/40'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                }`}
+                aria-label={isRtl ? 'سارة 3D' : 'Sara 3D'}
+              >
+                <span className="text-base">👩‍🏫</span>
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>👩‍🏫</span>
+                <span>{isRtl ? (isSara3DOpen ? 'سارة 3D نشطة (اضغط للإخفاء) ✨' : 'عرض سارة 3D 👩‍🏫') : 'Toggle 3D Sara'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">سارة 3D</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* ⚡ SPEECH SPEED */}
             <div className="relative group/btn">
               <button
@@ -3895,7 +3959,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">سرعة الصوت</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* ⏱️ LESSON DURATION TIMER */}
             <div className="relative group/btn" ref={timerDropdownRef}>
               <button
@@ -4005,7 +4071,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 </div>
               )}
             </div>
-
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">المؤقت</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 📦 ARCHIVE CURRENT SESSION */}
             <div className="relative group/btn">
               <button
@@ -4021,7 +4089,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">أرشفة</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🗂️ SESSIONS ARCHIVE */}
             <div className="relative group/btn">
               <button
@@ -4040,7 +4110,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">الأرشيف</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🌐 BILINGUAL SWITCHER */}
             <div className="relative group/btn">
               <button
@@ -4056,20 +4128,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-
-            {/* 🔥 STREAK */}
-            <div className="relative group/btn">
-              <div className="h-9 sm:h-10 px-2.5 rounded-full border-2 border-orange-200 bg-orange-50 text-[#ff9600] font-black text-xs flex items-center justify-center gap-1 shadow-xs cursor-default">
-                <Flame size={15} className="animate-bounce-slow text-orange-500" />
-                <span>{streak.current}</span>
-              </div>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>🔥</span>
-                <span>{isRtl ? `سلسلة الأيام المستمرة (${streak.current} يوم) 🔥` : `Daily Streak (${streak.current} days) 🔥`}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">اللغة</span>
             </div>
-
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🔊 VOICE TOGGLE */}
             <div className="relative group/btn">
               <button
@@ -4092,7 +4153,11 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-          </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">الصوت</span>
+            </div>
+            </div>
+          </section>
+          </nav>
         </div>
 
         {/* Mobile Redesigned 5-Segment Tab Bar (md:hidden) */}
@@ -4207,9 +4272,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             <div>
               <h3 className="text-xs sm:text-sm font-black text-[#002147] flex items-center gap-1.5 flex-wrap">
                 <span>{isRtl ? 'مناهج سارة التخصصية المستقلة' : "Sara's Independent Curriculums"}</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black shadow-2xs">
-                  {isRtl ? 'المنهج قيد البناء 🛠️' : 'Under construction 🛠️'}
-                </span>
               </h3>
               <p className="text-[10px] sm:text-[11px] text-slate-600 font-semibold hidden sm:block">
                 {isRtl ? 'اختر أي مسار تخصصي لتبدأ سارة بشرحه بالصوت والكتابة على السبورة الذكية 👩‍🏫' : 'Choose a track for Sara to teach on the smart whiteboard with voice 👩‍🏫'}
@@ -4217,7 +4279,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar w-full sm:w-auto justify-start sm:justify-end pb-0.5">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full justify-start">
             {/* 1. Grammar */}
             <button
               onClick={() => handleOpenCurriculum('grammar')}
@@ -5509,7 +5571,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             {/* The 4 Core Fluency Tracks Cards */}
             <div className="space-y-2.5">
               <h3 className="text-xs font-black text-[#002147] flex items-center justify-between px-1">
-                <span>{isRtl ? 'مناهج سارة (قيد البناء)' : 'Curriculum (under construction)'}</span>
+                <span>{isRtl ? 'مناهج سارة' : 'Curriculum (under construction)'}</span>
                 <span className="text-[10px] text-slate-500 font-bold">{isRtl ? 'دروس تفاعلية بالصوت والسبورة' : 'Interactive lessons'}</span>
               </h3>
 
@@ -6874,7 +6936,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           </div>
 
           {/* Quick Suggestion & Interactive Tools Toolbar (Circular Neat Dock with Hover Tooltips) */}
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 text-[11px] font-bold text-slate-600 no-scrollbar items-center">
+          <div className="hidden lg:flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 text-[11px] font-bold text-slate-600 no-scrollbar items-center">
             <span className="text-slate-400 shrink-0 text-[10px] hidden sm:inline">{isRtl ? 'أدوات سارة السريعة:' : 'Quick Tools:'}</span>
 
             {/* 1. 📚 SARA'S CURRICULUMS (Circular with Tooltip) */}
@@ -6882,13 +6944,13 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               <button
                 onClick={() => handleOpenCurriculum('all')}
                 className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-amber-400 bg-gradient-to-tr from-amber-400 via-yellow-400 to-amber-300 hover:from-amber-300 hover:to-yellow-200 text-slate-950 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110 active:scale-95 shrink-0 ring-1 ring-amber-300/60 relative"
-                aria-label={isRtl ? 'مناهج سارة (قيد البناء)' : "Sara's Curriculums"}
+                aria-label={isRtl ? 'مناهج سارة' : "Sara's Curriculums"}
               >
                 <span className="text-sm sm:text-base">📚</span>
               </button>
               <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/toolchip:opacity-100 translate-y-1 group-hover/toolchip:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-amber-300 text-xs font-black shadow-xl border border-amber-400/40 flex items-center gap-1.5">
                 <span>📚</span>
-                <span>{isRtl ? 'مناهج سارة (قيد البناء) 🛠️' : "Sara's Curriculum (under construction) 🛠️"}</span>
+                <span>{isRtl ? 'مناهج سارة 📚' : "Sara's Curriculum 📚"}</span>
                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-b border-r border-amber-400/40" />
               </div>
             </div>
@@ -7567,7 +7629,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                           </span>
                         </div>
                         <div className="text-[10px] text-slate-600 font-medium">
-                          {isRtl ? 'المنهج قيد البناء' : 'Under construction'}
+                          {isRtl ? '5 مسارات: الأساسيات، القواعد، المحادثة، القراءة، الكتابة' : '5 tracks ready'}
                         </div>
                       </div>
                     </div>
