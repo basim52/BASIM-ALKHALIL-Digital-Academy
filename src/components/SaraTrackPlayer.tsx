@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { X, ArrowRight, Lock, Volume2, Square, CheckCircle2 } from 'lucide-react';
 import type { SaraTrack, SaraTrackLesson, SaraChoiceQuestion } from '../data/saraTracks/foundations';
-import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
+import { prefetchAcademyAudio, cancelAllSpeech } from '../lib/audio';
 import { boardLinesToSpeech } from '../utils/boardToSpeech';
 
 interface Props {
@@ -9,6 +9,50 @@ interface Props {
   onClose: () => void;
   track: SaraTrack;
   uid?: string;
+}
+
+// ---- Sara narrator: same cloud voice as her chat (Gemini 'Kore' via /api/tts), one primed <audio> element.
+// The element is "unlocked" inside the user's tap, so mobile browsers allow the later playback.
+const SILENT_WAV = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+let narratorEl: HTMLAudioElement | null = null;
+let narratorToken = 0;
+function getNarrator(): HTMLAudioElement {
+  if (!narratorEl) { narratorEl = new Audio(); narratorEl.preload = 'auto'; }
+  return narratorEl;
+}
+/** Call synchronously inside a click/tap handler. */
+function unlockNarrator() {
+  const el = getNarrator();
+  try { el.src = SILENT_WAV; const p = el.play(); if (p) p.catch(() => {}); } catch { /* ignore */ }
+}
+function stopNarrator() {
+  narratorToken++;
+  if (narratorEl) { try { narratorEl.pause(); narratorEl.removeAttribute('src'); narratorEl.load(); } catch { /* ignore */ } }
+}
+type Seg = { text: string; lang: 'ar' | 'en' };
+const langOf = (t: string): 'ar' | 'en' => (/[\u0600-\u06FF]/.test(t) ? 'ar' : 'en');
+async function narrate(segs: Seg[], onSeg: (i: number) => void, onBlocked: () => void, onDone: () => void) {
+  const token = ++narratorToken;
+  cancelAllSpeech(); // nothing else speaks at the same time
+  const audios = segs.map(sg => prefetchAcademyAudio(sg.text, sg.lang, 'Kore'));
+  for (let i = 0; i < segs.length; i++) {
+    const b64 = await audios[i];
+    if (token !== narratorToken) return;
+    if (!b64) continue;
+    onSeg(i);
+    const el = getNarrator();
+    const url = URL.createObjectURL(new Blob([Uint8Array.from(atob(b64), c => c.charCodeAt(0))], { type: 'audio/wav' }));
+    el.src = url;
+    const ok = await new Promise<boolean>(resolve => {
+      el.onended = () => resolve(true);
+      el.onerror = () => resolve(true);
+      el.play().catch(err => { resolve(err?.name === 'NotAllowedError' ? false : true); });
+    });
+    URL.revokeObjectURL(url);
+    if (token !== narratorToken) return;
+    if (!ok) { onBlocked(); return; }
+  }
+  if (token === narratorToken) onDone();
 }
 
 const progressKey = (trackId: string, uid?: string) => `sara_track_${trackId}_${uid || 'guest'}`;
@@ -30,7 +74,7 @@ const Choice: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (
         const state = picked === null ? '' : i === q.correctIndex && picked === i ? 'bg-emerald-100 border-emerald-500' : picked === i ? 'bg-rose-100 border-rose-400' : 'opacity-70';
         return (
           <button key={i} disabled={locked} onClick={() => onPick(i)} dir="auto"
-            className={`w-full text-start px-3 py-1.5 rounded-xl border-2 border-slate-200 bg-white text-[13px] font-bold active:scale-[0.99] ${state}`}>{o}</button>
+            className={`w-full text-start px-3 py-1 rounded-xl border-2 border-slate-200 bg-white text-[13px] font-bold active:scale-[0.99] ${state}`}>{o}</button>
         );
       })}
     </div>
@@ -47,26 +91,41 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid }
   const [exPick, setExPick] = useState<number | null>(null);
   const [exScore, setExScore] = useState(0);
   const [speaking, setSpeaking] = useState(false);
+  const [activeSeg, setActiveSeg] = useState(-1);
+  const [blocked, setBlocked] = useState(false);
 
   useEffect(() => { setUnlocked(readUnlocked(track.id, uid)); }, [track.id, uid]);
-  const stop = () => { cancelAllSpeech(); setSpeaking(false); };
-  useEffect(() => () => cancelAllSpeech(), []);
+  const stop = () => { stopNarrator(); setSpeaking(false); setActiveSeg(-1); };
+  useEffect(() => () => stopNarrator(), []);
   useEffect(() => { if (!isOpen) stop(); }, [isOpen]);
 
   const lesson = useMemo(() => track.lessons.find(l => l.id === lessonId) || null, [lessonId, track]);
 
+  /** Narrate the page lines: segments = the exact on-screen lines (title, explanation, each example line). */
+  const startNarration = (l: SaraTrackLesson, alt: boolean) => {
+    if (!l.content) return;
+    stop();
+    const segs: Seg[] = lessonPageLines(l, alt).map(line => {
+      const text = boardLinesToSpeech([line]);
+      return { text, lang: langOf(line) };
+    });
+    setBlocked(false);
+    setSpeaking(true);
+    narrate(segs, setActiveSeg, () => { setSpeaking(false); setActiveSeg(-1); setBlocked(true); }, () => { setSpeaking(false); setActiveSeg(-1); });
+  };
   const openLesson = (l: SaraTrackLesson) => {
+    unlockNarrator(); // inside the tap
     stop(); setLessonId(l.id); setUseAlt(false); setCheckPick(null); setMode('learn'); setExIdx(0); setExPick(null); setExScore(0);
+    startNarration(l, false);
   };
   const speak = () => {
     if (!lesson?.content) return;
-    stop();
-    const text = boardLinesToSpeech(lessonPageLines(lesson, useAlt));
-    setSpeaking(true);
-    speakAcademyText(text, 'ar', undefined, () => setSpeaking(false));
+    unlockNarrator();
+    startNarration(lesson, useAlt);
   };
   const answerCheck = (i: number) => {
     if (!lesson?.content) return;
+    unlockNarrator();
     stop();
     setCheckPick(i);
     if (i === lesson.content.check.correctIndex) {
@@ -77,6 +136,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid }
       }
     } else {
       setUseAlt(true); // re-explain from another angle on the same page
+      startNarration(lesson, true);
       setTimeout(() => setCheckPick(null), 900);
     }
   };
@@ -126,15 +186,22 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid }
 
         {/* One-page lesson (no scrolling) */}
         {lesson?.content && mode === 'learn' && (
-          <div className="flex-1 min-h-0 flex flex-col gap-2 p-3 overflow-hidden">
-            <div className={`rounded-2xl p-3 border-2 ${useAlt ? 'bg-sky-50 border-sky-300' : 'bg-white border-amber-200'}`}>
+          <div className="flex-1 min-h-0 flex flex-col gap-1.5 p-2.5 overflow-hidden">
+            <div className="flex items-center gap-2">
+              <div className={`w-8 h-8 rounded-full bg-[#002147] text-amber-300 border-2 border-amber-400 flex items-center justify-center font-black shrink-0 ${speaking ? 'animate-pulse ring-4 ring-amber-300/60' : ''}`}>س</div>
+              <p className={`flex-1 text-[13px] font-black ${activeSeg === 0 ? 'text-amber-700' : 'text-slate-700'}`}>{speaking ? 'سارة تشرح الحين… 🎙️' : `معلمتك سارة — ${lesson.titleAr}`}</p>
+              {blocked && (
+                <button onClick={speak} className="px-3 py-1.5 rounded-xl bg-amber-400 text-slate-950 text-[12px] font-black animate-bounce">▶️ ابدأي يا سارة</button>
+              )}
+            </div>
+            <div className={`rounded-2xl p-2.5 border-2 transition-all ${activeSeg === 1 ? 'ring-4 ring-amber-300/70' : ''} ${useAlt ? 'bg-sky-50 border-sky-300' : 'bg-white border-amber-200'}`}>
               {useAlt && <p className="text-[11px] font-black text-sky-700 mb-1">سارة تشرحها لك بطريقة ثانية 👇</p>}
-              <p className="text-[13.5px] leading-relaxed font-semibold text-slate-800">{useAlt ? lesson.content.altExplanationAr : lesson.content.explanationAr}</p>
+              <p className="text-[13px] leading-relaxed font-semibold text-slate-800">{useAlt ? lesson.content.altExplanationAr : lesson.content.explanationAr}</p>
             </div>
             <div className="rounded-2xl p-2.5 bg-[#002147] text-white space-y-1">
               <p className="text-[10px] font-black text-amber-300">مثال حي</p>
               {lesson.content.example.map((e, i) => (
-                <p key={i} className="text-[13px] leading-snug"><span dir="ltr" className="block font-bold text-start" style={{ direction: 'ltr' }}>{e.en}</span><span className="block text-[11px] text-amber-100/80">{e.ar}</span></p>
+                <p key={i} className={`text-[13px] leading-snug rounded-lg px-1 ${activeSeg === i + 2 ? 'bg-amber-400/30' : ''}`}><span dir="ltr" className="block font-bold text-start" style={{ direction: 'ltr' }}>{e.en}</span><span className="block text-[11px] text-amber-100/80">{e.ar}</span></p>
               ))}
             </div>
             <div className="rounded-2xl p-2.5 bg-amber-50 border-2 border-amber-300">
