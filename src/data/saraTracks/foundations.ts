@@ -1,3 +1,5 @@
+import { FOUNDATIONS_4_TO_30 } from './foundations4to30';
+
 /** Sara track: English foundations for Arabic-speaking beginners. One lesson = one page. */
 export interface SaraChoiceQuestion {
   promptAr: string;
@@ -111,32 +113,6 @@ export const FOUNDATIONS_TRACK: SaraTrack = {
         ]
       }
     },
-    t(4, 'الضمائر الشخصية', 'Subject Pronouns (I, you, he, she...)'),
-    t(5, 'فعل الكينونة: am / is / are', 'The Verb To Be'),
-    t(6, 'النفي والسؤال مع to be', 'To Be: Negatives & Questions'),
-    t(7, 'أداة النكرة a و an', 'Articles: a / an'),
-    t(8, 'الجمع في الإنجليزي', 'Plural Nouns'),
-    t(9, 'هذا وذاك: this / that / these / those', 'This, That, These, Those'),
-    t(10, 'الألوان والعائلة', 'Colors & Family'),
-    t(11, 'الملكية: have / has', 'Have & Has'),
-    t(12, 'صفات الملكية: my / your / his / her', 'Possessive Adjectives'),
-    t(13, 'المضارع البسيط: الإثبات', 'Present Simple: Affirmative'),
-    t(14, 'المضارع البسيط: النفي', 'Present Simple: Negative'),
-    t(15, 'المضارع البسيط: السؤال', 'Present Simple: Questions'),
-    t(16, 'الأيام والساعة', 'Days & Telling the Time'),
-    t(17, 'يوجد: there is / there are', 'There Is / There Are'),
-    t(18, 'حروف المكان: in / on / under', 'Prepositions of Place'),
-    t(19, 'القدرة: can و can\'t', 'Can / Can\'t'),
-    t(20, 'الأوامر والطلبات', 'Imperatives'),
-    t(21, 'المضارع المستمر', 'Present Continuous'),
-    t(22, 'الماضي من to be: was / were', 'Past of To Be'),
-    t(23, 'الماضي البسيط: الأفعال المنتظمة', 'Past Simple: Regular Verbs'),
-    t(24, 'الماضي البسيط: الأفعال الشاذة', 'Past Simple: Irregular Verbs'),
-    t(25, 'أدوات السؤال: what / where / when / who', 'Question Words'),
-    t(26, 'المستقبل مع going to', 'Future with Going To'),
-    t(27, 'أحب وما أحب: like / don\'t like', 'Likes & Dislikes'),
-    t(28, 'الصفات والمقارنة', 'Adjectives & Comparatives'),
-    t(29, 'طلب الأكل والسؤال عن الاتجاهات', 'Ordering Food & Asking for Directions'),
-    t(30, 'مراجعة شاملة', 'Final Review')
+    ...FOUNDATIONS_4_TO_30
   ]
 };
