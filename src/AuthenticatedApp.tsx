@@ -5053,12 +5053,15 @@ const LessonPlayer = ({ lang, lesson, onBack, onComplete, category, level }: { l
 export interface AuthenticatedAppProps {
   currentUser: User;
   initialLang?: Language;
+  /** Starting view chosen on the entry chooser (e.g. 'sara-tutor'). */
+  initialView?: AppView;
   onSignOut?: () => void;
 }
 
 export default function AuthenticatedApp({ 
   currentUser: propUser,
   initialLang = 'ar',
+  initialView,
   onSignOut
 }: AuthenticatedAppProps) {
   const [currentUser, setCurrentUser] = useState<User>(propUser);
@@ -5070,7 +5073,7 @@ export default function AuthenticatedApp({
       setCurrentUser(propUser);
     }
   }, [propUser]);
-  const [view, setView] = useState<AppView>('dashboard');
+  const [view, setView] = useState<AppView>(initialView || 'dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isTabletSidebarExpanded, setIsTabletSidebarExpanded] = useState<boolean>(false);

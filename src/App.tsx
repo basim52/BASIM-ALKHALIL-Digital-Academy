@@ -29,6 +29,7 @@ import { auth, googleProvider } from './lib/firebase';
 import { translations, Language } from './lib/translations';
 import { UserRole } from './types';
 import { AcademyIntroSplash } from './components/AcademyIntroSplash';
+import { EntryChooser } from './components/EntryChooser';
 import { LandingPage } from './components/LandingPage';
 
 // Code splitting: Load the heavy authenticated app only after sign-in
@@ -379,6 +380,10 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  const [entryChoice, setEntryChoice] = useState<'sara' | 'academy' | null>(() => {
+    try { const v = sessionStorage.getItem('academy_entry_choice'); return v === 'sara' || v === 'academy' ? v : null; } catch { return null; }
+  });
+
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -419,6 +424,11 @@ export default function App() {
     );
   }
 
+  // After the intro + login: let the user pick Sara or the academy (once per session).
+  if (!entryChoice) {
+    return <EntryChooser onChoose={c => { try { sessionStorage.setItem('academy_entry_choice', c); } catch { /* ignore */ } setEntryChoice(c); }} />;
+  }
+
   return (
     <Suspense
       fallback={
@@ -431,7 +441,8 @@ export default function App() {
       <AuthenticatedApp 
         currentUser={currentUser} 
         initialLang={lang} 
-        onSignOut={handleSignOut} 
+        initialView={entryChoice === 'sara' ? 'sara-tutor' : undefined}
+        onSignOut={async () => { try { sessionStorage.removeItem('academy_entry_choice'); } catch { /* ignore */ } setEntryChoice(null); await handleSignOut(); }} 
       />
     </Suspense>
   );
