@@ -555,6 +555,32 @@ Looking forward to your reply. Tell me what we're tackling first!`;
     next();
   });
 
+  // 🔐 Every POST /api/* needs a Firebase ID token + per-user rate limit (protects the AI quota).
+  // GET routes stay public: CDN-cached lesson TTS, health/ping, video streaming.
+  const AI_LIMIT = Number(process.env.AI_RATE_LIMIT || 150); // requests per user per window
+  const AI_WINDOW_MS = 10 * 60 * 1000;
+  const rateBuckets = new Map<string, { n: number; reset: number }>();
+  app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (req.method !== "POST" || !req.path.startsWith("/api/")) return next();
+    const h = req.headers.authorization || "";
+    const idToken = h.startsWith("Bearer ") ? h.slice(7).trim() : "";
+    if (!idToken) return res.status(401).json({ error: "UNAUTHORIZED", message: "Sign in required" });
+    const adminAuth = getAdminAuth();
+    if (!adminAuth) return res.status(503).json({ error: "SERVICE_UNAVAILABLE", message: "Auth not configured" });
+    let uid = "";
+    try { uid = (await adminAuth.verifyIdToken(idToken)).uid; } catch { return res.status(401).json({ error: "UNAUTHORIZED", message: "Invalid or expired token" }); }
+    const now = Date.now();
+    const b = rateBuckets.get(uid);
+    if (!b || b.reset < now) rateBuckets.set(uid, { n: 1, reset: now + AI_WINDOW_MS });
+    else if (++b.n > AI_LIMIT) {
+      res.setHeader("Retry-After", String(Math.ceil((b.reset - now) / 1000)));
+      return res.status(429).json({ error: "RATE_LIMITED", rateLimited: true, message: "Too many requests, try again shortly" });
+    }
+    if (rateBuckets.size > 5000) { for (const [k, v] of rateBuckets) if (v.reset < now) rateBuckets.delete(k); }
+    (req as any).authUid = uid;
+    next();
+  });
+
   // Root test route
   app.get(["/ping", "/api/ping"], (req, res) => {
     res.json({ ok: true });

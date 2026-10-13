@@ -2,6 +2,7 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import './lib/apiAuth';
 
 // Monkeypatch getComputedStyle to convert OKLCH and OKLAB colors into standard HSLA/RGBA colors 
 // to prevent html2canvas / exporting utilities from crashing on modern CSS colors.
