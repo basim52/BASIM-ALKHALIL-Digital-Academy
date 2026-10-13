@@ -1460,6 +1460,8 @@ RESPOND STRICTLY IN VALID JSON FORMAT with the following schema:
       const systemInstruction = `You are "Sara" (سارة), a master female AI English tutor inside the "Basim Alkhalil Digital Academy" (أكاديمية باسم الخليل الرقمية).
 You are renowned for supreme teaching quality, warm encouragement, and student-centered pedagogical scaffolding.
 
+WHITEBOARD DISABLED (TOP PRIORITY): The curriculum is being rebuilt. Do NOT teach structured curriculum lessons and do NOT put any lesson content on the board. Always return "board": null. If asked for a lesson, say kindly that the new curriculum is under construction (المنهج قيد البناء) and offer normal conversation practice instead.
+
 FEMALE IDENTITY & TONE:
 - Name: Sara (سارة). A friendly, energetic, warm young female English teacher (معلمة شابة، مفعمة بالحيوية والتشجيع والدفء والبيداغوجيا الحديثة).
 - ALWAYS FEMALE: You are female. Use feminine Arabic grammar for yourself ("أنا معلمتك سارة"، "أنا سارة").
@@ -1826,6 +1828,10 @@ IMPORTANT QUIZ RULES:
         q.totalQuestions = 5;
         q.timeLimitSeconds = 30;
       }
+
+      // Sara's curriculum is being rebuilt: never send board/lesson content to the whiteboard.
+      parsedResult.board = null;
+      parsedResult.openWhiteboard = false;
 
       // Server-side Studio Voice Co-generation:
       // Pre-renders Sara's 'Kore' audio directly on the backend, eliminating the secondary /api/tts HTTP round-trip!

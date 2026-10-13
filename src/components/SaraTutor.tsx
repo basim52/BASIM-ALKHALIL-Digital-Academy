@@ -394,7 +394,29 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
-  const [activeBoard, setActiveBoard] = useState<SaraBoardData | null>(null);
+  // Sara's curriculum is being rebuilt: the board stays EMPTY. Every board write (chat replies,
+  // restored sessions, lesson launches) is blocked here at the single state setter.
+  const [activeBoard, _setActiveBoardRaw] = useState<SaraBoardData | null>(null);
+  const setActiveBoard = useCallback((_next?: unknown) => { _setActiveBoardRaw(null); }, []);
+  useEffect(() => {
+    // One-time purge of old cached boards (version-bumped key).
+    try {
+      if (localStorage.getItem('sara_board_cache_v') === '2') return;
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const k = localStorage.key(i);
+        if (!k || !k.startsWith('sara_')) continue;
+        const raw = localStorage.getItem(k);
+        if (!raw || !raw.includes('board')) continue;
+        try {
+          const strip = (v: any): any => Array.isArray(v) ? v.map(strip)
+            : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).filter(([key]) => key !== 'board' && key !== 'activeBoard').map(([key, val]) => [key, strip(val)]))
+            : v;
+          localStorage.setItem(k, JSON.stringify(strip(JSON.parse(raw))));
+        } catch { /* non-JSON value */ }
+      }
+      localStorage.setItem('sara_board_cache_v', '2');
+    } catch { /* storage unavailable */ }
+  }, []);
   const [isWhiteboardOpen, setIsWhiteboardOpen] = useState(false);
   const [currentWhiteboardPageIndex, setCurrentWhiteboardPageIndex] = useState<number>(0);
   
@@ -6085,7 +6107,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   </p>
 
                   {/* 📐 Smart Whiteboard Card inside Message Bubble */}
-                  {isSara && msg.board && (
+                  {false && isSara && msg.board && (
                     <div className="mt-3 p-3 rounded-2xl bg-gradient-to-r from-amber-50 to-amber-100/60 border border-amber-300 text-xs text-[#002147] shadow-2xs">
                       <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
                         <span className="font-black text-amber-950 flex items-center gap-1.5 text-xs sm:text-sm">
