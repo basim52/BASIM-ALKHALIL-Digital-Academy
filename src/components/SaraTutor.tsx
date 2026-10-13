@@ -558,10 +558,11 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [curriculumInitialPillar, setCurriculumInitialPillar] = useState<string>('all');
 
   const [isTrackOpen, setIsTrackOpen] = useState<boolean>(false);
+  const [trackFilter, setTrackFilter] = useState<'all' | 'grammar' | 'conversation'>('all');
   const handleOpenCurriculum = (pillar: string = 'all') => {
     setCurriculumInitialPillar(pillar);
-    // 📚 opens Sara's new foundations track; other entry points stay "under construction".
-    if (pillar === 'all') { setIsTrackOpen(true); return; }
+    // 📚/🌐 → all built tracks; 🧠 → foundations + advanced grammar; 💬 → conversation. Others stay "under construction".
+    if (pillar === 'all' || pillar === 'grammar' || pillar === 'conversation') { setTrackFilter(pillar); setIsTrackOpen(true); return; }
     setIsCurriculumModalOpen(true);
   };
 
@@ -8525,7 +8526,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         )}
       </AnimatePresence>
 
-      <SaraTracksHub isOpen={isTrackOpen} onClose={() => setIsTrackOpen(false)} uid={profile.uid}
+      <SaraTracksHub key={trackFilter} filter={trackFilter} isOpen={isTrackOpen} onClose={() => setIsTrackOpen(false)} uid={profile.uid}
         unlockAll={MASTER_ADMINS.includes(String((profile as any).email || auth.currentUser?.email || '').trim().toLowerCase()) || (profile as any).role === UserRole.PARENT || (profile as any).role === UserRole.ADMIN} />
 
       {/* 13. Sara Independent Fluency Curriculum Modal */}

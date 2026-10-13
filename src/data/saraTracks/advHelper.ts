@@ -10,9 +10,9 @@ const q = ([promptAr, opts, ci, promptEn]: Q, k = 0): SaraChoiceQuestion => {
 };
 
 /** Lesson factory for an advanced level; n is the 1-based position inside the level. */
-export const makeL = (levelId: string, startOrder: number) =>
+export const makeL = (levelId: string, startOrder: number, prefix = 'adv') =>
   (n: number, titleAr: string, titleEn: string, explanationAr: string, altExplanationAr: string,
     example: [string, string][], check: Q, exercises: Q[]): SaraTrackLesson => ({
-    id: `adv-${levelId}-${String(n).padStart(2, '0')}`, order: startOrder + n - 1, levelId, titleAr, titleEn,
+    id: `${prefix}-${levelId}-${String(n).padStart(2, '0')}`, order: startOrder + n - 1, levelId, titleAr, titleEn,
     content: { explanationAr, altExplanationAr, example: example.map(([en, ar]) => ({ en, ar })), check: q(check, n), exercises: exercises.map((e, i) => q(e, n + i + 1)) }
   });
