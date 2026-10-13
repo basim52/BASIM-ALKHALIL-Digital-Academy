@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { syncTrackProgress } from '../lib/saraProgressSync';
 import { X, Lock } from 'lucide-react';
 import { SaraTrackPlayer, readUnlocked } from './SaraTrackPlayer';
 import { FOUNDATIONS_TRACK } from '../data/saraTracks/foundations';
@@ -13,6 +14,15 @@ interface Props { isOpen: boolean; onClose: () => void; uid?: string; unlockAll?
 /** 📚 Track picker: foundations + advanced grammar (advanced opens after foundations lesson 1). */
 export const SaraTracksHub: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll, filter = 'all' }) => {
   const [active, setActive] = useState<SaraTrack | null>(null);
+  const [, setSyncTick] = useState(0);
+  // Pull cloud progress (other device / reinstall) when the hub opens; push anything newer from this device.
+  useEffect(() => {
+    if (!isOpen || !uid) return;
+    let alive = true;
+    syncTrackProgress(uid, [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK].map(t => t.id))
+      .then(changed => { if (alive && changed) setSyncTick(n => n + 1); });
+    return () => { alive = false; };
+  }, [isOpen, uid]);
   if (!isOpen) return null;
   const advancedOpen = !!unlockAll || readUnlocked(FOUNDATIONS_TRACK.id, uid) >= 2;
   // 💬, 📖 and ✍️ each have a single track: open it directly (its list shows the level sections) once unlocked.

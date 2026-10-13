@@ -63,15 +63,11 @@ import { getStudentStreak, recordStreakActivity, StreakData } from '../services/
 import { SmartWhiteboard } from './SmartWhiteboard';
 import { Sara3DCharacter } from './Sara3DCharacter';
 import { MASTER_CURRICULUM } from '../data/masterCurriculum';
-import { PhoneticAnalyzerModal } from './PhoneticAnalyzerModal';
-import { RolePlayModal, RolePlayScenario, ROLE_PLAY_SCENARIOS } from './RolePlayModal';
+import { RolePlayScenario, ROLE_PLAY_SCENARIOS } from './RolePlayModal';
 import { SaraPersonalNotebookModal } from './SaraPersonalNotebookModal';
 import { SaraAdaptiveMemoryModal } from './SaraAdaptiveMemoryModal';
-import { SaraVoiceCoachModal } from './SaraVoiceCoachModal';
-import { SaraSpeedDrillModal } from './SaraSpeedDrillModal';
 import { SaraParentInsightsModal } from './SaraParentInsightsModal';
 import { SaraAchievementsModal } from './SaraAchievementsModal';
-import { SaraWorksheetGeneratorModal } from './SaraWorksheetGeneratorModal';
 import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
 import { SaraCurriculumModal } from './SaraCurriculumModal';
 import { SaraTracksHub } from './SaraTracksHub';
@@ -79,8 +75,6 @@ import { SaraTools, type SaraToolId } from './SaraTools';
 import { MASTER_ADMINS, UserRole } from '../types';
 import { getScenarioEducationalContent } from '../data/saraScenarioCurriculumData';
 import { buildSaraLessonContext } from '../utils/saraLessonContext';
-import { SaraSmartPlanModal } from './SaraSmartPlanModal';
-import { StudyPlanner } from './Academic/StudyPlanner';
 import { CurriculumLesson, getAllCurriculumLessons } from '../utils/academicCurriculumCatalogue';
 
 interface MessageItem {
@@ -8218,29 +8212,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         )}
       </AnimatePresence>
 
-      {/* 8. Phonetic Voice Analyzer & Pronunciation Lab Modal */}
-      <PhoneticAnalyzerModal
-        isOpen={isPhoneticModalOpen}
-        onClose={() => setIsPhoneticModalOpen(false)}
-        targetSentence={phoneticTargetSentence || activeBoard?.sentence || 'Welcome to Basim Alkhalil Academy'}
-        isRtl={isRtl}
-        onSuccessXP={(xp) => {
-          setStreak(prev => ({
-            ...prev,
-            totalXP: (prev as any).totalXP ? (prev as any).totalXP + xp : xp
-          }));
-        }}
-      />
 
-      {/* 9. Role-Play Scenarios Hub Modal */}
-      <RolePlayModal
-        isOpen={isRolePlayModalOpen}
-        onClose={() => setIsRolePlayModalOpen(false)}
-        onStartScenario={handleStartRolePlayScenario}
-        isRtl={isRtl}
-        initialScenarioId={rolePlayInitialId}
-        initialTab={rolePlayInitialTab}
-      />
 
       {/* 10. Personal Error Notebook, Vocab Bank & Parent Progress Card Modal */}
       <SaraPersonalNotebookModal
@@ -8282,40 +8254,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         }}
       />
 
-      {/* 11B. Sara AI Voice Coach & Pronunciation Diagnostics Modal */}
-      <SaraVoiceCoachModal
-        isOpen={isVoiceCoachModalOpen}
-        onClose={() => setIsVoiceCoachModalOpen(false)}
-        targetSentence={activeBoard?.sentence || 'I am ready to speak English with confidence.'}
-        isRtl={isRtl}
-        studentLevel={(profile as any).level || tutorMemory.level || 'A1'}
-        onSuccessXP={(xp) => {
-          setStreak(prev => ({
-            ...prev,
-            totalXP: (prev as any).totalXP ? (prev as any).totalXP + xp : xp
-          }));
-        }}
-        onSavePronunciationNote={(note) => {
-          syncMemoryToFirestore({ newNotes: [note] }, false, 'AI Voice Coaching');
-        }}
-      />
 
-      {/* 11C. Sara Speed Drills & Micro-Challenges Modal */}
-      <SaraSpeedDrillModal
-        isOpen={isSpeedDrillModalOpen}
-        onClose={() => setIsSpeedDrillModalOpen(false)}
-        isRtl={isRtl}
-        studentLevel={(profile as any).level || tutorMemory.level || 'A1'}
-        onSuccessXP={(xp) => {
-          setStreak(prev => ({
-            ...prev,
-            totalXP: (prev as any).totalXP ? (prev as any).totalXP + xp : xp
-          }));
-        }}
-        onRecordDrillResult={(summary) => {
-          syncMemoryToFirestore({ newNotes: [summary] }, false, 'Speed Drills Challenge');
-        }}
-      />
 
       {/* 11D. Sara Parent & Mentor Insights Hub Modal */}
       <SaraParentInsightsModal
@@ -8347,18 +8286,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         }}
       />
 
-      {/* 11F. Sara Smart Printable Worksheet Generator & PDF Studio (#6) */}
-      <SaraWorksheetGeneratorModal
-        isOpen={isWorksheetModalOpen}
-        onClose={() => setIsWorksheetModalOpen(false)}
-        studentName={profile.displayName || ''}
-        studentLevel={(profile as any).level || tutorMemory.level || 'A1'}
-        currentLessonTopic={activeBoard?.title || activeBoard?.sentence || activeCurriculumLesson?.titleEn || 'Grammar & Spoken English'}
-        isRtl={isRtl}
-        onSendToSara={(prompt) => {
-          handleSendMessage(prompt);
-        }}
-      />
 
       {/* 11G. Sara Live Interactive Hands-Free Phone Call Modal (#7) */}
       <SaraLivePhoneCallModal
@@ -8606,79 +8533,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         isRtl={isRtl}
       />
 
-      {/* 14. Sara Smart Plan Generator Modal */}
-      <SaraSmartPlanModal
-        isOpen={isSmartPlanGeneratorOpen}
-        onClose={() => setIsSmartPlanGeneratorOpen(false)}
-        userProfile={profile as any}
-        isRtl={isRtl}
-        onPlanGenerated={(plan) => {
-          setActiveStudyPlan(plan);
-          fetchActiveStudyPlan();
-          const msgText = isRtl
-            ? `رائع يا بطل! تم توليد خطتك الذكية بنجاح 🎉 مسار "${plan.trackTitleAr || 'الخطة الأكاديمية'}" يضم ${plan.planItems?.length || 0} درساً مقسمة بانتظام. درسك الأول جاهز لنبدأ فوراً على السبورة الذكية!`
-            : `Awesome champion! Your smart study plan has been generated 🎉 "${plan.trackTitleEn || 'Academic Plan'}" includes ${plan.planItems?.length || 0} lessons. Your first lesson is ready!`;
-          const saraMsg: MessageItem = {
-            id: `msg_sara_plan_gen_${Date.now()}`,
-            role: 'sara',
-            text: msgText,
-            timestamp: Date.now()
-          };
-          setMessages(prev => [...prev, saraMsg]);
-          if (voiceEnabled) {
-            playSaraVoice(msgText);
-          }
-        }}
-        onStartFirstLesson={(lesson) => {
-          handleSelectCurriculumLesson(lesson);
-        }}
-        onViewFullPlan={() => {
-          setIsStudyPlanModalOpen(true);
-        }}
-      />
 
-      {/* 15. Full Academic Study Planner Modal inside Sara */}
-      {isStudyPlanModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md overflow-y-auto p-2 sm:p-4 flex items-center justify-center">
-          <div className="w-full max-w-7xl max-h-[96vh] bg-slate-50 rounded-3xl overflow-hidden shadow-2xl flex flex-col border border-slate-200 my-auto">
-            <StudyPlanner
-              lang={activeLang as any}
-              userProfile={profile as any}
-              isSaraModal={true}
-              onBack={() => setIsStudyPlanModalOpen(false)}
-              onNavigateToLesson={(courseId, level, unitId) => {
-                setIsStudyPlanModalOpen(false);
-                const allCur = getAllCurriculumLessons();
-                const matched = allCur.find(l => 
-                  l.id === unitId || 
-                  (l.courseId === courseId && l.level === level)
-                );
-                if (matched) {
-                  handleSelectCurriculumLesson(matched);
-                } else if (onNavigateToLesson) {
-                  onNavigateToLesson(courseId, level, unitId);
-                } else {
-                  handleSelectCurriculumLesson({
-                    id: unitId,
-                    pillarId: courseId,
-                    courseId,
-                    courseLabelAr: courseId,
-                    courseLabelEn: courseId,
-                    titleAr: unitId,
-                    titleEn: unitId,
-                    level,
-                    duration: '25 min'
-                  });
-                }
-              }}
-              onStartWithSara={(curriculumLesson) => {
-                setIsStudyPlanModalOpen(false);
-                handleSelectCurriculumLesson(curriculumLesson);
-              }}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 };

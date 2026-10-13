@@ -4,6 +4,7 @@ import { auth } from '../lib/firebase';
 import type { SaraTrack, SaraTrackLesson, SaraChoiceQuestion } from '../data/saraTracks/foundations';
 import { prefetchAcademyAudio, cancelAllSpeech, createManagedAudio } from '../lib/audio';
 import { boardLinesToSpeech } from '../utils/boardToSpeech';
+import { pushTrackProgress } from '../lib/saraProgressSync';
 import { trackLevels, buildLevelTest, scoreLevelTest, saveLevelTestAttempt, LEVEL_TEST_PASS, type LevelTestQuestion, type LevelTestAttempt } from '../lib/saraLevelTests';
 
 interface Props {
@@ -231,6 +232,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
     if (next > unlockedRaw) {
       setUnlocked(next);
       try { localStorage.setItem(progressKey(track.id, uid), String(next)); } catch { /* ignore */ }
+      void pushTrackProgress(uid, track.id, next);
     }
   };
   const answerCheck = (i: number) => {

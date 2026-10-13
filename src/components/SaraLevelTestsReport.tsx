@@ -1,13 +1,21 @@
 import React, { useEffect, useState } from 'react';
+import { loadTrackProgress } from '../lib/saraProgressSync';
+import { FOUNDATIONS_TRACK } from '../data/saraTracks/foundations';
+import { ADVANCED_TRACK } from '../data/saraTracks/advanced';
+import { CONVERSATION_TRACK } from '../data/saraTracks/conversation';
+import { READING_TRACK } from '../data/saraTracks/reading';
+import { WRITING_TRACK } from '../data/saraTracks/writing';
 import { loadLevelTestAttempts, summarizeLevelTests, LEVEL_TEST_PASS, type LevelTestSummary } from '../lib/saraLevelTests';
 
 /** Sara end-of-level tests per track/level: latest + best score, pass/fail, weak lessons, date. Used in parent report + analytics. */
 export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolean }> = ({ studentId, isRtl = true }) => {
   const [rows, setRows] = useState<LevelTestSummary[] | null>(null);
+  const [prog, setProg] = useState<Record<string, number>>({});
   useEffect(() => {
     if (!studentId) { setRows([]); return; }
     let alive = true;
     loadLevelTestAttempts(studentId).then(list => { if (alive) setRows(summarizeLevelTests(list)); });
+    loadTrackProgress(studentId).then(p => { if (alive) setProg(p); });
     return () => { alive = false; };
   }, [studentId]);
   const fmt = (ms: number) => new Date(ms).toLocaleDateString(isRtl ? 'ar-SA' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -18,6 +26,20 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
         <h3 className="text-sm sm:text-base font-black text-[#002147] flex-1">{isRtl ? 'اختبارات نهاية المستوى مع سارة' : "Sara's end-of-level tests"}</h3>
         <span className="text-[10px] font-black text-slate-500">{isRtl ? `النجاح ${LEVEL_TEST_PASS}%` : `Pass ${LEVEL_TEST_PASS}%`}</span>
       </div>
+      {Object.keys(prog).length > 0 && (
+        <div data-testid="sara-track-progress" className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
+          {[FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK].map(t => {
+            const done = Math.min(t.lessons.length, Math.max(0, (Number(prog[t.id]) || 1) - 1));
+            return (
+              <div key={t.id} className="rounded-xl bg-slate-50 border border-slate-200 px-2 py-1.5">
+                <p className="text-[10px] font-black text-slate-600 truncate">{t.titleAr}</p>
+                <p className="text-[12px] font-black text-[#002147]">{done}/{t.lessons.length} {isRtl ? 'درس' : 'lessons'}</p>
+                <div className="h-1 rounded bg-slate-200 mt-0.5"><div className="h-full rounded bg-amber-400" style={{ width: `${(done / t.lessons.length) * 100}%` }} /></div>
+              </div>
+            );
+          })}
+        </div>
+      )}
       {rows === null && <p className="text-xs text-slate-400 font-bold">{isRtl ? 'جاري التحميل…' : 'Loading…'}</p>}
       {rows && rows.length === 0 && <p className="text-xs text-slate-500 font-bold">{isRtl ? 'ما فيه اختبارات مستوى بعد. تفتح بعد اجتياز الدرس الأخير من كل مستوى.' : 'No level tests yet.'}</p>}
       {rows && rows.length > 0 && (
