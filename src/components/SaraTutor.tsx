@@ -524,18 +524,29 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   }, [loading]);
 
   // Plan 1: Voice & Speech Intelligence States (Phonetics, Hesitation, Role-Play)
-  const [isPhoneticModalOpen, setIsPhoneticModalOpen] = useState<boolean>(false);
+  const openCurriculumUnderConstruction = () => { try { setIsCurriculumModalOpen(true); } catch { /* noop */ } };
+  const [isPhoneticModalOpen, _raw_setIsPhoneticModalOpen] = useState<boolean>(false);
+  // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
+  const setIsPhoneticModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsPhoneticModalOpen(false); if (v === true) openCurriculumUnderConstruction(); };
   const [phoneticTargetSentence, setPhoneticTargetSentence] = useState<string>('');
-  const [isRolePlayModalOpen, setIsRolePlayModalOpen] = useState<boolean>(false);
+  const [isRolePlayModalOpen, _raw_setIsRolePlayModalOpen] = useState<boolean>(false);
+  // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
+  const setIsRolePlayModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsRolePlayModalOpen(false); if (v === true) openCurriculumUnderConstruction(); };
   const [rolePlayInitialTab, setRolePlayInitialTab] = useState<'lesson' | 'exercises' | 'quiz' | 'simulate'>('lesson');
   const [rolePlayInitialId, setRolePlayInitialId] = useState<string | undefined>(undefined);
   const [isNotebookModalOpen, setIsNotebookModalOpen] = useState<boolean>(false);
   const [isAdaptiveMemoryModalOpen, setIsAdaptiveMemoryModalOpen] = useState<boolean>(false);
-  const [isVoiceCoachModalOpen, setIsVoiceCoachModalOpen] = useState<boolean>(false);
-  const [isSpeedDrillModalOpen, setIsSpeedDrillModalOpen] = useState<boolean>(false);
+  const [isVoiceCoachModalOpen, _raw_setIsVoiceCoachModalOpen] = useState<boolean>(false);
+  // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
+  const setIsVoiceCoachModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsVoiceCoachModalOpen(false); if (v === true) openCurriculumUnderConstruction(); };
+  const [isSpeedDrillModalOpen, _raw_setIsSpeedDrillModalOpen] = useState<boolean>(false);
+  // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
+  const setIsSpeedDrillModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsSpeedDrillModalOpen(false); if (v === true) openCurriculumUnderConstruction(); };
   const [isParentInsightsModalOpen, setIsParentInsightsModalOpen] = useState<boolean>(false);
   const [isAchievementsModalOpen, setIsAchievementsModalOpen] = useState<boolean>(false);
-  const [isWorksheetModalOpen, setIsWorksheetModalOpen] = useState<boolean>(false);
+  const [isWorksheetModalOpen, _raw_setIsWorksheetModalOpen] = useState<boolean>(false);
+  // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
+  const setIsWorksheetModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsWorksheetModalOpen(false); if (v === true) openCurriculumUnderConstruction(); };
   const [isPhoneCallModalOpen, setIsPhoneCallModalOpen] = useState<boolean>(false);
   const [isContinuityBannerDismissed, setIsContinuityBannerDismissed] = useState<boolean>(false);
 
@@ -550,11 +561,15 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   };
 
   // 🗓️ Smart Academic Study Plan States (Identical to Academy)
-  const [isStudyPlanModalOpen, setIsStudyPlanModalOpen] = useState<boolean>(false);
+  const [isStudyPlanModalOpen, _raw_setIsStudyPlanModalOpen] = useState<boolean>(false);
+  // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
+  const setIsStudyPlanModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsStudyPlanModalOpen(false); if (v === true) openCurriculumUnderConstruction(); };
   const [activeStudyPlan, setActiveStudyPlan] = useState<StudyPlan | null>(null);
   const [isLoadingStudyPlan, setIsLoadingStudyPlan] = useState<boolean>(false);
   const [isStudyPlanBannerDismissed, setIsStudyPlanBannerDismissed] = useState<boolean>(false);
-  const [isSmartPlanGeneratorOpen, setIsSmartPlanGeneratorOpen] = useState<boolean>(false);
+  const [isSmartPlanGeneratorOpen, _raw_setIsSmartPlanGeneratorOpen] = useState<boolean>(false);
+  // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
+  const setIsSmartPlanGeneratorOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsSmartPlanGeneratorOpen(false); if (v === true) openCurriculumUnderConstruction(); };
   const [activeRolePlay, setActiveRolePlay] = useState<RolePlayScenario | null>(null);
   const [completedMissions, setCompletedMissions] = useState<number[]>([]);
   const [showHesitationEncouragement, setShowHesitationEncouragement] = useState<boolean>(false);
@@ -2341,6 +2356,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   // ==========================================
 
   const startPlacementTest = () => {
+    openCurriculumUnderConstruction();
+    if (Date.now() > 0) return;
     cancelAllSpeech();
     setPlacementState({
       isActive: true,
@@ -3494,7 +3511,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             <button
               onClick={() => handleOpenCurriculum('all')}
               className="w-8 h-8 rounded-full border-2 border-amber-400 bg-gradient-to-tr from-amber-300 to-yellow-300 text-slate-950 flex items-center justify-center shadow-xs active:scale-90 transition-all cursor-pointer"
-              title={isRtl ? 'مناهج سارة (4 مسارات) 📚' : "Sara's Curriculums 📚"}
+              title={isRtl ? 'مناهج سارة (قيد البناء) 🛠️' : "Sara's Curriculums 📚"}
               aria-label={isRtl ? 'مناهج سارة' : "Sara's Curriculums"}
             >
               <span className="text-xs">📚</span>
@@ -3577,16 +3594,13 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               <button
                 onClick={() => handleOpenCurriculum('all')}
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-amber-400 bg-gradient-to-tr from-amber-400 via-yellow-400 to-amber-300 hover:from-amber-300 hover:to-yellow-200 text-slate-950 flex items-center justify-center transition-all cursor-pointer shadow-md hover:scale-110 active:scale-95 shrink-0 ring-2 ring-amber-300/60 relative"
-                aria-label={isRtl ? 'مناهج سارة الجديدة (4 مسارات)' : "Sara's Exclusive Curriculums"}
+                aria-label={isRtl ? 'مناهج سارة (قيد البناء)' : "Sara's Exclusive Curriculums"}
               >
                 <span className="text-base sm:text-lg animate-bounce">📚</span>
-                <span className="absolute -top-1 -end-1 px-1 py-0.2 rounded-full bg-slate-950 text-amber-300 text-[8px] font-black border border-amber-400">
-                  4
-                </span>
               </button>
               <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-amber-300 text-xs font-black shadow-xl border border-amber-400/40 flex items-center gap-1.5">
                 <span>📚</span>
-                <span>{isRtl ? 'مناهج سارة الجديدة (4 مسارات تخصصية) ✨' : "Sara's Curriculums (4 Tracks) ✨"}</span>
+                <span>{isRtl ? 'مناهج سارة (قيد البناء) 🛠️' : "Sara's Curriculum (under construction) 🛠️"}</span>
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-t border-l border-amber-400/40" />
               </div>
             </div>
@@ -4185,7 +4199,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               <h3 className="text-xs sm:text-sm font-black text-[#002147] flex items-center gap-1.5 flex-wrap">
                 <span>{isRtl ? 'مناهج سارة التخصصية المستقلة' : "Sara's Independent Curriculums"}</span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black shadow-2xs">
-                  {isRtl ? '4 مسارات للطلاقة ✨' : '4 Fluency Tracks ✨'}
+                  {isRtl ? 'المنهج قيد البناء 🛠️' : 'Under construction 🛠️'}
                 </span>
               </h3>
               <p className="text-[10px] sm:text-[11px] text-slate-600 font-semibold hidden sm:block">
@@ -5486,7 +5500,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             {/* The 4 Core Fluency Tracks Cards */}
             <div className="space-y-2.5">
               <h3 className="text-xs font-black text-[#002147] flex items-center justify-between px-1">
-                <span>{isRtl ? 'مسارات سارة التخصصية للطلاقة (4 مسارات)' : 'Core Fluency Tracks (4 Tracks)'}</span>
+                <span>{isRtl ? 'مناهج سارة (قيد البناء)' : 'Curriculum (under construction)'}</span>
                 <span className="text-[10px] text-slate-500 font-bold">{isRtl ? 'دروس تفاعلية بالصوت والسبورة' : 'Interactive lessons'}</span>
               </h3>
 
@@ -6217,7 +6231,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   )}
 
                   {/* Actions to open an existing academy section */}
-                  {isSara && msg.actions && msg.actions.length > 0 && (
+                  {false && isSara && msg.actions && msg.actions.length > 0 && (
                     <div className="mt-3 pt-2.5 border-t border-slate-200 flex flex-wrap gap-2">
                       {msg.actions.map((act, aIdx) => {
                         const secMeta = SECTION_LABELS[act.sectionId] || { ar: act.sectionId, en: act.sectionId };
@@ -6859,16 +6873,13 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               <button
                 onClick={() => handleOpenCurriculum('all')}
                 className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-amber-400 bg-gradient-to-tr from-amber-400 via-yellow-400 to-amber-300 hover:from-amber-300 hover:to-yellow-200 text-slate-950 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-110 active:scale-95 shrink-0 ring-1 ring-amber-300/60 relative"
-                aria-label={isRtl ? 'مناهج سارة الجديدة (4 مسارات)' : "Sara's Curriculums"}
+                aria-label={isRtl ? 'مناهج سارة (قيد البناء)' : "Sara's Curriculums"}
               >
                 <span className="text-sm sm:text-base">📚</span>
-                <span className="absolute -top-1 -end-1 px-1 py-0.2 rounded-full bg-slate-950 text-amber-300 text-[8px] font-black border border-amber-400">
-                  4
-                </span>
               </button>
               <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover/toolchip:opacity-100 translate-y-1 group-hover/toolchip:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-amber-300 text-xs font-black shadow-xl border border-amber-400/40 flex items-center gap-1.5">
                 <span>📚</span>
-                <span>{isRtl ? 'مناهج سارة الجديدة (4 مسارات تخصصية) ✨' : "Sara's Curriculums (4 Tracks) ✨"}</span>
+                <span>{isRtl ? 'مناهج سارة (قيد البناء) 🛠️' : "Sara's Curriculum (under construction) 🛠️"}</span>
                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-b border-r border-amber-400/40" />
               </div>
             </div>
@@ -7547,7 +7558,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                           </span>
                         </div>
                         <div className="text-[10px] text-slate-600 font-medium">
-                          {isRtl ? '4 مسارات: القواعد التحدثية، المحادثة، القراءة والنطق، الكتابة' : '4 Tracks: Spoken Grammar, Speaking, Reading, Writing'}
+                          {isRtl ? 'المنهج قيد البناء' : 'Under construction'}
                         </div>
                       </div>
                     </div>
