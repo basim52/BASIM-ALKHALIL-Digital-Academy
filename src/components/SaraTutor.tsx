@@ -74,6 +74,8 @@ import { SaraAchievementsModal } from './SaraAchievementsModal';
 import { SaraWorksheetGeneratorModal } from './SaraWorksheetGeneratorModal';
 import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
 import { SaraCurriculumModal } from './SaraCurriculumModal';
+import { SaraTrackPlayer } from './SaraTrackPlayer';
+import { FOUNDATIONS_TRACK } from '../data/saraTracks/foundations';
 import { getScenarioEducationalContent } from '../data/saraScenarioCurriculumData';
 import { buildSaraLessonContext } from '../utils/saraLessonContext';
 import { SaraSmartPlanModal } from './SaraSmartPlanModal';
@@ -555,8 +557,11 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [isCurriculumModalOpen, setIsCurriculumModalOpen] = useState<boolean>(false);
   const [curriculumInitialPillar, setCurriculumInitialPillar] = useState<string>('all');
 
+  const [isTrackOpen, setIsTrackOpen] = useState<boolean>(false);
   const handleOpenCurriculum = (pillar: string = 'all') => {
     setCurriculumInitialPillar(pillar);
+    // 📚 opens Sara's new foundations track; other entry points stay "under construction".
+    if (pillar === 'all') { setIsTrackOpen(true); return; }
     setIsCurriculumModalOpen(true);
   };
 
@@ -8519,6 +8524,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           </div>
         )}
       </AnimatePresence>
+
+      <SaraTrackPlayer isOpen={isTrackOpen} onClose={() => setIsTrackOpen(false)} track={FOUNDATIONS_TRACK} uid={profile.uid} />
 
       {/* 13. Sara Independent Fluency Curriculum Modal */}
       <SaraCurriculumModal
