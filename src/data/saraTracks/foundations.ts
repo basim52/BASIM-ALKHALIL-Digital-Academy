@@ -63,8 +63,54 @@ export const FOUNDATIONS_TRACK: SaraTrack = {
         ]
       }
     },
-    t(2, 'أصوات الحروف الإنجليزية', 'The Alphabet & Letter Sounds'),
-    t(3, 'الأرقام من 1 إلى 100', 'Numbers 1–100'),
+    {
+      ...t(2, 'أصوات الحروف الإنجليزية', 'The Alphabet & Letter Sounds'),
+      content: {
+        explanationAr:
+          'الإنجليزي فيه 26 حرف، ولكل حرف اسم وصوت. الاسم نقوله في الأبجدية: A «اي»، B «بي»، C «سي». لكن داخل الكلمة نستخدم الصوت: b في bag تنطق «بـ»، و c في cat تنطق «كـ». الحروف الخمسة a e i o u اسمها vowels وأصواتها تتغير، مثل a في cat تنطق «آ» قصيرة. وانتبه: p غير b، الـ p تطلع معها نفخة هوا مثل pen.',
+        altExplanationAr:
+          'فكّر في الحرف كأنه شخص له اسم وله صوت. اسمه نناديه فيه: B «بي». وصوته اللي يطلع في الكلمات: «بـ» مثل ball. جرّب تحط يدك قدام فمك وقل pen وبعدها ben: مع p تحس بهوا، ومع b ما تحس. يعني الاسم للتهجئة، والصوت للقراءة.',
+        example: [
+          { en: 'c - a - t → cat', ar: 'كـ + آ + تـ = cat (قطة)' },
+          { en: 'p - e - n → pen', ar: 'بـ بنفخة + إ + نـ = pen (قلم)' }
+        ],
+        check: {
+          promptAr: 'وش الصوت اللي يطلعه حرف c في كلمة cat؟',
+          options: ['«كـ»', '«سي»', '«تشـ»'],
+          correctIndex: 0
+        },
+        exercises: [
+          { promptAr: 'أي كلمة تبدأ بصوت «بـ» بدون نفخة؟', options: ['ball', 'pen', 'cat'], correctIndex: 0 },
+          { promptAr: 'كم عدد حروف اللغة الإنجليزية؟', options: ['28', '26', '24'], correctIndex: 1 },
+          { promptAr: 'أي حرف من هذي الحروف vowel؟', options: ['t', 'm', 'e'], correctIndex: 2 },
+          { promptAr: 'وش اسم الحرف B في الأبجدية؟', options: ['«بي»', '«بـ»', '«با»'], correctIndex: 0 }
+        ]
+      }
+    },
+    {
+      ...t(3, 'الأرقام من 1 إلى 100', 'Numbers 1–100'),
+      content: {
+        explanationAr:
+          'من 1 إلى 10: one, two, three, four, five, six, seven, eight, nine, ten. و 11 و 12 لهم اسم خاص: eleven و twelve. من 13 إلى 19 نضيف teen: thirteen, fifteen. والعشرات تنتهي بـ ty: twenty, thirty, forty, fifty. وأي رقم بينهم نركّب العشرة مع الآحاد: 25 = twenty-five. و 100 = one hundred. وانتبه للفخ: thirteen (13) غير thirty (30).',
+        altExplanationAr:
+          'خلّها مثل تركيب الليقو: عندك قطع صغيرة من one إلى nine، وقطع كبيرة twenty, thirty, forty… تبي 47؟ خذ القطعة الكبيرة forty وركّب عليها seven: forty-seven. والأرقام من 13 إلى 19 نهايتها teen مثل fourteen و sixteen، أما العشرات فنهايتها ty مثل forty و sixty.',
+        example: [
+          { en: 'I am twelve years old.', ar: 'عمري ١٢ سنة.' },
+          { en: 'The price is forty-five riyals.', ar: 'السعر ٤٥ ريال.' }
+        ],
+        check: {
+          promptAr: 'كيف تكتب ٣٧ بالإنجليزي؟',
+          options: ['thirteen-seven', 'thirty-seven', 'seventy-three'],
+          correctIndex: 1
+        },
+        exercises: [
+          { promptAr: 'وش الرقم؟', promptEn: 'fifteen', options: ['5', '50', '15'], correctIndex: 2 },
+          { promptAr: 'اختر الكتابة الصحيحة للرقم 20:', options: ['twenty', 'twoty', 'twelve'], correctIndex: 0 },
+          { promptAr: 'أي كلمة تعني ٣٠؟', options: ['thirteen', 'thirty', 'three'], correctIndex: 1 },
+          { promptAr: 'كيف تقول ١٠٠؟', options: ['ten ten', 'one thousand', 'one hundred'], correctIndex: 2 }
+        ]
+      }
+    },
     t(4, 'الضمائر الشخصية', 'Subject Pronouns (I, you, he, she...)'),
     t(5, 'فعل الكينونة: am / is / are', 'The Verb To Be'),
     t(6, 'النفي والسؤال مع to be', 'To Be: Negatives & Questions'),

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { X, ArrowRight, Lock, Volume2, Square, CheckCircle2 } from 'lucide-react';
+import { X, ArrowRight, Lock, Volume2, Square, CheckCircle2, Mic, Send } from 'lucide-react';
+import { auth } from '../lib/firebase';
 import type { SaraTrack, SaraTrackLesson, SaraChoiceQuestion } from '../data/saraTracks/foundations';
 import { prefetchAcademyAudio, cancelAllSpeech } from '../lib/audio';
 import { boardLinesToSpeech } from '../utils/boardToSpeech';
@@ -28,6 +29,16 @@ function unlockNarrator() {
 function stopNarrator() {
   narratorToken++;
   if (narratorEl) { try { narratorEl.pause(); narratorEl.removeAttribute('src'); narratorEl.load(); } catch { /* ignore */ } }
+}
+async function playB64(b64: string): Promise<void> {
+  const token = ++narratorToken;
+  cancelAllSpeech();
+  const el = getNarrator();
+  const url = URL.createObjectURL(new Blob([Uint8Array.from(atob(b64), c => c.charCodeAt(0))], { type: 'audio/wav' }));
+  el.src = url;
+  await new Promise<void>(r => { el.onended = () => r(); el.onerror = () => r(); el.play().catch(() => r()); });
+  URL.revokeObjectURL(url);
+  void token;
 }
 type Seg = { text: string; lang: 'ar' | 'en' };
 const langOf = (t: string): 'ar' | 'en' => (/[\u0600-\u06FF]/.test(t) ? 'ar' : 'en');
@@ -93,6 +104,11 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid }
   const [speaking, setSpeaking] = useState(false);
   const [activeSeg, setActiveSeg] = useState(-1);
   const [blocked, setBlocked] = useState(false);
+  const [askOpen, setAskOpen] = useState(false);
+  const [askText, setAskText] = useState('');
+  const [askReply, setAskReply] = useState('');
+  const [askBusy, setAskBusy] = useState(false);
+  const [listening, setListening] = useState(false);
 
   useEffect(() => { setUnlocked(readUnlocked(track.id, uid)); }, [track.id, uid]);
   const stop = () => { stopNarrator(); setSpeaking(false); setActiveSeg(-1); };
@@ -118,6 +134,47 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid }
     stop(); setLessonId(l.id); setUseAlt(false); setCheckPick(null); setMode('learn'); setExIdx(0); setExPick(null); setExScore(0);
     startNarration(l, false);
   };
+  const nextLesson = lesson ? track.lessons.find(x => x.order === lesson.order + 1) : undefined;
+  const goNext = () => { if (nextLesson) openLesson(nextLesson); else { stop(); setLessonId(null); } };
+
+  const sendAsk = async (q: string) => {
+    const question = q.trim();
+    if (!question || !lesson?.content || askBusy) return;
+    unlockNarrator();
+    stop();
+    setAskBusy(true); setAskReply('');
+    try {
+      const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : '';
+      const res = await fetch('/api/sara/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}) },
+        body: JSON.stringify({
+          message: question, history: [], preferredLang: 'ar',
+          trackLesson: { title: `${lesson.titleAr} (${lesson.titleEn})`, explanation: useAlt ? lesson.content.altExplanationAr : lesson.content.explanationAr }
+        })
+      });
+      const data = await res.json();
+      const reply: string = data?.reply || 'ما قدرت أجاوب الحين، جرّب مرة ثانية 🌸';
+      setAskReply(reply); setAskText('');
+      setSpeaking(true);
+      if (data?.audio) await playB64(data.audio);
+      else { const b64 = await prefetchAcademyAudio(boardLinesToSpeech([reply]), 'ar', 'Kore'); if (b64) await playB64(b64); }
+      setSpeaking(false);
+    } catch {
+      setAskReply('صار خطأ بالاتصال، جرّب مرة ثانية.');
+    } finally { setAskBusy(false); }
+  };
+  const startMic = () => {
+    const SR: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { setAskReply('المايك غير مدعوم في هذا المتصفح، اكتب سؤالك.'); return; }
+    stop();
+    const rec = new SR(); rec.lang = 'ar-SA'; rec.interimResults = false;
+    rec.onresult = (e: any) => { const t = e.results?.[0]?.[0]?.transcript || ''; setAskText(t); sendAsk(t); };
+    rec.onend = () => setListening(false);
+    rec.onerror = () => setListening(false);
+    setListening(true); rec.start();
+  };
+
   const speak = () => {
     if (!lesson?.content) return;
     unlockNarrator();
@@ -146,7 +203,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid }
 
   return (
     <div className="fixed inset-0 z-[210] bg-slate-950/60 flex items-stretch justify-center" dir="rtl">
-      <div data-testid="sara-track-page" className="w-full max-w-xl h-[100dvh] bg-[#fdfaf3] flex flex-col overflow-hidden">
+      <div data-testid="sara-track-page" className="relative w-full max-w-xl h-[100dvh] bg-[#fdfaf3] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="shrink-0 flex items-center gap-2 px-3 py-2 bg-[#002147] text-white">
           {lesson ? (
@@ -168,7 +225,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid }
         {!lesson && (
           <div className="flex-1 min-h-0 overflow-y-auto p-3 grid gap-1.5 content-start">
             {track.lessons.map(l => {
-              const open = l.order <= unlocked && !!l.content;
+              const open = l.order <= unlocked;
               return (
                 <button key={l.id} disabled={!open} onClick={() => openLesson(l)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-start ${open ? 'bg-white border-amber-300 shadow-sm' : 'bg-slate-100 border-slate-200 opacity-60'}`}>
@@ -184,12 +241,21 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid }
           </div>
         )}
 
+        {lesson && !lesson.content && (
+          <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
+            <p className="text-4xl">🛠️</p>
+            <p className="text-base font-black text-[#002147]">هذا الدرس قيد البناء</p>
+            <button onClick={() => { stop(); setLessonId(null); }} className="px-5 py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">رجوع للدروس</button>
+          </div>
+        )}
+
         {/* One-page lesson (no scrolling) */}
         {lesson?.content && mode === 'learn' && (
           <div className="flex-1 min-h-0 flex flex-col gap-1.5 p-2.5 overflow-hidden">
             <div className="flex items-center gap-2">
               <div className={`w-8 h-8 rounded-full bg-[#002147] text-amber-300 border-2 border-amber-400 flex items-center justify-center font-black shrink-0 ${speaking ? 'animate-pulse ring-4 ring-amber-300/60' : ''}`}>س</div>
               <p className={`flex-1 text-[13px] font-black ${activeSeg === 0 ? 'text-amber-700' : 'text-slate-700'}`}>{speaking ? 'سارة تشرح الحين… 🎙️' : `معلمتك سارة — ${lesson.titleAr}`}</p>
+              <button onClick={() => { stop(); setAskOpen(true); }} className="px-2.5 py-1 rounded-xl bg-white border-2 border-[#002147]/20 text-[#002147] text-[12px] font-black shrink-0">❓ اسأل سارة</button>
               {blocked && (
                 <button onClick={speak} className="px-3 py-1.5 rounded-xl bg-amber-400 text-slate-950 text-[12px] font-black animate-bounce">▶️ ابدأي يا سارة</button>
               )}
@@ -206,12 +272,14 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid }
             </div>
             <div className="rounded-2xl p-2.5 bg-amber-50 border-2 border-amber-300">
               <p className="text-[10px] font-black text-amber-700 mb-1">سؤال فهم</p>
-              <Choice q={lesson.content.check} picked={checkPick} onPick={answerCheck} locked={passed} />
+              {passed
+                ? <p className="text-[13px] font-black text-emerald-700">✅ صح! {lesson.content.check.options[lesson.content.check.correctIndex]}</p>
+                : <Choice q={lesson.content.check} picked={checkPick} onPick={answerCheck} locked={passed} />}
             </div>
             {passed && (
               <div className="flex gap-2">
                 <button onClick={() => { stop(); setMode('exercises'); }} className="flex-1 py-2 rounded-xl bg-[#58cc02] text-white text-[13px] font-black">تمارين ({lesson.content.exercises.length}) — اختياري</button>
-                <button onClick={() => { stop(); setLessonId(null); }} className="flex-1 py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">✅ الدرس التالي مفتوح</button>
+                <button onClick={goNext} className="flex-1 py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">✅ الدرس التالي ←</button>
               </div>
             )}
           </div>
@@ -235,9 +303,31 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid }
               <div className="rounded-2xl p-4 bg-white border-2 border-emerald-300 text-center space-y-2">
                 <p className="text-2xl">🌟</p>
                 <p className="text-sm font-black text-slate-800">نتيجتك: {exScore} من {lesson.content.exercises.length}</p>
-                <button onClick={() => setLessonId(null)} className="w-full py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">رجوع للدروس</button>
+                <button onClick={goNext} className="w-full py-2 rounded-xl bg-[#58cc02] text-white text-[14px] font-black">الدرس التالي ←</button>
+                <button onClick={() => { stop(); setLessonId(null); }} className="w-full py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">رجوع للدروس</button>
               </div>
             )}
+          </div>
+        )}
+        {/* ❓ Ask Sara sheet (overlay, does not affect the page layout) */}
+        {askOpen && lesson?.content && (
+          <div className="absolute inset-0 z-10 bg-slate-950/40 flex items-end" onClick={() => { stop(); setAskOpen(false); }}>
+            <div className="w-full max-h-[60%] bg-white rounded-t-3xl p-3 flex flex-col gap-2 shadow-2xl" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center gap-2">
+                <div className={`w-8 h-8 rounded-full bg-[#002147] text-amber-300 flex items-center justify-center font-black ${speaking ? 'animate-pulse ring-4 ring-amber-300/60' : ''}`}>س</div>
+                <p className="flex-1 text-[13px] font-black text-[#002147] truncate">اسأل سارة عن: {lesson.titleAr}</p>
+                <button onClick={() => { stop(); setAskOpen(false); }} className="p-1 rounded-lg text-slate-500" aria-label="close"><X size={16} /></button>
+              </div>
+              <div className="flex-1 min-h-[60px] overflow-y-auto rounded-2xl bg-slate-50 border p-2.5 text-[13px] leading-relaxed text-slate-800">
+                {askBusy ? 'سارة تفكر… 🤔' : askReply || 'اكتب سؤالك أو اضغط المايك وتكلم 🎙️'}
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={startMic} disabled={askBusy} className={`p-2.5 rounded-xl text-white ${listening ? 'bg-rose-500 animate-pulse' : 'bg-[#002147]'}`} aria-label="mic"><Mic size={16} /></button>
+                <input value={askText} onChange={e => setAskText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') sendAsk(askText); }}
+                  placeholder="سؤالك عن الدرس…" className="flex-1 min-w-0 px-3 py-2 rounded-xl border-2 border-slate-200 text-[13px]" />
+                <button onClick={() => sendAsk(askText)} disabled={askBusy || !askText.trim()} className="p-2.5 rounded-xl bg-[#58cc02] text-white disabled:opacity-50" aria-label="send"><Send size={16} /></button>
+              </div>
+            </div>
           </div>
         )}
       </div>
