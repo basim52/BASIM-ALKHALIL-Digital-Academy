@@ -4,6 +4,7 @@ import { auth } from '../lib/firebase';
 import type { SaraTrack, SaraTrackLesson, SaraChoiceQuestion } from '../data/saraTracks/foundations';
 import { prefetchAcademyAudio, cancelAllSpeech } from '../lib/audio';
 import { boardLinesToSpeech } from '../utils/boardToSpeech';
+import { trackLevels, buildLevelTest, scoreLevelTest, saveLevelTestAttempt, LEVEL_TEST_PASS, type LevelTestQuestion, type LevelTestAttempt } from '../lib/saraLevelTests';
 
 interface Props {
   isOpen: boolean;
@@ -129,6 +130,12 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   const [unlockedRaw, setUnlocked] = useState(() => readUnlocked(track.id, uid));
   const unlocked = unlockAll ? track.lessons.length : unlockedRaw;
   const [lessonId, setLessonId] = useState<string | null>(null);
+  const [test, setTest] = useState<null | { levelId: string; levelTitleAr: string; qs: LevelTestQuestion[]; idx: number; answers: number[]; pick: number | null; result: LevelTestAttempt | null; saved: boolean | null }>(null);
+  const levels = useMemo(() => trackLevels(track), [track]);
+  const startTest = (lv: { id: string; titleAr: string; lessons: SaraTrackLesson[] }) => {
+    stop(); setLessonId(null);
+    setTest({ levelId: lv.id, levelTitleAr: lv.titleAr, qs: buildLevelTest(lv.lessons), idx: 0, answers: [], pick: null, result: null, saved: null });
+  };
   const [useAlt, setUseAlt] = useState(false);
   const [checkPick, setCheckPick] = useState<number | null>(null);
   const [mode, setMode] = useState<'learn' | 'exercises' | 'board'>('learn');
@@ -220,7 +227,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   /** Lesson passed (page check OR whiteboard exercises): unlock the next lesson, same rule everywhere. */
   const markPassed = () => {
     if (!lesson) return;
-    const next = Math.min(track.lessons.length, lesson.order + 1);
+    const next = lesson.order + 1; // may be length+1 → the track's last level test opens
     if (next > unlockedRaw) {
       setUnlocked(next);
       try { localStorage.setItem(progressKey(track.id, uid), String(next)); } catch { /* ignore */ }
@@ -248,12 +255,12 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
       <div data-testid="sara-track-page" className="relative w-full max-w-xl h-[100dvh] bg-[#fdfaf3] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="shrink-0 flex items-center gap-2 px-3 py-2 bg-[#002147] text-white">
-          {lesson ? (
-            <button onClick={() => { stop(); setLessonId(null); }} className="p-1.5 rounded-lg hover:bg-white/10" aria-label="back"><ArrowRight size={18} /></button>
+          {lesson || test ? (
+            <button onClick={() => { stop(); setLessonId(null); setTest(null); }} className="p-1.5 rounded-lg hover:bg-white/10" aria-label="back"><ArrowRight size={18} /></button>
           ) : <span className="text-lg">📚</span>}
           <div className="min-w-0 flex-1">
             <p className="text-[10px] text-amber-300 font-bold truncate">{track.titleAr}</p>
-            <p className="text-sm font-black truncate">{lesson ? `${lesson.order}. ${lesson.titleAr}` : `${track.lessons.length} درس`}</p>
+            <p className="text-sm font-black truncate">{lesson ? `${lesson.order}. ${lesson.titleAr}` : test ? `🏁 اختبار نهاية المستوى` : `${track.lessons.length} درس`}</p>
           </div>
           {lesson?.content && mode === 'learn' && (
             <button onClick={speaking ? stop : speak} className="p-1.5 rounded-lg bg-amber-400 text-slate-950" aria-label="read">
@@ -264,7 +271,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
         </div>
 
         {/* Lesson list */}
-        {!lesson && (
+        {!lesson && !test && (
           <div className="flex-1 min-h-0 overflow-y-auto p-3 grid gap-1.5 content-start">
             {track.lessons.map((l, idx) => {
               const open = l.order <= unlocked;
@@ -282,6 +289,23 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                   </span>
                   {open ? (l.order < unlocked ? <CheckCircle2 size={16} className="text-emerald-600" /> : null) : <Lock size={14} className="text-slate-400" />}
                 </button>
+                {(() => {
+                  const lv = levels.find(v => v.lessons[v.lessons.length - 1]?.id === l.id);
+                  if (!lv) return null;
+                  const last = lv.lessons[lv.lessons.length - 1].order;
+                  const testOpen = !!unlockAll || unlockedRaw > last;
+                  return (
+                    <button data-testid={`level-test-${lv.id}`} disabled={!testOpen} onClick={() => startTest(lv)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 text-start ${testOpen ? 'bg-[#002147] border-amber-400 text-white' : 'bg-slate-100 border-slate-200 text-slate-500 opacity-70'}`}>
+                      <span className="text-lg">🏁</span>
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-[13px] font-black truncate">اختبار نهاية المستوى — {lv.titleAr}</span>
+                        <span className="block text-[11px] opacity-80 truncate">{testOpen ? `النجاح من ${LEVEL_TEST_PASS}%` : `يفتح بعد اجتياز الدرس ${last}`}</span>
+                      </span>
+                      {!testOpen && <Lock size={14} />}
+                    </button>
+                  );
+                })()}
                 </React.Fragment>
               );
             })}
@@ -340,6 +364,67 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
             )}
           </div>
         )}
+
+        {/* End-of-level test: one question per screen, no hints until the end */}
+        {test && !lesson && (() => {
+          const total = test.qs.length;
+          if (test.result) {
+            const r = test.result;
+            return (
+              <div data-testid="level-test-result" className="flex-1 min-h-0 flex flex-col gap-2 p-3 overflow-hidden">
+                <div className={`rounded-2xl p-3 text-center border-2 ${r.passed ? 'bg-emerald-50 border-emerald-400' : 'bg-rose-50 border-rose-300'}`}>
+                  <p className="text-3xl font-black text-[#002147]">{r.score}%</p>
+                  <p className={`text-[14px] font-black ${r.passed ? 'text-emerald-700' : 'text-rose-700'}`}>{r.passed ? '🎉 ناجح' : `لم تنجح بعد — النجاح من ${LEVEL_TEST_PASS}%`}</p>
+                  <p className="text-[11px] text-slate-500 font-bold">{r.correct} من {r.total} · {test.levelTitleAr}{test.saved === false ? ' · محفوظ على الجهاز' : ''}</p>
+                </div>
+                {r.weakLessons.length > 0 && <p className="text-[12px] font-black text-slate-700">دروس تحتاج مراجعة:</p>}
+                <div className="flex-1 min-h-0 grid gap-1.5 content-start overflow-hidden">
+                  {r.weakLessons.slice(0, 5).map(w => (
+                    <button key={w.id} data-testid="weak-lesson" onClick={() => { const l = track.lessons.find(x => x.id === w.id); setTest(null); if (l) openLesson(l); }}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-amber-300 text-start">
+                      <span className="w-6 h-6 rounded-full bg-[#002147] text-white text-[11px] font-black flex items-center justify-center shrink-0">{w.order}</span>
+                      <span className="flex-1 min-w-0 text-[12px] font-black text-slate-800 truncate">{w.titleAr}</span>
+                      <span className="text-[11px] font-black text-rose-600 shrink-0">{w.wrong} ✗ · راجع ←</span>
+                    </button>
+                  ))}
+                  {r.weakLessons.length > 5 && <p className="text-[11px] text-slate-500 font-bold">+{r.weakLessons.length - 5} دروس أخرى</p>}
+                </div>
+                <div className="shrink-0 flex gap-2">
+                  <button data-testid="level-test-retry" onClick={() => { const lv = levels.find(v => v.id === test.levelId); if (lv) startTest(lv); }} className="flex-1 py-2 rounded-xl bg-amber-400 text-slate-950 text-[13px] font-black">🔁 إعادة الاختبار</button>
+                  <button onClick={() => setTest(null)} className="flex-1 py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">رجوع للدروس</button>
+                </div>
+              </div>
+            );
+          }
+          const cur = test.qs[test.idx];
+          return (
+            <div data-testid="level-test" className="flex-1 min-h-0 flex flex-col gap-2.5 p-3 overflow-hidden">
+              <div className="shrink-0">
+                <div className="flex items-center justify-between text-[11px] font-black text-slate-600 mb-1">
+                  <span>🏁 اختبار {test.levelTitleAr}</span><span>سؤال {test.idx + 1} من {total}</span>
+                </div>
+                <div className="h-2 rounded-full bg-slate-200 overflow-hidden"><div className="h-full bg-amber-400 transition-all" style={{ width: `${(test.idx / total) * 100}%` }} /></div>
+              </div>
+              <div className="rounded-2xl p-3 bg-white border-2 border-amber-200">
+                {/* no instant hint: the pick is only highlighted, right/wrong is revealed at the end */}
+                <p className="text-[13px] font-black text-slate-800 leading-snug mb-1.5">{cur.q.promptAr}{cur.q.promptEn && <span dir="ltr" className="block text-[#002147] font-bold">{cur.q.promptEn}</span>}</p>
+                <div className="grid gap-1.5">
+                  {cur.q.options.map((o, i) => (
+                    <button key={i} dir="auto" data-testid="test-option" onClick={() => setTest({ ...test, pick: i })}
+                      className={`w-full text-start px-3 py-1.5 rounded-xl border-2 text-[13px] font-bold ${test.pick === i ? 'bg-sky-100 border-sky-500' : 'bg-white border-slate-200'}`}>{o}</button>
+                  ))}
+                </div>
+              </div>
+              <button data-testid="test-next" disabled={test.pick === null} onClick={() => {
+                const answers = [...test.answers, test.pick!];
+                if (test.idx + 1 < total) { setTest({ ...test, answers, idx: test.idx + 1, pick: null }); return; }
+                const result = scoreLevelTest(track, test.levelId, test.levelTitleAr, test.qs, answers);
+                setTest({ ...test, answers, pick: null, result, saved: null });
+                saveLevelTestAttempt(uid, result).then(ok => setTest(t => (t && t.result === result ? { ...t, saved: ok } : t)));
+              }} className={`shrink-0 py-2 rounded-xl text-[13px] font-black ${test.pick === null ? 'bg-slate-200 text-slate-400' : 'bg-[#002147] text-white'}`}>{test.idx + 1 < total ? 'التالي ←' : '🏁 إنهاء الاختبار'}</button>
+            </div>
+          );
+        })()}
 
         {/* Interactive whiteboard: the same lesson, written visually, then its exercises on the board */}
         {lesson?.content && mode === 'board' && (() => {

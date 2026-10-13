@@ -143,6 +143,7 @@ import { ReadingLab } from './components/ReadingLab';
 import { WritingSpellingStudio } from './components/WritingSpellingStudio';
 import { SaraTutor } from './components/SaraTutor';
 import { cancelAllSpeech } from './lib/audio';
+import { SaraLevelTestsReport } from './components/SaraLevelTestsReport';
 import { SaraParentCard } from './components/SaraParentCard';
 import { Layers, Image as OxfordIcon, Library as OxfordClassicIcon, Languages } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -3613,6 +3614,7 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
                   lang={lang}
                   isRtl={isRtl}
                 />
+                <div className="mt-4"><SaraLevelTestsReport studentId={currentStudent.uid} isRtl={isRtl} /></div>
               </div>
             )}
 

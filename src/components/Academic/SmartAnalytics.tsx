@@ -1,3 +1,4 @@
+import { SaraLevelTestsReport } from '../SaraLevelTestsReport';
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -492,6 +493,9 @@ export const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({
             </div>
 
           </div>
+
+          {/* Sara end-of-level tests (all 5 tracks): latest/best, pass/fail, weak lessons */}
+          <SaraLevelTestsReport studentId={studentId} isRtl={isRtl} />
 
           {/* 12 ACADEMIC PILLARS MATRIX - Fully linked to each section */}
           <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200/80 shadow-xs space-y-6">

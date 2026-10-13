@@ -4,6 +4,7 @@ import { ADVANCED_TRACK } from '../src/data/saraTracks/advanced';
 import { CONVERSATION_TRACK } from '../src/data/saraTracks/conversation';
 import { READING_TRACK } from '../src/data/saraTracks/reading';
 import { WRITING_TRACK } from '../src/data/saraTracks/writing';
+import { trackLevels, buildLevelTest } from '../src/lib/saraLevelTests';
 let errors = 0;
 const seen = new Map<string, string>();
 const err = (m: string) => { errors++; console.log('ERROR', m); };
@@ -43,5 +44,24 @@ if (TRACK.levels) TRACK.levels.forEach(v => console.log(`  level ${v.id}: ${TRAC
 console.log(`${TRACK.id}: lessons ${TRACK.lessons.length}, built ${counts.length}, titles-only ${titlesOnly}, exercises ${counts.reduce((a, c) => a + Number(c.split(':')[1]), 0)}`);
 console.log('  exercise counts:', counts.join(' '));
 }
+// End-of-level tests: every 30-lesson level must yield 15–20 distinct questions, correct answer kept after shuffling
+let tests = 0;
+for (const TRACK of [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK]) {
+  for (const lv of trackLevels(TRACK)) {
+    tests++;
+    if (lv.lessons.length !== 30) err(`${TRACK.id}/${lv.id}: level has ${lv.lessons.length} lessons`);
+    for (let run = 0; run < 5; run++) {
+      const qs = buildLevelTest(lv.lessons);
+      if (qs.length < 15 || qs.length > 20) err(`${TRACK.id}/${lv.id}: test has ${qs.length} questions`);
+      if (new Set(qs.map(x => x.q.promptAr + '|' + (x.q.promptEn || ''))).size !== qs.length) err(`${TRACK.id}/${lv.id}: duplicate test question`);
+      qs.forEach(x => {
+        const src = TRACK.lessons.find(l => l.id === x.lessonId)!.content!;
+        const orig = [src.check, ...src.exercises].find(o => o.promptAr === x.q.promptAr && (o.promptEn || '') === (x.q.promptEn || '') && [...o.options].sort().join('|') === [...x.q.options].sort().join('|'));
+        if (!orig || orig.options[orig.correctIndex] !== x.q.options[x.q.correctIndex]) err(`${x.lessonId}: test answer mismatch`);
+      });
+    }
+  }
+}
+console.log(`level tests: ${tests}`);
 console.log('errors:', errors);
 process.exit(errors ? 1 : 0);

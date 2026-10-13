@@ -140,6 +140,15 @@ service cloud.firestore {
       }
 
       // Earned Completion Certificates (users/{userId}/certificates/{unitId})
+      // Sara end-of-level tests: student saves own attempts; parent/admin read; only admin edits/deletes
+      match /saraLevelTests/{attemptId} {
+        allow read: if isOwner(userId) || isParentOf(userId) || isAdmin();
+        allow create: if (isOwner(userId) || isAdmin()) &&
+          request.resource.data.score is number && request.resource.data.score >= 0 && request.resource.data.score <= 100 &&
+          request.resource.data.trackId is string && request.resource.data.levelId is string;
+        allow update, delete: if isAdmin();
+      }
+
       match /certificates/{unitId} {
         allow read: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.auth.uid == userId;
