@@ -29,6 +29,7 @@ import {
   Layers,
   Code
 } from 'lucide-react';
+import { managedSpeak } from '../lib/audio';
 
 interface GrammarUnit {
   id: string;
@@ -337,7 +338,7 @@ export const GrammarCurriculumCompanion = ({
     utterance.rate = 0.9;
     utterance.onstart = () => { setSpeakingId(id); setIsSpeaking(true); };
     utterance.onend = () => { setSpeakingId(null); setIsSpeaking(false); };
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   };
 
   const handleStopSpeech = () => {

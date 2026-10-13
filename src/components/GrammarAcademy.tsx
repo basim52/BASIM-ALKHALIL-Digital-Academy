@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Language } from '../lib/translations';
+import { managedSpeak } from '../lib/audio';
 
 interface GrammarAcademyProps {
   lang: Language;
@@ -257,7 +258,7 @@ export const GrammarAcademy: React.FC<GrammarAcademyProps> = ({ lang, onBack, us
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
       utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
+      managedSpeak(utterance);
     }
   };
 

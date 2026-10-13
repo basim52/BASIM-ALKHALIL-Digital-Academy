@@ -22,7 +22,7 @@ import {
   Ear
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
+import { speakAcademyText, cancelAllSpeech, createManagedAudio } from '../lib/audio';
 
 interface PhoneticAnalyzerModalProps {
   isOpen: boolean;
@@ -871,7 +871,7 @@ export const PhoneticAnalyzerModal: React.FC<PhoneticAnalyzerModalProps> = ({
         setIsPlayingUserAudio(true);
       }
     } else {
-      const audio = new Audio(userAudioUrl);
+      const audio = createManagedAudio(userAudioUrl);
       userAudioElementRef.current = audio;
       audio.onended = () => setIsPlayingUserAudio(false);
       audio.play();

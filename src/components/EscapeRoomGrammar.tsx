@@ -16,6 +16,7 @@ import {
   LockKeyholeOpen
 } from 'lucide-react';
 import { UserProfile } from '../types';
+import { managedSpeak } from '../lib/audio';
 
 interface EscapeRoomGrammarProps {
   lang: 'ar' | 'en';
@@ -157,7 +158,7 @@ export const EscapeRoomGrammar: React.FC<EscapeRoomGrammarProps> = ({
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
       utterance.rate = 0.85;
-      window.speechSynthesis.speak(utterance);
+      managedSpeak(utterance);
     }
   };
 

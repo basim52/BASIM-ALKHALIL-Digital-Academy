@@ -528,7 +528,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
   // Plan 1: Voice & Speech Intelligence States (Phonetics, Hesitation, Role-Play)
   const [saraTool, setSaraTool] = useState<SaraToolId | null>(null);
-  const openCurriculumUnderConstruction = () => { try { setIsCurriculumModalOpen(true); } catch { /* noop */ } };
   const [isPhoneticModalOpen, _raw_setIsPhoneticModalOpen] = useState<boolean>(false);
   // Curriculum tool emptied while the new curriculum is built: icon stays, opens 'المنهج قيد البناء'.
   const setIsPhoneticModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsPhoneticModalOpen(false); if (v === true) setSaraTool('pronunciation'); };
@@ -712,12 +711,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   };
 
   // Select and launch a scenario or lesson with Sara
-  // Sara's curriculum is being rebuilt from scratch: lesson launches show an empty board (no auto-speech).
+  // Old-curriculum lesson launches (plan banners, daily lessons, deep links) now open the new Sara tracks.
   const handleSelectCurriculumLesson = (_lesson?: any, _targetMode?: 'slides' | 'exercises' | 'quiz') => {
+    cancelAllSpeech();
     setActiveCurriculumLesson(null);
-    setActiveBoard(null);
-    setIsCurriculumModalOpen(true);
+    setIsCurriculumModalOpen(false);
     setIsStudyPlanModalOpen(false);
+    setTrackFilter('all');
+    setIsTrackOpen(true);
   };
 
   // 🗓️ Fetch active study plan for student (exact same studyPlans collection as Academy)
@@ -8528,19 +8529,16 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         )}
       </AnimatePresence>
 
-      <SaraTools tool={saraTool} onClose={() => setSaraTool(null)} uid={profile.uid}
+      <SaraTools tool={saraTool} onClose={() => { cancelAllSpeech(); setSaraTool(null); }} uid={profile.uid}
         unlockAll={MASTER_ADMINS.includes(String((profile as any).email || auth.currentUser?.email || '').trim().toLowerCase()) || (profile as any).role === UserRole.PARENT || (profile as any).role === UserRole.ADMIN} />
-      <SaraTracksHub key={trackFilter} filter={trackFilter} isOpen={isTrackOpen} onClose={() => setIsTrackOpen(false)} uid={profile.uid}
+      <SaraTracksHub key={trackFilter} filter={trackFilter} isOpen={isTrackOpen} onClose={() => { cancelAllSpeech(); setIsTrackOpen(false); }} uid={profile.uid}
         unlockAll={MASTER_ADMINS.includes(String((profile as any).email || auth.currentUser?.email || '').trim().toLowerCase()) || (profile as any).role === UserRole.PARENT || (profile as any).role === UserRole.ADMIN} />
 
       {/* 13. Sara Independent Fluency Curriculum Modal */}
       <SaraCurriculumModal
         isOpen={isCurriculumModalOpen}
         onClose={() => setIsCurriculumModalOpen(false)}
-        onSelectLesson={(lesson, targetMode) => {
-          setIsCurriculumModalOpen(false);
-          handleSelectCurriculumLesson(lesson, targetMode);
-        }}
+        onSelectLesson={() => handleSelectCurriculumLesson()}
         activeLessonId={activeCurriculumLesson?.id}
         initialPillar={curriculumInitialPillar}
         isRtl={isRtl}

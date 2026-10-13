@@ -32,6 +32,7 @@ import { LiveTranslate_Letters } from './LiveTranslate_Letters';
 import { LiveTranslate_Vocab } from './LiveTranslate_Vocab';
 import { LiveTranslate_Conversation } from './LiveTranslate_Conversation';
 import { ClipboardList, MessageSquare, BookOpenText } from 'lucide-react';
+import { managedSpeak } from '../lib/audio';
 
 interface LiveTranslateProps {
   isRtl?: boolean;
@@ -155,7 +156,7 @@ const speakText = (text: string, langCode: string) => {
     }
     if (preferredVoice) utterance.voice = preferredVoice;
     utterance.rate = 0.95;
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   } catch (err) {
     console.error("speechSynthesis error", err);
   }

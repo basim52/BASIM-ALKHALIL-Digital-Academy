@@ -50,6 +50,7 @@ import {
   ART_EXERCISES_UNIT2,
   LIFE_EXERCISES_UNIT2
 } from './unit2_all_exercises';
+import { managedSpeak } from '../lib/audio';
 
 interface FocusExercise {
   id: string;
@@ -1832,7 +1833,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
       };
 
       currentUtteranceRef.current = utterance;
-      window.speechSynthesis.speak(utterance);
+      managedSpeak(utterance);
     } catch (e) {
       console.warn("AI Encouragement speech system failure:", e);
     }
@@ -2129,7 +2130,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     utter.onerror = () => setSpeechPlaybackActive(false);
     currentUtteranceRef.current = utter;
     setSpeechPlaybackActive(true);
-    window.speechSynthesis.speak(utter);
+    managedSpeak(utter);
   };
 
   const speakMoveTranscript = () => {
@@ -2142,7 +2143,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     utter.onerror = () => setMoveSpeechActive(false);
     currentUtteranceRef.current = utter;
     setMoveSpeechActive(true);
-    window.speechSynthesis.speak(utter);
+    managedSpeak(utter);
   };
 
   const completedCount = localCompletedIds.size;
@@ -3780,7 +3781,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                               utterance.onstart = () => setIsWritingSpeechActive(true);
                               utterance.onend = () => setIsWritingSpeechActive(false);
                               utterance.onerror = () => setIsWritingSpeechActive(false);
-                              window.speechSynthesis.speak(utterance);
+                              managedSpeak(utterance);
                             } catch (err) {
                               console.warn("TTS error:", err);
                               setIsWritingSpeechActive(false);
@@ -4178,7 +4179,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                               utter.onerror = () => setSpeechPlaybackActive(false);
                               currentUtteranceRef.current = utter;
                               setSpeechPlaybackActive(true);
-                              window.speechSynthesis.speak(utter);
+                              managedSpeak(utter);
                             }
                           }}
                           className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
@@ -4761,7 +4762,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                 utter.onerror = () => setSpeechPlaybackActive(false);
                                 currentUtteranceRef.current = utter;
                                 setSpeechPlaybackActive(true);
-                                window.speechSynthesis.speak(utter);
+                                managedSpeak(utter);
                               }
                             }}
                             className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
@@ -5092,7 +5093,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                               utter.onerror = () => setSpeechPlaybackActive(false);
                               currentUtteranceRef.current = utter;
                               setSpeechPlaybackActive(true);
-                              window.speechSynthesis.speak(utter);
+                              managedSpeak(utter);
                             }
                           }}
                           className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
@@ -5388,7 +5389,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                               utter.onerror = () => setSpeechPlaybackActive(false);
                               currentUtteranceRef.current = utter;
                               setSpeechPlaybackActive(true);
-                              window.speechSynthesis.speak(utter);
+                              managedSpeak(utter);
                             }
                           }}
                           className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
@@ -5683,7 +5684,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                 utter.onerror = () => setSpeechPlaybackActive(false);
                                 currentUtteranceRef.current = utter;
                                 setSpeechPlaybackActive(true);
-                                window.speechSynthesis.speak(utter);
+                                managedSpeak(utter);
                               }
                             }}
                             className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
@@ -5968,7 +5969,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                 utter.onerror = () => setSpeechPlaybackActive(false);
                                 currentUtteranceRef.current = utter;
                                 setSpeechPlaybackActive(true);
-                                window.speechSynthesis.speak(utter);
+                                managedSpeak(utter);
                               }
                             }}
                             className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
@@ -6254,7 +6255,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                 utter.onerror = () => setSpeechPlaybackActive(false);
                                 currentUtteranceRef.current = utter;
                                 setSpeechPlaybackActive(true);
-                                window.speechSynthesis.speak(utter);
+                                managedSpeak(utter);
                               }
                             }}
                             className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${

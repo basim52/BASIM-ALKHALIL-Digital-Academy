@@ -19,6 +19,7 @@ import {
   Mic,
   Star
 } from 'lucide-react';
+import { managedSpeak } from '../lib/audio';
 
 interface ExpressionUnit {
   id: string;
@@ -206,7 +207,7 @@ export const ExpressionCurriculumCompanion = ({ lang, level = 'A1', onBack, onSt
     utterance.rate = 0.9;
     utterance.onstart = () => { setSpeakingId(id); setIsSpeaking(true); };
     utterance.onend = () => { setSpeakingId(null); setIsSpeaking(false); };
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   };
 
   const handleStopSpeech = () => {

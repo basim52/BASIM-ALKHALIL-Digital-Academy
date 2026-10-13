@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Language } from '../lib/translations';
+import { managedSpeak } from '../lib/audio';
 
 interface ReadingLabProps {
   lang: Language;
@@ -245,7 +246,7 @@ export const ReadingLab: React.FC<ReadingLabProps> = ({ lang, onBack, userLevel,
         setCurrentParagraphIndex(null);
       };
 
-      window.speechSynthesis.speak(utterance);
+      managedSpeak(utterance);
     }
   };
 
@@ -595,7 +596,7 @@ export const ReadingLab: React.FC<ReadingLabProps> = ({ lang, onBack, userLevel,
                           if ('speechSynthesis' in window) {
                             const u = new SpeechSynthesisUtterance(kw.word);
                             u.lang = 'en-US';
-                            window.speechSynthesis.speak(u);
+                            managedSpeak(u);
                           }
                         }}
                         className="w-7 h-7 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-emerald-600 flex items-center justify-center transition-colors cursor-pointer"

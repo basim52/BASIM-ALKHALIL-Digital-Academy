@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
+import { managedSpeak } from '../lib/audio';
 
 interface AIOmniCompanionProps {
   isRtl?: boolean;
@@ -124,7 +125,7 @@ export const AIOmniCompanion: React.FC<AIOmniCompanionProps> = ({
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
     
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   };
 
   // Speech-To-Text function

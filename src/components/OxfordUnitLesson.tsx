@@ -9,6 +9,7 @@ import { collection, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/fi
 import { OXFORD_LESSONS } from '../data/oxfordLessonsData';
 import { AILessonCompanion } from './AILessonCompanion';
 import { saveEarnedCertificate } from '../services/certificateService';
+import { managedSpeak } from '../lib/audio';
 
 interface OxfordUnitLessonProps {
   lang: Language;
@@ -1182,7 +1183,7 @@ export const OxfordUnitLesson = ({ lang, unitId, onBack, userProfile }: OxfordUn
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
 
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   };
 
   const stopSpeak = () => {

@@ -46,6 +46,7 @@ import { StudentProfile, CHILDHOOD_PACKAGES } from '../../types';
 import { db, resetDailyMinutes, updateRemainingMinutes } from '../../lib/firebase';
 import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../../lib/firestoreUtils';
+import { managedSpeak } from '../../lib/audio';
 
 const KID_COURSES = [
   { id: 'first-words', nameKey: 'firstWords', icon: Sparkles, color: 'bg-yellow-400', shadow: 'shadow-yellow-900/20', unlocked: true },
@@ -235,7 +236,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
     utterance.lang = currentLang === 'en' ? 'en-US' : 'ar-SA';
     utterance.pitch = 1.35;
     utterance.rate = 0.85;
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
     
     setMascotMood('celebrating');
     setMascotMessage(isRtl ? `باسل يقول: "${text}"` : `Basil says: "${text}"`);

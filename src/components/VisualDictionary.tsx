@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { VISUAL_DICTIONARY, DictionaryItem, DictionaryCategory } from '../data/visualDictionary';
 import { UserProfile } from '../types';
+import { managedSpeak } from '../lib/audio';
 
 interface VisualDictionaryProps {
   lang: 'ar' | 'en';
@@ -112,7 +113,7 @@ export const VisualDictionary: React.FC<VisualDictionaryProps> = ({
       utterance.onend = () => setIsSpeaking(null);
       utterance.onerror = () => setIsSpeaking(null);
       
-      window.speechSynthesis.speak(utterance);
+      managedSpeak(utterance);
     }
   };
 

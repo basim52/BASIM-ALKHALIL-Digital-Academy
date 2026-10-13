@@ -17,6 +17,7 @@ import {
   Type,
   Edit3
 } from 'lucide-react';
+import { managedSpeak } from '../lib/audio';
 
 interface WritingUnit {
   id: string;
@@ -353,7 +354,7 @@ export const WritingCurriculumCompanion = ({
     utterance.rate = 0.9;
     utterance.onstart = () => { setSpeakingId(id); setIsSpeaking(true); };
     utterance.onend = () => { setSpeakingId(null); setIsSpeaking(false); };
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   };
 
   const handleStopSpeech = () => {

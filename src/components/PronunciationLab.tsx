@@ -25,6 +25,7 @@ import {
   X
 } from 'lucide-react';
 import { UserProfile } from '../types';
+import { managedSpeak } from '../lib/audio';
 
 // Let's define the lesson structures
 interface MinimalPair {
@@ -749,7 +750,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({
         utterance.voice = premiumVoice;
       }
       
-      window.speechSynthesis.speak(utterance);
+      managedSpeak(utterance);
     } else {
       console.warn('Speech synthesis not supported in this browser.');
     }

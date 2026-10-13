@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { ENGLISH_WITH_SONGS_DATA } from '../data/interactiveCurriculum';
+import { createManagedAudio, managedSpeak } from '../lib/audio';
 
 interface EnglishSongsProps {
   lang: 'ar' | 'en';
@@ -260,7 +261,7 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
       utterance.onend = () => setIsSpeaking(null);
       utterance.onerror = () => setIsSpeaking(null);
 
-      window.speechSynthesis.speak(utterance);
+      managedSpeak(utterance);
     }
   };
 
@@ -377,7 +378,7 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
         setIsRecordingPlayback(false);
       }, 4000);
     } else {
-      const audio = new Audio(recordedBlobUrl);
+      const audio = createManagedAudio(recordedBlobUrl);
       audio.onplay = () => setIsRecordingPlayback(true);
       audio.onended = () => setIsRecordingPlayback(false);
       audio.onerror = () => setIsRecordingPlayback(false);

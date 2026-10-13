@@ -11,6 +11,7 @@ import {
   Play,
   RotateCcw
 } from 'lucide-react';
+import { managedSpeak } from '../../lib/audio';
 
 interface Question {
   id: string;
@@ -73,7 +74,7 @@ export const PhonicsReview = ({ lang, onBack }: { lang: 'en' | 'ar', onBack: () 
   const speak = (text: string) => {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   };
 
   useEffect(() => {

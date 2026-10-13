@@ -17,6 +17,7 @@ import {
   Mic,
   Users
 } from 'lucide-react';
+import { managedSpeak } from '../lib/audio';
 
 interface ConversationUnit {
   id: string;
@@ -255,7 +256,7 @@ export const ConversationCurriculumCompanion = ({
     utterance.rate = 0.9;
     utterance.onstart = () => { setSpeakingId(id); setIsSpeaking(true); };
     utterance.onend = () => { setSpeakingId(null); setIsSpeaking(false); };
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   };
 
   const handleStopSpeech = () => {

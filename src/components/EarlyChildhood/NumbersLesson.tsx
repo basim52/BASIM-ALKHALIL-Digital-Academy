@@ -10,6 +10,7 @@ import {
   Gamepad2,
   Trophy
 } from 'lucide-react';
+import { managedSpeak } from '../../lib/audio';
 
 
 interface NumberOption {
@@ -77,7 +78,7 @@ export const NumbersLesson = ({ lang, onBack, onComplete }: { lang: Language, on
     utterance.lang = 'en-US';
     utterance.rate = 0.85;
     utterance.pitch = 1.2;
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   }, []);
 
   const finishGame = useCallback((finalScore: number) => {

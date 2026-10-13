@@ -24,6 +24,7 @@ import {
   ChevronLeft
 } from 'lucide-react';
 import { UserProfile } from '../types';
+import { managedSpeak } from '../lib/audio';
 
 interface ChallengeScenario {
   id: string;
@@ -493,7 +494,7 @@ export const RolePlayChallenges: React.FC<RolePlayChallengesProps> = ({
       utterance.onend = () => setIsHostAudioPlaying(false);
       utterance.onerror = () => setIsHostAudioPlaying(false);
 
-      window.speechSynthesis.speak(utterance);
+      managedSpeak(utterance);
     }
   };
 

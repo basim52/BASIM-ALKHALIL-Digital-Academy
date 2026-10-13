@@ -23,6 +23,7 @@ import {
 import { UserProfile, MASTER_ADMINS } from '../types';
 import { auth, db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { managedSpeak } from '../lib/audio';
 
 interface Story {
   id: string;
@@ -412,7 +413,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(cleanWord);
       utterance.lang = 'en-US';
-      window.speechSynthesis.speak(utterance);
+      managedSpeak(utterance);
     } catch (err) {
       console.error("Error translating word:", err);
     } finally {
@@ -455,7 +456,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
         setIsPaused(false);
         setActiveWordIndex(null);
       };
-      window.speechSynthesis.speak(utterance);
+      managedSpeak(utterance);
     }
   };
 
@@ -700,7 +701,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
                         window.speechSynthesis.cancel();
                         const utt = new SpeechSynthesisUtterance(wordData.word);
                         utt.lang = 'en-US';
-                        window.speechSynthesis.speak(utt);
+                        managedSpeak(utt);
                       }} className="text-blue-400 hover:text-white transition-colors">
                         <Volume2 size={20} />
                       </button>

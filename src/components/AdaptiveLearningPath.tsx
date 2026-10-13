@@ -22,6 +22,7 @@ import {
   Flame,
   ArrowUpRight
 } from 'lucide-react';
+import { managedSpeak } from '../lib/audio';
 
 interface GapItem {
   id: string;
@@ -174,7 +175,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
     utterance.rate = 0.9;
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   };
 
   return (

@@ -21,7 +21,7 @@ import {
   ShieldAlert
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { playDirectSaraAudio, cancelAllSpeech } from '../lib/audio';
+import { playDirectSaraAudio, cancelAllSpeech, managedSpeak } from '../lib/audio';
 
 interface SaraVoiceCoachModalProps {
   isOpen: boolean;
@@ -286,7 +286,7 @@ export const SaraVoiceCoachModal: React.FC<SaraVoiceCoachModalProps> = ({
       utterance.pitch = 1.05;
       utterance.onend = () => setIsSaraModeling(false);
       utterance.onerror = () => setIsSaraModeling(false);
-      window.speechSynthesis.speak(utterance);
+      managedSpeak(utterance);
     } catch (e) {
       setIsSaraModeling(false);
     }
@@ -524,7 +524,7 @@ export const SaraVoiceCoachModal: React.FC<SaraVoiceCoachModalProps> = ({
                           const utt = new SpeechSynthesisUtterance(item.word);
                           utt.lang = 'en-US';
                           utt.rate = 0.8;
-                          window.speechSynthesis.speak(utt);
+                          managedSpeak(utt);
                         }}
                         className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white shrink-0 cursor-pointer"
                         title={isRtl ? 'استمع لنطق الكلمة' : 'Listen to word'}

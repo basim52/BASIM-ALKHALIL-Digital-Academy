@@ -22,7 +22,7 @@ import {
   Pause
 } from 'lucide-react';
 import { KidStory } from '../data/kidsStories';
-import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
+import { speakAcademyText, cancelAllSpeech, createManagedAudio } from '../lib/audio';
 import confetti from 'canvas-confetti';
 
 interface KidsStoryPlayerProps {
@@ -687,7 +687,7 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
                       {recordSuccess && audioUrl && (
                         <button
                           onClick={() => {
-                            const speech = new Audio(audioUrl);
+                            const speech = createManagedAudio(audioUrl);
                             speech.play();
                           }}
                           className="bg-white border border-[#e1deda] hover:bg-slate-100 text-[#002147] font-bold text-xs px-4 py-3 rounded-xl flex items-center gap-1.5 transition-colors"

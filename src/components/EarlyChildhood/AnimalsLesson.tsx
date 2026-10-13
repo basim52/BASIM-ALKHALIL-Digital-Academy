@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 
 import { Mascot } from './Mascot';
+import { managedSpeak } from '../../lib/audio';
 
 interface AnimalOption {
   id: string;
@@ -94,7 +95,7 @@ export const AnimalsLesson = ({ lang, onBack, onComplete }: { lang: Language, on
     utterance.lang = 'en-US';
     utterance.rate = 0.85;
     utterance.pitch = 1.1;
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   }, []);
 
   const finishGame = useCallback((finalScore: number) => {

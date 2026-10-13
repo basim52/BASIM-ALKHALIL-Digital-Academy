@@ -14,6 +14,7 @@ import {
   Info
 } from 'lucide-react';
 import { UserProfile } from '../types';
+import { managedSpeak } from '../lib/audio';
 
 interface AnimatedStoryboardProps {
   lang: 'ar' | 'en';
@@ -120,7 +121,7 @@ export const AnimatedStoryboard: React.FC<AnimatedStoryboardProps> = ({
       };
       utterance.onerror = () => setIsSpeaking(false);
 
-      window.speechSynthesis.speak(utterance);
+      managedSpeak(utterance);
     }
   };
 

@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { getScenarioEducationalContent, ScenarioEducationalContent } from '../data/saraScenarioCurriculumData';
+import { managedSpeak } from '../lib/audio';
 
 export type ScenarioCategory = 'all' | 'gaming' | 'sports' | 'food' | 'adventure' | 'school';
 
@@ -681,7 +682,7 @@ export const RolePlayModal: React.FC<RolePlayModalProps> = ({
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
       utterance.rate = 0.92;
-      window.speechSynthesis.speak(utterance);
+      managedSpeak(utterance);
     }
   };
 

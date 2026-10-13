@@ -17,6 +17,7 @@ import {
   Sparkles,
   Square
 } from 'lucide-react';
+import { managedSpeak } from '../lib/audio';
 
 interface AudioSync {
   word: string;
@@ -120,7 +121,7 @@ export const OxfordLesson = ({ lang, onComplete, onBack }: OxfordLessonProps) =>
       if (timer) clearInterval(timer);
     };
 
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   };
 
   return (

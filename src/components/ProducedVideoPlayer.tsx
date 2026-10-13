@@ -10,6 +10,7 @@ import confetti from 'canvas-confetti';
 import { ProducedVideoLesson, ProducedVideoScene, VideoDialogueLine } from '../data/producedVideoLessons';
 import { storeVideoFile } from '../lib/videoDb';
 import { getTranslatedBadge } from './VideoLibrary';
+import { managedSpeak } from '../lib/audio';
 
 interface ProducedVideoPlayerProps {
   lesson: ProducedVideoLesson;
@@ -135,7 +136,7 @@ export const ProducedVideoPlayer: React.FC<ProducedVideoPlayerProps> = ({
       };
 
       utteranceRef.current = utterance;
-      synthRef.current.speak(utterance);
+      managedSpeak(utterance);
     } else {
       // Fallback timer if muted or no synth
       const timer = setTimeout(() => {

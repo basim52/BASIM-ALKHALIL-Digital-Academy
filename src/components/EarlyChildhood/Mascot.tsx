@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { managedSpeak } from '../../lib/audio';
 
 interface MascotProps {
   mood: 'happy' | 'thinking' | 'celebrating' | 'idle';
@@ -35,7 +36,7 @@ export const Mascot: React.FC<MascotProps> = ({ mood, isRtl, message, onClick, a
     utterance.lang = isRtl ? 'ar-SA' : 'en-US';
     utterance.rate = 0.9;
     utterance.pitch = 1.1; // Slightly higher for friendly mascot
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   };
 
   React.useEffect(() => {

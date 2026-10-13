@@ -28,6 +28,7 @@ import {
   Plus as PlusIcon,
   Clock as ClockIcon
 } from 'lucide-react';
+import { managedSpeak } from '../lib/audio';
 
 interface ReadingUnit {
   id: string;
@@ -600,7 +601,7 @@ export const ReadingCurriculumCompanion = ({
       setSpeakingId(null);
     };
     
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   };
 
   const handleStopSpeech = () => {

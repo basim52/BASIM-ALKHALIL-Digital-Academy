@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Square
 } from 'lucide-react';
+import { managedSpeak } from '../../lib/audio';
 
 interface PracticeWord {
   id: string;
@@ -140,7 +141,7 @@ export const PronunciationLesson = ({ lang, onBack, onComplete }: { lang: Langua
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
 
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   }, [isSpeaking]);
 
   const startListening = async () => {

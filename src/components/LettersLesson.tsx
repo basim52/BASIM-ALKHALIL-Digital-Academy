@@ -32,6 +32,7 @@ import {
   Trophy,
   Star
 } from 'lucide-react';
+import { managedSpeak } from '../lib/audio';
 
 
 interface LetterOption {
@@ -383,7 +384,7 @@ export const LettersLesson = ({ lang, onBack, onComplete }: { lang: Language, on
     utterance.lang = 'en-US';
     utterance.rate = 0.75;
     utterance.pitch = 1.2;
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   }, []);
 
   const finishGame = useCallback((finalScore: number) => {

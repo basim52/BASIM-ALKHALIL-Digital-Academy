@@ -21,6 +21,7 @@ import {
   Plus
 } from 'lucide-react';
 import { UserProfile } from '../types';
+import { managedSpeak } from '../lib/audio';
 
 interface FlashcardsHubProps {
   lang: 'ar' | 'en';
@@ -2220,7 +2221,7 @@ export const FlashcardsHub: React.FC<FlashcardsHubProps> = ({
       utterance.onend = () => setCurrentlySpeaking(null);
       utterance.onerror = () => setCurrentlySpeaking(null);
       
-      window.speechSynthesis.speak(utterance);
+      managedSpeak(utterance);
     }
   };
 

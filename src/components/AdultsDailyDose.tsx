@@ -26,7 +26,7 @@ import {
   VolumeX
 } from 'lucide-react';
 import { DailyDoseLesson } from '../data/adultsDailyDose';
-import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
+import { speakAcademyText, cancelAllSpeech, createManagedAudio } from '../lib/audio';
 
 interface AdultsDailyDoseProps {
   lang: 'ar' | 'en';
@@ -733,7 +733,7 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
                       {hasRecorded && audioUrl && (
                         <button
                           onClick={() => {
-                            const audio = new Audio(audioUrl);
+                            const audio = createManagedAudio(audioUrl);
                             audio.play();
                           }}
                           className="bg-emerald-50 text-emerald-700 border border-emerald-100 font-extrabold text-xs px-5 py-3 rounded-2xl flex items-center gap-1.5 hover:bg-emerald-100 transition-colors"

@@ -58,6 +58,7 @@ import {
   darkCaveSpellingPoolData,
   culturalFestivalLocationsData
 } from './EducationalGamesData';
+import { managedSpeak } from '../lib/audio';
 
 interface EducationalGamesHubProps {
   lang: 'ar' | 'en';
@@ -167,7 +168,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
       utterance.lang = forceLang || (isRtl ? 'ar-SA' : 'en-US');
       utterance.rate = 1.0;
       utterance.pitch = 1.15;
-      window.speechSynthesis.speak(utterance);
+      managedSpeak(utterance);
     }
   };
 

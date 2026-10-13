@@ -8,6 +8,7 @@ import {
   Gamepad2,
   Trophy
 } from 'lucide-react';
+import { managedSpeak } from '../../lib/audio';
 
 interface WordOption {
   id: string;
@@ -149,7 +150,7 @@ export const FirstWordsLesson: React.FC<FirstWordsLessonProps> = ({ onBack, onCo
     utterance.rate = 0.8;
     utterance.pitch = 1.2;
     window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   }, []);
 
   const finishGame = useCallback((finalScore: number) => {

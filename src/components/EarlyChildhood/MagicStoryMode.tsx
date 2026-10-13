@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Sparkles, Wand2, Loader2, PartyPopper, Volume2, ChevronRight, MessageSquare, BookOpen } from 'lucide-react';
 import { Language } from '../../lib/translations';
 import confetti from 'canvas-confetti';
+import { managedSpeak } from '../../lib/audio';
 
 interface MagicStoryModeProps {
   lang: Language;
@@ -107,7 +108,7 @@ export const MagicStoryMode: React.FC<MagicStoryModeProps> = ({ lang, onBack, co
     utterance.lang = lang === 'ar' ? 'ar-SA' : 'en-US';
     utterance.rate = 0.85;
     utterance.pitch = 1.1;
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   }, [lang]);
 
   useEffect(() => {

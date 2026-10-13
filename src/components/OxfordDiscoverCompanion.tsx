@@ -25,6 +25,7 @@ import {
   GraduationCap,
   MessageSquare
 } from 'lucide-react';
+import { managedSpeak } from '../lib/audio';
 
 interface OxfordDiscoverCompanionProps {
   lang: Language;
@@ -261,7 +262,7 @@ export const OxfordDiscoverCompanion = ({ lang, onBack, initialUnitId, userProfi
     utterance.lang = voiceLang;
     utterance.onend = () => setSpeakingId(null);
     utterance.onerror = () => setSpeakingId(null);
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   };
 
   const filteredUnits = OXFORD_UNITS.filter(unit => {

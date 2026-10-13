@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Language } from '../lib/translations';
+import { managedSpeak } from '../lib/audio';
 
 interface WritingSpellingStudioProps {
   lang: Language;
@@ -191,7 +192,7 @@ export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ la
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
       utterance.rate = 0.85;
-      window.speechSynthesis.speak(utterance);
+      managedSpeak(utterance);
     }
   };
 

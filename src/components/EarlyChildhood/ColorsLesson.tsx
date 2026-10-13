@@ -11,6 +11,7 @@ import {
   Trophy,
   Star
 } from 'lucide-react';
+import { managedSpeak } from '../../lib/audio';
 
 
 interface ColorOption {
@@ -56,7 +57,7 @@ export const ColorsLesson = ({ lang, onBack, onComplete }: { lang: Language, onB
     utterance.lang = forceLang || 'en-US';
     utterance.rate = 0.85;
     utterance.pitch = 1.1; 
-    window.speechSynthesis.speak(utterance);
+    managedSpeak(utterance);
   }, []);
 
   const finishGame = useCallback((finalScore: number) => {

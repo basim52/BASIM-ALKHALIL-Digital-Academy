@@ -8,6 +8,81 @@ let currentPlayingNode: { stop: () => void } | null = null;
 let activeUtterances: SpeechSynthesisUtterance[] = [];
 let sharedAudioContext: AudioContext | null = null;
 
+/* ================= Central audio manager =================
+ * Every sound on the site goes through here: starting any new audio (HTMLAudioElement.play, speechSynthesis.speak,
+ * Sara's cloud TTS) first stops whatever is playing. While an exclusive owner (the live phone call) holds the audio,
+ * other playback requests are refused so background narration can't cut Sara off mid-sentence.
+ */
+const trackedMedia = new Set<HTMLMediaElement>();
+const mediaOwner = new WeakMap<object, string>();
+let exclusiveOwner: string | null = null;
+let pendingOwner: string | null = null;
+let silencing = false;
+
+/** Give one owner (e.g. 'call') exclusive use of audio; pass null to release. */
+export function setExclusiveAudioOwner(owner: string | null) {
+  exclusiveOwner = owner;
+  if (owner) stopAllAudio(owner, true);
+}
+const allowed = (o: object) => !exclusiveOwner || mediaOwner.get(o) === exclusiveOwner;
+
+/** Stop every sound except `keep`. */
+function silenceOthers(keep?: object) {
+  if (silencing) return;
+  silencing = true;
+  try {
+    if (currentPlayingNode && (currentPlayingNode as any).el !== keep) { try { currentPlayingNode.stop(); } catch (_) {} currentPlayingNode = null; }
+    trackedMedia.forEach(el => { if (el !== keep) { try { el.pause(); } catch (_) {} } });
+    if (typeof document !== 'undefined') document.querySelectorAll('audio').forEach(el => { if (el !== keep) { try { el.pause(); } catch (_) {} } });
+    if (typeof window !== 'undefined' && window.speechSynthesis && !(keep instanceof SpeechSynthesisUtterance)) { try { window.speechSynthesis.cancel(); } catch (_) {} }
+  } finally { silencing = false; }
+}
+
+/** Use instead of `new Audio()` everywhere: the element is tracked so it can always be stopped. */
+export function createManagedAudio(src?: string, owner?: string): HTMLAudioElement {
+  const a = src === undefined ? new Audio() : new Audio(src);
+  trackedMedia.add(a);
+  if (owner) mediaOwner.set(a, owner);
+  return a;
+}
+/** Use instead of `speechSynthesis.speak()` everywhere: stops other audio first. */
+export function managedSpeak(u: SpeechSynthesisUtterance, owner?: string) {
+  if (typeof window === 'undefined' || !window.speechSynthesis) return;
+  if (owner) mediaOwner.set(u, owner);
+  if (!allowed(u)) { setTimeout(() => { try { (u.onend as any)?.call(u, new Event('end')); } catch (_) {} }, 0); return; }
+  silenceOthers(u); // stops cloud/cached audio elements; queued utterances of the same speaker are kept
+  window.speechSynthesis.speak(u);
+}
+/** Stop everything (navigation, modal close, lesson change). Refused for non-owners while a call holds the audio unless forced. */
+export function stopAllAudio(owner?: string, force = false) {
+  if (exclusiveOwner && !force && owner !== exclusiveOwner) return;
+  globalSpeechRequestId++;
+  silenceOthers();
+}
+
+if (typeof window !== 'undefined' && typeof HTMLMediaElement !== 'undefined' && !(window as any).__saraAudioMgr) {
+  (window as any).__saraAudioMgr = true;
+  // Safety net for any element not created through createManagedAudio: playing it still stops the others.
+  const nativePlay = HTMLMediaElement.prototype.play;
+  HTMLMediaElement.prototype.play = function (this: HTMLMediaElement) {
+    if (this instanceof HTMLAudioElement) {
+      trackedMedia.add(this);
+      if (!allowed(this)) { try { this.pause(); } catch (_) {} return Promise.resolve(); }
+      silenceOthers(this);
+    }
+    return nativePlay.call(this);
+  };
+  const stopNav = () => stopAllAudio();
+  window.addEventListener('popstate', stopNav);
+  window.addEventListener('hashchange', stopNav);
+  window.addEventListener('pagehide', () => stopAllAudio(undefined, true));
+  const wrapHistory = (k: 'pushState' | 'replaceState') => {
+    const orig = history[k];
+    history[k] = function (this: History, ...args: any[]) { if (k === 'pushState') stopNav(); return (orig as any).apply(this, args); } as any;
+  };
+  wrapHistory('pushState');
+}
+
 function getAudioContext(): AudioContext | null {
   if (typeof window === "undefined") return null;
   const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -24,7 +99,9 @@ function getAudioContext(): AudioContext | null {
 /**
  * Stop any active speech, whether premium Gemini TTS or native offline speech
  */
-export const cancelAllSpeech = () => {
+export const cancelAllSpeech = (owner?: string) => {
+  if (exclusiveOwner && owner !== exclusiveOwner) return; // the live call keeps the floor
+  trackedMedia.forEach(el => { try { el.pause(); } catch (_) {} });
   // Invalidate any in-flight network requests immediately
   globalSpeechRequestId++;
 
@@ -115,7 +192,8 @@ if (typeof window !== "undefined") {
 async function playAudioSource(
   base64: string,
   onEnd?: () => void,
-  playbackRate: number = 1.0
+  playbackRate: number = 1.0,
+  owner?: string
 ): Promise<{ stop: () => void } | null> {
   if (typeof window === "undefined") return null;
 
@@ -129,7 +207,7 @@ async function playAudioSource(
     }
     const blob = new Blob([bytes], { type: "audio/wav" });
     const audioUrl = URL.createObjectURL(blob);
-    const audio = new Audio();
+    const audio = createManagedAudio(undefined, owner);
     audio.src = audioUrl;
     audio.preload = "auto";
     if (playbackRate && playbackRate > 0) {
@@ -148,7 +226,8 @@ async function playAudioSource(
       try {
         URL.revokeObjectURL(audioUrl);
       } catch (_) {}
-      if (currentPlayingNode?.stop) {
+      trackedMedia.delete(audio);
+      if ((currentPlayingNode as any)?.el === audio) {
         currentPlayingNode = null;
       }
     };
@@ -159,9 +238,9 @@ async function playAudioSource(
     };
 
     audio.onerror = () => {
+      // No hidden second player here: the old Web Audio backup could not be stopped and caused overlaps.
       cleanup();
-      // Try Web Audio API fallback
-      playAudioBuffer(base64, onEnd, playbackRate);
+      onEnd?.();
     };
 
     const playPromise = audio.play();
@@ -169,14 +248,16 @@ async function playAudioSource(
       await playPromise;
     }
 
-    return {
-      stop: () => {
-        cleanup();
-      }
-    };
+    if (isFinished || !allowed(audio)) { cleanup(); return null; }
+    const node = { el: audio, stop: () => { cleanup(); } };
+    return node;
   } catch (html5Err) {
+    // Autoplay blocked / decode failure: Web Audio backup, registered so it can be stopped.
     console.debug("HTML5 audio playback failed, falling back to Web Audio API:", html5Err);
-    return playAudioBuffer(base64, onEnd, playbackRate);
+    if (exclusiveOwner && owner !== exclusiveOwner) return null;
+    const node = await playAudioBuffer(base64, onEnd, playbackRate);
+    if (node) { silenceOthers(node); currentPlayingNode = node; }
+    return node;
   }
 }
 
@@ -269,7 +350,8 @@ function playNativeFallback(
   text: string,
   lang: "en" | "ar",
   onEnd?: () => void,
-  playbackRate: number = 1.0
+  playbackRate: number = 1.0,
+  owner?: string
 ): { stop: () => void } {
   if (typeof window === "undefined" || !window.speechSynthesis) {
     onEnd?.();
@@ -332,7 +414,7 @@ function playNativeFallback(
     onEnd?.();
   };
 
-  window.speechSynthesis.speak(utterance);
+  managedSpeak(utterance, owner);
 
   return {
     stop: () => {
@@ -419,8 +501,10 @@ export const speakAcademyText = async (
   voiceName: string = "Kore",
   playbackRate: number = 1.0
 ): Promise<{ stop: () => void }> => {
+  const owner = pendingOwner || undefined; pendingOwner = null;
+  if (exclusiveOwner && owner !== exclusiveOwner) { onEnd?.(); return { stop: () => {} }; }
   // Cancel active playback sessions and record request ID
-  cancelAllSpeech();
+  cancelAllSpeech(owner);
   const requestId = ++globalSpeechRequestId;
 
   // Strip Markdown tags from text to have clean speech reading
@@ -440,16 +524,19 @@ export const speakAcademyText = async (
   const cacheKey = `${lang}:${voiceName || "Kore"}:${cleanText}`;
   if (ttsAudioCache.has(cacheKey)) {
     const cachedAudio = ttsAudioCache.get(cacheKey)!;
-    const player = await playAudioSource(cachedAudio, onEnd, playbackRate);
+    const player = await playAudioSource(cachedAudio, onEnd, playbackRate, owner);
     if (player && requestId === globalSpeechRequestId) {
       currentPlayingNode = player;
       return player;
     }
+    // Superseded or failed: never fall through and play the same text a second time.
+    try { player?.stop(); } catch (_) {}
+    return { stop: () => {} };
   }
 
   // 1B. If under rate limit cooldown, use seamless feminine browser fallback immediately
   if (Date.now() < clientTtsCooldownUntil) {
-    const fallback = playNativeFallback(cleanText, lang, onEnd, playbackRate);
+    const fallback = playNativeFallback(cleanText, lang, onEnd, playbackRate, owner);
     currentPlayingNode = fallback;
     return fallback;
   }
@@ -500,11 +587,13 @@ export const speakAcademyText = async (
       // Store in memory cache for subsequent instant replays
       ttsAudioCache.set(cacheKey, data.audio);
 
-      const player = await playAudioSource(data.audio, onEnd, playbackRate);
+      const player = await playAudioSource(data.audio, onEnd, playbackRate, owner);
       if (player && requestId === globalSpeechRequestId) {
         currentPlayingNode = player;
         return player;
       }
+      try { player?.stop(); } catch (_) {}
+      return { stop: () => {} };
     } catch (err: any) {
       lastError = err;
       if (err.message?.includes("429") || err.message?.includes("RESOURCE_EXHAUSTED")) {
@@ -523,10 +612,13 @@ export const speakAcademyText = async (
   }
 
   console.warn("Sara voice network retries exhausted, activating resilient fallback:", lastError);
-  const fallback = playNativeFallback(cleanText, lang, onEnd, playbackRate);
+  const fallback = playNativeFallback(cleanText, lang, onEnd, playbackRate, owner);
   currentPlayingNode = fallback;
   return fallback;
 };
+
+/** Sara speaking inside the live phone call: owns the audio while the call is open. */
+export const speakAcademyTextAs = (owner: string, ...args: Parameters<typeof speakAcademyText>) => { pendingOwner = owner; return speakAcademyText(...args); };
 
 /**
  * Instant Audio Player: Plays pre-rendered studio base64 audio directly (zero network latency)
@@ -547,6 +639,7 @@ export const playDirectSaraAudio = async (
       currentPlayingNode = player;
       return player;
     }
+    try { player?.stop(); } catch (_) {}
   } catch (err) {
     console.warn("Direct audio buffer playback error:", err);
   }

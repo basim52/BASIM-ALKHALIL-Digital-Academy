@@ -15,6 +15,7 @@ import {
 import { db } from '../../lib/firebase';
 import { collection, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { UserProfile } from '../../types';
+import { managedSpeak } from '../../lib/audio';
 
 interface Question {
   id: number;
@@ -279,7 +280,7 @@ export const BiWeeklyTest: React.FC<BiWeeklyTestProps> = ({
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'en-US';
         utterance.rate = 0.9;
-        window.speechSynthesis.speak(utterance);
+        managedSpeak(utterance);
       }
     } catch (e) {
       console.warn("TTS Error", e);

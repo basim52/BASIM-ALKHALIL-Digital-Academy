@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { X, ArrowRight, Lock, Volume2, Square, CheckCircle2, Mic, Send } from 'lucide-react';
 import { auth } from '../lib/firebase';
 import type { SaraTrack, SaraTrackLesson, SaraChoiceQuestion } from '../data/saraTracks/foundations';
-import { prefetchAcademyAudio, cancelAllSpeech } from '../lib/audio';
+import { prefetchAcademyAudio, cancelAllSpeech, createManagedAudio } from '../lib/audio';
 import { boardLinesToSpeech } from '../utils/boardToSpeech';
 import { trackLevels, buildLevelTest, scoreLevelTest, saveLevelTestAttempt, LEVEL_TEST_PASS, type LevelTestQuestion, type LevelTestAttempt } from '../lib/saraLevelTests';
 
@@ -21,7 +21,7 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAE
 let narratorEl: HTMLAudioElement | null = null;
 let narratorToken = 0;
 function getNarrator(): HTMLAudioElement {
-  if (!narratorEl) { narratorEl = new Audio(); narratorEl.preload = 'auto'; }
+  if (!narratorEl) { narratorEl = createManagedAudio(); narratorEl.preload = 'auto'; }
   return narratorEl;
 }
 /** Call synchronously inside a click/tap handler. */

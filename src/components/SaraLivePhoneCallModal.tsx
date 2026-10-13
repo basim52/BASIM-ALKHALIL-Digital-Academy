@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
+import { speakAcademyTextAs, cancelAllSpeech, setExclusiveAudioOwner } from '../lib/audio';
 
 export interface PhoneScenario {
   id: string;
@@ -148,6 +148,13 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
     };
   }, []);
 
+  // While the call is open it owns the audio: other sounds stop and background narration can't interrupt Sara.
+  useEffect(() => {
+    if (!isOpen) return;
+    setExclusiveAudioOwner('call');
+    return () => { cancelAllSpeech('call'); setExclusiveAudioOwner(null); };
+  }, [isOpen]);
+
   // Timer effect when connected
   useEffect(() => {
     if (callState === 'connected') {
@@ -163,7 +170,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
   }, [callState]);
 
   const stopCallCleanup = () => {
-    cancelAllSpeech();
+    cancelAllSpeech('call');
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort();
@@ -227,7 +234,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
     }
     setIsStudentListening(false);
 
-    speakAcademyText(text, 'en', () => {
+    speakAcademyTextAs('call', text, 'en', () => {
       setIsSaraSpeaking(false);
       if (onEnd) onEnd();
     });
