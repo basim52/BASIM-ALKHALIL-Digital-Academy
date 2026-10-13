@@ -30,6 +30,8 @@ function unlockNarrator() {
 }
 function stopNarrator() {
   narratorToken++;
+  narratorPaused = false; narratorMode = null;
+  try { window.speechSynthesis?.cancel(); } catch { /* ignore */ }
   if (narratorEl) { try { narratorEl.pause(); narratorEl.removeAttribute('src'); narratorEl.load(); } catch { /* ignore */ } }
 }
 async function playB64(b64: string): Promise<void> {
@@ -44,27 +46,84 @@ async function playB64(b64: string): Promise<void> {
 }
 type Seg = { text: string; lang: 'ar' | 'en' };
 const langOf = (t: string): 'ar' | 'en' => (/[\u0600-\u06FF]/.test(t) ? 'ar' : 'en');
+
+// Which engine is speaking right now, so pause/resume can act on the right one.
+let narratorMode: 'cloud' | 'browser' | null = null;
+let narratorPaused = false;
+const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+/** Cloud voice with one polite retry (the TTS endpoint rate-limits bursts). */
+async function fetchSegAudio(sg: Seg): Promise<string | null> {
+  const first = await prefetchAcademyAudio(sg.text, sg.lang, 'Kore');
+  if (first) return first;
+  await wait(900);
+  return prefetchAcademyAudio(sg.text, sg.lang, 'Kore');
+}
+/** Browser voice fallback so Sara is never silent when the cloud voice is unavailable. */
+function speakBrowser(sg: Seg, token: number): Promise<void> {
+  return new Promise(resolve => {
+    const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined;
+    if (!synth || typeof SpeechSynthesisUtterance === 'undefined') return resolve();
+    const u = new SpeechSynthesisUtterance(sg.text);
+    u.lang = sg.lang === 'ar' ? 'ar-SA' : 'en-US';
+    const voice = synth.getVoices().find(v => v.lang?.toLowerCase().startsWith(sg.lang === 'ar' ? 'ar' : 'en'));
+    if (voice) u.voice = voice;
+    u.rate = sg.lang === 'ar' ? 1 : 0.95;
+    const done = () => resolve();
+    u.onend = done; u.onerror = done;
+    narratorMode = 'browser';
+    if (token !== narratorToken) return resolve();
+    synth.speak(u);
+  });
+}
+export function pauseNarrator() {
+  narratorPaused = true;
+  if (narratorMode === 'cloud' && narratorEl) { try { narratorEl.pause(); } catch { /* ignore */ } }
+  if (narratorMode === 'browser') { try { window.speechSynthesis.pause(); } catch { /* ignore */ } }
+}
+export function resumeNarrator() {
+  narratorPaused = false;
+  if (narratorMode === 'cloud' && narratorEl) { try { const p = narratorEl.play(); if (p) p.catch(() => {}); } catch { /* ignore */ } }
+  if (narratorMode === 'browser') { try { window.speechSynthesis.resume(); } catch { /* ignore */ } }
+}
+/**
+ * Read the segments in order with ONE voice. Requests are sequential (next one prefetched while the current plays),
+ * because firing them all at once trips the TTS rate limit and most segments came back empty (silent Sara).
+ */
 async function narrate(segs: Seg[], onSeg: (i: number) => void, onBlocked: () => void, onDone: () => void) {
   const token = ++narratorToken;
   cancelAllSpeech(); // nothing else speaks at the same time
-  const audios = segs.map(sg => prefetchAcademyAudio(sg.text, sg.lang, 'Kore'));
+  narratorPaused = false;
+  let next: Promise<string | null> | null = segs.length ? fetchSegAudio(segs[0]) : null;
   for (let i = 0; i < segs.length; i++) {
-    const b64 = await audios[i];
+    const b64 = await next;
     if (token !== narratorToken) return;
-    if (!b64) continue;
+    while (narratorPaused) { await wait(150); if (token !== narratorToken) return; }
+    next = null;
     onSeg(i);
+    if (!b64) {
+      await speakBrowser(segs[i], token);
+      if (token !== narratorToken) return;
+      if (i + 1 < segs.length) next = fetchSegAudio(segs[i + 1]);
+      continue;
+    }
     const el = getNarrator();
     const url = URL.createObjectURL(new Blob([Uint8Array.from(atob(b64), c => c.charCodeAt(0))], { type: 'audio/wav' }));
     el.src = url;
+    narratorMode = 'cloud';
+    // prefetch the next segment only once this one is playing (one request at a time)
     const ok = await new Promise<boolean>(resolve => {
       el.onended = () => resolve(true);
       el.onerror = () => resolve(true);
-      el.play().catch(err => { resolve(err?.name === 'NotAllowedError' ? false : true); });
+      el.play().then(() => { if (i + 1 < segs.length && token === narratorToken) next = fetchSegAudio(segs[i + 1]); })
+        .catch(err => { resolve(err?.name === 'NotAllowedError' ? false : true); });
     });
     URL.revokeObjectURL(url);
     if (token !== narratorToken) return;
-    if (!ok) { onBlocked(); return; }
+    if (!ok) { narratorMode = null; onBlocked(); return; }
+    if (!next && i + 1 < segs.length) next = fetchSegAudio(segs[i + 1]);
   }
+  narratorMode = null;
   if (token === narratorToken) onDone();
 }
 
@@ -114,7 +173,9 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   const [listening, setListening] = useState(false);
 
   useEffect(() => { setUnlocked(readUnlocked(track.id, uid)); }, [track.id, uid]);
-  const stop = () => { stopNarrator(); setSpeaking(false); setActiveSeg(-1); };
+  const [paused, setPaused] = useState(false);
+  const stop = () => { stopNarrator(); setSpeaking(false); setPaused(false); setActiveSeg(-1); };
+  const togglePause = () => { if (paused) { resumeNarrator(); setPaused(false); } else { pauseNarrator(); setPaused(true); } };
   useEffect(() => () => stopNarrator(), []);
   useEffect(() => { if (!isOpen) stop(); }, [isOpen]);
 
@@ -128,7 +189,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
       const text = boardLinesToSpeech([line]);
       return { text, lang: langOf(line) };
     });
-    setBlocked(false);
+    setBlocked(false); setPaused(false);
     setSpeaking(true);
     narrate(segs, setActiveSeg, () => { setSpeaking(false); setActiveSeg(-1); setBlocked(true); }, () => { setSpeaking(false); setActiveSeg(-1); });
   };
@@ -161,7 +222,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
       setAskReply(reply); setAskText('');
       setSpeaking(true);
       if (data?.audio) await playB64(data.audio);
-      else { const b64 = await prefetchAcademyAudio(boardLinesToSpeech([reply]), 'ar', 'Kore'); if (b64) await playB64(b64); }
+      else { const said = boardLinesToSpeech([reply]); const b64 = await prefetchAcademyAudio(said, 'ar', 'Kore'); if (b64) await playB64(b64); else await speakBrowser({ text: said, lang: 'ar' }, narratorToken); }
       setSpeaking(false);
     } catch {
       setAskReply('صار خطأ بالاتصال، جرّب مرة ثانية.');
@@ -262,11 +323,12 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
           <div className="flex-1 min-h-0 flex flex-col gap-1.5 p-2.5 overflow-hidden">
             <div className="flex items-center gap-2">
               <div className={`w-8 h-8 rounded-full bg-[#002147] text-amber-300 border-2 border-amber-400 flex items-center justify-center font-black shrink-0 ${speaking ? 'animate-pulse ring-4 ring-amber-300/60' : ''}`}>س</div>
-              <p className={`flex-1 text-[13px] font-black ${activeSeg === 0 ? 'text-amber-700' : 'text-slate-700'}`}>{speaking ? 'سارة تشرح الحين… 🎙️' : `معلمتك سارة — ${lesson.titleAr}`}</p>
-              <button onClick={() => { stop(); setAskOpen(true); }} className="px-2.5 py-1 rounded-xl bg-white border-2 border-[#002147]/20 text-[#002147] text-[12px] font-black shrink-0">❓ اسأل سارة</button>
-              {blocked && (
-                <button onClick={speak} className="px-3 py-1.5 rounded-xl bg-amber-400 text-slate-950 text-[12px] font-black animate-bounce">▶️ ابدأي يا سارة</button>
+              <button onClick={speak} data-testid="sara-explain" className={`px-2 py-1 rounded-xl bg-amber-400 text-slate-950 text-[11px] font-black shrink-0 ${blocked ? 'animate-bounce' : ''}`}>🔊 اشرحي يا سارة</button>
+              {speaking && (
+                <button onClick={togglePause} data-testid="sara-pause" className="px-2 py-1 rounded-xl bg-[#002147] text-white text-[11px] font-black shrink-0">{paused ? '▶️ كملي' : '⏸️ إيقاف مؤقت'}</button>
               )}
+              <span className="flex-1" />
+              <button onClick={() => { stop(); setAskOpen(true); }} className="px-2 py-1 rounded-xl bg-white border-2 border-[#002147]/20 text-[#002147] text-[11px] font-black shrink-0">❓ اسأل سارة</button>
             </div>
             <div className={`rounded-2xl p-2.5 border-2 transition-all ${activeSeg === 1 ? 'ring-4 ring-amber-300/70' : ''} ${useAlt ? 'bg-sky-50 border-sky-300' : 'bg-white border-amber-200'}`}>
               {useAlt && <p className="text-[11px] font-black text-sky-700 mb-1">سارة تشرحها لك بطريقة ثانية 👇</p>}

@@ -558,11 +558,11 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [curriculumInitialPillar, setCurriculumInitialPillar] = useState<string>('all');
 
   const [isTrackOpen, setIsTrackOpen] = useState<boolean>(false);
-  const [trackFilter, setTrackFilter] = useState<'all' | 'grammar' | 'conversation'>('all');
+  const [trackFilter, setTrackFilter] = useState<'all' | 'grammar' | 'conversation' | 'reading'>('all');
   const handleOpenCurriculum = (pillar: string = 'all') => {
     setCurriculumInitialPillar(pillar);
     // 📚/🌐 → all built tracks; 🧠 → foundations + advanced grammar; 💬 → conversation. Others stay "under construction".
-    if (pillar === 'all' || pillar === 'grammar' || pillar === 'conversation') { setTrackFilter(pillar); setIsTrackOpen(true); return; }
+    if (pillar === 'all' || pillar === 'grammar' || pillar === 'conversation' || pillar === 'reading') { setTrackFilter(pillar); setIsTrackOpen(true); return; }
     setIsCurriculumModalOpen(true);
   };
 

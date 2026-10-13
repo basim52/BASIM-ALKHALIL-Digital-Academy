@@ -4,19 +4,20 @@ import { SaraTrackPlayer, readUnlocked } from './SaraTrackPlayer';
 import { FOUNDATIONS_TRACK } from '../data/saraTracks/foundations';
 import { ADVANCED_TRACK } from '../data/saraTracks/advanced';
 import { CONVERSATION_TRACK } from '../data/saraTracks/conversation';
+import { READING_TRACK } from '../data/saraTracks/reading';
 import type { SaraTrack } from '../data/saraTracks/foundations';
 
-interface Props { isOpen: boolean; onClose: () => void; uid?: string; unlockAll?: boolean; filter?: 'all' | 'grammar' | 'conversation' }
+interface Props { isOpen: boolean; onClose: () => void; uid?: string; unlockAll?: boolean; filter?: 'all' | 'grammar' | 'conversation' | 'reading' }
 
 /** 📚 Track picker: foundations + advanced grammar (advanced opens after foundations lesson 1). */
 export const SaraTracksHub: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll, filter = 'all' }) => {
   const [active, setActive] = useState<SaraTrack | null>(null);
   if (!isOpen) return null;
   const advancedOpen = !!unlockAll || readUnlocked(FOUNDATIONS_TRACK.id, uid) >= 2;
-  // 💬 has a single track: open it directly (its list shows the level sections) once unlocked.
-  const direct = filter === 'conversation' && advancedOpen;
+  // 💬 and 📖 each have a single track: open it directly (its list shows the level sections) once unlocked.
+  const direct = (filter === 'conversation' || filter === 'reading') && advancedOpen;
   if (active || direct) {
-    const t = active || CONVERSATION_TRACK;
+    const t = active || (filter === 'reading' ? READING_TRACK : CONVERSATION_TRACK);
     return <SaraTrackPlayer isOpen onClose={() => (direct && !active ? onClose() : setActive(null))} track={t} uid={uid} unlockAll={unlockAll} />;
   }
   const built = (t: SaraTrack) => t.lessons.filter(l => l.content).length;
@@ -25,8 +26,12 @@ export const SaraTracksHub: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll
     { track: ADVANCED_TRACK, open: advancedOpen, icon: '🎓',
       note: advancedOpen ? `${ADVANCED_TRACK.levels!.length} مستويات · ${built(ADVANCED_TRACK)} درس جاهز` : 'يفتح بعد إنهاء الدرس الأول من الأساسيات' },
     { track: CONVERSATION_TRACK, open: advancedOpen, icon: '💬',
-      note: advancedOpen ? `${CONVERSATION_TRACK.levels!.length} مستويات · ${built(CONVERSATION_TRACK)} درس جاهز` : 'يفتح بعد إنهاء الدرس الأول من الأساسيات' }
-  ].filter(c => filter === 'all' || (filter === 'grammar' ? c.track.id !== CONVERSATION_TRACK.id : c.track.id === CONVERSATION_TRACK.id));
+      note: advancedOpen ? `${CONVERSATION_TRACK.levels!.length} مستويات · ${built(CONVERSATION_TRACK)} درس جاهز` : 'يفتح بعد إنهاء الدرس الأول من الأساسيات' },
+    { track: READING_TRACK, open: advancedOpen, icon: '📖',
+      note: advancedOpen ? `${READING_TRACK.levels!.length} مستويات · ${built(READING_TRACK)} درس جاهز` : 'يفتح بعد إنهاء الدرس الأول من الأساسيات' }
+  ].filter(c => filter === 'all'
+    || (filter === 'grammar' ? (c.track.id === FOUNDATIONS_TRACK.id || c.track.id === ADVANCED_TRACK.id)
+      : filter === 'reading' ? c.track.id === READING_TRACK.id : c.track.id === CONVERSATION_TRACK.id));
   return (
     <div className="fixed inset-0 z-[210] bg-slate-950/60 flex items-stretch justify-center" dir="rtl">
       <div className="w-full max-w-xl h-[100dvh] bg-[#fdfaf3] flex flex-col overflow-hidden">
