@@ -30,8 +30,7 @@ function unlockNarrator() {
 }
 function stopNarrator() {
   narratorToken++;
-  narratorPaused = false; narratorMode = null;
-  try { window.speechSynthesis?.cancel(); } catch { /* ignore */ }
+  narratorPaused = false;
   if (narratorEl) { try { narratorEl.pause(); narratorEl.removeAttribute('src'); narratorEl.load(); } catch { /* ignore */ } }
 }
 async function playB64(b64: string): Promise<void> {
@@ -44,87 +43,57 @@ async function playB64(b64: string): Promise<void> {
   URL.revokeObjectURL(url);
   void token;
 }
-type Seg = { text: string; lang: 'ar' | 'en' };
-const langOf = (t: string): 'ar' | 'en' => (/[\u0600-\u06FF]/.test(t) ? 'ar' : 'en');
-
-// Which engine is speaking right now, so pause/resume can act on the right one.
-let narratorMode: 'cloud' | 'browser' | null = null;
 let narratorPaused = false;
 const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
+const lessonAudioCache = new Map<string, string>(); // text → object URL (this session)
 
-/** Cloud voice with one polite retry (the TTS endpoint rate-limits bursts). */
-async function fetchSegAudio(sg: Seg): Promise<string | null> {
-  const first = await prefetchAcademyAudio(sg.text, sg.lang, 'Kore');
-  if (first) return first;
-  await wait(900);
-  return prefetchAcademyAudio(sg.text, sg.lang, 'Kore');
+/**
+ * Sara's real (cloud) voice for a whole lesson page in ONE request. The GET is CDN-cached for a year,
+ * so a page is generated once for everybody. Retries with backoff; never substitutes another voice.
+ */
+async function fetchLessonAudio(text: string, token: number): Promise<string | null> {
+  const hit = lessonAudioCache.get(text);
+  if (hit) return hit;
+  const delays = [0, 2500, 6000];
+  for (const d of delays) {
+    if (d) await wait(d);
+    if (token !== narratorToken) return null;
+    try {
+      const r = await fetch(`/api/tts/lesson?v=Kore&t=${encodeURIComponent(text)}`);
+      if (r.ok && (r.headers.get('content-type') || '').includes('audio')) {
+        const url = URL.createObjectURL(await r.blob());
+        lessonAudioCache.set(text, url);
+        return url;
+      }
+      if (r.status === 503) { const j = await r.json().catch(() => ({})); if (j?.quotaExhausted) return null; }
+    } catch { /* network: retry */ }
+  }
+  return null;
 }
-/** Browser voice fallback so Sara is never silent when the cloud voice is unavailable. */
-function speakBrowser(sg: Seg, token: number): Promise<void> {
-  return new Promise(resolve => {
-    const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined;
-    if (!synth || typeof SpeechSynthesisUtterance === 'undefined') return resolve();
-    const u = new SpeechSynthesisUtterance(sg.text);
-    u.lang = sg.lang === 'ar' ? 'ar-SA' : 'en-US';
-    const voice = synth.getVoices().find(v => v.lang?.toLowerCase().startsWith(sg.lang === 'ar' ? 'ar' : 'en'));
-    if (voice) u.voice = voice;
-    u.rate = sg.lang === 'ar' ? 1 : 0.95;
-    const done = () => resolve();
-    u.onend = done; u.onerror = done;
-    narratorMode = 'browser';
-    if (token !== narratorToken) return resolve();
-    synth.speak(u);
-  });
-}
-export function pauseNarrator() {
-  narratorPaused = true;
-  if (narratorMode === 'cloud' && narratorEl) { try { narratorEl.pause(); } catch { /* ignore */ } }
-  if (narratorMode === 'browser') { try { window.speechSynthesis.pause(); } catch { /* ignore */ } }
-}
+export function pauseNarrator() { narratorPaused = true; if (narratorEl) { try { narratorEl.pause(); } catch { /* ignore */ } } }
 export function resumeNarrator() {
   narratorPaused = false;
-  if (narratorMode === 'cloud' && narratorEl) { try { const p = narratorEl.play(); if (p) p.catch(() => {}); } catch { /* ignore */ } }
-  if (narratorMode === 'browser') { try { window.speechSynthesis.resume(); } catch { /* ignore */ } }
+  if (narratorEl && narratorEl.src && !narratorEl.ended) { try { const p = narratorEl.play(); if (p) p.catch(() => {}); } catch { /* ignore */ } }
 }
-/**
- * Read the segments in order with ONE voice. Requests are sequential (next one prefetched while the current plays),
- * because firing them all at once trips the TTS rate limit and most segments came back empty (silent Sara).
- */
-async function narrate(segs: Seg[], onSeg: (i: number) => void, onBlocked: () => void, onDone: () => void) {
+/** Play the full page text in Sara's voice. onFailed → show «إعادة المحاولة» (no substitute voice). */
+async function narrate(text: string, onBlocked: () => void, onFailed: () => void, onDone: () => void) {
   const token = ++narratorToken;
   cancelAllSpeech(); // nothing else speaks at the same time
   narratorPaused = false;
-  let next: Promise<string | null> | null = segs.length ? fetchSegAudio(segs[0]) : null;
-  for (let i = 0; i < segs.length; i++) {
-    const b64 = await next;
-    if (token !== narratorToken) return;
-    while (narratorPaused) { await wait(150); if (token !== narratorToken) return; }
-    next = null;
-    onSeg(i);
-    if (!b64) {
-      await speakBrowser(segs[i], token);
-      if (token !== narratorToken) return;
-      if (i + 1 < segs.length) next = fetchSegAudio(segs[i + 1]);
-      continue;
-    }
-    const el = getNarrator();
-    const url = URL.createObjectURL(new Blob([Uint8Array.from(atob(b64), c => c.charCodeAt(0))], { type: 'audio/wav' }));
-    el.src = url;
-    narratorMode = 'cloud';
-    // prefetch the next segment only once this one is playing (one request at a time)
-    const ok = await new Promise<boolean>(resolve => {
-      el.onended = () => resolve(true);
-      el.onerror = () => resolve(true);
-      el.play().then(() => { if (i + 1 < segs.length && token === narratorToken) next = fetchSegAudio(segs[i + 1]); })
-        .catch(err => { resolve(err?.name === 'NotAllowedError' ? false : true); });
-    });
-    URL.revokeObjectURL(url);
-    if (token !== narratorToken) return;
-    if (!ok) { narratorMode = null; onBlocked(); return; }
-    if (!next && i + 1 < segs.length) next = fetchSegAudio(segs[i + 1]);
-  }
-  narratorMode = null;
-  if (token === narratorToken) onDone();
+  const url = await fetchLessonAudio(text, token);
+  if (token !== narratorToken) return;
+  if (!url) { onFailed(); return; }
+  while (narratorPaused) { await wait(150); if (token !== narratorToken) return; }
+  const el = getNarrator();
+  el.src = url;
+  const ok = await new Promise<boolean>(resolve => {
+    el.onended = () => resolve(true);
+    el.onerror = () => resolve(true);
+    el.play().catch(err => resolve(err?.name === 'NotAllowedError' ? false : true));
+  });
+  if (token !== narratorToken) return;
+  if (!ok) { onBlocked(); return; }
+  onDone();
 }
 
 export const progressKey = (trackId: string, uid?: string) => `sara_track_${trackId}_${uid || 'guest'}`;
@@ -174,6 +143,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
 
   useEffect(() => { setUnlocked(readUnlocked(track.id, uid)); }, [track.id, uid]);
   const [paused, setPaused] = useState(false);
+  const [failed, setFailed] = useState(false);
   const stop = () => { stopNarrator(); setSpeaking(false); setPaused(false); setActiveSeg(-1); };
   const togglePause = () => { if (paused) { resumeNarrator(); setPaused(false); } else { pauseNarrator(); setPaused(true); } };
   useEffect(() => () => stopNarrator(), []);
@@ -185,13 +155,11 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   const startNarration = (l: SaraTrackLesson, alt: boolean) => {
     if (!l.content) return;
     stop();
-    const segs: Seg[] = lessonPageLines(l, alt).map(line => {
-      const text = boardLinesToSpeech([line]);
-      return { text, lang: langOf(line) };
-    });
-    setBlocked(false); setPaused(false);
-    setSpeaking(true);
-    narrate(segs, setActiveSeg, () => { setSpeaking(false); setActiveSeg(-1); setBlocked(true); }, () => { setSpeaking(false); setActiveSeg(-1); });
+    const text = lessonPageLines(l, alt).map(line => boardLinesToSpeech([line])).join('\n');
+    setBlocked(false); setFailed(false); setPaused(false);
+    setSpeaking(true); setActiveSeg(1);
+    const end = () => { setSpeaking(false); setActiveSeg(-1); };
+    narrate(text, () => { end(); setBlocked(true); }, () => { end(); setFailed(true); }, end);
   };
   const openLesson = (l: SaraTrackLesson) => {
     unlockNarrator(); // inside the tap
@@ -222,7 +190,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
       setAskReply(reply); setAskText('');
       setSpeaking(true);
       if (data?.audio) await playB64(data.audio);
-      else { const said = boardLinesToSpeech([reply]); const b64 = await prefetchAcademyAudio(said, 'ar', 'Kore'); if (b64) await playB64(b64); else await speakBrowser({ text: said, lang: 'ar' }, narratorToken); }
+      else { const said = boardLinesToSpeech([reply]); const b64 = await prefetchAcademyAudio(said, 'ar', 'Kore'); if (b64) await playB64(b64); }
       setSpeaking(false);
     } catch {
       setAskReply('صار خطأ بالاتصال، جرّب مرة ثانية.');
@@ -326,6 +294,9 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
               <button onClick={speak} data-testid="sara-explain" className={`px-2 py-1 rounded-xl bg-amber-400 text-slate-950 text-[11px] font-black shrink-0 ${blocked ? 'animate-bounce' : ''}`}>🔊 اشرحي يا سارة</button>
               {speaking && (
                 <button onClick={togglePause} data-testid="sara-pause" className="px-2 py-1 rounded-xl bg-[#002147] text-white text-[11px] font-black shrink-0">{paused ? '▶️ كملي' : '⏸️ إيقاف مؤقت'}</button>
+              )}
+              {failed && !speaking && (
+                <button onClick={speak} data-testid="sara-retry" className="px-2 py-1 rounded-xl bg-rose-100 border border-rose-300 text-rose-700 text-[11px] font-black shrink-0">🔄 إعادة المحاولة</button>
               )}
               <span className="flex-1" />
               <button onClick={() => { stop(); setAskOpen(true); }} className="px-2 py-1 rounded-xl bg-white border-2 border-[#002147]/20 text-[#002147] text-[11px] font-black shrink-0">❓ اسأل سارة</button>

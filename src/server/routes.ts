@@ -1228,7 +1228,9 @@ RESPOND STRICTLY IN VALID JSON FORMAT with the following schema:
 
   // High-fidelity speech synthesizer in-memory cache & helper (Sara Kore Studio Voice)
   const ttsAudioCache = new Map<string, string>();
-  let ttsRateLimitCooldownUntil = 0;
+  const TTS_MODELS = ["gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts", "gemini-3.1-flash-tts-preview", "gemini-2.5-flash-preview-tts", "gemini-2.5-pro-preview-tts"];
+  const ttsModelBlockedUntil = new Map<string, number>();
+  const allTtsModelsBlocked = () => TTS_MODELS.every(m => Date.now() < (ttsModelBlockedUntil.get(m) || 0));
 
   async function generateSaraSpeechAudio(text: string, voiceName: string = "Kore"): Promise<string | null> {
     const clean = text.replace(/[*#_`~>]/g, "").replace(/\[.*?\]\(.*?\)/g, "").trim();
@@ -1260,65 +1262,83 @@ RESPOND STRICTLY IN VALID JSON FORMAT with the following schema:
       return ttsAudioCache.get(cacheKey)!;
     }
 
-    if (Date.now() < ttsRateLimitCooldownUntil) {
-      return null;
-    }
-
-    // Try up to 2 attempts with brief backoff
-    for (let attempt = 0; attempt < 2; attempt++) {
-      if (!initAI() || !aiLive) {
-        if (attempt === 0) {
-          await new Promise(r => setTimeout(r, 200));
-          continue;
-        }
-        return null;
-      }
-
-      try {
-        const response = await aiLive.models.generateContent({
-          model: "gemini-3.8-flash-lite-tts",
-          contents: [{
-            role: "user",
-            parts: [{ text: speechTarget }]
-          }] as any,
-          config: {
-            responseModalities: [Modality.AUDIO],
-            speechConfig: {
-              voiceConfig: {
-                prebuiltVoiceConfig: {
-                  voiceName: targetVoice
-                }
-              }
-            }
-          }
-        });
-
-        const candidates = (response as any).candidates;
-        const audioPart = candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData?.mimeType?.includes("audio") || p.inlineData);
-        if (audioPart && audioPart.inlineData?.data) {
-          const audioData = audioPart.inlineData.data;
-          if (ttsAudioCache.size > 300) {
-            const firstKey = ttsAudioCache.keys().next().value;
-            if (firstKey) ttsAudioCache.delete(firstKey);
-          }
-          ttsAudioCache.set(cacheKey, audioData);
-          return audioData;
-        }
-      } catch (err: any) {
-        logToFile(`[TTS] Attempt ${attempt + 1} error with gemini-3.8-flash-lite-tts (${targetVoice}): ${err.message}`);
-        // If 429 quota exhaustion, immediately trigger backoff cooldown and abort retries
-        if (err.message?.includes("429") || err.message?.includes("RESOURCE_EXHAUSTED") || err.status === 429) {
-          ttsRateLimitCooldownUntil = Date.now() + 50000;
+    // Sara's Kore voice exists on every Gemini TTS model, and each model has its OWN daily quota
+    // (free tier: 100 requests/day/model). Rotate to the next model when one is exhausted instead of going silent.
+    for (const model of TTS_MODELS) {
+      if (Date.now() < (ttsModelBlockedUntil.get(model) || 0)) continue;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        if (!initAI() || !aiLive) {
+          if (attempt === 0) { await new Promise(r => setTimeout(r, 200)); continue; }
           return null;
         }
-        if (attempt === 0) {
-          await new Promise(r => setTimeout(r, 400));
+        try {
+          const response = await aiLive.models.generateContent({
+            model,
+            contents: [{ role: "user", parts: [{ text: speechTarget }] }] as any,
+            config: {
+              responseModalities: [Modality.AUDIO],
+              speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: targetVoice } } }
+            }
+          });
+          const candidates = (response as any).candidates;
+          const audioPart = candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData?.mimeType?.includes("audio") || p.inlineData);
+          if (audioPart && audioPart.inlineData?.data) {
+            const audioData = audioPart.inlineData.data;
+            if (ttsAudioCache.size > 300) {
+              const firstKey = ttsAudioCache.keys().next().value;
+              if (firstKey) ttsAudioCache.delete(firstKey);
+            }
+            ttsAudioCache.set(cacheKey, audioData);
+            return audioData;
+          }
+        } catch (err: any) {
+          const msg = String(err?.message || "");
+          logToFile(`[TTS] ${model} attempt ${attempt + 1} (${targetVoice}): ${msg.slice(0, 300)}`);
+          if (msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED") || err?.status === 429) {
+            // per-day quota → block this model until Google's retryDelay; per-minute → 60s. Then try the next model.
+            const daily = /per_day|PerDay/.test(msg);
+            const retry = Number((msg.match(/"retryDelay":"(\d+)s"/) || [])[1] || 0);
+            ttsModelBlockedUntil.set(model, Date.now() + (daily ? Math.max(retry, 3600) * 1000 : 60000));
+            break;
+          }
+          if (/404|NOT_FOUND|not found|not supported/i.test(msg)) { ttsModelBlockedUntil.set(model, Date.now() + 6 * 3600 * 1000); break; }
+          if (attempt === 0) await new Promise(r => setTimeout(r, 400));
         }
       }
     }
-
     return null;
   }
+
+  // Lesson narration: ONE request per lesson page, returned as WAV and cached by the Vercel CDN for a year.
+  // Lesson text is static, so each page is generated once for everybody and never touches the daily TTS quota again.
+  app.get("/api/tts/lesson", async (req, res) => {
+    const text = String(req.query.t || "").slice(0, 2000);
+    const voice = String(req.query.v || "Kore");
+    if (!text.trim()) return res.status(400).json({ error: "Text is required" });
+    try {
+      const audio = await generateSaraSpeechAudio(text, voice);
+      if (!audio) {
+        res.setHeader("Cache-Control", "no-store");
+        return res.status(503).json({ audio: null, quotaExhausted: allTtsModelsBlocked() });
+      }
+      let buf = Buffer.from(audio, "base64");
+      if (buf.subarray(0, 4).toString("ascii") !== "RIFF") {
+        // raw 24 kHz mono 16-bit PCM → wrap in a WAV header so every browser can play it
+        const h = Buffer.alloc(44);
+        h.write("RIFF", 0); h.writeUInt32LE(36 + buf.length, 4); h.write("WAVE", 8); h.write("fmt ", 12);
+        h.writeUInt32LE(16, 16); h.writeUInt16LE(1, 20); h.writeUInt16LE(1, 22); h.writeUInt32LE(24000, 24);
+        h.writeUInt32LE(48000, 28); h.writeUInt16LE(2, 32); h.writeUInt16LE(16, 34); h.write("data", 36); h.writeUInt32LE(buf.length, 40);
+        buf = Buffer.concat([h, buf]);
+      }
+      res.setHeader("Content-Type", "audio/wav");
+      res.setHeader("Cache-Control", "public, max-age=31536000, s-maxage=31536000, immutable");
+      res.setHeader("CDN-Cache-Control", "public, max-age=31536000, immutable");
+      return res.end(buf);
+    } catch {
+      res.setHeader("Cache-Control", "no-store");
+      return res.status(503).json({ audio: null });
+    }
+  });
 
   // High-fidelity speech synthesizer endpoint with resilient fallback
   app.post("/api/tts", async (req, res) => {
@@ -1326,15 +1346,11 @@ RESPOND STRICTLY IN VALID JSON FORMAT with the following schema:
       const { text, voiceName } = req.body;
       if (!text) return res.status(400).json({ error: "Text is required" });
 
-      if (Date.now() < ttsRateLimitCooldownUntil) {
-        return res.json({ audio: null, fallback: true, rateLimited: true });
-      }
-
       const audio = await generateSaraSpeechAudio(text, voiceName || "Kore");
       if (audio) {
         return res.json({ audio });
       }
-      return res.json({ audio: null, fallback: true });
+      return res.json({ audio: null, fallback: true, rateLimited: allTtsModelsBlocked() });
     } catch (error: any) {
       res.json({ audio: null, fallback: true });
     }

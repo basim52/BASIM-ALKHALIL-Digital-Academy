@@ -3,6 +3,7 @@ import { FOUNDATIONS_TRACK } from '../src/data/saraTracks/foundations';
 import { ADVANCED_TRACK } from '../src/data/saraTracks/advanced';
 import { CONVERSATION_TRACK } from '../src/data/saraTracks/conversation';
 import { READING_TRACK } from '../src/data/saraTracks/reading';
+import { WRITING_TRACK } from '../src/data/saraTracks/writing';
 let errors = 0;
 const seen = new Map<string, string>();
 const err = (m: string) => { errors++; console.log('ERROR', m); };
@@ -14,7 +15,7 @@ const checkQ = (id: string, label: string, q: any) => {
   const key = `${q.promptAr}|${q.promptEn || ''}|${(q.options || []).join('/')}`;
   if (seen.has(key)) err(`${id} ${label}: duplicate of ${seen.get(key)}`); else seen.set(key, `${id} ${label}`);
 };
-for (const TRACK of [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK]) {
+for (const TRACK of [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK]) {
 const counts: string[] = [];
 const ids = new Set<string>();
 let titlesOnly = 0;
@@ -28,7 +29,7 @@ TRACK.lessons.forEach((l, i) => {
   if (!c.explanationAr || !c.altExplanationAr) err(`${l.id}: missing explanation/alt`);
   if (c.explanationAr === c.altExplanationAr) err(`${l.id}: alt equals explanation`);
   if (!Array.isArray(c.example) || c.example.length < 2 || c.example.length > 4 || c.example.some(e => !e.en || !e.ar)) err(`${l.id}: example needs 2–4 lines en+ar`);
-  if (TRACK.id === 'reading') {
+  if (TRACK.id === 'reading' || TRACK.id === 'writing') {
     // narrated fields must never contain pronunciation notation (Sara reads them aloud)
     const narrated = [c.explanationAr, c.altExplanationAr, ...c.example.map(e => e.en + ' ' + e.ar)];
     narrated.forEach(t => { if (/[↗↘→_=\/ˈˌ]|\b[a-z]*-?[A-Z]{2,}-[a-z]/.test(t)) err(`${l.id}: pronunciation symbols in narrated text: ${t.slice(0, 40)}`); });
