@@ -75,9 +75,6 @@ import { SaraWorksheetGeneratorModal } from './SaraWorksheetGeneratorModal';
 import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
 import { SaraCurriculumModal } from './SaraCurriculumModal';
 import { getScenarioEducationalContent } from '../data/saraScenarioCurriculumData';
-import { buildSaraCurriculumExplanation } from '../utils/saraCurriculumExplainer';
-import { buildSaraExclusiveLessonExplanation } from '../utils/saraExclusiveExplainer';
-import { SaraCurriculumLesson } from '../data/saraExclusiveCurriculums';
 import { buildSaraLessonContext } from '../utils/saraLessonContext';
 import { SaraSmartPlanModal } from './SaraSmartPlanModal';
 import { StudyPlanner } from './Academic/StudyPlanner';
@@ -670,226 +667,12 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   };
 
   // Select and launch a scenario or lesson with Sara
-  const handleSelectCurriculumLesson = (lesson: any, targetMode?: 'slides' | 'exercises' | 'quiz') => {
-    setActiveCurriculumLesson(lesson);
-
-    // 1. Build rich pedagogical explanation & board data
-    const isExclusiveLesson = lesson && (lesson.keyPattern || lesson.pillarId === 'grammar' || lesson.pillarId === 'conversation' || lesson.pillarId === 'reading' || lesson.pillarId === 'writing') && lesson.speakingChallenge;
-    const explanation = isExclusiveLesson
-      ? buildSaraExclusiveLessonExplanation(lesson, activeLang)
-      : buildSaraCurriculumExplanation(lesson, activeLang);
-
-    setActiveBoard(explanation.boardData);
-    let initialPage = 0;
-    if (targetMode === 'exercises') {
-      initialPage = 4; // Practice Drills slide
-    } else if (targetMode === 'quiz') {
-      initialPage = 6; // Mastery Exam slide
-    }
-    setCurrentWhiteboardPageIndex(initialPage);
-    setQuizSelectedOption(null);
-    setQuizFeedback(null);
-    setIsWhiteboardOpen(true);
-    setMobileTab('board');
-    setIsCurriculumModalOpen(false);
+  // Sara's curriculum is being rebuilt from scratch: lesson launches show an empty board (no auto-speech).
+  const handleSelectCurriculumLesson = (_lesson?: any, _targetMode?: 'slides' | 'exercises' | 'quiz') => {
+    setActiveCurriculumLesson(null);
+    setActiveBoard(null);
+    setIsCurriculumModalOpen(true);
     setIsStudyPlanModalOpen(false);
-
-    // 2. Add message to chat history with track context if active
-    let spokenIntro = explanation.spokenIntro;
-    let chatMsgText = explanation.chatMessage;
-
-    if (activeStudyPlan?.trackId === 'ielts_toefl') {
-      const prefix = isRtl
-        ? '🎯 مسار الآيلتس والتوفل الأكاديمي: استعد للتحدث والتحليل بطلاقة!'
-        : '🎯 IELTS & TOEFL Academic Sprint: Get ready for academic speech and analysis!';
-      spokenIntro = isRtl
-        ? `أهلاً بك يا بطل في جلسة الآيلتس والتوفل الأكاديمي اليوم! ${spokenIntro}`
-        : `Welcome champion to today's IELTS & TOEFL Academic Sprint session! ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'business_interview') {
-      const prefix = isRtl
-        ? '💼 مسار الإنجليزية المهنية والمقابلات: تدريب عملي لسوق العمل والشركات!'
-        : '💼 Business English & Job Interview Track: Real-world workplace mastery!';
-      spokenIntro = isRtl
-        ? `مرحباً بك في جلسة الإنجليزية المهنية وسوق العمل! ${spokenIntro}`
-        : `Welcome to today's Business English & Interview Mastery session! ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'traveler_survival') {
-      const prefix = isRtl
-        ? '✈️ مسار السفر والمواقف السريعة: محاكاة حية للمواقف الواقعية!'
-        : '✈️ 14-Day Traveler Survival Track: Real-world immersion!';
-      spokenIntro = isRtl
-        ? `أهلاً بك في جلسة مسار السفر والمواقف الحية السريعة! ${spokenIntro}`
-        : `Welcome to today's Traveler Survival session! ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'weakness_recovery') {
-      const prefix = isRtl
-        ? '⚡ رادار الذكاء الاصطناعي لعلاج الضعف: جلسة مركزة لترميم وسد الفجوات وتثبيت القواعد!'
-        : '⚡ AI Weakness Recovery Radar: Targeted session to reinforce challenging points!';
-      spokenIntro = isRtl
-        ? `أهلاً بك يا بطل! هذه جلسة رادار علاج الضعف وسد الفجوات لنضمن إتقانك التام للقاعدة 🎯. ${spokenIntro}`
-        : `Welcome champion! This is your AI Weakness Recovery session to ensure 100% mastery 🎯. ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'micro_10min') {
-      const prefix = isRtl
-        ? '⏱️ خطة الـ 10 دقائق اليومية: جرعة سريعة ومكثفة لضمان استمراريتك!'
-        : '⏱️ 10-Minute Daily Micro Track: Rapid high-impact daily dose!';
-      spokenIntro = isRtl
-        ? `مرحباً بك في جرعتك السريعة لليوم! 10 دقائق مركزة لنحافظ على تقدمك. ${spokenIntro}`
-        : `Welcome to today's 10-minute micro-learning dose! Let's stay consistent. ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'weekend_bootcamp') {
-      const prefix = isRtl
-        ? '🚀 معسكر عطلة نهاية الأسبوع المكثف: جلسة تطبيقية عميقة مع سارة!'
-        : '🚀 Weekend Intensive Bootcamp: Deep application session with Sara!';
-      spokenIntro = isRtl
-        ? `أهلاً بك في معسكر نهاية الأسبوع المكثف مع سارة! ${spokenIntro}`
-        : `Welcome to the Weekend Intensive Bootcamp with Sara! ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'mastery_100day') {
-      const prefix = isRtl
-        ? '🏆 رحلة الـ 100 يوم للإتقان الشامل: خطوة جديدة نحو الطلاقة الكاملة!'
-        : '🏆 100-Day Comprehensive Mastery Journey: Another step toward complete fluency!';
-      spokenIntro = isRtl
-        ? `مرحباً بك في محطتك اليومية من رحلة الـ 100 يوم نحو الطلاقة التامة! ${spokenIntro}`
-        : `Welcome to today's stop on your 100-Day Mastery Journey! ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'phonics_safari') {
-      const prefix = isRtl
-        ? '🦁 مغامرة الصوتيات وقراءة الكلمات: مرح ومغامرة وتأسيس ممتع للأبطال الصغار!'
-        : '🦁 Phonics Safari & Word Mastery: Fun foundational adventure for young champions!';
-      spokenIntro = isRtl
-        ? `مرحباً بك يا بطل الصغير في مغامرة الصوتيات! اليوم سنستمع للأصوات وننطق الكلمات بمتعة ومرح 🦁. ${spokenIntro}`
-        : `Welcome little champion to the Phonics Safari! Today we will practice letter sounds and blend words together 🦁. ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'storybook_reader') {
-      const prefix = isRtl
-        ? '📖 خطة قارئ القصص المصورة الصغير: إبحار في عوالم الخيال وقراءة القصص التفاعلية!'
-        : '📖 Little Storybook Reader Plan: Sailing through imaginative tales & interactive stories!';
-      spokenIntro = isRtl
-        ? `أهلاً بك يا بطل في عالم القصص المصورة! اليوم لدينا قصة مشوقة سنقرؤها ونمثل حواراتها معاً 📖. ${spokenIntro}`
-        : `Welcome champion to the storybook realm! Today we have an exciting tale to read and dramatize together 📖. ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'speak_without_fear') {
-      const prefix = isRtl
-        ? '🗣️ تحدي الطلاقة والتحدث دون خوف: اكسر حاجز التردد وانطلق بالإنجليزية بثقة كاملة!'
-        : '🗣️ Speak Without Fear Challenge: Break hesitation and speak with 100% confidence!';
-      spokenIntro = isRtl
-        ? `أهلاً بك في تحدي الطلاقة والتحدث دون خوف! لا تقلق من الخطأ أبداً، تحدث بحرية وانطلق معي بثقة 🗣️. ${spokenIntro}`
-        : `Welcome to the Speak Without Fear Challenge! Never worry about mistakes—speak freely and build fearless fluency 🗣️. ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'accent_pronunciation') {
-      const prefix = isRtl
-        ? '🎙️ معمل مخارج الحروف واللكنة الواضحة: تدريب احترافي على النطق الصوتي الدقيق!'
-        : '🎙️ Clear Pronunciation & Accent Lab: Master articulation, rhythm & intonation!';
-      spokenIntro = isRtl
-        ? `أهلاً بك في معمل مخارج الحروف والنطق! استمع جيداً وكرر معي لنتقن مخارج الأصوات واللكنة الواضحة 🎙️. ${spokenIntro}`
-        : `Welcome to the Pronunciation & Accent Lab! Listen carefully and repeat after me for crisp articulation 🎙️. ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'study_abroad_readiness') {
-      const prefix = isRtl
-        ? '🌍 مسار الابتعاث والدراسة بالجامعات الدولية: مهارات التحدث والتواصل في الحرم الجامعي!'
-        : '🌍 Study Abroad & Campus English Track: Master academic lectures & university discussions!';
-      spokenIntro = isRtl
-        ? `مرحباً بك في جلسة مسار الابتعاث والدراسة الجامعية! سنصقل مهاراتك الأكاديمية والنقاشية معاً 🌍. ${spokenIntro}`
-        : `Welcome to the Study Abroad track! Let's polish your campus communication and academic skills 🌍. ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'error_pattern_booster') {
-      const prefix = isRtl
-        ? '🔍 خطة تفكيك وتصحيح الأخطاء الشائعة: تفادي الفخاخ اللغوية وإتقان القواعد بدقة!'
-        : '🔍 Common Mistakes Elimination Sprint: Avoid common pitfalls and master sentence syntax!';
-      spokenIntro = isRtl
-        ? `مرحباً بك يا بطل! في جلسة اليوم سنكشف الأخطاء الشائعة ونتعلم كيف نصيغ الجمل ببراعة ودقة 🔍. ${spokenIntro}`
-        : `Welcome champion! Today we tackle common English mistakes so you can speak and write with pinpoint precision 🔍. ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'school_exam_cram') {
-      const prefix = isRtl
-        ? '📝 مسار الاستعداد للاختبارات والامتحانات المدرسية: مراجعة دقيقة وتدريب على الأسئلة لضمان الدرجة الكاملة!'
-        : '📝 School Exam & Final Test Sprint: High-impact review for top exam grades!';
-      spokenIntro = isRtl
-        ? `أهلاً بك يا بطل! اليوم مراجعة مكثفة واستعداد للامتحانات مع سارة لضمان التفوق والدرجة الكاملة 📝. ${spokenIntro}`
-        : `Welcome champion! Today is an intensive test-prep sprint with Sara to ace your school exams 📝. ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'smart_habit_accountability') {
-      const prefix = isRtl
-        ? '🛡️ خطة الالتزام الذكي والتقرير الأسبوعي مع سارة: خطوة يومية ثابتة تصنع المعجزات!'
-        : "🛡️ Sara's Daily Habit & Weekly Report Coach: Consistent daily steps lead to mastery!";
-      spokenIntro = isRtl
-        ? `مرحباً بك يا بطل في جلستك اليومية! استمراريتك والتزامك هما سر نجاحك، ودعنا ننجز هدف اليوم معاً 🛡️. ${spokenIntro}`
-        : `Welcome champion to today's accountability session! Consistency is your superpower—let's achieve today's goal 🛡️. ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'weekly_challenge_league') {
-      const prefix = isRtl
-        ? '🎖️ دوري التحديات الأسبوعية ولوحة الشرف: اجمع نقاط الخبرة وتصدر قائمة الأبطال!'
-        : '🎖️ Weekly Challenge League & Honor Roll: Earn XP and climb the academy leaderboard!';
-      spokenIntro = isRtl
-        ? `أهلاً بك في تحدي هذا الأسبوع! اليوم لديك فرصة لحصد نقاط تميز ومضاعفة درجاتك لتتصدر لوحة الشرف 🎖️. ${spokenIntro}`
-        : `Welcome to this week's league quest! Complete today's mission to boost your XP and climb the leaderboard 🎖️. ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'ai_foundational_track') {
-      const prefix = isRtl
-        ? '🤖 البرنامج التأسيسي للذكاء الاصطناعي: رحلة شيقة لفهم أسرار الآلة وصيد الأنماط!'
-        : '🤖 Foundational AI Literacy Track: Explore how AI models think and learn!';
-      spokenIntro = isRtl
-        ? `أهلاً بك يا بطل في جلسة البرنامج التأسيسي للذكاء الاصطناعي! اليوم سنكتشف أسرار الآلة ونبني مفاهيمك التقنية بثقة 🤖✨. ${spokenIntro}`
-        : `Welcome champion to your Foundational AI session! Today we demystify how models think and build smart habits 🤖✨. ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'ai_specialized_track') {
-      const prefix = isRtl
-        ? '⚡ المسارات التخصصية المتقدمة للذكاء الاصطناعي: هندسة المعماريات والوكلاء الأذكياء والأتمتة!'
-        : '⚡ Specialized Advanced AI Track: Master deep architectures, vision, and agents!';
-      spokenIntro = isRtl
-        ? `مرحباً بك في جلسة المسار التخصصي المتقدم للذكاء الاصطناعي! سنغوص سوياً في أعماق المعمارية التقنية والتطبيقات الواقعية ⚡. ${spokenIntro}`
-        : `Welcome to your Specialized AI deep-dive session! Let's explore production-ready architectures and automation ⚡. ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'ai_prompt_pro_track') {
-      const prefix = isRtl
-        ? '🏆 أكاديمية احترافية المطالبات (Prompt Pro): إتقان معمارية الأوامر المركبة والأمان المتقدم!'
-        : '🏆 Prompt Engineering Pro Academy: Master Mega-Prompts, reasoning & security!';
-      spokenIntro = isRtl
-        ? `أهلاً بك في أكاديمية احترافية المطالبات! اليوم سنصقل مهاراتك في هندسة الأوامر الذكية وتحصين المخرجات ضد الهلوسة 🏆. ${spokenIntro}`
-        : `Welcome to the Prompt Engineering Pro masterclass! Today we engineer precision Mega-Prompts and robust guardrails 🏆. ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'professional_dev_track') {
-      const prefix = isRtl
-        ? '📚 مسار الدورات التطويرية وبناء المهارات القيادية: أنظمة العادات والتميز الشخصي!'
-        : '📚 Executive Development Track: Systems, mindset & leadership habits!';
-      spokenIntro = isRtl
-        ? `مرحباً بك في جلستك من مسار الدورات التطويرية! العادات اليومية المنضبطة تصنع الفرق الهائل، ودعنا نستلهم حكمة اليوم معاً 📚🌟. ${spokenIntro}`
-        : `Welcome to today's Executive Development session! Deliberate systems and daily habits create true mastery 📚🌟. ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    } else if (activeStudyPlan?.trackId === 'ai_executive_mastery') {
-      const prefix = isRtl
-        ? '🎓 دبلوم الذكاء الاصطناعي والدورات التطويرية الشامل: صناعة قيادي متمكن من أدوات المستقبل!'
-        : '🎓 Comprehensive AI & Executive Growth Diploma: Future-ready tech & leadership!';
-      spokenIntro = isRtl
-        ? `أهلاً بك يا بطل في دبلوم الذكاء الاصطناعي والدورات التطويرية الشامل! نجمع اليوم بين التقنية المتقدمة وبناء المهارات القيادية 🎓. ${spokenIntro}`
-        : `Welcome champion to your AI & Executive Growth Diploma session! Today we combine cutting-edge tech with leadership wisdom 🎓. ${spokenIntro}`;
-      chatMsgText = `**${prefix}**\n\n${chatMsgText}`;
-    }
-
-    const curriculumMsg: MessageItem = {
-      id: `msg_sara_curriculum_${Date.now()}`,
-      role: 'sara',
-      text: chatMsgText,
-      board: explanation.boardData,
-      timestamp: Date.now()
-    };
-    setMessages(prev => [...prev, curriculumMsg]);
-
-    // 3. Play voice explanation from Sara out loud
-    if (voiceEnabled) {
-      playSaraVoice(spokenIntro);
-    }
-
-    // 4. Save progress note to tutorMemory if student is signed in
-    if (profile.uid) {
-      syncMemoryToFirestore({
-        newNotes: [`درس الطالب منهج: ${lesson.titleAr} (${lesson.courseLabelAr})`],
-        mistakes: [],
-        wordsLearned: []
-      }, false, lesson.titleAr);
-    }
   };
 
   // 🗓️ Fetch active study plan for student (exact same studyPlans collection as Academy)
@@ -7318,7 +7101,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       <SmartWhiteboard
         isOpen={isWhiteboardOpen}
         onClose={() => setIsWhiteboardOpen(false)}
-        boardData={activeBoard}
+        boardData={null}
         isRtl={isRtl}
         onSpeak={(txt, onEnd) => playSaraVoice(txt, onEnd)}
         onQuizAnswer={handleQuizOptionClick}

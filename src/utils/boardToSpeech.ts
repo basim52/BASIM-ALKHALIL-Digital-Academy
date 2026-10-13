@@ -26,3 +26,7 @@ export function boardLinesToSpeech(lines: string[] | undefined | null): string {
     .map(l => (/[.!?؟。…"»)]$/.test(l) ? l : `${l}.`))
     .join(' ');
 }
+
+export function splitBoardLines(t: string): string[] {
+  return String(t || '').replace(/\s+/g, ' ').trim().split(/(?<=[.!?؟])\s+(?=[^\s"])/).map(x => x.trim()).filter(Boolean);
+}

@@ -56,8 +56,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 import { SaraBoardData, SaraBoardQuiz, SaraBoardPageSection } from '../types';
-import { boardLinesToSpeech } from '../utils/boardToSpeech';
-import { splitBoardLines } from '../utils/saraBoardSpeech';
+import { boardLinesToSpeech, splitBoardLines } from '../utils/boardToSpeech';
 import { playSnapshotShutterSound, prefetchAcademyAudio } from '../lib/audio';
 import { buildLimitedLessonQuizSet, shuffleQuiz } from '../utils/quizUtils';
 
@@ -3391,7 +3390,12 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
               {/* ======================================================== */}
               {/* 🌟 2. EMPTY STATE WHEN BOARD HAS NO LESSON YET */}
               {/* ======================================================== */}
-              {(!boardData || (!boardData.formula && !boardData.sentence && !boardData.notes && !boardData.diagram && !boardData.quiz)) && (
+              {!boardData && (
+                <div data-testid="sara-board-empty" className="min-h-[260px] flex items-end justify-center pb-4">
+                  <span className="text-[11px] font-bold opacity-40" style={{ color: currentTheme.accentHex }}>{isRtl ? 'المنهج قيد البناء' : 'Curriculum under construction'}</span>
+                </div>
+              )}
+              {false && boardData && (!boardData.formula && !boardData.sentence && !boardData.notes && !boardData.diagram && !boardData.quiz) && (
                 <div 
                   className="rounded-3xl border-2 border-dashed p-6 sm:p-10 text-center space-y-4 shadow-xl"
                   style={{
