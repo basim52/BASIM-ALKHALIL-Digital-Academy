@@ -765,7 +765,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
         </div>
 
         {/* Main Tab Switcher */}
-        <div className="bg-slate-100 p-1.5 rounded-[2rem] flex items-center gap-1 shadow-inner">
+        <div className="bg-slate-100 p-1.5 rounded-3xl flex items-center gap-1 shadow-inner">
           <button 
             onClick={() => setActiveTab('planner')}
             className={`px-8 py-3 rounded-[1.5rem] text-sm font-black transition-all ${
@@ -793,7 +793,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
         {/* Left / Sidebar Controls - Wider panel (at least 320px) without inner scrollbars */}
         <div className="w-full lg:w-[380px] xl:w-[420px] lg:shrink-0 space-y-6">
           {activeTab === 'planner' ? (
-            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden">
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
               {/* Generation Mode Selector: Auto AI vs Custom Pick */}
               <div className="mb-6">
                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
@@ -1256,7 +1256,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                 <button 
                   onClick={handleGeneratePlan}
                   disabled={isGenerating}
-                  className="w-full bg-[#002147] text-white py-4 px-6 rounded-[2rem] font-black flex items-center justify-center gap-3 hover:bg-[#002147] transition-all shadow-xl shadow-[#C49E3A]/10 disabled:opacity-50 active:scale-95 text-sm cursor-pointer"
+                  className="w-full bg-[#002147] text-white py-4 px-6 rounded-3xl font-black flex items-center justify-center gap-3 hover:bg-[#002147] transition-all shadow-xl shadow-[#C49E3A]/10 disabled:opacity-50 active:scale-95 text-sm cursor-pointer"
                 >
                   {isGenerating ? (
                     <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
@@ -1275,7 +1275,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
             </div>
           ) : (
             /* Saved Plans History Tab */
-            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm">
               <h3 className="font-black text-[#002147] mb-6 flex items-center gap-2 text-lg">
                 <CalendarDays size={20} className="text-[#9a7a2c]" />
                 {isRtl ? 'سجل الخطط المحفوظة' : 'Saved Plans Archive'}
@@ -1348,7 +1348,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
         <div className="w-full flex-1 min-w-0 space-y-8">
           {/* If Mode is CUSTOM and user wants to pick lessons */}
           {generationMode === 'custom' && activeTab === 'planner' && (
-            <div className="bg-white p-6 md:p-8 rounded-[3rem] border border-slate-200 shadow-sm">
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
                 <div>
                   <h3 className="text-xl font-black text-[#002147] flex items-center gap-2">
@@ -1498,7 +1498,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
 
           {/* If No Plan is Generated Yet - Compact preview with short hint */}
           {!generatedPlan && !isGenerating && (
-            <div className="p-8 md:p-12 bg-white border border-slate-200 rounded-[2.5rem] shadow-sm flex flex-col items-center justify-center text-center">
+            <div className="p-8 md:p-12 bg-white border border-slate-200 rounded-3xl shadow-sm flex flex-col items-center justify-center text-center">
               <div className="w-14 h-14 bg-[#C49E3A]/10 text-[#9a7a2c] rounded-2xl flex items-center justify-center mb-4 shadow-sm">
                 <CalendarDays size={28} />
               </div>
@@ -1515,7 +1515,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
 
           {/* Generating Indicator */}
           {isGenerating && (
-            <div className="h-full flex flex-col items-center justify-center text-center p-12 bg-white border border-slate-200 rounded-[3.5rem] shadow-sm">
+            <div className="h-full flex flex-col items-center justify-center text-center p-12 bg-white border border-slate-200 rounded-3xl shadow-sm">
               <motion.div 
                 animate={{ rotate: 360 }}
                 transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
@@ -1556,7 +1556,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                     bg: 'bg-rose-50' 
                   },
                 ].map((stat, i) => (
-                  <div key={i} className={`${stat.bg} ${stat.color} px-6 py-4 rounded-[2rem] flex-1 min-w-[140px] shadow-sm flex flex-col items-center justify-center border-b-4 border-current/20`}>
+                  <div key={i} className={`${stat.bg} ${stat.color} px-6 py-4 rounded-3xl flex-1 min-w-[140px] shadow-sm flex flex-col items-center justify-center border-b-4 border-current/20`}>
                     <span className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">{stat.label}</span>
                     <span className="text-xl font-black">{stat.value}</span>
                   </div>
@@ -1564,7 +1564,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
               </div>
 
               {/* Action Bar: View Switcher, Filter, Save, Export, Results */}
-              <div className="bg-white rounded-[3rem] border border-slate-200 shadow-sm overflow-hidden p-6 md:p-8">
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden p-6 md:p-8">
                 <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-slate-100 pb-6 mb-6">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-[#C49E3A]/10 text-[#9a7a2c] rounded-2xl flex items-center justify-center shadow-sm">
@@ -1958,7 +1958,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
               style={{ width: '1200px' }}
             >
               {/* Header */}
-              <div className="mb-10 p-10 bg-[#002147] rounded-[3rem] text-white relative overflow-hidden border-b-[8px] border-amber-400">
+              <div className="mb-10 p-10 bg-[#002147] rounded-3xl text-white relative overflow-hidden border-b-[8px] border-amber-400">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-2xl font-black text-amber-400 mb-1">
@@ -2025,7 +2025,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl relative z-10 overflow-hidden flex flex-col max-h-[80vh]"
+              className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl relative z-10 overflow-hidden flex flex-col max-h-[80vh]"
             >
               <div className="p-6 md:p-8 border-b border-slate-100 flex items-center justify-between">
                 <div>
@@ -2119,7 +2119,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
               initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="bg-white rounded-[2.5rem] p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 shadow-2xl relative"
+              className="bg-white rounded-3xl p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 shadow-2xl relative"
             >
               {/* Header */}
               <div className="flex items-center justify-between pb-4 border-b border-slate-100">

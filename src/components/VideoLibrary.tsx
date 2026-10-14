@@ -698,7 +698,7 @@ Key Learning Objectives:
         </div>
 
         <div className="max-w-3xl mx-auto">
-          <div className="aspect-video rounded-[2rem] overflow-hidden shadow-md bg-black mb-8 border-4 border-white relative">
+          <div className="aspect-video rounded-3xl overflow-hidden shadow-md bg-black mb-8 border-4 border-white relative">
             {isDirect ? (
               <div className="w-full h-full relative">
                 {activePlayUrl ? (
@@ -810,7 +810,7 @@ Key Learning Objectives:
             )}
           </div>
 
-          <div className="bg-white rounded-[2rem] p-6 border-2 border-b-4 border-slate-200 relative">
+          <div className="bg-white rounded-3xl p-6 border-2 border-b-4 border-slate-200 relative">
             <div className="flex flex-wrap items-center gap-2.5 mb-4">
               <span className="bg-[#1cb0f6] text-white px-3 py-1 rounded-full text-[10px] font-black">{selectedVideo.level}</span>
               <span className="bg-[#58cc02] text-white px-3 py-1 rounded-full text-[10px] font-black flex items-center gap-1">
@@ -1141,7 +1141,7 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden"
               >
-                <div className="bg-white rounded-[2rem] p-6 border-2 border-b-[6px] border-[#58cc02] shadow-sm">
+                <div className="bg-white rounded-3xl p-6 border-2 border-b-[6px] border-[#58cc02] shadow-sm">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-6 border-b-2 border-slate-100">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-[#58cc02]/10 text-[#58cc02] rounded-xl flex items-center justify-center">
@@ -1414,7 +1414,7 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
                   <motion.div 
                     key={`video-card-${video.id || vIdx}`}
                     whileHover={enabled || isEffectiveAdmin ? { y: -6 } : {}}
-                    className={`bg-white rounded-[2rem] overflow-hidden border-2 border-b-[6px] border-slate-200 hover:border-slate-300 transition-all cursor-pointer relative group flex flex-col justify-between ${
+                    className={`bg-white rounded-3xl overflow-hidden border-2 border-b-[6px] border-slate-200 hover:border-slate-300 transition-all cursor-pointer relative group flex flex-col justify-between ${
                       !(enabled || isEffectiveAdmin) ? 'grayscale opacity-70 cursor-not-allowed' : ''
                     }`}
                     onClick={() => handleSelectVideo(video)}
@@ -1509,7 +1509,7 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
       )}
 
       {/* FOOTER INFO BANNER */}
-      <footer className="mt-14 p-8 bg-white border-2 border-b-[6px] border-slate-200 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+      <footer className="mt-14 p-8 bg-white border-2 border-b-[6px] border-slate-200 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
           <div className="relative flex items-center gap-5">
             <div className="w-16 h-16 bg-[#58cc02] rounded-[1.5rem] flex items-center justify-center text-3xl shadow-md rotate-3 shrink-0 border-b-4 border-[#46a302]">
               🦉

@@ -2664,7 +2664,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     <div className="w-full text-right space-y-8" dir={isRtl ? 'rtl' : 'ltr'}>
       
       {/* 1. Header Banner */}
-      <div className="relative bg-gradient-to-r from-[#002147]/40 via-[#162a4d]/90 to-[#002147]/40 border border-[#C49E3A]/20 rounded-[2.5rem] p-8 md:p-10 overflow-hidden text-right shadow-2xl">
+      <div className="relative bg-gradient-to-r from-[#002147]/40 via-[#162a4d]/90 to-[#002147]/40 border border-[#C49E3A]/20 rounded-3xl p-8 md:p-10 overflow-hidden text-right shadow-2xl">
         <div className="absolute top-0 right-0 w-80 h-80 bg-[#C49E3A]/5 rounded-full blur-[100px] opacity-40 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-[100px] opacity-40 pointer-events-none" />
         
@@ -7252,9 +7252,9 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
       <div 
         id="balance-oasis-capture-card" 
         style={{ width: '700px', minHeight: '620px', position: 'absolute', top: '-10000px', left: '-10000px' }} 
-        className="bg-[#142345] text-white p-12 pr-12 pl-12 rounded-[2.5rem] border-4 border-[#C49E3A] relative font-sans text-right"
+        className="bg-[#142345] text-white p-12 pr-12 pl-12 rounded-3xl border-4 border-[#C49E3A] relative font-sans text-right"
       >
-        <div className="absolute inset-0 bg-gradient-to-tr from-[#051025] to-slate-950 opacity-95 rounded-[2.3rem] -z-10" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#051025] to-slate-950 opacity-95 rounded-3xl -z-10" />
         {/* Decorative elements */}
         <div className="absolute top-10 right-10 w-24 h-24 rounded-full border border-amber-500/10 -z-5" />
         <div className="absolute bottom-10 left-10 w-40 h-40 rounded-full border border-[#C49E3A]/10 -z-5" />
@@ -7336,10 +7336,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
         <div 
           id="single-exercise-capture-card" 
           style={{ width: '700px', minHeight: '620px', position: 'absolute', top: '-10000px', left: '-10000px' }} 
-          className="bg-[#112145] text-white p-12 pr-12 pl-12 rounded-[2rem] border border-slate-800/80 relative font-tajawal text-right shadow-2xl"
+          className="bg-[#112145] text-white p-12 pr-12 pl-12 rounded-3xl border border-slate-800/80 relative font-tajawal text-right shadow-2xl"
         >
           {/* Elegant background gradients - strictly dark mode tech-theme to match Bright Companion */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#091530] via-[#020617] to-[#020617] rounded-[1.9rem] -z-10" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#091530] via-[#020617] to-[#020617] rounded-3xl -z-10" />
           
           {/* Subtle architectural abstract decor */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#C49E3A]/5 rounded-full blur-3xl -z-5" />
@@ -7433,7 +7433,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
         <div
           id="unit-summary-capture-card"
           style={{ width: '1000px', position: 'absolute', top: '-10000px', left: '-10000px' }}
-          className="bg-[#0b1736] text-white p-10 rounded-[2rem] border border-slate-700/80 font-tajawal text-right shadow-2xl space-y-6"
+          className="bg-[#0b1736] text-white p-10 rounded-3xl border border-slate-700/80 font-tajawal text-right shadow-2xl space-y-6"
           dir="rtl"
         >
           {/* Academy Header */}

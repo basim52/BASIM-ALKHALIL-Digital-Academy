@@ -297,7 +297,7 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-10 bg-gradient-to-tr from-[#002147] via-[#002147] to-[#1e1b4b] p-6 rounded-[2.5rem] text-white overflow-hidden relative shadow-xl border-l-4 border-[#C49E3A]/60"
+          className="mb-10 bg-gradient-to-tr from-[#002147] via-[#002147] to-[#1e1b4b] p-6 rounded-3xl text-white overflow-hidden relative shadow-xl border-l-4 border-[#C49E3A]/60"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-[#C49E3A]/10 rounded-full blur-2xl pointer-events-none" />
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -345,7 +345,7 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
                 key={act.id}
                 whileHover={{ scale: 1.02, y: -4 }}
                 onClick={() => onNavigate(act.id)}
-                className="bg-white border border-slate-200/80 rounded-[2.5rem] p-6 lg:p-8 flex flex-col justify-between shadow-xs hover:shadow-xl transition-all cursor-pointer relative group overflow-hidden"
+                className="bg-white border border-slate-200/80 rounded-3xl p-6 lg:p-8 flex flex-col justify-between shadow-xs hover:shadow-xl transition-all cursor-pointer relative group overflow-hidden"
               >
                 {/* Micro corner highlights */}
                 <div className={`absolute top-0 right-0 w-32 h-32 ${act.bgColor} rounded-full blur-2xl opacity-50 group-hover:scale-125 transition-transform duration-500`} />
@@ -404,7 +404,7 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
         </div>
 
         {/* Co-op / Educational Info Footer Banner */}
-        <div className="mt-12 bg-[#002147] rounded-[2.5rem] p-6 lg:p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative shadow-xl border-b-4 border-[#C49E3A]">
+        <div className="mt-12 bg-[#002147] rounded-3xl p-6 lg:p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative shadow-xl border-b-4 border-[#C49E3A]">
           <div className="absolute right-0 bottom-0 top-0 w-1/3 bg-[#C49E3A]/5 rounded-l-full blur-2xl pointer-events-none" />
           
           <div className="space-y-2 max-w-2xl relative z-10">

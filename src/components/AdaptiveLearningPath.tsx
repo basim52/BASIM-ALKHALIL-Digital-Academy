@@ -72,6 +72,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisData, setAnalysisData] = useState<GapAnalysisData | null>(null);
+  const [loadError, setLoadError] = useState('');
 
   // Active Drill State
   const [activeDrillIndex, setActiveDrillIndex] = useState<number | null>(null);
@@ -108,10 +109,14 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
           ]
         })
       });
-      const data = await res.json();
-      setAnalysisData(data);
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data || !Array.isArray(data.detectedGaps)) throw new Error('BAD_RESPONSE');
+      setAnalysisData({ ...data, skillRadar: data.skillRadar || {}, actionPlanAr: Array.isArray(data.actionPlanAr) ? data.actionPlanAr : [] });
+      setLoadError('');
     } catch (e) {
       console.error(e);
+      setAnalysisData(null);
+      setLoadError('تعذّر تحميل التحليل الآن. تأكد من تسجيل الدخول والاتصال ثم أعد المحاولة.');
     } finally {
       setLoading(false);
     }
@@ -193,7 +198,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
             </button>
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-3 py-0.5 rounded-full text-xs font-black bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center gap-1">
+                <span className="px-3 py-0.5 rounded-full text-xs font-black bg-[#C49E3A]/20 text-[#E4C77A] border border-[#C49E3A]/30 flex items-center gap-1">
                   <Sparkles className="w-3.5 h-3.5" />
                   {isRtl ? 'الذكاء الاصطناعي التشخيصي والتكيفي' : 'Adaptive AI Diagnostics'}
                 </span>
@@ -211,7 +216,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
             <button
               onClick={fetchGapAnalysis}
               disabled={loading}
-              className="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm flex items-center gap-2 transition-all shadow-lg shadow-indigo-600/20 cursor-pointer disabled:opacity-50"
+              className="px-4 py-2.5 rounded-2xl bg-[#002147] hover:bg-[#C49E3A] text-white font-bold text-sm flex items-center gap-2 transition-all shadow-lg shadow-[#C49E3A]/20 cursor-pointer disabled:opacity-50"
             >
               <RotateCcw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               <span>{isRtl ? 'إعادة الفحص والتشخيص' : 'Re-run Diagnostics'}</span>
@@ -223,8 +228,8 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
         {loading && (
           <div className="flex flex-col items-center justify-center p-16 space-y-4 bg-slate-900/50 border border-slate-800 rounded-3xl">
             <div className="relative">
-              <div className="w-16 h-16 rounded-full border-4 border-indigo-500/20 border-t-indigo-500 animate-spin" />
-              <Brain className="w-7 h-7 text-indigo-400 absolute inset-0 m-auto animate-pulse" />
+              <div className="w-16 h-16 rounded-full border-4 border-[#C49E3A]/20 border-t-indigo-500 animate-spin" />
+              <Brain className="w-7 h-7 text-[#E4C77A] absolute inset-0 m-auto animate-pulse" />
             </div>
             <p className="text-slate-400 font-bold text-sm">
               {isRtl ? 'جاري تحليل الأداء اللغوي واستخراج الثغرات الدقيقة وتوليد التمارين العلاجية...' : 'Analyzing linguistic mastery and pinpointing knowledge gaps...'}
@@ -233,6 +238,12 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
         )}
 
         {/* Main Dashboard Content */}
+        {!loading && !analysisData && loadError && (
+          <div role="alert" className="mx-auto my-8 max-w-md rounded-3xl border border-red-200 bg-red-50 p-5 text-center" dir="rtl">
+            <p className="mb-3 text-sm font-bold text-red-700">{loadError}</p>
+            <button onClick={fetchGapAnalysis} className="rounded-xl bg-[#002147] px-5 py-2 text-xs font-black text-white">إعادة المحاولة</button>
+          </div>
+        )}
         {!loading && analysisData && (
           <div className="space-y-6">
             
@@ -240,12 +251,12 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               
               {/* Overall Mastery */}
-              <div className="bg-gradient-to-br from-indigo-950/60 to-slate-900/80 border border-indigo-800/40 p-5 rounded-3xl relative overflow-hidden">
+              <div className="bg-gradient-to-br from-[#002147]/60 to-slate-900/80 border border-[#C49E3A]/40 p-5 rounded-3xl relative overflow-hidden">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-indigo-300">
+                  <span className="text-xs font-bold text-[#E4C77A]">
                     {isRtl ? 'مؤشر الإتقان العام' : 'Overall Mastery Score'}
                   </span>
-                  <Award className="w-5 h-5 text-indigo-400" />
+                  <Award className="w-5 h-5 text-[#E4C77A]" />
                 </div>
                 <div className="mt-3 flex items-baseline gap-2">
                   <span className="text-4xl font-black text-white">{analysisData.overallMastery}%</span>
@@ -255,22 +266,22 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
                 </div>
                 <div className="w-full bg-slate-800 h-2 rounded-full mt-3 overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-1000"
+                    className="h-full bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] transition-all duration-1000"
                     style={{ width: `${analysisData.overallMastery}%` }}
                   />
                 </div>
               </div>
 
               {/* CEFR Level Evaluation */}
-              <div className="bg-gradient-to-br from-purple-950/60 to-slate-900/80 border border-purple-800/40 p-5 rounded-3xl relative overflow-hidden">
+              <div className="bg-gradient-to-br from-[#002147]/60 to-slate-900/80 border border-[#C49E3A]/40 p-5 rounded-3xl relative overflow-hidden">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-purple-300">
+                  <span className="text-xs font-bold text-[#E4C77A]">
                     {isRtl ? 'المستوى المقدر حالياً' : 'Estimated CEFR Level'}
                   </span>
-                  <Compass className="w-5 h-5 text-purple-400" />
+                  <Compass className="w-5 h-5 text-[#E4C77A]" />
                 </div>
                 <div className="mt-3 flex items-baseline gap-3">
-                  <span className="text-3xl font-black text-purple-300">{analysisData.cefrEstimated}</span>
+                  <span className="text-3xl font-black text-[#E4C77A]">{analysisData.cefrEstimated}</span>
                   <span className="text-xs font-bold text-slate-400">
                     {isRtl ? 'معيار أكسفورد الأوروبي المشترك' : 'Oxford CEFR Aligned'}
                   </span>
@@ -305,7 +316,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
             {/* Skill Radar / Strengths & Weaknesses Breakdown */}
             <div className="bg-slate-900/80 border border-slate-800/80 p-6 rounded-3xl">
               <h2 className="text-base font-black text-white flex items-center gap-2 mb-4">
-                <BarChart3 className="w-5 h-5 text-indigo-400" />
+                <BarChart3 className="w-5 h-5 text-[#E4C77A]" />
                 {isRtl ? 'توزيع الكفاءة عبر المهارات اللغوية الخمس' : '5-Pillar Competency Breakdown'}
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
@@ -320,10 +331,10 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
                   return (
                     <div key={skill} className="p-4 rounded-2xl bg-slate-800/40 border border-slate-700/50 flex flex-col items-center text-center">
                       <span className="text-xs font-black text-slate-300">{isRtl ? skillNames[skill]?.ar : skillNames[skill]?.en}</span>
-                      <span className="text-2xl font-black text-indigo-400 mt-2">{val}%</span>
+                      <span className="text-2xl font-black text-[#E4C77A] mt-2">{val}%</span>
                       <div className="w-full bg-slate-700/50 h-1.5 rounded-full mt-2 overflow-hidden">
                         <div 
-                          className="h-full bg-indigo-500 rounded-full" 
+                          className="h-full bg-[#C49E3A] rounded-full" 
                           style={{ width: `${val}%` }} 
                         />
                       </div>
@@ -356,7 +367,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
                   const severityBadge = {
                     High: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
                     Medium: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-                    Low: 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                    Low: 'bg-[#C49E3A]/20 text-[#E4C77A] border-[#C49E3A]/30'
                   }[gap.severity];
 
                   return (
@@ -364,7 +375,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
                       key={gap.id}
                       className={`border rounded-2xl transition-all ${
                         isOpened
-                          ? 'bg-slate-800/80 border-indigo-500/60 shadow-xl'
+                          ? 'bg-slate-800/80 border-[#C49E3A]/60 shadow-xl'
                           : 'bg-slate-800/30 border-slate-700/60 hover:border-slate-600'
                       }`}
                     >
@@ -380,7 +391,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
                       >
                         <div className="flex items-center gap-3">
                           <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm ${
-                            isResolved ? 'bg-emerald-500/20 text-emerald-400' : 'bg-indigo-500/20 text-indigo-400'
+                            isResolved ? 'bg-emerald-500/20 text-emerald-400' : 'bg-[#C49E3A]/20 text-[#E4C77A]'
                           }`}>
                             {isResolved ? <CheckCircle2 className="w-5 h-5" /> : index + 1}
                           </div>
@@ -402,7 +413,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
                               e.stopPropagation();
                               handleStartDynamicQuiz(gap.topicEn);
                             }}
-                            className="px-3 py-1.5 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-xs font-bold text-indigo-300 flex items-center gap-1.5 transition-all"
+                            className="px-3 py-1.5 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-xs font-bold text-[#E4C77A] flex items-center gap-1.5 transition-all"
                           >
                             <Sparkles className="w-3.5 h-3.5" />
                             <span>{isRtl ? 'اختبار مولد ذكياً' : 'AI Quiz'}</span>
@@ -425,10 +436,10 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
                             className="px-5 pb-5 pt-2 border-t border-slate-700/60 space-y-4"
                           >
                             {/* Educational Explanation Box */}
-                            <div className="p-4 rounded-2xl bg-indigo-950/40 border border-indigo-800/40 flex items-start gap-3">
-                              <Lightbulb className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+                            <div className="p-4 rounded-2xl bg-[#002147]/40 border border-[#C49E3A]/40 flex items-start gap-3">
+                              <Lightbulb className="w-5 h-5 text-[#E4C77A] shrink-0 mt-0.5" />
                               <div className="text-xs text-slate-200 leading-relaxed">
-                                <span className="font-bold text-indigo-300">{isRtl ? 'التفسير الأكاديمي والحل:' : 'Pedagogical Explanation:'} </span>
+                                <span className="font-bold text-[#E4C77A]">{isRtl ? 'التفسير الأكاديمي والحل:' : 'Pedagogical Explanation:'} </span>
                                 {gap.explanationAr}
                               </div>
                             </div>
@@ -436,7 +447,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
                             {/* Question sentence */}
                             <div className="p-4 rounded-2xl bg-slate-900 border border-slate-700/80 space-y-3">
                               <div className="flex items-center justify-between">
-                                <span className="text-xs font-black text-indigo-400 flex items-center gap-1.5">
+                                <span className="text-xs font-black text-[#E4C77A] flex items-center gap-1.5">
                                   <Target className="w-4 h-4" /> {isRtl ? 'التمرين العلاجي المباشر' : 'Remedial Drill'}
                                 </span>
                                 <button
@@ -457,7 +468,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
                                 {gap.remedialDrill.options.map((opt, optIdx) => {
                                   let btnStyle = 'bg-slate-800/80 border-slate-700 text-slate-200 hover:border-slate-500';
                                   if (selectedOption === optIdx) {
-                                    btnStyle = 'bg-indigo-600/30 border-indigo-500 text-indigo-200';
+                                    btnStyle = 'bg-[#002147]/30 border-[#C49E3A]/60 text-[#E4C77A]';
                                   }
                                   if (isAnswerSubmitted) {
                                     if (optIdx === gap.remedialDrill.correctIndex) {
@@ -500,7 +511,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
                                   <button
                                     onClick={() => handleDrillSubmit(gap.remedialDrill.correctIndex, gap.id)}
                                     disabled={selectedOption === null}
-                                    className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-lg shadow-indigo-600/20 cursor-pointer disabled:opacity-50"
+                                    className="px-5 py-2 rounded-xl bg-[#002147] hover:bg-[#C49E3A] text-white text-xs font-bold transition-all shadow-lg shadow-[#C49E3A]/20 cursor-pointer disabled:opacity-50"
                                   >
                                     {isRtl ? 'تأكيد الإجابة' : 'Submit Answer'}
                                   </button>
@@ -538,7 +549,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
             {/* Dynamic AI Generated Quiz Modal / Section */}
             {generatingQuiz && (
               <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 text-center space-y-3">
-                <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto" />
+                <div className="w-10 h-10 border-4 border-[#C49E3A]/60 border-t-transparent rounded-full animate-spin mx-auto" />
                 <p className="text-xs font-bold text-slate-300">
                   {isRtl ? 'جاري توليد كويز ديناميكي مخصص بالذكاء الاصطناعي...' : 'Generating dynamic adaptive AI quiz...'}
                 </p>
@@ -546,10 +557,10 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
             )}
 
             {dynamicQuiz && (
-              <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-950/80 to-slate-900 border border-indigo-700/60 space-y-5 shadow-2xl">
-                <div className="flex items-center justify-between border-b border-indigo-800/40 pb-4">
+              <div className="p-6 rounded-3xl bg-gradient-to-br from-[#002147]/80 to-slate-900 border border-[#C49E3A]/60 space-y-5 shadow-2xl">
+                <div className="flex items-center justify-between border-b border-[#C49E3A]/40 pb-4">
                   <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-indigo-400 bg-indigo-500/20 px-2.5 py-1 rounded-md border border-indigo-500/30">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[#E4C77A] bg-[#C49E3A]/20 px-2.5 py-1 rounded-md border border-[#C49E3A]/30">
                       Dynamic Adaptive Quiz
                     </span>
                     <h3 className="text-lg font-black text-white mt-1">{dynamicQuiz.quizTitle}</h3>
@@ -576,7 +587,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {dynamicQuiz.questions[quizQuestionIndex].options.map((opt: string, i: number) => {
                         let style = 'bg-slate-800/80 border-slate-700 text-slate-200';
-                        if (quizSelectedOption === i) style = 'bg-indigo-600/40 border-indigo-500 text-indigo-100';
+                        if (quizSelectedOption === i) style = 'bg-[#002147]/40 border-[#C49E3A]/60 text-[#E4C77A]';
                         if (quizSubmitted) {
                           if (i === dynamicQuiz.questions[quizQuestionIndex].correctIndex) {
                             style = 'bg-emerald-600/40 border-emerald-500 text-emerald-100 font-bold';
@@ -603,7 +614,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
                         <button
                           onClick={() => handleQuizSubmit(dynamicQuiz.questions[quizQuestionIndex].correctIndex)}
                           disabled={quizSelectedOption === null}
-                          className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs cursor-pointer disabled:opacity-50"
+                          className="px-5 py-2.5 rounded-xl bg-[#002147] hover:bg-[#C49E3A] text-white font-bold text-xs cursor-pointer disabled:opacity-50"
                         >
                           {isRtl ? 'تحقق من الإجابة' : 'Check'}
                         </button>
@@ -620,7 +631,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
 
                     {quizSubmitted && (
                       <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-slate-300">
-                        <span className="font-bold text-indigo-400">الشرح: </span>
+                        <span className="font-bold text-[#E4C77A]">الشرح: </span>
                         {dynamicQuiz.questions[quizQuestionIndex].explanationAr}
                       </div>
                     )}
@@ -636,7 +647,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
                     </p>
                     <button
                       onClick={() => setDynamicQuiz(null)}
-                      className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs"
+                      className="px-6 py-2.5 rounded-xl bg-[#002147] hover:bg-[#C49E3A] text-white font-bold text-xs"
                     >
                       {isRtl ? 'إغلاق والعودة للمسار' : 'Done'}
                     </button>
@@ -654,7 +665,7 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {analysisData.actionPlanAr.map((plan, i) => (
                   <div key={i} className="p-4 rounded-2xl bg-slate-800/40 border border-slate-700/50 flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 font-black text-xs flex items-center justify-center shrink-0">
+                    <span className="w-6 h-6 rounded-full bg-[#C49E3A]/20 text-[#E4C77A] font-black text-xs flex items-center justify-center shrink-0">
                       {i + 1}
                     </span>
                     <p className="text-xs font-semibold text-slate-300 leading-relaxed">{plan}</p>

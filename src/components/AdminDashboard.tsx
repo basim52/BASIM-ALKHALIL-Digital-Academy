@@ -631,7 +631,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Students list column */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white rounded-[2rem] p-6 border border-slate-200 shadow-sm">
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
               <h3 className="text-lg font-black text-[#002147] mb-4 flex items-center gap-2">
                 <Users className="text-[#9a7a2c]" size={18} />
                 {isRtl ? 'قائمة طلاب الأكاديمية' : 'Academy Students List'}
@@ -717,7 +717,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
           {/* Student analysis and report card */}
           <div className="lg:col-span-2 space-y-6">
             {!selectedStudent ? (
-              <div className="bg-white rounded-[2.5rem] border border-slate-200 p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
+              <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
                 <div className="w-20 h-20 bg-[#C49E3A]/10 rounded-full flex items-center justify-center mb-6 text-[#9a7a2c]">
                   <GraduationCap size={40} className="animate-bounce" />
                 </div>
@@ -731,7 +731,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
             ) : (
               <div className="space-y-6">
                 {/* Selected Student profile card with editor */}
-                <div className="bg-white rounded-[2rem] p-6 border border-slate-200 shadow-sm">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-6 border-b border-slate-100">
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-16 rounded-2xl bg-slate-50 p-1 border border-slate-100 shadow-sm shrink-0">
@@ -820,7 +820,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                 {/* Score results and report builder */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Scores List */}
-                  <div className="md:col-span-1 bg-white rounded-[2rem] p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+                  <div className="md:col-span-1 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
                     <div>
                       <h3 className="text-sm font-black text-[#002147] mb-4 flex items-center gap-2">
                         <FileText className="text-[#9a7a2c]" size={16} />
@@ -868,7 +868,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                   </div>
 
                   {/* Diagnostic / AI Output */}
-                  <div className="md:col-span-2 bg-white rounded-[2rem] p-6 border border-slate-200 shadow-sm flex flex-col justify-between min-h-[400px]">
+                  <div className="md:col-span-2 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between min-h-[400px]">
                     <div className="flex-1">
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="text-sm font-black text-[#002147] flex items-center gap-2">
@@ -945,7 +945,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
       )}
 
       {activeTab === 'curriculum_designer' && (
-        <div className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm relative overflow-hidden mb-12">
+        <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden mb-12">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#C49E3A]/10 rounded-full -mr-32 -mt-32 opacity-50 pointer-events-none" />
           
           <div className="relative z-10">
@@ -1003,7 +1003,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
 
               <div className="lg:col-span-3">
                 {designingCurriculum ? (
-                  <div className="flex flex-col items-center justify-center py-20 bg-slate-50 border border-dashed border-slate-200 rounded-[2rem]">
+                  <div className="flex flex-col items-center justify-center py-20 bg-slate-50 border border-dashed border-slate-200 rounded-3xl">
                     <div className="relative mb-6">
                       <div className="w-16 h-16 rounded-full border-4 border-[#C49E3A]/30 border-t-purple-600 animate-spin" />
                       <BrainCircuit className="text-[#9a7a2c] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" size={24} />
@@ -1039,7 +1039,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                       </button>
                     </div>
 
-                    <div id="curriculum-print-area" className="bg-white p-6 rounded-[2rem] border border-slate-100 space-y-6">
+                    <div id="curriculum-print-area" className="bg-white p-6 rounded-3xl border border-slate-100 space-y-6">
                       <div className="border-b border-dashed border-slate-200 pb-4 flex justify-between items-center">
                         <div>
                           <p className="text-[10px] font-black text-slate-400 tracking-widest">{isRtl ? 'أكاديمية باسم الخليل للمستقبليات' : 'BASIM AL KHALIL FUTURE ACADEMY'}</p>
@@ -1082,7 +1082,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-20 bg-slate-50 border border-dashed border-slate-200 rounded-[2rem] opacity-60">
+                  <div className="flex flex-col items-center justify-center py-20 bg-slate-50 border border-dashed border-slate-200 rounded-3xl opacity-60">
                     <Sparkles className="text-[#E4C77A] animate-pulse mb-3" size={36} />
                     <p className="text-xs font-bold text-slate-500">
                       {isRtl ? 'يرجى كتابة موضوع المنهج المقترح بالجانب ثم الضغط على "توليد وتصميم المنهج".' : 'Please input a desired learning subject on the left panel to begin construction.'}
@@ -1096,7 +1096,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
       )}
 
       {activeTab === 'voucher_system' && (
-        <div className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm relative overflow-hidden mb-12">
+        <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden mb-12">
           <div className="absolute top-0 right-0 w-64 h-64 bg-amber-50 rounded-full -mr-32 -mt-32 opacity-50 pointer-events-none" />
           
           <div className="relative z-10">
@@ -1173,7 +1173,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
 
               {/* List Column */}
               <div className="lg:col-span-2">
-                <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 min-h-[350px]">
+                <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 min-h-[350px]">
                   <h4 className="text-sm font-black text-[#002147] mb-4 flex items-center gap-2">
                     <Hash size={16} className="text-[#002147]" />
                     {isRtl ? 'سجل الأكواد التي تم توليدها مؤخراً' : 'Recently Generated Voucher Codes'}
@@ -1244,7 +1244,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
         <>
           {/* Diagnostics Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-        <div className="bg-[#002147] p-8 rounded-[2.5rem] shadow-xl text-white">
+        <div className="bg-[#002147] p-8 rounded-3xl shadow-xl text-white">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
               <Activity className="text-emerald-400" size={24} />
@@ -1274,7 +1274,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
           </div>
         </div>
 
-        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col justify-center">
+        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-center">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 bg-[#C49E3A]/10 rounded-2xl flex items-center justify-center">
               <Users className="text-[#9a7a2c]" size={24} />
@@ -1291,7 +1291,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-8">
-          <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm">
+          <section className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-black text-[#002147] flex items-center gap-3">
                 <Activity className="text-[#9a7a2c]" />
@@ -1321,7 +1321,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
           </section>
 
           {/* Aboud Statistics Card */}
-          <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+          <section className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden">
              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16 opacity-50" />
              <h3 className="text-xl font-black text-[#002147] mb-6 flex items-center gap-3 relative">
                <Activity className="text-emerald-500" />
@@ -1333,7 +1333,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
              </div>
           </section>
 
-          <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+          <section className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden">
              <div className="absolute top-0 right-0 w-32 h-32 bg-[#C49E3A]/10 rounded-full -mr-16 -mt-16 opacity-50" />
              <h3 className="text-xl font-black text-[#002147] mb-6 flex items-center gap-3 relative">
                <ShieldCheck className="text-[#9a7a2c]" />
@@ -1375,7 +1375,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
              </div>
           </section>
 
-          <section className="bg-gradient-to-br from-[#002147] to-[#003366] rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden">
+          <section className="bg-gradient-to-br from-[#002147] to-[#003366] rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16" />
              <div className="space-y-6 relative">
                 <div>
@@ -1404,7 +1404,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
         </div>
 
         <div className="lg:col-span-2 space-y-8">
-          <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+          <section className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#C49E3A]/10 rounded-full -mr-16 -mt-16 opacity-50" />
             <h3 className="text-xl font-black text-[#002147] mb-6 flex items-center gap-3 relative">
               <Bell className="text-orange-500" />
@@ -1429,7 +1429,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
             </div>
           </section>
 
-          <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm">
+          <section className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
               <h3 className="text-xl font-black text-[#002147] flex items-center gap-3">
                 <BrainCircuit className="text-[#9a7a2c]" />
@@ -1460,7 +1460,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                   ref={reportRef}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-slate-50 p-10 rounded-[3rem] border border-slate-100 shadow-sm relative overflow-hidden"
+                  className="bg-slate-50 p-10 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden"
                 >
                   <div className="prose prose-slate max-w-none custom-markdown-content font-arabic leading-relaxed prose-headings:text-[#002147] prose-headings:font-black prose-p:text-slate-600 prose-strong:text-[#C49E3A]">
                     <ReactMarkdown>{analysisResult}</ReactMarkdown>
@@ -1470,7 +1470,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
             )}
           </section>
 
-          <section className="bg-[#002147] rounded-[2.5rem] p-8 md:p-12 text-white overflow-hidden relative">
+          <section className="bg-[#002147] rounded-3xl p-8 md:p-12 text-white overflow-hidden relative">
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#002147]/20 blur-[100px] pointer-events-none" />
             <div className="relative z-10">
               <h3 className="text-2xl font-black mb-8 flex items-center gap-3">

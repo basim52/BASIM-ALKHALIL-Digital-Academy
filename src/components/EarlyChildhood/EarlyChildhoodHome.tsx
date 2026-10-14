@@ -501,7 +501,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
               <motion.div 
                 initial={{ scale: 0.9, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
-                className="bg-white w-full max-w-4xl rounded-[3rem] shadow-2xl relative flex flex-col overflow-hidden"
+                className="bg-white w-full max-w-4xl rounded-3xl shadow-2xl relative flex flex-col overflow-hidden"
               >
                   <header className="p-8 bg-[#002147] text-white flex items-center justify-between">
                      <div className="flex items-center gap-4">
@@ -531,7 +531,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
                        const canAfford = (profile?.points || 0) >= item.price;
 
                        return (
-                         <div key={item.id} className={`p-6 rounded-[2.5rem] border-4 flex flex-col items-center gap-4 transition-all ${isCurrent ? 'border-amber-400 bg-amber-50' : 'border-slate-50 bg-slate-50'}`}>
+                         <div key={item.id} className={`p-6 rounded-3xl border-4 flex flex-col items-center gap-4 transition-all ${isCurrent ? 'border-amber-400 bg-amber-50' : 'border-slate-50 bg-slate-50'}`}>
                             <div className="text-6xl mb-2">{item.icon}</div>
                             <h4 className="font-black text-[#002147]">{isRtl ? item.nameAr : item.name}</h4>
                             
@@ -569,7 +569,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
             exit={{ opacity: 0, scale: 0.5 }}
             className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-emerald-500/20 backdrop-blur-md"
           >
-            <div className="bg-white p-12 rounded-[5rem] text-center shadow-2xl relative overflow-hidden">
+            <div className="bg-white p-12 rounded-3xl text-center shadow-2xl relative overflow-hidden">
                <motion.div 
                  animate={{ rotate: 360 }}
                  transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
@@ -589,15 +589,9 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
 
       <header className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 mb-8 md:mb-16">
         <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-start">
-          <button 
-            onClick={onBack}
-            className="md:hidden self-start flex items-center gap-2 text-slate-400 hover:text-[#002147] transition-all group mb-2"
-          >
-            <ArrowLeft size={20} className={isRtl ? 'rotate-180' : ''} />
-          </button>
           <motion.div 
             whileHover={{ scale: 1.1, rotate: 5 }}
-            className="w-16 md:w-24 h-16 md:h-24 bg-[#002147] text-white rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shadow-xl relative overflow-hidden"
+            className="w-16 md:w-24 h-16 md:h-24 bg-[#002147] text-white rounded-[1.5rem] md:rounded-3xl flex items-center justify-center shadow-xl relative overflow-hidden"
           >
             <TrendingUp className="w-8 h-8 md:w-10 md:h-10" />
           </motion.div>
@@ -614,14 +608,6 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
         </div>
 
         <div className="flex gap-2 items-center">
-          <button 
-            onClick={onBack}
-            className="hidden md:flex items-center gap-2 px-5 py-3 rounded-2xl bg-white border-2 border-slate-100 text-[#002147] hover:border-[#002147]/20 transition-all shadow-sm mr-2"
-          >
-            <ArrowLeft size={18} className={isRtl ? 'rotate-180' : ''} />
-            <span className="font-black text-sm uppercase tracking-widest">{isRtl ? 'رجوع' : 'Back'}</span>
-          </button>
-
           <button 
             onClick={() => setShowStickerBook(true)}
             className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-amber-50 text-amber-600 border-2 border-amber-100 hover:bg-amber-100 transition-all shadow-sm"
@@ -666,7 +652,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
               <motion.div 
                 initial={{ scale: 0.9, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
-                className="bg-slate-50 w-full max-w-6xl h-[90vh] rounded-[3rem] shadow-2xl relative flex flex-col overflow-hidden"
+                className="bg-slate-50 w-full max-w-6xl h-[90vh] rounded-3xl shadow-2xl relative flex flex-col overflow-hidden"
               >
                  <header className="p-8 bg-white border-b border-slate-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-4">
@@ -693,7 +679,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
                        </div>
                        <div className="lg:col-span-6 space-y-8">
                           <ParentAIInsights lang={lang} studentName={profile?.displayName || 'Child'} studentLevel="Early Foundation" />
-                          <div className="bg-white p-8 rounded-[3rem] border-4 border-slate-50 shadow-xl">
+                          <div className="bg-white p-8 rounded-3xl border-4 border-slate-50 shadow-xl">
                              <h4 className="text-xl font-black text-[#002147] mb-4 flex items-center gap-2">
                                 <Star className="text-yellow-500" size={20} />
                                 {isRtl ? 'أبرز الإنجازات' : 'Top Achievements'}
@@ -728,7 +714,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
             exit={{ opacity: 0, scale: 0.95 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#002147]/40 backdrop-blur-sm"
           >
-            <motion.div className="bg-white rounded-[2rem] md:rounded-[3rem] p-8 md:p-12 shadow-2xl max-w-4xl w-full relative">
+            <motion.div className="bg-white rounded-3xl md:rounded-3xl p-8 md:p-12 shadow-2xl max-w-4xl w-full relative">
               <button 
                 onClick={() => setShowProgress(false)}
                 className="absolute top-6 right-6 w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"
@@ -742,7 +728,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                <div className="flex flex-col items-center text-center p-6 bg-yellow-50 rounded-[2rem] border-2 border-yellow-100/50 shadow-sm">
+                <div className="flex flex-col items-center text-center p-6 bg-yellow-50 rounded-3xl border-2 border-yellow-100/50 shadow-sm">
                   <div className="w-16 h-16 bg-yellow-400 text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-yellow-200">
                     <Star className="w-8 h-8" fill="currentColor" />
                   </div>
@@ -750,7 +736,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{isRtl ? 'كلمة تعلمت' : 'Words Learned'}</span>
                 </div>
                 
-                <div className="flex flex-col items-center text-center p-6 bg-[#C49E3A]/10 rounded-[2rem] border-2 border-[#C49E3A]/50 shadow-sm">
+                <div className="flex flex-col items-center text-center p-6 bg-[#C49E3A]/10 rounded-3xl border-2 border-[#C49E3A]/50 shadow-sm">
                   <div className="w-16 h-16 bg-[#C49E3A] text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-[#C49E3A]/30">
                     <Mic className="w-8 h-8" />
                   </div>
@@ -758,7 +744,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{isRtl ? 'نقاط النطق' : 'Speech Score'}</span>
                 </div>
 
-                <div className="flex flex-col items-center text-center p-6 bg-emerald-50 rounded-[2rem] border-2 border-emerald-100/50 shadow-sm">
+                <div className="flex flex-col items-center text-center p-6 bg-emerald-50 rounded-3xl border-2 border-emerald-100/50 shadow-sm">
                   <div className="w-16 h-16 bg-emerald-500 text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-emerald-200">
                     <Trophy className="w-8 h-8" />
                   </div>
@@ -766,7 +752,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{isRtl ? 'مستوى منجز' : 'Levels Done'}</span>
                 </div>
 
-                <div className="flex flex-col items-center text-center p-6 bg-rose-50 rounded-[2rem] border-2 border-rose-100/50 shadow-sm">
+                <div className="flex flex-col items-center text-center p-6 bg-rose-50 rounded-3xl border-2 border-rose-100/50 shadow-sm">
                   <div className="w-16 h-16 bg-rose-500 text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-rose-200">
                     <Clock className="w-8 h-8" />
                   </div>
@@ -775,7 +761,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
                 </div>
               </div>
 
-              <div className="mt-10 p-6 bg-[#002147] text-white rounded-[2rem] flex items-center justify-between">
+              <div className="mt-10 p-6 bg-[#002147] text-white rounded-3xl flex items-center justify-between">
                 <div>
                   <h3 className="font-black text-xl mb-1">{isRtl ? 'طاقة التعلم' : 'Learning Energy'}</h3>
                   <div className="w-48 h-3 bg-white/20 rounded-full overflow-hidden">
@@ -830,7 +816,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
         <div className="hidden lg:grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           
           {/* Daily Quests Box */}
-          <div className={`${showBasilTip ? 'lg:col-span-7' : 'lg:col-span-12'} bg-white/95 backdrop-blur-md p-6 rounded-[2.5rem] border border-slate-200/80 shadow-md transition-all duration-300`}>
+          <div className={`${showBasilTip ? 'lg:col-span-7' : 'lg:col-span-12'} bg-white/95 backdrop-blur-md p-6 rounded-3xl border border-slate-200/80 shadow-md transition-all duration-300`}>
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-2xl bg-amber-400/20 text-yellow-600 flex items-center justify-center">
@@ -926,7 +912,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
 
           {/* Basil's Tip Box (with close X button & localStorage persistence) */}
           {showBasilTip && (
-            <div className="lg:col-span-5 bg-gradient-to-br from-[#002147] via-[#002c5f] to-[#001733] p-6 rounded-[2.5rem] text-white overflow-hidden relative shadow-lg border-2 border-[#C49E3A]/40 transition-all duration-300">
+            <div className="lg:col-span-5 bg-gradient-to-br from-[#002147] via-[#002c5f] to-[#001733] p-6 rounded-3xl text-white overflow-hidden relative shadow-lg border-2 border-[#C49E3A]/40 transition-all duration-300">
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C49E3A] flex items-center gap-1.5">
@@ -1074,7 +1060,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setActiveLesson('magic-story')}
-          className="w-full bg-gradient-to-r from-[#002147] via-[#002147] to-[#002147] text-white rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-16 text-start relative overflow-hidden group shadow-2xl"
+          className="w-full bg-gradient-to-r from-[#002147] via-[#002147] to-[#002147] text-white rounded-3xl md:rounded-3xl p-8 md:p-16 text-start relative overflow-hidden group shadow-2xl"
         >
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-4">
@@ -1128,7 +1114,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-6xl mx-auto mb-10 bg-gradient-to-br from-amber-50 to-orange-50/50 p-8 rounded-[3rem] shadow-sm border border-amber-200/60 flex flex-col md:flex-row items-center justify-between gap-6"
+        className="max-w-6xl mx-auto mb-10 bg-gradient-to-br from-amber-50 to-orange-50/50 p-8 rounded-3xl shadow-sm border border-amber-200/60 flex flex-col md:flex-row items-center justify-between gap-6"
       >
         <div className={`text-center md:text-start ${isRtl ? 'md:text-right' : 'md:text-left'}`}>
           <h2 className="text-xl md:text-2xl font-black text-[#002147] mb-1 flex items-center gap-2 justify-center md:justify-start">
@@ -1164,7 +1150,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-6xl mx-auto mb-10 bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 flex flex-col items-center"
+          className="max-w-6xl mx-auto mb-10 bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center"
         >
           <h2 className="text-xl md:text-2xl font-black text-[#002147] mb-6 text-center">
             {isRtl ? 'كيف تشعر اليوم يا بطل؟' : 'How are you feeling today, Champ?'}
@@ -1229,7 +1215,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
                       whileHover={course.unlocked ? { y: -8, scale: 1.05, rotate: isEven ? -2 : 2 } : {}}
                       whileTap={course.unlocked ? { scale: 0.95 } : {}}
                       onClick={() => course.unlocked && setActiveLesson(course.id)}
-                      className={`relative bg-white rounded-3xl md:rounded-[4rem] p-8 md:p-12 text-center border-2 transition-all flex flex-col md:flex-row items-center gap-8 group overflow-hidden max-w-2xl w-full shadow-lg ${
+                      className={`relative bg-white rounded-3xl md:rounded-3xl p-8 md:p-12 text-center border-2 transition-all flex flex-col md:flex-row items-center gap-8 group overflow-hidden max-w-2xl w-full shadow-lg ${
                         course.unlocked 
                         ? `border-slate-50 hover:border-[#002147]/10 ${course.shadow}` 
                         : 'border-slate-100 opacity-60 grayscale'
@@ -1243,7 +1229,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
                         </div>
                       )}
 
-                      <div className={`w-24 md:w-40 h-24 md:h-40 ${course.color} text-white rounded-[2rem] md:rounded-[3rem] flex items-center justify-center shadow-2xl transition-transform group-hover:rotate-12 group-hover:scale-110 shrink-0`}>
+                      <div className={`w-24 md:w-40 h-24 md:h-40 ${course.color} text-white rounded-3xl md:rounded-3xl flex items-center justify-center shadow-2xl transition-transform group-hover:rotate-12 group-hover:scale-110 shrink-0`}>
                         <course.icon className="w-12 h-12 md:w-20 md:h-20" strokeWidth={2.5} />
                       </div>
 

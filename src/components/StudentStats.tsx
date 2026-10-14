@@ -83,7 +83,7 @@ export const StudentStats = ({ lang, userId, points, level, onNavigateToAdaptive
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex items-center gap-6">
+        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex items-center gap-6">
           <div className="w-16 h-16 bg-[#C49E3A]/10 rounded-3xl flex items-center justify-center text-[#9a7a2c]">
             <Clock size={32} />
           </div>
@@ -93,7 +93,7 @@ export const StudentStats = ({ lang, userId, points, level, onNavigateToAdaptive
           </div>
         </div>
 
-        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex items-center gap-6">
+        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex items-center gap-6">
           <div className="w-16 h-16 bg-emerald-50 rounded-3xl flex items-center justify-center text-emerald-600">
             <BookCheck size={32} />
           </div>
@@ -103,7 +103,7 @@ export const StudentStats = ({ lang, userId, points, level, onNavigateToAdaptive
           </div>
         </div>
 
-        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex items-center gap-6">
+        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex items-center gap-6">
           <div className="w-16 h-16 bg-orange-50 rounded-3xl flex items-center justify-center text-orange-600">
             <TrendingUp size={32} />
           </div>
@@ -114,7 +114,7 @@ export const StudentStats = ({ lang, userId, points, level, onNavigateToAdaptive
         </div>
       </div>
 
-      <section className="bg-white rounded-[3rem] p-10 border border-slate-200 shadow-sm">
+      <section className="bg-white rounded-3xl p-10 border border-slate-200 shadow-sm">
         <div className="flex justify-between items-center mb-10">
           <h3 className="text-xl font-black text-[#002147] flex items-center gap-3">
             <Trophy className="text-[#C49E3A]" />

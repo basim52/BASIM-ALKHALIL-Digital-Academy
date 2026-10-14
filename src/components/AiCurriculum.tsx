@@ -4644,7 +4644,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full text-right" dir={isRtl ? 'rtl' : 'ltr'}>
         {/* Left Column: Lesson card details */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-6 space-y-6">
+          <div className="bg-[#00274f] border border-white/10 rounded-3xl p-6 space-y-6">
             <div className="flex justify-between items-start gap-4">
               <div className="flex-1 text-right">
                 <span className="px-2.5 py-0.5 bg-amber-500/10 text-amber-300 border border-amber-500/15 rounded-full text-[10px] font-black uppercase tracking-widest">{trackName}</span>
@@ -4753,7 +4753,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
           {activeWorkspaceTab === 'chapters' ? (
             <>
               {/* Chapters Panel */}
-              <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-6 space-y-6">
+              <div className="bg-[#00274f] border border-white/10 rounded-3xl p-6 space-y-6">
                 {/* Chapter Navigator Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-4">
                   <div className="text-right flex-1">
@@ -4931,7 +4931,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
           ) : activeWorkspaceTab === 'sandbox' ? (
             <>
               {/* Challenge list */}
-              <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-6 space-y-6">
+              <div className="bg-[#00274f] border border-white/10 rounded-3xl p-6 space-y-6">
                 <div>
                   <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">{lesson.quest_card.section_title}</span>
                   <h3 className="text-xl font-black text-white mt-1 leading-tight">{lesson.quest_card.activity_name}</h3>
@@ -4987,7 +4987,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
               </div>
 
               {/* Dynamic Interactive AI Simulator Console */}
-              <div className="bg-slate-950 border border-white/10 rounded-[2rem] p-6 space-y-4 font-mono relative overflow-hidden">
+              <div className="bg-slate-950 border border-white/10 rounded-3xl p-6 space-y-4 font-mono relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
                 
                 <div className="flex justify-between items-center border-b border-white/5 pb-3">
@@ -5102,7 +5102,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
             </>
           ) : (
             /* Interactive Advanced Level Unit Quiz View */
-            <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-6 space-y-6">
+            <div className="bg-[#00274f] border border-white/10 rounded-3xl p-6 space-y-6">
               <div className="flex justify-between items-center border-b border-white/5 pb-4">
                 <div>
                   <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">
@@ -5457,7 +5457,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
     return (
       <div id="pro_workspace_container" className="space-y-8 text-right" dir="rtl">
         {/* Course Interactive Header */}
-        <div className="bg-[#00274f] border border-amber-500/20 rounded-[2rem] p-6 md:p-8 relative overflow-hidden">
+        <div className="bg-[#00274f] border border-amber-500/20 rounded-3xl p-6 md:p-8 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl" />
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
             <div className="space-y-3 text-right">
@@ -5516,7 +5516,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
           <div className="lg:col-span-5 space-y-6">
             
             {/* The Core Content Document */}
-            <div className="bg-[#00274f] border border-white/5 rounded-[2.5rem] p-8 space-y-6 relative">
+            <div className="bg-[#00274f] border border-white/5 rounded-3xl p-8 space-y-6 relative">
               <div className="flex items-center gap-3 border-b border-white/10 pb-4 justify-start">
                 <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
                   <BookOpen size={16} />
@@ -5544,7 +5544,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
             </div>
 
             {/* Quick Practice Tip */}
-            <div className="bg-gradient-to-br from-[#0c1328] to-[#040813] border border-white/5 rounded-[2.5rem] p-8 space-y-4">
+            <div className="bg-gradient-to-br from-[#0c1328] to-[#040813] border border-white/5 rounded-3xl p-8 space-y-4">
               <h4 className="text-sm font-black text-white flex items-center gap-2 justify-start">
                 <Info size={16} className="text-amber-400 animate-bounce" />
                 {isRtl ? '💡 نصيحة التطبيق العملي للدرس' : '💡 Context Optimization advice'}
@@ -5567,7 +5567,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
           <div className="lg:col-span-7 space-y-6">
             
             {/* Mega-Prompt Builder Panel */}
-            <div className="bg-[#00274f] border border-white/5 rounded-[2.5rem] p-8 space-y-6 relative">
+            <div className="bg-[#00274f] border border-white/5 rounded-3xl p-8 space-y-6 relative">
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div className="flex items-center gap-3 justify-start">
                   <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
@@ -5712,7 +5712,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
 
             {/* Compiled Prompt & Output Terminal Display */}
             {(proCompiledPrompt || proPlaygroundOutput) && (
-              <div className="bg-[#001a38] border border-white/5 rounded-[2.5rem] p-6 space-y-6">
+              <div className="bg-[#001a38] border border-white/5 rounded-3xl p-6 space-y-6">
                 
                 {/* Compiled Command */}
                 {proCompiledPrompt && (
@@ -5752,7 +5752,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
             )}
 
             {/* Bottom Actions of Lesson */}
-            <div className="bg-gradient-to-r from-emerald-500/10 to-[#C49E3A]/10 border border-emerald-500/30 p-6 rounded-[2.5rem] flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="bg-gradient-to-r from-emerald-500/10 to-[#C49E3A]/10 border border-emerald-500/30 p-6 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-right">
                 <h5 className="text-sm font-black text-white">{isRtl ? 'هل قمت ببناء وفحص تعاويذ هذا المبحث بنجاح؟' : 'Have you completed prompt compilation requirements?'}</h5>
                 <p className="text-xs text-slate-400 mt-1">{isRtl ? 'احرص على مطابقة محاور الدرس السلوكي واستنباط الفوارق العمليّة.' : 'Mark the lesson complete to progress your Certified Prompt Engineer journey.'}</p>
@@ -5845,7 +5845,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
               className="space-y-10 font-sans"
             >
               {/* Mission Card */}
-              <div className="relative overflow-hidden bg-gradient-to-r from-[#0d1e3d] to-[#071329] border border-white/10 rounded-[2.5rem] p-8 md:p-12 shadow-2xl">
+              <div className="relative overflow-hidden bg-gradient-to-r from-[#0d1e3d] to-[#071329] border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#C49E3A]/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl pointer-events-none" />
                 <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center justify-between">
@@ -6034,7 +6034,7 @@ The adventure is waiting!`
               {/* Tab 1: Standard Levels Grid */}
               {lobbyTab === 'lessons' && (
                 !(hasCompletedTest || bypassTest) ? (
-                  <div className="bg-[#00274f] border border-amber-500/20 rounded-[2.5rem] p-10 relative overflow-hidden text-right shadow-2xl animate-fade-in w-full" dir="rtl">
+                  <div className="bg-[#00274f] border border-amber-500/20 rounded-3xl p-10 relative overflow-hidden text-right shadow-2xl animate-fade-in w-full" dir="rtl">
                     <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl opacity-30" />
                     <div className="relative z-10 flex flex-col items-center text-center space-y-6 py-6 font-sans">
                       <div className="w-20 h-20 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
@@ -6128,7 +6128,7 @@ The adventure is waiting!`
                     <div id="pro_main_dashboard" className="space-y-12 text-right animate-fade-in animate-duration-300" dir="rtl">
                       
                       {/* Secondary Pro Sub-Tabs */}
-                      <div className="flex flex-wrap items-center justify-center gap-3 bg-slate-950/60 p-2.5 rounded-[2rem] border border-white/5 max-w-5xl mx-auto shadow-2xl">
+                      <div className="flex flex-wrap items-center justify-center gap-3 bg-slate-950/60 p-2.5 rounded-3xl border border-white/5 max-w-5xl mx-auto shadow-2xl">
                         <button
                           onClick={() => setProSubTab('dashboard')}
                           className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black transition-all ${proSubTab === 'dashboard' ? 'bg-amber-500 text-slate-950 font-sans shadow-lg shadow-amber-500/10' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
@@ -6163,7 +6163,7 @@ The adventure is waiting!`
                       {proSubTab === 'dashboard' && (
                         <div className="space-y-12 text-right">
                           {/* Certified Pro Dashboard Banner */}
-                          <div className="bg-[#00274f] border border-amber-500/20 rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden">
+                          <div className="bg-[#00274f] border border-amber-500/20 rounded-3xl p-8 md:p-10 relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl" />
                             <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 text-right">
                               <div className="space-y-4">
@@ -6221,7 +6221,7 @@ The adventure is waiting!`
                               return (
                                 <div 
                                   key={level.level_number}
-                                  className="bg-gradient-to-br from-[#0c1830]/80 to-slate-950/40 border border-white/5 rounded-[2.5rem] p-8 space-y-8 relative hover:border-amber-500/10 transition-all"
+                                  className="bg-gradient-to-br from-[#0c1830]/80 to-slate-950/40 border border-white/5 rounded-3xl p-8 space-y-8 relative hover:border-amber-500/10 transition-all"
                                 >
                                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/5 pb-6 text-right">
                                     <div className="space-y-2">
@@ -6311,7 +6311,7 @@ The adventure is waiting!`
                           </div>
 
                           {/* Certified Prompt Engineer Certification Panel */}
-                          <div className="bg-gradient-to-br from-[#121c38] to-[#040815] border border-amber-500/30 rounded-[3rem] p-8 md:p-10 space-y-8 relative overflow-hidden">
+                          <div className="bg-gradient-to-br from-[#121c38] to-[#040815] border border-amber-500/30 rounded-3xl p-8 md:p-10 space-y-8 relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl" />
                             
                             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-amber-500/20 text-right">
@@ -6543,7 +6543,7 @@ The adventure is waiting!`
                                     <div className="space-y-8 text-center w-full">
                                       
                                       {/* Golden Premium Authentic CSS Certificate Frame */}
-                                      <div className="max-w-4xl mx-auto bg-[#fffff8] text-slate-950 p-8 md:p-12 rounded-[2rem] border-[16px] border-[#cbb154] shadow-2xl relative select-text text-center font-serif leading-relaxed" dir="rtl">
+                                      <div className="max-w-4xl mx-auto bg-[#fffff8] text-slate-950 p-8 md:p-12 rounded-3xl border-[16px] border-[#cbb154] shadow-2xl relative select-text text-center font-serif leading-relaxed" dir="rtl">
                                         <div className="absolute top-0 left-0 w-full h-full border-4 border-slate-950 pointer-events-none opacity-25" />
                                         
                                         <div className="space-y-6 relative z-10 py-6">
@@ -6639,7 +6639,7 @@ The adventure is waiting!`
                         <div className="space-y-8 text-right animate-fade-in animate-duration-200">
                           
                           {/* Banner */}
-                          <div className="bg-gradient-to-r from-[#172036] to-[#0a1122] border border-amber-500/10 rounded-[2.5rem] p-8 space-y-4">
+                          <div className="bg-gradient-to-r from-[#172036] to-[#0a1122] border border-amber-500/10 rounded-3xl p-8 space-y-4">
                             <span className="px-3 py-1 bg-amber-500/15 text-amber-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-500/10">
                               {isRtl ? 'قسم القوالب الذهبية الفورية 💎' : 'Instant Gold Prompt Templates 💎'}
                             </span>
@@ -6718,7 +6718,7 @@ The adventure is waiting!`
                                 const compiledPrompt = getCompiledPrompt(currentTemplate.template, templateValues);
 
                                 return (
-                                  <div className="bg-gradient-to-br from-[#0c1328] to-slate-950 border border-white/10 rounded-[2.5rem] p-6 md:p-8 space-y-6 shadow-2xl relative">
+                                  <div className="bg-gradient-to-br from-[#0c1328] to-slate-950 border border-white/10 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative">
                                     
                                     {/* Template Box Design */}
                                     <div className="border-b border-white/5 pb-4">
@@ -6900,7 +6900,7 @@ Output Summary for [${topic}]:
                         <div className="space-y-8 text-right animate-fade-in animate-duration-200">
                           
                           {/* Banner */}
-                          <div className="bg-gradient-to-r from-[#162744] to-[#040815] border border-amber-500/10 rounded-[2.5rem] p-8 space-y-4">
+                          <div className="bg-gradient-to-r from-[#162744] to-[#040815] border border-amber-500/10 rounded-3xl p-8 space-y-4">
                             <span className="px-3 py-1 bg-amber-500/15 text-amber-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-500/10">
                               {isRtl ? 'معمل تركيب الأوامر الهيكلية 🧪' : 'Mega-Prompt Architectural Lab 🧪'}
                             </span>
@@ -6952,7 +6952,7 @@ Output Summary for [${topic}]:
                                 if (!currentMega) return null;
 
                                 return (
-                                  <div className="bg-gradient-to-br from-[#0b1226] to-slate-950 border border-white/10 rounded-[2.5rem] p-6 md:p-8 space-y-6 shadow-2xl relative">
+                                  <div className="bg-gradient-to-br from-[#0b1226] to-slate-950 border border-white/10 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative">
                                     
                                     {/* Header info */}
                                     <div className="border-b border-white/5 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -7067,7 +7067,7 @@ Output Summary for [${topic}]:
                       )}
 
                       {/* Resources Directory */}
-                      <div id="pro_sandbox_playground" className="bg-[#00274f] border border-white/5 rounded-[2.5rem] p-8 space-y-6 text-right">
+                      <div id="pro_sandbox_playground" className="bg-[#00274f] border border-white/5 rounded-3xl p-8 space-y-6 text-right">
                         <div className="flex items-center gap-3 justify-start">
                           <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
                             <BookOpen size={16} />
@@ -7111,7 +7111,7 @@ Output Summary for [${topic}]:
                         {ADVANCED_CURRICULUM_DATA.tracks.map((track, trackIdx) => (
                           <div 
                             key={track.track_name}
-                            className="bg-gradient-to-br from-[#0c1830] to-slate-950/45 border border-white/5 rounded-[2.5rem] p-8 space-y-6 flex flex-col justify-between hover:border-amber-400/20 transition-all hover:-translate-y-1 relative"
+                            className="bg-gradient-to-br from-[#0c1830] to-slate-950/45 border border-white/5 rounded-3xl p-8 space-y-6 flex flex-col justify-between hover:border-amber-400/20 transition-all hover:-translate-y-1 relative"
                           >
                             <div className="space-y-4">
                               <div className="flex items-center justify-between">
@@ -7173,7 +7173,7 @@ Output Summary for [${topic}]:
                         {AI_CURRICULUM_DATA.program_levels.map((level, levelIdx) => (
                           <div 
                             key={level.level_number}
-                            className="bg-slate-900/45 border border-white/5 rounded-[2.5rem] p-8 space-y-6 flex flex-col justify-between hover:border-amber-500/20 transition-all hover:-translate-y-1 relative"
+                            className="bg-slate-900/45 border border-white/5 rounded-3xl p-8 space-y-6 flex flex-col justify-between hover:border-amber-500/20 transition-all hover:-translate-y-1 relative"
                           >
                             <div className="space-y-4">
                               <div className="flex items-center justify-between">
@@ -7240,7 +7240,7 @@ Output Summary for [${topic}]:
               {lobbyTab === 'tools' && (
                 <div className="space-y-6 text-right" dir="rtl">
                   {/* Top Bar with Search & Quick Fav Count */}
-                  <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                  <div className="bg-[#00274f] border border-white/10 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="space-y-2 text-right w-full md:w-auto">
                       <h3 className="text-2xl font-black text-white flex items-center justify-start gap-2">
                         <BookOpen className="text-amber-400" size={24} />
@@ -7268,7 +7268,7 @@ Output Summary for [${topic}]:
                   {/* Search and Category Filter Layout */}
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     {/* Sidebar Categories */}
-                    <div className="lg:col-span-3 bg-slate-900/40 border border-white/5 rounded-[2rem] p-5 space-y-2">
+                    <div className="lg:col-span-3 bg-slate-900/40 border border-white/5 rounded-3xl p-5 space-y-2">
                       <h4 className="text-xs font-black text-amber-400 uppercase tracking-wider mb-4 pb-2 border-b border-white/5">
                         {isRtl ? '📁 أقسام الأدوات العمليّة' : '📁 Category Filter'}
                       </h4>
@@ -7335,7 +7335,7 @@ Output Summary for [${topic}]:
 
                         if (filtered.length === 0) {
                           return (
-                            <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-12 text-center text-slate-400 space-y-3">
+                            <div className="bg-[#00274f] border border-white/10 rounded-3xl p-12 text-center text-slate-400 space-y-3">
                               <Smile className="mx-auto text-amber-400" size={48} />
                               <p className="font-bold text-lg">{isRtl ? 'لا يوجد نتائج تطابق بحثك!' : 'No tools matched your active search filters.'}</p>
                               <p className="text-xs text-slate-500">{isRtl ? 'جرب البحث عن كلمات بديلة أو تغيير الفئات الجانبية.' : 'Try choosing another category or clearing search query.'}</p>
@@ -7459,7 +7459,7 @@ Output Summary for [${topic}]:
                   {activeChallengeView === '52weeks' && (
                     <div className="space-y-6">
                       {/* Milestones Tracker & Profile Header */}
-                      <div className="bg-[#00274f] border border-white/10 rounded-[3rem] p-8 md:p-10 text-right space-y-6 relative overflow-hidden">
+                      <div className="bg-[#00274f] border border-white/10 rounded-3xl p-8 md:p-10 text-right space-y-6 relative overflow-hidden">
                     <div className="absolute left-0 top-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
                     
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -7675,7 +7675,7 @@ Output Summary for [${topic}]:
                       return (
                         <div 
                           key={m.num}
-                          className="bg-slate-900/40 border border-white/5 rounded-[2rem] overflow-hidden transition-all hover:border-white/10"
+                          className="bg-slate-900/40 border border-white/5 rounded-3xl overflow-hidden transition-all hover:border-white/10"
                         >
                           {/* Accordion Header */}
                           <button
@@ -7773,7 +7773,7 @@ Output Summary for [${topic}]:
               {activeChallengeView === '30days' && (
                 <div className="space-y-6 animate-fade-in text-right">
                   {/* Milestones Tracker & Profile Header */}
-                  <div className="bg-[#00274f] border border-white/10 rounded-[3rem] p-8 md:p-10 text-right space-y-6 relative overflow-hidden font-sans">
+                  <div className="bg-[#00274f] border border-white/10 rounded-3xl p-8 md:p-10 text-right space-y-6 relative overflow-hidden font-sans">
                     <div className="absolute left-0 top-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
                     
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -7819,7 +7819,7 @@ Output Summary for [${topic}]:
                   {/* 30-Day Main Interactive Workspace */}
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     {/* Left Panel: Active Selected Day challenge detail card */}
-                    <div className="lg:col-span-5 bg-slate-950/60 border border-white/5 hover:border-amber-500/10 rounded-[2rem] p-6 space-y-6 transition-all h-full min-h-[350px]">
+                    <div className="lg:col-span-5 bg-slate-950/60 border border-white/5 hover:border-amber-500/10 rounded-3xl p-6 space-y-6 transition-all h-full min-h-[350px]">
                       {(() => {
                         const challenges30 = [
                           { day: 1, challenge: isRtl ? "اسأل ChatGPT: 'ما هو الذكاء الاصطناعي؟ اشرح لي كأني في العاشرة.'" : "Ask ChatGPT: 'What is AI? Explain to me as if I am 10 years old.'", tool: "ChatGPT", promptText: "What is artificial intelligence? Explain it to me like I am 10 years old with analogies." },
@@ -7927,7 +7927,7 @@ Output Summary for [${topic}]:
                     </div>
 
                     {/* Right Panel: The 30 Days selection grid */}
-                    <div className="lg:col-span-7 bg-slate-900/30 border border-white/5 rounded-[2rem] p-6 space-y-4">
+                    <div className="lg:col-span-7 bg-slate-900/30 border border-white/5 rounded-3xl p-6 space-y-4">
                       <div className="flex justify-between items-center pb-2">
                         <span className="text-[10px] bg-white/5 text-slate-400 px-3 py-1 rounded font-bold font-mono">
                           {isRtl ? '30 يوماً متتالياً' : '30 Consecutive Days'}
@@ -7978,7 +7978,7 @@ Output Summary for [${topic}]:
               {lobbyTab === 'experiments' && (
                 <div className="space-y-6 text-right animate-fade-in" dir="rtl">
                   {/* Experiments selection controls */}
-                  <div className="bg-[#00274f] border border-white/10 rounded-[2.5rem] p-6 flex flex-col md:flex-row justify-between items-center gap-6">
+                  <div className="bg-[#00274f] border border-white/10 rounded-3xl p-6 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="space-y-1.5">
                       <h3 className="text-2xl font-black text-white flex items-center justify-start gap-2">
                         <Sliders className="text-amber-400" />
@@ -8019,7 +8019,7 @@ Output Summary for [${topic}]:
                   {activeExperimentId === 1 && (
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                       {/* Left: Input parameters */}
-                      <div className="lg:col-span-4 bg-slate-900/40 border border-white/5 rounded-[2rem] p-6 space-y-4">
+                      <div className="lg:col-span-4 bg-slate-900/40 border border-white/5 rounded-3xl p-6 space-y-4">
                         <h4 className="text-md font-black text-white pb-3 border-b border-white/5">
                           {isRtl ? 'إعدادات مقارنة مولدات الصور' : 'Visual Painting Parameters'}
                         </h4>
@@ -8078,7 +8078,7 @@ Output Summary for [${topic}]:
                       </div>
 
                       {/* Right: Comparative Scoreboard and generated mockup */}
-                      <div className="lg:col-span-8 bg-[#00274f] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                      <div className="lg:col-span-8 bg-[#00274f] border border-white/10 rounded-3xl p-8 space-y-6">
                         <div className="flex justify-between items-center border-b border-white/5 pb-4">
                           <h4 className="text-lg font-black text-white">{isRtl ? 'النتائج والدرجات والخصائص الفنية لكل مولد صور' : 'Visual Engine Evaluation Results'}</h4>
                           <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded uppercase font-mono tracking-widest">{isRtl ? 'محاكاة مقارنة دقيقة' : 'SIMULATION MODE'}</span>
@@ -8147,7 +8147,7 @@ Output Summary for [${topic}]:
                             </div>
 
                             {/* Simulated rendering frame (Tailwind customized SVG drawings) */}
-                            <div className="bg-slate-950 rounded-[2rem] p-6 text-center border border-white/5 relative overflow-hidden flex flex-col items-center justify-center min-h-64">
+                            <div className="bg-slate-950 rounded-3xl p-6 text-center border border-white/5 relative overflow-hidden flex flex-col items-center justify-center min-h-64">
                               <span className="text-[10px] text-amber-400 font-black absolute top-4 right-4">{isRtl ? 'لوحة المحاكاة' : 'GENERATION PREVIEW'}</span>
                               <div className="p-4 bg-white/5 rounded-2xl border border-white/5 max-w-md space-y-4">
                                 {/* SVG Painting depending on style */}
@@ -8198,7 +8198,7 @@ Output Summary for [${topic}]:
                   {activeExperimentId === 2 && (
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                       {/* Left side: Task Picker */}
-                      <div className="lg:col-span-4 bg-slate-900/40 border border-white/5 rounded-[2rem] p-6 space-y-4 text-right">
+                      <div className="lg:col-span-4 bg-slate-900/40 border border-white/5 rounded-3xl p-6 space-y-4 text-right">
                         <h4 className="text-md font-black text-white pb-3 border-b border-white/5">{isRtl ? 'منطقة إطلاق الحوار والمقارنة' : 'LLM Instruction Controls'}</h4>
                         
                         <div className="space-y-4">
@@ -8256,7 +8256,7 @@ Output Summary for [${topic}]:
                       </div>
 
                       {/* Right side: Comparative Terminal Dashboard */}
-                      <div className="lg:col-span-8 bg-[#00274f] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                      <div className="lg:col-span-8 bg-[#00274f] border border-white/10 rounded-3xl p-8 space-y-6">
                         <div className="flex justify-between items-center">
                           <h4 className="text-md md:text-lg font-black text-white">{isRtl ? 'مقارنة حية لردود ومميزات النماذج اللغوية الأربعة' : 'Side-by-Side Response Simulator'}</h4>
                           <span className="text-[10px] bg-emerald-500/15 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20 font-mono font-black uppercase">{isRtl ? 'بناء ومقارنة المعايير' : 'CRITERIA DRIVEN'}</span>
@@ -8344,7 +8344,7 @@ Output Summary for [${topic}]:
                   {activeExperimentId === 3 && (
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                       {/* Left: configuration */}
-                      <div className="lg:col-span-5 bg-slate-900/40 border border-white/5 rounded-[2rem] p-6 space-y-4">
+                      <div className="lg:col-span-5 bg-slate-900/40 border border-white/5 rounded-3xl p-6 space-y-4">
                         <h4 className="text-md font-black text-white pb-3 border-b border-white/5">{isRtl ? 'تخليق وتحريك لقطات الفيديو' : 'Video Prompt Generator'}</h4>
                         
                         <div className="space-y-4 text-right">
@@ -8376,7 +8376,7 @@ Output Summary for [${topic}]:
                       </div>
 
                       {/* Right: Video scorecard comparisons */}
-                      <div className="lg:col-span-7 bg-[#00274f] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                      <div className="lg:col-span-7 bg-[#00274f] border border-white/10 rounded-3xl p-8 space-y-6">
                         <div className="flex justify-between items-center border-b border-white/5 pb-4">
                           <h4 className="text-md font-black text-white">{isRtl ? 'مقارنة أمن وجودة عمالقة حركة الفيديو' : 'Video Generation Scorecard'}</h4>
                         </div>
@@ -8416,7 +8416,7 @@ Output Summary for [${topic}]:
                   {/* EXPERIMENT 4: API COST CALCULATOR 📊 */}
                   {activeExperimentId === 4 && (
                     <div className="space-y-6">
-                      <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-6 md:p-8">
+                      <div className="bg-[#00274f] border border-white/10 rounded-3xl p-6 md:p-8">
                         <div className="max-w-3xl mx-auto space-y-6">
                           <div className="text-center space-y-2">
                             <span className="text-xs bg-amber-500/10 text-amber-300 font-bold px-3 py-1 rounded-full border border-amber-500/20 font-mono">
@@ -8574,7 +8574,7 @@ Output Summary for [${topic}]:
                   {/* EXPERIMENT 5: 2025 MODEL COMPARISON 🔍 */}
                   {activeExperimentId === 5 && (
                     <div className="space-y-6 text-right">
-                      <div className="bg-[#00274f] border border-white/10 rounded-[3rem] p-6 md:p-8 space-y-4">
+                      <div className="bg-[#00274f] border border-white/10 rounded-3xl p-6 md:p-8 space-y-4">
                         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                           <div className="space-y-1">
                             <h4 className="text-xl md:text-2xl font-black text-white flex items-center justify-start gap-2">
@@ -8696,7 +8696,7 @@ Output Summary for [${topic}]:
               {lobbyTab === 'family' && (
                 <div className="space-y-6 text-right animate-fade-in" dir="rtl">
                   {/* Family Corner Dashboard Area */}
-                  <div className="bg-[#00274f] border border-white/10 rounded-[3rem] p-8 md:p-10 space-y-6 relative overflow-hidden">
+                  <div className="bg-[#00274f] border border-white/10 rounded-3xl p-8 md:p-10 space-y-6 relative overflow-hidden">
                     <div className="absolute left-0 top-0 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
                     
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-6">
@@ -9076,7 +9076,7 @@ Output Summary for [${topic}]:
               {lobbyTab === 'english' && (
                 <div className="space-y-6 text-right animate-fade-in font-sans" dir="rtl">
                   {/* English Header */}
-                  <div className="bg-[#00274f] border border-white/10 rounded-[3rem] p-8 md:p-10 space-y-6 relative overflow-hidden">
+                  <div className="bg-[#00274f] border border-white/10 rounded-3xl p-8 md:p-10 space-y-6 relative overflow-hidden">
                     <div className="absolute left-0 top-0 w-80 h-80 bg-[#002147]/5 rounded-full blur-3xl pointer-events-none" />
                     
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -9107,7 +9107,7 @@ Output Summary for [${topic}]:
 
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     {/* Left: Interactive Modules with copy hooks */}
-                    <div className="lg:col-span-7 bg-slate-950/60 border border-white/5 rounded-[2rem] p-6 space-y-5">
+                    <div className="lg:col-span-7 bg-slate-950/60 border border-white/5 rounded-3xl p-6 space-y-5">
                       <div className="flex justify-between items-center pb-2 border-b border-white/5">
                         <span className="text-xs text-[#E4C77A] font-black font-mono">5 DYNAMIC PROMPTS</span>
                         <h4 className="text-sm font-black text-white">{isRtl ? '🧪 وحدات التدريب وتعاويذ الـ AI المقترحة:' : '🧪 Core Interactive Learning Prompts:'}</h4>
@@ -9314,7 +9314,7 @@ Output Summary for [${topic}]:
                     </div>
 
                     {/* Right: Suggested Weekly Calendar */}
-                    <div className="lg:col-span-5 bg-slate-900/30 border border-white/5 rounded-[2rem] p-6 space-y-4">
+                    <div className="lg:col-span-5 bg-slate-900/30 border border-white/5 rounded-3xl p-6 space-y-4">
                       <div className="space-y-1.5">
                         <span className="text-[10px] bg-slate-950/80 text-[#E4C77A] px-3 py-1 rounded font-black font-mono">7-DAY STRUCTURE</span>
                         <h4 className="text-sm font-black text-white">{isRtl ? '📅 خطة الالتزام الأسبوعية المقترحة:' : '📅 Suggested Weekly Plan:'}</h4>
@@ -9381,7 +9381,7 @@ Output Summary for [${topic}]:
               {lobbyTab === 'certificate' && (
                 <div className="space-y-6 text-right" dir="rtl">
                   {/* Certificate Dashboard Area */}
-                  <div className="bg-[#00274f] border border-white/10 rounded-[3rem] p-8 md:p-10 space-y-6 relative overflow-hidden">
+                  <div className="bg-[#00274f] border border-white/10 rounded-3xl p-8 md:p-10 space-y-6 relative overflow-hidden">
                     <div className="absolute left-0 top-0 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
                     
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-6">
@@ -9773,7 +9773,7 @@ Output Summary for [${topic}]:
                         </div>
 
                         {/* Interactive scroll preview replica of gold certificate */}
-                        <div id="ai-gold-certificate-card" className="bg-slate-950 border border-white/10 rounded-[3rem] p-8 md:p-12 relative overflow-hidden select-text text-center shadow-2xl">
+                        <div id="ai-gold-certificate-card" className="bg-slate-950 border border-white/10 rounded-3xl p-8 md:p-12 relative overflow-hidden select-text text-center shadow-2xl">
                           {/* Radial Ambient Gold */}
                           <div className="absolute right-[-40px] top-[-40px] w-56 h-56 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
                           <div className="absolute left-[-40px] bottom-[-40px] w-56 h-56 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -9843,7 +9843,7 @@ Output Summary for [${topic}]:
               {lobbyTab === 'printables' && (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                   {/* Printables Menu */}
-                  <div className="lg:col-span-4 bg-slate-900/40 border border-white/5 rounded-[2rem] p-6 space-y-3">
+                  <div className="lg:col-span-4 bg-slate-900/40 border border-white/5 rounded-3xl p-6 space-y-3">
                     <h4 className="text-lg font-black text-white flex items-center gap-2 mb-4 border-b border-white/5 pb-3">
                       <FileText className="text-amber-400" />
                       {isRtl ? 'حقيبة المطبوعات العائلية' : 'Family Printable Materials'}
@@ -9874,7 +9874,7 @@ Output Summary for [${topic}]:
                   <div className="lg:col-span-8 space-y-6">
                     {/* DOCUMENT 1: SAFETY CHARTER */}
                     {selectedPrintable === 'charter' && (
-                      <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                      <div className="bg-[#00274f] border border-white/10 rounded-3xl p-8 space-y-6">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-5">
                           <div>
                             <h3 className="text-2xl font-black text-white flex items-center gap-2">
@@ -9986,7 +9986,7 @@ Output Summary for [${topic}]:
                         </div>
 
                         {/* Visual mockup scroll */}
-                        <div className="bg-slate-950/45 border border-white/5 rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden text-right shadow-inner">
+                        <div className="bg-slate-950/45 border border-white/5 rounded-3xl p-8 md:p-12 relative overflow-hidden text-right shadow-inner">
                           <div className="border-4 border-double border-amber-500/30 p-6 md:p-10 rounded-2xl space-y-6">
                             <div className="text-center border-b border-dashed border-white/10 pb-4">
                               <span className="text-amber-400 text-xs font-black tracking-widest block mb-2">{isRtl ? 'مستقبلي ومعتمد' : 'FUTURE CERTIFIED'}</span>
@@ -10051,7 +10051,7 @@ Output Summary for [${topic}]:
 
                     {/* DOCUMENT 2: GRADUATION CERTIFICATE */}
                     {selectedPrintable === 'certificate' && (
-                      <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                      <div className="bg-[#00274f] border border-white/10 rounded-3xl p-8 space-y-6">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-5">
                           <div>
                             <h3 className="text-2xl font-black text-white flex items-center gap-2">
@@ -10152,7 +10152,7 @@ Output Summary for [${topic}]:
                         </div>
 
                         {/* Medallion certificate style view */}
-                        <div id="ai-printable-certificate-card" className="bg-slate-950/45 border border-white/5 rounded-[2.5rem] p-10 md:p-16 relative overflow-hidden text-center shadow-lg">
+                        <div id="ai-printable-certificate-card" className="bg-slate-950/45 border border-white/5 rounded-3xl p-10 md:p-16 relative overflow-hidden text-center shadow-lg">
                           {/* Circle watermark decorations */}
                           <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
                           <div className="absolute bottom-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
@@ -10190,7 +10190,7 @@ Output Summary for [${topic}]:
 
                     {/* DOCUMENT 3: FAMILY DICTIONARY */}
                     {selectedPrintable === 'dictionary' && (
-                      <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                      <div className="bg-[#00274f] border border-white/10 rounded-3xl p-8 space-y-6">
                         <div className="flex justify-between items-center border-b border-white/5 pb-5">
                           <div>
                             <h3 className="text-2xl font-black text-white flex items-center gap-2">
@@ -10261,7 +10261,7 @@ Output Summary for [${topic}]:
 
                     {/* DOCUMENT 4: CONTINUOUS ROADMAP */}
                     {selectedPrintable === 'roadmap' && (
-                      <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                      <div className="bg-[#00274f] border border-white/10 rounded-3xl p-8 space-y-6">
                         <div className="flex justify-between items-center border-b border-white/5 pb-5">
                           <div>
                             <h3 className="text-2xl font-black text-white flex items-center gap-2">
@@ -10333,7 +10333,7 @@ Output Summary for [${topic}]:
 
                     {/* DOCUMENT 5: INTERACTIVE PATTERN WORKSHEET */}
                     {selectedPrintable === 'worksheet' && (
-                      <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-8 space-y-6 text-right">
+                      <div className="bg-[#00274f] border border-white/10 rounded-3xl p-8 space-y-6 text-right">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-5">
                           <div>
                             <h3 className="text-2xl font-black text-white flex items-center gap-2">
@@ -10555,7 +10555,7 @@ Output Summary for [${topic}]:
               )}
 
               {lobbyTab === 'updates' && (
-                <div className="bg-[#00274f] border border-white/10 rounded-[2.5rem] p-6 lg:p-8 space-y-6 text-right relative overflow-hidden shadow-2xl animate-fade-in w-full" dir={isRtl ? 'rtl' : 'ltr'}>
+                <div className="bg-[#00274f] border border-white/10 rounded-3xl p-6 lg:p-8 space-y-6 text-right relative overflow-hidden shadow-2xl animate-fade-in w-full" dir={isRtl ? 'rtl' : 'ltr'}>
                   <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl opacity-30 pointer-events-none" />
                   
                   {/* Title & Subtitle */}
@@ -10781,7 +10781,7 @@ Output Summary for [${topic}]:
 
               {lobbyTab === 'study_plan' && (
                 !(hasCompletedTest || bypassTest) ? (
-                  <div className="bg-[#00274f] border border-amber-500/20 rounded-[2.5rem] p-10 relative overflow-hidden text-right shadow-2xl animate-fade-in w-full" dir="rtl">
+                  <div className="bg-[#00274f] border border-amber-500/20 rounded-3xl p-10 relative overflow-hidden text-right shadow-2xl animate-fade-in w-full" dir="rtl">
                     <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl opacity-30" />
                     <div className="relative z-10 flex flex-col items-center text-center space-y-6 py-6 font-sans">
                       <div className="w-20 h-20 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
@@ -10818,7 +10818,7 @@ Output Summary for [${topic}]:
                     </div>
                   </div>
                 ) : (
-                <div className="space-y-8 bg-[#00274f] p-8 rounded-[2rem] border border-white/5 relative overflow-hidden">
+                <div className="space-y-8 bg-[#00274f] p-8 rounded-3xl border border-white/5 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full -mr-32 -mt-32 opacity-50 pointer-events-none" />
                   
                   <div className="relative z-10">
@@ -11069,7 +11069,7 @@ Output Summary for [${topic}]:
                       {/* Right: Output Result Dashboard */}
                       <div className="lg:col-span-3">
                         {generatingPlan ? (
-                          <div className="flex flex-col items-center justify-center py-20 bg-white/5 border border-dashed border-white/10 rounded-[2rem]">
+                          <div className="flex flex-col items-center justify-center py-20 bg-white/5 border border-dashed border-white/10 rounded-3xl">
                             <div className="relative mb-6">
                               <div className="w-16 h-16 rounded-full border-4 border-amber-500/10 border-t-amber-500 animate-spin" />
                               <BrainCircuit className="text-amber-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" size={24} />
@@ -11164,7 +11164,7 @@ Output Summary for [${topic}]:
                             </div>
 
                              {customStudyPlan.isGrandPath ? (
-                              <div id="custom-plan-print-area" className="bg-[#001a38] p-6 rounded-[2rem] border border-white/5 space-y-8 select-none text-right">
+                              <div id="custom-plan-print-area" className="bg-[#001a38] p-6 rounded-3xl border border-white/5 space-y-8 select-none text-right">
                                 <div className="border-b border-dashed border-white/10 pb-4 flex justify-between items-center mr-2 ml-2">
                                   <div>
                                     <p className="text-[9px] font-black text-amber-400 tracking-widest uppercase flex items-center gap-1.5 justify-end">
@@ -11310,7 +11310,7 @@ Output Summary for [${topic}]:
                                 </div>
                               </div>
                              ) : (
-                              <div id="custom-plan-print-area" className="bg-[#001a38] p-6 rounded-[2rem] border border-white/5 space-y-6 text-right">
+                              <div id="custom-plan-print-area" className="bg-[#001a38] p-6 rounded-3xl border border-white/5 space-y-6 text-right">
                                 <div className="border-b border-dashed border-white/10 pb-4 flex justify-between items-center mr-2 ml-2">
                                   <div>
                                     <p className="text-[9px] font-black text-amber-400 tracking-widest uppercase">{isRtl ? 'مسار دراسي مخصص بالذكاء الاصطناعي' : 'CUSTOM AI LEARNING DIRECTIVE'}</p>
@@ -11369,7 +11369,7 @@ Output Summary for [${topic}]:
                              )}
                           </div>
                         ) : (
-                          <div className="flex flex-col items-center justify-center py-20 bg-white/[0.02] border border-dashed border-white/5 rounded-[2rem] opacity-60">
+                          <div className="flex flex-col items-center justify-center py-20 bg-white/[0.02] border border-dashed border-white/5 rounded-3xl opacity-60">
                             <Sparkles className="text-amber-400/40 animate-pulse mb-3" size={36} />
                             <p className="text-xs font-bold text-slate-400 text-center max-w-xs leading-relaxed">
                               {isRtl ? 'اكتب موضوع المنهج الذكي الذي ترغب بتوليده على اليمين ثم اضغط على زر توليد لإنشاء الهيكل.' : 'Please enter a desire study subject on the left panel & click generate to architect your personalized learning map.'}
@@ -11406,7 +11406,7 @@ Output Summary for [${topic}]:
               {/* Sidebar Left: Concepts & Activities instructions */}
               <div className="lg:col-span-4 space-y-6">
                 {/* Information Node */}
-                <div className="bg-[#00274f] border border-white/5 rounded-[2rem] p-6 space-y-6">
+                <div className="bg-[#00274f] border border-white/5 rounded-3xl p-6 space-y-6">
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1 text-right">
                       <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">{isRtl ? 'الدرس النشط' : 'ACTIVE EXERCISE'}</span>
@@ -11514,7 +11514,7 @@ Output Summary for [${topic}]:
               </div>
 
               {/* Main Center interactive activity wrapper */}
-              <div className="lg:col-span-8 bg-[#091120] border border-white/5 rounded-[2.5rem] p-6 md:p-10 min-h-[500px] flex flex-col justify-between shadow-2xl relative overflow-hidden">
+              <div className="lg:col-span-8 bg-[#091120] border border-white/5 rounded-3xl p-6 md:p-10 min-h-[500px] flex flex-col justify-between shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/5 rounded-full pointer-events-none blur-3xl" />
                 
                 <div className="space-y-6 relative z-10 w-full">
@@ -11533,7 +11533,7 @@ Output Summary for [${topic}]:
                   {/* LESSON 1 HANDS-ON INTERACTIVE GAME */}
                   {selectedLesson.lesson_number === 1 && (
                     <div className="space-y-6">
-                      <div className="bg-slate-950/60 p-6 md:p-8 rounded-[2rem] border border-white/5 space-y-6 relative overflow-hidden">
+                      <div className="bg-slate-950/60 p-6 md:p-8 rounded-3xl border border-white/5 space-y-6 relative overflow-hidden">
                         <div className="flex items-center justify-between">
                           <div className="space-y-1">
                             <span className="text-[10px] uppercase font-black tracking-widest text-amber-400">
@@ -11604,7 +11604,7 @@ Output Summary for [${topic}]:
                       </div>
 
                       {l1Complete && (
-                        <div className="p-8 bg-gradient-to-r from-emerald-500/10 to-[#C49E3A]/10 border border-emerald-500/20 rounded-[2.5rem] text-center space-y-4">
+                        <div className="p-8 bg-gradient-to-r from-emerald-500/10 to-[#C49E3A]/10 border border-emerald-500/20 rounded-3xl text-center space-y-4">
                           <Smile size={44} className="text-emerald-400 mx-auto animate-bounce" />
                           <h6 className="text-white text-lg font-black">{isRtl ? 'تم الانتهاء بنجاح! حصلت على 50 نقطة XP!' : 'Successfully completed! Earned 50 XP!'}</h6>
                           
@@ -11630,7 +11630,7 @@ Output Summary for [${topic}]:
                   {/* LESSON 2 HANDS-ON INTERACTIVE GAME */}
                   {selectedLesson.lesson_number === 2 && (
                     <div className="space-y-6">
-                      <div className="bg-slate-950/60 p-6 md:p-8 rounded-[2rem] border border-white/5 space-y-6 relative overflow-hidden">
+                      <div className="bg-slate-950/60 p-6 md:p-8 rounded-3xl border border-white/5 space-y-6 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
                         
                         <div className="flex items-center justify-between">
@@ -11885,7 +11885,7 @@ Output Summary for [${topic}]:
                               <motion.div 
                                 initial={{ scale: 0.9, opacity: 0 }} 
                                 animate={{ scale: 1, opacity: 1 }} 
-                                className="p-6 bg-gradient-to-r from-emerald-500/10 to-[#C49E3A]/10 border border-emerald-500/20 rounded-[2rem] text-center space-y-4"
+                                className="p-6 bg-gradient-to-r from-emerald-500/10 to-[#C49E3A]/10 border border-emerald-500/20 rounded-3xl text-center space-y-4"
                               >
                                 <Smile size={44} className="text-emerald-400 mx-auto animate-bounce" />
                                 <h6 className="text-white text-lg font-black">{isRtl ? 'تم إنهاء تحدي تدريب النموذج بنجاح! 🎉 حصلت على 60 نقطة XP!' : 'Successfully completed training! Earned 60 XP!'}</h6>
@@ -11935,7 +11935,7 @@ Output Summary for [${topic}]:
                   {/* LESSON 3 HANDS-ON INTERACTIVE GAME */}
                   {selectedLesson.lesson_number === 3 && (
                     <div className="space-y-8 font-sans">
-                      <div className="bg-slate-950/60 p-6 md:p-8 rounded-[2rem] border border-white/5 space-y-6 relative overflow-hidden">
+                      <div className="bg-slate-950/60 p-6 md:p-8 rounded-3xl border border-white/5 space-y-6 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
                         
                         <div className="flex items-center justify-between">
@@ -12058,7 +12058,7 @@ Output Summary for [${topic}]:
                       </div>
 
                       {/* FAMILY DEBATE: THE GIRAFFE SANDBOX */}
-                      <div className="bg-gradient-to-br from-[#0e1629] to-[#040a17] p-6 md:p-8 rounded-[2.5rem] border border-white/10 space-y-6 relative overflow-hidden">
+                      <div className="bg-gradient-to-br from-[#0e1629] to-[#040a17] p-6 md:p-8 rounded-3xl border border-white/10 space-y-6 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
                         
                         <div className="space-y-2">
@@ -12153,7 +12153,7 @@ Output Summary for [${topic}]:
                   {/* LESSON 4 HANDS-ON INTERACTIVE GAME */}
                   {selectedLesson.lesson_number === 4 && (
                     <div className="space-y-6">
-                      <div className="bg-slate-950/60 p-6 rounded-[2rem] border border-white/5 space-y-4">
+                      <div className="bg-slate-950/60 p-6 rounded-3xl border border-white/5 space-y-4">
                         <h5 className="text-lg font-black text-amber-300">{isRtl ? 'لعبة إزالة التشويش (Diffusion Simulation)' : 'De-noising Diffusion Engine Sandbox'}</h5>
                         <p className="text-slate-300 text-sm leading-relaxed">
                           {isRtl 
@@ -12223,7 +12223,7 @@ Output Summary for [${topic}]:
                   {/* LESSON 7 HANDS-ON INTERACTIVE GAME */}
                   {selectedLesson.lesson_number === 7 && (
                     <div className="space-y-6">
-                      <div className="bg-slate-950/60 p-6 rounded-[2rem] border border-white/5 space-y-4">
+                      <div className="bg-slate-950/60 p-6 rounded-3xl border border-white/5 space-y-4">
                         <h5 className="text-lg font-black text-amber-300">{isRtl ? 'مختبر تشريح التعاويذ' : 'Prompt Anatomy Laboratory'}</h5>
                         <p className="text-slate-300 text-sm leading-relaxed">
                           {isRtl 
@@ -12330,7 +12330,7 @@ Output Summary for [${topic}]:
                   {/* LESSON 8 HANDS-ON INTERACTIVE FINAL PROJECT */}
                   {selectedLesson.lesson_number === 8 && (
                     <div className="space-y-6">
-                      <div className="bg-slate-950/60 p-6 rounded-[2rem] border border-white/5 space-y-4">
+                      <div className="bg-slate-950/60 p-6 rounded-3xl border border-white/5 space-y-4">
                         <h5 className="text-lg font-black text-amber-300">{isRtl ? 'بناء وتشغيل المساعد العائلي المخصص' : 'Custom Family AI Helper Workbench'}</h5>
                         <p className="text-slate-300 text-sm leading-relaxed">
                           {isRtl 
@@ -12408,7 +12408,7 @@ Output Summary for [${topic}]:
                   {/* LESSON 12 HANDS-ON INTERACTIVE GAME */}
                   {selectedLesson.lesson_number === 12 && (
                     <div className="space-y-6">
-                      <div className="bg-slate-950/60 p-6 rounded-[2rem] border border-white/5 space-y-4">
+                      <div className="bg-slate-950/60 p-6 rounded-3xl border border-white/5 space-y-4">
                         <h5 className="text-lg font-black text-amber-300">{isRtl ? 'تمرين: صائد الفرص الرقمية 🚀' : 'Exercise: Digital Opportunity Hunter 🚀'}</h5>
                         <p className="text-slate-300 text-sm leading-relaxed">
                           {isRtl 
@@ -12509,7 +12509,7 @@ Output Summary for [${topic}]:
                   {/* LESSON 13 HANDS-ON INTERACTIVE GAME */}
                   {selectedLesson.lesson_number === 13 && (
                     <div className="space-y-6">
-                      <div className="bg-slate-950/60 p-6 rounded-[2rem] border border-white/5 space-y-4">
+                      <div className="bg-slate-950/60 p-6 rounded-3xl border border-white/5 space-y-4">
                         <h5 className="text-lg font-black text-amber-300">{isRtl ? 'تمرين: السيمفونية بين الإنسان والآلة 🎨📖' : 'Exercise: Human-Machine Co-creation Symphony 🎨📖'}</h5>
                         <p className="text-slate-300 text-sm leading-relaxed">
                           {isRtl 
@@ -12600,7 +12600,7 @@ Output Summary for [${topic}]:
                   {/* GENERAL INTERACTIVE LESSON CHALLENGE (FOR LESSONS 5, 6, 9, 10, 11, 14, 15, 16, 17, 18, 19, 20) */}
                   {![1, 2, 3, 4, 7, 8, 12, 13].includes(selectedLesson.lesson_number) && (
                     <div className="space-y-6">
-                      <div className="bg-slate-950/60 p-6 rounded-[2rem] border border-white/5 space-y-4">
+                      <div className="bg-slate-950/60 p-6 rounded-3xl border border-white/5 space-y-4">
                         <h5 className="text-lg font-black text-amber-300">
                           {isRtl ? 'تحدي سفير الذكاء الاصطناعي 🌟' : 'AI Ambassador Challenge 🌟'}
                         </h5>
@@ -12776,7 +12776,7 @@ Output Summary for [${topic}]:
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0.95, y: 20 }}
                   onClick={(e) => e.stopPropagation()}
-                  className="bg-[#00274f] border border-white/10 rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl relative text-right"
+                  className="bg-[#00274f] border border-white/10 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative text-right"
                   dir={isRtl ? 'rtl' : 'ltr'}
                 >
                   {/* Top Bar Banner Accent */}
@@ -13246,7 +13246,7 @@ Output Summary for [${topic}]:
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.95, y: 20 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-[#00274f] border border-amber-500/30 rounded-[2.5rem] w-full max-w-xl overflow-hidden shadow-2xl relative"
+                className="bg-[#00274f] border border-amber-500/30 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl relative"
                 dir={isRtl ? 'rtl' : 'ltr'}
               >
                 {/* Top Banner accent */}
@@ -13565,10 +13565,10 @@ Output Summary for [${topic}]:
         <div 
           id="lesson-capture-card" 
           style={{ width: '700px', minHeight: '620px', position: 'absolute', top: '-10000px', left: '-10000px' }} 
-          className="bg-[#020617] text-white p-12 pr-12 pl-12 rounded-[2rem] border border-slate-800/80 relative font-tajawal text-right shadow-2xl"
+          className="bg-[#020617] text-white p-12 pr-12 pl-12 rounded-3xl border border-slate-800/80 relative font-tajawal text-right shadow-2xl"
         >
           {/* Elegant background gradients - matching Bright Companion tech theme */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#00274f] via-[#020617] to-[#020617] rounded-[1.9rem] -z-10" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#00274f] via-[#020617] to-[#020617] rounded-3xl -z-10" />
           
           {/* Glowing backdrops for visual depth */}
           <div className="absolute top-10 right-10 w-24 h-24 bg-[#C49E3A]/5 rounded-full blur-2xl -z-5" />

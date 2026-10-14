@@ -84,11 +84,11 @@ export const Leaderboard = ({ lang, isAdmin }: { lang: Language, isAdmin?: boole
       </header>
 
       {loading ? (
-        <div className="bg-white rounded-[3rem] p-20 text-center border border-slate-200">
+        <div className="bg-white rounded-3xl p-20 text-center border border-slate-200">
           <div className="w-12 h-12 border-4 border-[#002147] border-t-transparent rounded-full animate-spin mx-auto"></div>
         </div>
       ) : (
-        <div className="bg-white rounded-[3rem] overflow-hidden border border-slate-200 shadow-sm min-h-[400px]">
+        <div className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm min-h-[400px]">
           <div className="grid grid-cols-12 gap-4 p-8 bg-slate-50 border-b border-slate-200 text-xs font-black text-slate-400 uppercase tracking-widest">
             <div className="col-span-2 text-center">{t.rank}</div>
             <div className="col-span-7">{isRtl ? 'الطالب' : 'Student'}</div>

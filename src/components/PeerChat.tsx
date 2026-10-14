@@ -65,7 +65,7 @@ export const PeerChat = ({ lang, profile }: { lang: Language, profile: UserProfi
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-14rem)] bg-white rounded-[3rem] border border-slate-200 shadow-sm overflow-hidden" dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className="flex flex-col h-[calc(100vh-14rem)] bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden" dir={isRtl ? 'rtl' : 'ltr'}>
       <header className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-[#002147] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[#C49E3A]/30">

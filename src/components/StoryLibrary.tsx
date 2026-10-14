@@ -484,7 +484,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
         </button>
 
         {isTestMode ? (
-          <div className="bg-white rounded-[3rem] p-10 md:p-16 border border-slate-200 shadow-sm relative overflow-hidden">
+          <div className="bg-white rounded-3xl p-10 md:p-16 border border-slate-200 shadow-sm relative overflow-hidden">
              <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32 -z-0" />
              
              <header className="mb-12 text-center relative z-10">
@@ -518,7 +518,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
                 <motion.div 
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  className="bg-[#002147] text-white p-8 rounded-[2rem] text-center mb-8 relative z-10 shadow-2xl"
+                  className="bg-[#002147] text-white p-8 rounded-3xl text-center mb-8 relative z-10 shadow-2xl"
                 >
                    <div className="flex items-center justify-center gap-6 mb-6">
                       <div className="w-24 h-24 rounded-full border-4 border-[#C49E3A]/60 flex flex-col items-center justify-center bg-white/5">
@@ -584,7 +584,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
                       ) : (
                         <button 
                           onClick={toggleRecording}
-                          className="px-12 py-6 rounded-[2rem] bg-[#002147] text-white font-black text-lg uppercase tracking-widest flex items-center gap-4 shadow-2xl shadow-[#C49E3A]/30 hover:bg-[#002147] transition-all group"
+                          className="px-12 py-6 rounded-3xl bg-[#002147] text-white font-black text-lg uppercase tracking-widest flex items-center gap-4 shadow-2xl shadow-[#C49E3A]/30 hover:bg-[#002147] transition-all group"
                         >
                           <Mic size={32} />
                           {isRtl ? 'ابدأ القراءة الآن' : 'Start Reading Now'}
@@ -618,7 +618,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
              </button>
           </div>
         ) : (
-          <div className="bg-white rounded-[3rem] p-10 md:p-16 border border-slate-200 shadow-sm relative overflow-hidden">
+          <div className="bg-white rounded-3xl p-10 md:p-16 border border-slate-200 shadow-sm relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32 -z-0" />
             
             <header className="mb-12 text-center relative z-10">
@@ -653,7 +653,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
             <div className="flex flex-wrap items-center justify-center gap-4 mt-12">
               <button 
                 onClick={() => toggleSpeak(selectedStory.content)}
-                className={`bg-[#002147] text-white px-8 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest flex items-center gap-4 hover:bg-[#C49E3A] transition-all shadow-xl shadow-[#C49E3A]/30 ${isPaused || !isSpeaking ? 'bg-[#002147]' : 'bg-emerald-600'}`}
+                className={`bg-[#002147] text-white px-8 py-5 rounded-3xl font-black text-sm uppercase tracking-widest flex items-center gap-4 hover:bg-[#C49E3A] transition-all shadow-xl shadow-[#C49E3A]/30 ${isPaused || !isSpeaking ? 'bg-[#002147]' : 'bg-emerald-600'}`}
               >
                 {isSpeaking && !isPaused ? <Pause size={24} /> : <Play size={24} />}
                 {isSpeaking && !isPaused 
@@ -663,7 +663,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
 
               <button 
                 onClick={handleStartTest}
-                className="bg-[#C49E3A] text-white px-8 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest flex items-center gap-4 hover:bg-[#002147] transition-all shadow-xl shadow-amber-100"
+                className="bg-[#C49E3A] text-white px-8 py-5 rounded-3xl font-black text-sm uppercase tracking-widest flex items-center gap-4 hover:bg-[#002147] transition-all shadow-xl shadow-amber-100"
               >
                 <Mic size={24} />
                 {isRtl ? 'اختبار القراءة' : 'Reading Test'}
@@ -672,7 +672,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
               {isSpeaking && (
                 <button 
                   onClick={stopSpeak}
-                  className="w-16 h-16 rounded-[2rem] bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-lg"
+                  className="w-16 h-16 rounded-3xl bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-lg"
                 >
                   <Square size={24} fill="currentColor" />
                 </button>
@@ -690,7 +690,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
               exit={{ y: 100, opacity: 0 }}
               className="fixed bottom-12 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:max-w-xl z-50"
             >
-              <div className="bg-[#002147] text-white p-8 rounded-[2.5rem] shadow-2xl border-4 border-white flex items-center justify-between gap-6">
+              <div className="bg-[#002147] text-white p-8 rounded-3xl shadow-2xl border-4 border-white flex items-center justify-between gap-6">
                 <div className="flex-1">
                   <div className="flex items-center gap-4 mb-1">
                     <h4 className="text-3xl font-black text-white">{wordData.word}</h4>
@@ -739,7 +739,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
             key={`story-card-${story.id || sIdx}`}
             whileHover={{ y: -10 }}
             onClick={() => handleSelectStory(story)}
-            className="bg-white rounded-[2.5rem] overflow-hidden border border-slate-200 shadow-sm group cursor-pointer relative"
+            className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm group cursor-pointer relative"
           >
             <div className="h-48 relative overflow-hidden bg-slate-900 flex items-center justify-center text-slate-300">
                {!story.image || brokenImages[story.id] ? (
@@ -786,7 +786,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
       </div>
 
       <div className="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8">
-         <div className="bg-gradient-to-br from-[#002147] to-[#002147] rounded-[3rem] p-10 text-white shadow-xl relative overflow-hidden">
+         <div className="bg-gradient-to-br from-[#002147] to-[#002147] rounded-3xl p-10 text-white shadow-xl relative overflow-hidden">
             <div className="absolute bottom-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mb-20" />
             <Languages size={40} className="mb-6 text-[#E4C77A] opacity-50" />
             <h4 className="text-2xl font-black mb-4">{isRtl ? 'مساعد الترجمة الفوري' : 'Instant Translation Assistant'}</h4>
@@ -802,8 +802,8 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
             </div>
          </div>
 
-         <div className="bg-white rounded-[3rem] p-10 border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center">
-            <div className="w-20 h-20 bg-amber-50 text-amber-500 rounded-[2rem] flex items-center justify-center mb-6">
+         <div className="bg-white rounded-3xl p-10 border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center">
+            <div className="w-20 h-20 bg-amber-50 text-amber-500 rounded-3xl flex items-center justify-center mb-6">
                <Search size={32} />
             </div>
             <h4 className="text-xl font-black text-[#002147] mb-2">{isRtl ? 'ابحث عن قصتك المفضلة' : 'Search Your Favorite Story'}</h4>
