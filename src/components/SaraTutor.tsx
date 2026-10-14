@@ -50,7 +50,8 @@ import {
   Brain,
   Phone,
   FileText,
-  Headphones
+  Headphones,
+  Globe
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile, AppView, SaraBoardData, SaraChatResponse, TutorMemoryDoc, proficiencyLevel, CurriculumCategory, StudyPlan, LearningStyleType, LearningPacingType } from '../types';
@@ -74,6 +75,8 @@ import { SaraTracksHub } from './SaraTracksHub';
 import { SaraListeningPlayer } from './SaraListeningPlayer';
 import { SaraPronunciationPlayer } from './SaraPronunciationPlayer';
 import { SaraVocabPlayer } from './SaraVocabPlayer';
+import { SaraDailyPlayer } from './SaraDailyPlayer';
+import { DAILY_LESSONS } from '../data/saraTracks/dailyLife';
 import { VOCAB_LESSONS } from '../data/saraTracks/vocabulary';
 import { PRONUNCIATION_LESSONS } from '../data/saraTracks/pronunciation';
 import { LISTENING_LESSONS } from '../data/saraTracks/listening';
@@ -570,6 +573,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [isListeningOpen, setIsListeningOpen] = useState(false);
   const [isPronOpen, setIsPronOpen] = useState(false);
   const [isVocabOpen, setIsVocabOpen] = useState(false);
+  const [isDailyOpen, setIsDailyOpen] = useState(false);
   const [trackFilter, setTrackFilter] = useState<'all' | 'grammar' | 'conversation' | 'reading' | 'writing'>('all');
   const handleOpenCurriculum = (pillar: string = 'all') => {
     setCurriculumInitialPillar(pillar);
@@ -577,6 +581,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     if (pillar === 'listening') { setIsListeningOpen(true); return; }
     if (pillar === 'pronunciation') { setIsPronOpen(true); return; }
     if (pillar === 'vocabulary') { setIsVocabOpen(true); return; }
+    if (pillar === 'daily') { setIsDailyOpen(true); return; }
     if (pillar === 'all' || pillar === 'grammar' || pillar === 'conversation' || pillar === 'reading' || pillar === 'writing') { setTrackFilter(pillar); setIsTrackOpen(true); return; }
     setIsCurriculumModalOpen(true);
   };
@@ -3183,6 +3188,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               </button>
               <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">المفردات</span>
             </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+              <button onClick={() => handleOpenCurriculum('daily')} data-testid="sara-daily-icon"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#C49E3A] bg-[#002147] text-amber-300 flex items-center justify-center shadow-xs hover:scale-105 active:scale-95 shrink-0"
+                aria-label={isRtl ? 'الحياة اليومية' : 'Everyday English'}>
+                <Globe size={16} />
+              </button>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">الحياة اليومية</span>
+            </div>
             </div>
           </section>
           <section className="shrink-0 rounded-2xl bg-slate-50 border border-slate-200 px-2 pt-1.5 pb-1">
@@ -5071,6 +5084,21 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                       <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-amber-100 text-amber-800">{VOCAB_LESSONS.length} درس · {VOCAB_LESSONS.reduce((n, l) => n + l.words.length, 0)} كلمة</span>
                     </div>
                     <p className="text-[10px] text-slate-500 mt-0.5">{isRtl ? 'كلمات يومية بالمواضيع، بطاقات ومراجعة متباعدة' : 'Topic words, flashcards & spaced review'}</p>
+                  </div>
+                </div>
+                <ChevronRight size={16} className={`text-amber-600 shrink-0 ${isRtl ? 'rotate-180' : ''}`} />
+              </div>
+              {/* 8. Everyday English */}
+              <div onClick={() => handleOpenCurriculum('daily')}
+                className="bg-white border-2 border-amber-300 hover:border-amber-400 p-3.5 rounded-2xl shadow-xs transition-all cursor-pointer active:scale-98 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="w-10 h-10 rounded-xl bg-[#002147] text-amber-300 flex items-center justify-center text-xl shrink-0">🌍</span>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="text-xs font-black text-[#002147]">{isRtl ? 'إنجليزي الحياة اليومية' : 'Everyday English'}</h4>
+                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-amber-100 text-amber-800">{DAILY_LESSONS.length} موقف</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-0.5">{isRtl ? 'المطار والفندق والمطعم والطبيب، حوارات ولعب أدوار' : 'Real-life situations & role-play'}</p>
                   </div>
                 </div>
                 <ChevronRight size={16} className={`text-amber-600 shrink-0 ${isRtl ? 'rotate-180' : ''}`} />
@@ -7508,6 +7536,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       </AnimatePresence>
 
       <SaraTools tool={saraTool} onClose={() => { cancelAllSpeech(); setSaraTool(null); }} uid={profile.uid}
+        unlockAll={MASTER_ADMINS.includes(String((profile as any).email || auth.currentUser?.email || '').trim().toLowerCase()) || (profile as any).role === UserRole.PARENT || (profile as any).role === UserRole.ADMIN} />
+      <SaraDailyPlayer isOpen={isDailyOpen} onClose={() => { cancelAllSpeech(); setIsDailyOpen(false); }} uid={profile.uid}
         unlockAll={MASTER_ADMINS.includes(String((profile as any).email || auth.currentUser?.email || '').trim().toLowerCase()) || (profile as any).role === UserRole.PARENT || (profile as any).role === UserRole.ADMIN} />
       <SaraVocabPlayer isOpen={isVocabOpen} onClose={() => { cancelAllSpeech(); setIsVocabOpen(false); }} uid={profile.uid}
         unlockAll={MASTER_ADMINS.includes(String((profile as any).email || auth.currentUser?.email || '').trim().toLowerCase()) || (profile as any).role === UserRole.PARENT || (profile as any).role === UserRole.ADMIN} />
