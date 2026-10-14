@@ -5,6 +5,7 @@ import { CompletionCertificateModal, type CertificateData } from './CompletionCe
 import type { SaraTrack, SaraTrackLesson, SaraChoiceQuestion } from '../data/saraTracks/foundations';
 import { prefetchAcademyAudio, cancelAllSpeech, createManagedAudio } from '../lib/audio';
 import { boardLinesToSpeech } from '../utils/boardToSpeech';
+import { LEGACY_TRACK_IDS, migrateLegacyCount } from '../data/saraTracks/fromCurriculum';
 import { pushTrackProgress, markLastTrack } from '../lib/saraProgressSync';
 import { trackLevels, buildLevelTest, scoreLevelTest, saveLevelTestAttempt, LEVEL_TEST_PASS, type LevelTestQuestion, type LevelTestAttempt } from '../lib/saraLevelTests';
 
@@ -106,7 +107,13 @@ const BOARD_THEME = { bgHex: '#083344', gradientToHex: '#0E7490', accentHex: '#2
 
 export const progressKey = (trackId: string, uid?: string) => `sara_track_${trackId}_${uid || 'guest'}`;
 export const readUnlocked = (trackId: string, uid?: string) => {
-  try { return Math.max(1, Number(localStorage.getItem(progressKey(trackId, uid))) || 1); } catch { return 1; }
+  try {
+    const legacy = LEGACY_TRACK_IDS[trackId];
+    if (legacy && localStorage.getItem(progressKey(trackId, uid)) === null) {
+      const old = Number(localStorage.getItem(progressKey(legacy, uid))) || 1;
+      if (old > 1) localStorage.setItem(progressKey(trackId, uid), String(migrateLegacyCount(old)));
+    }
+    return Math.max(1, Number(localStorage.getItem(progressKey(trackId, uid))) || 1); } catch { return 1; }
 };
 
 /** Lines shown on the lesson page = exactly what Sara reads. */

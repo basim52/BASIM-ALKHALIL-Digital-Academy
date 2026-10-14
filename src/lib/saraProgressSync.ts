@@ -1,3 +1,4 @@
+import { LEGACY_TRACK_IDS, migrateLegacyCount } from '../data/saraTracks/fromCurriculum';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -36,7 +37,9 @@ export async function syncTrackProgress(uid: string | undefined, trackIds: strin
   const up: Record<string, number> = {};
   for (const id of trackIds) {
     let local = 1; try { local = Math.max(1, Number(localStorage.getItem(KEY(id, uid))) || 1); } catch { /* ignore */ }
-    const r = Number(remote[id]) || 1;
+    const lg = LEGACY_TRACK_IDS[id];
+    const r = Number(remote[id]) || (lg ? migrateLegacyCount(Number(remote[lg]) || 1) : 1);
+    if (lg && local === 1) { try { const o = Number(localStorage.getItem(KEY(lg, uid))) || 1; local = migrateLegacyCount(o); if (o > 1) localStorage.setItem(KEY(id, uid), String(local)); } catch { /* ignore */ } }
     if (r > local) { try { localStorage.setItem(KEY(id, uid), String(r)); changed = true; } catch { /* ignore */ } }
     else if (local > r) up[`saraTrackProgress.${id}`] = local;
   }
