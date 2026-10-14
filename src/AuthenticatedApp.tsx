@@ -7677,7 +7677,9 @@ export default function AuthenticatedApp({
               {!['dashboard', 'sara-tutor', 'placement-test', 'real-time-voice-call', 'ai-chat'].includes(view) && (
                 <AcademySectionBar view={view} isRtl={isRtl} onHome={() => { cancelAllSpeech(); setView('dashboard'); }} />
               )}
-              {renderContent()}
+              <div className={!['dashboard', 'sara-tutor', 'placement-test', 'real-time-voice-call', 'ai-chat'].includes(view) ? 'academy-section contents' : 'contents'}>
+                {renderContent()}
+              </div>
             </Suspense>
 
             {/* Global Notification Toast */}

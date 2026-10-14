@@ -214,3 +214,12 @@
     display: none !important;
   }
 }
+
+/* Academy sections: one button language (tap size, focus ring, press feedback). Sara/home untouched. */
+.academy-section button { -webkit-tap-highlight-color: transparent; }
+.academy-section button:focus-visible { outline: 3px solid #C49E3A; outline-offset: 2px; }
+.academy-section button:not(:disabled):active { transform: scale(0.97); }
+@media (pointer: coarse) {
+  .academy-section button:not([role="tab"]):not([data-compact]) { min-height: 40px; }
+  .academy-section button:not([role="tab"]):not([data-compact]):has(> svg:only-child) { min-width: 40px; }
+}
