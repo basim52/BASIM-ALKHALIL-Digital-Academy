@@ -7,11 +7,15 @@ import { CONVERSATION_TRACK } from '../data/saraTracks/conversation';
 import { READING_TRACK } from '../data/saraTracks/reading';
 import { WRITING_TRACK } from '../data/saraTracks/writing';
 import { readUnlocked, saraNarrate, saraStopNarrator, saraUnlockNarrator } from './SaraTrackPlayer';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { savePlacementLevel } from '../lib/placement';
 import { trackLevels, saveLevelTestAttempt, summarizeLevelTests, type LevelTestAttempt } from '../lib/saraLevelTests';
 
 export type SaraToolId = 'placement' | 'speed' | 'worksheet' | 'plan' | 'roleplay' | 'pronunciation' | 'voicecoach';
 export const SARA_TRACKS: SaraTrack[] = [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK];
-interface Props { tool: SaraToolId | null; onClose: () => void; uid?: string; unlockAll?: boolean }
+export interface PlacementOutcome { level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'; bandId: string; trackId: string; score: number }
+interface Props { tool: SaraToolId | null; onClose: () => void; uid?: string; unlockAll?: boolean; onPlacementDone?: (r: PlacementOutcome) => void }
 
 const TITLES: Record<SaraToolId, string> = {
   placement: '🎯 اختبار تحديد المستوى', speed: '⚡ تحدي السرعة', worksheet: '📝 ورقة عمل', plan: '🗓️ خطة الدراسة الأسبوعية',
@@ -100,7 +104,7 @@ const BANDS: { id: string; titleAr: string; track: SaraTrack; levelId: string }[
   ...(ADVANCED_TRACK.levels || []).map(v => ({ id: v.id, titleAr: v.titleAr, track: ADVANCED_TRACK, levelId: v.id })),
 ];
 const placementKey = (uid?: string) => `sara_placement_${uid || 'guest'}`;
-const Placement: React.FC<{ uid?: string }> = ({ uid }) => {
+const Placement: React.FC<{ uid?: string; onDone?: (r: PlacementOutcome) => void }> = ({ uid, onDone }) => {
   const qs = useMemo(() => BANDS.flatMap((b, bi) => {
     const lv = trackLevels(b.track).find(l => l.id === b.levelId);
     const pool = shuffle((lv?.lessons || []).filter(l => l.content)).slice(0, 4);
@@ -131,6 +135,13 @@ const Placement: React.FC<{ uid?: string }> = ({ uid }) => {
     const a: LevelTestAttempt = { trackId: 'placement', trackTitleAr: '🎯 تحديد المستوى', levelId: b.id, levelTitleAr: `البداية المقترحة: ${b.titleAr}`,
       score: result.score, correct: result.correct, total: qs.length, passed: true, wrongByLesson: {}, weakLessons: [], createdAtMs: Date.now() };
     void saveLevelTestAttempt(uid, a);
+    // Official level (single placement test for the whole academy): saved server-side (students can't write `level`).
+    const fCorrect = qs.map((q, k) => ({ q, ok: answers[k] })).filter(x => x.q.band === 0 && x.ok).length;
+    const level = (b.id === 'foundations' ? (fCorrect >= 2 ? 'A2' : 'A1') : b.id.toUpperCase()) as PlacementOutcome['level'];
+    const outcome: PlacementOutcome = { level, bandId: b.id, trackId: b.track.id, score: result.score };
+    void savePlacementLevel(level, { totalScore: result.score, quizScore: result.score });
+    if (uid) void updateDoc(doc(db, 'users', uid), { placementStartTrackId: b.track.id, placementStartBandId: b.id, placementScore: result.score, placementAt: Date.now(), placementTestCompleted: true }).catch(() => {});
+    onDone?.(outcome);
   }, [result]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!qs.length) return <p className="p-3 text-sm">لا توجد أسئلة</p>;
   if (result) {
@@ -140,7 +151,7 @@ const Placement: React.FC<{ uid?: string }> = ({ uid }) => {
         <p className="text-4xl">🎯</p>
         <p className="text-lg font-black text-[#002147]">نتيجتك: {result.correct}/{qs.length} ({result.score}%)</p>
         <p className="text-[15px] font-black text-amber-700">ابدأ من: {b.track.titleAr} — {b.titleAr}</p>
-        <p className="text-[12px] text-slate-600">حُفظت النتيجة، ويمكن لولي الأمر رؤيتها في تقرير الاختبارات.</p>
+        <p className="text-[12px] text-slate-600">حُفظت النتيجة كمستواك الرسمي في الأكاديمية، ويمكن لولي الأمر رؤيتها في تقرير الاختبارات.</p>
         <Btn onClick={() => { setI(0); setAnswers([]); setPicked(null); }}>إعادة الاختبار</Btn>
       </div>
     );
@@ -417,7 +428,7 @@ const VoiceCoach: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid, unlo
 };
 
 /** One-page Sara tool (same look as the track player). */
-export const SaraTools: React.FC<Props> = ({ tool, onClose, uid, unlockAll }) => {
+export const SaraTools: React.FC<Props> = ({ tool, onClose, uid, unlockAll, onPlacementDone }) => {
   if (!tool) return null;
   const p = { uid, unlockAll };
   return (
@@ -430,7 +441,7 @@ export const SaraTools: React.FC<Props> = ({ tool, onClose, uid, unlockAll }) =>
           </div>
           <button onClick={() => { saraStopNarrator(); onClose(); }} className="p-1.5 rounded-lg hover:bg-white/10" aria-label="close"><X size={18} /></button>
         </div>
-        {tool === 'placement' && <Placement uid={uid} />}
+        {tool === 'placement' && <Placement uid={uid} onDone={onPlacementDone} />}
         {tool === 'speed' && <SpeedDrill {...p} />}
         {tool === 'worksheet' && <Worksheet {...p} />}
         {tool === 'plan' && <StudyPlan {...p} />}

@@ -345,6 +345,8 @@ interface SaraTutorProps {
   onLangChange?: (newLang: Language) => void;
   onNavigateToLesson?: (courseId: string, level: string, unitId: string) => void;
   initialLesson?: any;
+  /** Open a feature right away (used when old routes point here, e.g. the old voice-call screen). */
+  initialAction?: 'call';
 }
 
 const SECTION_LABELS: Record<string, { ar: string; en: string }> = {
@@ -372,7 +374,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   onProfileUpdated,
   onLangChange,
   onNavigateToLesson,
-  initialLesson
+  initialLesson,
+  initialAction
 }) => {
   const [activeLang, setActiveLang] = useState<Language>(lang);
 
@@ -545,6 +548,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   // Tool icon opens the matching Sara tool page (SaraTools).
   const setIsWorksheetModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsWorksheetModalOpen(false); if (v === true) setSaraTool('worksheet'); };
   const [isPhoneCallModalOpen, setIsPhoneCallModalOpen] = useState<boolean>(false);
+  useEffect(() => { if (initialAction === 'call') setIsPhoneCallModalOpen(true); }, [initialAction]);
   const [isContinuityBannerDismissed, setIsContinuityBannerDismissed] = useState<boolean>(false);
 
   // Active Curriculum Lesson & Modal States

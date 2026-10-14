@@ -73,7 +73,7 @@ import { MASTER_CURRICULUM } from './data/masterCurriculum';
 import { generateWhatsAppLink, NOTIFICATION_TEMPLATES } from './lib/whatsapp';
 const ShareableNotification = lazy(() => import('./components/ShareableNotification').then(m => ({ default: m.ShareableNotification })));
 const AIConversation = lazy(() => import('./components/AIConversation').then(m => ({ default: m.AIConversation })));
-import { PlacementTest } from './components/PlacementTest';
+const SaraTools = lazy(() => import('./components/SaraTools').then(m => ({ default: m.SaraTools })));
 import { auth, googleProvider, db, handleFirestoreError, OperationType, testConnection, redeemVoucherTransaction } from './lib/firebase';
 import firebaseConfig from '../firebase-applet-config.json';
 import { onAuthStateChanged, signInWithPopup, signOut, User } from 'firebase/auth';
@@ -114,7 +114,6 @@ const AdultsDailyDose = lazy(() => import('./components/AdultsDailyDose').then(m
 import { ADULTS_DAILY_DOSES } from './data/adultsDailyDose';
 const KidsStoryPlayer = lazy(() => import('./components/KidsStoryPlayer').then(m => ({ default: m.KidsStoryPlayer })));
 import { KIDS_STORIES } from './data/kidsStories';
-const PronunciationLab = lazy(() => import('./components/PronunciationLab').then(m => ({ default: m.PronunciationLab })));
 const RolePlayChallenges = lazy(() => import('./components/RolePlayChallenges').then(m => ({ default: m.RolePlayChallenges })));
 const VisualDictionary = lazy(() => import('./components/VisualDictionary').then(m => ({ default: m.VisualDictionary })));
 import { CompletionCertificateModal, CertificateData } from './components/CompletionCertificateModal';
@@ -301,7 +300,6 @@ import { linguisticFluidityE1 } from './data/lessons/e_c2_4';
 import { aestheticSynthesisE1 } from './data/lessons/e_c2_5';
 const AIOmniCompanion = lazy(() => import('./components/AIOmniCompanion').then(m => ({ default: m.AIOmniCompanion })));
 const GlobalCommandPalette = lazy(() => import('./components/GlobalCommandPalette').then(m => ({ default: m.GlobalCommandPalette })));
-const RealtimeVoiceCall = lazy(() => import('./components/RealtimeVoiceCall').then(m => ({ default: m.RealtimeVoiceCall })));
 const AdaptiveLearningPath = lazy(() => import('./components/AdaptiveLearningPath').then(m => ({ default: m.AdaptiveLearningPath })));
 const DynamicWorksheetGenerator = lazy(() => import('./components/DynamicWorksheetGenerator').then(m => ({ default: m.DynamicWorksheetGenerator })));
 const BranchingStoryEngine = lazy(() => import('./components/BranchingStoryEngine').then(m => ({ default: m.BranchingStoryEngine })));
@@ -6182,45 +6180,8 @@ export default function AuthenticatedApp({
       );
     }
     if (view === 'pronunciation-lab') {
-      return (
-        <PronunciationLab
-          lang={lang}
-          userProfile={userProfile}
-          onBack={() => setView('dashboard')}
-          onXPAdded={async (xp) => {
-            if (userProfile && currentUser) {
-              const currentPoints = (userProfile as any).points || 0;
-              const newPoints = currentPoints + xp;
-              try {
-                if (!currentUser.uid.startsWith('sim_')) {
-                  await updateDoc(doc(db, 'users', currentUser.uid), {
-                    points: newPoints
-                  });
-                  await addDoc(collection(db, 'lessonResults'), {
-                    userId: currentUser.uid,
-                    parentIds: (userProfile as any).linkedParentIds || [],
-                    lessonId: 'pronunciation_lab_general',
-                    courseId: 'pronunciation_lab',
-                    level: 'Lab',
-                    lessonTitle: 'Pronunciation Lab Practice',
-                    score: 10,
-                    total: 10,
-                    timestamp: serverTimestamp()
-                  });
-                  recordStreakActivity(currentUser.uid).catch(console.error);
-                }
-                setUserProfile({
-                  ...userProfile,
-                  points: newPoints
-                } as any);
-                alert(lang === 'ar' ? `رائع! حصلت على +${xp} نقطة تفوق في معمل النطق! 🎉` : `Awesome! You got +${xp} XP in the Pronunciation Lab! 🎉`);
-              } catch (e) {
-                console.error("Error updating points for Pronunciation Lab:", e);
-              }
-            }
-          }}
-        />
-      );
+      // One pronunciation lab: Sara's (cached Sara voice + mic practice from the reading lessons).
+      return <SaraTools tool="pronunciation" uid={currentUser.uid} onClose={() => setView('dashboard')} />;
     }
     if (view === 'roleplay-challenges') {
       return (
@@ -6302,12 +6263,15 @@ export default function AuthenticatedApp({
         />
       );
     }
-    if (view === 'real-time-voice-call') {
+    if (view === 'real-time-voice-call' && userProfile) {
+      // One phone call: Sara's live call (opens straight away inside Sara).
       return (
-        <RealtimeVoiceCall
-          lang={lang}
-          onBack={() => setView('interactive-learning')}
-        />
+        <SaraTutor lang={lang} profile={userProfile} initialAction="call"
+          onNavigate={(target) => { cancelAllSpeech(); setView(target); }}
+          onBack={() => { cancelAllSpeech(); setView('dashboard'); }}
+          onProfileUpdated={(updated) => setUserProfile(updated)}
+          onLangChange={(newLang) => setLang(newLang)}
+          onNavigateToLesson={handleNavigateToLesson} />
       );
     }
     if (view === 'adaptive-learning-path') {
@@ -7101,29 +7065,13 @@ export default function AuthenticatedApp({
     }
 
     if (view === 'placement-test') {
+      // Single official placement test = Sara's placement tool (sets the official level via /api/placement/save).
       return (
-        <PlacementTest 
-          lang={lang} 
-          onBack={() => setView('dashboard')} 
-          userProfile={userProfile}
-          setUserProfile={setUserProfile as any}
-          onComplete={async (level) => {
-            try {
-              // Level is already saved server-side by PlacementTest (savePlacementLevel)
-              if (userProfile) {
-                setUserProfile({
-                  ...userProfile,
-                  level,
-                  placementTestCompleted: true,
-                  placementCompleted: true,
-                } as any);
-              }
-              setView('curriculum');
-            } catch (error) {
-              handleFirestoreError(error, OperationType.UPDATE, `students/${currentUser.uid}`);
-            }
-          }} 
-        />
+        <SaraTools tool="placement" uid={currentUser.uid}
+          onClose={() => setView(userProfile && (userProfile as any).placementTestCompleted ? 'sara-tutor' : 'dashboard')}
+          onPlacementDone={(r) => {
+            if (userProfile) setUserProfile({ ...userProfile, level: r.level, placementTestCompleted: true, placementCompleted: true } as any);
+          }} />
       );
     }
 
@@ -7319,7 +7267,7 @@ export default function AuthenticatedApp({
           className={`flex min-h-screen bg-[#f8fafc] ${isRtl ? 'flex-row' : 'flex-row-reverse'}`}
         >
           {/* Navigation - Responsive Strategy */}
-          {view !== 'placement-test' && view !== 'sara-tutor' && (
+          {view !== 'placement-test' && view !== 'sara-tutor' && view !== 'real-time-voice-call' && (
             <>
               {/* Mobile Top Header */}
               <header className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-slate-100 z-50 px-4 py-2.5 flex justify-between items-center shadow-sm">
@@ -7903,7 +7851,7 @@ export default function AuthenticatedApp({
           )}
 
           <main className={`flex-1 min-w-0 w-full overflow-x-hidden transition-all ${
-            view === 'placement-test' || view === 'sara-tutor'
+            view === 'placement-test' || view === 'sara-tutor' || view === 'real-time-voice-call'
               ? ''
               : view === 'ai-chat'
               ? (isRtl ? 'md:mr-20 lg:mr-64 pt-14 md:pt-20 lg:pt-0' : 'md:ml-20 lg:ml-64 pt-14 md:pt-20 lg:pt-0')
@@ -7944,7 +7892,7 @@ export default function AuthenticatedApp({
           </main>
 
           {/* Global Omnipresent AI Companion */}
-          {view !== 'sara-tutor' && <AIOmniCompanion
+          {view !== 'sara-tutor' && view !== 'real-time-voice-call' && <AIOmniCompanion
             isRtl={isRtl}
             currentContext={`Active Academy Section: ${view}`}
             onNavigateToView={(targetView) => setView(targetView as AppView)}
