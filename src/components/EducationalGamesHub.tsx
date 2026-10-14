@@ -876,13 +876,13 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
     return (
       <div className="space-y-8">
         {/* Elite Banner */}
-        <div className="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 rounded-3xl p-6 md:p-8 border border-[#6C5CE7]/30 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-[#6C5CE7]/10 rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-36 h-36 bg-[#00CEC9]/5 rounded-full blur-2xl pointer-events-none" />
+        <div className="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 rounded-3xl p-6 md:p-8 border border-[#002147]/30 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-[#002147]/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-36 h-36 bg-[#C49E3A]/5 rounded-full blur-2xl pointer-events-none" />
           
           <div className="flex flex-col lg:flex-row items-center justify-between gap-6 relative z-10">
             <div className="space-y-3 text-center lg:text-left">
-              <span className="px-3 py-1 bg-[#6C5CE7]/20 text-[#a29bfe] border border-[#6C5CE7]/40 rounded-full text-[11px] font-black uppercase tracking-wider font-mono">
+              <span className="px-3 py-1 bg-[#002147]/20 text-[#E4C77A] border border-[#002147]/40 rounded-full text-[11px] font-black uppercase tracking-wider font-mono">
                 {isRtl ? 'الدليل الاستراتيجي لتطور الطفل' : 'SYSTÈMATIC GROWTH ARCHITECTURE'}
               </span>
               <h2 className="text-xl md:text-3xl font-black text-[#FDCB6E] tracking-tight">
@@ -923,7 +923,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               }}
               className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 border ${
                 planTab === tab.id
-                  ? 'bg-gradient-to-r from-[#6C5CE7] to-[#5142be] text-white border-[#6C5CE7]/60 shadow-lg'
+                  ? 'bg-gradient-to-r from-[#002147] to-[#00183a] text-white border-[#002147]/60 shadow-lg'
                   : 'bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border-slate-800/80'
               }`}
             >
@@ -965,7 +965,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                     </div>
 
                     <div className="p-3 bg-slate-950/40 rounded-xl space-y-2">
-                      <span className="text-[9px] uppercase font-black text-[#00CEC9] block font-mono tracking-widest">{isRtl ? 'الألعاب المخصصة لهذا المسار' : 'CORE CURRICULUM GAMES'}</span>
+                      <span className="text-[9px] uppercase font-black text-[#C49E3A] block font-mono tracking-widest">{isRtl ? 'الألعاب المخصصة لهذا المسار' : 'CORE CURRICULUM GAMES'}</span>
                       <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-350 font-bold">
                         <div>⚔️ {isRtl ? 'معركة الكلمات (2)' : 'Word Battle (#2)'}</div>
                         <div>⚔️ {isRtl ? 'بطل الإملاء (6)' : 'Spelling Hero (#6)'}</div>
@@ -1129,7 +1129,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                 <div className="space-y-4 mt-4">
                   
                   {/* Step 1 */}
-                  <div className="flex gap-4 p-4.5 bg-slate-950/40 rounded-xl border border-slate-800 hover:border-[#6C5CE7]/30 transition-all">
+                  <div className="flex gap-4 p-4.5 bg-slate-950/40 rounded-xl border border-slate-800 hover:border-[#002147]/30 transition-all">
                     <span className="text-2xl mt-1">🌅</span>
                     <div className="flex-1 space-y-1">
                       <span className="text-[10px] font-mono text-[#E4C77A] font-extrabold uppercase tracking-wider block">
@@ -1140,14 +1140,14 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                     </div>
                     <button
                       onClick={() => selectGame('game_009')}
-                      className="px-3 py-1 bg-[#6C5CE7] hover:bg-[#5142be] text-white text-[10px] font-bold rounded-lg cursor-pointer my-auto"
+                      className="px-3 py-1 bg-[#002147] hover:bg-[#00183a] text-white text-[10px] font-bold rounded-lg cursor-pointer my-auto"
                     >
                       {isRtl ? 'ابدأ' : 'Play'}
                     </button>
                   </div>
 
                   {/* Step 2 */}
-                  <div className="flex gap-4 p-4.5 bg-slate-950/40 rounded-xl border border-slate-800 hover:border-[#6C5CE7]/30 transition-all">
+                  <div className="flex gap-4 p-4.5 bg-slate-950/40 rounded-xl border border-slate-800 hover:border-[#002147]/30 transition-all">
                     <span className="text-2xl mt-1">🧪</span>
                     <div className="flex-1 space-y-1">
                       <span className="text-[10px] font-mono text-amber-400 font-extrabold uppercase tracking-wider block">
@@ -1165,7 +1165,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   </div>
 
                   {/* Step 3 */}
-                  <div className="flex gap-4 p-4.5 bg-slate-950/40 rounded-xl border border-slate-800 hover:border-[#6C5CE7]/30 transition-all">
+                  <div className="flex gap-4 p-4.5 bg-slate-950/40 rounded-xl border border-slate-800 hover:border-[#002147]/30 transition-all">
                     <span className="text-2xl mt-1">👑</span>
                     <div className="flex-1 space-y-1">
                       <span className="text-[10px] font-mono text-[#E4C77A] font-extrabold uppercase tracking-wider block">
@@ -1176,7 +1176,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                     </div>
                     <button
                       onClick={() => selectGame('game_011')}
-                      className="px-3 py-1 bg-[#6C5CE7] hover:bg-[#5142be] text-white text-[10px] font-bold rounded-lg cursor-pointer my-auto"
+                      className="px-3 py-1 bg-[#002147] hover:bg-[#00183a] text-white text-[10px] font-bold rounded-lg cursor-pointer my-auto"
                     >
                       {isRtl ? 'ابدأ' : 'Play'}
                     </button>
@@ -1237,7 +1237,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs font-extrabold">
                       <span className="text-slate-200">{isRtl ? '🧪 بناء العبارات وصياغة التركيب النحوي' : 'Syntax Compose & Grammatical Harmony'}</span>
-                      <span className="text-[#00CEC9] font-mono">—</span>
+                      <span className="text-[#C49E3A] font-mono">—</span>
                     </div>
                     <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
                       <div className="bg-gradient-to-r from-[#002147] to-[#C49E3A] h-full rounded-full" style={{ width: '0%' }} />
@@ -1472,7 +1472,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
   return (
     <div className="min-h-screen bg-[#2D3436] text-slate-100 flex flex-col font-sans select-none pb-20">
       {/* Interactive header leveraging dynamic CSS values */}
-      <header className="bg-gradient-to-r from-[#6C5CE7] to-[#5142be] py-6 px-6 md:px-12 text-white shadow-md relative overflow-hidden">
+      <header className="bg-gradient-to-r from-[#002147] to-[#00183a] py-6 px-6 md:px-12 text-white shadow-md relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-xl pointer-events-none" />
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 z-10 relative">
           <div className="flex items-center gap-4">
@@ -1497,7 +1497,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
             <span className="text-xl">🌟</span>
             <div>
               <span className="text-[10px] block font-bold text-[#FDCB6E] uppercase tracking-wider">{isRtl ? 'درجات الجلسة' : 'Session Merits'}</span>
-              <span className="text-md font-black text-[#00CEC9] font-mono">+{sessionXP} XP</span>
+              <span className="text-md font-black text-[#C49E3A] font-mono">+{sessionXP} XP</span>
             </div>
           </div>
         </div>
@@ -1515,9 +1515,9 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
             >
               {/* Introduction Banner with Mentor Basil */}
               <div className="bg-[#1e2324] rounded-3xl p-6 md:p-8 border border-slate-700/60 shadow-xl flex flex-col md:flex-row items-center gap-6 justify-between relative overflow-hidden">
-                <div className="absolute right-0 top-0 w-32 h-32 bg-[#6C5CE7]/5 rounded-full pointer-events-none" />
+                <div className="absolute right-0 top-0 w-32 h-32 bg-[#002147]/5 rounded-full pointer-events-none" />
                 <div className="space-y-3">
-                  <span className="px-2.5 py-0.5 bg-[#6C5CE7]/20 text-[#6C5CE7] border border-[#6C5CE7]/30 rounded-full text-[11px] font-bold">
+                  <span className="px-2.5 py-0.5 bg-[#002147]/20 text-[#002147] border border-[#002147]/30 rounded-full text-[11px] font-bold">
                     {isRtl ? 'بوابة الألعاب المطورة بالكامل 🧪✨' : 'Radically Transformed Play Portal 🧪✨'}
                   </span>
                   <h2 className="text-xl md:text-2xl font-black text-[#FDCB6E]">
@@ -1541,7 +1541,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   onClick={() => { setLobbyTab('roadmap'); playSound('click'); }}
                   className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer ${
                     lobbyTab === 'roadmap'
-                      ? 'bg-[#6C5CE7] text-white shadow-lg shadow-[#6C5CE7]/20'
+                      ? 'bg-[#002147] text-white shadow-lg shadow-[#002147]/20'
                       : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                   }`}
                 >
@@ -1552,7 +1552,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   onClick={() => { setLobbyTab('catalog'); playSound('click'); }}
                   className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer ${
                     lobbyTab === 'catalog'
-                      ? 'bg-[#6C5CE7] text-white shadow-lg shadow-[#6C5CE7]/20'
+                      ? 'bg-[#002147] text-white shadow-lg shadow-[#002147]/20'
                       : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                   }`}
                 >
@@ -1563,8 +1563,8 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   onClick={() => { setLobbyTab('sandbox'); playSound('click'); }}
                   className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer relative overflow-hidden ${
                     lobbyTab === 'sandbox'
-                      ? 'bg-[#00CEC9] text-slate-900 shadow-lg shadow-[#00CEC9]/20 font-black'
-                      : 'text-[#00CEC9] hover:bg-slate-800'
+                      ? 'bg-[#C49E3A] text-slate-900 shadow-lg shadow-[#C49E3A]/20 font-black'
+                      : 'text-[#C49E3A] hover:bg-slate-800'
                   }`}
                 >
                   <Sparkles className="w-4 h-4 animate-pulse text-[#D63031]" />
@@ -1620,7 +1620,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
 
                 return (
                   <div className="space-y-10 py-4 relative">
-                    <div className="absolute top-10 bottom-10 left-4 md:left-1/2 w-1 bg-gradient-to-b from-[#6C5CE7] to-[#00CEC9] transform md:-translate-x-1/2 opacity-20 pointer-events-none" />
+                    <div className="absolute top-10 bottom-10 left-4 md:left-1/2 w-1 bg-gradient-to-b from-[#002147] to-[#C49E3A] transform md:-translate-x-1/2 opacity-20 pointer-events-none" />
 
                     {stages.map((stg, sIdx) => {
                       const isUnlocked = totalXP >= stg.reqXp;
@@ -1634,13 +1634,13 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                           key={stg.id}
                           className={`relative bg-[#1e2324] rounded-3xl p-6 border ${
                             isUnlocked 
-                              ? 'border-[#6C5CE7]/40 shadow-[#6C5CE7]/5 shadow-xl' 
+                              ? 'border-[#002147]/40 shadow-[#002147]/5 shadow-xl' 
                               : 'border-slate-800/80 opacity-60'
                           }`}
                         >
                           <div className={`absolute left-4 md:left-1/2 top-6 w-8 h-8 rounded-full flex items-center justify-center font-black text-xs transform md:-translate-x-1/2 z-10 transition-all ${
                             isUnlocked 
-                              ? 'bg-[#6C5CE7] text-white shadow-md shadow-[#6C5CE7]/30 ring-4 ring-[#6C5CE7]/10' 
+                              ? 'bg-[#002147] text-white shadow-md shadow-[#002147]/30 ring-4 ring-[#002147]/10' 
                               : 'bg-slate-800 text-slate-500'
                           }`}>
                             {stg.id}
@@ -1674,7 +1674,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                                     key={game.id}
                                     className={`p-4 rounded-2xl border transition-all flex flex-col justify-between h-[155px] relative overflow-hidden group ${
                                       isUnlocked
-                                        ? 'bg-slate-900/60 border-slate-800 hover:border-[#6C5CE7]/50 hover:bg-slate-800/40'
+                                        ? 'bg-slate-900/60 border-slate-800 hover:border-[#002147]/50 hover:bg-slate-800/40'
                                         : 'bg-slate-900/20 border-slate-900/40 select-none'
                                     }`}
                                   >
@@ -1699,7 +1699,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                                     {isUnlocked ? (
                                       <button
                                         onClick={() => selectGame(game.id)}
-                                        className="w-full mt-3 py-1.5 bg-[#6C5CE7] hover:bg-[#5b4dbd] text-white text-[10px] font-black rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer"
+                                        className="w-full mt-3 py-1.5 bg-[#002147] hover:bg-[#00183a] text-white text-[10px] font-black rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer"
                                       >
                                         <Play className="w-3 h-3" />
                                         {isRtl ? 'ابدأ اللعب الآن' : 'Launch Game'}
@@ -1732,7 +1732,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                           onClick={() => { playSound('click'); setActiveCategory(c.id); }}
                           className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
                             activeCategory === c.id 
-                              ? 'bg-[#6C5CE7] text-white shadow-md' 
+                              ? 'bg-[#002147] text-white shadow-md' 
                               : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                           }`}
                         >
@@ -1749,7 +1749,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           placeholder={isRtl ? "البحث عن لعبة..." : "Search games..."}
-                          className="w-full pl-9 pr-4 py-2 bg-slate-800 border border-[#444C4E] rounded-xl text-xs text-white focus:outline-none focus:border-[#6C5CE7] transition-all"
+                          className="w-full pl-9 pr-4 py-2 bg-slate-800 border border-[#444C4E] rounded-xl text-xs text-white focus:outline-none focus:border-[#002147] transition-all"
                         />
                       </div>
                     )}
@@ -1765,7 +1765,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                           <motion.div
                             whileHover={{ scale: 1.02 }}
                             key={game.id}
-                            className="bg-[#1e2324] hover:bg-slate-800/80 rounded-2xl p-5 border border-slate-700/60 hover:border-[#6C5CE7]/60 transition-all flex flex-col justify-between h-[230px] group shadow-sm relative overflow-hidden"
+                            className="bg-[#1e2324] hover:bg-slate-800/80 rounded-2xl p-5 border border-slate-700/60 hover:border-[#002147]/60 transition-all flex flex-col justify-between h-[230px] group shadow-sm relative overflow-hidden"
                           >
                             <div className="absolute top-2 right-2 text-[10px] font-mono text-slate-500 font-bold">
                               #{idx+1}
@@ -1793,7 +1793,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
 
                             <button
                               onClick={() => selectGame(game.id)}
-                              className="w-full mt-4 py-2 bg-slate-700/80 hover:bg-[#6C5CE7] text-white hover:text-white rounded-xl text-[11px] font-black tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer"
+                              className="w-full mt-4 py-2 bg-slate-700/80 hover:bg-[#002147] text-white hover:text-white rounded-xl text-[11px] font-black tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer"
                             >
                               <Play className="w-3.5 h-3.5" />
                               {isRtl ? 'انطلق والعب الآن' : 'Unleash Gameplay'}
@@ -1818,10 +1818,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               {/* TAB CONTENT: AI CREATIVE WORKSPACE (SANDBOX) */}
               {lobbyTab === 'sandbox' && (
                 <div className="bg-[#1e2324] rounded-3xl p-6 md:p-8 border border-slate-700/60 relative overflow-hidden shadow-2xl space-y-6 animate-fadeIn">
-                  <div className="absolute right-0 top-0 w-48 h-48 bg-[#00CEC9]/5 rounded-full pointer-events-none" />
+                  <div className="absolute right-0 top-0 w-48 h-48 bg-[#C49E3A]/5 rounded-full pointer-events-none" />
 
                   <div className="space-y-2">
-                    <h3 className="text-lg md:text-xl font-black text-[#00CEC9] flex items-center gap-2">
+                    <h3 className="text-lg md:text-xl font-black text-[#C49E3A] flex items-center gap-2">
                       <Sparkles className="w-5 h-5" />
                       {isRtl ? 'مختبر ألعاب باسل بالذكاء الاصطناعي 🧪✨' : 'Mentor Basil\'s Custom AI Game Lab 🧪✨'}
                     </h3>
@@ -1844,12 +1844,12 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             value={sandboxTheme}
                             onChange={(e) => setSandboxTheme(e.target.value)}
                             placeholder={isRtl ? "مثال: رحلة سفاري الديناصورات أو مغامرة فضاء..." : "e.g. Dinosaur Safari adventure, Minecraft Builder..."}
-                            className="flex-1 px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#00CEC9] font-medium transition-all"
+                            className="flex-1 px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#C49E3A] font-medium transition-all"
                           />
                           <button
                             onClick={() => handleGenerateSandboxGame(sandboxTheme)}
                             disabled={!sandboxTheme.trim()}
-                            className="px-6 py-3 bg-[#00CEC9] hover:bg-[#00b2ae] disabled:bg-slate-800 disabled:text-slate-500 text-slate-900 font-black text-xs rounded-xl transition-all cursor-pointer shrink-0 flex items-center justify-center gap-2"
+                            className="px-6 py-3 bg-[#C49E3A] hover:bg-[#00b2ae] disabled:bg-slate-800 disabled:text-slate-500 text-slate-900 font-black text-xs rounded-xl transition-all cursor-pointer shrink-0 flex items-center justify-center gap-2"
                           >
                             <Sparkles className="w-4 h-4 text-slate-900" />
                             {isRtl ? 'توليد اللعبة المخصصة 🚀' : 'Build Custom Game 🚀'}
@@ -1884,11 +1884,11 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                     <div className="py-12 flex flex-col items-center justify-center space-y-4">
                       <div className="relative w-16 h-16">
                         <div className="absolute inset-0 rounded-full border-4 border-slate-800" />
-                        <div className="absolute inset-0 rounded-full border-4 border-[#00CEC9] border-t-transparent animate-spin" />
+                        <div className="absolute inset-0 rounded-full border-4 border-[#C49E3A] border-t-transparent animate-spin" />
                         <span className="absolute inset-0 flex items-center justify-center text-lg">🧪</span>
                       </div>
                       <div className="text-center space-y-1">
-                        <p className="text-xs font-black text-[#00CEC9]">{isRtl ? 'يتم الآن صياغة واجهة اللعبة بالكامل...' : 'Compiling the ultimate tailored game...'}</p>
+                        <p className="text-xs font-black text-[#C49E3A]">{isRtl ? 'يتم الآن صياغة واجهة اللعبة بالكامل...' : 'Compiling the ultimate tailored game...'}</p>
                         <p className="text-[10px] text-slate-400">{isRtl ? 'يقوم باسل بالتعاون مع الذكاء الاصطناعي ببناء قصة وأسئلة فريدة' : 'Basil is co-authoring a custom gameplay script and audio'}</p>
                       </div>
                     </div>
@@ -1900,7 +1900,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                     return (
                       <div className="space-y-6 pt-2 animate-fadeIn">
                         <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
-                          <span className="text-[10px] uppercase font-black tracking-wider text-[#00CEC9] block mb-1">📖 {isRtl ? 'المقدمة الغامرة' : 'Immersive Backstory'}</span>
+                          <span className="text-[10px] uppercase font-black tracking-wider text-[#C49E3A] block mb-1">📖 {isRtl ? 'المقدمة الغامرة' : 'Immersive Backstory'}</span>
                           <p className="text-xs font-medium leading-relaxed text-slate-200">
                             {isRtl ? sandboxGame.story.ar : sandboxGame.story.en}
                           </p>
@@ -1918,7 +1918,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                                 key={dot} 
                                 className={`w-2 h-2 rounded-full transition-all ${
                                   dot <= sandboxCurrentQuestionIdx 
-                                    ? 'bg-[#00CEC9]' 
+                                    ? 'bg-[#C49E3A]' 
                                     : 'bg-slate-700'
                                 }`} 
                               />
@@ -1945,7 +1945,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                                   disabled={sandboxSelectedOpt !== null}
                                   className={`p-3.5 rounded-xl text-xs font-bold text-left transition-all cursor-pointer flex items-center justify-between ${
                                     sandboxSelectedOpt === null
-                                      ? 'bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-800 hover:border-[#00CEC9]/40'
+                                      ? 'bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-800 hover:border-[#C49E3A]/40'
                                       : showSuccessBorder
                                         ? 'bg-green-950/40 border-green-500 text-green-300 font-black'
                                         : showFailBorder
@@ -1986,7 +1986,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                           <div className="flex justify-end">
                             <button
                               onClick={handleNextSandboxQuestion}
-                              className="px-5 py-2.5 bg-[#00CEC9] hover:bg-[#00b2ae] text-slate-900 font-black text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                              className="px-5 py-2.5 bg-[#C49E3A] hover:bg-[#00b2ae] text-slate-900 font-black text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
                             >
                               <span>{sandboxCurrentQuestionIdx === 2 ? (isRtl ? 'عرض نتائج المهام 🏆' : 'See Quest Results 🏆') : (isRtl ? 'التالي ➡️' : 'Next Challenge ➡️')}</span>
                               <ArrowRight className="w-3.5 h-3.5 text-slate-900" />
@@ -2005,7 +2005,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                     >
                       <span className="text-6xl block animate-bounce">🏆🧪</span>
                       <div className="space-y-2">
-                        <h4 className="text-lg font-black text-[#00CEC9]">
+                        <h4 className="text-lg font-black text-[#C49E3A]">
                           {isRtl ? 'تم إكمال المهمة المبتكرة بنجاح!' : 'Innovative Quest Successfully Mastered!'}
                         </h4>
                         <p className="text-xs text-slate-300 font-medium">
@@ -2015,8 +2015,8 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                         </p>
                       </div>
 
-                      <div className="max-w-md mx-auto bg-slate-900 border-2 border-dashed border-[#00CEC9]/40 p-5 rounded-2xl space-y-3 relative">
-                        <span className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-[#00CEC9] text-slate-900 text-[10px] font-black rounded-full uppercase tracking-widest">
+                      <div className="max-w-md mx-auto bg-slate-900 border-2 border-dashed border-[#C49E3A]/40 p-5 rounded-2xl space-y-3 relative">
+                        <span className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-[#C49E3A] text-slate-900 text-[10px] font-black rounded-full uppercase tracking-widest">
                           {isRtl ? 'شهادة إنجاز ذكية' : 'AI Academic Certificate'}
                         </span>
                         <div className="pt-3">
@@ -2028,7 +2028,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             ? `"تثبت هذه الوثيقة أن بطلنا قد أثبت مرونة لغوية ذكية، وحل جميع المهام بنجاح فائق."`
                             : `"This document certifies that our brave learner successfully resolved custom AI problems with marvelous vocabulary skills."`}
                         </p>
-                        <span className="text-[9px] text-[#00CEC9] font-black block mt-1">✓ VERIFIED BY BASIL DIGITAL ACADEMY</span>
+                        <span className="text-[9px] text-[#C49E3A] font-black block mt-1">✓ VERIFIED BY BASIL DIGITAL ACADEMY</span>
                       </div>
 
                       <div className="flex justify-center gap-3">
@@ -2040,7 +2040,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                         </button>
                         <button
                           onClick={() => { setLobbyTab('roadmap'); playSound('click'); }}
-                          className="px-5 py-2.5 bg-[#6C5CE7] hover:bg-[#5b4dbd] text-white font-black text-xs rounded-xl transition-all cursor-pointer"
+                          className="px-5 py-2.5 bg-[#002147] hover:bg-[#00183a] text-white font-black text-xs rounded-xl transition-all cursor-pointer"
                         >
                           {isRtl ? 'العودة لخريطة المهام' : 'Back to Roadmap'}
                         </button>
@@ -2120,12 +2120,12 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
 
                       <div className="space-y-2">
                         <div className="flex justify-between items-center text-xs font-mono font-bold">
-                          <span className="text-[#00CEC9]">LEVEL {level}</span>
+                          <span className="text-[#C49E3A]">LEVEL {level}</span>
                           <span className="text-slate-400">{currentLevelXP} / 150 XP</span>
                         </div>
                         <div className="w-full bg-slate-900 h-3.5 rounded-full overflow-hidden border border-slate-800 p-0.5">
                           <div 
-                            className="bg-gradient-to-r from-[#6C5CE7] to-[#00CEC9] h-full rounded-full transition-all duration-500"
+                            className="bg-gradient-to-r from-[#002147] to-[#C49E3A] h-full rounded-full transition-all duration-500"
                             style={{ width: `${xpPercent}%` }}
                           />
                         </div>
@@ -2312,7 +2312,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             }}
                             className={`aspect-square rounded-lg text-xs flex items-center justify-center font-black transition-all ${
                               isPlayer 
-                                ? 'bg-[#6C5CE7] text-white ring-2 ring-white scale-105' 
+                                ? 'bg-[#002147] text-white ring-2 ring-white scale-105' 
                                 : isTreasure 
                                   ? 'bg-[#FDCB6E] text-slate-900 animate-pulse font-serif text-md' 
                                   : 'bg-slate-800 hover:bg-slate-700 text-slate-500 hover:text-slate-200'
@@ -2354,7 +2354,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               }
                               setShowMapModal(false);
                             }}
-                            className="p-3 bg-slate-800 hover:bg-[#6C5CE7] text-white font-bold rounded-xl text-[11px] transition-all cursor-pointer text-center"
+                            className="p-3 bg-slate-800 hover:bg-[#002147] text-white font-bold rounded-xl text-[11px] transition-all cursor-pointer text-center"
                           >
                             {opt}
                           </button>
@@ -2552,7 +2552,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                     <div className="flex flex-wrap gap-2">
                       {Object.entries(traderLetters).map(([letter, count]) => (
                         count > 0 && (
-                          <div key={letter} className="px-3 py-2 bg-[#6C5CE7] text-white font-black font-mono rounded-xl flex items-center gap-2">
+                          <div key={letter} className="px-3 py-2 bg-[#002147] text-white font-black font-mono rounded-xl flex items-center gap-2">
                             <span>{letter}</span>
                             <span className="text-[9px] bg-slate-900/40 px-1.5 py-0.5 rounded-md font-sans">x{count}</span>
                           </div>
@@ -2608,7 +2608,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                    </div>
 
                    <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-700 text-center">
-                     <p className="text-[10px] font-bold text-[#00CEC9]">
+                     <p className="text-[10px] font-bold text-[#C49E3A]">
                        {isRtl ? '💡 كلمات متميزة نوصي بصنعها للحصول على 2x ذهب إضافي:' : '💡 Premium high-value targets for 2x GOLD boost:'}
                      </p>
                      <p className="text-[10px] text-slate-400 font-mono mt-1">
@@ -2685,7 +2685,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             setDialoguePoliteness(1.0);
                           }
                         }}
-                        className="px-5 py-2.5 bg-[#6C5CE7] hover:bg-[#5142be] text-white rounded-xl text-xs font-black cursor-pointer"
+                        className="px-5 py-2.5 bg-[#002147] hover:bg-[#00183a] text-white rounded-xl text-xs font-black cursor-pointer"
                       >
                         {dialogueIndex < dialogueAmbassadorScenariosData.length - 1 
                           ? (isRtl ? "الحوار التالي ➡️" : "Next Scenario ➡️")
@@ -2703,7 +2703,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                 <div className="space-y-6 text-center">
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-red-400 font-bold">{isRtl ? 'القلوب:' : 'Shield Lives:'} {"❤️".repeat(spellingLives)}</span>
-                    <span className="text-[#00CEC9] font-mono font-black">Score: {spellingScore}</span>
+                    <span className="text-[#C49E3A] font-mono font-black">Score: {spellingScore}</span>
                   </div>
 
                   <div className="p-8 bg-slate-900 rounded-3xl border border-slate-700 min-h-[140px] flex flex-col justify-center items-center relative overflow-hidden">
@@ -2778,7 +2778,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             speakFeedback("A drop of salty rain, wrong choice!");
                           }
                         }}
-                        className="px-4 py-2.5 bg-slate-800 hover:bg-[#6C5CE7] hover:text-white rounded-xl text-xs font-black text-slate-200 transition-all cursor-pointer text-center"
+                        className="px-4 py-2.5 bg-slate-800 hover:bg-[#002147] hover:text-white rounded-xl text-xs font-black text-slate-200 transition-all cursor-pointer text-center"
                       >
                         {item.word}
                       </button>
@@ -2852,7 +2852,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             setDragonAttackIdx(prev => (prev + 1) % politeKnightDragonAttacksData.length);
                           }
                         }}
-                        className="p-3 bg-slate-800 hover:bg-[#6C5CE7] hover:text-white rounded-xl text-left text-xs font-black transition-all cursor-pointer font-mono"
+                        className="p-3 bg-slate-800 hover:bg-[#002147] hover:text-white rounded-xl text-left text-xs font-black transition-all cursor-pointer font-mono"
                       >
                         {opt.text}
                       </button>
@@ -2879,7 +2879,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                       const correctWord = pronunciationDetectivePairsData[detectiveIndex].correct;
                       speakFeedback(correctWord, 'en');
                     }}
-                    className="w-20 h-20 bg-[#6C5CE7] hover:bg-[#5142be] text-white rounded-full flex items-center justify-center text-3xl mx-auto shadow-md transition-all cursor-pointer animate-pulse"
+                    className="w-20 h-20 bg-[#002147] hover:bg-[#00183a] text-white rounded-full flex items-center justify-center text-3xl mx-auto shadow-md transition-all cursor-pointer animate-pulse"
                   >
                     🔊
                   </button>
@@ -2961,7 +2961,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               speakFeedback("Try another preposition!");
                             }
                           }}
-                          className="p-2 bg-slate-800 hover:bg-[#6C5CE7] text-white rounded-lg text-[10px] font-black cursor-pointer transition-all text-center"
+                          className="p-2 bg-slate-800 hover:bg-[#002147] text-white rounded-lg text-[10px] font-black cursor-pointer transition-all text-center"
                         >
                           {option}
                         </button>
@@ -3014,7 +3014,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               speakFeedback("Think of a more polite pathway!");
                             }
                           }}
-                          className="p-3 bg-slate-800 hover:bg-[#6C5CE7] hover:text-white rounded-xl text-left text-xs font-black font-mono cursor-pointer transition-all border border-slate-700/60"
+                          className="p-3 bg-slate-800 hover:bg-[#002147] hover:text-white rounded-xl text-left text-xs font-black font-mono cursor-pointer transition-all border border-slate-700/60"
                         >
                           {opt}
                         </button>
@@ -3185,7 +3185,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                           <span className="text-sm font-black text-[#FDCB6E]">
                             {isRtl ? "تحدي اللباقة النشط: " : "Active Etiquette Goal: "}
                           </span>
-                          <span className="text-xs bg-[#6C5CE7] text-white px-2.5 py-0.5 rounded-full font-black">
+                          <span className="text-xs bg-[#002147] text-white px-2.5 py-0.5 rounded-full font-black">
                             {isRtl ? `المرحلة ${ (raceChallengeIndex % friendshipChallenges.length) + 1 }` : `Stage ${ (raceChallengeIndex % friendshipChallenges.length) + 1 }`}
                           </span>
                         </div>
@@ -3219,7 +3219,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                         </div>
                         <div className="w-full bg-slate-950 border border-slate-800 h-10 rounded-2xl relative flex items-center overflow-hidden">
                           {/* Progress bar background indicator */}
-                          <div className="bg-gradient-to-r from-[#6C5CE7]/30 to-[#6C5CE7] h-full transition-all duration-300" style={{ width: `${friendshipProgress}%` }} />
+                          <div className="bg-gradient-to-r from-[#002147]/30 to-[#002147] h-full transition-all duration-300" style={{ width: `${friendshipProgress}%` }} />
                           {/* Moving Lion emoji */}
                           <div 
                             className="absolute transition-all duration-500 text-2xl flex items-center justify-center pb-1"
@@ -3247,7 +3247,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                         </div>
                         <div className="w-full bg-slate-950 border border-slate-800 h-10 rounded-2xl relative flex items-center overflow-hidden">
                           {/* Progress bar background indicator */}
-                          <div className="bg-gradient-to-r from-[#00CEC9]/30 to-[#00CEC9] h-full transition-all duration-300" style={{ width: `${friendshipProgress2}%` }} />
+                          <div className="bg-gradient-to-r from-[#C49E3A]/30 to-[#C49E3A] h-full transition-all duration-300" style={{ width: `${friendshipProgress2}%` }} />
                           {/* Moving Unicorn emoji */}
                           <div 
                             className="absolute transition-all duration-500 text-2xl flex items-center justify-center pb-1"
@@ -3267,7 +3267,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
 
                     {/* VICTORY OVERLAY CARD */}
                     {raceWinner && (
-                      <div className="bg-[#00CEC9]/10 border-2 border-[#00CEC9]/40 p-6 rounded-2xl text-center space-y-4 animate-bounce">
+                      <div className="bg-[#C49E3A]/10 border-2 border-[#C49E3A]/40 p-6 rounded-2xl text-center space-y-4 animate-bounce">
                         <p className="text-2xl">🏆👑🎉</p>
                         <h4 className="text-md font-black text-white">
                           {isRtl 
@@ -3281,7 +3281,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                         </p>
                         <button
                           onClick={resetRaceGame}
-                          className="px-6 py-2 bg-[#00CEC9] hover:bg-[#00cec9]/90 text-slate-950 font-black rounded-xl text-xs transition-all active:scale-95 cursor-pointer"
+                          className="px-6 py-2 bg-[#C49E3A] hover:bg-[#C49E3A]/90 text-slate-950 font-black rounded-xl text-xs transition-all active:scale-95 cursor-pointer"
                         >
                           {isRtl ? "ابدأ سباقاً جديداً 🔄" : "Start New Race 🔄"}
                         </button>
@@ -3293,10 +3293,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                         {/* CHALLENGE CARD */}
                         <div className="bg-gradient-to-br from-slate-900 to-slate-900/60 p-5 rounded-2xl border border-slate-700/50 space-y-3.5 relative overflow-hidden">
                           {/* Glow background accent */}
-                          <div className="absolute -right-20 -top-20 w-44 h-44 bg-[#6C5CE7]/10 rounded-full blur-3xl pointer-events-none" />
+                          <div className="absolute -right-20 -top-20 w-44 h-44 bg-[#002147]/10 rounded-full blur-3xl pointer-events-none" />
 
                           <div className="flex justify-between items-center">
-                            <span className="text-[10px] bg-[#6C5CE7]/20 text-slate-200 px-3 py-1 rounded-full font-black border border-[#6C5CE7]/30">
+                            <span className="text-[10px] bg-[#002147]/20 text-slate-200 px-3 py-1 rounded-full font-black border border-[#002147]/30">
                               {isRtl ? `بطاقة تعاون: دور اللاعب ${raceCurrentPlayer}` : `Co-op Challenge: Player ${raceCurrentPlayer}'s Turn`}
                             </span>
                             <span className="text-xs text-[#FDCB6E] font-black flex items-center gap-1 animate-pulse">
@@ -3322,7 +3322,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               <button
                                 key={sug.phrase}
                                 onClick={() => handleCoopSubmit(sug.phrase)}
-                                className="px-3.5 py-2 bg-slate-800/80 hover:bg-[#6C5CE7] hover:text-white text-slate-200 rounded-xl text-xs font-black transition-all flex items-center gap-1 cursor-pointer border border-slate-700 active:scale-95"
+                                className="px-3.5 py-2 bg-slate-800/80 hover:bg-[#002147] hover:text-white text-slate-200 rounded-xl text-xs font-black transition-all flex items-center gap-1 cursor-pointer border border-slate-700 active:scale-95"
                               >
                                 <span>{sug.phrase}</span>
                                 <span className="text-[10px] text-slate-400 group-hover:text-slate-200 font-normal">
@@ -3346,7 +3346,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                                 }
                               }}
                               placeholder={isRtl ? "أو تدرب على كتابتها يدوياً بالإنجليزية هنا..." : "Or practice typing it manually here..."}
-                              className="w-full text-center px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs font-mono font-bold focus:outline-none focus:border-[#6C5CE7]/60 focus:ring-1 focus:ring-[#6C5CE7]/60"
+                              className="w-full text-center px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs font-mono font-bold focus:outline-none focus:border-[#002147]/60 focus:ring-1 focus:ring-[#002147]/60"
                             />
                           </div>
 
@@ -3362,7 +3362,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               id="submit-cheer-btn"
                               onClick={() => handleCoopSubmit()}
                               disabled={!raceInput.trim()}
-                              className="w-full py-3.5 bg-[#6C5CE7] hover:bg-[#5142be] disabled:opacity-50 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer shadow-lg shadow-[#6C5CE7]/20"
+                              className="w-full py-3.5 bg-[#002147] hover:bg-[#00183a] disabled:opacity-50 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer shadow-lg shadow-[#002147]/20"
                             >
                               🚀 {isRtl ? "تحقق وأرسل المكتوب يدوياً (15+ خطوة)" : "Verify & Boost manual (15+ Steps)"}
                             </button>
@@ -3396,14 +3396,14 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                       </div>
                       <div className="text-right">
                         <span className="text-[10px] text-slate-400 font-bold block">{isRtl ? 'السلعة في المتجر' : 'Market Item'}</span>
-                        <span className="text-xs bg-[#6C5CE7]/20 px-2 py-0.5 rounded font-mono font-bold text-white border border-[#6C5CE7]/30">
+                        <span className="text-xs bg-[#002147]/20 px-2 py-0.5 rounded font-mono font-bold text-white border border-[#002147]/30">
                           {marketWordIndex + 1} / {wordMarketRustyWordsData.length}
                         </span>
                       </div>
                     </div>
 
                     <div className="p-4 bg-slate-900/60 rounded-xl border border-slate-800 text-center space-y-1">
-                      <p className="text-[10px] uppercase tracking-widest text-[#00CEC9] font-black">{isRtl ? 'الكلمة الأساسية المكسورة' : 'CURRENCY ROOT ELEMENT'}</p>
+                      <p className="text-[10px] uppercase tracking-widest text-[#C49E3A] font-black">{isRtl ? 'الكلمة الأساسية المكسورة' : 'CURRENCY ROOT ELEMENT'}</p>
                       <h4 className="text-xl font-bold font-mono text-white tracking-widest">{currentItem.display}</h4>
                       <p className="text-[10px] text-slate-400">{isRtl ? 'أصل الكلمة بحاجة لربط بادئة أو لاحقة صحيحة' : 'Reforge the concept by splicing its prefix/suffix extension'}</p>
                     </div>
@@ -3433,10 +3433,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               speakFeedback("Oops! Spelling or meaning doesn't match root grammar. Try the other splice!");
                             }
                           }}
-                          className="p-4 bg-slate-800 hover:bg-[#6C5CE7] hover:text-white rounded-xl text-center space-y-1.5 cursor-pointer transition-all border border-slate-700/60 active:scale-95"
+                          className="p-4 bg-slate-800 hover:bg-[#002147] hover:text-white rounded-xl text-center space-y-1.5 cursor-pointer transition-all border border-slate-700/60 active:scale-95"
                         >
                           <h5 className="font-mono text-xs font-bold text-white">{opt.text}</h5>
-                          <p className="text-[10px] text-slate-400">{isRtl ? 'التجميع المقترح:' : 'Result:'} <b className="text-[#00CEC9]">{opt.res}</b></p>
+                          <p className="text-[10px] text-slate-400">{isRtl ? 'التجميع المقترح:' : 'Result:'} <b className="text-[#C49E3A]">{opt.res}</b></p>
                         </button>
                       ))}
                     </div>
@@ -3479,7 +3479,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                         }
                       }}
                       placeholder={isRtl ? "اكتب العبارة المفكوكة بالإنجليزية..." : `Translate: "${currentPuzzle.cipher}"...`}
-                      className="w-full text-center px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs font-mono tracking-wider focus:outline-none focus:border-[#6C5CE7]"
+                      className="w-full text-center px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs font-mono tracking-wider focus:outline-none focus:border-[#002147]"
                     />
 
                     {cipherDecrypted && (
@@ -3501,7 +3501,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               setCipherDecrypted(false);
                             }
                           }}
-                          className="px-5 py-2.5 bg-[#00CEC9] hover:bg-[#00cec9]/90 text-slate-950 rounded-xl text-xs font-black cursor-pointer shadow-lg shadow-[#00CEC9]/10 animate-pulse"
+                          className="px-5 py-2.5 bg-[#C49E3A] hover:bg-[#C49E3A]/90 text-slate-950 rounded-xl text-xs font-black cursor-pointer shadow-lg shadow-[#C49E3A]/10 animate-pulse"
                         >
                           {isRtl ? "الشيفرة التالية ➡️" : "Next Cipher ➡️"}
                         </button>
@@ -3542,7 +3542,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                         setTheaterFeedback(isRtl ? "الحوار رائع، لكن حاول إدخال قيمة تهذيبية مثل please أو thank you لرفع التقييم!" : "Include words of courtesy to earn extra theater merits!");
                       }
                     }}
-                    className="w-full py-2.5 bg-[#6C5CE7] hover:bg-[#5142be] text-white rounded-xl text-xs font-black cursor-pointer transition-all text-center"
+                    className="w-full py-2.5 bg-[#002147] hover:bg-[#00183a] text-white rounded-xl text-xs font-black cursor-pointer transition-all text-center"
                   >
                     🎭 {isRtl ? 'عرض المشهد على الستارة والتقييم' : 'Submit Scene Description to Basil'}
                   </button>
@@ -3604,7 +3604,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               speakFeedback("Wrong verbal plank, bridge collapsed, try again!");
                             }
                           }}
-                          className="p-2.5 bg-slate-800 hover:bg-[#6C5CE7] hover:text-white rounded-xl text-xs font-bold tracking-wider cursor-pointer font-mono border border-slate-700/60 active:scale-95"
+                          className="p-2.5 bg-slate-800 hover:bg-[#002147] hover:text-white rounded-xl text-xs font-bold tracking-wider cursor-pointer font-mono border border-slate-700/60 active:scale-95"
                         >
                           {opt}
                         </button>
@@ -3646,7 +3646,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             speakFeedback("A cold shoulder, select positive encouragement!");
                           }
                         }}
-                        className="p-3 bg-slate-800 hover:bg-[#6C5CE7] hover:text-white rounded-xl text-xs font-black transition-all cursor-pointer font-mono"
+                        className="p-3 bg-slate-800 hover:bg-[#002147] hover:text-white rounded-xl text-xs font-black transition-all cursor-pointer font-mono"
                       >
                         {opt.txt}
                       </button>
@@ -3670,7 +3670,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                       <h5 className="text-xs font-extrabold text-[#FDCB6E] mt-2">
                         {isRtl ? currentRecipe.titleAr : currentRecipe.titleEn}
                       </h5>
-                      <p className="text-[10px] text-[#00CEC9] mt-1">Select logic tokens: SUBJECT ➔ VERB ➔ OBJECT</p>
+                      <p className="text-[10px] text-[#C49E3A] mt-1">Select logic tokens: SUBJECT ➔ VERB ➔ OBJECT</p>
                     </div>
 
                     <div className="p-3 bg-slate-900/40 rounded-2xl border border-slate-800 text-center min-h-[50px] flex items-center justify-center gap-2 flex-wrap">
@@ -3682,7 +3682,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             key={tIdx}
-                            className="px-3 py-1.5 bg-[#6C5CE7] rounded-xl text-xs font-mono font-black text-white border border-[#6C5CE7]/40 shadow-md flex items-center gap-1"
+                            className="px-3 py-1.5 bg-[#002147] rounded-xl text-xs font-mono font-black text-white border border-[#002147]/40 shadow-md flex items-center gap-1"
                           >
                             <span>{tok}</span>
                           </motion.div>
@@ -3704,7 +3704,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             className={`w-full text-center py-2.5 rounded-lg text-[10px] font-bold text-white mb-2 cursor-pointer transition-all ${
                               phraseChefSelected.includes(word)
                                 ? 'bg-slate-900/30 text-slate-700 border border-slate-800/40 opacity-40 cursor-not-allowed'
-                                : 'bg-slate-800 hover:bg-[#6C5CE7] hover:scale-105 active:scale-95'
+                                : 'bg-slate-800 hover:bg-[#002147] hover:scale-105 active:scale-95'
                             }`}
                           >
                             {word}
@@ -3725,7 +3725,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             className={`w-full text-center py-2.5 rounded-lg text-[10px] font-bold text-white mb-2 cursor-pointer transition-all ${
                               phraseChefSelected.includes(word)
                                 ? 'bg-slate-900/30 text-slate-700 border border-slate-800/40 opacity-40 cursor-not-allowed'
-                                : 'bg-slate-800 hover:bg-[#6C5CE7] hover:scale-105 active:scale-95'
+                                : 'bg-slate-800 hover:bg-[#002147] hover:scale-105 active:scale-95'
                             }`}
                           >
                             {word}
@@ -3746,7 +3746,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             className={`w-full text-center py-2.5 rounded-lg text-[10px] font-bold text-white mb-2 cursor-pointer transition-all ${
                               phraseChefSelected.includes(word)
                                 ? 'bg-slate-900/30 text-slate-700 border border-slate-800/40 opacity-40 cursor-not-allowed'
-                                : 'bg-slate-800 hover:bg-[#6C5CE7] hover:scale-105 active:scale-95'
+                                : 'bg-slate-800 hover:bg-[#002147] hover:scale-105 active:scale-95'
                             }`}
                           >
                             {word}
@@ -3809,7 +3809,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   </p>
 
                   <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 text-center text-xs">
-                    <span className="text-[#00CEC9] font-black uppercase font-mono tracking-widest text-[10px] block mb-1">
+                    <span className="text-[#C49E3A] font-black uppercase font-mono tracking-widest text-[10px] block mb-1">
                       {isRtl ? 'حالة الكهف' : 'CAVE LANTERNS LIT'}
                     </span>
                     <span className="font-mono text-white">
@@ -3877,7 +3877,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                 
                 return (
                   <div className="space-y-6">
-                    <p className="text-[10px] uppercase font-black tracking-widest text-[#00CEC9] text-center font-mono">
+                    <p className="text-[10px] uppercase font-black tracking-widest text-[#C49E3A] text-center font-mono">
                       {isRtl ? 'بوابة التعددية الثقافية والأدب العالمي' : 'GATEWAY TO GLOBAL COURTESY & DIPLOMACY'}
                     </p>
 
@@ -3894,8 +3894,8 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               setCurrentCountry(country.nameEn);
                               speakFeedback(`Navigating to ${country.nameEn}`);
                             }}
-                            className={`flex-none px-3 py-2 bg-slate-900 hover:bg-[#6C5CE7] hover:text-white rounded-xl text-xs font-black cursor-pointer border transition-all active:scale-95 flex items-center gap-1 font-mono ${
-                              isSelected ? 'border-[#00CEC9] text-[#00CEC9]' : 'border-slate-800 text-slate-300'
+                            className={`flex-none px-3 py-2 bg-slate-900 hover:bg-[#002147] hover:text-white rounded-xl text-xs font-black cursor-pointer border transition-all active:scale-95 flex items-center gap-1 font-mono ${
+                              isSelected ? 'border-[#C49E3A] text-[#C49E3A]' : 'border-slate-800 text-slate-300'
                             }`}
                           >
                             <span>{isRtl ? country.nameAr : country.nameEn}</span>
@@ -3906,7 +3906,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
 
                     <div className="p-5 bg-slate-900 rounded-3xl border border-slate-700/60 space-y-2.5">
                       <span className="text-3xl block animate-pulse">🌍</span>
-                      <p className="text-[10px] text-[#00CEC9] font-black uppercase font-mono tracking-widest">
+                      <p className="text-[10px] text-[#C49E3A] font-black uppercase font-mono tracking-widest">
                         {isRtl ? 'الموقف الثقافي اللبق:' : 'CULTURAL SCENARIO CHALLENGE'}
                       </p>
                       <p className="text-xs font-medium text-slate-200 leading-relaxed font-sans select-none">
@@ -3930,7 +3930,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               speakFeedback("Traditional roots require a different tone, try again!");
                             }
                           }}
-                          className="p-3.5 bg-slate-800 hover:bg-[#6C5CE7] hover:text-white rounded-xl text-left text-xs font-black cursor-pointer transition-all active:scale-95 border border-slate-700/60 leading-relaxed font-mono"
+                          className="p-3.5 bg-slate-800 hover:bg-[#002147] hover:text-white rounded-xl text-left text-xs font-black cursor-pointer transition-all active:scale-95 border border-slate-700/60 leading-relaxed font-mono"
                         >
                           {opt.txt}
                         </button>
