@@ -588,11 +588,29 @@ Looking forward to your reply. Tell me what we're tackling first!`;
 
 
   // 📘 Book/PDF text → structured micro-course (دورات تطويرية). Auth + rate limit come from the /api/* middleware.
-  const COURSE_MODELS = ["gemini-3.8-flash", "gemini-3.8-flash-lite", "gemini-3.1-pro-preview", "gemini-2.5-flash"];
+  const COURSE_MODELS = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"]; // names from ai.google.dev/gemini-api/docs/models (Oct 2026)
+  const COURSE_DAILY_LIMIT = 5;
   app.post("/api/pd/book-to-course", async (req: express.Request, res: express.Response) => {
     const raw = String(req.body?.text || "").replace(/\s+\n/g, "\n").trim();
     if (raw.length < 200) return res.status(400).json({ error: "TEXT_TOO_SHORT" });
     if (!initAI() || !aiLive) return res.status(503).json({ error: "AI_NOT_CONFIGURED" });
+    // Daily limit: 5 generations per user per Riyadh day (master admin unlimited). Counted only on success.
+    const uid = (req as any).authUid as string;
+    let quotaRef: any = null;
+    try {
+      const email = String((await getAdminAuth()!.getUser(uid)).email || "").toLowerCase();
+      if (email !== "basim5252@gmail.com") {
+        const day = new Date(Date.now() + 3 * 3600 * 1000).toISOString().slice(0, 10);
+        const db = getAdminDb();
+        if (!db) return res.status(503).json({ error: "AI_FAILED" });
+        quotaRef = db.collection("pdCourseQuota").doc(`${uid}_${day}`);
+        const used = Number((await quotaRef.get()).data()?.count || 0);
+        if (used >= COURSE_DAILY_LIMIT) return res.status(429).json({ error: "DAILY_LIMIT", limit: COURSE_DAILY_LIMIT });
+      }
+    } catch (e: any) {
+      logToFile(`book-to-course quota check failed: ${String(e?.message || e).slice(0, 200)}`);
+      return res.status(503).json({ error: "AI_FAILED" });
+    }
     const text = raw.slice(0, 24000);
     const q = { type: Type.OBJECT, properties: { questionAr: { type: Type.STRING }, questionEn: { type: Type.STRING }, optionsAr: { type: Type.ARRAY, items: { type: Type.STRING } }, optionsEn: { type: Type.ARRAY, items: { type: Type.STRING } }, correctIndex: { type: Type.INTEGER }, explanationAr: { type: Type.STRING }, explanationEn: { type: Type.STRING } }, required: ["questionAr", "questionEn", "optionsAr", "optionsEn", "correctIndex", "explanationAr", "explanationEn"] };
     const lesson = { type: Type.OBJECT, properties: { titleAr: { type: Type.STRING }, titleEn: { type: Type.STRING }, summaryAr: { type: Type.STRING }, summaryEn: { type: Type.STRING }, keyPointsAr: { type: Type.ARRAY, items: { type: Type.STRING } }, keyPointsEn: { type: Type.ARRAY, items: { type: Type.STRING } } }, required: ["titleAr", "titleEn", "summaryAr", "summaryEn", "keyPointsAr", "keyPointsEn"] };
@@ -612,6 +630,7 @@ ${text}
         const ok = c && Array.isArray(c.modules) && c.modules.length > 0 && c.modules.every((m: any) => Array.isArray(m.lessons) && m.lessons.length > 0);
         if (!ok) { lastErr = new Error("BAD_SHAPE"); continue; }
         for (const m of c.modules) m.quiz = (Array.isArray(m.quiz) ? m.quiz : []).filter((x: any) => Array.isArray(x.optionsAr) && x.optionsAr.length >= 2 && Array.isArray(x.optionsEn) && x.optionsEn.length === x.optionsAr.length && x.correctIndex >= 0 && x.correctIndex < x.optionsAr.length);
+        if (quotaRef) { try { await quotaRef.set({ uid, count: FieldValue.increment(1), updatedAt: FieldValue.serverTimestamp() }, { merge: true }); } catch { /* do not fail the user on counter write */ } }
         return res.json({ course: c, model, truncated: raw.length > text.length });
       } catch (err: any) {
         lastErr = err;

@@ -1293,7 +1293,8 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
     } catch (e: any) {
       const code = String(e?.message || '');
       setConvertError(
-        code === 'AI_QUOTA' || code === 'RATE_LIMITED' ? (isRtl ? 'الخدمة مشغولة الآن (تم بلوغ الحد). حاول بعد قليل.' : 'The AI service is busy (limit reached). Please try again shortly.')
+        code === 'DAILY_LIMIT' ? (isRtl ? 'وصلت للحد اليومي: ٥ دورات في اليوم. جرّب مرة أخرى غداً.' : 'Daily limit reached: 5 courses per day. Try again tomorrow.')
+        : code === 'AI_QUOTA' || code === 'RATE_LIMITED' ? (isRtl ? 'الخدمة مشغولة الآن (تم بلوغ الحد). حاول بعد قليل.' : 'The AI service is busy (limit reached). Please try again shortly.')
         : code === 'AUTH' ? (isRtl ? 'سجّل الدخول بحسابك أولاً ثم أعد المحاولة.' : 'Please sign in first, then retry.')
         : code === 'TEXT_TOO_SHORT' ? (isRtl ? 'النص قصير جداً.' : 'Text is too short.')
         : (isRtl ? 'تعذّر إنشاء الدورة الآن. تأكد من الاتصال وحاول مرة أخرى.' : 'Could not build the course right now. Check your connection and retry.'));
