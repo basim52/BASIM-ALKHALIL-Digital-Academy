@@ -221,5 +221,4 @@
 .academy-section button:not(:disabled):active { transform: scale(0.97); }
 @media (pointer: coarse) {
   .academy-section button:not([role="tab"]):not([data-compact]) { min-height: 40px; }
-  .academy-section button:not([role="tab"]):not([data-compact]):has(> svg:only-child) { min-width: 40px; }
 }
