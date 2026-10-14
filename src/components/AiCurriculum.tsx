@@ -11691,8 +11691,8 @@ Output Summary for [${topic}]:
                               disabled={lSmileCountExceeded()}
                               className={`w-full py-3 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2 ${
                                 lSmileCountExceeded()
-                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 cursor-not-allowed'
-                                  : 'bg-emerald-500 hover:bg-emerald-600 text-slate-950 active:scale-95'
+                                  ? 'bg-[#002147]/10 text-emerald-400 border border-[#C49E3A]/20 cursor-not-allowed'
+                                  : 'bg-[#002147] hover:bg-[#002147] text-slate-950 active:scale-95'
                               }`}
                             >
                               <span>📸</span>
@@ -11801,7 +11801,7 @@ Output Summary for [${topic}]:
                                 onClick={() => handlePredictL2('smile')}
                                 className={`p-4 rounded-2xl border text-center transition-all flex flex-col items-center justify-center gap-1.5 active:scale-95 ${
                                   l2TestInput === 'smile'
-                                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
+                                    ? 'bg-[#002147]/10 border-[#C49E3A]/40 text-emerald-300'
                                     : 'bg-white/5 border-white/5 text-slate-200 hover:border-white/15'
                                 }`}
                               >
@@ -11997,7 +11997,7 @@ Output Summary for [${topic}]:
                                     isSelected
                                       ? option.isHallucination
                                         ? 'bg-red-500/15 border-red-500/40 text-red-300 shadow-lg shadow-red-500/5'
-                                        : 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-lg shadow-emerald-500/5'
+                                        : 'bg-[#002147]/15 border-[#C49E3A]/40 text-emerald-300 shadow-lg shadow-emerald-500/5'
                                       : 'bg-white/5 border-white/5 hover:border-amber-400/20 text-slate-200'
                                   }`}
                                 >

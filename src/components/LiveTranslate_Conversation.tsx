@@ -391,7 +391,7 @@ export function LiveTranslate_Conversation({ isRtl, targetLang, onPlayChime, spe
                           <button
                             type="button"
                             onClick={() => speakText(phrase, targetLang)}
-                            className="p-1 rounded bg-white border border-slate-250 text-slate-500 hover:text-[#002147] transition cursor-pointer"
+                            className="p-1 rounded bg-white border border-slate-250 text-[#002147] hover:text-[#002147] transition cursor-pointer"
                           >
                             <Volume2 size={11} />
                           </button>

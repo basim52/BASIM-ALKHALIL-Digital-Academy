@@ -353,7 +353,7 @@ export function LiveTranslate_Vocab({ isRtl, targetLang, onPlayChime, speakText 
                   type="button"
                   disabled={activeIndex === 0}
                   onClick={() => { setActiveIndex(prev => prev - 1); setIsFlipped(false); onPlayChime('message'); }}
-                  className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-800 rounded-xl text-xs font-black border border-slate-200/80 transition active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer flex items-center gap-1"
+                  className="px-4 py-2 bg-white hover:bg-[#C49E3A]/10 text-[#002147] rounded-xl text-xs font-black border border-[#002147]/20 transition active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer flex items-center gap-1"
                 >
                   {isRtl ? '← السابق' : '← Previous'}
                 </button>
@@ -364,7 +364,7 @@ export function LiveTranslate_Vocab({ isRtl, targetLang, onPlayChime, speakText 
                   type="button"
                   disabled={activeIndex === cards.length - 1}
                   onClick={() => { setActiveIndex(prev => prev + 1); setIsFlipped(false); onPlayChime('message'); }}
-                  className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-800 rounded-xl text-xs font-black border border-slate-200/80 transition active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer flex items-center gap-1"
+                  className="px-4 py-2 bg-white hover:bg-[#C49E3A]/10 text-[#002147] rounded-xl text-xs font-black border border-[#002147]/20 transition active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer flex items-center gap-1"
                 >
                   {isRtl ? 'التالي →' : 'Next →'}
                 </button>

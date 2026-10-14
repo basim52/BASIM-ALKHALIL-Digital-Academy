@@ -677,7 +677,7 @@ Key Learning Objectives:
               setSelectedOptionIdx(null);
               setHasChecked(false);
             }}
-            className="flex items-center gap-2 text-slate-400 hover:text-[#58cc02] transition-colors font-black text-sm uppercase tracking-wider bg-white px-5 py-2.5 rounded-full border border-slate-200/60 shadow-sm w-fit active:scale-95 duration-100"
+            className="flex items-center gap-2 text-slate-400 hover:text-[#58cc02] transition-colors font-black text-sm uppercase tracking-wider bg-white px-5 py-2.5 rounded-full border border-[#002147]/20 shadow-sm w-fit active:scale-95 duration-100"
           >
             <ArrowLeft size={16} className={isRtl ? 'rotate-180' : ''} />
             {isRtl ? 'العودة للمكتبة' : 'Back to Library'}
@@ -918,7 +918,7 @@ Key Learning Objectives:
           onClick={() => setLibraryTab('produced')}
           className={`w-full sm:flex-1 min-w-0 py-3 px-3 sm:px-4 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all ${
             libraryTab === 'produced'
-              ? 'bg-[#58cc02] text-white shadow-md shadow-[#58cc02]/20'
+              ? 'bg-[#002147] text-white shadow-md shadow-[#58cc02]/20'
               : 'text-slate-500 hover:bg-slate-100'
           }`}
         >
@@ -988,7 +988,7 @@ Key Learning Objectives:
                   onClick={() => setSelectedLevelFilter(lvl)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all shrink-0 ${
                     selectedLevelFilter === lvl
-                      ? 'bg-[#58cc02] text-white shadow-sm'
+                      ? 'bg-[#002147] text-white shadow-sm'
                       : 'text-slate-500 hover:text-slate-800'
                   }`}
                 >
@@ -1189,7 +1189,7 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
                                 type="button"
                                 onClick={() => { setDirectSourceMode('link'); setErrorText(''); }}
                                 className={`py-1.5 rounded-lg text-[10px] font-black transition-all ${
-                                  directSourceMode === 'link' ? 'bg-[#58cc02] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                  directSourceMode === 'link' ? 'bg-[#002147] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
                                 }`}
                               >
                                 {isRtl ? 'رابط ملف مباشر دائم (مستحسن ⚡)' : 'Persistent Direct URL (Recommended ⚡)'}
@@ -1198,7 +1198,7 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
                                 type="button"
                                 onClick={() => { setDirectSourceMode('file'); setErrorText(''); }}
                                 className={`py-1.5 rounded-lg text-[10px] font-black transition-all ${
-                                  directSourceMode === 'file' ? 'bg-[#58cc02] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                  directSourceMode === 'file' ? 'bg-[#002147] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
                                 }`}
                               >
                                 {isRtl ? 'رفع ملف فيديو (خادم مؤقت 📁)' : 'Upload Video File (Ephemeral 📁)'}
@@ -1304,7 +1304,7 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
                                 onClick={() => setInputLevel(lvl)}
                                 className={`py-1 bg-white font-extrabold text-[10px] rounded-lg border transition-all ${
                                   inputLevel === lvl 
-                                    ? 'border-[#58cc02] text-[#58cc02] scale-105 shadow-sm' 
+                                    ? 'border-[#C49E3A] text-[#58cc02] scale-105 shadow-sm' 
                                     : 'border-slate-100 text-slate-400 hover:text-slate-600'
                                 }`}
                               >

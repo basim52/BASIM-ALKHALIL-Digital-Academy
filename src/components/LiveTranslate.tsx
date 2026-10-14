@@ -610,7 +610,7 @@ export function LiveTranslate({ isRtl = true, lang = 'ar', userProfile, onBack }
                         setSourceText(pText.ar);
                         playPristineChime('message');
                       }}
-                      className="w-full p-2 text-right text-[10px] bg-white border border-slate-200 hover:border-amber-accent/50 rounded-xl transition block truncate select-none text-slate-600 cursor-pointer font-medium"
+                      className="w-full p-2 text-right text-[10px] bg-white border border-[#002147]/20 hover:border-amber-accent/50 rounded-xl transition block truncate select-none text-[#002147] cursor-pointer font-medium"
                     >
                       {pText.ar}
                     </button>
@@ -799,7 +799,7 @@ export function LiveTranslate({ isRtl = true, lang = 'ar', userProfile, onBack }
                                   <button
                                     type="button"
                                     onClick={() => speakText(voc.en, 'en')}
-                                    className="p-1.5 bg-white border border-slate-200 hover:bg-[#002147] hover:text-white rounded-full transition cursor-pointer"
+                                    className="p-1.5 bg-white border border-[#002147]/20 hover:bg-[#002147] hover:text-white rounded-full transition cursor-pointer"
                                   >
                                     <Volume2 size={10} />
                                   </button>
@@ -856,7 +856,7 @@ export function LiveTranslate({ isRtl = true, lang = 'ar', userProfile, onBack }
                         setIdiomPhrase(idi.value);
                         handleIdiomConvert(idi.value);
                       }}
-                      className="w-full text-right p-2.5 bg-white border border-slate-200 hover:border-amber-accent hover:border-solid rounded-xl text-[10.5px] transition block font-bold text-[#002147] cursor-pointer"
+                      className="w-full text-right p-2.5 bg-white border border-[#002147]/20 hover:border-amber-accent hover:border-solid rounded-xl text-[10.5px] transition block font-bold text-[#002147] cursor-pointer"
                     >
                       <span className="block text-slate-400 text-[8px] font-normal uppercase font-mono tracking-widest mb-0.5">Preset {index+1}</span>
                       {idi.label}
@@ -971,7 +971,7 @@ export function LiveTranslate({ isRtl = true, lang = 'ar', userProfile, onBack }
                                 <button
                                   type="button"
                                   onClick={() => speakText(ex.sentence, 'en')}
-                                  className="p-1 px-1.5 bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-100 cursor-pointer text-[10px]"
+                                  className="p-1 px-1.5 bg-white border border-[#002147]/20 text-[#002147] rounded-lg hover:bg-[#C49E3A]/10 cursor-pointer text-[10px]"
                                 >
                                   🔊
                                 </button>
