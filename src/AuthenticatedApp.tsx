@@ -2976,20 +2976,11 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
           : `${profile.displayName || 'Parent/Admin'} (My Personal Study Profile)`,
         role: profile.role,
         avatarUrl: profile.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.displayName || 'BK'}`,
-        points: profile.points || 1250,
+        points: profile.points || 0,
         level: profile.level || 'A2',
         isSelf: true
       };
-      const demoStudent = {
-        uid: 'sim_student_noor',
-        displayName: isRtl ? 'نور الخليل' : 'Noor Al-Khalil',
-        role: UserRole.STUDENT,
-        avatarUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=100',
-        points: 840,
-        level: 'A1',
-        studentCode: '102938'
-      };
-      setLinkedStudents([selfStudent, demoStudent]);
+      setLinkedStudents([selfStudent]);
       setSelectedStudentIndex(0);
       setLoading(false);
       return;
@@ -5692,9 +5683,7 @@ export default function AuthenticatedApp({
       uid: mockUid,
       email: email,
       displayName: role === UserRole.ADMIN ? 'Basim Alkhalil' : 'Demo Student User',
-      photoURL: role === UserRole.ADMIN 
-        ? 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100' 
-        : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100',
+      photoURL: null,
       emailVerified: true
     };
     

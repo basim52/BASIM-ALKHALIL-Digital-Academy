@@ -327,9 +327,7 @@ export default function App() {
       uid: mockUid,
       email: email,
       displayName: displayName || (isMasterAdmin ? 'أ. باسم الخليل' : 'طالب الأكاديمية'),
-      photoURL: isMasterAdmin 
-        ? 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100' 
-        : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100',
+      photoURL: null,
       emailVerified: true
     };
     localStorage.setItem('academy_active_user', JSON.stringify(userSession));
