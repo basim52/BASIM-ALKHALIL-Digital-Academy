@@ -581,6 +581,19 @@ Looking forward to your reply. Tell me what we're tackling first!`;
     next();
   });
 
+  // 🛡️ /api/admin/* — master admin only (server-side check, not just the UI).
+  const SERVER_ADMINS = ["basim5252@gmail.com"];
+  app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (!req.path.startsWith("/api/admin")) return next();
+    try {
+      const uid = (req as any).authUid as string | undefined;
+      if (!uid) return res.status(401).json({ error: "UNAUTHORIZED" });
+      const u = await getAdminAuth()!.getUser(uid);
+      if ((u.customClaims as any)?.admin === true || SERVER_ADMINS.includes(String(u.email || "").toLowerCase())) return next();
+      return res.status(403).json({ error: "FORBIDDEN" });
+    } catch { return res.status(403).json({ error: "FORBIDDEN" }); }
+  });
+
   // Root test route
   app.get(["/ping", "/api/ping"], (req, res) => {
     res.json({ ok: true });

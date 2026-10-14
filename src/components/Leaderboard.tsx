@@ -109,7 +109,7 @@ export const Leaderboard = ({ lang, isAdmin }: { lang: Language, isAdmin?: boole
                     <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm">
                       <img src={student.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${student.displayName}`} alt={student.displayName} />
                     </div>
-                    <span className="font-bold text-[#002147] text-lg">{student.displayName}</span>
+                    <span className="font-bold text-[#002147] text-lg">{isAdmin ? student.displayName : String(student.displayName || "").trim().split(/\s+/)[0]}</span>
                   </div>
                   <div className="col-span-3 text-right font-black text-[#002147] text-xl">
                     {(student.points || 0).toLocaleString()} <span className="text-[10px] text-slate-400 uppercase">XP</span>

@@ -347,7 +347,9 @@ service cloud.firestore {
     // --- 15. Community Global Chat ---
     match /global_chat/{chatId} {
       allow read: if isSignedIn();
-      allow create: if isSignedIn() && request.resource.data.senderId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.senderId == request.auth.uid
+        && request.resource.data.text is string && request.resource.data.text.size() <= 500
+        && !request.resource.data.text.lower().matches('.*(https?://|www[.]).*');
       allow update, delete: if isAdmin();
     }
 

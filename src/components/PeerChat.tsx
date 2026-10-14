@@ -46,8 +46,11 @@ export const PeerChat = ({ lang, profile }: { lang: Language, profile: UserProfi
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-
-    const text = input;
+    if (/(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|net|org|io|me|ly|sa|link)\b)/i.test(input)) {
+      alert(lang === 'ar' ? 'الروابط غير مسموحة في غرف التواصل حفاظاً على أمان الطلاب.' : 'Links are not allowed in chat rooms for student safety.');
+      return;
+    }
+    const text = input.trim().slice(0, 500);
     setInput('');
 
     try {
