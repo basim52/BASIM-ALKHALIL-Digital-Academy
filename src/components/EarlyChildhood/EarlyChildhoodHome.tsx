@@ -593,7 +593,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
             whileHover={{ scale: 1.1, rotate: 5 }}
             className="w-16 md:w-24 h-16 md:h-24 bg-[#002147] text-white rounded-[1.5rem] md:rounded-3xl flex items-center justify-center shadow-xl relative overflow-hidden"
           >
-            <TrendingUp className="w-8 h-8 md:w-10 md:h-10" />
+            <span className="text-3xl md:text-5xl" aria-hidden="true">🧸</span>
           </motion.div>
           <div>
             <h1 className="text-2xl md:text-5xl font-black text-[#002147] mb-1 tracking-tight">{t.earlyChildhood}</h1>

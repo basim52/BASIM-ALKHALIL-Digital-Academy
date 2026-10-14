@@ -11691,7 +11691,7 @@ Output Summary for [${topic}]:
                               disabled={lSmileCountExceeded()}
                               className={`w-full py-3 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2 ${
                                 lSmileCountExceeded()
-                                  ? 'bg-[#002147]/10 text-emerald-400 border border-[#C49E3A]/20 cursor-not-allowed'
+                                  ? 'bg-[#002147]/10 text-[#C49E3A] border border-[#C49E3A]/20 cursor-not-allowed'
                                   : 'bg-[#002147] hover:bg-[#002147] text-slate-950 active:scale-95'
                               }`}
                             >
@@ -11801,7 +11801,7 @@ Output Summary for [${topic}]:
                                 onClick={() => handlePredictL2('smile')}
                                 className={`p-4 rounded-2xl border text-center transition-all flex flex-col items-center justify-center gap-1.5 active:scale-95 ${
                                   l2TestInput === 'smile'
-                                    ? 'bg-[#002147]/10 border-[#C49E3A]/40 text-emerald-300'
+                                    ? 'bg-[#002147]/10 border-[#C49E3A]/40 text-[#E4C77A]'
                                     : 'bg-white/5 border-white/5 text-slate-200 hover:border-white/15'
                                 }`}
                               >
