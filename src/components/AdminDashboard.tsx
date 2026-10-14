@@ -516,7 +516,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
       setAnalysisResult(result.text || "No analysis available.");
     } catch (err: any) {
       console.error("Analysis Error:", err);
-      setAnalysisResult(`### ❌ ${isRtl ? 'فشل التحليل' : 'Analysis Failed'}\n\n${err.message}`);
+      setAnalysisResult(`### ❌ ${isRtl ? 'تعذّر التحليل الآن' : 'Analysis failed'}\n\n${isRtl ? (/AI_QUOTA|429/.test(String(err.message)) ? 'خدمة الذكاء مشغولة (بلغت الحد). حاول بعد قليل بالضغط على الزر مرة أخرى.' : 'حدث خطأ في خدمة الذكاء. اضغط الزر مرة أخرى لإعادة المحاولة.') : err.message}`);
     } finally {
       setAnalyzing(false);
       setAnalyzingStatus(null);
