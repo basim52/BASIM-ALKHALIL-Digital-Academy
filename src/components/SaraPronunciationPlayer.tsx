@@ -50,7 +50,7 @@ const Lesson: React.FC<{ l: SaraPronLesson; onBack: () => void; onPassed: () => 
     <div className="flex-1 min-h-0 flex flex-col p-2.5 gap-1.5 overflow-hidden" data-testid="pron-lesson">
       <div className="flex items-center gap-2">
         <button onClick={onBack} className="p-1.5 rounded-lg bg-[#002147] text-white" aria-label="back"><ArrowRight size={16} /></button>
-        <p className="flex-1 text-[14px] font-black text-[#002147] truncate">{l.order}. {l.titleAr}</p>
+        <p className="flex-1 text-[14px] font-black text-[#002147] truncate">{l.order > 30 ? l.order - 30 : l.order}. {l.titleAr}</p>
         <span dir="ltr" className="text-[10px] font-black px-1.5 rounded bg-[#002147] text-amber-300">{l.titleEn}</span>
       </div>
       <div className="flex gap-1.5">
