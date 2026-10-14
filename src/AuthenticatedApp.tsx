@@ -74,6 +74,7 @@ import { generateWhatsAppLink, NOTIFICATION_TEMPLATES } from './lib/whatsapp';
 const ShareableNotification = lazy(() => import('./components/ShareableNotification').then(m => ({ default: m.ShareableNotification })));
 const AIConversation = lazy(() => import('./components/AIConversation').then(m => ({ default: m.AIConversation })));
 const SaraTracksHub = lazy(() => import('./components/SaraTracksHub').then(m => ({ default: m.SaraTracksHub })));
+import { AcademySectionBar } from './components/AcademySectionBar';
 const SaraSkillsChart = lazy(() => import('./components/SaraSkillsChart').then(m => ({ default: m.SaraSkillsChart })));
 const SaraTools = lazy(() => import('./components/SaraTools').then(m => ({ default: m.SaraTools })));
 import { auth, googleProvider, db, handleFirestoreError, OperationType, testConnection, redeemVoucherTransaction } from './lib/firebase';
@@ -7688,6 +7689,9 @@ export default function AuthenticatedApp({
               : (isRtl ? 'md:mr-20 lg:mr-64 mb-24 md:mb-6 pt-16 md:pt-20 lg:pt-4 pb-28 md:pb-12' : 'md:ml-20 lg:ml-64 mb-24 md:mb-6 pt-16 md:pt-20 lg:pt-4 pb-28 md:pb-12')
           }`}>
             <Suspense fallback={<div className="min-h-[50vh] flex items-center justify-center"><div className="w-10 h-10 rounded-full border-4 border-[#C49E3A] border-t-transparent animate-spin" aria-label="loading" /></div>}>
+              {!['dashboard', 'sara-tutor', 'placement-test', 'real-time-voice-call', 'ai-chat'].includes(view) && (
+                <AcademySectionBar view={view} isRtl={isRtl} onHome={() => { cancelAllSpeech(); setView('dashboard'); }} />
+              )}
               {renderContent()}
             </Suspense>
 
