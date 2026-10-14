@@ -7,10 +7,20 @@ import { db } from './firebase';
  */
 const KEY = (trackId: string, uid: string) => `sara_track_${trackId}_${uid}`;
 
+const LAST = (uid?: string) => `sara_last_track_${uid || 'guest'}`;
+/** Remember the Sara track the student used most recently (device; cloud copy rides on pushTrackProgress). */
+export function markLastTrack(uid: string | undefined, trackId: string) { try { localStorage.setItem(LAST(uid), JSON.stringify({ id: trackId, at: Date.now() })); } catch { /* ignore */ } }
+export function readLastTrack(uid?: string): { id: string; at: number } | null { try { const v = localStorage.getItem(LAST(uid)); return v ? JSON.parse(v) : null; } catch { return null; } }
+
 export async function pushTrackProgress(uid: string | undefined, trackId: string, unlocked: number) {
   if (!uid) return;
-  try { await updateDoc(doc(db, 'users', uid), { [`saraTrackProgress.${trackId}`]: unlocked, saraTrackProgressAt: Date.now() }); }
+  try { await updateDoc(doc(db, 'users', uid), { [`saraTrackProgress.${trackId}`]: unlocked, saraTrackProgressAt: Date.now(), saraLastTrack: trackId }); }
   catch (e) { console.debug('saraTrackProgress push note:', e); }
+}
+
+export async function loadTrackMeta(uid: string): Promise<{ progress: Record<string, number>; lastTrack: string | null; at: number }> {
+  try { const d = (await getDoc(doc(db, 'users', uid))).data() || {}; return { progress: (d.saraTrackProgress as Record<string, number>) || {}, lastTrack: (d.saraLastTrack as string) || null, at: Number(d.saraTrackProgressAt) || 0 }; }
+  catch { return { progress: {}, lastTrack: null, at: 0 }; }
 }
 
 export async function loadTrackProgress(uid: string): Promise<Record<string, number>> {

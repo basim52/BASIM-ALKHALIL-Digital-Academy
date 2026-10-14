@@ -4,7 +4,7 @@ import { auth } from '../lib/firebase';
 import type { SaraTrack, SaraTrackLesson, SaraChoiceQuestion } from '../data/saraTracks/foundations';
 import { prefetchAcademyAudio, cancelAllSpeech, createManagedAudio } from '../lib/audio';
 import { boardLinesToSpeech } from '../utils/boardToSpeech';
-import { pushTrackProgress } from '../lib/saraProgressSync';
+import { pushTrackProgress, markLastTrack } from '../lib/saraProgressSync';
 import { trackLevels, buildLevelTest, scoreLevelTest, saveLevelTestAttempt, LEVEL_TEST_PASS, type LevelTestQuestion, type LevelTestAttempt } from '../lib/saraLevelTests';
 
 interface Props {
@@ -14,6 +14,8 @@ interface Props {
   uid?: string;
   /** Admin/parent preview: every lesson open. */
   unlockAll?: boolean;
+  /** Open straight into this lesson (home "continue" card). */
+  initialLessonId?: string;
 }
 
 // ---- Sara narrator: same cloud voice as her chat (Gemini 'Kore' via /api/tts), one primed <audio> element.
@@ -127,10 +129,10 @@ const Choice: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (
   </div>
 );
 
-export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, unlockAll }) => {
+export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, unlockAll, initialLessonId }) => {
   const [unlockedRaw, setUnlocked] = useState(() => readUnlocked(track.id, uid));
   const unlocked = unlockAll ? track.lessons.length : unlockedRaw;
-  const [lessonId, setLessonId] = useState<string | null>(null);
+  const [lessonId, setLessonId] = useState<string | null>(initialLessonId || null);
   const [test, setTest] = useState<null | { levelId: string; levelTitleAr: string; qs: LevelTestQuestion[]; idx: number; answers: number[]; pick: number | null; result: LevelTestAttempt | null; saved: boolean | null }>(null);
   const levels = useMemo(() => trackLevels(track), [track]);
   const startTest = (lv: { id: string; titleAr: string; lessons: SaraTrackLesson[] }) => {
@@ -176,6 +178,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   };
   const openLesson = (l: SaraTrackLesson) => {
     unlockNarrator(); // inside the tap
+    markLastTrack(uid, track.id);
     stop(); setLessonId(l.id); setUseAlt(false); setCheckPick(null); setMode('learn'); setExIdx(0); setExPick(null); setExScore(0);
     startNarration(l, false);
   };

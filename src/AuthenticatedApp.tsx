@@ -75,6 +75,13 @@ const ShareableNotification = lazy(() => import('./components/ShareableNotificat
 const AIConversation = lazy(() => import('./components/AIConversation').then(m => ({ default: m.AIConversation })));
 const SaraTracksHub = lazy(() => import('./components/SaraTracksHub').then(m => ({ default: m.SaraTracksHub })));
 import { AcademySectionBar } from './components/AcademySectionBar';
+const SaraContinueCard = lazy(() => import('./components/SaraContinueCard').then(m => ({ default: m.SaraContinueCard })));
+const SaraTrackPlayerLazy = lazy(() => import('./components/SaraTrackPlayer').then(m => ({ default: m.SaraTrackPlayer })));
+const SaraContinueView = lazy(() => import('./lib/saraContinue').then(m => ({ default: (p: { uid: string; unlockAll: boolean; onClose: () => void }) => {
+  const tg = m.getContinueTarget();
+  const track = m.SARA_TRACKS.find(t => t.id === tg?.trackId) || m.SARA_TRACKS[0];
+  return <SaraTrackPlayerLazy isOpen track={track} uid={p.uid} unlockAll={p.unlockAll} initialLessonId={tg?.lessonId || undefined} onClose={p.onClose} />;
+} })));
 const SaraSkillsChart = lazy(() => import('./components/SaraSkillsChart').then(m => ({ default: m.SaraSkillsChart })));
 const SaraTools = lazy(() => import('./components/SaraTools').then(m => ({ default: m.SaraTools })));
 import { auth, googleProvider, db, handleFirestoreError, OperationType, testConnection, redeemVoucherTransaction } from './lib/firebase';
@@ -1581,6 +1588,67 @@ const StudentHome = ({
     { id: 'social', labelAr: '🏆 الصدارة والمجتمع', labelEn: 'Leaderboard & Social' },
   ];
 
+
+  const HOME_GROUPS: { id: string; labelAr: string; labelEn: string; ids: string[] }[] = [
+    { id: 'sara', labelAr: 'تعلّم مع سارة', labelEn: 'Learn with Sara', ids: ['sara-tutor', 'pronunciation-lab', 'live-translate'] },
+    { id: 'tracks', labelAr: 'المناهج', labelEn: 'Curricula', ids: ['grammar-academy', 'reading-lab', 'writing-spelling-studio', 'video-library', 'early-childhood'] },
+    { id: 'practice', labelAr: 'التدريب والألعاب', labelEn: 'Practice & Games', ids: ['interactive-learning', 'educational-games', 'story-library'] },
+    { id: 'progress', labelAr: 'التقدّم والتقارير', labelEn: 'Progress & Reports', ids: ['progress', 'academic-planner'] },
+  ];
+  const groupedIds = new Set(HOME_GROUPS.flatMap(g => g.ids));
+  const homeGroups = [
+    ...HOME_GROUPS.map(g => ({ ...g, items: g.ids.map(id => allSections.find(x => x.id === id)).filter(Boolean) as typeof allSections })),
+    { id: 'more', labelAr: 'المزيد', labelEn: 'More', ids: [], items: allSections.filter(x => !groupedIds.has(x.id)) },
+  ];
+  const renderSectionCard = (sec: (typeof allSections)[number], sIdx: number) => {
+              const SectionIcon = sec.icon;
+              return (
+                <motion.div
+                  key={`landing-sec-${sec.id}-${sIdx}`}
+                  whileHover={{ y: -5 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    if (sec.id === 'ai-chat') {
+                      onStartConversation();
+                    } else {
+                      onNavigate(sec.id as AppView);
+                    }
+                  }}
+                  className="bg-white p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-b-4 sm:border-b-[5px] border-slate-200 hover:border-[#C49E3A]/60 hover:shadow-md cursor-pointer transition-all flex flex-col justify-between relative overflow-hidden group"
+                >
+                  {/* Visual Glow Circle */}
+                  <div className={`absolute right-[-15px] top-[-10px] w-24 h-24 ${sec.glowColor} rounded-full blur-xl opacity-20 group-hover:scale-130 transition-transform duration-500 pointer-events-none`} />
+
+                  <div>
+                    <div className="flex items-center justify-between mb-2 sm:mb-4">
+                      <span className={`hidden sm:inline px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider ${sec.badgeStyle}`}>
+                        {isRtl ? sec.badgeAr : sec.badgeEn}
+                      </span>
+                      <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center border-2 border-slate-100 ${sec.iconBg} ${sec.iconColor} group-hover:scale-110 transition-transform`}>
+                        <SectionIcon size={20} />
+                      </div>
+                    </div>
+
+                    <h3 className="text-[13px] sm:text-lg font-black text-[#002147] sm:mb-2 leading-snug flex items-center gap-2 group-hover:text-[#C49E3A] transition-colors">
+                      {isRtl ? sec.titleAr : sec.titleEn}
+                    </h3>
+
+                    <p className="hidden sm:block text-slate-500 font-semibold text-xs leading-relaxed mb-5 line-clamp-3">
+                      {isRtl ? sec.descAr : sec.descEn}
+                    </p>
+                  </div>
+
+                  <div className="hidden sm:flex items-center justify-between border-t border-slate-100 pt-3.5 mt-auto">
+                    <span className={`text-[10px] font-black ${sec.btnTextColor} uppercase tracking-widest`}>
+                      {isRtl ? 'دخول مباشر ⚡' : 'Open Corridor ⚡'}
+                    </span>
+                    <span className={`w-7 h-7 rounded-xl ${sec.btnBg} ${sec.iconColor} flex items-center justify-center text-xs font-black group-hover:translate-x-1 transition-transform`}>
+                      {isRtl ? '←' : '→'}
+                    </span>
+                  </div>
+                </motion.div>
+              );
+  };
   const filteredSections = allSections.filter((sec) => {
     const matchesCat = selectedCategory === 'all' || sec.category === selectedCategory;
     const query = searchQuery.trim().toLowerCase();
@@ -1618,6 +1686,11 @@ const StudentHome = ({
             }}
           />
         )}
+
+        {/* CONTINUE WHERE YOU LEFT OFF (Sara track) */}
+        <Suspense fallback={<div className="h-[84px] rounded-3xl bg-[#002147]/90" />}>
+          <SaraContinueCard uid={profile.uid} onOpen={() => onNavigate('sara-continue')} />
+        </Suspense>
 
         {/* DUOLINGO STATUS STRIP - MOBILE OPTIMIZED */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 bg-white border-2 border-b-4 border-slate-200 rounded-3xl sm:rounded-[2rem] shadow-sm animate-fade-in relative overflow-hidden">
@@ -2149,59 +2222,27 @@ const StudentHome = ({
           </div>
         </div>
 
-        {/* CARDS GRID - RESPONSIVE & MODERN */}
+        {/* CARDS GRID - grouped (all/no search) or flat (filtered) */}
         {filteredSections.length > 0 ? (
+          selectedCategory === 'all' && !searchQuery.trim() ? (
+            <div className="space-y-5 sm:space-y-8">
+              {homeGroups.map(g => g.items.length > 0 && (
+                <section key={`home-group-${g.id}`} aria-label={g.labelAr}>
+                  <h2 className="flex items-center gap-2 mb-2.5 sm:mb-4 text-sm sm:text-base font-black text-[#002147]">
+                    <span className="w-1.5 h-5 rounded-full bg-[#C49E3A]" />
+                    <span>{isRtl ? g.labelAr : g.labelEn}</span>
+                  </h2>
+                  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-6">
+                    {g.items.map((sec, i) => renderSectionCard(sec, i))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          ) : (
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-6">
-            {filteredSections.map((sec, sIdx) => {
-              const SectionIcon = sec.icon;
-              return (
-                <motion.div
-                  key={`landing-sec-${sec.id}-${sIdx}`}
-                  whileHover={{ y: -5 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => {
-                    if (sec.id === 'ai-chat') {
-                      onStartConversation();
-                    } else {
-                      onNavigate(sec.id as AppView);
-                    }
-                  }}
-                  className="bg-white p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-b-4 sm:border-b-[5px] border-slate-200 hover:border-[#C49E3A]/60 hover:shadow-md cursor-pointer transition-all flex flex-col justify-between relative overflow-hidden group"
-                >
-                  {/* Visual Glow Circle */}
-                  <div className={`absolute right-[-15px] top-[-10px] w-24 h-24 ${sec.glowColor} rounded-full blur-xl opacity-20 group-hover:scale-130 transition-transform duration-500 pointer-events-none`} />
-
-                  <div>
-                    <div className="flex items-center justify-between mb-2 sm:mb-4">
-                      <span className={`hidden sm:inline px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider ${sec.badgeStyle}`}>
-                        {isRtl ? sec.badgeAr : sec.badgeEn}
-                      </span>
-                      <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center border-2 border-slate-100 ${sec.iconBg} ${sec.iconColor} group-hover:scale-110 transition-transform`}>
-                        <SectionIcon size={20} />
-                      </div>
-                    </div>
-
-                    <h3 className="text-[13px] sm:text-lg font-black text-[#002147] sm:mb-2 leading-snug flex items-center gap-2 group-hover:text-[#C49E3A] transition-colors">
-                      {isRtl ? sec.titleAr : sec.titleEn}
-                    </h3>
-
-                    <p className="hidden sm:block text-slate-500 font-semibold text-xs leading-relaxed mb-5 line-clamp-3">
-                      {isRtl ? sec.descAr : sec.descEn}
-                    </p>
-                  </div>
-
-                  <div className="hidden sm:flex items-center justify-between border-t border-slate-100 pt-3.5 mt-auto">
-                    <span className={`text-[10px] font-black ${sec.btnTextColor} uppercase tracking-widest`}>
-                      {isRtl ? 'دخول مباشر ⚡' : 'Open Corridor ⚡'}
-                    </span>
-                    <span className={`w-7 h-7 rounded-xl ${sec.btnBg} ${sec.iconColor} flex items-center justify-center text-xs font-black group-hover:translate-x-1 transition-transform`}>
-                      {isRtl ? '←' : '→'}
-                    </span>
-                  </div>
-                </motion.div>
-              );
-            })}
+            {filteredSections.map((sec, sIdx) => renderSectionCard(sec, sIdx))}
           </div>
+          )
         ) : (
           <div className="p-10 bg-white border-2 border-dashed border-slate-200 rounded-3xl text-center space-y-3">
             <Search size={32} className="mx-auto text-slate-300" />
@@ -6870,6 +6911,9 @@ export default function AuthenticatedApp({
           }} 
         />
       );
+    }
+    if (view === 'sara-continue') {
+      return <SaraContinueView uid={currentUser.uid} unlockAll={saraUnlockAll} onClose={() => setView('dashboard')} />;
     }
     if (view === 'reading-curriculum') {
       // Old skill curriculum → the matching new Sara track (old data/progress untouched).
