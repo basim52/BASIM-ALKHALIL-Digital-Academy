@@ -44,7 +44,7 @@ const Lesson: React.FC<{ l: SaraPronLesson; onBack: () => void; onPassed: () => 
   useEffect(() => { play(lesson); /* auto-explain on open (tap already unlocked audio) */ }, [l.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const explaining = state?.text === lesson;
   return (
-    <div className="flex-1 min-h-0 flex flex-col p-3 gap-2 overflow-hidden" data-testid="pron-lesson">
+    <div className="flex-1 min-h-0 flex flex-col p-2.5 gap-1.5 overflow-hidden" data-testid="pron-lesson">
       <div className="flex items-center gap-2">
         <button onClick={onBack} className="p-1.5 rounded-lg bg-[#002147] text-white" aria-label="back"><ArrowRight size={16} /></button>
         <p className="flex-1 text-[14px] font-black text-[#002147] truncate">{l.order}. {l.titleAr}</p>
