@@ -1,5 +1,6 @@
 import MixedText from './MixedText';
-import { SaraNewLevelTest, NewLevelTestCard } from './SaraNewLevelTest';
+import { SaraNewLevelTest } from './SaraNewLevelTest';
+import SaraLevelledList from './SaraLevelledList';
 import React, { useEffect, useState } from 'react';
 import { X, ArrowRight, Lock, CheckCircle2, Volume2, RotateCcw } from 'lucide-react';
 import { PRONUNCIATION_LESSONS, PRONUNCIATION_TRACK_ID, type SaraPronLesson } from '../data/saraTracks/pronunciation';
@@ -95,14 +96,14 @@ const Lesson: React.FC<{ l: SaraPronLesson; onBack: () => void; onPassed: () => 
 export const SaraPronunciationPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll }) => {
   const [unlockedRaw, setUnlocked] = useState(() => readUnlocked(PRONUNCIATION_TRACK_ID, uid));
   const [active, setActive] = useState<SaraPronLesson | null>(null);
-  const [testing, setTesting] = useState(false);
+  const [testing, setTesting] = useState<'a' | 'b' | null>(null);
+  const [testTick, setTestTick] = useState(0);
   useEffect(() => {
     if (!isOpen) return;
     setUnlocked(readUnlocked(PRONUNCIATION_TRACK_ID, uid));
     if (uid) syncTrackProgress(uid, [PRONUNCIATION_TRACK_ID]).then(c => { if (c) setUnlocked(readUnlocked(PRONUNCIATION_TRACK_ID, uid)); });
   }, [isOpen, uid]);
   if (!isOpen) return null;
-  const unlocked = unlockAll ? PRONUNCIATION_LESSONS.length : unlockedRaw;
   const passed = Math.min(PRONUNCIATION_LESSONS.length, unlockedRaw - 1);
   const onPassed = (l: SaraPronLesson) => {
     const next = l.order + 1;
@@ -118,27 +119,15 @@ export const SaraPronunciationPlayer: React.FC<Props> = ({ isOpen, onClose, uid,
       <div data-testid="sara-pron" className="w-full max-w-xl h-[100dvh] bg-[#fdfaf3] flex flex-col overflow-hidden">
         <div className="shrink-0 flex items-center gap-2 px-3 py-2 bg-[#002147] text-white">
           <span className="text-lg">🗣️</span>
-          <p className="flex-1 text-sm font-black">النطق — المستوى الأول</p>
+          <p className="flex-1 text-sm font-black">النطق{active ? (active.levelId === 'b' ? ' — المستوى الثاني' : ' — المستوى الأول') : ''}</p>
           <span className="text-[11px] text-amber-300 font-bold">{passed}/{PRONUNCIATION_LESSONS.length}</span>
           <button onClick={() => { saraStopNarrator(); onClose(); }} className="p-1.5 rounded-lg hover:bg-white/10" aria-label="close"><X size={18} /></button>
         </div>
         {active ? <Lesson key={active.id} l={active} onBack={() => setActive(null)} onPassed={() => onPassed(active)} /> : (
-          <div className="flex-1 min-h-0 overflow-y-auto p-3 grid gap-1.5 content-start">
-            {PRONUNCIATION_LESSONS.map(l => {
-              const open = l.order <= unlocked;
-              return (
-                <button key={l.id} disabled={!open} onClick={() => { saraUnlockNarrator(); setActive(l); }}
-                  className={`w-full min-w-0 flex items-center gap-2 p-2.5 rounded-xl border-2 text-start ${open ? 'bg-white border-amber-300' : 'bg-slate-100 border-slate-200 opacity-60'}`}>
-                  <span className="w-7 h-7 rounded-full bg-[#002147] text-amber-300 text-[12px] font-black flex items-center justify-center shrink-0">{l.order}</span>
-                  <span className="flex-1 min-w-0 text-[13px] font-black text-[#002147] truncate">{l.titleAr}</span>
-                  {open ? (l.order < unlockedRaw ? <CheckCircle2 size={16} className="text-emerald-600" /> : null) : <Lock size={14} className="text-slate-400" />}
-                </button>
-              );
-            })}
-            <NewLevelTestCard track="pronunciation" open={!!unlockAll || unlockedRaw > PRONUNCIATION_LESSONS.length} onStart={() => setTesting(true)} />
-          </div>
+          <SaraLevelledList lessons={PRONUNCIATION_LESSONS} unlockedRaw={unlockedRaw} unlockAll={unlockAll} uid={uid} track="pronunciation" trackId={PRONUNCIATION_TRACK_ID}
+            refresh={testTick} onOpen={l => setActive(PRONUNCIATION_LESSONS.find(x => x.id === l.id) || null)} onTest={lv => setTesting(lv)} />
         )}
-        {testing && <SaraNewLevelTest track="pronunciation" uid={uid} onClose={() => setTesting(false)} />}
+        {testing && <SaraNewLevelTest track="pronunciation" level={testing} uid={uid} onClose={() => { setTesting(null); setTestTick(n => n + 1); }} />}
       </div>
     </div>
   );

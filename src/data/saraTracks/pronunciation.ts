@@ -1,7 +1,7 @@
 /** Pronunciation — Level 1: 30 lessons on the sounds Arabic speakers find hardest. Real, hand-written content. */
 export interface SaraPronExercise { promptAr: string; /** Sara plays this first (cloud voice). */ play?: string; options: string[]; correctIndex: number }
 export interface SaraPronLesson {
-  id: string; order: number; titleAr: string; titleEn: string;
+  id: string; order: number; levelId: 'a' | 'b'; titleAr: string; titleEn: string;
   ideaAr: string;
   /** Minimal pairs (tap each word to hear it). */
   pairs?: [string, string][];
@@ -21,6 +21,13 @@ const pairExercises = (pairs: [string, string][]): SaraPronExercise[] =>
     const options = i % 2 ? [p[1], p[0]] : [p[0], p[1]];
     return { promptAr: 'اسمع سارة: أي كلمة قالت؟', play, options, correctIndex: options.indexOf(play) };
   });
+
+/** Level-2 options are authored correct-first; rotate so the answer moves between slots. */
+const rotate = (e: SaraPronExercise, k: number): SaraPronExercise => {
+  const n = e.options.length, r = k % n;
+  const options = e.options.map((_, j) => e.options[(j - r + n) % n]);
+  return { ...e, options, correctIndex: (e.correctIndex + r) % n };
+};
 
 const RAW: Raw[] = [
   ['P و B في أول الكلمة', 'P vs B (start)', 'العربي ما فيه حرف P، فنقولها B. الفرق: P بدون صوت من الحنجرة ومعها نفخة هوا. حط يدك قدام فمك: مع pin تحس بالهوا، ومع bin ما تحس.', [['pin', 'bin'], ['pack', 'back'], ['pear', 'bear']], 'Put the paper in the bin.'],
@@ -91,10 +98,107 @@ const RAW: Raw[] = [
      { promptAr: 'الكلمات المهمة في الجملة:', options: ['أطول وأقوى', 'أسرع وأخف'], correctIndex: 0 }]],
 ];
 
-export const PRONUNCIATION_LESSONS: SaraPronLesson[] = RAW.map(([titleAr, titleEn, ideaAr, pw, sayEn, ex], i) => {
+/** Level 2 (harder): diphthongs, more consonant contrasts, connected speech, stress & intonation in context. */
+const RAW2: Raw[] = [
+  ['صوت ir في bird و ar في hard', 'ER vs AR', 'ir و ur و er في bird و nurse و her صوت واحد طويل من وسط الفم والشفايف مرتخية، ما فيه «ي» ولا «ر» قوية. ar في hard الفم مفتوح لورا مثل «آ» طويلة.', [['bird', 'bard'], ['heard', 'hard'], ['firm', 'farm']], 'The nurse heard the bird first.'],
+  ['oy و i الطويلة', 'OY vs I (boy/buy)', 'oy في boy تبدأ بشفايف مدوّرة «أو» وتتزحلق لـ «ي». i في buy تبدأ بفم مفتوح «آ» وتتزحلق لـ «ي». نفس النهاية، البداية مختلفة.', [['boy', 'buy'], ['toy', 'tie'], ['oil', 'aisle']], 'The boy enjoys his new toy.'],
+  ['ow في now و o في no', 'OW vs OH', 'ow في now تبدأ بفم مفتوح «آ» وتنتهي بشفايف مدوّرة «و». o في no تبدأ من وسط الفم «أ» وتنتهي «و». loud عالي، و load حمولة.', [['now', 'no'], ['loud', 'load'], ['town', 'tone']], 'How about going downtown now?'],
+  ['صوت ZH في measure', 'The ZH sound', 's في measure و usually تنطق مثل «ج» الشامية الناعمة (ژ): صوت «ش» لكن مع اهتزاز. لا تقولها «ز» ولا «ج» قوية.', ['measure', 'usually', 'treasure', 'television', 'decision'], 'I usually watch television at night.',
+    [{ promptAr: 's في usually تنطق مثل:', play: 'usually', options: ['ژ (ش مجهورة)', 'ز', 'س'], correctIndex: 0 },
+     { promptAr: 'si في television تنطق مثل:', play: 'television', options: ['ژ', 'س', 'ش'], correctIndex: 0 },
+     { promptAr: 'أي كلمة فيها صوت ژ؟', play: 'treasure', options: ['treasure', 'tree', 'trust'], correctIndex: 0 }]],
+  ['NG في آخر الكلمة', 'NG vs N', 'ng في sing صوت واحد من ورا اللسان عند سقف الحلق، مثل «ن» من الخشم بدون ما تنطق g. n في sin طرف اللسان ورا الأسنان.', [['sing', 'sin'], ['thing', 'thin'], ['wing', 'win']], 'She is singing a long song.'],
+  ['singer و finger', 'NG with and without G', 'في singer ما ننطق g: «سِنَر». لكن في finger و hungry و English ننطق g بعد ng: «فِنْگَر». القاعدة: إذا الكلمة أصلها فعل + er مثل sing → singer ما تنطق g.', ['singer', 'finger', 'hungry', 'English', 'longer'], 'The singer hurt his finger.',
+    [{ promptAr: 'في singer صوت g:', play: 'singer', options: ['ما ينطق', 'ينطق'], correctIndex: 0 },
+     { promptAr: 'في finger صوت g:', play: 'finger', options: ['ينطق', 'ما ينطق'], correctIndex: 0 },
+     { promptAr: 'في English صوت g:', play: 'English', options: ['ينطق', 'ما ينطق'], correctIndex: 0 }]],
+  ['H في أول الكلمة', 'H vs no H', 'h الإنجليزية هوا خفيف من الحلق مثل «هـ» العربية، لا تحذفها ولا تزيدها. hair شعر، و air هواء. heat حرارة، و eat ياكل.', [['hair', 'air'], ['heat', 'eat'], ['hold', 'old']], 'Hold the hot cup with your hand.'],
+  ['Y و J', 'Y vs J', 'y في yes مثل «ي» العربية، و j في jet مثل «ج». لا تخلطها: yet تعني بعد، و jet طيارة نفاثة.', [['yet', 'jet'], ['yes', 'Jess'], ['yolk', 'joke']], 'Yes, the jet is yellow.'],
+  ['S و Z في آخر الكلمة', 'Final S vs Z', 'العربي ينطق z في الآخر «س». z لازم يكون معها اهتزاز في الحلق، وقبلها حركة أطول شوي. price سعر، و prize جائزة.', [['price', 'prize'], ['bus', 'buzz'], ['place', 'plays']], 'He plays for the prize.'],
+  ['T و D في آخر الكلمة', 'Final T vs D', 'الحركة قبل d أطول من قبل t: bed أطول من bet. وd فيها صوت من الحلق. right يمين، و ride يركب.', [['bet', 'bed'], ['right', 'ride'], ['seat', 'seed']], 'Put the seed in the right bed.'],
+  ['K و G', 'K vs G', 'k هوا بدون صوت مثل «ك» مع نفخة، و g نفس المكان مع اهتزاز مثل «ق» الخليجية. coat معطف، و goat ماعز.', [['coat', 'goat'], ['back', 'bag'], ['cold', 'gold']], 'The gold ring is in the bag.'],
+  ['L الثقيلة في آخر الكلمة', 'Dark L', 'L في آخر الكلمة أو قبل حرف ساكن ثقيلة: ورا لسانك يرتفع مثل «ل» في «الله». feel و ball و milk. وفي أول الكلمة خفيفة: light.', ['feel', 'ball', 'milk', 'people', 'little'], 'People feel full after milk.',
+    [{ promptAr: 'L في ball:', play: 'ball', options: ['ثقيلة', 'خفيفة'], correctIndex: 0 },
+     { promptAr: 'L في light:', play: 'light', options: ['خفيفة', 'ثقيلة'], correctIndex: 0 },
+     { promptAr: 'كم مرة تسمع L في little؟', play: 'little', options: ['مرتين', 'مرة'], correctIndex: 0 }]],
+  ['T الأمريكية بين حرفين علة', 'The American flap T', 'في الأمريكي t بين حرفين علة تصير سريعة مثل «ر» خفيفة جدًا أو «د»: water «واتر/وادر»، better «بيدر»، city «سيدي». في البريطاني تبقى t واضحة.', ['water', 'better', 'city', 'party', 'little'], 'A little water is better.',
+    [{ promptAr: 'في الأمريكي water تنطق تقريبًا:', play: 'water', options: ['«وادر»', '«واتتر» بقوة'], correctIndex: 0 },
+     { promptAr: 't في city (أمريكي):', play: 'city', options: ['سريعة مثل د', 'تاء قوية'], correctIndex: 0 },
+     { promptAr: 'وين تصير t سريعة؟', options: ['بين حرفين علة', 'في أول الكلمة'], correctIndex: 0 }]],
+  ['ثلاث حروف ساكنة في البداية', 'Three-consonant clusters', 'str و spl و scr: انطق الثلاثة ورا بعض بدون أي حركة قبلها ولا بينها. street مو «إستريت» ولا «سِتريت».', ['street', 'strong', 'splash', 'scream', 'spring'], 'The strong spring wind is on the street.',
+    [{ promptAr: 'النطق الصحيح لـ street:', play: 'street', options: ['ستريت مباشرة', 'إستريت', 'سِتِريت'], correctIndex: 0 },
+     { promptAr: 'كم حرف ساكن في بداية splash؟', play: 'splash', options: ['3', '2', '1'], correctIndex: 0 },
+     { promptAr: 'scream تبدأ بـ:', play: 'scream', options: ['s-c-r', 's-k', 'e-s'], correctIndex: 0 }]],
+  ['نهايات صعبة', 'Hard final clusters', 'كلمات مثل months و texts و asked نهايتها ثلاث أصوات ساكنة. لا تحذفها ولا تزيد حركة. months «مَنْثس»، texts «تِكْستس».', ['months', 'texts', 'asked', 'sixth', 'world'], 'I asked for six texts this month.',
+    [{ promptAr: 'آخر صوت في texts:', play: 'texts', options: ['ts', 't', 's'], correctIndex: 0 },
+     { promptAr: 'asked تنطق:', play: 'asked', options: ['آسكت', 'آسكيد', 'آسك'], correctIndex: 0 },
+     { promptAr: 'months فيها صوت:', play: 'months', options: ['ث ثم س', 'س بس', 'ت ثم س'], correctIndex: 0 }]],
+  ['نهاية tion و sion', '-tion & -sion', 'tion تنطق «شَن» خفيفة: nation «نيشَن». sion بعد حرف علة تنطق «ژَن»: decision «دِسِژَن». والضغط دايم على المقطع اللي قبلها.', ['nation', 'station', 'decision', 'television', 'information'], 'The station made a quick decision.',
+    [{ promptAr: 'tion في station تنطق:', play: 'station', options: ['شَن', 'تيون', 'سيون'], correctIndex: 0 },
+     { promptAr: 'sion في decision تنطق:', play: 'decision', options: ['ژَن', 'سيون', 'شَن'], correctIndex: 0 },
+     { promptAr: 'الضغط في nation على:', play: 'nation', options: ['NA', 'tion'], correctIndex: 0 }]],
+  ['نهاية ture و sure', '-ture & -sure', 'ture تنطق «تشَر» خفيفة: picture «بِكتشَر». sure في آخر الكلمة بعد حرف علة «ژَر»: pleasure «بليژَر». لا تقرأها «تيور».', ['picture', 'future', 'nature', 'pleasure', 'measure'], 'It is a pleasure to see the picture.',
+    [{ promptAr: 'ture في future تنطق:', play: 'future', options: ['تشَر', 'تيور'], correctIndex: 0 },
+     { promptAr: 'sure في pleasure تنطق:', play: 'pleasure', options: ['ژَر', 'شور'], correctIndex: 0 },
+     { promptAr: 'nature تنطق:', play: 'nature', options: ['نيتشَر', 'ناتيور'], correctIndex: 0 }]],
+  ['حروف صامتة أكثر', 'More silent letters', 's ما تنطق في island، و h ما تنطق في honest و hour، و p ما تنطق في receipt، و d الأولى ما تنطق في Wednesday، و c ما تنطق في muscle.', ['island', 'honest', 'hour', 'receipt', 'Wednesday'], 'See you in an hour on Wednesday.',
+    [{ promptAr: 'أي حرف ما ينطق في island؟', play: 'island', options: ['s', 'l', 'n'], correctIndex: 0 },
+     { promptAr: 'أي حرف ما ينطق في receipt؟', play: 'receipt', options: ['p', 'c', 't'], correctIndex: 0 },
+     { promptAr: 'لماذا نقول an hour مو a hour؟', play: 'an hour', options: ['لأن h ما تنطق', 'لأنها جمع'], correctIndex: 0 }]],
+  ['كلمات نفس النطق', 'Homophones', 'كلمات تنطق نفس الشي وتختلف كتابة ومعنى: right و write، hear و here، son و sun، flour و flower. المعنى يجي من الجملة.', ['right', 'write', 'hear', 'here', 'son', 'sun'], 'I can hear you from here.',
+    [{ promptAr: 'اسمع: «Please ___ your name.» أي كلمة؟', play: 'Please write your name.', options: ['write', 'right'], correctIndex: 0 },
+     { promptAr: 'اسمع: «My ___ is ten.» أي كلمة؟', play: 'My son is ten.', options: ['son', 'sun'], correctIndex: 0 },
+     { promptAr: 'اسمع: «Come ___.» أي كلمة؟', play: 'Come here.', options: ['here', 'hear'], correctIndex: 0 }]],
+  ['نفس الكتابة ونطق مختلف', 'Same spelling, different sound', 'read في المضارع «ريد» وفي الماضي «رِد». live فعل «لِف» وصفة «لايف». wind هواء «وِند» وفعل يلف «وايند». السياق يحدد.', ['read', 'live', 'wind', 'lead', 'tear'], 'Yesterday I read a book about live music.',
+    [{ promptAr: 'اسمع: read هنا في الماضي ولا المضارع؟', play: 'Yesterday I read a book.', options: ['ماضي «رِد»', 'مضارع «ريد»'], correctIndex: 0 },
+     { promptAr: 'اسمع: live هنا فعل ولا صفة؟', play: 'I watched a live match.', options: ['صفة «لايف»', 'فعل «لِف»'], correctIndex: 0 },
+     { promptAr: 'اسمع: wind هنا اسم ولا فعل؟', play: 'The wind is strong.', options: ['اسم «وِند»', 'فعل «وايند»'], correctIndex: 0 }]],
+  ['الضغط: اسم ولا فعل', 'Noun vs verb stress', 'بعض الكلمات الاسم ضغطه على الأول والفعل على الثاني: a REcord / to reCORD، a PREsent / to preSENT، an OBject / to obJECT.', ['record', 'present', 'object', 'export', 'increase'], 'I want to record a new record.',
+    [{ promptAr: 'اسمع: «I want to record a song.» الضغط:', play: 'I want to record a song.', options: ['re-CORD (فعل)', 'RE-cord (اسم)'], correctIndex: 0 },
+     { promptAr: 'اسمع: «This is a present for you.» الضغط:', play: 'This is a present for you.', options: ['PRE-sent (اسم)', 'pre-SENT (فعل)'], correctIndex: 0 },
+     { promptAr: 'الفعل غالبًا ضغطه على:', options: ['المقطع الثاني', 'المقطع الأول'], correctIndex: 0 }]],
+  ['الضغط في الكلمات المركبة', 'Compound stress', 'الأسماء المركبة ضغطها على الكلمة الأولى: BLACKboard (سبورة)، BEDroom، AIRport. لكن صفة + اسم الضغط على الثاني: a black BOARD (لوح أسود).', ['blackboard', 'bedroom', 'airport', 'football', 'toothbrush'], 'My toothbrush is in the bedroom.',
+    [{ promptAr: 'الضغط في airport:', play: 'airport', options: ['AIR-port', 'air-PORT'], correctIndex: 0 },
+     { promptAr: 'الضغط في bedroom:', play: 'bedroom', options: ['BED-room', 'bed-ROOM'], correctIndex: 0 },
+     { promptAr: 'الأسماء المركبة ضغطها على:', options: ['الكلمة الأولى', 'الكلمة الثانية'], correctIndex: 0 }]],
+  ['الضغط يتحرك مع اللواحق', 'Stress shift with suffixes', 'مع ic و ity و ian الضغط يجي على المقطع اللي قبلها مباشرة: eCOnomy → ecoNOMic، PUblic → puBLIcity، MUsic → muSIcian.', ['economy', 'economic', 'music', 'musician', 'public', 'publicity'], 'The musician studies economics.',
+    [{ promptAr: 'الضغط في economic:', play: 'economic', options: ['e-co-NOM-ic', 'E-co-nom-ic', 'e-CO-nom-ic'], correctIndex: 0 },
+     { promptAr: 'الضغط في musician:', play: 'musician', options: ['mu-SI-cian', 'MU-si-cian', 'mu-si-CIAN'], correctIndex: 0 },
+     { promptAr: 'مع ic الضغط يكون:', options: ['قبلها مباشرة', 'في أول الكلمة'], correctIndex: 0 }]],
+  ['الاختصارات', 'Contractions', 'في الكلام نختصر: I am → I\'m، you are → you\'re، they will → they\'ll، would not → wouldn\'t. انطقها مقطع واحد سريع، مو كلمتين.', ["I'm", "you're", "they'll", "wouldn't", "it's"], "I'm sure they'll come, but it's late.",
+    [{ promptAr: 'اسمع: أي اختصار قالت سارة؟', play: "They'll be here soon.", options: ["They'll", 'They are', "They'd"], correctIndex: 0 },
+     { promptAr: 'اسمع: أي اختصار؟', play: "I wouldn't do that.", options: ["wouldn't", "won't", "didn't"], correctIndex: 0 },
+     { promptAr: "you're معناها:", options: ['you are', 'your', 'you were'], correctIndex: 0 }]],
+  ['gonna و wanna و gotta', 'Informal reductions', 'في الكلام السريع: going to → gonna، want to → wanna، got to → gotta. تسمعها كثير في الأفلام، لكن في الكتابة الرسمية اكتبها كاملة.', ['gonna', 'wanna', 'gotta', 'kinda', 'lemme'], "I'm going to call you. I want to talk.",
+    [{ promptAr: 'اسمع: gonna تعني:', play: "I'm gonna call you.", options: ['going to', 'got to', 'want to'], correctIndex: 0 },
+     { promptAr: 'اسمع: wanna تعني:', play: 'Do you wanna eat?', options: ['want to', 'going to', 'have to'], correctIndex: 0 },
+     { promptAr: 'في إيميل رسمي تكتب:', options: ['going to', 'gonna'], correctIndex: 0 }]],
+  ['حذف الأصوات في الكلام', 'Elision', 'لما تجي t أو d بين حرفين ساكنين تختفي تقريبًا: next day «نِكس دَي»، last night «لاس نايت»، handbag «هانبَاق». هذا طبيعي عند المتحدثين.', ['next day', 'last night', 'handbag', 'friendship', 'must be'], 'I saw her last night with a new handbag.',
+    [{ promptAr: 'اسمع: في last night صوت t:', play: 'last night', options: ['يكاد يختفي', 'واضح جدًا'], correctIndex: 0 },
+     { promptAr: 'اسمع: handbag تنطق تقريبًا:', play: 'handbag', options: ['هانبَاق', 'هاند-باق'], correctIndex: 0 },
+     { promptAr: 'الحرف اللي يختفي غالبًا:', options: ['t و d', 'm و n'], correctIndex: 0 }]],
+  ['اندماج الأصوات', 'Assimilation', 'd + you تصير «جو»: did you → «دِدجو». t + you تصير «تشو»: don\'t you → «دونتشو»، what you → «واتشو». اسمعها وتعوّد عليها.', ['did you', "don't you", 'would you', 'what you', 'meet you'], 'Did you see it? Would you like some?',
+    [{ promptAr: 'اسمع: did you تنطق تقريبًا:', play: 'Did you eat?', options: ['دِدجو', 'دِد يو'], correctIndex: 0 },
+     { promptAr: 'اسمع: what you تنطق تقريبًا:', play: 'What you need is rest.', options: ['واتشو', 'وات يو'], correctIndex: 0 },
+     { promptAr: 'would you تنطق تقريبًا:', play: 'Would you like tea?', options: ['وُدجو', 'وُد يو'], correctIndex: 0 }]],
+  ['التوقف ومجموعات الكلام', 'Thought groups', 'الجملة الطويلة نقسمها لمجموعات ونوقف وقفة صغيرة بينها: When I got home | I made dinner | and called my mother. الوقفة الغلط تلخبط المعنى.', ['When I got home,', 'I made dinner', 'and called my mother.'], 'When I got home, I made dinner and called my mother.',
+    [{ promptAr: 'وين الوقفة المناسبة؟', play: 'After the class, we went to the park.', options: ['بعد class', 'بعد the'], correctIndex: 0 },
+     { promptAr: 'الوقفة تكون غالبًا عند:', options: ['الفاصلة ونهاية الفكرة', 'وسط الكلمة'], correctIndex: 0 },
+     { promptAr: 'اسمع: كم مجموعة في الجملة؟', play: 'If it rains, we will stay home.', options: ['2', '4'], correctIndex: 0 }]],
+  ['الضغط للتأكيد', 'Contrastive stress', 'نضغط على الكلمة اللي نبي نصحح فيها أو نأكدها: I said BLUE, not green. نفس الجملة بضغط مختلف تعطي معنى مختلف: SHE took my pen (هي مو غيرها).', ['I said BLUE.', 'SHE took it.', 'It was MY idea.'], 'I wanted tea, not coffee.',
+    [{ promptAr: '«I said BLUE, not green» الضغط على:', play: 'I said blue, not green.', options: ['blue', 'said'], correctIndex: 0 },
+     { promptAr: '«It was MY idea» تعني:', options: ['أنا صاحب الفكرة مو غيري', 'الفكرة كانت سيئة'], correctIndex: 0 },
+     { promptAr: 'نضغط على الكلمة اللي:', options: ['نصحح فيها أو نأكدها', 'أطول وحدة'], correctIndex: 0 }]],
+  ['نغمة القوائم والاستغراب', 'List & surprise intonation', 'في القوائم الصوت يطلع مع كل عنصر وينزل مع الأخير: apples ↗, bananas ↗, and oranges ↘. وفي الاستغراب الصوت يطلع عالي: Really? ↗ You won?', ['apples, bananas, and oranges', 'Really?', 'You won?'], 'I bought apples, bananas, and oranges.',
+    [{ promptAr: 'في القائمة، الصوت مع آخر عنصر:', play: 'red, green, and blue', options: ['ينزل ↘', 'يطلع ↗'], correctIndex: 0 },
+     { promptAr: 'Really? للاستغراب الصوت:', play: 'Really?', options: ['يطلع ↗', 'ينزل ↘'], correctIndex: 0 },
+     { promptAr: 'مع العناصر قبل الأخير الصوت:', options: ['يطلع ↗', 'ينزل ↘'], correctIndex: 0 }]],
+];
+
+export const PRONUNCIATION_LESSONS: SaraPronLesson[] = [...RAW, ...RAW2].map(([titleAr, titleEn, ideaAr, pw, sayEn, ex], i) => {
   const isPairs = Array.isArray(pw[0]);
   const pairs = isPairs ? (pw as [string, string][]) : undefined;
-  return { id: `pron-a-${String(i + 1).padStart(2, '0')}`, order: i + 1, titleAr, titleEn, ideaAr, pairs, words: isPairs ? undefined : (pw as string[]), sayEn,
-    exercises: ex || pairExercises(pairs!) };
+  return { id: i < 30 ? `pron-a-${String(i + 1).padStart(2, '0')}` : `pron-b-${String(i - 29).padStart(2, '0')}`, order: i + 1, levelId: (i < 30 ? 'a' : 'b') as 'a' | 'b', titleAr, titleEn, ideaAr, pairs, words: isPairs ? undefined : (pw as string[]), sayEn,
+    exercises: (ex || pairExercises(pairs!)).map((e, k) => (i < 30 ? e : rotate(e, i + k))) };
 });
 export const PRONUNCIATION_TRACK_ID = 'pronunciation';
