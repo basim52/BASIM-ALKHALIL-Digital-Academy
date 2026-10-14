@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, ArrowRight, Lock, CheckCircle2, Volume2, RotateCcw } from 'lucide-react';
 import { PRONUNCIATION_LESSONS, PRONUNCIATION_TRACK_ID, type SaraPronLesson } from '../data/saraTracks/pronunciation';
+import { pauseNarrator, resumeNarrator } from './SaraTrackPlayer';
 import { readUnlocked, progressKey, saraNarrate, saraStopNarrator, saraUnlockNarrator } from './SaraTrackPlayer';
 import { pushTrackProgress, syncTrackProgress } from '../lib/saraProgressSync';
 import SpeakingDrillCheck from './SpeakingDrillCheck';
@@ -36,6 +37,12 @@ const Lesson: React.FC<{ l: SaraPronLesson; onBack: () => void; onPassed: () => 
       {st === 'failed' ? <RotateCcw size={12} /> : <Volume2 size={12} className="text-[#C49E3A]" />}{w}{st === 'loading' && '…'}</button>;
   };
   const failed = state?.s === 'failed';
+  // Sara explains: the idea text on screen, then she models every example word shown below it (same order).
+  const examples = l.pairs ? l.pairs.flat() : l.words!;
+  const lesson = `${l.ideaAr} ${examples.join('، ')}`;
+  const [paused, setPaused] = useState(false);
+  useEffect(() => { play(lesson); /* auto-explain on open (tap already unlocked audio) */ }, [l.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  const explaining = state?.text === lesson;
   return (
     <div className="flex-1 min-h-0 flex flex-col p-3 gap-2 overflow-hidden" data-testid="pron-lesson">
       <div className="flex items-center gap-2">
@@ -43,12 +50,18 @@ const Lesson: React.FC<{ l: SaraPronLesson; onBack: () => void; onPassed: () => 
         <p className="flex-1 text-[14px] font-black text-[#002147] truncate">{l.order}. {l.titleAr}</p>
         <span dir="ltr" className="text-[10px] font-black px-1.5 rounded bg-[#002147] text-amber-300">{l.titleEn}</span>
       </div>
+      <div className="flex gap-1.5">
+        <button onClick={() => { setPaused(false); play(lesson); }} className="flex-1 py-1.5 rounded-xl bg-[#C49E3A] text-[#002147] text-[12px] font-black flex items-center justify-center gap-1">
+          {explaining && state?.s === 'failed' ? <><RotateCcw size={13} />تعذّر الصوت، إعادة المحاولة</> : explaining && state?.s === 'loading' ? 'سارة تجهّز الشرح…' : <><Volume2 size={13} />اشرحي يا سارة</>}
+        </button>
+        <button onClick={() => { if (paused) { resumeNarrator(); setPaused(false); } else { pauseNarrator(); setPaused(true); } }} className="px-3 py-1.5 rounded-xl bg-[#002147] text-amber-300 text-[12px] font-black">{paused ? '▶️ كمّلي' : '⏸️ إيقاف مؤقت'}</button>
+      </div>
       <p className="text-[12.5px] leading-snug font-bold text-slate-700 bg-white rounded-xl border-2 border-amber-300 p-2">{l.ideaAr}</p>
       <div className="flex flex-wrap gap-1.5 items-center">
         {l.pairs ? l.pairs.map((p, i) => <span key={i} className="flex items-center gap-1">{chip(p[0], `a${i}`)}<span className="text-slate-400 text-[11px]">/</span>{chip(p[1], `b${i}`)}</span>)
           : l.words!.map((w, i) => chip(w, `w${i}`))}
       </div>
-      {failed && <p className="text-[11px] font-black text-rose-600">تعذّر صوت سارة. اضغط الكلمة مرة ثانية لإعادة المحاولة.</p>}
+      {failed && !explaining && <p className="text-[11px] font-black text-rose-600">تعذّر صوت سارة. اضغط الكلمة مرة ثانية لإعادة المحاولة.</p>}
       <div className="grid gap-1.5">
         {l.exercises.map((e, ei) => (
           <div key={ei} className="rounded-xl bg-white border border-amber-200 p-1.5 flex items-center gap-1.5 flex-wrap">
@@ -111,7 +124,7 @@ export const SaraPronunciationPlayer: React.FC<Props> = ({ isOpen, onClose, uid,
             {PRONUNCIATION_LESSONS.map(l => {
               const open = l.order <= unlocked;
               return (
-                <button key={l.id} disabled={!open} onClick={() => setActive(l)}
+                <button key={l.id} disabled={!open} onClick={() => { saraUnlockNarrator(); setActive(l); }}
                   className={`w-full min-w-0 flex items-center gap-2 p-2.5 rounded-xl border-2 text-start ${open ? 'bg-white border-amber-300' : 'bg-slate-100 border-slate-200 opacity-60'}`}>
                   <span className="w-7 h-7 rounded-full bg-[#002147] text-amber-300 text-[12px] font-black flex items-center justify-center shrink-0">{l.order}</span>
                   <span className="flex-1 min-w-0 text-[13px] font-black text-[#002147] truncate">{l.titleAr}</span>
