@@ -49,7 +49,8 @@ import {
   Trash2,
   Brain,
   Phone,
-  FileText
+  FileText,
+  Headphones
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile, AppView, SaraBoardData, SaraChatResponse, TutorMemoryDoc, proficiencyLevel, CurriculumCategory, StudyPlan, LearningStyleType, LearningPacingType } from '../types';
@@ -70,6 +71,14 @@ import { SaraAchievementsModal } from './SaraAchievementsModal';
 import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
 import { SaraCurriculumModal } from './SaraCurriculumModal';
 import { SaraTracksHub } from './SaraTracksHub';
+import { SaraListeningPlayer } from './SaraListeningPlayer';
+import { LISTENING_LESSONS } from '../data/saraTracks/listening';
+import { FOUNDATIONS_TRACK as SARA_FOUND_T } from '../data/saraTracks/foundations';
+import { ADVANCED_TRACK as SARA_ADV_T } from '../data/saraTracks/advanced';
+import { CONVERSATION_TRACK as SARA_CONV_T } from '../data/saraTracks/conversation';
+import { READING_TRACK as SARA_READ_T } from '../data/saraTracks/reading';
+import { WRITING_TRACK as SARA_WRITE_T } from '../data/saraTracks/writing';
+const saraBuilt = (...ts: { lessons: { content?: unknown }[] }[]) => ts.reduce((n, t) => n + t.lessons.filter(l => l.content).length, 0);
 import { SaraTools, type SaraToolId } from './SaraTools';
 import { MASTER_ADMINS, UserRole } from '../types';
 import { getScenarioEducationalContent } from '../data/saraScenarioCurriculumData';
@@ -554,10 +563,12 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [curriculumInitialPillar, setCurriculumInitialPillar] = useState<string>('all');
 
   const [isTrackOpen, setIsTrackOpen] = useState<boolean>(false);
+  const [isListeningOpen, setIsListeningOpen] = useState(false);
   const [trackFilter, setTrackFilter] = useState<'all' | 'grammar' | 'conversation' | 'reading' | 'writing'>('all');
   const handleOpenCurriculum = (pillar: string = 'all') => {
     setCurriculumInitialPillar(pillar);
     // 📚/🌐 → all built tracks; 🧠 → foundations + advanced grammar; 💬 → conversation. Others stay "under construction".
+    if (pillar === 'listening') { setIsListeningOpen(true); return; }
     if (pillar === 'all' || pillar === 'grammar' || pillar === 'conversation' || pillar === 'reading' || pillar === 'writing') { setTrackFilter(pillar); setIsTrackOpen(true); return; }
     setIsCurriculumModalOpen(true);
   };
@@ -3140,6 +3151,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </div>
               <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">ورقة عمل</span>
             </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+              <button onClick={() => handleOpenCurriculum('listening')} data-testid="sara-listening-icon"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#C49E3A] bg-[#002147] text-amber-300 flex items-center justify-center shadow-xs hover:scale-105 active:scale-95 shrink-0"
+                aria-label={isRtl ? 'الاستماع' : 'Listening'}>
+                <Headphones size={16} />
+              </button>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">الاستماع</span>
+            </div>
             </div>
           </section>
           <section className="shrink-0 rounded-2xl bg-slate-50 border border-slate-200 px-2 pt-1.5 pb-1">
@@ -4926,7 +4945,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   <div>
                     <div className="flex items-center gap-1.5">
                       <h4 className="text-xs font-black text-[#002147]">{isRtl ? 'منهج القواعد التحدثية السريعة' : 'Spoken Grammar & Patterns'}</h4>
-                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-blue-100 text-blue-800">10 مستويات</span>
+                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-blue-100 text-blue-800">{saraBuilt(SARA_FOUND_T, SARA_ADV_T)} درس</span>
                     </div>
                     <p className="text-[10px] text-slate-500 mt-0.5">{isRtl ? 'قواعد سريعة للحديث بثقة بدون تردد' : 'Spoken rules for instant fluency'}</p>
                   </div>
@@ -4944,7 +4963,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   <div>
                     <div className="flex items-center gap-1.5">
                       <h4 className="text-xs font-black text-[#002147]">{isRtl ? 'منهج المحادثة والطلاقة التفاعلية' : 'Active Conversation & Fluency'}</h4>
-                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-cyan-100 text-cyan-800">12 سيناريو</span>
+                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-cyan-100 text-cyan-800">{saraBuilt(SARA_CONV_T)} درس</span>
                     </div>
                     <p className="text-[10px] text-slate-500 mt-0.5">{isRtl ? 'حوارات يومية وتدريب صوتي على سرعة الرد' : 'Daily conversations & voice speed'}</p>
                   </div>
@@ -4962,7 +4981,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   <div>
                     <div className="flex items-center gap-1.5">
                       <h4 className="text-xs font-black text-[#002147]">{isRtl ? 'منهج القراءة التعبيرية والنطق الصوتي' : 'Expressive Reading & Phonetics'}</h4>
-                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800">مخارج الحروف</span>
+                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800">{saraBuilt(SARA_READ_T)} درس</span>
                     </div>
                     <p className="text-[10px] text-slate-500 mt-0.5">{isRtl ? 'إتقان نطق الأصوات والكلمات الصعبة' : 'Master phonetics and accents'}</p>
                   </div>
@@ -4980,12 +4999,27 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   <div>
                     <div className="flex items-center gap-1.5">
                       <h4 className="text-xs font-black text-[#002147]">{isRtl ? 'منهج الكتابة التعبيرية الحوارية' : 'Conversational Writing'}</h4>
-                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-purple-100 text-purple-800">إيميل ونصوص</span>
+                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-purple-100 text-purple-800">{saraBuilt(SARA_WRITE_T)} درس</span>
                     </div>
                     <p className="text-[10px] text-slate-500 mt-0.5">{isRtl ? 'كتابة رسائل رسمية وإيميلات احترافية' : 'Formal emails & essay writing'}</p>
                   </div>
                 </div>
                 <ChevronRight size={16} className={`text-purple-600 shrink-0 ${isRtl ? 'rotate-180' : ''}`} />
+              </div>
+              {/* 5. Listening */}
+              <div onClick={() => handleOpenCurriculum('listening')}
+                className="bg-white border-2 border-amber-300 hover:border-amber-400 p-3.5 rounded-2xl shadow-xs transition-all cursor-pointer active:scale-98 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="w-10 h-10 rounded-xl bg-[#002147] text-amber-300 flex items-center justify-center text-xl shrink-0">🎧</span>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="text-xs font-black text-[#002147]">{isRtl ? 'منهج الاستماع' : 'Listening'}</h4>
+                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-amber-100 text-amber-800">{LISTENING_LESSONS.length} درس</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-0.5">{isRtl ? 'حوارات بصوت سارة، أسئلة فهم وإملاء' : "Sara's dialogues, questions & dictation"}</p>
+                  </div>
+                </div>
+                <ChevronRight size={16} className={`text-amber-600 shrink-0 ${isRtl ? 'rotate-180' : ''}`} />
               </div>
             </div>
 
@@ -7420,6 +7454,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       </AnimatePresence>
 
       <SaraTools tool={saraTool} onClose={() => { cancelAllSpeech(); setSaraTool(null); }} uid={profile.uid}
+        unlockAll={MASTER_ADMINS.includes(String((profile as any).email || auth.currentUser?.email || '').trim().toLowerCase()) || (profile as any).role === UserRole.PARENT || (profile as any).role === UserRole.ADMIN} />
+      <SaraListeningPlayer isOpen={isListeningOpen} onClose={() => { cancelAllSpeech(); setIsListeningOpen(false); }} uid={profile.uid}
         unlockAll={MASTER_ADMINS.includes(String((profile as any).email || auth.currentUser?.email || '').trim().toLowerCase()) || (profile as any).role === UserRole.PARENT || (profile as any).role === UserRole.ADMIN} />
       <SaraTracksHub key={trackFilter} filter={trackFilter} isOpen={isTrackOpen} onClose={() => { cancelAllSpeech(); setIsTrackOpen(false); }} uid={profile.uid}
         unlockAll={MASTER_ADMINS.includes(String((profile as any).email || auth.currentUser?.email || '').trim().toLowerCase()) || (profile as any).role === UserRole.PARENT || (profile as any).role === UserRole.ADMIN} />
