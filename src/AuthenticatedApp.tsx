@@ -1129,18 +1129,8 @@ const StudentHome = ({
     if (isSimulated) {
       try {
         const stored = JSON.parse(localStorage.getItem(`certs_${profile.uid}`) || '[]');
-        if (stored.length === 0) {
-          const sampleCert: CertificateData = {
-            unitId: 'unit_a1_foundations',
-            unitTitle: 'Core English Phonemic & Foundations',
-            unitTitleAr: 'الوحدة التأسيسية: الصوتيات والتواصل الفعّال',
-            completedAt: new Date(Date.now() - 86400000).toISOString(),
-            studentName: profile.displayName || 'طالب متميز'
-          };
-          localStorage.setItem(`certs_${profile.uid}`, JSON.stringify([sampleCert]));
-          setCertificates([sampleCert]);
-        } else {
-          setCertificates(stored);
+        {
+          setCertificates(Array.isArray(stored) ? stored : []);
         }
       } catch {
         setCertificates([]);
@@ -2779,13 +2769,9 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
           userId: studentId,
           studentName: student.displayName,
           planItems: [
-            { id: 1, title: isRtl ? 'مقدمة في المحادثة والتواصل التفاعلي' : 'Intro to English Conversation', dateLabel: new Date().toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }), score: 95 },
-            { id: 2, title: isRtl ? 'القواعد التأسيسية والمفردات اليومية' : 'Core Grammar & Everyday Vocabulary', dateLabel: 'Tomorrow', score: 88 }
           ]
         });
         setCurrentPlanResults([
-          { id: 'res_1', lessonId: 'l1', score: 95, total: 100, timestamp: Date.now() },
-          { id: 'res_2', lessonId: 'l2', score: 88, total: 100, timestamp: Date.now() - 86400000 }
         ]);
         return;
       }
@@ -3053,7 +3039,7 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
         displayName: isRtl ? `طالب تجريبي (${cleanCode})` : `Demo Student (${cleanCode})`,
         role: UserRole.STUDENT,
         avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${cleanCode}`,
-        points: 500,
+        points: 0,
         level: 'A1',
         studentCode: cleanCode
       };
@@ -5212,8 +5198,6 @@ export default function AuthenticatedApp({
           userId: currentUser.uid,
           studentName: studentName,
           planItems: [
-            { id: 1, title: lang === 'ar' ? 'أسس التواصل الحديث' : 'Foundations of Modern Communication', score: 100 },
-            { id: 2, title: lang === 'ar' ? 'السرد الرقمي ومهارات المحادثة' : 'Digital Narratives & Conversation', score: 85 }
           ]
         });
         return;

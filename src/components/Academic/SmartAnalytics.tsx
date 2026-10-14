@@ -110,18 +110,7 @@ export const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({
     const now = Date.now();
     const day = 24 * 60 * 60 * 1000;
     
-    return [
-      { id: 'sim-1', courseId: 'grammar_academy', lessonId: 'g_past_perfect', lessonTitle: isRtl ? 'أكاديمية القواعد: الماضي التام والروابط الزمنية' : 'Grammar: Past Perfect & Temporal Connectors', score: 95, total: 100, level: 'B1', timestamp: new Date(now - 1 * day) },
-      { id: 'sim-2', courseId: 'reading_lab', lessonId: 'r_london_history', lessonTitle: isRtl ? 'مختبر القراءة: تاريخ معالم لندن العريقة' : 'Reading Lab: Historic London Landmarks', score: 90, total: 100, level: 'B1', timestamp: new Date(now - 2 * day) },
-      { id: 'sim-3', courseId: 'writing_studio', lessonId: 'w_essay_ai_future', lessonTitle: isRtl ? 'استوديو التعبير: صياغة مقال الذكاء الاصطناعي' : 'Writing Studio: Essay on Future of AI', score: 88, total: 100, level: 'B1', timestamp: new Date(now - 3 * day) },
-      { id: 'sim-4', courseId: 'pronunciation_lab', lessonId: 'pron_connected_speech', lessonTitle: isRtl ? 'معمل النطق: مخارج الحروف والنبرة المتصلة' : 'Pronunciation: Connected Speech & Rhythm', score: 85, total: 100, level: 'B1', timestamp: new Date(now - 4 * day) },
-      { id: 'sim-5', courseId: 'educational_games', lessonId: 'etiquette_royal_knights', lessonTitle: isRtl ? 'واحة الألعاب: فرسان الذوق والآداب الراقية' : 'Educational Games: Royal Etiquette Knights', score: 100, total: 100, level: 'All', timestamp: new Date(now - 5 * day) },
-      { id: 'sim-6', courseId: 'kids_stories', lessonId: 'kids_story_001', lessonTitle: isRtl ? 'مغامرات نور: الوصول إلى مطار هيثرو' : 'Noor Adventures: Arriving at Heathrow', score: 92, total: 100, level: 'A2', timestamp: new Date(now - 6 * day) },
-      { id: 'sim-7', courseId: 'adults_daily_dose', lessonId: 'dd_common_errors_01', lessonTitle: isRtl ? 'الجرعة اليومية: تصحيح أخطاء حروف الجر' : 'Daily Dose: Preposition Error Clinic', score: 80, total: 100, level: 'B1', timestamp: new Date(now - 7 * day) },
-      { id: 'sim-8', courseId: 'oxford_discover', lessonId: 'ox_unit_3_energy', lessonTitle: isRtl ? 'منهج أكسفورد: الوحدة 3 - الطاقة المتجددة' : 'Oxford Discover: Unit 3 Renewable Energy', score: 78, total: 100, level: 'B1', timestamp: new Date(now - 8 * day) },
-      { id: 'sim-9', courseId: 'live_translate', lessonId: 'trans_idioms_01', lessonTitle: isRtl ? 'المترجم الحي: صياغة الأمثال والتعابير الاصطلاحية' : 'Live Translate: Idioms & Nuance Sandbox', score: 84, total: 100, level: 'B1', timestamp: new Date(now - 9 * day) },
-      { id: 'sim-10', courseId: 'bi-weekly-test', lessonId: 'test_midterm_01', lessonTitle: isRtl ? 'الاختبار النصف شهري الشامل' : 'Comprehensive Bi-Weekly Assessment', score: 88, total: 100, level: 'B1', timestamp: new Date(now - 10 * day) }
-    ];
+    return [] as any[]; // no fabricated results — honest empty state
   };
 
   // Fetch Live Results from Firestore

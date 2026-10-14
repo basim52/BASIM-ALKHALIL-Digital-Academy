@@ -44,49 +44,9 @@ export const SaraParentCard: React.FC<SaraParentCardProps> = ({
       const isSimulated = studentId.startsWith('sim_') || !auth.currentUser;
 
       if (isSimulated) {
-        // Mock data for simulated demo students
-        setMemory({
-          level: 'A1',
-          age: 11,
-          interests: ['Video Games', 'Space & Science'],
-          goal: 'School English Excellence & Speaking Fluency',
-          wordsLearned: ['Diligent', 'Adventure', 'Curious', 'Explore', 'Achievement', 'Galaxy', 'Friendly', 'Challenge'],
-          frequentMistakes: [
-            'Third-person singular "s" (he/she goes vs go)',
-            'Past simple irregular verbs (went vs goed)',
-            'Articles: "a" vs "an" before vowels'
-          ],
-          lastSessionSummary: 'أتقن الطالب قاعدة المفرد والجمع، وتدرب على جمل التحية واستخدام المضارع البسيط.',
-          dailyCount: 14,
-          dailyCountDate: new Date().toISOString().split('T')[0]
-        });
-
-        setSessions([
-          {
-            id: 'sess_1',
-            startedAt: new Date(Date.now() - 3600000 * 3).toISOString(),
-            endedAt: new Date(Date.now() - 3600000 * 2.8).toISOString(),
-            skill: 'Present Simple & Daily Habits 📐',
-            quizScore: 3,
-            summary: 'تدرب الطالب على أفعال الروتين اليومي، وصححنا توافق الفعل مع الفاعل بنجاح.'
-          },
-          {
-            id: 'sess_2',
-            startedAt: new Date(Date.now() - 86400000).toISOString(),
-            endedAt: new Date(Date.now() - 86400000 + 720000).toISOString(),
-            skill: 'Active Reading: The Little Astronaut 📖',
-            quizScore: 2,
-            summary: 'قراءة قصة رائد الفضاء الصغير واستخراج 4 كلمات جديدة مع تدريب النطق.'
-          },
-          {
-            id: 'sess_3',
-            startedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-            endedAt: new Date(Date.now() - 86400000 * 2 + 650000).toISOString(),
-            skill: 'Pronunciation & Phonics: Short vowels 🎙️',
-            quizScore: 3,
-            summary: 'التفريق بين نطق الحروف الصوتية القصيرة وحل تحدي النطق الصوتي.'
-          }
-        ]);
+        // Simulated/offline: no real data — honest empty state
+        setMemory(null);
+        setSessions([]);
         setLoading(false);
         return;
       }

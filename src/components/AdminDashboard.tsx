@@ -142,13 +142,13 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
 
       const studentMetrics = {
         studentName: selectedStudent.displayName || selectedStudent.email || 'طالب متميز',
-        level: selectedStudent.level && selectedStudent.level !== 'A1' ? selectedStudent.level : (isAboodB ? 'A2' : 'A1'),
-        points: selectedStudent.points && selectedStudent.points > 0 ? selectedStudent.points : (isAboodB ? 320 : 0),
+        level: selectedStudent.level && selectedStudent.level !== 'A1' ? selectedStudent.level : 'A1',
+        points: selectedStudent.points && selectedStudent.points > 0 ? selectedStudent.points : 0,
         email: selectedStudent.email || '',
         phoneNumber: selectedStudent.phoneNumber || 'غير محدد',
-        totalAssignments: totalLessons > 0 ? totalLessons : (isAboodB ? 10 : 0),
-        completedAssignments: totalLessons > 0 ? totalLessons : (isAboodB ? 8 : 0),
-        avgScore: averageScore > 0 ? averageScore : (isAboodB ? 85 : 0),
+        totalAssignments: totalLessons > 0 ? totalLessons : 0,
+        completedAssignments: totalLessons > 0 ? totalLessons : 0,
+        avgScore: averageScore > 0 ? averageScore : 0,
         attendance: 100,
         allGrades: selectedStudentResults.length > 0 
           ? selectedStudentResults.map(r => ({
@@ -157,13 +157,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
               total: r.total,
               courseId: r.courseId || 'general'
             }))
-          : (isAboodB 
-              ? [
-                  { lessonTitle: 'Grammar Essentials', score: 8, total: 10, courseId: 'general' },
-                  { lessonTitle: 'Reading Comprehension', score: 9, total: 10, courseId: 'general' }
-                ]
-              : []
-            )
+          : []
       };
 
       setStudentReportStatus(isRtl ? 'جاري كتابة التقرير الأكاديمي وصياغة النصائح عبر الذكاء الاصطناعي...' : 'Synthesizing report narrative and guidance via AI...');
@@ -1333,40 +1327,9 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                <Activity className="text-emerald-500" />
                {isRtl ? 'إحصائيات الطلاب الجدد' : 'New Students Statistics'}
              </h3>
-             <div className="space-y-6 relative z-10">
-                <div className="bg-slate-50 p-6 rounded-3xl border border-blue-100 shadow-sm group hover:border-blue-300 transition-all">
-                   <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-4">
-                         <div className="w-16 h-16 rounded-2xl bg-white p-1 border border-slate-100 shadow-sm">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aboud" alt="Aboud" className="w-full h-full rounded-xl" />
-                         </div>
-                         <div>
-                            <h4 className="text-xl font-black text-[#002147]">{isRtl ? 'عبود' : 'Aboud'}</h4>
-                            <p className="text-xs font-black text-blue-600 uppercase tracking-widest">{isRtl ? 'طالب منضم حديثاً' : 'Newly Joined Student'}</p>
-                         </div>
-                      </div>
-                      <div className="text-right">
-                         <span className="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">Growth 9.8</span>
-                      </div>
-                   </div>
-                   <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-white p-4 rounded-2xl border border-slate-100">
-                         <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">{isRtl ? 'معدل النجاح' : 'Success Rate'}</p>
-                         <p className="text-lg font-black text-[#002147]">94%</p>
-                      </div>
-                      <div className="bg-white p-4 rounded-2xl border border-slate-100">
-                         <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">{isRtl ? 'الالتزام بالخطة' : 'Plan Commitment'}</p>
-                         <p className="text-lg font-black text-blue-600">+12%</p>
-                      </div>
-                   </div>
-                   <div className="mt-6 pt-6 border-t border-slate-100 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                         <BrainCircuit size={16} className="text-purple-500" />
-                         <span className="text-xs font-bold text-slate-500">{isRtl ? 'تحليل الذكاء الاصطناعي: مستوى متميز جداً' : 'AI Analysis: Exceptional Growth'}</span>
-                      </div>
-                      <Sparkles size={16} className="text-amber-500 animate-pulse" />
-                   </div>
-                </div>
+             <div className="relative z-10 bg-slate-50 p-6 rounded-3xl border border-slate-100 text-center">
+                <p className="text-sm font-black text-[#002147]">{isRtl ? 'تظهر إحصائيات كل طالب من بياناته الحقيقية في قائمة الطلاب أعلاه.' : 'Each student\'s statistics come from their real data in the students list above.'}</p>
+                <p className="text-xs font-bold text-slate-400 mt-2">{isRtl ? 'لا توجد أرقام تجريبية هنا.' : 'No sample numbers here.'}</p>
              </div>
           </section>
 

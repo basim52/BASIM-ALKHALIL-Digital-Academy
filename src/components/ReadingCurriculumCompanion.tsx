@@ -677,13 +677,6 @@ export const ReadingCurriculumCompanion = ({
         )}
 
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex flex-col items-end">
-            <div className="flex items-center gap-1">
-              <Star className="text-amber-400 fill-amber-400" size={12} />
-              <span className="text-xs font-black text-[#002147]">1,280</span>
-            </div>
-            <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest leading-none">Global Rank #12</p>
-          </div>
           <div className="w-10 h-10 rounded-2xl bg-slate-100 border-2 border-white shadow-sm overflow-hidden">
             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" />
           </div>

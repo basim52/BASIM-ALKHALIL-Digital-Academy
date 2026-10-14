@@ -977,10 +977,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                     <div className="space-y-1">
                       <div className="flex justify-between text-[10px] font-black text-slate-400 font-mono">
                         <span>{isRtl ? 'الإنجاز الأكاديمي' : 'SYLLABUS PROGRESS'}</span>
-                        <span className="text-indigo-400">80%</span>
+                        <span className="text-indigo-400">—</span>
                       </div>
                       <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-indigo-500 h-full rounded-full" style={{ width: '80%' }} />
+                        <div className="bg-indigo-500 h-full rounded-full" style={{ width: '0%' }} />
                       </div>
                     </div>
                   </div>
@@ -1030,10 +1030,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                     <div className="space-y-1">
                       <div className="flex justify-between text-[10px] font-black text-slate-400 font-mono">
                         <span>{isRtl ? 'الإنجاز الأكاديمي' : 'SYLLABUS PROGRESS'}</span>
-                        <span className="text-emerald-400">65%</span>
+                        <span className="text-emerald-400">—</span>
                       </div>
                       <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-emerald-500 h-full rounded-full" style={{ width: '65%' }} />
+                        <div className="bg-emerald-500 h-full rounded-full" style={{ width: '0%' }} />
                       </div>
                     </div>
                   </div>
@@ -1083,10 +1083,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                     <div className="space-y-1">
                       <div className="flex justify-between text-[10px] font-black text-slate-400 font-mono">
                         <span>{isRtl ? 'الإنجاز الأكاديمي' : 'SYLLABUS PROGRESS'}</span>
-                        <span className="text-purple-400">90%</span>
+                        <span className="text-purple-400">—</span>
                       </div>
                       <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-purple-500 h-full rounded-full" style={{ width: '90%' }} />
+                        <div className="bg-purple-500 h-full rounded-full" style={{ width: '0%' }} />
                       </div>
                     </div>
                   </div>
@@ -1200,7 +1200,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                     {isRtl ? 'تشريح مهارات الجدارة والسلوك 📊' : 'Behavioral & Linguistic Competency Index'}
                   </h3>
                   <p className="text-[10px] text-slate-400 mt-1">
-                    {isRtl ? 'تتبع نقاط قوتك التفاعلية بناءً على نوع اللعب ومجموع نقاطك عبر العشرين لعبة.' : 'Analysis of cognitive growth, social intelligence and English dexterity.'}
+                    {isRtl ? 'لا توجد بيانات قياس محفوظة بعد — سيظهر هذا المؤشر عند توفر نتائج حقيقية.' : 'No measured data yet — this index appears once real results exist.'}
                   </p>
                 </div>
 
@@ -1209,10 +1209,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs font-extrabold">
                       <span className="text-slate-200">{isRtl ? '👂 دقة الاستماع وتمييز مخارج الحروف' : 'Acoustic Auditory & Sounds Distinction'}</span>
-                      <span className="text-cyan-400 font-mono">80%</span>
+                      <span className="text-cyan-400 font-mono">—</span>
                     </div>
                     <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                      <div className="bg-gradient-to-r from-cyan-600 to-cyan-400 h-full rounded-full" style={{ width: '80%' }} />
+                      <div className="bg-gradient-to-r from-cyan-600 to-cyan-400 h-full rounded-full" style={{ width: '0%' }} />
                     </div>
                     <p className="text-[9px] text-slate-400 italic">
                       {isRtl ? 'ممتاز جداً! تذكر ممارسة لعبة "محقق النطق" يومياً لرفعه إلى 95%.' : 'Fabulous response. Replay Pronunciation Detective to boost it.'}
@@ -1223,10 +1223,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs font-extrabold">
                       <span className="text-slate-200">{isRtl ? '👑 الذكاء الاجتماعي وبوتوكول الرد اللبق' : 'Social Manners & Diplomacy Greeting'}</span>
-                      <span className="text-purple-400 font-mono">90%</span>
+                      <span className="text-purple-400 font-mono">—</span>
                     </div>
                     <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                      <div className="bg-gradient-to-r from-purple-650 to-purple-405 h-full rounded-full" style={{ width: '90%' }} />
+                      <div className="bg-gradient-to-r from-purple-650 to-purple-405 h-full rounded-full" style={{ width: '0%' }} />
                     </div>
                     <p className="text-[9px] text-slate-400 italic">
                       {isRtl ? 'أنت رائع في مهارات اللباقة! تواصل التقدم في "سفير الحوار" و"فارس الكلمة المهذبة".' : 'Stellar achievement. Complete Dialogue Ambassador to keep it pristine.'}
@@ -1237,10 +1237,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs font-extrabold">
                       <span className="text-slate-200">{isRtl ? '🧪 بناء العبارات وصياغة التركيب النحوي' : 'Syntax Compose & Grammatical Harmony'}</span>
-                      <span className="text-[#00CEC9] font-mono">65%</span>
+                      <span className="text-[#00CEC9] font-mono">—</span>
                     </div>
                     <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                      <div className="bg-gradient-to-r from-teal-600 to-teal-400 h-full rounded-full" style={{ width: '65%' }} />
+                      <div className="bg-gradient-to-r from-teal-600 to-teal-400 h-full rounded-full" style={{ width: '0%' }} />
                     </div>
                     <p className="text-[9px] text-slate-400 italic">
                       {isRtl ? 'منطقة تطوير رئيسية! تدرب على لعب "طباخ العبارات" و"بستان القواعد" لتعلم الفاعل والمفعول.' : 'Important improvement zone. Play Phrase Chef and Grammar Garden to strengthen sentence structures.'}
@@ -1251,10 +1251,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs font-extrabold">
                       <span className="text-slate-200">{isRtl ? '⚡ سرعة البديهة والتهجئة الفورية' : 'Speed Spelling & Direct Lexicon Retrieval'}</span>
-                      <span className="text-rose-400 font-mono">75%</span>
+                      <span className="text-rose-400 font-mono">—</span>
                     </div>
                     <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                      <div className="bg-gradient-to-r from-rose-600 to-rose-400 h-full rounded-full" style={{ width: '75%' }} />
+                      <div className="bg-gradient-to-r from-rose-600 to-rose-400 h-full rounded-full" style={{ width: '0%' }} />
                     </div>
                     <p className="text-[9px] text-slate-400 italic">
                       {isRtl ? 'سرعة طيبة في الاستدعاء اللفظي إملائياً! درب بديهتك مجدداً في "بطل الإملاء".' : 'Great spelling response. Push hard in Spelling Hero meteor levels to touch 90%.'}
@@ -1265,10 +1265,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs font-extrabold">
                       <span className="text-slate-200">{isRtl ? '❤️ الذكاء العاطفي والتعاطف اللفظي' : 'Linguistic Empathy & Emotional Intelligence'}</span>
-                      <span className="text-[#FDCB6E] font-mono">85%</span>
+                      <span className="text-[#FDCB6E] font-mono">—</span>
                     </div>
                     <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                      <div className="bg-gradient-to-r from-amber-600 to-amber-400 h-full rounded-full" style={{ width: '85%' }} />
+                      <div className="bg-gradient-to-r from-amber-600 to-amber-400 h-full rounded-full" style={{ width: '0%' }} />
                     </div>
                     <p className="text-[9px] text-slate-400 italic">
                       {isRtl ? 'عالي جداً! لقد نجحت زوهورك في حديقة المشاعر بسبب طيبة عباراتك في مساعدة الآخرين.' : 'Empathetic work. Rewarding results achieved by comforting Flowers of Garden of Emotions.'}
