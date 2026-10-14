@@ -28,7 +28,6 @@ import {
   HelpCircle,
   Compass,
   Timer,
-  Clock,
   Bell,
   Plus,
   Camera,
@@ -493,11 +492,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [timerDurationMinutes, setTimerDurationMinutes] = useState<number>(10);
   const [timerSecondsLeft, setTimerSecondsLeft] = useState<number>(10 * 60);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(true);
-  const [isTimerEnabled, setIsTimerEnabled] = useState<boolean>(true);
+  const [isTimerEnabled, setIsTimerEnabled] = useState<boolean>(false);
   const [isTimeUpModalOpen, setIsTimeUpModalOpen] = useState<boolean>(false);
   const [isSessionTimeUp, setIsSessionTimeUp] = useState<boolean>(false);
-  const [showTimerDropdown, setShowTimerDropdown] = useState<boolean>(false);
-  const timerDropdownRef = useRef<HTMLDivElement>(null);
   const hasTriggeredTimeUpRef = useRef<boolean>(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -1880,19 +1877,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     return () => clearInterval(quizTimer);
   }, [activeBoard?.quiz, quizSelectedOption, chatQuizStarted]);
 
-  // Click outside to close timer dropdown
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (timerDropdownRef.current && !timerDropdownRef.current.contains(e.target as Node)) {
-        setShowTimerDropdown(false);
-      }
-    };
-    if (showTimerDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showTimerDropdown]);
-
   // ==========================================
   // 🎓 Complete & Save Lesson Engine (تسجيل النتيجة وحفظها بعد خوض الاختبار الحقيقي)
   // ==========================================
@@ -2185,21 +2169,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     }
   };
 
-  const selectTimerDuration = (mins: number) => {
-    setTimerDurationMinutes(mins);
-    setShowTimerDropdown(false);
-    hasTriggeredTimeUpRef.current = false;
-    setIsSessionTimeUp(false);
-    if (mins === 0) {
-      setIsTimerEnabled(false);
-      setIsTimerRunning(false);
-    } else {
-      setIsTimerEnabled(true);
-      setTimerSecondsLeft(mins * 60);
-      setIsTimerRunning(true);
-    }
-  };
-
   const extendSessionByMinutes = (mins: number = 5) => {
     hasTriggeredTimeUpRef.current = false;
     setIsSessionTimeUp(false);
@@ -2215,16 +2184,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     setIsTimeUpModalOpen(false);
     setTimerSecondsLeft(timerDurationMinutes * 60);
     setIsTimerRunning(true);
-  };
-
-  const toggleTimerPause = () => {
-    setIsTimerRunning(prev => !prev);
-  };
-
-  const formatTimerDisplay = (totalSec: number) => {
-    const mins = Math.floor(totalSec / 60);
-    const secs = totalSec % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   // Toggle single turn voice recognition
@@ -3062,24 +3021,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               {isLiveMode && <span className="text-[10px] font-black">{isRtl ? 'لايف' : 'LIVE'}</span>}
             </button>
 
-            {/* Session Timer Pill */}
-            <button
-              onClick={() => setShowTimerDropdown(!showTimerDropdown)}
-              className={`px-2 py-1 rounded-xl border text-[11px] font-mono font-black transition-all cursor-pointer flex items-center gap-1 ${
-                !isTimerEnabled || timerDurationMinutes === 0
-                  ? 'bg-slate-50 text-slate-500 border-slate-200'
-                  : timerSecondsLeft === 0
-                  ? 'bg-rose-100 text-rose-800 border-rose-300 animate-pulse'
-                  : timerSecondsLeft < 120
-                  ? 'bg-amber-50 text-amber-800 border-amber-300'
-                  : 'bg-slate-50 text-slate-700 border-slate-200'
-              }`}
-              title={isRtl ? 'مؤقت الجلسة' : 'Session Timer'}
-            >
-              <Clock size={12} className="text-amber-600" />
-              <span>{formatTimerDisplay(timerSecondsLeft)}</span>
-            </button>
-
             {/* Sara 3D Character Button */}
             <button
               onClick={() => setIsSara3DOpen(!isSara3DOpen)}
@@ -3472,118 +3413,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               </div>
             </div>
               <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">سرعة الصوت</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* ⏱️ LESSON DURATION TIMER */}
-            <div className="relative group/btn" ref={timerDropdownRef}>
-              <button
-                onClick={() => setShowTimerDropdown(!showTimerDropdown)}
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
-                  !isTimerEnabled || timerDurationMinutes === 0
-                    ? 'bg-slate-50 text-slate-600 border-slate-200'
-                    : timerSecondsLeft === 0
-                    ? 'bg-rose-100 text-rose-900 border-rose-300 ring-2 ring-rose-400/40 animate-pulse'
-                    : timerSecondsLeft < 60
-                    ? 'bg-rose-50 text-rose-700 border-rose-300 animate-pulse'
-                    : timerSecondsLeft < 180
-                    ? 'bg-amber-50 text-amber-800 border-amber-300'
-                    : 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                }`}
-                aria-label={isRtl ? 'مؤقت الحصة' : 'Lesson Timer'}
-              >
-                {timerSecondsLeft === 0 ? (
-                  <Bell size={16} className="text-rose-600 animate-bounce" />
-                ) : (
-                  <Clock size={16} className={isTimerRunning && isTimerEnabled && timerDurationMinutes > 0 ? 'text-[#002147] animate-pulse' : 'text-slate-500'} />
-                )}
-              </button>
-
-              {/* Hover Tooltip */}
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>⏱️</span>
-                <span>
-                  {!isTimerEnabled || timerDurationMinutes === 0
-                    ? (isRtl ? 'مؤقت الحصة (حر - اضغط للضبط) ⏱️' : 'Lesson Timer (Open Session) ⏱️')
-                    : (isRtl ? `مؤقت الحصة: ${formatTimerDisplay(timerSecondsLeft)} (${timerDurationMinutes} د) ⏱️` : `Timer: ${formatTimerDisplay(timerSecondsLeft)} ⏱️`)}
-                </span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-
-              {/* Timer Dropdown Menu */}
-              {showTimerDropdown && (
-                <div className="absolute top-full mt-2 end-0 w-64 bg-white border-2 border-slate-200 rounded-2xl shadow-xl p-3.5 z-50 animate-in fade-in zoom-in-95">
-                  <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-100">
-                    <span className="text-xs font-black text-[#002147] flex items-center gap-1.5">
-                      <Timer size={15} className="text-[#C49E3A]" />
-                      {isRtl ? 'مؤقت الحصة مع سارة' : 'Lesson Timer'}
-                    </span>
-                    <button
-                      onClick={() => setShowTimerDropdown(false)}
-                      className="text-slate-400 hover:text-slate-600 text-xs p-1 rounded-lg hover:bg-slate-100 cursor-pointer"
-                    >
-                      ✕
-                    </button>
-                  </div>
-
-                  <p className="text-[11px] text-slate-500 font-bold mb-2">
-                    {isRtl ? 'اختر مدة الحصة ليرن الجرس عند انتهائها:' : 'Set lesson duration to ring the bell when finished:'}
-                  </p>
-
-                  {/* Preset Buttons */}
-                  <div className="grid grid-cols-3 gap-1.5 mb-3">
-                    {[5, 10, 15].map(mins => (
-                      <button
-                        key={`preset-${mins}`}
-                        onClick={() => selectTimerDuration(mins)}
-                        className={`p-2 rounded-xl border text-center transition-all cursor-pointer ${
-                          timerDurationMinutes === mins && isTimerEnabled
-                            ? 'bg-[#002147] text-amber-300 border-[#002147] font-black shadow-xs ring-2 ring-amber-300/40'
-                            : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 font-bold'
-                        }`}
-                      >
-                        <div className="text-sm font-black">{mins}</div>
-                        <div className="text-[10px]">{isRtl ? 'دقائق' : 'mins'}</div>
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Actions inside Dropdown */}
-                  <div className="space-y-1.5 pt-2 border-t border-slate-100">
-                    {isTimerEnabled && timerDurationMinutes > 0 && (
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={toggleTimerPause}
-                          className="flex-1 py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center gap-1 cursor-pointer"
-                        >
-                          {isTimerRunning ? <Pause size={12} /> : <Play size={12} />}
-                          <span>{isTimerRunning ? (isRtl ? 'إيقاف مؤقت' : 'Pause') : (isRtl ? 'استئناف' : 'Resume')}</span>
-                        </button>
-                        <button
-                          onClick={() => extendSessionByMinutes(5)}
-                          className="py-1.5 px-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-black flex items-center gap-1 cursor-pointer"
-                          title={isRtl ? 'إضافة 5 دقائق إضافية' : 'Add 5 minutes'}
-                        >
-                          <Plus size={12} />
-                          <span>5+ {isRtl ? 'د' : 'm'}</span>
-                        </button>
-                      </div>
-                    )}
-
-                    <button
-                      onClick={() => selectTimerDuration(0)}
-                      className={`w-full py-1.5 px-2 rounded-xl text-xs font-bold text-center transition-all cursor-pointer ${
-                        !isTimerEnabled || timerDurationMinutes === 0
-                          ? 'bg-blue-100 text-blue-900 font-black'
-                          : 'bg-slate-50 hover:bg-slate-100 text-slate-600'
-                      }`}
-                    >
-                      {isRtl ? 'محادثة مفتوحة (بدون مؤقت) ♾️' : 'Open session (No timer) ♾️'}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">المؤقت</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 📦 ARCHIVE CURRENT SESSION */}
@@ -5554,29 +5383,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 </div>
               </div>
 
-              {/* Session Timer Row */}
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
-                <span className="text-xs font-black text-[#002147] flex items-center gap-1">
-                  <Clock size={13} className="text-amber-600" />
-                  <span>{isRtl ? 'مؤقت الحصة:' : 'Lesson Timer:'}</span>
-                </span>
-                <div className="flex items-center gap-1">
-                  {[5, 10, 15, 0].map(mins => (
-                    <button
-                      key={`mob-tm-lab-${mins}`}
-                      onClick={() => selectTimerDuration(mins)}
-                      className={`px-2.5 py-1 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                        timerDurationMinutes === mins && isTimerEnabled
-                          ? 'bg-amber-400 text-slate-950 shadow-xs'
-                          : 'bg-slate-100 text-slate-600'
-                      }`}
-                    >
-                      {mins === 0 ? 'حر ♾️' : `${mins}د`}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Archive Row */}
               <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
                 <button
@@ -6776,19 +6582,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {/* Timer selection */}
-                  <button
-                    onClick={() => {
-                      setShowMobileToolsDrawer(false);
-                      setShowTimerDropdown(true);
-                    }}
-                    className="flex-1 py-2 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <Clock size={13} className="text-amber-500" />
-                    <span>{isRtl ? 'مؤقت الجلسة:' : 'Session Timer:'}</span>
-                    <span className="font-mono font-black">{formatTimerDisplay(timerSecondsLeft)}</span>
-                  </button>
-
                   {/* Archive Session */}
                   <button
                     onClick={() => {
