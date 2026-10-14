@@ -23,6 +23,8 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 import { managedSpeak } from '../lib/audio';
+import { computeSaraSkills } from '../lib/saraSkills';
+import { loadLevelTestAttempts, summarizeLevelTests } from '../lib/saraLevelTests';
 
 interface GapItem {
   id: string;
@@ -59,6 +61,7 @@ interface AdaptiveLearningPathProps {
   userLevel?: string;
   userName?: string;
   onNavigateToView?: (view: any) => void;
+  uid?: string;
 }
 
 export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
@@ -66,13 +69,15 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
   onBack,
   userLevel = 'B1',
   userName = 'Student',
-  onNavigateToView
+  onNavigateToView,
+  uid
 }) => {
   const isRtl = lang === 'ar';
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisData, setAnalysisData] = useState<GapAnalysisData | null>(null);
   const [loadError, setLoadError] = useState('');
+  const [noData, setNoData] = useState(false);
 
   // Active Drill State
   const [activeDrillIndex, setActiveDrillIndex] = useState<number | null>(null);
@@ -91,27 +96,38 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
   // Initial Load & AI Diagnostic Call
   useEffect(() => {
     fetchGapAnalysis();
-  }, [userLevel]);
+  }, [userLevel, uid]);
 
   const fetchGapAnalysis = async () => {
     setLoading(true);
+    setLoadError('');
     try {
+      // Real data only: Sara track progress + level-test results. No sample answers.
+      const sk = await computeSaraSkills(uid, userLevel);
+      const tests = uid ? summarizeLevelTests(await loadLevelTestAttempts(uid)) : [];
+      if (!sk.hasData && tests.length === 0) {
+        setNoData(true); setAnalysisData(null); setLoading(false);
+        return;
+      }
+      setNoData(false);
+      const studentAnswers = [
+        ...sk.skills.map(x => ({ skill: x.labelEn, lessonsPassed: x.passed, lessonsTotal: x.total, bestLevelTest: x.testBest })),
+        ...tests.map(t => ({ levelTest: `${t.trackId}/${t.levelId}`, bestScore: t.best.score, latestScore: t.latest.score, attempts: t.attempts,
+          weakLessons: (t.latest.weakLessons || []).slice(0, 6).map(w => ({ lesson: w.titleAr, wrong: w.wrong })) })),
+      ];
+      const realPct = (id: string) => sk.skills.find(x => x.id === id);
       const res = await fetch('/api/ai/adaptive-gap-analysis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          currentLevel: userLevel,
-          studentName: userName,
-          studentAnswers: [
-            { question: "Present Perfect vs Past Simple", correct: false },
-            { question: "Voicing P vs B", correct: false },
-            { question: "Collocations with Make/Do", correct: true }
-          ]
-        })
+        body: JSON.stringify({ currentLevel: userLevel, studentName: userName, studentAnswers })
       });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data || !Array.isArray(data.detectedGaps)) throw new Error('BAD_RESPONSE');
-      setAnalysisData({ ...data, skillRadar: data.skillRadar || {}, actionPlanAr: Array.isArray(data.actionPlanAr) ? data.actionPlanAr : [] });
+      const radar: Record<string, number> = {};
+      sk.skills.forEach(x => { radar[x.id] = x.testBest !== null ? Math.max(x.pct, x.testBest) : x.pct; });
+      const vals = Object.values(radar);
+      setAnalysisData({ ...data, overallMastery: vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0, cefrEstimated: userLevel, skillRadar: radar, actionPlanAr: Array.isArray(data.actionPlanAr) ? data.actionPlanAr : [] });
+      void realPct;
       setLoadError('');
     } catch (e) {
       console.error(e);
@@ -238,6 +254,13 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
         )}
 
         {/* Main Dashboard Content */}
+        {!loading && noData && (
+          <div className="mx-auto my-8 max-w-md rounded-3xl border border-[#C49E3A]/40 bg-white p-6 text-center" dir="rtl">
+            <p className="text-5xl font-black text-[#002147]">0%</p>
+            <p className="mt-2 mb-4 text-sm font-bold text-slate-600">ما فيه نتائج دروس أو اختبارات بعد. ابدأ أول درس عشان نحلل مستواك الحقيقي.</p>
+            <button onClick={() => onNavigateToView?.('sara-continue')} className="rounded-xl bg-[#C49E3A] px-5 py-2.5 text-sm font-black text-[#002147]">ابدأ أول درس</button>
+          </div>
+        )}
         {!loading && !analysisData && loadError && (
           <div role="alert" className="mx-auto my-8 max-w-md rounded-3xl border border-red-200 bg-red-50 p-5 text-center" dir="rtl">
             <p className="mb-3 text-sm font-bold text-red-700">{loadError}</p>

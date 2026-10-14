@@ -2498,75 +2498,15 @@ Respond ONLY with a valid JSON object:
     try {
       const { studentAnswers = [], currentLevel = "B1", studentName = "Student" } = req.body;
 
-      if (!initAI() || !aiLive) {
-        return res.json({
-          overallMastery: 78,
-          cefrEstimated: currentLevel,
-          detectedGaps: [
-            {
-              id: "gap-1",
-              domain: "Grammar",
-              topicAr: "الخلط بين الماضي البسيط والمضارع التام",
-              topicEn: "Past Simple vs. Present Perfect",
-              severity: "Medium",
-              explanationAr: "يميل الطالب لاستخدام Past Simple حتى عندما يكون للأثر امتداد في الحاضر (L1 interference).",
-              remedialDrill: {
-                question: "I ________ (live) in London for 3 years, and I still live here today.",
-                options: ["have lived", "lived", "was living", "had lived"],
-                correctIndex: 0,
-                hint: "لاحظ أن الفعل ما زال مستمراً حتى الآن في الحاضر (Present Perfect)."
-              }
-            },
-            {
-              id: "gap-2",
-              domain: "Vocabulary & Collocations",
-              topicAr: "المتلازمات اللفظية (Make vs. Do)",
-              topicEn: "Collocations with 'Make' & 'Do'",
-              severity: "Low",
-              explanationAr: "استخدام do بدلاً من make في سياقات القرارات والوعود.",
-              remedialDrill: {
-                question: "She needs to ________ a difficult decision before tomorrow.",
-                options: ["make", "do", "take", "create"],
-                correctIndex: 0,
-                hint: "القرارات والخيارات تأتي دائماً مع فعل Make."
-              }
-            },
-            {
-              id: "gap-3",
-              domain: "Pronunciation & Phonetics",
-              topicAr: "التمييز بين أصوات /p/ و /b/ ونهايات -ed",
-              topicEn: "Voicing & Past -ed Endings (/t/, /d/, /ɪd/)",
-              severity: "High",
-              explanationAr: "تحتاج مخارج الحروف الانفجارية لتركيز أعلى على نطق صوت /p/ غير المجهور.",
-              remedialDrill: {
-                question: "In the word 'Decided', the '-ed' ending is pronounced as:",
-                options: ["/ɪd/", "/t/", "/d/", "/de/"],
-                correctIndex: 0,
-                hint: "الأفعال المنتهية بصوت /t/ أو /d/ تأخذ صوت /ɪd/ مثل decided و wanted."
-              }
-            }
-          ],
-          skillRadar: {
-            grammar: 76,
-            vocabulary: 84,
-            pronunciation: 72,
-            listening: 88,
-            reading: 80
-          },
-          actionPlanAr: [
-            "إتمام تمرينين في المتلازمات اللفظية اليوم",
-            "مراجعة فيديو الفرق بين Past Simple و Present Perfect",
-            "جلسة نطق مكثفة في Pronunciation Lab للتمييز بين P و B"
-          ]
-        });
-      }
+      if (!Array.isArray(studentAnswers) || studentAnswers.length === 0) return res.status(400).json({ error: "NO_DATA" });
+      if (!initAI() || !aiLive) return res.status(503).json({ error: "AI_NOT_CONFIGURED" });
 
       const prompt = `You are the Lead Academic AI Diagnostic Specialist at Basim Alkhalil Academy.
 Analyze the following student performance data and generate an in-depth Adaptive Language Gap Diagnostic & Remedial Roadmap:
 Student Current Level: ${currentLevel}
 Student Answers & Performance Logs: ${JSON.stringify(studentAnswers)}
 
-Identify precise language gaps (Grammar, Vocabulary, Pronunciation, Listening, Reading).
+Identify precise language gaps ONLY from the data above (weak lessons, low test scores, skills with little progress). Do not invent mistakes the data does not show; if data is thin, return fewer gaps.
 Respond ONLY with a valid JSON object matching this schema:
 {
   "overallMastery": 82,
@@ -2612,13 +2552,7 @@ Respond ONLY with a valid JSON object matching this schema:
         const parsed = JSON.parse(result.text || "{}");
         res.json(parsed);
       } catch (parseErr) {
-        res.json({
-          overallMastery: 75,
-          cefrEstimated: currentLevel,
-          detectedGaps: [],
-          skillRadar: { grammar: 75, vocabulary: 80, pronunciation: 70, listening: 85, reading: 78 },
-          actionPlanAr: ["متابعة الدروس التفاعلية اليومية بانتظام."]
-        });
+        res.status(502).json({ error: "AI_BAD_JSON" });
       }
     } catch (err: any) {
       logToFile(`Error in /api/ai/adaptive-gap-analysis: ${err.message}`);

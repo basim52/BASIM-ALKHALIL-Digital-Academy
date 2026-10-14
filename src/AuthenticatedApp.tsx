@@ -6226,6 +6226,7 @@ export default function AuthenticatedApp({
           userName={(userProfile as any)?.name || (userProfile as any)?.displayName || currentUser?.displayName || 'Student'}
           onBack={() => setView('interactive-learning')}
           onNavigateToView={(target) => setView(target)}
+          uid={currentUser?.uid}
         />
       );
     }
