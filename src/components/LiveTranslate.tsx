@@ -890,7 +890,7 @@ export function LiveTranslate({ isRtl = true, lang = 'ar', userProfile, onBack }
                   type="button"
                   disabled={isConvertingIdiom || !idiomPhrase.trim()}
                   onClick={() => handleIdiomConvert('')}
-                  className="w-full py-3 bg-gradient-to-r from-amber-accent to-amber-500 text-ink text-xs font-black rounded-xl transition shadow-md shadow-amber-600/10 cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-gradient-to-r from-amber-accent to-[#C49E3A] text-ink text-xs font-black rounded-xl transition shadow-md shadow-amber-600/10 cursor-pointer flex items-center justify-center gap-2"
                 >
                   {isConvertingIdiom ? (
                     <div className="flex items-center gap-1">

@@ -1147,7 +1147,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                     <button
                       onClick={generateVoucher}
                       disabled={generating}
-                      className="w-full bg-amber-500 hover:bg-amber-400 text-[#002147] py-3.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer shadow-md disabled:opacity-50"
+                      className="w-full bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] py-3.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer shadow-md disabled:opacity-50"
                     >
                       {generating ? (
                         <div className="w-5 h-5 border-2 border-[#002147] border-t-transparent rounded-full animate-spin mx-auto" />
@@ -1258,7 +1258,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
             <button
                onClick={testApiConnection}
                disabled={analyzing}
-               className="w-full py-4 bg-emerald-500 rounded-2xl font-black text-sm flex items-center justify-center gap-3 hover:bg-emerald-400 transition-all active:scale-95 disabled:opacity-50"
+               className="w-full py-4 bg-[#002147] rounded-2xl font-black text-sm flex items-center justify-center gap-3 hover:bg-[#00306b] transition-all active:scale-95 disabled:opacity-50"
             >
               <BrainCircuit size={18} />
               {analyzing ? (isRtl ? 'جاري الفحص...' : 'Checking...') : (isRtl ? 'فحص اتصال API V2' : 'Test API Connection V2')}
@@ -1450,7 +1450,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                 <div className="flex justify-end">
                   <button
                     onClick={handleShareAsImage}
-                    className="bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-600 hover:text-white px-5 py-2.5 rounded-full flex items-center gap-2 text-xs font-black transition-all cursor-pointer shadow-sm"
+                    className="bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-[#00306b] hover:text-white px-5 py-2.5 rounded-full flex items-center gap-2 text-xs font-black transition-all cursor-pointer shadow-sm"
                   >
                     <Download size={14} />
                     {isRtl ? 'تحميل تقرير المنصة كصورة 💾' : 'Download Platform Report as Image 💾'}

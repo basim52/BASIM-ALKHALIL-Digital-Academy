@@ -4653,7 +4653,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
               <button
                 disabled={exportingLesson}
                 onClick={() => handleExportLessonAsImage(lesson, 'advanced')}
-                className="bg-[#001a38] border border-amber-500/35 hover:bg-amber-500 hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
+                className="bg-[#001a38] border border-amber-500/35 hover:bg-[#b08c2f] hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
               >
                 {exportingLesson && lessonToExport?.lesson_number === lesson.lesson_number ? (
                   <>
@@ -4895,7 +4895,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                             onClick={() => {
                               setActiveChapterIdx(activeChapterIdx + 1);
                             }}
-                            className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-black px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-amber-500/10 flex items-center gap-1 cursor-pointer"
+                            className="bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-black px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-amber-500/10 flex items-center gap-1 cursor-pointer"
                           >
                             {isRtl ? 'الفصل التالي' : 'Next Chapter'}
                             <ChevronRight size={14} className={isRtl ? 'rotate-180' : ''} />
@@ -4906,7 +4906,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                               onClick={() => {
                                 setActiveWorkspaceTab('sandbox');
                               }}
-                              className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-black px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-amber-500/10 flex items-center gap-1 cursor-pointer"
+                              className="bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-black px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-amber-500/10 flex items-center gap-1 cursor-pointer"
                             >
                               <Terminal size={14} />
                               {isRtl ? 'انتقل للمعمل 🛠' : 'Go to Sandbox 🛠'}
@@ -4915,7 +4915,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                               onClick={() => {
                                 setActiveWorkspaceTab('quiz');
                               }}
-                              className="bg-gradient-to-r from-emerald-500 to-[#002147] hover:from-emerald-400 hover:to-[#C49E3A] text-slate-950 text-xs font-black px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-emerald-500/10 flex items-center gap-1 cursor-pointer"
+                              className="bg-gradient-to-r from-[#002147] to-[#002147] hover:from-emerald-400 hover:to-[#C49E3A] text-slate-950 text-xs font-black px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-emerald-500/10 flex items-center gap-1 cursor-pointer"
                             >
                               <Award size={14} />
                               {isRtl ? 'ابدأ الاختبار 📝' : 'Take Quiz 📝'}
@@ -5016,7 +5016,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                       <button
                         disabled={simulating}
                         onClick={handleRunPython}
-                        className="w-full bg-[#fb923c] text-slate-950 font-black text-xs py-2.5 rounded-xl hover:bg-amber-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                        className="w-full bg-[#fb923c] text-slate-950 font-black text-xs py-2.5 rounded-xl hover:bg-[#b08c2f] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                       >
                         <Play size={12} fill="#020617" />
                         {simulating ? (isRtl ? 'جاري محاكاة الخادم ولغة بايثون...' : 'Simulating Local Interpreter...') : (isRtl ? 'شغل كود بايثون وعالج الأوامر ⚡' : 'Run Python Simulation script ⚡')}
@@ -5080,7 +5080,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                       <button
                         onClick={handleSimSubmit}
                         disabled={simulating}
-                        className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 rounded-xl flex items-center justify-center font-black text-xs shrink-0"
+                        className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] px-4 rounded-xl flex items-center justify-center font-black text-xs shrink-0"
                       >
                         <Send size={14} />
                       </button>
@@ -5093,7 +5093,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
               <div className="flex justify-end pt-4">
                 <button
                   onClick={handleCompleteLessonAndAwardXp}
-                  className="bg-gradient-to-r from-emerald-500 to-[#002147] hover:from-emerald-400 hover:to-[#C49E3A] text-slate-950 font-black px-8 py-4 rounded-2xl flex items-center gap-3 shadow-lg shadow-emerald-500/10 transition-all active:scale-95 text-sm"
+                  className="bg-gradient-to-r from-[#002147] to-[#002147] hover:from-emerald-400 hover:to-[#C49E3A] text-slate-950 font-black px-8 py-4 rounded-2xl flex items-center gap-3 shadow-lg shadow-emerald-500/10 transition-all active:scale-95 text-sm"
                 >
                   <CheckCircle size={18} />
                   {isCompleted ? (isRtl ? 'تجاوز التحدي مجدداً' : 'Replay challenge completed') : (isRtl ? 'أكملت المغامرة بنجاح وحصدت +50 XP 🏆' : 'Adventure completed successfully (+50 XP) 🏆')}
@@ -5476,7 +5476,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                 <button
                   disabled={exportingLesson}
                   onClick={() => handleExportLessonAsImage(lesson, 'pro')}
-                  className="bg-[#001a38] border border-amber-500/35 hover:bg-amber-500 hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
+                  className="bg-[#001a38] border border-amber-500/35 hover:bg-[#b08c2f] hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
                 >
                   {exportingLesson && lessonToExport?.lesson_number === lesson.lesson_number ? (
                     <>
@@ -5694,7 +5694,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <button
                   onClick={handleCompilePrompt}
-                  className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black px-5 py-3.5 rounded-xl text-xs transition-all active:scale-95 flex items-center justify-center gap-2"
+                  className="flex-1 bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black px-5 py-3.5 rounded-xl text-xs transition-all active:scale-95 flex items-center justify-center gap-2"
                 >
                   <Wand2 size={14} />
                   {isRtl ? '🛠️ تشييد وهيكلة الأمر العملاق' : 'Compile Mega-prompt'}
@@ -5760,7 +5760,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
 
               <button
                 onClick={handleCompleteProLesson}
-                className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-6 py-3.5 rounded-2xl text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/10 transition-all active:scale-95 shrink-0"
+                className="bg-[#002147] hover:bg-[#00306b] text-white font-black px-6 py-3.5 rounded-2xl text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/10 transition-all active:scale-95 shrink-0"
               >
                 <CheckCircle size={14} />
                 {isCompleted ? (isRtl ? 'مكتمل بنجاح (اعتماد تكراري)' : 'Completed') : (isRtl ? 'تسجيل إكمال الدرس وحصد +100 XP 🏆' : 'Mark Lesson Complete +100 XP 🏆')}
@@ -6055,7 +6055,7 @@ The adventure is waiting!`
                       <div className="pt-4 flex flex-col sm:flex-row gap-4 items-center justify-center">
                         <button
                           onClick={() => onNavigate && onNavigate('placement-test')}
-                          className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-8 py-4 rounded-2xl text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all active:scale-95 shrink-0 hover:-translate-y-0.5 font-sans cursor-pointer"
+                          className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black px-8 py-4 rounded-2xl text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all active:scale-95 shrink-0 hover:-translate-y-0.5 font-sans cursor-pointer"
                         >
                           <Sparkles size={16} />
                           {isRtl ? 'ابدأ اختبار تحديد المستوى الآن 🎯' : 'Start Placement Test Now 🎯'}
@@ -6299,7 +6299,7 @@ The adventure is waiting!`
                                           setXp(prev => prev + 200);
                                         }}
                                         disabled={!projectDraft.trim() || projectSaved}
-                                        className="bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-black px-6 py-3 rounded-xl text-xs transition-all active:scale-95 shadow-md shadow-amber-500/10"
+                                        className="bg-[#C49E3A] hover:bg-[#b08c2f] disabled:opacity-50 text-[#002147] font-black px-6 py-3 rounded-xl text-xs transition-all active:scale-95 shadow-md shadow-amber-500/10"
                                       >
                                         {projectSaved ? (isRtl ? '✓ تم حفظ واعتماد المشروع' : '✓ Saved and Certified') : (isRtl ? '💾 حفظ وإرسال مسودة المشروع (+200 XP)' : '💾 Save & Submit Level Project (+200 XP)')}
                                       </button>
@@ -6469,7 +6469,7 @@ The adventure is waiting!`
                                         alert(isRtl ? "بعض الخيارات بحاجة لمزيد من المراجعة الأكاديمية! راجع مباحث المستوى الأول وسلسلة التفكير ثم حاول مجدداً بنور العلم." : "Some validation answers are incorrect. Please review the first level concepts and try again!");
                                       }
                                     }}
-                                    className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-8 py-3.5 rounded-2xl text-xs transition-all active:scale-95 shadow-md shadow-amber-500/10 font-sans"
+                                    className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black px-8 py-3.5 rounded-2xl text-xs transition-all active:scale-95 shadow-md shadow-amber-500/10 font-sans"
                                   >
                                     {isRtl ? '📋 تحليل وتصحيح الاختبار المتقدم' : 'Submit Exam Verification'}
                                   </button>
@@ -6535,7 +6535,7 @@ The adventure is waiting!`
                                   {!showProCertificate ? (
                                     <button
                                       onClick={() => setShowProCertificate(true)}
-                                      className="mx-auto bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 hover:scale-105 text-slate-950 font-black px-12 py-5 rounded-2xl flex items-center justify-center gap-3 shadow-2xl shadow-yellow-500/20 transition-all font-sans text-sm animate-bounce"
+                                      className="mx-auto bg-gradient-to-r from-[#C49E3A] via-[#C49E3A] to-[#C49E3A] hover:scale-105 text-slate-950 font-black px-12 py-5 rounded-2xl flex items-center justify-center gap-3 shadow-2xl shadow-yellow-500/20 transition-all font-sans text-sm animate-bounce"
                                     >
                                       🏆 {isRtl ? 'إصدار واستعراض شهادة مهندس الأوامر المعتمد' : 'Issue and View Verified Certificate'}
                                     </button>
@@ -6852,7 +6852,7 @@ Output Summary for [${topic}]:
                                           }, 1000);
                                         }}
                                         disabled={testingTemplateLoading}
-                                        className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-black px-6 py-3 rounded-xl text-xs transition-all active:scale-95 flex items-center justify-center gap-2 font-sans shadow-md shadow-amber-500/10"
+                                        className="w-full sm:w-auto bg-[#C49E3A] hover:bg-[#b08c2f] disabled:opacity-50 text-[#002147] font-black px-6 py-3 rounded-xl text-xs transition-all active:scale-95 flex items-center justify-center gap-2 font-sans shadow-md shadow-amber-500/10"
                                       >
                                         <Play size={14} />
                                         {testingTemplateLoading ? (isRtl ? 'جاري محاكاة الاستجابة...' : 'Simulating Response...') : (isRtl ? 'تشغيل المعمل الاختباري (+50 XP)' : 'Run Laboratory Simulation')}
@@ -7045,7 +7045,7 @@ Output Summary for [${topic}]:
                                             element.scrollIntoView({ behavior: 'smooth' });
                                           }
                                         }}
-                                        className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-6 py-3 rounded-xl text-xs transition-all flex items-center gap-2 font-sans"
+                                        className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black px-6 py-3 rounded-xl text-xs transition-all flex items-center gap-2 font-sans"
                                       >
                                         🧪 {isRtl ? 'حقن وتجربة الأمر الضخم بالملتقى التدريبي' : 'Load into Workspace Playground'}
                                       </button>
@@ -7221,7 +7221,7 @@ Output Summary for [${topic}]:
                                     setQuizLevel(level.level_number);
                                     setLobbyTab('perfection');
                                   }}
-                                  className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 active:scale-95 transition-all text-slate-950 font-black p-4 rounded-2xl flex items-center justify-center gap-2 border border-amber-400/20 text-xs mt-4 animate-pulse shadow-lg shadow-amber-500/10 cursor-pointer text-center"
+                                  className="w-full bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] hover:from-amber-400 hover:to-amber-500 active:scale-95 transition-all text-slate-950 font-black p-4 rounded-2xl flex items-center justify-center gap-2 border border-amber-400/20 text-xs mt-4 animate-pulse shadow-lg shadow-amber-500/10 cursor-pointer text-center"
                                 >
                                   📝 {isRtl ? `خوض اختبار المستوى ${level.level_number} المعتمد! 🏆` : `Take Certified Level ${level.level_number} Quiz! 🏆`}
                                 </button>
@@ -8066,7 +8066,7 @@ Output Summary for [${topic}]:
                               setTimeout(() => setExp1Running(false), 2000);
                             }}
                             disabled={exp1Running}
-                            className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-slate-800 text-slate-950 font-black py-3 rounded-xl text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
+                            className="w-full bg-[#C49E3A] hover:bg-[#b08c2f] disabled:bg-slate-800 text-[#002147] font-black py-3 rounded-xl text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
                           >
                             {exp1Running ? (
                               <span className="animate-spin">🌀</span>
@@ -8248,7 +8248,7 @@ Output Summary for [${topic}]:
                               }, 1500);
                             }}
                             disabled={exp2Running}
-                            className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-slate-800 text-slate-950 font-black py-3 rounded-xl text-xs flex items-center justify-center gap-2"
+                            className="w-full bg-[#C49E3A] hover:bg-[#b08c2f] disabled:bg-slate-800 text-[#002147] font-black py-3 rounded-xl text-xs flex items-center justify-center gap-2"
                           >
                             {exp2Running ? '🌀 جاري صياغة التعويذ الحواري...' : '⚔️ إطلاق تحدي النماذج اللغوية!'}
                           </button>
@@ -8368,7 +8368,7 @@ Output Summary for [${topic}]:
                               setExp3Running(true);
                               setTimeout(() => setExp3Running(false), 2000);
                             }}
-                            className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-3 rounded-xl text-xs active:scale-95 transition-all"
+                            className="w-full bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black py-3 rounded-xl text-xs active:scale-95 transition-all"
                           >
                             {exp3Running ? '🌀 تجسيد حركة الكاميرا والعمق...' : '🎬 مقارنة مولدات الفيديو التوليدي'}
                           </button>
@@ -8848,7 +8848,7 @@ Output Summary for [${topic}]:
                                       setActiveDiscussionId(prev => (prev % 12) + 1);
                                       alert(isRtl ? "تم تسجيل المناقشة العائلية وحصلتم على +15 XP! واصلوا التنسيق الأسرى 👨‍👩‍👧‍👦" : "Family Discussion logged! Earned +15 XP! Keep bonding.");
                                     }}
-                                    className="w-full bg-amber-400 hover:bg-amber-500 text-slate-950 py-3.5 rounded-2xl text-xs font-black transition-all active:scale-95 flex items-center justify-center gap-2"
+                                    className="w-full bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] py-3.5 rounded-2xl text-xs font-black transition-all active:scale-95 flex items-center justify-center gap-2"
                                   >
                                     <span>{isRtl ? '✓ ناقشنا هذا في العائلة وحصلنا +15 XP' : 'Mark as discussed & earn +15 XP!'}</span>
                                   </button>
@@ -9005,7 +9005,7 @@ Output Summary for [${topic}]:
                                       setXp(prev => prev + 15);
                                       alert(isRtl ? "رائع! تم نشر جواب العائلة في لوحة الأفكار بنجاح وحصلتم على +15 XP!💡" : "Idea posted to family wall! Earned +15 XP!💡");
                                     }}
-                                    className="w-full bg-amber-400 hover:bg-amber-500 text-slate-950 py-3 rounded-xl text-xs font-black transition-all active:scale-95 flex items-center justify-center gap-2"
+                                    className="w-full bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] py-3 rounded-xl text-xs font-black transition-all active:scale-95 flex items-center justify-center gap-2"
                                   >
                                     <span>{isRtl ? "انشر الفكرة في لوحة الأفكار الأسرية 💡" : "Share to Family Idea Board 💡"}</span>
                                   </button>
@@ -9429,7 +9429,7 @@ Output Summary for [${topic}]:
                         <div className="flex md:justify-end justify-center">
                           <button
                             onClick={() => setExamStep(1)}
-                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-8 py-3.5 rounded-xl text-xs flex items-center gap-2 transition-all active:scale-95"
+                            className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black px-8 py-3.5 rounded-xl text-xs flex items-center gap-2 transition-all active:scale-95"
                           >
                             <span>{isRtl ? 'بدء تقديم الامتحان العملي 🚀' : 'Start Professional Exam 🚀'}</span>
                             <ChevronRight size={14} className="rotate-180" />
@@ -9469,7 +9469,7 @@ Output Summary for [${topic}]:
                               }
                               setExamStep(2);
                             }}
-                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs"
+                            className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black px-6 py-2.5 rounded-xl text-xs"
                           >
                             {isRtl ? 'المتابعة للخطوة التالية' : 'Next Step'}
                           </button>
@@ -9514,7 +9514,7 @@ Output Summary for [${topic}]:
                               }
                               setExamStep(3);
                             }}
-                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs"
+                            className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black px-6 py-2.5 rounded-xl text-xs"
                           >
                             {isRtl ? 'المتابعة للخطوة التالية' : 'Next'}
                           </button>
@@ -9553,7 +9553,7 @@ Output Summary for [${topic}]:
                               }
                               setExamStep(4);
                             }}
-                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs"
+                            className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black px-6 py-2.5 rounded-xl text-xs"
                           >
                             {isRtl ? 'المتابعة للتعميد المشترك' : 'Next'}
                           </button>
@@ -9638,7 +9638,7 @@ Output Summary for [${topic}]:
                               setExamStep(5);
                               setXp(prev => prev + 500);
                             }}
-                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-8 py-3 rounded-xl text-xs active:scale-95 transition-all"
+                            className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black px-8 py-3 rounded-xl text-xs active:scale-95 transition-all"
                           >
                             {isRtl ? 'بناء الرمز واعتماد الشهادة العائلية الاحترافية 🎓🎉' : 'Generate Gold Ambassador Certificate 🎓🎉'}
                           </button>
@@ -9691,7 +9691,7 @@ Output Summary for [${topic}]:
                                   }
                                 }
                               }}
-                              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 active:scale-95 transition-all shadow-lg cursor-pointer"
+                              className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 active:scale-95 transition-all shadow-lg cursor-pointer"
                             >
                               <Download size={16} />
                               {isRtl ? 'تصدير الشهادة كصورة PNG 📸' : 'Export Certificate as PNG 📸'}
@@ -10095,7 +10095,7 @@ Output Summary for [${topic}]:
                                 }
                               }}
                               disabled={!certStudentName.trim()}
-                              className="bg-amber-500 hover:bg-amber-400 disabled:opacity-40 font-black text-slate-950 px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 active:scale-95 transition-all shadow-lg cursor-pointer"
+                              className="bg-[#C49E3A] hover:bg-[#b08c2f] disabled:opacity-40 font-black text-[#002147] px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 active:scale-95 transition-all shadow-lg cursor-pointer"
                             >
                               <Download size={16} />
                               {isRtl ? 'تصدير الشهادة كصورة PNG 📸' : 'Export Certificate as PNG 📸'}
@@ -10768,7 +10768,7 @@ Output Summary for [${topic}]:
                             }
                           }}
                           disabled={updatesQaLoading}
-                          className="bg-amber-500 hover:bg-amber-600 disabled:bg-slate-800 disabled:text-slate-500 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs transition-all flex items-center justify-center shrink-0"
+                          className="bg-[#C49E3A] hover:bg-[#b08c2f] disabled:bg-slate-800 disabled:text-slate-500 text-[#002147] font-black px-4 py-2.5 rounded-xl text-xs transition-all flex items-center justify-center shrink-0"
                         >
                           <Send size={12} />
                         </button>
@@ -10802,7 +10802,7 @@ Output Summary for [${topic}]:
                       <div className="pt-4 flex flex-col sm:flex-row gap-4 items-center justify-center">
                         <button
                           onClick={() => onNavigate && onNavigate('placement-test')}
-                          className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-8 py-4 rounded-2xl text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all active:scale-95 shrink-0 hover:-translate-y-0.5 font-sans cursor-pointer"
+                          className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black px-8 py-4 rounded-2xl text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all active:scale-95 shrink-0 hover:-translate-y-0.5 font-sans cursor-pointer"
                         >
                           <Sparkles size={16} />
                           {isRtl ? 'ابدأ اختبار تحديد المستوى الآن 🎯' : 'Start Placement Test Now 🎯'}
@@ -10911,7 +10911,7 @@ Output Summary for [${topic}]:
                           <button
                             onClick={handleGenerateCustomPlan}
                             disabled={generatingPlan || (plannerCategory === 'custom' && !plannerSubject.trim())}
-                            className="w-full bg-amber-500 text-slate-950 py-3.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-amber-400 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-amber-500/10 disabled:opacity-50"
+                            className="w-full bg-[#C49E3A] text-[#002147] py-3.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-[#b08c2f] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-amber-500/10 disabled:opacity-50"
                           >
                             {generatingPlan ? (
                               <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
@@ -11045,7 +11045,7 @@ Output Summary for [${topic}]:
                                   </p>
                                   <button
                                     onClick={() => setShowAICertificateModal(true)}
-                                    className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2 rounded-xl text-[9px] uppercase tracking-wider cursor-pointer transition-all flex items-center justify-center gap-1.5"
+                                    className="w-full bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black py-2 rounded-xl text-[9px] uppercase tracking-wider cursor-pointer transition-all flex items-center justify-center gap-1.5"
                                   >
                                     <Sparkles size={11} />
                                     {isRtl ? 'عرض وطباعة شهادة التفوق 📜' : 'View & Print Certificate 📜'}
@@ -11137,7 +11137,7 @@ Output Summary for [${topic}]:
                                       }
                                     }
                                   }}
-                                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap w-full sm:w-auto justify-center"
+                                  className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap w-full sm:w-auto justify-center"
                                 >
                                   <Download size={14} />
                                   {isRtl ? 'حفظ كصورة 💾' : 'Save as Image 💾'}
@@ -11415,7 +11415,7 @@ Output Summary for [${topic}]:
                     <button
                       disabled={exportingLesson}
                       onClick={() => handleExportLessonAsImage(selectedLesson, 'foundational')}
-                      className="bg-[#001a38] border border-amber-500/35 hover:bg-amber-500 hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
+                      className="bg-[#001a38] border border-amber-500/35 hover:bg-[#b08c2f] hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
                     >
                       {exportingLesson && lessonToExport?.lesson_number === selectedLesson.lesson_number ? (
                         <>
@@ -11582,7 +11582,7 @@ Output Summary for [${topic}]:
                           />
                           <button 
                             onClick={handleL1Submit}
-                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-8 py-4 rounded-2xl font-black transition-all text-sm shrink-0 shadow-lg hover:shadow-amber-500/10 active:scale-95"
+                            className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] px-8 py-4 rounded-2xl font-black transition-all text-sm shrink-0 shadow-lg hover:shadow-amber-500/10 active:scale-95"
                           >
                             {l1Patterns[l1Step].isCreative 
                               ? (isRtl ? 'إنهاء التحدي بنجاح 🎉' : 'Publish Sequence 🎉')
@@ -12395,7 +12395,7 @@ Output Summary for [${topic}]:
                             <button 
                               onClick={handleL6Send}
                               disabled={l6Chatting || !l6InputText.trim()}
-                              className="bg-amber-500 hover:bg-amber-600 text-slate-950 w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 active:scale-95 transition-all text-sm font-bold"
+                              className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 active:scale-95 transition-all text-sm font-bold"
                             >
                               <Send size={16} />
                             </button>
@@ -12475,7 +12475,7 @@ Output Summary for [${topic}]:
                                 }, 1200);
                               }}
                               disabled={l10Loading || !l10Hobby.trim()}
-                              className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-5 rounded-2xl text-xs font-black active:scale-95 transition-all flex items-center justify-center gap-2 shrink-0 font-mono"
+                              className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] px-5 rounded-2xl text-xs font-black active:scale-95 transition-all flex items-center justify-center gap-2 shrink-0 font-mono"
                             >
                               <span>{l10Loading ? (isRtl ? 'جاري الابتكار...' : 'Innovating...') : (isRtl ? 'ابتدع مهنة! ✨' : 'Forge Career! ✨')}</span>
                             </button>
@@ -13067,7 +13067,7 @@ Output Summary for [${topic}]:
                                 <button
                                   onClick={() => handleGenerateLessonQuiz(selectedCustomUnit)}
                                   disabled={loadingQuiz}
-                                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-5 py-2.5 rounded-xl text-xs font-black tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-amber-500/10"
+                                  className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] px-5 py-2.5 rounded-xl text-xs font-black tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-amber-500/10"
                                 >
                                   {loadingQuiz ? (
                                     <>
@@ -13408,7 +13408,7 @@ Output Summary for [${topic}]:
                           });
                         }
                       }}
-                      className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-6 py-2.5 rounded-xl text-xs font-black self-stretch sm:self-auto transition-all cursor-pointer shadow-md shadow-amber-500/10"
+                      className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] px-6 py-2.5 rounded-xl text-xs font-black self-stretch sm:self-auto transition-all cursor-pointer shadow-md shadow-amber-500/10"
                     >
                       {isRtl ? 'تسجيل وتصحيح التقييم 🏆' : 'Submit Checkpoint Exam 🏆'}
                     </button>
@@ -13471,7 +13471,7 @@ Output Summary for [${topic}]:
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => window.print()}
-                    className="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-[10px] font-black tracking-wider transition-all flex items-center gap-1 cursor-pointer"
+                    className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] px-4 py-2 rounded-xl text-[10px] font-black tracking-wider transition-all flex items-center gap-1 cursor-pointer"
                   >
                     <Printer size={12} />
                     {isRtl ? 'طباعة / حفظ PDF 📄' : 'Print / Save PDF 📄'}

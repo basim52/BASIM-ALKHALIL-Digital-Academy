@@ -1642,7 +1642,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                     <button 
                       onClick={handleExportImage}
                       disabled={isExporting}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-black hover:bg-emerald-700 transition-all disabled:opacity-50 cursor-pointer"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-[#002147] text-white rounded-xl text-xs font-black hover:bg-[#00306b] transition-all disabled:opacity-50 cursor-pointer"
                     >
                       {isExporting ? <Download size={14} className="animate-bounce" /> : <Share2 size={14} />}
                       <span>{isRtl ? 'تصدير للواتساب' : 'WhatsApp Export'}</span>
@@ -1678,7 +1678,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                             console.warn("Could not trigger certificate:", e);
                           }
                         }}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-[#C49E3A] text-white rounded-xl text-xs font-black hover:opacity-90 transition-all shadow-sm cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] text-white rounded-xl text-xs font-black hover:opacity-90 transition-all shadow-sm cursor-pointer"
                         title={isRtl ? 'إصدار شهادة إنجاز معتمدة' : 'Issue Certificate of Completion'}
                       >
                         <Award size={14} />
@@ -2302,7 +2302,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                       showToast(isRtl ? 'تم نسخ التقرير لمشاركته عبر الواتساب!' : 'Copied report to clipboard!');
                     }
                   }}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-[#002147] hover:opacity-95 text-white font-black text-xs transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#002147] to-[#002147] hover:opacity-95 text-white font-black text-xs transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
                 >
                   <Share2 size={14} />
                   <span>{isRtl ? 'مشاركة التقرير عبر الواتساب 📱' : 'Share via WhatsApp 📱'}</span>

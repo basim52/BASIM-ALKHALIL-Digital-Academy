@@ -436,7 +436,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
           </p>
           <button 
             onClick={onBack}
-            className="bg-white text-[#9a7a2c] px-10 py-4 rounded-3xl font-black text-xl shadow-2xl hover:bg-yellow-400 transition-colors"
+            className="bg-white text-[#9a7a2c] px-10 py-4 rounded-3xl font-black text-xl shadow-2xl hover:bg-[#b08c2f] transition-colors"
           >
             {isRtl ? 'الرجوع للقائمة' : 'Back to Menu'}
           </button>

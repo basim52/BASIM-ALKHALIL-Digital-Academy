@@ -1043,7 +1043,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                       selectGame('game_018');
                       speakFeedback("Launching Phrase Chef!");
                     }}
-                    className="w-full mt-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1"
+                    className="w-full mt-5 py-2.5 bg-[#002147] hover:bg-[#00306b] text-white rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1"
                   >
                     <Play className="w-3.5 h-3.5" />
                     {isRtl ? 'اطبخ طبقاً نحوياً الآن' : 'Start Grammar Stove'}
@@ -1307,7 +1307,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                       setSelectedCertificateId('cert_etiquette');
                       speakFeedback("Displaying Courtesy Envoy Diploma. Congratulations!");
                     }}
-                    className="w-full py-2 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl text-[10px] font-black tracking-wider transition-all cursor-pointer"
+                    className="w-full py-2 bg-[#C49E3A] hover:bg-[#b08c2f] text-slate-900 rounded-xl text-[10px] font-black tracking-wider transition-all cursor-pointer"
                   >
                     👑 {isRtl ? 'عرض واستلام الشهادة' : 'Claim & View Royal Award'}
                   </button>
@@ -1449,7 +1449,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                       speakFeedback(isRtl ? "مبارك الفوز والتميز الرائع!" : "Splendid work! We are so proud of you.");
                       alert(isRtl ? "احسنت الاختيار! تم تحميل الشهادة وطباعتها بنجاح إلى ملف التميز بباحة مكتبتك! 🏆📄" : "Diploma certified! Saved securely inside your personal academic dashboard collection! 🏆📄");
                     }}
-                    className="flex-1 py-3 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-slate-950 rounded-xl text-xs font-black shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
+                    className="flex-1 py-3 bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] hover:from-amber-500 hover:to-yellow-600 text-slate-950 rounded-xl text-xs font-black shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
                   >
                     🚀 {isRtl ? 'تحميل وطباعة الشهادة 📄' : 'Download and Print Certificate 📄'}
                   </button>
@@ -2898,7 +2898,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             speakFeedback("Close sound, but incorrect spelling target!");
                           }
                         }}
-                        className="p-3 bg-slate-800 hover:bg-emerald-500 text-white rounded-xl text-xs font-black font-mono transition-all text-center cursor-pointer"
+                        className="p-3 bg-slate-800 hover:bg-[#00306b] text-white rounded-xl text-xs font-black font-mono transition-all text-center cursor-pointer"
                       >
                         {word}
                       </button>

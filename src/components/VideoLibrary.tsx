@@ -875,7 +875,7 @@ Key Learning Objectives:
           {/* AI VIDEO GENERATOR BUTTON */}
           <button
             onClick={() => setShowAiStudioModal(true)}
-            className="px-5 py-3.5 bg-gradient-to-r from-[#58cc02] to-[#22c55e] hover:brightness-105 text-white font-black text-xs uppercase tracking-wider rounded-2xl border-b-4 border-[#3a8402] active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-[#58cc02]/25"
+            className="px-5 py-3.5 bg-gradient-to-r from-[#002147] to-[#002147] hover:brightness-105 text-white font-black text-xs uppercase tracking-wider rounded-2xl border-b-4 border-[#C49E3A] active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-[#58cc02]/25"
           >
             <Wand2 size={16} />
             <span>{isRtl ? 'إنتاج فيديو بالذكاء الاصطناعي 🪄' : 'AI Video Producer Studio 🪄'}</span>
@@ -1078,7 +1078,7 @@ Key Learning Objectives:
                 <div className="p-5 pt-0 flex items-center gap-2">
                   <button
                     onClick={() => setSelectedProducedLesson(lesson)}
-                    className="flex-1 py-3 bg-[#58cc02] hover:bg-[#64e404] text-white font-black text-xs uppercase tracking-wider rounded-xl border-b-3 border-[#3b8702] active:scale-95 transition-all flex items-center justify-center gap-2 shadow-sm"
+                    className="flex-1 py-3 bg-[#002147] hover:bg-[#64e404] text-white font-black text-xs uppercase tracking-wider rounded-xl border-b-3 border-[#3b8702] active:scale-95 transition-all flex items-center justify-center gap-2 shadow-sm"
                   >
                     <Play size={14} fill="currentColor" />
                     <span>{isRtl ? 'مشاهدة الدرس بالصوت والصورة' : 'Play Audiovisual Lesson'}</span>
@@ -1490,7 +1490,7 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
                           onClick={(e) => handleDownloadVideo(video, e)}
                           title={isRtl ? 'تحميل الفيديو' : 'Download Video'}
                           disabled={downloadingId === video.id}
-                          className="p-2.5 bg-slate-100 hover:bg-[#58cc02] hover:text-white text-slate-600 rounded-xl transition-all border border-slate-200 shrink-0"
+                          className="p-2.5 bg-slate-100 hover:bg-[#002147] hover:text-white text-slate-600 rounded-xl transition-all border border-slate-200 shrink-0"
                         >
                           {downloadingId === video.id ? (
                             <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />

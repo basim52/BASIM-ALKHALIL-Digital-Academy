@@ -227,7 +227,7 @@ export function LiveTranslate_Vocab({ isRtl, targetLang, onPlayChime, speakText 
                 type="button"
                 disabled={isGeneratingDeck}
                 onClick={handleGenerateCustomDeck}
-                className="absolute left-1 p-1.5 bg-amber-400 text-[#002147] rounded-lg hover:bg-amber-500 transition cursor-pointer disabled:opacity-50"
+                className="absolute left-1 p-1.5 bg-[#C49E3A] text-[#002147] rounded-lg hover:bg-[#b08c2f] transition cursor-pointer disabled:opacity-50"
               >
                 {isGeneratingDeck ? (
                   <RefreshCw size={11} className="animate-spin" />
@@ -473,7 +473,7 @@ export function LiveTranslate_Vocab({ isRtl, targetLang, onPlayChime, speakText 
                 <button
                   type="button"
                   onClick={startMatchGame}
-                  className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black rounded-xl text-xs transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 mx-auto shadow-md shadow-emerald-700/10"
+                  className="px-4 py-2 bg-gradient-to-r from-[#002147] to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black rounded-xl text-xs transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 mx-auto shadow-md shadow-emerald-700/10"
                 >
                   <Play size={12} className="fill-white" />
                   <span>{isRtl ? 'ابدأ لعبة المطابقة الفورية' : 'Start Matrix Challenge'}</span>

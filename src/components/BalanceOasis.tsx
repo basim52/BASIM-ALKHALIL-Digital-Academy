@@ -2718,7 +2718,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               <button
                 disabled={isExporting}
                 onClick={handleExportOasisCard}
-                className="w-full bg-gradient-to-r from-[#C49E3A] to-emerald-500 hover:from-[#002147] hover:to-emerald-600 disabled:opacity-50 text-slate-950 font-black py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all cursor-pointer mt-1"
+                className="w-full bg-gradient-to-r from-[#C49E3A] to-[#002147] hover:from-[#002147] hover:to-emerald-600 disabled:opacity-50 text-slate-950 font-black py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all cursor-pointer mt-1"
               >
                 {isExporting ? (
                   <>
@@ -3182,7 +3182,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               <div className="flex justify-center pt-2">
                 <button
                   onClick={closeCompletionSession}
-                  className="bg-gradient-to-r from-[#C49E3A] to-emerald-400 hover:from-[#C49E3A] hover:to-emerald-500 text-slate-950 font-black px-6 py-3 rounded-xl text-xs sm:text-sm transition-all shadow-lg shadow-[#C49E3A]/20 active:scale-95 flex items-center gap-2 cursor-pointer"
+                  className="bg-gradient-to-r from-[#C49E3A] to-[#002147] hover:from-[#C49E3A] hover:to-emerald-500 text-slate-950 font-black px-6 py-3 rounded-xl text-xs sm:text-sm transition-all shadow-lg shadow-[#C49E3A]/20 active:scale-95 flex items-center gap-2 cursor-pointer"
                 >
                   {isRtl ? 'العودة لساحة التمارين واستكمال التعلم 🎯' : 'Return to Oasis & Code 🎯'}
                 </button>
@@ -3320,7 +3320,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                   <button 
                     onClick={handleSessionComplete}
-                    className="bg-[#C49E3A] hover:bg-[#002147] text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition shadow-lg shadow-[#C49E3A]/20"
+                    className="bg-[#C49E3A] hover:bg-[#002147] text-[#002147] hover:text-white font-black px-4 py-2 rounded-xl text-xs transition shadow-lg shadow-[#C49E3A]/20"
                   >
                     {isRtl ? 'أنهيت التركيز بنجاح! ✓' : 'Focus Complete! ✓'}
                   </button>
@@ -3451,7 +3451,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                   <button 
                     onClick={handleMoveSessionComplete}
-                    className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition shadow-lg shadow-amber-500/20"
+                    className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black px-4 py-2 rounded-xl text-xs transition shadow-lg shadow-amber-500/20"
                   >
                     {isRtl ? 'أنجزت تمرين الحركة! ✓' : 'Completed Break! ✓'}
                   </button>
@@ -4255,7 +4255,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           setSelectedEmotionEx(null);
                           stopSpeech();
                         }}
-                        className="w-full bg-gradient-to-r from-emerald-500 to-[#C49E3A] hover:from-emerald-600 hover:to-[#002147] text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-emerald-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+                        className="w-full bg-gradient-to-r from-[#002147] to-[#C49E3A] hover:from-emerald-600 hover:to-[#002147] text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-emerald-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
                       >
                         <span>✓</span>
                         {isRtl ? 'تسجيل إنجاز تمرين الذكاء الوجداني والولوج للتعزيز 🎙' : 'Mark Completed & Open Encouragement 🎙'}
@@ -4374,7 +4374,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             localStorage.setItem('balance_oasis_feeling_logs', JSON.stringify(updated));
                             setFeelingReflectiveNote('');
                           }}
-                          className="w-full bg-gradient-to-r from-emerald-500 to-[#C49E3A] hover:from-emerald-600 hover:to-[#002147] text-slate-950 font-black py-2.5 rounded-xl text-xs shadow-lg transition duration-200 cursor-pointer flex items-center justify-center gap-1.5"
+                          className="w-full bg-gradient-to-r from-[#002147] to-[#C49E3A] hover:from-emerald-600 hover:to-[#002147] text-slate-950 font-black py-2.5 rounded-xl text-xs shadow-lg transition duration-200 cursor-pointer flex items-center justify-center gap-1.5"
                         >
                           <span>🌡️</span>
                           {isRtl ? 'تسجيل درجة الحرارة العاطفية في السجل' : 'Log Temperature Entry'}
@@ -5171,7 +5171,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           setSelectedLeaderEx(null);
                           stopSpeech();
                         }}
-                        className="w-full bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-rose-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+                        className="w-full bg-gradient-to-r from-rose-500 to-[#C49E3A] hover:from-rose-600 hover:to-amber-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-rose-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
                       >
                         <span>✓</span>
                         {isRtl ? 'تسجيل إنجاز تمرين القيادة وإطلاق التحفيز 🎙' : 'Mark Completed & Open Encouragement 🎙'}
@@ -5754,7 +5754,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           setSelectedMoneyEx(null);
                           stopSpeech();
                         }}
-                        className="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-orange-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+                        className="w-full bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] hover:from-amber-500 hover:to-orange-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-orange-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
                       >
                         <span>✓</span>
                         {isRtl ? 'تسجيل إنجاز تمرين الثقافة المالية وإطلاق التحفيز 🎙' : 'Mark Completed & Open Encouragement 🎙'}
@@ -6040,7 +6040,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           setSelectedConfidenceEx(null);
                           stopSpeech();
                         }}
-                        className="w-full bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-orange-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+                        className="w-full bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] hover:from-orange-500 hover:to-amber-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-orange-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
                       >
                         <span>✓</span>
                         {isRtl ? 'تسجيل إنجاز تمرين الثقة وإطلاق التحفيز 🎙' : 'Mark Completed & Open Encouragement 🎙'}
@@ -6327,7 +6327,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           setSelectedCriticalEx(null);
                           stopSpeech();
                         }}
-                        className="w-full bg-gradient-to-r from-orange-400 to-rose-500 hover:from-orange-500 hover:to-rose-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-rose-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+                        className="w-full bg-gradient-to-r from-[#C49E3A] to-rose-500 hover:from-orange-500 hover:to-rose-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-rose-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
                       >
                         <span>✓</span>
                         {isRtl ? 'تسجيل إنجاز تمرين التفكير وإطلاق التحفيز 🎙' : 'Mark Completed & Open Encouragement 🎙'}
@@ -6553,7 +6553,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                               }, 1100);
                             }}
                             disabled={innovStepsChecked.some(c => !c)}
-                            className="bg-gradient-to-r from-yellow-400 via-amber-400 to-emerald-400 disabled:opacity-40 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-slate-950 font-black px-6 py-3 rounded-xl text-xs tracking-wide shadow-xl active:scale-95 transition-all w-full cursor-pointer"
+                            className="bg-gradient-to-r from-[#C49E3A] via-[#C49E3A] to-[#002147] disabled:opacity-40 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-slate-950 font-black px-6 py-3 rounded-xl text-xs tracking-wide shadow-xl active:scale-95 transition-all w-full cursor-pointer"
                           >
                             {innovStepsChecked.some(c => !c)
                               ? (isRtl ? '⚠️ أكمل جميع الخطوات للإنهاء والتسجيل' : '⚠️ Complete all checklist steps to finish')
@@ -7071,7 +7071,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                               }, 1100);
                             }}
                             disabled={lifeStepsChecked.some(c => !c)}
-                            className="bg-gradient-to-r from-emerald-400 via-[#C49E3A] to-[#C49E3A] disabled:opacity-40 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-slate-950 font-black px-6 py-3 rounded-xl text-xs tracking-wide shadow-xl active:scale-95 transition-all w-full cursor-pointer"
+                            className="bg-gradient-to-r from-[#002147] via-[#C49E3A] to-[#C49E3A] disabled:opacity-40 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-slate-950 font-black px-6 py-3 rounded-xl text-xs tracking-wide shadow-xl active:scale-95 transition-all w-full cursor-pointer"
                           >
                             {lifeStepsChecked.some(c => !c)
                               ? (isRtl ? '⚠️ أكمل جميع الخطوات للإنهاء والتسجيل' : '⚠️ Complete all checklist steps to finish')

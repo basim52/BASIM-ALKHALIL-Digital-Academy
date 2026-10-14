@@ -395,7 +395,7 @@ export function LiveTranslate_Letters({ isRtl, targetLang, onPlayChime, speakTex
                     <button
                       type="button"
                       onClick={startNewQuiz}
-                      className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-lg text-[10px] transition flex items-center gap-1 cursor-pointer"
+                      className="px-3 py-1.5 bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black rounded-lg text-[10px] transition flex items-center gap-1 cursor-pointer"
                     >
                       <RefreshCw size={11} />
                       <span>{isRtl ? 'التالي 🚀' : 'Next 🚀'}</span>

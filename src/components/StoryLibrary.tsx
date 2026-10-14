@@ -566,7 +566,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
                         <>
                            <button 
                              onClick={resumeRecording}
-                             className="w-24 h-24 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-2xl shadow-emerald-200 hover:scale-110 transition-transform"
+                             className="w-24 h-24 rounded-full bg-[#002147] text-white flex items-center justify-center shadow-2xl shadow-emerald-200 hover:scale-110 transition-transform"
                            >
                              <Play size={32} fill="currentColor" />
                            </button>

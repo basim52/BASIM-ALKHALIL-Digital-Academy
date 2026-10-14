@@ -2101,7 +2101,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                                 total
                               );
                             }}
-                            className="bg-amber-400 hover:bg-amber-500 text-[#002147] font-black px-6 py-4 rounded-2xl text-sm flex items-center justify-center gap-2 transition-all shrink-0 cursor-pointer shadow-lg w-full md:w-auto hover:scale-105 z-10"
+                            className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black px-6 py-4 rounded-2xl text-sm flex items-center justify-center gap-2 transition-all shrink-0 cursor-pointer shadow-lg w-full md:w-auto hover:scale-105 z-10"
                           >
                             <Award size={18} />
                             <span>{isRtl ? 'إصدار شهادة الإتمام الفورية 🎓' : 'Issue Dynamic Course Certificate 🎓'}</span>
@@ -2620,7 +2620,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                                             setActiveChapter(null);
                                             setActiveLesson(null);
                                           }}
-                                          className="bg-emerald-500 hover:bg-emerald-600 text-white font-black transition-all py-3 px-6 rounded-xl text-xs flex items-center gap-2 block shadow-md cursor-pointer"
+                                          className="bg-[#002147] hover:bg-[#00306b] text-white font-black transition-all py-3 px-6 rounded-xl text-xs flex items-center gap-2 block shadow-md cursor-pointer"
                                         >
                                           <CheckCircle2 size={15} />
                                           <span>{isRtl ? 'تم العبور بنجاح! تابع الفصول المتبقية 🚀' : 'Passed! Complete remaining modules 🚀'}</span>
