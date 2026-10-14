@@ -8,7 +8,7 @@ import { auth } from './firebase';
 if (typeof window !== 'undefined' && !(window as any).__apiAuthPatched) {
   (window as any).__apiAuthPatched = true;
   const nativeFetch = window.fetch.bind(window);
-  window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+  const patchedFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     try {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
       const method = (init?.method || (input instanceof Request ? input.method : 'GET')).toUpperCase();
@@ -23,5 +23,11 @@ if (typeof window !== 'undefined' && !(window as any).__apiAuthPatched) {
     } catch { /* fall through without token */ }
     return nativeFetch(input, init);
   };
+  let installed = false;
+  try { window.fetch = patchedFetch as typeof window.fetch; installed = window.fetch === patchedFetch; } catch { /* getter-only fetch (e.g. sandboxed preview iframes) */ }
+  if (!installed) {
+    try { Object.defineProperty(window, 'fetch', { value: patchedFetch, configurable: true, writable: true }); installed = window.fetch === patchedFetch; } catch { /* not configurable */ }
+  }
+  if (!installed) console.warn('[apiAuth] could not patch window.fetch; API calls will be sent without the automatic auth header in this environment.');
 }
 export {};
