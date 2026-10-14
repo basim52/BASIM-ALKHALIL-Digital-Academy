@@ -1,24 +1,29 @@
-import { LISTENING_LESSONS, LISTENING_TRACK_ID } from '../data/saraTracks/listening';
-import { PRONUNCIATION_LESSONS, PRONUNCIATION_TRACK_ID } from '../data/saraTracks/pronunciation';
-import { VOCAB_LESSONS, VOCAB_TRACK_ID } from '../data/saraTracks/vocabulary';
-import { DAILY_LESSONS, DAILY_TRACK_ID } from '../data/saraTracks/dailyLife';
+import { LISTENING_LESSONS, LISTENING_LESSONS as LISTENING_ALL, LISTENING_TRACK_ID } from '../data/saraTracks/listening';
+import { PRONUNCIATION_LESSONS, PRONUNCIATION_LESSONS as PRON_ALL, PRONUNCIATION_TRACK_ID } from '../data/saraTracks/pronunciation';
+import { VOCAB_LESSONS, VOCAB_LESSONS as VOCAB_ALL, VOCAB_TRACK_ID } from '../data/saraTracks/vocabulary';
+import { DAILY_LESSONS, DAILY_LESSONS as DAILY_ALL, DAILY_TRACK_ID } from '../data/saraTracks/dailyLife';
 
 /** One test item from a level's real lesson content. play = text Sara says (cloud voice) before answering. */
 export interface NewTestItem { lessonId: string; lessonOrder: number; lessonTitleAr: string; promptAr: string; show?: string; play?: string; options: string[]; correctIndex: number }
 export type NewTrackKey = 'listening' | 'pronunciation' | 'vocabulary' | 'daily';
 export const NEW_TRACK_META: Record<NewTrackKey, { trackId: string; titleAr: string; levelId: string; levelTitleAr: string; total: number }> = {
-  listening: { trackId: LISTENING_TRACK_ID, titleAr: 'الاستماع', levelId: 'a', levelTitleAr: 'المستوى الأول', total: LISTENING_LESSONS.length },
-  pronunciation: { trackId: PRONUNCIATION_TRACK_ID, titleAr: 'النطق', levelId: 'a', levelTitleAr: 'المستوى الأول', total: PRONUNCIATION_LESSONS.length },
-  vocabulary: { trackId: VOCAB_TRACK_ID, titleAr: 'المفردات', levelId: 'a', levelTitleAr: 'المستوى الأول', total: VOCAB_LESSONS.length },
-  daily: { trackId: DAILY_TRACK_ID, titleAr: 'الحياة اليومية', levelId: 'a', levelTitleAr: 'المستوى الأول', total: DAILY_LESSONS.length },
+  listening: { trackId: LISTENING_TRACK_ID, titleAr: 'الاستماع', levelId: 'a', levelTitleAr: 'المستوى الأول', total: 30 },
+  pronunciation: { trackId: PRONUNCIATION_TRACK_ID, titleAr: 'النطق', levelId: 'a', levelTitleAr: 'المستوى الأول', total: 30 },
+  vocabulary: { trackId: VOCAB_TRACK_ID, titleAr: 'المفردات', levelId: 'a', levelTitleAr: 'المستوى الأول', total: 30 },
+  daily: { trackId: DAILY_TRACK_ID, titleAr: 'الحياة اليومية', levelId: 'a', levelTitleAr: 'المستوى الأول', total: 30 },
 };
 export const TEST_SIZE = 20;
 
 const rnd = <T,>(a: T[]): T[] => { const r = a.slice(); for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; };
 const mix = (correct: string, wrong: string[]) => { const options = rnd([correct, ...wrong.filter(w => w !== correct).slice(0, 2)]); return { options, correctIndex: options.indexOf(correct) }; };
 
-export function buildNewTrackTest(key: NewTrackKey): NewTestItem[] {
+export type NewLevelId = 'a' | 'b';
+const inLevel = <T extends { order: number }>(a: T[], level: NewLevelId) => a.filter(l => (level === 'a' ? l.order <= 30 : l.order > 30 && l.order <= 60));
+export const levelTitleAr = (level: NewLevelId) => (level === 'a' ? 'المستوى الأول' : 'المستوى الثاني');
+
+export function buildNewTrackTest(key: NewTrackKey, level: NewLevelId = 'a'): NewTestItem[] {
   const out: NewTestItem[] = [];
+  const LISTENING_LESSONS = inLevel(LISTENING_ALL, level), PRONUNCIATION_LESSONS = inLevel(PRON_ALL, level), VOCAB_LESSONS = inLevel(VOCAB_ALL, level), DAILY_LESSONS = inLevel(DAILY_ALL, level);
   if (key === 'listening') {
     for (const l of rnd(LISTENING_LESSONS).slice(0, 10)) { // heard sentence
       const wrong = rnd(LISTENING_LESSONS.filter(x => x.id !== l.id)).map(x => x.dictation);
