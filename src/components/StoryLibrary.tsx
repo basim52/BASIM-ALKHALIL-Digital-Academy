@@ -488,7 +488,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
              <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32 -z-0" />
              
              <header className="mb-12 text-center relative z-10">
-                <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+                <div className="w-20 h-20 bg-[#C49E3A]/10 text-[#9a7a2c] rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
                    <Mic size={40} className={isRecording ? 'animate-pulse' : ''} />
                 </div>
                 <h2 className="text-3xl font-black text-[#002147] mb-2">{isRtl ? 'اختبار مهارة القراءة' : 'Reading Fluency Test'}</h2>
@@ -521,13 +521,13 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
                   className="bg-[#002147] text-white p-8 rounded-[2rem] text-center mb-8 relative z-10 shadow-2xl"
                 >
                    <div className="flex items-center justify-center gap-6 mb-6">
-                      <div className="w-24 h-24 rounded-full border-4 border-blue-400 flex flex-col items-center justify-center bg-white/5">
+                      <div className="w-24 h-24 rounded-full border-4 border-[#C49E3A]/60 flex flex-col items-center justify-center bg-white/5">
                          <span className="text-3xl font-black">{testResult.score}%</span>
                          <span className="text-[10px] font-black uppercase">{isRtl ? 'النتيجة' : 'SCORE'}</span>
                       </div>
                       <div className="text-left">
                          <p className="text-xl font-black mb-1">{testResult.score > 80 ? (isRtl ? 'أداء ممتاز!' : 'Excellent Performance!') : (isRtl ? 'أداء جيد، حاول مجدداً' : 'Good job, keep practicing!')}</p>
-                         <p className="text-blue-200 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                         <p className="text-[#E4C77A] text-xs font-bold uppercase tracking-widest flex items-center gap-2">
                             <RefreshCcw size={14} /> 
                             {isRtl ? `لديك ${testResult.mistakes.length} أخطاء نطق` : `You had ${testResult.mistakes.length} pronunciation mistakes`}
                          </p>
@@ -576,7 +576,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
                                setRecordingPaused(false);
                                calculateScore();
                              }}
-                             className="w-16 h-16 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-100 transition-colors shadow-sm"
+                             className="w-16 h-16 rounded-full bg-[#C49E3A]/10 text-[#9a7a2c] flex items-center justify-center hover:bg-[#C49E3A]/10 transition-colors shadow-sm"
                            >
                              <CheckCircle2 size={24} />
                            </button>
@@ -584,7 +584,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
                       ) : (
                         <button 
                           onClick={toggleRecording}
-                          className="px-12 py-6 rounded-[2rem] bg-blue-600 text-white font-black text-lg uppercase tracking-widest flex items-center gap-4 shadow-2xl shadow-blue-200 hover:bg-blue-700 transition-all group"
+                          className="px-12 py-6 rounded-[2rem] bg-[#002147] text-white font-black text-lg uppercase tracking-widest flex items-center gap-4 shadow-2xl shadow-[#C49E3A]/30 hover:bg-[#002147] transition-all group"
                         >
                           <Mic size={32} />
                           {isRtl ? 'ابدأ القراءة الآن' : 'Start Reading Now'}
@@ -622,12 +622,12 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
             <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32 -z-0" />
             
             <header className="mb-12 text-center relative z-10">
-              <span className="bg-blue-100 text-blue-600 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-4 inline-block">{selectedStory.level}</span>
+              <span className="bg-[#C49E3A]/10 text-[#9a7a2c] px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-4 inline-block">{selectedStory.level}</span>
               <h2 className="text-4xl font-black text-[#002147] mb-4">{isRtl ? selectedStory.titleAr : selectedStory.titleEn}</h2>
               <div className="flex items-center justify-center gap-4 text-slate-400 font-bold text-xs uppercase tracking-widest">
                  <span className="flex items-center gap-2"><BookOpen size={14} /> {selectedStory.content.split(' ').length} words</span>
                  <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                 <span className="text-blue-500">{t.clickWordHint}</span>
+                 <span className="text-[#9a7a2c]">{t.clickWordHint}</span>
               </div>
             </header>
 
@@ -639,8 +639,8 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
                     <span 
                       key={idx}
                       onClick={() => handleWordClick(word)}
-                      className={`px-1.5 py-0.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition-all border border-transparent inline-block ${
-                        isActive ? 'bg-amber-100 text-[#002147] font-extrabold border-amber-300 scale-105 shadow-xs' : 'hover:border-blue-100'
+                      className={`px-1.5 py-0.5 rounded-lg hover:bg-[#C49E3A]/10 hover:text-[#9a7a2c] cursor-pointer transition-all border border-transparent inline-block ${
+                        isActive ? 'bg-amber-100 text-[#002147] font-extrabold border-amber-300 scale-105 shadow-xs' : 'hover:border-[#C49E3A]/30'
                       }`}
                     >
                       {word}{' '}
@@ -653,7 +653,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
             <div className="flex flex-wrap items-center justify-center gap-4 mt-12">
               <button 
                 onClick={() => toggleSpeak(selectedStory.content)}
-                className={`bg-[#002147] text-white px-8 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest flex items-center gap-4 hover:bg-[#C49E3A] transition-all shadow-xl shadow-blue-100 ${isPaused || !isSpeaking ? 'bg-[#002147]' : 'bg-emerald-600'}`}
+                className={`bg-[#002147] text-white px-8 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest flex items-center gap-4 hover:bg-[#C49E3A] transition-all shadow-xl shadow-[#C49E3A]/30 ${isPaused || !isSpeaking ? 'bg-[#002147]' : 'bg-emerald-600'}`}
               >
                 {isSpeaking && !isPaused ? <Pause size={24} /> : <Play size={24} />}
                 {isSpeaking && !isPaused 
@@ -695,19 +695,19 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
                   <div className="flex items-center gap-4 mb-1">
                     <h4 className="text-3xl font-black text-white">{wordData.word}</h4>
                     {loadingWord ? (
-                      <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-5 h-5 border-2 border-[#C49E3A]/60 border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <button onClick={() => {
                         window.speechSynthesis.cancel();
                         const utt = new SpeechSynthesisUtterance(wordData.word);
                         utt.lang = 'en-US';
                         managedSpeak(utt);
-                      }} className="text-blue-400 hover:text-white transition-colors">
+                      }} className="text-[#E4C77A] hover:text-white transition-colors">
                         <Volume2 size={20} />
                       </button>
                     )}
                   </div>
-                  <p className="text-blue-200 text-xs font-bold uppercase tracking-widest mb-4 italic">/ {wordData.pronunciation || '...'} /</p>
+                  <p className="text-[#E4C77A] text-xs font-bold uppercase tracking-widest mb-4 italic">/ {wordData.pronunciation || '...'} /</p>
                   <div className="bg-white/10 px-4 py-2 rounded-xl inline-block">
                     <p className="text-xl font-black text-[#C49E3A]">{wordData.translation || '...'}</p>
                   </div>
@@ -763,7 +763,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-6 z-20">
                       <div className="text-white">
                         <h3 className="font-black text-xl mb-1 leading-tight">{isRtl ? story.titleAr : story.titleEn}</h3>
-                        <p className="text-blue-200 text-[10px] font-bold uppercase tracking-widest">{story.content.split(' ').length} {isRtl ? 'كلمة' : 'words'}</p>
+                        <p className="text-[#E4C77A] text-[10px] font-bold uppercase tracking-widest">{story.content.split(' ').length} {isRtl ? 'كلمة' : 'words'}</p>
                       </div>
                    </div>
                  </>
@@ -772,7 +772,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
             <div className="p-6">
               <p className="text-slate-500 text-sm line-clamp-2 mb-6 font-medium leading-relaxed italic">"{story.content}"</p>
               <div className="flex items-center justify-between">
-                <button className="bg-slate-50 text-[#002147] px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-slate-100 group-hover:border-blue-600 group-hover:text-blue-600 transition-all flex items-center gap-2">
+                <button className="bg-slate-50 text-[#002147] px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-slate-100 group-hover:border-[#C49E3A]/60 group-hover:text-[#9a7a2c] transition-all flex items-center gap-2">
                   <Play size={12} fill="currentColor" />
                   {t.readNow}
                 </button>
@@ -786,11 +786,11 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
       </div>
 
       <div className="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8">
-         <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[3rem] p-10 text-white shadow-xl relative overflow-hidden">
+         <div className="bg-gradient-to-br from-[#002147] to-[#002147] rounded-[3rem] p-10 text-white shadow-xl relative overflow-hidden">
             <div className="absolute bottom-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mb-20" />
-            <Languages size={40} className="mb-6 text-blue-200 opacity-50" />
+            <Languages size={40} className="mb-6 text-[#E4C77A] opacity-50" />
             <h4 className="text-2xl font-black mb-4">{isRtl ? 'مساعد الترجمة الفوري' : 'Instant Translation Assistant'}</h4>
-            <p className="text-blue-100 text-sm leading-relaxed mb-8 flex-1">
+            <p className="text-[#E4C77A] text-sm leading-relaxed mb-8 flex-1">
               {isRtl 
                 ? 'لا تتوقف عند الكلمات الصعبة. اضغط على أي كلمة للحصول على ترجمة فورية ونطق صوتي دقيق مدعوم بالذكاء الاصطناعي.' 
                 : "Don't stop at hard words. Click any word for instant translation and accurate AI-powered audio pronunciation."}
@@ -809,7 +809,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
             <h4 className="text-xl font-black text-[#002147] mb-2">{isRtl ? 'ابحث عن قصتك المفضلة' : 'Search Your Favorite Story'}</h4>
             <p className="text-slate-400 text-sm mb-8">{isRtl ? 'نظام البحث الذكي سيساعدك في إيجاد المحتوى المناسب لمستواك.' : 'Smart search will help you find content matching your level.'}</p>
             <div className="w-full max-w-md relative">
-              <input type="text" className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl py-4 px-12 focus:outline-none focus:border-blue-600 transition-all font-medium text-sm" placeholder={isRtl ? 'ابحث هنا...' : 'Search here...'} />
+              <input type="text" className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl py-4 px-12 focus:outline-none focus:border-[#C49E3A]/60 transition-all font-medium text-sm" placeholder={isRtl ? 'ابحث هنا...' : 'Search here...'} />
               <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
             </div>
          </div>

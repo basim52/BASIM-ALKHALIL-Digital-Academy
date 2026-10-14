@@ -750,7 +750,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
           </button>
           <div className="text-center">
             <h2 className="text-2xl md:text-4xl font-black text-[#002147] flex items-center gap-3 justify-center mb-1">
-              <Brain className="text-blue-600" size={36} />
+              <Brain className="text-[#9a7a2c]" size={36} />
               {isSaraModal 
                 ? (isRtl ? 'الخطة الأكاديمية والجدول الذكي مع سارة 👩‍🏫🗓️' : 'Smart Academic Study Plan with Sara 👩‍🏫🗓️')
                 : (isRtl ? 'الخطة الدراسية الذكية الشاملة' : 'Smart Academic Study Planner')}
@@ -770,7 +770,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
             onClick={() => setActiveTab('planner')}
             className={`px-8 py-3 rounded-[1.5rem] text-sm font-black transition-all ${
               activeTab === 'planner' 
-                ? 'bg-white text-blue-600 shadow-md scale-[1.02]' 
+                ? 'bg-white text-[#9a7a2c] shadow-md scale-[1.02]' 
                 : 'text-slate-400 hover:text-slate-600'
             }`}
           >
@@ -780,7 +780,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
             onClick={() => setActiveTab('history')}
             className={`px-8 py-3 rounded-[1.5rem] text-sm font-black transition-all ${
               activeTab === 'history' 
-                ? 'bg-white text-blue-600 shadow-md scale-[1.02]' 
+                ? 'bg-white text-[#9a7a2c] shadow-md scale-[1.02]' 
                 : 'text-slate-400 hover:text-slate-600'
             }`}
           >
@@ -805,7 +805,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                     onClick={() => setGenerationMode('auto')}
                     className={`py-3 px-2 rounded-xl text-xs font-black transition-all flex flex-col items-center justify-center gap-1 ${
                       generationMode === 'auto'
-                        ? 'bg-blue-600 text-white shadow-md'
+                        ? 'bg-[#002147] text-white shadow-md'
                         : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
@@ -831,13 +831,13 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
               {generationMode === 'auto' && (
                 <div className="space-y-6 mb-8 border-b border-slate-100 pb-8">
                   {/* Specialized Plan Tracks (مسارات الأهداف المتخصصة والخطط التكيفية ونمط الحياة) */}
-                  <div className="space-y-3 p-4 bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/30 rounded-3xl border border-blue-100/80 shadow-2xs">
+                  <div className="space-y-3 p-4 bg-gradient-to-br from-slate-50 via-[#C49E3A]/40 to-[#C49E3A]/30 rounded-3xl border border-[#C49E3A]/80 shadow-2xs">
                     <div className="flex items-center justify-between">
                       <label className="text-[10px] font-black text-[#002147] uppercase tracking-wider flex items-center gap-1.5">
                         <span className="text-sm">🎯</span>
                         <span>{isRtl ? 'المسار التخصصي الذكي المختار' : 'Smart Track Archetype'}</span>
                       </label>
-                      <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-blue-600 text-white shadow-2xs">
+                      <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-[#002147] text-white shadow-2xs">
                         {isRtl ? 'بناء تلقائي ذكي' : 'Auto-Tuned'}
                       </span>
                     </div>
@@ -860,7 +860,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                           onClick={() => setTrackCategoryFilter(tab.id as any)}
                           className={`px-2.5 py-1.5 rounded-xl whitespace-nowrap transition-all cursor-pointer ${
                             trackCategoryFilter === tab.id
-                              ? 'bg-white text-blue-700 shadow-xs'
+                              ? 'bg-white text-[#9a7a2c] shadow-xs'
                               : 'text-slate-600 hover:text-slate-900'
                           }`}
                         >
@@ -881,7 +881,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                               onClick={() => handleSelectTrack(track)}
                               className={`p-3 rounded-2xl border-2 transition-all cursor-pointer relative ${
                                 isSelected
-                                  ? 'bg-white border-blue-600 shadow-md ring-2 ring-blue-500/20'
+                                  ? 'bg-white border-[#C49E3A]/60 shadow-md ring-2 ring-[#C49E3A]/20'
                                   : 'bg-white/80 border-slate-200/90 hover:border-slate-300 hover:bg-white'
                               }`}
                             >
@@ -892,7 +892,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                                     <h4 className="text-xs font-black text-[#002147] flex items-center gap-1.5 flex-wrap">
                                       <span>{isRtl ? track.titleAr : track.titleEn}</span>
                                       {isSelected && (
-                                        <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                                        <span className="w-2 h-2 rounded-full bg-[#002147] animate-pulse" />
                                       )}
                                     </h4>
                                     <span className="text-[9px] font-black px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 mt-1 inline-block">
@@ -901,7 +901,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                                   </div>
                                 </div>
                                 <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border ${
-                                  isSelected ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'
+                                  isSelected ? 'bg-[#002147] border-[#C49E3A]/60 text-white' : 'border-slate-300 bg-white'
                                 }`}>
                                   {isSelected && <Check size={12} />}
                                 </div>
@@ -915,7 +915,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                                     ? `${track.recommendedDurationWeeks} أسابيع • ${track.recommendedLessonsPerDay} حصص/يوم` 
                                     : `${track.recommendedDurationWeeks} wks • ${track.recommendedLessonsPerDay} lessons/day`}
                                 </span>
-                                <span className={`font-black ${isSelected ? 'text-blue-600' : 'text-slate-500'}`}>
+                                <span className={`font-black ${isSelected ? 'text-[#9a7a2c]' : 'text-slate-500'}`}>
                                   {isSelected 
                                     ? (isRtl ? 'المسار المفعّل ✓' : 'Active Track ✓') 
                                     : (isRtl ? 'اختر المسار ⚡' : 'Select Track ⚡')}
@@ -947,9 +947,9 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
 
                     {/* AI & Professional Development Focus Banner */}
                     {(selectedTrackId.startsWith('ai_') || selectedTrackId === 'professional_dev_track') && (
-                      <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-2xl text-[11px] font-bold text-indigo-900 space-y-1">
-                        <div className="flex items-center gap-1.5 font-black text-indigo-950">
-                          <Sparkles size={14} className="text-indigo-600" />
+                      <div className="p-3 bg-[#C49E3A]/10 border border-[#C49E3A]/30 rounded-2xl text-[11px] font-bold text-[#9a7a2c] space-y-1">
+                        <div className="flex items-center gap-1.5 font-black text-[#9a7a2c]">
+                          <Sparkles size={14} className="text-[#9a7a2c]" />
                           <span>
                             {selectedTrackId === 'ai_foundational_track'
                               ? (isRtl ? 'البرنامج التأسيسي للذكاء الاصطناعي (20 درساً متسلسلاً)' : 'Foundational AI Literacy Track (20 Sequential Lessons)')
@@ -962,7 +962,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                               : (isRtl ? 'دبلوم الذكاء الاصطناعي والدورات التطويرية الشامل' : 'Comprehensive AI & Executive Growth Diploma')}
                           </span>
                         </div>
-                        <p className="text-[10px] leading-relaxed text-indigo-700/90 font-medium">
+                        <p className="text-[10px] leading-relaxed text-[#9a7a2c]/90 font-medium">
                           {isRtl
                             ? 'تمت برمجة هذا المسار ليجدول الدروس التخصصية للمنهج بالترتيب المنطقي السليم، مع شروح سارة المعمقة من صلب المناهج وأمهات الكتب وكويزات قياس الفهم.'
                             : 'This track schedules full curriculum units in orderly sequence with deep pedagogical insights, authentic book extracts, and quizzes.'}
@@ -978,7 +978,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                     <div className="flex gap-2">
                       <button 
                         onClick={selectAllPillars}
-                        className="text-[10px] font-black text-blue-600 hover:underline"
+                        className="text-[10px] font-black text-[#9a7a2c] hover:underline"
                       >
                         {isRtl ? 'الكل' : 'All'}
                       </button>
@@ -1002,13 +1002,13 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                           onClick={() => togglePillarSelection(p.id)}
                           className={`w-full flex items-center justify-between p-3 rounded-2xl border transition-all text-right ${
                             isSelected 
-                              ? 'bg-blue-50/70 border-blue-300 text-[#002147]' 
+                              ? 'bg-[#C49E3A]/70 border-[#C49E3A]/30 text-[#002147]' 
                               : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200'
                           }`}
                         >
                           <div className="flex items-center gap-2.5">
                             <div className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-black ${
-                              isSelected ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
+                              isSelected ? 'bg-[#002147] text-white' : 'bg-slate-200 text-slate-500'
                             }`}>
                               {isSelected ? <Check size={14} /> : <div className="w-2 h-2 rounded-full bg-slate-300" />}
                             </div>
@@ -1024,16 +1024,16 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
               {/* Mode B: Custom Selected Lessons Summary Box */}
               {generationMode === 'custom' && (
                 <div className="space-y-4 mb-8 border-b border-slate-100 pb-8">
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl">
+                  <div className="p-4 bg-[#C49E3A]/10 border border-[#C49E3A]/30 rounded-2xl">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-black text-blue-900">
+                      <span className="text-xs font-black text-[#9a7a2c]">
                         {isRtl ? 'الوحدات والدروس المختارة:' : 'Selected Units:'}
                       </span>
-                      <span className="px-2.5 py-0.5 rounded-full bg-blue-600 text-white text-xs font-black">
+                      <span className="px-2.5 py-0.5 rounded-full bg-[#002147] text-white text-xs font-black">
                         {customSelectedLessonIds.size} {isRtl ? 'درس' : 'lessons'}
                       </span>
                     </div>
-                    <p className="text-[10px] text-blue-700/70 font-bold leading-relaxed">
+                    <p className="text-[10px] text-[#9a7a2c]/70 font-bold leading-relaxed">
                       {isRtl 
                         ? 'يمكنك تصفح واختيار الدروس من الواجهة الرئيسية وتخصيصها لكل قسم.' 
                         : 'Browse and check specific lessons in the main view for each section.'}
@@ -1072,7 +1072,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                           onClick={() => setDifficultyLevel(item.value as any)}
                           className={`px-4 py-2.5 rounded-full border-2 font-black text-xs whitespace-nowrap transition-all text-center cursor-pointer ${
                             isSelected 
-                              ? 'border-blue-600 bg-[#002147] text-white shadow-md scale-[1.02]' 
+                              ? 'border-[#C49E3A]/60 bg-[#002147] text-white shadow-md scale-[1.02]' 
                               : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-slate-100'
                           }`}
                         >
@@ -1102,7 +1102,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                           onClick={() => setWeeksToGenerate(opt.value)}
                           className={`px-4 py-2.5 rounded-full border-2 font-black text-xs whitespace-nowrap transition-all text-center cursor-pointer ${
                             isSelected 
-                              ? 'border-blue-600 bg-blue-600 text-white shadow-md scale-[1.02]' 
+                              ? 'border-[#C49E3A]/60 bg-[#002147] text-white shadow-md scale-[1.02]' 
                               : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-slate-100'
                           }`}
                         >
@@ -1123,7 +1123,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                       <button
                         type="button"
                         onClick={() => setSelectedDays([0, 1, 2, 3, 4, 5, 6])}
-                        className="text-blue-600 hover:underline"
+                        className="text-[#9a7a2c] hover:underline"
                       >
                         {isRtl ? 'كل الأيام' : 'All'}
                       </button>
@@ -1155,7 +1155,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                           onClick={() => toggleDay(idx)}
                           className={`py-2.5 px-1 rounded-xl border-2 font-black text-[11px] sm:text-xs transition-all text-center ${
                             isSelected 
-                              ? 'border-blue-600 bg-blue-600 text-white shadow-sm' 
+                              ? 'border-[#C49E3A]/60 bg-[#002147] text-white shadow-sm' 
                               : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200'
                           }`}
                         >
@@ -1179,7 +1179,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                         onClick={() => setLessonsPerDay(num)}
                         className={`flex-1 py-2.5 rounded-xl border-2 font-black text-xs transition-all ${
                           lessonsPerDay === num 
-                            ? 'border-blue-600 bg-blue-600 text-white shadow-sm' 
+                            ? 'border-[#C49E3A]/60 bg-[#002147] text-white shadow-sm' 
                             : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200'
                         }`}
                       >
@@ -1199,7 +1199,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-black text-[#002147] focus:ring-2 focus:ring-blue-600 outline-none"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-black text-[#002147] focus:ring-2 focus:ring-[#C49E3A]/60 outline-none"
                     />
                   </div>
                   <div>
@@ -1210,16 +1210,16 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                       type="time"
                       value={preferredTime}
                       onChange={(e) => setPreferredTime(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-black text-[#002147] focus:ring-2 focus:ring-blue-600 outline-none"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-black text-[#002147] focus:ring-2 focus:ring-[#C49E3A]/60 outline-none"
                     />
                   </div>
                 </div>
 
                 {/* Bi-weekly milestone tests toggle */}
-                <div className="flex items-center justify-between p-3.5 bg-indigo-50/60 rounded-2xl border border-indigo-100">
+                <div className="flex items-center justify-between p-3.5 bg-[#C49E3A]/60 rounded-2xl border border-[#C49E3A]/30">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 size={16} className="text-indigo-600" />
-                    <span className="text-xs font-black text-indigo-900">
+                    <CheckCircle2 size={16} className="text-[#9a7a2c]" />
+                    <span className="text-xs font-black text-[#9a7a2c]">
                       {isRtl ? 'اختبارات تقييم نصف شهرية' : 'Bi-weekly Milestone Tests'}
                     </span>
                   </div>
@@ -1227,7 +1227,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                     type="checkbox"
                     checked={includeBiWeeklyTests}
                     onChange={(e) => setIncludeBiWeeklyTests(e.target.checked)}
-                    className="w-4 h-4 text-indigo-600 rounded cursor-pointer"
+                    className="w-4 h-4 text-[#9a7a2c] rounded cursor-pointer"
                   />
                 </div>
 
@@ -1256,7 +1256,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                 <button 
                   onClick={handleGeneratePlan}
                   disabled={isGenerating}
-                  className="w-full bg-[#002147] text-white py-4 px-6 rounded-[2rem] font-black flex items-center justify-center gap-3 hover:bg-blue-900 transition-all shadow-xl shadow-blue-900/10 disabled:opacity-50 active:scale-95 text-sm cursor-pointer"
+                  className="w-full bg-[#002147] text-white py-4 px-6 rounded-[2rem] font-black flex items-center justify-center gap-3 hover:bg-[#002147] transition-all shadow-xl shadow-[#C49E3A]/10 disabled:opacity-50 active:scale-95 text-sm cursor-pointer"
                 >
                   {isGenerating ? (
                     <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
@@ -1277,7 +1277,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
             /* Saved Plans History Tab */
             <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
               <h3 className="font-black text-[#002147] mb-6 flex items-center gap-2 text-lg">
-                <CalendarDays size={20} className="text-blue-500" />
+                <CalendarDays size={20} className="text-[#9a7a2c]" />
                 {isRtl ? 'سجل الخطط المحفوظة' : 'Saved Plans Archive'}
               </h3>
               
@@ -1285,7 +1285,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                 {loadPreviousLoading ? (
                   <div className="flex flex-col items-center justify-center py-10">
                     <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}>
-                      <Sparkles size={24} className="text-blue-400" />
+                      <Sparkles size={24} className="text-[#E4C77A]" />
                     </motion.div>
                   </div>
                 ) : savedPlans.length === 0 ? (
@@ -1304,13 +1304,13 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                         }}
                         className={`flex-1 text-right p-4 rounded-3xl border-2 transition-all flex flex-col gap-1 ${
                           selectedSavedPlan?.id === plan.id 
-                            ? 'border-blue-600 bg-blue-50' 
+                            ? 'border-[#C49E3A]/60 bg-[#C49E3A]/10' 
                             : 'border-slate-50 bg-slate-50/50 hover:border-slate-100'
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-black text-[#002147]">{plan.studentName}</span>
-                          <span className="text-[10px] font-black text-blue-600 opacity-60">
+                          <span className="text-[10px] font-black text-[#9a7a2c] opacity-60">
                             {plan.createdAt?.toDate ? plan.createdAt.toDate().toLocaleDateString(isRtl ? 'ar-EG' : 'en-US') : ''}
                           </span>
                         </div>
@@ -1352,7 +1352,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
                 <div>
                   <h3 className="text-xl font-black text-[#002147] flex items-center gap-2">
-                    <Layers className="text-blue-600" size={24} />
+                    <Layers className="text-[#9a7a2c]" size={24} />
                     {isRtl ? 'تصفح واختيار الدروس والوحدات من الأقسام' : 'Browse & Pick Lessons From All Departments'}
                   </h3>
                   <p className="text-xs text-slate-400 font-bold mt-1">
@@ -1370,13 +1370,13 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                       placeholder={isRtl ? 'بحث في الدروس...' : 'Search lessons...'}
                       value={customSearchQuery}
                       onChange={(e) => setCustomSearchQuery(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 pl-8 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-600"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 pl-8 text-xs font-bold outline-none focus:ring-2 focus:ring-[#C49E3A]/60"
                     />
                   </div>
                   <select
                     value={customLevelFilter}
                     onChange={(e) => setCustomLevelFilter(e.target.value)}
-                    className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-600"
+                    className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-[#C49E3A]/60"
                   >
                     <option value="all">{isRtl ? 'كل المستويات' : 'All Levels'}</option>
                     <option value="Kid">Kid / براعم</option>
@@ -1410,7 +1410,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                     >
                       <span>{isRtl ? pillar.nameAr : pillar.nameEn}</span>
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                        isActive ? 'bg-blue-500 text-white' : 'bg-slate-200 text-slate-700'
+                        isActive ? 'bg-[#C49E3A] text-white' : 'bg-slate-200 text-slate-700'
                       }`}>
                         {selectedInPillar > 0 ? `${selectedInPillar}/${countInPillar}` : countInPillar}
                       </span>
@@ -1430,7 +1430,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                 </div>
                 <button
                   onClick={() => toggleSelectAllInCurrentPillar(customSectionLessons)}
-                  className="text-xs font-black text-blue-600 hover:underline flex items-center gap-1.5"
+                  className="text-xs font-black text-[#9a7a2c] hover:underline flex items-center gap-1.5"
                 >
                   <CheckSquare size={14} />
                   <span>
@@ -1456,12 +1456,12 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                         onClick={() => toggleCustomLesson(lesson.id)}
                         className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-3.5 ${
                           isChecked 
-                            ? 'bg-blue-50/80 border-blue-600 shadow-sm' 
+                            ? 'bg-[#C49E3A]/80 border-[#C49E3A]/60 shadow-sm' 
                             : 'bg-white border-slate-100 hover:border-slate-200'
                         }`}
                       >
                         <div className={`mt-0.5 w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${
-                          isChecked ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'
+                          isChecked ? 'bg-[#002147] border-[#C49E3A]/60 text-white' : 'border-slate-300 bg-white'
                         }`}>
                           {isChecked && <Check size={12} />}
                         </div>
@@ -1474,7 +1474,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                               {lesson.duration}
                             </span>
                             {lesson.categoryTagAr && (
-                              <span className="text-[9px] font-bold text-blue-600 mr-auto">
+                              <span className="text-[9px] font-bold text-[#9a7a2c] mr-auto">
                                 {isRtl ? lesson.categoryTagAr : lesson.categoryTagEn}
                               </span>
                             )}
@@ -1499,7 +1499,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
           {/* If No Plan is Generated Yet - Compact preview with short hint */}
           {!generatedPlan && !isGenerating && (
             <div className="p-8 md:p-12 bg-white border border-slate-200 rounded-[2.5rem] shadow-sm flex flex-col items-center justify-center text-center">
-              <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
+              <div className="w-14 h-14 bg-[#C49E3A]/10 text-[#9a7a2c] rounded-2xl flex items-center justify-center mb-4 shadow-sm">
                 <CalendarDays size={28} />
               </div>
               <h3 className="text-lg md:text-xl font-black text-[#002147] mb-2">
@@ -1519,7 +1519,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
               <motion.div 
                 animate={{ rotate: 360 }}
                 transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
-                className="w-20 h-20 rounded-full border-4 border-blue-600 border-t-transparent mb-6"
+                className="w-20 h-20 rounded-full border-4 border-[#C49E3A]/60 border-t-transparent mb-6"
               />
               <h3 className="text-2xl font-black text-[#002147] mb-2">
                 {isRtl ? 'جاري بناء وتوزيع وحدات الخطة الدراسية...' : 'Assembling & Distributing Plan Units...'}
@@ -1542,7 +1542,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
               {/* Summary Stats Strip */}
               <div className="flex flex-wrap gap-4">
                 {[
-                  { label: isRtl ? 'إجمالي الدروس' : 'Total Lessons', value: generatedPlan.length, color: 'text-blue-600', bg: 'bg-blue-50' },
+                  { label: isRtl ? 'إجمالي الدروس' : 'Total Lessons', value: generatedPlan.length, color: 'text-[#9a7a2c]', bg: 'bg-[#C49E3A]/10' },
                   { label: isRtl ? 'الدروس المنجزة' : 'Completed', value: achievement?.completedCount || 0, color: 'text-emerald-600', bg: 'bg-emerald-50' },
                   { label: isRtl ? 'نسبة الإنجاز' : 'Completion %', value: `${Math.round(achievement?.percentage || 0)}%`, color: 'text-amber-600', bg: 'bg-amber-50' },
                   { 
@@ -1567,14 +1567,14 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
               <div className="bg-white rounded-[3rem] border border-slate-200 shadow-sm overflow-hidden p-6 md:p-8">
                 <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-slate-100 pb-6 mb-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shadow-sm">
+                    <div className="w-12 h-12 bg-[#C49E3A]/10 text-[#9a7a2c] rounded-2xl flex items-center justify-center shadow-sm">
                       <Calendar size={24} />
                     </div>
                     <div>
                       <h4 className="font-black text-[#002147] text-lg md:text-xl">
                         {isRtl ? 'جدول المناهج والدروس' : 'Integrated Curriculum Schedule'}
                       </h4>
-                      <p className="text-xs text-indigo-600 font-bold">
+                      <p className="text-xs text-[#9a7a2c] font-bold">
                         {isRtl ? 'اضغط على أي درس للبدء والممارسة مباشرة 🎯' : 'Click on any lesson to open & practice directly 🎯'}
                       </p>
                     </div>
@@ -1587,7 +1587,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                       value={studentName}
                       onChange={(e) => setStudentName(e.target.value)}
                       placeholder={isRtl ? 'اسم الطالب (مثال: عبود)' : 'Student Name (e.g. Abboud)'}
-                      className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-black text-[#002147] focus:ring-2 focus:ring-blue-600 outline-none min-w-[160px]"
+                      className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-black text-[#002147] focus:ring-2 focus:ring-[#C49E3A]/60 outline-none min-w-[160px]"
                     />
 
                     {/* View Switcher: Timeline vs Month Calendar */}
@@ -1595,7 +1595,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                       <button
                         onClick={() => setScheduleViewMode('timeline')}
                         className={`p-2 rounded-lg text-xs font-black transition-all ${
-                          scheduleViewMode === 'timeline' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400'
+                          scheduleViewMode === 'timeline' ? 'bg-white text-[#9a7a2c] shadow-sm' : 'text-slate-400'
                         }`}
                         title={isRtl ? 'عرض القائمة الزمنية' : 'Timeline View'}
                       >
@@ -1604,7 +1604,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                       <button
                         onClick={() => setScheduleViewMode('calendar')}
                         className={`p-2 rounded-lg text-xs font-black transition-all ${
-                          scheduleViewMode === 'calendar' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400'
+                          scheduleViewMode === 'calendar' ? 'bg-white text-[#9a7a2c] shadow-sm' : 'text-slate-400'
                         }`}
                         title={isRtl ? 'عرض التقويم الشهري' : 'Calendar Grid View'}
                       >
@@ -1618,7 +1618,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                       className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all ${
                         saveSuccess 
                           ? 'bg-emerald-500 text-white' 
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                          : 'bg-[#002147] text-white hover:bg-[#002147]'
                       } disabled:opacity-50`}
                     >
                       {isSaving ? <Sparkles size={14} className="animate-spin" /> : <Save size={14} />}
@@ -1633,7 +1633,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                           setActiveTab('history');
                         }
                       }}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-[#002147] text-white rounded-xl text-xs font-black hover:bg-blue-900 transition-all cursor-pointer"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-[#002147] text-white rounded-xl text-xs font-black hover:bg-[#002147] transition-all cursor-pointer"
                     >
                       <BarChart2 size={14} />
                       <span>{isRtl ? 'النتائج والخطط الأكاديمية' : 'Results & Plans'}</span>
@@ -1653,7 +1653,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                         setDigestWeekNumber(1);
                         setShowWeeklyDigestModal(true);
                       }}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white rounded-xl text-xs font-black hover:opacity-95 transition-all cursor-pointer shadow-sm active:scale-95"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#002147] via-[#002147] to-[#002147] text-white rounded-xl text-xs font-black hover:opacity-95 transition-all cursor-pointer shadow-sm active:scale-95"
                       title={isRtl ? 'عرض التقرير الأسبوعي الذكي مع سارة' : 'Weekly Progress Digest with Sara'}
                     >
                       <Sparkles size={14} className="text-amber-300" />
@@ -1716,7 +1716,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                             onClick={() => setCalendarActiveMonth(mNum)}
                             className={`px-3 py-1 rounded-lg text-xs font-black transition-all ${
                               calendarActiveMonth === mNum 
-                                ? 'bg-blue-600 text-white shadow-sm' 
+                                ? 'bg-[#002147] text-white shadow-sm' 
                                 : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                             }`}
                           >
@@ -1766,7 +1766,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                                         {isRtl ? 'أسبوع' : 'Wk'} {firstItem.week}
                                       </span>
                                       {firstItem.dateLabel && (
-                                        <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
+                                        <span className="text-[10px] font-black text-[#9a7a2c] bg-[#C49E3A]/10 px-2 py-0.5 rounded-md">
                                           {firstItem.dateLabel}
                                         </span>
                                       )}
@@ -1795,14 +1795,14 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                                           onClick={() => handleLessonClick(item)}
                                           className={`flex-1 min-w-[280px] p-4 rounded-2xl border transition-all cursor-pointer group/item relative ${
                                             isTest
-                                              ? 'bg-indigo-50/70 border-indigo-200 hover:border-indigo-400'
-                                              : 'bg-white border-slate-100 hover:border-blue-300 hover:shadow-md'
+                                              ? 'bg-[#C49E3A]/70 border-[#C49E3A]/30 hover:border-[#C49E3A]/60'
+                                              : 'bg-white border-slate-100 hover:border-[#C49E3A]/30 hover:shadow-md'
                                           }`}
                                         >
                                           <div className="flex items-start justify-between gap-2 mb-2">
                                             <div className="flex items-center gap-2 flex-wrap">
                                               <span className={`text-[10px] font-black px-2 py-0.5 rounded-md uppercase ${
-                                                isTest ? 'bg-indigo-600 text-white' : 'bg-blue-100 text-blue-800'
+                                                isTest ? 'bg-[#002147] text-white' : 'bg-[#C49E3A]/10 text-[#9a7a2c]'
                                               }`}>
                                                 {item.courseLabel}
                                               </span>
@@ -1810,7 +1810,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                                                 {item.duration}
                                               </span>
                                               {item.trackBadge && (
-                                                <span className="text-[9px] font-black px-2 py-0.5 rounded-md bg-purple-50 border border-purple-200 text-purple-700">
+                                                <span className="text-[9px] font-black px-2 py-0.5 rounded-md bg-[#C49E3A]/10 border border-[#C49E3A]/30 text-[#9a7a2c]">
                                                   {item.trackBadge}
                                                 </span>
                                               )}
@@ -1833,7 +1833,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                                               </button>
                                             )}
                                           </div>
-                                          <h5 className="text-sm font-black text-[#002147] group-hover/item:text-blue-600 transition-colors leading-snug">
+                                          <h5 className="text-sm font-black text-[#002147] group-hover/item:text-[#9a7a2c] transition-colors leading-snug">
                                             {item.topic}
                                           </h5>
                                           {res && (
@@ -1842,7 +1842,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                                                 <CheckCircle2 size={10} />
                                                 {isRtl ? 'تم الإنجاز' : 'Completed'}
                                               </span>
-                                              <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded" dir="ltr">
+                                              <span className="text-[10px] font-black text-[#9a7a2c] bg-[#C49E3A]/10 px-2 py-0.5 rounded" dir="ltr">
                                                 ({res.total > 0 ? `${res.score}/${res.total}` : `${res.score || 0}`})
                                               </span>
                                             </div>
@@ -1867,7 +1867,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                                 <td className="p-6 rounded-r-3xl border-y border-r border-slate-100 text-right align-top">
                                   <button 
                                     onClick={() => openAddContext(firstItem.day, firstItem.week, firstItem.month, firstItem.dateLabel)}
-                                    className="w-9 h-9 flex items-center justify-center bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all shadow-sm border border-blue-100"
+                                    className="w-9 h-9 flex items-center justify-center bg-[#C49E3A]/10 text-[#9a7a2c] hover:bg-[#002147] hover:text-white rounded-xl transition-all shadow-sm border border-[#C49E3A]/30"
                                     title={isRtl ? 'إضافة درس لهذا اليوم' : 'Add lesson to this day'}
                                   >
                                     <Plus size={18} />
@@ -1894,7 +1894,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                             <span className="text-xs font-black text-[#002147]">
                               {isRtl ? `الأسبوع ${weekNum}` : `Week ${weekNum}`}
                             </span>
-                            <span className="text-[10px] font-black px-2 py-0.5 rounded bg-blue-100 text-blue-800">
+                            <span className="text-[10px] font-black px-2 py-0.5 rounded bg-[#C49E3A]/10 text-[#9a7a2c]">
                               {weekItems.length} {isRtl ? 'دروس' : 'lessons'}
                             </span>
                           </div>
@@ -1911,13 +1911,13 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                                   onClick={() => handleLessonClick(item)}
                                   className={`p-3 rounded-2xl border transition-all cursor-pointer ${
                                     item.isTest 
-                                      ? 'bg-indigo-100/70 border-indigo-300' 
-                                      : 'bg-white border-slate-100 hover:border-blue-400 shadow-sm'
+                                      ? 'bg-[#C49E3A]/70 border-[#C49E3A]/30' 
+                                      : 'bg-white border-slate-100 hover:border-[#C49E3A]/60 shadow-sm'
                                   }`}
                                 >
                                   <div className="flex items-center justify-between text-[9px] font-black text-slate-400 mb-1">
                                     <span>{item.day}</span>
-                                    <span className="text-blue-600">{item.courseLabel}</span>
+                                    <span className="text-[#9a7a2c]">{item.courseLabel}</span>
                                   </div>
                                   <p className="text-xs font-black text-[#002147] line-clamp-2">
                                     {item.topic}
@@ -1967,12 +1967,12 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                     <h1 className="text-4xl font-black text-white">
                       {isRtl ? `الخطة الدراسية الذكية: ${studentName}` : `Academic Roadmap: ${studentName}`}
                     </h1>
-                    <p className="text-xs text-blue-200 mt-2 font-bold">
+                    <p className="text-xs text-[#E4C77A] mt-2 font-bold">
                       {isRtl ? `الصفحة ${pageIdx + 1} من ${Math.ceil(generatedPlan.length / 18)}` : `Page ${pageIdx + 1} of ${Math.ceil(generatedPlan.length / 18)}`}
                     </p>
                   </div>
                   <div className="bg-white/10 p-6 rounded-2xl border border-white/10 text-center">
-                    <span className="text-xs font-black text-blue-200 uppercase">{isRtl ? 'إجمالي الخطة' : 'Total Load'}</span>
+                    <span className="text-xs font-black text-[#E4C77A] uppercase">{isRtl ? 'إجمالي الخطة' : 'Total Load'}</span>
                     <div className="text-3xl font-black">{generatedPlan.length} {isRtl ? 'وحدة' : 'Units'}</div>
                   </div>
                 </div>
@@ -1985,10 +1985,10 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                     <tr key={item.id} className="bg-slate-50 rounded-2xl">
                       <td className="p-4 rounded-l-2xl font-black text-xs text-[#002147] w-48">
                         <div>{item.day} - {item.dateLabel}</div>
-                        <div className="text-[10px] text-blue-600 font-bold">{isRtl ? 'أسبوع' : 'Wk'} {item.week} • {item.timeLabel}</div>
+                        <div className="text-[10px] text-[#9a7a2c] font-bold">{isRtl ? 'أسبوع' : 'Wk'} {item.week} • {item.timeLabel}</div>
                       </td>
                       <td className="p-4 font-black text-sm text-[#002147]">
-                        <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded mr-2 ml-2">
+                        <span className="text-[10px] bg-[#002147] text-white px-2 py-0.5 rounded mr-2 ml-2">
                           {item.courseLabel}
                         </span>
                         {item.topic}
@@ -2033,7 +2033,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                     {isRtl ? 'إضافة درس أو وحدة للجدول' : 'Add Lesson to Schedule'}
                   </h3>
                   {addContext && (
-                    <p className="text-xs font-bold text-blue-600 mt-1">
+                    <p className="text-xs font-bold text-[#9a7a2c] mt-1">
                       {isRtl ? `إضافة إلى: ${addContext.day} - ${addContext.dateLabel}` : `Adding to: ${addContext.day} - ${addContext.dateLabel}`}
                     </p>
                   )}
@@ -2050,12 +2050,12 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                     placeholder={isRtl ? 'بحث في الدروس...' : 'Search lessons...'}
                     value={modalSearch}
                     onChange={(e) => setModalSearch(e.target.value)}
-                    className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-600"
+                    className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold outline-none focus:ring-2 focus:ring-[#C49E3A]/60"
                   />
                   <select
                     value={modalPillar}
                     onChange={(e) => setModalPillar(e.target.value)}
-                    className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-600"
+                    className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold outline-none focus:ring-2 focus:ring-[#C49E3A]/60"
                   >
                     <option value="all">{isRtl ? 'كل الأقسام' : 'All Sections'}</option>
                     {ACADEMIC_SECTION_DEFINITIONS.map(p => (
@@ -2065,7 +2065,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                   <select
                     value={modalLevel}
                     onChange={(e) => setModalLevel(e.target.value)}
-                    className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-600"
+                    className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold outline-none focus:ring-2 focus:ring-[#C49E3A]/60"
                   >
                     <option value="all">{isRtl ? 'كل المستويات' : 'All Levels'}</option>
                     <option value="Kid">Kid</option>
@@ -2089,18 +2089,18 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                       <button
                         key={`modal-lesson-${lesson.pillarId}-${lesson.id}-${mIdx}`}
                         onClick={() => handleAddLessonFromModal(lesson)}
-                        className="w-full text-right p-3.5 bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 rounded-2xl transition-all flex items-center justify-between group"
+                        className="w-full text-right p-3.5 bg-slate-50 hover:bg-[#C49E3A]/10 border border-slate-100 hover:border-[#C49E3A]/30 rounded-2xl transition-all flex items-center justify-between group"
                       >
                         <div className="flex items-center gap-3">
-                          <span className="text-[9px] font-black px-2 py-0.5 rounded bg-blue-600 text-white uppercase">
+                          <span className="text-[9px] font-black px-2 py-0.5 rounded bg-[#002147] text-white uppercase">
                             {lesson.level}
                           </span>
                           <div>
                             <span className="text-[10px] font-bold text-slate-400 block">{lesson.courseLabelAr}</span>
-                            <span className="text-xs font-black text-[#002147] group-hover:text-blue-600">{lesson.titleAr}</span>
+                            <span className="text-xs font-black text-[#002147] group-hover:text-[#9a7a2c]">{lesson.titleAr}</span>
                           </div>
                         </div>
-                        <Plus size={16} className="text-blue-600 group-hover:scale-125 transition-transform" />
+                        <Plus size={16} className="text-[#9a7a2c] group-hover:scale-125 transition-transform" />
                       </button>
                     ))
                   )}
@@ -2124,13 +2124,13 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
               {/* Header */}
               <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center shadow-md">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#002147] to-[#002147] text-white flex items-center justify-center shadow-md">
                     <Sparkles size={24} className="text-amber-300" />
                   </div>
                   <div>
                     <h3 className="text-lg md:text-xl font-black text-[#002147] flex items-center gap-2">
                       <span>{isRtl ? 'التقرير الأسبوعي الذكي مع سارة' : 'Weekly Progress Digest with Sara'}</span>
-                      <span className="text-xs px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-700 font-bold">
+                      <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#C49E3A]/10 text-[#9a7a2c] font-bold">
                         {isRtl ? `الأسبوع ${digestWeekNumber}` : `Week ${digestWeekNumber}`}
                       </span>
                     </h3>
@@ -2160,7 +2160,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                       onClick={() => setDigestWeekNumber(wNum)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
                         digestWeekNumber === wNum
-                          ? 'bg-purple-600 text-white shadow-sm'
+                          ? 'bg-[#002147] text-white shadow-sm'
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                     >
@@ -2172,14 +2172,14 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
 
               {/* Weekly Metrics Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-5">
-                <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100 text-center">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 block mb-1">
+                <div className="p-4 rounded-2xl bg-[#C49E3A]/10 border border-[#C49E3A]/30 text-center">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-[#9a7a2c] block mb-1">
                     {isRtl ? 'إنجاز الدروس' : 'Lessons'}
                   </span>
                   <span className="text-xl font-black text-[#002147]">
                     {weeklyDigestData.completed} / {weeklyDigestData.total}
                   </span>
-                  <span className="text-[10px] font-bold text-blue-500 block mt-0.5">
+                  <span className="text-[10px] font-bold text-[#9a7a2c] block mt-0.5">
                     ({weeklyDigestData.percentage}%)
                   </span>
                 </div>
@@ -2208,22 +2208,22 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                   </span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-purple-50 border border-purple-100 text-center">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 block mb-1">
+                <div className="p-4 rounded-2xl bg-[#C49E3A]/10 border border-[#C49E3A]/30 text-center">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-[#9a7a2c] block mb-1">
                     {isRtl ? 'الاستشفاء والـ Streak' : 'Streak & Grace'}
                   </span>
-                  <span className="text-xl font-black text-purple-800 flex items-center justify-center gap-1">
+                  <span className="text-xl font-black text-[#9a7a2c] flex items-center justify-center gap-1">
                     <span>🔥</span>
                     <span>{weeklyDigestData.hasCatchUp ? 'مرن' : 'نشط'}</span>
                   </span>
-                  <span className="text-[10px] font-bold text-purple-600 block mt-0.5">
+                  <span className="text-[10px] font-bold text-[#9a7a2c] block mt-0.5">
                     {weeklyDigestData.hasCatchUp ? (isRtl ? 'يوم تعويض متاح' : 'Grace Day On') : (isRtl ? 'مستمر' : 'Active')}
                   </span>
                 </div>
               </div>
 
               {/* Sara's Pedagogical Review Card */}
-              <div className="p-5 rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white shadow-lg space-y-2.5 my-4">
+              <div className="p-5 rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-[#002147] text-white shadow-lg space-y-2.5 my-4">
                 <div className="flex items-center gap-2 text-amber-300 font-black text-xs">
                   <span className="text-base">👩‍🏫</span>
                   <span>{isRtl ? 'التقييم التربوي الذكي من سارة' : "Sara's Pedagogical Analysis"}</span>
@@ -2302,7 +2302,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
                       showToast(isRtl ? 'تم نسخ التقرير لمشاركته عبر الواتساب!' : 'Copied report to clipboard!');
                     }
                   }}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white font-black text-xs transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-[#002147] hover:opacity-95 text-white font-black text-xs transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
                 >
                   <Share2 size={14} />
                   <span>{isRtl ? 'مشاركة التقرير عبر الواتساب 📱' : 'Share via WhatsApp 📱'}</span>

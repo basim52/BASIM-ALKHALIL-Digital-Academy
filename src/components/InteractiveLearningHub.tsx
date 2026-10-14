@@ -58,11 +58,11 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
       description: 'يقوم الذكاء الاصطناعي بتحليل إجاباتك ورصد نقاط الضعف الدقيقة وتوليد كويزات وتمارين علاجية مخصصة فوراً!',
       descriptionEn: 'AI pinpoints exact linguistic weaknesses, offering custom targeted drills and dynamic quizzes to master every skill!',
       icon: Brain,
-      color: 'bg-indigo-600',
-      textColor: 'text-indigo-800',
-      bgColor: 'bg-indigo-50/80',
-      borderColor: 'border-indigo-200',
-      pillColor: 'bg-indigo-100 text-indigo-800',
+      color: 'bg-[#002147]',
+      textColor: 'text-[#9a7a2c]',
+      bgColor: 'bg-[#C49E3A]/80',
+      borderColor: 'border-[#C49E3A]/30',
+      pillColor: 'bg-[#C49E3A]/10 text-[#9a7a2c]',
       badge: isRtl ? 'ذكاء تكيفي تنبؤي' : 'Predictive Gap Tree',
       xpReward: '+200 XP',
       level: 'All CEFR Tiers 🎯'
@@ -74,11 +74,11 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
       description: 'قم بتوليد أوراق عمل واختبارات تفاعلية مخصصة فوراً حسب اهتماماتك ومستواك، مع خيار الحل المباشر أو الطباعة الأكاديمية بنموذج الإجابة!',
       descriptionEn: 'Generate tailored academic worksheets with instant online grading, printable PDF mode, and comprehensive answer keys!',
       icon: FileText,
-      color: 'bg-blue-600',
-      textColor: 'text-blue-800',
-      bgColor: 'bg-blue-50/80',
-      borderColor: 'border-blue-200',
-      pillColor: 'bg-blue-100 text-blue-800',
+      color: 'bg-[#002147]',
+      textColor: 'text-[#9a7a2c]',
+      bgColor: 'bg-[#C49E3A]/80',
+      borderColor: 'border-[#C49E3A]/30',
+      pillColor: 'bg-[#C49E3A]/10 text-[#9a7a2c]',
       badge: isRtl ? 'أوراق عمل تفاعلية وطباعة' : 'Gemini 3.8 Worksheets',
       xpReward: '+120 XP',
       level: 'A1 - C2 📄'
@@ -90,11 +90,11 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
       description: 'اختر مسار مغامراتك باللغة الإنجليزية في لندن والفضاء وأكسفورد! كل قرار تتخذه يصنع فصلاً جديداً ونهايات مشوقة غير متوقعة.',
       descriptionEn: 'Make critical choices in authentic English adventures. Every decision dynamically crafts new plot branches with audio narration!',
       icon: GitBranch,
-      color: 'bg-teal-600',
-      textColor: 'text-teal-800',
-      bgColor: 'bg-teal-50/80',
-      borderColor: 'border-teal-200',
-      pillColor: 'bg-teal-100 text-teal-800',
+      color: 'bg-[#002147]',
+      textColor: 'text-[#9a7a2c]',
+      bgColor: 'bg-[#C49E3A]/80',
+      borderColor: 'border-[#C49E3A]/30',
+      pillColor: 'bg-[#C49E3A]/10 text-[#9a7a2c]',
       badge: isRtl ? 'مغامرات متفرعة حية' : 'Branching Choices',
       xpReward: '+150 XP',
       level: 'All Tiers 🧭'
@@ -122,11 +122,11 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
       description: 'تعلم كلمات أكسفورد وقواعد الإنجليزية بالتكرار المتباعد والنطق المسموع والتقييم الفطن للذاكرة!',
       descriptionEn: 'Master premium academic Oxford vocabulary and rules via interactive spaced-repetition card flipping and audio!',
       icon: BookOpen,
-      color: 'bg-indigo-600',
-      textColor: 'text-indigo-800',
-      bgColor: 'bg-indigo-50/70',
-      borderColor: 'border-indigo-100',
-      pillColor: 'bg-indigo-100 text-indigo-800',
+      color: 'bg-[#002147]',
+      textColor: 'text-[#9a7a2c]',
+      bgColor: 'bg-[#C49E3A]/70',
+      borderColor: 'border-[#C49E3A]/30',
+      pillColor: 'bg-[#C49E3A]/10 text-[#9a7a2c]',
       badge: isRtl ? 'حفظ ذكي وتكرار متباعد' : 'Spaced Repetition Mastery',
       xpReward: '+30 XP',
       level: 'All Levels'
@@ -154,11 +154,11 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
       description: 'استمع للأغاني الكلاسيكية مع الكلمات التفاعلية وملء الفراغات للفوز بجوائز رائعة!',
       descriptionEn: 'Sing along to classic English tracks with dynamic real-time lyrics and vocabulary quiz questions!',
       icon: Music,
-      color: 'bg-blue-500',
-      textColor: 'text-blue-800',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-100',
-      pillColor: 'bg-blue-100 text-blue-800',
+      color: 'bg-[#C49E3A]',
+      textColor: 'text-[#9a7a2c]',
+      bgColor: 'bg-[#C49E3A]/10',
+      borderColor: 'border-[#C49E3A]/30',
+      pillColor: 'bg-[#C49E3A]/10 text-[#9a7a2c]',
       badge: isRtl ? 'مهارات الاستماع والغناء' : 'Listening & Pronunciation',
       xpReward: '+15 XP',
       level: 'A1 - Active'
@@ -186,11 +186,11 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
       description: 'حول مغامرات الطفلة "نور" في لندن لمشهد سينمائي مسموع يتعلم فيه الأطفال حركة الكاميرا والسيناريو المباشر.',
       descriptionEn: 'Step inside London’s subway as a digital voice actor. Learn camera guidelines, scripts & direct translation.',
       icon: Film,
-      color: 'bg-teal-500',
-      textColor: 'text-teal-800',
-      bgColor: 'bg-teal-50',
-      borderColor: 'border-teal-100',
-      pillColor: 'bg-teal-100 text-teal-800',
+      color: 'bg-[#C49E3A]',
+      textColor: 'text-[#9a7a2c]',
+      bgColor: 'bg-[#C49E3A]/10',
+      borderColor: 'border-[#C49E3A]/30',
+      pillColor: 'bg-[#C49E3A]/10 text-[#9a7a2c]',
       badge: isRtl ? 'التمثيل الصوتي والسيناريو' : 'Voice Acting & Drama',
       xpReward: '+25 XP',
       level: 'Junior Play'
@@ -202,11 +202,11 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
       description: 'عش مواقف واقعية وسجل صوتك للتحدث بالمطعم والمطار والفندق وصحح نطقك فوراً بالذكاء الاصطناعي.',
       descriptionEn: 'Practice real-life conversations in restaurants, airports, and hotels with smart feedback and scoring.',
       icon: Users,
-      color: 'bg-indigo-500',
-      textColor: 'text-indigo-800',
-      bgColor: 'bg-indigo-50',
-      borderColor: 'border-indigo-100',
-      pillColor: 'bg-indigo-100 text-indigo-800',
+      color: 'bg-[#C49E3A]',
+      textColor: 'text-[#9a7a2c]',
+      bgColor: 'bg-[#C49E3A]/10',
+      borderColor: 'border-[#C49E3A]/30',
+      pillColor: 'bg-[#C49E3A]/10 text-[#9a7a2c]',
       badge: isRtl ? 'المحادثة اللبقة وسرعة البديهة' : 'Conversational Speaking',
       xpReward: '+30 XP',
       level: 'B1 speaking'
@@ -218,11 +218,11 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
       description: 'كن المحقق الذكي وفك المجهول والرموز النحوية (زمن المضارع البسيط) لتتحرر من حجر برج وساعة بيغ بن العريقة!',
       descriptionEn: 'Solve Subject-Verb coordination and negative agreement ciphers to unlock heavy Big Ben doors!',
       icon: Key,
-      color: 'bg-purple-500',
-      textColor: 'text-purple-800',
-      bgColor: 'bg-purple-50/50',
-      borderColor: 'border-purple-200/60',
-      pillColor: 'bg-purple-100 text-purple-800',
+      color: 'bg-[#C49E3A]',
+      textColor: 'text-[#9a7a2c]',
+      bgColor: 'bg-[#C49E3A]/50',
+      borderColor: 'border-[#C49E3A]/60',
+      pillColor: 'bg-[#C49E3A]/10 text-[#9a7a2c]',
       badge: isRtl ? 'ذكاء وقواعد وتراكيب' : 'Active Logic & Grammar',
       xpReward: '+30 XP',
       level: 'A1/A2 Logic'
@@ -266,7 +266,7 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
       {/* Visual background accents */}
       <div className="absolute top-0 left-0 right-0 h-96 bg-gradient-to-b from-[#FFF2D7]/40 to-transparent pointer-events-none" />
       <div className="absolute top-20 right-10 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-20 left-10 w-96 h-96 bg-teal-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-20 left-10 w-96 h-96 bg-[#C49E3A]/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-6xl mx-auto px-4 pt-8 relative z-10">
 
@@ -297,18 +297,18 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-10 bg-gradient-to-tr from-purple-900 via-[#002147] to-[#1e1b4b] p-6 rounded-[2.5rem] text-white overflow-hidden relative shadow-xl border-l-4 border-purple-500"
+          className="mb-10 bg-gradient-to-tr from-[#002147] via-[#002147] to-[#1e1b4b] p-6 rounded-[2.5rem] text-white overflow-hidden relative shadow-xl border-l-4 border-[#C49E3A]/60"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#C49E3A]/10 rounded-full blur-2xl pointer-events-none" />
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-1.5 flex-1 text-center md:text-start lg:text-right">
-              <span className="text-[10px] font-black uppercase tracking-widest text-purple-300 bg-purple-500/10 px-3 py-1 rounded-md">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#E4C77A] bg-[#C49E3A]/10 px-3 py-1 rounded-md">
                 {isRtl ? 'الخطة 3: بوابة المتعة واستحقاق الأوسمة والمفاتيح 🔑' : 'Plan 3: Gamified Rewards & Progression Keys 🔑'}
               </span>
               <h2 className="text-xl md:text-2xl font-black mt-1">
                 {isRtl ? 'حجرة مفاتيح التحديات الكبرى 🔐' : 'Grand Interactive Quest Cabin'}
               </h2>
-              <p className="text-xs text-purple-200 font-semibold max-w-xl">
+              <p className="text-xs text-[#E4C77A] font-semibold max-w-xl">
                 {isRtl 
                   ? 'اجمع المفاتيح الذهبية عبر التفوق في الأنشطة التالية لتأهيل مجموع نقاطك إلى لوحة الشرف!' 
                   : 'Complete mini-quests across playroom cards to earn magical golden progression keys and boost your overall rank.'}
@@ -323,10 +323,10 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
                 { nameAr: 'مفتاح الأداء الصوتي', key: 'acting', emoji: '🔑' }
               ].map((item, idx) => (
                 <div key={`p-key-${idx}`} className="flex flex-col items-center">
-                  <div className="w-12 h-12 bg-purple-500/20 text-purple-300 hover:text-yellow-400 hover:bg-purple-500/40 rounded-2xl flex items-center justify-center text-xl transition-all shadow-sm">
+                  <div className="w-12 h-12 bg-[#C49E3A]/20 text-[#E4C77A] hover:text-yellow-400 hover:bg-[#C49E3A]/40 rounded-2xl flex items-center justify-center text-xl transition-all shadow-sm">
                     {item.emoji}
                   </div>
-                  <span className="text-[9px] text-purple-250 mt-1.5 font-bold text-center max-w-[80px] truncate leading-tight">
+                  <span className="text-[9px] text-[#E4C77A] mt-1.5 font-bold text-center max-w-[80px] truncate leading-tight">
                     {isRtl ? item.nameAr : item.key}
                   </span>
                 </div>
