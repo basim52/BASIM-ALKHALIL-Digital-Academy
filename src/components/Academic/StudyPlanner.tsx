@@ -741,7 +741,7 @@ export const StudyPlanner: React.FC<StudyPlannerProps> = ({
         <div className="flex items-center justify-between w-full mb-6">
           <button 
             onClick={onBack}
-            className="flex items-center gap-2 text-slate-500 hover:text-[#002147] transition-colors p-2 rounded-2xl hover:bg-slate-100 cursor-pointer"
+            className={`flex items-center gap-2 text-slate-500 hover:text-[#002147] transition-colors p-2 rounded-2xl hover:bg-slate-100 cursor-pointer ${isSaraModal ? '' : 'invisible'}`}
           >
             <ArrowLeft size={20} className={isRtl ? 'rotate-180' : ''} />
             <span className="font-bold text-sm">

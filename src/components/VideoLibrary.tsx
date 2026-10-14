@@ -857,13 +857,6 @@ Key Learning Objectives:
       {/* HEADER SECTION */}
       <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6 min-w-0">
         <div className="min-w-0">
-          <button 
-            onClick={onBack}
-            className="flex items-center gap-1.5 text-slate-400 hover:text-slate-600 transition-colors mb-4 font-black text-xs uppercase tracking-wider bg-white px-4 py-2 rounded-full border border-slate-200/60 shadow-sm"
-          >
-            <ArrowLeft size={16} className={isRtl ? 'rotate-180' : ''} />
-            {isRtl ? 'العودة للرئيسية' : 'Back to Dashboard'}
-          </button>
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-2xl sm:text-3xl font-black text-slate-800 leading-none">{t.videoLibrary}</h2>
             <div className="bg-gradient-to-r from-[#58cc02] to-[#1cb0f6] text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider animate-pulse leading-none shadow-sm shrink-0">

@@ -386,7 +386,7 @@ export function LiveTranslate({ isRtl = true, lang = 'ar', userProfile, onBack }
           </div>
 
           <div className="flex items-center gap-2">
-            {onBack && (
+            {false && onBack && (
               <button
                 type="button"
                 onClick={onBack}

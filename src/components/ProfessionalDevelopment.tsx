@@ -1860,14 +1860,6 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
 
       {/* Navigation Header */}
       <div className="max-w-6xl mx-auto px-4 pt-6 pb-2 border-b border-[#e1deda] flex justify-between items-center">
-        <button 
-          onClick={onBack}
-          className="flex items-center gap-2 text-slate-500 hover:text-[#b48e56] transition-colors py-2 px-1 text-sm font-bold"
-        >
-          <ArrowLeft size={16} />
-          <span>{isRtl ? 'العودة للوحة التحكم' : 'Back to Dashboard'}</span>
-        </button>
-
         <div className="flex gap-1 bg-[#eae6df] p-1 rounded-xl">
           <button 
             onClick={() => setActiveTab('browse')}

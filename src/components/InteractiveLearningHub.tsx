@@ -291,13 +291,6 @@ export const InteractiveLearningHub: React.FC<InteractiveLearningHubProps> = ({
             </div>
           </div>
 
-          <button
-            onClick={onBack}
-            className={`flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-black text-xs transition-all cursor-pointer shadow-3xs ${isRtl ? 'flex-row-reverse' : ''}`}
-          >
-            {isRtl ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
-            <span>{isRtl ? 'العودة للرئيسية' : 'Back to Dashboard'}</span>
-          </button>
         </div>
 
         {/* Plan 3: Custom Game Progression Key System & Cabin */}
