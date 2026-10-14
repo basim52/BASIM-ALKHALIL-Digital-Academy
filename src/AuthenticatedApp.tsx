@@ -3528,7 +3528,7 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
             >
               <div className="absolute top-0 right-0 w-32 h-32 opacity-10 group-hover:scale-110 transition-transform">
                 <img 
-                  src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=400&q=80" 
+                  src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%2306b6d4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%230891b2%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8F%AB%3C/text%3E%3C/svg%3E" 
                   alt="Kids Background Decor"
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover rounded-full"
@@ -3536,7 +3536,7 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
               </div>
               <div className="flex gap-4 relative z-10 w-full flex-row items-center">
                 <img 
-                  src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=400&q=80" 
+                  src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23002147%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%231e4b8f%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8F%AB%3C/text%3E%3C/svg%3E" 
                   alt="Kids Interactive Story"
                   referrerPolicy="no-referrer"
                   className="w-12 h-12 md:w-16 md:h-16 rounded-2xl object-cover shrink-0 border-2 border-amber-500/30 shadow-md transform group-hover:-rotate-3 transition-transform"
@@ -5192,7 +5192,7 @@ export default function AuthenticatedApp({
           role: UserRole.STUDENT,
           level: 'A1',
           points: 840,
-          avatarUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=100'
+          avatarUrl: 'data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23ec4899%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%23db2777%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E'
         } as UserProfile);
       }
       return;

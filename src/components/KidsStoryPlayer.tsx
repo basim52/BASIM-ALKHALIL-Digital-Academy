@@ -275,7 +275,7 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
         <header className="flex justify-between items-center bg-white border-2 border-[#e1deda] px-6 py-4 rounded-[2rem] shadow-sm mb-8 flex-row-reverse">
           <div className="flex items-center gap-4">
             <img 
-              src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=150&q=80" 
+              src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%2310b981%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%230d9488%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8F%AB%3C/text%3E%3C/svg%3E" 
               alt="Kids London Story Icon"
               referrerPolicy="no-referrer"
               className="w-12 h-12 bg-amber-100 rounded-2xl object-cover border-2 border-amber-200/50 shadow-sm shrink-0"
@@ -368,7 +368,7 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
                  <div className="space-y-6">
                    <div className="flex flex-col md:flex-row-reverse gap-4 items-center border-b border-slate-100 pb-4">
                      <img 
-                       src="https://images.unsplash.com/photo-1548625361-155deee223d5?auto=format&fit=crop&w=300&q=80" 
+                       src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23002147%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%231e4b8f%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8F%AB%3C/text%3E%3C/svg%3E" 
                        alt="Big Ben London Adventure"
                        referrerPolicy="no-referrer"
                        className="w-24 h-20 object-cover rounded-2xl border border-amber-200 shadow-xs shrink-0"
@@ -471,7 +471,7 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
                 <div className="space-y-6">
                   <div className="flex flex-col md:flex-row-reverse gap-4 items-center border-b border-slate-100 pb-4">
                     <img 
-                      src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=300&q=80" 
+                      src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23ec4899%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%23db2777%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8F%AB%3C/text%3E%3C/svg%3E" 
                       alt="Golden Dictionary Book"
                       referrerPolicy="no-referrer"
                       className="w-24 h-20 object-cover rounded-2xl border border-amber-200 shadow-xs shrink-0"
@@ -519,7 +519,7 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
                 <div className="space-y-6">
                   <div className="flex flex-col md:flex-row-reverse gap-4 items-center border-b border-slate-100 pb-4">
                     <img 
-                      src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=300&q=80" 
+                      src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%230ea5e9%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%232563eb%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8F%AB%3C/text%3E%3C/svg%3E" 
                       alt="Airport Puzzle Journey"
                       referrerPolicy="no-referrer"
                       className="w-24 h-20 object-cover rounded-2xl border border-amber-200 shadow-xs shrink-0"
@@ -622,7 +622,7 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
                 <div className="space-y-6">
                   <div className="flex flex-col md:flex-row-reverse gap-4 items-center border-b border-slate-100 pb-4">
                     <img 
-                      src="https://images.unsplash.com/photo-1472457897821-70d3819a0e24?auto=format&fit=crop&w=300&q=80" 
+                      src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23ec4899%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%23db2777%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8F%AB%3C/text%3E%3C/svg%3E" 
                       alt="Voice acting microphone"
                       referrerPolicy="no-referrer"
                       className="w-24 h-20 object-cover rounded-2xl border border-amber-200 shadow-xs shrink-0"
