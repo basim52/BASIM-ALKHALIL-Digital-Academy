@@ -1,3 +1,4 @@
+import { SaraNewLevelTest, NewLevelTestCard } from './SaraNewLevelTest';
 import React, { useEffect, useMemo, useState } from 'react';
 import { X, ArrowRight, ArrowLeft, Lock, CheckCircle2, Volume2, RotateCcw } from 'lucide-react';
 import { VOCAB_LESSONS, VOCAB_TRACK_ID, type SaraVocabLesson, type SaraVocabWord } from '../data/saraTracks/vocabulary';
@@ -124,6 +125,7 @@ const Lesson: React.FC<{ l: SaraVocabLesson; onBack: () => void; onPassed: () =>
 export const SaraVocabPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll }) => {
   const [unlockedRaw, setUnlocked] = useState(() => readUnlocked(VOCAB_TRACK_ID, uid));
   const [active, setActive] = useState<SaraVocabLesson | null>(null);
+  const [testing, setTesting] = useState(false);
   useEffect(() => {
     if (!isOpen) return;
     setUnlocked(readUnlocked(VOCAB_TRACK_ID, uid));
@@ -159,8 +161,10 @@ export const SaraVocabPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unlockA
                 </button>
               );
             })}
+            <NewLevelTestCard track="vocabulary" open={!!unlockAll || unlockedRaw > VOCAB_LESSONS.length} onStart={() => setTesting(true)} />
           </div>
         )}
+        {testing && <SaraNewLevelTest track="vocabulary" uid={uid} onClose={() => setTesting(false)} />}
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { ADVANCED_TRACK } from '../data/saraTracks/advanced';
 import { CONVERSATION_TRACK } from '../data/saraTracks/conversation';
 import { READING_TRACK } from '../data/saraTracks/reading';
 import { WRITING_TRACK } from '../data/saraTracks/writing';
+import { NEW_SKILL_TRACKS } from '../lib/saraSkills';
 import { loadLevelTestAttempts, summarizeLevelTests, LEVEL_TEST_PASS, type LevelTestSummary } from '../lib/saraLevelTests';
 
 /** Sara end-of-level tests per track/level: latest + best score, pass/fail, weak lessons, date. Used in parent report + analytics. */
@@ -28,7 +29,7 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
       </div>
       {Object.keys(prog).length > 0 && (
         <div data-testid="sara-track-progress" className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
-          {[FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK].map(t => {
+          {[FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK, ...NEW_SKILL_TRACKS].map(t => {
             const done = Math.min(t.lessons.length, Math.max(0, (Number(prog[t.id]) || 1) - 1));
             return (
               <div key={t.id} className="rounded-xl bg-slate-50 border border-slate-200 px-2 py-1.5">

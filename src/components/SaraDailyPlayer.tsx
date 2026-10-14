@@ -1,4 +1,5 @@
 import MixedText from './MixedText';
+import { SaraNewLevelTest, NewLevelTestCard } from './SaraNewLevelTest';
 import React, { useEffect, useMemo, useState } from 'react';
 import { X, ArrowRight, Lock, CheckCircle2, Volume2, RotateCcw } from 'lucide-react';
 import { DAILY_LESSONS, DAILY_TRACK_ID, type SaraDailyLesson } from '../data/saraTracks/dailyLife';
@@ -142,6 +143,7 @@ const Lesson: React.FC<{ l: SaraDailyLesson; onBack: () => void; onPassed: () =>
 export const SaraDailyPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll }) => {
   const [unlockedRaw, setUnlocked] = useState(() => readUnlocked(DAILY_TRACK_ID, uid));
   const [active, setActive] = useState<SaraDailyLesson | null>(null);
+  const [testing, setTesting] = useState(false);
   useEffect(() => {
     if (!isOpen) return;
     setUnlocked(readUnlocked(DAILY_TRACK_ID, uid));
@@ -177,8 +179,10 @@ export const SaraDailyPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unlockA
                 </button>
               );
             })}
+            <NewLevelTestCard track="daily" open={!!unlockAll || unlockedRaw > DAILY_LESSONS.length} onStart={() => setTesting(true)} />
           </div>
         )}
+        {testing && <SaraNewLevelTest track="daily" uid={uid} onClose={() => setTesting(false)} />}
       </div>
     </div>
   );

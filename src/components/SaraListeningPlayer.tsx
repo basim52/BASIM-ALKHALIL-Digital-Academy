@@ -1,3 +1,4 @@
+import { SaraNewLevelTest, NewLevelTestCard } from './SaraNewLevelTest';
 import React, { useEffect, useMemo, useState } from 'react';
 import { X, ArrowRight, Lock, CheckCircle2, Volume2, RotateCcw } from 'lucide-react';
 import { LISTENING_LESSONS, LISTENING_TRACK_ID, LISTENING_TITLE_AR, type SaraListeningLesson } from '../data/saraTracks/listening';
@@ -93,6 +94,7 @@ const Lesson: React.FC<{ l: SaraListeningLesson; onBack: () => void; onPassed: (
 export const SaraListeningPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll }) => {
   const [unlockedRaw, setUnlocked] = useState(() => readUnlocked(LISTENING_TRACK_ID, uid));
   const [active, setActive] = useState<SaraListeningLesson | null>(null);
+  const [testing, setTesting] = useState(false);
   useEffect(() => {
     if (!isOpen) return;
     setUnlocked(readUnlocked(LISTENING_TRACK_ID, uid));
@@ -130,8 +132,10 @@ export const SaraListeningPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unl
                 </button>
               );
             })}
+            <NewLevelTestCard track="listening" open={!!unlockAll || unlockedRaw > LISTENING_LESSONS.length} onStart={() => setTesting(true)} />
           </div>
         )}
+        {testing && <SaraNewLevelTest track="listening" uid={uid} onClose={() => setTesting(false)} />}
       </div>
     </div>
   );

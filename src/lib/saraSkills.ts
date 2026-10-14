@@ -19,6 +19,9 @@ const PRON_AS_TRACK = { id: PRONUNCIATION_TRACK_ID, titleAr: 'النطق', title
 export interface SaraSkill { id: 'grammar' | 'conversation' | 'reading' | 'writing' | 'listening' | 'pronunciation' | 'vocabulary' | 'daily'; labelAr: string; labelEn: string; passed: number; total: number; pct: number; testBest: number | null }
 export interface SaraSkills { skills: SaraSkill[]; hasData: boolean; placementLevel: string | null }
 
+/** Level-1 tracks with their own players (listening, pronunciation, vocabulary, everyday English), as SaraTrack shapes for reports. */
+export const NEW_SKILL_TRACKS: SaraTrack[] = [LISTENING_AS_TRACK, PRON_AS_TRACK, VOCAB_AS_TRACK, DAILY_AS_TRACK];
+
 const SKILLS: { id: SaraSkill['id']; labelAr: string; labelEn: string; tracks: SaraTrack[] }[] = [
   { id: 'grammar', labelAr: 'القواعد 🧠', labelEn: 'Grammar 🧠', tracks: [FOUNDATIONS_TRACK, ADVANCED_TRACK] },
   { id: 'conversation', labelAr: 'المحادثة 💬', labelEn: 'Conversation 💬', tracks: [CONVERSATION_TRACK] },
