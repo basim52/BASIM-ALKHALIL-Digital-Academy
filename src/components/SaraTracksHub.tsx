@@ -56,7 +56,7 @@ export const SaraTracksHub: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll
         <div className="flex-1 min-h-0 overflow-y-auto p-3 grid gap-2 content-start">
           {cards.map(c => (
             <button key={c.track.id} disabled={!c.open} onClick={() => setActive(c.track)}
-              className={`flex items-center gap-3 p-3 rounded-2xl border-2 text-start ${c.open ? 'bg-white border-amber-300 shadow-sm' : 'bg-slate-100 border-slate-200 opacity-60'}`}>
+              className={`w-full min-w-0 overflow-hidden flex items-center gap-3 p-3 rounded-2xl border-2 text-start ${c.open ? 'bg-white border-amber-300 shadow-sm' : 'bg-slate-100 border-slate-200 opacity-60'}`}>
               <span className="text-2xl">{c.icon}</span>
               <span className="flex-1 min-w-0">
                 <span className="block text-[14px] font-black text-[#002147]">{c.track.titleAr}</span>
