@@ -13,9 +13,15 @@ const TITLES: Record<string, [string, string]> = {
   'professional-development': ['دورات تطويرية 🎓', 'Professional Development 🎓'],
   'balance-oasis': ['واحة التوازن 🌊', 'Balance Oasis 🌊'],
   'academic-analytics': ['التحليلات الأكاديمية 📊', 'Academic Analytics 📊'],
-  'academic-planner': ['المخطط الدراسي 🗓️', 'Study Planner 🗓️'],
+  'academic-planner': ['الخطة الدراسية الذكية 🗓️', 'Study Planner 🗓️'],
+  'story-library': ['مكتبة القصص المسموعة 📚', 'Audio Story Library 📚'],
+  'video-library': ['دروس الفيديو التفاعلية 🎬', 'Interactive Video Lessons 🎬'],
+  'progress': ['تقارير الأداء 📊', 'Performance Reports 📊'],
+  'leaderboard': ['لوحة المتصدرين 🏆', 'Leaderboard 🏆'],
+  'early-childhood': ['أكاديمية الطفولة المبكرة 👶', 'Early Childhood Academy 👶'],
+  'chat': ['غرف التواصل 💬', 'Chat Rooms 💬'],
   'parent': ['لوحة ولي الأمر 👨‍👩‍👧', 'Parent Dashboard 👨‍👩‍👧'],
-  'admin': ['لوحة الإدارة 🛡️', 'Admin Dashboard 🛡️'],
+  'admin': ['غرفة قيادة باسم الخليل 🛡️', 'Admin Dashboard 🛡️'],
 };
 
 /** One consistent navy/gold section header with a Home button, shown above every academy section (not home, not Sara). */

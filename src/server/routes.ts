@@ -586,6 +586,46 @@ Looking forward to your reply. Tell me what we're tackling first!`;
     res.json({ ok: true });
   });
 
+
+  // 📘 Book/PDF text → structured micro-course (دورات تطويرية). Auth + rate limit come from the /api/* middleware.
+  const COURSE_MODELS = ["gemini-3.8-flash", "gemini-3.8-flash-lite", "gemini-3.1-pro-preview", "gemini-2.5-flash"];
+  app.post("/api/pd/book-to-course", async (req: express.Request, res: express.Response) => {
+    const raw = String(req.body?.text || "").replace(/\s+\n/g, "\n").trim();
+    if (raw.length < 200) return res.status(400).json({ error: "TEXT_TOO_SHORT" });
+    if (!initAI() || !aiLive) return res.status(503).json({ error: "AI_NOT_CONFIGURED" });
+    const text = raw.slice(0, 24000);
+    const q = { type: Type.OBJECT, properties: { questionAr: { type: Type.STRING }, questionEn: { type: Type.STRING }, optionsAr: { type: Type.ARRAY, items: { type: Type.STRING } }, optionsEn: { type: Type.ARRAY, items: { type: Type.STRING } }, correctIndex: { type: Type.INTEGER }, explanationAr: { type: Type.STRING }, explanationEn: { type: Type.STRING } }, required: ["questionAr", "questionEn", "optionsAr", "optionsEn", "correctIndex", "explanationAr", "explanationEn"] };
+    const lesson = { type: Type.OBJECT, properties: { titleAr: { type: Type.STRING }, titleEn: { type: Type.STRING }, summaryAr: { type: Type.STRING }, summaryEn: { type: Type.STRING }, keyPointsAr: { type: Type.ARRAY, items: { type: Type.STRING } }, keyPointsEn: { type: Type.ARRAY, items: { type: Type.STRING } } }, required: ["titleAr", "titleEn", "summaryAr", "summaryEn", "keyPointsAr", "keyPointsEn"] };
+    const schema = { type: Type.OBJECT, properties: { titleAr: { type: Type.STRING }, titleEn: { type: Type.STRING }, descriptionAr: { type: Type.STRING }, descriptionEn: { type: Type.STRING }, modules: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { titleAr: { type: Type.STRING }, titleEn: { type: Type.STRING }, descriptionAr: { type: Type.STRING }, descriptionEn: { type: Type.STRING }, lessons: { type: Type.ARRAY, items: lesson }, quiz: { type: Type.ARRAY, items: q } }, required: ["titleAr", "titleEn", "descriptionAr", "descriptionEn", "lessons", "quiz"] } } }, required: ["titleAr", "titleEn", "descriptionAr", "descriptionEn", "modules"] };
+    const prompt = `You are an instructional designer. Turn ONLY the source text below into a short micro-course. Use only ideas that are actually in the text; do not invent facts, statistics or author names.
+Output: 2-4 modules, each with 2-4 lessons (summary 80-160 words, 3-5 key points) and 2-3 multiple-choice quiz questions (exactly 3 options, correctIndex 0-2) that test the module content. Arabic fields in clear Modern Standard Arabic, English fields in plain English.
+
+SOURCE TEXT:
+"""
+${text}
+"""`;
+    let lastErr: any = null;
+    for (const model of COURSE_MODELS) {
+      try {
+        const r = await aiLive.models.generateContent({ model, contents: prompt, config: { responseMimeType: "application/json", responseSchema: schema as any, maxOutputTokens: 8192 } });
+        const c = JSON.parse((r.text || "").trim());
+        const ok = c && Array.isArray(c.modules) && c.modules.length > 0 && c.modules.every((m: any) => Array.isArray(m.lessons) && m.lessons.length > 0);
+        if (!ok) { lastErr = new Error("BAD_SHAPE"); continue; }
+        for (const m of c.modules) m.quiz = (Array.isArray(m.quiz) ? m.quiz : []).filter((x: any) => Array.isArray(x.optionsAr) && x.optionsAr.length >= 2 && Array.isArray(x.optionsEn) && x.optionsEn.length === x.optionsAr.length && x.correctIndex >= 0 && x.correctIndex < x.optionsAr.length);
+        return res.json({ course: c, model, truncated: raw.length > text.length });
+      } catch (err: any) {
+        lastErr = err;
+        const msg = String(err?.message || err);
+        logToFile(`book-to-course ${model} failed: ${msg.slice(0, 200)}`);
+        // quota / overload / unknown model → try the next model; anything else also falls through to the next one
+        continue;
+      }
+    }
+    const msg = String(lastErr?.message || "");
+    const quota = msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED");
+    return res.status(quota ? 429 : 502).json({ error: quota ? "AI_QUOTA" : "AI_FAILED" });
+  });
+
   // Secure Voucher Redemption Endpoint
   app.post("/api/vouchers/redeem", async (req: express.Request, res: express.Response) => {
     try {

@@ -85,6 +85,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
   const [convertedCourse, setConvertedCourse] = useState<BookCourse | null>(null);
   const [isConverting, setIsConverting] = useState<boolean>(false);
   const [conversionStep, setConversionStep] = useState<string>('');
+  const [convertError, setConvertError] = useState<string>('');
 
   // Reader & Scannability customization
   const [fontSize, setFontSize] = useState<'normal' | 'medium' | 'large' | 'xl'>('normal');
@@ -1243,183 +1244,62 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
   };
 
   // Human Intelligent Parser for pasted book text / PDF content
-  const runMicroDeconstruction = () => {
-    if (!rawText.trim()) {
-      alert(isRtl ? 'يرجى تقديم محتوى أو فصول لتطبيق التفكيك الهيكلي!' : 'Please feed raw text or book chapters to deconstruct!');
+  const GENERATED_COVER = 'data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%230ea5e9%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%232563eb%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E';
+  const runMicroDeconstruction = async () => {
+    const text = rawText.trim();
+    setConvertError('');
+    if (text.length < 200) {
+      setConvertError(isRtl ? 'النص قصير جداً. ألصق فقرة أو فصلاً لا يقل عن ٢٠٠ حرف.' : 'Text is too short. Paste at least 200 characters.');
       return;
     }
-
     setIsConverting(true);
-    setConversionStep(isRtl ? '1. تفكيك هيكلي فوري لمجمل الكتاب...' : '1. Core deconstruction in progress...');
-    
-    setTimeout(() => {
-      setConversionStep(isRtl ? '2. أنسنة لغة الخطاب المباشر ومخاطبة العقل...' : '2. Conversational tone & humanization...');
-      
-      setTimeout(() => {
-        setConversionStep(isRtl ? '3. دمج محطات التثبيت وبناء اختبار الفهم...' : '3. Injecting review node and gatekeeper validation...');
-        
-        setTimeout(() => {
-          // Rule-based heuristic generation extracting concepts from user raw text
-          const lines = rawText.split('\n').filter(l => l.trim().length > 10);
-          const chunks = lines.slice(0, 4);
-          const firstChunk = chunks[0] || 'Orientation details...';
-          const secondChunk = chunks[1] || 'Core concepts details...';
-          const thirdChunk = chunks[2] || 'Application details...';
-          
-          const fakeGenerated: BookCourse = {
-            id: 'generated_course_' + Date.now(),
-            titleAr: isRtl ? 'مسارك التدريبي المولد ذكياً' : 'Your Smartly Generated Course',
-            titleEn: 'Your AI Generated Course',
-            authorAr: isRtl ? 'الذكاء الهندسي المطور' : 'Development Engineering Engine',
-            authorEn: 'Creative AI Copilot',
-            coverImage: 'data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%230ea5e9%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%232563eb%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%A4%96%3C/text%3E%3C/svg%3E',
-            descriptionAr: isRtl ? 'مسار تم إنتاجه تلقائياً من المستند الخاص بك لضمان الاستبصار السريع.' : 'Course instantly extracted and aligned with standard framework guidelines.',
-            descriptionEn: 'Synthesized directly from your raw PDF data.',
-            chapters: [
-              {
-                id: 'gen_ch1',
-                chapterNum: 1,
-                titleAr: isRtl ? 'الفصل الأول: البعد التطبيقي والمحاور المركزة' : 'Chapter 1: Deconstructed Principles',
-                titleEn: 'Chapter 1: Core Extracted Principles',
-                descriptionAr: isRtl ? 'تلخيص الأفكار المعرفية في جزيئات صغيرة سهلة الهضم.' : 'Extracted micro-concepts organized to save study time.',
-                descriptionEn: 'Micro-concepts generated directly from your uploaded book file.',
-                lessons: [
-                  {
-                    id: 'gen_ch1_l1',
-                    idNum: 1,
-                    titleAr: '1. التمهيد ومحور الأولوية الأبرز في النص',
-                    titleEn: '1. Orientation: Highest Focus Priority',
-                    duration: '3m',
-                    type: 'intro',
-                    contentAr: `مبادئ الإدراك السليم: 
-لقد قمنا بتصفية المستند الخاص بنا واسترجاع النقاط الذهبية لتقديمها لك في لغة خطابية سهلة.
-
-**مفهومنا الأساسي في هذا الفصل:**
-\${firstChunk}
-
-**أهمية هذا الدرس:** أسرع بوابة للتعلم هي تفكيك الفكرة الكلية إلى نقاط تنموية ممتعة، بدلاً من قراءة المذكرات الأكاديمية الطويلة والجافة.`,
-                    contentEn: `Welcome to your customized micro-course. 
-We extracted the ultimate golden nuggets from your source file to offer you direct, interactive knowledge fast.
-
-**Core Thesis:**
-\${firstChunk}
-
-By dividing raw chapters into structured micro-concepts, we retain active mental clarity.`
-                  },
-                  {
-                    id: 'gen_ch1_l2',
-                    idNum: 2,
-                    titleAr: '2. عمق المعرفة: التثبيت وصياغة الواقع الفعلي',
-                    titleEn: '2. Actionable Core: The Deep Dive Application',
-                    duration: '4m',
-                    type: 'core',
-                    contentAr: `يتناول هذا المقطع عمق السلسلة العملية المستخلصة من المستند:
-
-\${secondChunk}
-
-مما يبرز بوضوح أنه في شؤون الحياة والتعلم، يجب عليك ممارسة التطبيق الفعلي يومياً بدلاً من مجرد الحفظ النظري للأبجديات.`,
-                    contentEn: `This segment targets the practical application of your custom uploaded material:
-
-\${secondChunk}
-
-It confirms that successful modern learners prioritize dynamic continuous action over static memorization.`
-                  },
-                  {
-                    id: 'gen_ch1_l3',
-                    idNum: 3,
-                    titleAr: '3. محطة تثبيت ومراجعة سريعة لربط الأفكار الذكية',
-                    titleEn: '3. Synthesis Node: Bringing It All Together',
-                    duration: '3m',
-                    type: 'review',
-                    contentAr: `تهانينا على الوصول لمحطة التثبيت! دعنا نربط الفكر الشمولي لما تعلمناه:
-
-1. **دائرة الفهم التفاعلي:** التركيز يتركز في النقاط الأقرب للتنفيذ والنشاط اليومي.
-2. **أنسنة البيانات:** فهم المعايير وتطبيقها يضمن توفير ساعات من القراءة الهامشية.
-3. **تطبيق الفكرة القادمة:**
-\${thirdChunk}`,
-                    contentEn: `Congratulations on reaching the Synthesis Node! Let us align the main takeaways:
-
-1. **Strategic Action:** Real absorption is triggered when you relate abstract data to your regular routine.
-2. **Human Translation:** Understanding context keeps your development fast.
-3. **Primary focus going forward:**
-\${thirdChunk}`
-                  },
-                  {
-                    id: 'gen_ch1_l4',
-                    idNum: 4,
-                    titleAr: '4. دليل الإرشادات وتجهيز المفاهيم قبل اختبار العبور',
-                    titleEn: '4. Standard tips node: Best Practices Before Verification',
-                    duration: '2m',
-                    type: 'tips',
-                    contentAr: `إليك الدليل التطبيقي السريع استعداداً لبوابة اختبار العبور الفطن:
-
-- **تدبر المحاور:** عرج بذهنك على العناصر السابقة التي حددناها بدقة.
-- **التجربة الممتدة:** حاول صيانة هذه المفاهيم في نقاشاتك العادية مع زملائك اليوم.
-- لنبدأ معاً **اختبار الفهم** لتوثيق تقدمك بنجاح!`,
-                    contentEn: `Here are quick checklist components to review before jumping into standard verification:
-
-- **Mental Mapping:** Take 30 seconds to visualize the synthesis points.
-- **Micro Practice:** Explain this summary to a friend or co-worker today to reinforce it.
-- Let usนั่ง the **Verification Quiz** to log your achievement.`
-                  }
-                ],
-                quiz: [
-                  {
-                    questionAr: "ما هو الاستخلاص الأساسي لمحور الفائدة الذي ناقشناه في البداية؟",
-                    questionEn: "What is the core focus area of the first deconstructed section?",
-                    optionsAr: [
-                      isRtl ? "أن دراسة جزيئات المعرفة الصغيرة تحقق تركيزاً فعالاً يغنيك عن المجلدات الجافة." : "That micro-learning pathways build active focus that saves time.",
-                      isRtl ? "أنه يجب قراءة 1000 صفحة يومياً دون مراجعة أو اختبار فهم." : "That you must read 1000 pages continuous without verification.",
-                      isRtl ? "أن التعلم يعتمد فقط على الحظ كلياً دون صياغة المبادئ." : "That learning relies strictly on random luck without rules."
-                    ],
-                    optionsEn: [
-                      "That deconstructed micro-learning tracks yield immense retention compared to dry manuals.",
-                      "That you should rush through thousands of pages without summarizing.",
-                      "That progress comes from pure coincidence without rules."
-                    ],
-                    correctIndex: 0,
-                    explanationAr: isRtl ? "تجزئة الفصل الطويل لنقاط تناقش فكرة واحدة يحفز خلايا الفهم العميقة." : "Aligning paragraphs into modular actions keeps cognitive loads balanced.",
-                    explanationEn: "Filtering dense documents into simple action steps maintains memory efficiency."
-                  },
-                  {
-                    questionAr: "كيف تضمن تخليد المعرفة واستبصارها في الواقع العملي؟",
-                    questionEn: "How do you guarantee continuous integration of your knowledge?",
-                    optionsAr: [
-                      isRtl ? "عبر ممارستها وتطبيقها والربط الدائم للمفاهيم بالنشاط الفعلي." : "By practicing, executing, and relating guidelines directly to activities.",
-                      isRtl ? "عن طريق تجنب الاختبارات وإهمال مراجعات الفصول." : "By skipping review nodes altogether.",
-                      isRtl ? "ترك المنهج فور الانتهاء والبدء في دورة عشوائية أخرى." : "By leaving the screen instantly and ignoring the verification."
-                    ],
-                    optionsEn: [
-                      "By practicing, converting definitions to habits, and doing regular application.",
-                      "By avoiding quizzes or structural review steps.",
-                      "By never revising or checking the progression."
-                    ],
-                    correctIndex: 0,
-                    explanationAr: isRtl ? "ربط التطابق يخلد الفهم ويسرع عجلة التنمية الذاتية للذهن." : "Meaningful practical challenges activate deeper neuronal connections.",
-                    explanationEn: "Translating words to dynamic habits solidifies learning and results."
-                  }
-                ]
-              }
-            ]
-          };
-
-          setConvertedCourse(fakeGenerated);
-          setSelectedBook(fakeGenerated);
-          setActiveChapter(fakeGenerated.chapters[0]);
-          setActiveLesson(fakeGenerated.chapters[0].lessons[0]);
-          setLessonIndex(0);
-          setShowQuiz(false);
-          setIsConverting(false);
-          
-          confetti({
-            particleCount: 150,
-            angle: 60,
-            spread: 55,
-            origin: { x: 0 }
-          });
-        }, 1500);
-      }, 1500);
-    }, 1500);
+    setConversionStep(isRtl ? 'سارة تقرأ النص وتبني الدورة... قد يستغرق ذلك دقيقة' : 'Reading your text and building the course... this can take a minute');
+    try {
+      const r = await fetch('/api/pd/book-to-course', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok || !data?.course) {
+        const code = data?.error || (r.status === 401 ? 'AUTH' : 'AI_FAILED');
+        throw new Error(code);
+      }
+      const c = data.course;
+      const bullets = (arr: string[] = []) => arr.map(p => `- ${p}`).join('\n');
+      const course: BookCourse = {
+        id: 'generated_course_' + Date.now(),
+        titleAr: c.titleAr, titleEn: c.titleEn,
+        authorAr: 'من النص الذي أدخلته', authorEn: 'From your text',
+        coverImage: GENERATED_COVER,
+        descriptionAr: c.descriptionAr, descriptionEn: c.descriptionEn,
+        chapters: c.modules.map((m: any, mi: number) => ({
+          id: `gen_ch${mi + 1}`, chapterNum: mi + 1,
+          titleAr: m.titleAr, titleEn: m.titleEn, descriptionAr: m.descriptionAr, descriptionEn: m.descriptionEn,
+          lessons: m.lessons.map((l: any, li: number) => ({
+            id: `gen_ch${mi + 1}_l${li + 1}`, idNum: li + 1,
+            titleAr: l.titleAr, titleEn: l.titleEn,
+            duration: `${Math.max(2, Math.round(String(l.summaryEn || '').split(/\s+/).length / 60) + 1)}m`,
+            type: li === 0 ? 'intro' : 'core',
+            contentAr: `${l.summaryAr}\n\n**أهم النقاط:**\n${bullets(l.keyPointsAr)}`,
+            contentEn: `${l.summaryEn}\n\n**Key points:**\n${bullets(l.keyPointsEn)}`,
+          })),
+          quiz: m.quiz || [],
+        })),
+      };
+      setConvertedCourse(course);
+      setSelectedBook(course);
+      setActiveChapter(course.chapters[0]);
+      setActiveLesson(course.chapters[0].lessons[0]);
+      setLessonIndex(0);
+      setShowQuiz(false);
+      confetti({ particleCount: 120, angle: 60, spread: 55, origin: { x: 0 } });
+    } catch (e: any) {
+      const code = String(e?.message || '');
+      setConvertError(
+        code === 'AI_QUOTA' || code === 'RATE_LIMITED' ? (isRtl ? 'الخدمة مشغولة الآن (تم بلوغ الحد). حاول بعد قليل.' : 'The AI service is busy (limit reached). Please try again shortly.')
+        : code === 'AUTH' ? (isRtl ? 'سجّل الدخول بحسابك أولاً ثم أعد المحاولة.' : 'Please sign in first, then retry.')
+        : code === 'TEXT_TOO_SHORT' ? (isRtl ? 'النص قصير جداً.' : 'Text is too short.')
+        : (isRtl ? 'تعذّر إنشاء الدورة الآن. تأكد من الاتصال وحاول مرة أخرى.' : 'Could not build the course right now. Check your connection and retry.'));
+    } finally {
+      setIsConverting(false);
+    }
   };
 
   // Helper to highlight matching text in search
@@ -2821,6 +2701,12 @@ It confirms that successful modern learners prioritize dynamic continuous action
                   </div>
                 ) : (
                   <div className="space-y-5">
+                    {convertError && (
+                      <div role="alert" className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-right text-sm font-bold text-red-700">
+                        <span>{convertError}</span>
+                        <button onClick={runMicroDeconstruction} className="rounded-xl bg-[#002147] px-4 py-2 text-xs font-black text-white">{isRtl ? 'إعادة المحاولة' : 'Retry'}</button>
+                      </div>
+                    )}
                     <textarea 
                       rows={8}
                       placeholder={isRtl 
@@ -2847,7 +2733,7 @@ It confirms that successful modern learners prioritize dynamic continuous action
                         className="bg-[#b48e56] hover:bg-[#a17e4b] text-white transition-all font-black text-xs py-3 px-8 rounded-xl shadow-md flex items-center gap-1.5"
                       >
                         <Sparkles size={14} />
-                        <span>{isRtl ? 'كود تفكيك ومعالجة الذكاء' : 'Deconstruct Now'}</span>
+                        <span>{isRtl ? 'حوّله إلى دورة بالذكاء الاصطناعي' : 'Build course with AI'}</span>
                       </button>
                     </div>
                   </div>
