@@ -7,10 +7,12 @@ import { READING_TRACK } from '../data/saraTracks/reading';
 import { WRITING_TRACK } from '../data/saraTracks/writing';
 import type { SaraTrack } from '../data/saraTracks/foundations';
 import { LISTENING_LESSONS, LISTENING_TRACK_ID } from '../data/saraTracks/listening';
+import { PRONUNCIATION_LESSONS, PRONUNCIATION_TRACK_ID } from '../data/saraTracks/pronunciation';
 
 const LISTENING_AS_TRACK = { id: LISTENING_TRACK_ID, titleAr: 'الاستماع', titleEn: 'Listening', lessons: LISTENING_LESSONS.map(l => ({ id: l.id, order: l.order, titleAr: l.titleAr, titleEn: l.titleEn })) } as SaraTrack;
+const PRON_AS_TRACK = { id: PRONUNCIATION_TRACK_ID, titleAr: 'النطق', titleEn: 'Pronunciation', lessons: PRONUNCIATION_LESSONS.map(l => ({ id: l.id, order: l.order, titleAr: l.titleAr, titleEn: l.titleEn })) } as SaraTrack;
 
-export interface SaraSkill { id: 'grammar' | 'conversation' | 'reading' | 'writing' | 'listening'; labelAr: string; labelEn: string; passed: number; total: number; pct: number; testBest: number | null }
+export interface SaraSkill { id: 'grammar' | 'conversation' | 'reading' | 'writing' | 'listening' | 'pronunciation'; labelAr: string; labelEn: string; passed: number; total: number; pct: number; testBest: number | null }
 export interface SaraSkills { skills: SaraSkill[]; hasData: boolean; placementLevel: string | null }
 
 const SKILLS: { id: SaraSkill['id']; labelAr: string; labelEn: string; tracks: SaraTrack[] }[] = [
@@ -19,6 +21,7 @@ const SKILLS: { id: SaraSkill['id']; labelAr: string; labelEn: string; tracks: S
   { id: 'reading', labelAr: 'القراءة والنطق 📖', labelEn: 'Reading 📖', tracks: [READING_TRACK] },
   { id: 'writing', labelAr: 'الكتابة ✍️', labelEn: 'Writing ✍️', tracks: [WRITING_TRACK] },
   { id: 'listening', labelAr: 'الاستماع 🎧', labelEn: 'Listening 🎧', tracks: [LISTENING_AS_TRACK] },
+  { id: 'pronunciation', labelAr: 'النطق 🗣️', labelEn: 'Pronunciation 🗣️', tracks: [PRON_AS_TRACK] },
 ];
 
 /** Real per-skill values: lessons passed per Sara track (cloud ∪ this device), best level-test score, placement level. No sample numbers. */
