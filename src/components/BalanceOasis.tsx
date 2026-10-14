@@ -1019,46 +1019,46 @@ export const getMovementIcon = (id: string) => {
 const getExerciseIcon = (id: string, size: number = 18) => {
   switch (id) {
     case 'focus_001':
-      return <Smile size={size} className="text-teal-400" />;
+      return <Smile size={size} className="text-[#E4C77A]" />;
     case 'focus_002':
       return <Smile size={size} className="text-emerald-400" />;
     case 'focus_003':
       return <Sparkles size={size} className="text-amber-400" />;
     case 'focus_004':
-      return <Compass size={size} className="text-cyan-400" />;
+      return <Compass size={size} className="text-[#E4C77A]" />;
     case 'focus_005':
       return <Heart size={size} className="text-rose-400" />;
     case 'focus_006':
-      return <Wind size={size} className="text-sky-400" />;
+      return <Wind size={size} className="text-[#E4C77A]" />;
     case 'focus_007':
       return <Flame size={size} className="text-orange-400" />;
     case 'focus_008':
-      return <Cloud size={size} className="text-teal-300" />;
+      return <Cloud size={size} className="text-[#E4C77A]" />;
     case 'focus_009':
-      return <Sparkles size={size} className="text-teal-400" />;
+      return <Sparkles size={size} className="text-[#E4C77A]" />;
     case 'focus_010':
     case 'focus_011':
-      return <Moon size={size} className="text-purple-400" />;
+      return <Moon size={size} className="text-[#E4C77A]" />;
     case 'focus_012':
       return <Sun size={size} className="text-yellow-400" />;
     case 'focus_013':
-      return <Compass size={size} className="text-blue-400" />;
+      return <Compass size={size} className="text-[#E4C77A]" />;
     case 'focus_014':
       return <Award size={size} className="text-amber-500" />;
     case 'focus_015':
       return <Heart size={size} className="text-pink-400" />;
     case 'focus_016':
-      return <Cloud size={size} className="text-indigo-400" />;
+      return <Cloud size={size} className="text-[#E4C77A]" />;
     case 'focus_017':
-      return <Wind size={size} className="text-teal-200" />;
+      return <Wind size={size} className="text-[#E4C77A]" />;
     case 'focus_018':
-      return <Compass size={size} className="text-teal-500" />;
+      return <Compass size={size} className="text-[#9a7a2c]" />;
     case 'focus_019':
       return <Smile size={size} className="text-amber-300" />;
     case 'focus_020':
       return <Award size={size} className="text-emerald-500" />;
     default:
-      return <Wind size={size} className="text-teal-400" />;
+      return <Wind size={size} className="text-[#E4C77A]" />;
   }
 };
 
@@ -2218,7 +2218,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
           const options = {
             cacheBust: true,
             pixelRatio: 2.5,
-            backgroundColor: '#030712',
+            backgroundColor: '#001a38',
             styleSheetsFilter: (styleSheet: CSSStyleSheet) => {
               try {
                 const rules = styleSheet.cssRules;
@@ -2499,7 +2499,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
           }}
           className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all duration-300 flex items-center gap-2 cursor-pointer select-none ${
             unitNum === 1
-              ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25 scale-[1.02]'
+              ? 'bg-gradient-to-r from-[#C49E3A] to-[#002147] text-white shadow-lg shadow-[#C49E3A]/25 scale-[1.02]'
               : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
           }`}
         >
@@ -2527,7 +2527,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
         <button
           disabled={isExportingUnit}
           onClick={() => handleExportUnitSummary(subTabKey, unitNum)}
-          className="px-3.5 py-2 bg-gradient-to-r from-amber-500/20 via-rose-500/20 to-teal-500/20 border border-amber-400/40 hover:border-amber-400 text-amber-200 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-md"
+          className="px-3.5 py-2 bg-gradient-to-r from-amber-500/20 via-rose-500/20 to-[#C49E3A]/20 border border-amber-400/40 hover:border-amber-400 text-amber-200 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-md"
           title={isRtl ? `تصدير كامل بوستر خطوات تمارين الوحدة ${unitNum === 1 ? 'الأولى' : 'الثانية'} كصورة عالية الدقة 📸` : 'Export unit steps poster as image 📸'}
         >
           {isExportingUnit ? (
@@ -2545,7 +2545,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
         <span className={`text-[11px] font-extrabold px-3 py-1.5 rounded-xl border flex items-center gap-1.5 font-mono ${
           unitNum === 2
             ? 'bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-emerald-500/10 border-amber-500/30 text-amber-300'
-            : 'bg-blue-500/10 border-blue-500/20 text-blue-300'
+            : 'bg-[#C49E3A]/10 border-[#C49E3A]/20 text-[#E4C77A]'
         }`}>
           <span>{unitNum === 2 ? '🌸' : '⚡'}</span>
           <span>{isRtl ? `الوحدة ${unitNum === 1 ? '1' : '2'}` : `Unit ${unitNum}`}</span>
@@ -2664,14 +2664,14 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
     <div className="w-full text-right space-y-8" dir={isRtl ? 'rtl' : 'ltr'}>
       
       {/* 1. Header Banner */}
-      <div className="relative bg-gradient-to-r from-teal-900/40 via-[#162a4d]/90 to-teal-900/40 border border-teal-500/20 rounded-[2.5rem] p-8 md:p-10 overflow-hidden text-right shadow-2xl">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-teal-500/5 rounded-full blur-[100px] opacity-40 pointer-events-none" />
+      <div className="relative bg-gradient-to-r from-[#002147]/40 via-[#162a4d]/90 to-[#002147]/40 border border-[#C49E3A]/20 rounded-[2.5rem] p-8 md:p-10 overflow-hidden text-right shadow-2xl">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-[#C49E3A]/5 rounded-full blur-[100px] opacity-40 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-[100px] opacity-40 pointer-events-none" />
         
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-3">
-            <span className="text-xs font-bold text-teal-400 uppercase tracking-widest bg-teal-500/10 border border-teal-500/20 px-3 py-1 rounded-full inline-flex items-center gap-1.5">
-              <Compass size={12} className="text-teal-400" />
+            <span className="text-xs font-bold text-[#E4C77A] uppercase tracking-widest bg-[#C49E3A]/10 border border-[#C49E3A]/20 px-3 py-1 rounded-full inline-flex items-center gap-1.5">
+              <Compass size={12} className="text-[#E4C77A]" />
               {isRtl ? 'واحة التوازن والسكينة الأسرية' : 'Mindfulness & Oasis of Calm'}
             </span>
             <h2 className="text-3xl md:text-4xl font-black text-white leading-tight">
@@ -2688,12 +2688,12 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
           <div className="bg-[#12244a] border border-white/10 rounded-2xl p-5 w-full md:w-72 space-y-3 shrink-0">
             <div className="flex justify-between items-center text-xs">
               <span className="text-slate-400 font-bold">{isRtl ? 'إجمالي الإنجاز بالواحة:' : 'Oasis Progress:'}</span>
-              <span className="text-teal-400 font-black font-mono tracking-tight">{totalCompleted} / {totalAvailable}</span>
+              <span className="text-[#E4C77A] font-black font-mono tracking-tight">{totalCompleted} / {totalAvailable}</span>
             </div>
             
             <div className="w-full bg-slate-900 rounded-full h-2 overflow-hidden block">
               <div 
-                className="bg-gradient-to-r from-teal-400 to-emerald-400 h-full rounded-full transition-all duration-500" 
+                className="bg-gradient-to-r from-[#C49E3A] to-emerald-400 h-full rounded-full transition-all duration-500" 
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -2712,13 +2712,13 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                 value={customStudentName}
                 onChange={(e) => setCustomStudentName(e.target.value)}
                 placeholder={isRtl ? 'اكتب اسمك هنا لتخصيص الصورة' : 'Type name here to customize'}
-                className="w-full bg-slate-950 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 text-right transition-all block"
+                className="w-full bg-slate-950 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#C49E3A]/60 text-right transition-all block"
               />
               
               <button
                 disabled={isExporting}
                 onClick={handleExportOasisCard}
-                className="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 disabled:opacity-50 text-slate-950 font-black py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all cursor-pointer mt-1"
+                className="w-full bg-gradient-to-r from-[#C49E3A] to-emerald-500 hover:from-[#002147] hover:to-emerald-600 disabled:opacity-50 text-slate-950 font-black py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all cursor-pointer mt-1"
               >
                 {isExporting ? (
                   <>
@@ -2755,7 +2755,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             }}
             className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'calm'
-                ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-slate-950 font-black shadow-lg shadow-teal-500/10'
+                ? 'bg-gradient-to-r from-[#C49E3A] to-[#002147] text-slate-950 font-black shadow-lg shadow-[#C49E3A]/10'
                 : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
             }`}
           >
@@ -2799,7 +2799,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             }}
             className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'writing'
-                ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-slate-950 font-black shadow-lg shadow-purple-500/10'
+                ? 'bg-gradient-to-r from-[#C49E3A] to-[#002147] text-slate-950 font-black shadow-lg shadow-[#C49E3A]/10'
                 : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
             }`}
           >
@@ -2843,7 +2843,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             }}
             className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'communication'
-                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-slate-950 font-black shadow-lg shadow-blue-500/10'
+                ? 'bg-gradient-to-r from-[#C49E3A] to-[#002147] text-slate-950 font-black shadow-lg shadow-[#C49E3A]/10'
                 : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
             }`}
           >
@@ -2887,7 +2887,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             }}
             className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'teamwork'
-                ? 'bg-gradient-to-r from-indigo-500 to-sky-500 text-slate-950 font-black shadow-lg shadow-indigo-500/15'
+                ? 'bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] text-slate-950 font-black shadow-lg shadow-[#C49E3A]/15'
                 : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
             }`}
           >
@@ -2999,7 +2999,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             }}
             className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'art'
-                ? 'bg-gradient-to-r from-pink-400 via-rose-400 to-indigo-400 text-slate-950 font-black shadow-lg shadow-pink-500/20'
+                ? 'bg-gradient-to-r from-pink-400 via-rose-400 to-[#C49E3A] text-slate-950 font-black shadow-lg shadow-pink-500/20'
                 : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
             }`}
           >
@@ -3023,7 +3023,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             }}
             className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeSubTab === 'life'
-                ? 'bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-slate-950 font-black shadow-lg shadow-teal-500/20'
+                ? 'bg-gradient-to-r from-emerald-400 via-[#C49E3A] to-[#C49E3A] text-slate-950 font-black shadow-lg shadow-[#C49E3A]/20'
                 : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
             }`}
           >
@@ -3041,13 +3041,13 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
-            className="bg-[#15274d] border border-teal-500/20 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden"
+            className="bg-[#15274d] border border-[#C49E3A]/20 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden"
           >
             {/* Ambient Background Sparkles */}
             <div className="absolute inset-0 pointer-events-none opacity-25">
-              <div className="absolute top-10 left-10 w-2 h-2 bg-teal-400 rounded-full animate-ping" />
+              <div className="absolute top-10 left-10 w-2 h-2 bg-[#C49E3A] rounded-full animate-ping" />
               <div className="absolute bottom-20 right-10 w-3 h-3 bg-amber-400 rounded-full animate-pulse" />
-              <div className="absolute top-1/2 left-1/3 w-1.5 h-1.5 bg-sky-400 rounded-full animate-ping" />
+              <div className="absolute top-1/2 left-1/3 w-1.5 h-1.5 bg-[#C49E3A] rounded-full animate-ping" />
             </div>
 
             <div className="relative z-10 max-w-2xl mx-auto space-y-8 flex flex-col items-center">
@@ -3067,7 +3067,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               {/* Main Recording Grid Container */}
               <div className="w-full bg-[#162d57] border border-white/5 rounded-2xl p-6 space-y-6">
                 <div className="text-center space-y-2">
-                  <span className="text-xs font-bold text-teal-400 bg-teal-500/10 border border-teal-500/20 px-3 py-1 rounded-full inline-block">
+                  <span className="text-xs font-bold text-[#E4C77A] bg-[#C49E3A]/10 border border-[#C49E3A]/20 px-3 py-1 rounded-full inline-block">
                     🎙️ {isRtl ? 'واحة التسجيل الصوتي والتحفيظ اللفظي' : 'Voice Reflection & Speech Mantra'}
                   </span>
                   <h4 className="text-sm md:text-base font-black text-white">
@@ -3089,7 +3089,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl cursor-pointer ${
                       isRecording 
                         ? 'bg-rose-500 text-white border-4 border-rose-300 animate-pulse' 
-                        : 'bg-gradient-to-br from-teal-400 to-emerald-500 text-slate-950 hover:scale-105 hover:shadow-teal-500/10'
+                        : 'bg-gradient-to-br from-[#C49E3A] to-emerald-500 text-slate-950 hover:scale-105 hover:shadow-[#C49E3A]/10'
                     }`}
                   >
                     {isRecording ? (
@@ -3146,17 +3146,17 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                 <motion.div
                   initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="w-full bg-gradient-to-br from-teal-950/40 via-slate-950 to-[#03060c] border border-teal-500/30 rounded-2xl p-6 space-y-4 text-center shadow-lg"
+                  className="w-full bg-gradient-to-br from-[#002147]/40 via-slate-950 to-[#03060c] border border-[#C49E3A]/30 rounded-2xl p-6 space-y-4 text-center shadow-lg"
                 >
                   <div className="flex items-center justify-center gap-2">
                     <span className="text-2xl animate-bounce">🤖</span>
-                    <h4 className="text-xs font-black text-teal-400 uppercase tracking-widest">{isRtl ? 'تشجيع الذكاء الاصطناعي اللطيف' : 'Soft AI Encouragement'}</h4>
+                    <h4 className="text-xs font-black text-[#E4C77A] uppercase tracking-widest">{isRtl ? 'تشجيع الذكاء الاصطناعي اللطيف' : 'Soft AI Encouragement'}</h4>
                     {isSpeakingEncouragement && (
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
                     )}
                   </div>
 
-                  <p className="text-white text-sm md:text-base leading-relaxed font-black tracking-wide bg-teal-950/15 border border-white/5 p-4 rounded-xl">
+                  <p className="text-white text-sm md:text-base leading-relaxed font-black tracking-wide bg-[#002147]/15 border border-white/5 p-4 rounded-xl">
                     {aiEncouragementText}
                   </p>
 
@@ -3182,7 +3182,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               <div className="flex justify-center pt-2">
                 <button
                   onClick={closeCompletionSession}
-                  className="bg-gradient-to-r from-teal-400 to-emerald-400 hover:from-teal-500 hover:to-emerald-500 text-slate-950 font-black px-6 py-3 rounded-xl text-xs sm:text-sm transition-all shadow-lg shadow-teal-500/20 active:scale-95 flex items-center gap-2 cursor-pointer"
+                  className="bg-gradient-to-r from-[#C49E3A] to-emerald-400 hover:from-[#C49E3A] hover:to-emerald-500 text-slate-950 font-black px-6 py-3 rounded-xl text-xs sm:text-sm transition-all shadow-lg shadow-[#C49E3A]/20 active:scale-95 flex items-center gap-2 cursor-pointer"
                 >
                   {isRtl ? 'العودة لساحة التمارين واستكمال التعلم 🎯' : 'Return to Oasis & Code 🎯'}
                 </button>
@@ -3195,13 +3195,13 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            className="bg-[#15274d] border border-teal-500/30 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden text-center"
+            className="bg-[#15274d] border border-[#C49E3A]/30 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden text-center"
           >
             {/* Meditative floating background sparkles */}
             <div className="absolute inset-0 pointer-events-none opacity-20">
-              <div className="absolute top-10 left-10 w-2 h-2 bg-teal-400 rounded-full animate-ping" />
+              <div className="absolute top-10 left-10 w-2 h-2 bg-[#C49E3A] rounded-full animate-ping" />
               <div className="absolute bottom-20 right-10 w-3 h-3 bg-emerald-400 rounded-full animate-pulse" />
-              <div className="absolute top-1/2 left-1/3 w-1.5 h-1.5 bg-sky-400 rounded-full animate-ping" />
+              <div className="absolute top-1/2 left-1/3 w-1.5 h-1.5 bg-[#C49E3A] rounded-full animate-ping" />
             </div>
 
             <div className="relative z-10 max-w-3xl mx-auto space-y-8 flex flex-col items-center">
@@ -3221,7 +3221,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   <button 
                     onClick={() => setSoundEnabled(!soundEnabled)}
                     className={`p-2 rounded-xl border transition ${
-                      soundEnabled ? 'bg-teal-500/10 border-teal-500/30 text-teal-400' : 'bg-white/5 border-white/5 text-slate-500'
+                      soundEnabled ? 'bg-[#C49E3A]/10 border-[#C49E3A]/30 text-[#E4C77A]' : 'bg-white/5 border-white/5 text-slate-500'
                     }`}
                     title={isRtl ? 'صوت التردد الهادئ' : 'Ambient Tone hum'}
                   >
@@ -3229,7 +3229,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   </button>
 
                   <span className="text-xs bg-[#1e345c] border border-white/5 px-3 py-1.5 rounded-xl text-slate-300 font-bold flex items-center gap-1.5 font-mono">
-                    <Timer size={13} className="text-teal-400 animate-pulse" />
+                    <Timer size={13} className="text-[#E4C77A] animate-pulse" />
                     {timeLeft}s {isRtl ? 'متبقية' : 'left'}
                   </span>
                 </div>
@@ -3245,7 +3245,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     opacity: breathState === 'inhale' ? 0.22 : breathState === 'hold' ? 0.35 : breathState === 'exhale' ? 0.08 : 0.04
                   }}
                   transition={{ duration: 4, ease: "easeInOut" }}
-                  className="absolute inset-0 bg-teal-500 rounded-full blur-2xl"
+                  className="absolute inset-0 bg-[#C49E3A] rounded-full blur-2xl"
                 />
 
                 <motion.div 
@@ -3253,7 +3253,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     scale: breathState === 'inhale' ? 1.25 : breathState === 'hold' ? 1.25 : breathState === 'exhale' ? 0.95 : 0.95,
                   }}
                   transition={{ duration: 4, ease: "easeInOut" }}
-                  className="absolute w-52 h-52 bg-gradient-to-br from-teal-500/10 to-emerald-500/20 rounded-full border border-teal-500/20 flex items-center justify-center"
+                  className="absolute w-52 h-52 bg-gradient-to-br from-[#C49E3A]/10 to-emerald-500/20 rounded-full border border-[#C49E3A]/20 flex items-center justify-center"
                 />
 
                 {/* Inner solid coaching token with label */}
@@ -3262,7 +3262,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     scale: breathState === 'inhale' ? 1.1 : breathState === 'hold' ? 1.1 : breathState === 'exhale' ? 0.85 : 0.85
                   }}
                   transition={{ duration: 4, ease: "easeInOut" }}
-                  className="w-36 h-36 rounded-full bg-slate-950 border-2 border-teal-400 flex flex-col items-center justify-center z-10 shadow-lg text-center p-3"
+                  className="w-36 h-36 rounded-full bg-slate-950 border-2 border-[#C49E3A]/60 flex flex-col items-center justify-center z-10 shadow-lg text-center p-3"
                 >
                   {getExerciseIcon(selectedEx.id, 28)}
                   <span className="text-base font-black text-white tracking-widest uppercase animate-fade-in mt-1">
@@ -3320,7 +3320,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                   <button 
                     onClick={handleSessionComplete}
-                    className="bg-teal-500 hover:bg-teal-600 text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition shadow-lg shadow-teal-500/20"
+                    className="bg-[#C49E3A] hover:bg-[#002147] text-slate-950 font-black px-4 py-2 rounded-xl text-xs transition shadow-lg shadow-[#C49E3A]/20"
                   >
                     {isRtl ? 'أنهيت التركيز بنجاح! ✓' : 'Focus Complete! ✓'}
                   </button>
@@ -3408,7 +3408,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   
                   <div className="border-t border-white/5 pt-3 mt-3 flex flex-col gap-1 text-xs">
                     <p className="text-slate-400">
-                      <span className="font-bold text-teal-400">🌟 {isRtl ? 'ردد بصوت عالٍ أثناء الحركة:' : 'Say out loud while moving:'}</span>{' '}
+                      <span className="font-bold text-[#E4C77A]">🌟 {isRtl ? 'ردد بصوت عالٍ أثناء الحركة:' : 'Say out loud while moving:'}</span>{' '}
                       <span className="italic font-mono text-white">"{selectedMoveEx.say_while_moving}"</span>
                     </p>
                     <p className="text-slate-500 mt-1.5">
@@ -3488,7 +3488,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-white/5 pb-4 gap-4">
                   <div>
                     <h3 className="text-lg font-black text-white flex items-center gap-2">
-                      <span className="text-teal-400">⏱️</span>
+                      <span className="text-[#E4C77A]">⏱️</span>
                       {isRtl ? 'ضبط زمن وحجم جلسة التأمل:' : 'Set Meditation Target Timer:'}
                     </h3>
                     <p className="text-slate-400 text-xs mt-1">
@@ -3507,7 +3507,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                         }}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold transition font-mono ${
                           meditationTime === t 
-                            ? 'bg-teal-500 text-slate-950 shadow-lg shadow-teal-500/20' 
+                            ? 'bg-[#C49E3A] text-slate-950 shadow-lg shadow-[#C49E3A]/20' 
                             : 'bg-white/5 text-slate-400 hover:text-white'
                         }`}
                       >
@@ -3529,7 +3529,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                         className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#13284f] flex flex-col justify-between group ${
                           isCompleted 
                             ? 'border-emerald-500/30' 
-                            : 'border-white/5 hover:border-teal-500/30'
+                            : 'border-white/5 hover:border-[#C49E3A]/30'
                         }`}
                       >
                         {/* Badge */}
@@ -3543,7 +3543,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                               <Check size={10} strokeWidth={3} />
                             </span>
                           ) : (
-                            <span className="w-1.5 h-1.5 rounded-full bg-teal-500/50" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#C49E3A]/50" />
                           )}
                         </div>
 
@@ -3551,7 +3551,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                         <div className="space-y-1.5 text-right">
                           <div className="flex items-center gap-2">
                             {cardIcon}
-                            <h4 className="text-sm font-black text-white group-hover:text-teal-300 transition line-clamp-1">
+                            <h4 className="text-sm font-black text-white group-hover:text-[#E4C77A] transition line-clamp-1">
                               {isRtl ? ex.title_ar : ex.title_en}
                             </h4>
                           </div>
@@ -3567,7 +3567,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border ${
                               isCompleted 
                                 ? 'bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-300 border-emerald-500/10'
-                                : 'bg-teal-500/5 group-hover:bg-teal-500 group-hover:text-slate-950 text-teal-400 border-teal-500/10 group-hover:border-teal-500'
+                                : 'bg-[#C49E3A]/5 group-hover:bg-[#C49E3A] group-hover:text-slate-950 text-[#E4C77A] border-[#C49E3A]/10 group-hover:border-[#C49E3A]/60'
                             }`}
                           >
                             <Play size={11} fill="currentColor" />
@@ -3723,9 +3723,9 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   {/* Core Editor Container Layout */}
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
                     {/* Left Column: Notepad Textarea */}
-                    <div className="lg:col-span-8 bg-[#142345] border border-purple-500/10 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+                    <div className="lg:col-span-8 bg-[#142345] border border-[#C49E3A]/10 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
                       <div className="space-y-2">
-                        <label className="block text-xs font-black text-purple-400 uppercase tracking-widest text-right">
+                        <label className="block text-xs font-black text-[#E4C77A] uppercase tracking-widest text-right">
                           {isRtl ? 'صندوق التعبير والإنتاج الوجداني والقصصي' : 'Creative Writing & Emotional Expression Panel'}
                         </label>
                         <p className="text-[11px] text-slate-400 text-right italic leading-relaxed">
@@ -3745,7 +3745,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                         placeholder={isRtl 
                           ? `ابدأ بكتابة قصتك وإبداعك هنا متبعاً خطوات التحدي...` 
                           : `Start writing your story here, following the challenge steps...`}
-                        className="w-full min-h-[250px] bg-[#101d36] border border-white/5 focus:border-purple-500/50 rounded-xl p-4 text-sm md:text-base text-slate-100 placeholder-slate-500 focus:outline-none transition leading-relaxed text-right"
+                        className="w-full min-h-[250px] bg-[#101d36] border border-white/5 focus:border-[#C49E3A]/50 rounded-xl p-4 text-sm md:text-base text-slate-100 placeholder-slate-500 focus:outline-none transition leading-relaxed text-right"
                         dir="rtl"
                       />
 
@@ -3789,7 +3789,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           }}
                           className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                             isWritingSpeechActive
-                              ? 'bg-purple-500/20 border border-purple-500/40 text-purple-400'
+                              ? 'bg-[#C49E3A]/20 border border-[#C49E3A]/40 text-[#E4C77A]'
                               : 'bg-white/5 hover:bg-white/10 text-slate-300'
                           }`}
                         >
@@ -3882,7 +3882,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                         <div className="space-y-3" dir="rtl">
                           <div>
-                            <h6 className="text-[10px] font-black uppercase text-purple-400 tracking-wider">
+                            <h6 className="text-[10px] font-black uppercase text-[#E4C77A] tracking-wider">
                               {isRtl ? 'وصف التحدي الإبداعي وطرحه:' : 'Creative Task Description:'}
                             </h6>
                             <p className="text-xs text-slate-300 leading-relaxed mt-1">
@@ -3892,7 +3892,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                           {/* Steps Checklist */}
                           <div className="space-y-2 mt-2 pt-2 border-t border-white/5">
-                            <h6 className="text-[10px] font-black uppercase text-purple-400 tracking-wider mb-2">
+                            <h6 className="text-[10px] font-black uppercase text-[#E4C77A] tracking-wider mb-2">
                               {isRtl ? 'خطوات التطبيق العملي للنشاط والقصة:' : 'Practical Steps Checklist:'}
                             </h6>
                             <div className="space-y-2 max-h-[170px] overflow-y-auto pr-1">
@@ -3908,13 +3908,13 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                     }}
                                     className={`w-full text-right p-2.5 rounded-xl border transition-all text-[11px] flex items-start gap-2.5 cursor-pointer select-none ${
                                       isChecked 
-                                        ? 'bg-purple-500/10 border-purple-500/20 text-purple-200' 
-                                        : 'bg-[#142345] border-white/5 text-slate-400 hover:border-purple-500/10'
+                                        ? 'bg-[#C49E3A]/10 border-[#C49E3A]/20 text-[#E4C77A]' 
+                                        : 'bg-[#142345] border-white/5 text-slate-400 hover:border-[#C49E3A]/10'
                                     }`}
                                   >
                                     <span className={`mt-0.5 w-4.5 h-4.5 rounded border flex items-center justify-center shrink-0 transition-all ${
                                       isChecked 
-                                        ? 'bg-purple-500 border-purple-500 text-slate-950' 
+                                        ? 'bg-[#C49E3A] border-[#C49E3A]/60 text-slate-950' 
                                         : 'border-slate-600 text-transparent'
                                     }`}>
                                       <Check size={9} strokeWidth={4} />
@@ -3927,7 +3927,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           </div>
 
                           <div className="pt-2 border-t border-white/5">
-                            <h6 className="text-[10px] font-black uppercase text-purple-400 tracking-wider">
+                            <h6 className="text-[10px] font-black uppercase text-[#E4C77A] tracking-wider">
                               {isRtl ? 'الأثر النفسي والتربوي المتوقع:' : 'Expected Outcome:'}
                             </h6>
                             <p className="text-xs text-slate-300 leading-relaxed mt-1">
@@ -3962,7 +3962,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           setSelectedWritingEx(null);
                           stopSpeech();
                         }}
-                        className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white font-black py-3 rounded-xl text-xs sm:text-sm shadow-lg shadow-purple-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+                        className="w-full bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] hover:from-[#002147] hover:to-[#002147] text-white font-black py-3 rounded-xl text-xs sm:text-sm shadow-lg shadow-[#C49E3A]/20 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
                       >
                         <span>✓</span>
                         {isRtl ? 'تسجيل إنجاز تمرين الكتابة والولوج للتعزيز 🎙️' : 'Mark Completed & Get Encouraged 🎙️'}
@@ -3991,7 +3991,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-2 text-right" dir="rtl">
                     <div className="space-y-1">
                       <h3 className="text-lg font-black text-white flex items-center gap-2 justify-end">
-                        <span className="text-purple-400">✍️</span>
+                        <span className="text-[#E4C77A]">✍️</span>
                         {isRtl ? 'التعبير الإبداعي والذكاء العاطفي (الكتابة كأداة للتفكير):' : 'Creative Writing & Emotional Intelligence (Notepad as a Tool for Thinking):'}
                       </h3>
                       <p className="text-slate-400 text-xs">
@@ -3999,7 +3999,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       </p>
                     </div>
 
-                    <div className="text-xs bg-purple-500/10 border border-purple-500/20 text-purple-400 px-3 py-1.5 rounded-xl font-bold font-mono">
+                    <div className="text-xs bg-[#C49E3A]/10 border border-[#C49E3A]/20 text-[#E4C77A] px-3 py-1.5 rounded-xl font-bold font-mono">
                       {isRtl ? `أنجزت ${completedWritingIds.size} تمارين` : `${completedWritingIds.size} Completed`}
                     </div>
                   </div>
@@ -4015,7 +4015,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#13284f] flex flex-col justify-between group ${
                             isCompleted
                               ? 'border-emerald-500/30'
-                              : 'border-white/5 hover:border-purple-500/30'
+                              : 'border-white/5 hover:border-[#C49E3A]/30'
                           }`}
                         >
                           {/* Badge */}
@@ -4029,14 +4029,14 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                 <Check size={10} strokeWidth={3} />
                               </span>
                             ) : (
-                              <span className="w-1.5 h-1.5 rounded-full bg-purple-500/50" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#C49E3A]/50" />
                             )}
                           </div>
 
                           {/* Meta details */}
                           <div className="space-y-1.5 text-right font-sans">
                             <div className="flex items-center gap-2 justify-end">
-                              <h4 className="text-sm font-black text-white group-hover:text-purple-300 transition line-clamp-1">
+                              <h4 className="text-sm font-black text-white group-hover:text-[#E4C77A] transition line-clamp-1">
                                 {isRtl ? ex.title_ar : ex.title_en}
                               </h4>
                               <span className="text-lg">✍️</span>
@@ -4053,7 +4053,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                               className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
                                 isCompleted
                                   ? 'bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-300 border-emerald-500/10'
-                                  : 'bg-purple-500/5 group-hover:bg-purple-500 group-hover:text-slate-950 text-purple-400 border-purple-500/10 group-hover:border-purple-500'
+                                  : 'bg-[#C49E3A]/5 group-hover:bg-[#C49E3A] group-hover:text-slate-950 text-[#E4C77A] border-[#C49E3A]/10 group-hover:border-[#C49E3A]/60'
                               }`}
                             >
                               <FileText size={11} />
@@ -4255,7 +4255,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           setSelectedEmotionEx(null);
                           stopSpeech();
                         }}
-                        className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-emerald-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+                        className="w-full bg-gradient-to-r from-emerald-500 to-[#C49E3A] hover:from-emerald-600 hover:to-[#002147] text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-emerald-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
                       >
                         <span>✓</span>
                         {isRtl ? 'تسجيل إنجاز تمرين الذكاء الوجداني والولوج للتعزيز 🎙' : 'Mark Completed & Open Encouragement 🎙'}
@@ -4268,7 +4268,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                 <div className="space-y-8 text-right" dir="rtl">
                   
                   {/* 1. Real-time Emotional Thermometer & Mood Log Section */}
-                  <div className="bg-gradient-to-br from-[#0c192e] to-[#050b14] border border-white/5 rounded-3xl p-6 shadow-2xl space-y-6">
+                  <div className="bg-gradient-to-br from-[#0c192e] to-[#001a38] border border-white/5 rounded-3xl p-6 shadow-2xl space-y-6">
                     <div className="border-b border-white/5 pb-4">
                       <div className="flex items-center gap-2.5 justify-end">
                         <h3 className="text-lg font-black text-white">
@@ -4290,17 +4290,17 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                         
                         {/* Selected Feeling Icon Grid */}
                         <div className="space-y-2">
-                          <label className="text-xs font-black text-teal-400 uppercase tracking-wider block">
+                          <label className="text-xs font-black text-[#E4C77A] uppercase tracking-wider block">
                             {isRtl ? 'بماذا تشعر الآن بالدرجة الأولى؟' : 'Primary Feeling Tag:'}
                           </label>
                           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                             {[
                               { id: 'angry', emoji: '😡', label_ar: 'غضب', label_en: 'Anger', color: 'from-rose-500/20 to-red-500/20 border-red-500/40 text-red-200' },
                               { id: 'anxious', emoji: '😰', label_ar: 'قلق/توتر', label_en: 'Anxiety', color: 'from-amber-500/20 to-orange-500/20 border-orange-500/40 text-orange-200' },
-                              { id: 'sad', emoji: '😢', label_ar: 'حزن/تعب', label_en: 'Sadness', color: 'from-sky-500/20 to-blue-500/20 border-blue-500/40 text-blue-200' },
+                              { id: 'sad', emoji: '😢', label_ar: 'حزن/تعب', label_en: 'Sadness', color: 'from-[#C49E3A]/20 to-[#C49E3A]/20 border-[#C49E3A]/40 text-[#E4C77A]' },
                               { id: 'fear', emoji: '😨', label_ar: 'خوف', label_en: 'Fear', color: 'from-yellow-500/20 to-yellow-600/20 border-yellow-500/40 text-yellow-100' },
-                              { id: 'serene', emoji: '🧘', label_ar: 'هدوء/سلام', label_en: 'Serenity', color: 'from-teal-500/20 to-emerald-500/20 border-teal-500/40 text-teal-200' },
-                              { id: 'joyful', emoji: '⭐', label_ar: 'فرح/إنجاز', label_en: 'Joy', color: 'from-purple-500/20 to-indigo-500/20 border-purple-500/40 text-purple-200' }
+                              { id: 'serene', emoji: '🧘', label_ar: 'هدوء/سلام', label_en: 'Serenity', color: 'from-[#C49E3A]/20 to-emerald-500/20 border-[#C49E3A]/40 text-[#E4C77A]' },
+                              { id: 'joyful', emoji: '⭐', label_ar: 'فرح/إنجاز', label_en: 'Joy', color: 'from-[#C49E3A]/20 to-[#C49E3A]/20 border-[#C49E3A]/40 text-[#E4C77A]' }
                             ].map((feel) => (
                               <button
                                 key={feel.id}
@@ -4322,7 +4322,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                         <div className="space-y-2">
                           <div className="flex justify-between items-center text-xs">
                             <span className="font-mono text-slate-400">{currentThermometerValue} / 10</span>
-                            <span className="font-black text-teal-400">
+                            <span className="font-black text-[#E4C77A]">
                               {isRtl ? 'درجة الحرارة العاطفية والتأثير الحركي:' : 'Emotional Temperature Level:'}
                             </span>
                           </div>
@@ -4347,7 +4347,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                         {/* Reflection prompt */}
                         <div className="space-y-1.5 text-right">
-                          <label className="text-xs font-black text-teal-400 uppercase tracking-wider block">
+                          <label className="text-xs font-black text-[#E4C77A] uppercase tracking-wider block">
                             {isRtl ? 'صف باختصار سبب شعورك الحالي (اختياري للتفريغ):' : 'Brief Cause note (Optional for self-relief):'}
                           </label>
                           <input
@@ -4355,7 +4355,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             value={feelingReflectiveNote}
                             onChange={(e) => setFeelingReflectiveNote(e.target.value)}
                             placeholder={isRtl ? 'مثال: الفرح بإنجاز كود برمجي، أو التوتر من كثرة الشاشات...' : 'E.g., joy from completing a unit, or pressure from long study hours...'}
-                            className="w-full bg-[#142345] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-teal-500 text-right"
+                            className="w-full bg-[#142345] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#C49E3A]/60 text-right"
                           />
                         </div>
 
@@ -4374,7 +4374,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             localStorage.setItem('balance_oasis_feeling_logs', JSON.stringify(updated));
                             setFeelingReflectiveNote('');
                           }}
-                          className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black py-2.5 rounded-xl text-xs shadow-lg transition duration-200 cursor-pointer flex items-center justify-center gap-1.5"
+                          className="w-full bg-gradient-to-r from-emerald-500 to-[#C49E3A] hover:from-emerald-600 hover:to-[#002147] text-slate-950 font-black py-2.5 rounded-xl text-xs shadow-lg transition duration-200 cursor-pointer flex items-center justify-center gap-1.5"
                         >
                           <span>🌡️</span>
                           {isRtl ? 'تسجيل درجة الحرارة العاطفية في السجل' : 'Log Temperature Entry'}
@@ -4414,10 +4414,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                 switch (log.feeling) {
                                   case 'angry': return { emoji: '😡', bg: 'bg-rose-500/10 text-rose-300 border-rose-500/20', label: (isRtl ? 'غضب' : 'Anger') };
                                   case 'anxious': return { emoji: '😰', bg: 'bg-amber-500/10 text-amber-300 border-amber-500/20', label: (isRtl ? 'قلق' : 'Anxiety') };
-                                  case 'sad': return { emoji: '😢', bg: 'bg-sky-500/10 text-sky-300 border-sky-500/20', label: (isRtl ? 'حزن' : 'Sadness') };
+                                  case 'sad': return { emoji: '😢', bg: 'bg-[#C49E3A]/10 text-[#E4C77A] border-[#C49E3A]/20', label: (isRtl ? 'حزن' : 'Sadness') };
                                   case 'fear': return { emoji: '😨', bg: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20', label: (isRtl ? 'خوف' : 'Fear') };
-                                  case 'serene': return { emoji: '🧘', bg: 'bg-teal-500/10 text-teal-300 border-teal-500/20', label: (isRtl ? 'هدوء' : 'Serene') };
-                                  case 'joyful': return { emoji: '⭐', bg: 'bg-purple-500/10 text-purple-300 border-purple-500/20', label: (isRtl ? 'فرح' : 'Joy') };
+                                  case 'serene': return { emoji: '🧘', bg: 'bg-[#C49E3A]/10 text-[#E4C77A] border-[#C49E3A]/20', label: (isRtl ? 'هدوء' : 'Serene') };
+                                  case 'joyful': return { emoji: '⭐', bg: 'bg-[#C49E3A]/10 text-[#E4C77A] border-[#C49E3A]/20', label: (isRtl ? 'فرح' : 'Joy') };
                                   default: return { emoji: '💭', bg: 'bg-slate-500/10 text-slate-300 border-slate-500/20', label: 'شائع' };
                                 }
                               })();
@@ -4572,7 +4572,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       }}
                       className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all duration-300 flex items-center gap-2 cursor-pointer select-none ${
                         commActiveUnit === 1
-                          ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25 scale-[1.02]'
+                          ? 'bg-gradient-to-r from-[#C49E3A] to-[#002147] text-white shadow-lg shadow-[#C49E3A]/25 scale-[1.02]'
                           : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
                       }`}
                     >
@@ -4601,7 +4601,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     <button
                       disabled={isExportingUnit}
                       onClick={() => handleExportUnitSummary('communication', commActiveUnit)}
-                      className="px-3.5 py-2 bg-gradient-to-r from-amber-500/20 via-rose-500/20 to-teal-500/20 border border-amber-400/40 hover:border-amber-400 text-amber-200 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-md"
+                      className="px-3.5 py-2 bg-gradient-to-r from-amber-500/20 via-rose-500/20 to-[#C49E3A]/20 border border-amber-400/40 hover:border-amber-400 text-amber-200 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-md"
                       title={isRtl ? `تصدير كامل بوستر خطوات تمارين الوحدة ${commActiveUnit === 1 ? 'الأولى' : 'الثانية'} كصورة عالية الدقة 📸` : 'Export unit steps poster as image 📸'}
                     >
                       {isExportingUnit ? (
@@ -4619,7 +4619,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     <span className={`text-[11px] font-extrabold px-3 py-1.5 rounded-xl border flex items-center gap-1.5 font-mono ${
                       commActiveUnit === 2
                         ? 'bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-emerald-500/10 border-amber-500/30 text-amber-300'
-                        : 'bg-blue-500/10 border-blue-500/20 text-blue-400'
+                        : 'bg-[#C49E3A]/10 border-[#C49E3A]/20 text-[#E4C77A]'
                     }`}>
                       <span>{commActiveUnit === 2 ? '🌸' : '💬'}</span>
                       {commActiveUnit === 2
@@ -4695,7 +4695,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           <h4 className={`text-xs font-black uppercase tracking-widest border-b pb-2 ${
                             commActiveUnit === 2 
                               ? 'text-amber-300 border-amber-500/20' 
-                              : 'text-blue-400 border-white/5'
+                              : 'text-[#E4C77A] border-white/5'
                           }`}>
                             {isRtl ? 'خطوات التطبيق والتمرين العملي:' : 'Practical Exercise Checklist:'}
                           </h4>
@@ -4716,17 +4716,17 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                     isChecked 
                                       ? commActiveUnit === 2
                                         ? 'bg-gradient-to-r from-amber-500/20 via-rose-500/20 to-emerald-500/20 border-amber-400/50 text-amber-100 shadow-inner'
-                                        : 'bg-blue-500/10 border-blue-500/30 text-blue-100 shadow-inner' 
+                                        : 'bg-[#C49E3A]/10 border-[#C49E3A]/30 text-[#E4C77A] shadow-inner' 
                                       : commActiveUnit === 2
                                         ? 'bg-[#1e1f3a] border-amber-500/10 text-slate-300 hover:border-amber-400/30'
-                                        : 'bg-[#1d315c] border-white/5 text-slate-300 hover:border-blue-500/20'
+                                        : 'bg-[#1d315c] border-white/5 text-slate-300 hover:border-[#C49E3A]/20'
                                   }`}
                                 >
                                   <span className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
                                     isChecked 
                                       ? commActiveUnit === 2
                                         ? 'bg-gradient-to-r from-amber-400 to-rose-400 border-amber-400 text-slate-950 font-black'
-                                        : 'bg-blue-500 border-blue-500 text-slate-950' 
+                                        : 'bg-[#C49E3A] border-[#C49E3A]/60 text-slate-950' 
                                       : 'border-slate-500 text-transparent'
                                   }`}>
                                     <Check size={12} strokeWidth={4} />
@@ -4812,7 +4812,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           <div className={`border rounded-2xl p-4 text-xs leading-relaxed ${
                             commActiveUnit === 2
                               ? 'bg-gradient-to-r from-amber-950/40 via-rose-950/40 to-emerald-950/40 border-amber-500/30 text-amber-200'
-                              : 'bg-blue-950/20 border-blue-500/20 text-blue-200'
+                              : 'bg-[#002147]/20 border-[#C49E3A]/20 text-[#E4C77A]'
                           }`} dir="rtl">
                             <p className="font-extrabold mb-1">
                               {commActiveUnit === 2 ? '🌸' : '🤝'} {isRtl ? 'الأثر والترابط العائلي:' : 'Social Impact:'}
@@ -4853,7 +4853,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           className={`w-full font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4 ${
                             commActiveUnit === 2
                               ? 'bg-gradient-to-r from-amber-400 via-rose-500 to-emerald-400 hover:from-amber-300 hover:via-rose-400 hover:to-emerald-300 text-slate-950 shadow-amber-500/20'
-                              : 'bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-slate-950 shadow-blue-500/10'
+                              : 'bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] hover:from-[#002147] hover:to-[#002147] text-slate-950 shadow-[#C49E3A]/10'
                           }`}
                         >
                           <span>✓</span>
@@ -4868,7 +4868,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-2 text-right" dir="rtl">
                       <div className="space-y-1">
                         <h3 className="text-lg font-black text-white flex items-center gap-2">
-                          <span className={commActiveUnit === 2 ? 'text-amber-400' : 'text-blue-400'}>
+                          <span className={commActiveUnit === 2 ? 'text-amber-400' : 'text-[#E4C77A]'}>
                             {commActiveUnit === 2 ? '🌸☀️' : '💬'}
                           </span>
                           {commActiveUnit === 2 
@@ -4885,7 +4885,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       <div className={`text-xs border px-3 py-1.5 rounded-xl font-bold font-mono ${
                         commActiveUnit === 2
                           ? 'bg-amber-500/10 border-amber-500/30 text-amber-300'
-                          : 'bg-blue-500/10 border-blue-500/20 text-blue-400'
+                          : 'bg-[#C49E3A]/10 border-[#C49E3A]/20 text-[#E4C77A]'
                       }`}>
                         {isRtl 
                           ? `أنجزت ${(commActiveUnit === 1 ? COMMUNICATION_EXERCISES : COMMUNICATION_EXERCISES_UNIT2).filter(ex => completedCommIds.has(ex.id)).length} من 20` 
@@ -4907,8 +4907,8 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                   ? 'bg-gradient-to-br from-[#271b36] via-[#1d2238] to-[#152a38] border-amber-400/40 shadow-md shadow-amber-500/10'
                                   : 'bg-gradient-to-br from-[#1e1b33] via-[#172036] to-[#132534] border-amber-500/20 hover:border-amber-400/60 hover:shadow-lg hover:shadow-amber-500/10'
                                 : isCompleted
-                                  ? 'bg-[#13284f] border-blue-500/30'
-                                  : 'bg-[#13284f] border-white/5 hover:border-blue-500/30'
+                                  ? 'bg-[#13284f] border-[#C49E3A]/30'
+                                  : 'bg-[#13284f] border-white/5 hover:border-[#C49E3A]/30'
                             }`}
                           >
                             {/* Badge */}
@@ -4931,7 +4931,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                 </span>
                               ) : (
                                 <span className={`w-1.5 h-1.5 rounded-full ${
-                                  commActiveUnit === 2 ? 'bg-amber-400/60' : 'bg-blue-500/50'
+                                  commActiveUnit === 2 ? 'bg-amber-400/60' : 'bg-[#C49E3A]/50'
                                 }`} />
                               )}
                             </div>
@@ -4940,7 +4940,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                             <div className="space-y-1.5 text-right font-sans">
                               <div className="flex items-center gap-2 justify-end">
                                 <h4 className={`text-sm font-black text-white transition line-clamp-1 ${
-                                  commActiveUnit === 2 ? 'group-hover:text-amber-300' : 'group-hover:text-blue-300'
+                                  commActiveUnit === 2 ? 'group-hover:text-amber-300' : 'group-hover:text-[#E4C77A]'
                                 }`}>
                                   {isRtl ? ex.title_ar : ex.title_en}
                                 </h4>
@@ -4961,8 +4961,8 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                       ? 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/20'
                                       : 'bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-emerald-500/10 group-hover:from-amber-400 group-hover:via-rose-500 group-hover:to-emerald-400 group-hover:text-slate-950 text-amber-300 border-amber-500/30'
                                     : isCompleted
-                                      ? 'bg-blue-500/5 hover:bg-blue-500/10 text-blue-300 border-blue-500/10'
-                                      : 'bg-blue-500/5 group-hover:bg-blue-500 group-hover:text-slate-950 text-blue-400 border-blue-500/10 group-hover:border-blue-500'
+                                      ? 'bg-[#C49E3A]/5 hover:bg-[#C49E3A]/10 text-[#E4C77A] border-[#C49E3A]/10'
+                                      : 'bg-[#C49E3A]/5 group-hover:bg-[#C49E3A] group-hover:text-slate-950 text-[#E4C77A] border-[#C49E3A]/10 group-hover:border-[#C49E3A]/60'
                                 }`}
                               >
                                 <span>{commActiveUnit === 2 ? '🌸' : '⚡'}</span>
@@ -5331,7 +5331,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                       {/* Step-by-step interactive tasks */}
                       <div className="space-y-4">
-                        <h4 className="text-xs font-black text-indigo-400 uppercase tracking-widest border-b border-white/5 pb-2">
+                        <h4 className="text-xs font-black text-[#E4C77A] uppercase tracking-widest border-b border-white/5 pb-2">
                           {isRtl ? 'خطوات التطبيق والتمرين الميداني عائلياً والتعاوني:' : 'Practical Cooperation Steps:'}
                         </h4>
 
@@ -5349,13 +5349,13 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                 }}
                                 className={`w-full text-right p-4 rounded-2xl border transition-all duration-200 flex items-start gap-4 cursor-pointer select-none ${
                                   isChecked 
-                                    ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-100 shadow-inner' 
-                                    : 'bg-[#1d315c] border-white/5 text-slate-300 hover:border-indigo-500/20'
+                                    ? 'bg-[#C49E3A]/10 border-[#C49E3A]/30 text-[#E4C77A] shadow-inner' 
+                                    : 'bg-[#1d315c] border-white/5 text-slate-300 hover:border-[#C49E3A]/20'
                                 }`}
                               >
                                 <span className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
                                   isChecked 
-                                    ? 'bg-indigo-500 border-indigo-500 text-slate-950' 
+                                    ? 'bg-[#C49E3A] border-[#C49E3A]/60 text-slate-950' 
                                     : 'border-slate-500 text-transparent'
                                 }`}>
                                   <Check size={12} strokeWidth={4} />
@@ -5432,7 +5432,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           </h4>
                         </div>
 
-                        <div className="bg-indigo-950/20 border border-indigo-500/20 rounded-2xl p-4 text-indigo-200 text-xs leading-relaxed" dir="rtl">
+                        <div className="bg-[#002147]/20 border border-[#C49E3A]/20 rounded-2xl p-4 text-[#E4C77A] text-xs leading-relaxed" dir="rtl">
                           <p className="font-extrabold mb-1">🤝 {isRtl ? 'الروح الجماعية والتعاون:' : 'Teamwork & Synergy:'}</p>
                           <p>{selectedTeamEx.outcome_ar || (isRtl ? 'بناء قيم التعاون المشترك بين الإخوة وأفراد الأسرة.' : 'Strengthening brotherly ties and core cooperative values.')}</p>
                         </div>
@@ -5468,7 +5468,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           setSelectedTeamEx(null);
                           stopSpeech();
                         }}
-                        className="w-full bg-gradient-to-r from-indigo-500 to-sky-500 hover:from-indigo-600 hover:to-sky-600 text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-indigo-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+                        className="w-full bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] hover:from-[#002147] hover:to-[#002147] text-slate-950 font-black py-3.5 rounded-2xl text-xs sm:text-sm shadow-xl shadow-[#C49E3A]/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
                       >
                         <span>✓</span>
                         {isRtl ? 'تسجيل إنجاز تمرين التعاون وإطلاق التحفيز 🎙' : 'Mark Completed & Open Encouragement 🎙'}
@@ -5497,7 +5497,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-4 gap-2 text-right">
                     <div className="space-y-1">
                       <h3 className="text-lg font-black text-white flex items-center gap-2 justify-end">
-                        <span className="text-indigo-400">🤝</span>
+                        <span className="text-[#E4C77A]">🤝</span>
                         {isRtl ? 'منهج التعاون والمشاريع الجماعية للنشء:' : 'Cooperation & Joint Projects Curriculum:'}
                       </h3>
                       <p className="text-slate-400 text-xs">
@@ -5505,7 +5505,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                       </p>
                     </div>
 
-                    <div className="text-xs bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-3 py-1.5 rounded-xl font-bold font-mono">
+                    <div className="text-xs bg-[#C49E3A]/10 border border-[#C49E3A]/20 text-[#E4C77A] px-3 py-1.5 rounded-xl font-bold font-mono">
                       {isRtl ? `أنجزت ${completedTeamIds.size} تمارين` : `${completedTeamIds.size} Completed`}
                     </div>
                   </div>
@@ -5520,8 +5520,8 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           key={ex.id}
                           className={`relative rounded-2xl border transition-all duration-300 p-5 space-y-3 bg-[#13284f] flex flex-col justify-between group ${
                             isCompleted
-                              ? 'border-indigo-500/30'
-                              : 'border-white/5 hover:border-indigo-500/30'
+                              ? 'border-[#C49E3A]/30'
+                              : 'border-white/5 hover:border-[#C49E3A]/30'
                           }`}
                         >
                           {/* Badge */}
@@ -5535,14 +5535,14 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                                 <Check size={10} strokeWidth={3} />
                               </span>
                             ) : (
-                              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500/50" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#C49E3A]/50" />
                             )}
                           </div>
 
                           {/* Meta info */}
                           <div className="space-y-1.5 text-right font-sans">
                             <div className="flex items-center gap-2 justify-end">
-                              <h4 className="text-sm font-black text-white group-hover:text-indigo-300 transition line-clamp-1">
+                              <h4 className="text-sm font-black text-white group-hover:text-[#E4C77A] transition line-clamp-1">
                                 {isRtl ? ex.title_ar : ex.title_en}
                               </h4>
                               <span className="text-lg">{ex.emoji}</span>
@@ -5559,8 +5559,8 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                               onClick={() => setSelectedTeamEx(ex)}
                               className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
                                 isCompleted
-                                  ? 'bg-indigo-500/5 hover:bg-indigo-500/10 text-indigo-300 border-indigo-500/10'
-                                  : 'bg-indigo-500/5 group-hover:bg-indigo-500 group-hover:text-slate-950 text-indigo-400 border-indigo-500/10 group-hover:border-indigo-500'
+                                  ? 'bg-[#C49E3A]/5 hover:bg-[#C49E3A]/10 text-[#E4C77A] border-[#C49E3A]/10'
+                                  : 'bg-[#C49E3A]/5 group-hover:bg-[#C49E3A] group-hover:text-slate-950 text-[#E4C77A] border-[#C49E3A]/10 group-hover:border-[#C49E3A]/60'
                               }`}
                             >
                               <span>⚡</span>
@@ -5716,7 +5716,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                     {/* Right column: Target outcomes inside card */}
                     <div className="space-y-4">
-                      <div className="bg-gradient-to-br from-[#1e1503] via-[#050b14] to-[#040915] border border-[#f59e0b]/15 rounded-2xl p-6 text-center space-y-4 relative overflow-hidden">
+                      <div className="bg-gradient-to-br from-[#1e1503] via-[#001a38] to-[#040915] border border-[#f59e0b]/15 rounded-2xl p-6 text-center space-y-4 relative overflow-hidden">
                         <div className="absolute -top-12 -left-12 w-32 h-32 bg-amber-500/5 rounded-full blur-[40px] pointer-events-none" />
                         <span className="text-3xl">{selectedMoneyEx.emoji}</span>
                         <div className="space-y-1">
@@ -6001,7 +6001,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                     {/* Right column: Target outcomes inside card */}
                     <div className="space-y-4">
-                      <div className="bg-gradient-to-br from-[#1e1003] via-[#050b14] to-[#040915] border border-orange-500/15 rounded-2xl p-6 text-center space-y-4 relative overflow-hidden">
+                      <div className="bg-gradient-to-br from-[#1e1003] via-[#001a38] to-[#040915] border border-orange-500/15 rounded-2xl p-6 text-center space-y-4 relative overflow-hidden">
                         <div className="absolute -top-12 -left-12 w-32 h-32 bg-orange-500/5 rounded-full blur-[40px] pointer-events-none" />
                         <span className="text-3xl">{selectedConfidenceEx.emoji}</span>
                         <div className="space-y-1">
@@ -6287,7 +6287,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
                     {/* Right column: Target outcomes inside card */}
                     <div className="space-y-4">
-                      <div className="bg-gradient-to-br from-[#1a0e13] via-[#050b14] to-[#040915] border border-rose-500/15 rounded-2xl p-6 text-center space-y-4 relative overflow-hidden">
+                      <div className="bg-gradient-to-br from-[#1a0e13] via-[#001a38] to-[#040915] border border-rose-500/15 rounded-2xl p-6 text-center space-y-4 relative overflow-hidden">
                         <div className="absolute -top-12 -left-12 w-32 h-32 bg-rose-500/5 rounded-full blur-[40px] pointer-events-none" />
                         <span className="text-3xl">{selectedCriticalEx.emoji}</span>
                         <div className="space-y-1">
@@ -6462,10 +6462,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </button>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-xs bg-[#0b1710] border border-emerald-500/20 px-3 py-1.5 rounded-xl text-emerald-300 font-bold font-mono">
+                      <span className="text-xs bg-[#001a38] border border-emerald-500/20 px-3 py-1.5 rounded-xl text-emerald-300 font-bold font-mono">
                         🎯 {isRtl ? selectedInnovEx.skill_focus : 'Focus Skill'}
                       </span>
-                      <span className="text-xs bg-[#0b1710] border border-emerald-500/20 px-3 py-1.5 rounded-xl text-emerald-300 font-bold font-mono">
+                      <span className="text-xs bg-[#001a38] border border-emerald-500/20 px-3 py-1.5 rounded-xl text-emerald-300 font-bold font-mono">
                         ⚙️ {isRtl ? selectedInnovEx.activity_type : 'Activity Type'}
                       </span>
                     </div>
@@ -6487,7 +6487,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           </div>
                         </div>
 
-                        <p className="text-sm text-slate-300 leading-relaxed bg-[#0b1710]/40 border border-emerald-500/5 p-4 rounded-xl">
+                        <p className="text-sm text-slate-300 leading-relaxed bg-[#001a38]/40 border border-emerald-500/5 p-4 rounded-xl">
                           {selectedInnovEx.description_ar}
                         </p>
 
@@ -6637,7 +6637,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           key={ex.id}
                           className={`group bg-[#15274c]/90 border p-5 rounded-2xl flex flex-col justify-between transition-all duration-300 relative overflow-hidden ${
                             isCompleted
-                              ? 'border-emerald-500/20 bg-emerald-[#0b1710]/80 hover:border-emerald-500/40'
+                              ? 'border-emerald-500/20 bg-emerald-[#001a38]/80 hover:border-emerald-500/40'
                               : 'border-white/5 hover:border-emerald-500/25 hover:bg-[#1d2f59]/80 shadow-lg'
                           }`}
                         >
@@ -6812,7 +6812,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                               }, 1100);
                             }}
                             disabled={artStepsChecked.some(c => !c)}
-                            className="bg-gradient-to-r from-pink-400 via-rose-400 to-indigo-400 disabled:opacity-40 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-slate-950 font-black px-6 py-3 rounded-xl text-xs tracking-wide shadow-xl active:scale-95 transition-all w-full cursor-pointer"
+                            className="bg-gradient-to-r from-pink-400 via-rose-400 to-[#C49E3A] disabled:opacity-40 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-slate-950 font-black px-6 py-3 rounded-xl text-xs tracking-wide shadow-xl active:scale-95 transition-all w-full cursor-pointer"
                           >
                             {artStepsChecked.some(c => !c)
                               ? (isRtl ? '⚠️ أكمل جميع الخطوات للإنهاء والتسجيل' : '⚠️ Complete all checklist steps to finish')
@@ -6936,7 +6936,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                               className={`flex-1 py-1.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
                                 isCompleted
                                   ? 'bg-pink-550/10 hover:bg-pink-550/20 text-pink-300 border-pink-500/25'
-                                  : 'bg-pink-500/5 group-hover:bg-gradient-to-r group-hover:from-pink-450 group-hover:via-rose-400 group-hover:to-indigo-400 group-hover:text-slate-950 text-pink-400 border-pink-500/10 group-hover:border-pink-400'
+                                  : 'bg-pink-500/5 group-hover:bg-gradient-to-r group-hover:from-pink-450 group-hover:via-rose-400 group-hover:to-[#C49E3A] group-hover:text-slate-950 text-pink-400 border-pink-500/10 group-hover:border-pink-400'
                               }`}
                             >
                               <span>⚡</span>
@@ -6980,10 +6980,10 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                     </button>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-xs bg-[#0b1710] border border-emerald-500/20 px-3 py-1.5 rounded-xl text-emerald-300 font-bold font-mono">
+                      <span className="text-xs bg-[#001a38] border border-emerald-500/20 px-3 py-1.5 rounded-xl text-emerald-300 font-bold font-mono">
                         🎯 {isRtl ? selectedLifeEx.skill_focus : 'Focus Skill'}
                       </span>
-                      <span className="text-xs bg-[#0b1710] border border-emerald-500/20 px-3 py-1.5 rounded-xl text-emerald-300 font-bold font-mono">
+                      <span className="text-xs bg-[#001a38] border border-emerald-500/20 px-3 py-1.5 rounded-xl text-emerald-300 font-bold font-mono">
                         ⚙️ {isRtl ? selectedLifeEx.activity_type : 'Activity Type'}
                       </span>
                     </div>
@@ -7005,7 +7005,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           </div>
                         </div>
 
-                        <p className="text-sm text-slate-300 leading-relaxed bg-[#0b1710]/40 border border-emerald-500/5 p-4 rounded-xl">
+                        <p className="text-sm text-slate-300 leading-relaxed bg-[#001a38]/40 border border-emerald-500/5 p-4 rounded-xl">
                           {selectedLifeEx.description_ar}
                         </p>
 
@@ -7071,7 +7071,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                               }, 1100);
                             }}
                             disabled={lifeStepsChecked.some(c => !c)}
-                            className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 disabled:opacity-40 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-slate-950 font-black px-6 py-3 rounded-xl text-xs tracking-wide shadow-xl active:scale-95 transition-all w-full cursor-pointer"
+                            className="bg-gradient-to-r from-emerald-400 via-[#C49E3A] to-[#C49E3A] disabled:opacity-40 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-slate-950 font-black px-6 py-3 rounded-xl text-xs tracking-wide shadow-xl active:scale-95 transition-all w-full cursor-pointer"
                           >
                             {lifeStepsChecked.some(c => !c)
                               ? (isRtl ? '⚠️ أكمل جميع الخطوات للإنهاء والتسجيل' : '⚠️ Complete all checklist steps to finish')
@@ -7155,7 +7155,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                           key={ex.id}
                           className={`group bg-[#15274c]/90 border p-5 rounded-2xl flex flex-col justify-between transition-all duration-300 relative overflow-hidden ${
                             isCompleted
-                              ? 'border-emerald-500/20 bg-[#0b1710]/85 hover:border-emerald-500/40'
+                              ? 'border-emerald-500/20 bg-[#001a38]/85 hover:border-emerald-500/40'
                               : 'border-white/5 hover:border-emerald-500/25 hover:bg-[#1d2f56]/80 shadow-lg'
                           }`}
                         >
@@ -7195,7 +7195,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
                               className={`flex-1 py-1.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 border cursor-pointer ${
                                 isCompleted
                                   ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border-emerald-500/25'
-                                  : 'bg-emerald-500/5 group-hover:bg-gradient-to-r group-hover:from-emerald-450 group-hover:via-teal-450 group-hover:to-cyan-400 group-hover:text-slate-950 text-emerald-400 border-emerald-500/10 group-hover:border-emerald-400'
+                                  : 'bg-emerald-500/5 group-hover:bg-gradient-to-r group-hover:from-emerald-450 group-hover:via-[#C49E3A] group-hover:to-[#C49E3A] group-hover:text-slate-950 text-emerald-400 border-emerald-500/10 group-hover:border-emerald-400'
                               }`}
                             >
                               <span>⚡</span>
@@ -7228,7 +7228,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
 
       {/* 4. Deep Educational Value Guideline */}
       <div className="bg-[#16274d] border border-white/5 rounded-2xl p-6 text-right space-y-3">
-        <h4 className="text-xs font-black uppercase text-teal-400 tracking-wider flex items-center gap-1.5">
+        <h4 className="text-xs font-black uppercase text-[#E4C77A] tracking-wider flex items-center gap-1.5">
           <span>🧠</span>
           {isRtl ? 'العلم خلف واحة السكينة والهدوء:' : 'Cognitive Science behind the Serenity Oasis:'}
         </h4>
@@ -7257,7 +7257,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
         <div className="absolute inset-0 bg-gradient-to-tr from-[#051025] to-slate-950 opacity-95 rounded-[2.3rem] -z-10" />
         {/* Decorative elements */}
         <div className="absolute top-10 right-10 w-24 h-24 rounded-full border border-amber-500/10 -z-5" />
-        <div className="absolute bottom-10 left-10 w-40 h-40 rounded-full border border-teal-500/10 -z-5" />
+        <div className="absolute bottom-10 left-10 w-40 h-40 rounded-full border border-[#C49E3A]/10 -z-5" />
 
         <div className="flex justify-between items-start border-b border-white/10 pb-6 mb-8">
           <div>
@@ -7342,7 +7342,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
           <div className="absolute inset-0 bg-gradient-to-b from-[#091530] via-[#020617] to-[#020617] rounded-[1.9rem] -z-10" />
           
           {/* Subtle architectural abstract decor */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/5 rounded-full blur-3xl -z-5" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#C49E3A]/5 rounded-full blur-3xl -z-5" />
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl -z-5" />
 
           {/* Premium Academy Branding Header */}
@@ -7352,7 +7352,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest font-sans">Basim Al Khalil Digital Academy</p>
             </div>
             <div className="text-left font-sans">
-              <span className="px-3 py-1 bg-teal-500/10 border border-teal-500/20 text-teal-300 rounded-full text-[10px] font-extrabold uppercase tracking-widest block font-sans">
+              <span className="px-3 py-1 bg-[#C49E3A]/10 border border-[#C49E3A]/20 text-[#E4C77A] rounded-full text-[10px] font-extrabold uppercase tracking-widest block font-sans">
                 {isRtl ? 'واحة التوازن واليقظة الذاتية' : 'Mindfulness & Balance Oasis'}
               </span>
               <span className="text-[9px] text-slate-500 block font-sans text-left mt-1">Date: {new Date().toLocaleDateString('ar-EG')}</span>
@@ -7375,7 +7375,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             <h1 className="text-2xl font-black text-white leading-tight tracking-tight font-tajawal">
               {exerciseToExport.title}
             </h1>
-            <div className="w-16 h-1 bg-gradient-to-r from-teal-500 to-amber-400 mx-auto rounded-full mt-3.5" />
+            <div className="w-16 h-1 bg-gradient-to-r from-[#C49E3A] to-amber-400 mx-auto rounded-full mt-3.5" />
           </div>
 
           {/* Exercise Script Description Container */}
@@ -7387,7 +7387,7 @@ export const BalanceOasis: React.FC<BalanceOasisProps> = ({
             {/* Steps & Challenges if present */}
             {exerciseToExport.steps && exerciseToExport.steps.length > 0 && (
               <div className="space-y-3 pt-4 border-t border-white/5 text-right">
-                <span className="text-[11px] text-teal-400 font-extrabold tracking-wide block mb-1">
+                <span className="text-[11px] text-[#E4C77A] font-extrabold tracking-wide block mb-1">
                   {isRtl ? '📝 خطوات وتطبيقات التحدي بالتفصيل:' : '📝 Step-by-Step Action Guidelines:'}
                 </span>
                 {exerciseToExport.steps.map((st, i) => (

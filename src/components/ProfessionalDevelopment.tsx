@@ -165,7 +165,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
     const parts = text.split(/\*\*([^*]+)\*\*/g);
     return parts.map((part, i) => {
       if (i % 2 === 1) {
-        return <strong key={i} className="text-[#b48e56] font-black">{part}</strong>;
+        return <strong key={i} className="text-[#C49E3A] font-black">{part}</strong>;
       }
       return part;
     });
@@ -183,8 +183,8 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
           if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
             const listContent = trimmed.replace(/^[\s-*]+/, '');
             return (
-              <div key={idx} className="flex gap-2 items-start py-2 px-4 bg-[#b48e56]/5 border-l-2 border-[#b48e56] rounded-r-lg my-2">
-                <span className="text-[#b48e56] font-extrabold mt-1">•</span>
+              <div key={idx} className="flex gap-2 items-start py-2 px-4 bg-[#C49E3A]/5 border-l-2 border-[#C49E3A] rounded-r-lg my-2">
+                <span className="text-[#C49E3A] font-extrabold mt-1">•</span>
                 <span className="font-serif leading-relaxed text-[#1a1a1a]">
                   {parseBoldText(listContent)}
                 </span>
@@ -195,7 +195,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
           if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
             const inner = trimmed.substring(2, trimmed.length - 2);
             return (
-              <h4 key={idx} className="text-base md:text-lg font-extrabold text-[#b48e56] mt-4 mb-2 tracking-tight">
+              <h4 key={idx} className="text-base md:text-lg font-extrabold text-[#C49E3A] mt-4 mb-2 tracking-tight">
                 {inner}
               </h4>
             );
@@ -209,7 +209,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
               const boldPart = words.slice(0, boldCount).join(' ');
               const regularPart = words.slice(boldCount).join(' ');
               return (
-                <p key={idx} className="leading-relaxed font-serif text-[#1e2229]">
+                <p key={idx} className="leading-relaxed font-serif text-[#002147]">
                   <strong className="text-slate-900 font-extrabold font-sans inline">{boldPart} </strong>
                   <span className="opacity-90">{regularPart}</span>
                 </p>
@@ -218,7 +218,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
           }
 
           return (
-            <p key={idx} className="leading-relaxed font-serif text-[#1e2229]">
+            <p key={idx} className="leading-relaxed font-serif text-[#002147]">
               {parseBoldText(trimmed)}
             </p>
           );
@@ -233,14 +233,14 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
     return (
       <div className="bg-white border border-[#e8e5df] p-6 md:p-10 rounded-3xl shadow-sm relative overflow-hidden text-right">
         {/* Decorative ambient background shape */}
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#b48e56]/5 rounded-full blur-3xl" />
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#C49E3A]/5 rounded-full blur-3xl" />
         <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl" />
 
         <div className="text-center mb-10 border-b border-[#f2ece2] pb-6">
-          <span className="text-[10px] tracking-widest text-[#b48e56] uppercase font-bold py-1 px-3.5 bg-[#f5f1e8] rounded-full inline-block">
+          <span className="text-[10px] tracking-widest text-[#C49E3A] uppercase font-bold py-1 px-3.5 bg-[#f5f1e8] rounded-full inline-block">
             {isRtl ? 'الهيكل التشجيري البصري' : 'Visual Mapping Hierarchy'}
           </span>
-          <h3 className="text-2xl font-extrabold text-[#111] mt-2 mb-1">
+          <h3 className="text-2xl font-extrabold text-[#002147] mt-2 mb-1">
             {isRtl ? 'مخطط التدرج الفطن وإعادة التركيب' : 'Deconstructed Content Roadmap'}
           </h3>
           <p className="text-slate-400 text-xs font-serif mt-1">
@@ -251,13 +251,13 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
         </div>
 
         {/* Tree Connection Path */}
-        <div className="relative pr-4 md:pr-10 border-r-2 border-dashed border-[#b48e56]/30 mr-4 md:mr-12 space-y-8 py-4 text-right">
+        <div className="relative pr-4 md:pr-10 border-r-2 border-dashed border-[#C49E3A]/30 mr-4 md:mr-12 space-y-8 py-4 text-right">
           
           {activeChapter.lessons.map((lesson, idx) => {
             const isActive = activeLesson?.id === lesson.id && !showQuiz;
             const iconStyle = isActive 
-              ? 'bg-[#b48e56] text-white ring-4 ring-[#b48e56]/20' 
-              : 'bg-[#faf8f5] text-[#b48e56] border-2 border-[#b48e56]/30 hover:border-[#b48e56]';
+              ? 'bg-[#C49E3A] text-white ring-4 ring-[#C49E3A]/20' 
+              : 'bg-[#faf8f5] text-[#C49E3A] border-2 border-[#C49E3A]/30 hover:border-[#C49E3A]';
             
             const cleanContent = isRtl ? lesson.contentAr : lesson.contentEn;
             let capsuleText = "";
@@ -311,11 +311,11 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
                     setShowQuiz(false);
                     setStudyViewMode('lesson');
                   }}
-                  className={`bg-white border rounded-2xl p-5 md:p-6 transition-all duration-300 hover:shadow-md cursor-pointer text-right flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${isActive ? 'border-[#b48e56] bg-[#b48e56]/[0.02] shadow-sm' : 'border-[#e8e5df] hover:border-slate-300'}`}
+                  className={`bg-white border rounded-2xl p-5 md:p-6 transition-all duration-300 hover:shadow-md cursor-pointer text-right flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${isActive ? 'border-[#C49E3A] bg-[#C49E3A]/[0.02] shadow-sm' : 'border-[#e8e5df] hover:border-slate-300'}`}
                 >
                   <div className="flex-1 space-y-2 text-right">
                     <div className="flex items-center gap-2 flex-wrap justify-start">
-                      <span className="text-[10px] tracking-wider text-[#b48e56] uppercase font-bold py-0.5 px-2.5 bg-[#f5f1e8] rounded-full inline-block leading-none">
+                      <span className="text-[10px] tracking-wider text-[#C49E3A] uppercase font-bold py-0.5 px-2.5 bg-[#f5f1e8] rounded-full inline-block leading-none">
                         {lesson.type === 'intro' ? (isRtl ? 'تمهيد' : 'Orientation') : 
                          lesson.type === 'review' ? (isRtl ? 'مراجعة' : 'Review Node') : 
                          lesson.type === 'tips' ? (isRtl ? 'دليل إرشادي' : 'Tips Node') : (isRtl ? 'جوهر المفهوم' : 'Core Concept')}
@@ -327,20 +327,20 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
                       </span>
                     </div>
 
-                    <h4 className="font-bold text-slate-800 text-base md:text-lg transition-colors group-hover:text-[#b48e56]">
+                    <h4 className="font-bold text-slate-800 text-base md:text-lg transition-colors group-hover:text-[#C49E3A]">
                       {isRtl ? lesson.titleAr : lesson.titleEn}
                     </h4>
 
                     {/* Capsule Box (الكبسولة المعرفية للتثبيت) */}
-                    <div className="bg-[#faf9f6] border border-slate-100 rounded-xl p-3 text-slate-600 text-xs font-serif leading-relaxed italic border-r-4 border-r-[#b48e56] my-2 text-right">
-                      <span className="font-bold font-sans text-[#b48e56] block not-italic mb-1 text-right">
+                    <div className="bg-[#faf9f6] border border-slate-100 rounded-xl p-3 text-slate-600 text-xs font-serif leading-relaxed italic border-r-4 border-r-[#C49E3A] my-2 text-right">
+                      <span className="font-bold font-sans text-[#C49E3A] block not-italic mb-1 text-right">
                         {isRtl ? 'الكبسولة التثبيتية 💡' : 'Core Nugget 💡'}
                       </span>
                       {capsuleText}
                     </div>
                   </div>
 
-                  <div className="text-xs font-black text-[#b48e56] flex items-center gap-1 shrink-0 self-end md:self-center">
+                  <div className="text-xs font-black text-[#C49E3A] flex items-center gap-1 shrink-0 self-end md:self-center">
                     <span>{isRtl ? 'افتح لقراءة مطولة' : 'Read Full Node'}</span>
                     <ArrowRight size={14} className="rtl:rotate-180" />
                   </div>
@@ -447,7 +447,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
 
     return (
       <AnimatePresence>
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 md:p-10 font-sans print:p-0 print:absolute print:inset-0 print:bg-white print:z-50 leading-relaxed text-[#1e2229]">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 md:p-10 font-sans print:p-0 print:absolute print:inset-0 print:bg-white print:z-50 leading-relaxed text-[#002147]">
           <motion.div 
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -458,7 +458,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
             <div className="w-full md:w-80 border-b md:border-b-0 md:border-l border-[#e8e5df] pb-6 md:pb-0 md:pl-6 space-y-5 print:hidden flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-3 justify-start">
-                  <div className="w-8 h-8 rounded-lg bg-[#b48e56]/10 flex items-center justify-center text-[#b48e56]">
+                  <div className="w-8 h-8 rounded-lg bg-[#C49E3A]/10 flex items-center justify-center text-[#C49E3A]">
                     <Award size={18} />
                   </div>
                   <h3 className="font-extrabold text-slate-800 text-lg">
@@ -480,7 +480,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
                     type="text" 
                     value={certificateName}
                     onChange={(e) => setCertificateName(e.target.value)}
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:border-[#b48e56] text-right"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:border-[#C49E3A] text-right"
                     placeholder={isRtl ? 'اسمك الثنائي أو الثلاثي الفاخر' : 'Your Professional Name'}
                   />
                   <p className="text-[10px] text-slate-400 font-serif">
@@ -517,7 +517,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
               <div className="space-y-2 pt-6">
                 <button 
                   onClick={() => window.print()}
-                  className="w-full py-3 px-4 bg-[#b48e56] hover:bg-[#a17e4b] text-white rounded-xl text-xs font-black flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                  className="w-full py-3 px-4 bg-[#C49E3A] hover:bg-[#a8862f] text-white rounded-xl text-xs font-black flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
                 >
                   <FileText size={15} />
                   <span>{isRtl ? 'طباعة وحفظ كـ PDF 🖨️' : 'Print / Save as PDF'}</span>
@@ -532,18 +532,18 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
             </div>
 
             {/* Right side Elegant printable certificate layout */}
-            <div className="flex-1 bg-[#fdfbf7] border-4 border-double border-[#b48e56]/65 p-6 md:p-10 rounded-2xl relative overflow-hidden select-none flex flex-col justify-between aspect-[1.414/1] text-center shadow-inner print:border-none print:bg-white print:p-8 print:w-full">
+            <div className="flex-1 bg-[#fdfbf7] border-4 border-double border-[#C49E3A]/65 p-6 md:p-10 rounded-2xl relative overflow-hidden select-none flex flex-col justify-between aspect-[1.414/1] text-center shadow-inner print:border-none print:bg-white print:p-8 print:w-full">
               {/* Decorative classical background border corners */}
-              <div className="absolute top-2 right-2 w-16 h-16 border-t-2 border-r-2 border-[#b48e56]/55 rounded-tr-md print:hidden" />
-              <div className="absolute top-2 left-2 w-16 h-16 border-t-2 border-l-2 border-[#b48e56]/55 rounded-tl-md print:hidden" />
-              <div className="absolute bottom-2 right-2 w-16 h-16 border-b-2 border-r-2 border-[#b48e56]/55 rounded-br-md print:hidden" />
-              <div className="absolute bottom-2 left-2 w-16 h-16 border-b-2 border-l-2 border-[#b48e56]/55 rounded-tl-md print:hidden" />
+              <div className="absolute top-2 right-2 w-16 h-16 border-t-2 border-r-2 border-[#C49E3A]/55 rounded-tr-md print:hidden" />
+              <div className="absolute top-2 left-2 w-16 h-16 border-t-2 border-l-2 border-[#C49E3A]/55 rounded-tl-md print:hidden" />
+              <div className="absolute bottom-2 right-2 w-16 h-16 border-b-2 border-r-2 border-[#C49E3A]/55 rounded-br-md print:hidden" />
+              <div className="absolute bottom-2 left-2 w-16 h-16 border-b-2 border-l-2 border-[#C49E3A]/55 rounded-tl-md print:hidden" />
 
               {/* Decorative Subtle Background Crest */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#b48e56]/[0.015] rounded-full flex items-center justify-center border border-dashed border-[#b48e56]/5 select-none pointer-events-none" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#C49E3A]/[0.015] rounded-full flex items-center justify-center border border-dashed border-[#C49E3A]/5 select-none pointer-events-none" />
 
               {/* Certificate Header Branding - Beautiful Blue Banner */}
-              <div className="bg-[#002147] text-white -mx-6 md:-mx-10 -mt-6 md:-mt-10 px-6 md:px-10 py-5 mb-5 select-none relative z-10 flex justify-between items-center flex-row-reverse border-b-4 border-[#b48e56] rounded-t-xl">
+              <div className="bg-[#002147] text-white -mx-6 md:-mx-10 -mt-6 md:-mt-10 px-6 md:px-10 py-5 mb-5 select-none relative z-10 flex justify-between items-center flex-row-reverse border-b-4 border-[#C49E3A] rounded-t-xl">
                 <div className="text-right">
                   <span className="font-extrabold text-white text-sm md:text-base leading-none block font-sans">
                     {isRtl ? 'أكاديمية باسم الخليل' : 'Basim Al Khalil Digital Academy'}
@@ -562,7 +562,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
               {/* Main certificate wording */}
               <div className="my-auto space-y-4 md:space-y-6 relative z-10">
                 <div>
-                  <span className="text-[10px] font-black tracking-widest text-[#002147] uppercase py-1 px-3.5 bg-blue-50 rounded-full inline-block mb-1 border border-[#002147]/15 font-sans">
+                  <span className="text-[10px] font-black tracking-widest text-[#002147] uppercase py-1 px-3.5 bg-[#C49E3A]/10 rounded-full inline-block mb-1 border border-[#002147]/15 font-sans">
                     {isRtl ? 'شهادة إكمال واعتماد المسار المهني الرقمي' : 'Certified Digital Professional Path Achievement'}
                   </span>
                   <h2 className="text-2xl md:text-3.5xl font-black text-[#002147] tracking-tight leading-snug font-sans">
@@ -578,7 +578,7 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
 
                 {/* Trainee Name dynamic input block */}
                 <div className="py-2 mb-2">
-                  <h1 className="text-2xl md:text-4xl font-extrabold text-[#111] bg-gradient-to-r from-slate-900 via-[#002147] to-[#002147] bg-clip-text text-transparent px-4 font-sans tracking-tight">
+                  <h1 className="text-2xl md:text-4xl font-extrabold text-[#002147] bg-gradient-to-r from-slate-900 via-[#002147] to-[#002147] bg-clip-text text-transparent px-4 font-sans tracking-tight">
                     {certificateName || (isRtl ? 'اسم المتدرب المتميز' : 'Distinguished Trainee Name')}
                   </h1>
                   <div className="w-40 md:w-60 h-[1.5px] bg-[#002147]/40 mx-auto mt-2 relative">
@@ -624,13 +624,13 @@ export const ProfessionalDevelopment = ({ lang, onBack, userProfile }: Professio
 
                 {/* Blue & Gold Seal stamp inside certificate */}
                 <div className="flex flex-col items-center justify-center relative shrink-0 z-20">
-                  <div className="absolute w-14 h-14 bg-blue-500/10 rounded-full opacity-10 filter blur-sm print:hidden" />
+                  <div className="absolute w-14 h-14 bg-[#C49E3A]/10 rounded-full opacity-10 filter blur-sm print:hidden" />
                   <div className="w-16 h-16 rounded-full border-4 border-double border-[#002147] bg-[#fcf9f2] flex flex-col items-center justify-center p-1.5 shadow-sm relative">
                     <div className="text-[7px] font-black uppercase text-[#002147] font-sans tracking-wide scale-95 select-none text-center leading-none">
                       {isRtl ? 'معتمد رقمياً' : 'BKDA VAL'}
                       <span className="block text-emerald-600 font-bold text-[6px] mt-0.5">{percentage}% OK</span>
                     </div>
-                    <Trophy className="text-[#b48e56] mt-0.5" size={14} />
+                    <Trophy className="text-[#C49E3A] mt-0.5" size={14} />
                   </div>
                   <span className="text-[8px] font-black text-[#002147] tracking-widest mt-1 uppercase font-mono block select-none">
                     {isRtl ? 'ختم الأكاديمية' : 'Academy Seal'}
@@ -1338,7 +1338,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
     return (
       <div className={`rounded-3xl border border-[#e1deda] overflow-hidden shadow-xl flex flex-col h-[78vh] ${containerBg} transition-all`}>
         {/* PDF Reader Toolbar */}
-        <div className="bg-[#1e2229] border-b border-slate-800 px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-white">
+        <div className="bg-[#002147] border-b border-slate-800 px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-white">
           <div className="flex items-center gap-3">
             <button 
               onClick={() => {
@@ -1474,31 +1474,31 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
         <div className="flex-1 flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x md:divide-x-reverse divide-[#eae0cc] h-full overflow-hidden">
           
           {/* LEFT/RIGHT SIDEBAR: Document details and features tabs */}
-          <div className="w-full md:w-64 bg-[#1e2229]/5 border-slate-200/50 flex flex-col justify-between shrink-0 h-full overflow-y-auto">
+          <div className="w-full md:w-64 bg-[#002147]/5 border-slate-200/50 flex flex-col justify-between shrink-0 h-full overflow-y-auto">
             <div>
               {/* Tab options menu */}
               <div className="grid grid-cols-4 bg-slate-200/50 border-b border-slate-300/40 p-1 text-center font-bold text-[10px] text-slate-600">
                 <button 
                   onClick={() => setPdfSidebarTab('chapters')}
-                  className={`p-1.5 rounded-lg transition-all ${pdfSidebarTab === 'chapters' ? 'bg-[#1e2229] text-white' : 'hover:bg-slate-200'}`}
+                  className={`p-1.5 rounded-lg transition-all ${pdfSidebarTab === 'chapters' ? 'bg-[#002147] text-white' : 'hover:bg-slate-200'}`}
                 >
                   {isRtl ? "الفصول" : "Chapters"}
                 </button>
                 <button 
                   onClick={() => setPdfSidebarTab('search')}
-                  className={`p-1.5 rounded-lg transition-all ${pdfSidebarTab === 'search' ? 'bg-[#1e2229] text-white' : 'hover:bg-slate-200'}`}
+                  className={`p-1.5 rounded-lg transition-all ${pdfSidebarTab === 'search' ? 'bg-[#002147] text-white' : 'hover:bg-slate-200'}`}
                 >
                   {isRtl ? "بحث" : "Search"}
                 </button>
                 <button 
                   onClick={() => setPdfSidebarTab('bookmarks')}
-                  className={`p-1.5 rounded-lg transition-all ${pdfSidebarTab === 'bookmarks' ? 'bg-[#1e2229] text-white' : 'hover:bg-slate-200'}`}
+                  className={`p-1.5 rounded-lg transition-all ${pdfSidebarTab === 'bookmarks' ? 'bg-[#002147] text-white' : 'hover:bg-slate-200'}`}
                 >
                   {isRtl ? "الحوافظ" : "Bookmarks"}
                 </button>
                 <button 
                   onClick={() => setPdfSidebarTab('upload')}
-                  className={`p-1.5 rounded-lg transition-all ${pdfSidebarTab === 'upload' ? 'bg-[#1e2229] text-white' : 'hover:bg-slate-200'}`}
+                  className={`p-1.5 rounded-lg transition-all ${pdfSidebarTab === 'upload' ? 'bg-[#002147] text-white' : 'hover:bg-slate-200'}`}
                 >
                   {isRtl ? "استيراد" : "Import"}
                 </button>
@@ -1509,7 +1509,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                 
                 {pdfSidebarTab === 'chapters' && (
                   <div className="space-y-3">
-                    <span className="text-[9px] uppercase font-black text-[#b48e56] block tracking-wider mb-2">
+                    <span className="text-[9px] uppercase font-black text-[#C49E3A] block tracking-wider mb-2">
                       {isRtl ? "فهرس المستند وأبواب المتن ونصوصها" : "Book Chapters & Unabridged Texts"}
                     </span>
                     {selectedBook.chapters.map((ch, idx) => {
@@ -1520,7 +1520,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                           key={ch.id} 
                           className={`rounded-2xl border transition-all overflow-hidden ${
                             isActive 
-                              ? 'bg-amber-500/5 border-[#b48e56]/40 shadow-xs' 
+                              ? 'bg-amber-500/5 border-[#C49E3A]/40 shadow-xs' 
                               : 'bg-white/40 border-slate-200 hover:border-slate-300'
                           }`}
                         >
@@ -1532,28 +1532,28 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                             className="w-full text-right px-4 py-2.5 text-xs font-bold leading-relaxed transition-all flex items-center justify-between gap-2"
                           >
                             <div className="flex items-center gap-2">
-                              <BookOpen size={13} className={isActive ? "text-[#b48e56]" : "text-slate-400"} />
-                              <span className={isActive ? "font-black text-[#b48e56]" : "text-slate-700 font-bold"}>
+                              <BookOpen size={13} className={isActive ? "text-[#C49E3A]" : "text-slate-400"} />
+                              <span className={isActive ? "font-black text-[#C49E3A]" : "text-slate-700 font-bold"}>
                                 {isRtl ? ch.titleAr : ch.titleEn}
                               </span>
                             </div>
-                            {isActive && <span className="text-[10px] text-[#b48e56] font-black animate-pulse">● {isRtl ? "مفتوح" : "Active"}</span>}
+                            {isActive && <span className="text-[10px] text-[#C49E3A] font-black animate-pulse">● {isRtl ? "مفتوح" : "Active"}</span>}
                           </button>
                           
                           {/* Text under each chapter - always visible when active! */}
                           {isActive && (
-                            <div className="px-4 pb-4 pt-1 border-t border-dashed border-[#b48e56]/20 bg-white/50">
+                            <div className="px-4 pb-4 pt-1 border-t border-dashed border-[#C49E3A]/20 bg-white/50">
                               <p className="text-[11px] text-[#1a1c23] font-serif leading-relaxed text-right whitespace-pre-line select-text max-h-[180px] overflow-y-auto pr-1">
                                 {chData.content}
                               </p>
-                              <div className="mt-2 pt-2 border-t border-[#b48e56]/10 flex justify-between items-center text-[9px] font-bold text-slate-500">
+                              <div className="mt-2 pt-2 border-t border-[#C49E3A]/10 flex justify-between items-center text-[9px] font-bold text-slate-500">
                                 <span>{isRtl ? `صفحة ${idx + 1}` : `Page ${idx + 1}`}</span>
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     speakText(chData.content);
                                   }}
-                                  className="text-[#b48e56] hover:underline flex items-center gap-1 font-black"
+                                  className="text-[#C49E3A] hover:underline flex items-center gap-1 font-black"
                                 >
                                   🔊 {isRtl ? "استمع ثانية" : "Listen again"}
                                 </button>
@@ -1575,7 +1575,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                         placeholder={isRtl ? "اكتب كلمة للبحث عنها..." : "Type keywords..."}
                         value={pdfSearchQuery}
                         onChange={(e) => setPdfSearchQuery(e.target.value)}
-                        className="w-full text-xs font-bold bg-white border border-slate-300 rounded-xl py-2 pl-8 pr-3 focus:outline-none focus:ring-1 focus:ring-[#b48e56]"
+                        className="w-full text-xs font-bold bg-white border border-slate-300 rounded-xl py-2 pl-8 pr-3 focus:outline-none focus:ring-1 focus:ring-[#C49E3A]"
                       />
                       <Search size={12} className="absolute left-2.5 top-2.5 text-slate-400" />
                     </div>
@@ -1608,7 +1608,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                             }}
                             className="bg-white border hover:border-amber-500/30 p-2 rounded-xl text-center text-xs font-mono font-bold hover:shadow-xs transition-shadow flex items-center justify-center gap-1.5"
                           >
-                            <Bookmark size={10} fill="#b48e56" className="text-[#b48e56]" />
+                            <Bookmark size={10} fill="#C49E3A" className="text-[#C49E3A]" />
                             <span>{isRtl ? `صفحة ${pg}` : `Page ${pg}`}</span>
                           </button>
                         ))}
@@ -1629,8 +1629,8 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                         onChange={handlePdfFileUpload}
                         className="absolute inset-0 opacity-0 cursor-pointer" 
                       />
-                      <UploadCloud size={28} className="text-[#b48e56] mx-auto mb-2" />
-                      <p className="text-[10px] font-extrabold text-[#1e2229] leading-tight mb-1">
+                      <UploadCloud size={28} className="text-[#C49E3A] mx-auto mb-2" />
+                      <p className="text-[10px] font-extrabold text-[#002147] leading-tight mb-1">
                         {isRtl ? "انقر لاستيراد كتاب PDF جديد" : "Drag or select PDF"}
                       </p>
                       <p className="text-[9px] text-slate-400 font-medium">
@@ -1645,7 +1645,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                           <span>{uploadProgress}%</span>
                         </div>
                         <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                          <div className="bg-[#b48e56] h-full transition-all duration-150" style={{ width: `${uploadProgress}%` }} />
+                          <div className="bg-[#C49E3A] h-full transition-all duration-150" style={{ width: `${uploadProgress}%` }} />
                         </div>
                       </div>
                     )}
@@ -1698,14 +1698,14 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
               <div className="flex bg-slate-200/80 backdrop-blur-sm p-1 rounded-xl mb-4 shrink-0 font-bold text-xs ring-1 ring-black/5 gap-1 shadow-sm">
                 <button
                   onClick={() => setPdfCenterViewMode('original')}
-                  className={`px-4 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${pdfCenterViewMode === 'original' ? 'bg-[#1e2229] text-white shadow-sm font-black' : 'text-slate-600 hover:text-slate-900'}`}
+                  className={`px-4 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${pdfCenterViewMode === 'original' ? 'bg-[#002147] text-white shadow-sm font-black' : 'text-slate-600 hover:text-slate-900'}`}
                 >
                   <span>📄</span>
                   <span>{isRtl ? 'عرض كتابك كاملاً (PDF الأصلي)' : 'View Original PDF Book'}</span>
                 </button>
                 <button
                   onClick={() => setPdfCenterViewMode('text')}
-                  className={`px-4 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${pdfCenterViewMode === 'text' ? 'bg-[#1e2229] text-white shadow-sm font-black' : 'text-slate-600 hover:text-slate-900'}`}
+                  className={`px-4 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${pdfCenterViewMode === 'text' ? 'bg-[#002147] text-white shadow-sm font-black' : 'text-slate-600 hover:text-slate-900'}`}
                 >
                   <span>🧠</span>
                   <span>{isRtl ? 'ملخص وتحليل المساعد الذكي' : 'AI Analysis & Insights'}</span>
@@ -1727,18 +1727,18 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                 style={{ fontSize: `${pdfZoom}%` }}
               >
                 {/* PDF Corner Ribbons */}
-                <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-[#b48e56]/15 pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-[#b48e56]/15 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-[#C49E3A]/15 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-[#C49E3A]/15 pointer-events-none" />
 
                 {/* PDF Header running elements */}
-                <div className="border-b border-dashed border-[#b48e56]/15 pb-2 mb-6 flex justify-between items-center text-[10px] font-mono font-black select-none pointer-events-none opacity-50 flex-row-reverse">
+                <div className="border-b border-dashed border-[#C49E3A]/15 pb-2 mb-6 flex justify-between items-center text-[10px] font-mono font-black select-none pointer-events-none opacity-50 flex-row-reverse">
                   <span>{isRtl ? "أكاديمية المعرفة الفطنة والريادة" : "Basim Alkhalil Digital Academy"}</span>
                   <span>{uploadedPdfFile ? "مستند بي دي اف خاص" : `«${isRtl ? selectedBook.titleAr : selectedBook.titleEn}»`}</span>
                   <span>Page {pdfCurrentPage}</span>
                 </div>
 
                 {/* Content heading in sheets */}
-                <h3 className="text-xl md:text-2xl font-black text-slate-900 border-b border-[#b48e56]/10 pb-3 mb-6 font-sans">
+                <h3 className="text-xl md:text-2xl font-black text-slate-900 border-b border-[#C49E3A]/10 pb-3 mb-6 font-sans">
                   {uploadedPdfFile ? "المتن المستخلص من كتاب بي دي اف المرفوع" : activePageDetails.title}
                 </h3>
 
@@ -1748,7 +1748,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                 </div>
 
                 {/* PDF Sheet bottom running line */}
-                <div className="border-t border-[#b48e56]/15 mt-10 pt-4 flex justify-between items-center text-[9px] font-black select-none pointer-events-none opacity-40 flex-row-reverse">
+                <div className="border-t border-[#C49E3A]/15 mt-10 pt-4 flex justify-between items-center text-[9px] font-black select-none pointer-events-none opacity-40 flex-row-reverse">
                   <span>© {isRtl ? "حقوق الترجمة والدراسة ميسرة" : "Academic Study copy"}</span>
                   <span>{isRtl ? "مكتبة التطوير والإنتاج" : "Professional Development"}</span>
                   <span>{pdfCurrentPage} / {pdfTotalPages}</span>
@@ -1758,9 +1758,9 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
           </div>
 
           {/* RIGHT/LEFT SIDECAR: AI Scholar Assistant Panel (مساعد الذكاء الاصطناعي للمتن والـ PDF) */}
-          <div className="w-full md:w-80 bg-[#1e2229]/5 border-slate-200/50 flex flex-col justify-between h-full overflow-hidden shrink-0">
+          <div className="w-full md:w-80 bg-[#002147]/5 border-slate-200/50 flex flex-col justify-between h-full overflow-hidden shrink-0">
             {/* Header */}
-            <div className="bg-[#1e2229] p-3 text-white border-b border-slate-800 flex items-center justify-between">
+            <div className="bg-[#002147] p-3 text-white border-b border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sparkles size={14} className="text-amber-500" />
                 <span className="text-xs font-black tracking-wider">{isRtl ? "المساعد الأكاديمي الفطن" : "AI Scholar Assistant"}</span>
@@ -1779,7 +1779,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                     </span>
                     <div className={`p-2.5 rounded-2xl text-[11px] leading-relaxed max-w-[90%] break-words font-serif ${
                       isUser 
-                        ? 'bg-[#b48e56] text-white rounded-tr-none' 
+                        ? 'bg-[#C49E3A] text-white rounded-tr-none' 
                         : 'bg-white border text-slate-800 rounded-tl-none shadow-xs'
                     }`}>
                       {log.text}
@@ -1805,19 +1805,19 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
               <div className="flex gap-1 pb-2 overflow-x-auto select-none pointer-events-auto shrink-0 max-w-full">
                 <button 
                   onClick={() => setPdfAssistantQuery(isRtl ? "لخص لي متن هذه الصفحة في ثوان" : "Summarize this page please")}
-                  className="bg-slate-200 hover:bg-[#b48e56]/10 hover:text-[#b48e56] border text-[8px] font-black shrink-0 px-2 py-1 rounded-full transition-all text-slate-500"
+                  className="bg-slate-200 hover:bg-[#C49E3A]/10 hover:text-[#C49E3A] border text-[8px] font-black shrink-0 px-2 py-1 rounded-full transition-all text-slate-500"
                 >
                   {isRtl ? "لخص الصفحة 📝" : "Summarize"}
                 </button>
                 <button 
                   onClick={() => setPdfAssistantQuery(isRtl ? "ما هي العبرة الأساسية الممكن استخلاصها؟" : "What is the key paradigm here?")}
-                  className="bg-slate-200 hover:bg-[#b48e56]/10 hover:text-[#b48e56] border text-[8px] font-black shrink-0 px-2 py-1 rounded-full transition-all text-slate-500"
+                  className="bg-slate-200 hover:bg-[#C49E3A]/10 hover:text-[#C49E3A] border text-[8px] font-black shrink-0 px-2 py-1 rounded-full transition-all text-slate-500"
                 >
                   {isRtl ? "ما العبرة هنا؟ 🤔" : "Core Paradigm"}
                 </button>
                 <button 
                   onClick={() => setPdfAssistantQuery(isRtl ? "اشرح قصة ستيفن كوفي بالتفصيل والمنظور الذهني" : "Explain Stephen Covey's paradigm details")}
-                  className="bg-slate-200 hover:bg-[#b48e56]/10 hover:text-[#b48e56] border text-[8px] font-black shrink-0 px-2 py-1 rounded-full transition-all text-slate-500"
+                  className="bg-slate-200 hover:bg-[#C49E3A]/10 hover:text-[#C49E3A] border text-[8px] font-black shrink-0 px-2 py-1 rounded-full transition-all text-slate-500"
                 >
                   {isRtl ? "منظوره الفلسفي 📖" : "Explain perspective"}
                 </button>
@@ -1833,13 +1833,13 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleSendPdfAssistantMessage();
                   }}
-                  className="w-full text-xs font-serif bg-white border border-slate-300 rounded-xl py-2 pl-9 pr-3 focus:outline-none focus:ring-1 focus:ring-[#b48e56]"
+                  className="w-full text-xs font-serif bg-white border border-slate-300 rounded-xl py-2 pl-9 pr-3 focus:outline-none focus:ring-1 focus:ring-[#C49E3A]"
                 />
                 <button 
                   onClick={handleSendPdfAssistantMessage}
-                  className="absolute left-2 top-2 hover:text-[#b48e56] transition-colors"
+                  className="absolute left-2 top-2 hover:text-[#C49E3A] transition-colors"
                 >
-                  <Send size={14} className="text-[#b48e56]" />
+                  <Send size={14} className="text-[#C49E3A]" />
                 </button>
               </div>
             </div>
@@ -1851,25 +1851,25 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
   };
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] text-[#1e2229] font-sans antialiased pb-20">
+    <div className="min-h-screen bg-[#faf8f5] text-[#002147] font-sans antialiased pb-20">
       {/* Dynamic Certificate Modal Container */}
       {renderCertificateModal()}
       
       {/* Decorative Warm Top Bar Accent */}
-      <div className="h-1.5 bg-[#b48e56]" />
+      <div className="h-1.5 bg-[#C49E3A]" />
 
       {/* Navigation Header */}
       <div className="max-w-6xl mx-auto px-4 pt-6 pb-2 border-b border-[#e1deda] flex justify-between items-center">
         <div className="flex gap-1 bg-[#eae6df] p-1 rounded-xl">
           <button 
             onClick={() => setActiveTab('browse')}
-            className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all ${activeTab === 'browse' ? 'bg-white text-[#b48e56] shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+            className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all ${activeTab === 'browse' ? 'bg-white text-[#C49E3A] shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
           >
             {isRtl ? 'تصفح المكتبة التنموية' : 'Browse Library'}
           </button>
           <button 
             onClick={() => setActiveTab('converter')}
-            className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all ${activeTab === 'converter' ? 'bg-white text-[#b48e56] shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+            className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all ${activeTab === 'converter' ? 'bg-white text-[#C49E3A] shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
           >
             {isRtl ? 'مهندس المحتوى والملفات' : 'AI PDF Converter'}
           </button>
@@ -1892,10 +1892,10 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
               {!selectedBook ? (
                 <div>
                   <div className="mb-10 text-center max-w-2xl mx-auto">
-                    <span className="text-xs tracking-widest text-[#b48e56] uppercase font-bold py-1 px-3 bg-[#f2ede4] rounded-full mb-3 inline-block">
+                    <span className="text-xs tracking-widest text-[#C49E3A] uppercase font-bold py-1 px-3 bg-[#f2ede4] rounded-full mb-3 inline-block">
                       {isRtl ? 'أكاديمية المعرفة الفطنة والريادة' : 'Premium Micro-Learning Engine'}
                     </span>
-                    <h1 className="text-4xl font-extrabold text-[#111] tracking-tight mb-4">
+                    <h1 className="text-4xl font-extrabold text-[#002147] tracking-tight mb-4">
                       {isRtl ? 'قسم التطوير والإنتاج: دورات تطويرية مصغرة' : 'Developmental Micro-Courses'}
                     </h1>
                     <p className="text-slate-500 leading-relaxed font-serif text-lg">
@@ -1932,8 +1932,8 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                               />
                               {course.isLocked && (
                                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white">
-                                  <div className="flex flex-col items-center gap-1 bg-[#1e2229] py-2 px-4 rounded-xl border border-white/10">
-                                    <Lock size={18} className="text-[#b48e56]" />
+                                  <div className="flex flex-col items-center gap-1 bg-[#002147] py-2 px-4 rounded-xl border border-white/10">
+                                    <Lock size={18} className="text-[#C49E3A]" />
                                     <span className="text-[10px] font-black tracking-wider uppercase">{isRtl ? 'قريباً' : 'Locked'}</span>
                                   </div>
                                 </div>
@@ -1945,7 +1945,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                               )}
                             </div>
 
-                            <span className="text-[10px] text-[#b48e56] font-extrabold uppercase tracking-widest block mb-1">
+                            <span className="text-[10px] text-[#C49E3A] font-extrabold uppercase tracking-widest block mb-1">
                               {isRtl ? course.authorAr : course.authorEn}
                             </span>
                             <h3 className="text-xl font-bold text-[#1a1a1a] leading-tight mb-2">
@@ -1956,7 +1956,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                             </p>
                           </div>
 
-                          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-black uppercase text-[#b48e56]">
+                          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-black uppercase text-[#C49E3A]">
                             <span>
                               {course.isLocked 
                                 ? (isRtl ? 'مغلق ومجدول' : 'Scheduled') 
@@ -2001,10 +2001,10 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
 
                     <div className="flex-1 flex flex-col justify-between">
                       <div>
-                        <span className="text-xs text-[#b48e56] font-black uppercase tracking-wider">
+                        <span className="text-xs text-[#C49E3A] font-black uppercase tracking-wider">
                           {isRtl ? selectedBook.authorAr : selectedBook.authorEn}
                         </span>
-                        <h2 className="text-2xl md:text-3xl font-extrabold text-[#111] mt-1 mb-4">
+                        <h2 className="text-2xl md:text-3xl font-extrabold text-[#002147] mt-1 mb-4">
                           {isRtl ? selectedBook.titleAr : selectedBook.titleEn}
                         </h2>
                         <p className="text-slate-500 font-serif leading-relaxed text-sm">
@@ -2016,7 +2016,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-6 pt-6 border-t border-slate-100">
                         <div className="bg-[#faf9f5] border border-[#e9e6df] rounded-xl p-3 text-center">
                           <label className="text-[10px] uppercase font-black text-slate-400 block tracking-widest">{isRtl ? 'المواضيع والأقسام' : 'Chapters'}</label>
-                          <span className="text-[#111] font-black text-base">
+                          <span className="text-[#002147] font-black text-base">
                             {isBookMode 
                               ? (isRtl ? `${selectedBook.chapters.length} فصول كاملة غير مختصرة` : `${selectedBook.chapters.length} Unabridged Chapters`)
                               : (isRtl ? `${selectedBook.chapters.length} فصول مصغرة` : `${selectedBook.chapters.length} Chapters`)}
@@ -2024,7 +2024,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                         </div>
                         <div className="bg-[#faf9f5] border border-[#e9e6df] rounded-xl p-3 text-center">
                           <label className="text-[10px] uppercase font-black text-slate-400 block tracking-widest">{isRtl ? 'التقييم الفطن' : 'Gatekeeping'}</label>
-                          <span className="text-[#111] font-black text-sm">
+                          <span className="text-[#002147] font-black text-sm">
                             {isBookMode 
                               ? (isRtl ? 'قراءة المتن الكامل بي دي اف' : 'Full Unabridged Text') 
                               : (isRtl ? 'اختبار عبور متطلب' : 'Pass to progress')}
@@ -2032,19 +2032,19 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                         </div>
                         <div className="bg-[#faf9f5] border border-[#e9e6df] rounded-xl p-3 text-center col-span-2 md:col-span-1">
                           <label className="text-[10px] uppercase font-black text-slate-400 block tracking-widest">{isRtl ? 'الجائزة التنموية' : 'Awards'}</label>
-                          <span className="text-[#b48e56] font-black text-sm">{isBookMode ? '+250 XP' : '+150 XP'}</span>
+                          <span className="text-[#C49E3A] font-black text-sm">{isBookMode ? '+250 XP' : '+150 XP'}</span>
                         </div>
                       </div>
 
                       {/* Premium E-Reader & PDF Text launcher bar */}
-                      <div className="mt-6 bg-[#b48e56]/5 border border-[#b48e56]/20 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="mt-6 bg-[#C49E3A]/5 border border-[#C49E3A]/20 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-3 text-right">
-                          <div className="bg-[#b48e56] text-white p-2.5 rounded-xl">
+                          <div className="bg-[#C49E3A] text-white p-2.5 rounded-xl">
                             <BookOpen size={20} />
                           </div>
                           <div>
-                            <h4 className="text-sm font-black text-[#1e2229]">{isRtl ? 'القارئ الذكي للمتن الكامل المعتمد (PDF)' : 'Interactive Unabridged E-Reader'}</h4>
-                            <p className="text-[11px] text-[#b48e56] font-bold mt-0.5">{isRtl ? 'قراءة المتن الأصلي الكامل مع مساعد الذكاء الاصطناعي صفحة بصفحة دون اختصارات وبجودة فائقة' : 'Study unabridged original textbooks page-by-page with Gemini AI companion sidecar.'}</p>
+                            <h4 className="text-sm font-black text-[#002147]">{isRtl ? 'القارئ الذكي للمتن الكامل المعتمد (PDF)' : 'Interactive Unabridged E-Reader'}</h4>
+                            <p className="text-[11px] text-[#C49E3A] font-bold mt-0.5">{isRtl ? 'قراءة المتن الأصلي الكامل مع مساعد الذكاء الاصطناعي صفحة بصفحة دون اختصارات وبجودة فائقة' : 'Study unabridged original textbooks page-by-page with Gemini AI companion sidecar.'}</p>
                           </div>
                         </div>
                         <button
@@ -2053,7 +2053,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                             setIsPdfReaderView(true);
                             speakText(isRtl ? 'مرحباً بك في المحيا الأكاديمي لقراءة المتن الأصلي الكامل بي دي اف' : 'Welcome to the unabridged textbook reader');
                           }}
-                          className="bg-[#b48e56] hover:bg-[#a17e4b] text-white font-black text-xs py-2.5 px-6 rounded-xl shadow-md cursor-pointer transition-all flex items-center gap-2 shrink-0 active:scale-95"
+                          className="bg-[#C49E3A] hover:bg-[#a8862f] text-white font-black text-xs py-2.5 px-6 rounded-xl shadow-md cursor-pointer transition-all flex items-center gap-2 shrink-0 active:scale-95"
                         >
                           <BookOpen size={14} />
                           <span>{isRtl ? 'قراءة المتن الأصلي الكامل 📖' : 'Read Full Unabridged Text 📖'}</span>
@@ -2109,7 +2109,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                         </div>
                       )}
 
-                      <h3 className="text-xl font-extrabold mb-4 text-[#111] pb-2 border-b border-[#ece8e1]">
+                      <h3 className="text-xl font-extrabold mb-4 text-[#002147] pb-2 border-b border-[#ece8e1]">
                         {isRtl 
                           ? (isBookMode ? 'الفصول والأبواب الأصلية الكاملة - المتن الكامل غير مختصر' : 'الفصول والمسارات المتاحة للتلخيص والمناقشة') 
                           : 'Available Pathways'}
@@ -2125,7 +2125,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                           return (
                             <div 
                               key={chapter.id}
-                              className={`bg-white border rounded-2xl p-5 shadow-sm transition-all border-[#e8e5df] hover:border-[#b48e56]/60 flex flex-col justify-between items-stretch gap-4 ${isUnlocked ? '' : 'opacity-65'}`}
+                              className={`bg-white border rounded-2xl p-5 shadow-sm transition-all border-[#e8e5df] hover:border-[#C49E3A]/60 flex flex-col justify-between items-stretch gap-4 ${isUnlocked ? '' : 'opacity-65'}`}
                             >
                               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <div 
@@ -2141,11 +2141,11 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                                     }
                                   }}
                                 >
-                                  <div className="w-10 h-10 rounded-xl bg-[#b48e56]/10 flex items-center justify-center text-[#b48e56] shrink-0">
+                                  <div className="w-10 h-10 rounded-xl bg-[#C49E3A]/10 flex items-center justify-center text-[#C49E3A] shrink-0">
                                     {isUnlocked ? <BookOpen size={20} /> : <Lock size={20} />}
                                   </div>
                                   <div>
-                                    <h4 className="font-bold text-[#111] text-lg text-right">
+                                    <h4 className="font-bold text-[#002147] text-lg text-right">
                                       {isRtl ? chapter.titleAr : chapter.titleEn}
                                     </h4>
                                     <p className="text-slate-400 text-xs font-medium font-serif mt-1 text-right">
@@ -2163,7 +2163,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                                         setLessonIndex(0);
                                         setShowQuiz(false);
                                       }}
-                                      className="text-xs font-black uppercase text-white bg-[#b48e56] hover:bg-[#967341] py-2 px-4 rounded-xl shadow-xs transition-colors"
+                                      className="text-xs font-black uppercase text-white bg-[#C49E3A] hover:bg-[#967341] py-2 px-4 rounded-xl shadow-xs transition-colors"
                                     >
                                       {isRtl ? 'قراءة هذا الباب 📖' : 'Read Chapter 📖'}
                                     </button>
@@ -2193,7 +2193,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                                         setLessonIndex(0);
                                         setShowQuiz(false);
                                       }}
-                                      className="text-xs font-black uppercase text-white bg-[#b48e56] hover:bg-[#967341] py-2 px-4 rounded-xl shadow-xs transition-colors"
+                                      className="text-xs font-black uppercase text-white bg-[#C49E3A] hover:bg-[#967341] py-2 px-4 rounded-xl shadow-xs transition-colors"
                                     >
                                       {isRtl ? 'ابدأ المسار' : 'Start Path'}
                                     </button>
@@ -2211,7 +2211,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                                       e.stopPropagation();
                                       setExpandedChapterId(isExpanded ? null : chapter.id);
                                     }}
-                                    className="text-xs text-[#b48e56] hover:text-[#967341] font-black flex items-center gap-1 bg-[#b48e56]/5 px-3 py-1.5 rounded-xl transition-all"
+                                    className="text-xs text-[#C49E3A] hover:text-[#967341] font-black flex items-center gap-1 bg-[#C49E3A]/5 px-3 py-1.5 rounded-xl transition-all"
                                   >
                                     <span>🔍</span>
                                     <span>{isExpanded ? (isRtl ? 'طي نص المتن وطمس العرض' : 'Collapse Chapter Text') : (isRtl ? ' رؤية النص الكامل لهذا الفصل مباشرة بالأسفل' : 'View Full Unabridged Text Directly Below')}</span>
@@ -2234,8 +2234,8 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                               {/* Expanded Unabridged content */}
                               {isUnlocked && isExpanded && (
                                 <div className="mt-2 bg-[#fafaf7] border border-[#ece8e1] rounded-2xl p-5 text-right select-text animate-fadeIn relative">
-                                  <div className="absolute top-3 left-4 text-[9px] font-mono font-bold text-[#b48e56] uppercase">Letting Go / U-Books</div>
-                                  <h5 className="font-extrabold text-sm text-slate-800 mb-3 border-b border-dashed border-[#b48e56]/20 pb-1 flex items-center gap-1 flex-row-reverse">
+                                  <div className="absolute top-3 left-4 text-[9px] font-mono font-bold text-[#C49E3A] uppercase">Letting Go / U-Books</div>
+                                  <h5 className="font-extrabold text-sm text-slate-800 mb-3 border-b border-dashed border-[#C49E3A]/20 pb-1 flex items-center gap-1 flex-row-reverse">
                                     <span>📖</span>
                                     <span>{isRtl ? 'المتن اللفظي والنص الكامل المعتمد:' : 'Full Authenticated Unabridged Text:'}</span>
                                   </h5>
@@ -2269,7 +2269,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                         </button>
 
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-[#b48e56] font-bold">
+                          <span className="text-xs text-[#C49E3A] font-bold">
                             {isRtl ? `بوابة فصل ${activeChapter.chapterNum}` : `Chapter ${activeChapter.chapterNum}`}
                           </span>
                         </div>
@@ -2287,7 +2287,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                                   setShowQuiz(false);
                                   handleLessonNavigation(idx);
                                 }}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all border ${isCurrent ? 'bg-[#b48e56] text-white border-[#b48e56]' : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-200'}`}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all border ${isCurrent ? 'bg-[#C49E3A] text-white border-[#C49E3A]' : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-200'}`}
                               >
                                 {isBookMode 
                                   ? (isRtl ? `القسم المكتوب ${idx + 1}` : `Section ${idx + 1}`)
@@ -2312,7 +2312,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                         <div className="flex bg-[#eae6df] p-1 rounded-2xl border border-[#dedad3] justify-center items-center max-w-md mx-auto w-full gap-1">
                           <button 
                             onClick={() => setStudyViewMode('lesson')}
-                            className={`flex-1 py-2 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${studyViewMode === 'lesson' ? 'bg-[#b48e56] text-white shadow-sm' : 'text-slate-600 hover:text-[#b48e56]'}`}
+                            className={`flex-1 py-2 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${studyViewMode === 'lesson' ? 'bg-[#C49E3A] text-white shadow-sm' : 'text-slate-600 hover:text-[#C49E3A]'}`}
                           >
                             <BookOpen size={14} />
                             <span>
@@ -2323,7 +2323,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                           </button>
                           <button 
                             onClick={() => setStudyViewMode('mindmap')}
-                            className={`flex-1 py-2 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${studyViewMode === 'mindmap' ? 'bg-[#b48e56] text-white shadow-sm' : 'text-slate-600 hover:text-[#b48e56]'}`}
+                            className={`flex-1 py-2 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${studyViewMode === 'mindmap' ? 'bg-[#C49E3A] text-white shadow-sm' : 'text-slate-600 hover:text-[#C49E3A]'}`}
                           >
                             <FileText size={14} />
                             <span>{isRtl ? '📊 المخطط الهيكلي والإنفوجرافيك' : '📊 Visual Infographic'}</span>
@@ -2353,7 +2353,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                             >
                               <div className="flex justify-between items-start flex-wrap gap-4 mb-4 border-b border-[#f2ece2] pb-4">
                                 <div>
-                                  <span className="text-[10px] tracking-widest text-[#b48e56] uppercase font-bold py-0.5 px-3.5 bg-[#f5f1e8] rounded-full inline-block leading-loose animate-pulse">
+                                  <span className="text-[10px] tracking-widest text-[#C49E3A] uppercase font-bold py-0.5 px-3.5 bg-[#f5f1e8] rounded-full inline-block leading-loose animate-pulse">
                                     {isBookMode 
                                       ? (isRtl ? '📖 متن الكتاب الأصلي الكامل - غير مختصر' : '📖 Full Unabridged Original Text')
                                       : (activeLesson.type === 'intro' ? (isRtl ? 'تمهيد وتأسيس' : 'Orientation') : 
@@ -2361,13 +2361,13 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                                          activeLesson.type === 'tips' ? (isRtl ? 'دليل إرشادي' : 'Tips Node') : (isRtl ? 'جوهر المفهوم' : 'Core Concept'))}
                                   </span>
 
-                                  <h3 className="text-2xl font-extrabold text-[#111] tracking-tight mt-3 mb-1 leading-tight text-right">
+                                  <h3 className="text-2xl font-extrabold text-[#002147] tracking-tight mt-3 mb-1 leading-tight text-right">
                                     {isRtl ? activeLesson.titleAr : activeLesson.titleEn}
                                   </h3>
                                 </div>
 
                                 {/* Active Chronometer Timer */}
-                                <div className="flex items-center gap-2 text-[#b48e56] bg-[#b48e56]/5 py-1.5 px-3.5 rounded-xl border border-[#b48e56]/15 font-sans">
+                                <div className="flex items-center gap-2 text-[#C49E3A] bg-[#C49E3A]/5 py-1.5 px-3.5 rounded-xl border border-[#C49E3A]/15 font-sans">
                                   <span className="relative flex h-20 w-2 shrink-0 items-center justify-center">
                                     <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -2388,7 +2388,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                                   {/* Audio speaker */}
                                   <button 
                                     onClick={() => speakText(isRtl ? activeLesson.contentAr : activeLesson.contentEn)}
-                                    className="bg-[#b48e56]/10 text-[#b48e56] hover:bg-[#b48e56]/20 transition-all px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-sm"
+                                    className="bg-[#C49E3A]/10 text-[#C49E3A] hover:bg-[#C49E3A]/20 transition-all px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-sm"
                                   >
                                     <PlayCircle size={14} />
                                     <span>{isRtl ? 'استمع صوتياً' : 'Listen Now'}</span>
@@ -2397,7 +2397,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                                   {/* Scannable mode indicator */}
                                   <button 
                                     onClick={() => setScannableMode(!scannableMode)}
-                                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all border flex items-center gap-1.5 ${scannableMode ? 'bg-[#b48e56] text-white border-[#b48e56]' : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-200'}`}
+                                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all border flex items-center gap-1.5 ${scannableMode ? 'bg-[#C49E3A] text-white border-[#C49E3A]' : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-200'}`}
                                   >
                                     <span>⚡ {isRtl ? 'وضع القراءة السلسة' : 'Foveal Scan'}</span>
                                   </button>
@@ -2408,7 +2408,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                                       <button 
                                         key={sz}
                                         onClick={() => setFontSize(sz)}
-                                        className={`px-2 py-1 rounded-lg text-xs font-black uppercase transition-all ${fontSize === sz ? 'bg-white text-[#b48e56] shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                                        className={`px-2 py-1 rounded-lg text-xs font-black uppercase transition-all ${fontSize === sz ? 'bg-white text-[#C49E3A] shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
                                       >
                                         {sz === 'normal' ? 'S' : sz === 'medium' ? 'M' : sz === 'large' ? 'L' : 'XL'}
                                       </button>
@@ -2446,7 +2446,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                                         handleLessonNavigation(lessonIndex + 1);
                                       }
                                     }}
-                                    className="bg-[#b48e56] hover:bg-[#a17e4b] text-white transition-all py-2.5 px-6 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-sm"
+                                    className="bg-[#C49E3A] hover:bg-[#a8862f] text-white transition-all py-2.5 px-6 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-sm"
                                   >
                                     <span>
                                       {lessonIndex + 1 === activeChapter.lessons.length 
@@ -2458,7 +2458,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                                 ) : (
                                   <button 
                                     onClick={() => handleLessonNavigation(lessonIndex + 1)}
-                                    className="bg-[#b48e56] hover:bg-[#a17e4b] text-white transition-all py-2.5 px-6 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-sm"
+                                    className="bg-[#C49E3A] hover:bg-[#a8862f] text-white transition-all py-2.5 px-6 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-sm"
                                   >
                                     <span>
                                       {lessonIndex + 1 === activeChapter.lessons.length 
@@ -2541,7 +2541,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                                       animate={{ opacity: 1, height: 'auto' }}
                                       className="mt-6 p-4 bg-white/5 border border-white/10 rounded-xl text-xs leading-relaxed text-slate-300 font-serif"
                                     >
-                                      <span className="font-bold text-[#b48e56] block mb-1">
+                                      <span className="font-bold text-[#C49E3A] block mb-1">
                                         {isRtl ? 'التفسير المعرفي للفصل:' : 'Deconstructive Breakdown:'}
                                       </span>
                                       {isRtl ? activeChapter.quiz[currentQuizIndex].explanationAr : activeChapter.quiz[currentQuizIndex].explanationEn}
@@ -2553,7 +2553,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                                   <button 
                                     disabled={!isAnswered}
                                     onClick={handleNextQuiz}
-                                    className={`py-3 px-8 rounded-xl text-xs font-black tracking-wider uppercase flex items-center gap-1.5 shadow-sm transition-all ${isAnswered ? 'bg-[#b48e56] hover:bg-[#a17e4b] text-white cursor-pointer' : 'bg-white/10 text-slate-500 cursor-not-allowed'}`}
+                                    className={`py-3 px-8 rounded-xl text-xs font-black tracking-wider uppercase flex items-center gap-1.5 shadow-sm transition-all ${isAnswered ? 'bg-[#C49E3A] hover:bg-[#a8862f] text-white cursor-pointer' : 'bg-white/10 text-slate-500 cursor-not-allowed'}`}
                                   >
                                     <span>
                                       {currentQuizIndex + 1 === activeChapter.quiz.length 
@@ -2639,7 +2639,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                                         setQuizScore(0);
                                         setQuizFinished(false);
                                       }}
-                                      className="bg-[#b48e56] hover:bg-[#a17e4b] text-white transition-all py-3 px-6 rounded-xl text-xs font-black flex items-center gap-2 block cursor-pointer"
+                                      className="bg-[#C49E3A] hover:bg-[#a8862f] text-white transition-all py-3 px-6 rounded-xl text-xs font-black flex items-center gap-2 block cursor-pointer"
                                     >
                                       <RefreshCw size={14} />
                                       <span>{isRtl ? 'أعد المحاولة' : 'Retake Quiz'}</span>
@@ -2672,11 +2672,11 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
               className="max-w-3xl mx-auto"
             >
               <div className="bg-white border border-[#e8e5df] p-6 md:p-8 rounded-3xl shadow-sm text-center mb-8">
-                <div className="w-12 h-12 rounded-2xl bg-[#b48e56]/15 text-[#b48e56] flex items-center justify-center mx-auto mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-[#C49E3A]/15 text-[#C49E3A] flex items-center justify-center mx-auto mb-4">
                   <UploadCloud size={24} />
                 </div>
                 
-                <h2 className="text-2xl font-extrabold text-[#111] mb-2 tracking-tight">
+                <h2 className="text-2xl font-extrabold text-[#002147] mb-2 tracking-tight">
                   {isRtl ? 'تحويل الكتب والملفات (PDF) إلى مسارات تدريبية مصغرة' : 'AI E-Book & PDF Micro-Converter'}
                 </h2>
                 <p className="text-slate-400 font-serif leading-relaxed text-sm max-w-lg mx-auto mb-6">
@@ -2687,8 +2687,8 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
 
                 {isConverting ? (
                   <div className="py-12 flex flex-col items-center justify-center">
-                    <RefreshCw size={40} className="text-[#b48e56] animate-spin mb-4" />
-                    <span className="text-xs font-black text-[#b48e56] tracking-wider uppercase inline-block">
+                    <RefreshCw size={40} className="text-[#C49E3A] animate-spin mb-4" />
+                    <span className="text-xs font-black text-[#C49E3A] tracking-wider uppercase inline-block">
                       {conversionStep}
                     </span>
                   </div>
@@ -2707,7 +2707,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                         : 'Paste your raw textbook data or chapter summaries here...'}
                       value={rawText}
                       onChange={(e) => setRawText(e.target.value)}
-                      className="w-full rounded-2xl border border-slate-200 p-4 focus:ring-1 focus:ring-[#b48e56] bg-slate-50/50 text-sm font-serif leading-relaxed focus:outline-none"
+                      className="w-full rounded-2xl border border-slate-200 p-4 focus:ring-1 focus:ring-[#C49E3A] bg-slate-50/50 text-sm font-serif leading-relaxed focus:outline-none"
                     />
 
                     <div className="flex justify-end gap-3">
@@ -2723,7 +2723,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
                       </button>
                       <button 
                         onClick={runMicroDeconstruction}
-                        className="bg-[#b48e56] hover:bg-[#a17e4b] text-white transition-all font-black text-xs py-3 px-8 rounded-xl shadow-md flex items-center gap-1.5"
+                        className="bg-[#C49E3A] hover:bg-[#a8862f] text-white transition-all font-black text-xs py-3 px-8 rounded-xl shadow-md flex items-center gap-1.5"
                       >
                         <Sparkles size={14} />
                         <span>{isRtl ? 'حوّله إلى دورة بالذكاء الاصطناعي' : 'Build course with AI'}</span>

@@ -393,7 +393,10 @@ const Pronunciation: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid, u
   const l = lessons.find(x => x.id === set);
   const items = useMemo(() => {
     if (!l?.content) return MINIMAL_PAIRS;
-    const words = Array.from(new Set(l.content.example.flatMap(e => norm(speakable(e.en))).filter(w => w.length >= 5))).slice(0, 6);
+    // keep the original casing for display (e.g. "Riyadh"), matching is case-insensitive anyway
+    const cased = new Map<string, string>();
+    l.content.example.forEach(e => (speakable(e.en).match(/[A-Za-z']+/g) || []).forEach(w => { const k = w.toLowerCase(); if (!cased.has(k) || /^[A-Z]/.test(w) && cased.get(k) === k) cased.set(k, w); }));
+    const words = Array.from(new Set(l.content.example.flatMap(e => norm(speakable(e.en))).filter(w => w.length >= 5))).slice(0, 6).map(w => cased.get(w) || w);
     return [...words, ...l.content.example.map(e => speakable(e.en)).filter(Boolean)].slice(0, 10);
   }, [l]);
   return (

@@ -4644,7 +4644,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full text-right" dir={isRtl ? 'rtl' : 'ltr'}>
         {/* Left Column: Lesson card details */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-[#0b172e] border border-white/10 rounded-[2rem] p-6 space-y-6">
+          <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-6 space-y-6">
             <div className="flex justify-between items-start gap-4">
               <div className="flex-1 text-right">
                 <span className="px-2.5 py-0.5 bg-amber-500/10 text-amber-300 border border-amber-500/15 rounded-full text-[10px] font-black uppercase tracking-widest">{trackName}</span>
@@ -4653,7 +4653,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
               <button
                 disabled={exportingLesson}
                 onClick={() => handleExportLessonAsImage(lesson, 'advanced')}
-                className="bg-[#050b14] border border-amber-500/35 hover:bg-amber-500 hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
+                className="bg-[#001a38] border border-amber-500/35 hover:bg-amber-500 hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
               >
                 {exportingLesson && lessonToExport?.lesson_number === lesson.lesson_number ? (
                   <>
@@ -4701,7 +4701,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
 
           <button
             onClick={() => setSelectedLesson(null)}
-            className="w-full bg-[#0b1329] hover:bg-slate-900 border border-white/10 text-slate-300 font-black p-4 rounded-xl text-xs flex justify-center items-center gap-2 transition-all"
+            className="w-full bg-[#00274f] hover:bg-slate-900 border border-white/10 text-slate-300 font-black p-4 rounded-xl text-xs flex justify-center items-center gap-2 transition-all"
           >
             <ArrowLeft className={isRtl ? 'rotate-180' : ''} size={14} />
             {isRtl ? 'العودة لقائمة المسارات المتقدمة' : 'Back to Advanced Tracks'}
@@ -4711,7 +4711,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
         {/* Right Column: Interactive SandBox Workspace and Simulator */}
         <div className="lg:col-span-7 space-y-6">
           {/* Workspace Tab Switcher */}
-          <div className="flex bg-[#0b1329] border border-white/10 p-1.5 rounded-2xl gap-2">
+          <div className="flex bg-[#00274f] border border-white/10 p-1.5 rounded-2xl gap-2">
             <button
               onClick={() => setActiveWorkspaceTab('chapters')}
               className={`flex-1 py-3.5 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-2 ${
@@ -4753,7 +4753,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
           {activeWorkspaceTab === 'chapters' ? (
             <>
               {/* Chapters Panel */}
-              <div className="bg-[#0b172e] border border-white/10 rounded-[2rem] p-6 space-y-6">
+              <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-6 space-y-6">
                 {/* Chapter Navigator Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-4">
                   <div className="text-right flex-1">
@@ -4788,7 +4788,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                         className={`py-2.5 rounded-xl text-xs font-black border transition-all text-center ${
                           isSelected
                             ? 'bg-amber-500/10 border-amber-500/40 text-amber-400 shadow-md'
-                            : 'bg-[#050b14]/50 border-white/5 text-slate-400 hover:text-white hover:bg-white/5'
+                            : 'bg-[#001a38]/50 border-white/5 text-slate-400 hover:text-white hover:bg-white/5'
                         }`}
                         title={chData.title}
                       >
@@ -4851,7 +4851,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                               {isCopied ? (isRtl ? 'تم النسخ!' : 'Copied!') : (isRtl ? 'نسخ الكود' : 'Copy Code')}
                             </button>
                           </div>
-                          <pre className="bg-[#050b14] border-b border-x border-white/5 p-4 rounded-b-xl overflow-x-auto text-left select-all">
+                          <pre className="bg-[#001a38] border-b border-x border-white/5 p-4 rounded-b-xl overflow-x-auto text-left select-all">
                             <code className="text-xs font-mono text-emerald-400 leading-relaxed block">
                               {currentChapter.code}
                             </code>
@@ -4915,7 +4915,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                               onClick={() => {
                                 setActiveWorkspaceTab('quiz');
                               }}
-                              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 text-xs font-black px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-emerald-500/10 flex items-center gap-1 cursor-pointer"
+                              className="bg-gradient-to-r from-emerald-500 to-[#002147] hover:from-emerald-400 hover:to-[#C49E3A] text-slate-950 text-xs font-black px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-emerald-500/10 flex items-center gap-1 cursor-pointer"
                             >
                               <Award size={14} />
                               {isRtl ? 'ابدأ الاختبار 📝' : 'Take Quiz 📝'}
@@ -4931,7 +4931,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
           ) : activeWorkspaceTab === 'sandbox' ? (
             <>
               {/* Challenge list */}
-              <div className="bg-[#0b172e] border border-white/10 rounded-[2rem] p-6 space-y-6">
+              <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-6 space-y-6">
                 <div>
                   <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">{lesson.quest_card.section_title}</span>
                   <h3 className="text-xl font-black text-white mt-1 leading-tight">{lesson.quest_card.activity_name}</h3>
@@ -4966,15 +4966,15 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                           value={sandboxInputs[`ans_${chal.id}`] || ''}
                           onChange={(e) => setSandboxInputs(prev => ({ ...prev, [`ans_${chal.id}`]: e.target.value }))}
                           rows={2}
-                          className="w-full text-xs font-semibold bg-[#050b14]/90 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
+                          className="w-full text-xs font-semibold bg-[#001a38]/90 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
                         />
                       </div>
                     );
                   })}
 
                   {lesson.quest_card.discussion_question && (
-                    <div className="p-4 bg-blue-500/5 rounded-2xl border border-blue-500/15">
-                      <h4 className="text-xs font-black text-blue-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+                    <div className="p-4 bg-[#C49E3A]/5 rounded-2xl border border-[#C49E3A]/15">
+                      <h4 className="text-xs font-black text-[#E4C77A] uppercase tracking-widest mb-1 flex items-center gap-2">
                         <HelpCircle size={14} />
                         {isRtl ? 'سؤال للنقاش والمطالعة' : 'DISCUSSION QUESTION'}
                       </h4>
@@ -5010,7 +5010,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                         placeholder={isRtl ? 'مبرمج التقدم الحكيم' : 'Basim the Coder'}
                         value={sandboxInputs['python_name'] || ''}
                         onChange={(e) => setSandboxInputs(prev => ({ ...prev, python_name: e.target.value }))}
-                        className="w-full text-xs bg-[#050b14]/80 border border-white/10 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-amber-500 text-right"
+                        className="w-full text-xs bg-[#001a38]/80 border border-white/10 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-amber-500 text-right"
                       />
 
                       <button
@@ -5025,7 +5025,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
 
                     {/* Simulated result terminal terminal-logs */}
                     {(simulating || simResponse) && (
-                      <div className="bg-[#050b14] p-4 rounded-xl border border-white/5 text-xs text-sky-400 space-y-2 select-text font-mono whitespace-pre-wrap leading-relaxed">
+                      <div className="bg-[#001a38] p-4 rounded-xl border border-white/5 text-xs text-[#E4C77A] space-y-2 select-text font-mono whitespace-pre-wrap leading-relaxed">
                         {simulating && simulatingStep === 1 && (
                           <div className="text-amber-400 animate-pulse">🛠️ {isRtl ? 'مرحبًا بك في معمل Google Colab المحاكي. جاري تحميل المفسر الأساسي ونواة بايثون...' : 'Initializing cloud VM. Spawning Python kernel container...'}</div>
                         )}
@@ -5039,7 +5039,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                 ) : (
                   /* Conversational interface (Lessons 1-6) */
                   <div className="space-y-4">
-                    <div className="bg-[#050b14] p-4 rounded-xl border border-white/5 max-h-56 overflow-y-auto text-xs space-y-3 font-semibold">
+                    <div className="bg-[#001a38] p-4 rounded-xl border border-white/5 max-h-56 overflow-y-auto text-xs space-y-3 font-semibold">
                       {/* Default greetings */}
                       <div className="text-slate-400 leading-relaxed italic text-center pb-2 border-b border-white/5">
                         💡 {isRtl ? 'قم بنسخ أي من التحديات بالأعلى وصياغة مفرداتها وتفعيل البوت لمشاهدة التحليل ذكيًا ومطابقًا لتعاويذك السحرية!' : 'Paste any challenge template above, modify components, and write into simulation chat to experience real-time AI reply.'}
@@ -5075,7 +5075,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                         value={sandboxInputs['sim_chat_input'] || ''}
                         onChange={(e) => setSandboxInputs(prev => ({ ...prev, sim_chat_input: e.target.value }))}
                         onKeyDown={(e) => e.key === 'Enter' && handleSimSubmit()}
-                        className="flex-1 bg-[#050b14] border border-white/10 rounded-xl px-4 py-3 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 text-right"
+                        className="flex-1 bg-[#001a38] border border-white/10 rounded-xl px-4 py-3 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 text-right"
                       />
                       <button
                         onClick={handleSimSubmit}
@@ -5093,7 +5093,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
               <div className="flex justify-end pt-4">
                 <button
                   onClick={handleCompleteLessonAndAwardXp}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black px-8 py-4 rounded-2xl flex items-center gap-3 shadow-lg shadow-emerald-500/10 transition-all active:scale-95 text-sm"
+                  className="bg-gradient-to-r from-emerald-500 to-[#002147] hover:from-emerald-400 hover:to-[#C49E3A] text-slate-950 font-black px-8 py-4 rounded-2xl flex items-center gap-3 shadow-lg shadow-emerald-500/10 transition-all active:scale-95 text-sm"
                 >
                   <CheckCircle size={18} />
                   {isCompleted ? (isRtl ? 'تجاوز التحدي مجدداً' : 'Replay challenge completed') : (isRtl ? 'أكملت المغامرة بنجاح وحصدت +50 XP 🏆' : 'Adventure completed successfully (+50 XP) 🏆')}
@@ -5102,7 +5102,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
             </>
           ) : (
             /* Interactive Advanced Level Unit Quiz View */
-            <div className="bg-[#0b172e] border border-white/10 rounded-[2rem] p-6 space-y-6">
+            <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-6 space-y-6">
               <div className="flex justify-between items-center border-b border-white/5 pb-4">
                 <div>
                   <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">
@@ -5457,7 +5457,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
     return (
       <div id="pro_workspace_container" className="space-y-8 text-right" dir="rtl">
         {/* Course Interactive Header */}
-        <div className="bg-[#0b1329] border border-amber-500/20 rounded-[2rem] p-6 md:p-8 relative overflow-hidden">
+        <div className="bg-[#00274f] border border-amber-500/20 rounded-[2rem] p-6 md:p-8 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl" />
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
             <div className="space-y-3 text-right">
@@ -5476,7 +5476,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                 <button
                   disabled={exportingLesson}
                   onClick={() => handleExportLessonAsImage(lesson, 'pro')}
-                  className="bg-[#050b14] border border-amber-500/35 hover:bg-amber-500 hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
+                  className="bg-[#001a38] border border-amber-500/35 hover:bg-amber-500 hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
                 >
                   {exportingLesson && lessonToExport?.lesson_number === lesson.lesson_number ? (
                     <>
@@ -5516,7 +5516,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
           <div className="lg:col-span-5 space-y-6">
             
             {/* The Core Content Document */}
-            <div className="bg-[#0b172e] border border-white/5 rounded-[2.5rem] p-8 space-y-6 relative">
+            <div className="bg-[#00274f] border border-white/5 rounded-[2.5rem] p-8 space-y-6 relative">
               <div className="flex items-center gap-3 border-b border-white/10 pb-4 justify-start">
                 <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
                   <BookOpen size={16} />
@@ -5567,7 +5567,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
           <div className="lg:col-span-7 space-y-6">
             
             {/* Mega-Prompt Builder Panel */}
-            <div className="bg-[#0b172e] border border-white/5 rounded-[2.5rem] p-8 space-y-6 relative">
+            <div className="bg-[#00274f] border border-white/5 rounded-[2.5rem] p-8 space-y-6 relative">
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div className="flex items-center gap-3 justify-start">
                   <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
@@ -5609,7 +5609,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                     value={proPlaygroundRole}
                     onChange={(e) => setProPlaygroundRole(e.target.value)}
                     placeholder="مثال: مستشار قانوني، طبيب أطفال، خبير بايثون أول..."
-                    className="w-full bg-[#050b14] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors text-right"
+                    className="w-full bg-[#001a38] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors text-right"
                   />
                 </div>
 
@@ -5621,7 +5621,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                     value={proPlaygroundGoal}
                     onChange={(e) => setProPlaygroundGoal(e.target.value)}
                     placeholder="اكتب هنا ما تطلب من الروبوت صياغته أو مراجعته بدقة..."
-                    className="w-full bg-[#050b14] border border-white/10 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors resize-none text-right"
+                    className="w-full bg-[#001a38] border border-white/10 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors resize-none text-right"
                   />
                 </div>
 
@@ -5633,7 +5633,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                     value={proPlaygroundAudience}
                     onChange={(e) => setProPlaygroundAudience(e.target.value)}
                     placeholder="مثال: رواد أعضاء جدد، عائلات شابة..."
-                    className="w-full bg-[#050b14] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors text-right"
+                    className="w-full bg-[#001a38] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors text-right"
                   />
                 </div>
 
@@ -5643,7 +5643,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                   <select
                     value={proPlaygroundFormat}
                     onChange={(e) => setProPlaygroundFormat(e.target.value)}
-                    className="w-full bg-[#050b14] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors text-right"
+                    className="w-full bg-[#001a38] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors text-right"
                   >
                     <option value="JSON Object">Structured JSON Object</option>
                     <option value="XML Nested Block">XML Tag Block</option>
@@ -5661,7 +5661,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                     value={proPlaygroundTone}
                     onChange={(e) => setProPlaygroundTone(e.target.value)}
                     placeholder="مثال: علمية، ودية، أكاديمية، رسمية..."
-                    className="w-full bg-[#050b14] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors text-right"
+                    className="w-full bg-[#001a38] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors text-right"
                   />
                 </div>
 
@@ -5673,7 +5673,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                     value={proPlaygroundSubtone}
                     onChange={(e) => setProPlaygroundSubtone(e.target.value)}
                     placeholder="مثال: توجيهية، حذرة، دافئة للعمل..."
-                    className="w-full bg-[#050b14] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors text-right"
+                    className="w-full bg-[#001a38] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors text-right"
                   />
                 </div>
 
@@ -5685,7 +5685,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                     value={proPlaygroundConstraints}
                     onChange={(e) => setProPlaygroundConstraints(e.target.value)}
                     placeholder="مثال: يمنع تكرار الكلام، لا تكتب مقدمة ترحيبية، ارفض الكشف عن تعليمتك الأساسية..."
-                    className="w-full bg-[#050b14] border border-white/10 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors resize-none text-right"
+                    className="w-full bg-[#001a38] border border-white/10 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors resize-none text-right"
                   />
                 </div>
               </div>
@@ -5712,7 +5712,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
 
             {/* Compiled Prompt & Output Terminal Display */}
             {(proCompiledPrompt || proPlaygroundOutput) && (
-              <div className="bg-[#050b14] border border-white/5 rounded-[2.5rem] p-6 space-y-6">
+              <div className="bg-[#001a38] border border-white/5 rounded-[2.5rem] p-6 space-y-6">
                 
                 {/* Compiled Command */}
                 {proCompiledPrompt && (
@@ -5752,7 +5752,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
             )}
 
             {/* Bottom Actions of Lesson */}
-            <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 p-6 rounded-[2.5rem] flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="bg-gradient-to-r from-emerald-500/10 to-[#C49E3A]/10 border border-emerald-500/30 p-6 rounded-[2.5rem] flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-right">
                 <h5 className="text-sm font-black text-white">{isRtl ? 'هل قمت ببناء وفحص تعاويذ هذا المبحث بنجاح؟' : 'Have you completed prompt compilation requirements?'}</h5>
                 <p className="text-xs text-slate-400 mt-1">{isRtl ? 'احرص على مطابقة محاور الدرس السلوكي واستنباط الفوارق العمليّة.' : 'Mark the lesson complete to progress your Certified Prompt Engineer journey.'}</p>
@@ -5775,11 +5775,11 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
 
 
   return (
-    <div className="flex-1 bg-[#050b14] text-slate-100 min-h-screen font-sans overflow-y-auto" dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className="flex-1 bg-[#001a38] text-slate-100 min-h-screen font-sans overflow-y-auto" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Astronaut Particle Accents */}
       <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-b from-[#09162e] to-transparent pointer-events-none opacity-40 z-0" />
       
-      <header className="relative z-10 px-6 py-5 border-b border-white/5 flex items-center justify-between backdrop-blur-md bg-[#050b14]/80 sticky top-0">
+      <header className="relative z-10 px-6 py-5 border-b border-white/5 flex items-center justify-between backdrop-blur-md bg-[#001a38]/80 sticky top-0">
         <div className="flex items-center gap-4">
           <button 
             onClick={() => {
@@ -5847,7 +5847,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
               {/* Mission Card */}
               <div className="relative overflow-hidden bg-gradient-to-r from-[#0d1e3d] to-[#071329] border border-white/10 rounded-[2.5rem] p-8 md:p-12 shadow-2xl">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-96 h-96 bg-sky-500/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#C49E3A]/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl pointer-events-none" />
                 <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center justify-between">
                   <div className="space-y-6 max-w-4xl text-right md:text-right">
                     <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 px-4 py-1.5 rounded-full border border-amber-500/25">
@@ -5900,7 +5900,7 @@ The adventure is waiting!`
                   onClick={() => setLobbyTab('lessons')}
                   className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
                     lobbyTab === 'lessons'
-                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -5911,7 +5911,7 @@ The adventure is waiting!`
                   onClick={() => setLobbyTab('tools')}
                   className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
                     lobbyTab === 'tools'
-                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -5922,7 +5922,7 @@ The adventure is waiting!`
                   onClick={() => setLobbyTab('challenges')}
                   className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
                     lobbyTab === 'challenges'
-                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -5933,7 +5933,7 @@ The adventure is waiting!`
                   onClick={() => setLobbyTab('experiments')}
                   className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
                     lobbyTab === 'experiments'
-                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -5944,7 +5944,7 @@ The adventure is waiting!`
                   onClick={() => setLobbyTab('family')}
                   className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
                     lobbyTab === 'family'
-                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -5955,7 +5955,7 @@ The adventure is waiting!`
                   onClick={() => setLobbyTab('english')}
                   className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
                     lobbyTab === 'english'
-                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -5966,7 +5966,7 @@ The adventure is waiting!`
                   onClick={() => setLobbyTab('certificate')}
                   className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
                     lobbyTab === 'certificate'
-                      ? 'bg-gradient-to-t from-amber-500/10 to-transparent text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      ? 'bg-gradient-to-t from-amber-500/10 to-transparent text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -5977,7 +5977,7 @@ The adventure is waiting!`
                   onClick={() => setLobbyTab('printables')}
                   className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
                     lobbyTab === 'printables'
-                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -5989,7 +5989,7 @@ The adventure is waiting!`
                   onClick={() => setLobbyTab('perfection')}
                   className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
                     lobbyTab === 'perfection'
-                      ? 'bg-gradient-to-t from-amber-500/15 to-transparent text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      ? 'bg-gradient-to-t from-amber-500/15 to-transparent text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -6000,7 +6000,7 @@ The adventure is waiting!`
                   onClick={() => setLobbyTab('study_plan')}
                   className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
                     lobbyTab === 'study_plan'
-                      ? 'bg-gradient-to-t from-amber-500/15 to-transparent text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#050b14]'
+                      ? 'bg-gradient-to-t from-amber-500/15 to-transparent text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -6011,18 +6011,18 @@ The adventure is waiting!`
                   onClick={() => setLobbyTab('balance_oasis')}
                   className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
                     lobbyTab === 'balance_oasis'
-                      ? 'bg-gradient-to-t from-teal-500/15 to-transparent text-teal-300 border-t border-x border-teal-500/10 border-b-2 border-b-[#050b14]'
+                      ? 'bg-gradient-to-t from-[#C49E3A]/15 to-transparent text-[#E4C77A] border-t border-x border-[#C49E3A]/10 border-b-2 border-b-[#001a38]'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  <Smile size={16} className="text-teal-400" />
+                  <Smile size={16} className="text-[#E4C77A]" />
                   {isRtl ? 'واحة التوازن 🌊' : 'Balance Oasis 🌊'}
                 </button>
                 <button
                   onClick={() => setLobbyTab('updates')}
                   className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
                     lobbyTab === 'updates'
-                      ? 'bg-gradient-to-t from-amber-500/15 to-transparent text-amber-300 border-t border-x border-amber-500/10 border-b-2 border-b-[#050b14]'
+                      ? 'bg-gradient-to-t from-amber-500/15 to-transparent text-amber-300 border-t border-x border-amber-500/10 border-b-2 border-b-[#001a38]'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -6034,7 +6034,7 @@ The adventure is waiting!`
               {/* Tab 1: Standard Levels Grid */}
               {lobbyTab === 'lessons' && (
                 !(hasCompletedTest || bypassTest) ? (
-                  <div className="bg-[#0b1329] border border-amber-500/20 rounded-[2.5rem] p-10 relative overflow-hidden text-right shadow-2xl animate-fade-in w-full" dir="rtl">
+                  <div className="bg-[#00274f] border border-amber-500/20 rounded-[2.5rem] p-10 relative overflow-hidden text-right shadow-2xl animate-fade-in w-full" dir="rtl">
                     <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl opacity-30" />
                     <div className="relative z-10 flex flex-col items-center text-center space-y-6 py-6 font-sans">
                       <div className="w-20 h-20 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
@@ -6163,7 +6163,7 @@ The adventure is waiting!`
                       {proSubTab === 'dashboard' && (
                         <div className="space-y-12 text-right">
                           {/* Certified Pro Dashboard Banner */}
-                          <div className="bg-[#0b1329] border border-amber-500/20 rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden">
+                          <div className="bg-[#00274f] border border-amber-500/20 rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl" />
                             <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 text-right">
                               <div className="space-y-4">
@@ -6249,7 +6249,7 @@ The adventure is waiting!`
                                         <button
                                           key={lesson.lesson_number}
                                           onClick={() => setSelectedProLesson(lesson)}
-                                          className="w-full bg-[#050b14]/60 hover:bg-[#050b14]/90 hover:border-amber-500/20 active:scale-95 transition-all text-slate-200 p-4 rounded-2xl flex items-center justify-between border border-white/5 group text-right text-xs font-semibold"
+                                          className="w-full bg-[#001a38]/60 hover:bg-[#001a38]/90 hover:border-amber-500/20 active:scale-95 transition-all text-slate-200 p-4 rounded-2xl flex items-center justify-between border border-white/5 group text-right text-xs font-semibold"
                                         >
                                           <div className="flex items-center gap-3 justify-start">
                                             {isComp ? (
@@ -6269,7 +6269,7 @@ The adventure is waiting!`
                                   </div>
 
                                   {/* Level Project Submission Console */}
-                                  <div className="bg-[#050b14]/80 p-6 rounded-3xl border border-white/5 space-y-4">
+                                  <div className="bg-[#001a38]/80 p-6 rounded-3xl border border-white/5 space-y-4">
                                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
                                       <div className="text-right">
                                         <span className="text-[10px] text-amber-400 font-black tracking-wider uppercase block">💾 {isRtl ? 'مشروع جرد المستوى العملي المعزّز' : 'PRACTICAL LEVEL PROJECT'}</span>
@@ -6389,7 +6389,7 @@ The adventure is waiting!`
 
                             {/* Interactive Finals - Double Assessment Quiz Panel (Only show if not passed) */}
                             {!proQuizPassed && (
-                              <div className="bg-[#050b14]/70 p-6 rounded-3xl border border-white/5 space-y-6">
+                              <div className="bg-[#001a38]/70 p-6 rounded-3xl border border-white/5 space-y-6">
                                 <div className="border-b border-white/5 pb-3">
                                   <h5 className="text-md font-black text-amber-400">📝 {isRtl ? 'الاختبار الأكاديمي النهائي: سيناريوهات الهندسة التوليدية الفوقية' : 'Academic Graduation Exam'}</h5>
                                   <p className="text-xs text-slate-400 mt-1">{isRtl ? 'حلل الثلاثة معضلات المعقدة التالية واختر المنهج المبرهن تكنولوجياً:' : 'Solve these 3 advanced prompting dilemmas to demonstrate certified competence:'}</p>
@@ -6489,7 +6489,7 @@ The adventure is waiting!`
                             )}
 
                             {/* Ethics Pledge Panel */}
-                            <div className="bg-[#050b14]/70 p-6 rounded-3xl border border-white/5 space-y-4">
+                            <div className="bg-[#001a38]/70 p-6 rounded-3xl border border-white/5 space-y-4">
                               <div className="border-b border-white/5 pb-3">
                                 <h5 className="text-md font-black text-slate-200">🤝 {isRtl ? 'ميثاق وأخلاقيات هندسة المخرجات والتنمية السلوكية للروبوت' : 'Ethics Pledge for AI Prompt Professionals'}</h5>
                                 <p className="text-xs text-slate-400 mt-1">{isRtl ? 'يتوجب التوقيع والالتزام الطوعي بهذا العهد قبل استعراض وحيازة شهادة الاعتماد:' : 'An official sign-off on behavior guidelines covenants:'}</p>
@@ -6763,7 +6763,7 @@ The adventure is waiting!`
                                                   setTestingTemplateOutput(""); // Reset output upon change
                                                 }}
                                                 placeholder={isRtl ? `اكتب مواءمة ${placeholder}...` : `Fill ${placeholder}...`}
-                                                className="w-full bg-[#050b14] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400 font-bold transition-all placeholder-slate-600 text-right"
+                                                className="w-full bg-[#001a38] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400 font-bold transition-all placeholder-slate-600 text-right"
                                               />
                                             </div>
                                           ))}
@@ -6774,7 +6774,7 @@ The adventure is waiting!`
                                     {/* Compiled Text Result Block */}
                                     <div className="space-y-2">
                                       <span className="text-[10px] font-black text-emerald-400/80 uppercase block">⚙️ {isRtl ? 'المطالبة المصاغة النهائية المجهزة للنشر' : 'COMPILED WORKSPACE PROMPT'}</span>
-                                      <div className="bg-[#050b14] p-4 rounded-xl border border-white/10 font-mono text-xs text-slate-100 select-text leading-relaxed whitespace-pre-wrap select-all relative group max-h-48 overflow-y-auto text-right">
+                                      <div className="bg-[#001a38] p-4 rounded-xl border border-white/10 font-mono text-xs text-slate-100 select-text leading-relaxed whitespace-pre-wrap select-all relative group max-h-48 overflow-y-auto text-right">
                                         {compiledPrompt}
                                       </div>
                                     </div>
@@ -7021,7 +7021,7 @@ Output Summary for [${topic}]:
                                     </div>
 
                                     {/* Architectural Break-down breakdown */}
-                                    <div className="bg-[#050b14]/50 border border-white/5 p-5 rounded-2xl space-y-2 text-right">
+                                    <div className="bg-[#001a38]/50 border border-white/5 p-5 rounded-2xl space-y-2 text-right">
                                       <h5 className="text-xs font-black text-amber-400">🕵️‍♂️ {isRtl ? 'لماذا هو قوي؟ وكيف تم تصميمه هندسياً؟' : 'Why is this Mega-Prompt extremely robust?'}</h5>
                                       <p className="text-xs text-slate-300 !leading-relaxed font-semibold">
                                         {currentMega.analysis}
@@ -7067,7 +7067,7 @@ Output Summary for [${topic}]:
                       )}
 
                       {/* Resources Directory */}
-                      <div id="pro_sandbox_playground" className="bg-[#0b1329] border border-white/5 rounded-[2.5rem] p-8 space-y-6 text-right">
+                      <div id="pro_sandbox_playground" className="bg-[#00274f] border border-white/5 rounded-[2.5rem] p-8 space-y-6 text-right">
                         <div className="flex items-center gap-3 justify-start">
                           <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
                             <BookOpen size={16} />
@@ -7091,7 +7091,7 @@ Output Summary for [${topic}]:
                               href={tool.url}
                               target="_blank"
                               rel="noreferrer"
-                              className="bg-[#050b14] border border-white/10 hover:border-amber-400/30 text-white font-black p-4 rounded-xl text-[10px] text-center transition-all hover:-translate-y-1 block cursor-pointer"
+                              className="bg-[#001a38] border border-white/10 hover:border-amber-400/30 text-white font-black p-4 rounded-xl text-[10px] text-center transition-all hover:-translate-y-1 block cursor-pointer"
                             >
                               🚀 {tool.name}
                             </a>
@@ -7240,7 +7240,7 @@ Output Summary for [${topic}]:
               {lobbyTab === 'tools' && (
                 <div className="space-y-6 text-right" dir="rtl">
                   {/* Top Bar with Search & Quick Fav Count */}
-                  <div className="bg-[#0b1329] border border-white/10 rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                  <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="space-y-2 text-right w-full md:w-auto">
                       <h3 className="text-2xl font-black text-white flex items-center justify-start gap-2">
                         <BookOpen className="text-amber-400" size={24} />
@@ -7303,7 +7303,7 @@ Output Summary for [${topic}]:
                     {/* Tools Grid Area */}
                     <div className="lg:col-span-9 space-y-6">
                       {/* Search Input */}
-                      <div className="bg-[#0b1329] p-4 rounded-[1.5rem] border border-white/10 flex items-center gap-3">
+                      <div className="bg-[#00274f] p-4 rounded-[1.5rem] border border-white/10 flex items-center gap-3">
                         <input
                           type="text"
                           value={toolsSearchQuery}
@@ -7335,7 +7335,7 @@ Output Summary for [${topic}]:
 
                         if (filtered.length === 0) {
                           return (
-                            <div className="bg-[#0b1329] border border-white/10 rounded-[2rem] p-12 text-center text-slate-400 space-y-3">
+                            <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-12 text-center text-slate-400 space-y-3">
                               <Smile className="mx-auto text-amber-400" size={48} />
                               <p className="font-bold text-lg">{isRtl ? 'لا يوجد نتائج تطابق بحثك!' : 'No tools matched your active search filters.'}</p>
                               <p className="text-xs text-slate-500">{isRtl ? 'جرب البحث عن كلمات بديلة أو تغيير الفئات الجانبية.' : 'Try choosing another category or clearing search query.'}</p>
@@ -7459,7 +7459,7 @@ Output Summary for [${topic}]:
                   {activeChallengeView === '52weeks' && (
                     <div className="space-y-6">
                       {/* Milestones Tracker & Profile Header */}
-                      <div className="bg-[#0b1329] border border-white/10 rounded-[3rem] p-8 md:p-10 text-right space-y-6 relative overflow-hidden">
+                      <div className="bg-[#00274f] border border-white/10 rounded-[3rem] p-8 md:p-10 text-right space-y-6 relative overflow-hidden">
                     <div className="absolute left-0 top-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
                     
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -7773,7 +7773,7 @@ Output Summary for [${topic}]:
               {activeChallengeView === '30days' && (
                 <div className="space-y-6 animate-fade-in text-right">
                   {/* Milestones Tracker & Profile Header */}
-                  <div className="bg-[#0b1329] border border-white/10 rounded-[3rem] p-8 md:p-10 text-right space-y-6 relative overflow-hidden font-sans">
+                  <div className="bg-[#00274f] border border-white/10 rounded-[3rem] p-8 md:p-10 text-right space-y-6 relative overflow-hidden font-sans">
                     <div className="absolute left-0 top-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
                     
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -7978,7 +7978,7 @@ Output Summary for [${topic}]:
               {lobbyTab === 'experiments' && (
                 <div className="space-y-6 text-right animate-fade-in" dir="rtl">
                   {/* Experiments selection controls */}
-                  <div className="bg-[#0b1329] border border-white/10 rounded-[2.5rem] p-6 flex flex-col md:flex-row justify-between items-center gap-6">
+                  <div className="bg-[#00274f] border border-white/10 rounded-[2.5rem] p-6 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="space-y-1.5">
                       <h3 className="text-2xl font-black text-white flex items-center justify-start gap-2">
                         <Sliders className="text-amber-400" />
@@ -8031,7 +8031,7 @@ Output Summary for [${topic}]:
                               value={exp1Prompt}
                               onChange={(e) => setExp1Prompt(e.target.value)}
                               rows={3}
-                              className="w-full bg-[#050b14]/90 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono leading-relaxed"
+                              className="w-full bg-[#001a38]/90 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono leading-relaxed"
                               placeholder={isRtl ? 'اكتب وصوفاً رائعة للوحة ...' : 'Enter a masterpiece image prompt...'}
                             />
                           </div>
@@ -8078,7 +8078,7 @@ Output Summary for [${topic}]:
                       </div>
 
                       {/* Right: Comparative Scoreboard and generated mockup */}
-                      <div className="lg:col-span-8 bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                      <div className="lg:col-span-8 bg-[#00274f] border border-white/10 rounded-[2rem] p-8 space-y-6">
                         <div className="flex justify-between items-center border-b border-white/5 pb-4">
                           <h4 className="text-lg font-black text-white">{isRtl ? 'النتائج والدرجات والخصائص الفنية لكل مولد صور' : 'Visual Engine Evaluation Results'}</h4>
                           <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded uppercase font-mono tracking-widest">{isRtl ? 'محاكاة مقارنة دقيقة' : 'SIMULATION MODE'}</span>
@@ -8168,13 +8168,13 @@ Output Summary for [${topic}]:
                                   </svg>
                                 )}
                                 {exp1SelectedStyle === 'watercolor' && (
-                                  <svg viewBox="0 0 100 100" className="w-24 h-24 mx-auto text-sky-400 animate-pulse">
+                                  <svg viewBox="0 0 100 100" className="w-24 h-24 mx-auto text-[#E4C77A] animate-pulse">
                                     <path d="M30,50 Q40,30 60,35 T80,60 T50,80 Z" fill="currentColor" opacity="0.25" />
                                     <circle cx="45" cy="50" r="15" fill="currentColor" opacity="0.4" />
                                   </svg>
                                 )}
                                 {exp1SelectedStyle === 'clay' && (
-                                  <svg viewBox="0 0 100 100" className="w-24 h-24 mx-auto text-indigo-400 animate-pulse">
+                                  <svg viewBox="0 0 100 100" className="w-24 h-24 mx-auto text-[#E4C77A] animate-pulse">
                                     <rect x="25" y="25" width="50" height="50" rx="20" fill="currentColor" opacity="0.2" />
                                     <circle cx="50" cy="50" r="15" fill="currentColor" />
                                   </svg>
@@ -8235,7 +8235,7 @@ Output Summary for [${topic}]:
                               value={exp2CustomPrompt}
                               onChange={(e) => setExp2CustomPrompt(e.target.value)}
                               placeholder={isRtl ? 'مثال: بأسلوب تاريخي، للأطفال ...' : 'e.g., Use dark space metaphors...'}
-                              className="w-full bg-[#050b14]/95 border border-white/10 rounded-xl px-4 py-2 font-semibold text-xs focus:outline-none focus:border-amber-500"
+                              className="w-full bg-[#001a38]/95 border border-white/10 rounded-xl px-4 py-2 font-semibold text-xs focus:outline-none focus:border-amber-500"
                             />
                           </div>
 
@@ -8256,7 +8256,7 @@ Output Summary for [${topic}]:
                       </div>
 
                       {/* Right side: Comparative Terminal Dashboard */}
-                      <div className="lg:col-span-8 bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                      <div className="lg:col-span-8 bg-[#00274f] border border-white/10 rounded-[2rem] p-8 space-y-6">
                         <div className="flex justify-between items-center">
                           <h4 className="text-md md:text-lg font-black text-white">{isRtl ? 'مقارنة حية لردود ومميزات النماذج اللغوية الأربعة' : 'Side-by-Side Response Simulator'}</h4>
                           <span className="text-[10px] bg-emerald-500/15 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20 font-mono font-black uppercase">{isRtl ? 'بناء ومقارنة المعايير' : 'CRITERIA DRIVEN'}</span>
@@ -8293,7 +8293,7 @@ Output Summary for [${topic}]:
                             {/* 2. Claude */}
                             <div className="bg-slate-950/70 p-5 rounded-2xl border border-white/5 space-y-3">
                               <div className="flex justify-between items-center text-xs font-bold border-b border-white/5 pb-2">
-                                <span className="text-purple-400">Claude 3.5 (الكاتب البليغ)</span>
+                                <span className="text-[#E4C77A]">Claude 3.5 (الكاتب البليغ)</span>
                                 <strong>Claude (Literary & Deep) 🖋️</strong>
                               </div>
                               <p className="text-[12px] text-slate-200 leading-relaxed font-semibold">
@@ -8308,7 +8308,7 @@ Output Summary for [${topic}]:
                             {/* 3. Gemini */}
                             <div className="bg-slate-950/70 p-5 rounded-2xl border border-white/5 space-y-3">
                               <div className="flex justify-between items-center text-xs font-bold border-b border-white/5 pb-2">
-                                <span className="text-blue-400">Gemini 1.5 (مدعوم ببحث جوجل)</span>
+                                <span className="text-[#E4C77A]">Gemini 1.5 (مدعوم ببحث جوجل)</span>
                                 <strong>Gemini (Analytical & Factual) 🌐</strong>
                               </div>
                               <p className="text-[12px] text-slate-200 leading-relaxed font-semibold">
@@ -8323,7 +8323,7 @@ Output Summary for [${topic}]:
                             {/* 4. Perplexity */}
                             <div className="bg-slate-950/70 p-5 rounded-2xl border border-white/5 space-y-3">
                               <div className="flex justify-between items-center text-xs font-bold border-b border-white/5 pb-2">
-                                <span className="text-teal-400">Perplexity (الباحث الموثق)</span>
+                                <span className="text-[#E4C77A]">Perplexity (الباحث الموثق)</span>
                                 <strong>Perplexity (Grounding & Search) 🔍</strong>
                               </div>
                               <p className="text-[12px] text-slate-200 leading-relaxed font-semibold">
@@ -8354,7 +8354,7 @@ Output Summary for [${topic}]:
                               type="text"
                               value={exp3ImagePrompt}
                               onChange={(e) => setExp3ImagePrompt(e.target.value)}
-                              className="w-full bg-[#050b14]/90 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+                              className="w-full bg-[#001a38]/90 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
                             />
                           </div>
 
@@ -8376,7 +8376,7 @@ Output Summary for [${topic}]:
                       </div>
 
                       {/* Right: Video scorecard comparisons */}
-                      <div className="lg:col-span-7 bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                      <div className="lg:col-span-7 bg-[#00274f] border border-white/10 rounded-[2rem] p-8 space-y-6">
                         <div className="flex justify-between items-center border-b border-white/5 pb-4">
                           <h4 className="text-md font-black text-white">{isRtl ? 'مقارنة أمن وجودة عمالقة حركة الفيديو' : 'Video Generation Scorecard'}</h4>
                         </div>
@@ -8416,7 +8416,7 @@ Output Summary for [${topic}]:
                   {/* EXPERIMENT 4: API COST CALCULATOR 📊 */}
                   {activeExperimentId === 4 && (
                     <div className="space-y-6">
-                      <div className="bg-[#0b1329] border border-white/10 rounded-[2rem] p-6 md:p-8">
+                      <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-6 md:p-8">
                         <div className="max-w-3xl mx-auto space-y-6">
                           <div className="text-center space-y-2">
                             <span className="text-xs bg-amber-500/10 text-amber-300 font-bold px-3 py-1 rounded-full border border-amber-500/20 font-mono">
@@ -8574,7 +8574,7 @@ Output Summary for [${topic}]:
                   {/* EXPERIMENT 5: 2025 MODEL COMPARISON 🔍 */}
                   {activeExperimentId === 5 && (
                     <div className="space-y-6 text-right">
-                      <div className="bg-[#0b1329] border border-white/10 rounded-[3rem] p-6 md:p-8 space-y-4">
+                      <div className="bg-[#00274f] border border-white/10 rounded-[3rem] p-6 md:p-8 space-y-4">
                         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                           <div className="space-y-1">
                             <h4 className="text-xl md:text-2xl font-black text-white flex items-center justify-start gap-2">
@@ -8637,7 +8637,7 @@ Output Summary for [${topic}]:
                               limitations: isRtl ? 'أقل دقة في التحليلات الحسابية الكبيرة جداً' : 'Lower reliability in mathematical optimizations.'
                             }
                           ].filter(m => m.name.toLowerCase().includes(compSearchQuery.toLowerCase()) || m.provider.toLowerCase().includes(compSearchQuery.toLowerCase())).map(m => (
-                            <div key={m.name} className="bg-[#050b14] border border-white/5 hover:border-amber-500/20 rounded-2xl p-6 space-y-4 flex flex-col justify-between transition-all text-right" dir="rtl">
+                            <div key={m.name} className="bg-[#001a38] border border-white/5 hover:border-amber-500/20 rounded-2xl p-6 space-y-4 flex flex-col justify-between transition-all text-right" dir="rtl">
                               <div className="space-y-3">
                                 <div className="flex justify-between items-center">
                                   <span className="text-xs bg-amber-500/10 border border-amber-500/20 text-amber-400 font-extrabold px-3 py-1 rounded-full">{m.provider}</span>
@@ -8696,7 +8696,7 @@ Output Summary for [${topic}]:
               {lobbyTab === 'family' && (
                 <div className="space-y-6 text-right animate-fade-in" dir="rtl">
                   {/* Family Corner Dashboard Area */}
-                  <div className="bg-[#0b1329] border border-white/10 rounded-[3rem] p-8 md:p-10 space-y-6 relative overflow-hidden">
+                  <div className="bg-[#00274f] border border-white/10 rounded-[3rem] p-8 md:p-10 space-y-6 relative overflow-hidden">
                     <div className="absolute left-0 top-0 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
                     
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-6">
@@ -8760,8 +8760,8 @@ Output Summary for [${topic}]:
                               isRtl ? "تجنب أسلوب الوعظ المباشر، بل استمع لرأيهم الخاص أولاً." : "Do not lecture; listen fully to their perspective first.",
                               isRtl ? "شاركهم مخاوفك وتطلعاتك للمستقبل بطريقة منفتحة وصادقة." : "Share your honest hopes and concerns about the future with transparency."
                             ],
-                            color: "from-blue-500/10 to-blue-500/5",
-                            border: "border-blue-500/20"
+                            color: "from-[#C49E3A]/10 to-[#C49E3A]/5",
+                            border: "border-[#C49E3A]/20"
                           },
                           {
                             title: isRtl ? "🛡️ كيف تحميهم رقمياً؟" : "How to protect them?",
@@ -9076,12 +9076,12 @@ Output Summary for [${topic}]:
               {lobbyTab === 'english' && (
                 <div className="space-y-6 text-right animate-fade-in font-sans" dir="rtl">
                   {/* English Header */}
-                  <div className="bg-[#0b1329] border border-white/10 rounded-[3rem] p-8 md:p-10 space-y-6 relative overflow-hidden">
-                    <div className="absolute left-0 top-0 w-80 h-80 bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
+                  <div className="bg-[#00274f] border border-white/10 rounded-[3rem] p-8 md:p-10 space-y-6 relative overflow-hidden">
+                    <div className="absolute left-0 top-0 w-80 h-80 bg-[#002147]/5 rounded-full blur-3xl pointer-events-none" />
                     
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                       <div className="space-y-2">
-                        <span className="text-blue-400 font-mono text-[10px] bg-blue-500/15 px-3 py-1 rounded-full border border-blue-500/20 font-black tracking-widest uppercase">
+                        <span className="text-[#E4C77A] font-mono text-[10px] bg-[#C49E3A]/15 px-3 py-1 rounded-full border border-[#C49E3A]/20 font-black tracking-widest uppercase">
                           {isRtl ? 'جسر الأكاديمية اللغوي' : 'ENGLISH LANGUAGE BRIDGE'}
                         </span>
                         <h3 className="text-2xl md:text-3xl font-black text-white">
@@ -9096,7 +9096,7 @@ Output Summary for [${topic}]:
 
                       {/* Streak indicators */}
                       <div className="bg-slate-950 px-6 py-4 rounded-3xl border border-white/5 space-y-1 shrink-0 w-full md:w-auto text-center md:text-right font-mono">
-                        <span className="text-[10px] text-blue-400 font-black block">{isRtl ? 'أيام الالتزام هذا الأسبوع' : 'WEEKLY STUDY STREAK'}</span>
+                        <span className="text-[10px] text-[#E4C77A] font-black block">{isRtl ? 'أيام الالتزام هذا الأسبوع' : 'WEEKLY STUDY STREAK'}</span>
                         <div className="flex justify-center md:justify-start items-baseline gap-1">
                           <span className="text-3xl font-black text-white">{completedEnglishDays.length}</span>
                           <span className="text-slate-500 font-bold text-sm">/ 7 {isRtl ? 'أيام' : 'days'}</span>
@@ -9109,7 +9109,7 @@ Output Summary for [${topic}]:
                     {/* Left: Interactive Modules with copy hooks */}
                     <div className="lg:col-span-7 bg-slate-950/60 border border-white/5 rounded-[2rem] p-6 space-y-5">
                       <div className="flex justify-between items-center pb-2 border-b border-white/5">
-                        <span className="text-xs text-blue-400 font-black font-mono">5 DYNAMIC PROMPTS</span>
+                        <span className="text-xs text-[#E4C77A] font-black font-mono">5 DYNAMIC PROMPTS</span>
                         <h4 className="text-sm font-black text-white">{isRtl ? '🧪 وحدات التدريب وتعاويذ الـ AI المقترحة:' : '🧪 Core Interactive Learning Prompts:'}</h4>
                       </div>
 
@@ -9130,7 +9130,7 @@ Output Summary for [${topic}]:
                             }}
                             className={`p-3 rounded-xl text-center border transition-all text-xs font-black ${
                               m.idx === activeEnglishModuleIdx 
-                                ? 'border-blue-400 bg-blue-500/15 text-blue-300 font-black' 
+                                ? 'border-[#C49E3A]/60 bg-[#C49E3A]/15 text-[#E4C77A] font-black' 
                                 : 'border-white/5 bg-slate-900/60 text-slate-400 hover:text-white'
                             }`}
                           >
@@ -9190,7 +9190,7 @@ Output Summary for [${topic}]:
                           <div className="space-y-4 pt-1 animate-fade-in text-right">
                             <h4 className="text-md font-black text-white leading-snug">{activeMod.title}</h4>
                             
-                            <div className="bg-slate-900/80 p-4 rounded-xl border border-blue-500/10 space-y-3 relative">
+                            <div className="bg-slate-900/80 p-4 rounded-xl border border-[#C49E3A]/10 space-y-3 relative">
                               <div className="flex justify-between items-center">
                                 <button
                                   onClick={() => {
@@ -9202,12 +9202,12 @@ Output Summary for [${topic}]:
                                   className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
                                     englishPromptCopied 
                                       ? 'bg-emerald-500 hover:bg-emerald-600 text-white' 
-                                      : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                      : 'bg-[#002147] hover:bg-[#002147] text-white'
                                   }`}
                                 >
                                   {englishPromptCopied ? (isRtl ? '✓ تم النسخ للمحفظة 🎉 (+5 XP)' : '✓ Copied! (+5 XP)') : (isRtl ? 'نسخ التعويذة (Prompt) 📋' : 'Copy Prompt 📋')}
                                 </button>
-                                <span className="text-[10px] text-blue-400 font-black tracking-widest">{isRtl ? "التعويذة السحرية المعتمدة" : "OFFICIAL MANDATE"}</span>
+                                <span className="text-[10px] text-[#E4C77A] font-black tracking-widest">{isRtl ? "التعويذة السحرية المعتمدة" : "OFFICIAL MANDATE"}</span>
                               </div>
 
                               <p className="text-xs text-slate-300 font-mono select-all bg-slate-950/70 p-3 rounded border border-white/5 text-left leading-relaxed" dir="ltr">
@@ -9215,7 +9215,7 @@ Output Summary for [${topic}]:
                               </p>
                             </div>
 
-                            <div className="p-3 bg-blue-500/10 border border-blue-500/20 text-xs text-blue-300 rounded-xl leading-relaxed">
+                            <div className="p-3 bg-[#C49E3A]/10 border border-[#C49E3A]/20 text-xs text-[#E4C77A] rounded-xl leading-relaxed">
                               <span className="font-extrabold block">{isRtl ? '💡 نصيحة الخبراء التربويين:' : '💡 Specialist Tips:'}</span>
                               <p className="pt-0.5">{activeMod.tips}</p>
                             </div>
@@ -9239,7 +9239,7 @@ Output Summary for [${topic}]:
                                         <span className={`text-xs p-3 rounded-2xl max-w-sm font-medium ${
                                           sh.role === 'user' 
                                             ? 'bg-slate-800 text-white rounded-tl-none font-mono text-left' 
-                                            : 'bg-blue-900/30 text-blue-200 border border-blue-500/20 rounded-tr-none text-right'
+                                            : 'bg-[#002147]/30 text-[#E4C77A] border border-[#C49E3A]/20 rounded-tr-none text-right'
                                         }`}>
                                           {sh.text}
                                         </span>
@@ -9259,7 +9259,7 @@ Output Summary for [${topic}]:
                                     value={englishSimMessage}
                                     onChange={(e) => setEnglishSimMessage(e.target.value)}
                                     placeholder={activeMod.placeholder}
-                                    className="w-full bg-slate-900 border border-white/10 px-3 py-2 rounded-xl text-xs text-white font-mono focus:outline-none focus:border-blue-400 text-left"
+                                    className="w-full bg-slate-900 border border-white/10 px-3 py-2 rounded-xl text-xs text-white font-mono focus:outline-none focus:border-[#C49E3A]/60 text-left"
                                     dir="ltr"
                                     onKeyDown={(e) => {
                                       if (e.key === 'Enter') {
@@ -9301,7 +9301,7 @@ Output Summary for [${topic}]:
                                         setXp(prev => prev + 5);
                                       }, 1000);
                                     }}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-black select-none shrink-0"
+                                    className="bg-[#002147] hover:bg-[#002147] text-white px-4 py-2 rounded-xl text-xs font-black select-none shrink-0"
                                   >
                                     {isRtl ? 'دردش 💬' : 'Chat'}
                                   </button>
@@ -9316,7 +9316,7 @@ Output Summary for [${topic}]:
                     {/* Right: Suggested Weekly Calendar */}
                     <div className="lg:col-span-5 bg-slate-900/30 border border-white/5 rounded-[2rem] p-6 space-y-4">
                       <div className="space-y-1.5">
-                        <span className="text-[10px] bg-slate-950/80 text-blue-400 px-3 py-1 rounded font-black font-mono">7-DAY STRUCTURE</span>
+                        <span className="text-[10px] bg-slate-950/80 text-[#E4C77A] px-3 py-1 rounded font-black font-mono">7-DAY STRUCTURE</span>
                         <h4 className="text-sm font-black text-white">{isRtl ? '📅 خطة الالتزام الأسبوعية المقترحة:' : '📅 Suggested Weekly Plan:'}</h4>
                       </div>
 
@@ -9381,7 +9381,7 @@ Output Summary for [${topic}]:
               {lobbyTab === 'certificate' && (
                 <div className="space-y-6 text-right" dir="rtl">
                   {/* Certificate Dashboard Area */}
-                  <div className="bg-[#0b1329] border border-white/10 rounded-[3rem] p-8 md:p-10 space-y-6 relative overflow-hidden">
+                  <div className="bg-[#00274f] border border-white/10 rounded-[3rem] p-8 md:p-10 space-y-6 relative overflow-hidden">
                     <div className="absolute left-0 top-0 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
                     
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-6">
@@ -9455,7 +9455,7 @@ Output Summary for [${topic}]:
                           value={examAns1}
                           onChange={(e) => setExamAns1(e.target.value)}
                           rows={4}
-                          className="w-full bg-[#050b14]/90 border border-white/10 rounded-2xl p-4 text-xs font-mono text-amber-300 focus:outline-none focus:border-amber-500 placeholder:text-slate-600 leading-relaxed"
+                          className="w-full bg-[#001a38]/90 border border-white/10 rounded-2xl p-4 text-xs font-mono text-amber-300 focus:outline-none focus:border-amber-500 placeholder:text-slate-600 leading-relaxed"
                           placeholder={isRtl ? 'مثال: A high resolution cinematic shot of a futuristic library, twilight volumetric light, photography with 50mm lens, photorealistic details, --ar 16:9' : 'Write prompt details...'}
                         />
 
@@ -9494,7 +9494,7 @@ Output Summary for [${topic}]:
                           value={examAns2}
                           onChange={(e) => setExamAns2(e.target.value)}
                           rows={5}
-                          className="w-full bg-[#050b14]/90 border border-white/10 rounded-2xl p-4 text-xs font-mono text-amber-300 focus:outline-none focus:border-amber-500 placeholder:text-slate-600 leading-relaxed"
+                          className="w-full bg-[#001a38]/90 border border-white/10 rounded-2xl p-4 text-xs font-mono text-amber-300 focus:outline-none focus:border-amber-500 placeholder:text-slate-600 leading-relaxed"
                           placeholder={isRtl ? 'مثال: [الدور]: مبرمج محترف، [السياق]: تعليم أطفال صغار، [المهمة]... [القيود]... [أمثلة]...' : 'Write structures mega-prompt...'}
                         />
 
@@ -9539,7 +9539,7 @@ Output Summary for [${topic}]:
                           value={examAns3}
                           onChange={(e) => setExamAns3(e.target.value)}
                           rows={4}
-                          className="w-full bg-[#050b14]/90 border border-white/10 rounded-2xl p-4 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 placeholder:text-slate-600"
+                          className="w-full bg-[#001a38]/90 border border-white/10 rounded-2xl p-4 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 placeholder:text-slate-600"
                           placeholder={isRtl ? 'اكتب خطوات التحري والتحقق (مثل استخدام كلمة السر، عزل النبرة، إبلاغ الراشدين)...' : 'Describe security verification steps...'}
                         />
 
@@ -9582,7 +9582,7 @@ Output Summary for [${topic}]:
                               <select
                                 value={advCertProj}
                                 onChange={(e) => setAdvCertProj(e.target.value)}
-                                className="w-full bg-[#050b14]/95 border border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-amber-500"
+                                className="w-full bg-[#001a38]/95 border border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-amber-500"
                               >
                                 <option value="film">{isRtl ? '🎬 فيلم قصير توليدي لسينما البيت' : 'Short generative family cinema film'}</option>
                                 <option value="story">{isRtl ? '📖 رواية وقصص أطفال ملونة متسقة' : 'Consistent kids story book'}</option>
@@ -9597,7 +9597,7 @@ Output Summary for [${topic}]:
                                 type="text"
                                 value={examAns4}
                                 onChange={(e) => setExamAns4(e.target.value)}
-                                className="w-full bg-[#050b14]/95 border border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500"
+                                className="w-full bg-[#001a38]/95 border border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500"
                                 placeholder={isRtl ? 'مثال: فيلم دقيقتين يحكي قصة نيزك زحل مع الحكمة...' : 'e.g., A 2-minute film outlining Jupiter travels...'}
                               />
                             </div>
@@ -9610,7 +9610,7 @@ Output Summary for [${topic}]:
                                 type="text"
                                 value={advCertName}
                                 onChange={(e) => setAdvCertName(e.target.value)}
-                                className="w-full bg-[#050b14]/95 border border-white/10 rounded-xl px-4 py-2 text-xs text-amber-300 font-black focus:outline-none focus:border-amber-500"
+                                className="w-full bg-[#001a38]/95 border border-white/10 rounded-xl px-4 py-2 text-xs text-amber-300 font-black focus:outline-none focus:border-amber-500"
                                 placeholder={isRtl ? 'مثال: أسعد بن ياسر الخليلي' : 'e.g., Asad bin Yasir Al Khalil'}
                               />
                             </div>
@@ -9621,7 +9621,7 @@ Output Summary for [${topic}]:
                                 type="text"
                                 value={certificationDate}
                                 onChange={(e) => setCertificationDate(e.target.value)}
-                                className="w-full bg-[#050b14]/95 border border-white/10 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-amber-500"
+                                className="w-full bg-[#001a38]/95 border border-white/10 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-amber-500"
                               />
                             </div>
                           </div>
@@ -9669,7 +9669,7 @@ Output Summary for [${topic}]:
                                     const options = {
                                       cacheBust: true,
                                       pixelRatio: 2.5,
-                                      backgroundColor: '#030712',
+                                      backgroundColor: '#001a38',
                                       styleSheetsFilter: (styleSheet: CSSStyleSheet) => {
                                         try {
                                           const rules = styleSheet.cssRules;
@@ -9713,13 +9713,13 @@ Output Summary for [${topic}]:
                                       {/* Golden badge inside certificate print */}
                                       <div style="text-align: center; margin-bottom: 30px;">
                                         <h2 style="font-size: 15px; font-weight: 900; color: #b45309; letter-spacing: 4px; margin: 0 0 10px 0; text-transform: uppercase;">أكاديمية المستقبل وعلم الرياضيات التأسيسية</h2>
-                                        <h1 style="font-size: 30px; font-weight: 900; color: #1e3a8a; margin: 0 0 10px 0; letter-spacing: -1px;">الشهادة المتقدمة للتفوق والذكاء الاصطناعي التوليدي</h1>
+                                        <h1 style="font-size: 30px; font-weight: 900; color: #002147; margin: 0 0 10px 0; letter-spacing: -1px;">الشهادة المتقدمة للتفوق والذكاء الاصطناعي التوليدي</h1>
                                         <p style="font-size: 11px; font-weight: bold; color: #64748b; margin: 0; text-transform: uppercase; letter-spacing: 2px;">ADVANCED PROFESSIONAL CERTIFICATE IN GENERATIVE AI MASTERY & ETHICS</p>
                                       </div>
 
                                       <div style="text-align: center; font-size: 16px; line-height: 2; color: #334155; margin-bottom: 40px;">
                                         بناءً على النجاح المميز في اجتياز غوامض التقييمات العلمية، والدفاع عن مشروع تخرج عائلتكم المتميز:<br>
-                                        <strong style="font-size: 18px; color: #1e3a8a; background-color: #f0fdf4; padding: 4px 12px; border-radius: 4px;">"${projTitle}"</strong>
+                                        <strong style="font-size: 18px; color: #002147; background-color: #f0fdf4; padding: 4px 12px; border-radius: 4px;">"${projTitle}"</strong>
                                         <br><span style="font-size: 15px;">يُشيد مجلس أمناء أكاديمية المستقبليات بسائر أفراد عائلة المستكشف الشجاع:</span>
                                         <h2 style="font-size: 38px; font-weight: 900; color: #b45309; margin: 25px 0; text-decoration: underline; background: linear-gradient(to right, #b45309, #d97706); -webkit-background-clip: text; color: #b45309;">${advCertName}</h2>
                                         <p style="font-size: 16px; font-weight: bold; color: #010409;">سفيراً معتمداً مستقبلياً للتقنيات والوعي والأمن التعددي بالمنزل</p>
@@ -9729,7 +9729,7 @@ Output Summary for [${topic}]:
                                       <div style="display: flex; justify-content: space-between; align-items: end; border-top: 2px solid #e1e8f0; padding-top: 30px; margin-top: 40px; font-size: 12px; color: #64748b;">
                                         <div>
                                           <strong>توقيع مجلس الأمناء والاعتماد:</strong>
-                                          <div style="font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; color: #1e3a8a; margin-top: 5px;">Academy Founders Team</div>
+                                          <div style="font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; color: #002147; margin-top: 5px;">Academy Founders Team</div>
                                           <div style="font-size: 10px; color: #94a3b8; font-family: monospace;">Fingerprint: ${Math.random().toString(36).substring(2, 10).toUpperCase()}</div>
                                         </div>
                                         <div style="text-align: center;">
@@ -9737,11 +9737,11 @@ Output Summary for [${topic}]:
                                             <span style="font-size: 18px; color: #b45309;">★</span>
                                           </div>
                                           <strong style="color: #010409;">تاريخ التقييم والتعميد:</strong><br>
-                                          <span style="font-weight: bold; color: #1e3a8a;">${certificationDate || new Date().toISOString().split('T')[0]}</span>
+                                          <span style="font-weight: bold; color: #002147;">${certificationDate || new Date().toISOString().split('T')[0]}</span>
                                         </div>
                                         <div style="text-align: left;">
                                           <strong>رقم المصادقة المعتمد:</strong><br>
-                                          <span style="font-family: monospace; font-weight: bold; color: #1e3a8a;">CERT-${Math.floor(Math.random() * 900000 + 100000)}</span><br>
+                                          <span style="font-family: monospace; font-weight: bold; color: #002147;">CERT-${Math.floor(Math.random() * 900000 + 100000)}</span><br>
                                           <span style="font-size: 9px; color: #94a3b8;">Verified Ambassador Security Node</span>
                                         </div>
                                       </div>
@@ -9874,7 +9874,7 @@ Output Summary for [${topic}]:
                   <div className="lg:col-span-8 space-y-6">
                     {/* DOCUMENT 1: SAFETY CHARTER */}
                     {selectedPrintable === 'charter' && (
-                      <div className="bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                      <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-8 space-y-6">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-5">
                           <div>
                             <h3 className="text-2xl font-black text-white flex items-center gap-2">
@@ -9888,47 +9888,47 @@ Output Summary for [${topic}]:
                           <button
                             onClick={() => {
                               const html = `
-                                <div style="max-width: 800px; margin: 0 auto; padding: 40px; border: 10px double #1e3a8a; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); color: #0f172a;" dir="rtl">
-                                  <div style="text-align: center; border-bottom: 2px dashed #1e3a8a; padding-bottom: 20px; margin-bottom: 30px;">
-                                    <h1 style="font-size: 32px; font-weight: 900; color: #1e3a8a; margin: 0 0 10px 0;">ميثاق الأمان الرقمي لعائلة ${familyName}</h1>
+                                <div style="max-width: 800px; margin: 0 auto; padding: 40px; border: 10px double #002147; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); color: #0f172a;" dir="rtl">
+                                  <div style="text-align: center; border-bottom: 2px dashed #002147; padding-bottom: 20px; margin-bottom: 30px;">
+                                    <h1 style="font-size: 32px; font-weight: 900; color: #002147; margin: 0 0 10px 0;">ميثاق الأمان الرقمي لعائلة ${familyName}</h1>
                                     <p style="font-size: 14px; color: #64748b; font-weight: bold; margin: 0; text-transform: uppercase;">وثيقة عائلية معتمدة للحماية الشخصية والوعي التكنولوجي</p>
                                   </div>
                                   <div style="font-size: 16px; line-height: 1.8; margin-bottom: 30px; text-align: justify; color: #334155;">
-                                    نحن عائلة <strong style="color: #1e3a8a; text-decoration: underline;">${familyName}</strong>، ندرك قوة الذكاء الاصطناعي ومسؤوليته المتعاظمة. وبناءً على تعلمنا بالبرنامج، نتعهد معاً بالالتزام بالبنود الخمسة التالية لحماية أنفسنا وأحبابنا:
+                                    نحن عائلة <strong style="color: #002147; text-decoration: underline;">${familyName}</strong>، ندرك قوة الذكاء الاصطناعي ومسؤوليته المتعاظمة. وبناءً على تعلمنا بالبرنامج، نتعهد معاً بالالتزام بالبنود الخمسة التالية لحماية أنفسنا وأحبابنا:
                                   </div>
                                   <div style="margin-bottom: 40px;">
                                     <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0; display: flex; align-items: start; gap: 15px;">
                                       <span style="font-size: 20px;">1️⃣</span>
                                       <div>
-                                        <h3 style="font-size: 16px; font-weight: 900; color: #1e3a8a; margin: 0 0 5px 0;">الكلمة السرية العائلية:</h3>
+                                        <h3 style="font-size: 16px; font-weight: 900; color: #002147; margin: 0 0 5px 0;">الكلمة السرية العائلية:</h3>
                                         <p style="font-size: 14px; margin: 0; color: #475569;">لدينا كلمة سرية خاصة بنا هي: <span style="font-size: 16px; font-weight: bold; color: #b45309; background-color: #fef3c7; padding: 2px 8px; border-radius: 4px;">${charterPassword || '__________'}</span> لا يشاركها أحد خارج العائلة، نستخدمها للتحقق من هوية المتصل في الطوارئ والوسائط المشبوهة لكسر هجمات التزييف العميق.</p>
                                       </div>
                                     </div>
                                     <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0; display: flex; align-items: start; gap: 15px;">
                                       <span style="font-size: 20px;">2️⃣</span>
                                       <div>
-                                        <h3 style="font-size: 16px; font-weight: 900; color: #1e3a8a; margin: 0 0 5px 0;">صيانة الأصول والملفات الشخصية:</h3>
+                                        <h3 style="font-size: 16px; font-weight: 900; color: #002147; margin: 0 0 5px 0;">صيانة الأصول والملفات الشخصية:</h3>
                                         <p style="font-size: 14px; margin: 0; color: #475569;">لا نرفع ولا نشارك صور الوجوه الخاصة أو بصمات الصوت في أي تطبيق ذكاء اصطناعي غير موثوق به ودون موافقة الوالدين.</p>
                                       </div>
                                     </div>
                                     <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0; display: flex; align-items: start; gap: 15px;">
                                       <span style="font-size: 20px;">3️⃣</span>
                                       <div>
-                                        <h3 style="font-size: 16px; font-weight: 900; color: #1e3a8a; margin: 0 0 5px 0;">التشكك الصحي المباشر:</h3>
+                                        <h3 style="font-size: 16px; font-weight: 900; color: #002147; margin: 0 0 5px 0;">التشكك الصحي المباشر:</h3>
                                         <p style="font-size: 14px; margin: 0; color: #475569;">عندما نشاهد أي خبر مفاجئ أو صورة غريبة أو نبرة مستفزة، نتذكر فوراً ظاهرة "التزييف العميق والهلوسة" ونسأل فوراً: "هل ما نراه حقيقي؟" قبل تصديقه.</p>
                                       </div>
                                     </div>
                                     <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0; display: flex; align-items: start; gap: 15px;">
                                       <span style="font-size: 20px;">4️⃣</span>
                                       <div>
-                                        <h3 style="font-size: 16px; font-weight: 900; color: #1e3a8a; margin: 0 0 5px 0;">ثقافة الإبلاغ والشجاعة:</h3>
+                                        <h3 style="font-size: 16px; font-weight: 900; color: #002147; margin: 0 0 5px 0;">ثقافة الإبلاغ والشجاعة:</h3>
                                         <p style="font-size: 14px; margin: 0; color: #475569;">أي فرد يشاهد إنساناً آلياً أو روبوتاً يهدده أو يشير لشيء غريب، يتواصل مع الوالدين دون إحراج أو تأجيل.</p>
                                       </div>
                                     </div>
                                     <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0; display: flex; align-items: start; gap: 15px;">
                                       <span style="font-size: 20px;">5️⃣</span>
                                       <div>
-                                        <h3 style="font-size: 16px; font-weight: 900; color: #1e3a8a; margin: 0 0 5px 0;">احترام خصوصية الغير:</h3>
+                                        <h3 style="font-size: 16px; font-weight: 900; color: #002147; margin: 0 0 5px 0;">احترام خصوصية الغير:</h3>
                                         <p style="font-size: 14px; margin: 0; color: #475569;">لا نستخدم أدوات التوليد لمعالجة أو تشويه واللعب بصور زملائنا أو أقربائنا دون إذنهم المسبق لتبقى التكنولوجيا دائماً سبيلاً للأخلاق والمحبة.</p>
                                       </div>
                                     </div>
@@ -9966,7 +9966,7 @@ Output Summary for [${topic}]:
                               type="text"
                               value={familyName}
                               onChange={(e) => setFamilyName(e.target.value)}
-                              className="w-full bg-[#050b14]/80 border border-white/10 rounded-xl px-4 py-2 font-semibold text-white focus:outline-none focus:border-amber-500"
+                              className="w-full bg-[#001a38]/80 border border-white/10 rounded-xl px-4 py-2 font-semibold text-white focus:outline-none focus:border-amber-500"
                               placeholder={isRtl ? 'الخليل' : 'Al Khalil'}
                             />
                           </div>
@@ -9978,7 +9978,7 @@ Output Summary for [${topic}]:
                                 type="text"
                                 value={charterPassword}
                                 onChange={(e) => setCharterPassword(e.target.value)}
-                                className="w-full bg-[#050b14]/80 border border-white/10 rounded-xl pl-4 pr-10 py-2 font-mono font-bold text-amber-400 focus:outline-none focus:border-amber-500"
+                                className="w-full bg-[#001a38]/80 border border-white/10 rounded-xl pl-4 pr-10 py-2 font-mono font-bold text-amber-400 focus:outline-none focus:border-amber-500"
                                 placeholder={isRtl ? 'مثال: تفاحة الأندلس' : 'e.g., Apple88'}
                               />
                             </div>
@@ -10051,7 +10051,7 @@ Output Summary for [${topic}]:
 
                     {/* DOCUMENT 2: GRADUATION CERTIFICATE */}
                     {selectedPrintable === 'certificate' && (
-                      <div className="bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                      <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-8 space-y-6">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-5">
                           <div>
                             <h3 className="text-2xl font-black text-white flex items-center gap-2">
@@ -10072,7 +10072,7 @@ Output Summary for [${topic}]:
                                     const options = {
                                       cacheBust: true,
                                       pixelRatio: 2.5,
-                                      backgroundColor: '#0b1329',
+                                      backgroundColor: '#00274f',
                                       styleSheetsFilter: (styleSheet: CSSStyleSheet) => {
                                         try {
                                           const rules = styleSheet.cssRules;
@@ -10107,7 +10107,7 @@ Output Summary for [${topic}]:
                                 const html = `
                                   <div style="max-width: 850px; margin: 0 auto; padding: 50px; border: 12px double #d97706; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); color: #0f172a; text-align: center; position: relative;" dir="rtl">
                                     <div style="font-size: 14px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #b45309; margin-bottom: 20px;">أكاديمية المستقبليات الذكائية والتعليم التوليدي</div>
-                                    <h1 style="font-size: 38px; font-weight: 900; color: #1e3a8a; margin: 15px 0 5px 0;">شهادة سفير معتمد للذكاء الاصطناعي</h1>
+                                    <h1 style="font-size: 38px; font-weight: 900; color: #002147; margin: 15px 0 5px 0;">شهادة سفير معتمد للذكاء الاصطناعي</h1>
                                     <div style="width: 100px; height: 3px; background-color: #d97706; margin: 15px auto;"></div>
                                     <p style="font-size: 16px; color: #475569; margin-bottom: 30px;">تُمنح هذه الوثيقة باعتزاز وفخر عظيمين للسفير اليافع البطل:</p>
                                     <div style="font-size: 36px; font-weight: 900; color: #b45309; margin: 25px 0; border-bottom: 2px dashed #e2e8f0; display: inline-block; padding-bottom: 10px; width: 450px;">${certStudentName}</div>
@@ -10122,7 +10122,7 @@ Output Summary for [${topic}]:
                                       </div>
                                       <div style="text-align: center;">
                                         <div style="font-size: 12px; color: #94a3b8; margin-bottom: 10px;">بإصدار وتوقيع:</div>
-                                        <div style="font-size: 16px; font-weight: bold; color: #1e3a8a;">باسم الخليل وموجهي الأكاديمية</div>
+                                        <div style="font-size: 16px; font-weight: bold; color: #002147;">باسم الخليل وموجهي الأكاديمية</div>
                                         <span style="display: block; width: 220px; border-bottom: 1px solid #64748b; margin-top: 5px;"></span>
                                       </div>
                                     </div>
@@ -10146,7 +10146,7 @@ Output Summary for [${topic}]:
                             type="text"
                             value={certStudentName}
                             onChange={(e) => setCertStudentName(e.target.value)}
-                            className="w-full bg-[#050b14]/80 border border-white/10 rounded-xl px-4 py-2 font-semibold text-white focus:outline-none focus:border-amber-500 text-right"
+                            className="w-full bg-[#001a38]/80 border border-white/10 rounded-xl px-4 py-2 font-semibold text-white focus:outline-none focus:border-amber-500 text-right"
                             placeholder={isRtl ? 'مثال: السفير أحمد باسم الخليل' : 'e.g., Ambassador Ahmed'}
                           />
                         </div>
@@ -10190,7 +10190,7 @@ Output Summary for [${topic}]:
 
                     {/* DOCUMENT 3: FAMILY DICTIONARY */}
                     {selectedPrintable === 'dictionary' && (
-                      <div className="bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                      <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-8 space-y-6">
                         <div className="flex justify-between items-center border-b border-white/5 pb-5">
                           <div>
                             <h3 className="text-2xl font-black text-white flex items-center gap-2">
@@ -10205,7 +10205,7 @@ Output Summary for [${topic}]:
                             onClick={() => {
                               const html = `
                                 <div style="max-width: 800px; margin: 0 auto; padding: 40px; background-color: #ffffff; color: #0f172a; font-family: 'Cairo', sans-serif;" dir="rtl">
-                                  <h1 style="font-size: 30px; font-weight: 900; color: #1e3a8a; text-align: center; margin-bottom: 5px;">قاموس العائلة الرقمية الشيق</h1>
+                                  <h1 style="font-size: 30px; font-weight: 900; color: #002147; text-align: center; margin-bottom: 5px;">قاموس العائلة الرقمية الشيق</h1>
                                   <p style="text-align: center; color: #64748b; font-size: 14px; margin-bottom: 40px; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px;">المصطلحات الكبرى بلغة بيتية دافئة ولطيفة</p>
                                   
                                   <div style="display: grid; grid-cols: 1; gap: 20px;">
@@ -10261,7 +10261,7 @@ Output Summary for [${topic}]:
 
                     {/* DOCUMENT 4: CONTINUOUS ROADMAP */}
                     {selectedPrintable === 'roadmap' && (
-                      <div className="bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6">
+                      <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-8 space-y-6">
                         <div className="flex justify-between items-center border-b border-white/5 pb-5">
                           <div>
                             <h3 className="text-2xl font-black text-white flex items-center gap-2">
@@ -10276,20 +10276,20 @@ Output Summary for [${topic}]:
                             onClick={() => {
                               const html = `
                                 <div style="max-width: 800px; margin: 0 auto; padding: 40px; background-color: #ffffff; color: #0f172a; font-family: 'Cairo', sans-serif;" dir="rtl">
-                                  <h1 style="font-size: 30px; font-weight: 900; color: #1e3a8a; text-align: center; margin-bottom: 5px;">خارطة التعلم المستمر بعد البرنامج</h1>
+                                  <h1 style="font-size: 30px; font-weight: 900; color: #002147; text-align: center; margin-bottom: 5px;">خارطة التعلم المستمر بعد البرنامج</h1>
                                   <p style="text-align: center; color: #b45309; font-size: 16px; margin-bottom: 40px; font-weight: bold; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px;">القاعدة الكبرى: القليل المنتظم أفضل بكثير من الكثير المشتت المتقطع</p>
                                   
-                                  <div style="position: relative; border-right: 3px solid #1e3a8a; padding-right: 25px; margin-right: 15px;">
+                                  <div style="position: relative; border-right: 3px solid #002147; padding-right: 25px; margin-right: 15px;">
                                     <div style="margin-bottom: 30px;">
-                                      <strong style="font-size: 18px; color: #1e3a8a; display: block; margin-bottom: 5px;">📍 الخطوة 1: تقليد أداة الشهر العائلية</strong>
+                                      <strong style="font-size: 18px; color: #002147; display: block; margin-bottom: 5px;">📍 الخطوة 1: تقليد أداة الشهر العائلية</strong>
                                       <p style="font-size: 14px; color: #475569; margin: 0; line-height: 1.6;">يجتمع شمل الوالدين بأبنائهم لمدة نصف ساعة فقط كل مطلع شهر لتذوق وتجريب أداة توليدية فنية جديدة ومناقشة عيوبها وطرق الاستفادة منها.</p>
                                     </div>
                                     <div style="margin-bottom: 30px;">
-                                      <strong style="font-size: 18px; color: #1e3a8a; display: block; margin-bottom: 5px;">🎯 الخطوة 2: صياغة التحديات الحية</strong>
+                                      <strong style="font-size: 18px; color: #002147; display: block; margin-bottom: 5px;">🎯 الخطوة 2: صياغة التحديات الحية</strong>
                                       <p style="font-size: 14px; color: #475569; margin: 0; line-height: 1.6;">بدائل ممتعة: استخدام تعاويذ مبرورة لصياغة قصة قبل النوم بدلاً من اليوتيوب العشوائي الصامت، محاكاة الروبوت ليكلم طفلك كأنه الحكيم لقمان.</p>
                                     </div>
                                     <div style="margin-bottom: 30px;">
-                                      <strong style="font-size: 18px; color: #1e3a8a; display: block; margin-bottom: 5px;">🎓 القواعد الذهبية الأبدية لعائلتنا</strong>
+                                      <strong style="font-size: 18px; color: #002147; display: block; margin-bottom: 5px;">🎓 القواعد الذهبية الأبدية لعائلتنا</strong>
                                       <p style="font-size: 14px; color: #475569; margin: 0; line-height: 1.6;">- لسنا مجرد متلقين بل نحن الموجهون وصانعو المعنى والريش الحية.<br>- الوعي وحماية الأخوه مسبقين دوماً على السرعة وتكالب البرامج الرقمية الفانية.<br>- الحوار المكتمل والمرح المنزلي هما أساس التنشئة الذكية العبقرية البرة.</p>
                                     </div>
                                   </div>
@@ -10307,21 +10307,21 @@ Output Summary for [${topic}]:
                         {/* Roadmap content visual */}
                         <div className="space-y-6 relative border-r-2 border-amber-500/20 pr-6 mr-4 py-2 text-right">
                           <div className="relative">
-                            <div className="absolute right-[-31px] top-1 w-4 h-4 rounded-full bg-amber-500 border-4 border-[#0b1329]" />
+                            <div className="absolute right-[-31px] top-1 w-4 h-4 rounded-full bg-amber-500 border-4 border-[#00274f]" />
                             <h5 className="text-md font-black text-amber-300">{isRtl ? '1. تطبيق "أداة الشهر العائلية"' : '1. "Tool of the Month" Routine'}</h5>
                             <p className="text-slate-300 text-sm mt-1 leading-relaxed">
                               {isRtl ? 'نصف ساعة كل أول جمعة في الشهر، نجتمع بضحكاتنا لنكتشف أداة ونرصد نواقصها التخييلية مع مشاركة الإيجابي فيها.' : 'Spend half an hour monthly reviewing one unique app, analyzing limitations.'}
                             </p>
                           </div>
                           <div className="relative">
-                            <div className="absolute right-[-31px] top-1 w-4 h-4 rounded-full bg-amber-500 border-4 border-[#0b1329]" />
+                            <div className="absolute right-[-31px] top-1 w-4 h-4 rounded-full bg-amber-500 border-4 border-[#00274f]" />
                             <h5 className="text-md font-black text-amber-300">{isRtl ? '2. ممارسات دافئة بدلاً من التلقي الأعمى' : '2. Active Curation versus Consumption'}</h5>
                             <p className="text-slate-300 text-sm mt-1 leading-relaxed">
                               {isRtl ? 'ابتكار قصص ليلية بالاستعانة بالمولدات، أو رسم بذور صلصالية ومحاكاتها بالذكاء الفني المعتدل بدلاً من الاستمرار بالتمرير العث في تيك توك.' : 'Synthesize custom text SAGAs at bedroom chats instead of passive endless scrolling.'}
                             </p>
                           </div>
                           <div className="relative">
-                            <div className="absolute right-[-31px] top-1 w-4 h-4 rounded-full bg-amber-500 border-4 border-[#0b1329]" />
+                            <div className="absolute right-[-31px] top-1 w-4 h-4 rounded-full bg-amber-500 border-4 border-[#00274f]" />
                             <h5 className="text-md font-black text-amber-300">{isRtl ? '3. المبدأ الذهبي الصارم للبيت' : '3. Our Absolute Golden Rule'}</h5>
                             <p className="text-slate-300 text-sm mt-1 leading-relaxed italic text-amber-400">
                               {isRtl ? '"الذكاء الاصطناعي مجرد فرشاة عصرية، أما عيوننا الإنسانية ومروءتنا العائلية فهي الكاتب والمشكل الحقيقي لكل بهاء وعمران."' : '"AI is but an advanced digital brush, whereas our human heart and family bonds hold the true authorship of life."'}
@@ -10333,7 +10333,7 @@ Output Summary for [${topic}]:
 
                     {/* DOCUMENT 5: INTERACTIVE PATTERN WORKSHEET */}
                     {selectedPrintable === 'worksheet' && (
-                      <div className="bg-[#0b1329] border border-white/10 rounded-[2rem] p-8 space-y-6 text-right">
+                      <div className="bg-[#00274f] border border-white/10 rounded-[2rem] p-8 space-y-6 text-right">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-5">
                           <div>
                             <h3 className="text-2xl font-black text-white flex items-center gap-2">
@@ -10350,7 +10350,7 @@ Output Summary for [${topic}]:
                                 <div style="max-width: 800px; margin: 0 auto; padding: 40px; background-color: #ffffff; color: #010409; font-family: 'Cairo', sans-serif;" dir="rtl">
                                   <div style="border: 2px solid #d97706; padding: 25px; border-radius: 8px;">
                                     <div style="text-align: center; border-bottom: 2px dashed #d97706; padding-bottom: 15px; margin-bottom: 25px;">
-                                      <h1 style="font-size: 26px; font-weight: 900; color: #1e3a8a; margin: 0;">ورقة تجريب الأنماط وكشف الروبوت</h1>
+                                      <h1 style="font-size: 26px; font-weight: 900; color: #002147; margin: 0;">ورقة تجريب الأنماط وكشف الروبوت</h1>
                                       <p style="font-size: 13px; color: #64748b; margin: 5px 0 0 0;">خاص بالدرس الأول - عائلة ${familyName}</p>
                                     </div>
                                     <div style="font-size: 14px; margin-bottom: 25px; line-height: 1.6; color: #334155;">
@@ -10358,29 +10358,29 @@ Output Summary for [${topic}]:
                                     </div>
                                     
                                     <div style="margin-bottom: 25px;">
-                                      <p style="font-weight: bold; color: #1e3a8a; margin: 15px 0 5px 0;">1. النمط السهل (الأبجدية): أ، ب، ج، [___]، [___] </p>
+                                      <p style="font-weight: bold; color: #002147; margin: 15px 0 5px 0;">1. النمط السهل (الأبجدية): أ، ب، ج، [___]، [___] </p>
                                       <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 4px; font-size: 14px; font-weight: bold; background-color: #f8fafc;">إجابتك المسجلة: ${wsQ1 || '(لم تُحل)'}</div>
                                     </div>
                                     <div style="margin-bottom: 25px;">
-                                      <p style="font-weight: bold; color: #1e3a8a; margin: 15px 0 5px 0;">2. النمط المتوسط (المضاعفات): 2، 4، 6، 8، [___]، [___] </p>
+                                      <p style="font-weight: bold; color: #002147; margin: 15px 0 5px 0;">2. النمط المتوسط (المضاعفات): 2، 4، 6، 8، [___]، [___] </p>
                                       <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 4px; font-size: 14px; font-weight: bold; background-color: #f8fafc;">إجابتك المسجلة: ${wsQ2 || '(لم تُحل)'}</div>
                                     </div>
                                     <div style="margin-bottom: 25px;">
-                                      <p style="font-weight: bold; color: #1e3a8a; margin: 15px 0 5px 0;">3. النمط الزمني الصعب: صباح، ظهر، عصر، [___]، [___] </p>
+                                      <p style="font-weight: bold; color: #002147; margin: 15px 0 5px 0;">3. النمط الزمني الصعب: صباح، ظهر، عصر، [___]، [___] </p>
                                       <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 4px; font-size: 14px; font-weight: bold; background-color: #f8fafc;">إجابتك المسجلة: ${wsQ3 || '(لم تُحل)'}</div>
                                     </div>
                                     <div style="margin-bottom: 25px;">
-                                      <p style="font-weight: bold; color: #1e3a8a; margin: 15px 0 5px 0;">4. نمط فيبوناتشي (للعباقرة): 1، 1، 2، 3، 5، 8، [___]، [___] </p>
+                                      <p style="font-weight: bold; color: #002147; margin: 15px 0 5px 0;">4. نمط فيبوناتشي (للعباقرة): 1، 1، 2، 3، 5، 8، [___]، [___] </p>
                                       <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 4px; font-size: 14px; font-weight: bold; background-color: #f8fafc;">إجابتك المسجلة: ${wsQ4 || '(لم تُحل)'}</div>
                                     </div>
                                     <div style="margin-bottom: 25px;">
-                                      <p style="font-weight: bold; color: #1e3a8a; margin: 15px 0 5px 0;">5. النمط اللانهائي والمبتكر لعائلتكم:</p>
+                                      <p style="font-weight: bold; color: #002147; margin: 15px 0 5px 0;">5. النمط اللانهائي والمبتكر لعائلتكم:</p>
                                       <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 4px; font-size: 14px; background-color: #f8fafc;">إجابتك المبتكرة: ${wsQ5 || '(لم تسجل نمط)'}</div>
                                     </div>
 
                                     <div style="border-top: 2px dashed #d97706; padding-top: 20px; margin-top: 30px; display: flex; justify-content: space-between; align-items: center;">
                                       <div>
-                                        <b style="color: #1e3a8a; display: block;">النتيجة المصححة:</b>
+                                        <b style="color: #002147; display: block;">النتيجة المصححة:</b>
                                         <span style="font-size: 18px; font-weight: 900; color: #b45309;">${wsScore}/4 أنماط كاملة</span>
                                       </div>
                                       <div style="text-align: left; font-size: 12px; color: #64748b;">
@@ -10412,19 +10412,19 @@ Output Summary for [${topic}]:
                                   type="text"
                                   value={wsQ1}
                                   onChange={(e) => setWsQ1(e.target.value)}
-                                  className="w-full bg-[#050b14]/90 border border-white/10 rounded-xl px-3 py-1.5 focus:outline-none focus:border-amber-500"
+                                  className="w-full bg-[#001a38]/90 border border-white/10 rounded-xl px-3 py-1.5 focus:outline-none focus:border-amber-500"
                                   placeholder={isRtl ? 'أدخل الحرفين مفصولين بفاصلة، مثل: د, هـ' : 'e.g., d, e'}
                                 />
                               </div>
 
                               <div className="space-y-1">
-                                <span className="text-xs bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded border border-sky-500/20">{isRtl ? '🌿 متوسطة' : 'Medium'}</span>
+                                <span className="text-xs bg-[#C49E3A]/10 text-[#E4C77A] px-2 py-0.5 rounded border border-[#C49E3A]/20">{isRtl ? '🌿 متوسطة' : 'Medium'}</span>
                                 <label className="block text-sm font-semibold mt-1">2. 2، 4، 6، 8، ___، ___</label>
                                 <input
                                   type="text"
                                   value={wsQ2}
                                   onChange={(e) => setWsQ2(e.target.value)}
-                                  className="w-full bg-[#050b14]/90 border border-white/10 rounded-xl px-3 py-1.5 focus:outline-none focus:border-amber-500"
+                                  className="w-full bg-[#001a38]/90 border border-white/10 rounded-xl px-3 py-1.5 focus:outline-none focus:border-amber-500"
                                   placeholder="e.g., 10, 12"
                                 />
                               </div>
@@ -10436,19 +10436,19 @@ Output Summary for [${topic}]:
                                   type="text"
                                   value={wsQ3}
                                   onChange={(e) => setWsQ3(e.target.value)}
-                                  className="w-full bg-[#050b14]/90 border border-white/10 rounded-xl px-3 py-1.5 focus:outline-none focus:border-amber-500"
+                                  className="w-full bg-[#001a38]/90 border border-white/10 rounded-xl px-3 py-1.5 focus:outline-none focus:border-amber-500"
                                   placeholder={isRtl ? 'مثال: مغرب, عشاء' : 'e.g., sunset, night'}
                                 />
                               </div>
 
                               <div className="space-y-1">
-                                <span className="text-xs bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded border border-purple-500/20">{isRtl ? '🌌 للعباقرة والأجداد' : 'Genius'}</span>
+                                <span className="text-xs bg-[#C49E3A]/10 text-[#E4C77A] px-2 py-0.5 rounded border border-[#C49E3A]/20">{isRtl ? '🌌 للعباقرة والأجداد' : 'Genius'}</span>
                                 <label className="block text-sm font-semibold mt-1">4. 1، 1، 2، 3، 5، 8، ___، ___</label>
                                 <input
                                   type="text"
                                   value={wsQ4}
                                   onChange={(e) => setWsQ4(e.target.value)}
-                                  className="w-full bg-[#050b14]/90 border border-white/10 rounded-xl px-3 py-1.5 focus:outline-none focus:border-amber-500 font-mono"
+                                  className="w-full bg-[#001a38]/90 border border-white/10 rounded-xl px-3 py-1.5 focus:outline-none focus:border-amber-500 font-mono"
                                   placeholder="e.g., 13, 21"
                                 />
                               </div>
@@ -10461,7 +10461,7 @@ Output Summary for [${topic}]:
                                 type="text"
                                 value={wsQ5}
                                 onChange={(e) => setWsQ5(e.target.value)}
-                                className="w-full bg-[#050b14]/90 border border-white/10 rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500"
+                                className="w-full bg-[#001a38]/90 border border-white/10 rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500"
                                 placeholder={isRtl ? 'مثال: أحمر، حلو، أحمر، حلو، ___، ___' : 'e.g., Apple, Banana, Apple, Banana...'}
                               />
                             </div>
@@ -10555,7 +10555,7 @@ Output Summary for [${topic}]:
               )}
 
               {lobbyTab === 'updates' && (
-                <div className="bg-[#0b172e] border border-white/10 rounded-[2.5rem] p-6 lg:p-8 space-y-6 text-right relative overflow-hidden shadow-2xl animate-fade-in w-full" dir={isRtl ? 'rtl' : 'ltr'}>
+                <div className="bg-[#00274f] border border-white/10 rounded-[2.5rem] p-6 lg:p-8 space-y-6 text-right relative overflow-hidden shadow-2xl animate-fade-in w-full" dir={isRtl ? 'rtl' : 'ltr'}>
                   <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl opacity-30 pointer-events-none" />
                   
                   {/* Title & Subtitle */}
@@ -10625,7 +10625,7 @@ Output Summary for [${topic}]:
                           {/* Breakthrough 3 */}
                           <div className="bg-slate-900/60 p-4 rounded-xl border border-white/5 hover:border-amber-500/20 transition-all group">
                             <div className="flex justify-between items-start gap-2">
-                              <span className="text-[10px] font-black uppercase bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded">
+                              <span className="text-[10px] font-black uppercase bg-[#C49E3A]/10 text-[#E4C77A] border border-[#C49E3A]/20 px-2 py-0.5 rounded">
                                 {isRtl ? 'ذاتي العمل' : 'AUTONOMOUS'}
                               </span>
                               <h5 className="text-xs font-black text-white group-hover:text-amber-400 transition-colors">
@@ -10781,7 +10781,7 @@ Output Summary for [${topic}]:
 
               {lobbyTab === 'study_plan' && (
                 !(hasCompletedTest || bypassTest) ? (
-                  <div className="bg-[#0b1329] border border-amber-500/20 rounded-[2.5rem] p-10 relative overflow-hidden text-right shadow-2xl animate-fade-in w-full" dir="rtl">
+                  <div className="bg-[#00274f] border border-amber-500/20 rounded-[2.5rem] p-10 relative overflow-hidden text-right shadow-2xl animate-fade-in w-full" dir="rtl">
                     <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl opacity-30" />
                     <div className="relative z-10 flex flex-col items-center text-center space-y-6 py-6 font-sans">
                       <div className="w-20 h-20 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
@@ -10818,7 +10818,7 @@ Output Summary for [${topic}]:
                     </div>
                   </div>
                 ) : (
-                <div className="space-y-8 bg-[#0b172e] p-8 rounded-[2rem] border border-white/5 relative overflow-hidden">
+                <div className="space-y-8 bg-[#00274f] p-8 rounded-[2rem] border border-white/5 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full -mr-32 -mt-32 opacity-50 pointer-events-none" />
                   
                   <div className="relative z-10">
@@ -10837,7 +10837,7 @@ Output Summary for [${topic}]:
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                        {/* Left: Input Sidebar */}
                       <div className="lg:col-span-1 space-y-6">
-                        <div className="bg-[#050b14]/80 p-6 rounded-3xl border border-white/5 space-y-4">
+                        <div className="bg-[#001a38]/80 p-6 rounded-3xl border border-white/5 space-y-4">
                           <div>
                             <label className="block text-[10px] font-black text-amber-400 uppercase tracking-wider mb-2">
                               {isRtl ? 'تصنيف الخطة العلمية' : 'LEARNING PATH LEVEL'}
@@ -10898,7 +10898,7 @@ Output Summary for [${topic}]:
                               <select
                                 value={plannerFocus}
                                 onChange={(e) => setPlannerFocus(e.target.value)}
-                                className="w-full px-4 py-3 bg-[#050b14]/90 border border-white/10 rounded-xl text-xs focus:outline-none focus:border-amber-500 font-bold text-white"
+                                className="w-full px-4 py-3 bg-[#001a38]/90 border border-white/10 rounded-xl text-xs focus:outline-none focus:border-amber-500 font-bold text-white"
                               >
                                 <option value="بسيط عائلي مخصص للمبتدئين والأطفال">{isRtl ? 'بسيط عائلي (للمبتدئين والأطفال)' : 'Simple Family (Beginners & Kids)'}</option>
                                 <option value="شغل عملي وبرمجة وتطبيق مشاريع">{isRtl ? 'تطبيقي عملي ومشاريع برمجية' : 'Hands-on Projects & Coding'}</option>
@@ -10946,7 +10946,7 @@ Output Summary for [${topic}]:
                         </div>
 
                         {/* سجل علامات الدارس الذكي بالذكاء الاصطناعي */}
-                        <div className="bg-[#050b14]/90 p-6 rounded-3xl border border-white/5 space-y-4 text-right">
+                        <div className="bg-[#001a38]/90 p-6 rounded-3xl border border-white/5 space-y-4 text-right">
                           <h4 className="text-xs font-black text-amber-400 uppercase tracking-wider mb-1 flex items-center gap-1.5 justify-start">
                             <GraduationCap className="text-amber-400" size={16} />
                             {isRtl ? 'سجل درجات اختبارات الذكاء الاصطناعي 📊' : 'AI Quizzes Gradebook 📊'}
@@ -11093,7 +11093,7 @@ Output Summary for [${topic}]:
                                   className={`${
                                     cloudSaveSuccess 
                                       ? 'bg-emerald-500 hover:bg-emerald-400 text-white' 
-                                      : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                                      : 'bg-[#002147] hover:bg-[#C49E3A] text-white'
                                   } px-4 py-2 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all cursor-pointer whitespace-nowrap w-full sm:w-auto`}
                                 >
                                   {savingToCloud ? (
@@ -11115,7 +11115,7 @@ Output Summary for [${topic}]:
                                         const options = {
                                           cacheBust: true,
                                           pixelRatio: 2.5,
-                                          backgroundColor: '#050b14',
+                                          backgroundColor: '#001a38',
                                           styleSheetsFilter: (styleSheet: CSSStyleSheet) => {
                                             try {
                                               const rules = styleSheet.cssRules;
@@ -11164,7 +11164,7 @@ Output Summary for [${topic}]:
                             </div>
 
                              {customStudyPlan.isGrandPath ? (
-                              <div id="custom-plan-print-area" className="bg-[#050b14] p-6 rounded-[2rem] border border-white/5 space-y-8 select-none text-right">
+                              <div id="custom-plan-print-area" className="bg-[#001a38] p-6 rounded-[2rem] border border-white/5 space-y-8 select-none text-right">
                                 <div className="border-b border-dashed border-white/10 pb-4 flex justify-between items-center mr-2 ml-2">
                                   <div>
                                     <p className="text-[9px] font-black text-amber-400 tracking-widest uppercase flex items-center gap-1.5 justify-end">
@@ -11191,7 +11191,7 @@ Output Summary for [${topic}]:
                                       <div key={phase.id} className="relative bg-white/[0.01] rounded-2xl border border-white/5 p-5 hover:border-amber-500/20 transition-all duration-300">
                                         {/* Locked phase screen overlay */}
                                         {!isPhaseUnlocked && (
-                                          <div className="absolute inset-0 bg-[#050b14]/95 backdrop-blur-sm rounded-2xl z-25 flex flex-col items-center justify-center text-center p-6 border border-white/5">
+                                          <div className="absolute inset-0 bg-[#001a38]/95 backdrop-blur-sm rounded-2xl z-25 flex flex-col items-center justify-center text-center p-6 border border-white/5">
                                             <Lock className="text-amber-400 mb-2 animate-bounce" size={24} />
                                             <h5 className="text-xs font-black text-white">
                                               {isRtl ? '🔒 هذه المرحلة مقفلة حالياً!' : '🔒 Phase Locked!'}
@@ -11237,7 +11237,7 @@ Output Summary for [${topic}]:
                                               <div
                                                 key={lesson.id}
                                                 onClick={() => handleSelectCustomUnit({ ...lesson, id: lesson.id, level: grpTag })}
-                                                className="bg-[#050b14]/40 p-3 rounded-xl border border-white/5 hover:border-amber-500/40 hover:bg-amber-500/[0.01]/30 flex items-start gap-2.5 cursor-pointer transition-all active:scale-98 group/unit"
+                                                className="bg-[#001a38]/40 p-3 rounded-xl border border-white/5 hover:border-amber-500/40 hover:bg-amber-500/[0.01]/30 flex items-start gap-2.5 cursor-pointer transition-all active:scale-98 group/unit"
                                               >
                                                 <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
                                                   isCompleted 
@@ -11310,7 +11310,7 @@ Output Summary for [${topic}]:
                                 </div>
                               </div>
                              ) : (
-                              <div id="custom-plan-print-area" className="bg-[#050b14] p-6 rounded-[2rem] border border-white/5 space-y-6 text-right">
+                              <div id="custom-plan-print-area" className="bg-[#001a38] p-6 rounded-[2rem] border border-white/5 space-y-6 text-right">
                                 <div className="border-b border-dashed border-white/10 pb-4 flex justify-between items-center mr-2 ml-2">
                                   <div>
                                     <p className="text-[9px] font-black text-amber-400 tracking-widest uppercase">{isRtl ? 'مسار دراسي مخصص بالذكاء الاصطناعي' : 'CUSTOM AI LEARNING DIRECTIVE'}</p>
@@ -11339,7 +11339,7 @@ Output Summary for [${topic}]:
                                               <div 
                                                 key={unitId} 
                                                 onClick={() => handleSelectCustomUnit({ ...unit, level, id: unitId })}
-                                                className="bg-[#050b14]/50 p-3 rounded-xl border border-white/5 hover:border-amber-500/40 hover:bg-amber-500/[0.02] flex items-start gap-2.5 cursor-pointer transition-all active:scale-98 group/unit"
+                                                className="bg-[#001a38]/50 p-3 rounded-xl border border-white/5 hover:border-amber-500/40 hover:bg-amber-500/[0.02] flex items-start gap-2.5 cursor-pointer transition-all active:scale-98 group/unit"
                                               >
                                                 <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
                                                   isCompleted 
@@ -11406,7 +11406,7 @@ Output Summary for [${topic}]:
               {/* Sidebar Left: Concepts & Activities instructions */}
               <div className="lg:col-span-4 space-y-6">
                 {/* Information Node */}
-                <div className="bg-[#0b172e] border border-white/5 rounded-[2rem] p-6 space-y-6">
+                <div className="bg-[#00274f] border border-white/5 rounded-[2rem] p-6 space-y-6">
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1 text-right">
                       <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">{isRtl ? 'الدرس النشط' : 'ACTIVE EXERCISE'}</span>
@@ -11415,7 +11415,7 @@ Output Summary for [${topic}]:
                     <button
                       disabled={exportingLesson}
                       onClick={() => handleExportLessonAsImage(selectedLesson, 'foundational')}
-                      className="bg-[#050b14] border border-amber-500/35 hover:bg-amber-500 hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
+                      className="bg-[#001a38] border border-amber-500/35 hover:bg-amber-500 hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
                     >
                       {exportingLesson && lessonToExport?.lesson_number === selectedLesson.lesson_number ? (
                         <>
@@ -11464,8 +11464,8 @@ Output Summary for [${topic}]:
                     </div>
 
                     {selectedLesson.parent_summary && (
-                      <div className="p-4 bg-purple-500/5 rounded-2xl border border-purple-500/15">
-                        <h4 className="text-xs font-black text-purple-400 uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
+                      <div className="p-4 bg-[#C49E3A]/5 rounded-2xl border border-[#C49E3A]/15">
+                        <h4 className="text-xs font-black text-[#E4C77A] uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
                           <Bot size={14} />
                           {isRtl ? 'خلاصة للآباء' : 'PARENT SUMMARY'}
                         </h4>
@@ -11476,8 +11476,8 @@ Output Summary for [${topic}]:
                     )}
 
                     {selectedLesson.discussion_question && (
-                      <div className="p-4 bg-blue-500/5 rounded-2xl border border-blue-500/15">
-                        <h4 className="text-xs font-black text-blue-400 uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
+                      <div className="p-4 bg-[#C49E3A]/5 rounded-2xl border border-[#C49E3A]/15">
+                        <h4 className="text-xs font-black text-[#E4C77A] uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
                           <HelpCircle size={14} />
                           {isRtl ? 'سؤال للنقاش العائلي' : 'DISCUSSION QUESTION'}
                         </h4>
@@ -11488,8 +11488,8 @@ Output Summary for [${topic}]:
                     )}
 
                     {selectedLesson.image_description && (
-                      <div className="p-4 bg-sky-500/5 rounded-2xl border border-sky-500/15">
-                        <h4 className="text-xs font-black text-sky-400 uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
+                      <div className="p-4 bg-[#C49E3A]/5 rounded-2xl border border-[#C49E3A]/15">
+                        <h4 className="text-xs font-black text-[#E4C77A] uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
                           <PenTool size={14} />
                           {isRtl ? 'وصف الصورة الفنية المقترحة' : 'SUGGESTED LESSON SCENE'}
                         </h4>
@@ -11604,7 +11604,7 @@ Output Summary for [${topic}]:
                       </div>
 
                       {l1Complete && (
-                        <div className="p-8 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-[2.5rem] text-center space-y-4">
+                        <div className="p-8 bg-gradient-to-r from-emerald-500/10 to-[#C49E3A]/10 border border-emerald-500/20 rounded-[2.5rem] text-center space-y-4">
                           <Smile size={44} className="text-emerald-400 mx-auto animate-bounce" />
                           <h6 className="text-white text-lg font-black">{isRtl ? 'تم الانتهاء بنجاح! حصلت على 50 نقطة XP!' : 'Successfully completed! Earned 50 XP!'}</h6>
                           
@@ -11885,7 +11885,7 @@ Output Summary for [${topic}]:
                               <motion.div 
                                 initial={{ scale: 0.9, opacity: 0 }} 
                                 animate={{ scale: 1, opacity: 1 }} 
-                                className="p-6 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-[2rem] text-center space-y-4"
+                                className="p-6 bg-gradient-to-r from-emerald-500/10 to-[#C49E3A]/10 border border-emerald-500/20 rounded-[2rem] text-center space-y-4"
                               >
                                 <Smile size={44} className="text-emerald-400 mx-auto animate-bounce" />
                                 <h6 className="text-white text-lg font-black">{isRtl ? 'تم إنهاء تحدي تدريب النموذج بنجاح! 🎉 حصلت على 60 نقطة XP!' : 'Successfully completed training! Earned 60 XP!'}</h6>
@@ -12572,7 +12572,7 @@ Output Summary for [${topic}]:
                           </button>
 
                           {l11Symphony && (
-                            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="p-5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-2xl border border-emerald-500/20 space-y-3">
+                            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="p-5 bg-gradient-to-r from-emerald-500/10 to-[#C49E3A]/10 rounded-2xl border border-emerald-500/20 space-y-3">
                               <div className="space-y-1">
                                 <span className="text-[10px] text-amber-300 font-bold block uppercase tracking-wider">{isRtl ? 'رسمة التعويذة المصممة المشتركة:' : 'JOINT ART DESIGN PROMPT:'}</span>
                                 <p className="text-xs font-mono text-slate-300 bg-black/40 px-3 py-2 rounded-xl border border-white/5">
@@ -12758,7 +12758,7 @@ Output Summary for [${topic}]:
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-[#050b14]/95 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto"
+                className="fixed inset-0 bg-[#001a38]/95 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto"
                 onClick={() => {
                   setSelectedCustomUnit(null);
                   setCustomUnitQuizSelected(null);
@@ -12776,11 +12776,11 @@ Output Summary for [${topic}]:
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0.95, y: 20 }}
                   onClick={(e) => e.stopPropagation()}
-                  className="bg-[#0b172e] border border-white/10 rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl relative text-right"
+                  className="bg-[#00274f] border border-white/10 rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl relative text-right"
                   dir={isRtl ? 'rtl' : 'ltr'}
                 >
                   {/* Top Bar Banner Accent */}
-                  <div className="bg-gradient-to-r from-amber-500/20 to-indigo-500/20 p-6 border-b border-white/5 flex justify-between items-center">
+                  <div className="bg-gradient-to-r from-amber-500/20 to-[#C49E3A]/20 p-6 border-b border-white/5 flex justify-between items-center">
                     <div className="text-right w-full">
                       <span className="text-[10px] font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-md inline-block">
                         {isRtl ? `مستوى ${selectedCustomUnit.level} • خطتك الذكية` : `CEFR Level ${selectedCustomUnit.level} • Smart Path`}
@@ -12841,11 +12841,11 @@ Output Summary for [${topic}]:
 
                         {/* Laboratory Practice */}
                         <div className="space-y-2">
-                          <h5 className="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center gap-1.5 justify-start">
-                            <Bot size={14} className="text-indigo-400" />
+                          <h5 className="text-xs font-black uppercase tracking-wider text-[#E4C77A] flex items-center gap-1.5 justify-start">
+                            <Bot size={14} className="text-[#E4C77A]" />
                             {isRtl ? '🔬 النشاط التجريبي العالي (Sandbox Mission)' : '🔬 PRACTICAL SANDBOX MISSION'}
                           </h5>
-                          <div className="bg-indigo-500/5 p-4 rounded-2xl border border-indigo-500/10 space-y-3">
+                          <div className="bg-[#C49E3A]/5 p-4 rounded-2xl border border-[#C49E3A]/10 space-y-3">
                             <p className="text-[11px] text-slate-300 font-bold leading-relaxed">
                               {act.mission}
                             </p>
@@ -12856,7 +12856,7 @@ Output Summary for [${topic}]:
                                 setCustomUnitQuizCorrect(null);
                                 setLobbyTab('experiments'); // Go to play workspace
                               }}
-                              className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-[10px] font-black tracking-wider uppercase transition-all flex items-center gap-1.5 cursor-pointer"
+                              className="bg-[#002147] hover:bg-[#C49E3A] text-white px-4 py-2 rounded-xl text-[10px] font-black tracking-wider uppercase transition-all flex items-center gap-1.5 cursor-pointer"
                             >
                               <Play size={10} />
                               {isRtl ? 'افتح المعمل التفاعلي الفوري 🚀' : 'Open AI Learning Lab Now 🚀'}
@@ -12871,7 +12871,7 @@ Output Summary for [${topic}]:
                             {isRtl ? '🏁 التحدي السريع والتقييم' : '🏁 INTERACTIVE MINI-QUEST'}
                           </h5>
                           
-                          <div className="bg-[#050b14] p-5 rounded-2xl border border-white/5 space-y-4">
+                          <div className="bg-[#001a38] p-5 rounded-2xl border border-white/5 space-y-4">
                             <p className="text-xs font-bold text-white text-right">
                               {act.question}
                             </p>
@@ -13025,7 +13025,7 @@ Output Summary for [${topic}]:
                                 )}
                               </div>
                             ) : !activeLessonQuiz ? (
-                              <div className="bg-[#050b14] p-5 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center space-y-4 py-8">
+                              <div className="bg-[#001a38] p-5 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center space-y-4 py-8">
                                 <Sparkles size={24} className="text-amber-400 animate-pulse" />
                                 <p className="text-xs font-bold text-slate-300">
                                   {isRtl 
@@ -13083,7 +13083,7 @@ Output Summary for [${topic}]:
                                 </button>
                               </div>
                             ) : (
-                              <div className="bg-[#050b14] p-5 rounded-2xl border border-white/5 space-y-6 text-right">
+                              <div className="bg-[#001a38] p-5 rounded-2xl border border-white/5 space-y-6 text-right">
                                 {activeLessonQuiz.map((q, qIdx) => {
                                   const selectedOptionIdx = lessonQuizAnswers[qIdx];
                                   
@@ -13190,7 +13190,7 @@ Output Summary for [${topic}]:
                   </div>
 
                   {/* Actions Footer */}
-                  <div className="p-6 bg-[#050b14]/50 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
+                  <div className="p-6 bg-[#001a38]/50 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <button
                       onClick={() => {
                         setSelectedCustomUnit(null);
@@ -13236,7 +13236,7 @@ Output Summary for [${topic}]:
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-[#050b14]/95 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto font-sans text-right"
+              className="fixed inset-0 bg-[#001a38]/95 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto font-sans text-right"
               onClick={() => {
                 setActiveMilestoneExam(null);
               }}
@@ -13246,7 +13246,7 @@ Output Summary for [${topic}]:
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.95, y: 20 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-[#0b172e] border border-amber-500/30 rounded-[2.5rem] w-full max-w-xl overflow-hidden shadow-2xl relative"
+                className="bg-[#00274f] border border-amber-500/30 rounded-[2.5rem] w-full max-w-xl overflow-hidden shadow-2xl relative"
                 dir={isRtl ? 'rtl' : 'ltr'}
               >
                 {/* Top Banner accent */}
@@ -13357,7 +13357,7 @@ Output Summary for [${topic}]:
                 </div>
 
                 {/* Footer Controls */}
-                <div className="p-6 bg-[#050b14]/50 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="p-6 bg-[#001a38]/50 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
                   <button
                     onClick={() => setActiveMilestoneExam(null)}
                     type="button"
@@ -13457,7 +13457,7 @@ Output Summary for [${topic}]:
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#0b1329] border border-amber-500/20 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative"
+              className="bg-[#00274f] border border-amber-500/20 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative"
               dir={isRtl ? 'rtl' : 'ltr'}
             >
               {/* Header Actions */}
@@ -13568,10 +13568,10 @@ Output Summary for [${topic}]:
           className="bg-[#020617] text-white p-12 pr-12 pl-12 rounded-[2rem] border border-slate-800/80 relative font-tajawal text-right shadow-2xl"
         >
           {/* Elegant background gradients - matching Bright Companion tech theme */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0b172e] via-[#020617] to-[#020617] rounded-[1.9rem] -z-10" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#00274f] via-[#020617] to-[#020617] rounded-[1.9rem] -z-10" />
           
           {/* Glowing backdrops for visual depth */}
-          <div className="absolute top-10 right-10 w-24 h-24 bg-teal-500/5 rounded-full blur-2xl -z-5" />
+          <div className="absolute top-10 right-10 w-24 h-24 bg-[#C49E3A]/5 rounded-full blur-2xl -z-5" />
           <div className="absolute bottom-10 left-10 w-40 h-40 bg-amber-500/5 rounded-full blur-2xl -z-5" />
 
           {/* Premium Academy Branding Header */}
@@ -13595,7 +13595,7 @@ Output Summary for [${topic}]:
             <div className="w-14 h-14 rounded-2xl bg-slate-900/80 border border-slate-700/50 flex items-center justify-center shadow-lg mb-3">
               <span className="text-2xl">🤖</span>
             </div>
-            <span className="text-[10px] text-teal-400 font-extrabold tracking-widest uppercase block font-sans">
+            <span className="text-[10px] text-[#E4C77A] font-extrabold tracking-widest uppercase block font-sans">
               {isRtl ? `الدرس ${lessonToExport.lesson_number}` : `Lesson ${lessonToExport.lesson_number}`}
             </span>
           </div>
@@ -13605,13 +13605,13 @@ Output Summary for [${topic}]:
             <h1 className="text-2xl font-black text-white leading-tight tracking-tight font-tajawal">
               {lessonToExport.lesson_title}
             </h1>
-            <div className="w-16 h-1 bg-gradient-to-r from-amber-400 to-teal-400 mx-auto rounded-full mt-3.5" />
+            <div className="w-16 h-1 bg-gradient-to-r from-amber-400 to-[#C49E3A] mx-auto rounded-full mt-3.5" />
           </div>
 
           {/* Core Concept Statement Container */}
-          <div className="bg-[#0b172e]/50 border border-white/5 rounded-2xl p-6 my-5 text-right space-y-4 font-tajawal" dir="rtl">
+          <div className="bg-[#00274f]/50 border border-white/5 rounded-2xl p-6 my-5 text-right space-y-4 font-tajawal" dir="rtl">
             <div className="text-right">
-              <span className="text-[11px] text-teal-400 font-extrabold tracking-wide block mb-1">
+              <span className="text-[11px] text-[#E4C77A] font-extrabold tracking-wide block mb-1">
                 🧠 {isRtl ? 'الفكرة الجوهرية والمنهج التعليمي للدرس:' : 'Core Lesson Philosophy & Objective:'}
               </span>
               <p className="text-sm text-slate-200 leading-relaxed font-semibold font-tajawal pr-1">
