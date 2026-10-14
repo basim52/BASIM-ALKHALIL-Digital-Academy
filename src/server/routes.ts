@@ -581,6 +581,23 @@ Looking forward to your reply. Tell me what we're tackling first!`;
     next();
   });
 
+  // 🌐 Live translation: tighter per-user limit (each call is a Gemini request).
+  const LT_LIMIT = Number(process.env.LIVE_TRANSLATE_LIMIT || 40); // per user per 10 minutes
+  const ltBuckets = new Map<string, { n: number; reset: number }>();
+  app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (req.method !== "POST" || !req.path.startsWith("/api/live-translate")) return next();
+    const uid = (req as any).authUid as string | undefined;
+    if (!uid) return next();
+    const now = Date.now();
+    const b = ltBuckets.get(uid);
+    if (!b || b.reset < now) ltBuckets.set(uid, { n: 1, reset: now + 10 * 60 * 1000 });
+    else if (++b.n > LT_LIMIT) {
+      res.setHeader("Retry-After", String(Math.ceil((b.reset - now) / 1000)));
+      return res.status(429).json({ error: "TRANSLATE_LIMIT", rateLimited: true, message: "وصلت لحد الترجمة المؤقت. انتظر دقائق ثم حاول مرة أخرى." });
+    }
+    next();
+  });
+
   // 🛡️ /api/admin/* — master admin only (server-side check, not just the UI).
   const SERVER_ADMINS = ["basim5252@gmail.com"];
   app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {

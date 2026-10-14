@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { X, ArrowRight, Lock, Volume2, Square, CheckCircle2, Mic, Send } from 'lucide-react';
 import { auth } from '../lib/firebase';
+import { CompletionCertificateModal, type CertificateData } from './CompletionCertificateModal';
 import type { SaraTrack, SaraTrackLesson, SaraChoiceQuestion } from '../data/saraTracks/foundations';
 import { prefetchAcademyAudio, cancelAllSpeech, createManagedAudio } from '../lib/audio';
 import { boardLinesToSpeech } from '../utils/boardToSpeech';
@@ -131,6 +132,7 @@ const Choice: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (
 
 export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, unlockAll, initialLessonId }) => {
   const [unlockedRaw, setUnlocked] = useState(() => readUnlocked(track.id, uid));
+  const [cert, setCert] = useState<CertificateData | null>(null);
   const unlocked = unlockAll ? track.lessons.length : unlockedRaw;
   const [lessonId, setLessonId] = useState<string | null>(initialLessonId || null);
   const [test, setTest] = useState<null | { levelId: string; levelTitleAr: string; qs: LevelTestQuestion[]; idx: number; answers: number[]; pick: number | null; result: LevelTestAttempt | null; saved: boolean | null }>(null);
@@ -396,6 +398,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                 </div>
                 <div className="shrink-0 flex gap-2">
                   <button data-testid="level-test-retry" onClick={() => { const lv = levels.find(v => v.id === test.levelId); if (lv) startTest(lv); }} className="flex-1 py-2 rounded-xl bg-amber-400 text-slate-950 text-[13px] font-black">🔁 إعادة الاختبار</button>
+                  {r.passed && <button data-testid="level-test-cert" onClick={() => setCert({ unitId: `${track.id}:${test.levelId}`, unitTitle: `${track.titleAr} — ${test.levelTitleAr} (${r.score}%)`, unitTitleAr: `${track.titleAr} — ${test.levelTitleAr} (${r.score}%)`, completedAt: r.createdAtMs, studentName: auth.currentUser?.displayName || undefined })} className="flex-1 py-2 rounded-xl bg-[#C49E3A] text-[#002147] text-[13px] font-black">🎓 شهادتي</button>}
                   <button onClick={() => setTest(null)} className="flex-1 py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">رجوع للدروس</button>
                 </div>
               </div>
@@ -425,6 +428,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                 if (test.idx + 1 < total) { setTest({ ...test, answers, idx: test.idx + 1, pick: null }); return; }
                 const result = scoreLevelTest(track, test.levelId, test.levelTitleAr, test.qs, answers);
                 setTest({ ...test, answers, pick: null, result, saved: null });
+                if (result.passed) setCert({ unitId: `${track.id}:${test.levelId}`, unitTitle: `${track.titleAr} — ${test.levelTitleAr} (${result.score}%)`, unitTitleAr: `${track.titleAr} — ${test.levelTitleAr} (${result.score}%)`, completedAt: result.createdAtMs, studentName: auth.currentUser?.displayName || undefined });
                 saveLevelTestAttempt(uid, result).then(ok => setTest(t => (t && t.result === result ? { ...t, saved: ok } : t)));
               }} className={`shrink-0 py-2 rounded-xl text-[13px] font-black ${test.pick === null ? 'bg-slate-200 text-slate-400' : 'bg-[#002147] text-white'}`}>{test.idx + 1 < total ? 'التالي ←' : '🏁 إنهاء الاختبار'}</button>
             </div>
@@ -546,6 +550,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
           </div>
         )}
       </div>
+    {cert && <div className="relative z-[300]"><CompletionCertificateModal isOpen={!!cert} onClose={() => setCert(null)} certificate={cert} isRtl /></div>}
     </div>
   );
 };

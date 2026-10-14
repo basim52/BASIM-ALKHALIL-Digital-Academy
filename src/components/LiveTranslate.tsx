@@ -230,14 +230,14 @@ export function LiveTranslate({ isRtl = true, lang = 'ar', userProfile, onBack }
       });
 
       if (!response.ok) {
-        throw new Error('Translation failed');
+        throw new Error(response.status === 429 ? 'LIMIT' : 'Translation failed');
       }
 
       const data = await response.json();
       setTranslationResult(data);
       playPristineChime('success');
     } catch (e: any) {
-      setTranslationError(isRtl ? 'تعذر الاتصال بمدقق الترجمة الذكي. حاول مجدداً.' : 'Could not reach linguistic engine.');
+      setTranslationError(e?.message === 'LIMIT' ? (isRtl ? 'وصلت لحد الترجمة المؤقت (٤٠ طلب كل ١٠ دقائق). انتظر قليلاً ثم حاول.' : 'Translation limit reached (40 per 10 min). Please wait a little.') : (isRtl ? 'تعذر الاتصال بمدقق الترجمة الذكي. حاول مجدداً.' : 'Could not reach linguistic engine.'));
       playPristineChime('close');
     } finally {
       setIsTranslating(false);
