@@ -73,6 +73,7 @@ import { MASTER_CURRICULUM } from './data/masterCurriculum';
 import { generateWhatsAppLink, NOTIFICATION_TEMPLATES } from './lib/whatsapp';
 const ShareableNotification = lazy(() => import('./components/ShareableNotification').then(m => ({ default: m.ShareableNotification })));
 const AIConversation = lazy(() => import('./components/AIConversation').then(m => ({ default: m.AIConversation })));
+const SaraTracksHub = lazy(() => import('./components/SaraTracksHub').then(m => ({ default: m.SaraTracksHub })));
 const SaraTools = lazy(() => import('./components/SaraTools').then(m => ({ default: m.SaraTools })));
 import { auth, googleProvider, db, handleFirestoreError, OperationType, testConnection, redeemVoucherTransaction } from './lib/firebase';
 import firebaseConfig from '../firebase-applet-config.json';
@@ -1672,7 +1673,7 @@ const StudentHome = ({
         </div>
         
         {/* LANDING PAGE HERO BANNER */}
-        <div className="relative p-6 sm:p-8 md:p-10 rounded-3xl sm:rounded-[2.5rem] bg-gradient-to-br from-[#58cc02] via-[#4db802] to-[#3a8602] text-white overflow-hidden shadow-lg border-b-6 border-[#2d6b00]">
+        <div className="relative p-5 sm:p-8 md:p-10 rounded-3xl sm:rounded-[2.5rem] bg-gradient-to-br from-[#002147] via-[#0a3568] to-[#001733] text-white overflow-hidden shadow-lg border-b-6 border-[#C49E3A]">
           <div className="absolute top-0 right-0 w-72 sm:w-[450px] h-72 sm:h-[450px] bg-gradient-to-br from-white/20 to-transparent rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-10 left-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
           
@@ -2166,7 +2167,7 @@ const StudentHome = ({
 
         {/* CARDS GRID - RESPONSIVE & MODERN */}
         {filteredSections.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-6">
             {filteredSections.map((sec, sIdx) => {
               const SectionIcon = sec.icon;
               return (
@@ -2181,31 +2182,31 @@ const StudentHome = ({
                       onNavigate(sec.id as AppView);
                     }
                   }}
-                  className="bg-white p-5 sm:p-6 rounded-3xl border-2 border-b-[5px] border-slate-200 hover:border-[#58cc02]/50 hover:shadow-md cursor-pointer transition-all flex flex-col justify-between relative overflow-hidden group"
+                  className="bg-white p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-b-4 sm:border-b-[5px] border-slate-200 hover:border-[#C49E3A]/60 hover:shadow-md cursor-pointer transition-all flex flex-col justify-between relative overflow-hidden group"
                 >
                   {/* Visual Glow Circle */}
                   <div className={`absolute right-[-15px] top-[-10px] w-24 h-24 ${sec.glowColor} rounded-full blur-xl opacity-20 group-hover:scale-130 transition-transform duration-500 pointer-events-none`} />
 
                   <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className={`px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider ${sec.badgeStyle}`}>
+                    <div className="flex items-center justify-between mb-2 sm:mb-4">
+                      <span className={`hidden sm:inline px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider ${sec.badgeStyle}`}>
                         {isRtl ? sec.badgeAr : sec.badgeEn}
                       </span>
-                      <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border-2 border-slate-100 ${sec.iconBg} ${sec.iconColor} group-hover:scale-110 transition-transform`}>
+                      <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center border-2 border-slate-100 ${sec.iconBg} ${sec.iconColor} group-hover:scale-110 transition-transform`}>
                         <SectionIcon size={20} />
                       </div>
                     </div>
 
-                    <h3 className="text-base sm:text-lg font-black text-slate-800 mb-2 leading-tight flex items-center gap-2 group-hover:text-[#58cc02] transition-colors">
+                    <h3 className="text-[13px] sm:text-lg font-black text-[#002147] sm:mb-2 leading-snug flex items-center gap-2 group-hover:text-[#C49E3A] transition-colors">
                       {isRtl ? sec.titleAr : sec.titleEn}
                     </h3>
 
-                    <p className="text-slate-500 font-semibold text-xs leading-relaxed mb-5 line-clamp-3">
+                    <p className="hidden sm:block text-slate-500 font-semibold text-xs leading-relaxed mb-5 line-clamp-3">
                       {isRtl ? sec.descAr : sec.descEn}
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between border-t border-slate-100 pt-3.5 mt-auto">
+                  <div className="hidden sm:flex items-center justify-between border-t border-slate-100 pt-3.5 mt-auto">
                     <span className={`text-[10px] font-black ${sec.btnTextColor} uppercase tracking-widest`}>
                       {isRtl ? 'دخول مباشر ⚡' : 'Open Corridor ⚡'}
                     </span>
@@ -5839,16 +5840,14 @@ export default function AuthenticatedApp({
     }
   };
 
+  // Same admin/parent unlock rule as Sara's tracks.
+  const saraUnlockAll = MASTER_ADMINS.includes(String((userProfile as any)?.email || currentUser?.email || '').trim().toLowerCase()) || (userProfile as any)?.role === UserRole.PARENT || (userProfile as any)?.role === UserRole.ADMIN;
   const renderContent = () => {
     try {
       const levelBasedViews = [
         'curriculum',
         'modern-curriculum',
-        'reading-curriculum',
-        'grammar-curriculum',
-        'conversation-curriculum',
-        'writing-curriculum',
-        'expression-curriculum',
+        // skill curricula now open Sara's tracks (no placement gate there)
         'oxford-discover',
         'oxford-classic',
         'ai-curriculum'
@@ -6916,149 +6915,24 @@ export default function AuthenticatedApp({
       );
     }
     if (view === 'reading-curriculum') {
-      const units = ALL_READING_UNITS[selectedReadingLevel];
-      return (
-        <ReadingCurriculumCompanion 
-          lang={lang} 
-          level={selectedReadingLevel}
-          initialUnitId={autoStartUnitId}
-          onBack={() => {
-            setAutoStartUnitId(null);
-            setView('modern-curriculum');
-          }} 
-            onStartLesson={(unitId) => {
-              setAutoStartUnitId(null);
-              const unit = units.find(u => u.id === unitId);
-              const quizItems = buildInteractiveLessonQuiz('reading', unit);
-              const lessonObj = {
-                id: unitId,
-                title: unit?.titleEn || 'New Lesson',
-                titleAr: unit?.titleAr || 'درس جديد',
-                content: unit?.readingTextEn,
-                contentAr: unit?.readingTextAr,
-                proficiencyLevel: selectedReadingLevel as any,
-                quiz: quizItems
-              } as Lesson;
-              setActiveLesson(lessonObj);
-              setView('lesson');
-            }}
-        />
-      );
+      // Old skill curriculum → the matching new Sara track (old data/progress untouched).
+      return <SaraTracksHub isOpen filter="reading" uid={currentUser.uid} unlockAll={saraUnlockAll} onClose={() => setView('dashboard')} />;
     }
     if (view === 'grammar-curriculum') {
-      const units = ALL_GRAMMAR_UNITS[selectedGrammarLevel];
-      return (
-        <GrammarCurriculumCompanion 
-          lang={lang} 
-          level={selectedGrammarLevel}
-          initialUnitId={autoStartUnitId}
-          onBack={() => {
-            setAutoStartUnitId(null);
-            setView('modern-curriculum');
-          }} 
-          onStartLesson={(unitId) => {
-            setAutoStartUnitId(null);
-            const unit = units.find(u => u.id === unitId);
-            const quizItems = buildInteractiveLessonQuiz('grammar', unit);
-            const lessonObj = {
-              id: unitId,
-              title: unit?.titleEn || 'New Lesson',
-              titleAr: unit?.titleAr || 'درس جديد',
-              content: unit?.explanationEn,
-              contentAr: unit?.explanationAr,
-              proficiencyLevel: selectedGrammarLevel as any,
-              quiz: quizItems
-            } as Lesson;
-            setActiveLesson(lessonObj);
-            setView('lesson');
-          }}
-        />
-      );
+      // Old skill curriculum → the matching new Sara track (old data/progress untouched).
+      return <SaraTracksHub isOpen filter="grammar" uid={currentUser.uid} unlockAll={saraUnlockAll} onClose={() => setView('dashboard')} />;
     }
     if (view === 'conversation-curriculum') {
-      const units = ALL_CONVERSATION_UNITS[selectedConversationLevel];
-      return (
-        <ConversationCurriculumCompanion 
-          lang={lang} 
-          level={selectedConversationLevel}
-          initialUnitId={autoStartUnitId}
-          onBack={() => {
-            setAutoStartUnitId(null);
-            setView('modern-curriculum');
-          }} 
-          onStartLesson={(unitId) => {
-            setAutoStartUnitId(null);
-            const unit = units.find(u => u.id === unitId);
-            const quizItems = buildInteractiveLessonQuiz('conversation', unit);
-            const lessonObj = {
-              id: unitId,
-              title: unit?.titleEn || 'New Lesson',
-              titleAr: unit?.titleAr || 'درس جديد',
-              content: unit?.contextEn,
-              contentAr: unit?.contextAr,
-              proficiencyLevel: selectedConversationLevel as any,
-              quiz: quizItems
-            } as Lesson;
-            setActiveLesson(lessonObj);
-            setView('lesson');
-          }}
-        />
-      );
+      // Old skill curriculum → the matching new Sara track (old data/progress untouched).
+      return <SaraTracksHub isOpen filter="conversation" uid={currentUser.uid} unlockAll={saraUnlockAll} onClose={() => setView('dashboard')} />;
     }
     if (view === 'writing-curriculum') {
-      const units = ALL_WRITING_UNITS[selectedWritingLevel];
-      return (
-        <WritingCurriculumCompanion 
-          lang={lang} 
-          level={selectedWritingLevel}
-          initialUnitId={autoStartUnitId}
-          onBack={() => {
-            setAutoStartUnitId(null);
-            setView('modern-curriculum');
-          }} 
-          onStartLesson={(unitId) => {
-            setAutoStartUnitId(null);
-            const unit = units.find(u => u.id === unitId);
-            const quizItems = buildInteractiveLessonQuiz('writing', unit);
-            const lessonObj = {
-              id: unitId,
-              title: unit?.titleEn || 'New Lesson',
-              titleAr: unit?.titleAr || 'درس جديد',
-              content: unit?.conceptEn,
-              contentAr: unit?.conceptAr,
-              proficiencyLevel: selectedWritingLevel as any,
-              quiz: quizItems
-            } as Lesson;
-            setActiveLesson(lessonObj);
-            setView('lesson');
-          }}
-        />
-      );
+      // Old skill curriculum → the matching new Sara track (old data/progress untouched).
+      return <SaraTracksHub isOpen filter="writing" uid={currentUser.uid} unlockAll={saraUnlockAll} onClose={() => setView('dashboard')} />;
     }
     if (view === 'expression-curriculum') {
-      const units = ALL_EXPRESSION_UNITS[selectedExpressionLevel];
-      return (
-        <ExpressionCurriculumCompanion 
-          lang={lang} 
-          level={selectedExpressionLevel}
-          onBack={() => setView('modern-curriculum')} 
-          onStartLesson={(unitId) => {
-            const unit = units.find(u => u.id === unitId);
-            const quizItems = buildInteractiveLessonQuiz('expression', unit);
-            const lessonObj = {
-              id: unitId,
-              title: unit?.titleEn || 'New Lesson',
-              titleAr: unit?.titleAr || 'درس جديد',
-              content: unit?.philosophyEn,
-              contentAr: unit?.philosophyAr,
-              proficiencyLevel: selectedExpressionLevel as any,
-              quiz: quizItems
-            } as Lesson;
-            setActiveLesson(lessonObj);
-            setView('lesson');
-          }}
-        />
-      );
+      // Old skill curriculum → the matching new Sara track (old data/progress untouched).
+      return <SaraTracksHub isOpen filter="conversation" uid={currentUser.uid} unlockAll={saraUnlockAll} onClose={() => setView('dashboard')} />;
     }
     if (view === 'story-library') {
       return <StoryLibrary lang={lang} profile={userProfile} onUpdateProfile={(p) => setUserProfile(p as StudentProfile)} onNavigate={setView} onBack={() => { setInitialStoryId(null); setView('dashboard'); }} initialStoryId={initialStoryId} />;
