@@ -74,6 +74,7 @@ import { generateWhatsAppLink, NOTIFICATION_TEMPLATES } from './lib/whatsapp';
 const ShareableNotification = lazy(() => import('./components/ShareableNotification').then(m => ({ default: m.ShareableNotification })));
 const AIConversation = lazy(() => import('./components/AIConversation').then(m => ({ default: m.AIConversation })));
 const SaraTracksHub = lazy(() => import('./components/SaraTracksHub').then(m => ({ default: m.SaraTracksHub })));
+const SaraSkillsChart = lazy(() => import('./components/SaraSkillsChart').then(m => ({ default: m.SaraSkillsChart })));
 const SaraTools = lazy(() => import('./components/SaraTools').then(m => ({ default: m.SaraTools })));
 import { auth, googleProvider, db, handleFirestoreError, OperationType, testConnection, redeemVoucherTransaction } from './lib/firebase';
 import firebaseConfig from '../firebase-applet-config.json';
@@ -1311,7 +1312,7 @@ const StudentHome = ({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-            data: { name: profile.displayName, level: (profile as any).level || 'A1', points: 1240 },
+            data: { name: profile.displayName, level: (profile as any).level || 'A1', points: Number((profile as any).points || 0) },
             prompt: `Give a 1-sentence encouraging study recommendation for this student at Basim Academy. Language: ${lang === 'ar' ? 'Arabic' : 'English'}.`
           })
         });
@@ -1657,17 +1658,9 @@ const StudentHome = ({
               <span className="text-base select-none animate-bounce-slow">🔥</span>
               <span>{streak.current} {isRtl ? 'يوم' : 'days'}</span>
             </button>
-            <div className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 border-2 border-blue-200 rounded-2xl text-[#1cb0f6] font-black text-xs shadow-sm hover:scale-105 transition-all">
+            <div className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 border-2 border-blue-200 rounded-2xl text-[#1cb0f6] font-black text-xs shadow-sm" title={t.points}>
               <span className="text-base">💎</span>
-              <span>1,240</span>
-            </div>
-            <div className="flex items-center gap-1 px-3 py-1.5 bg-rose-50 border-2 border-rose-200 rounded-2xl text-[#ea2b2b] font-black text-xs shadow-sm hover:scale-105 transition-all">
-              <span className="text-base">❤️</span>
-              <span>5</span>
-            </div>
-            <div className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 border-2 border-amber-200 rounded-2xl text-[#ffc800] font-black text-xs shadow-sm hover:scale-105 transition-all">
-              <span className="text-base">👑</span>
-              <span>12</span>
+              <span>{Number((profile as any).points || 0).toLocaleString('en-US')}</span>
             </div>
           </div>
         </div>
@@ -1748,7 +1741,7 @@ const StudentHome = ({
               <div className="flex items-center justify-center gap-3 px-4 py-3 bg-white/15 rounded-xl sm:rounded-2xl">
                 <Trophy className="text-[#ffc800] w-6 h-6 sm:w-7 sm:h-7" />
                 <div className="text-left font-black">
-                  <p className="text-xl sm:text-2xl font-black text-white leading-none">1,240</p>
+                  <p className="text-xl sm:text-2xl font-black text-white leading-none">{Number((profile as any).points || 0).toLocaleString('en-US')}</p>
                   <p className="text-[9px] font-black text-white/80 uppercase tracking-widest leading-none mt-1">{t.points}</p>
                 </div>
               </div>
@@ -2358,28 +2351,7 @@ const StudentHome = ({
                 <BarChart3 className="text-[#58cc02]" size={18} />
                 <span className="text-sm font-black tracking-tight">{t.skillAnalysis}</span>
               </h3>
-              <div className="space-y-6">
-                {[
-                  { label: 'Listening 🎧', value: 85, color: 'bg-[#1cb0f6]' },
-                  { label: 'Speaking 🗣️', value: 62, color: 'bg-[#ff9600]' },
-                  { label: 'Reading 📖', value: 78, color: 'bg-[#58cc02]' },
-                  { label: 'Writing ✍️', value: 45, color: 'bg-[#b87cf8]' },
-                ].map((skill) => (
-                  <div key={skill.label}>
-                    <div className="flex justify-between items-center text-xs mb-2">
-                      <span className="font-black text-slate-500 uppercase tracking-widest text-[9px]">{skill.label}</span>
-                      <span className="text-slate-800 font-extrabold text-xs">%{skill.value}</span>
-                    </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${skill.value}%` }}
-                        className={`h-full ${skill.color} rounded-full`} 
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <SaraSkillsChart uid={profile.uid} isRtl={isRtl} placementLevel={(profile as any).placementTestCompleted ? ((profile as any).level || null) : null} onStart={() => onNavigate('sara-tutor')} />
             </div>
           </div>
         </div>
