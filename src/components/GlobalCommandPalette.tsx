@@ -57,17 +57,6 @@ export const GlobalCommandPalette: React.FC<GlobalCommandPaletteProps> = ({
   const items: CommandItem[] = [
     // Curriculum
     {
-      id: 'oxford-discover',
-      titleAr: 'سلسلة أوكسفورد ديسكفر (Oxford Discover 1-6)',
-      titleEn: 'Oxford Discover Series (Grades 1-6)',
-      descriptionAr: 'الوحدات المنهجية الكاملة، المشاريع البحثية، والتمارين التفاعلية',
-      descriptionEn: 'Complete units, research projects, and interactive exercises',
-      icon: BookOpen,
-      category: 'curriculum',
-      view: 'oxford-discover',
-      badge: 'المنهج الأساسي'
-    },
-    {
       id: 'curriculum-grammar',
       titleAr: 'منهج القواعد الشامل (A1 - C2)',
       titleEn: 'Comprehensive Grammar Mastery (A1-C2)',

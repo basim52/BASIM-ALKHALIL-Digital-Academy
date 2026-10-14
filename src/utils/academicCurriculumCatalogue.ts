@@ -14,15 +14,6 @@ import {
   ALL_EXPRESSION_UNITS 
 } from '../components/ExpressionCurriculumCompanion';
 import { 
-  OXFORD_UNITS 
-} from '../components/OxfordDiscoverCompanion';
-import { 
-  OXFORD_LESSONS 
-} from '../data/oxfordLessonsData';
-import { 
-  OLD_OXFORD_LESSONS 
-} from '../components/OxfordUnitLesson';
-import { 
   STORIES 
 } from '../components/StoryLibrary';
 import { 
@@ -128,18 +119,6 @@ export const ACADEMIC_SECTION_DEFINITIONS: PillarCategoryDefinition[] = [
     bgLight: 'bg-cyan-50',
     borderColor: 'border-cyan-200',
     tagColor: 'bg-cyan-100 text-cyan-800'
-  },
-  {
-    id: 'oxford',
-    nameAr: 'سلسلة مناهج أكسفورد المصورة',
-    nameEn: 'Oxford Discover Curriculum',
-    descAr: 'المنهج العالمي المصور بجميع وحداته وتحديات التفكير والقيم الإنسانية',
-    descEn: 'World-renowned illustrated curriculum with big questions, values & CLIL projects',
-    iconName: 'Award',
-    color: 'text-amber-600',
-    bgLight: 'bg-amber-50',
-    borderColor: 'border-amber-200',
-    tagColor: 'bg-amber-100 text-amber-800'
   },
   {
     id: 'pronunciation',
@@ -415,44 +394,6 @@ export function getAllCurriculumLessons(): CurriculumLesson[] {
         });
       });
     }
-  });
-
-  // 5. OXFORD DISCOVER CURRICULUM
-  OXFORD_UNITS.forEach(u => {
-    all.push({
-      id: String(u.id),
-      pillarId: 'oxford',
-      courseId: 'oxford',
-      courseLabelAr: 'سلسلة أكسفورد المصورة',
-      courseLabelEn: 'Oxford Discover',
-      titleAr: u.titleAr || u.titleEn,
-      titleEn: u.titleEn,
-      descriptionAr: `وحدة تعليمية مصورة من منهج أكسفورد مع أنشطة التفكير والقيم`,
-      descriptionEn: `Illustrated Oxford Discover unit with critical thinking & values`,
-      level: 'General',
-      duration: '50 min',
-      categoryTagAr: 'منهج أكسفورد',
-      categoryTagEn: 'Oxford'
-    });
-  });
-
-  Object.keys(OLD_OXFORD_LESSONS).forEach(key => {
-    const u = OLD_OXFORD_LESSONS[key];
-    all.push({
-      id: `old_${key}`,
-      pillarId: 'oxford',
-      courseId: 'oxford',
-      courseLabelAr: 'أكسفورد الكلاسيكي',
-      courseLabelEn: 'Classic Oxford Module',
-      titleAr: u.bigQuestionAr || u.bigQuestion,
-      titleEn: u.bigQuestion,
-      descriptionAr: 'الوحدة المصورة الكلاسيكية مع السؤال الشامل',
-      descriptionEn: 'Classic Oxford module featuring the Big Question',
-      level: 'General',
-      duration: '45 min',
-      categoryTagAr: 'أكسفورد كلاسيكي',
-      categoryTagEn: 'Oxford Classic'
-    });
   });
 
   // 6. PRONUNCIATION LAB & PHONETICS
@@ -910,7 +851,7 @@ export const SPECIALIZED_PLAN_TRACKS: SpecializedPlanTrack[] = [
     recommendedDays: [0, 1, 2, 3, 4],
     recommendedPillars: [
       'grammar', 'reading', 'conversation', 'writing', 'expression',
-      'oxford_discover', 'stories', 'adults_daily_dose', 'interactive_play'
+      'stories', 'adults_daily_dose', 'interactive_play'
     ],
     difficultyLevel: 'intermediate',
     color: 'blue',
@@ -1006,7 +947,7 @@ export const SPECIALIZED_PLAN_TRACKS: SpecializedPlanTrack[] = [
     recommendedLessonsPerDay: 2,
     recommendedDays: [0, 2, 4], // Sun, Tue, Thu
     recommendedPillars: [
-      'grammar', 'reading', 'conversation', 'writing', 'expression', 'oxford_discover'
+      'grammar', 'reading', 'conversation', 'writing', 'expression'
     ],
     difficultyLevel: 'intermediate',
     color: 'purple',
@@ -1065,7 +1006,7 @@ export const SPECIALIZED_PLAN_TRACKS: SpecializedPlanTrack[] = [
     recommendedDays: [0, 1, 2, 3, 4],
     recommendedPillars: [
       'grammar', 'reading', 'conversation', 'writing', 'expression',
-      'oxford_discover', 'stories', 'adults_daily_dose', 'interactive_play'
+      'stories', 'adults_daily_dose', 'interactive_play'
     ],
     difficultyLevel: 'all',
     color: 'indigo',
@@ -1086,7 +1027,7 @@ export const SPECIALIZED_PLAN_TRACKS: SpecializedPlanTrack[] = [
     recommendedDurationWeeks: 4,
     recommendedLessonsPerDay: 1,
     recommendedDays: [0, 1, 2, 3, 4],
-    recommendedPillars: ['oxford_discover', 'interactive_play', 'stories', 'translation_language_lab'],
+    recommendedPillars: ['interactive_play', 'stories', 'translation_language_lab'],
     difficultyLevel: 'beginner',
     color: 'amber',
     gradient: 'from-amber-400 via-orange-500 to-yellow-600'
@@ -1142,7 +1083,7 @@ export const SPECIALIZED_PLAN_TRACKS: SpecializedPlanTrack[] = [
     recommendedDurationWeeks: 4,
     recommendedLessonsPerDay: 2,
     recommendedDays: [0, 1, 2, 3, 4],
-    recommendedPillars: ['translation_language_lab', 'conversation', 'oxford_discover', 'interactive_play'],
+    recommendedPillars: ['translation_language_lab', 'conversation', 'interactive_play'],
     difficultyLevel: 'all',
     color: 'violet',
     gradient: 'from-violet-600 via-purple-600 to-indigo-700'
@@ -1238,7 +1179,7 @@ export const SPECIALIZED_PLAN_TRACKS: SpecializedPlanTrack[] = [
     recommendedDurationWeeks: 6,
     recommendedLessonsPerDay: 2,
     recommendedDays: [0, 1, 2, 3, 4],
-    recommendedPillars: ['conversation', 'interactive_play', 'oxford_discover', 'grammar', 'stories'],
+    recommendedPillars: ['conversation', 'interactive_play', 'grammar', 'stories'],
     difficultyLevel: 'intermediate',
     color: 'amber',
     gradient: 'from-amber-500 via-yellow-600 to-amber-700'

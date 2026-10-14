@@ -144,20 +144,6 @@ export const ACADEMIC_PILLARS: AcademicPillar[] = [
     route: 'adults-daily-dose'
   },
   {
-    id: 'oxford',
-    key: 'oxford',
-    nameAr: 'سلسلة مناهج أكسفورد المصورة',
-    nameEn: 'Oxford Discover Curriculum',
-    descAr: 'المنهج التفاعلي الدولي من أكسفورد، أسئلة الوحدة، والأنشطة الإثرائية.',
-    descEn: 'Comprehensive Oxford Discover modules, big questions, and unit activities.',
-    icon: Award,
-    color: 'bg-blue-600',
-    bgGradient: 'from-blue-700 to-slate-900',
-    borderColor: 'border-blue-300',
-    textColor: 'text-blue-700',
-    route: 'oxford-discover'
-  },
-  {
     id: 'conversation',
     key: 'conversation',
     nameAr: 'المعلمة سارة – محادثة لايف',
@@ -302,15 +288,6 @@ export function mapResultToPillar(item: any): AcademicPillar {
     lesson.startsWith('dd_')
   ) {
     return ACADEMIC_PILLARS.find(p => p.id === 'daily_dose')!;
-  }
-
-  // 9. Oxford Series
-  if (
-    course.includes('oxford') || 
-    lesson.startsWith('ox_') || 
-    title.includes('oxford')
-  ) {
-    return ACADEMIC_PILLARS.find(p => p.id === 'oxford')!;
   }
 
   // 10. Conversation & AI Chat

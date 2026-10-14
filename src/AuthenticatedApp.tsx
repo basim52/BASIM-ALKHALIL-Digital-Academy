@@ -102,14 +102,11 @@ const ParentAIInsights = lazy(() => import('./components/ParentAIInsights').then
 const ParentWeeklyReportCard = lazy(() => import('./components/ParentWeeklyReportCard').then(m => ({ default: m.ParentWeeklyReportCard })));
 const ProgressRoadmap = lazy(() => import('./components/ProgressRoadmap').then(m => ({ default: m.ProgressRoadmap })));
 const ReadingLesson = lazy(() => import('./components/ReadingLesson').then(m => ({ default: m.ReadingLesson })));
-const OxfordLesson = lazy(() => import('./components/OxfordLesson').then(m => ({ default: m.OxfordLesson })));
 const EarlyChildhoodHome = lazy(() => import('./components/EarlyChildhood/EarlyChildhoodHome').then(m => ({ default: m.EarlyChildhoodHome })));
 const StudyPlanner = lazy(() => import('./components/Academic/StudyPlanner').then(m => ({ default: m.StudyPlanner })));
 const ResultsChart = lazy(() => import('./components/Academic/ResultsChart').then(m => ({ default: m.ResultsChart })));
 const SmartAnalytics = lazy(() => import('./components/Academic/SmartAnalytics').then(m => ({ default: m.SmartAnalytics })));
 const BiWeeklyTest = lazy(() => import('./components/Academic/BiWeeklyTest').then(m => ({ default: m.BiWeeklyTest })));
-const OxfordDiscoverCompanion = lazy(() => import('./components/OxfordDiscoverCompanion').then(m => ({ default: m.OxfordDiscoverCompanion })));
-const OxfordClassicCompanion = lazy(() => import('./components/OxfordClassicCompanion').then(m => ({ default: m.OxfordClassicCompanion })));
 import { ReadingCurriculumCompanion, ReadingLevel, ALL_READING_UNITS } from './components/ReadingCurriculumCompanion';
 import { GrammarCurriculumCompanion, GrammarLevel, ALL_GRAMMAR_UNITS } from './components/GrammarCurriculumCompanion';
 import { ConversationCurriculumCompanion, ConversationLevel, ALL_CONVERSATION_UNITS } from './components/ConversationCurriculumCompanion';
@@ -5127,10 +5124,6 @@ export default function AuthenticatedApp({
       setView('pronunciation-lab');
     } else if (courseId === 'live_translate' || courseId === 'translation') {
       setView('live-translate');
-    } else if (courseId === 'oxford') {
-      setAutoStartUnitId(unitId);
-      const isOld = !isNaN(Number(unitId)) || String(unitId).startsWith('old_');
-      setView(isOld ? 'oxford-classic' : 'oxford-discover');
     } else if (courseId === 'story-library' || courseId === 'stories') {
       setInitialStoryId(unitId);
       setView('story-library');
@@ -5828,8 +5821,6 @@ export default function AuthenticatedApp({
         'curriculum',
         'modern-curriculum',
         // skill curricula now open Sara's tracks (no placement gate there)
-        'oxford-discover',
-        'oxford-classic',
         'ai-curriculum'
       ];
 
@@ -5968,32 +5959,6 @@ export default function AuthenticatedApp({
           studentId={currentStudentId}
           level={userProfile?.level || 'B1'}
           onNavigateToSection={(target) => setView(target as any)}
-        />
-      );
-    }
-    if (view === 'oxford-discover') {
-      return (
-        <OxfordDiscoverCompanion 
-          lang={lang} 
-          userProfile={userProfile}
-          onBack={() => {
-            setAutoStartUnitId(null);
-            setView('dashboard');
-          }} 
-          initialUnitId={autoStartUnitId}
-        />
-      );
-    }
-    if (view === 'oxford-classic') {
-      return (
-        <OxfordClassicCompanion 
-          lang={lang} 
-          userProfile={userProfile}
-          onBack={() => {
-            setAutoStartUnitId(null);
-            setView('dashboard');
-          }} 
-          initialUnitId={autoStartUnitId}
         />
       );
     }
@@ -6997,13 +6962,14 @@ export default function AuthenticatedApp({
     }
 
     if (view === 'lesson' && activeLesson) {
-      // Oxford Lesson specific check
-      if (activeLesson.id === 'oxford-1') {
-        return <OxfordLesson 
-          lang={lang} 
-          onComplete={handleLessonComplete}
-          onBack={() => setView('curriculum')}
-        />;
+      // Oxford content was retired; old saved links land on a friendly notice instead of a broken lesson.
+      if (String(activeLesson.id || '').startsWith('oxford')) {
+        return (
+          <div dir={isRtl ? 'rtl' : 'ltr'} className="mx-auto mt-10 max-w-md rounded-3xl bg-white p-6 text-center shadow">
+            <p className="mb-4 font-bold text-[#002147]">{isRtl ? 'هذا الدرس لم يعد متاحاً. جرّب مسارات سارة الجديدة.' : 'This lesson is no longer available. Try Sara\'s new tracks.'}</p>
+            <button onClick={() => setView('dashboard')} className="rounded-xl bg-[#C49E3A] px-5 py-2 font-black text-[#002147]">{isRtl ? 'الرئيسية' : 'Home'}</button>
+          </div>
+        );
       }
 
       // Determine category from ID prefix if possible
