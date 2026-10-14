@@ -68,7 +68,7 @@ export const PeerChat = ({ lang, profile }: { lang: Language, profile: UserProfi
     <div className="flex flex-col h-[calc(100vh-14rem)] bg-white rounded-[3rem] border border-slate-200 shadow-sm overflow-hidden" dir={isRtl ? 'rtl' : 'ltr'}>
       <header className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+          <div className="w-12 h-12 bg-[#002147] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[#C49E3A]/30">
             <MessageCircle size={24} />
           </div>
           <div>
@@ -97,7 +97,7 @@ export const PeerChat = ({ lang, profile }: { lang: Language, profile: UserProfi
               </span>
               <div className={`p-4 rounded-2xl text-sm font-medium shadow-sm ${
                 msg.userId === profile.uid 
-                  ? 'bg-blue-600 text-white rounded-tr-none' 
+                  ? 'bg-[#002147] text-white rounded-tr-none' 
                   : 'bg-white text-[#002147] border border-slate-100 rounded-tl-none'
               }`}>
                 {msg.text}
@@ -113,7 +113,7 @@ export const PeerChat = ({ lang, profile }: { lang: Language, profile: UserProfi
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={isRtl ? 'اكتب رسالتك لزملائك...' : 'Type a message to your peers...'}
-          className="flex-1 bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-500 transition-all outline-none"
+          className="flex-1 bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-[#C49E3A]/60 transition-all outline-none"
         />
         <button 
           type="submit"

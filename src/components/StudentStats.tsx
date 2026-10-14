@@ -70,7 +70,7 @@ export const StudentStats = ({ lang, userId, points, level, onNavigateToAdaptive
   if (loading) {
     return (
       <div className="flex items-center justify-center p-20">
-        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-[#C49E3A]/60 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -84,7 +84,7 @@ export const StudentStats = ({ lang, userId, points, level, onNavigateToAdaptive
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex items-center gap-6">
-          <div className="w-16 h-16 bg-blue-50 rounded-3xl flex items-center justify-center text-blue-600">
+          <div className="w-16 h-16 bg-[#C49E3A]/10 rounded-3xl flex items-center justify-center text-[#9a7a2c]">
             <Clock size={32} />
           </div>
           <div>
@@ -122,7 +122,7 @@ export const StudentStats = ({ lang, userId, points, level, onNavigateToAdaptive
           </h3>
           <div className="flex gap-2">
             <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
-              <span className="w-2 h-2 bg-blue-500 rounded-full" />
+              <span className="w-2 h-2 bg-[#C49E3A] rounded-full" />
               XP Growth
             </div>
           </div>

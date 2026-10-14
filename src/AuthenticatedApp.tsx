@@ -6705,7 +6705,7 @@ export default function AuthenticatedApp({
     }
     if (view === 'balance-oasis') {
       return (
-        <div className="flex-1 p-5 md:p-12 overflow-y-auto bg-[#030712] min-h-screen text-right" dir={isRtl ? 'rtl' : 'ltr'}>
+        <div className="flex-1 p-5 md:p-12 overflow-y-auto bg-[#001a38] min-h-screen text-right" dir={isRtl ? 'rtl' : 'ltr'}>
           <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
             <BalanceOasis isRtl={isRtl} />
           </div>

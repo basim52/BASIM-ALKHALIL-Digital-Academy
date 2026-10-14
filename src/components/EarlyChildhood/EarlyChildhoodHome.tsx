@@ -51,19 +51,19 @@ import { managedSpeak } from '../../lib/audio';
 const KID_COURSES = [
   { id: 'first-words', nameKey: 'firstWords', icon: Sparkles, color: 'bg-yellow-400', shadow: 'shadow-yellow-900/20', unlocked: true },
   { id: 'creative-lab', nameKey: 'creativeLab', icon: Palette, color: 'bg-pink-500', shadow: 'shadow-pink-900/20', unlocked: true },
-  { id: 'pronunciation', nameKey: 'pronunciation', icon: Mic, color: 'bg-indigo-500', shadow: 'shadow-indigo-900/20', unlocked: true },
+  { id: 'pronunciation', nameKey: 'pronunciation', icon: Mic, color: 'bg-[#C49E3A]', shadow: 'shadow-[#C49E3A]/20', unlocked: true },
   { id: 'colors', nameKey: 'colors', icon: Palette, color: 'bg-rose-500', shadow: 'shadow-rose-900/20', unlocked: true },
-  { id: 'numbers', nameKey: 'numbers', icon: Hash, color: 'bg-blue-500', shadow: 'shadow-blue-900/20', unlocked: true },
+  { id: 'numbers', nameKey: 'numbers', icon: Hash, color: 'bg-[#C49E3A]', shadow: 'shadow-[#C49E3A]/20', unlocked: true },
   { id: 'animals', nameKey: 'animals', icon: Dog, color: 'bg-emerald-500', shadow: 'shadow-emerald-900/20', unlocked: true },
   { id: 'shapes', nameKey: 'shapes', icon: Shapes, color: 'bg-orange-500', shadow: 'shadow-orange-900/20', unlocked: true },
-  { id: 'letters', nameKey: 'letters', icon: Type, color: 'bg-purple-500', shadow: 'shadow-purple-900/20', unlocked: true },
+  { id: 'letters', nameKey: 'letters', icon: Type, color: 'bg-[#C49E3A]', shadow: 'shadow-[#C49E3A]/20', unlocked: true },
   { id: 'phonics-review', nameKey: 'review', icon: Trophy, color: 'bg-yellow-400', shadow: 'shadow-yellow-900/20', unlocked: true },
 ];
 
 const DAILY_QUESTS = [
   { id: 'words', icon: Sparkles, color: 'text-amber-500', bg: 'bg-amber-50', border: 'border-amber-100' },
   { id: 'colors', icon: Palette, color: 'text-rose-500', bg: 'bg-rose-50', border: 'border-rose-100' },
-  { id: 'stories', icon: BrainCircuit, color: 'text-indigo-500', bg: 'bg-indigo-50', border: 'border-indigo-100' },
+  { id: 'stories', icon: BrainCircuit, color: 'text-[#9a7a2c]', bg: 'bg-[#C49E3A]/10', border: 'border-[#C49E3A]/30' },
 ];
 
 const CURRICULUM_LEVELS = [
@@ -298,8 +298,8 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
 
   const moods = [
     { id: 'happy', emoji: '😊', label: isRtl ? 'سعيد' : 'Happy', color: 'bg-yellow-400' },
-    { id: 'curious', emoji: '🧐', label: isRtl ? 'فضولي' : 'Curious', color: 'bg-blue-400' },
-    { id: 'sleepy', emoji: '😴', label: isRtl ? 'نعسان' : 'Sleepy', color: 'bg-purple-400' },
+    { id: 'curious', emoji: '🧐', label: isRtl ? 'فضولي' : 'Curious', color: 'bg-[#C49E3A]' },
+    { id: 'sleepy', emoji: '😴', label: isRtl ? 'نعسان' : 'Sleepy', color: 'bg-[#C49E3A]' },
     { id: 'energetic', emoji: '🚀', label: isRtl ? 'نشيط' : 'Energetic', color: 'bg-orange-500' },
   ];
 
@@ -425,18 +425,18 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
 
   if (timeIsUp || (hasLimit && remainingMinutes <= 0 && !activeLesson)) {
     return (
-      <div className="min-h-screen bg-indigo-900 flex items-center justify-center p-6 text-center text-white">
+      <div className="min-h-screen bg-[#002147] flex items-center justify-center p-6 text-center text-white">
         <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
           <div className="text-[120px] mb-8">😴</div>
           <h1 className="text-4xl md:text-6xl font-black mb-4">
             {isRtl ? 'انتهى وقتك اليوم يا بطل!' : 'Time\'s up for today, Champ!'}
           </h1>
-          <p className="text-indigo-200 text-xl mb-10 max-w-md mx-auto">
+          <p className="text-[#E4C77A] text-xl mb-10 max-w-md mx-auto">
             {isRtl ? 'لقد أبليت حسناً! نراك غداً لمزيد من المغامرات الممتعة.' : 'You did amazing! See you tomorrow for more fun adventures.'}
           </p>
           <button 
             onClick={onBack}
-            className="bg-white text-indigo-900 px-10 py-4 rounded-3xl font-black text-xl shadow-2xl hover:bg-yellow-400 transition-colors"
+            className="bg-white text-[#9a7a2c] px-10 py-4 rounded-3xl font-black text-xl shadow-2xl hover:bg-yellow-400 transition-colors"
           >
             {isRtl ? 'الرجوع للقائمة' : 'Back to Menu'}
           </button>
@@ -510,7 +510,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
                         </div>
                         <div>
                            <h2 className="text-2xl font-black">{isRtl ? 'خزانة ملابس باسل' : "Basil's Wardrobe"}</h2>
-                           <p className="text-blue-200 font-bold uppercase tracking-widest text-[10px]">{isRtl ? 'استخدم نقاطك للأناقة' : 'STYLE UP WITH YOUR POINTS'}</p>
+                           <p className="text-[#E4C77A] font-bold uppercase tracking-widest text-[10px]">{isRtl ? 'استخدم نقاطك للأناقة' : 'STYLE UP WITH YOUR POINTS'}</p>
                         </div>
                      </div>
                      <div className="flex items-center gap-4">
@@ -670,7 +670,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
               >
                  <header className="p-8 bg-white border-b border-slate-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-4">
-                       <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white">
+                       <div className="w-14 h-14 bg-[#002147] rounded-2xl flex items-center justify-center text-white">
                           <TrendingUp size={28} />
                        </div>
                        <div>
@@ -750,8 +750,8 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{isRtl ? 'كلمة تعلمت' : 'Words Learned'}</span>
                 </div>
                 
-                <div className="flex flex-col items-center text-center p-6 bg-indigo-50 rounded-[2rem] border-2 border-indigo-100/50 shadow-sm">
-                  <div className="w-16 h-16 bg-indigo-500 text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-indigo-200">
+                <div className="flex flex-col items-center text-center p-6 bg-[#C49E3A]/10 rounded-[2rem] border-2 border-[#C49E3A]/50 shadow-sm">
+                  <div className="w-16 h-16 bg-[#C49E3A] text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-[#C49E3A]/30">
                     <Mic className="w-8 h-8" />
                   </div>
                   <span className="text-3xl font-black text-[#002147]">{stats.pronunciationScore}</span>
@@ -802,7 +802,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
         <div className="lg:hidden mb-4">
           <button
             onClick={() => setIsMobileQuestsOpen(true)}
-            className="w-full flex items-center justify-between p-3.5 bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-indigo-500/10 hover:from-amber-500/20 rounded-2xl border border-amber-200/80 shadow-sm text-[#002147] transition-all cursor-pointer"
+            className="w-full flex items-center justify-between p-3.5 bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-[#C49E3A]/10 hover:from-amber-500/20 rounded-2xl border border-amber-200/80 shadow-sm text-[#002147] transition-all cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-amber-400 text-white flex items-center justify-center shadow-sm">
@@ -899,7 +899,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
                         <motion.div 
                           initial={{ width: 0 }}
                           animate={{ width: `${(q.progress / q.total) * 100}%` }}
-                          className={`h-full ${isDone ? 'bg-emerald-500' : (questInfo?.color.replace('text-', 'bg-') || 'bg-blue-500')}`}
+                          className={`h-full ${isDone ? 'bg-emerald-500' : (questInfo?.color.replace('text-', 'bg-') || 'bg-[#C49E3A]')}`}
                         />
                       </div>
                       <span className="text-[9px] font-black text-slate-400 block text-end">
@@ -1028,7 +1028,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
                       <div className="h-2.5 bg-black/5 rounded-full overflow-hidden">
                         <div 
                           style={{ width: `${(q.progress / q.total) * 100}%` }}
-                          className={`h-full ${isDone ? 'bg-emerald-500' : (questInfo?.color.replace('text-', 'bg-') || 'bg-blue-500')}`}
+                          className={`h-full ${isDone ? 'bg-emerald-500' : (questInfo?.color.replace('text-', 'bg-') || 'bg-[#C49E3A]')}`}
                         />
                       </div>
                       <span className="text-[10px] font-black text-slate-400 block text-end mt-1">
@@ -1074,7 +1074,7 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setActiveLesson('magic-story')}
-          className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-16 text-start relative overflow-hidden group shadow-2xl"
+          className="w-full bg-gradient-to-r from-[#002147] via-[#002147] to-[#002147] text-white rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-16 text-start relative overflow-hidden group shadow-2xl"
         >
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-4">
@@ -1088,12 +1088,12 @@ export const EarlyChildhoodHome = ({ lang, profile, onBack, initialActiveLesson 
             
             <h2 className="text-3xl md:text-7xl font-black mb-3 tracking-tighter leading-none">{t.createMagicStory}</h2>
             
-            <p className="text-blue-100 font-bold max-w-lg text-sm md:text-xl mb-8 leading-relaxed opacity-90">
+            <p className="text-[#E4C77A] font-bold max-w-lg text-sm md:text-xl mb-8 leading-relaxed opacity-90">
               {isRtl ? 'سأقوم بتأليف قصة مذهلة باستخدام الكلمات التي تعلمتها اليوم! هيا بنا نبدأ المغامرة.' : 'I\'ll write an amazing story using the words you learned today! Let\'s start the adventure.'}
             </p>
             
             <div className="flex flex-wrap items-center gap-6">
-               <div className="bg-white text-indigo-600 px-8 py-4 rounded-2xl font-black text-sm md:text-lg uppercase tracking-widest shadow-xl group-hover:bg-yellow-400 group-hover:text-yellow-900 transition-all flex items-center gap-2">
+               <div className="bg-white text-[#9a7a2c] px-8 py-4 rounded-2xl font-black text-sm md:text-lg uppercase tracking-widest shadow-xl group-hover:bg-yellow-400 group-hover:text-yellow-900 transition-all flex items-center gap-2">
                  {isRtl ? 'ابدأ الآن' : 'Start My Story'}
                  <ChevronRight size={20} strokeWidth={3} className={isRtl ? 'rotate-180' : ''} />
                </div>

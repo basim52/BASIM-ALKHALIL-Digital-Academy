@@ -615,7 +615,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
           onClick={() => setActiveTab('curriculum_designer')}
           className={`flex-1 min-w-[120px] py-3 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${activeTab === 'curriculum_designer' ? 'bg-white text-[#002147] shadow-sm' : 'text-slate-500 hover:text-[#002147]'}`}
         >
-          <Sparkles size={15} className="text-purple-500" />
+          <Sparkles size={15} className="text-[#9a7a2c]" />
           {isRtl ? 'مصمم المناهج الذكي AI' : 'AI Curriculum'}
         </button>
         <button
@@ -633,7 +633,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
           <div className="lg:col-span-1 space-y-6">
             <div className="bg-white rounded-[2rem] p-6 border border-slate-200 shadow-sm">
               <h3 className="text-lg font-black text-[#002147] mb-4 flex items-center gap-2">
-                <Users className="text-blue-600" size={18} />
+                <Users className="text-[#9a7a2c]" size={18} />
                 {isRtl ? 'قائمة طلاب الأكاديمية' : 'Academy Students List'}
               </h3>
               
@@ -646,14 +646,14 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                     placeholder={isRtl ? 'البحث بالاسم، الإيميل أو الهاتف...' : 'Search name, email, phone...'}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-800"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#C49E3A]/60 focus:bg-white transition-all text-slate-800"
                   />
                 </div>
                 
                 <select
                   value={levelFilter}
                   onChange={(e) => setLevelFilter(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500 text-slate-700 font-bold"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#C49E3A]/60 text-slate-700 font-bold"
                 >
                   <option value="">{isRtl ? 'تصفية حسب المستوى (الكل)' : 'Filter by level (All)'}</option>
                   <option value="A1">A1</option>
@@ -686,7 +686,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                         <button
                           key={`log-${student.id}`}
                           onClick={() => handleSelectStudent(student)}
-                          className={`w-full text-right p-4 rounded-2xl border transition-all flex items-center justify-between group ${isSelected ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-slate-50 border-slate-100 hover:border-slate-300'}`}
+                          className={`w-full text-right p-4 rounded-2xl border transition-all flex items-center justify-between group ${isSelected ? 'bg-[#C49E3A]/10 border-[#C49E3A]/30 shadow-sm' : 'bg-slate-50 border-slate-100 hover:border-slate-300'}`}
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-white overflow-hidden shadow-sm relative shrink-0">
@@ -694,7 +694,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                               <div className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white ${isOnline ? 'bg-emerald-500' : 'bg-slate-300'}`} />
                             </div>
                             <div>
-                              <p className="font-bold text-xs text-[#002147] transition-all group-hover:text-blue-600">{student.displayName}</p>
+                              <p className="font-bold text-xs text-[#002147] transition-all group-hover:text-[#9a7a2c]">{student.displayName}</p>
                               <p className="text-[10px] text-slate-400 font-bold tracking-wider">{student.email}</p>
                             </div>
                           </div>
@@ -718,7 +718,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
           <div className="lg:col-span-2 space-y-6">
             {!selectedStudent ? (
               <div className="bg-white rounded-[2.5rem] border border-slate-200 p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
-                <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6 text-blue-500">
+                <div className="w-20 h-20 bg-[#C49E3A]/10 rounded-full flex items-center justify-center mb-6 text-[#9a7a2c]">
                   <GraduationCap size={40} className="animate-bounce" />
                 </div>
                 <h4 className="text-xl font-black text-[#002147] mb-2">{isRtl ? 'سجل متابعة وتقارير الطلاب الذكية' : 'Student Smart Reports Log'}</h4>
@@ -740,7 +740,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="text-lg font-black text-[#002147]">{selectedStudent.displayName}</h4>
-                          <span className="bg-blue-100 text-blue-700 text-[10px] font-black px-2.5 py-0.5 rounded-full">{selectedStudent.role || 'student'}</span>
+                          <span className="bg-[#C49E3A]/10 text-[#9a7a2c] text-[10px] font-black px-2.5 py-0.5 rounded-full">{selectedStudent.role || 'student'}</span>
                         </div>
                         <p className="text-xs text-slate-400 font-bold">{selectedStudent.email}</p>
                       </div>
@@ -749,7 +749,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                     <div className="flex gap-2">
                       <button 
                         onClick={() => handlePromoteToAdmin(selectedStudent.id, selectedStudent.displayName)}
-                        className="bg-indigo-50 border border-indigo-100 text-indigo-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all flex items-center gap-2 cursor-pointer"
+                        className="bg-[#C49E3A]/10 border border-[#C49E3A]/30 text-[#9a7a2c] px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#002147] hover:text-white transition-all flex items-center gap-2 cursor-pointer"
                       >
                         <ShieldAlert size={14} />
                         {isRtl ? 'ترقية لمسؤول' : 'Make Admin'}
@@ -772,7 +772,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                         <select
                           defaultValue={selectedStudent.level || 'A1'}
                           id="edit-level-select"
-                          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 focus:outline-none focus:border-blue-500"
+                          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 focus:outline-none focus:border-[#C49E3A]/60"
                         >
                           <option value="A1">A1</option>
                           <option value="A2">A2</option>
@@ -801,7 +801,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                           id="edit-phone-input"
                           defaultValue={selectedStudent.phoneNumber || ''}
                           placeholder="e.g. 9665XXXXXXXX"
-                          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-blue-500 text-slate-800 font-mono font-bold"
+                          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-[#C49E3A]/60 text-slate-800 font-mono font-bold"
                         />
                         <button
                           onClick={() => {
@@ -823,7 +823,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                   <div className="md:col-span-1 bg-white rounded-[2rem] p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
                     <div>
                       <h3 className="text-sm font-black text-[#002147] mb-4 flex items-center gap-2">
-                        <FileText className="text-blue-500" size={16} />
+                        <FileText className="text-[#9a7a2c]" size={16} />
                         {isRtl ? 'نتائج الامتحانات والكويزات' : 'Exam & Quiz Results'}
                       </h3>
                       
@@ -872,7 +872,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                     <div className="flex-1">
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="text-sm font-black text-[#002147] flex items-center gap-2">
-                          <BrainCircuit className="text-purple-600" size={16} />
+                          <BrainCircuit className="text-[#9a7a2c]" size={16} />
                           {isRtl ? 'تقرير باسم الخليل للأداء الذكي' : 'Basim Alkhalil Smart Academic Report'}
                         </h3>
                         {studentAnalysisResult && (
@@ -889,7 +889,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                       {generatingStudentReport ? (
                         <div className="flex flex-col items-center justify-center h-64 text-center">
                           <div className="relative mb-4">
-                            <div className="w-12 h-12 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin" />
+                            <div className="w-12 h-12 rounded-full border-4 border-[#C49E3A]/30 border-t-blue-600 animate-spin" />
                             <Sparkles className="text-amber-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" size={18} />
                           </div>
                           <p className="text-xs font-bold text-[#002147] max-w-sm leading-relaxed">{studentReportStatus}</p>
@@ -898,7 +898,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                         <div className="space-y-4">
                           <div 
                             ref={studentReportRef}
-                            className="bg-slate-50 p-6 rounded-2xl border border-blue-100/50 relative overflow-hidden"
+                            className="bg-slate-50 p-6 rounded-2xl border border-[#C49E3A]/50 relative overflow-hidden"
                           >
                             {/* Academic Seals */}
                             <div className="absolute top-4 right-4 bg-[#002147]/5 text-[#002147] border border-[#002147]/10 px-2.5 py-1 rounded-md text-[8px] font-black uppercase tracking-widest pointer-events-none">
@@ -912,7 +912,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                         </div>
                       ) : (
                         <div className="flex flex-col items-center justify-center h-64 text-center opacity-60">
-                          <Sparkles className="text-indigo-400 animate-pulse mb-3" size={32} />
+                          <Sparkles className="text-[#E4C77A] animate-pulse mb-3" size={32} />
                           <p className="text-xs font-bold text-slate-500">{isRtl ? 'لم يتم توليد التقرير بعد. اضغط على "إصدار تقرير الأداء الذكي" للبدء.' : 'No report generated yet. Click "Issue Smart AI Report" to formulate one.'}</p>
                         </div>
                       )}
@@ -929,7 +929,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                         </button>
                         <button
                           onClick={() => handleShareStudentAsImage(selectedStudent.displayName || 'student')}
-                          className="flex-1 bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-600 hover:text-white py-2.5 px-4 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all cursor-pointer"
+                          className="flex-1 bg-[#C49E3A]/10 text-[#9a7a2c] border border-[#C49E3A]/30 hover:bg-[#002147] hover:text-white py-2.5 px-4 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all cursor-pointer"
                         >
                           <Download size={14} />
                           {isRtl ? 'تحميل كصورة 💾' : 'Download as Image 💾'}
@@ -946,13 +946,13 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
 
       {activeTab === 'curriculum_designer' && (
         <div className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm relative overflow-hidden mb-12">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-purple-50 rounded-full -mr-32 -mt-32 opacity-50 pointer-events-none" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#C49E3A]/10 rounded-full -mr-32 -mt-32 opacity-50 pointer-events-none" />
           
           <div className="relative z-10">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 pb-6 border-b border-slate-100">
               <div>
                 <h3 className="text-2xl font-black text-[#002147] flex items-center gap-3">
-                  <BrainCircuit className="text-purple-600 animate-pulse" size={28} />
+                  <BrainCircuit className="text-[#9a7a2c] animate-pulse" size={28} />
                   {isRtl ? 'مصمم المناهج الأكاديمية الذكي (AI)' : 'AI Smart Academic Curriculum Designer'}
                 </h3>
                 <p className="text-slate-400 mt-1 font-medium text-sm">
@@ -972,7 +972,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                     value={designSubject}
                     onChange={(e) => setDesignSubject(e.target.value)}
                     placeholder={isRtl ? 'مثال: الإنجليزية القانونية، محادثات السفر...' : 'e.g., Legal English, Travel Dialogues...'}
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-purple-500 font-bold text-slate-800 mb-4"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#C49E3A]/60 font-bold text-slate-800 mb-4"
                   />
 
                   <button
@@ -983,15 +983,15 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                     {designingCurriculum ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <Sparkles size={14} className="text-blue-300" />
+                      <Sparkles size={14} className="text-[#E4C77A]" />
                     )}
                     {isRtl ? 'توليد وتصميم المنهج 🚀' : 'Design Curriculum 🚀'}
                   </button>
                 </div>
 
-                <div className="bg-indigo-50/50 p-6 rounded-3xl border border-indigo-100">
+                <div className="bg-[#C49E3A]/50 p-6 rounded-3xl border border-[#C49E3A]/30">
                   <h4 className="text-xs font-black text-[#002147] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <CheckCircle className="text-indigo-600" size={14} />
+                    <CheckCircle className="text-[#9a7a2c]" size={14} />
                     {isRtl ? 'توجيهات التصميم' : 'DESIGN GUIDELINES'}
                   </h4>
                   <ul className="text-[11px] text-slate-600 space-y-2 list-disc pl-4" dir={isRtl ? 'rtl' : 'ltr'}>
@@ -1005,8 +1005,8 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                 {designingCurriculum ? (
                   <div className="flex flex-col items-center justify-center py-20 bg-slate-50 border border-dashed border-slate-200 rounded-[2rem]">
                     <div className="relative mb-6">
-                      <div className="w-16 h-16 rounded-full border-4 border-purple-100 border-t-purple-600 animate-spin" />
-                      <BrainCircuit className="text-purple-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" size={24} />
+                      <div className="w-16 h-16 rounded-full border-4 border-[#C49E3A]/30 border-t-purple-600 animate-spin" />
+                      <BrainCircuit className="text-[#9a7a2c] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" size={24} />
                     </div>
                     <h4 className="text-lg font-black text-[#002147] mb-2">{isRtl ? 'جاري صياغة المنهج وهيكلة المستويات الستة...' : 'Architecting custom 6-level curriculum...'}</h4>
                     <p className="text-xs text-slate-400 max-w-sm text-center">
@@ -1017,7 +1017,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                   <div className="space-y-6">
                     <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
                       <div>
-                        <span className="text-[10px] font-black uppercase tracking-wider text-purple-600 bg-purple-50 px-2.5 py-1 rounded-md">{isRtl ? 'تصميم ناجح' : 'SUCCESSFULLY ARCHITECTED'}</span>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-[#9a7a2c] bg-[#C49E3A]/10 px-2.5 py-1 rounded-md">{isRtl ? 'تصميم ناجح' : 'SUCCESSFULLY ARCHITECTED'}</span>
                         <h4 className="text-sm font-black text-[#002147] mt-2">{isRtl ? `منهج مخصص لـ: ${designSubject}` : `Custom Curriculum for: ${designSubject}`}</h4>
                       </div>
                       <button
@@ -1032,7 +1032,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                             });
                           }
                         }}
-                        className="bg-purple-50 hover:bg-purple-600 hover:text-white text-purple-600 border border-purple-100 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer"
+                        className="bg-[#C49E3A]/10 hover:bg-[#002147] hover:text-white text-[#9a7a2c] border border-[#C49E3A]/30 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer"
                       >
                         <Download size={14} />
                         {isRtl ? 'حفظ المخطط كصورة' : 'Save Plan as Image'}
@@ -1054,7 +1054,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                           return (
                             <div key={level} className="bg-slate-50/50 hover:bg-slate-50 transition-all duration-300 p-5 rounded-2xl border border-slate-100">
                               <div className="flex items-center gap-2.5 mb-3 border-b border-slate-100 pb-2">
-                                <span className="bg-purple-600 text-white font-serif text-[11px] font-extrabold px-3 py-1 rounded-lg">
+                                <span className="bg-[#002147] text-white font-serif text-[11px] font-extrabold px-3 py-1 rounded-lg">
                                   {level}
                                 </span>
                                 <h4 className="font-extrabold text-[#002147] text-xs uppercase tracking-wider">{isRtl ? `مستوى ${level}` : `${level} Competency`}</h4>
@@ -1083,7 +1083,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-20 bg-slate-50 border border-dashed border-slate-200 rounded-[2rem] opacity-60">
-                    <Sparkles className="text-purple-400 animate-pulse mb-3" size={36} />
+                    <Sparkles className="text-[#E4C77A] animate-pulse mb-3" size={36} />
                     <p className="text-xs font-bold text-slate-500">
                       {isRtl ? 'يرجى كتابة موضوع المنهج المقترح بالجانب ثم الضغط على "توليد وتصميم المنهج".' : 'Please input a desired learning subject on the left panel to begin construction.'}
                     </p>
@@ -1124,7 +1124,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                   
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-[10px] font-black text-blue-200 uppercase tracking-wider mb-2">
+                      <label className="block text-[10px] font-black text-[#E4C77A] uppercase tracking-wider mb-2">
                         {isRtl ? 'عدد النقاط المحملة بالكود' : 'VOUCHER CREDITS (POINTS)'}
                       </label>
                       <div className="flex items-center justify-between bg-white/10 rounded-xl p-1.5 border border-white/10 select-none">
@@ -1221,7 +1221,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                                     navigator.clipboard.writeText(v.code);
                                     alert(isRtl ? 'تم نسخ الرمز!' : 'Voucher copied!');
                                   }}
-                                  className="mx-auto text-[#002147] hover:text-blue-600 transition-colors px-2 py-1 rounded hover:bg-blue-50 cursor-pointer flex items-center justify-center"
+                                  className="mx-auto text-[#002147] hover:text-[#9a7a2c] transition-colors px-2 py-1 rounded hover:bg-[#C49E3A]/10 cursor-pointer flex items-center justify-center"
                                   title={isRtl ? 'نسخ الرمز' : 'Copy Code'}
                                 >
                                   <Copy size={13} />
@@ -1276,8 +1276,8 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
 
         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col justify-center">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center">
-              <Users className="text-blue-600" size={24} />
+            <div className="w-12 h-12 bg-[#C49E3A]/10 rounded-2xl flex items-center justify-center">
+              <Users className="text-[#9a7a2c]" size={24} />
             </div>
             <div>
               <h2 className="text-xl font-black text-[#002147]">{isRtl ? 'الطلاب النشطون' : 'Active Students'}</h2>
@@ -1294,7 +1294,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
           <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-black text-[#002147] flex items-center gap-3">
-                <Activity className="text-blue-600" />
+                <Activity className="text-[#9a7a2c]" />
                 {t.activeStudents}
               </h3>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{onlineStudents.length} / {allStudents.length}</span>
@@ -1304,9 +1304,9 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                 <div className="text-center py-10 opacity-40 italic text-sm">{t.noActiveStudents}</div>
               ) : (
                 onlineStudents.map((student) => (
-                  <div key={student.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-blue-200 transition-all">
+                  <div key={student.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-[#C49E3A]/30 transition-all">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-blue-100 overflow-hidden shadow-sm">
+                      <div className="w-10 h-10 rounded-xl bg-[#C49E3A]/10 overflow-hidden shadow-sm">
                         <img src={student.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${student.displayName}`} alt="" />
                       </div>
                       <div>
@@ -1334,9 +1334,9 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
           </section>
 
           <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 opacity-50" />
+             <div className="absolute top-0 right-0 w-32 h-32 bg-[#C49E3A]/10 rounded-full -mr-16 -mt-16 opacity-50" />
              <h3 className="text-xl font-black text-[#002147] mb-6 flex items-center gap-3 relative">
-               <ShieldCheck className="text-indigo-500" />
+               <ShieldCheck className="text-[#9a7a2c]" />
                {isRtl ? 'إدارة جميع الطلاب' : 'All Students Management'}
              </h3>
              <div className="space-y-4 relative z-10 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
@@ -1345,7 +1345,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                     <div key={`all-${student.id}`} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 group">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-indigo-100 overflow-hidden shadow-sm">
+                          <div className="w-10 h-10 rounded-xl bg-[#C49E3A]/10 overflow-hidden shadow-sm">
                             <img src={student.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${student.displayName}`} alt="" />
                           </div>
                           <div>
@@ -1357,7 +1357,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                       <div className="flex gap-2">
                         <button 
                           onClick={() => handlePromoteToAdmin(student.id, student.displayName)}
-                          className="flex-1 bg-white border border-indigo-100 text-indigo-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center gap-2"
+                          className="flex-1 bg-white border border-[#C49E3A]/30 text-[#9a7a2c] py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#002147] hover:text-white transition-all flex items-center justify-center gap-2"
                         >
                           <ShieldAlert size={14} />
                           {isRtl ? 'مسؤول' : 'Admin'}
@@ -1380,14 +1380,14 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
              <div className="space-y-6 relative">
                 <div>
                    <div className="flex items-center gap-2 mb-1">
-                     <Users size={14} className="text-blue-200" />
-                     <p className="text-blue-200 text-[10px] font-black uppercase tracking-[0.2em]">{t.totalStudents}</p>
+                     <Users size={14} className="text-[#E4C77A]" />
+                     <p className="text-[#E4C77A] text-[10px] font-black uppercase tracking-[0.2em]">{t.totalStudents}</p>
                    </div>
                    <h4 className="text-4xl font-black">{allStudents.length}</h4>
                 </div>
                 <div className="h-px bg-white/10" />
                 <div>
-                  <p className="text-blue-200 text-[10px] font-black uppercase tracking-[0.2em] mb-1">{t.averageLevel}</p>
+                  <p className="text-[#E4C77A] text-[10px] font-black uppercase tracking-[0.2em] mb-1">{t.averageLevel}</p>
                   <h4 className="text-4xl font-black">
                     {allStudents.length > 0 
                       ? (() => {
@@ -1405,7 +1405,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
 
         <div className="lg:col-span-2 space-y-8">
           <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#C49E3A]/10 rounded-full -mr-16 -mt-16 opacity-50" />
             <h3 className="text-xl font-black text-[#002147] mb-6 flex items-center gap-3 relative">
               <Bell className="text-orange-500" />
               {t.sendBroadcast}
@@ -1416,13 +1416,13 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
                   value={broadcastMessage}
                   onChange={(e) => setBroadcastMessage(e.target.value)}
                   placeholder={t.broadcastPlaceholder}
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl p-6 text-sm focus:outline-none focus:border-blue-600 h-32 resize-none transition-all"
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl p-6 text-sm focus:outline-none focus:border-[#C49E3A]/60 h-32 resize-none transition-all"
                 />
               </div>
               <button 
                 onClick={handleBroadcast}
                 disabled={sending || !broadcastMessage.trim()}
-                className="bg-[#002147] text-white p-6 rounded-3xl hover:bg-[#C49E3A] transition-all disabled:opacity-50 shadow-lg shadow-blue-100 shrink-0"
+                className="bg-[#002147] text-white p-6 rounded-3xl hover:bg-[#C49E3A] transition-all disabled:opacity-50 shadow-lg shadow-[#C49E3A]/30 shrink-0"
               >
                 {sending ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Send size={24} className={isRtl ? 'rotate-180' : ''} />}
               </button>
@@ -1432,15 +1432,15 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
           <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
               <h3 className="text-xl font-black text-[#002147] flex items-center gap-3">
-                <BrainCircuit className="text-purple-600" />
+                <BrainCircuit className="text-[#9a7a2c]" />
                 {t.aiAnalysis}
               </h3>
               <button 
                 onClick={handleAnalyze}
                 disabled={analyzing}
-                className="bg-purple-50 text-purple-600 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-purple-600 hover:text-white transition-all flex items-center gap-3 disabled:opacity-50 w-full md:w-auto justify-center"
+                className="bg-[#C49E3A]/10 text-[#9a7a2c] px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#002147] hover:text-white transition-all flex items-center gap-3 disabled:opacity-50 w-full md:w-auto justify-center"
               >
-                {analyzing ? <div className="w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" /> : <Sparkles size={16} />}
+                {analyzing ? <div className="w-4 h-4 border-2 border-[#C49E3A]/60 border-t-transparent rounded-full animate-spin" /> : <Sparkles size={16} />}
                 {t.analyzePlatform}
               </button>
             </header>
@@ -1471,15 +1471,15 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
           </section>
 
           <section className="bg-[#002147] rounded-[2.5rem] p-8 md:p-12 text-white overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 blur-[100px] pointer-events-none" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#002147]/20 blur-[100px] pointer-events-none" />
             <div className="relative z-10">
               <h3 className="text-2xl font-black mb-8 flex items-center gap-3">
-                <Sparkles className="text-blue-400" />
+                <Sparkles className="text-[#E4C77A]" />
                 {isRtl ? 'خطة إحلال التقنية وتطوير المناهج' : 'Technology Replacement & Curriculum Strategy'}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-sm">
-                  <div className="w-10 h-10 bg-blue-500 rounded-xl mb-4 flex items-center justify-center">
+                  <div className="w-10 h-10 bg-[#C49E3A] rounded-xl mb-4 flex items-center justify-center">
                     <Hash className="text-white w-5 h-5" />
                   </div>
                   <h4 className="font-bold text-sm mb-2">{isRtl ? 'إحلال المحرك الأساسي' : 'Core Engine Replacement'}</h4>
