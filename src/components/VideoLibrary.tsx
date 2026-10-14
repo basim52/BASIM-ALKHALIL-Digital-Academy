@@ -37,7 +37,8 @@ import {
   Filter
 } from 'lucide-react';
 import { UserProfile, MASTER_ADMINS } from '../types';
-import { db } from '../lib/firebase';
+import { db, auth, storage } from '../lib/firebase';
+import { ref as storageRef, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storeVideoFile, getVideoFile, deleteVideoFile } from '../lib/videoDb';
 import { 
   collection, 
@@ -153,10 +154,14 @@ function extractYoutubeId(urlOrId: string): string {
   if (cleaned.length === 11 && !cleaned.includes('/') && !cleaned.includes('.')) {
     return cleaned;
   }
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  if (!/^(https?:\/\/)?((www|m|music)\.)?(youtube\.com|youtu\.be|youtube-nocookie\.com)\//i.test(cleaned)) return '';
+  const regExp = /(youtu\.be\/|v\/|u\/\w\/|embed\/|shorts\/|live\/|watch\?v=|\&v=)([A-Za-z0-9_-]{11})/;
   const match = cleaned.match(regExp);
-  return (match && match[2].length === 11) ? match[2] : cleaned;
+  return match ? match[2] : '';
 }
+
+const MAX_VIDEO_BYTES = 500 * 1024 * 1024;
+const VIDEO_THUMB = 'data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%234f46e5%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%237c3aed%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8E%AC%3C/text%3E%3C/svg%3E';
 
 export const VideoLibrary = ({ 
   lang, 
@@ -215,6 +220,7 @@ export const VideoLibrary = ({
   const isEffectiveAdmin = isAdminUser || forceAdminMode;
 
   const [showAddForm, setShowAddForm] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [uploadTab, setUploadTab] = useState<'direct' | 'youtube'>('direct');
 
   // Direct video options (link vs local file)
@@ -300,14 +306,8 @@ export const VideoLibrary = ({
             if (blob) {
               statusMap[v.id] = true;
             } else {
-              // 2. Check Express server disk
-              try {
-                const res = await fetch(`/api/videos/check/${v.id}`);
-                const data = await res.json();
-                statusMap[v.id] = !!data.exists;
-              } catch (err) {
-                statusMap[v.id] = false;
-              }
+              // Legacy server-disk uploads no longer exist
+              statusMap[v.id] = false;
             }
           }
         }
@@ -343,12 +343,11 @@ export const VideoLibrary = ({
             objectUrl = URL.createObjectURL(fileBlob as Blob);
             setActivePlayUrl(objectUrl);
           } else {
-            // C. Fallback to Express server chunk streaming endpoint
-            setActivePlayUrl(`/api/videos/stream/${selectedVideo.id}`);
+            setHasVideoPlayError(true);
           }
         } catch (err) {
           console.warn("Failed to load local video cache:", String(err));
-          setActivePlayUrl(`/api/videos/stream/${selectedVideo.id}`);
+          setHasVideoPlayError(true);
         }
       } else {
         setActivePlayUrl('');
@@ -461,6 +460,7 @@ export const VideoLibrary = ({
         let finalDirectUrl = '';
         let finalFileName = '';
         let finalFileSize = 'Direct HD';
+        let storagePath = '';
 
         if (directSourceMode === 'link') {
           if (!directLinkUrl.trim()) {
@@ -477,48 +477,49 @@ export const VideoLibrary = ({
             setActionLoading(false);
             return;
           }
+          const okType = /^video\/(mp4|webm|quicktime|ogg)$/.test(videoFile.type);
+          if (!okType) {
+            setErrorText(isRtl ? 'نوع الملف غير مدعوم. استخدم MP4 أو WebM أو MOV.' : 'Unsupported file type. Use MP4, WebM or MOV.');
+            setActionLoading(false);
+            return;
+          }
+          if (videoFile.size > MAX_VIDEO_BYTES) {
+            setErrorText(isRtl ? 'حجم الفيديو أكبر من 500 ميجابايت.' : 'Video is larger than 500 MB.');
+            setActionLoading(false);
+            return;
+          }
+          const uid = auth.currentUser?.uid;
+          if (!uid) {
+            setErrorText(isRtl ? 'سجّل الدخول أولاً لرفع الفيديو.' : 'Please sign in to upload.');
+            setActionLoading(false);
+            return;
+          }
           const sizeMB = (videoFile.size / (1024 * 1024)).toFixed(1);
           finalFileName = videoFile.name;
           finalFileSize = `${sizeMB} MB`;
-          finalDirectUrl = `/api/videos/stream/${Date.now()}`;
+          const safeName = videoFile.name.replace(/[^A-Za-z0-9._-]/g, '_').slice(-80);
+          const objectRef = storageRef(storage, `videos/${uid}/${Date.now()}_${safeName}`);
+          setUploadProgress(0);
+          const task = uploadBytesResumable(objectRef, videoFile, { contentType: videoFile.type });
+          await new Promise<void>((resolve, reject) => {
+            task.on('state_changed', (snap) => setUploadProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100)), reject, () => resolve());
+          });
+          finalDirectUrl = await getDownloadURL(objectRef);
+          storagePath = objectRef.fullPath;
         }
 
-        // Add document to Firestore database
-        const docRef = await addDoc(collection(db, 'videos'), {
+        await addDoc(collection(db, 'videos'), {
           directUrl: finalDirectUrl,
+          ...(storagePath ? { storagePath } : {}),
           fileName: finalFileName,
           fileSize: finalFileSize,
           titleEn: inputTitleEn.trim() || finalFileName,
           titleAr: inputTitleAr.trim() || finalFileName,
           level: inputLevel,
           duration: 'Direct HD',
-          thumbnail: 'data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%234f46e5%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%237c3aed%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8E%AC%3C/text%3E%3C/svg%3E', // Beautiful placeholder
+          thumbnail: VIDEO_THUMB,
           createdAt: serverTimestamp()
         });
-
-        // 1. Only do local storage and serverside storage if it's physical file mode
-        if (directSourceMode === 'file' && videoFile) {
-          try {
-            // Save the file binary in local IndexedDB for instant zero-latency playback
-            await storeVideoFile(docRef.id, videoFile);
-          } catch (idbErr) {
-            console.warn("IndexedDB cache failing (sandboxed check):", String(idbErr));
-          }
-
-          // Upload the file binary to Express server for persistent cross-client playback
-          const fd = new FormData();
-          fd.append('videoId', docRef.id);
-          fd.append('video', videoFile);
-
-          const uploadResponse = await fetch(`/api/videos/upload?videoId=${docRef.id}`, {
-            method: 'POST',
-            body: fd
-          });
-
-          if (!uploadResponse.ok) {
-            throw new Error('Failed to upload video to server');
-          }
-        }
 
         setSuccessText(isRtl ? '🎉 تم إضافة الفيديو المباشر بنجاح وتأمينه للتشغيل الفوري!' : '🎉 Direct HD video added and secured successfully!');
       } else {
@@ -550,6 +551,7 @@ export const VideoLibrary = ({
       setInputTitleAr('');
       setInputLevel('A1');
       setVideoFile(null);
+      setUploadProgress(null);
 
       setTimeout(() => {
         setShowAddForm(false);
@@ -558,7 +560,11 @@ export const VideoLibrary = ({
 
     } catch (err: any) {
       console.warn(String(err));
-      setErrorText(isRtl ? 'حدث خطأ أثناء حفظ الفديو.' : 'Error occurred while saving the video.');
+      const code = String(err?.code || '');
+      setErrorText(code.includes('unauthorized')
+        ? (isRtl ? 'لا تملك صلاحية الرفع. تأكد من نشر قواعد التخزين.' : 'Upload not permitted. Check storage rules.')
+        : (isRtl ? 'تعذّر حفظ الفيديو. حاول مرة أخرى.' : 'Could not save the video. Please try again.'));
+      setUploadProgress(null);
     } finally {
       setActionLoading(false);
     }
@@ -589,8 +595,7 @@ export const VideoLibrary = ({
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
           } else {
-            const cleanName = encodeURIComponent(video.fileName || `${video.titleEn}.mp4`);
-            window.location.href = `/api/videos/download/${video.id}?filename=${cleanName}`;
+            setErrorText(isRtl ? 'هذا الفيديو القديم غير متاح للتنزيل. أعد رفعه.' : 'This legacy video is unavailable. Please re-upload it.');
           }
         }
       } else if (video.youtubeId) {
@@ -637,11 +642,12 @@ Key Learning Objectives:
         setDeletedDefaultIds(updated);
         localStorage.setItem('deleted_default_videos', JSON.stringify(updated));
       } else {
+        const target = dbVideos.find((v: any) => v.id === vidId) as any;
         await deleteDoc(doc(db, 'videos', vidId));
-        await deleteVideoFile(vidId);
-        await fetch(`/api/videos/delete/${vidId}`, { method: 'DELETE' }).catch(err => {
-          console.warn("Error deleting physical video from server:", String(err));
-        });
+        await deleteVideoFile(vidId).catch(() => {});
+        if (target?.storagePath) {
+          await deleteObject(storageRef(storage, target.storagePath)).catch(err => console.warn('Storage delete failed:', String(err)));
+        }
       }
     } catch (err) {
       console.warn("Error deleting video doc:", String(err));
@@ -752,14 +758,6 @@ Key Learning Objectives:
                                   console.warn("IndexedDB store fail within sandboxed iframe", String(idbErr));
                                 }
 
-                                const fd = new FormData();
-                                fd.append('videoId', selectedVideo.id);
-                                fd.append('video', file);
-
-                                await fetch(`/api/videos/upload?videoId=${selectedVideo.id}`, {
-                                  method: 'POST',
-                                  body: fd
-                                });
 
                                 const url = URL.createObjectURL(file);
                                 setHasVideoPlayError(false);
@@ -1388,7 +1386,11 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
                         className="px-6 py-3.5 duo-btn-green text-xs text-white uppercase font-black disabled:opacity-50"
                       >
                         {actionLoading ? (
+                          uploadProgress !== null ? (
+                            <span>{isRtl ? `جارٍ الرفع ${uploadProgress}%` : `Uploading ${uploadProgress}%`}</span>
+                          ) : (
                           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
+                          )
                         ) : (
                           isRtl ? 'تحميل ونشر الدرس 🚀' : 'Upload & Publish Lesson 🚀'
                         )}
