@@ -5186,14 +5186,7 @@ export default function AuthenticatedApp({
       if (activeStudentId === currentUser?.uid && userProfile) {
         setActiveStudentProfile(userProfile);
       } else {
-        setActiveStudentProfile({
-          uid: activeStudentId,
-          displayName: lang === 'ar' ? 'نور الخليل' : 'Noor Al-Khalil',
-          role: UserRole.STUDENT,
-          level: 'A1',
-          points: 840,
-          avatarUrl: 'data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23ec4899%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%23db2777%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E'
-        } as UserProfile);
+        setActiveStudentProfile(null);
       }
       return;
     }
