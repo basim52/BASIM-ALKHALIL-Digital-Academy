@@ -142,6 +142,9 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
   useEffect(() => { if (isOpen && preset) setSelectedScenario(preset); }, [isOpen, preset?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const keyPhrases = preset?.keyPhrases || [];
   const isWords = preset?.trackTag === 'vocab';
+  const isFree = preset?.id === 'free-talk';
+  const [typed, setTyped] = useState('');
+  const sendTyped = () => { const t = typed.trim(); if (!t || stateRef.current !== 'connected') return; setTyped(''); stopListening(); if (speakingRef.current) stopSaraAudio(); handleStudentSpoke(t); };
   const [usedPhrases, setUsedPhrases] = useState<string[]>([]);
   const norm = (x: string) => x.toLowerCase().replace(/[^a-z0-9' ]/g, ' ').replace(/\s+/g, ' ').trim();
   /** A key phrase counts as used when most of its words appear, in order, in what the student said (real speech text). */
@@ -415,7 +418,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
         body: JSON.stringify({
           message: spokenText, history,
           scenario: `${selectedScenario.titleEn}: ${selectedScenario.initialPrompt}`,
-          level: studentLevel, name: studentName, context: callCtx?.text || '',
+          level: studentLevel, name: studentName, context: isFree ? '' : (callCtx?.text || ''), free: isFree,
         }),
       });
       if (!response.ok || !response.body) throw new Error(`call-turn ${response.status}`);
@@ -555,9 +558,9 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
               <div className="flex flex-col items-center text-center pt-1 pb-3 shrink-0">
                 <Avatar size={72} />
                 <p className="text-xs text-white/70 max-w-xs leading-relaxed -mt-1">
-                  {isRtl ? 'اختر موضوع المكالمة وتحدّث بصوتك — سارة ترد بصوتها مباشرة.' : 'Pick a topic and just talk — Sara answers in her own voice.'}
+                  {preset ? (isRtl ? 'تكلّم بصوتك أو اكتب — سارة ترد بصوتها مباشرة.' : 'Speak or type — Sara answers in her own voice.') : (isRtl ? 'اختر موضوع المكالمة وتحدّث بصوتك — سارة ترد بصوتها مباشرة.' : 'Pick a topic and just talk — Sara answers in her own voice.')}
                 </p>
-                {!!callCtx?.focusAr.length && (
+                {!!callCtx?.focusAr.length && !preset && (
                   <p data-testid="call-focus" className="mt-1.5 text-[11px] font-bold text-amber-300 line-clamp-2 max-w-xs">
                     {isRtl ? '🎯 سارة بتركّز على: ' : '🎯 Sara will focus on: '}{(isRtl ? callCtx.focusAr : callCtx.focusEn).join(' · ')}
                   </p>
@@ -565,7 +568,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
               </div>
               {preset ? (
                 <div className="flex-1 min-h-0 flex flex-col gap-1.5 overflow-hidden" data-testid="call-preset">
-                  <p className="text-[11px] font-black" style={{ color: GOLD }}>{keyPhrases.length ? (isRtl ? (isWords ? 'حاول تستخدم هالكلمات في كلامك:' : 'حاول تستخدم هالعبارات في كلامك:') : 'Try to use these phrases:') : (isRtl ? 'تكلّم بحرية — سارة تكمّل معك الحوار.' : 'Talk freely — Sara keeps the conversation going.')}</p>
+                  <p className="text-[11px] font-black" style={{ color: GOLD }}>{keyPhrases.length ? (isRtl ? (isWords ? 'حاول تستخدم هالكلمات في كلامك:' : 'حاول تستخدم هالعبارات في كلامك:') : 'Try to use these phrases:') : (isRtl ? 'عن أي موضوع تحبه — بدون جمل جاهزة ولا تقييم. المكالمة تستمر لين تضغط إنهاء.' : 'Any topic you like — no set sentences, no scoring. It continues until you tap End.')}</p>
                   {keyPhrases.slice(0, 5).map(ph => <p key={ph} dir="ltr" className="text-[12.5px] font-bold text-white text-left rounded-xl px-2.5 py-1.5 border truncate" style={{ borderColor: 'rgba(196,158,58,0.35)', background: 'rgba(255,255,255,0.04)' }}>{ph}</p>)}
                 </div>
               ) : (
@@ -630,6 +633,15 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
                 )}
               </div>
 
+              {/* Optional typing: same turn as speaking */}
+              {callState === 'connected' && (
+                <form onSubmit={e => { e.preventDefault(); sendTyped(); }} className="shrink-0 flex gap-1.5 pt-1" dir="ltr">
+                  <input data-testid="call-type" value={typed} onChange={e => setTyped(e.target.value)} placeholder={isRtl ? 'أو اكتب بالإنجليزي…' : 'Or type in English…'}
+                    className="flex-1 min-w-0 rounded-xl px-3 py-2 text-[13px] bg-white/10 border border-white/15 text-white placeholder:text-white/40 outline-none focus:border-[#C49E3A]" />
+                  <button type="submit" data-testid="call-type-send" disabled={!typed.trim()} className="px-3 rounded-xl font-black text-[12px] disabled:opacity-40" style={{ background: GOLD, color: NAVY }}>{isRtl ? 'إرسال' : 'Send'}</button>
+                </form>
+              )}
+
               {/* Controls */}
               <div className="shrink-0 flex items-end justify-around pt-2">
                 <CtrlBtn testid="call-mute" on={isMuted} onClick={() => { const m = !isMuted; setIsMuted(m); if (m) stopListening(); else startSpeechRecognition(); }}
@@ -649,7 +661,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
                 <h4 className="text-lg font-black">{isRtl ? 'انتهت المكالمة' : 'Call ended'}</h4>
                 <p className="text-xs text-white/70 mt-1">{isRtl ? selectedScenario.titleAr : selectedScenario.titleEn}</p>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              {!isFree && <div className="grid grid-cols-2 gap-2">
                 {[
                   [isRtl ? 'المدة' : 'Duration', formatTime(callSeconds)],
                   [isRtl ? 'مرات تحدّثك' : 'Your turns', String(callTurns)],
@@ -661,7 +673,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
                     <div className="text-[10px] text-white/60 font-bold">{k}</div>
                   </div>
                 ))}
-              </div>
+              </div>}
               {keyPhrases.length > 0 && (
                 <div data-testid="call-phrases-used" className="rounded-2xl p-2.5 border" style={{ borderColor: 'rgba(196,158,58,0.3)' }}>
                   <p className="text-[11px] font-black text-amber-300 mb-1">{isRtl ? `${isWords ? 'الكلمات' : 'العبارات'} اللي استخدمتها: ${usedPhrases.length} من ${keyPhrases.length}` : `Phrases you used: ${usedPhrases.length} of ${keyPhrases.length}`}</p>

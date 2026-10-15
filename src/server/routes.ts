@@ -2391,7 +2391,7 @@ Respond ONLY with a valid JSON object matching:
   const CALL_MODELS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.8-flash"];
   const callModelBlockedUntil = new Map<string, number>();
   app.post("/api/sara/call-turn", async (req, res) => {
-    const { message = "", history = [], scenario = "", level = "B1", name = "", context = "", warm = false, withAudio = true } = req.body || {};
+    const { message = "", history = [], scenario = "", level = "B1", name = "", context = "", warm = false, withAudio = true, free = false } = req.body || {};
     if (warm) { initAI(); return res.json({ ok: true, ai: !!aiLive }); } // warms the function, auth and AI client
     const text = String(message).slice(0, 600).trim();
     if (!text) return res.status(400).json({ error: "message required" });
@@ -2403,7 +2403,7 @@ Respond ONLY with a valid JSON object matching:
     if (!initAI() || !aiLive) { send({ t: "error", error: "AI_UNAVAILABLE" }); return res.end(); }
     const sys = `You are Sara, a warm English tutor on a live PHONE CALL with ${String(name).slice(0, 40) || "a student"} (CEFR ${String(level).slice(0, 8)}).
 Scenario: ${String(scenario).slice(0, 300)}
-${context ? `What this student needs (real data from the app): ${String(context).slice(0, 700)}\nWeave this practice in naturally.\n` : ""}Rules: spoken English only, 1-2 short sentences (max 35 words), no lists, no markdown, no emojis. Match the level. If the student makes a clear mistake, model the correct form briefly, then ask one follow-up question.`;
+${context && !free ? `What this student needs (real data from the app): ${String(context).slice(0, 700)}\nWeave this practice in naturally.\n` : ""}Rules: spoken English only, 1-2 short sentences (max 35 words), no lists, no markdown, no emojis. Match the level. ${free ? "This is a free, open conversation: follow the student's topic like a friend on the phone. Do not correct, test or evaluate; just reply naturally and keep the talk going." : "If the student makes a clear mistake, model the correct form briefly, then ask one follow-up question."}`;
     const contents = formatGeminiHistory((Array.isArray(history) ? history : []).slice(-8), text);
     let firstTextMs = 0, firstAudioMs = 0, idx = 0, usedModel = "";
     let audioChain: Promise<void> = Promise.resolve();

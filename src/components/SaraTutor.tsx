@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { 
+import { MessageCircle, 
   ArrowRight, 
   ArrowLeft, 
   Send, 
@@ -70,6 +70,7 @@ import { SaraAdaptiveMemoryModal } from './SaraAdaptiveMemoryModal';
 import { SaraParentInsightsModal } from './SaraParentInsightsModal';
 import { SaraAchievementsModal } from './SaraAchievementsModal';
 import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
+import { FREE_CALL_PRESET } from './SaraLessonCall';
 import { SaraCurriculumModal } from './SaraCurriculumModal';
 import { SaraTracksHub } from './SaraTracksHub';
 import { SaraListeningPlayer } from './SaraListeningPlayer';
@@ -562,6 +563,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   // Tool icon opens the matching Sara tool page (SaraTools).
   const setIsWorksheetModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsWorksheetModalOpen(false); if (v === true) setSaraTool('worksheet'); };
   const [isPhoneCallModalOpen, setIsPhoneCallModalOpen] = useState<boolean>(false);
+  const [isFreeChatOpen, setIsFreeChatOpen] = useState<boolean>(false);
   useEffect(() => { if (initialAction === 'call') setIsPhoneCallModalOpen(true); }, [initialAction]);
   const [isContinuityBannerDismissed, setIsContinuityBannerDismissed] = useState<boolean>(false);
 
@@ -3189,6 +3191,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <span className="text-[13px] font-black">Aa</span>
               </button>
               <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">المفردات</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+              <button onClick={() => setIsFreeChatOpen(true)} data-testid="sara-free-icon"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#C49E3A] bg-[#002147] text-amber-300 flex items-center justify-center shadow-xs hover:scale-105 active:scale-95 shrink-0"
+                aria-label={isRtl ? 'محاورة حرة' : 'Free conversation'}>
+                <MessageCircle size={16} />
+              </button>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">محاورة حرة</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
               <button onClick={() => handleOpenCurriculum('daily')} data-testid="sara-daily-icon"
@@ -7314,6 +7324,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       />
 
 
+      {/* Free open conversation (no targets, no scoring) */}
+      {isFreeChatOpen && <SaraLivePhoneCallModal isOpen onClose={() => setIsFreeChatOpen(false)} studentName={profile.displayName || ''}
+        studentLevel={(profile as any).level || tutorMemory.level || 'A1'} isRtl={isRtl} studentId={profile.uid} preset={FREE_CALL_PRESET} />}
       {/* 11G. Sara Live Interactive Hands-Free Phone Call Modal (#7) */}
       <SaraLivePhoneCallModal
         isOpen={isPhoneCallModalOpen}
