@@ -10,12 +10,13 @@ import { readUnlocked, saraNarrate, saraStopNarrator, saraUnlockNarrator } from 
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { savePlacementLevel } from '../lib/placement';
+import { buildSaraPlan, loadPlanState, taskDone, readSavedPlan, savePlan, weekStartIso, WEEK_ORDER, DEFAULT_STUDY_DAYS, type SaraPlan, type PlanState, type PlanTask, type PlanKind } from '../lib/saraPlan';
 import { trackLevels, saveLevelTestAttempt, summarizeLevelTests, type LevelTestAttempt } from '../lib/saraLevelTests';
 
 export type SaraToolId = 'placement' | 'speed' | 'worksheet' | 'plan' | 'roleplay' | 'pronunciation' | 'voicecoach';
 export const SARA_TRACKS: SaraTrack[] = [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK];
 export interface PlacementOutcome { level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'; bandId: string; trackId: string; score: number }
-interface Props { tool: SaraToolId | null; onClose: () => void; uid?: string; unlockAll?: boolean; onPlacementDone?: (r: PlacementOutcome) => void }
+interface Props { tool: SaraToolId | null; onClose: () => void; uid?: string; unlockAll?: boolean; onPlacementDone?: (r: PlacementOutcome) => void; onOpenTrack?: (trackId: string) => void }
 
 const TITLES: Record<SaraToolId, string> = {
   placement: '🎯 اختبار تحديد المستوى', speed: '⚡ تحدي السرعة', worksheet: '📝 ورقة عمل', plan: '🗓️ خطة الدراسة الأسبوعية',
@@ -270,39 +271,74 @@ const Worksheet: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid, unloc
 
 /* ---------------- 🗓️ Study plan ---------------- */
 const DAYS = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
-const StudyPlan: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid }) => {
-  const weekStart = (() => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 1) % 7)); return d.toISOString().slice(0, 10); })();
-  const ck = `sara_plan_${uid || 'guest'}_${weekStart}`;
-  const [done, setDone] = useState<Record<string, boolean>>(() => lsGet(ck, {}));
-  const tasks = useMemo(() => {
-    const attempts = lsGet<LevelTestAttempt[]>(`sara_level_tests_${uid || 'guest'}`, []);
-    const weak = summarizeLevelTests(attempts).filter(s => s.trackId !== 'placement').flatMap(s => s.latest.weakLessons.map(w => ({ ...w, track: s.trackTitleAr })));
-    const next: { label: string; kind: 'new' | 'review' }[] = [];
-    for (const t of SARA_TRACKS) {
-      const u = readUnlocked(t.id, uid);
-      t.lessons.filter(l => l.content && l.order >= u).slice(0, 2).forEach(l => next.push({ label: `${t.titleAr}: ${l.order}. ${l.titleAr}`, kind: 'new' }));
-    }
-    const review = weak.slice(0, 7).map(w => ({ label: `مراجعة ${w.track}: ${w.order}. ${w.titleAr}`, kind: 'review' as const }));
-    const all = [...next, ...review];
-    return DAYS.map((d, i) => ({ day: d, items: i === 6 ? [{ label: '⚡ تحدي السرعة + مراجعة الأسبوع', kind: 'review' as const }] : all.filter((_, k) => k % 6 === i).slice(0, 2) }));
-  }, [uid]);
-  const toggle = (k: string) => setDone(d => { const n = { ...d, [k]: !d[k] }; lsSet(ck, n); return n; });
-  const total = tasks.reduce((s, d) => s + d.items.length, 0); const ok = Object.values(done).filter(Boolean).length;
+const KIND_ICON: Record<PlanKind, string> = { lesson: '📘', review: '🔁', test: '🏁', exam: '🎓', catchup: '🛟' };
+const StudyPlan: React.FC<{ uid?: string; unlockAll?: boolean; onOpenTrack?: (trackId: string) => void }> = ({ uid, unlockAll, onOpenTrack }) => {
+  const [plan, setPlan] = useState<SaraPlan | null>(() => readSavedPlan(uid));
+  const [st, setSt] = useState<PlanState | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [sel, setSel] = useState<number>(() => new Date().getDay());
+  const [perDay, setPerDay] = useState(plan?.perDay || 2);
+  const [days, setDays] = useState<number[]>(plan?.studyDays || DEFAULT_STUDY_DAYS);
+  const ck = `sara_plan_v2_done_${uid || 'guest'}_${plan?.weekStart || ''}`;
+  useEffect(() => { setTicks(lsGet(ck, {})); }, [ck]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [ticks, setTicks] = useState<Record<string, boolean>>(() => lsGet(ck, {}));
+  const gen = async (pd = perDay, sd = days) => { setBusy(true); const p = await buildSaraPlan(uid, !!unlockAll, { perDay: pd, studyDays: sd }); savePlan(uid, p); setPlan(p); setBusy(false); };
+  useEffect(() => { loadPlanState(uid).then(setSt); if (!readSavedPlan(uid)) gen(); }, [uid]); // eslint-disable-line react-hooks/exhaustive-deps
+  const wsMs = plan ? new Date(plan.weekStart + 'T00:00:00').getTime() : Date.now();
+  const isDone = (t: PlanTask) => (st && taskDone(t, st, wsMs)) || !!ticks[t.key];
+  const all = plan ? plan.days.flatMap(d => d.tasks) : [];
+  const doneN = all.filter(isDone).length;
+  const day = plan?.days.find(d => d.dayIdx === sel);
+  const toggleDay = (d: number) => setDays(x => x.includes(d) ? (x.length > 1 ? x.filter(y => y !== d) : x) : [...x, d]);
   return (
-    <div className="flex-1 min-h-0 p-3 flex flex-col gap-2">
-      <p className="text-[12px] font-black text-slate-600">أسبوع {weekStart} · أنجزت {ok}/{total}</p>
-      <div data-testid="study-plan" className="flex-1 min-h-0 overflow-y-auto grid gap-1.5 content-start">
-        {tasks.map(d => (
-          <div key={d.day} className="rounded-xl bg-white border border-amber-200 px-2.5 py-1.5">
-            <p className="text-[12px] font-black text-amber-700">{d.day}</p>
-            {d.items.length === 0 && <p className="text-[11px] text-slate-500">راحة / مراجعة حرة</p>}
-            {d.items.map(it => { const k = d.day + it.label; return (
-              <label key={k} className="flex items-center gap-2 text-[12px] font-bold text-slate-800 cursor-pointer">
-                <input type="checkbox" data-testid="plan-check" checked={!!done[k]} onChange={() => toggle(k)} />
-                <span className={done[k] ? 'line-through text-slate-400' : ''}>{it.kind === 'review' ? '🔁' : '📘'} {it.label}</span>
-              </label>); })}
-          </div>
-        ))}
+    <div data-testid="study-plan" className="flex-1 min-h-0 p-2.5 flex flex-col gap-2 overflow-hidden">
+      <div className="rounded-2xl bg-[#002147] text-white p-2.5">
+        <div className="flex items-center gap-2">
+          <p className="flex-1 text-[12px] font-black text-amber-300">خطة 7 أيام{plan ? ` · أنجزت ${doneN} من ${all.length}` : ''}</p>
+          <button data-testid="plan-regen" disabled={busy} onClick={() => gen()} className="px-2 py-1 rounded-lg bg-[#C49E3A] text-[#002147] text-[11px] font-black disabled:opacity-50">{busy ? '…' : '⚡ حدّث الخطة'}</button>
+        </div>
+        {(plan?.focusAr || []).slice(0, 2).map(f => <p key={f} className="text-[11px] font-bold text-white/85 truncate">• {f}</p>)}
+        {plan && !plan.focusAr.length && <p className="text-[11px] font-bold text-white/70">الخطة مبنية على تقدمك الفعلي في المسارات وترتيب فتح الدروس.</p>}
+      </div>
+      <div className="flex items-center gap-1.5 text-[11px] font-black text-[#002147]">
+        <span>دروس باليوم:</span>
+        {[1, 2, 3].map(n => <button key={n} data-testid={`plan-perday-${n}`} onClick={() => { setPerDay(n); gen(n, days); }} className={`w-7 h-6 rounded-lg border ${perDay === n ? 'bg-[#002147] text-amber-300 border-[#002147]' : 'bg-white border-amber-300'}`}>{n}</button>)}
+        <span className="flex-1" />
+        <button onClick={() => gen(perDay, days)} className="px-2 h-6 rounded-lg bg-white border border-amber-300">حفظ الأيام</button>
+      </div>
+      <div className="grid grid-cols-7 gap-1">
+        {(plan?.days.map(x => x.dayIdx) || WEEK_ORDER).map(d => { const pd = plan?.days.find(x => x.dayIdx === d); const n = pd?.tasks.length || 0; const k = pd?.tasks.filter(isDone).length || 0; const on = days.includes(d);
+          return (
+            <button key={d} data-testid="plan-day" onClick={() => setSel(d)} onDoubleClick={() => toggleDay(d)}
+              className={`rounded-xl py-1 text-center border-2 ${sel === d ? 'border-[#C49E3A] bg-amber-50' : 'border-transparent bg-white'} ${on ? '' : 'opacity-50'}`}>
+              <p className="text-[10px] font-black text-[#002147] truncate">{['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'][d]}</p>
+              <p className={`text-[10px] font-black ${n && k === n ? 'text-emerald-600' : 'text-amber-700'}`}>{n ? `${k}/${n}` : '—'}</p>
+            </button>); })}
+      </div>
+      {day && (
+        <div className="flex items-center gap-2 text-[11px] font-bold text-slate-600">
+          <span className="flex-1">{day.labelAr}{days.includes(day.dayIdx) ? '' : ' — يوم راحة'}</span>
+          <button data-testid="plan-toggle-day" onClick={() => toggleDay(day.dayIdx)} className="px-2 py-0.5 rounded-lg bg-white border border-amber-300 text-[#002147] font-black">{days.includes(day.dayIdx) ? 'اجعله راحة' : 'اجعله يوم دراسة'}</button>
+        </div>
+      )}
+      <div className="flex-1 min-h-0 flex flex-col gap-1.5 overflow-hidden">
+        {!plan && <p className="text-center text-sm font-black text-[#002147] py-6">سارة تبني خطتك من تقدّمك الحقيقي…</p>}
+        {day && day.tasks.length === 0 && <p className="text-center text-[12px] font-bold text-slate-500 py-4">{days.includes(day.dayIdx) ? 'خلصت كل الدروس المتاحة 🎉' : 'راحة 🌿'}</p>}
+        {day?.tasks.map(t => { const done = isDone(t); return (
+          <div key={t.key} data-testid="plan-task" className={`rounded-xl border-2 px-2.5 py-1.5 ${done ? 'bg-emerald-50 border-emerald-300' : t.open ? 'bg-white border-amber-300' : 'bg-white/60 border-slate-200'}`}>
+            <div className="flex items-center gap-2">
+              <span className="text-base">{done ? '✅' : KIND_ICON[t.kind]}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-black text-amber-700 truncate">{t.trackAr}</p>
+                <p className={`text-[12.5px] font-black text-[#002147] truncate ${done ? 'line-through opacity-60' : ''}`}>{t.titleAr}</p>
+              </div>
+              {(t.kind === 'review' || t.kind === 'catchup')
+                ? <button onClick={() => { const n = { ...ticks, [t.key]: !ticks[t.key] }; setTicks(n); lsSet(ck, n); }} className="shrink-0 px-2 py-1 rounded-lg border border-[#002147]/20 text-[11px] font-black text-[#002147]">{ticks[t.key] ? 'تراجع' : 'تم'}</button>
+                : !done && t.open && onOpenTrack && t.trackId && <button data-testid="plan-open" onClick={() => onOpenTrack(t.trackId)} className="shrink-0 px-2.5 py-1 rounded-lg bg-[#002147] text-amber-300 text-[11px] font-black">ابدأ</button>}
+              {!done && !t.open && <span className="shrink-0 text-[10px] font-black text-slate-400">🔒</span>}
+            </div>
+            <p className="text-[10.5px] font-bold text-slate-500 truncate">{t.reasonAr}</p>
+          </div>); })}
       </div>
     </div>
   );
@@ -431,7 +467,7 @@ const VoiceCoach: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid, unlo
 };
 
 /** One-page Sara tool (same look as the track player). */
-export const SaraTools: React.FC<Props> = ({ tool, onClose, uid, unlockAll, onPlacementDone }) => {
+export const SaraTools: React.FC<Props> = ({ tool, onClose, uid, unlockAll, onPlacementDone, onOpenTrack }) => {
   if (!tool) return null;
   const p = { uid, unlockAll };
   return (
@@ -447,7 +483,7 @@ export const SaraTools: React.FC<Props> = ({ tool, onClose, uid, unlockAll, onPl
         {tool === 'placement' && <Placement uid={uid} onDone={onPlacementDone} />}
         {tool === 'speed' && <SpeedDrill {...p} />}
         {tool === 'worksheet' && <Worksheet {...p} />}
-        {tool === 'plan' && <StudyPlan {...p} />}
+        {tool === 'plan' && <StudyPlan {...p} onOpenTrack={onOpenTrack ? id => { saraStopNarrator(); onClose(); onOpenTrack(id); } : undefined} />}
         {tool === 'roleplay' && <RolePlay {...p} />}
         {tool === 'pronunciation' && <Pronunciation {...p} />}
         {tool === 'voicecoach' && <VoiceCoach {...p} />}

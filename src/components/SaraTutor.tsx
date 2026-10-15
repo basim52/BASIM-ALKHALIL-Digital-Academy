@@ -7562,6 +7562,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       </AnimatePresence>
 
       <SaraTools tool={saraTool} onClose={() => { cancelAllSpeech(); setSaraTool(null); }} uid={profile.uid}
+        onOpenTrack={id => { const m: Record<string, string> = { foundations: 'grammar', advanced_v2: 'grammar', conversation_v2: 'conversation', reading_v2: 'reading', writing_v2: 'writing', listening: 'listening', pronunciation: 'pronunciation', vocabulary: 'vocabulary', daily: 'daily' };
+          if (id === 'exam-prep') setIsExamOpen(true); else handleOpenCurriculum(m[id] || 'all'); }}
         unlockAll={MASTER_ADMINS.includes(String((profile as any).email || auth.currentUser?.email || '').trim().toLowerCase()) || (profile as any).role === UserRole.PARENT || (profile as any).role === UserRole.ADMIN} />
       <SaraExamPrep isOpen={isExamOpen} onClose={() => { cancelAllSpeech(); setIsExamOpen(false); }} uid={profile.uid} />
       <SaraDailyPlayer isOpen={isDailyOpen} onClose={() => { cancelAllSpeech(); setIsDailyOpen(false); }} uid={profile.uid}
