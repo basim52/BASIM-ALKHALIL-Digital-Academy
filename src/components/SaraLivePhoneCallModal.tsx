@@ -455,435 +455,172 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
 
   if (!isOpen) return null;
 
+  const NAVY = '#002147', GOLD = '#C49E3A';
+  const phase: 'connecting' | 'thinking' | 'speaking' | 'listening' | 'idle' =
+    callState === 'calling' ? 'connecting' : isThinking ? 'thinking' : isSaraSpeaking ? 'speaking' : isStudentListening ? 'listening' : 'idle';
+  const phaseLabel = {
+    connecting: isRtl ? 'جارٍ الاتصال بسارة…' : 'Connecting to Sara…',
+    thinking: isRtl ? 'سارة تفكّر…' : 'Sara is thinking…',
+    speaking: isRtl ? 'سارة تتحدث' : 'Sara is speaking',
+    listening: isRtl ? 'سارة تسمعك… تكلّم' : 'Listening… speak now',
+    idle: isMuted ? (isRtl ? 'المايك مكتوم' : 'Mic muted') : (isRtl ? 'الخط مفتوح' : 'Line open'),
+  }[phase];
+  const lastSara = [...callTranscript].reverse().find(t => t.role === 'sara');
+  const lastUser = [...callTranscript].reverse().find(t => t.role === 'user');
+  const close = () => { stopCallCleanup(); setCallState('idle'); onClose(); };
+  const ring = phase === 'speaking' ? GOLD : phase === 'listening' ? '#34d399' : phase === 'thinking' ? '#fcd34d' : 'rgba(196,158,58,0.35)';
+
+  const Avatar = ({ size }: { size: number }) => (
+    <div className="relative flex items-center justify-center" style={{ width: size + 40, height: size + 40 }}>
+      {(phase === 'speaking' || phase === 'listening' || phase === 'connecting') && [0, 1].map(k => (
+        <motion.div key={k} className="absolute rounded-full border-2" style={{ width: size, height: size, borderColor: ring }}
+          animate={{ scale: [1, 1.35], opacity: [0.7, 0] }} transition={{ duration: 1.6, repeat: Infinity, delay: k * 0.8 }} />
+      ))}
+      <div className="rounded-full flex items-center justify-center shadow-2xl relative z-10 transition-colors"
+        style={{ width: size, height: size, background: `radial-gradient(circle at 30% 30%, #0b3a75, ${NAVY})`, border: `3px solid ${ring}` }}>
+        <span style={{ fontSize: size * 0.45 }}>👩‍🏫</span>
+      </div>
+    </div>
+  );
+
+  const CtrlBtn = ({ on, onClick, icon, label, testid, danger }: { on?: boolean; onClick: () => void; icon: React.ReactNode; label: string; testid: string; danger?: boolean }) => (
+    <button onClick={onClick} data-testid={testid} aria-pressed={on} className="flex flex-col items-center gap-1 cursor-pointer active:scale-95 transition-transform">
+      <span className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center border transition-colors ${danger ? 'bg-rose-600 border-rose-400 text-white shadow-lg shadow-rose-900/40' : on ? 'bg-amber-300 text-[#002147] border-amber-200' : 'bg-white/5 text-white border-white/15'}`}>{icon}</span>
+      <span className="text-[10px] font-bold text-white/70">{label}</span>
+    </button>
+  );
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" dir={isRtl ? 'rtl' : 'ltr'}>
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 15 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 15 }}
-        data-testid="sara-call" className="w-full max-w-xl max-h-[92vh] flex flex-col rounded-3xl bg-slate-900 border-2 border-slate-700 shadow-2xl text-white overflow-hidden relative"
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+        data-testid="sara-call"
+        className="w-full h-[100dvh] sm:h-[min(820px,94dvh)] sm:max-w-md sm:rounded-[2rem] flex flex-col text-white overflow-hidden relative sm:border"
+        style={{ background: `linear-gradient(180deg, ${NAVY} 0%, #001631 100%)`, borderColor: 'rgba(196,158,58,0.35)' }}
       >
-        {/* Glow ambient background */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 right-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full blur-3xl pointer-events-none" style={{ background: 'rgba(196,158,58,0.12)' }} />
 
-        {/* TOP STATUS BAR */}
-        <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between z-10 bg-slate-900/80 backdrop-blur-md">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <Phone size={18} className="text-white" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-black text-sm text-white">
-                  {isRtl ? 'مكالمة هاتفية حية مع سارة 📞' : 'Live Phone Call with Sara 📞'}
-                </h3>
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  HD Voice
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 font-medium">
-                Oxford London AI Studio • CEFR {studentLevel}
-              </p>
-            </div>
+        {/* Header */}
+        <div className="px-4 pt-[max(env(safe-area-inset-top),0.75rem)] pb-2 flex items-center justify-between relative z-10 shrink-0">
+          <div className="min-w-0">
+            <div className="text-[11px] font-bold tracking-wide" style={{ color: GOLD }}>{isRtl ? 'مكالمة مع سارة' : 'Call with Sara'}</div>
+            <div className="text-sm font-black truncate">{isRtl ? selectedScenario.titleAr : selectedScenario.titleEn}</div>
           </div>
-
-          <button
-            onClick={() => {
-              stopCallCleanup();
-              onClose();
-            }}
-            className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
-          >
-            ✕
-          </button>
+          <div className="flex items-center gap-2">
+            {callState === 'connected' && <span className="text-xs font-black tabular-nums text-amber-300" data-testid="call-timer">{formatTime(callSeconds)}</span>}
+            <button onClick={close} aria-label="close" className="w-8 h-8 rounded-full bg-white/10 text-white/80 flex items-center justify-center cursor-pointer">✕</button>
+          </div>
         </div>
 
-        {/* BODY CONTAINER */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col z-10">
-          {/* STATE 1: IDLE / PICK SCENARIO */}
+        <div className="flex-1 min-h-0 flex flex-col px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] relative z-10">
+          {/* PICK SCENARIO */}
           {callState === 'idle' && (
-            <div className="flex-1 flex flex-col justify-between space-y-6">
-              <div className="text-center space-y-2 pt-2">
-                <div className="inline-flex p-3 rounded-3xl bg-blue-500/10 border border-blue-400/20 text-blue-400 mb-1">
-                  <Headphones size={28} />
-                </div>
-                <h4 className="text-lg font-black text-white">
-                  {isRtl ? 'اختر موضوع المكالمة الهاتفية' : 'Choose Your Phone Call Scenario'}
-                </h4>
-                <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
-                  {isRtl
-                    ? 'تدرب على التحدث بالإنجليزية في مكالمة هاتفية واقعية حرة اليدين. تحدث بصوتك دون لمس الشاشة وسترد عليك سارة فورياً.'
-                    : 'Practice spoken English in a realistic hands-free phone conversation. Speak naturally and Sara answers directly.'}
+            <div className="flex-1 min-h-0 flex flex-col">
+              <div className="flex flex-col items-center text-center pt-1 pb-3 shrink-0">
+                <Avatar size={72} />
+                <p className="text-xs text-white/70 max-w-xs leading-relaxed -mt-1">
+                  {isRtl ? 'اختر موضوع المكالمة وتحدّث بصوتك — سارة ترد بصوتها مباشرة.' : 'Pick a topic and just talk — Sara answers in her own voice.'}
                 </p>
               </div>
+              <div className="grid grid-cols-2 gap-2 flex-1 min-h-0 content-start">
+                {PHONE_SCENARIOS.map(sc => {
+                  const on = selectedScenario.id === sc.id;
+                  return (
+                    <button key={sc.id} onClick={() => setSelectedScenario(sc)}
+                      className="p-2.5 rounded-2xl border text-start flex items-center gap-2 cursor-pointer transition-colors"
+                      style={{ background: on ? 'rgba(196,158,58,0.18)' : 'rgba(255,255,255,0.04)', borderColor: on ? GOLD : 'rgba(255,255,255,0.12)' }}>
+                      <span className="text-xl shrink-0">{sc.icon}</span>
+                      <span className="text-[11px] font-black leading-tight line-clamp-2">{isRtl ? sc.titleAr : sc.titleEn}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <button onClick={handleStartCall} data-testid="call-start"
+                className="mt-3 w-full py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shrink-0"
+                style={{ background: GOLD, color: NAVY }}>
+                <Phone size={18} />
+                {isRtl ? 'اتصل بسارة' : 'Call Sara'}
+              </button>
+            </div>
+          )}
 
-              {/* Scenarios Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {PHONE_SCENARIOS.map(sc => (
-                  <button
-                    key={sc.id}
-                    onClick={() => setSelectedScenario(sc)}
-                    className={`p-3 rounded-2xl border text-start transition-all cursor-pointer flex items-start gap-3 ${
-                      selectedScenario.id === sc.id
-                        ? 'bg-blue-600/20 border-blue-500 text-white shadow-lg shadow-blue-500/10'
-                        : 'bg-slate-800/60 border-slate-700/80 hover:bg-slate-800 text-slate-300'
-                    }`}
-                  >
-                    <span className="text-2xl shrink-0 p-1.5 rounded-xl bg-slate-800 border border-slate-700">
-                      {sc.icon}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-black truncate">
-                          {isRtl ? sc.titleAr : sc.titleEn}
-                        </span>
-                        {selectedScenario.id === sc.id && (
-                          <CheckCircle2 size={14} className="text-blue-400 shrink-0" />
-                        )}
-                      </div>
-                      <p className="text-[10px] text-slate-400 font-medium line-clamp-2 mt-0.5">
-                        {isRtl ? sc.starterSaraSpeechAr : sc.starterSaraSpeech}
-                      </p>
-                    </div>
+          {/* CONNECTING / IN CALL */}
+          {(callState === 'calling' || callState === 'connected') && (
+            <div className="flex-1 min-h-0 flex flex-col">
+              <div className="flex flex-col items-center pt-2 shrink-0">
+                <div onClick={interruptSara} data-testid="call-barge-in" className={phase === 'speaking' || phase === 'thinking' ? 'cursor-pointer' : ''}>
+                  <Avatar size={112} />
+                </div>
+                <div className="text-lg font-black -mt-1">{isRtl ? 'سارة' : 'Sara'}</div>
+                <div data-testid="call-phase" data-phase={phase} className="mt-1 px-3 py-1 rounded-full text-xs font-black flex items-center gap-1.5"
+                  style={{ background: 'rgba(255,255,255,0.06)', color: phase === 'listening' ? '#6ee7b7' : '#fcd34d' }}>
+                  {phase === 'listening' ? <Mic size={13} /> : phase === 'speaking' ? <Volume2 size={13} /> : <Radio size={13} />}
+                  {phaseLabel}
+                </div>
+                <div className="h-4 mt-1 text-[10px] text-white/50">
+                  {(phase === 'speaking' || phase === 'thinking') && (isRtl ? 'اضغط على سارة لمقاطعتها والتحدث' : 'Tap Sara to interrupt')}
+                </div>
+              </div>
+
+              {/* Live captions */}
+              <div className="flex-1 min-h-0 flex flex-col justify-center py-2">
+                {showCaptions && callState === 'connected' && (
+                  <div data-testid="call-captions" className="rounded-2xl p-3 border overflow-hidden" style={{ background: 'rgba(0,0,0,0.25)', borderColor: 'rgba(196,158,58,0.25)' }} dir="ltr">
+                    {(interimTranscript || lastUser) && (
+                      <p className="text-[11px] text-emerald-200/80 line-clamp-2 mb-1.5"><span className="font-black">{isRtl ? 'أنت: ' : 'You: '}</span>{interimTranscript || lastUser?.text}</p>
+                    )}
+                    <p className="text-sm sm:text-base font-bold leading-snug text-amber-100 line-clamp-4">
+                      {isThinking ? '…' : (lastSara?.text || '')}
+                    </p>
+                  </div>
+                )}
+                {voiceError && (
+                  <button onClick={retryVoice} data-testid="call-retry" className="mt-2 w-full py-2.5 rounded-2xl border text-amber-300 text-xs font-black flex items-center justify-center gap-2 cursor-pointer" style={{ borderColor: GOLD, background: 'rgba(196,158,58,0.12)' }}>
+                    <RotateCcw size={14} />
+                    {voiceError === 'ai' ? (isRtl ? 'تعذّر الوصول لسارة — أعد المحاولة' : "Couldn't reach Sara — retry") : (isRtl ? 'تعذّر تشغيل صوت سارة — أعد المحاولة' : "Sara's voice failed — retry")}
                   </button>
+                )}
+              </div>
+
+              {/* Controls */}
+              <div className="shrink-0 flex items-end justify-around pt-2">
+                <CtrlBtn testid="call-mute" on={isMuted} onClick={() => { const m = !isMuted; setIsMuted(m); if (m) stopListening(); else startSpeechRecognition(); }}
+                  icon={isMuted ? <MicOff size={22} /> : <Mic size={22} />} label={isMuted ? (isRtl ? 'مكتوم' : 'Muted') : (isRtl ? 'كتم' : 'Mute')} />
+                <CtrlBtn testid="call-captions-toggle" on={showCaptions} onClick={() => setShowCaptions(!showCaptions)} icon={<MessageSquare size={22} />} label={isRtl ? 'الترجمة النصية' : 'Captions'} />
+                <CtrlBtn testid="call-speaker" on={!isSpeakerOn} onClick={() => setIsSpeakerOn(!isSpeakerOn)} icon={isSpeakerOn ? <Volume2 size={22} /> : <VolumeX size={22} />} label={isRtl ? 'الصوت' : 'Sound'} />
+                <CtrlBtn testid="call-end" danger onClick={callState === 'calling' ? () => { stopCallCleanup(); setCallState('idle'); } : handleEndCall} icon={<PhoneOff size={24} />} label={isRtl ? 'إنهاء' : 'End'} />
+              </div>
+            </div>
+          )}
+
+          {/* ENDED: real numbers only */}
+          {callState === 'ended' && (
+            <div className="flex-1 min-h-0 flex flex-col justify-center gap-4" data-testid="call-ended">
+              <div className="text-center">
+                <div className="inline-flex p-3 rounded-full mb-2" style={{ background: 'rgba(196,158,58,0.15)', color: GOLD }}><Award size={30} /></div>
+                <h4 className="text-lg font-black">{isRtl ? 'انتهت المكالمة' : 'Call ended'}</h4>
+                <p className="text-xs text-white/70 mt-1">{isRtl ? selectedScenario.titleAr : selectedScenario.titleEn}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  [isRtl ? 'المدة' : 'Duration', formatTime(callSeconds)],
+                  [isRtl ? 'مرات تحدّثك' : 'Your turns', String(callTurns)],
+                  [isRtl ? 'كلمات قلتها' : 'Words you said', String(studentWordsSpoken)],
+                  [isRtl ? 'متوسط زمن رد سارة' : 'Avg Sara reply', avgLatency ? `${(avgLatency / 1000).toFixed(1)}s` : '—'],
+                ].map(([k, v]) => (
+                  <div key={k} className="p-3 rounded-2xl text-center border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(196,158,58,0.25)' }}>
+                    <div className="text-base font-black text-amber-300 tabular-nums">{v}</div>
+                    <div className="text-[10px] text-white/60 font-bold">{k}</div>
+                  </div>
                 ))}
               </div>
-
-              {/* Start Call CTA Button */}
-              <div className="pt-2">
-                <button
-                  onClick={handleStartCall}
-                  data-testid="call-start"
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2.5 shadow-xl shadow-emerald-500/25 transition-all cursor-pointer active:scale-98"
-                >
-                  <Phone size={20} className="fill-slate-950" />
-                  <span>
-                    {isRtl
-                      ? `بدء الاتصال بسارة الآن (${selectedScenario.titleAr}) 📞`
-                      : `Call Sara Now (${selectedScenario.titleEn}) 📞`}
-                  </span>
+              <p className="text-[11px] text-white/60 text-center">{isRtl ? 'حُفظ ملخص المكالمة في تقدّمك وتقرير وليّ الأمر.' : 'A summary was saved to your progress and parent report.'}</p>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => setCallState('idle')} className="py-3 rounded-2xl border border-white/20 text-white font-black text-xs flex items-center justify-center gap-2 cursor-pointer">
+                  <RotateCcw size={14} />{isRtl ? 'مكالمة جديدة' : 'New call'}
                 </button>
-              </div>
-            </div>
-          )}
-
-          {/* STATE 2: OUTGOING CALLING */}
-          {callState === 'calling' && (
-            <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 py-12">
-              <div className="relative">
-                <div className="w-28 h-28 rounded-full bg-blue-500/20 border-2 border-blue-400/40 animate-ping absolute inset-0" />
-                <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-[#002147] to-blue-700 border-4 border-blue-400 flex items-center justify-center shadow-2xl relative z-10">
-                  <span className="text-5xl">👩‍🏫</span>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="text-xl font-black text-white">Sara Oxford Tutor</h4>
-                <p className="text-xs text-blue-400 font-bold mt-1 animate-pulse">
-                  {isRtl ? 'جارٍ الاتصال بسارة... 📡' : 'Calling Sara in London... 📡'}
-                </p>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  {isRtl ? selectedScenario.titleAr : selectedScenario.titleEn}
-                </p>
-              </div>
-
-              <div className="pt-6">
-                <button
-                  onClick={() => { stopCallCleanup(); setCallState('idle'); }}
-                  className="px-6 py-2.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-rose-600/30 cursor-pointer transition-all"
-                >
-                  <PhoneOff size={16} />
-                  <span>{isRtl ? 'إلغاء الاتصال' : 'Cancel Call'}</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* STATE 3: CONNECTED ACTIVE CALL */}
-          {callState === 'connected' && (
-            <div className="flex-1 flex flex-col justify-between space-y-4">
-              {/* Call Header / Timer */}
-              <div className="flex items-center justify-between bg-slate-800/60 p-3 rounded-2xl border border-slate-700/60">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
-                  <span className="text-xs font-black text-emerald-400 tracking-wider">
-                    {formatTime(callSeconds)}
-                  </span>
-                </div>
-
-                <div className="text-center">
-                  <div className="text-xs font-black text-white">{isRtl ? selectedScenario.titleAr : selectedScenario.titleEn}</div>
-                </div>
-
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400">
-                  <span>{callTurns} {isRtl ? 'مداخلات' : 'turns'}</span>
-                </div>
-              </div>
-
-              {/* Sara Interactive Avatar & Wave */}
-              <div className="flex flex-col items-center justify-center py-6 space-y-4">
-                <div className="relative cursor-pointer" onClick={interruptSara} data-testid="call-barge-in">
-                  {/* Speaking glow ring */}
-                  {isSaraSpeaking && (
-                    <motion.div
-                      animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0.2, 0.6] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                      className="absolute -inset-3 rounded-full bg-amber-400/30 blur-md"
-                    />
-                  )}
-                  {isStudentListening && (
-                    <motion.div
-                      animate={{ scale: [1, 1.2, 1], opacity: [0.7, 0.3, 0.7] }}
-                      transition={{ duration: 1.2, repeat: Infinity }}
-                      className="absolute -inset-3 rounded-full bg-emerald-400/30 blur-md"
-                    />
-                  )}
-
-                  <div className={`w-28 h-28 rounded-full bg-gradient-to-tr from-[#002147] to-blue-800 border-4 ${
-                    isSaraSpeaking ? 'border-amber-400' : isStudentListening ? 'border-emerald-400' : 'border-slate-600'
-                  } flex items-center justify-center shadow-2xl relative z-10 transition-colors`}>
-                    <span className="text-5xl">👩‍🏫</span>
-                  </div>
-                </div>
-
-                {/* State Indicator Badge */}
-                <div>
-                  {isSaraSpeaking ? (
-                    <span className="px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-black flex items-center gap-1.5 animate-pulse">
-                      <Volume2 size={14} />
-                      {isRtl ? 'سارة تتحدث إليك الآن...' : 'Sara is speaking...'}
-                    </span>
-                  ) : isStudentListening ? (
-                    <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-black flex items-center gap-1.5 animate-pulse">
-                      <Mic size={14} />
-                      {isRtl ? 'سارة تستمع إلى صوتك... تحدث بحرية' : 'Sara is listening... Speak now'}
-                    </span>
-                  ) : (
-                    <span className="px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-xs font-bold flex items-center gap-1.5">
-                      <Radio size={14} className="text-blue-400" />
-                      {isRtl ? 'الخط متصل وثابت' : 'Call Connected'}
-                    </span>
-                  )}
-                </div>
-
-                {/* Audio Waves Simulation */}
-                <div className="flex items-center gap-1 h-8">
-                  {[40, 70, 95, 60, 85, 100, 75, 45, 90, 65, 80, 50].map((h, i) => (
-                    <motion.div
-                      key={i}
-                      animate={{
-                        height: (isSaraSpeaking || isStudentListening) ? [`${Math.max(15, h * 0.3)}%`, `${h}%`, `${Math.max(10, h * 0.2)}%`] : '15%'
-                      }}
-                      transition={{
-                        duration: 0.6 + (i * 0.05),
-                        repeat: Infinity,
-                        ease: 'easeInOut'
-                      }}
-                      className={`w-1 rounded-full ${
-                        isSaraSpeaking ? 'bg-amber-400' : isStudentListening ? 'bg-emerald-400' : 'bg-slate-700'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {voiceError && (
-                <button onClick={retryVoice} data-testid="call-retry" className="w-full py-2.5 rounded-2xl bg-amber-400/15 border border-amber-400/40 text-amber-300 text-xs font-black flex items-center justify-center gap-2 cursor-pointer">
-                  <RotateCcw size={14} />
-                  {voiceError === 'ai' ? (isRtl ? 'تعذّر الوصول لسارة — أعد المحاولة' : "Couldn't reach Sara — retry") : (isRtl ? 'تعذّر تشغيل صوت سارة — أعد المحاولة' : "Sara's voice failed — retry")}
-                </button>
-              )}
-
-              {/* Dynamic Transcript / Subtitles */}
-              {showCaptions && (
-                <div className="bg-slate-950/60 p-3.5 rounded-2xl border border-slate-800/80 max-h-36 overflow-y-auto space-y-2 text-xs">
-                  {callTranscript.length === 0 && (
-                    <p className="text-slate-500 italic text-center">
-                      {isRtl ? 'المحادثة الصوتية بدأت...' : 'Voice call started...'}
-                    </p>
-                  )}
-                  {callTranscript.slice(-3).map((item, idx) => (
-                    <div
-                      key={idx}
-                      className={`p-2 rounded-xl ${
-                        item.role === 'sara'
-                          ? 'bg-blue-900/30 border border-blue-800/40 text-blue-200'
-                          : 'bg-emerald-900/30 border border-emerald-800/40 text-emerald-200'
-                      }`}
-                    >
-                      <span className="font-black text-[10px] block opacity-75 mb-0.5">
-                        {item.role === 'sara' ? '👩‍🏫 Sara' : '👤 You'}
-                      </span>
-                      <p className="leading-relaxed">{item.text}</p>
-                    </div>
-                  ))}
-                  {interimTranscript && (
-                    <div className="p-2 rounded-xl bg-slate-800 text-slate-300 italic animate-pulse">
-                      <span className="font-bold text-[10px] block text-emerald-400 mb-0.5">👤 Listening...</span>
-                      "{interimTranscript}"
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Interactive Phone Control Pad */}
-              <div className="pt-2">
-                <div className="grid grid-cols-4 gap-2 mb-3">
-                  {/* Mute button */}
-                  <button
-                    onClick={() => {
-                      const m = !isMuted; setIsMuted(m);
-                      if (m) stopListening(); else startSpeechRecognition();
-                    }}
-                    className={`p-3 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                      isMuted
-                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                        : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-                    }`}
-                  >
-                    {isMuted ? <MicOff size={18} /> : <Mic size={18} />}
-                    <span className="text-[10px] font-black">{isMuted ? (isRtl ? 'كتم' : 'Muted') : (isRtl ? 'المايك' : 'Mic')}</span>
-                  </button>
-
-                  {/* Speaker button */}
-                  <button
-                    onClick={() => setIsSpeakerOn(!isSpeakerOn)}
-                    className={`p-3 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                      !isSpeakerOn
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                        : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-                    }`}
-                  >
-                    {!isSpeakerOn ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                    <span className="text-[10px] font-black">{isRtl ? 'المكبر' : 'Speaker'}</span>
-                  </button>
-
-                  {/* Push to talk / Manual Mic Trigger */}
-                  <button
-                    onClick={() => {
-                      if (!isSaraSpeaking) {
-                        startSpeechRecognition();
-                      }
-                    }}
-                    disabled={isSaraSpeaking}
-                    className={`p-3 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                      isStudentListening
-                        ? 'bg-emerald-500 text-slate-950 font-black shadow-lg shadow-emerald-500/30'
-                        : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-                    }`}
-                  >
-                    <Radio size={18} />
-                    <span className="text-[10px] font-black">{isRtl ? 'تحدث' : 'Push Talk'}</span>
-                  </button>
-
-                  {/* Toggle Captions */}
-                  <button
-                    onClick={() => setShowCaptions(!showCaptions)}
-                    className={`p-3 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                      showCaptions
-                        ? 'bg-blue-600/30 text-blue-300 border border-blue-500/30'
-                        : 'bg-slate-800 hover:bg-slate-700 text-slate-400'
-                    }`}
-                  >
-                    <MessageSquare size={18} />
-                    <span className="text-[10px] font-black">{isRtl ? 'النص' : 'Captions'}</span>
-                  </button>
-                </div>
-
-                {/* END CALL BUTTON */}
-                <button
-                  onClick={handleEndCall}
-                  className="w-full py-3.5 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-black text-sm flex items-center justify-center gap-2 shadow-xl shadow-rose-600/30 transition-all cursor-pointer active:scale-98"
-                >
-                  <PhoneOff size={20} />
-                  <span>{isRtl ? 'إنهاء المكالمة والحصول على التقرير 🛑' : 'End Call & Get Debrief 🛑'}</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* STATE 4: ENDED / DEBRIEF SUMMARY */}
-          {callState === 'ended' && (
-            <div className="flex-1 flex flex-col justify-between space-y-5 py-2">
-              <div className="text-center space-y-2">
-                <div className="inline-flex p-3 rounded-3xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 mb-1">
-                  <Award size={32} />
-                </div>
-                <h4 className="text-xl font-black text-white">
-                  {isRtl ? 'أحسنت يا بطل! اكتملت المكالمة بنجاح 🎉' : 'Awesome Job! Call Completed 🎉'}
-                </h4>
-                <p className="text-xs text-slate-300">
-                  {isRtl
-                    ? `لقد أجريت محادثة هاتفية حية باللغة الإنجليزية في سيناريو "${selectedScenario.titleAr}".`
-                    : `You practiced real-time spoken English in the "${selectedScenario.titleEn}" scenario.`}
-                </p>
-              </div>
-
-              {/* Call Stats Grid */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700 text-center">
-                  <Timer size={18} className="mx-auto text-blue-400 mb-1" />
-                  <div className="text-base font-black text-white">{formatTime(callSeconds)}</div>
-                  <div className="text-[10px] text-slate-400 font-bold">{isRtl ? 'مدة المكالمة' : 'Duration'}</div>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700 text-center">
-                  <Radio size={18} className="mx-auto text-amber-400 mb-1" />
-                  <div className="text-base font-black text-white">{callTurns}</div>
-                  <div className="text-[10px] text-slate-400 font-bold">{isRtl ? 'جولات التحدث' : 'Spoken Turns'}</div>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700 text-center">
-                  <Zap size={18} className="mx-auto text-emerald-400 mb-1" />
-                  <div className="text-base font-black text-emerald-400">
-                    +{Math.max(20, Math.min(100, Math.floor(callSeconds / 3) + (callTurns * 5)))} XP
-                  </div>
-                  <div className="text-[10px] text-slate-400 font-bold">{isRtl ? 'النقاط المكتسبة' : 'XP Rewarded'}</div>
-                </div>
-              </div>
-
-              {/* Performance Feedback */}
-              <div className="p-4 rounded-2xl bg-blue-950/40 border border-blue-800/50 space-y-2">
-                <div className="flex items-center gap-2">
-                  <Sparkles size={16} className="text-amber-400" />
-                  <h5 className="text-xs font-black text-white">
-                    {isRtl ? 'تقييم سارة الفوري للطلاقة الصوتية' : 'Sara’s Instant Voice Feedback'}
-                  </h5>
-                </div>
-                <p className="text-xs text-blue-200 leading-relaxed font-medium">
-                  {callTurns >= 3
-                    ? (isRtl
-                      ? `استجابة سريعة ممتازة وثقة ملحوظة في التحدث عبر الهاتف دون تردد! استخدمت مصطلحات مناسبة لموقف ${selectedScenario.titleAr}. استمر في هذا الزخم!`
-                      : `Great auditory reaction time and confidence speaking on the telephone! You maintained good composure in the ${selectedScenario.titleEn} situation.`)
-                    : (isRtl
-                      ? 'مجهود رائع كبداية! في المكالمة القادمة، جرب التحدث بجمل أطول وإضافة تفاصيل أكثر لزيادة طلاقتك الهاتفية.'
-                      : 'Good effort! Next call, try elaborating with longer sentences to build telephone conversation stamina.')}
-                </p>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <button
-                  onClick={() => {
-                    setCallState('idle');
-                  }}
-                  className="py-3 rounded-2xl border border-slate-700 hover:bg-slate-800 text-slate-300 font-black text-xs flex items-center justify-center gap-2 cursor-pointer transition-all"
-                >
-                  <RotateCcw size={14} />
-                  <span>{isRtl ? 'مكالمة جديدة' : 'New Call'}</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    stopCallCleanup();
-                    onClose();
-                  }}
-                  className="py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-blue-600/25 cursor-pointer transition-all"
-                >
-                  <CheckCircle2 size={14} />
-                  <span>{isRtl ? 'العودة لدردشة سارة' : 'Back to Sara'}</span>
+                <button onClick={close} className="py-3 rounded-2xl font-black text-xs flex items-center justify-center gap-2 cursor-pointer" style={{ background: GOLD, color: NAVY }}>
+                  <CheckCircle2 size={14} />{isRtl ? 'العودة لسارة' : 'Back to Sara'}
                 </button>
               </div>
             </div>
