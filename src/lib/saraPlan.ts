@@ -23,7 +23,7 @@ import { loadExamResults, readExamResults, type ExamResults } from './saraExamSy
 export type PlanKind = 'lesson' | 'review' | 'test' | 'exam' | 'catchup';
 export interface PlanTask { key: string; kind: PlanKind; trackId: string; trackAr: string; titleAr: string; order?: number; levelId?: string; setId?: string; open: boolean; reasonAr: string }
 export interface PlanDay { dayIdx: number; labelAr: string; study: boolean; tasks: PlanTask[] }
-export interface SaraPlan { weekStart: string; createdAt: number; perDay: number; studyDays: number[]; isNew: boolean; focusAr: string[]; days: PlanDay[]; priorityTrackId?: string }
+export interface SaraPlan { weekStart: string; createdAt: number; perDay: number; studyDays: number[]; isNew: boolean; focusAr: string[]; days: PlanDay[]; priorityTrackId?: string; fromBasket?: boolean }
 export interface PlanState { unlocked: Record<string, number>; passedTests: Set<string>; exam: ExamResults }
 
 export const CORE_TRACKS: SaraTrack[] = [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK];
@@ -199,7 +199,7 @@ export const savePlan = (uid: string | undefined, p: SaraPlan) => { try { localS
 /** Time estimate per lesson (minutes) — shown to the student as an estimate, same idea as the academy's lesson durations. */
 export const LESSON_MIN = (trackId: string) => (NEW_IDS.has(trackId) ? 12 : 20);
 export const TEST_MIN = 15;
-export interface RoadLesson { order: number; num: number; titleAr: string; state: 'done' | 'next' | 'open' | 'locked' | 'soon' }
+export interface RoadLesson { order: number; num: number; titleAr: string; state: 'done' | 'next' | 'open' | 'locked' | 'soon'; inBasket?: boolean }
 export interface RoadLevel { id: string; titleAr: string; lessons: RoadLesson[]; testPassed: boolean | null }
 export interface RoadTrack { id: string; titleAr: string; total: number; done: number; remaining: number; levels: RoadLevel[]; finish?: string; minutesLeft: number }
 export interface Roadmap { tracks: RoadTrack[]; totalLessons: number; doneLessons: number; remainingLessons: number; testsLeft: number; minutesPerDay: number; weeklyMinutes: number;
@@ -208,7 +208,8 @@ export interface Roadmap { tracks: RoadTrack[]; totalLessons: number; doneLesson
 const addDays = (d: Date, n: number) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 
 /** Every track and level with real progress/lock state; finish dates simulated day by day with the chosen study days and lessons/day (round-robin, priority track twice). */
-export function buildRoadmap(st: PlanState, opts: { perDay: number; studyDays: number[]; unlockAll: boolean; priorityTrackId?: string }): Roadmap {
+export function buildRoadmap(st: PlanState, opts: { perDay: number; studyDays: number[]; unlockAll: boolean; priorityTrackId?: string; basket?: string[]; basketOnly?: boolean }): Roadmap {
+  const bset = new Set(opts.basket || []); const only = !!opts.basketOnly;
   const tracks: RoadTrack[] = ALL_PLAN_TRACKS.map(t => {
     const u = st.unlocked[t.id] || 1; const isNew = NEW_IDS.has(t.id);
     const lvls = isNew ? SARA_NEW_LEVELS.map(v => ({ id: v.id as string, titleAr: v.titleAr, lessons: t.lessons.filter(l => l.order >= v.from && l.order <= v.to) }))
@@ -219,16 +220,16 @@ export function buildRoadmap(st: PlanState, opts: { perDay: number; studyDays: n
         lessons: v.lessons.map(l => {
           const builtL = isNew || !!l.content;
           const state: RoadLesson['state'] = l.order < u ? 'done' : !builtL ? 'soon' : l.order === u && (prevPassed || opts.unlockAll) ? 'next' : opts.unlockAll ? 'open' : 'locked';
-          return { order: l.order, num: isNew ? ((l.order - 1) % 30) + 1 : l.order, titleAr: l.titleAr, state };
+          return { order: l.order, num: isNew ? ((l.order - 1) % 30) + 1 : l.order, titleAr: l.titleAr, state, inBasket: bset.has(`${t.id}:${l.order}`) };
         }) };
     });
-    const b = built(t); const done = b.filter(l => l.order < u).length;
+    const b = only ? built(t).filter(l => bset.has(`${t.id}:${l.order}`)) : built(t); const done = b.filter(l => l.order < u).length;
     const remaining = b.length - done;
     return { id: t.id, titleAr: t.titleAr, total: b.length, done, remaining, levels, minutesLeft: remaining * LESSON_MIN(t.id) };
   });
   // Level tests still needed in the new tracks (they gate the next level) — counted in time, not as lessons.
   let testsLeft = 0;
-  for (const t of tracks) if (NEW_IDS.has(t.id)) for (const v of t.levels) if (v.testPassed === false && v.lessons.some(l => l.state !== 'done')) testsLeft++;
+  for (const t of tracks) if (NEW_IDS.has(t.id)) for (const v of t.levels) if (v.testPassed === false && v.lessons.some(l => l.state !== 'done' && (!only || l.inBasket))) testsLeft++;
   const perDay = Math.min(3, Math.max(1, opts.perDay)); const sd = opts.studyDays.length ? opts.studyDays : DEFAULT_STUDY_DAYS;
   // Simulate: each study day takes perDay lessons from the tracks in turn (priority track twice per round).
   const left: Record<string, number> = {}; tracks.forEach(t => { left[t.id] = t.remaining; });
@@ -252,4 +253,71 @@ export function buildRoadmap(st: PlanState, opts: { perDay: number; studyDays: n
   const minutesPerDay = Math.round(perDay * (tracks.filter(t => t.remaining).reduce((a, t) => a + LESSON_MIN(t.id), 0) / Math.max(1, tracks.filter(t => t.remaining).length)));
   return { tracks, totalLessons: total, doneLessons: doneL, remainingLessons: rem, testsLeft, perDay, studyDaysPerWeek: sd.length, minutesPerDay, weeklyMinutes: minutesPerDay * sd.length,
     weeks: rem ? Math.ceil(days / 7) : 0, months: rem ? Math.round((days / 30.44) * 10) / 10 : 0, finish: rem ? isoDate(lastDay) : '', totalMinutesLeft: tracks.reduce((a, t) => a + t.minutesLeft, 0) + testsLeft * TEST_MIN };
+}
+
+/* ---------------- 🧺 Lesson basket (student builds their own plan) ---------------- */
+export interface BasketData { items: string[]; updatedAt: number }
+const BKEY = (uid?: string) => `sara_basket_${uid || 'guest'}`;
+export const basketKey = (trackId: string, order: number) => `${trackId}:${order}`;
+export const readBasket = (uid?: string): BasketData => { try { const v = JSON.parse(localStorage.getItem(BKEY(uid)) || 'null'); if (v && Array.isArray(v.items)) return v; } catch { /* ignore */ } return { items: [], updatedAt: 0 }; };
+export const writeBasketLocal = (uid: string | undefined, b: BasketData) => { try { localStorage.setItem(BKEY(uid), JSON.stringify(b)); } catch { /* ignore */ } };
+const trackById = (id: string) => ALL_PLAN_TRACKS.find(t => t.id === id);
+/** Keep only real built lessons, in curriculum order (done ones stay so progress shows). */
+export function cleanBasket(items: string[], _st?: PlanState): string[] {
+  const out: string[] = [];
+  for (const t of ALL_PLAN_TRACKS) { for (const l of built(t)) { const k = basketKey(t.id, l.order); if (items.includes(k)) out.push(k); } }
+  return out;
+}
+/** Add lessons; for a normal student a locked lesson brings the lessons before it (in-order unlocking). Returns how many prerequisites were added. */
+export function basketAdd(items: string[], st: PlanState, trackId: string, orders: number[], unlockAll: boolean): { items: string[]; prereq: number } {
+  const t = trackById(trackId); if (!t) return { items, prereq: 0 };
+  const u = st.unlocked[t.id] || 1; const set = new Set(items); const want = new Set(orders.filter(o => o >= u));
+  let prereq = 0;
+  if (!unlockAll && want.size) { const max = Math.max(...want); for (const l of built(t)) if (l.order >= u && l.order < max && !want.has(l.order) && !set.has(basketKey(t.id, l.order))) { want.add(l.order); prereq++; } }
+  for (const o of want) if (built(t).some(l => l.order === o)) set.add(basketKey(t.id, o));
+  return { items: cleanBasket([...set], st), prereq };
+}
+/** Remove lessons; for a normal student, removing a lesson also removes the later basket lessons of that track that depend on it. */
+export function basketRemove(items: string[], trackId: string, orders: number[], unlockAll: boolean): string[] {
+  const min = Math.min(...orders); const rm = new Set(orders.map(o => basketKey(trackId, o)));
+  return items.filter(k => { const [id, o] = [k.slice(0, k.lastIndexOf(':')), Number(k.slice(k.lastIndexOf(':') + 1))]; return !(rm.has(k) || (!unlockAll && id === trackId && o > min)); });
+}
+/** Smart suggestion: the tracks the smart plan picked (same rules), ~4 weeks of their next lessons. */
+export function smartBasket(plan: SaraPlan, st: PlanState, unlockAll: boolean): string[] {
+  const ids = [...new Set(plan.days.flatMap(d => d.tasks).filter(x => x.kind === 'lesson').map(x => x.trackId))];
+  if (!ids.length) return [];
+  const total = plan.perDay * plan.studyDays.length * 4;
+  let items: string[] = [];
+  ids.forEach(id => { const t = trackById(id)!; const u = st.unlocked[id] || 1; const share = Math.ceil(total / ids.length) * (id === plan.priorityTrackId ? 2 : 1);
+    const next = built(t).filter(l => l.order >= u).slice(0, share).map(l => l.order); items = basketAdd(items, st, id, next, unlockAll).items; });
+  return items;
+}
+/** 7-day schedule from the basket only (same day rules: in-order, level tests before a gated level, one lesson per track a day, catch-up day). */
+export async function buildBasketPlan(uid: string | undefined, unlockAll: boolean, items: string[], opts: { perDay?: number; studyDays?: number[] } = {}): Promise<SaraPlan> {
+  const perDay = Math.min(3, Math.max(1, opts.perDay || 2));
+  const studyDays = (opts.studyDays && opts.studyDays.length ? opts.studyDays : DEFAULT_STUDY_DAYS).slice();
+  const st = await loadPlanState(uid);
+  const bset = new Set(cleanBasket(items, st));
+  const tracks = ALL_PLAN_TRACKS.filter(t => built(t).some(l => bset.has(basketKey(t.id, l.order))));
+  const queues = tracks.map(t => {
+    const q = trackQueue(t, st, unlockAll, 9999); const maxB = Math.max(...built(t).filter(l => bset.has(basketKey(t.id, l.order))).map(l => l.order));
+    return q.filter((x, i) => x.kind === 'lesson' ? bset.has(basketKey(t.id, x.order!)) : q.slice(i + 1).some(y => y.kind === 'lesson' && (y.order || 0) <= maxB)).map(x => x.kind === 'lesson' ? { ...x, reasonAr: `من سلتك · ${x.reasonAr}` } : x);
+  });
+  const ptr = queues.map(() => 0);
+  const start = new Date(); start.setHours(0, 0, 0, 0); const ws = isoDate(start);
+  const order = Array.from({ length: 7 }, (_, k) => (start.getDay() + k) % 7);
+  const lastStudy = [...order].reverse().find(d => studyDays.includes(d));
+  let rot = 0;
+  const days: PlanDay[] = order.map((d, pos) => {
+    const study = studyDays.includes(d); const tasks: PlanTask[] = [];
+    if (study && queues.length) {
+      if (d === lastStudy && studyDays.length >= 4) tasks.push({ key: `catchup:${ws}`, kind: 'catchup', trackId: '', trackAr: 'يوم تعويض', titleAr: 'كمّل أي مهمة فاتتك هالأسبوع', open: true, reasonAr: 'يوم مرن للتعويض والمراجعة' });
+      else { const used = new Set<number>(); let g = 0;
+        while (tasks.length < perDay && g++ < queues.length * 2) { const qi = rot++ % queues.length; if (used.has(qi)) continue; const it = queues[qi][ptr[qi]]; if (!it) continue; ptr[qi]++; used.add(qi); tasks.push(it); } }
+    }
+    return { dayIdx: d, labelAr: pos === 0 ? `اليوم (${DAY_AR[d]})` : pos === 1 ? `بكرة (${DAY_AR[d]})` : DAY_AR[d], study, tasks };
+  });
+  const left = queues.reduce((a, q, i) => a + q.length - ptr[i], 0);
+  return { weekStart: ws, createdAt: Date.now(), perDay, studyDays, isNew: false, days, fromBasket: true,
+    focusAr: [`خطتك من سلتك: ${bset.size} درس من ${tracks.length} ${tracks.length === 1 ? 'منهج' : 'مناهج'}`, ...(left ? [`${left} مهمة من السلة للأسابيع الجاية`] : [])] };
 }

@@ -7,10 +7,10 @@ import { CONVERSATION_TRACK } from '../data/saraTracks/conversation';
 import { READING_TRACK } from '../data/saraTracks/reading';
 import { WRITING_TRACK } from '../data/saraTracks/writing';
 import { readUnlocked, saraNarrate, saraStopNarrator, saraUnlockNarrator } from './SaraTrackPlayer';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { savePlacementLevel } from '../lib/placement';
-import { buildRoadmap, LESSON_MIN, type Roadmap } from '../lib/saraPlan';
+import { buildRoadmap, LESSON_MIN, type Roadmap, readBasket, writeBasketLocal, basketAdd, basketRemove, smartBasket, buildBasketPlan, cleanBasket, type BasketData } from '../lib/saraPlan';
 import { buildSaraPlan, loadPlanState, taskDone, readSavedPlan, savePlan, weekStartIso, WEEK_ORDER, DEFAULT_STUDY_DAYS, type SaraPlan, type PlanState, type PlanTask, type PlanKind } from '../lib/saraPlan';
 import { trackLevels, saveLevelTestAttempt, summarizeLevelTests, type LevelTestAttempt } from '../lib/saraLevelTests';
 
@@ -283,29 +283,57 @@ const StudyPlan: React.FC<{ uid?: string; unlockAll?: boolean; onOpenTrack?: (tr
   const ck = `sara_plan_v2_done_${uid || 'guest'}_${plan?.weekStart || ''}`;
   useEffect(() => { setTicks(lsGet(ck, {})); }, [ck]); // eslint-disable-line react-hooks/exhaustive-deps
   const [ticks, setTicks] = useState<Record<string, boolean>>(() => lsGet(ck, {}));
-  const gen = async (pd = perDay, sd = days) => { setBusy(true); const p = await buildSaraPlan(uid, !!unlockAll, { perDay: pd, studyDays: sd }); savePlan(uid, p); setPlan(p); setBusy(false); };
-  useEffect(() => { loadPlanState(uid).then(setSt); if (!readSavedPlan(uid)) gen(); }, [uid]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [basket, setBasketS] = useState<BasketData>(() => readBasket(uid));
+  const modeKey = `sara_plan_mode_${uid || 'guest'}`;
+  const [mode, setModeS] = useState<'smart' | 'basket'>(() => ((lsGet(modeKey, 'smart' as string) as string) === 'basket' ? 'basket' : 'smart'));
+  const setMode = (m: 'smart' | 'basket') => { setModeS(m); lsSet(modeKey, m); };
+  const setBasket = (items: string[]) => {
+    const b = { items, updatedAt: Date.now() }; setBasketS(b); writeBasketLocal(uid, b);
+    if (uid) void updateDoc(doc(db, 'users', uid), { saraBasket: b }).catch(() => {});
+  };
+  const gen = async (pd = perDay, sd = days, m = mode, items = basket.items) => {
+    setBusy(true);
+    const p = m === 'basket' && items.length ? await buildBasketPlan(uid, !!unlockAll, items, { perDay: pd, studyDays: sd }) : await buildSaraPlan(uid, !!unlockAll, { perDay: pd, studyDays: sd });
+    savePlan(uid, p); setPlan(p); setBusy(false); return p;
+  };
+  useEffect(() => {
+    loadPlanState(uid).then(setSt);
+    if (!readSavedPlan(uid)) gen();
+    // basket from the account (newer copy wins), so it follows the student across devices
+    if (uid) getDoc(doc(db, 'users', uid)).then(snap => { const r = snap.data()?.saraBasket as BasketData | undefined;
+      if (r && Array.isArray(r.items) && (r.updatedAt || 0) > (readBasket(uid).updatedAt || 0)) { const b = { items: cleanBasket(r.items), updatedAt: r.updatedAt }; setBasketS(b); writeBasketLocal(uid, b); } }).catch(() => {});
+  }, [uid]); // eslint-disable-line react-hooks/exhaustive-deps
   const wsMs = plan ? new Date(plan.weekStart + 'T00:00:00').getTime() : Date.now();
   const isDone = (t: PlanTask) => (st && taskDone(t, st, wsMs)) || !!ticks[t.key];
   const all = plan ? plan.days.flatMap(d => d.tasks) : [];
   const doneN = all.filter(isDone).length;
   const day = plan?.days.find(d => d.dayIdx === sel);
-  const [tab, setTab] = useState<'week' | 'overview' | 'curricula'>('week');
-  const road: Roadmap | null = useMemo(() => (st ? buildRoadmap(st, { perDay, studyDays: days, unlockAll: !!unlockAll, priorityTrackId: plan?.priorityTrackId }) : null), [st, perDay, days, unlockAll, plan?.priorityTrackId]);
+  const [tab, setTab] = useState<'week' | 'overview' | 'curricula' | 'basket'>('week');
+  const useB = mode === 'basket' && basket.items.length > 0;
+  const road: Roadmap | null = useMemo(() => (st ? buildRoadmap(st, { perDay, studyDays: days, unlockAll: !!unlockAll, priorityTrackId: useB ? undefined : plan?.priorityTrackId, basket: basket.items, basketOnly: useB }) : null), [st, perDay, days, unlockAll, plan?.priorityTrackId, basket.items, useB]);
+  const basketRoad: Roadmap | null = useMemo(() => (st && basket.items.length ? buildRoadmap(st, { perDay, studyDays: days, unlockAll: !!unlockAll, basket: basket.items, basketOnly: true }) : null), [st, perDay, days, unlockAll, basket.items]);
+  const [note, setNote] = useState('');
+  const bAdd = (trackId: string, orders: number[]) => { if (!st) return; const r = basketAdd(basket.items, st, trackId, orders, !!unlockAll); setBasket(r.items); setNote(r.prereq ? `أضفنا ${r.prereq} درس قبله عشان الدروس تنفتح بالترتيب` : ''); };
+  const bRemove = (trackId: string, orders: number[]) => { setBasket(basketRemove(basket.items, trackId, orders, !!unlockAll)); setNote(unlockAll ? '' : 'شلنا معه الدروس اللي بعده في نفس المنهج (تنفتح بالترتيب)'); };
+  const suggest = async () => { if (!st) return; const p = plan && !plan.fromBasket ? plan : await buildSaraPlan(uid, !!unlockAll, { perDay, studyDays: days }); setBasket(smartBasket(p, st, !!unlockAll)); setNote('سارة عبّت السلة من تقدّمك ونقاط ضعفك (حوالي 4 أسابيع)'); };
+  const useBasket = async () => { setMode('basket'); await gen(perDay, days, 'basket', basket.items); setTab('week'); };
+  const useSmart = async () => { setMode('smart'); await gen(perDay, days, 'smart'); };
   const toggleDay = (d: number) => setDays(x => x.includes(d) ? (x.length > 1 ? x.filter(y => y !== d) : x) : [...x, d]);
   return (
     <div data-testid="study-plan" className="flex-1 min-h-0 p-2.5 flex flex-col gap-2 overflow-hidden">
-      <div className="grid grid-cols-3 gap-1 shrink-0">
-        {([['week', '🗓️ الأسبوع'], ['overview', '🧭 الخطة الكاملة'], ['curricula', '📚 المناهج']] as const).map(([k, l]) => (
-          <button key={k} data-testid={`plan-tab-${k}`} onClick={() => setTab(k)} className={`py-1.5 rounded-xl text-[12px] font-black border-2 ${tab === k ? 'bg-[#002147] text-amber-300 border-[#002147]' : 'bg-white text-[#002147] border-amber-300'}`}>{l}</button>
+      <div className="grid grid-cols-4 gap-1 shrink-0">
+        {([['week', '🗓️ الأسبوع'], ['overview', '🧭 الكاملة'], ['curricula', '📚 المناهج'], ['basket', `🧺 السلة${basket.items.length ? ` ${basket.items.length}` : ''}`]] as const).map(([k, l]) => (
+          <button key={k} data-testid={`plan-tab-${k}`} onClick={() => setTab(k)} className={`py-1.5 rounded-xl text-[11.5px] font-black border-2 truncate ${tab === k ? 'bg-[#002147] text-amber-300 border-[#002147]' : 'bg-white text-[#002147] border-amber-300'}`}>{l}</button>
         ))}
       </div>
-      {tab === 'overview' && <PlanOverview road={road} />}
-      {tab === 'curricula' && <PlanCurricula road={road} onOpenTrack={onOpenTrack} />}
+      {tab === 'overview' && <PlanOverview road={road} fromBasket={useB} />}
+      {tab === 'curricula' && <PlanCurricula road={road} onOpenTrack={onOpenTrack} onAdd={bAdd} onRemove={bRemove} note={note} />}
+      {tab === 'basket' && <PlanBasket road={basketRoad} count={basket.items.length} mode={mode} busy={busy} note={note} onSuggest={suggest} onClear={() => { setBasket([]); setNote(''); if (mode === 'basket') useSmart(); }}
+        onUse={useBasket} onSmart={useSmart} onRemoveTrack={id => setBasket(basket.items.filter(k => !k.startsWith(id + ':')))} onBrowse={() => setTab('curricula')} />}
       {tab === 'week' && <>
       <div className="rounded-2xl bg-[#002147] text-white p-2.5">
         <div className="flex items-center gap-2">
-          <p className="flex-1 text-[12px] font-black text-amber-300">خطة 7 أيام{plan ? ` · أنجزت ${doneN} من ${all.length}` : ''}</p>
+          <p className="flex-1 text-[12px] font-black text-amber-300 truncate">{plan?.fromBasket ? '🧺 خطتي من السلة' : '⚡ الخطة الذكية'} · 7 أيام{plan ? ` · ${doneN}/${all.length}` : ''}</p>
           <button data-testid="plan-regen" disabled={busy} onClick={() => gen()} className="px-2 py-1 rounded-lg bg-[#C49E3A] text-[#002147] text-[11px] font-black disabled:opacity-50">{busy ? '…' : '⚡ حدّث الخطة'}</button>
         </div>
         {(plan?.focusAr || []).slice(0, 2).map(f => <p key={f} className="text-[11px] font-bold text-white/85 truncate">• {f}</p>)}
@@ -359,14 +387,14 @@ const StudyPlan: React.FC<{ uid?: string; unlockAll?: boolean; onOpenTrack?: (tr
 const fmtDate = (iso: string) => iso ? new Date(iso + 'T00:00:00').toLocaleDateString('ar-SA', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
 const fmtMin = (m: number) => m >= 60 ? `${Math.floor(m / 60)} س${m % 60 ? ` ${m % 60} د` : ''}` : `${m} د`;
 /** The full smart plan: duration in months, finish date, daily/weekly time, per-track finish — all from real remaining lessons. */
-const PlanOverview: React.FC<{ road: Roadmap | null }> = ({ road }) => {
+const PlanOverview: React.FC<{ road: Roadmap | null; fromBasket?: boolean }> = ({ road, fromBasket }) => {
   if (!road) return <p className="text-center text-sm font-black text-[#002147] py-6">سارة تحسب خطتك الكاملة…</p>;
   const stat = (k: string, v: string) => <div key={k} className="rounded-xl bg-white border border-amber-300 px-1.5 py-1 text-center"><p className="text-[13px] font-black text-[#002147] tabular-nums">{v}</p><p className="text-[9.5px] font-bold text-slate-500">{k}</p></div>;
   return (
     <div data-testid="plan-overview" className="flex-1 min-h-0 flex flex-col gap-1.5 overflow-hidden">
       <div className="rounded-2xl bg-[#002147] text-white p-2.5 text-center">
         {road.remainingLessons ? <>
-          <p className="text-[11px] font-bold text-white/70">مدة خطتك الذكية حتى تخلص كل المناهج</p>
+          <p className="text-[11px] font-bold text-white/70">{fromBasket ? 'مدة خطتك حتى تخلص دروس سلتك' : 'مدة خطتك الذكية حتى تخلص كل المناهج'}</p>
           <p data-testid="plan-months" className="text-[22px] font-black text-amber-300 leading-tight">{road.months} {road.months <= 2 ? 'شهر' : 'أشهر'} <span className="text-[12px] text-white/80">({road.weeks} أسبوع)</span></p>
           <p className="text-[11px] font-bold text-white/85">تخلص تقريباً في {fmtDate(road.finish)}</p>
         </> : <p className="text-[15px] font-black text-amber-300 py-2">خلصت كل الدروس المتاحة 🎉</p>}
@@ -381,7 +409,7 @@ const PlanOverview: React.FC<{ road: Roadmap | null }> = ({ road }) => {
       </div>
       <p className="text-[11px] font-black text-[#002147]">متى تخلص كل منهج:</p>
       <div className="flex-1 min-h-0 grid gap-1 content-start overflow-hidden">
-        {road.tracks.map(t => (
+        {road.tracks.filter(t => !fromBasket || t.total).map(t => (
           <div key={t.id} data-testid="plan-track-row" className="flex items-center gap-2 rounded-lg bg-white border border-slate-200 px-2 py-0.5">
             <p className="w-24 shrink-0 text-[11px] font-black text-[#002147] truncate">{t.titleAr}</p>
             <div className="flex-1 h-1.5 rounded bg-slate-200"><div className="h-full rounded bg-[#C49E3A]" style={{ width: `${t.total ? (t.done / t.total) * 100 : 0}%` }} /></div>
@@ -395,9 +423,45 @@ const PlanOverview: React.FC<{ road: Roadmap | null }> = ({ road }) => {
   );
 };
 
+/** 🧺 Lesson basket: the student's own pick of lessons from all curricula → their plan. */
+const PlanBasket: React.FC<{ road: Roadmap | null; count: number; mode: 'smart' | 'basket'; busy: boolean; note: string; onSuggest: () => void; onClear: () => void; onUse: () => void; onSmart: () => void; onRemoveTrack: (id: string) => void; onBrowse: () => void }> = ({ road, count, mode, busy, note, onSuggest, onClear, onUse, onSmart, onRemoveTrack, onBrowse }) => {
+  const rows = road ? road.tracks.filter(t => t.total) : [];
+  return (
+    <div data-testid="plan-basket" className="flex-1 min-h-0 flex flex-col gap-1.5 overflow-hidden">
+      <div className="rounded-2xl bg-[#002147] text-white p-2.5 text-center">
+        <p className="text-[11px] font-bold text-white/70">سلة دروسك 🧺 — اختر بنفسك من كل المناهج</p>
+        <p data-testid="basket-count" className="text-[22px] font-black text-amber-300 leading-tight">{count} درس</p>
+        {road && road.remainingLessons > 0 ? <p data-testid="basket-time" className="text-[11px] font-bold text-white/85">≈ {road.months} {road.months <= 2 ? 'شهر' : 'أشهر'} ({road.weeks} أسبوع) · {road.minutesPerDay} د باليوم · تخلص {fmtDate(road.finish)}</p>
+          : <p className="text-[11px] font-bold text-white/70">{count ? 'خلصت كل دروس سلتك 🎉' : 'السلة فاضية — أضف دروس من «المناهج» أو خلّ سارة تقترح'}</p>}
+      </div>
+      <div className="grid grid-cols-2 gap-1">
+        <button data-testid="basket-suggest" disabled={busy} onClick={onSuggest} className="py-1.5 rounded-xl bg-[#C49E3A] text-[#002147] text-[12px] font-black disabled:opacity-50">✨ اقتراح سارة الذكي</button>
+        <button data-testid="basket-browse" onClick={onBrowse} className="py-1.5 rounded-xl bg-white border-2 border-amber-300 text-[#002147] text-[12px] font-black">📚 أضف من المناهج</button>
+      </div>
+      {note && <p data-testid="basket-note" className="text-[10px] font-bold text-amber-700 truncate">{note}</p>}
+      <div className="flex-1 min-h-0 grid gap-1 content-start overflow-hidden">
+        {rows.map(t => (
+          <div key={t.id} data-testid="basket-row" className="flex items-center gap-2 rounded-lg bg-white border border-slate-200 px-2 py-1">
+            <p className="flex-1 min-w-0 text-[11.5px] font-black text-[#002147] truncate">{t.titleAr}</p>
+            <p className="text-[10px] font-bold text-slate-500 tabular-nums">{t.total} درس{t.done ? ` · ✅${t.done}` : ''} · {fmtMin(t.minutesLeft)}</p>
+            <p className="w-20 text-[10px] font-black text-amber-700 text-left truncate">{t.remaining ? fmtDate(t.finish || '') : '✅'}</p>
+            <button onClick={() => onRemoveTrack(t.id)} aria-label="شيل" className="w-5 h-5 rounded-full bg-slate-100 text-slate-500 text-[11px] font-black">×</button>
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-[1fr_auto] gap-1">
+        <button data-testid="basket-use" disabled={!count || busy} onClick={onUse} className="py-2 rounded-xl bg-[#002147] text-amber-300 text-[12.5px] font-black disabled:opacity-40">📅 ولّد خطتي من السلة</button>
+        {count > 0 && <button data-testid="basket-clear" onClick={onClear} className="px-3 rounded-xl bg-white border border-slate-300 text-slate-600 text-[11px] font-black">تفريغ</button>}
+      </div>
+      {mode === 'basket' && <button data-testid="basket-smart" onClick={onSmart} className="text-[10.5px] font-black text-[#002147] underline">رجوع للخطة الذكية التلقائية</button>}
+      <p className="text-[9.5px] font-bold text-slate-500 leading-snug">الوقت تقدير: ~{LESSON_MIN('foundations')} د لدرس المسارات الأساسية و~{LESSON_MIN('vocabulary')} د للجديدة. الدروس تنفتح بالترتيب، فإضافة درس مقفول تضيف اللي قبله.</p>
+    </div>
+  );
+};
+
 const STATE_CLS: Record<string, string> = { done: 'bg-emerald-500 text-white', next: 'bg-[#C49E3A] text-[#002147] ring-2 ring-[#002147]', open: 'bg-white text-[#002147] border border-amber-300', locked: 'bg-slate-200 text-slate-400', soon: 'bg-slate-100 text-slate-300 border border-dashed border-slate-300' };
 /** All curricula: every track → level → lesson, with real done/next/locked state. One track and one block of 30 at a time (no scroll). */
-const PlanCurricula: React.FC<{ road: Roadmap | null; onOpenTrack?: (id: string) => void }> = ({ road, onOpenTrack }) => {
+const PlanCurricula: React.FC<{ road: Roadmap | null; onOpenTrack?: (id: string) => void; onAdd: (t: string, o: number[]) => void; onRemove: (t: string, o: number[]) => void; note: string }> = ({ road, onOpenTrack, onAdd, onRemove, note }) => {
   const [tid, setTid] = useState<string>('');
   const [lv, setLv] = useState(0);
   const [pg, setPg] = useState(0);
@@ -430,17 +494,23 @@ const PlanCurricula: React.FC<{ road: Roadmap | null; onOpenTrack?: (id: string)
       )}
       <div className="flex items-center gap-2 text-[10.5px] font-bold text-slate-600">
         <span className="flex-1 truncate">{level.titleAr}{level.testPassed === true ? ' · اختبار المستوى ✅' : level.testPassed === false ? ' · اختبار المستوى لم يُجتز' : ''}</span>
+        {(() => { const free = level.lessons.filter(l => l.state !== 'done' && l.state !== 'soon'); const allIn = free.length > 0 && free.every(l => l.inBasket);
+          const tFree = t.levels.flatMap(v => v.lessons).filter(l => l.state !== 'done' && l.state !== 'soon'); const tIn = tFree.length > 0 && tFree.every(l => l.inBasket);
+          return <>{free.length > 0 && <button data-testid="basket-level" onClick={() => allIn ? onRemove(t.id, free.map(l => l.order)) : onAdd(t.id, free.map(l => l.order))} className="px-1.5 rounded bg-white border border-amber-300 text-[#002147] font-black">{allIn ? '− المستوى' : '+ المستوى'}</button>}
+            {t.levels.length > 1 && tFree.length > 0 && <button data-testid="basket-track" onClick={() => tIn ? onRemove(t.id, tFree.map(l => l.order)) : onAdd(t.id, tFree.map(l => l.order))} className="px-1.5 rounded bg-[#002147] text-amber-300 font-black">{tIn ? '− المنهج' : '+ المنهج'}</button>}</>; })()}
         {pages > 1 && <><button disabled={pg === 0} onClick={() => setPg(pg - 1)} className="px-1.5 rounded bg-white border border-amber-300 disabled:opacity-30">›</button><span>{pg + 1}/{pages}</span><button disabled={pg >= pages - 1} onClick={() => setPg(pg + 1)} className="px-1.5 rounded bg-white border border-amber-300 disabled:opacity-30">‹</button></>}
       </div>
       <div data-testid="plan-cur-grid" className="grid grid-cols-6 gap-1">
-        {chunk.map(l => <button key={l.order} onClick={() => setPick(l.order)} className={`h-7 rounded-lg text-[11px] font-black tabular-nums ${STATE_CLS[l.state]} ${pick === l.order ? 'outline outline-2 outline-[#002147]' : ''}`}>{l.num}</button>)}
+        {chunk.map(l => <button key={l.order} onClick={() => setPick(l.order)} className={`relative h-7 rounded-lg text-[11px] font-black tabular-nums ${STATE_CLS[l.state]} ${pick === l.order ? 'outline outline-2 outline-[#002147]' : ''}`}>{l.num}{l.inBasket && <span data-testid="basket-dot" className="absolute -top-1 left-0 w-3 h-3 rounded-full bg-[#C49E3A] border border-white text-[7px] leading-[10px] text-[#002147]">🧺</span>}</button>)}
       </div>
       <div className="rounded-xl bg-white border border-amber-300 px-2.5 py-1.5 min-h-[44px]">
         {picked ? <>
           <p className="text-[12px] font-black text-[#002147] truncate">{picked.num}. {picked.titleAr}</p>
           <div className="flex items-center gap-2"><p className="flex-1 text-[10.5px] font-bold text-slate-500">{stLabel[picked.state]}</p>
+            {picked.state !== 'done' && picked.state !== 'soon' && <button data-testid="basket-lesson" onClick={() => picked.inBasket ? onRemove(t.id, [picked.order]) : onAdd(t.id, [picked.order])} className={`px-2 py-0.5 rounded-lg text-[11px] font-black border ${picked.inBasket ? 'bg-white text-[#002147] border-amber-300' : 'bg-[#C49E3A] text-[#002147] border-[#C49E3A]'}`}>{picked.inBasket ? '− من السلة' : '+ للسلة'}</button>}
             {(picked.state === 'next' || picked.state === 'open') && onOpenTrack && <button onClick={() => onOpenTrack(t.id)} className="px-2 py-0.5 rounded-lg bg-[#002147] text-amber-300 text-[11px] font-black">ابدأ</button>}</div>
-        </> : <p className="text-[11px] font-bold text-slate-500">اضغط رقم أي درس لتشوف اسمه وحالته. 🟩 خلصته · 🟨 التالي · ⬜ مقفول</p>}
+        </> : <p className="text-[11px] font-bold text-slate-500">اضغط رقم أي درس لتشوفه وتضيفه للسلة 🧺. 🟩 خلصته · 🟨 التالي · ⬜ مقفول</p>}
+        {note && <p data-testid="basket-note" className="text-[10px] font-bold text-amber-700 truncate">{note}</p>}
       </div>
     </div>
   );
