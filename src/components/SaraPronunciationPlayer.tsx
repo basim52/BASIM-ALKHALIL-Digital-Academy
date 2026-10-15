@@ -1,6 +1,7 @@
 import MixedText from './MixedText';
 import { SaraNewLevelTest } from './SaraNewLevelTest';
 import SaraLevelledList from './SaraLevelledList';
+import SaraLessonBoard from './SaraLessonBoard';
 import { levelTitleAr, type NewLevelId } from '../lib/saraNewTrackTests';
 import React, { useEffect, useState } from 'react';
 import { X, ArrowRight, Lock, CheckCircle2, Volume2, RotateCcw } from 'lucide-react';
@@ -24,7 +25,7 @@ function useSara() {
   return { state, play };
 }
 
-const Lesson: React.FC<{ l: SaraPronLesson; onBack: () => void; onPassed: () => void }> = ({ l, onBack, onPassed }) => {
+const Lesson: React.FC<{ l: SaraPronLesson; onBack: () => void; onPassed: () => void; onBoard?: () => void }> = ({ l, onBack, onPassed, onBoard }) => {
   const { state, play } = useSara();
   const [picked, setPicked] = useState<(number | null)[]>(l.exercises.map(() => null));
   const [tries, setTries] = useState(0);
@@ -52,6 +53,7 @@ const Lesson: React.FC<{ l: SaraPronLesson; onBack: () => void; onPassed: () => 
       <div className="flex items-center gap-2">
         <button onClick={onBack} className="p-1.5 rounded-lg bg-[#002147] text-white" aria-label="back"><ArrowRight size={16} /></button>
         <p className="flex-1 text-[14px] font-black text-[#002147] truncate">{((l.order - 1) % 30) + 1}. {l.titleAr}</p>
+        {onBoard && <button onClick={() => { saraStopNarrator(); onBoard(); }} data-testid="open-board" className="shrink-0 px-1.5 py-1 rounded-lg bg-[#083344] text-teal-100 border border-teal-400/60 text-[10px] font-black leading-tight">🧑‍🏫 اشرح بالسبورة التفاعلية</button>}
         <span dir="ltr" className="text-[10px] font-black px-1.5 rounded bg-[#002147] text-amber-300">{l.titleEn}</span>
       </div>
       <div className="flex gap-1.5">
@@ -94,9 +96,19 @@ const Lesson: React.FC<{ l: SaraPronLesson; onBack: () => void; onPassed: () => 
   );
 };
 
+/** Whiteboard version of a pronunciation lesson: the idea in points, the words/pairs, then the same exercises (Sara plays the audio). */
+const boardOf = (l: SaraPronLesson) => ({
+  titleAr: l.titleAr, titleEn: l.titleEn,
+  points: l.ideaAr.split(/(?<=[.!؟?:])\s+/).filter(Boolean).slice(0, 5),
+  examplesTitle: l.pairs ? 'الكلمات المتشابهة' : 'كلمات للتدريب', compactExamples: true,
+  examples: [...(l.pairs ? l.pairs.map(p => ({ en: `${p[0]} / ${p[1]}` })) : (l.words || []).map(w => ({ en: w }))), { en: l.sayEn }],
+  questions: l.exercises.map(e => ({ promptAr: e.promptAr, options: e.options, correctIndex: e.correctIndex, play: e.play })),
+});
+
 export const SaraPronunciationPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll }) => {
   const [unlockedRaw, setUnlocked] = useState(() => readUnlocked(PRONUNCIATION_TRACK_ID, uid));
   const [active, setActive] = useState<SaraPronLesson | null>(null);
+  const [board, setBoard] = useState(false);
   const [testing, setTesting] = useState<NewLevelId | null>(null);
   const [testTick, setTestTick] = useState(0);
   useEffect(() => {
@@ -124,7 +136,9 @@ export const SaraPronunciationPlayer: React.FC<Props> = ({ isOpen, onClose, uid,
           <span className="text-[11px] text-amber-300 font-bold">{passed}/{PRONUNCIATION_LESSONS.length}</span>
           <button onClick={() => { saraStopNarrator(); onClose(); }} className="p-1.5 rounded-lg hover:bg-white/10" aria-label="close"><X size={18} /></button>
         </div>
-        {active ? <Lesson key={active.id} l={active} onBack={() => setActive(null)} onPassed={() => onPassed(active)} /> : (
+        {active ? (board ? <SaraLessonBoard key={'board-' + active.id} {...boardOf(active)} onClose={() => setBoard(false)} onPassed={() => onPassed(active)}
+            onNextLesson={(active.order % 30 ? PRONUNCIATION_LESSONS[active.order] : undefined) ? () => { setBoard(false); setActive((active.order % 30 ? PRONUNCIATION_LESSONS[active.order] : undefined)!); } : undefined} />
+          : <Lesson key={active.id} l={active} onBack={() => { setBoard(false); setActive(null); }} onPassed={() => onPassed(active)} onBoard={() => setBoard(true)} />) : (
           <SaraLevelledList lessons={PRONUNCIATION_LESSONS} unlockedRaw={unlockedRaw} unlockAll={unlockAll} uid={uid} track="pronunciation" trackId={PRONUNCIATION_TRACK_ID}
             refresh={testTick} onOpen={l => setActive(PRONUNCIATION_LESSONS.find(x => x.id === l.id) || null)} onTest={lv => setTesting(lv)} />
         )}
