@@ -30,6 +30,13 @@ export const FREE_CALL_PRESET: CallPreset = {
   starterSaraSpeech: "Hi! Let's just chat in English. What would you like to talk about today?", starterSaraSpeechAr: '',
 };
 
+/** Open free chat loosely seeded with a lesson topic (still pure free mode: same id → no targets, no corrections, closing review). */
+export const freeCallPresetFor = (titleEn: string, titleAr: string): CallPreset => ({
+  ...FREE_CALL_PRESET, titleAr: `محاورة سارة: ${titleAr}`, titleEn: `Chat with Sara: ${titleEn}`,
+  initialPrompt: `${FREE_CALL_PRESET.initialPrompt} The student was just studying "${titleEn}"; you may touch on it lightly at the start, but follow whatever they want to talk about.`,
+  starterSaraSpeech: `Hi! We were just looking at "${titleEn}". We can chat about that, or anything you like. What's on your mind?`,
+});
+
 /** The two buttons shown after a lesson's exercises, plus the call screen. Sara's cloud voice only (call engine). */
 const SaraLessonCall: React.FC<{ preset: CallPreset; uid?: string; level?: string; withFree?: boolean; studentName?: string; label?: string }> = ({ preset, uid, level, withFree, studentName, label }) => {
   const [open, setOpen] = useState<CallPreset | null>(null);

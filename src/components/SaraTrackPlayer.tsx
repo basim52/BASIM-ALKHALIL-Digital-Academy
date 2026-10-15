@@ -7,7 +7,8 @@ import { prefetchAcademyAudio, cancelAllSpeech, createManagedAudio } from '../li
 import { boardLinesToSpeech } from '../utils/boardToSpeech';
 import { LEGACY_TRACK_IDS, migrateLegacyCount } from '../data/saraTracks/fromCurriculum';
 import { pushTrackProgress, markLastTrack } from '../lib/saraProgressSync';
-import SaraLessonCall, { lessonCallPreset } from './SaraLessonCall';
+import SaraLessonCall, { lessonCallPreset, freeCallPresetFor } from './SaraLessonCall';
+import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
 import { trackLevels, buildLevelTest, scoreLevelTest, saveLevelTestAttempt, LEVEL_TEST_PASS, type LevelTestQuestion, type LevelTestAttempt } from '../lib/saraLevelTests';
 
 interface Props {
@@ -163,6 +164,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   const [speaking, setSpeaking] = useState(false);
   const [activeSeg, setActiveSeg] = useState(-1);
   const [blocked, setBlocked] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const [askOpen, setAskOpen] = useState(false);
   const [askText, setAskText] = useState('');
   const [askReply, setAskReply] = useState('');
@@ -351,7 +353,10 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                 <button onClick={speak} data-testid="sara-retry" className="px-2 py-1 rounded-xl bg-rose-100 border border-rose-300 text-rose-700 text-[11px] font-black shrink-0">🔄 إعادة المحاولة</button>
               )}
               <span className="flex-1" />
-              <button onClick={() => { stop(); setAskOpen(true); }} className="px-2 py-1 rounded-xl bg-white border-2 border-[#002147]/20 text-[#002147] text-[11px] font-black shrink-0">❓ اسأل سارة</button>
+            </div>
+            <div className="flex gap-1.5 -mt-0.5">
+              <button onClick={() => { stop(); setAskOpen(true); }} className="flex-1 py-1 rounded-xl bg-white border-2 border-[#002147]/20 text-[#002147] text-[11px] font-black">❓ اسأل سارة</button>
+              <button onClick={() => { stop(); setChatOpen(true); }} data-testid="lesson-free-chat" className="flex-1 py-1 rounded-xl bg-[#002147] border-2 border-[#C49E3A] text-amber-300 text-[11px] font-black">💬 محاورة سارة</button>
             </div>
             <div className={`rounded-2xl p-2.5 border-2 transition-all ${activeSeg === 1 ? 'ring-4 ring-amber-300/70' : ''} ${useAlt ? 'bg-sky-50 border-sky-300' : 'bg-white border-amber-200'}`}>
               {useAlt && <p className="text-[11px] font-black text-sky-700 mb-1">سارة تشرحها لك بطريقة ثانية 👇</p>}
@@ -543,6 +548,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
             )}
           </div>
         )}
+        {chatOpen && lesson && <SaraLivePhoneCallModal isOpen onClose={() => setChatOpen(false)} studentName="" studentLevel="A2" isRtl studentId={uid} preset={freeCallPresetFor(lesson.titleEn, lesson.titleAr)} />}
         {/* ❓ Ask Sara sheet (overlay, does not affect the page layout) */}
         {askOpen && lesson?.content && (
           <div className="absolute inset-0 z-10 bg-slate-950/40 flex items-end" onClick={() => { stop(); setAskOpen(false); }}>
