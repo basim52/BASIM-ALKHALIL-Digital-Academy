@@ -8,15 +8,37 @@ import { registerRoutes } from "./src/server/routes";
 
 const logToFile = (msg: string) => console.log(`[Server] ${msg}`);
 
+// Catch unhandled exceptions and rejections so dev server process never dies
+process.on('uncaughtException', (err) => {
+  console.error('[Server UncaughtException]', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[Server UnhandledRejection]', reason);
+});
+
 async function startServer() {
   const app = express();
   app.use(express.json({ limit: "15mb" }));
   app.use(express.urlencoded({ extended: true, limit: "15mb" }));
   const server = createServer(app);
   const wss = new WebSocketServer({ noServer: true });
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
+
+  server.on('error', (err: any) => {
+    console.error('[Server HTTP Error]', err);
+  });
+
+  wss.on('error', (err: any) => {
+    console.error('[Server WSS Error]', err);
+  });
 
   server.on('upgrade', (request, socket, head) => {
+    socket.on('error', (err) => {
+      // Prevent unhandled socket error event from terminating the process
+      logToFile(`[Socket Error] ${err?.message || err}`);
+    });
+
     const rawUrl = request.url || '';
     const pathname = rawUrl.split('?')[0];
     
@@ -69,4 +91,7 @@ async function startServer() {
   });
 }
 
-startServer();
+startServer().catch((err) => {
+  console.error('[Fatal Error Starting Server]', err);
+});
+

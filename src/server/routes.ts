@@ -610,9 +610,9 @@ Looking forward to your reply. Tell me what we're tackling first!`;
     } catch { return res.status(403).json({ error: "FORBIDDEN" }); }
   });
 
-  // Root test route
-  app.get(["/ping", "/api/ping"], (req, res) => {
-    res.json({ ok: true });
+  // Root test & health check routes
+  app.get(["/ping", "/api/ping", "/health", "/api/health"], (req, res) => {
+    res.json({ ok: true, status: "healthy" });
   });
 
 
