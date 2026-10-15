@@ -273,19 +273,24 @@ const Worksheet: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid, unloc
 /* ---------------- 🗓️ Study plan ---------------- */
 const DAYS = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
 const KIND_ICON: Record<PlanKind, string> = { lesson: '📘', review: '🔁', test: '🏁', exam: '🎓', catchup: '🛟' };
+type PlanTab = 'week' | 'overview' | 'curricula' | 'basket';
+interface PlanSettings { perDay: number; studyDays: number[]; mode: 'smart' | 'basket'; tab?: PlanTab; ticks: Record<string, Record<string, boolean>>; updatedAt: number }
 const StudyPlan: React.FC<{ uid?: string; unlockAll?: boolean; onOpenTrack?: (trackId: string) => void }> = ({ uid, unlockAll, onOpenTrack }) => {
   const [plan, setPlan] = useState<SaraPlan | null>(() => readSavedPlan(uid));
   const [st, setSt] = useState<PlanState | null>(null);
   const [busy, setBusy] = useState(false);
   const [sel, setSel] = useState<number>(() => new Date().getDay());
-  const [perDay, setPerDay] = useState(plan?.perDay || 2);
-  const [days, setDays] = useState<number[]>(plan?.studyDays || DEFAULT_STUDY_DAYS);
+  // Plan settings follow the student's account (users/{uid}.saraPlanSettings), newest copy wins — same as the basket.
+  const skey = `sara_plan_settings_${uid || 'guest'}`;
+  const saved0 = useMemo(() => lsGet<PlanSettings | null>(skey, null), [skey]);
+  const [perDay, setPerDay] = useState(saved0?.perDay || plan?.perDay || 2);
+  const [days, setDays] = useState<number[]>(saved0?.studyDays?.length ? saved0.studyDays : plan?.studyDays || DEFAULT_STUDY_DAYS);
   const ck = `sara_plan_v2_done_${uid || 'guest'}_${plan?.weekStart || ''}`;
   useEffect(() => { setTicks(lsGet(ck, {})); }, [ck]); // eslint-disable-line react-hooks/exhaustive-deps
   const [ticks, setTicks] = useState<Record<string, boolean>>(() => lsGet(ck, {}));
   const [basket, setBasketS] = useState<BasketData>(() => readBasket(uid));
   const modeKey = `sara_plan_mode_${uid || 'guest'}`;
-  const [mode, setModeS] = useState<'smart' | 'basket'>(() => ((lsGet(modeKey, 'smart' as string) as string) === 'basket' ? 'basket' : 'smart'));
+  const [mode, setModeS] = useState<'smart' | 'basket'>(() => ((saved0?.mode || (lsGet(modeKey, 'smart' as string) as string)) === 'basket' ? 'basket' : 'smart'));
   const setMode = (m: 'smart' | 'basket') => { setModeS(m); lsSet(modeKey, m); };
   const setBasket = (items: string[]) => {
     const b = { items, updatedAt: Date.now() }; setBasketS(b); writeBasketLocal(uid, b);
@@ -301,14 +306,46 @@ const StudyPlan: React.FC<{ uid?: string; unlockAll?: boolean; onOpenTrack?: (tr
     if (!readSavedPlan(uid)) gen();
     // basket from the account (newer copy wins), so it follows the student across devices
     if (uid) getDoc(doc(db, 'users', uid)).then(snap => { const r = snap.data()?.saraBasket as BasketData | undefined;
-      if (r && Array.isArray(r.items) && (r.updatedAt || 0) > (readBasket(uid).updatedAt || 0)) { const b = { items: cleanBasket(r.items), updatedAt: r.updatedAt }; setBasketS(b); writeBasketLocal(uid, b); } }).catch(() => {});
+      let items = basket.items;
+      if (r && Array.isArray(r.items) && (r.updatedAt || 0) > (readBasket(uid).updatedAt || 0)) { const b = { items: cleanBasket(r.items), updatedAt: r.updatedAt }; items = b.items; setBasketS(b); writeBasketLocal(uid, b); }
+      const rs = snap.data()?.saraPlanSettings as PlanSettings | undefined;
+      if (rs && (rs.updatedAt || 0) > (lsGet<PlanSettings | null>(skey, null)?.updatedAt || 0)) applyRemote(rs, items);
+    }).catch(() => {});
   }, [uid]); // eslint-disable-line react-hooks/exhaustive-deps
   const wsMs = plan ? new Date(plan.weekStart + 'T00:00:00').getTime() : Date.now();
   const isDone = (t: PlanTask) => (st && taskDone(t, st, wsMs)) || !!ticks[t.key];
   const all = plan ? plan.days.flatMap(d => d.tasks) : [];
   const doneN = all.filter(isDone).length;
   const day = plan?.days.find(d => d.dayIdx === sel);
-  const [tab, setTab] = useState<'week' | 'overview' | 'curricula' | 'basket'>('week');
+  const [tab, setTab] = useState<PlanTab>(() => saved0?.tab || 'week');
+  // ---- settings sync: local now, account debounced ----
+  const content = (): Omit<PlanSettings, 'updatedAt'> => {
+    const prev = lsGet<PlanSettings | null>(skey, null)?.ticks || {};
+    const t: Record<string, Record<string, boolean>> = { ...prev }; if (plan?.weekStart) t[plan.weekStart] = ticks;
+    const keep = Object.keys(t).sort().slice(-3); const tk: Record<string, Record<string, boolean>> = {}; keep.forEach(k => { tk[k] = t[k]; });
+    return { perDay, studyDays: days, mode, tab, ticks: tk };
+  };
+  const lastRef = useRef<string>(saved0 ? JSON.stringify({ perDay: saved0.perDay, studyDays: saved0.studyDays, mode: saved0.mode, tab: saved0.tab, ticks: saved0.ticks }) : '');
+  const pushTimer = useRef<any>(null);
+  useEffect(() => {
+    const c = content(); const j = JSON.stringify(c);
+    if (!lastRef.current) { lastRef.current = j; return; } // first render without saved settings: nothing changed yet
+    if (j === lastRef.current) return;
+    lastRef.current = j;
+    const full: PlanSettings = { ...c, updatedAt: Date.now() }; lsSet(skey, full);
+    if (uid) { clearTimeout(pushTimer.current); pushTimer.current = setTimeout(() => { void updateDoc(doc(db, 'users', uid), { saraPlanSettings: full }).catch(() => {}); }, 1200); }
+  }, [perDay, days, mode, tab, ticks, plan?.weekStart]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => clearTimeout(pushTimer.current), []);
+  function applyRemote(rs: PlanSettings, items: string[]) {
+    const pd = rs.perDay || 2; const sd = rs.studyDays?.length ? rs.studyDays : DEFAULT_STUDY_DAYS; const m = rs.mode === 'basket' ? 'basket' : 'smart';
+    lastRef.current = JSON.stringify({ perDay: rs.perDay, studyDays: rs.studyDays, mode: rs.mode, tab: rs.tab, ticks: rs.ticks });
+    lsSet(skey, rs); lsSet(modeKey, m);
+    setPerDay(pd); setDays(sd); setModeS(m); if (rs.tab) setTab(rs.tab);
+    const cur = readSavedPlan(uid);
+    const go = !cur || cur.perDay !== pd || JSON.stringify(cur.studyDays) !== JSON.stringify(sd) || !!cur.fromBasket !== (m === 'basket' && items.length > 0);
+    const apply = (ws?: string) => { const tk = ws && rs.ticks?.[ws]; if (tk) { lsSet(`sara_plan_v2_done_${uid || 'guest'}_${ws}`, tk); setTicks(tk); } };
+    if (go) void gen(pd, sd, m, items).then(p => apply(p.weekStart)); else apply(cur?.weekStart);
+  }
   const useB = mode === 'basket' && basket.items.length > 0;
   const road: Roadmap | null = useMemo(() => (st ? buildRoadmap(st, { perDay, studyDays: days, unlockAll: !!unlockAll, priorityTrackId: useB ? undefined : plan?.priorityTrackId, basket: basket.items, basketOnly: useB }) : null), [st, perDay, days, unlockAll, plan?.priorityTrackId, basket.items, useB]);
   const basketRoad: Roadmap | null = useMemo(() => (st && basket.items.length ? buildRoadmap(st, { perDay, studyDays: days, unlockAll: !!unlockAll, basket: basket.items, basketOnly: true }) : null), [st, perDay, days, unlockAll, basket.items]);
