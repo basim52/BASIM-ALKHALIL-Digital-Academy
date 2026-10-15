@@ -10,6 +10,7 @@ import { readUnlocked, saraNarrate, saraStopNarrator, saraUnlockNarrator } from 
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { savePlacementLevel } from '../lib/placement';
+import { buildRoadmap, LESSON_MIN, type Roadmap } from '../lib/saraPlan';
 import { buildSaraPlan, loadPlanState, taskDone, readSavedPlan, savePlan, weekStartIso, WEEK_ORDER, DEFAULT_STUDY_DAYS, type SaraPlan, type PlanState, type PlanTask, type PlanKind } from '../lib/saraPlan';
 import { trackLevels, saveLevelTestAttempt, summarizeLevelTests, type LevelTestAttempt } from '../lib/saraLevelTests';
 
@@ -289,9 +290,19 @@ const StudyPlan: React.FC<{ uid?: string; unlockAll?: boolean; onOpenTrack?: (tr
   const all = plan ? plan.days.flatMap(d => d.tasks) : [];
   const doneN = all.filter(isDone).length;
   const day = plan?.days.find(d => d.dayIdx === sel);
+  const [tab, setTab] = useState<'week' | 'overview' | 'curricula'>('week');
+  const road: Roadmap | null = useMemo(() => (st ? buildRoadmap(st, { perDay, studyDays: days, unlockAll: !!unlockAll, priorityTrackId: plan?.priorityTrackId }) : null), [st, perDay, days, unlockAll, plan?.priorityTrackId]);
   const toggleDay = (d: number) => setDays(x => x.includes(d) ? (x.length > 1 ? x.filter(y => y !== d) : x) : [...x, d]);
   return (
     <div data-testid="study-plan" className="flex-1 min-h-0 p-2.5 flex flex-col gap-2 overflow-hidden">
+      <div className="grid grid-cols-3 gap-1 shrink-0">
+        {([['week', '🗓️ الأسبوع'], ['overview', '🧭 الخطة الكاملة'], ['curricula', '📚 المناهج']] as const).map(([k, l]) => (
+          <button key={k} data-testid={`plan-tab-${k}`} onClick={() => setTab(k)} className={`py-1.5 rounded-xl text-[12px] font-black border-2 ${tab === k ? 'bg-[#002147] text-amber-300 border-[#002147]' : 'bg-white text-[#002147] border-amber-300'}`}>{l}</button>
+        ))}
+      </div>
+      {tab === 'overview' && <PlanOverview road={road} />}
+      {tab === 'curricula' && <PlanCurricula road={road} onOpenTrack={onOpenTrack} />}
+      {tab === 'week' && <>
       <div className="rounded-2xl bg-[#002147] text-white p-2.5">
         <div className="flex items-center gap-2">
           <p className="flex-1 text-[12px] font-black text-amber-300">خطة 7 أيام{plan ? ` · أنجزت ${doneN} من ${all.length}` : ''}</p>
@@ -339,6 +350,97 @@ const StudyPlan: React.FC<{ uid?: string; unlockAll?: boolean; onOpenTrack?: (tr
             </div>
             <p className="text-[10.5px] font-bold text-slate-500 truncate">{t.reasonAr}</p>
           </div>); })}
+      </div>
+      </>}
+    </div>
+  );
+};
+
+const fmtDate = (iso: string) => iso ? new Date(iso + 'T00:00:00').toLocaleDateString('ar-SA', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+const fmtMin = (m: number) => m >= 60 ? `${Math.floor(m / 60)} س${m % 60 ? ` ${m % 60} د` : ''}` : `${m} د`;
+/** The full smart plan: duration in months, finish date, daily/weekly time, per-track finish — all from real remaining lessons. */
+const PlanOverview: React.FC<{ road: Roadmap | null }> = ({ road }) => {
+  if (!road) return <p className="text-center text-sm font-black text-[#002147] py-6">سارة تحسب خطتك الكاملة…</p>;
+  const stat = (k: string, v: string) => <div key={k} className="rounded-xl bg-white border border-amber-300 px-1.5 py-1 text-center"><p className="text-[13px] font-black text-[#002147] tabular-nums">{v}</p><p className="text-[9.5px] font-bold text-slate-500">{k}</p></div>;
+  return (
+    <div data-testid="plan-overview" className="flex-1 min-h-0 flex flex-col gap-1.5 overflow-hidden">
+      <div className="rounded-2xl bg-[#002147] text-white p-2.5 text-center">
+        {road.remainingLessons ? <>
+          <p className="text-[11px] font-bold text-white/70">مدة خطتك الذكية حتى تخلص كل المناهج</p>
+          <p data-testid="plan-months" className="text-[22px] font-black text-amber-300 leading-tight">{road.months} {road.months <= 2 ? 'شهر' : 'أشهر'} <span className="text-[12px] text-white/80">({road.weeks} أسبوع)</span></p>
+          <p className="text-[11px] font-bold text-white/85">تخلص تقريباً في {fmtDate(road.finish)}</p>
+        </> : <p className="text-[15px] font-black text-amber-300 py-2">خلصت كل الدروس المتاحة 🎉</p>}
+      </div>
+      <div className="grid grid-cols-3 gap-1">
+        {stat('درس متبقي', `${road.remainingLessons} من ${road.totalLessons}`)}
+        {stat('درس أنجزته', String(road.doneLessons))}
+        {stat('اختبار مستوى باقي', String(road.testsLeft))}
+        {stat('دقائق باليوم (تقدير)', `${road.minutesPerDay}`)}
+        {stat('بالأسبوع (تقدير)', fmtMin(road.weeklyMinutes))}
+        {stat('دروس × أيام', `${road.perDay} × ${road.studyDaysPerWeek}`)}
+      </div>
+      <p className="text-[11px] font-black text-[#002147]">متى تخلص كل منهج:</p>
+      <div className="flex-1 min-h-0 grid gap-1 content-start overflow-hidden">
+        {road.tracks.map(t => (
+          <div key={t.id} data-testid="plan-track-row" className="flex items-center gap-2 rounded-lg bg-white border border-slate-200 px-2 py-0.5">
+            <p className="w-24 shrink-0 text-[11px] font-black text-[#002147] truncate">{t.titleAr}</p>
+            <div className="flex-1 h-1.5 rounded bg-slate-200"><div className="h-full rounded bg-[#C49E3A]" style={{ width: `${t.total ? (t.done / t.total) * 100 : 0}%` }} /></div>
+            <p className="w-12 shrink-0 text-[10px] font-bold text-slate-500 tabular-nums text-center">{t.done}/{t.total}</p>
+            <p className="w-24 shrink-0 text-[10px] font-black text-amber-700 text-left truncate">{t.remaining ? fmtDate(t.finish || '') : '✅ خلص'}</p>
+          </div>
+        ))}
+      </div>
+      <p className="text-[9.5px] font-bold text-slate-500 leading-snug">الحساب من دروسك المتبقية فعلياً وأيام دراستك وعدد دروسك باليوم. الوقت تقدير: ~{LESSON_MIN('foundations')} دقيقة لدرس المسارات الأساسية و~{LESSON_MIN('vocabulary')} دقيقة للمسارات الجديدة.</p>
+    </div>
+  );
+};
+
+const STATE_CLS: Record<string, string> = { done: 'bg-emerald-500 text-white', next: 'bg-[#C49E3A] text-[#002147] ring-2 ring-[#002147]', open: 'bg-white text-[#002147] border border-amber-300', locked: 'bg-slate-200 text-slate-400', soon: 'bg-slate-100 text-slate-300 border border-dashed border-slate-300' };
+/** All curricula: every track → level → lesson, with real done/next/locked state. One track and one block of 30 at a time (no scroll). */
+const PlanCurricula: React.FC<{ road: Roadmap | null; onOpenTrack?: (id: string) => void }> = ({ road, onOpenTrack }) => {
+  const [tid, setTid] = useState<string>('');
+  const [lv, setLv] = useState(0);
+  const [pg, setPg] = useState(0);
+  const [pick, setPick] = useState<number | null>(null);
+  if (!road) return <p className="text-center text-sm font-black text-[#002147] py-6">…</p>;
+  const t = road.tracks.find(x => x.id === tid) || road.tracks[0];
+  const level = t.levels[Math.min(lv, t.levels.length - 1)];
+  const pages = Math.ceil(level.lessons.length / 30); const chunk = level.lessons.slice(pg * 30, pg * 30 + 30);
+  const picked = level.lessons.find(l => l.order === pick);
+  const stLabel = { done: '✅ خلصته', next: '▶️ درسك التالي', open: '🔓 مفتوح', locked: '🔒 مقفول — يفتح بالترتيب', soon: '⏳ قيد الإعداد' } as const;
+  return (
+    <div data-testid="plan-curricula" className="flex-1 min-h-0 flex flex-col gap-1.5 overflow-hidden">
+      <div className="grid grid-cols-3 gap-1">
+        {road.tracks.map(x => (
+          <button key={x.id} data-testid="plan-cur-track" onClick={() => { setTid(x.id); setLv(0); setPg(0); setPick(null); }}
+            className={`rounded-xl px-1 py-1 border-2 text-center ${x.id === t.id ? 'border-[#C49E3A] bg-[#002147] text-amber-300' : 'border-amber-200 bg-white text-[#002147]'}`}>
+            <p className="text-[10.5px] font-black truncate">{x.titleAr}</p>
+            <p className="text-[9.5px] font-bold opacity-80 tabular-nums">{x.done}/{x.total}</p>
+          </button>
+        ))}
+      </div>
+      {t.levels.length > 1 && (
+        <div className="flex gap-1 overflow-hidden">
+          {t.levels.map((v, i) => (
+            <button key={v.id} onClick={() => { setLv(i); setPg(0); setPick(null); }} className={`flex-1 min-w-0 rounded-lg py-1 text-[10px] font-black truncate border ${i === lv ? 'bg-[#C49E3A] text-[#002147] border-[#C49E3A]' : 'bg-white text-[#002147] border-amber-200'}`}>
+              {v.testPassed ? '🏁 ' : ''}{v.titleAr.replace(/المستوى /, 'م. ')}
+            </button>
+          ))}
+        </div>
+      )}
+      <div className="flex items-center gap-2 text-[10.5px] font-bold text-slate-600">
+        <span className="flex-1 truncate">{level.titleAr}{level.testPassed === true ? ' · اختبار المستوى ✅' : level.testPassed === false ? ' · اختبار المستوى لم يُجتز' : ''}</span>
+        {pages > 1 && <><button disabled={pg === 0} onClick={() => setPg(pg - 1)} className="px-1.5 rounded bg-white border border-amber-300 disabled:opacity-30">›</button><span>{pg + 1}/{pages}</span><button disabled={pg >= pages - 1} onClick={() => setPg(pg + 1)} className="px-1.5 rounded bg-white border border-amber-300 disabled:opacity-30">‹</button></>}
+      </div>
+      <div data-testid="plan-cur-grid" className="grid grid-cols-6 gap-1">
+        {chunk.map(l => <button key={l.order} onClick={() => setPick(l.order)} className={`h-7 rounded-lg text-[11px] font-black tabular-nums ${STATE_CLS[l.state]} ${pick === l.order ? 'outline outline-2 outline-[#002147]' : ''}`}>{l.num}</button>)}
+      </div>
+      <div className="rounded-xl bg-white border border-amber-300 px-2.5 py-1.5 min-h-[44px]">
+        {picked ? <>
+          <p className="text-[12px] font-black text-[#002147] truncate">{picked.num}. {picked.titleAr}</p>
+          <div className="flex items-center gap-2"><p className="flex-1 text-[10.5px] font-bold text-slate-500">{stLabel[picked.state]}</p>
+            {(picked.state === 'next' || picked.state === 'open') && onOpenTrack && <button onClick={() => onOpenTrack(t.id)} className="px-2 py-0.5 rounded-lg bg-[#002147] text-amber-300 text-[11px] font-black">ابدأ</button>}</div>
+        </> : <p className="text-[11px] font-bold text-slate-500">اضغط رقم أي درس لتشوف اسمه وحالته. 🟩 خلصته · 🟨 التالي · ⬜ مقفول</p>}
       </div>
     </div>
   );

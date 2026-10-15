@@ -23,7 +23,7 @@ import { loadExamResults, readExamResults, type ExamResults } from './saraExamSy
 export type PlanKind = 'lesson' | 'review' | 'test' | 'exam' | 'catchup';
 export interface PlanTask { key: string; kind: PlanKind; trackId: string; trackAr: string; titleAr: string; order?: number; levelId?: string; setId?: string; open: boolean; reasonAr: string }
 export interface PlanDay { dayIdx: number; labelAr: string; study: boolean; tasks: PlanTask[] }
-export interface SaraPlan { weekStart: string; createdAt: number; perDay: number; studyDays: number[]; isNew: boolean; focusAr: string[]; days: PlanDay[] }
+export interface SaraPlan { weekStart: string; createdAt: number; perDay: number; studyDays: number[]; isNew: boolean; focusAr: string[]; days: PlanDay[]; priorityTrackId?: string }
 export interface PlanState { unlocked: Record<string, number>; passedTests: Set<string>; exam: ExamResults }
 
 export const CORE_TRACKS: SaraTrack[] = [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK];
@@ -184,7 +184,7 @@ export async function buildSaraPlan(uid: string | undefined, unlockAll: boolean,
     return { dayIdx: d, labelAr: pos === 0 ? `اليوم (${DAY_AR[d]})` : pos === 1 ? `بكرة (${DAY_AR[d]})` : DAY_AR[d], study, tasks };
   });
   if (examTask && !examPlaced) { const d = days.find(x => x.study && x.tasks.length && x.tasks[0].kind !== 'catchup'); if (d) d.tasks.push(examTask); }
-  return { weekStart: ws, createdAt: Date.now(), perDay, studyDays, isNew, focusAr, days };
+  return { weekStart: ws, createdAt: Date.now(), perDay, studyDays, isNew, focusAr, days, priorityTrackId: !isNew && weakSkill && SKILL_OF[active[0]?.id] === weakSkill.id ? active[0].id : undefined };
 }
 
 const PKEY = (uid?: string) => `sara_plan_v2_${uid || 'guest'}`;
@@ -194,3 +194,62 @@ export const readSavedPlan = (uid?: string): SaraPlan | null => {
     const age = (Date.now() - new Date(p.weekStart + 'T00:00:00').getTime()) / 86400000; return age >= 0 && age < 7 ? p : null; } catch { return null; }
 };
 export const savePlan = (uid: string | undefined, p: SaraPlan) => { try { localStorage.setItem(PKEY(uid), JSON.stringify(p)); } catch { /* ignore */ } };
+
+/* ---------------- Full roadmap (all tracks, all levels) ---------------- */
+/** Time estimate per lesson (minutes) — shown to the student as an estimate, same idea as the academy's lesson durations. */
+export const LESSON_MIN = (trackId: string) => (NEW_IDS.has(trackId) ? 12 : 20);
+export const TEST_MIN = 15;
+export interface RoadLesson { order: number; num: number; titleAr: string; state: 'done' | 'next' | 'open' | 'locked' | 'soon' }
+export interface RoadLevel { id: string; titleAr: string; lessons: RoadLesson[]; testPassed: boolean | null }
+export interface RoadTrack { id: string; titleAr: string; total: number; done: number; remaining: number; levels: RoadLevel[]; finish?: string; minutesLeft: number }
+export interface Roadmap { tracks: RoadTrack[]; totalLessons: number; doneLessons: number; remainingLessons: number; testsLeft: number; minutesPerDay: number; weeklyMinutes: number;
+  studyDaysPerWeek: number; perDay: number; weeks: number; months: number; finish: string; totalMinutesLeft: number }
+
+const addDays = (d: Date, n: number) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+
+/** Every track and level with real progress/lock state; finish dates simulated day by day with the chosen study days and lessons/day (round-robin, priority track twice). */
+export function buildRoadmap(st: PlanState, opts: { perDay: number; studyDays: number[]; unlockAll: boolean; priorityTrackId?: string }): Roadmap {
+  const tracks: RoadTrack[] = ALL_PLAN_TRACKS.map(t => {
+    const u = st.unlocked[t.id] || 1; const isNew = NEW_IDS.has(t.id);
+    const lvls = isNew ? SARA_NEW_LEVELS.map(v => ({ id: v.id as string, titleAr: v.titleAr, lessons: t.lessons.filter(l => l.order >= v.from && l.order <= v.to) }))
+      : trackLevels(t).map(v => ({ id: v.id, titleAr: v.titleAr, lessons: v.lessons }));
+    const levels: RoadLevel[] = lvls.filter(v => v.lessons.length).map((v, vi, arr) => {
+      const prevPassed = vi === 0 || !isNew || st.passedTests.has(`${t.id}:${arr[vi - 1].id}`);
+      return { id: v.id, titleAr: v.titleAr, testPassed: v.id === 'all' ? null : st.passedTests.has(`${t.id}:${v.id}`),
+        lessons: v.lessons.map(l => {
+          const builtL = isNew || !!l.content;
+          const state: RoadLesson['state'] = l.order < u ? 'done' : !builtL ? 'soon' : l.order === u && (prevPassed || opts.unlockAll) ? 'next' : opts.unlockAll ? 'open' : 'locked';
+          return { order: l.order, num: isNew ? ((l.order - 1) % 30) + 1 : l.order, titleAr: l.titleAr, state };
+        }) };
+    });
+    const b = built(t); const done = b.filter(l => l.order < u).length;
+    const remaining = b.length - done;
+    return { id: t.id, titleAr: t.titleAr, total: b.length, done, remaining, levels, minutesLeft: remaining * LESSON_MIN(t.id) };
+  });
+  // Level tests still needed in the new tracks (they gate the next level) — counted in time, not as lessons.
+  let testsLeft = 0;
+  for (const t of tracks) if (NEW_IDS.has(t.id)) for (const v of t.levels) if (v.testPassed === false && v.lessons.some(l => l.state !== 'done')) testsLeft++;
+  const perDay = Math.min(3, Math.max(1, opts.perDay)); const sd = opts.studyDays.length ? opts.studyDays : DEFAULT_STUDY_DAYS;
+  // Simulate: each study day takes perDay lessons from the tracks in turn (priority track twice per round).
+  const left: Record<string, number> = {}; tracks.forEach(t => { left[t.id] = t.remaining; });
+  const rot: string[] = []; tracks.forEach(t => { if (t.remaining) { rot.push(t.id); if (t.id === opts.priorityTrackId) rot.push(t.id); } });
+  let day = new Date(); day.setHours(0, 0, 0, 0); let r = 0, guard = 0; let lastDay = day;
+  let remainingAll = tracks.reduce((a, t) => a + t.remaining, 0);
+  while (remainingAll > 0 && guard++ < 4000) {
+    if (sd.includes(day.getDay())) {
+      const used = new Set<string>(); let k = 0, g2 = 0;
+      while (k < perDay && remainingAll > 0 && g2++ < rot.length * 2 + 2) {
+        const id = rot[r++ % rot.length]; if (!left[id] || used.has(id)) continue;
+        left[id]--; remainingAll--; used.add(id); k++; lastDay = day;
+        if (!left[id]) { const tr = tracks.find(x => x.id === id)!; tr.finish = isoDate(day); }
+      }
+    }
+    day = addDays(day, 1);
+  }
+  const total = tracks.reduce((a, t) => a + t.total, 0), doneL = tracks.reduce((a, t) => a + t.done, 0), rem = total - doneL;
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  const days = Math.max(0, Math.round((lastDay.getTime() - now.getTime()) / 86400000) + 1);
+  const minutesPerDay = Math.round(perDay * (tracks.filter(t => t.remaining).reduce((a, t) => a + LESSON_MIN(t.id), 0) / Math.max(1, tracks.filter(t => t.remaining).length)));
+  return { tracks, totalLessons: total, doneLessons: doneL, remainingLessons: rem, testsLeft, perDay, studyDaysPerWeek: sd.length, minutesPerDay, weeklyMinutes: minutesPerDay * sd.length,
+    weeks: rem ? Math.ceil(days / 7) : 0, months: rem ? Math.round((days / 30.44) * 10) / 10 : 0, finish: rem ? isoDate(lastDay) : '', totalMinutesLeft: tracks.reduce((a, t) => a + t.minutesLeft, 0) + testsLeft * TEST_MIN };
+}
