@@ -25,6 +25,9 @@ import { cancelAllSpeech, setExclusiveAudioOwner, prefetchAcademyAudio, playClou
 import { saraUnlockNarrator } from './SaraTrackPlayer';
 import { buildCallContext, saveCallRecord, type CallContext, type CallRecord } from '../lib/saraCallLink';
 
+
+/** The student's silence allowance per turn (before speaking and between words). */
+const STUDENT_WAIT_MS = 10000;
 export interface PhoneScenario {
   id: string;
   titleAr: string;
@@ -272,7 +275,8 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
 
   const stopListening = () => {
     if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-    if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch (e) {} recognitionRef.current = null; }
+    finalizeTurnRef.current = null; clearStudentTurn();
+    if (recognitionRef.current) { const r = recognitionRef.current; recognitionRef.current = null; r.onend = null; try { r.abort(); } catch (e) {} }
     setIsStudentListening(false);
   };
 
@@ -366,55 +370,85 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
     speakLines([starterText], [greeting]);
   };
 
+  // Student turn: the student gets up to STUDENT_WAIT_MS of silence (before speaking AND between words) before the
+  // turn is sent. Words heard so far survive the browser's own recognizer restarts. «أنهيت» sends early.
+  const turnTextRef = useRef('');        // final words already heard this turn
+  const turnInterimRef = useRef('');     // current not-yet-final words
+  const turnDeadlineRef = useRef(0);
+  const turnTickRef = useRef<any>(null);
+  const finalizeTurnRef = useRef<(() => void) | null>(null);
+  const [waitLeft, setWaitLeft] = useState(0);
+  const [heardSomething, setHeardSomething] = useState(false);
+  const armStudentWait = () => {
+    turnDeadlineRef.current = Date.now() + STUDENT_WAIT_MS;
+    setWaitLeft(Math.ceil(STUDENT_WAIT_MS / 1000));
+    if (!turnTickRef.current) turnTickRef.current = setInterval(() => {
+      const left = turnDeadlineRef.current - Date.now();
+      setWaitLeft(Math.max(0, Math.ceil(left / 1000)));
+      if (left <= 0 && (turnTextRef.current || turnInterimRef.current).trim()) finalizeTurnRef.current?.();
+    }, 250);
+  };
+  const clearStudentTurn = () => {
+    if (turnTickRef.current) clearInterval(turnTickRef.current);
+    turnTickRef.current = null; turnTextRef.current = ''; turnInterimRef.current = '';
+    setWaitLeft(0); setHeardSomething(false);
+  };
+  const turnText = () => `${turnTextRef.current} ${turnInterimRef.current}`.replace(/\s+/g, ' ').trim();
+  /** «أنهيت»: send what was heard right now, without waiting. */
+  const finishStudentTurn = () => { if (turnText()) finalizeTurnRef.current?.(); };
+
   // Speech Recognition Handling (reads refs, so hands-free restarts work)
-  const startSpeechRecognition = () => {
+  const startSpeechRecognition = (keepTurn = false) => {
     if (mutedRef.current || stateRef.current !== 'connected' || speakingRef.current) return;
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) { console.warn('SpeechRecognition API not available in this browser.'); return; }
     try {
-      stopListening();
+      if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch (e) {} recognitionRef.current = null; }
+      if (!keepTurn) { clearStudentTurn(); armStudentWait(); }
       const recognition = new SpeechRecognition();
       recognition.lang = 'en-US';
-      recognition.continuous = false;
+      recognition.continuous = true;
       recognition.interimResults = true;
       recognition.maxAlternatives = 1;
       let done = false;
-      let latestInterim = '';
-      const finalize = (text: string) => {
+      const finalize = () => {
         if (done) return; done = true;
-        if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+        const text = turnText();
+        clearStudentTurn();
         try { recognition.abort(); } catch (_) {}
         if (recognitionRef.current === recognition) recognitionRef.current = null;
         setIsStudentListening(false);
-        handleStudentSpoke(text);
+        if (text) handleStudentSpoke(text);
       };
-      recognition.onstart = () => { setIsStudentListening(true); setInterimTranscript(''); };
+      finalizeTurnRef.current = finalize;
+      recognition.onstart = () => { setIsStudentListening(true); if (!keepTurn) setInterimTranscript(''); };
       recognition.onresult = (event: any) => {
-        let interim = '', final = '';
+        let interim = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) final += event.results[i][0].transcript;
-          else interim += event.results[i][0].transcript;
+          const t = event.results[i][0].transcript;
+          if (event.results[i].isFinal) turnTextRef.current = `${turnTextRef.current} ${t}`.trim();
+          else interim += t;
         }
-        setInterimTranscript(interim || final);
-        if (final.trim()) { finalize(final.trim()); return; }
-        // Faster end-of-turn: if the words stop changing for 1.1 s, treat them as final.
-        latestInterim = interim.trim();
-        if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-        if (latestInterim) silenceTimerRef.current = setTimeout(() => finalize(latestInterim), 1100);
+        turnInterimRef.current = interim.trim();
+        const all = turnText();
+        setInterimTranscript(all);
+        if (all) setHeardSomething(true);
+        armStudentWait(); // every new sound restarts the 10 s pause allowance
+      };
+      const reopen = () => {
+        if (done) return;
+        if (recognitionRef.current === recognition) recognitionRef.current = null;
+        // the recognizer stopped by itself: keep the same turn (and its words) open until the pause allowance runs out
+        if (turnInterimRef.current) { turnTextRef.current = `${turnTextRef.current} ${turnInterimRef.current}`.trim(); turnInterimRef.current = ''; }
+        if (stateRef.current !== 'connected' || mutedRef.current) { clearStudentTurn(); setIsStudentListening(false); return; }
+        if (turnDeadlineRef.current - Date.now() <= 0 && turnText()) { finalize(); return; }
+        setTimeout(() => { if (!done && !recognitionRef.current) startSpeechRecognition(true); }, 150);
       };
       recognition.onerror = (event: any) => {
-        if (done) return;
-        setIsStudentListening(false);
-        if (event.error === 'aborted') return;
-        if (event.error === 'no-speech' || event.error === 'network') setTimeout(() => startSpeechRecognition(), 300);
+        if (done || event.error === 'aborted') return;
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') { setIsStudentListening(false); return; }
       };
-      recognition.onend = () => {
-        if (done) return;
-        setIsStudentListening(false);
-        if (latestInterim) { finalize(latestInterim); return; }
-        if (recognitionRef.current === recognition) recognitionRef.current = null;
-        setTimeout(() => startSpeechRecognition(), 300); // keep the line open hands-free
-      };
+      recognition.onend = reopen;
       recognitionRef.current = recognition;
       recognition.start();
     } catch (err) {
@@ -640,8 +674,17 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
                   {phase === 'listening' ? <Mic size={13} /> : phase === 'speaking' ? <Volume2 size={13} /> : <Radio size={13} />}
                   {phaseLabel}
                 </div>
-                <div className="h-4 mt-1 text-[10px] text-white/50">
+                <div className="h-7 mt-1 text-[10px] text-white/50 flex items-center justify-center gap-2">
                   {(phase === 'speaking' || phase === 'thinking') && (isRtl ? 'اضغط على سارة لمقاطعتها والتحدث' : 'Tap Sara to interrupt')}
+                  {phase === 'listening' && (<>
+                    <span data-testid="call-wait" className="inline-flex items-center gap-1.5 text-amber-200/80 font-bold">
+                      <span className="relative w-14 h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.15)' }}>
+                        <span className="absolute inset-y-0 right-0 rounded-full transition-all duration-300" style={{ width: `${(waitLeft / (STUDENT_WAIT_MS / 1000)) * 100}%`, background: GOLD }} />
+                      </span>
+                      {heardSomething ? (isRtl ? `أكمل… ${waitLeft}ث` : `Go on… ${waitLeft}s`) : (isRtl ? 'خذ وقتك' : 'Take your time')}
+                    </span>
+                    {heardSomething && <button data-testid="call-done" onClick={finishStudentTurn} className="px-2.5 py-1 rounded-full font-black text-[11px] cursor-pointer" style={{ background: GOLD, color: NAVY }}>{isRtl ? 'أنهيت ✓' : 'Done ✓'}</button>}
+                  </>)}
                 </div>
               </div>
 
