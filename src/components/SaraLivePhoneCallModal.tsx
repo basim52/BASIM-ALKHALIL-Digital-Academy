@@ -141,6 +141,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
   const [selectedScenario, setSelectedScenario] = useState<PhoneScenario>(preset || PHONE_SCENARIOS[0]);
   useEffect(() => { if (isOpen && preset) setSelectedScenario(preset); }, [isOpen, preset?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const keyPhrases = preset?.keyPhrases || [];
+  const isWords = preset?.trackTag === 'vocab';
   const [usedPhrases, setUsedPhrases] = useState<string[]>([]);
   const norm = (x: string) => x.toLowerCase().replace(/[^a-z0-9' ]/g, ' ').replace(/\s+/g, ' ').trim();
   /** A key phrase counts as used when most of its words appear, in order, in what the student said (real speech text). */
@@ -477,7 +478,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
     if (callTurns > 0) saveCallRecord(studentId, {
       at: Date.now(), scenario: selectedScenario.titleEn, scenarioAr: selectedScenario.titleAr, seconds: callSeconds, turns: callTurns,
       words: studentWordsSpoken, avgReplyMs: avgLatency,
-      focus: keyPhrases.length ? [`${isRtl ? 'عبارات مستخدمة' : 'phrases used'} ${usedPhrases.length}/${keyPhrases.length}`, ...usedPhrases.slice(0, 4)] : (callCtx?.focusAr || []),
+      focus: keyPhrases.length ? [`${isRtl ? (isWords ? 'كلمات مستخدمة' : 'عبارات مستخدمة') : 'phrases used'} ${usedPhrases.length}/${keyPhrases.length}`, ...usedPhrases.slice(0, 4)] : (callCtx?.focusAr || []),
     });
     if (onSaveCallSummary) {
       const summary = `Sara Phone Call (${selectedScenario.titleEn}): ${formatTime(callSeconds)} duration, ${callTurns} speech turns, ${studentWordsSpoken} words spoken.${avgLatency ? ` Avg reply ${(avgLatency / 1000).toFixed(1)}s.` : ''}${keyPhrases.length ? ` Key phrases used ${usedPhrases.length}/${keyPhrases.length}: ${usedPhrases.join('; ') || 'none'}.` : callCtx?.focusEn.length ? ` Focus: ${callCtx.focusEn.join('; ')}.` : ''}`;
@@ -564,7 +565,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
               </div>
               {preset ? (
                 <div className="flex-1 min-h-0 flex flex-col gap-1.5 overflow-hidden" data-testid="call-preset">
-                  <p className="text-[11px] font-black" style={{ color: GOLD }}>{keyPhrases.length ? (isRtl ? 'حاول تستخدم هالعبارات في كلامك:' : 'Try to use these phrases:') : (isRtl ? 'تكلّم بحرية — سارة تكمّل معك الحوار.' : 'Talk freely — Sara keeps the conversation going.')}</p>
+                  <p className="text-[11px] font-black" style={{ color: GOLD }}>{keyPhrases.length ? (isRtl ? (isWords ? 'حاول تستخدم هالكلمات في كلامك:' : 'حاول تستخدم هالعبارات في كلامك:') : 'Try to use these phrases:') : (isRtl ? 'تكلّم بحرية — سارة تكمّل معك الحوار.' : 'Talk freely — Sara keeps the conversation going.')}</p>
                   {keyPhrases.slice(0, 5).map(ph => <p key={ph} dir="ltr" className="text-[12.5px] font-bold text-white text-left rounded-xl px-2.5 py-1.5 border truncate" style={{ borderColor: 'rgba(196,158,58,0.35)', background: 'rgba(255,255,255,0.04)' }}>{ph}</p>)}
                 </div>
               ) : (
@@ -663,7 +664,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
               </div>
               {keyPhrases.length > 0 && (
                 <div data-testid="call-phrases-used" className="rounded-2xl p-2.5 border" style={{ borderColor: 'rgba(196,158,58,0.3)' }}>
-                  <p className="text-[11px] font-black text-amber-300 mb-1">{isRtl ? `العبارات اللي استخدمتها: ${usedPhrases.length} من ${keyPhrases.length}` : `Phrases you used: ${usedPhrases.length} of ${keyPhrases.length}`}</p>
+                  <p className="text-[11px] font-black text-amber-300 mb-1">{isRtl ? `${isWords ? 'الكلمات' : 'العبارات'} اللي استخدمتها: ${usedPhrases.length} من ${keyPhrases.length}` : `Phrases you used: ${usedPhrases.length} of ${keyPhrases.length}`}</p>
                   <div className="flex flex-wrap gap-1" dir="ltr">
                     {keyPhrases.slice(0, 6).map(ph => <span key={ph} className={`text-[10.5px] font-bold px-1.5 py-0.5 rounded-lg max-w-full truncate ${usedPhrases.includes(ph) ? 'bg-emerald-500/20 text-emerald-200' : 'bg-white/5 text-white/45'}`}>{usedPhrases.includes(ph) ? '✓ ' : ''}{ph}</span>)}
                   </div>

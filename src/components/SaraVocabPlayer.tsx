@@ -7,6 +7,7 @@ import { X, ArrowRight, ArrowLeft, Lock, CheckCircle2, Volume2, RotateCcw } from
 import { VOCAB_LESSONS, VOCAB_TRACK_ID, type SaraVocabLesson, type SaraVocabWord } from '../data/saraTracks/vocabulary';
 import { readUnlocked, progressKey, saraNarrate, saraStopNarrator, saraUnlockNarrator, pauseNarrator, resumeNarrator } from './SaraTrackPlayer';
 import { pushTrackProgress, syncTrackProgress } from '../lib/saraProgressSync';
+import SaraLessonCall, { lessonCallPreset, levelToCefr } from './SaraLessonCall';
 
 interface Props { isOpen: boolean; onClose: () => void; uid?: string; unlockAll?: boolean }
 interface Q { promptAr: string; show: string; options: string[]; correct: number; say?: string }
@@ -35,7 +36,7 @@ function reviewQs(l: SaraVocabLesson): Q[] {
 
 type Step = 'learn' | 'practice' | 'review' | 'done';
 
-const Lesson: React.FC<{ l: SaraVocabLesson; onBack: () => void; onPassed: () => void; onBoard?: () => void }> = ({ l, onBack, onPassed, onBoard }) => {
+const Lesson: React.FC<{ l: SaraVocabLesson; onBack: () => void; onPassed: () => void; onBoard?: () => void; uid?: string }> = ({ l, onBack, onPassed, onBoard, uid }) => {
   const [step, setStep] = useState<Step>('learn');
   const [card, setCard] = useState(0);
   const [audio, setAudio] = useState<null | 'loading' | 'failed'>(null);
@@ -117,6 +118,9 @@ const Lesson: React.FC<{ l: SaraVocabLesson; onBack: () => void; onPassed: () =>
         <p className="text-4xl">{score >= PASS ? '🎉' : '💪'}</p>
         <p className="text-[15px] font-black text-[#002147]">{right}/{total} صحيحة ({score}%)</p>
         <p className="text-[13px] font-bold text-slate-600">{score >= PASS ? 'أحسنت! انفتح الدرس التالي.' : `تحتاج ${PASS}% عشان ينفتح الدرس التالي. راجع الكلمات وحاول مرة ثانية.`}</p>
+        <SaraLessonCall uid={uid} level={levelToCefr(l.levelId)}
+          preset={lessonCallPreset({ id: l.id, titleAr: l.titleAr, titleEn: l.titleEn, icon: l.icon, kind: 'vocab', tag: 'vocab', phrases: l.words.slice(0, 5).map(w => w.en),
+            starter: `Let's talk about ${l.titleEn.toLowerCase()} and use our new words. ${l.words[0]?.example || ''} What about you?` })} />
         <div className="flex gap-2 w-full">
           {score < PASS && <button onClick={() => { setStep('learn'); setCard(0); setQi(0); setRight(0); }} className="flex-1 py-2.5 rounded-xl bg-[#002147] text-amber-300 font-black text-sm">أعد الدرس</button>}
           <button onClick={onBack} className="flex-1 py-2.5 rounded-xl bg-[#C49E3A] text-[#002147] font-black text-sm">رجوع للدروس</button>
@@ -165,7 +169,7 @@ export const SaraVocabPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unlockA
         </div>
         {active ? (board ? <SaraLessonBoard key={'board-' + active.id} {...boardOf(active)} onClose={() => setBoard(false)} onPassed={() => onPassed(active)}
             onNextLesson={(active.order % 30 ? VOCAB_LESSONS[active.order] : undefined) ? () => { setBoard(false); setActive((active.order % 30 ? VOCAB_LESSONS[active.order] : undefined)!); } : undefined} />
-          : <Lesson key={active.id} l={active} onBack={() => { setBoard(false); setActive(null); }} onPassed={() => onPassed(active)} onBoard={() => setBoard(true)} />) : (
+          : <Lesson key={active.id} l={active} onBack={() => { setBoard(false); setActive(null); }} onPassed={() => onPassed(active)} onBoard={() => setBoard(true)} uid={uid} />) : (
           <SaraLevelledList lessons={VOCAB_LESSONS} unlockedRaw={unlockedRaw} unlockAll={unlockAll} uid={uid} track="vocabulary" trackId={VOCAB_TRACK_ID}
             refresh={testTick} onOpen={l => setActive(VOCAB_LESSONS.find(x => x.id === l.id) || null)} onTest={lv => setTesting(lv)} />
         )}
