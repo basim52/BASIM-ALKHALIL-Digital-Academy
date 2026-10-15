@@ -76,6 +76,7 @@ import { SaraListeningPlayer } from './SaraListeningPlayer';
 import { SaraPronunciationPlayer } from './SaraPronunciationPlayer';
 import { SaraVocabPlayer } from './SaraVocabPlayer';
 import { SaraDailyPlayer } from './SaraDailyPlayer';
+import { SaraExamPrep } from './SaraExamPrep';
 import { DAILY_LESSONS } from '../data/saraTracks/dailyLife';
 import { VOCAB_LESSONS } from '../data/saraTracks/vocabulary';
 import { PRONUNCIATION_LESSONS } from '../data/saraTracks/pronunciation';
@@ -574,6 +575,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [isPronOpen, setIsPronOpen] = useState(false);
   const [isVocabOpen, setIsVocabOpen] = useState(false);
   const [isDailyOpen, setIsDailyOpen] = useState(false);
+  const [isExamOpen, setIsExamOpen] = useState(false);
   const [trackFilter, setTrackFilter] = useState<'all' | 'grammar' | 'conversation' | 'reading' | 'writing'>('all');
   const handleOpenCurriculum = (pillar: string = 'all') => {
     setCurriculumInitialPillar(pillar);
@@ -3195,6 +3197,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <Globe size={16} />
               </button>
               <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">الحياة اليومية</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+              <button onClick={() => setIsExamOpen(true)} data-testid="sara-exam-icon"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#C49E3A] bg-[#002147] text-amber-300 flex items-center justify-center shadow-xs hover:scale-105 active:scale-95 shrink-0"
+                aria-label="IELTS / STEP">
+                <span className="text-[9px] font-black">IELTS</span>
+              </button>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">IELTS/STEP</span>
             </div>
             </div>
           </section>
@@ -7537,6 +7547,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
       <SaraTools tool={saraTool} onClose={() => { cancelAllSpeech(); setSaraTool(null); }} uid={profile.uid}
         unlockAll={MASTER_ADMINS.includes(String((profile as any).email || auth.currentUser?.email || '').trim().toLowerCase()) || (profile as any).role === UserRole.PARENT || (profile as any).role === UserRole.ADMIN} />
+      <SaraExamPrep isOpen={isExamOpen} onClose={() => { cancelAllSpeech(); setIsExamOpen(false); }} uid={profile.uid} />
       <SaraDailyPlayer isOpen={isDailyOpen} onClose={() => { cancelAllSpeech(); setIsDailyOpen(false); }} uid={profile.uid}
         unlockAll={MASTER_ADMINS.includes(String((profile as any).email || auth.currentUser?.email || '').trim().toLowerCase()) || (profile as any).role === UserRole.PARENT || (profile as any).role === UserRole.ADMIN} />
       <SaraVocabPlayer isOpen={isVocabOpen} onClose={() => { cancelAllSpeech(); setIsVocabOpen(false); }} uid={profile.uid}
