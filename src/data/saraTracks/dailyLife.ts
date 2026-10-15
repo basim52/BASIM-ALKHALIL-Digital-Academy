@@ -4150,7 +4150,1390 @@ const RAW3: R[] = [
 ]
 ]
 ];
-export const DAILY_LESSONS: SaraDailyLesson[] = [...RAW, ...RAW2, ...RAW3].map(([titleAr, titleEn, icon, introAr, ph, dl], i) => ({
+/** Level 4 (C1→C2): diplomacy, leadership and nuanced social situations, hand-written. */
+const RAW4: R[] = [
+[
+"إيصال خبر سيئ",
+"Breaking Bad News",
+"📉",
+"عشان توصل خبر سيئ بلطف مهّد: I'm afraid I have some bad news. وكن واضح: Unfortunately, the project has been cancelled. واعرض الخطوة الجاية: Let's talk about what happens next.",
+[
+[
+"I'm afraid I have some bad news.",
+"للأسف عندي خبر مو حلو."
+],
+[
+"Unfortunately, the project has been cancelled.",
+"للأسف المشروع انلغى."
+],
+[
+"I know this isn't what you were hoping for.",
+"أعرف إن هذا مو اللي كنت تتمناه."
+],
+[
+"Let's talk about what happens next.",
+"خلنا نتكلم عن الخطوة الجاية."
+]
+],
+[
+[
+"A",
+"You wanted to see me?",
+"كنت تبي تشوفني؟"
+],
+[
+"B",
+"Yes. I'm afraid I have some bad news. Unfortunately, the project has been cancelled.",
+"إيه. للأسف عندي خبر مو حلو. المشروع انلغى."
+],
+[
+"A",
+"Oh no. We've worked on it for months.",
+"لا! اشتغلنا عليه شهور."
+],
+[
+"B",
+"I know this isn't what you were hoping for. Let's talk about what happens next.",
+"أعرف إن هذا مو اللي كنت تتمناه. خلنا نتكلم عن الخطوة الجاية."
+]
+]
+],
+[
+"التلطيف والتحفظ",
+"Hedging Your Statements",
+"🌫️",
+"في المواقف الرسمية خفف كلامك: It seems that... و: It might be worth... و: I'd tend to think... كذا تبين رأيك بدون ما تكون حاد.",
+[
+[
+"It seems that the numbers are lower than expected.",
+"يبدو إن الأرقام أقل من المتوقع."
+],
+[
+"It might be worth checking again.",
+"يمكن يستاهل نتأكد مرة ثانية."
+],
+[
+"I'd tend to think the second option is safer.",
+"أميل إن الخيار الثاني أأمن."
+],
+[
+"To some extent, that's true.",
+"إلى حد ما هذا صحيح."
+]
+],
+[
+[
+"A",
+"So the campaign failed?",
+"يعني الحملة فشلت؟"
+],
+[
+"B",
+"Not exactly. It seems that the results were lower than expected.",
+"مو بالضبط. يبدو إن النتائج كانت أقل من المتوقع."
+],
+[
+"A",
+"Should we stop it, then?",
+"نوقفها إذن؟"
+],
+[
+"B",
+"I'd tend to think we should adjust it first. It might be worth testing a new message.",
+"أميل إننا نعدّلها أول. يمكن يستاهل نجرب رسالة جديدة."
+]
+]
+],
+[
+"الوساطة بين زميلين",
+"Mediating a Conflict",
+"🧑‍⚖️",
+"إذا تتوسط بين اثنين قل: Let's hear both sides. ولخص بحياد: So, if I understand, you both want... واقترح: What would a fair solution look like?",
+[
+[
+"Let's hear both sides.",
+"خلنا نسمع الطرفين."
+],
+[
+"I'd like each of you to speak without interruption.",
+"أبي كل واحد يتكلم بدون مقاطعة."
+],
+[
+"It sounds like you both want the same outcome.",
+"يبين إنكم تبون نفس النتيجة."
+],
+[
+"What would a fair solution look like?",
+"كيف يكون الحل العادل في رأيكم؟"
+]
+],
+[
+[
+"A",
+"He keeps changing my designs without asking.",
+"هو دايم يغير تصاميمي بدون ما يسأل."
+],
+[
+"B",
+"Let's hear both sides. I'd like each of you to speak without interruption.",
+"خلنا نسمع الطرفين. أبي كل واحد يتكلم بدون مقاطعة."
+],
+[
+"A",
+"Fine. I just want to be consulted.",
+"طيب. أنا بس أبي أُستشار."
+],
+[
+"B",
+"It sounds like you both want a good final product. What would a fair solution look like?",
+"يبين إنكم تبون منتج نهائي ممتاز. كيف يكون الحل العادل؟"
+]
+]
+],
+[
+"التعامل مع عميل غاضب",
+"Handling an Angry Customer",
+"😡",
+"مع العميل الغاضب لا تدافع: I completely understand your frustration. واعتذر بصدق: I'm sorry this happened. والتزم بشي محدد: I'll personally make sure it's resolved by tomorrow.",
+[
+[
+"I completely understand your frustration.",
+"أفهم انزعاجك تماماً."
+],
+[
+"I'm sorry this happened.",
+"آسف إن هذا صار."
+],
+[
+"Let me see what I can do right now.",
+"خلني أشوف وش أقدر أسوي الحين."
+],
+[
+"I'll personally make sure it's resolved by tomorrow.",
+"بنفسي بتأكد إنها تنحل قبل بكرة."
+]
+],
+[
+[
+"A",
+"This is the third time my order has arrived broken!",
+"هذي ثالث مرة طلبي يوصل مكسور!"
+],
+[
+"B",
+"I completely understand your frustration, and I'm sorry this happened.",
+"أفهم انزعاجك تماماً، وآسف إن هذا صار."
+],
+[
+"A",
+"Sorry isn't enough. I want a solution.",
+"الأسف ما يكفي. أبي حل."
+],
+[
+"B",
+"Of course. I'll send a replacement today, and I'll personally make sure it's resolved by tomorrow.",
+"أكيد. برسل بديل اليوم، وبنفسي بتأكد إنها تنحل قبل بكرة."
+]
+]
+],
+[
+"قيادة نقاش جماعي",
+"Facilitating a Discussion",
+"🎙️",
+"عشان تدير نقاش وتشرك الكل قل: Let's hear from someone who hasn't spoken yet. وتلخص: So far we've agreed on... وترجع للموضوع: Let's get back to the main question.",
+[
+[
+"Let's hear from someone who hasn't spoken yet.",
+"خلنا نسمع من أحد ما تكلم للحين."
+],
+[
+"That's an interesting point. Could you expand on it?",
+"نقطة مثيرة. ممكن توسع فيها؟"
+],
+[
+"So far, we've agreed on two things.",
+"لين الحين اتفقنا على شيئين."
+],
+[
+"Let's get back to the main question.",
+"خلنا نرجع للسؤال الأساسي."
+]
+],
+[
+[
+"A",
+"And another thing about the parking...",
+"وشي ثاني عن المواقف..."
+],
+[
+"B",
+"Let's get back to the main question. Nora, we haven't heard from you yet.",
+"خلنا نرجع للسؤال الأساسي. نورة، ما سمعنا منك للحين."
+],
+[
+"A",
+"I think we should start the training online.",
+"أشوف نبدأ التدريب أونلاين."
+],
+[
+"B",
+"That's an interesting point. Could you expand on it?",
+"نقطة مثيرة. ممكن توسعين فيها؟"
+]
+]
+],
+[
+"رفض طلب من المدير",
+"Pushing Back on Your Manager",
+"🛑",
+"إذا مديرك طلب شي مستحيل قل بأدب: I want to make sure I do this well. وبيّن الواقع: With my current workload, I can't deliver both by Friday. واطلب قرار: Which should I prioritise?",
+[
+[
+"I want to make sure I do this well.",
+"أبي أتأكد إني أسويه صح."
+],
+[
+"With my current workload, I can't deliver both by Friday.",
+"مع ضغط شغلي الحالي ما أقدر أسلم الاثنين قبل الجمعة."
+],
+[
+"Which one should I prioritise?",
+"أي واحد أقدّمه؟"
+],
+[
+"Could we push the deadline to Tuesday?",
+"ممكن نأجل الموعد للثلاثاء؟"
+]
+],
+[
+[
+"A",
+"I need the report and the presentation by Friday.",
+"أبي التقرير والعرض قبل الجمعة."
+],
+[
+"B",
+"I want to make sure I do this well. With my current workload, I can't deliver both by Friday.",
+"أبي أتأكد إني أسويه صح. مع ضغط شغلي ما أقدر أسلم الاثنين قبل الجمعة."
+],
+[
+"A",
+"Hmm. They're both important.",
+"همم. الاثنين مهمين."
+],
+[
+"B",
+"I understand. Which one should I prioritise? Or could we push the presentation to Tuesday?",
+"فاهم. أي واحد أقدّمه؟ أو ممكن نأجل العرض للثلاثاء؟"
+]
+]
+],
+[
+"مقابلة إعلامية",
+"Being Interviewed by the Media",
+"📺",
+"في المقابلات الإعلامية خذ وقتك: That's a good question. وإذا ما تقدر تجاوب: I'm not in a position to comment on that. وارجع لرسالتك: What I can tell you is...",
+[
+[
+"That's a good question.",
+"سؤال جميل."
+],
+[
+"I'm not in a position to comment on that.",
+"ما أقدر أعلق على هذا."
+],
+[
+"What I can tell you is that we're working hard.",
+"اللي أقدر أقوله إننا نشتغل بجد."
+],
+[
+"Our priority is the safety of our customers.",
+"أولويتنا سلامة عملائنا."
+]
+],
+[
+[
+"A",
+"Is it true the company will close two branches?",
+"صحيح إن الشركة بتقفل فرعين؟"
+],
+[
+"B",
+"I'm not in a position to comment on that yet.",
+"ما أقدر أعلق على هذا للحين."
+],
+[
+"A",
+"But customers are worried.",
+"بس العملاء قلقين."
+],
+[
+"B",
+"That's understandable. What I can tell you is that our priority is our customers.",
+"مفهوم. اللي أقدر أقوله إن أولويتنا عملاؤنا."
+]
+]
+],
+[
+"تقديم شكوى رسمية مكتوبة شفهياً",
+"Formal Request to an Authority",
+"🏛️",
+"لما تتكلم مع جهة رسمية استخدم لغة رسمية: I'm writing to request... أو: I would be grateful if you could... واذكر المرفقات: I've enclosed copies of the documents.",
+[
+[
+"I would be grateful if you could review my case.",
+"أكون ممتن لو تراجعون حالتي."
+],
+[
+"I've enclosed copies of the relevant documents.",
+"أرفقت نسخ من المستندات المطلوبة."
+],
+[
+"I look forward to hearing from you.",
+"أتطلع لردكم."
+],
+[
+"Could you let me know the expected timeframe?",
+"ممكن تبلغوني بالمدة المتوقعة؟"
+]
+],
+[
+[
+"A",
+"Good morning. How can we help you?",
+"صباح الخير. كيف نخدمك؟"
+],
+[
+"B",
+"Good morning. I would be grateful if you could review my permit application.",
+"صباح النور. أكون ممتن لو تراجعون طلب التصريح حقي."
+],
+[
+"A",
+"Do you have the supporting documents?",
+"عندك المستندات الداعمة؟"
+],
+[
+"B",
+"Yes, I've enclosed copies here. Could you let me know the expected timeframe?",
+"إيه، أرفقت النسخ هنا. ممكن تبلغوني بالمدة المتوقعة؟"
+]
+]
+],
+[
+"الحديث عن موضوع حساس",
+"Discussing a Sensitive Topic",
+"🫥",
+"في المواضيع الحساسة خلك لطيف: I hope you don't mind me asking... واحترم الحدود: You don't have to answer if you'd rather not. وطمّن: Whatever you decide, I'm here.",
+[
+[
+"I hope you don't mind me asking...",
+"أتمنى ما تمانع إني أسأل..."
+],
+[
+"You don't have to answer if you'd rather not.",
+"مو لازم تجاوب إذا ما تبي."
+],
+[
+"I've noticed you seem a bit down lately.",
+"لاحظت إنك متضايق شوي الفترة الأخيرة."
+],
+[
+"Whatever you decide, I'm here for you.",
+"أياً كان قرارك، أنا موجود لك."
+]
+],
+[
+[
+"A",
+"You look tired these days.",
+"شكلك تعبان هالأيام."
+],
+[
+"B",
+"I hope you don't mind me asking, but is everything okay at home?",
+"أتمنى ما تمانع إني أسأل، بس كل شي تمام في البيت؟"
+],
+[
+"A",
+"It's complicated. I'd rather not talk about it now.",
+"معقدة. ما أبي أتكلم عنها الحين."
+],
+[
+"B",
+"That's fine. You don't have to. Whatever you decide, I'm here for you.",
+"عادي. مو لازم. أياً كان قرارك، أنا موجود لك."
+]
+]
+],
+[
+"عرض فكرة على مستثمر",
+"Pitching to an Investor",
+"💡",
+"في عرض فكرتك ابدأ بالمشكلة: Every year, millions of people struggle with... ثم الحل: Our app solves this by... واطلب بوضوح: We're looking for an investment of...",
+[
+[
+"Every year, thousands of families struggle to find tutors.",
+"كل سنة آلاف الأسر تعاني عشان تلقى مدرسين."
+],
+[
+"Our app solves this by matching them in minutes.",
+"تطبيقنا يحل هذا بربطهم خلال دقايق."
+],
+[
+"We already have five thousand active users.",
+"عندنا خمسة آلاف مستخدم نشط."
+],
+[
+"We're looking for an investment of two million riyals.",
+"ندور استثمار بمليونين ريال."
+]
+],
+[
+[
+"A",
+"So, what problem are you solving?",
+"طيب، وش المشكلة اللي تحلونها؟"
+],
+[
+"B",
+"Every year, thousands of families struggle to find good tutors. Our app matches them in minutes.",
+"كل سنة آلاف الأسر تعاني تلقى مدرسين. تطبيقنا يربطهم خلال دقايق."
+],
+[
+"A",
+"Do you have any traction?",
+"عندكم انتشار فعلي؟"
+],
+[
+"B",
+"Yes, we already have five thousand active users, and we're looking for an investment of two million riyals.",
+"إيه، عندنا خمسة آلاف مستخدم نشط، وندور استثمار بمليونين ريال."
+]
+]
+],
+[
+"الرد على أسئلة صعبة بعد عرض",
+"Handling Tough Questions",
+"🔥",
+"بعد العرض إذا جاك سؤال صعب: Thank you for raising that. وإذا ما تعرف: I don't have that figure with me, but I'll get back to you. وإذا السؤال خارج الموضوع: That's slightly beyond today's scope.",
+[
+[
+"Thank you for raising that.",
+"شكراً إنك طرحت هذا."
+],
+[
+"I don't have that figure with me, but I'll get back to you.",
+"ما عندي الرقم الحين، بس برجع لك فيه."
+],
+[
+"That's slightly beyond the scope of today's talk.",
+"هذا شوي خارج نطاق عرض اليوم."
+],
+[
+"Does that answer your question?",
+"هل هذا يجاوب سؤالك؟"
+]
+],
+[
+[
+"A",
+"What was the exact cost of the pilot project?",
+"كم كانت التكلفة بالضبط للمشروع التجريبي؟"
+],
+[
+"B",
+"Thank you for raising that. I don't have that figure with me, but I'll get back to you today.",
+"شكراً إنك طرحت هذا. ما عندي الرقم الحين، بس برجع لك فيه اليوم."
+],
+[
+"A",
+"And how will this affect other departments?",
+"وكيف بيأثر على الأقسام الثانية؟"
+],
+[
+"B",
+"That's slightly beyond the scope of today's talk, but I'm happy to discuss it afterwards.",
+"هذا شوي خارج نطاق العرض، بس يسعدني نناقشه بعدين."
+]
+]
+],
+[
+"التهنئة الرسمية والخطب القصيرة",
+"Giving a Short Speech",
+"🥂",
+"في كلمة قصيرة ابدأ: On behalf of the team, I'd like to... واذكر إنجاز: Over the past ten years, Ahmed has... واختم: Please join me in wishing him all the best.",
+[
+[
+"On behalf of the team, I'd like to say a few words.",
+"نيابة عن الفريق أحب أقول كلمتين."
+],
+[
+"Over the past ten years, he has achieved so much.",
+"خلال العشر سنين اللي فاتت حقق إنجازات كثيرة."
+],
+[
+"We'll truly miss working with you.",
+"بنفتقد الشغل معك فعلاً."
+],
+[
+"Please join me in wishing him all the best.",
+"شاركوني نتمنى له كل التوفيق."
+]
+],
+[
+[
+"A",
+"Could you say something at Ahmed's farewell?",
+"ممكن تقول كلمة في توديع أحمد؟"
+],
+[
+"B",
+"Of course. On behalf of the team, I'd like to say a few words.",
+"أكيد. نيابة عن الفريق أحب أقول كلمتين."
+],
+[
+"A",
+"Everyone's listening.",
+"الكل يسمع."
+],
+[
+"B",
+"Over the past ten years, Ahmed has achieved so much. Please join me in wishing him all the best.",
+"خلال العشر سنين حقق أحمد الكثير. شاركوني نتمنى له كل التوفيق."
+]
+]
+],
+[
+"المجاملة في الحديث الراقي",
+"Sophisticated Small Talk",
+"🍽️",
+"في العشاء الرسمي افتح مواضيع خفيفة: Have you been following the new art festival? واسأل بعمق: What drew you to this field? وأظهر الاهتمام: That must have been fascinating.",
+[
+[
+"Have you been following the new art festival?",
+"تتابع مهرجان الفنون الجديد؟"
+],
+[
+"What drew you to this field?",
+"وش اللي جذبك لهالمجال؟"
+],
+[
+"That must have been fascinating.",
+"أكيد كانت تجربة رائعة."
+],
+[
+"I've never thought of it that way.",
+"عمري ما فكرت فيها بهالطريقة."
+]
+],
+[
+[
+"A",
+"I worked as an archaeologist in AlUla for five years.",
+"اشتغلت عالم آثار في العلا خمس سنين."
+],
+[
+"B",
+"That must have been fascinating. What drew you to this field?",
+"أكيد كانت تجربة رائعة. وش اللي جذبك لهالمجال؟"
+],
+[
+"A",
+"I loved history as a child, and the desert hides so many stories.",
+"كنت أحب التاريخ من صغري، والصحرا تخبي قصص كثيرة."
+],
+[
+"B",
+"I've never thought of it that way. The desert as a library!",
+"عمري ما فكرت فيها كذا. الصحرا كأنها مكتبة!"
+]
+]
+],
+[
+"مكالمة متابعة مع عميل",
+"Following Up with a Client",
+"📞",
+"بعد إرسال عرض اتصل: I'm just following up on the proposal we sent. واسأل: Have you had a chance to look at it? وخل الضغط خفيف: No rush, I just wanted to check if you had any questions.",
+[
+[
+"I'm just following up on the proposal we sent.",
+"بس أتابع العرض اللي أرسلناه."
+],
+[
+"Have you had a chance to look at it?",
+"لحقت تطلع عليه؟"
+],
+[
+"No rush. I just wanted to check if you had any questions.",
+"ما فيه عجلة. بس حبيت أتأكد إذا عندك أسئلة."
+],
+[
+"Would a short call next week be helpful?",
+"تفيدك مكالمة قصيرة الأسبوع الجاي؟"
+]
+],
+[
+[
+"A",
+"Hello, this is Majed.",
+"هلا، معك ماجد."
+],
+[
+"B",
+"Hi Majed, it's Sami. I'm just following up on the proposal we sent. Have you had a chance to look at it?",
+"هلا ماجد، معك سامي. أتابع العرض اللي أرسلناه. لحقت تطلع عليه؟"
+],
+[
+"A",
+"Not fully yet. It's been a busy week.",
+"مو كامل للحين. الأسبوع كان مزحوم."
+],
+[
+"B",
+"No rush. Would a short call next week be helpful?",
+"ما فيه عجلة. تفيدك مكالمة قصيرة الأسبوع الجاي؟"
+]
+]
+],
+[
+"الاعتذار الرسمي نيابة عن شركة",
+"Apologising on Behalf of a Company",
+"🏢",
+"عشان تعتذر رسمياً: On behalf of the company, please accept our sincere apologies. واشرح: This was caused by... ووضح التعويض: As a gesture of goodwill, we'd like to offer...",
+[
+[
+"On behalf of the company, please accept our sincere apologies.",
+"نيابة عن الشركة، تقبل اعتذارنا الصادق."
+],
+[
+"This was caused by a system error.",
+"هذا صار بسبب خطأ في النظام."
+],
+[
+"As a gesture of goodwill, we'd like to offer a full refund.",
+"كبادرة حسن نية نبي نعرض استرداد كامل."
+],
+[
+"We've taken steps to make sure it doesn't happen again.",
+"اتخذنا خطوات عشان ما يتكرر."
+]
+],
+[
+[
+"A",
+"My booking disappeared and I lost my holiday!",
+"حجزي اختفى وضاعت إجازتي!"
+],
+[
+"B",
+"On behalf of the company, please accept our sincere apologies. This was caused by a system error.",
+"نيابة عن الشركة، تقبل اعتذارنا الصادق. صار بسبب خطأ في النظام."
+],
+[
+"A",
+"That doesn't give me my holiday back.",
+"هذا ما يرجع لي إجازتي."
+],
+[
+"B",
+"I understand. As a gesture of goodwill, we'd like to offer a full refund and a free night.",
+"أفهمك. كبادرة حسن نية نعرض استرداد كامل وليلة مجانية."
+]
+]
+],
+[
+"المناقشة الأكاديمية",
+"Taking Part in a Seminar",
+"🎓",
+"في حلقة النقاش الجامعية قل: Building on what Sara said... أو: I'd like to challenge that idea slightly. وادعم رأيك: The study we read suggests...",
+[
+[
+"Building on what Sara said, I think...",
+"بالبناء على كلام سارة، أعتقد..."
+],
+[
+"I'd like to challenge that idea slightly.",
+"أبي أعترض على هالفكرة شوي."
+],
+[
+"The study we read suggests the opposite.",
+"الدراسة اللي قريناها تقترح العكس."
+],
+[
+"That depends on how we define success.",
+"هذا يعتمد على كيف نعرّف النجاح."
+]
+],
+[
+[
+"A",
+"Clearly, social media makes teenagers less happy.",
+"واضح إن السوشال ميديا تخلي المراهقين أقل سعادة."
+],
+[
+"B",
+"I'd like to challenge that idea slightly. The study we read suggests the effect is quite small.",
+"أبي أعترض شوي. الدراسة اللي قريناها تقول التأثير بسيط."
+],
+[
+"A",
+"But many teenagers say they feel anxious.",
+"بس مراهقين كثير يقولون يحسون بقلق."
+],
+[
+"B",
+"True. Building on that, it may depend on how much time they spend online.",
+"صحيح. وبالبناء على هذا، يمكن يعتمد على كم يقضون أونلاين."
+]
+]
+],
+[
+"التعامل مع الشائعات في العمل",
+"Addressing Rumours",
+"🗯️",
+"إذا فيه شائعة في الشغل وضّح: I've heard some concerns, and I want to be transparent. وصحح: There are no plans to cut jobs. واطلب: If you hear anything, please come to me directly.",
+[
+[
+"I've heard some concerns, and I want to be transparent.",
+"سمعت بعض المخاوف وأبي أكون شفاف."
+],
+[
+"There are currently no plans to cut jobs.",
+"ما فيه حالياً أي خطط لتقليل الوظائف."
+],
+[
+"If you hear anything, please come to me directly.",
+"إذا سمعت شي تعال لي مباشرة."
+],
+[
+"I'll update everyone as soon as I know more.",
+"بحدّث الكل أول ما أعرف أكثر."
+]
+],
+[
+[
+"A",
+"People are saying the office will close.",
+"الناس يقولون المكتب بيقفل."
+],
+[
+"B",
+"I've heard some concerns, and I want to be transparent. There are currently no plans to close it.",
+"سمعت بعض المخاوف وأبي أكون شفاف. ما فيه حالياً أي خطط لقفله."
+],
+[
+"A",
+"So where did the rumour come from?",
+"طيب من وين طلعت الشائعة؟"
+],
+[
+"B",
+"I'm not sure. If you hear anything, please come to me directly. I'll update everyone as soon as I know more.",
+"مو متأكد. إذا سمعت شي تعال لي مباشرة. بحدث الكل أول ما أعرف."
+]
+]
+],
+[
+"التحدث عن إنجاز بتواضع",
+"Talking About Achievements Modestly",
+"🏅",
+"إذا أحد مدحك قل بتواضع: Thank you, but it was really a team effort. واذكر المساعدة: I couldn't have done it without... واعترف بالجهد: It took a lot of hard work.",
+[
+[
+"Thank you, but it was really a team effort.",
+"شكراً، بس كان جهد فريق."
+],
+[
+"I couldn't have done it without my colleagues.",
+"ما كنت بقدر بدون زملائي."
+],
+[
+"It took a lot of hard work.",
+"أخذ تعب كثير."
+],
+[
+"I'm still learning.",
+"لسا أتعلم."
+]
+],
+[
+[
+"A",
+"Congratulations on the award! You must be so proud.",
+"مبروك الجائزة! أكيد فخور."
+],
+[
+"B",
+"Thank you, but it was really a team effort.",
+"شكراً، بس كان جهد فريق."
+],
+[
+"A",
+"Still, you led the project.",
+"ومع ذلك أنت قدت المشروع."
+],
+[
+"B",
+"True, it took a lot of hard work, but I couldn't have done it without my colleagues.",
+"صحيح، أخذ تعب كثير، بس ما كنت بقدر بدون زملائي."
+]
+]
+],
+[
+"طلب دعم مالي لمشروع خيري",
+"Fundraising for a Cause",
+"🤲",
+"لما تجمع تبرعات قل: We're raising money for... ووضح الأثر: Every hundred riyals provides... وادعُ بلطف: Any contribution, however small, makes a difference.",
+[
+[
+"We're raising money for a children's hospital.",
+"نجمع تبرعات لمستشفى أطفال."
+],
+[
+"Every hundred riyals provides a week of medicine.",
+"كل مية ريال توفر دواء أسبوع."
+],
+[
+"Any contribution, however small, makes a difference.",
+"أي مساهمة مهما كانت صغيرة تفرق."
+],
+[
+"You can donate online through our website.",
+"تقدر تتبرع أونلاين من موقعنا."
+]
+],
+[
+[
+"A",
+"What's this event for?",
+"هالفعالية لأي شي؟"
+],
+[
+"B",
+"We're raising money for a children's hospital. Every hundred riyals provides a week of medicine.",
+"نجمع تبرعات لمستشفى أطفال. كل مية ريال توفر دواء أسبوع."
+],
+[
+"A",
+"I can't give much, I'm afraid.",
+"للأسف ما أقدر أعطي كثير."
+],
+[
+"B",
+"Any contribution, however small, makes a difference. You can also donate online.",
+"أي مساهمة مهما كانت صغيرة تفرق. وتقدر تتبرع أونلاين بعد."
+]
+]
+],
+[
+"مناقشة عقد",
+"Reviewing a Contract",
+"📑",
+"قبل توقيع عقد اسأل: Could you walk me through this clause? وإذا عندك تحفظ: I'm not comfortable with the penalty clause. واطلب: Could we amend this section?",
+[
+[
+"Could you walk me through this clause?",
+"ممكن تشرح لي هالبند؟"
+],
+[
+"I'm not comfortable with the penalty clause.",
+"مو مرتاح لبند الغرامة."
+],
+[
+"Could we amend this section?",
+"ممكن نعدّل هالقسم؟"
+],
+[
+"I'd like my lawyer to review it first.",
+"أبي محامي يراجعه أول."
+]
+],
+[
+[
+"A",
+"Here's the contract. Just sign at the bottom.",
+"هذا العقد. بس وقّع تحت."
+],
+[
+"B",
+"Before I sign, could you walk me through clause seven?",
+"قبل أوقع، ممكن تشرح لي البند السابع؟"
+],
+[
+"A",
+"It says you pay a penalty if you cancel early.",
+"يقول تدفع غرامة إذا ألغيت بدري."
+],
+[
+"B",
+"I'm not comfortable with that. Could we amend this section? I'd also like my lawyer to review it.",
+"مو مرتاح لهذا. ممكن نعدّل هالقسم؟ وأبي محامي يراجعه بعد."
+]
+]
+],
+[
+"ترشيح شخص لوظيفة",
+"Recommending Someone",
+"👍",
+"عشان ترشح أحد قل: I'd highly recommend Lama for the role. واذكر دليل: She consistently delivers excellent work. واختم: I'm confident she'd be a great asset.",
+[
+[
+"I'd highly recommend Lama for the role.",
+"أرشح لمى للوظيفة بقوة."
+],
+[
+"She consistently delivers excellent work.",
+"دايماً تقدم شغل ممتاز."
+],
+[
+"She's great at handling difficult clients.",
+"ممتازة في التعامل مع العملاء الصعبين."
+],
+[
+"I'm confident she'd be a great asset.",
+"واثق إنها بتكون إضافة قوية."
+]
+],
+[
+[
+"A",
+"We're hiring a team leader. Any suggestions?",
+"نوظف قائد فريق. عندك اقتراح؟"
+],
+[
+"B",
+"I'd highly recommend Lama. She consistently delivers excellent work.",
+"أرشح لمى بقوة. دايماً تقدم شغل ممتاز."
+],
+[
+"A",
+"Has she managed people before?",
+"سبق أدارت ناس؟"
+],
+[
+"B",
+"She led a small team last year, and she's great with difficult clients. I'm confident she'd be a great asset.",
+"قادت فريق صغير السنة اللي فاتت، وممتازة مع العملاء الصعبين. واثق إنها بتكون إضافة قوية."
+]
+]
+],
+[
+"الحديث عن تجربة فشل",
+"Discussing a Failure",
+"🔁",
+"لما تتكلم عن فشل بنضج قل: Looking back, I underestimated... ووضح الدرس: What I learned from it is... واختم: Now I always make sure to...",
+[
+[
+"Looking back, I underestimated how long it would take.",
+"بالنظر للماضي، استهنت بالوقت اللي بياخذه."
+],
+[
+"What I learned from it is to plan for delays.",
+"اللي تعلمته إني أخطط للتأخير."
+],
+[
+"It was a tough lesson, but a valuable one.",
+"كان درس قاسي بس قيّم."
+],
+[
+"Now I always make sure to test early.",
+"الحين دايماً أتأكد أجرب بدري."
+]
+],
+[
+[
+"A",
+"Have you ever had a project that failed?",
+"عمرك كان عندك مشروع فشل؟"
+],
+[
+"B",
+"Yes. Looking back, I underestimated how long it would take.",
+"إيه. بالنظر للماضي، استهنت بالوقت اللي بياخذه."
+],
+[
+"A",
+"What did you learn from it?",
+"وش تعلمت منه؟"
+],
+[
+"B",
+"It was a tough lesson, but a valuable one. Now I always make sure to plan for delays.",
+"كان درس قاسي بس قيّم. الحين دايماً أخطط للتأخير."
+]
+]
+],
+[
+"التعبير عن الامتنان العميق",
+"Expressing Deep Gratitude",
+"💐",
+"عشان تشكر أحد من قلب قل: I can't thank you enough. ووضح الأثر: Your support meant the world to me. واعرض الرد: If I can ever return the favour...",
+[
+[
+"I can't thank you enough.",
+"ما أقدر أوفيك حقك من الشكر."
+],
+[
+"Your support meant the world to me.",
+"دعمك كان يعني لي الكثير."
+],
+[
+"I really don't know what I'd have done without you.",
+"صدق ما أدري وش كنت بسوي بدونك."
+],
+[
+"If I can ever return the favour, just say the word.",
+"إذا أقدر أرد الجميل يوم، بس قل."
+]
+],
+[
+[
+"A",
+"I heard you got the scholarship!",
+"سمعت إنك أخذت المنحة!"
+],
+[
+"B",
+"Yes! I can't thank you enough for your reference letter.",
+"إيه! ما أقدر أوفيك حقك على خطاب التوصية."
+],
+[
+"A",
+"You deserved it. I just wrote the truth.",
+"تستاهل. أنا بس كتبت الحقيقة."
+],
+[
+"B",
+"Your support meant the world to me. If I can ever return the favour, just say the word.",
+"دعمك كان يعني لي الكثير. إذا أقدر أرد الجميل يوم، بس قل."
+]
+]
+],
+[
+"طرح فكرة جديدة على الإدارة",
+"Proposing a Change",
+"🔧",
+"عشان تقترح تغيير قل: I'd like to propose a small change to how we... ووضح الفائدة: This could save us around ten hours a week. واقترح تجربة: How about we pilot it for a month?",
+[
+[
+"I'd like to propose a change to how we handle orders.",
+"أبي أقترح تغيير في طريقة تعاملنا مع الطلبات."
+],
+[
+"This could save us around ten hours a week.",
+"ممكن يوفر علينا حوالي عشر ساعات بالأسبوع."
+],
+[
+"How about we pilot it for a month?",
+"وش رأيكم نجربه شهر؟"
+],
+[
+"If it doesn't work, we can always go back.",
+"إذا ما نفع نقدر نرجع."
+]
+],
+[
+[
+"A",
+"What did you want to discuss?",
+"وش كنت تبي تناقش؟"
+],
+[
+"B",
+"I'd like to propose a change to how we handle orders. This could save us around ten hours a week.",
+"أبي أقترح تغيير في طريقة الطلبات. ممكن يوفر علينا عشر ساعات بالأسبوع."
+],
+[
+"A",
+"Sounds good, but change is risky.",
+"حلو، بس التغيير فيه مخاطرة."
+],
+[
+"B",
+"How about we pilot it for a month? If it doesn't work, we can always go back.",
+"وش رأيك نجربه شهر؟ إذا ما نفع نقدر نرجع."
+]
+]
+],
+[
+"المجادلة الودية بين أصدقاء",
+"Friendly Debate",
+"⚽",
+"في نقاش ودي مع ربعك قل: Come on, you can't be serious! وبرأيك: Say what you like, but... وتنهي بلطف: Let's agree to disagree.",
+[
+[
+"Come on, you can't be serious!",
+"يا رجال، مستحيل تكون جاد!"
+],
+[
+"Say what you like, but the numbers don't lie.",
+"قل اللي تبي، بس الأرقام ما تكذب."
+],
+[
+"Fair enough, you've got a point there.",
+"معقول، عندك حق في هذي."
+],
+[
+"Let's agree to disagree.",
+"خلنا نتفق إننا مختلفين."
+]
+],
+[
+[
+"A",
+"Honestly, the old team was much better than this one.",
+"بصراحة الفريق القديم كان أحسن بواجد من هذا."
+],
+[
+"B",
+"Come on, you can't be serious! We won the league this year.",
+"يا رجال، مستحيل تكون جاد! فزنا بالدوري هالسنة."
+],
+[
+"A",
+"Fair enough, but the old team played better football.",
+"معقول، بس الفريق القديم كان يلعب كورة أحلى."
+],
+[
+"B",
+"Say what you like, but the numbers don't lie. Let's agree to disagree.",
+"قل اللي تبي، بس الأرقام ما تكذب. خلنا نتفق إننا مختلفين."
+]
+]
+],
+[
+"التعامل مع موقف محرج",
+"Recovering from an Awkward Moment",
+"😅",
+"إذا صار موقف محرج خففه: Well, that was embarrassing! واعتذر بخفة: Sorry, I got that completely wrong. وكمّل: Anyway, where were we?",
+[
+[
+"Well, that was embarrassing!",
+"ياخي هذا كان محرج!"
+],
+[
+"Sorry, I got your name completely wrong.",
+"آسف، غلطت في اسمك تماماً."
+],
+[
+"I'm terrible with names.",
+"أنا سيء جداً في الأسامي."
+],
+[
+"Anyway, where were we?",
+"المهم، وين وقفنا؟"
+]
+],
+[
+[
+"A",
+"Actually, my name is Hessa, not Hind.",
+"ترى اسمي حصة مو هند."
+],
+[
+"B",
+"Oh, sorry! I got your name completely wrong. Well, that was embarrassing!",
+"أوه آسفة! غلطت في اسمك تماماً. هذا كان محرج!"
+],
+[
+"A",
+"Don't worry, it happens all the time.",
+"لا تشيلين هم، يصير دايم."
+],
+[
+"B",
+"I'm terrible with names. Anyway, where were we?",
+"أنا سيئة في الأسامي. المهم، وين وقفنا؟"
+]
+]
+],
+[
+"التحدث مع خبير",
+"Consulting an Expert",
+"🧑‍🔬",
+"لما تستشير خبير قل: I'd value your opinion on something. واسأل بعمق: In your experience, what's the biggest risk? واطلب توصية: What would you do in my position?",
+[
+[
+"I'd value your opinion on something.",
+"يهمني رأيك في شي."
+],
+[
+"In your experience, what's the biggest risk?",
+"من خبرتك، وش أكبر مخاطرة؟"
+],
+[
+"What would you do in my position?",
+"لو كنت مكاني وش بتسوي؟"
+],
+[
+"That's really helpful, thank you.",
+"هذا مفيد جداً، شكراً."
+]
+],
+[
+[
+"A",
+"Of course. What's on your mind?",
+"أكيد. وش في بالك؟"
+],
+[
+"B",
+"I'd value your opinion on opening a second café. In your experience, what's the biggest risk?",
+"يهمني رأيك في فتح كوفي ثاني. من خبرتك، وش أكبر مخاطرة؟"
+],
+[
+"A",
+"Usually it's choosing the wrong location.",
+"عادةً اختيار الموقع الغلط."
+],
+[
+"B",
+"That's really helpful. What would you do in my position?",
+"مفيد جداً. لو كنت مكاني وش بتسوي؟"
+]
+]
+],
+[
+"التخطيط المالي مع الشريك",
+"Discussing Finances with a Partner",
+"💑",
+"لما تتكلم عن الفلوس مع شريكك قل: I think we need to talk about our budget. واقترح بهدوء: What if we set a monthly limit for eating out? وتفاهم: Let's look at it together.",
+[
+[
+"I think we need to talk about our budget.",
+"أعتقد لازم نتكلم عن ميزانيتنا."
+],
+[
+"We're spending more than we're saving.",
+"قاعدين نصرف أكثر مما ندخر."
+],
+[
+"What if we set a monthly limit for eating out?",
+"وش رأيك نحط حد شهري للأكل برا؟"
+],
+[
+"Let's look at it together this weekend.",
+"خلنا نشوفها سوا هالويكند."
+]
+],
+[
+[
+"A",
+"You look worried. What's up?",
+"شكلك قلقان. وش فيك؟"
+],
+[
+"B",
+"I think we need to talk about our budget. We're spending more than we're saving.",
+"أعتقد لازم نتكلم عن ميزانيتنا. نصرف أكثر مما ندخر."
+],
+[
+"A",
+"Really? Where's it all going?",
+"صدق؟ وين تروح كلها؟"
+],
+[
+"B",
+"Mostly restaurants. What if we set a monthly limit? Let's look at it together this weekend.",
+"أغلبها مطاعم. وش رأيك نحط حد شهري؟ خلنا نشوفها سوا هالويكند."
+]
+]
+],
+[
+"التعليق على أداء موظف ضعيف",
+"Addressing Poor Performance",
+"📋",
+"لما تتكلم مع موظف أداؤه ضعيف كن محدد: I've noticed that deadlines have been missed recently. واسأل: Is there anything affecting your work? واتفق على خطة: Let's agree on clear goals for the next month.",
+[
+[
+"I've noticed that deadlines have been missed recently.",
+"لاحظت إن فيه مواعيد فاتت مؤخراً."
+],
+[
+"Is there anything affecting your work?",
+"فيه شي يأثر على شغلك؟"
+],
+[
+"I want to support you, but things need to improve.",
+"أبي أدعمك، بس الأمور لازم تتحسن."
+],
+[
+"Let's agree on clear goals for the next month.",
+"خلنا نتفق على أهداف واضحة للشهر الجاي."
+]
+],
+[
+[
+"A",
+"You asked to see me?",
+"طلبت تشوفني؟"
+],
+[
+"B",
+"Yes. I've noticed that some deadlines have been missed recently. Is there anything affecting your work?",
+"إيه. لاحظت إن فيه مواعيد فاتت مؤخراً. فيه شي يأثر على شغلك؟"
+],
+[
+"A",
+"I've been struggling with the new system.",
+"أعاني مع النظام الجديد."
+],
+[
+"B",
+"Thanks for telling me. I want to support you. Let's arrange training and agree on clear goals for next month.",
+"شكراً إنك قلت. أبي أدعمك. خلنا نرتب تدريب ونتفق على أهداف واضحة للشهر الجاي."
+]
+]
+],
+[
+"ختام مفاوضات",
+"Closing a Deal",
+"✍️",
+"عشان تقفل اتفاق قل: I think we've found a solution that works for both of us. ولخص: Just to confirm, we've agreed on... واختم: I'll send the final contract by tomorrow.",
+[
+[
+"I think we've found a solution that works for both of us.",
+"أعتقد لقينا حل يناسب الطرفين."
+],
+[
+"Just to confirm, we've agreed on a two-year contract.",
+"بس للتأكيد، اتفقنا على عقد سنتين."
+],
+[
+"I'll send the final contract by tomorrow.",
+"برسل العقد النهائي قبل بكرة."
+],
+[
+"It's been a pleasure doing business with you.",
+"سعدنا بالتعامل معكم."
+]
+],
+[
+[
+"A",
+"So, ten percent discount if we sign for two years?",
+"يعني خصم عشرة بالمية إذا وقعنا سنتين؟"
+],
+[
+"B",
+"Exactly. I think we've found a solution that works for both of us.",
+"بالضبط. أعتقد لقينا حل يناسب الطرفين."
+],
+[
+"A",
+"Agreed. What's the next step?",
+"اتفقنا. وش الخطوة الجاية؟"
+],
+[
+"B",
+"Just to confirm: two years, ten percent off. I'll send the final contract by tomorrow. It's been a pleasure.",
+"بس للتأكيد: سنتين وخصم عشرة بالمية. برسل العقد النهائي قبل بكرة. سعدنا فيكم."
+]
+]
+]
+];
+export const DAILY_LESSONS: SaraDailyLesson[] = [...RAW, ...RAW2, ...RAW3, ...RAW4].map(([titleAr, titleEn, icon, introAr, ph, dl], i) => ({
   id: `daily-${'abcd'[Math.floor(i / 30)]}-${String((i % 30) + 1).padStart(2, '0')}`, order: i + 1, levelId: 'abcd'[Math.floor(i / 30)] as 'a' | 'b' | 'c' | 'd', titleAr, titleEn, icon, introAr,
   phrases: ph.map(([en, ar]) => ({ en, ar })), dialogue: dl.map(([sp, en, ar]) => ({ sp, en, ar }))
 }));
