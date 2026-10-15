@@ -6040,7 +6040,2020 @@ const RAW3: R[] = [
 ]
 ]
 ];
-export const VOCAB_LESSONS: SaraVocabLesson[] = [...RAW, ...RAW2, ...RAW3].map(([titleAr, titleEn, icon, ws], i) => ({
+/** Level 4 (C1→C2): academic, professional and idiomatic vocabulary, hand-written, no repeats. */
+const RAW4: R[] = [
+[
+"الحجاج المتقدم",
+"Advanced Argument",
+"🧩",
+[
+[
+"assert",
+"يؤكد بثقة",
+"📣",
+"She asserted that the figures were wrong."
+],
+[
+"undermine",
+"يقوّض",
+"🪓",
+"Rumours can undermine trust in a company."
+],
+[
+"substantiate",
+"يُثبت بالأدلة",
+"📎",
+"He couldn't substantiate his claims."
+],
+[
+"fallacy",
+"مغالطة",
+"🎭",
+"It's a fallacy that money brings happiness."
+],
+[
+"concede",
+"يعترف / يتنازل",
+"🏳️",
+"I concede that your plan is cheaper."
+],
+[
+"counterargument",
+"حجة مضادة",
+"↩️",
+"A good essay deals with the counterargument."
+],
+[
+"compelling",
+"مقنع جداً",
+"🧲",
+"She made a compelling case for change."
+],
+[
+"refute",
+"يدحض",
+"🚫",
+"The scientist refuted the theory with new data."
+],
+[
+"nuanced",
+"دقيق ومتوازن",
+"🎚️",
+"The issue needs a nuanced discussion."
+],
+[
+"premise",
+"فرضية أساسية",
+"🧱",
+"The whole argument rests on a false premise."
+]
+]
+],
+[
+"الحوكمة والسياسة",
+"Governance and Policy",
+"🏛️",
+[
+[
+"sovereignty",
+"السيادة",
+"👑",
+"Every nation protects its sovereignty."
+],
+[
+"implement",
+"ينفّذ",
+"🛠️",
+"The ministry will implement the plan next year."
+],
+[
+"mandate",
+"تفويض / يُلزم",
+"📜",
+"The law mandates seat belts for all passengers."
+],
+[
+"transparency",
+"الشفافية",
+"🔍",
+"Citizens demand more transparency."
+],
+[
+"incentive",
+"حافز",
+"🎁",
+"Tax incentives attract foreign companies."
+],
+[
+"subsidy",
+"دعم حكومي",
+"💵",
+"Fuel subsidies were reduced."
+],
+[
+"allocate",
+"يخصّص",
+"📦",
+"The budget allocates more money to health."
+],
+[
+"stakeholder",
+"صاحب مصلحة",
+"👥",
+"All stakeholders were invited to the meeting."
+],
+[
+"diplomacy",
+"الدبلوماسية",
+"🕊️",
+"The crisis was solved through diplomacy."
+],
+[
+"initiative",
+"مبادرة",
+"🚀",
+"The green initiative aims to plant ten billion trees."
+]
+]
+],
+[
+"البحث الأكاديمي",
+"Academic Research",
+"📚",
+[
+[
+"empirical",
+"تجريبي / قائم على الملاحظة",
+"🔬",
+"We need empirical evidence, not opinions."
+],
+[
+"methodology",
+"منهجية",
+"🧭",
+"The methodology section explains how data was collected."
+],
+[
+"correlation",
+"ارتباط",
+"🔗",
+"There is a strong correlation between sleep and grades."
+],
+[
+"causation",
+"السببية",
+"➡️",
+"Correlation does not imply causation."
+],
+[
+"validity",
+"صلاحية / صدق",
+"✔️",
+"Critics questioned the validity of the survey."
+],
+[
+"anomaly",
+"حالة شاذة",
+"❗",
+"One result was an anomaly."
+],
+[
+"replicate",
+"يكرر (تجربة)",
+"🔁",
+"Other teams failed to replicate the results."
+],
+[
+"qualitative",
+"نوعي",
+"💬",
+"We used qualitative interviews."
+],
+[
+"quantitative",
+"كمّي",
+"📊",
+"The study is mainly quantitative."
+],
+[
+"literature review",
+"مراجعة الأدبيات",
+"📖",
+"My literature review covers twenty studies."
+]
+]
+],
+[
+"الصفات الدقيقة للشخصية",
+"Character Nuances",
+"🎭",
+[
+[
+"meticulous",
+"دقيق جداً",
+"🔬",
+"She is meticulous about every detail."
+],
+[
+"arrogant",
+"متكبر",
+"🦚",
+"His arrogant tone annoyed everyone."
+],
+[
+"diligent",
+"مجتهد",
+"🐜",
+"Diligent students review every day."
+],
+[
+"stubborn",
+"عنيد",
+"🐂",
+"He's too stubborn to admit he's wrong."
+],
+[
+"humble",
+"متواضع",
+"🙇",
+"Despite his success, he stayed humble."
+],
+[
+"witty",
+"خفيف الظل وذكي",
+"😏",
+"Her witty replies made us laugh."
+],
+[
+"cynical",
+"متشائم ساخر",
+"🙄",
+"He's cynical about politicians."
+],
+[
+"impulsive",
+"متهوّر",
+"⚡",
+"Don't make impulsive decisions with money."
+],
+[
+"articulate",
+"فصيح",
+"🎙️",
+"She is an articulate speaker."
+],
+[
+"ambitious",
+"طموح",
+"🏔️",
+"He has ambitious plans for his company."
+]
+]
+],
+[
+"المال والاستثمار",
+"Finance and Investment",
+"📈",
+[
+[
+"asset",
+"أصل (مالي)",
+"🏦",
+"Property is his biggest asset."
+],
+[
+"dividend",
+"أرباح الأسهم الموزعة",
+"💰",
+"The company pays a dividend twice a year."
+],
+[
+"portfolio",
+"محفظة استثمارية",
+"💼",
+"Diversify your portfolio to reduce risk."
+],
+[
+"volatile",
+"متقلب",
+"🎢",
+"The market has been very volatile."
+],
+[
+"equity",
+"حقوق ملكية / أسهم",
+"📄",
+"She owns 20% of the company's equity."
+],
+[
+"liquidity",
+"السيولة",
+"💧",
+"Banks need enough liquidity."
+],
+[
+"yield",
+"عائد",
+"🌾",
+"The bond has a yield of 5%."
+],
+[
+"bankrupt",
+"مفلس",
+"📉",
+"The firm went bankrupt last year."
+],
+[
+"speculate",
+"يضارب / يتكهن",
+"🎲",
+"It is risky to speculate on currencies."
+],
+[
+"audit",
+"تدقيق حسابات",
+"🧾",
+"The annual audit found no problems."
+]
+]
+],
+[
+"البيئة المتقدمة",
+"Ecology",
+"🌿",
+[
+[
+"biodiversity",
+"التنوع البيولوجي",
+"🦋",
+"Coral reefs have rich biodiversity."
+],
+[
+"ecosystem",
+"نظام بيئي",
+"🌐",
+"Pollution damages the whole ecosystem."
+],
+[
+"desertification",
+"التصحر",
+"🏜️",
+"Desertification threatens farmland."
+],
+[
+"mitigate",
+"يخفف (أثر)",
+"🧯",
+"Trees help mitigate the effects of heat."
+],
+[
+"depletion",
+"استنزاف",
+"🪫",
+"Groundwater depletion is a serious issue."
+],
+[
+"endangered",
+"مهدد بالانقراض",
+"🐆",
+"The Arabian leopard is endangered."
+],
+[
+"contaminate",
+"يلوّث",
+"☣️",
+"Chemicals contaminated the river."
+],
+[
+"reforestation",
+"إعادة التشجير",
+"🌳",
+"Reforestation projects are expanding."
+],
+[
+"carbon neutral",
+"محايد كربونياً",
+"⚖️",
+"The city aims to be carbon neutral by 2060."
+],
+[
+"irreversible",
+"لا رجعة فيه",
+"⛔",
+"Some damage may be irreversible."
+]
+]
+],
+[
+"الطب المتقدم",
+"Medicine",
+"⚕️",
+[
+[
+"prognosis",
+"توقعات سير المرض",
+"📈",
+"The prognosis is good after surgery."
+],
+[
+"benign",
+"حميد",
+"🙂",
+"Luckily, the tumour was benign."
+],
+[
+"malignant",
+"خبيث",
+"⚠️",
+"Doctors confirmed it was malignant."
+],
+[
+"side effect",
+"عرض جانبي",
+"💊",
+"Drowsiness is a common side effect."
+],
+[
+"immune system",
+"جهاز المناعة",
+"🛡️",
+"Sleep strengthens the immune system."
+],
+[
+"surgeon",
+"جرّاح",
+"🔪",
+"The surgeon explained the operation."
+],
+[
+"rehabilitation",
+"إعادة تأهيل",
+"🦽",
+"He spent months in rehabilitation."
+],
+[
+"contagion",
+"عدوى / انتقال المرض",
+"🦠",
+"Masks reduce the risk of contagion."
+],
+[
+"chronic pain",
+"ألم مزمن",
+"🩹",
+"Physiotherapy can ease chronic pain."
+],
+[
+"genetic",
+"وراثي",
+"🧬",
+"The disease has a genetic cause."
+]
+]
+],
+[
+"التقنية المتقدمة",
+"Advanced Technology",
+"💽",
+[
+[
+"algorithm",
+"خوارزمية",
+"🧮",
+"The algorithm recommends videos you might like."
+],
+[
+"bandwidth",
+"عرض النطاق",
+"📶",
+"Video calls need more bandwidth."
+],
+[
+"interface",
+"واجهة",
+"🖥️",
+"The interface is simple and clean."
+],
+[
+"prototype",
+"نموذج أولي",
+"🧪",
+"We tested the prototype last week."
+],
+[
+"obsolete",
+"متقادم / لم يعد مستخدماً",
+"🗑️",
+"Fax machines are almost obsolete."
+],
+[
+"breach",
+"اختراق",
+"🔓",
+"The data breach affected millions of users."
+],
+[
+"scalable",
+"قابل للتوسع",
+"📈",
+"We need a scalable system."
+],
+[
+"cloud computing",
+"الحوسبة السحابية",
+"☁️",
+"Cloud computing reduces server costs."
+],
+[
+"virtual reality",
+"الواقع الافتراضي",
+"🥽",
+"Architects use virtual reality to show designs."
+],
+[
+"disruptive",
+"مُحدث للتغيير الجذري",
+"💥",
+"Streaming was a disruptive technology."
+]
+]
+],
+[
+"اللغة والتواصل",
+"Language and Communication",
+"🗨️",
+[
+[
+"fluent",
+"طليق",
+"🗣️",
+"She is fluent in three languages."
+],
+[
+"ambiguous",
+"غامض / يحتمل معنيين",
+"❔",
+"The instructions were ambiguous."
+],
+[
+"convey",
+"ينقل (معنى)",
+"📨",
+"Pictures can convey strong emotions."
+],
+[
+"eloquent",
+"بليغ",
+"🎤",
+"He gave an eloquent speech."
+],
+[
+"jargon",
+"مصطلحات متخصصة",
+"🧾",
+"Avoid jargon when you talk to clients."
+],
+[
+"idiom",
+"تعبير اصطلاحي",
+"💬",
+"\"Break the ice\" is a common idiom."
+],
+[
+"literal",
+"حرفي",
+"🔤",
+"Don't take it in the literal sense."
+],
+[
+"connotation",
+"دلالة ضمنية",
+"🎨",
+"\"Cheap\" has a negative connotation."
+],
+[
+"paraphrase",
+"يعيد الصياغة",
+"🔄",
+"Paraphrase the text in your own words."
+],
+[
+"concise",
+"موجز",
+"✂️",
+"Keep your answer clear and concise."
+]
+]
+],
+[
+"العمل المؤسسي",
+"Corporate Life",
+"🏢",
+[
+[
+"restructure",
+"يعيد الهيكلة",
+"🏗️",
+"The company plans to restructure its departments."
+],
+[
+"outsource",
+"يستعين بمصادر خارجية",
+"🌍",
+"They outsource customer service."
+],
+[
+"benchmark",
+"معيار مرجعي",
+"📏",
+"These results set a new benchmark."
+],
+[
+"compliance",
+"الامتثال",
+"✅",
+"Compliance with safety rules is required."
+],
+[
+"KPI",
+"مؤشر أداء رئيسي",
+"🎯",
+"Each team has three KPIs."
+],
+[
+"headquarters",
+"المقر الرئيسي",
+"🏙️",
+"The headquarters moved to Riyadh."
+],
+[
+"turnover",
+"معدل دوران الموظفين / حجم المبيعات",
+"🔄",
+"Staff turnover is high in this sector."
+],
+[
+"bottom line",
+"صافي الربح / الخلاصة",
+"📉",
+"Cutting waste improves the bottom line."
+],
+[
+"appraisal",
+"تقييم الأداء",
+"📋",
+"My annual appraisal is next week."
+],
+[
+"synergy",
+"تآزر",
+"⚙️",
+"The merger created real synergy."
+]
+]
+],
+[
+"القانون المتقدم",
+"Legal English",
+"📑",
+[
+[
+"clause",
+"بند",
+"§",
+"Read the cancellation clause carefully."
+],
+[
+"breach of contract",
+"إخلال بالعقد",
+"💔",
+"They sued for breach of contract."
+],
+[
+"plaintiff",
+"المدّعي",
+"🙋",
+"The plaintiff asked for compensation."
+],
+[
+"appeal",
+"يستأنف",
+"⬆️",
+"He will appeal against the decision."
+],
+[
+"acquit",
+"يبرّئ",
+"🕊️",
+"The jury acquitted her of all charges."
+],
+[
+"jurisdiction",
+"اختصاص قضائي",
+"🗺️",
+"This case is outside our jurisdiction."
+],
+[
+"precedent",
+"سابقة",
+"📚",
+"The ruling set an important precedent."
+],
+[
+"binding",
+"ملزم",
+"🔗",
+"The agreement is legally binding."
+],
+[
+"intellectual property",
+"الملكية الفكرية",
+"💡",
+"Protect your intellectual property."
+],
+[
+"arbitration",
+"التحكيم",
+"⚖️",
+"The dispute was settled through arbitration."
+]
+]
+],
+[
+"الإعلام الرقمي",
+"Digital Media",
+"📲",
+[
+[
+"algorithmic feed",
+"خلاصة خوارزمية",
+"📜",
+"The algorithmic feed shows what keeps you scrolling."
+],
+[
+"viral",
+"منتشر بسرعة",
+"🚀",
+"The video went viral overnight."
+],
+[
+"engagement",
+"التفاعل",
+"💬",
+"Questions increase engagement on posts."
+],
+[
+"echo chamber",
+"غرفة صدى",
+"🔊",
+"Social media can create echo chambers."
+],
+[
+"clickbait",
+"عناوين مضللة لجذب النقر",
+"🎣",
+"Don't trust clickbait headlines."
+],
+[
+"monetise",
+"يحقق دخلاً من",
+"💲",
+"She monetises her channel through ads."
+],
+[
+"troll",
+"متصيّد",
+"👹",
+"Ignore the trolls in the comments."
+],
+[
+"moderation",
+"الإشراف على المحتوى",
+"🧹",
+"Content moderation is a hard job."
+],
+[
+"anonymity",
+"إخفاء الهوية",
+"🎭",
+"Anonymity online encourages rude comments."
+],
+[
+"subscriber",
+"مشترك",
+"🔔",
+"The channel reached a million subscribers."
+]
+]
+],
+[
+"المشاعر الدقيقة",
+"Subtle Emotions",
+"🌗",
+[
+[
+"ambivalent",
+"متردد بين شعورين",
+"⚖️",
+"I feel ambivalent about moving abroad."
+],
+[
+"apprehensive",
+"متوجس",
+"😬",
+"She was apprehensive about the interview."
+],
+[
+"elated",
+"في غاية الفرح",
+"🤩",
+"We were elated by the news."
+],
+[
+"indignant",
+"ساخط",
+"😠",
+"He was indignant at the unfair decision."
+],
+[
+"melancholy",
+"حزن هادئ",
+"🌧️",
+"The song has a melancholy tone."
+],
+[
+"content",
+"راضٍ",
+"😌",
+"He is content with a simple life."
+],
+[
+"resentful",
+"ممتعض",
+"😒",
+"She felt resentful about being ignored."
+],
+[
+"overjoyed",
+"فرحان جداً",
+"🥳",
+"They were overjoyed at the birth of their son."
+],
+[
+"remorse",
+"ندم",
+"😔",
+"He showed no remorse for his actions."
+],
+[
+"bewildered",
+"مذهول / حائر",
+"😵",
+"The tourists looked bewildered."
+]
+]
+],
+[
+"العلوم الاجتماعية",
+"Social Sciences",
+"👥",
+[
+[
+"socioeconomic",
+"اجتماعي اقتصادي",
+"📊",
+"Socioeconomic status affects health."
+],
+[
+"marginalised",
+"مهمّش",
+"🚧",
+"Marginalised groups need more support."
+],
+[
+"integration",
+"اندماج",
+"🧩",
+"Language is key to integration."
+],
+[
+"urbanisation",
+"التحضّر",
+"🏙️",
+"Urbanisation has changed family life."
+],
+[
+"norm",
+"عُرف / معيار",
+"📏",
+"Social norms differ between cultures."
+],
+[
+"stereotype",
+"صورة نمطية",
+"🏷️",
+"Avoid stereotypes about other nations."
+],
+[
+"discrimination",
+"تمييز",
+"🚫",
+"The law bans discrimination at work."
+],
+[
+"mobility",
+"الحراك",
+"🪜",
+"Education increases social mobility."
+],
+[
+"cohesion",
+"التماسك",
+"🤝",
+"Festivals strengthen community cohesion."
+],
+[
+"demography",
+"علم السكان",
+"👨‍👩‍👧‍👦",
+"Demography studies birth and death rates."
+]
+]
+],
+[
+"الهندسة والبناء",
+"Engineering and Construction",
+"🏗️",
+[
+[
+"blueprint",
+"مخطط",
+"📐",
+"The architect showed us the blueprint."
+],
+[
+"foundation",
+"أساس",
+"🧱",
+"They poured the foundation in one day."
+],
+[
+"durable",
+"متين",
+"🪨",
+"This material is light but durable."
+],
+[
+"structural",
+"إنشائي",
+"🏛️",
+"Engineers found structural damage."
+],
+[
+"specification",
+"مواصفة",
+"📋",
+"The bridge was built to strict specifications."
+],
+[
+"contractor",
+"مقاول",
+"👷",
+"The contractor finished ahead of schedule."
+],
+[
+"insulation",
+"عزل",
+"🧤",
+"Good insulation lowers cooling costs."
+],
+[
+"load-bearing",
+"حامل للأحمال",
+"🏋️",
+"Don't remove that load-bearing wall."
+],
+[
+"feasibility study",
+"دراسة جدوى",
+"🔎",
+"A feasibility study came first."
+],
+[
+"commission",
+"يكلّف بـ / عمولة",
+"📝",
+"The city commissioned a new stadium."
+]
+]
+],
+[
+"الأخلاقيات",
+"Ethics",
+"🧭",
+[
+[
+"ethical",
+"أخلاقي",
+"🧭",
+"Is it ethical to test on animals?"
+],
+[
+"integrity",
+"النزاهة",
+"💎",
+"He is a man of integrity."
+],
+[
+"dilemma",
+"معضلة",
+"🤔",
+"She faced a moral dilemma."
+],
+[
+"accountability",
+"المساءلة",
+"🧾",
+"We need accountability for public money."
+],
+[
+"conflict of interest",
+"تضارب مصالح",
+"⚔️",
+"He declared a conflict of interest."
+],
+[
+"consent",
+"موافقة",
+"✍️",
+"Patients must give consent before surgery."
+],
+[
+"exploit",
+"يستغل",
+"🪤",
+"Some companies exploit cheap labour."
+],
+[
+"whistleblower",
+"مُبلّغ عن مخالفات",
+"📯",
+"The whistleblower exposed the fraud."
+],
+[
+"bribery",
+"رشوة",
+"💰",
+"Bribery is a serious crime."
+],
+[
+"corruption",
+"فساد",
+"🕳️",
+"The government is fighting corruption."
+]
+]
+],
+[
+"الفضاء والفلك",
+"Space and Astronomy",
+"🌌",
+[
+[
+"orbit",
+"مدار",
+"🛰️",
+"The satellite is in orbit around the Earth."
+],
+[
+"galaxy",
+"مجرة",
+"🌌",
+"Our galaxy is called the Milky Way."
+],
+[
+"astronaut",
+"رائد فضاء",
+"👨‍🚀",
+"Two Saudi astronauts went to the space station."
+],
+[
+"spacecraft",
+"مركبة فضائية",
+"🛸",
+"The spacecraft landed safely."
+],
+[
+"telescope",
+"تلسكوب",
+"🔭",
+"Through the telescope we saw Saturn."
+],
+[
+"launch pad",
+"منصة إطلاق",
+"🚀",
+"The rocket waited on the launch pad."
+],
+[
+"atmosphere",
+"الغلاف الجوي",
+"🌍",
+"The atmosphere protects us from radiation."
+],
+[
+"meteor",
+"نيزك",
+"☄️",
+"We watched a meteor shower in the desert."
+],
+[
+"solar system",
+"المجموعة الشمسية",
+"🪐",
+"Jupiter is the largest planet in the solar system."
+],
+[
+"light year",
+"سنة ضوئية",
+"💫",
+"The star is four light years away."
+]
+]
+],
+[
+"الأفعال الأكاديمية",
+"Academic Verbs",
+"✍️",
+[
+[
+"illustrate",
+"يوضّح بمثال",
+"🖼️",
+"This graph illustrates the change."
+],
+[
+"fluctuate",
+"يتذبذب",
+"📉",
+"Prices fluctuated during the year."
+],
+[
+"attribute to",
+"ينسب إلى",
+"🏷️",
+"The rise is attributed to tourism."
+],
+[
+"derive from",
+"يُستمد من",
+"🌱",
+"Many English words derive from Latin."
+],
+[
+"constitute",
+"يشكّل",
+"🧩",
+"Women constitute half of the students."
+],
+[
+"facilitate",
+"يسهّل",
+"🛤️",
+"Technology facilitates learning."
+],
+[
+"highlight",
+"يُبرز",
+"🖍️",
+"The report highlights three problems."
+],
+[
+"underestimate",
+"يستهين بـ",
+"📉",
+"Never underestimate your opponent."
+],
+[
+"diminish",
+"يتضاءل",
+"🔻",
+"His influence diminished over time."
+],
+[
+"outline",
+"يوجز / يعرض الخطوط العريضة",
+"📝",
+"First, outline the main points."
+]
+]
+],
+[
+"روابط الكتابة",
+"Linking Words for Writing",
+"🔗",
+[
+[
+"nevertheless",
+"ومع ذلك",
+"↪️",
+"It was raining; nevertheless, we went out."
+],
+[
+"furthermore",
+"علاوة على ذلك",
+"➕",
+"Furthermore, the plan saves money."
+],
+[
+"consequently",
+"نتيجة لذلك",
+"➡️",
+"He didn't study; consequently, he failed."
+],
+[
+"whereas",
+"في حين",
+"⇄",
+"Ali likes tea, whereas Omar prefers coffee."
+],
+[
+"notwithstanding",
+"بالرغم من",
+"🧱",
+"Notwithstanding the cost, the project went ahead."
+],
+[
+"hence",
+"ومن ثمّ",
+"∴",
+"Fuel is expensive, hence the high prices."
+],
+[
+"albeit",
+"وإن كان",
+"〰️",
+"It worked, albeit slowly."
+],
+[
+"in contrast",
+"بالمقابل",
+"🌓",
+"In contrast, rural areas grew slowly."
+],
+[
+"to a large extent",
+"إلى حد كبير",
+"📏",
+"I agree to a large extent."
+],
+[
+"by and large",
+"بشكل عام",
+"🌐",
+"By and large, the results were positive."
+]
+]
+],
+[
+"تعبيرات اصطلاحية",
+"Common Idioms",
+"💡",
+[
+[
+"break the ice",
+"يكسر الحاجز",
+"🧊",
+"A joke helped break the ice."
+],
+[
+"a piece of cake",
+"سهل جداً",
+"🍰",
+"The test was a piece of cake."
+],
+[
+"hit the nail on the head",
+"أصاب كبد الحقيقة",
+"🔨",
+"You hit the nail on the head."
+],
+[
+"under the weather",
+"متوعك",
+"🤒",
+"I'm feeling a bit under the weather."
+],
+[
+"cost an arm and a leg",
+"غالٍ جداً",
+"💸",
+"That car cost an arm and a leg."
+],
+[
+"once in a blue moon",
+"نادراً جداً",
+"🌕",
+"We eat out once in a blue moon."
+],
+[
+"on the same page",
+"متفقين على نفس الفهم",
+"📄",
+"Let's make sure we're on the same page."
+],
+[
+"the last straw",
+"القشة التي قصمت ظهر البعير",
+"🌾",
+"Being late again was the last straw."
+],
+[
+"call it a day",
+"ننهي الشغل لليوم",
+"🌇",
+"We're tired; let's call it a day."
+],
+[
+"beat around the bush",
+"يلف ويدور",
+"🌳",
+"Stop beating around the bush and tell me."
+]
+]
+],
+[
+"أفعال مركبة متقدمة",
+"Advanced Phrasal Verbs",
+"🔧",
+[
+[
+"come up with",
+"يبتكر / يطلع بـ",
+"💡",
+"She came up with a brilliant idea."
+],
+[
+"put off",
+"يؤجل",
+"⏸️",
+"Don't put off your homework."
+],
+[
+"carry out",
+"ينفّذ",
+"🧑‍🔬",
+"They carried out a survey."
+],
+[
+"bring about",
+"يُحدث",
+"🌀",
+"The internet brought about huge changes."
+],
+[
+"phase out",
+"يُلغي تدريجياً",
+"🌘",
+"The country will phase out plastic bags."
+],
+[
+"rule out",
+"يستبعد",
+"❌",
+"Doctors ruled out a fracture."
+],
+[
+"look into",
+"يحقق في",
+"🔎",
+"We will look into your complaint."
+],
+[
+"set back",
+"يؤخّر / يعرقل",
+"↩️",
+"The storm set back the project by weeks."
+],
+[
+"account for",
+"يمثّل / يفسّر",
+"📊",
+"Oil accounts for most exports."
+],
+[
+"step down",
+"يتنحى",
+"🪜",
+"The CEO stepped down after ten years."
+]
+]
+],
+[
+"الزراعة والغذاء",
+"Agriculture and Food Security",
+"🌾",
+[
+[
+"crop",
+"محصول",
+"🌽",
+"Dates are the main crop in Al-Ahsa."
+],
+[
+"harvest",
+"حصاد",
+"🧺",
+"The harvest was excellent this year."
+],
+[
+"irrigation",
+"ري",
+"💦",
+"Drip irrigation saves water."
+],
+[
+"fertiliser",
+"سماد",
+"🧪",
+"Too much fertiliser pollutes rivers."
+],
+[
+"livestock",
+"الماشية",
+"🐄",
+"Farmers raise livestock in the north."
+],
+[
+"yield per hectare",
+"إنتاج الهكتار",
+"📈",
+"Technology increased the yield per hectare."
+],
+[
+"famine",
+"مجاعة",
+"🥣",
+"The war caused famine in the region."
+],
+[
+"self-sufficient",
+"مكتفٍ ذاتياً",
+"🏠",
+"The country is self-sufficient in milk."
+],
+[
+"greenhouse",
+"بيت محمي",
+"🏡",
+"Tomatoes grow in a greenhouse."
+],
+[
+"food security",
+"الأمن الغذائي",
+"🛡️",
+"Food security is a national priority."
+]
+]
+],
+[
+"النقل واللوجستيات",
+"Transport and Logistics",
+"🚛",
+[
+[
+"logistics",
+"الخدمات اللوجستية",
+"📦",
+"Logistics is a growing sector."
+],
+[
+"freight",
+"شحن بضائع",
+"🚢",
+"Most freight moves by sea."
+],
+[
+"warehouse",
+"مستودع",
+"🏭",
+"The goods are stored in a warehouse."
+],
+[
+"supply chain",
+"سلسلة الإمداد",
+"⛓️",
+"The pandemic disrupted supply chains."
+],
+[
+"congestion",
+"اختناق مروري",
+"🚦",
+"Congestion is worse at rush hour."
+],
+[
+"commute",
+"التنقل اليومي للعمل",
+"🚌",
+"My commute takes forty minutes."
+],
+[
+"toll",
+"رسوم طريق",
+"🛣️",
+"You pay a toll on this highway."
+],
+[
+"fleet",
+"أسطول",
+"🚚",
+"The company has a fleet of fifty trucks."
+],
+[
+"customs",
+"الجمارك",
+"🛃",
+"The package is held at customs."
+],
+[
+"tracking number",
+"رقم التتبع",
+"🔢",
+"Here is your tracking number."
+]
+]
+],
+[
+"الفلسفة والتفكير",
+"Philosophy and Ideas",
+"🦉",
+[
+[
+"concept",
+"مفهوم",
+"💭",
+"Freedom is a difficult concept to define."
+],
+[
+"dogma",
+"عقيدة جامدة",
+"📏",
+"Science should question dogma."
+],
+[
+"rational",
+"عقلاني",
+"🧠",
+"Let's make a rational decision."
+],
+[
+"subjective",
+"ذاتي",
+"👤",
+"Beauty is subjective."
+],
+[
+"objective",
+"موضوعي",
+"🎯",
+"Try to be objective when you judge."
+],
+[
+"paradox",
+"مفارقة",
+"♾️",
+"It's a paradox: the more choice, the less happy."
+],
+[
+"perception",
+"إدراك / تصوّر",
+"👓",
+"Perception is not always reality."
+],
+[
+"assumption",
+"افتراض",
+"❓",
+"Don't make assumptions about people."
+],
+[
+"ideology",
+"أيديولوجيا",
+"📕",
+"The party has a clear ideology."
+],
+[
+"wisdom",
+"حكمة",
+"🦉",
+"Age brings wisdom."
+]
+]
+],
+[
+"المقابلات والسيرة",
+"CV and Interviews",
+"📄",
+[
+[
+"proficient",
+"متمكن",
+"💪",
+"I am proficient in Excel and Python."
+],
+[
+"track record",
+"سجل حافل",
+"🏁",
+"She has a strong track record in sales."
+],
+[
+"transferable skills",
+"مهارات قابلة للنقل",
+"🔁",
+"Teamwork is a transferable skill."
+],
+[
+"shortlist",
+"قائمة مختصرة",
+"📋",
+"You have been shortlisted for an interview."
+],
+[
+"reference letter",
+"خطاب مرجعي",
+"✉️",
+"Please attach a reference letter."
+],
+[
+"cover letter",
+"خطاب تقديم",
+"📨",
+"Write a short cover letter."
+],
+[
+"notice period",
+"فترة الإشعار",
+"📆",
+"My notice period is one month."
+],
+[
+"remuneration",
+"المكافأة / الأجر",
+"💵",
+"The remuneration package includes housing."
+],
+[
+"in-depth",
+"متعمق",
+"🔍",
+"I have in-depth knowledge of the market."
+],
+[
+"headhunt",
+"يستقطب (موظفاً)",
+"🎯",
+"She was headhunted by a rival firm."
+]
+]
+],
+[
+"الوصف المتقدم",
+"Vivid Description",
+"🖌️",
+[
+[
+"breathtaking",
+"يخطف الأنفاس",
+"😮",
+"The view from the mountain was breathtaking."
+],
+[
+"bustling",
+"مزدحم بالحركة",
+"🏃",
+"We walked through the bustling market."
+],
+[
+"desolate",
+"مهجور وموحش",
+"🏚️",
+"The village looked desolate."
+],
+[
+"picturesque",
+"خلاب",
+"🏞️",
+"AlUla has picturesque valleys."
+],
+[
+"dilapidated",
+"متهالك",
+"🏚️",
+"The old house was dilapidated."
+],
+[
+"pristine",
+"نقي لم يُمس",
+"💎",
+"The beach was pristine."
+],
+[
+"tranquil",
+"هادئ وساكن",
+"🧘",
+"We stayed in a tranquil village."
+],
+[
+"vibrant",
+"نابض بالحياة",
+"🌈",
+"Jeddah has a vibrant art scene."
+],
+[
+"overcrowded",
+"مكتظ",
+"👥",
+"The bus was overcrowded."
+],
+[
+"immense",
+"هائل",
+"🏔️",
+"The desert is immense."
+]
+]
+],
+[
+"الإقناع والخطابة",
+"Persuasion and Rhetoric",
+"🎤",
+[
+[
+"emphasise",
+"يؤكد على",
+"❗",
+"I want to emphasise one point."
+],
+[
+"rhetorical question",
+"سؤال بلاغي",
+"❓",
+"\"Who doesn't want to be happy?\" is a rhetorical question."
+],
+[
+"appeal to",
+"يستميل / يخاطب",
+"❤️",
+"The advert appeals to parents."
+],
+[
+"anecdote",
+"حكاية قصيرة",
+"📖",
+"He began his speech with an anecdote."
+],
+[
+"persuasive",
+"مقنع",
+"🧲",
+"Write a persuasive essay on this topic."
+],
+[
+"captivate",
+"يأسر",
+"✨",
+"Her story captivated the audience."
+],
+[
+"credibility",
+"المصداقية",
+"🏅",
+"Wrong numbers damage your credibility."
+],
+[
+"exaggerate",
+"يبالغ",
+"🎈",
+"Don't exaggerate the problem."
+],
+[
+"rebuttal",
+"رد مضاد",
+"🔁",
+"His rebuttal was short and strong."
+],
+[
+"call to action",
+"دعوة للتحرك",
+"📢",
+"End your speech with a call to action."
+]
+]
+],
+[
+"المفاوضات",
+"Negotiation",
+"🤝",
+[
+[
+"leverage",
+"ورقة ضغط",
+"🪝",
+"We have leverage because they need our product."
+],
+[
+"concession",
+"تنازل",
+"🏳️",
+"Both sides made concessions."
+],
+[
+"deadlock",
+"طريق مسدود",
+"🔒",
+"The talks ended in deadlock."
+],
+[
+"counteroffer",
+"عرض مضاد",
+"🔄",
+"They rejected our price and made a counteroffer."
+],
+[
+"mutually beneficial",
+"مفيد للطرفين",
+"🤲",
+"We want a mutually beneficial deal."
+],
+[
+"terms and conditions",
+"الشروط والأحكام",
+"📃",
+"Read the terms and conditions first."
+],
+[
+"bargaining power",
+"القوة التفاوضية",
+"💪",
+"Large buyers have more bargaining power."
+],
+[
+"non-negotiable",
+"غير قابل للتفاوض",
+"🚷",
+"Safety standards are non-negotiable."
+],
+[
+"draft agreement",
+"مسودة اتفاقية",
+"📝",
+"We sent them a draft agreement."
+],
+[
+"walk away",
+"ينسحب",
+"🚶",
+"Be ready to walk away from a bad deal."
+]
+]
+],
+[
+"السياحة والضيافة",
+"Tourism and Hospitality",
+"🏨",
+[
+[
+"hospitality",
+"الضيافة",
+"☕",
+"Saudi hospitality is famous worldwide."
+],
+[
+"destination",
+"وجهة",
+"📍",
+"AlUla is a popular destination."
+],
+[
+"peak season",
+"موسم الذروة",
+"📈",
+"Prices double in peak season."
+],
+[
+"off-peak",
+"خارج الذروة",
+"📉",
+"Travel off-peak to save money."
+],
+[
+"amenities",
+"المرافق",
+"🏊",
+"The resort has excellent amenities."
+],
+[
+"eco-tourism",
+"السياحة البيئية",
+"🌿",
+"Eco-tourism protects nature."
+],
+[
+"concierge",
+"موظف الكونسيرج",
+"🛎️",
+"Ask the concierge for a taxi."
+],
+[
+"occupancy rate",
+"نسبة الإشغال",
+"🛏️",
+"The hotel's occupancy rate is 90%."
+],
+[
+"sightseeing",
+"مشاهدة المعالم",
+"📸",
+"We spent the day sightseeing."
+],
+[
+"souvenir",
+"تذكار",
+"🎁",
+"I bought a souvenir for my mother."
+]
+]
+],
+[
+"الوقت والإنتاجية",
+"Time and Productivity",
+"⏱️",
+[
+[
+"procrastinate",
+"يماطل",
+"🛋️",
+"I procrastinate when tasks are boring."
+],
+[
+"prioritise",
+"يرتب الأولويات",
+"🥇",
+"Prioritise the urgent tasks."
+],
+[
+"multitask",
+"ينجز عدة مهام معاً",
+"🤹",
+"Few people can multitask well."
+],
+[
+"time-consuming",
+"يستهلك وقتاً",
+"⌛",
+"Writing reports is time-consuming."
+],
+[
+"streamline",
+"يبسّط ويسرّع",
+"🌊",
+"We streamlined the approval process."
+],
+[
+"backlog",
+"متراكمات",
+"📚",
+"There's a backlog of emails to answer."
+],
+[
+"milestone",
+"مرحلة فارقة",
+"🏁",
+"Launching the app was a big milestone."
+],
+[
+"productive",
+"منتج",
+"⚙️",
+"Mornings are my most productive time."
+],
+[
+"distraction",
+"ملهٍ",
+"📱",
+"Phones are the biggest distraction."
+],
+[
+"routine",
+"روتين",
+"🔁",
+"A morning routine helps me focus."
+]
+]
+]
+];
+export const VOCAB_LESSONS: SaraVocabLesson[] = [...RAW, ...RAW2, ...RAW3, ...RAW4].map(([titleAr, titleEn, icon, ws], i) => ({
   id: `vocab-${'abcd'[Math.floor(i / 30)]}-${String((i % 30) + 1).padStart(2, '0')}`, order: i + 1, levelId: 'abcd'[Math.floor(i / 30)] as 'a' | 'b' | 'c' | 'd', titleAr, titleEn, icon,
   words: ws.map(([en, ar, emoji, example]) => ({ en, ar, emoji, example }))
 }));
