@@ -2767,7 +2767,1390 @@ const RAW2: R[] = [
 ]
 ]
 ];
-export const DAILY_LESSONS: SaraDailyLesson[] = [...RAW, ...RAW2].map(([titleAr, titleEn, icon, introAr, ph, dl], i) => ({
+/** Level 3 (B2→C1): 30 professional/tactful situations, hand-written. */
+const RAW3: R[] = [
+[
+"رفض بلباقة",
+"Saying No Politely",
+"🙅",
+"عشان ترفض بدون ما تجرح قل: I'm afraid I can't make it. وإذا تبي تعطي بديل: Maybe another time? ولو تبي تشكره على العرض: Thanks for thinking of me.",
+[
+[
+"I'm afraid I can't make it.",
+"للأسف ما أقدر أجي."
+],
+[
+"Thanks for thinking of me.",
+"شكراً إنك تذكرتني."
+],
+[
+"I've got a lot on my plate this week.",
+"عندي أشغال كثيرة هالأسبوع."
+],
+[
+"Maybe another time?",
+"يمكن مرة ثانية؟"
+]
+],
+[
+[
+"A",
+"We're having a barbecue on Friday. Can you come?",
+"عندنا شوي يوم الجمعة، تقدر تجي؟"
+],
+[
+"B",
+"Thanks for thinking of me, but I'm afraid I can't make it.",
+"شكراً إنك تذكرتني، بس للأسف ما أقدر أجي."
+],
+[
+"A",
+"Oh, that's a shame. Busy week?",
+"أوه، خسارة. أسبوعك مزحوم؟"
+],
+[
+"B",
+"Yes, I've got a lot on my plate. Maybe another time?",
+"إيه، عندي أشغال كثيرة. يمكن مرة ثانية؟"
+]
+]
+],
+[
+"التعبير عن عدم الرضا بأدب",
+"Expressing Disagreement Tactfully",
+"🤔",
+"في النقاش لا تقول You're wrong، قل: I see your point, but... أو: I'm not sure I agree. وإذا تبي تقترح: Have you considered...?",
+[
+[
+"I see your point, but I see it differently.",
+"فاهم وجهة نظرك، بس أنا أشوفها غير."
+],
+[
+"I'm not sure I agree with that.",
+"مو متأكد إني أتفق مع هذا."
+],
+[
+"Have you considered another option?",
+"فكرت في خيار ثاني؟"
+],
+[
+"That's a fair point.",
+"هذي نقطة منطقية."
+]
+],
+[
+[
+"A",
+"I think we should cancel the project completely.",
+"أعتقد لازم نلغي المشروع كله."
+],
+[
+"B",
+"I see your point, but I'm not sure I agree.",
+"فاهم وجهة نظرك، بس مو متأكد إني أتفق."
+],
+[
+"A",
+"Why not? It's costing too much.",
+"ليش لا؟ يكلّف واجد."
+],
+[
+"B",
+"That's a fair point. Have you considered reducing the budget instead?",
+"نقطة منطقية. فكرت نقلل الميزانية بدال كذا؟"
+]
+]
+],
+[
+"طلب توضيح",
+"Asking for Clarification",
+"❓",
+"إذا ما فهمت قل: Sorry, could you clarify what you mean? أو: Do you mean...? وعشان تتأكد: So, if I understand correctly...",
+[
+[
+"Could you clarify what you mean?",
+"ممكن توضح وش تقصد؟"
+],
+[
+"Do you mean we start next week?",
+"تقصد نبدأ الأسبوع الجاي؟"
+],
+[
+"So, if I understand correctly, the price includes delivery.",
+"يعني إذا فهمت صح، السعر يشمل التوصيل."
+],
+[
+"Could you go over that again?",
+"ممكن تعيد هذا مرة ثانية؟"
+]
+],
+[
+[
+"A",
+"The delivery date depends on the final approval.",
+"موعد التسليم يعتمد على الموافقة النهائية."
+],
+[
+"B",
+"Sorry, could you clarify what you mean by final approval?",
+"عفواً، ممكن توضح وش تقصد بالموافقة النهائية؟"
+],
+[
+"A",
+"The manager has to sign the contract first.",
+"المدير لازم يوقع العقد أول."
+],
+[
+"B",
+"So, if I understand correctly, nothing moves until he signs?",
+"يعني إذا فهمت صح، ما يتحرك شي لين يوقع؟"
+]
+]
+],
+[
+"شكوى رسمية لمدير",
+"Escalating a Complaint",
+"📈",
+"إذا ما انحلت مشكلتك اطلب المسؤول: I'd like to speak to a manager, please. واشرح بهدوء: I've called three times about this. واطلب حل واضح: What exactly will you do to fix it?",
+[
+[
+"I'd like to speak to a manager, please.",
+"أبي أكلم المدير لو سمحت."
+],
+[
+"I've called three times about this issue.",
+"اتصلت ثلاث مرات بخصوص هالمشكلة."
+],
+[
+"What exactly will you do to fix it?",
+"وش بالضبط بتسوون عشان تحلونها؟"
+],
+[
+"I expect a reply by the end of the week.",
+"أتوقع رد قبل نهاية الأسبوع."
+]
+],
+[
+[
+"A",
+"I'm sorry, the system still shows the old address.",
+"آسف، النظام لسا يطلع العنوان القديم."
+],
+[
+"B",
+"I've called three times about this. I'd like to speak to a manager, please.",
+"اتصلت ثلاث مرات بخصوص هذا. أبي أكلم المدير لو سمحت."
+],
+[
+"A",
+"I'm the manager. I apologise for the trouble.",
+"أنا المدير. أعتذر عن الإزعاج."
+],
+[
+"B",
+"Thank you. What exactly will you do to fix it?",
+"شكراً. وش بالضبط بتسوون عشان تحلونها؟"
+]
+]
+],
+[
+"مقابلة عمل متقدمة",
+"Interview: Strengths and Weaknesses",
+"🎯",
+"لما يسألونك عن نقطة ضعفك لا تقول ما عندي، قل: I sometimes take on too much. ثم وضح كيف تتحسن: I'm working on it by... وعن نقاط قوتك: I'm good at solving problems under pressure.",
+[
+[
+"I'm good at solving problems under pressure.",
+"أنا شاطر في حل المشاكل تحت الضغط."
+],
+[
+"I sometimes take on too much.",
+"أحياناً آخذ مهام أكثر من طاقتي."
+],
+[
+"I'm working on it by planning my week.",
+"أشتغل على هذا بتخطيط أسبوعي."
+],
+[
+"For example, in my last job...",
+"مثلاً، في شغلي السابق..."
+]
+],
+[
+[
+"A",
+"What would you say is your greatest weakness?",
+"وش تعتبر أكبر نقطة ضعف عندك؟"
+],
+[
+"B",
+"I sometimes take on too much, but I'm working on it by planning my week.",
+"أحياناً آخذ مهام فوق طاقتي، بس أشتغل على هذا بتخطيط أسبوعي."
+],
+[
+"A",
+"And your main strength?",
+"وأهم نقطة قوة؟"
+],
+[
+"B",
+"I'm good at solving problems under pressure. For example, in my last job I fixed a system failure overnight.",
+"أنا شاطر في حل المشاكل تحت الضغط. مثلاً في شغلي السابق صلحت عطل في النظام خلال ليلة."
+]
+]
+],
+[
+"رفض عرض عمل",
+"Turning Down a Job Offer",
+"✉️",
+"إذا جاك عرض ما يناسبك قل بأدب: Thank you for the offer, but I've decided to decline. واذكر سبب عام: It's not the right fit for me at the moment. وخل الباب مفتوح: I hope we can stay in touch.",
+[
+[
+"Thank you for the offer.",
+"شكراً على العرض."
+],
+[
+"I've decided to decline.",
+"قررت أعتذر عنه."
+],
+[
+"It's not the right fit for me at the moment.",
+"ما يناسبني في الوقت الحالي."
+],
+[
+"I hope we can stay in touch.",
+"أتمنى نظل على تواصل."
+]
+],
+[
+[
+"A",
+"So, have you made a decision about our offer?",
+"طيب، قررت بخصوص عرضنا؟"
+],
+[
+"B",
+"Yes. Thank you for the offer, but I've decided to decline.",
+"إيه. شكراً على العرض، بس قررت أعتذر."
+],
+[
+"A",
+"I'm sorry to hear that. May I ask why?",
+"يؤسفني هذا. ممكن أعرف السبب؟"
+],
+[
+"B",
+"It's not the right fit for me at the moment, but I hope we can stay in touch.",
+"ما يناسبني حالياً، بس أتمنى نظل على تواصل."
+]
+]
+],
+[
+"إدارة اجتماع",
+"Chairing a Meeting",
+"🪑",
+"إذا أنت تدير الاجتماع ابدأ: Let's get started. ونظم الكلام: Let's move on to the next item. ولما تختم: To sum up, we agreed that...",
+[
+[
+"Let's get started.",
+"خلونا نبدأ."
+],
+[
+"Let's move on to the next item.",
+"ننتقل للبند اللي بعده."
+],
+[
+"Could we keep this brief?",
+"ممكن نختصر؟"
+],
+[
+"To sum up, we agreed on three things.",
+"باختصار، اتفقنا على ثلاث نقاط."
+]
+],
+[
+[
+"A",
+"Thanks for coming, everyone. Let's get started.",
+"شكراً لحضوركم. خلونا نبدأ."
+],
+[
+"B",
+"Before we start, can I add something to the agenda?",
+"قبل نبدأ، أقدر أضيف شي لجدول الأعمال؟"
+],
+[
+"A",
+"Sure, but could we keep this brief? Let's move on to the budget first.",
+"أكيد، بس خلنا نختصر. نبدأ بالميزانية أول."
+],
+[
+"B",
+"Fine. Then to sum up, we'll review costs on Monday.",
+"تمام. باختصار، بنراجع التكاليف يوم الاثنين."
+]
+]
+],
+[
+"مقاطعة بلباقة",
+"Interrupting Politely",
+"✋",
+"إذا تبي تدخل في الكلام قل: Sorry to interrupt, but... وإذا أحد قاطعك: If I could just finish my point... وإذا تبي ترجع للموضوع: Going back to what you said...",
+[
+[
+"Sorry to interrupt, but I have a quick question.",
+"آسف على المقاطعة، بس عندي سؤال سريع."
+],
+[
+"If I could just finish my point...",
+"لو تسمح أكمل فكرتي..."
+],
+[
+"Going back to what you said earlier...",
+"بالرجوع للي قلته قبل..."
+],
+[
+"Please, go ahead.",
+"تفضل، كمّل."
+]
+],
+[
+[
+"A",
+"And the second reason the sales dropped is...",
+"والسبب الثاني إن المبيعات نزلت هو..."
+],
+[
+"B",
+"Sorry to interrupt, but do you have the exact numbers?",
+"آسف على المقاطعة، بس عندك الأرقام بالضبط؟"
+],
+[
+"A",
+"If I could just finish my point, I'll show them on the next slide.",
+"لو تسمح أكمل فكرتي، بعرضها في الشريحة الجاية."
+],
+[
+"B",
+"Of course. Please, go ahead.",
+"أكيد. تفضل، كمّل."
+]
+]
+],
+[
+"تقديم ملاحظات لزميل",
+"Giving Feedback to a Colleague",
+"💬",
+"عشان تنتقد بلطف ابدأ بالإيجابي: Overall, this is really good. ثم اقترح: One thing you could improve is... واختم بالدعم: Let me know if you need help.",
+[
+[
+"Overall, this is really good work.",
+"بشكل عام، هذا شغل ممتاز."
+],
+[
+"One thing you could improve is the introduction.",
+"شي واحد تقدر تحسنه هو المقدمة."
+],
+[
+"It might be clearer if you add an example.",
+"يمكن يكون أوضح لو تضيف مثال."
+],
+[
+"Let me know if you need any help.",
+"قل لي إذا تحتاج أي مساعدة."
+]
+],
+[
+[
+"A",
+"Did you get a chance to read my report?",
+"لحقت تقرأ تقريري؟"
+],
+[
+"B",
+"Yes. Overall, this is really good work.",
+"إيه. بشكل عام، شغل ممتاز."
+],
+[
+"A",
+"Thanks! Anything I should change?",
+"شكراً! فيه شي لازم أغيره؟"
+],
+[
+"B",
+"One thing you could improve is the introduction. It might be clearer if you add an example.",
+"شي واحد تقدر تحسنه هو المقدمة. يمكن يكون أوضح لو تضيف مثال."
+]
+]
+],
+[
+"تلقي النقد",
+"Receiving Criticism",
+"🧏",
+"إذا أحد انتقدك لا تدافع بسرعة، قل: Thanks for letting me know. واسأل: Could you give me an example? ووعد بالتحسن: I'll keep that in mind next time.",
+[
+[
+"Thanks for letting me know.",
+"شكراً إنك نبهتني."
+],
+[
+"Could you give me an example?",
+"ممكن تعطيني مثال؟"
+],
+[
+"I'll keep that in mind next time.",
+"بحط هذا في بالي المرة الجاية."
+],
+[
+"I didn't realise that.",
+"ما كنت منتبه لهذا."
+]
+],
+[
+[
+"A",
+"Your emails to clients are sometimes too short.",
+"إيميلاتك للعملاء أحياناً قصيرة زيادة."
+],
+[
+"B",
+"Thanks for letting me know. Could you give me an example?",
+"شكراً إنك نبهتني. ممكن تعطيني مثال؟"
+],
+[
+"A",
+"Yesterday you replied with just one word: \"Fine.\"",
+"أمس رديت بكلمة وحدة: \"تمام.\""
+],
+[
+"B",
+"I didn't realise that. I'll keep that in mind next time.",
+"ما كنت منتبه. بحط هذا في بالي المرة الجاية."
+]
+]
+],
+[
+"الاعتذار عن خطأ في العمل",
+"Owning a Mistake at Work",
+"🙇",
+"إذا غلطت اعترف بوضوح: That was my mistake. واشرح الحل: Here's what I've done to fix it. وطمّن: It won't happen again.",
+[
+[
+"That was my mistake.",
+"هذا كان غلطي."
+],
+[
+"I take full responsibility.",
+"أتحمل المسؤولية كاملة."
+],
+[
+"Here's what I've done to fix it.",
+"هذا اللي سويته عشان أصلحه."
+],
+[
+"It won't happen again.",
+"ما راح يتكرر."
+]
+],
+[
+[
+"A",
+"The client received the wrong invoice this morning.",
+"العميل وصلته فاتورة غلط الصبح."
+],
+[
+"B",
+"That was my mistake. I take full responsibility.",
+"هذا كان غلطي. أتحمل المسؤولية كاملة."
+],
+[
+"A",
+"What are we going to do now?",
+"وش بنسوي الحين؟"
+],
+[
+"B",
+"I've already sent the correct one and apologised. It won't happen again.",
+"أرسلت الصحيحة واعتذرت. ما راح يتكرر."
+]
+]
+],
+[
+"التفاوض على سعر",
+"Negotiating a Price",
+"🤝",
+"في التفاوض قل: Is there any flexibility on the price? واعرض: Would you accept...? وإذا تبي تقفل الاتفاق: If you can do that, we have a deal.",
+[
+[
+"Is there any flexibility on the price?",
+"فيه مرونة في السعر؟"
+],
+[
+"Would you accept twelve thousand?",
+"تقبل باثنعشر ألف؟"
+],
+[
+"That's a bit beyond my budget.",
+"هذا فوق ميزانيتي شوي."
+],
+[
+"If you can do that, we have a deal.",
+"إذا تقدر على هذا، اتفقنا."
+]
+],
+[
+[
+"A",
+"The car is fifteen thousand riyals.",
+"السيارة بخمسطعش ألف ريال."
+],
+[
+"B",
+"That's a bit beyond my budget. Is there any flexibility on the price?",
+"هذا فوق ميزانيتي شوي. فيه مرونة في السعر؟"
+],
+[
+"A",
+"I could go down to thirteen and a half.",
+"أقدر أنزل لثلاثطعش ونص."
+],
+[
+"B",
+"Would you accept thirteen? If you can do that, we have a deal.",
+"تقبل بثلاثطعش؟ إذا تقدر، اتفقنا."
+]
+]
+],
+[
+"خلاف مع جار",
+"Resolving a Dispute with a Neighbour",
+"🏘️",
+"لحل مشكلة مع جارك بهدوء قل: I was hoping we could talk about something. واشرح المشكلة بدون اتهام: The noise has been keeping us up. واقترح حل: Would it be possible to...?",
+[
+[
+"I was hoping we could talk about something.",
+"كنت أتمنى نتكلم في موضوع."
+],
+[
+"The noise has been keeping us up at night.",
+"الإزعاج قاعد يسهرنا بالليل."
+],
+[
+"Would it be possible to keep it down after eleven?",
+"ممكن تخففون الصوت بعد الساعة ١١؟"
+],
+[
+"I really appreciate your understanding.",
+"أقدّر تفهمك كثير."
+]
+],
+[
+[
+"A",
+"Hi! Is everything okay?",
+"هلا! كل شي تمام؟"
+],
+[
+"B",
+"Yes, thanks. I was hoping we could talk about something. The noise has been keeping us up.",
+"إيه شكراً. كنت أتمنى نتكلم في شي. الإزعاج قاعد يسهرنا."
+],
+[
+"A",
+"Oh, I'm sorry. The kids play late on weekends.",
+"أوه آسف. العيال يلعبون لين متأخر في الويكند."
+],
+[
+"B",
+"I understand. Would it be possible to keep it down after eleven? I really appreciate it.",
+"فاهم. ممكن تخففون الصوت بعد ١١؟ أقدّر هذا كثير."
+]
+]
+],
+[
+"التأمين والمطالبة",
+"Making an Insurance Claim",
+"📋",
+"عشان تقدم مطالبة تأمين قل: I'd like to make a claim. واشرح: My car was damaged in a parking lot. واسأل: What documents do you need from me?",
+[
+[
+"I'd like to make a claim.",
+"أبي أقدم مطالبة."
+],
+[
+"My car was damaged in a parking lot.",
+"سيارتي تضررت في موقف."
+],
+[
+"What documents do you need from me?",
+"وش الأوراق اللي تحتاجونها مني؟"
+],
+[
+"How long does the process usually take?",
+"العملية عادةً كم تاخذ؟"
+]
+],
+[
+[
+"A",
+"Good morning, claims department.",
+"صباح الخير، قسم المطالبات."
+],
+[
+"B",
+"Hi, I'd like to make a claim. My car was damaged in a parking lot.",
+"هلا، أبي أقدم مطالبة. سيارتي تضررت في موقف."
+],
+[
+"A",
+"I'm sorry to hear that. Do you have a police report?",
+"يؤسفني. عندك تقرير من المرور؟"
+],
+[
+"B",
+"Yes. What other documents do you need, and how long does it usually take?",
+"إيه. وش الأوراق الثانية اللي تحتاجونها، وكم تاخذ عادةً؟"
+]
+]
+],
+[
+"مكالمة مع شركة الاتصالات",
+"Disputing a Bill",
+"🧾",
+"إذا فاتورتك غلط قل: There seems to be a mistake on my bill. وحدد: I was charged twice for the same service. واطلب: Could you remove the charge?",
+[
+[
+"There seems to be a mistake on my bill.",
+"يبدو فيه غلط في فاتورتي."
+],
+[
+"I was charged twice for the same service.",
+"انخصم مني مرتين على نفس الخدمة."
+],
+[
+"Could you remove the extra charge?",
+"ممكن تشيلون المبلغ الزايد؟"
+],
+[
+"Could you send me a corrected bill?",
+"ممكن ترسلون لي فاتورة مصححة؟"
+]
+],
+[
+[
+"A",
+"How can I help you today?",
+"كيف أقدر أساعدك اليوم؟"
+],
+[
+"B",
+"There seems to be a mistake on my bill. I was charged twice for the same service.",
+"يبدو فيه غلط في فاتورتي. انخصم مني مرتين على نفس الخدمة."
+],
+[
+"A",
+"Let me check... Yes, I can see that. I'm sorry.",
+"خلني أشوف... إيه، واضح. آسف."
+],
+[
+"B",
+"Could you remove the extra charge and send me a corrected bill?",
+"ممكن تشيلون المبلغ الزايد وترسلون فاتورة مصححة؟"
+]
+]
+],
+[
+"طلب توصية",
+"Asking for a Reference",
+"📄",
+"عشان تطلب خطاب توصية قل: Would you be willing to write me a reference? وأعطه الوقت: The deadline is next month. واشكره: I'd really appreciate it.",
+[
+[
+"Would you be willing to write me a reference?",
+"تقبل تكتب لي خطاب توصية؟"
+],
+[
+"I'm applying for a master's programme.",
+"أنا متقدم لبرنامج ماجستير."
+],
+[
+"The deadline is next month.",
+"آخر موعد الشهر الجاي."
+],
+[
+"I'd really appreciate it.",
+"بكون ممتن لك كثير."
+]
+],
+[
+[
+"A",
+"Hello, Ahmed! How can I help?",
+"هلا أحمد! كيف أقدر أساعدك؟"
+],
+[
+"B",
+"I'm applying for a master's programme. Would you be willing to write me a reference?",
+"متقدم لبرنامج ماجستير. تقبل تكتب لي خطاب توصية؟"
+],
+[
+"A",
+"Of course. When do you need it?",
+"أكيد. متى تحتاجه؟"
+],
+[
+"B",
+"The deadline is next month. I'd really appreciate it.",
+"آخر موعد الشهر الجاي. بكون ممتن لك كثير."
+]
+]
+],
+[
+"العودة للعمل بعد إجازة",
+"Catching Up After Leave",
+"🔙",
+"لما ترجع من إجازة قل: Could you bring me up to speed? واسأل: Did I miss anything important? وعشان ترتب أولوياتك: What should I focus on first?",
+[
+[
+"Could you bring me up to speed?",
+"ممكن تحدثني باللي صار؟"
+],
+[
+"Did I miss anything important?",
+"فاتني شي مهم؟"
+],
+[
+"What should I focus on first?",
+"وش أركز عليه أول؟"
+],
+[
+"I'll catch up on my emails this morning.",
+"بخلص إيميلاتي الصبح."
+]
+],
+[
+[
+"A",
+"Welcome back! How was your holiday?",
+"حياك! كيف كانت إجازتك؟"
+],
+[
+"B",
+"Great, thanks. Could you bring me up to speed? Did I miss anything important?",
+"حلوة، شكراً. ممكن تحدثني؟ فاتني شي مهم؟"
+],
+[
+"A",
+"The client meeting moved to Tuesday, and we hired a new designer.",
+"اجتماع العميل انتقل للثلاثاء، ووظفنا مصمم جديد."
+],
+[
+"B",
+"Okay. What should I focus on first?",
+"تمام. وش أركز عليه أول؟"
+]
+]
+],
+[
+"مناسبة رسمية",
+"Networking at an Event",
+"🍸",
+"في الفعاليات المهنية ابدأ بـ: Hi, I don't think we've met. وعرف بنفسك: I work in marketing at... واختم: It was great talking to you. Here's my card.",
+[
+[
+"Hi, I don't think we've met.",
+"هلا، ما أظن تعارفنا."
+],
+[
+"I work in marketing at a tech company.",
+"أشتغل في التسويق بشركة تقنية."
+],
+[
+"What brings you to this event?",
+"وش جابك لهالفعالية؟"
+],
+[
+"It was great talking to you.",
+"سعدت بالحديث معك."
+]
+],
+[
+[
+"A",
+"Hi, I don't think we've met. I'm Faisal.",
+"هلا، ما أظن تعارفنا. أنا فيصل."
+],
+[
+"B",
+"Nice to meet you. I'm Noura. I work in marketing at a tech company.",
+"تشرفنا. أنا نورة. أشتغل بالتسويق في شركة تقنية."
+],
+[
+"A",
+"Interesting! What brings you to this event?",
+"حلو! وش جابك للفعالية؟"
+],
+[
+"B",
+"I'm looking for new partners. It was great talking to you. Here's my card.",
+"أدور شركاء جدد. سعدت بالحديث معك. هذي بطاقتي."
+]
+]
+],
+[
+"التحدث عن الأخبار",
+"Discussing the News",
+"📰",
+"عشان تفتح موضوع عن خبر قل: Did you hear about...? وتعطي رأيك: Personally, I think... وتسأل عن رأي غيرك: What's your take on it?",
+[
+[
+"Did you hear about the new metro line?",
+"سمعت عن خط المترو الجديد؟"
+],
+[
+"Apparently, it opens next month.",
+"على ما يبدو بيفتح الشهر الجاي."
+],
+[
+"Personally, I think it's a great idea.",
+"شخصياً، أشوفها فكرة ممتازة."
+],
+[
+"What's your take on it?",
+"وش رأيك أنت؟"
+]
+],
+[
+[
+"A",
+"Did you hear about the new metro line?",
+"سمعت عن خط المترو الجديد؟"
+],
+[
+"B",
+"Yes! Apparently, it opens next month.",
+"إيه! على ما يبدو بيفتح الشهر الجاي."
+],
+[
+"A",
+"Personally, I think it'll reduce traffic a lot. What's your take on it?",
+"شخصياً أتوقع يخفف الزحمة واجد. وش رأيك؟"
+],
+[
+"B",
+"I hope so, but people may still prefer their cars.",
+"أتمنى، بس يمكن الناس يفضلون سياراتهم."
+]
+]
+],
+[
+"طلب تمديد موعد",
+"Asking for an Extension",
+"⏳",
+"إذا تحتاج وقت إضافي قل: Would it be possible to get an extension? واذكر السبب: I've been unwell this week. واقترح موعد: Could I submit it by Sunday?",
+[
+[
+"Would it be possible to get an extension?",
+"ممكن أحصل على تمديد؟"
+],
+[
+"I've been unwell this week.",
+"كنت تعبان هالأسبوع."
+],
+[
+"Could I submit it by Sunday?",
+"ممكن أسلمه يوم الأحد؟"
+],
+[
+"I've already finished most of it.",
+"خلصت أغلبه."
+]
+],
+[
+[
+"A",
+"Hi, Sara. What can I do for you?",
+"هلا سارة. وش أقدر أسوي لك؟"
+],
+[
+"B",
+"Would it be possible to get an extension on the essay? I've been unwell this week.",
+"ممكن آخذ تمديد للمقالة؟ كنت تعبانة هالأسبوع."
+],
+[
+"A",
+"I'm sorry to hear that. How much have you done?",
+"يؤسفني. كم خلصتي منها؟"
+],
+[
+"B",
+"I've already finished most of it. Could I submit it by Sunday?",
+"خلصت أغلبها. ممكن أسلمها الأحد؟"
+]
+]
+],
+[
+"الحديث مع الطبيب عن نتائج",
+"Discussing Test Results",
+"🩺",
+"لما تراجع نتائج تحاليل اسأل: What do these results mean? وعن الخطة: What are my treatment options? وإذا ما فهمت: Could you explain that in simpler terms?",
+[
+[
+"What do these results mean?",
+"وش معنى هالنتائج؟"
+],
+[
+"Is it anything serious?",
+"هو شي خطير؟"
+],
+[
+"What are my treatment options?",
+"وش خيارات العلاج عندي؟"
+],
+[
+"Could you explain that in simpler terms?",
+"ممكن تشرح بطريقة أبسط؟"
+]
+],
+[
+[
+"A",
+"Your blood tests show your vitamin D is quite low.",
+"تحاليل الدم تبين إن فيتامين د عندك منخفض."
+],
+[
+"B",
+"What do these results mean? Is it anything serious?",
+"وش معنى هالنتائج؟ هو شي خطير؟"
+],
+[
+"A",
+"It's common. It can cause tiredness and weak bones.",
+"منتشر. ممكن يسبب تعب وضعف عظام."
+],
+[
+"B",
+"Could you explain my treatment options in simpler terms?",
+"ممكن تشرح خيارات العلاج بطريقة أبسط؟"
+]
+]
+],
+[
+"حجز قاعة لفعالية",
+"Organising an Event",
+"🎪",
+"لتنظيم فعالية قل: We're planning an event for about a hundred guests. واسأل: What's included in the package? وعن الحجز: Can we pay a deposit to hold the date?",
+[
+[
+"We're planning an event for about a hundred guests.",
+"نخطط لفعالية لحوالي مية ضيف."
+],
+[
+"What's included in the package?",
+"وش يشمل البكج؟"
+],
+[
+"Can we pay a deposit to hold the date?",
+"نقدر ندفع عربون عشان نثبت التاريخ؟"
+],
+[
+"Is there parking for guests?",
+"فيه مواقف للضيوف؟"
+]
+],
+[
+[
+"A",
+"How can I help you?",
+"كيف أقدر أخدمك؟"
+],
+[
+"B",
+"We're planning an event for about a hundred guests. What's included in the package?",
+"نخطط لفعالية لحوالي مية ضيف. وش يشمل البكج؟"
+],
+[
+"A",
+"The hall, catering, and sound system.",
+"القاعة والضيافة ونظام الصوت."
+],
+[
+"B",
+"Sounds good. Can we pay a deposit to hold the date?",
+"ممتاز. نقدر ندفع عربون نثبت فيه التاريخ؟"
+]
+]
+],
+[
+"طلب زيادة راتب",
+"Asking for a Raise",
+"💹",
+"عشان تطلب زيادة رتب كلامك: I'd like to discuss my salary. واذكر إنجازاتك: Over the past year, I've... واطلب بوضوح: I believe a raise would reflect my contribution.",
+[
+[
+"I'd like to discuss my salary.",
+"أبي أناقش راتبي."
+],
+[
+"Over the past year, I've taken on more responsibilities.",
+"خلال السنة اللي فاتت، تحملت مسؤوليات أكثر."
+],
+[
+"I believe a raise would reflect my contribution.",
+"أعتقد إن الزيادة تعكس مساهمتي."
+],
+[
+"When could we review this?",
+"متى نقدر نراجع هذا؟"
+]
+],
+[
+[
+"A",
+"You wanted to see me?",
+"كنت تبي تشوفني؟"
+],
+[
+"B",
+"Yes. I'd like to discuss my salary. Over the past year, I've taken on more responsibilities.",
+"إيه. أبي أناقش راتبي. السنة اللي فاتت تحملت مسؤوليات أكثر."
+],
+[
+"A",
+"That's true. You've done a great job.",
+"صحيح. سويت شغل ممتاز."
+],
+[
+"B",
+"Thank you. I believe a raise would reflect my contribution. When could we review this?",
+"شكراً. أعتقد الزيادة تعكس مساهمتي. متى نقدر نراجع هذا؟"
+]
+]
+],
+[
+"تقديم استقالة",
+"Resigning Professionally",
+"🚪",
+"عشان تستقيل باحترافية قل: I've decided to hand in my notice. واشكرهم: I'm grateful for everything I've learned here. واعرض المساعدة: I'm happy to help train my replacement.",
+[
+[
+"I've decided to hand in my notice.",
+"قررت أقدم استقالتي."
+],
+[
+"My last day will be the end of the month.",
+"آخر يوم لي نهاية الشهر."
+],
+[
+"I'm grateful for everything I've learned here.",
+"ممتن لكل شي تعلمته هنا."
+],
+[
+"I'm happy to help train my replacement.",
+"يسعدني أساعد في تدريب اللي بيجي مكاني."
+]
+],
+[
+[
+"A",
+"Is everything alright? You look serious.",
+"كل شي تمام؟ شكلك جدي."
+],
+[
+"B",
+"I've decided to hand in my notice. My last day will be the end of the month.",
+"قررت أقدم استقالتي. آخر يوم لي نهاية الشهر."
+],
+[
+"A",
+"We'll be sad to see you go.",
+"بنزعل إنك بتمشي."
+],
+[
+"B",
+"I'm grateful for everything I've learned here, and I'm happy to help train my replacement.",
+"ممتن لكل شي تعلمته هنا، ويسعدني أدرب اللي بيجي مكاني."
+]
+]
+],
+[
+"التعزية والمواساة",
+"Offering Support",
+"🤲",
+"إذا أحد يمر بوقت صعب قل: I'm so sorry to hear that. واعرض المساعدة: If there's anything I can do, just let me know. وطمّنه: Take all the time you need.",
+[
+[
+"I'm so sorry to hear that.",
+"يؤسفني كثير أسمع هذا."
+],
+[
+"That must be really hard for you.",
+"أكيد هذا صعب عليك."
+],
+[
+"If there's anything I can do, just let me know.",
+"إذا فيه أي شي أقدر أسويه، بس قل لي."
+],
+[
+"Take all the time you need.",
+"خذ وقتك كامل."
+]
+],
+[
+[
+"A",
+"I won't be at work this week. My father is in hospital.",
+"ما راح أداوم هالأسبوع. أبوي في المستشفى."
+],
+[
+"B",
+"I'm so sorry to hear that. That must be really hard for you.",
+"يؤسفني كثير. أكيد هذا صعب عليك."
+],
+[
+"A",
+"Thank you. I'm worried about my tasks, though.",
+"شكراً. بس أنا قلقان على مهامي."
+],
+[
+"B",
+"Don't worry. Take all the time you need. If there's anything I can do, just let me know.",
+"لا تشيل هم. خذ وقتك. إذا فيه أي شي أقدر أسويه قل لي."
+]
+]
+],
+[
+"مناقشة خطة سفر جماعية",
+"Planning a Group Trip",
+"🗺️",
+"لما تخططون رحلة مع ربع قل: What do you all think about...? وتقترح: How about we split the costs? وعشان تقفلون القرار: Shall we go ahead and book?",
+[
+[
+"What do you all think about going to AlUla?",
+"وش رأيكم نروح العلا؟"
+],
+[
+"How about we split the costs?",
+"وش رأيكم نقسم التكاليف؟"
+],
+[
+"I'm easy, either works for me.",
+"ما عندي مشكلة، أي خيار يناسبني."
+],
+[
+"Shall we go ahead and book?",
+"نمشي ونحجز؟"
+]
+],
+[
+[
+"A",
+"What do you all think about going to AlUla next month?",
+"وش رأيكم نروح العلا الشهر الجاي؟"
+],
+[
+"B",
+"Great idea. How about we split the costs of the villa?",
+"فكرة حلوة. وش رأيكم نقسم تكلفة الفيلا؟"
+],
+[
+"A",
+"Sure. Should we drive or fly?",
+"أكيد. نسوق ولا نطير؟"
+],
+[
+"B",
+"I'm easy, either works for me. Shall we go ahead and book?",
+"ما عندي مشكلة، أي واحد يناسبني. نمشي ونحجز؟"
+]
+]
+],
+[
+"مقابلة في السفارة للدراسة",
+"Student Visa Interview",
+"🛂",
+"في مقابلة تأشيرة دراسة كن واضح: I've been accepted at the University of Leeds. وعن التمويل: My studies are fully funded by a scholarship. وعن رجوعك: I plan to return home after graduating.",
+[
+[
+"I've been accepted at the University of Leeds.",
+"انقبلت في جامعة ليدز."
+],
+[
+"I'll be studying engineering for two years.",
+"بدرس هندسة لمدة سنتين."
+],
+[
+"My studies are fully funded by a scholarship.",
+"دراستي ممولة بالكامل من منحة."
+],
+[
+"I plan to return home after graduating.",
+"أخطط أرجع لبلدي بعد التخرج."
+]
+],
+[
+[
+"A",
+"Why do you want to go to the UK?",
+"ليش تبي تروح بريطانيا؟"
+],
+[
+"B",
+"I've been accepted at the University of Leeds. I'll be studying engineering.",
+"انقبلت في جامعة ليدز. بدرس هندسة."
+],
+[
+"A",
+"Who is paying for your studies?",
+"مين بيدفع دراستك؟"
+],
+[
+"B",
+"My studies are fully funded by a scholarship, and I plan to return home after graduating.",
+"دراستي ممولة بالكامل من منحة، وأخطط أرجع بعد التخرج."
+]
+]
+],
+[
+"شرح مشكلة تقنية",
+"Explaining a Technical Problem",
+"🖥️",
+"عشان تشرح مشكلة تقنية بدقة قل: Every time I open the app, it crashes. وحدد متى بدأت: It started after the last update. واذكر اللي جربته: I've already tried restarting it.",
+[
+[
+"Every time I open the app, it crashes.",
+"كل ما أفتح التطبيق يقفل."
+],
+[
+"It started after the last update.",
+"بدأت بعد آخر تحديث."
+],
+[
+"I've already tried restarting my phone.",
+"جربت أعيد تشغيل جوالي."
+],
+[
+"Is there a known issue?",
+"هل هي مشكلة معروفة؟"
+]
+],
+[
+[
+"A",
+"Technical support, how can I help?",
+"الدعم الفني، كيف أساعدك؟"
+],
+[
+"B",
+"Every time I open the app, it crashes. It started after the last update.",
+"كل ما أفتح التطبيق يقفل. بدأت بعد آخر تحديث."
+],
+[
+"A",
+"Have you tried restarting your phone?",
+"جربت تعيد تشغيل جوالك؟"
+],
+[
+"B",
+"Yes, I've already tried that. Is there a known issue?",
+"إيه، جربت. هل هي مشكلة معروفة؟"
+]
+]
+],
+[
+"الحديث عن الخطط المستقبلية",
+"Talking About Future Plans",
+"🔭",
+"عشان تتكلم عن طموحاتك قل: In five years, I'd like to... وعن خطتك: I'm planning to do a master's. وإذا مو متأكد: It depends on how things go.",
+[
+[
+"In five years, I'd like to run my own business.",
+"بعد خمس سنين أبي يكون عندي مشروعي."
+],
+[
+"I'm planning to do a master's first.",
+"أخطط آخذ ماجستير أول."
+],
+[
+"It depends on how things go.",
+"يعتمد على كيف تمشي الأمور."
+],
+[
+"I'm hoping to work abroad for a while.",
+"أتمنى أشتغل برا فترة."
+]
+],
+[
+[
+"A",
+"Where do you see yourself in five years?",
+"وين تشوف نفسك بعد خمس سنين؟"
+],
+[
+"B",
+"In five years, I'd like to run my own business.",
+"بعد خمس سنين أبي يكون عندي مشروعي."
+],
+[
+"A",
+"And what's your plan to get there?",
+"وش خطتك عشان توصل؟"
+],
+[
+"B",
+"I'm planning to do a master's first, but it depends on how things go.",
+"أخطط آخذ ماجستير أول، بس يعتمد على كيف تمشي الأمور."
+]
+]
+],
+[
+"إقناع شخص",
+"Persuading Someone",
+"🧲",
+"عشان تقنع أحد قدّم الفائدة: The main advantage is... وتعامل مع اعتراضه: I understand your concern, but... واختم: Why don't we give it a try?",
+[
+[
+"The main advantage is that it saves time.",
+"الميزة الأساسية إنه يوفر الوقت."
+],
+[
+"I understand your concern, but it's worth it.",
+"أفهم قلقك، بس يستاهل."
+],
+[
+"In the long run, it'll cost less.",
+"على المدى البعيد بيكلف أقل."
+],
+[
+"Why don't we give it a try?",
+"ليش ما نجربه؟"
+]
+],
+[
+[
+"A",
+"I don't think we need a new system. The old one works.",
+"ما أظن نحتاج نظام جديد. القديم شغال."
+],
+[
+"B",
+"The main advantage is that it saves time on every order.",
+"الميزة الأساسية إنه يوفر وقت في كل طلب."
+],
+[
+"A",
+"But it's expensive.",
+"بس غالي."
+],
+[
+"B",
+"I understand your concern, but in the long run it'll cost less. Why don't we give it a try?",
+"أفهم قلقك، بس على المدى البعيد بيكلف أقل. ليش ما نجربه؟"
+]
+]
+]
+];
+export const DAILY_LESSONS: SaraDailyLesson[] = [...RAW, ...RAW2, ...RAW3].map(([titleAr, titleEn, icon, introAr, ph, dl], i) => ({
   id: `daily-${'abcd'[Math.floor(i / 30)]}-${String((i % 30) + 1).padStart(2, '0')}`, order: i + 1, levelId: 'abcd'[Math.floor(i / 30)] as 'a' | 'b' | 'c' | 'd', titleAr, titleEn, icon, introAr,
   phrases: ph.map(([en, ar]) => ({ en, ar })), dialogue: dl.map(([sp, en, ar]) => ({ sp, en, ar }))
 }));
