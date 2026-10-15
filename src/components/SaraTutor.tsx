@@ -7321,6 +7321,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         studentName={profile.displayName || ''}
         studentLevel={(profile as any).level || tutorMemory.level || 'A1'}
         isRtl={isRtl}
+        studentId={profile.uid}
+        lessonTitle={activeCurriculumLesson ? (activeCurriculumLesson.titleEn || activeCurriculumLesson.titleAr) : undefined}
+        recentMistakes={tutorMemory.frequentMistakes}
         onSuccessXP={(xp) => {
           setStreak(prev => ({
             ...prev,

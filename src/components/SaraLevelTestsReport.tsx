@@ -8,6 +8,7 @@ import { WRITING_TRACK } from '../data/saraTracks/writing';
 import { NEW_SKILL_TRACKS } from '../lib/saraSkills';
 import { loadExamResults, type ExamResults } from '../lib/saraExamSync';
 import { EXAM_SETS } from '../data/saraTracks/examPrep';
+import { loadCallRecords, type CallRecord } from '../lib/saraCallLink';
 import { loadLevelTestAttempts, summarizeLevelTests, LEVEL_TEST_PASS, type LevelTestSummary } from '../lib/saraLevelTests';
 
 /** Sara end-of-level tests per track/level: latest + best score, pass/fail, weak lessons, date. Used in parent report + analytics. */
@@ -15,12 +16,14 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
   const [rows, setRows] = useState<LevelTestSummary[] | null>(null);
   const [prog, setProg] = useState<Record<string, number>>({});
   const [exam, setExam] = useState<ExamResults>({});
+  const [calls, setCalls] = useState<CallRecord[]>([]);
   useEffect(() => {
     if (!studentId) { setRows([]); return; }
     let alive = true;
     loadLevelTestAttempts(studentId).then(list => { if (alive) setRows(summarizeLevelTests(list)); });
     loadTrackProgress(studentId).then(p => { if (alive) setProg(p); });
     loadExamResults(studentId).then(e => { if (alive) setExam(e); });
+    loadCallRecords(studentId).then(c => { if (alive) setCalls(c); });
     return () => { alive = false; };
   }, [studentId]);
   const fmt = (ms: number) => new Date(ms).toLocaleDateString(isRtl ? 'ar-SA' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -81,6 +84,25 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
                 <p className="text-[11px] font-black text-slate-700 truncate">{x.exam} · {x.kind === 'reading' ? (isRtl ? 'قراءة' : 'Reading') : (isRtl ? 'استماع' : 'Listening')} · {x.titleEn}</p>
                 <p className="text-[11px] font-bold text-slate-600">{isRtl ? 'أفضل' : 'Best'}: {r.correct}/{r.total} ({t(r.timeSec)}) · {isRtl ? 'آخر' : 'Last'}: {r.lastCorrect}/{r.total} ({t(r.lastTimeSec)}) · {isRtl ? 'محاولات' : 'Attempts'}: {r.attempts} · {fmt(r.lastAt)}</p>
               </div>); })}
+          </div>
+        </div>
+      )}
+      {calls.length > 0 && (
+        <div data-testid="sara-calls-report" className="space-y-1.5">
+          <p className="text-[12px] font-black text-[#002147]">{isRtl ? '📞 مكالمات المحادثة مع سارة (آخر 5)' : '📞 Speaking calls with Sara (last 5)'}</p>
+          <div className="grid gap-1.5 sm:grid-cols-2">
+            {calls.slice(-5).reverse().map(c => (
+              <div key={c.at} className="rounded-xl bg-slate-50 border border-slate-200 px-2.5 py-1.5">
+                <div className="flex items-center gap-2 text-[11px] font-black text-[#002147]">
+                  <span className="truncate flex-1">{isRtl ? c.scenarioAr : c.scenario}</span>
+                  <span className="text-slate-500 font-bold">{fmt(c.at)}</span>
+                </div>
+                <p className="text-[11px] font-bold text-slate-600">
+                  {`${Math.floor(c.seconds / 60)}:${String(c.seconds % 60).padStart(2, '0')}`} · {c.turns} {isRtl ? 'مداخلة' : 'turns'} · {c.words} {isRtl ? 'كلمة' : 'words'}
+                </p>
+                {c.focus?.length > 0 && <p className="text-[10px] font-bold text-amber-700 truncate">{isRtl ? 'التركيز: ' : 'Focus: '}{c.focus.join(' · ')}</p>}
+              </div>
+            ))}
           </div>
         </div>
       )}

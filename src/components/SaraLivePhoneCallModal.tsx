@@ -23,6 +23,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { cancelAllSpeech, setExclusiveAudioOwner, prefetchAcademyAudio, playCloudAudioAs } from '../lib/audio';
 import { saraUnlockNarrator } from './SaraTrackPlayer';
+import { buildCallContext, saveCallRecord, type CallContext } from '../lib/saraCallLink';
 
 export interface PhoneScenario {
   id: string;
@@ -107,6 +108,10 @@ interface SaraLivePhoneCallModalProps {
   onSuccessXP?: (xp: number) => void;
   onSaveCallSummary?: (summary: string) => void;
   onSendTranscriptToChat?: (transcript: { role: 'user' | 'sara'; text: string }[]) => void;
+  /** Linkage: real student data so Sara practises what this student needs. */
+  studentId?: string;
+  lessonTitle?: string;
+  recentMistakes?: string[];
 }
 
 export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
@@ -117,8 +122,18 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
   isRtl,
   onSuccessXP,
   onSaveCallSummary,
-  onSendTranscriptToChat
+  onSendTranscriptToChat,
+  studentId,
+  lessonTitle,
+  recentMistakes
 }) => {
+  const [callCtx, setCallCtx] = useState<CallContext | null>(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    let alive = true;
+    buildCallContext(studentId, { placement: studentLevel, lessonTitle, mistakes: recentMistakes }).then(c => { if (alive) setCallCtx(c); });
+    return () => { alive = false; };
+  }, [isOpen, studentId, lessonTitle]);
   const [callState, setCallStateRaw] = useState<'idle' | 'calling' | 'connected' | 'ended'>('idle');
   const [selectedScenario, setSelectedScenario] = useState<PhoneScenario>(PHONE_SCENARIOS[0]);
   const [isMuted, setIsMutedRaw] = useState(false);
@@ -385,7 +400,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
         body: JSON.stringify({
           message: spokenText, history,
           scenario: `${selectedScenario.titleEn}: ${selectedScenario.initialPrompt}`,
-          level: studentLevel, name: studentName,
+          level: studentLevel, name: studentName, context: callCtx?.text || '',
         }),
       });
       if (!response.ok || !response.body) throw new Error(`call-turn ${response.status}`);
@@ -444,8 +459,12 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
     const earnedXP = Math.max(20, Math.min(100, Math.floor(callSeconds / 3) + (callTurns * 5)));
     try { confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
     if (onSuccessXP) onSuccessXP(earnedXP);
+    if (callTurns > 0) saveCallRecord(studentId, {
+      at: Date.now(), scenario: selectedScenario.titleEn, scenarioAr: selectedScenario.titleAr, seconds: callSeconds, turns: callTurns,
+      words: studentWordsSpoken, avgReplyMs: avgLatency, focus: callCtx?.focusAr || [],
+    });
     if (onSaveCallSummary) {
-      const summary = `Sara Phone Call (${selectedScenario.titleEn}): ${formatTime(callSeconds)} duration, ${callTurns} speech turns, ${studentWordsSpoken} words spoken.${avgLatency ? ` Avg reply ${(avgLatency / 1000).toFixed(1)}s.` : ''}`;
+      const summary = `Sara Phone Call (${selectedScenario.titleEn}): ${formatTime(callSeconds)} duration, ${callTurns} speech turns, ${studentWordsSpoken} words spoken.${avgLatency ? ` Avg reply ${(avgLatency / 1000).toFixed(1)}s.` : ''}${callCtx?.focusEn.length ? ` Focus: ${callCtx.focusEn.join('; ')}.` : ''}`;
       onSaveCallSummary(summary);
     }
     if (onSendTranscriptToChat && transcriptRef.current.length > 0) {
@@ -521,6 +540,11 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
                 <p className="text-xs text-white/70 max-w-xs leading-relaxed -mt-1">
                   {isRtl ? 'اختر موضوع المكالمة وتحدّث بصوتك — سارة ترد بصوتها مباشرة.' : 'Pick a topic and just talk — Sara answers in her own voice.'}
                 </p>
+                {!!callCtx?.focusAr.length && (
+                  <p data-testid="call-focus" className="mt-1.5 text-[11px] font-bold text-amber-300 line-clamp-2 max-w-xs">
+                    {isRtl ? '🎯 سارة بتركّز على: ' : '🎯 Sara will focus on: '}{(isRtl ? callCtx.focusAr : callCtx.focusEn).join(' · ')}
+                  </p>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-2 flex-1 min-h-0 content-start">
                 {PHONE_SCENARIOS.map(sc => {
