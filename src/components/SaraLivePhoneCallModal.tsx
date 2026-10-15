@@ -28,6 +28,8 @@ import { buildCallContext, saveCallRecord, type CallContext, type CallRecord } f
 
 import { mergeSpeech, collapseRepeats, sessionText } from '../lib/speechMerge';
 import { SaraAvatar } from './SaraAvatar';
+import { canUseSara3D } from '../lib/sara3dSupport';
+const SaraCall3D = React.lazy(() => import('./SaraCall3D')); // three.js only loads when a conversation opens
 /** The student's silence allowance per turn (before speaking and between words). */
 const STUDENT_WAIT_MS = 10000;
 export interface PhoneScenario {
@@ -565,6 +567,21 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
   if (!isOpen) return null;
 
   const NAVY = '#002147', GOLD = '#C49E3A';
+  const [use3D, setUse3D] = useState(() => canUseSara3D());
+  const [ready3D, setReady3D] = useState(false);
+  const [callRoot, setCallRoot] = useState<HTMLDivElement | null>(null);
+  const [camOn, setCamOn] = useState(false);
+  const camVideoRef = useRef<HTMLVideoElement>(null);
+  const camStreamRef = useRef<MediaStream | null>(null);
+  const stopCam = () => { camStreamRef.current?.getTracks().forEach(t => t.stop()); camStreamRef.current = null; setCamOn(false); };
+  /** AR feel: the student's own (front) camera behind Sara. Video only — the mic stays with speech recognition. */
+  const toggleCam = async () => {
+    if (camOn) { stopCam(); return; }
+    try { const st = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 720 } }, audio: false }); camStreamRef.current = st; setCamOn(true); }
+    catch { setCamOn(false); }
+  };
+  useEffect(() => { if (camOn && camVideoRef.current && camStreamRef.current) { camVideoRef.current.srcObject = camStreamRef.current; void camVideoRef.current.play().catch(() => {}); } }, [camOn]);
+  useEffect(() => () => { camStreamRef.current?.getTracks().forEach(t => t.stop()); }, []);
   const phase: 'connecting' | 'thinking' | 'speaking' | 'listening' | 'idle' =
     callState === 'calling' ? 'connecting' : isThinking ? 'thinking' : isSaraSpeaking ? 'speaking' : isStudentListening ? 'listening' : 'idle';
   const phaseLabel = {
@@ -576,17 +593,17 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
   }[phase];
   const lastSara = [...callTranscript].reverse().find(t => t.role === 'sara');
   const lastUser = [...callTranscript].reverse().find(t => t.role === 'user');
-  const close = () => { stopCallCleanup(); setCallState('idle'); onClose(); };
+  const close = () => { stopCam(); stopCallCleanup(); setCallState('idle'); onClose(); };
   const ring = phase === 'speaking' ? GOLD : phase === 'listening' ? '#34d399' : phase === 'thinking' ? '#fcd34d' : 'rgba(196,158,58,0.35)';
 
   const happy = phase !== 'thinking' && !!lastSara && /\b(great|excellent|well done|awesome|perfect|amazing|good job|fantastic|brilliant|nice)\b/i.test(lastSara.text);
   const Avatar = ({ size }: { size: number }) => (
     <div className="relative flex items-center justify-center" style={{ width: size + 40, height: size + 40 }}>
-      {(phase === 'speaking' || phase === 'listening' || phase === 'connecting') && [0, 1].map(k => (
+      {!ready3D && (phase === 'speaking' || phase === 'listening' || phase === 'connecting') && [0, 1].map(k => (
         <motion.div key={k} className="absolute rounded-full border-2" style={{ width: size, height: size, borderColor: ring }}
           animate={{ scale: [1, 1.35], opacity: [0.7, 0] }} transition={{ duration: 1.6, repeat: Infinity, delay: k * 0.8 }} />
       ))}
-      <div className="relative z-10">
+      <div className="relative z-10 transition-opacity duration-300" style={{ opacity: ready3D ? 0 : 1 }}>
         <SaraAvatar size={size} state={phase} happy={happy} ring={ring} />
       </div>
     </div>
@@ -603,11 +620,14 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/70 backdrop-blur-sm" dir={isRtl ? 'rtl' : 'ltr'}>
       <motion.div
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        data-testid="sara-call"
+        data-testid="sara-call" ref={setCallRoot}
         className="w-full h-[100dvh] sm:h-[min(820px,94dvh)] sm:max-w-md sm:rounded-[2rem] flex flex-col text-white overflow-hidden relative sm:border"
         style={{ background: `linear-gradient(180deg, ${NAVY} 0%, #001631 100%)`, borderColor: 'rgba(196,158,58,0.35)' }}
       >
         <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full blur-3xl pointer-events-none" style={{ background: 'rgba(196,158,58,0.12)' }} />
+        {camOn && <video ref={camVideoRef} data-testid="sara-cam" autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover pointer-events-none" style={{ transform: 'scaleX(-1)' }} />}
+        {camOn && <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(0,33,71,.55), rgba(0,22,49,.35) 40%, rgba(0,22,49,.7))' }} />}
+        {use3D && callRoot && <React.Suspense fallback={null}><SaraCall3D root={callRoot} state={phase} happy={happy} onReady={() => setReady3D(true)} onFail={() => { setUse3D(false); setReady3D(false); }} /></React.Suspense>}
 
         {/* Header */}
         <div className="px-4 pt-[max(env(safe-area-inset-top),0.75rem)] pb-2 flex items-center justify-between relative z-10 shrink-0">
@@ -616,6 +636,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
             <div className="text-sm font-black truncate">{isRtl ? selectedScenario.titleAr : selectedScenario.titleEn}</div>
           </div>
           <div className="flex items-center gap-2">
+            {ready3D && <button data-testid="cam-toggle" onClick={toggleCam} aria-pressed={camOn} className={`h-8 px-2.5 rounded-full text-[11px] font-black cursor-pointer ${camOn ? 'bg-amber-300 text-[#002147]' : 'bg-white/10 text-white/85'}`}>{camOn ? (isRtl ? '📷 إيقاف' : '📷 Off') : (isRtl ? '📷 شغّل الكاميرا' : '📷 Camera')}</button>}
             {callState === 'connected' && <span className="text-xs font-black tabular-nums text-amber-300" data-testid="call-timer">{formatTime(callSeconds)}</span>}
             <button onClick={close} aria-label="close" className="w-8 h-8 rounded-full bg-white/10 text-white/80 flex items-center justify-center cursor-pointer">✕</button>
           </div>
