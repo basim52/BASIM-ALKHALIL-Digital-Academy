@@ -4,6 +4,7 @@ import { SARA_READING_PHONETICS_LESSONS } from '../saraCurriculum/readingLessons
 import { SARA_CONVERSATIONAL_WRITING_LESSONS } from '../saraCurriculum/writingLessons';
 import type { SaraCurriculumLesson } from '../saraCurriculum/types';
 import type { SaraCefr, SaraQuestion } from '../saraCurriculum/types';
+import { LISTENING_L3 } from './listeningL3';
 
 export interface SaraListeningLesson {
   id: string; order: number; levelId: 'a' | 'b' | 'c' | 'd'; titleAr: string; titleEn: string; cefr?: SaraCefr;
@@ -34,6 +35,7 @@ export const LISTENING_LESSONS: SaraListeningLesson[] = [
   ...toListening([...SARA_ACTIVE_CONVERSATION_LESSONS].filter(ok).sort(byRank).slice(0, 30), 'a', 1),
   ...toListening([...SARA_SPOKEN_GRAMMAR_LESSONS, ...SARA_READING_PHONETICS_LESSONS, ...SARA_CONVERSATIONAL_WRITING_LESSONS]
     .filter(l => ok(l) && (l.cefr === 'B1' || l.cefr === 'B2')).sort(byRank).slice(0, 30), 'b', 31),
+  ...LISTENING_L3,
 ];
 
 export const LISTENING_TRACK_ID = 'listening';

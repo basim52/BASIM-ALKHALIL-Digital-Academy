@@ -6,7 +6,7 @@ export type SaraPillarId = 'grammar' | 'conversation' | 'reading' | 'writing';
 export type SaraLessonLevel = 'مبتدئ (Starter)' | 'متوسط (Intermediate)' | 'متقدم (Advanced)';
 
 
-export type SaraCefr = 'Pre-A1' | 'A1' | 'A2' | 'B1' | 'B2';
+export type SaraCefr = 'Pre-A1' | 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
 
 export interface SaraVocabItem {
   word: string;
