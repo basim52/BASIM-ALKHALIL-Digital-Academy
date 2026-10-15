@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { X, ArrowRight, Volume2, RotateCcw, Clock, BookOpen, Headphones, CheckCircle2 } from 'lucide-react';
 import MixedText from './MixedText';
+import SaraLessonBoard from './SaraLessonBoard';
 import { EXAM_SETS, type ExamKind, type ExamSet } from '../data/saraTracks/examPrep';
 import { saraNarrate, saraStopNarrator, saraUnlockNarrator } from './SaraTrackPlayer';
 import { readExamResults, saveExamAttempt, syncExamResults } from '../lib/saraExamSync';
@@ -13,8 +14,21 @@ const intro = (s: ExamSet) => s.kind === 'reading'
   ? `تدريب قراءة ${s.exam}. عندك ${s.minutes} دقائق. اقرأ النص ثم جاوب على ${s.questions.length} أسئلة. تقدر ترجع للنص في أي وقت.`
   : `تدريب استماع ${s.exam}. بشغّل لك المقطع، وتقدر تسمعه مرة ثانية للتدريب. عندك ${s.minutes} دقائق للإجابة على ${s.questions.length} أسئلة.`;
 
-const Runner: React.FC<{ s: ExamSet; uid?: string; onBack: () => void }> = ({ s, uid, onBack }) => {
-  const [phase, setPhase] = useState<'intro' | 'text' | 'q' | 'result' | 'review'>('intro');
+const TIPS: Record<string, string[]> = {
+  'IELTS-reading': ['اقرأ الأسئلة أول، بعدين امسح النص بسرعة تدوّر على الكلمات المفتاحية.', 'TRUE = النص يقول نفس المعنى. FALSE = النص يقول العكس. NOT GIVEN = النص ما ذكر المعلومة أبداً.', 'انتبه للكلمات القوية مثل all و never و only: غالباً تغيّر الجواب.', 'لا تعتمد على معلوماتك العامة، الجواب من النص بس.'],
+  'IELTS-listening': ['اقرأ الأسئلة قبل التشغيل وتوقّع نوع الجواب: رقم، اسم، وقت.', 'انتبه للتصحيح: المتكلم أحياناً يقول شي ثم يغيّره (not ten, eleven).', 'الأسئلة تمشي بنفس ترتيب المقطع.', 'الإملاء مهم في الأسماء والأرقام.'],
+  'STEP-reading': ['حدد الفكرة الرئيسية من أول وآخر جملة في الفقرة.', 'أسئلة معنى الكلمة: ارجع للجملة وجرّب كل خيار مكان الكلمة.', 'أسئلة NOT mentioned: شطّب كل خيار تلقاه في النص.', 'لا تطوّل في سؤال واحد، الوقت محدود.'],
+  'STEP-listening': ['ركّز على المعلومة المطلوبة: وين، متى، كم.', 'الإعلانات فيها تغييرات مهمة (not in the library, but...).', 'اكتب ملاحظة سريعة بالأرقام وأنت تسمع.', 'اختر الجواب اللي سمعته، مو اللي تتوقعه.'],
+};
+const boardOf = (s: ExamSet) => ({
+  titleAr: s.titleAr, titleEn: `${s.exam} · ${s.titleEn}`, points: TIPS[`${s.exam}-${s.kind}`],
+  examplesTitle: s.kind === 'reading' ? 'من النص' : 'نص المقطع',
+  examples: (s.kind === 'reading' ? s.text.join(' ').split(/(?<=[.!?])\s+/).slice(0, 3) : s.text.slice(0, 4)).map(en => ({ en })),
+  questions: s.questions.map(q => ({ promptAr: q.type === 'tfng' ? 'TRUE أو FALSE أو NOT GIVEN؟' : 'اختر الجواب الصحيح', promptEn: q.q, options: q.options, correctIndex: q.correctIndex, play: s.kind === 'listening' ? spoken(s) : undefined })),
+});
+
+const Runner: React.FC<{ s: ExamSet; uid?: string; onBack: () => void; onNext?: () => void }> = ({ s, uid, onBack, onNext }) => {
+  const [phase, setPhase] = useState<'intro' | 'text' | 'q' | 'result' | 'review' | 'board'>('intro');
   const [qi, setQi] = useState(0); const [answers, setAnswers] = useState<(number | null)[]>(() => s.questions.map(() => null));
   const [left, setLeft] = useState(s.minutes * 60); const [showText, setShowText] = useState(false);
   const [audio, setAudio] = useState<'idle' | 'loading' | 'playing' | 'failed'>('idle'); const [plays, setPlays] = useState(0);
@@ -64,8 +78,10 @@ const Runner: React.FC<{ s: ExamSet; uid?: string; onBack: () => void }> = ({ s,
         <div className="rounded-xl bg-amber-50 border border-amber-200 p-2.5 text-[12px] text-slate-700 font-bold">أسئلة أصلية مكتوبة للتدريب على أسلوب الاختبار، مو مأخوذة من اختبارات حقيقية. النتيجة = عدد إجاباتك الصحيحة فقط، وما تعني توقّع لدرجتك الرسمية.</div>
         {audio === 'failed' && <button onClick={() => say(intro(s))} className="self-start flex items-center gap-1 rounded-lg bg-[#002147] text-amber-300 px-2.5 py-1.5 text-[12px] font-bold"><RotateCcw size={13} />اشرحي يا سارة</button>}
         <div className="flex-1" />
+        <button onClick={() => { saraStopNarrator(); setPhase('board'); }} data-testid="open-board" className="rounded-xl bg-[#083344] text-teal-100 border border-teal-400/60 font-black py-2.5 text-[13px]">🧑‍🏫 اشرح بالسبورة التفاعلية</button>
         <button onClick={start} className="rounded-xl bg-[#002147] text-amber-300 font-black py-3">ابدأ — المؤقت يشتغل</button>
       </div>)}
+      {phase === 'board' && <div className="flex-1 min-h-0 -m-3 flex flex-col"><SaraLessonBoard {...boardOf(s)} onClose={() => setPhase('intro')} onPassed={() => { /* untimed board practice: not saved as a timed result */ }} onNextLesson={onNext} /></div>}
       {phase === 'text' && (<div className="flex-1 min-h-0 flex flex-col gap-2">
         <p className="text-[11px] font-bold text-[#C49E3A]">{s.titleEn}</p>
         <div className="flex-1 min-h-0 overflow-hidden rounded-2xl bg-white border border-slate-200 p-3 text-[13px] leading-[1.55] text-slate-800" dir="ltr">{s.text.map((t, i) => <p key={i}>{t}</p>)}</div>
@@ -136,7 +152,8 @@ export const SaraExamPrep: React.FC<Props> = ({ isOpen, onClose, uid }) => {
         <p className="flex-1 text-sm font-black">تحضير IELTS و STEP</p>
         <button onClick={() => { saraStopNarrator(); onClose(); }} aria-label="close"><X size={20} /></button>
       </div>
-      {active ? <Runner key={active.id} s={active} uid={uid} onBack={() => { setActive(null); setTick(t => t + 1); }} /> : (
+      {active ? <Runner key={active.id} s={active} uid={uid} onBack={() => { setActive(null); setTick(t => t + 1); }}
+        onNext={(() => { const l = EXAM_SETS.filter(x => x.exam === active.exam && x.kind === active.kind); const n = l[l.findIndex(x => x.id === active.id) + 1]; return n ? () => setActive(n) : undefined; })()} /> : (
         <div className="flex-1 min-h-0 flex flex-col gap-2 p-3">
           <div className="grid grid-cols-2 gap-1.5">
             {(['IELTS', 'STEP'] as ExamKind[]).map(e => <button key={e} onClick={() => setExam(e)} className={`rounded-xl py-2 font-black text-[13px] border-2 ${exam === e ? 'bg-[#002147] text-amber-300 border-[#002147]' : 'bg-white text-[#002147] border-slate-200'}`}>{e}</button>)}
