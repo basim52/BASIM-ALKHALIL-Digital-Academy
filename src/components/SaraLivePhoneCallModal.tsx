@@ -26,6 +26,7 @@ import { saraUnlockNarrator } from './SaraTrackPlayer';
 import { buildCallContext, saveCallRecord, type CallContext, type CallRecord } from '../lib/saraCallLink';
 
 
+import { mergeSpeech, collapseRepeats, sessionText } from '../lib/speechMerge';
 /** The student's silence allowance per turn (before speaking and between words). */
 const STUDENT_WAIT_MS = 10000;
 export interface PhoneScenario {
@@ -393,7 +394,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
     turnTickRef.current = null; turnTextRef.current = ''; turnInterimRef.current = '';
     setWaitLeft(0); setHeardSomething(false);
   };
-  const turnText = () => `${turnTextRef.current} ${turnInterimRef.current}`.replace(/\s+/g, ' ').trim();
+  const turnText = () => collapseRepeats(mergeSpeech(turnTextRef.current, turnInterimRef.current)); // earlier sessions + this one, no repeats
   /** «أنهيت»: send what was heard right now, without waiting. */
   const finishStudentTurn = () => { if (turnText()) finalizeTurnRef.current?.(); };
 
@@ -422,14 +423,16 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
       };
       finalizeTurnRef.current = finalize;
       recognition.onstart = () => { setIsStudentListening(true); if (!keepTurn) setInterimTranscript(''); };
+      const finals: string[] = []; // this session's final results, by result index (re-sent results overwrite, never append)
       recognition.onresult = (event: any) => {
         let interim = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const t = event.results[i][0].transcript;
-          if (event.results[i].isFinal) turnTextRef.current = `${turnTextRef.current} ${t}`.trim();
-          else interim += t;
+        for (let i = event.resultIndex || 0; i < event.results.length; ++i) {
+          const t = String(event.results[i][0]?.transcript || '');
+          if (event.results[i].isFinal) finals[i] = t.trim();
+          else interim += ' ' + t;
         }
-        turnInterimRef.current = interim.trim();
+        // this session's words, deduped (Android sends cumulative/repeated finals); interim is only a preview on top
+        turnInterimRef.current = sessionText(finals, interim);
         const all = turnText();
         setInterimTranscript(all);
         if (all) setHeardSomething(true);
@@ -439,7 +442,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
         if (done) return;
         if (recognitionRef.current === recognition) recognitionRef.current = null;
         // the recognizer stopped by itself: keep the same turn (and its words) open until the pause allowance runs out
-        if (turnInterimRef.current) { turnTextRef.current = `${turnTextRef.current} ${turnInterimRef.current}`.trim(); turnInterimRef.current = ''; }
+        if (turnInterimRef.current) { turnTextRef.current = turnText(); turnInterimRef.current = ''; }
         if (stateRef.current !== 'connected' || mutedRef.current) { clearStudentTurn(); setIsStudentListening(false); return; }
         if (turnDeadlineRef.current - Date.now() <= 0 && turnText()) { finalize(); return; }
         setTimeout(() => { if (!done && !recognitionRef.current) startSpeechRecognition(true); }, 150);
@@ -521,7 +524,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
   };
 
   // Student spoke
-  const handleStudentSpoke = (spokenText: string) => {
+  const handleStudentSpoke = (spokenText: string) => { // speech arrives already deduped (turnText); typed text is kept as typed
     if (!spokenText.trim()) return;
     spokeAtRef.current = performance.now();
     lastUserTextRef.current = spokenText;
