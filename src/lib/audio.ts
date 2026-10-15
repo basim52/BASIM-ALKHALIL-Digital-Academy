@@ -618,6 +618,9 @@ export const speakAcademyText = async (
   return fallback;
 };
 
+/** Play Sara's cloud-voice audio (base64 from /api/tts or the call stream) as `owner`. Never a browser voice. */
+export const playCloudAudioAs = (owner: string, b64: string, onEnd?: () => void) => playAudioSource(b64, onEnd, 1, owner);
+
 /** Sara speaking inside the live phone call: owns the audio while the call is open. */
 export const speakAcademyTextAs = (owner: string, ...args: Parameters<typeof speakAcademyText>) => { pendingOwner = owner; return speakAcademyText(...args); };
 

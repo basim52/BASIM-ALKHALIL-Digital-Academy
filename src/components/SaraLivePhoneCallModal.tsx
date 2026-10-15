@@ -21,7 +21,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { speakAcademyTextAs, cancelAllSpeech, setExclusiveAudioOwner } from '../lib/audio';
+import { cancelAllSpeech, setExclusiveAudioOwner, prefetchAcademyAudio, playCloudAudioAs } from '../lib/audio';
+import { saraUnlockNarrator } from './SaraTrackPlayer';
 
 export interface PhoneScenario {
   id: string;
@@ -118,27 +119,60 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
   onSaveCallSummary,
   onSendTranscriptToChat
 }) => {
-  const [callState, setCallState] = useState<'idle' | 'calling' | 'connected' | 'ended'>('idle');
+  const [callState, setCallStateRaw] = useState<'idle' | 'calling' | 'connected' | 'ended'>('idle');
   const [selectedScenario, setSelectedScenario] = useState<PhoneScenario>(PHONE_SCENARIOS[0]);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isSpeakerOn, setIsSpeakerOn] = useState(true);
+  const [isMuted, setIsMutedRaw] = useState(false);
+  const [isSpeakerOn, setIsSpeakerOnRaw] = useState(true);
   const [showCaptions, setShowCaptions] = useState(true);
-  const [handsFreeAutoListen, setHandsFreeAutoListen] = useState(true);
 
-  // Call analytics & state
+  // Call analytics & state (all real counts)
   const [callSeconds, setCallSeconds] = useState(0);
   const [callTurns, setCallTurns] = useState(0);
   const [studentWordsSpoken, setStudentWordsSpoken] = useState(0);
-  const [isSaraSpeaking, setIsSaraSpeaking] = useState(false);
+  const [isSaraSpeaking, setIsSaraSpeakingRaw] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
   const [isStudentListening, setIsStudentListening] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState('');
   const [callTranscript, setCallTranscript] = useState<{ role: 'user' | 'sara'; text: string; time: string }[]>([]);
   const [currentAiSpeechText, setCurrentAiSpeechText] = useState('');
+  const [voiceError, setVoiceError] = useState<null | 'audio' | 'ai'>(null);
+  const [latencies, setLatencies] = useState<number[]>([]); // measured: student stops speaking → Sara's first audio (ms)
 
-  // Audio recognition ref
+  // Refs mirror state so recognition / audio callbacks never read stale values.
+  const stateRef = useRef(callState);
+  const mutedRef = useRef(false);
+  const speakerRef = useRef(true);
+  const speakingRef = useRef(false);
+  const transcriptRef = useRef<{ role: 'user' | 'sara'; text: string; time: string }[]>([]);
   const recognitionRef = useRef<any>(null);
   const timerIntervalRef = useRef<any>(null);
   const isComponentMounted = useRef<boolean>(true);
+  const turnIdRef = useRef(0);
+  const abortRef = useRef<AbortController | null>(null);
+  const playingRef = useRef<{ stop: () => void } | null>(null);
+  const segRef = useRef<{ text: string; audio?: string | null }[]>([]);
+  const playIdxRef = useRef(0);
+  const streamDoneRef = useRef(true);
+  const spokeAtRef = useRef(0);
+  const lastUserTextRef = useRef('');
+  const silenceTimerRef = useRef<any>(null);
+
+  const setCallState = (s: 'idle' | 'calling' | 'connected' | 'ended') => { stateRef.current = s; setCallStateRaw(s); };
+  const setIsMuted = (m: boolean) => { mutedRef.current = m; setIsMutedRaw(m); };
+  const setIsSpeakerOn = (v: boolean) => { speakerRef.current = v; setIsSpeakerOnRaw(v); };
+  const setIsSaraSpeaking = (v: boolean) => { speakingRef.current = v; setIsSaraSpeakingRaw(v); };
+  const nowTime = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const pushLine = (role: 'user' | 'sara', text: string) => {
+    transcriptRef.current = [...transcriptRef.current, { role, text, time: nowTime() }];
+    setCallTranscript(transcriptRef.current);
+  };
+  const appendSara = (text: string, newTurn: boolean) => {
+    const t = transcriptRef.current;
+    if (!newTurn && t.length && t[t.length - 1].role === 'sara') {
+      transcriptRef.current = [...t.slice(0, -1), { ...t[t.length - 1], text: `${t[t.length - 1].text} ${text}` }];
+      setCallTranscript(transcriptRef.current);
+    } else pushLine('sara', text);
+  };
 
   useEffect(() => {
     isComponentMounted.current = true;
@@ -158,149 +192,166 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
   // Timer effect when connected
   useEffect(() => {
     if (callState === 'connected') {
-      timerIntervalRef.current = setInterval(() => {
-        setCallSeconds(prev => prev + 1);
-      }, 1000);
-    } else {
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    }
-    return () => {
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    };
+      timerIntervalRef.current = setInterval(() => setCallSeconds(prev => prev + 1), 1000);
+    } else if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); };
   }, [callState]);
 
-  const stopCallCleanup = () => {
+  const stopSaraAudio = () => {
+    turnIdRef.current++;
+    abortRef.current?.abort(); abortRef.current = null;
+    try { playingRef.current?.stop(); } catch (_) {}
+    playingRef.current = null;
     cancelAllSpeech('call');
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.abort();
-      } catch (e) {}
-      recognitionRef.current = null;
-    }
-    if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current);
-    }
+    segRef.current = []; playIdxRef.current = 0; streamDoneRef.current = true;
+    setIsSaraSpeaking(false); setIsThinking(false);
   };
 
-  // Format seconds to mm:ss
+  const stopListening = () => {
+    if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+    if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch (e) {} recognitionRef.current = null; }
+    setIsStudentListening(false);
+  };
+
+  const stopCallCleanup = () => {
+    stopSaraAudio();
+    stopListening();
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+  };
+
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60).toString().padStart(2, '0');
     const s = (secs % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
   };
 
-  // Start outgoing call
-  const handleStartCall = () => {
-    setCallState('calling');
-    setCallSeconds(0);
-    setCallTurns(0);
-    setStudentWordsSpoken(0);
-    setCallTranscript([]);
-
-    // Simulate ringtone for 2.2 seconds then connect
-    setTimeout(() => {
-      if (!isComponentMounted.current) return;
-      setCallState('connected');
-
-      // Sara speaks initial greeting
-      const starterText = selectedScenario.starterSaraSpeech;
-      playSaraPhoneVoice(starterText, () => {
-        if (handsFreeAutoListen && !isMuted) {
-          startSpeechRecognition();
-        }
-      });
-
-      const initialTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      setCallTranscript([
-        { role: 'sara', text: starterText, time: initialTime }
-      ]);
-    }, 2200);
+  /** Sara's turn finished (all sentences played): hand the floor back to the student. */
+  const afterSaraTurn = () => {
+    setIsSaraSpeaking(false);
+    if (stateRef.current === 'connected' && !mutedRef.current) setTimeout(() => startSpeechRecognition(), 120);
   };
 
-  // Play Sara Voice with callback
-  const playSaraPhoneVoice = (text: string, onEnd?: () => void) => {
-    if (!isSpeakerOn) {
-      if (onEnd) onEnd();
-      return;
+  /** Plays queued sentences in order; each sentence's cloud audio may still be arriving. Sara's cloud voice only. */
+  const pumpQueue = async (turn: number) => {
+    if (turn !== turnIdRef.current || playingRef.current) return;
+    const i = playIdxRef.current;
+    const seg = segRef.current[i];
+    if (!seg) { if (streamDoneRef.current) afterSaraTurn(); return; }
+    if (seg.audio === undefined) return; // waiting for this sentence's audio
+    let audio = seg.audio;
+    if (!audio) { // the stream could not voice it: one direct retry, never a browser voice
+      audio = await prefetchAcademyAudio(seg.text, 'en', 'Kore').catch(() => null);
+      if (turn !== turnIdRef.current) return;
+      if (!audio) { setVoiceError('audio'); setIsSaraSpeaking(false); return; }
+      seg.audio = audio;
     }
+    setVoiceError(null);
+    setIsThinking(false);
     setIsSaraSpeaking(true);
-    setCurrentAiSpeechText(text);
-
-    // Stop listening while Sara speaks to avoid echo
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.abort();
-      } catch (e) {}
-    }
-    setIsStudentListening(false);
-
-    // End-of-speech step runs once, after Sara's audio actually ends (or fails), never at start.
-    let finished = false;
-    const finish = () => { if (finished) return; finished = true; setIsSaraSpeaking(false); if (onEnd) onEnd(); };
-    speakAcademyTextAs('call', text, 'en', undefined, finish).catch(finish);
+    setCurrentAiSpeechText(seg.text);
+    if (spokeAtRef.current) { const ms = Math.round(performance.now() - spokeAtRef.current); spokeAtRef.current = 0; setLatencies(l => [...l, ms]); }
+    if (!speakerRef.current) { playIdxRef.current = i + 1; pumpQueue(turn); return; }
+    let ended = false;
+    const onEnd = () => {
+      if (ended) return; ended = true;
+      playingRef.current = null;
+      if (turn !== turnIdRef.current) return;
+      playIdxRef.current = i + 1;
+      pumpQueue(turn);
+    };
+    const node = await playCloudAudioAs('call', audio, onEnd).catch(() => null);
+    if (turn !== turnIdRef.current) { try { node?.stop(); } catch (_) {} return; }
+    if (node && !ended) playingRef.current = node;
+    else if (!node && !ended) { setVoiceError('audio'); setIsSaraSpeaking(false); }
   };
 
-  // Speech Recognition Handling
+  /** Retry after a voice / connection failure: replays the stuck sentence, or resends the student's last words. */
+  const retryVoice = () => {
+    const kind = voiceError;
+    setVoiceError(null);
+    if (kind === 'ai' && lastUserTextRef.current) { askSara(lastUserTextRef.current, false); return; }
+    const seg = segRef.current[playIdxRef.current];
+    if (seg) { seg.audio = null; setIsSaraSpeaking(true); pumpQueue(turnIdRef.current); }
+    else afterSaraTurn();
+  };
+
+  /** Speak a fixed line (greeting) through the same queue. */
+  const speakLines = (texts: string[], audios: (string | null | undefined)[] = []) => {
+    stopSaraAudio();
+    const turn = turnIdRef.current;
+    segRef.current = texts.map((text, k) => ({ text, audio: audios[k] === undefined ? null : audios[k] }));
+    playIdxRef.current = 0; streamDoneRef.current = true;
+    setIsSaraSpeaking(true);
+    pumpQueue(turn);
+  };
+
+  // Start outgoing call: no fake ring — we warm the server and fetch Sara's greeting audio, then connect.
+  const handleStartCall = async () => {
+    setCallState('calling');
+    setCallSeconds(0); setCallTurns(0); setStudentWordsSpoken(0); setLatencies([]); setVoiceError(null);
+    transcriptRef.current = []; setCallTranscript([]);
+    saraUnlockNarrator();
+    const starterText = selectedScenario.starterSaraSpeech;
+    fetch('/api/sara/call-turn', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ warm: true }) }).catch(() => {});
+    const greeting = await Promise.race([
+      prefetchAcademyAudio(starterText, 'en', 'Kore').catch(() => null),
+      new Promise<null>(r => setTimeout(() => r(null), 9000)),
+    ]);
+    if (!isComponentMounted.current || stateRef.current !== 'calling') return;
+    setCallState('connected');
+    pushLine('sara', starterText);
+    speakLines([starterText], [greeting]);
+  };
+
+  // Speech Recognition Handling (reads refs, so hands-free restarts work)
   const startSpeechRecognition = () => {
-    if (isMuted || callState !== 'connected' || isSaraSpeaking) return;
-
+    if (mutedRef.current || stateRef.current !== 'connected' || speakingRef.current) return;
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      console.warn('SpeechRecognition API not available in this browser.');
-      return;
-    }
-
+    if (!SpeechRecognition) { console.warn('SpeechRecognition API not available in this browser.'); return; }
     try {
-      if (recognitionRef.current) {
-        recognitionRef.current.abort();
-      }
-
+      stopListening();
       const recognition = new SpeechRecognition();
       recognition.lang = 'en-US';
       recognition.continuous = false;
       recognition.interimResults = true;
       recognition.maxAlternatives = 1;
-
-      recognition.onstart = () => {
-        setIsStudentListening(true);
-        setInterimTranscript('');
+      let done = false;
+      let latestInterim = '';
+      const finalize = (text: string) => {
+        if (done) return; done = true;
+        if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+        try { recognition.abort(); } catch (_) {}
+        if (recognitionRef.current === recognition) recognitionRef.current = null;
+        setIsStudentListening(false);
+        handleStudentSpoke(text);
       };
-
+      recognition.onstart = () => { setIsStudentListening(true); setInterimTranscript(''); };
       recognition.onresult = (event: any) => {
-        let interim = '';
-        let final = '';
-
+        let interim = '', final = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            final += event.results[i][0].transcript;
-          } else {
-            interim += event.results[i][0].transcript;
-          }
+          if (event.results[i].isFinal) final += event.results[i][0].transcript;
+          else interim += event.results[i][0].transcript;
         }
-
         setInterimTranscript(interim || final);
-
-        if (final.trim()) {
-          handleStudentSpoke(final.trim());
-        }
+        if (final.trim()) { finalize(final.trim()); return; }
+        // Faster end-of-turn: if the words stop changing for 1.1 s, treat them as final.
+        latestInterim = interim.trim();
+        if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+        if (latestInterim) silenceTimerRef.current = setTimeout(() => finalize(latestInterim), 1100);
       };
-
       recognition.onerror = (event: any) => {
+        if (done) return;
         setIsStudentListening(false);
-        // If no speech detected in hands-free mode, restart after slight delay
-        if (event.error === 'no-speech' && handsFreeAutoListen && callState === 'connected' && !isMuted && !isSaraSpeaking) {
-          setTimeout(() => {
-            if (callState === 'connected' && !isSaraSpeaking && !isMuted) {
-              startSpeechRecognition();
-            }
-          }, 800);
-        }
+        if (event.error === 'aborted') return;
+        if (event.error === 'no-speech' || event.error === 'network') setTimeout(() => startSpeechRecognition(), 300);
       };
-
       recognition.onend = () => {
+        if (done) return;
         setIsStudentListening(false);
+        if (latestInterim) { finalize(latestInterim); return; }
+        if (recognitionRef.current === recognition) recognitionRef.current = null;
+        setTimeout(() => startSpeechRecognition(), 300); // keep the line open hands-free
       };
-
       recognitionRef.current = recognition;
       recognition.start();
     } catch (err) {
@@ -309,98 +360,96 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
     }
   };
 
-  // Student spoke response
-  const handleStudentSpoke = async (spokenText: string) => {
-    if (!spokenText.trim()) return;
+  /** Barge-in: tap while Sara talks to cut her off and speak. */
+  const interruptSara = () => {
+    if (!speakingRef.current && !isThinking) return;
+    stopSaraAudio();
+    setVoiceError(null);
+    setTimeout(() => startSpeechRecognition(), 80);
+  };
 
-    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    setCallTranscript(prev => [...prev, { role: 'user', text: spokenText, time: nowTime }]);
-    setCallTurns(prev => prev + 1);
-    const wordsInUtterance = spokenText.split(/\s+/).filter(Boolean).length;
-    setStudentWordsSpoken(prev => prev + wordsInUtterance);
-    setInterimTranscript('');
-
-    // Fetch Sara AI response
+  // One streamed request per turn: sentences + their Sara-voice audio arrive as soon as each is ready.
+  const askSara = async (spokenText: string, record: boolean) => {
+    stopSaraAudio();
+    const turn = turnIdRef.current;
+    const ctrl = new AbortController(); abortRef.current = ctrl;
+    segRef.current = []; playIdxRef.current = 0; streamDoneRef.current = false;
+    setIsThinking(true); setIsSaraSpeaking(true);
+    setCurrentAiSpeechText(isRtl ? 'سارة تفكر في الرد...' : 'Sara is thinking...');
+    const history = transcriptRef.current.slice(record ? -9 : -8, -1).map(item => ({ role: item.role === 'sara' ? 'model' : 'user', text: item.text }));
+    let first = true;
     try {
-      setIsSaraSpeaking(true);
-      setCurrentAiSpeechText(isRtl ? 'سارة تفكر في الرد...' : 'Sara is thinking...');
-
-      const historyFormatted = callTranscript.slice(-6).map(item => ({
-        role: item.role === 'sara' ? 'model' : 'user',
-        text: item.text
-      }));
-
-      const response = await fetch('/api/sara/chat', {
-        method: 'POST',
+      const response = await fetch('/api/sara/call-turn', {
+        method: 'POST', signal: ctrl.signal,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: spokenText,
-          history: historyFormatted,
-          rolePlay: {
-            scenarioTitle: selectedScenario.titleEn,
-            scenarioPrompt: `${selectedScenario.initialPrompt}. This is a real-time telephone conversation with ${studentName || 'the student'}. Speak concisely in 1-3 spoken conversational sentences suited for natural phone call audio. Do not format with markdown or bullets.`
-          },
-          snapshot: {
-            name: studentName,
-            level: studentLevel,
-            pacing: 'conversational_immersive'
-          }
-        })
+          message: spokenText, history,
+          scenario: `${selectedScenario.titleEn}: ${selectedScenario.initialPrompt}`,
+          level: studentLevel, name: studentName,
+        }),
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to get Sara audio response');
+      if (!response.ok || !response.body) throw new Error(`call-turn ${response.status}`);
+      const reader = response.body.getReader();
+      const dec = new TextDecoder();
+      let buf = '';
+      let failed = false;
+      const handle = (line: string) => {
+        if (!line.trim()) return;
+        let ev: any; try { ev = JSON.parse(line); } catch { return; }
+        if (turn !== turnIdRef.current) return;
+        if (ev.t === 's') { segRef.current[ev.i] = { text: ev.text, audio: segRef.current[ev.i]?.audio }; appendSara(ev.text, first); first = false; }
+        else if (ev.t === 'a') { if (segRef.current[ev.i]) segRef.current[ev.i].audio = ev.audio || null; pumpQueue(turn); }
+        else if (ev.t === 'error') failed = true;
+      };
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        let nl: number;
+        while ((nl = buf.indexOf('\n')) >= 0) { handle(buf.slice(0, nl)); buf = buf.slice(nl + 1); }
       }
-
-      const data = await response.json();
-      const replyText = data.reply || "I hear you clearly! Let us keep chatting.";
-
-      setCallTranscript(prev => [...prev, { role: 'sara', text: replyText, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }]);
-
-      playSaraPhoneVoice(replyText, () => {
-        if (handsFreeAutoListen && !isMuted && callState === 'connected') {
-          startSpeechRecognition();
-        }
-      });
-    } catch (err) {
-      console.error('Phone AI chat error:', err);
-      const fallbackReply = "That makes total sense! Tell me more about what you think.";
-      setCallTranscript(prev => [...prev, { role: 'sara', text: fallbackReply, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }]);
-      playSaraPhoneVoice(fallbackReply, () => {
-        if (handsFreeAutoListen && !isMuted && callState === 'connected') {
-          startSpeechRecognition();
-        }
-      });
+      handle(buf);
+      if (turn !== turnIdRef.current) return;
+      streamDoneRef.current = true;
+      segRef.current.forEach(s => { if (s && s.audio === undefined) s.audio = null; });
+      if (failed && segRef.current.length === 0) throw new Error('AI failed');
+      pumpQueue(turn);
+    } catch (err: any) {
+      if (err?.name === 'AbortError' || turn !== turnIdRef.current) return;
+      console.error('Phone AI call error:', err);
+      streamDoneRef.current = true;
+      setIsThinking(false); setIsSaraSpeaking(false);
+      setVoiceError('ai'); // honest error + retry instead of a canned reply
     }
   };
+
+  // Student spoke
+  const handleStudentSpoke = (spokenText: string) => {
+    if (!spokenText.trim()) return;
+    spokeAtRef.current = performance.now();
+    lastUserTextRef.current = spokenText;
+    pushLine('user', spokenText);
+    setCallTurns(prev => prev + 1);
+    setStudentWordsSpoken(prev => prev + spokenText.split(/\s+/).filter(Boolean).length);
+    setInterimTranscript('');
+    askSara(spokenText, true);
+  };
+
+  const avgLatency = latencies.length ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length) : 0;
 
   // End Call
   const handleEndCall = () => {
     stopCallCleanup();
     setCallState('ended');
-
-    // Calculate XP reward based on duration & words
     const earnedXP = Math.max(20, Math.min(100, Math.floor(callSeconds / 3) + (callTurns * 5)));
-
-    try {
-      confetti({
-        particleCount: 60,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-    } catch (e) {}
-
-    if (onSuccessXP) {
-      onSuccessXP(earnedXP);
-    }
-
+    try { confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
+    if (onSuccessXP) onSuccessXP(earnedXP);
     if (onSaveCallSummary) {
-      const summary = `Sara Phone Call (${selectedScenario.titleEn}): ${formatTime(callSeconds)} duration, ${callTurns} speech turns, ${studentWordsSpoken} words spoken.`;
+      const summary = `Sara Phone Call (${selectedScenario.titleEn}): ${formatTime(callSeconds)} duration, ${callTurns} speech turns, ${studentWordsSpoken} words spoken.${avgLatency ? ` Avg reply ${(avgLatency / 1000).toFixed(1)}s.` : ''}`;
       onSaveCallSummary(summary);
     }
-
-    if (onSendTranscriptToChat && callTranscript.length > 0) {
-      onSendTranscriptToChat(callTranscript.map(t => ({ role: t.role, text: t.text })));
+    if (onSendTranscriptToChat && transcriptRef.current.length > 0) {
+      onSendTranscriptToChat(transcriptRef.current.map(t => ({ role: t.role, text: t.text })));
     }
   };
 
@@ -412,7 +461,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
-        className="w-full max-w-xl max-h-[92vh] flex flex-col rounded-3xl bg-slate-900 border-2 border-slate-700 shadow-2xl text-white overflow-hidden relative"
+        data-testid="sara-call" className="w-full max-w-xl max-h-[92vh] flex flex-col rounded-3xl bg-slate-900 border-2 border-slate-700 shadow-2xl text-white overflow-hidden relative"
       >
         {/* Glow ambient background */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
@@ -506,6 +555,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
               <div className="pt-2">
                 <button
                   onClick={handleStartCall}
+                  data-testid="call-start"
                   className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2.5 shadow-xl shadow-emerald-500/25 transition-all cursor-pointer active:scale-98"
                 >
                   <Phone size={20} className="fill-slate-950" />
@@ -541,7 +591,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
 
               <div className="pt-6">
                 <button
-                  onClick={() => setCallState('idle')}
+                  onClick={() => { stopCallCleanup(); setCallState('idle'); }}
                   className="px-6 py-2.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-rose-600/30 cursor-pointer transition-all"
                 >
                   <PhoneOff size={16} />
@@ -574,7 +624,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
 
               {/* Sara Interactive Avatar & Wave */}
               <div className="flex flex-col items-center justify-center py-6 space-y-4">
-                <div className="relative">
+                <div className="relative cursor-pointer" onClick={interruptSara} data-testid="call-barge-in">
                   {/* Speaking glow ring */}
                   {isSaraSpeaking && (
                     <motion.div
@@ -639,6 +689,13 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
                 </div>
               </div>
 
+              {voiceError && (
+                <button onClick={retryVoice} data-testid="call-retry" className="w-full py-2.5 rounded-2xl bg-amber-400/15 border border-amber-400/40 text-amber-300 text-xs font-black flex items-center justify-center gap-2 cursor-pointer">
+                  <RotateCcw size={14} />
+                  {voiceError === 'ai' ? (isRtl ? 'تعذّر الوصول لسارة — أعد المحاولة' : "Couldn't reach Sara — retry") : (isRtl ? 'تعذّر تشغيل صوت سارة — أعد المحاولة' : "Sara's voice failed — retry")}
+                </button>
+              )}
+
               {/* Dynamic Transcript / Subtitles */}
               {showCaptions && (
                 <div className="bg-slate-950/60 p-3.5 rounded-2xl border border-slate-800/80 max-h-36 overflow-y-auto space-y-2 text-xs">
@@ -677,12 +734,8 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
                   {/* Mute button */}
                   <button
                     onClick={() => {
-                      setIsMuted(!isMuted);
-                      if (!isMuted && recognitionRef.current) {
-                        try { recognitionRef.current.abort(); } catch (e) {}
-                      } else if (isMuted && !isSaraSpeaking) {
-                        startSpeechRecognition();
-                      }
+                      const m = !isMuted; setIsMuted(m);
+                      if (m) stopListening(); else startSpeechRecognition();
                     }}
                     className={`p-3 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                       isMuted

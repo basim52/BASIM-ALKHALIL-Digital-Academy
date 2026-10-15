@@ -2385,6 +2385,68 @@ Respond ONLY with a valid JSON object matching:
   });
 
   // Real-Time Voice Call & Live Fluency Partner Endpoint
+  // 📞 Sara live phone call — ONE streamed request per turn: fast model writes a short reply, each finished
+  // sentence is sent at once and its Sara-voice audio (cloud TTS) is generated in parallel and streamed in order.
+  // NDJSON events: {t:"s", i, text} · {t:"a", i, audio|null} · {t:"done", model, firstTextMs, firstAudioMs, totalMs} · {t:"error"}
+  const CALL_MODELS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.8-flash"];
+  const callModelBlockedUntil = new Map<string, number>();
+  app.post("/api/sara/call-turn", async (req, res) => {
+    const { message = "", history = [], scenario = "", level = "B1", name = "", context = "", warm = false, withAudio = true } = req.body || {};
+    if (warm) { initAI(); return res.json({ ok: true, ai: !!aiLive }); } // warms the function, auth and AI client
+    const text = String(message).slice(0, 600).trim();
+    if (!text) return res.status(400).json({ error: "message required" });
+    res.setHeader("Content-Type", "application/x-ndjson; charset=utf-8");
+    res.setHeader("Cache-Control", "no-store");
+    res.setHeader("X-Accel-Buffering", "no");
+    const t0 = Date.now();
+    const send = (o: any) => { try { res.write(JSON.stringify(o) + "\n"); (res as any).flush?.(); } catch { /* closed */ } };
+    if (!initAI() || !aiLive) { send({ t: "error", error: "AI_UNAVAILABLE" }); return res.end(); }
+    const sys = `You are Sara, a warm English tutor on a live PHONE CALL with ${String(name).slice(0, 40) || "a student"} (CEFR ${String(level).slice(0, 8)}).
+Scenario: ${String(scenario).slice(0, 300)}
+${context ? `What this student needs (real data from the app): ${String(context).slice(0, 700)}\nWeave this practice in naturally.\n` : ""}Rules: spoken English only, 1-2 short sentences (max 35 words), no lists, no markdown, no emojis. Match the level. If the student makes a clear mistake, model the correct form briefly, then ask one follow-up question.`;
+    const contents = formatGeminiHistory((Array.isArray(history) ? history : []).slice(-8), text);
+    let firstTextMs = 0, firstAudioMs = 0, idx = 0, usedModel = "";
+    let audioChain: Promise<void> = Promise.resolve();
+    const emitSentence = (sentence: string) => {
+      const i = idx++;
+      if (!firstTextMs) firstTextMs = Date.now() - t0;
+      send({ t: "s", i, text: sentence });
+      if (withAudio) {
+        const p = generateSaraSpeechAudio(sentence, "Kore").catch(() => null);
+        audioChain = audioChain.then(async () => { const a = await p; if (a && !firstAudioMs) firstAudioMs = Date.now() - t0; send({ t: "a", i, audio: a }); });
+      }
+    };
+    for (const model of CALL_MODELS) {
+      if (Date.now() < (callModelBlockedUntil.get(model) || 0)) continue;
+      try {
+        const stream = await aiLive.models.generateContentStream({ model, contents, config: { systemInstruction: sys, maxOutputTokens: 160, temperature: 0.8 } });
+        let buf = "";
+        for await (const chunk of stream as any) {
+          buf += chunk.text || "";
+          let m: RegExpMatchArray | null;
+          while ((m = buf.match(/^([\s\S]*?[.!?])(\s+|$)/)) && m[1].trim().length >= 2 && (m[2] || buf.length > m[1].length)) {
+            const sentence = m[1].replace(/[*#_`~>]/g, "").trim(); buf = buf.slice(m[0].length);
+            if (sentence) emitSentence(sentence);
+          }
+        }
+        const rest = buf.replace(/[*#_`~>]/g, "").trim();
+        if (rest) emitSentence(rest);
+        if (idx === 0) throw new Error("empty reply");
+        usedModel = model; break;
+      } catch (err: any) {
+        const msg = String(err?.message || err);
+        logToFile(`[call-turn] ${model}: ${msg.slice(0, 200)}`);
+        if (idx > 0) { usedModel = model; break; } // partial reply already spoken: keep it
+        if (/429|RESOURCE_EXHAUSTED/.test(msg)) callModelBlockedUntil.set(model, Date.now() + 60000);
+        else if (/404|NOT_FOUND|not supported|INVALID_ARGUMENT|400/.test(msg)) callModelBlockedUntil.set(model, Date.now() + 6 * 3600 * 1000);
+      }
+    }
+    if (idx === 0) { send({ t: "error", error: "AI_FAILED" }); return res.end(); }
+    await audioChain;
+    send({ t: "done", model: usedModel, firstTextMs, firstAudioMs, totalMs: Date.now() - t0 });
+    res.end();
+  });
+
   app.post("/api/ai/realtime-voice-call", async (req, res) => {
     try {
       const { userAudioTranscript, scenario = "Free Conversation", studentLevel = "Intermediate", history = [] } = req.body;
