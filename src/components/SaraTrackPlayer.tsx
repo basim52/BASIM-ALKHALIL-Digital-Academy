@@ -138,8 +138,8 @@ const Choice: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (
   </div>
 );
 
-/** Tracks that get «حاور سارة» after the exercises (Conversation; Grammar added separately). */
-const CALL_TRACKS: Record<string, 'conversation' | 'grammar'> = { conversation_v2: 'conversation' };
+/** Tracks that get «حاور سارة» after the exercises (Conversation + Grammar: foundations, advanced). */
+const CALL_TRACKS: Record<string, 'conversation' | 'grammar'> = { conversation_v2: 'conversation', foundations: 'grammar', advanced_v2: 'grammar' };
 
 export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, unlockAll, initialLessonId }) => {
   const [unlockedRaw, setUnlocked] = useState(() => readUnlocked(track.id, uid));
@@ -535,7 +535,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                 <p className="text-sm font-black text-slate-800">نتيجتك: {exScore} من {lesson.content.exercises.length}</p>
                 {CALL_TRACKS[track.id] && <SaraLessonCall uid={uid}
                   preset={lessonCallPreset({ id: lesson.id, titleAr: lesson.titleAr, titleEn: lesson.titleEn, kind: CALL_TRACKS[track.id], tag: CALL_TRACKS[track.id],
-                    phrases: lesson.content.example.map(e => e.en),
+                    phrases: [...new Set(lesson.content.example.flatMap(e => e.en.replace(/\b[AB]:\s*/g, '\n').split(/\n|(?<=[.!?])\s+/)).map(x => x.trim()).filter(x => x.length > 3 && x.split(/\s+/).length <= 9))].slice(0, 4),
                     starter: `Let's practise "${lesson.titleEn}" in a real conversation. ${lesson.content.example[0]?.en || ''} Now you try — what would you say?` })} />}
                 <button onClick={goNext} className="w-full py-2 rounded-xl bg-[#58cc02] text-white text-[14px] font-black">الدرس التالي ←</button>
                 <button onClick={() => { stop(); setLessonId(null); }} className="w-full py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">رجوع للدروس</button>
