@@ -1,3 +1,4 @@
+import { registerSaraSpeech } from './saraSpeechLevel';
 /**
  * Basim Alkhalil Academic Platform - Unified Speech Engine
  * Ultra-high fidelity Gemini TTS with resilient fallback.
@@ -244,6 +245,7 @@ async function playAudioSource(
     };
 
     const playPromise = audio.play();
+    if (owner === 'call') registerSaraSpeech(audio, bytes); // avatar lip-sync (reads only; audio path untouched)
     if (playPromise !== undefined) {
       await playPromise;
     }

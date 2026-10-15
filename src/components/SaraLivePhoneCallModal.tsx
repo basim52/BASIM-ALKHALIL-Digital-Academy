@@ -27,6 +27,7 @@ import { buildCallContext, saveCallRecord, type CallContext, type CallRecord } f
 
 
 import { mergeSpeech, collapseRepeats, sessionText } from '../lib/speechMerge';
+import { SaraAvatar } from './SaraAvatar';
 /** The student's silence allowance per turn (before speaking and between words). */
 const STUDENT_WAIT_MS = 10000;
 export interface PhoneScenario {
@@ -578,15 +579,15 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
   const close = () => { stopCallCleanup(); setCallState('idle'); onClose(); };
   const ring = phase === 'speaking' ? GOLD : phase === 'listening' ? '#34d399' : phase === 'thinking' ? '#fcd34d' : 'rgba(196,158,58,0.35)';
 
+  const happy = phase !== 'thinking' && !!lastSara && /\b(great|excellent|well done|awesome|perfect|amazing|good job|fantastic|brilliant|nice)\b/i.test(lastSara.text);
   const Avatar = ({ size }: { size: number }) => (
     <div className="relative flex items-center justify-center" style={{ width: size + 40, height: size + 40 }}>
       {(phase === 'speaking' || phase === 'listening' || phase === 'connecting') && [0, 1].map(k => (
         <motion.div key={k} className="absolute rounded-full border-2" style={{ width: size, height: size, borderColor: ring }}
           animate={{ scale: [1, 1.35], opacity: [0.7, 0] }} transition={{ duration: 1.6, repeat: Infinity, delay: k * 0.8 }} />
       ))}
-      <div className="rounded-full flex items-center justify-center shadow-2xl relative z-10 transition-colors"
-        style={{ width: size, height: size, background: `radial-gradient(circle at 30% 30%, #0b3a75, ${NAVY})`, border: `3px solid ${ring}` }}>
-        <span style={{ fontSize: size * 0.45 }}>👩‍🏫</span>
+      <div className="relative z-10">
+        <SaraAvatar size={size} state={phase} happy={happy} ring={ring} />
       </div>
     </div>
   );
@@ -625,7 +626,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
           {callState === 'idle' && (
             <div className="flex-1 min-h-0 flex flex-col">
               <div className="flex flex-col items-center text-center pt-1 pb-3 shrink-0">
-                <Avatar size={72} />
+                {Avatar({ size: 104 })}
                 <p className="text-xs text-white/70 max-w-xs leading-relaxed -mt-1">
                   {preset ? (isRtl ? 'تكلّم بصوتك أو اكتب — سارة ترد بصوتها مباشرة.' : 'Speak or type — Sara answers in her own voice.') : (isRtl ? 'اختر موضوع المكالمة وتحدّث بصوتك — سارة ترد بصوتها مباشرة.' : 'Pick a topic and just talk — Sara answers in her own voice.')}
                 </p>
@@ -669,7 +670,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
             <div className="flex-1 min-h-0 flex flex-col">
               <div className="flex flex-col items-center pt-2 shrink-0">
                 <div onClick={interruptSara} data-testid="call-barge-in" className={phase === 'speaking' || phase === 'thinking' ? 'cursor-pointer' : ''}>
-                  <Avatar size={112} />
+                  {Avatar({ size: 148 })}
                 </div>
                 <div className="text-lg font-black -mt-1">{isRtl ? 'سارة' : 'Sara'}</div>
                 <div data-testid="call-phase" data-phase={phase} className="mt-1 px-3 py-1 rounded-full text-xs font-black flex items-center gap-1.5"
