@@ -4,6 +4,8 @@ import { loadLevelTestAttempts, type LevelTestAttempt } from './saraLevelTests';
 export const SARA_NEW_LEVELS = [
   { id: 'a' as const, titleAr: 'المستوى الأول', from: 1, to: 30 },
   { id: 'b' as const, titleAr: 'المستوى الثاني', from: 31, to: 60 },
+  { id: 'c' as const, titleAr: 'المستوى الثالث', from: 61, to: 90 },
+  { id: 'd' as const, titleAr: 'المستوى الرابع', from: 91, to: 120 },
 ];
 const localAttempts = (uid?: string): LevelTestAttempt[] => { try { return JSON.parse(localStorage.getItem(`sara_level_tests_${uid || 'guest'}`) || '[]'); } catch { return []; } };
 /** Has the student passed this level's end test (device ∪ cloud)? Level 2 opens only after level 1 is passed. */

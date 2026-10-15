@@ -1,6 +1,6 @@
 /** Everyday English — Level 1: 30 real-life scenarios (hand-written). Sara plays the staff/other person (A); the student is B. */
 export interface SaraDailyLine { sp: 'A' | 'B'; en: string; ar: string }
-export interface SaraDailyLesson { id: string; order: number; levelId: 'a' | 'b'; titleAr: string; titleEn: string; icon: string; introAr: string; phrases: { en: string; ar: string }[]; dialogue: SaraDailyLine[] }
+export interface SaraDailyLesson { id: string; order: number; levelId: 'a' | 'b' | 'c' | 'd'; titleAr: string; titleEn: string; icon: string; introAr: string; phrases: { en: string; ar: string }[]; dialogue: SaraDailyLine[] }
 type R = [string, string, string, string, [string, string][], ['A' | 'B', string, string][]];
 const RAW: R[] = [
 [
@@ -2768,7 +2768,7 @@ const RAW2: R[] = [
 ]
 ];
 export const DAILY_LESSONS: SaraDailyLesson[] = [...RAW, ...RAW2].map(([titleAr, titleEn, icon, introAr, ph, dl], i) => ({
-  id: i < 30 ? `daily-a-${String(i + 1).padStart(2, '0')}` : `daily-b-${String(i - 29).padStart(2, '0')}`, order: i + 1, levelId: (i < 30 ? 'a' : 'b') as 'a' | 'b', titleAr, titleEn, icon, introAr,
+  id: `daily-${'abcd'[Math.floor(i / 30)]}-${String((i % 30) + 1).padStart(2, '0')}`, order: i + 1, levelId: 'abcd'[Math.floor(i / 30)] as 'a' | 'b' | 'c' | 'd', titleAr, titleEn, icon, introAr,
   phrases: ph.map(([en, ar]) => ({ en, ar })), dialogue: dl.map(([sp, en, ar]) => ({ sp, en, ar }))
 }));
 export const DAILY_TRACK_ID = 'daily';

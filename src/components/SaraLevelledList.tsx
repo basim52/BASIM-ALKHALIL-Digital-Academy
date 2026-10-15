@@ -11,17 +11,18 @@ export function SaraLevelledList<T extends Item>({ lessons, unlockedRaw, unlockA
   lessons: T[]; unlockedRaw: number; unlockAll?: boolean; uid?: string; track: NewTrackKey; trackId: string; refresh: number;
   onOpen: (l: T) => void; onTest: (level: NewLevelId) => void;
 }) {
-  const passedA = useLevelPassed(uid, trackId, 'a', refresh);
+  const passed = { a: useLevelPassed(uid, trackId, 'a', refresh), b: useLevelPassed(uid, trackId, 'b', refresh), c: useLevelPassed(uid, trackId, 'c', refresh) } as Record<string, boolean>;
   const unlocked = unlockAll ? lessons.length : unlockedRaw;
   return (
     <div className="flex-1 min-h-0 overflow-y-auto p-3 grid gap-1.5 content-start">
-      {SARA_NEW_LEVELS.map(lv => {
+      {SARA_NEW_LEVELS.map((lv, li) => {
         const ls = lessons.filter(l => l.order >= lv.from && l.order <= lv.to);
         if (!ls.length) return null;
-        const gate = lv.id === 'a' || !!unlockAll || passedA;
+        const prev = li > 0 ? SARA_NEW_LEVELS[li - 1] : null;
+        const gate = !prev || !!unlockAll || passed[prev.id];
         return (
           <React.Fragment key={lv.id}>
-            <p className="text-[12px] font-black text-[#C49E3A] mt-1">{lv.titleAr}{!gate && <span className="text-slate-500"> · يفتح بعد النجاح في اختبار المستوى الأول</span>}</p>
+            <p className="text-[12px] font-black text-[#C49E3A] mt-1">{lv.titleAr}{!gate && <span className="text-slate-500"> · يفتح بعد النجاح في اختبار {prev?.titleAr}</span>}</p>
             {ls.map(l => {
               const open = gate && l.order <= unlocked;
               return (

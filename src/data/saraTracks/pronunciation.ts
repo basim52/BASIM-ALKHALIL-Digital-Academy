@@ -1,7 +1,7 @@
 /** Pronunciation — Level 1: 30 lessons on the sounds Arabic speakers find hardest. Real, hand-written content. */
 export interface SaraPronExercise { promptAr: string; /** Sara plays this first (cloud voice). */ play?: string; options: string[]; correctIndex: number }
 export interface SaraPronLesson {
-  id: string; order: number; levelId: 'a' | 'b'; titleAr: string; titleEn: string;
+  id: string; order: number; levelId: 'a' | 'b' | 'c' | 'd'; titleAr: string; titleEn: string;
   ideaAr: string;
   /** Minimal pairs (tap each word to hear it). */
   pairs?: [string, string][];
@@ -198,7 +198,7 @@ const RAW2: Raw[] = [
 export const PRONUNCIATION_LESSONS: SaraPronLesson[] = [...RAW, ...RAW2].map(([titleAr, titleEn, ideaAr, pw, sayEn, ex], i) => {
   const isPairs = Array.isArray(pw[0]);
   const pairs = isPairs ? (pw as [string, string][]) : undefined;
-  return { id: i < 30 ? `pron-a-${String(i + 1).padStart(2, '0')}` : `pron-b-${String(i - 29).padStart(2, '0')}`, order: i + 1, levelId: (i < 30 ? 'a' : 'b') as 'a' | 'b', titleAr, titleEn, ideaAr, pairs, words: isPairs ? undefined : (pw as string[]), sayEn,
+  return { id: `pron-${'abcd'[Math.floor(i / 30)]}-${String((i % 30) + 1).padStart(2, '0')}`, order: i + 1, levelId: 'abcd'[Math.floor(i / 30)] as 'a' | 'b' | 'c' | 'd', titleAr, titleEn, ideaAr, pairs, words: isPairs ? undefined : (pw as string[]), sayEn,
     exercises: (ex || pairExercises(pairs!)).map((e, k) => (i < 30 ? e : rotate(e, i + k))) };
 });
 export const PRONUNCIATION_TRACK_ID = 'pronunciation';

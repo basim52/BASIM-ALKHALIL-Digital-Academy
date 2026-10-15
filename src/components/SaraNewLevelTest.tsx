@@ -11,7 +11,7 @@ export const NewLevelTestCard: React.FC<{ track: NewTrackKey; level?: NewLevelId
     <span className="text-xl">🏁</span>
     <span className="flex-1 min-w-0">
       <span className={`block text-[13px] font-black ${open ? 'text-amber-300' : 'text-[#002147]'}`}>اختبار نهاية {levelTitleAr(level)}</span>
-      <span className={`block text-[11px] font-bold ${open ? 'text-white/80' : 'text-slate-500'}`}>{open ? `من دروس ${NEW_TRACK_META[track].titleAr} الـ ${NEW_TRACK_META[track].total} · النجاح ${LEVEL_TEST_PASS}%` : `يفتح بعد إنهاء الدرس ${level === 'a' ? 30 : 60}`}</span>
+      <span className={`block text-[11px] font-bold ${open ? 'text-white/80' : 'text-slate-500'}`}>{open ? `من دروس ${NEW_TRACK_META[track].titleAr} الـ ${NEW_TRACK_META[track].total} · النجاح ${LEVEL_TEST_PASS}%` : `يفتح بعد إنهاء الدرس ${({ a: 30, b: 60, c: 90, d: 120 })[level]}`}</span>
     </span>
     {!open && <Lock size={14} className="text-slate-400" />}
   </button>

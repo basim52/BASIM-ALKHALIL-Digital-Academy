@@ -1,6 +1,7 @@
 import MixedText from './MixedText';
 import { SaraNewLevelTest } from './SaraNewLevelTest';
 import SaraLevelledList from './SaraLevelledList';
+import { levelTitleAr, type NewLevelId } from '../lib/saraNewTrackTests';
 import React, { useEffect, useState } from 'react';
 import { X, ArrowRight, Lock, CheckCircle2, Volume2, RotateCcw } from 'lucide-react';
 import { PRONUNCIATION_LESSONS, PRONUNCIATION_TRACK_ID, type SaraPronLesson } from '../data/saraTracks/pronunciation';
@@ -50,7 +51,7 @@ const Lesson: React.FC<{ l: SaraPronLesson; onBack: () => void; onPassed: () => 
     <div className="flex-1 min-h-0 flex flex-col p-2.5 gap-1.5 overflow-hidden" data-testid="pron-lesson">
       <div className="flex items-center gap-2">
         <button onClick={onBack} className="p-1.5 rounded-lg bg-[#002147] text-white" aria-label="back"><ArrowRight size={16} /></button>
-        <p className="flex-1 text-[14px] font-black text-[#002147] truncate">{l.order > 30 ? l.order - 30 : l.order}. {l.titleAr}</p>
+        <p className="flex-1 text-[14px] font-black text-[#002147] truncate">{((l.order - 1) % 30) + 1}. {l.titleAr}</p>
         <span dir="ltr" className="text-[10px] font-black px-1.5 rounded bg-[#002147] text-amber-300">{l.titleEn}</span>
       </div>
       <div className="flex gap-1.5">
@@ -96,7 +97,7 @@ const Lesson: React.FC<{ l: SaraPronLesson; onBack: () => void; onPassed: () => 
 export const SaraPronunciationPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll }) => {
   const [unlockedRaw, setUnlocked] = useState(() => readUnlocked(PRONUNCIATION_TRACK_ID, uid));
   const [active, setActive] = useState<SaraPronLesson | null>(null);
-  const [testing, setTesting] = useState<'a' | 'b' | null>(null);
+  const [testing, setTesting] = useState<NewLevelId | null>(null);
   const [testTick, setTestTick] = useState(0);
   useEffect(() => {
     if (!isOpen) return;
@@ -119,7 +120,7 @@ export const SaraPronunciationPlayer: React.FC<Props> = ({ isOpen, onClose, uid,
       <div data-testid="sara-pron" className="w-full max-w-xl h-[100dvh] bg-[#fdfaf3] flex flex-col overflow-hidden">
         <div className="shrink-0 flex items-center gap-2 px-3 py-2 bg-[#002147] text-white">
           <span className="text-lg">🗣️</span>
-          <p className="flex-1 text-sm font-black">النطق{active ? (active.levelId === 'b' ? ' — المستوى الثاني' : ' — المستوى الأول') : ''}</p>
+          <p className="flex-1 text-sm font-black">النطق{active ? ` — ${levelTitleAr(active.levelId)}` : ''}</p>
           <span className="text-[11px] text-amber-300 font-bold">{passed}/{PRONUNCIATION_LESSONS.length}</span>
           <button onClick={() => { saraStopNarrator(); onClose(); }} className="p-1.5 rounded-lg hover:bg-white/10" aria-label="close"><X size={18} /></button>
         </div>

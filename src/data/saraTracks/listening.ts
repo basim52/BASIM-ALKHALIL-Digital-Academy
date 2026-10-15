@@ -6,7 +6,7 @@ import type { SaraCurriculumLesson } from '../saraCurriculum/types';
 import type { SaraCefr, SaraQuestion } from '../saraCurriculum/types';
 
 export interface SaraListeningLesson {
-  id: string; order: number; levelId: 'a' | 'b'; titleAr: string; titleEn: string; cefr?: SaraCefr;
+  id: string; order: number; levelId: 'a' | 'b' | 'c' | 'd'; titleAr: string; titleEn: string; cefr?: SaraCefr;
   /** Spoken by Sara's cloud voice (speaker names removed). */
   audioText: string;
   /** Shown only after answering. */

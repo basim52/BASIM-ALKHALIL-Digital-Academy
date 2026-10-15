@@ -17,9 +17,10 @@ export const TEST_SIZE = 20;
 const rnd = <T,>(a: T[]): T[] => { const r = a.slice(); for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; };
 const mix = (correct: string, wrong: string[]) => { const options = rnd([correct, ...wrong.filter(w => w !== correct).slice(0, 2)]); return { options, correctIndex: options.indexOf(correct) }; };
 
-export type NewLevelId = 'a' | 'b';
-const inLevel = <T extends { order: number }>(a: T[], level: NewLevelId) => a.filter(l => (level === 'a' ? l.order <= 30 : l.order > 30 && l.order <= 60));
-export const levelTitleAr = (level: NewLevelId) => (level === 'a' ? 'المستوى الأول' : 'المستوى الثاني');
+export type NewLevelId = 'a' | 'b' | 'c' | 'd';
+const LV_START: Record<NewLevelId, number> = { a: 1, b: 31, c: 61, d: 91 };
+const inLevel = <T extends { order: number }>(a: T[], level: NewLevelId) => a.filter(l => l.order >= LV_START[level] && l.order < LV_START[level] + 30);
+export const levelTitleAr = (level: NewLevelId) => ({ a: 'المستوى الأول', b: 'المستوى الثاني', c: 'المستوى الثالث', d: 'المستوى الرابع' })[level];
 
 export function buildNewTrackTest(key: NewTrackKey, level: NewLevelId = 'a'): NewTestItem[] {
   const out: NewTestItem[] = [];
