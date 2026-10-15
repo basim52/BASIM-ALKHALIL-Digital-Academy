@@ -1,5 +1,6 @@
 import { SaraNewLevelTest } from './SaraNewLevelTest';
 import SaraLevelledList from './SaraLevelledList';
+import SaraLessonBoard from './SaraLessonBoard';
 import { levelTitleAr, type NewLevelId } from '../lib/saraNewTrackTests';
 import React, { useEffect, useMemo, useState } from 'react';
 import { X, ArrowRight, Lock, CheckCircle2, Volume2, RotateCcw } from 'lucide-react';
@@ -23,7 +24,7 @@ const DICTATION_PASS = 80;
 
 type Audio = 'idle' | 'loading' | 'playing' | 'failed' | 'blocked';
 
-const Lesson: React.FC<{ l: SaraListeningLesson; onBack: () => void; onPassed: () => void }> = ({ l, onBack, onPassed }) => {
+const Lesson: React.FC<{ l: SaraListeningLesson; onBack: () => void; onPassed: () => void; onBoard?: () => void }> = ({ l, onBack, onPassed, onBoard }) => {
   const [audio, setAudio] = useState<Audio>('idle');
   const [step, setStep] = useState<'q' | 'd' | 'done'>('q');
   const [picked, setPicked] = useState<(number | null)[]>(l.questions.map(() => null));
@@ -51,6 +52,7 @@ const Lesson: React.FC<{ l: SaraListeningLesson; onBack: () => void; onPassed: (
       <div className="flex items-center gap-2">
         <button onClick={onBack} className="p-1.5 rounded-lg bg-[#002147] text-white" aria-label="back"><ArrowRight size={16} /></button>
         <p className="flex-1 text-[14px] font-black text-[#002147] truncate">{((l.order - 1) % 30) + 1}. {l.titleAr}</p>
+        {onBoard && <button onClick={() => { saraStopNarrator(); onBoard(); }} data-testid="open-board" className="shrink-0 px-1.5 py-1 rounded-lg bg-[#083344] text-teal-100 border border-teal-400/60 text-[10px] font-black leading-tight">🧑‍🏫 اشرح بالسبورة التفاعلية</button>}
         {l.cefr && <span className="text-[10px] font-black px-1.5 rounded bg-[#002147] text-amber-300">{l.cefr}</span>}
       </div>
       {step === 'q' && <>
@@ -93,9 +95,18 @@ const Lesson: React.FC<{ l: SaraListeningLesson; onBack: () => void; onPassed: (
   );
 };
 
+/** Whiteboard version of a listening lesson: strategy, the script, then the same questions. */
+const boardOf = (l: SaraListeningLesson) => ({
+  titleAr: l.titleAr, titleEn: l.titleEn,
+  points: ['اسمع المقطع مرة كاملة وركّز على الفكرة العامة: مين يتكلم، ووين، وليش.', 'في المرة الثانية دوّر على التفاصيل: الأرقام والأوقات والأسماء.', 'اقرأ السؤال قبل ما تسمع عشان تعرف وش تدوّر عليه.'],
+  examplesTitle: 'نص المقطع', examples: l.scriptLines.slice(0, 4).map(en => ({ en })),
+  questions: l.questions.map(q => ({ promptAr: q.questionAr, promptEn: q.questionEn, options: q.options, correctIndex: q.correctIndex, play: l.audioText })),
+});
+
 export const SaraListeningPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll }) => {
   const [unlockedRaw, setUnlocked] = useState(() => readUnlocked(LISTENING_TRACK_ID, uid));
   const [active, setActive] = useState<SaraListeningLesson | null>(null);
+  const [board, setBoard] = useState(false);
   const [testing, setTesting] = useState<NewLevelId | null>(null);
   const [testTick, setTestTick] = useState(0);
   useEffect(() => {
@@ -121,7 +132,9 @@ export const SaraListeningPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unl
           <span className="text-[11px] text-amber-300 font-bold">{passed}/{LISTENING_LESSONS.length}</span>
           <button onClick={() => { saraStopNarrator(); onClose(); }} className="p-1.5 rounded-lg hover:bg-white/10" aria-label="close"><X size={18} /></button>
         </div>
-        {active ? <Lesson key={active.id} l={active} onBack={() => setActive(null)} onPassed={() => onPassed(active)} /> : (
+        {active ? (board ? <SaraLessonBoard key={'board-' + active.id} {...boardOf(active)} onClose={() => setBoard(false)} onPassed={() => onPassed(active)}
+            onNextLesson={(active.order % 30 ? LISTENING_LESSONS[active.order] : undefined) ? () => { setBoard(false); setActive((active.order % 30 ? LISTENING_LESSONS[active.order] : undefined)!); } : undefined} />
+          : <Lesson key={active.id} l={active} onBack={() => { setBoard(false); setActive(null); }} onPassed={() => onPassed(active)} onBoard={() => setBoard(true)} />) : (
           <SaraLevelledList lessons={LISTENING_LESSONS} unlockedRaw={unlockedRaw} unlockAll={unlockAll} uid={uid} track="listening" trackId={LISTENING_TRACK_ID}
             refresh={testTick} onOpen={l => setActive(LISTENING_LESSONS.find(x => x.id === l.id) || null)} onTest={lv => setTesting(lv)} />
         )}
