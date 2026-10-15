@@ -3,11 +3,9 @@ import { X, ArrowRight, Volume2, RotateCcw, Clock, BookOpen, Headphones, CheckCi
 import MixedText from './MixedText';
 import { EXAM_SETS, type ExamKind, type ExamSet } from '../data/saraTracks/examPrep';
 import { saraNarrate, saraStopNarrator, saraUnlockNarrator } from './SaraTrackPlayer';
+import { readExamResults, saveExamAttempt, syncExamResults } from '../lib/saraExamSync';
 
 interface Props { isOpen: boolean; onClose: () => void; uid?: string }
-type Best = Record<string, { correct: number; total: number; at: number }>;
-const key = (uid?: string) => `sara_exam_prep_${uid || 'guest'}`;
-const readBest = (uid?: string): Best => { try { return JSON.parse(localStorage.getItem(key(uid)) || '{}'); } catch { return {}; } };
 const spoken = (s: ExamSet) => s.text.map(t => t.replace(/^[^:]{1,20}:\s*/, '')).join(' ');
 const fmt = (sec: number) => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
 
@@ -20,7 +18,7 @@ const Runner: React.FC<{ s: ExamSet; uid?: string; onBack: () => void }> = ({ s,
   const [qi, setQi] = useState(0); const [answers, setAnswers] = useState<(number | null)[]>(() => s.questions.map(() => null));
   const [left, setLeft] = useState(s.minutes * 60); const [showText, setShowText] = useState(false);
   const [audio, setAudio] = useState<'idle' | 'loading' | 'playing' | 'failed'>('idle'); const [plays, setPlays] = useState(0);
-  const [ri, setRi] = useState(0);
+  const [ri, setRi] = useState(0); const [saved, setSaved] = useState<boolean | null>(null);
   const say = (t: string, isTrack = false) => {
     saraUnlockNarrator(); setAudio('loading');
     saraNarrate(t, () => setAudio('failed'), () => setAudio('failed'), () => setAudio('idle'));
@@ -37,8 +35,7 @@ const Runner: React.FC<{ s: ExamSet; uid?: string; onBack: () => void }> = ({ s,
   const finish = () => {
     saraStopNarrator();
     const correct = s.questions.filter((q, i) => answers[i] === q.correctIndex).length;
-    const b = readBest(uid); const prev = b[s.id];
-    if (!prev || correct >= prev.correct) { b[s.id] = { correct, total: s.questions.length, at: Date.now() }; try { localStorage.setItem(key(uid), JSON.stringify(b)); } catch { /* ignore */ } }
+    saveExamAttempt(uid, s.id, correct, s.questions.length, s.minutes * 60 - left).then(ok => setSaved(ok));
     setPhase('result');
   };
   useEffect(() => { if (running && left === 0) finish(); }, [left, running]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -108,7 +105,7 @@ const Runner: React.FC<{ s: ExamSet; uid?: string; onBack: () => void }> = ({ s,
           <p className="text-3xl font-black">{correct} / {s.questions.length}</p>
           <p className="text-[12px] font-bold mt-1">الوقت المستخدم: {fmt(s.minutes * 60 - left)}{left === 0 ? ' · انتهى الوقت' : ''}</p>
         </div>
-        <p className="text-[12px] font-bold text-slate-600">هذي نتيجة تدريب فقط، مو توقّع لدرجة {s.exam} الرسمية.</p>
+        <p className="text-[12px] font-bold text-slate-600">هذي نتيجة تدريب فقط، مو توقّع لدرجة {s.exam} الرسمية.{uid ? (saved === false ? ' · انحفظت على الجهاز' : saved ? ' · انحفظت في تقريرك' : '') : ''}</p>
         <div className="flex-1" />
         {wrong.length > 0 && <button onClick={() => { setRi(0); setPhase('review'); }} className="rounded-xl border-2 border-[#002147] text-[#002147] font-black py-2.5">راجع الأخطاء ({wrong.length})</button>}
         <button onClick={() => { saraStopNarrator(); onBack(); }} className="rounded-xl bg-[#002147] text-amber-300 font-black py-2.5">رجوع للتمارين</button>
@@ -129,7 +126,8 @@ const Runner: React.FC<{ s: ExamSet; uid?: string; onBack: () => void }> = ({ s,
 export const SaraExamPrep: React.FC<Props> = ({ isOpen, onClose, uid }) => {
   const [exam, setExam] = useState<ExamKind>('IELTS'); const [kind, setKind] = useState<'reading' | 'listening'>('reading');
   const [active, setActive] = useState<ExamSet | null>(null); const [tick, setTick] = useState(0);
-  const best = useMemo(() => readBest(uid), [uid, tick, isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (isOpen) syncExamResults(uid).then(ch => { if (ch) setTick(t => t + 1); }); }, [isOpen, uid]);
+  const best = useMemo(() => readExamResults(uid), [uid, tick, isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!isOpen) return null;
   const sets = EXAM_SETS.filter(s => s.exam === exam && s.kind === kind);
   return (

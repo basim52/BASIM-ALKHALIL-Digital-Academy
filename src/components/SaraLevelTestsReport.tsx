@@ -6,17 +6,21 @@ import { CONVERSATION_TRACK } from '../data/saraTracks/conversation';
 import { READING_TRACK } from '../data/saraTracks/reading';
 import { WRITING_TRACK } from '../data/saraTracks/writing';
 import { NEW_SKILL_TRACKS } from '../lib/saraSkills';
+import { loadExamResults, type ExamResults } from '../lib/saraExamSync';
+import { EXAM_SETS } from '../data/saraTracks/examPrep';
 import { loadLevelTestAttempts, summarizeLevelTests, LEVEL_TEST_PASS, type LevelTestSummary } from '../lib/saraLevelTests';
 
 /** Sara end-of-level tests per track/level: latest + best score, pass/fail, weak lessons, date. Used in parent report + analytics. */
 export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolean }> = ({ studentId, isRtl = true }) => {
   const [rows, setRows] = useState<LevelTestSummary[] | null>(null);
   const [prog, setProg] = useState<Record<string, number>>({});
+  const [exam, setExam] = useState<ExamResults>({});
   useEffect(() => {
     if (!studentId) { setRows([]); return; }
     let alive = true;
     loadLevelTestAttempts(studentId).then(list => { if (alive) setRows(summarizeLevelTests(list)); });
     loadTrackProgress(studentId).then(p => { if (alive) setProg(p); });
+    loadExamResults(studentId).then(e => { if (alive) setExam(e); });
     return () => { alive = false; };
   }, [studentId]);
   const fmt = (ms: number) => new Date(ms).toLocaleDateString(isRtl ? 'ar-SA' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -66,6 +70,18 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
               )}
             </div>
           ))}
+        </div>
+      )}
+      {EXAM_SETS.some(x => exam[x.id]) && (
+        <div data-testid="sara-exam-report" className="space-y-1.5">
+          <p className="text-[12px] font-black text-[#002147]">{isRtl ? '🎓 تدريب IELTS و STEP (عدد الإجابات الصحيحة والوقت — ليس توقعاً للدرجة)' : '🎓 IELTS & STEP practice (raw correct answers and time — not a score prediction)'}</p>
+          <div className="grid gap-1.5 sm:grid-cols-2">
+            {EXAM_SETS.filter(x => exam[x.id]).map(x => { const r = exam[x.id]; const t = (n: number) => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}`; return (
+              <div key={x.id} className="rounded-xl bg-slate-50 border border-slate-200 px-2.5 py-1.5">
+                <p className="text-[11px] font-black text-slate-700 truncate">{x.exam} · {x.kind === 'reading' ? (isRtl ? 'قراءة' : 'Reading') : (isRtl ? 'استماع' : 'Listening')} · {x.titleEn}</p>
+                <p className="text-[11px] font-bold text-slate-600">{isRtl ? 'أفضل' : 'Best'}: {r.correct}/{r.total} ({t(r.timeSec)}) · {isRtl ? 'آخر' : 'Last'}: {r.lastCorrect}/{r.total} ({t(r.lastTimeSec)}) · {isRtl ? 'محاولات' : 'Attempts'}: {r.attempts} · {fmt(r.lastAt)}</p>
+              </div>); })}
+          </div>
         </div>
       )}
     </div>

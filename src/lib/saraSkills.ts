@@ -17,7 +17,7 @@ const VOCAB_AS_TRACK = { id: VOCAB_TRACK_ID, titleAr: 'المفردات', titleE
 const PRON_AS_TRACK = { id: PRONUNCIATION_TRACK_ID, titleAr: 'النطق', titleEn: 'Pronunciation', lessons: PRONUNCIATION_LESSONS.map(l => ({ id: l.id, order: l.order, titleAr: l.titleAr, titleEn: l.titleEn })) } as SaraTrack;
 
 export interface SaraSkill { id: 'grammar' | 'conversation' | 'reading' | 'writing' | 'listening' | 'pronunciation' | 'vocabulary' | 'daily'; labelAr: string; labelEn: string; passed: number; total: number; pct: number; testBest: number | null }
-export interface SaraSkills { skills: SaraSkill[]; hasData: boolean; placementLevel: string | null }
+export interface SaraSkills { skills: SaraSkill[]; exam: SaraExamItem[]; hasData: boolean; placementLevel: string | null }
 
 /** Level-1 tracks with their own players (listening, pronunciation, vocabulary, everyday English), as SaraTrack shapes for reports. */
 export const NEW_SKILL_TRACKS: SaraTrack[] = [LISTENING_AS_TRACK, PRON_AS_TRACK, VOCAB_AS_TRACK, DAILY_AS_TRACK];
@@ -34,6 +34,10 @@ const SKILLS: { id: SaraSkill['id']; labelAr: string; labelEn: string; tracks: S
 ];
 
 /** Real per-skill values: lessons passed per Sara track (cloud ∪ this device), best level-test score, placement level. No sample numbers. */
+import { loadExamResults, readExamResults, type ExamResults } from './saraExamSync';
+import { EXAM_SETS } from '../data/saraTracks/examPrep';
+export interface SaraExamItem { setId: string; exam: string; kind: 'reading' | 'listening'; title: string; bestCorrect: number; lastCorrect: number; total: number; bestTimeSec: number; lastTimeSec: number; limitSec: number; attempts: number }
+
 export async function computeSaraSkills(uid: string | undefined, placementLevel?: string | null): Promise<SaraSkills> {
   const remote = uid ? await loadTrackProgress(uid) : {};
   const local = (id: string) => { try { return Number(localStorage.getItem(`sara_track_${id}_${uid || 'guest'}`)) || 1; } catch { return 1; } };
@@ -47,5 +51,9 @@ export async function computeSaraSkills(uid: string | undefined, placementLevel?
     const best = tests.filter(x => s.tracks.some(t => t.id === x.trackId)).map(x => x.best.score);
     return { id: s.id, labelAr: s.labelAr, labelEn: s.labelEn, passed, total, pct: total ? Math.round((passed / total) * 100) : 0, testBest: best.length ? Math.max(...best) : null };
   });
-  return { skills, hasData: skills.some(s => s.passed > 0 || s.testBest !== null), placementLevel: placementLevel || null };
+  // IELTS/STEP practice: real raw counts + time (cloud ∪ device). No band predictions.
+  const er: ExamResults = { ...(uid ? await loadExamResults(uid) : {}) };
+  for (const [k, v] of Object.entries(readExamResults(uid))) if (!er[k] || v.lastAt > er[k].lastAt) er[k] = v;
+  const exam: SaraExamItem[] = EXAM_SETS.filter(x => er[x.id]).map(x => { const r = er[x.id]; return { setId: x.id, exam: x.exam, kind: x.kind, title: x.titleEn, bestCorrect: r.correct, lastCorrect: r.lastCorrect, total: r.total, bestTimeSec: r.timeSec, lastTimeSec: r.lastTimeSec, limitSec: x.minutes * 60, attempts: r.attempts }; });
+  return { skills, exam, hasData: skills.some(s => s.passed > 0 || s.testBest !== null) || exam.length > 0, placementLevel: placementLevel || null };
 }

@@ -114,6 +114,8 @@ export const AdaptiveLearningPath: React.FC<AdaptiveLearningPathProps> = ({
         ...sk.skills.map(x => ({ skill: x.labelEn, lessonsPassed: x.passed, lessonsTotal: x.total, bestLevelTest: x.testBest })),
         ...tests.map(t => ({ levelTest: `${t.trackId}/${t.levelId}`, bestScore: t.best.score, latestScore: t.latest.score, attempts: t.attempts,
           weakLessons: (t.latest.weakLessons || []).slice(0, 6).map(w => ({ lesson: w.titleAr, wrong: w.wrong })) })),
+        ...sk.exam.map(e => ({ examPractice: `${e.exam} ${e.kind}: ${e.title}`, note: 'original practice set; raw correct answers only, NOT an official band/score',
+          bestCorrect: e.bestCorrect, lastCorrect: e.lastCorrect, questions: e.total, lastTimeSec: e.lastTimeSec, timeLimitSec: e.limitSec, attempts: e.attempts })),
       ];
       const realPct = (id: string) => sk.skills.find(x => x.id === id);
       const res = await fetch('/api/ai/adaptive-gap-analysis', {

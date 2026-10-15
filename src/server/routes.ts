@@ -2535,7 +2535,7 @@ Analyze the following student performance data and generate an in-depth Adaptive
 Student Current Level: ${currentLevel}
 Student Answers & Performance Logs: ${JSON.stringify(studentAnswers)}
 
-Identify precise language gaps ONLY from the data above (weak lessons, low test scores, skills with little progress). Do not invent mistakes the data does not show; if data is thin, return fewer gaps.
+Identify precise language gaps ONLY from the data above (weak lessons, low test scores, skills with little progress). Do not invent mistakes the data does not show; if data is thin, return fewer gaps. Items with examPractice are IELTS/STEP practice results (raw correct counts and time on original practice sets): use them to spot reading/listening gaps, but NEVER predict or mention an IELTS band or STEP score.
 Respond ONLY with a valid JSON object matching this schema:
 {
   "overallMastery": 82,
