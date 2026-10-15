@@ -2447,6 +2447,36 @@ ${context && !free ? `What this student needs (real data from the app): ${String
     res.end();
   });
 
+  // 📝 End-of-call review for free conversation: grounded in the real transcript; points must quote the student.
+  app.post("/api/sara/call-review", async (req, res) => {
+    const tr = (Array.isArray(req.body?.transcript) ? req.body.transcript : []).slice(-40)
+      .map((t: any) => ({ role: t?.role === "user" ? "user" : "sara", text: String(t?.text || "").slice(0, 400).trim() })).filter((t: any) => t.text);
+    const studentLines = tr.filter((t: any) => t.role === "user").map((t: any) => t.text);
+    const words = studentLines.join(" ").split(/\s+/).filter(Boolean).length;
+    if (studentLines.length < 2 || words < 12) return res.json({ tooShort: true, turns: studentLines.length, words });
+    const norm = (x: string) => x.toLowerCase().replace(/[^a-z0-9' ]/g, " ").replace(/\s+/g, " ").trim();
+    const all = norm(studentLines.join(" | "));
+    const sys = `You review a student's free English phone conversation with Sara (a warm tutor). Level: ${String(req.body?.level || "").slice(0, 8)}.
+Return ONLY JSON: {"verdict":"good"|"fair"|"needs_work","verdictAr":"short warm Arabic verdict like «شغلك جيد 👏» or «تحتاج تحسين بسيط»","summaryAr":"1-2 warm encouraging Arabic sentences in Sara's Saudi-friendly style",
+"pronunciationNoteAr":"one Arabic sentence saying honestly that pronunciation is inferred only from how the speech recogniser wrote the words",
+"pronunciation":[P],"vocabulary":[P],"grammar":[P],"fluency":[P]} where P = {"said":"EXACT words the student said, copied from the STUDENT lines","better":"a better English version","tipAr":"short practical Arabic tip"}.
+Max 2 points per section; only real issues; an empty array is fine. Pronunciation points only when a misrecognised word clearly suggests a sound problem. No numeric scores, no bands.`;
+    const convo = tr.map((t: any) => `${t.role === "user" ? "STUDENT" : "SARA"}: ${t.text}`).join("\n");
+    try {
+      const result = await callAiWithRetry({ contents: [{ role: "user", parts: [{ text: convo }] }], config: { systemInstruction: sys, responseMimeType: "application/json", maxOutputTokens: 1400, temperature: 0.4 } });
+      const raw = String(result.text || "").replace(/^```(json)?|```$/g, "").trim();
+      const j = JSON.parse(raw.slice(raw.indexOf("{"), raw.lastIndexOf("}") + 1));
+      const keep = (arr: any) => (Array.isArray(arr) ? arr : []).map((p: any) => ({ said: String(p?.said || "").slice(0, 200), better: String(p?.better || "").slice(0, 200), tipAr: String(p?.tipAr || "").slice(0, 200) }))
+        .filter((p: any) => p.said && p.better && norm(p.said).length > 1 && all.includes(norm(p.said))).slice(0, 2); // must really quote the student
+      const verdict = ["good", "fair", "needs_work"].includes(j.verdict) ? j.verdict : "fair";
+      res.json({ verdict, verdictAr: String(j.verdictAr || "").slice(0, 80), summaryAr: String(j.summaryAr || "").slice(0, 400), pronunciationNoteAr: String(j.pronunciationNoteAr || "").slice(0, 200),
+        pronunciation: keep(j.pronunciation), vocabulary: keep(j.vocabulary), grammar: keep(j.grammar), fluency: keep(j.fluency), turns: studentLines.length, words });
+    } catch (err: any) {
+      logToFile(`[call-review] ${err?.message}`);
+      res.status(502).json({ error: "REVIEW_FAILED" });
+    }
+  });
+
   app.post("/api/ai/realtime-voice-call", async (req, res) => {
     try {
       const { userAudioTranscript, scenario = "Free Conversation", studentLevel = "Intermediate", history = [] } = req.body;

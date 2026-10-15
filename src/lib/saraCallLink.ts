@@ -51,14 +51,15 @@ export async function buildCallContext(uid: string | undefined, opts: { placemen
   return { text: parts.join(' ').slice(0, 700), focusAr: focusAr.slice(0, 4), focusEn: focusEn.slice(0, 4) };
 }
 
-export interface CallRecord { at: number; scenario: string; scenarioAr: string; seconds: number; turns: number; words: number; avgReplyMs: number; focus: string[] }
+export interface CallReviewSummary { verdict: string; verdictAr: string; summaryAr: string; points: { area: string; said: string; better: string }[] }
+export interface CallRecord { at: number; scenario: string; scenarioAr: string; seconds: number; turns: number; words: number; avgReplyMs: number; focus: string[]; review?: CallReviewSummary }
 const KEY = (uid?: string) => `sara_calls_${uid || 'guest'}`;
 
 export function readCallRecords(uid?: string): CallRecord[] { try { return JSON.parse(localStorage.getItem(KEY(uid)) || '[]'); } catch { return []; } }
 
 /** Save one finished call (real numbers) to the device and users/{uid}.saraCalls (last 20). */
 export async function saveCallRecord(uid: string | undefined, rec: CallRecord): Promise<boolean> {
-  const list = [...readCallRecords(uid), rec].slice(-20);
+  const list = [...readCallRecords(uid).filter(c => c.at !== rec.at), rec].slice(-20); // same call → updated in place
   try { localStorage.setItem(KEY(uid), JSON.stringify(list)); } catch { /* ignore */ }
   if (!uid) return false;
   try {

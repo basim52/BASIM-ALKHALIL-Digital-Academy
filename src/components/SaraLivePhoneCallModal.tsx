@@ -23,7 +23,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { cancelAllSpeech, setExclusiveAudioOwner, prefetchAcademyAudio, playCloudAudioAs } from '../lib/audio';
 import { saraUnlockNarrator } from './SaraTrackPlayer';
-import { buildCallContext, saveCallRecord, type CallContext } from '../lib/saraCallLink';
+import { buildCallContext, saveCallRecord, type CallContext, type CallRecord } from '../lib/saraCallLink';
 
 export interface PhoneScenario {
   id: string;
@@ -144,6 +144,36 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
   const isWords = preset?.trackTag === 'vocab';
   const isFree = preset?.id === 'free-talk';
   const [typed, setTyped] = useState('');
+  type RP = { said: string; better: string; tipAr: string };
+  type Review = { tooShort?: boolean; verdict?: string; verdictAr?: string; summaryAr?: string; pronunciationNoteAr?: string; pronunciation?: RP[]; vocabulary?: RP[]; grammar?: RP[]; fluency?: RP[] };
+  const [review, setReview] = useState<{ st: 'loading' | 'ok' | 'fail'; d?: Review } | null>(null);
+  const [revTab, setRevTab] = useState<'pronunciation' | 'vocabulary' | 'grammar' | 'fluency'>('grammar');
+  const [revVoice, setRevVoice] = useState<'idle' | 'loading' | 'fail'>('idle');
+  const recRef = useRef<CallRecord | null>(null);
+  /** End-of-call review (free mode only): the real transcript goes to the AI; nothing is evaluated during the call. */
+  const fetchReview = async () => {
+    setReview({ st: 'loading' });
+    try {
+      const r = await fetch('/api/sara/call-review', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ level: studentLevel, transcript: transcriptRef.current.map(t => ({ role: t.role, text: t.text })) }) });
+      if (!r.ok) throw new Error(String(r.status));
+      const d: Review = await r.json();
+      setReview({ st: 'ok', d });
+      const tabs = (['grammar', 'vocabulary', 'fluency', 'pronunciation'] as const).find(k => (d[k] || []).length);
+      if (tabs) setRevTab(tabs);
+      if (recRef.current && !d.tooShort) {
+        const points = (['pronunciation', 'vocabulary', 'grammar', 'fluency'] as const).flatMap(k => (d[k] || []).map(p => ({ area: k, said: p.said, better: p.better })));
+        recRef.current = { ...recRef.current, review: { verdict: d.verdict || '', verdictAr: d.verdictAr || '', summaryAr: d.summaryAr || '', points } };
+        saveCallRecord(studentId, recRef.current);
+      }
+    } catch { setReview({ st: 'fail' }); }
+  };
+  const speakVerdict = async (text: string) => {
+    setRevVoice('loading');
+    const a = await prefetchAcademyAudio(text, 'ar', 'Kore').catch(() => null);
+    if (!a) { setRevVoice('fail'); return; }
+    setRevVoice('idle'); playCloudAudioAs('call', a);
+  };
   const sendTyped = () => { const t = typed.trim(); if (!t || stateRef.current !== 'connected') return; setTyped(''); stopListening(); if (speakingRef.current) stopSaraAudio(); handleStudentSpoke(t); };
   const [usedPhrases, setUsedPhrases] = useState<string[]>([]);
   const norm = (x: string) => x.toLowerCase().replace(/[^a-z0-9' ]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -478,7 +508,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
     const earnedXP = Math.max(20, Math.min(100, Math.floor(callSeconds / 3) + (callTurns * 5)));
     try { confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
     if (onSuccessXP) onSuccessXP(earnedXP);
-    if (callTurns > 0) saveCallRecord(studentId, {
+    if (callTurns > 0) saveCallRecord(studentId, recRef.current = {
       at: Date.now(), scenario: selectedScenario.titleEn, scenarioAr: selectedScenario.titleAr, seconds: callSeconds, turns: callTurns,
       words: studentWordsSpoken, avgReplyMs: avgLatency,
       focus: keyPhrases.length ? [`${isRtl ? (isWords ? 'كلمات مستخدمة' : 'عبارات مستخدمة') : 'phrases used'} ${usedPhrases.length}/${keyPhrases.length}`, ...usedPhrases.slice(0, 4)] : (callCtx?.focusAr || []),
@@ -487,6 +517,8 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
       const summary = `Sara Phone Call (${selectedScenario.titleEn}): ${formatTime(callSeconds)} duration, ${callTurns} speech turns, ${studentWordsSpoken} words spoken.${avgLatency ? ` Avg reply ${(avgLatency / 1000).toFixed(1)}s.` : ''}${keyPhrases.length ? ` Key phrases used ${usedPhrases.length}/${keyPhrases.length}: ${usedPhrases.join('; ') || 'none'}.` : callCtx?.focusEn.length ? ` Focus: ${callCtx.focusEn.join('; ')}.` : ''}`;
       onSaveCallSummary(summary);
     }
+    setReview(null); setRevVoice('idle');
+    if (isFree) { if (callTurns > 0) fetchReview(); else setReview({ st: 'ok', d: { tooShort: true } }); }
     if (onSendTranscriptToChat && transcriptRef.current.length > 0) {
       onSendTranscriptToChat(transcriptRef.current.map(t => ({ role: t.role, text: t.text })));
     }
@@ -657,7 +689,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
           {callState === 'ended' && (
             <div className="flex-1 min-h-0 flex flex-col justify-center gap-4" data-testid="call-ended">
               <div className="text-center">
-                <div className="inline-flex p-3 rounded-full mb-2" style={{ background: 'rgba(196,158,58,0.15)', color: GOLD }}><Award size={30} /></div>
+                {!isFree && <div className="inline-flex p-3 rounded-full mb-2" style={{ background: 'rgba(196,158,58,0.15)', color: GOLD }}><Award size={30} /></div>}
                 <h4 className="text-lg font-black">{isRtl ? 'انتهت المكالمة' : 'Call ended'}</h4>
                 <p className="text-xs text-white/70 mt-1">{isRtl ? selectedScenario.titleAr : selectedScenario.titleEn}</p>
               </div>
@@ -680,6 +712,51 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
                   <div className="flex flex-wrap gap-1" dir="ltr">
                     {keyPhrases.slice(0, 6).map(ph => <span key={ph} className={`text-[10.5px] font-bold px-1.5 py-0.5 rounded-lg max-w-full truncate ${usedPhrases.includes(ph) ? 'bg-emerald-500/20 text-emerald-200' : 'bg-white/5 text-white/45'}`}>{usedPhrases.includes(ph) ? '✓ ' : ''}{ph}</span>)}
                   </div>
+                </div>
+              )}
+              {isFree && review && (
+                <div data-testid="call-review" className="flex flex-col gap-2 min-h-0">
+                  {review.st === 'loading' && <p className="text-center text-sm font-black text-amber-300 animate-pulse py-6">سارة تراجع مكالمتك… ✍️</p>}
+                  {review.st === 'fail' && (
+                    <button onClick={fetchReview} data-testid="review-retry" className="py-3 rounded-2xl border text-amber-300 text-xs font-black flex items-center justify-center gap-2" style={{ borderColor: GOLD }}>
+                      <RotateCcw size={14} />تعذّر تجهيز التقييم — أعد المحاولة
+                    </button>
+                  )}
+                  {review.st === 'ok' && review.d?.tooShort && (
+                    <p className="text-center text-[13px] font-bold text-white/80 rounded-2xl p-3 border" style={{ borderColor: 'rgba(196,158,58,0.3)' }}>المكالمة كانت قصيرة شوي عشان أقيّمها 😊 المرة الجاية كلّمني أكثر — جملتين ثلاث على الأقل — وبعطيك ملاحظاتي.</p>
+                  )}
+                  {review.st === 'ok' && review.d && !review.d.tooShort && (() => { const d = review.d; const pts = d[revTab] || [];
+                    const tabs = [['grammar', 'القواعد'], ['vocabulary', 'المفردات'], ['fluency', 'الطلاقة'], ['pronunciation', 'النطق']] as const;
+                    return <>
+                      <div className="rounded-2xl p-2.5 border" style={{ borderColor: GOLD, background: 'rgba(196,158,58,0.1)' }}>
+                        <div className="flex items-center gap-2">
+                          <p data-testid="review-verdict" className="flex-1 text-[15px] font-black text-amber-300">{d.verdictAr || (d.verdict === 'good' ? 'شغلك جيد 👏' : d.verdict === 'needs_work' ? 'تحتاج تحسين بسيط 💪' : 'ماشي حالك، كمّل 👍')}</p>
+                          <button onClick={() => speakVerdict(`${d.verdictAr || ''}. ${d.summaryAr || ''}`)} data-testid="review-voice" className="shrink-0 px-2 py-1 rounded-lg text-[11px] font-black" style={{ background: GOLD, color: NAVY }}>
+                            {revVoice === 'loading' ? '…' : revVoice === 'fail' ? '🔄 الصوت' : '🔊 اسمع'}
+                          </button>
+                        </div>
+                        <p className="text-[12px] font-bold text-white/85 leading-snug line-clamp-3 mt-0.5">{d.summaryAr}</p>
+                      </div>
+                      <div className="grid grid-cols-4 gap-1">
+                        {tabs.map(([k, label]) => (
+                          <button key={k} onClick={() => setRevTab(k)} data-testid={`review-tab-${k}`} className="py-1.5 rounded-xl text-[11px] font-black border"
+                            style={revTab === k ? { background: GOLD, color: NAVY, borderColor: GOLD } : { borderColor: 'rgba(255,255,255,0.15)', color: 'white' }}>
+                            {label}{(d[k] || []).length ? ' •' : ''}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="rounded-2xl p-2 border flex flex-col gap-1.5 overflow-hidden" style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(0,0,0,0.2)' }}>
+                        {revTab === 'pronunciation' && <p className="text-[10.5px] font-bold text-white/55">{d.pronunciationNoteAr || 'ملاحظات النطق مبنية فقط على الكلمات اللي التقطها التعرّف على الصوت، مو تحليل صوتي دقيق.'}</p>}
+                        {pts.length === 0 && <p className="text-[12px] font-bold text-emerald-200">ما لاحظت شي يحتاج تعديل هنا 👍</p>}
+                        {pts.map((pt, i) => (
+                          <div key={i} className="text-[12px] leading-snug">
+                            <p dir="ltr" className="text-left text-rose-200/90 line-clamp-2">✗ “{pt.said}”</p>
+                            <p dir="ltr" className="text-left text-emerald-200 font-bold line-clamp-2">✓ {pt.better}</p>
+                            {pt.tipAr && <p className="text-white/70 text-[11px] line-clamp-2">{pt.tipAr}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    </>; })()}
                 </div>
               )}
               <p className="text-[11px] text-white/60 text-center">{isRtl ? 'حُفظ ملخص المكالمة في تقدّمك وتقرير وليّ الأمر.' : 'A summary was saved to your progress and parent report.'}</p>
