@@ -112,6 +112,8 @@ interface SaraLivePhoneCallModalProps {
   studentId?: string;
   lessonTitle?: string;
   recentMistakes?: string[];
+  /** Lesson mode: one fixed scenario (from a lesson) and the key phrases Sara nudges the student to use. */
+  preset?: PhoneScenario & { keyPhrases?: string[]; trackTag?: string };
 }
 
 export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
@@ -125,7 +127,8 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
   onSendTranscriptToChat,
   studentId,
   lessonTitle,
-  recentMistakes
+  recentMistakes,
+  preset
 }) => {
   const [callCtx, setCallCtx] = useState<CallContext | null>(null);
   useEffect(() => {
@@ -135,7 +138,18 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
     return () => { alive = false; };
   }, [isOpen, studentId, lessonTitle]);
   const [callState, setCallStateRaw] = useState<'idle' | 'calling' | 'connected' | 'ended'>('idle');
-  const [selectedScenario, setSelectedScenario] = useState<PhoneScenario>(PHONE_SCENARIOS[0]);
+  const [selectedScenario, setSelectedScenario] = useState<PhoneScenario>(preset || PHONE_SCENARIOS[0]);
+  useEffect(() => { if (isOpen && preset) setSelectedScenario(preset); }, [isOpen, preset?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  const keyPhrases = preset?.keyPhrases || [];
+  const [usedPhrases, setUsedPhrases] = useState<string[]>([]);
+  const norm = (x: string) => x.toLowerCase().replace(/[^a-z0-9' ]/g, ' ').replace(/\s+/g, ' ').trim();
+  /** A key phrase counts as used when most of its words appear, in order, in what the student said (real speech text). */
+  const phraseUsed = (said: string, ph: string) => {
+    const w = norm(ph).split(' ').filter(x => x.length > 1); const t = norm(said);
+    if (!w.length) return false; if (t.includes(norm(ph))) return true;
+    let pos = 0, hit = 0; for (const x of w) { const k = t.indexOf(x, pos); if (k >= 0) { hit++; pos = k + x.length; } }
+    return hit / w.length >= 0.75;
+  };
   const [isMuted, setIsMutedRaw] = useState(false);
   const [isSpeakerOn, setIsSpeakerOnRaw] = useState(true);
   const [showCaptions, setShowCaptions] = useState(true);
@@ -303,7 +317,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
   // Start outgoing call: no fake ring — we warm the server and fetch Sara's greeting audio, then connect.
   const handleStartCall = async () => {
     setCallState('calling');
-    setCallSeconds(0); setCallTurns(0); setStudentWordsSpoken(0); setLatencies([]); setVoiceError(null);
+    setCallSeconds(0); setCallTurns(0); setUsedPhrases([]); setStudentWordsSpoken(0); setLatencies([]); setVoiceError(null);
     transcriptRef.current = []; setCallTranscript([]);
     saraUnlockNarrator();
     const starterText = selectedScenario.starterSaraSpeech;
@@ -447,6 +461,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
     setCallTurns(prev => prev + 1);
     setStudentWordsSpoken(prev => prev + spokenText.split(/\s+/).filter(Boolean).length);
     setInterimTranscript('');
+    if (keyPhrases.length) setUsedPhrases(u => [...u, ...keyPhrases.filter(ph => !u.includes(ph) && phraseUsed(spokenText, ph))]);
     askSara(spokenText, true);
   };
 
@@ -461,10 +476,11 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
     if (onSuccessXP) onSuccessXP(earnedXP);
     if (callTurns > 0) saveCallRecord(studentId, {
       at: Date.now(), scenario: selectedScenario.titleEn, scenarioAr: selectedScenario.titleAr, seconds: callSeconds, turns: callTurns,
-      words: studentWordsSpoken, avgReplyMs: avgLatency, focus: callCtx?.focusAr || [],
+      words: studentWordsSpoken, avgReplyMs: avgLatency,
+      focus: keyPhrases.length ? [`${isRtl ? 'عبارات مستخدمة' : 'phrases used'} ${usedPhrases.length}/${keyPhrases.length}`, ...usedPhrases.slice(0, 4)] : (callCtx?.focusAr || []),
     });
     if (onSaveCallSummary) {
-      const summary = `Sara Phone Call (${selectedScenario.titleEn}): ${formatTime(callSeconds)} duration, ${callTurns} speech turns, ${studentWordsSpoken} words spoken.${avgLatency ? ` Avg reply ${(avgLatency / 1000).toFixed(1)}s.` : ''}${callCtx?.focusEn.length ? ` Focus: ${callCtx.focusEn.join('; ')}.` : ''}`;
+      const summary = `Sara Phone Call (${selectedScenario.titleEn}): ${formatTime(callSeconds)} duration, ${callTurns} speech turns, ${studentWordsSpoken} words spoken.${avgLatency ? ` Avg reply ${(avgLatency / 1000).toFixed(1)}s.` : ''}${keyPhrases.length ? ` Key phrases used ${usedPhrases.length}/${keyPhrases.length}: ${usedPhrases.join('; ') || 'none'}.` : callCtx?.focusEn.length ? ` Focus: ${callCtx.focusEn.join('; ')}.` : ''}`;
       onSaveCallSummary(summary);
     }
     if (onSendTranscriptToChat && transcriptRef.current.length > 0) {
@@ -510,7 +526,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/70 backdrop-blur-sm" dir={isRtl ? 'rtl' : 'ltr'}>
       <motion.div
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
         data-testid="sara-call"
@@ -546,6 +562,12 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
                   </p>
                 )}
               </div>
+              {preset ? (
+                <div className="flex-1 min-h-0 flex flex-col gap-1.5 overflow-hidden" data-testid="call-preset">
+                  <p className="text-[11px] font-black" style={{ color: GOLD }}>{keyPhrases.length ? (isRtl ? 'حاول تستخدم هالعبارات في كلامك:' : 'Try to use these phrases:') : (isRtl ? 'تكلّم بحرية — سارة تكمّل معك الحوار.' : 'Talk freely — Sara keeps the conversation going.')}</p>
+                  {keyPhrases.slice(0, 5).map(ph => <p key={ph} dir="ltr" className="text-[12.5px] font-bold text-white text-left rounded-xl px-2.5 py-1.5 border truncate" style={{ borderColor: 'rgba(196,158,58,0.35)', background: 'rgba(255,255,255,0.04)' }}>{ph}</p>)}
+                </div>
+              ) : (
               <div className="grid grid-cols-2 gap-2 flex-1 min-h-0 content-start">
                 {PHONE_SCENARIOS.map(sc => {
                   const on = selectedScenario.id === sc.id;
@@ -559,6 +581,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
                   );
                 })}
               </div>
+              )}
               <button onClick={handleStartCall} data-testid="call-start"
                 className="mt-3 w-full py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shrink-0"
                 style={{ background: GOLD, color: NAVY }}>
@@ -638,6 +661,14 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
                   </div>
                 ))}
               </div>
+              {keyPhrases.length > 0 && (
+                <div data-testid="call-phrases-used" className="rounded-2xl p-2.5 border" style={{ borderColor: 'rgba(196,158,58,0.3)' }}>
+                  <p className="text-[11px] font-black text-amber-300 mb-1">{isRtl ? `العبارات اللي استخدمتها: ${usedPhrases.length} من ${keyPhrases.length}` : `Phrases you used: ${usedPhrases.length} of ${keyPhrases.length}`}</p>
+                  <div className="flex flex-wrap gap-1" dir="ltr">
+                    {keyPhrases.slice(0, 6).map(ph => <span key={ph} className={`text-[10.5px] font-bold px-1.5 py-0.5 rounded-lg max-w-full truncate ${usedPhrases.includes(ph) ? 'bg-emerald-500/20 text-emerald-200' : 'bg-white/5 text-white/45'}`}>{usedPhrases.includes(ph) ? '✓ ' : ''}{ph}</span>)}
+                  </div>
+                </div>
+              )}
               <p className="text-[11px] text-white/60 text-center">{isRtl ? 'حُفظ ملخص المكالمة في تقدّمك وتقرير وليّ الأمر.' : 'A summary was saved to your progress and parent report.'}</p>
               <div className="grid grid-cols-2 gap-2">
                 <button onClick={() => setCallState('idle')} className="py-3 rounded-2xl border border-white/20 text-white font-black text-xs flex items-center justify-center gap-2 cursor-pointer">

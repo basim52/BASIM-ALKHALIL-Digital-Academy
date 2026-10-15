@@ -9,6 +9,7 @@ import { DAILY_LESSONS, DAILY_TRACK_ID, type SaraDailyLesson } from '../data/sar
 import { readUnlocked, progressKey, saraNarrate, saraStopNarrator, saraUnlockNarrator, pauseNarrator, resumeNarrator } from './SaraTrackPlayer';
 import { pushTrackProgress, syncTrackProgress } from '../lib/saraProgressSync';
 import SpeakingDrillCheck from './SpeakingDrillCheck';
+import SaraLessonCall, { lessonCallPreset, levelToCefr } from './SaraLessonCall';
 
 interface Props { isOpen: boolean; onClose: () => void; uid?: string; unlockAll?: boolean }
 
@@ -19,7 +20,7 @@ function shuffle<T>(a: T[], seed: number): T[] {
 }
 type Step = 'learn' | 'dialogue' | 'practice' | 'role' | 'done';
 
-const Lesson: React.FC<{ l: SaraDailyLesson; onBack: () => void; onPassed: () => void; onBoard?: () => void }> = ({ l, onBack, onPassed, onBoard }) => {
+const Lesson: React.FC<{ l: SaraDailyLesson; onBack: () => void; onPassed: () => void; onBoard?: () => void; uid?: string }> = ({ l, onBack, onPassed, onBoard, uid }) => {
   const [step, setStep] = useState<Step>('learn');
   const [audio, setAudio] = useState<{ t: string; s: 'loading' | 'failed' } | null>(null);
   const [paused, setPaused] = useState(false);
@@ -135,6 +136,8 @@ const Lesson: React.FC<{ l: SaraDailyLesson; onBack: () => void; onPassed: () =>
         <p className="text-4xl">{practicePass ? '🎉' : '💪'}</p>
         <p className="text-[15px] font-black text-[#002147]">التمارين {right}/3</p>
         <p className="text-[13px] font-bold text-slate-600">{practicePass ? 'أحسنت! انفتح الموقف التالي.' : 'تحتاج ٢ من ٣ في التمارين عشان ينفتح التالي. أعد الدرس.'}</p>
+        <SaraLessonCall uid={uid} level={levelToCefr(l.levelId)} withFree label="حاور سارة في الموقف"
+          preset={lessonCallPreset({ id: l.id, titleAr: l.titleAr, titleEn: l.titleEn, icon: l.icon, kind: 'role', tag: 'daily', phrases: l.phrases.map(p => p.en), starter: l.dialogue[0]?.en })} />
         <div className="flex gap-2 w-full">
           {!practicePass && <button onClick={() => { setStep('learn'); setQi(0); setRight(0); setTi(0); }} className="flex-1 py-2.5 rounded-xl bg-[#002147] text-amber-300 font-black text-sm">أعد الدرس</button>}
           <button onClick={onBack} className="flex-1 py-2.5 rounded-xl bg-[#C49E3A] text-[#002147] font-black text-sm">رجوع للمواقف</button>
@@ -185,7 +188,7 @@ export const SaraDailyPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unlockA
         </div>
         {active ? (board ? <SaraLessonBoard key={'board-' + active.id} {...boardOf(active)} onClose={() => setBoard(false)} onPassed={() => onPassed(active)}
             onNextLesson={(active.order % 30 ? DAILY_LESSONS[active.order] : undefined) ? () => { setBoard(false); setActive((active.order % 30 ? DAILY_LESSONS[active.order] : undefined)!); } : undefined} />
-          : <Lesson key={active.id} l={active} onBack={() => { setBoard(false); setActive(null); }} onPassed={() => onPassed(active)} onBoard={() => setBoard(true)} />) : (
+          : <Lesson key={active.id} l={active} onBack={() => { setBoard(false); setActive(null); }} onPassed={() => onPassed(active)} onBoard={() => setBoard(true)} uid={uid} />) : (
           <SaraLevelledList lessons={DAILY_LESSONS} unlockedRaw={unlockedRaw} unlockAll={unlockAll} uid={uid} track="daily" trackId={DAILY_TRACK_ID}
             refresh={testTick} onOpen={l => setActive(DAILY_LESSONS.find(x => x.id === l.id) || null)} onTest={lv => setTesting(lv)} />
         )}
