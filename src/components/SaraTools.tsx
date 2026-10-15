@@ -315,6 +315,10 @@ const StudyPlan: React.FC<{ uid?: string; unlockAll?: boolean; onOpenTrack?: (tr
   const [note, setNote] = useState('');
   const bAdd = (trackId: string, orders: number[]) => { if (!st) return; const r = basketAdd(basket.items, st, trackId, orders, !!unlockAll); setBasket(r.items); setNote(r.prereq ? `أضفنا ${r.prereq} درس قبله عشان الدروس تنفتح بالترتيب` : ''); };
   const bRemove = (trackId: string, orders: number[]) => { setBasket(basketRemove(basket.items, trackId, orders, !!unlockAll)); setNote(unlockAll ? '' : 'شلنا معه الدروس اللي بعده في نفس المنهج (تنفتح بالترتيب)'); };
+  const group = (keys: string[]) => { const g: Record<string, number[]> = {}; keys.forEach(k => { const i = k.lastIndexOf(':'); (g[k.slice(0, i)] ||= []).push(Number(k.slice(i + 1))); }); return g; };
+  const bAddMany = (keys: string[]) => { if (!st) return; let items = basket.items, pre = 0; for (const [id, os] of Object.entries(group(keys))) { const r = basketAdd(items, st, id, os, !!unlockAll); items = r.items; pre += r.prereq; }
+    setBasket(items); setNote(`أضفنا ${keys.length} درس${pre ? ` + ${pre} قبلها عشان الترتيب` : ''}`); };
+  const bRemoveMany = (keys: string[]) => { let items = basket.items; for (const [id, os] of Object.entries(group(keys))) items = basketRemove(items, id, os, !!unlockAll); setBasket(items); setNote(`شلنا ${basket.items.length - items.length} درس من السلة`); };
   const suggest = async () => { if (!st) return; const p = plan && !plan.fromBasket ? plan : await buildSaraPlan(uid, !!unlockAll, { perDay, studyDays: days }); setBasket(smartBasket(p, st, !!unlockAll)); setNote('سارة عبّت السلة من تقدّمك ونقاط ضعفك (حوالي 4 أسابيع)'); };
   const useBasket = async () => { setMode('basket'); await gen(perDay, days, 'basket', basket.items); setTab('week'); };
   const useSmart = async () => { setMode('smart'); await gen(perDay, days, 'smart'); };
@@ -327,7 +331,7 @@ const StudyPlan: React.FC<{ uid?: string; unlockAll?: boolean; onOpenTrack?: (tr
         ))}
       </div>
       {tab === 'overview' && <PlanOverview road={road} fromBasket={useB} />}
-      {tab === 'curricula' && <PlanCurricula road={road} onOpenTrack={onOpenTrack} onAdd={bAdd} onRemove={bRemove} note={note} />}
+      {tab === 'curricula' && <PlanCurricula road={road} onOpenTrack={onOpenTrack} onAdd={bAdd} onRemove={bRemove} onAddMany={bAddMany} onRemoveMany={bRemoveMany} note={note} />}
       {tab === 'basket' && <PlanBasket road={basketRoad} count={basket.items.length} mode={mode} busy={busy} note={note} onSuggest={suggest} onClear={() => { setBasket([]); setNote(''); if (mode === 'basket') useSmart(); }}
         onUse={useBasket} onSmart={useSmart} onRemoveTrack={id => setBasket(basket.items.filter(k => !k.startsWith(id + ':')))} onBrowse={() => setTab('curricula')} />}
       {tab === 'week' && <>
@@ -461,7 +465,9 @@ const PlanBasket: React.FC<{ road: Roadmap | null; count: number; mode: 'smart' 
 
 const STATE_CLS: Record<string, string> = { done: 'bg-emerald-500 text-white', next: 'bg-[#C49E3A] text-[#002147] ring-2 ring-[#002147]', open: 'bg-white text-[#002147] border border-amber-300', locked: 'bg-slate-200 text-slate-400', soon: 'bg-slate-100 text-slate-300 border border-dashed border-slate-300' };
 /** All curricula: every track → level → lesson, with real done/next/locked state. One track and one block of 30 at a time (no scroll). */
-const PlanCurricula: React.FC<{ road: Roadmap | null; onOpenTrack?: (id: string) => void; onAdd: (t: string, o: number[]) => void; onRemove: (t: string, o: number[]) => void; note: string }> = ({ road, onOpenTrack, onAdd, onRemove, note }) => {
+const PlanCurricula: React.FC<{ road: Roadmap | null; onOpenTrack?: (id: string) => void; onAdd: (t: string, o: number[]) => void; onRemove: (t: string, o: number[]) => void; onAddMany: (k: string[]) => void; onRemoveMany: (k: string[]) => void; note: string }> = ({ road, onOpenTrack, onAdd, onRemove, onAddMany, onRemoveMany, note }) => {
+  const [multi, setMulti] = useState(false);
+  const [selK, setSelK] = useState<string[]>([]);
   const [tid, setTid] = useState<string>('');
   const [lv, setLv] = useState(0);
   const [pg, setPg] = useState(0);
@@ -471,6 +477,10 @@ const PlanCurricula: React.FC<{ road: Roadmap | null; onOpenTrack?: (id: string)
   const level = t.levels[Math.min(lv, t.levels.length - 1)];
   const pages = Math.ceil(level.lessons.length / 30); const chunk = level.lessons.slice(pg * 30, pg * 30 + 30);
   const picked = level.lessons.find(l => l.order === pick);
+  const keyOf = (o: number) => `${t.id}:${o}`;
+  const selectable = (ls: { order: number; state: string }[]) => ls.filter(l => l.state !== 'done' && l.state !== 'soon').map(l => keyOf(l.order));
+  const toggleKeys = (ks: string[]) => setSelK(cur => { const all = ks.every(k => cur.includes(k)); return all ? cur.filter(k => !ks.includes(k)) : [...new Set([...cur, ...ks])]; });
+  const selSet = new Set(selK);
   const stLabel = { done: '✅ خلصته', next: '▶️ درسك التالي', open: '🔓 مفتوح', locked: '🔒 مقفول — يفتح بالترتيب', soon: '⏳ قيد الإعداد' } as const;
   return (
     <div data-testid="plan-curricula" className="flex-1 min-h-0 flex flex-col gap-1.5 overflow-hidden">
@@ -496,13 +506,23 @@ const PlanCurricula: React.FC<{ road: Roadmap | null; onOpenTrack?: (id: string)
         <span className="flex-1 truncate">{level.titleAr}{level.testPassed === true ? ' · اختبار المستوى ✅' : level.testPassed === false ? ' · اختبار المستوى لم يُجتز' : ''}</span>
         {(() => { const free = level.lessons.filter(l => l.state !== 'done' && l.state !== 'soon'); const allIn = free.length > 0 && free.every(l => l.inBasket);
           const tFree = t.levels.flatMap(v => v.lessons).filter(l => l.state !== 'done' && l.state !== 'soon'); const tIn = tFree.length > 0 && tFree.every(l => l.inBasket);
-          return <>{free.length > 0 && <button data-testid="basket-level" onClick={() => allIn ? onRemove(t.id, free.map(l => l.order)) : onAdd(t.id, free.map(l => l.order))} className="px-1.5 rounded bg-white border border-amber-300 text-[#002147] font-black">{allIn ? '− المستوى' : '+ المستوى'}</button>}
-            {t.levels.length > 1 && tFree.length > 0 && <button data-testid="basket-track" onClick={() => tIn ? onRemove(t.id, tFree.map(l => l.order)) : onAdd(t.id, tFree.map(l => l.order))} className="px-1.5 rounded bg-[#002147] text-amber-300 font-black">{tIn ? '− المنهج' : '+ المنهج'}</button>}</>; })()}
+          return <>{free.length > 0 && <button data-testid="basket-level" onClick={() => multi ? toggleKeys(selectable(level.lessons)) : allIn ? onRemove(t.id, free.map(l => l.order)) : onAdd(t.id, free.map(l => l.order))} className="px-1.5 rounded bg-white border border-amber-300 text-[#002147] font-black">{multi ? '☑ كل المستوى' : allIn ? '− المستوى' : '+ المستوى'}</button>}
+            {t.levels.length > 1 && tFree.length > 0 && <button data-testid="basket-track" onClick={() => multi ? toggleKeys(tFree.map(l => keyOf(l.order))) : tIn ? onRemove(t.id, tFree.map(l => l.order)) : onAdd(t.id, tFree.map(l => l.order))} className="px-1.5 rounded bg-[#002147] text-amber-300 font-black">{multi ? '☑ كل المنهج' : tIn ? '− المنهج' : '+ المنهج'}</button>}</>; })()}
         {pages > 1 && <><button disabled={pg === 0} onClick={() => setPg(pg - 1)} className="px-1.5 rounded bg-white border border-amber-300 disabled:opacity-30">›</button><span>{pg + 1}/{pages}</span><button disabled={pg >= pages - 1} onClick={() => setPg(pg + 1)} className="px-1.5 rounded bg-white border border-amber-300 disabled:opacity-30">‹</button></>}
       </div>
       <div data-testid="plan-cur-grid" className="grid grid-cols-6 gap-1">
-        {chunk.map(l => <button key={l.order} onClick={() => setPick(l.order)} className={`relative h-7 rounded-lg text-[11px] font-black tabular-nums ${STATE_CLS[l.state]} ${pick === l.order ? 'outline outline-2 outline-[#002147]' : ''}`}>{l.num}{l.inBasket && <span data-testid="basket-dot" className="absolute -top-1 left-0 w-3 h-3 rounded-full bg-[#C49E3A] border border-white text-[7px] leading-[10px] text-[#002147]">🧺</span>}</button>)}
+        {chunk.map(l => <button key={l.order} data-testid="cur-lesson" onClick={() => { if (multi) { if (l.state !== 'done' && l.state !== 'soon') toggleKeys([keyOf(l.order)]); } else setPick(l.order); }} className={`relative h-7 rounded-lg text-[11px] font-black tabular-nums ${STATE_CLS[l.state]} ${(multi ? selSet.has(keyOf(l.order)) : pick === l.order) ? 'outline outline-[3px] outline-[#002147]' : ''}`}>{multi && selSet.has(keyOf(l.order)) && <span className="absolute -bottom-1 right-0 w-3 h-3 rounded-full bg-[#002147] text-amber-300 text-[8px] leading-3">✓</span>}{l.num}{l.inBasket && <span data-testid="basket-dot" className="absolute -top-1 left-0 w-3 h-3 rounded-full bg-[#C49E3A] border border-white text-[7px] leading-[10px] text-[#002147]">🧺</span>}</button>)}
       </div>
+      <div className="flex items-center gap-1.5">
+        <button data-testid="multi-toggle" onClick={() => { setMulti(!multi); setSelK([]); setPick(null); }} className={`px-2 py-1 rounded-lg text-[11px] font-black border-2 ${multi ? 'bg-[#002147] text-amber-300 border-[#002147]' : 'bg-white text-[#002147] border-amber-300'}`}>{multi ? '✕ إلغاء التحديد' : '☑️ تحديد متعدد'}</button>
+        {multi && <span data-testid="multi-count" className="flex-1 text-[10.5px] font-black text-[#002147] truncate">محدد {selK.length} درس{(() => { const n = new Set(selK.map(k => k.slice(0, k.lastIndexOf(':')))).size; return n > 1 ? ` من ${n} مناهج` : ''; })()}</span>}
+      </div>
+      {multi ? (
+        <div className="rounded-xl bg-white border border-amber-300 px-2 py-1.5 min-h-[44px] grid grid-cols-2 gap-1">
+          <button data-testid="multi-add" disabled={!selK.length} onClick={() => { onAddMany(selK); setSelK([]); }} className="py-1.5 rounded-lg bg-[#C49E3A] text-[#002147] text-[12px] font-black disabled:opacity-40">🧺 أضف {selK.length} للسلة</button>
+          <button data-testid="multi-remove" disabled={!selK.length} onClick={() => { onRemoveMany(selK); setSelK([]); }} className="py-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 text-[12px] font-black disabled:opacity-40">− شيل {selK.length} من السلة</button>
+        </div>
+      ) :
       <div className="rounded-xl bg-white border border-amber-300 px-2.5 py-1.5 min-h-[44px]">
         {picked ? <>
           <p className="text-[12px] font-black text-[#002147] truncate">{picked.num}. {picked.titleAr}</p>
@@ -510,8 +530,8 @@ const PlanCurricula: React.FC<{ road: Roadmap | null; onOpenTrack?: (id: string)
             {picked.state !== 'done' && picked.state !== 'soon' && <button data-testid="basket-lesson" onClick={() => picked.inBasket ? onRemove(t.id, [picked.order]) : onAdd(t.id, [picked.order])} className={`px-2 py-0.5 rounded-lg text-[11px] font-black border ${picked.inBasket ? 'bg-white text-[#002147] border-amber-300' : 'bg-[#C49E3A] text-[#002147] border-[#C49E3A]'}`}>{picked.inBasket ? '− من السلة' : '+ للسلة'}</button>}
             {(picked.state === 'next' || picked.state === 'open') && onOpenTrack && <button onClick={() => onOpenTrack(t.id)} className="px-2 py-0.5 rounded-lg bg-[#002147] text-amber-300 text-[11px] font-black">ابدأ</button>}</div>
         </> : <p className="text-[11px] font-bold text-slate-500">اضغط رقم أي درس لتشوفه وتضيفه للسلة 🧺. 🟩 خلصته · 🟨 التالي · ⬜ مقفول</p>}
-        {note && <p data-testid="basket-note" className="text-[10px] font-bold text-amber-700 truncate">{note}</p>}
-      </div>
+      </div>}
+      {note && <p data-testid="basket-note" className="text-[10px] font-bold text-amber-700 truncate">{note}</p>}
     </div>
   );
 };
