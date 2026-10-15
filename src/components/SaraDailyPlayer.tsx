@@ -1,6 +1,7 @@
 import MixedText from './MixedText';
 import { SaraNewLevelTest } from './SaraNewLevelTest';
 import SaraLevelledList from './SaraLevelledList';
+import SaraLessonBoard from './SaraLessonBoard';
 import { levelTitleAr, type NewLevelId } from '../lib/saraNewTrackTests';
 import React, { useEffect, useMemo, useState } from 'react';
 import { X, ArrowRight, Lock, CheckCircle2, Volume2, RotateCcw } from 'lucide-react';
@@ -18,7 +19,7 @@ function shuffle<T>(a: T[], seed: number): T[] {
 }
 type Step = 'learn' | 'dialogue' | 'practice' | 'role' | 'done';
 
-const Lesson: React.FC<{ l: SaraDailyLesson; onBack: () => void; onPassed: () => void }> = ({ l, onBack, onPassed }) => {
+const Lesson: React.FC<{ l: SaraDailyLesson; onBack: () => void; onPassed: () => void; onBoard?: () => void }> = ({ l, onBack, onPassed, onBoard }) => {
   const [step, setStep] = useState<Step>('learn');
   const [audio, setAudio] = useState<{ t: string; s: 'loading' | 'failed' } | null>(null);
   const [paused, setPaused] = useState(false);
@@ -69,6 +70,7 @@ const Lesson: React.FC<{ l: SaraDailyLesson; onBack: () => void; onPassed: () =>
       <div className="flex items-center gap-2">
         <button onClick={onBack} className="p-1.5 rounded-lg bg-[#002147] text-white" aria-label="back"><ArrowRight size={16} /></button>
         <p className="flex-1 text-[14px] font-black text-[#002147] truncate">{((l.order - 1) % 30) + 1}. {l.icon} {l.titleAr}</p>
+        {onBoard && <button onClick={() => { saraStopNarrator(); onBoard(); }} data-testid="open-board" className="shrink-0 px-1.5 py-1 rounded-lg bg-[#083344] text-teal-100 border border-teal-400/60 text-[10px] font-black leading-tight">🧑‍🏫 اشرح بالسبورة التفاعلية</button>}
         <span className="text-[10px] font-black px-1.5 rounded bg-[#002147] text-amber-300">{stepNo}/4</span>
       </div>
       {step === 'learn' && <>
@@ -142,9 +144,22 @@ const Lesson: React.FC<{ l: SaraDailyLesson; onBack: () => void; onPassed: () =>
   );
 };
 
+/** Whiteboard version of an everyday situation: the idea, the 4 key phrases, then meaning + dialogue exercises. */
+const boardOf = (l: SaraDailyLesson) => {
+  const ph = l.phrases; const qs = ph.slice(0, 3).map((p, i) => { const others = ph.filter(x => x.en !== p.en);
+    const opts = [p.ar, others[i % others.length].ar, others[(i + 1) % others.length].ar]; const r = i % 3; const o = [...opts.slice(r), ...opts.slice(0, r)];
+    return { promptAr: 'وش معنى هالجملة؟', promptEn: p.en, options: o, correctIndex: o.indexOf(p.ar), play: p.en }; });
+  const a = l.dialogue[0], bAns = l.dialogue[1]; const wrong = l.dialogue[3];
+  const flip = l.order % 2 === 1; qs.push({ promptAr: 'وش أنسب رد؟', promptEn: a.en, options: flip ? [wrong.en, bAns.en] : [bAns.en, wrong.en], correctIndex: flip ? 1 : 0, play: a.en });
+  return { titleAr: `${l.icon} ${l.titleAr}`, titleEn: l.titleEn,
+    points: l.introAr.split(/(?<=[.!؟?])\s+/).filter(Boolean).slice(0, 4),
+    examplesTitle: 'جمل الموقف', examples: ph.map(p => ({ en: p.en, ar: p.ar })), questions: qs };
+};
+
 export const SaraDailyPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll }) => {
   const [unlockedRaw, setUnlocked] = useState(() => readUnlocked(DAILY_TRACK_ID, uid));
   const [active, setActive] = useState<SaraDailyLesson | null>(null);
+  const [board, setBoard] = useState(false);
   const [testing, setTesting] = useState<NewLevelId | null>(null);
   const [testTick, setTestTick] = useState(0);
   useEffect(() => {
@@ -168,7 +183,9 @@ export const SaraDailyPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unlockA
           <span className="text-[11px] text-amber-300 font-bold">{passed}/{DAILY_LESSONS.length}</span>
           <button onClick={() => { saraStopNarrator(); onClose(); }} className="p-1.5 rounded-lg hover:bg-white/10" aria-label="close"><X size={18} /></button>
         </div>
-        {active ? <Lesson key={active.id} l={active} onBack={() => setActive(null)} onPassed={() => onPassed(active)} /> : (
+        {active ? (board ? <SaraLessonBoard key={'board-' + active.id} {...boardOf(active)} onClose={() => setBoard(false)} onPassed={() => onPassed(active)}
+            onNextLesson={(active.order % 30 ? DAILY_LESSONS[active.order] : undefined) ? () => { setBoard(false); setActive((active.order % 30 ? DAILY_LESSONS[active.order] : undefined)!); } : undefined} />
+          : <Lesson key={active.id} l={active} onBack={() => { setBoard(false); setActive(null); }} onPassed={() => onPassed(active)} onBoard={() => setBoard(true)} />) : (
           <SaraLevelledList lessons={DAILY_LESSONS} unlockedRaw={unlockedRaw} unlockAll={unlockAll} uid={uid} track="daily" trackId={DAILY_TRACK_ID}
             refresh={testTick} onOpen={l => setActive(DAILY_LESSONS.find(x => x.id === l.id) || null)} onTest={lv => setTesting(lv)} />
         )}
