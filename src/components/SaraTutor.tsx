@@ -62,7 +62,6 @@ import { doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, ge
 import { speakAcademyText, playDirectSaraAudio, cancelAllSpeech, playSchoolBellChime } from '../lib/audio';
 import { getStudentStreak, recordStreakActivity, StreakData } from '../services/streakService';
 import { SmartWhiteboard } from './SmartWhiteboard';
-import { Sara3DCharacter } from './Sara3DCharacter';
 import { MASTER_CURRICULUM } from '../data/masterCurriculum';
 import { RolePlayScenario, ROLE_PLAY_SCENARIOS } from './RolePlayModal';
 import { SaraPersonalNotebookModal } from './SaraPersonalNotebookModal';
@@ -6281,39 +6280,10 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         }}
       />
 
-      {/* 5. 3D Interactive Floating Avatar Character of Sara */}
-      <Sara3DCharacter
-        isOpen={isSara3DOpen}
-        onToggle={() => setIsSara3DOpen(!isSara3DOpen)}
-        isRtl={isRtl}
-        isSpeaking={isSpeaking}
-        isLiveMode={isLiveMode}
-        liveStatus={liveStatus}
-        currentSpeechText={lastSaraSpeech}
-        isWhiteboardOpen={isWhiteboardOpen}
-        isExplainingWhiteboard={isSpeaking && isWhiteboardOpen}
-        currentLang={activeLang}
-        onToggleLang={() => handleToggleLanguage()}
-        onCharacterClick={() => {
-          if (!isSpeaking) {
-            const greetings = isRtl
-              ? [
-                  'أنا معك خطوة بخطوة يا بطل! 🌟 انظر للسبورة لنشرح سوا!',
-                  'هل ترغب أن نمارس بعض الجمل الصوتية معاً الآن؟ 🎙️',
-                  'أنا سارة، رفيقتك ومعلمتك الشخصية في الأكاديمية! ✨',
-                  'أحسنت في استمرارك ومثابرتك في التعلم! 👏'
-                ]
-              : [
-                  "I'm here with you step by step! 🌟 Let's check the board together!",
-                  'Ready to practice some English sentences together? 🎙️',
-                  "I'm Sara, your personal mentor at the Academy! ✨",
-                  'Keep up the fantastic momentum! 👏'
-                ];
-            const phrase = greetings[Math.floor(Math.random() * greetings.length)];
-            playSaraVoice(phrase);
-          }
-        }}
-      />
+      {/* 5. «سارة 3D» tool: the same 3D Sara + engine as the call (free conversation, 10 s reply window, dedupe, review) */}
+      {isSara3DOpen && <SaraLivePhoneCallModal isOpen onClose={() => setIsSara3DOpen(false)} studentName={profile.displayName || ''}
+        studentLevel={(profile as any).level || tutorMemory.level || 'A1'} isRtl={isRtl} studentId={profile.uid}
+        preset={{ ...FREE_CALL_PRESET, titleAr: 'سارة 3D — تكلّم معها', titleEn: 'Sara 3D — talk with her', icon: '👩‍🏫' }} />}
 
       {/* 6. Archive Session Confirmation Modal («أرشف هالجلسة؟») */}
       <AnimatePresence>
