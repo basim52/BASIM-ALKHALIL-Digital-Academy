@@ -101,7 +101,7 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
                   {`${Math.floor(c.seconds / 60)}:${String(c.seconds % 60).padStart(2, '0')}`} · {c.turns} {isRtl ? 'مداخلة' : 'turns'} · {c.words} {isRtl ? 'كلمة' : 'words'}
                 </p>
                 {c.review && <p className="text-[10.5px] font-bold text-[#002147] line-clamp-2">📝 {c.review.verdictAr} {c.review.points.slice(0, 2).map(p => `«${p.said}» ← ${p.better}`).join(' · ')}</p>}
-                {c.topicEn && <p className="text-[10px] font-black text-[#002147]">{isRtl ? `موضوع الأسبوع (${c.weekKey || ''}): ${c.topicAr || c.topicEn}` : `Weekly topic (${c.weekKey || ''}): ${c.topicEn}`}</p>}
+                {c.topicEn && <p className="text-[10px] font-black text-[#002147]">{isRtl ? `موضوع اليوم (${c.dateKey || c.weekKey || ''}): ${c.topicAr || c.topicEn}` : `Daily topic (${c.dateKey || c.weekKey || ''}): ${c.topicEn}`}</p>}
                 {c.focus?.length > 0 && <p className="text-[10px] font-bold text-amber-700 truncate">{isRtl ? 'التركيز: ' : 'Focus: '}{c.focus.join(' · ')}</p>}
               </div>
             ))}

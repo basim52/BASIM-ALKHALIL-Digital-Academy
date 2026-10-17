@@ -1,18 +1,18 @@
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteField } from 'firebase/firestore';
 import { db } from './firebase';
 
-export interface WeeklyTopic {
+export interface DailyTopic {
   id: string; icon: string; titleAr: string; titleEn: string; theme: string; starter: string;
 }
 export type TopicBand = 'beginner' | 'intermediate' | 'advanced';
-export interface WeeklyTopicPick {
-  weekKey: string; topic: WeeklyTopic; band: TopicBand; bandAr: string;
+export interface DailyTopicPick {
+  dateKey: string; topic: DailyTopic; band: TopicBand; bandAr: string;
   openerEn: string; instructionEn: string; examplesEn: string[];
 }
-export interface FreeTopicWeek { weekKey: string; done: boolean; topicId: string }
+export interface FreeTopicDay { dateKey: string; done: boolean; topicId: string }
 
 /** Rotating pool (30). The same ISO week gives everyone the same topic. */
-export const WEEKLY_TOPICS: WeeklyTopic[] = [
+export const DAILY_TOPICS: DailyTopic[] = [
   ['hobbies','🎨','الهوايات','Hobbies','the things you enjoy in your free time','playing football'],
   ['family','👨‍👩‍👧','العائلة','Family','the people in your family','spending time with my brother'],
   ['school','🏫','المدرسة','School','your school day','learning with my teacher'],
@@ -50,19 +50,12 @@ const riyadhDate = (d: Date) => {
   const get = (t: string) => Number(parts.find(p => p.type === t)?.value || 0);
   return { y: get('year'), m: get('month'), d: get('day') };
 };
+const pad = (n: number) => String(n).padStart(2, '0');
 
-/** ISO week (Monday start) for the calendar date in Asia/Riyadh. */
-export function riyadhIsoWeek(date = new Date()): { year: number; week: number; weekKey: string } {
+/** Calendar date in Asia/Riyadh as YYYY-MM-DD (the day boundary for the topic). */
+export function riyadhDateKey(date = new Date()): string {
   const { y, m, d } = riyadhDate(date);
-  const cur = new Date(Date.UTC(y, m - 1, d));
-  const day = (cur.getUTCDay() + 6) % 7; // Mon=0
-  cur.setUTCDate(cur.getUTCDate() - day + 3); // Thursday of this ISO week
-  const isoYear = cur.getUTCFullYear();
-  const first = new Date(Date.UTC(isoYear, 0, 4));
-  const fday = (first.getUTCDay() + 6) % 7;
-  first.setUTCDate(first.getUTCDate() - fday + 3);
-  const week = 1 + Math.round((cur.getTime() - first.getTime()) / 604800000);
-  return { year: isoYear, week, weekKey: `${isoYear}-W${String(week).padStart(2, '0')}` };
+  return `${y}-${pad(m)}-${pad(d)}`;
 }
 
 export const topicBand = (level?: string): TopicBand => {
@@ -70,10 +63,12 @@ export const topicBand = (level?: string): TopicBand => {
   return l.startsWith('A') ? 'beginner' : l.startsWith('B') ? 'intermediate' : 'advanced';
 };
 
-/** This week's topic and level-adapted opening/examples. Deterministic: ISO year-week modulo pool size. */
-export function getWeeklyTopic(date = new Date(), level?: string): WeeklyTopicPick {
-  const { year, week, weekKey } = riyadhIsoWeek(date);
-  const topic = WEEKLY_TOPICS[(year * 53 + week) % WEEKLY_TOPICS.length];
+/** Today's topic and level-adapted opening/examples. Deterministic by Riyadh date: consecutive days cycle through the pool. */
+export function getDailyTopic(date = new Date(), level?: string): DailyTopicPick {
+  const { y, m, d } = riyadhDate(date);
+  const dateKey = `${y}-${pad(m)}-${pad(d)}`;
+  const epochDays = Math.floor(Date.UTC(y, m - 1, d) / 86400000);
+  const topic = DAILY_TOPICS[((epochDays % DAILY_TOPICS.length) + DAILY_TOPICS.length) % DAILY_TOPICS.length];
   const band = topicBand(level);
   const bandAr = band === 'beginner' ? 'جمل قصيرة وبسيطة تناسب مستواك' : band === 'intermediate' ? 'احكِ مثالاً وسبباً من حياتك' : 'ناقش الفوائد والتحديات برأيك';
   const openerEn = band === 'beginner'
@@ -91,30 +86,31 @@ export function getWeeklyTopic(date = new Date(), level?: string): WeeklyTopicPi
     : band === 'intermediate'
       ? 'Ask for examples and reasons, with natural follow-up questions.'
       : 'Invite opinions, comparisons, benefits and challenges, while keeping replies concise.';
-  return { weekKey, topic, band, bandAr, openerEn, instructionEn, examplesEn };
+  return { dateKey, topic, band, bandAr, openerEn, instructionEn, examplesEn };
 }
 
-const KEY = (uid?: string) => `sara_free_topic_week_${uid || 'guest'}`;
-export function readFreeTopicWeek(uid?: string): FreeTopicWeek | null {
-  try { const v = JSON.parse(localStorage.getItem(KEY(uid)) || 'null'); return v && v.weekKey && v.topicId ? v as FreeTopicWeek : null; } catch { return null; }
+const KEY = (uid?: string) => `sara_free_topic_day_${uid || 'guest'}`;
+const LEGACY_KEY = (uid?: string) => `sara_free_topic_week_${uid || 'guest'}`;
+export function readFreeTopicDay(uid?: string): FreeTopicDay | null {
+  try { const v = JSON.parse(localStorage.getItem(KEY(uid)) || 'null'); return v && v.dateKey && v.topicId ? v as FreeTopicDay : null; } catch { return null; }
 }
-export function writeFreeTopicWeekLocal(uid: string | undefined, v: FreeTopicWeek) {
-  try { localStorage.setItem(KEY(uid), JSON.stringify(v)); } catch { /* ignore */ }
+export function writeFreeTopicDayLocal(uid: string | undefined, v: FreeTopicDay) {
+  try { localStorage.setItem(KEY(uid), JSON.stringify(v)); localStorage.removeItem(LEGACY_KEY(uid)); } catch { /* ignore */ }
 }
-/** Save this week's topic completion to the device and users/{uid}.saraFreeTopicWeek. */
-export async function saveFreeTopicWeek(uid: string | undefined, v: FreeTopicWeek): Promise<void> {
-  writeFreeTopicWeekLocal(uid, v);
+/** Save today's topic completion locally and to users/{uid}.saraFreeTopicDay; removes the old weekly field. */
+export async function saveFreeTopicDay(uid: string | undefined, v: FreeTopicDay): Promise<void> {
+  writeFreeTopicDayLocal(uid, v);
   if (!uid) return;
-  try { await updateDoc(doc(db, 'users', uid), { saraFreeTopicWeek: v }); } catch { /* offline: local copy remains */ }
+  try { await updateDoc(doc(db, 'users', uid), { saraFreeTopicDay: v, saraFreeTopicWeek: deleteField() }); } catch { /* offline: local copy remains */ }
 }
-/** Account copy wins when it belongs to a newer (or the same, completed) week. */
-export async function loadFreeTopicWeek(uid?: string): Promise<FreeTopicWeek | null> {
-  const local = readFreeTopicWeek(uid);
+/** Account copy wins when it belongs to a newer date (or the same date, completed). Old weekly records are not converted: they carry no completion date. */
+export async function loadFreeTopicDay(uid?: string): Promise<FreeTopicDay | null> {
+  const local = readFreeTopicDay(uid);
   if (!uid) return local;
   try {
-    const cloud = (await getDoc(doc(db, 'users', uid))).data()?.saraFreeTopicWeek as FreeTopicWeek | undefined;
-    if (cloud?.weekKey && cloud.topicId && (!local || cloud.weekKey > local.weekKey || (cloud.weekKey === local.weekKey && cloud.done))) {
-      writeFreeTopicWeekLocal(uid, cloud); return cloud;
+    const cloud = (await getDoc(doc(db, 'users', uid))).data()?.saraFreeTopicDay as FreeTopicDay | undefined;
+    if (cloud?.dateKey && cloud.topicId && (!local || cloud.dateKey > local.dateKey || (cloud.dateKey === local.dateKey && cloud.done))) {
+      writeFreeTopicDayLocal(uid, cloud); return cloud;
     }
   } catch { /* offline */ }
   return local;

@@ -13,7 +13,7 @@ import { savePlacementLevel } from '../lib/placement';
 import { buildRoadmap, LESSON_MIN, type Roadmap, readBasket, writeBasketLocal, basketAdd, basketRemove, smartBasket, buildBasketPlan, cleanBasket, type BasketData } from '../lib/saraPlan';
 import { buildSaraPlan, loadPlanState, taskDone, readSavedPlan, savePlan, weekStartIso, WEEK_ORDER, DEFAULT_STUDY_DAYS, type SaraPlan, type PlanState, type PlanTask, type PlanKind } from '../lib/saraPlan';
 import { trackLevels, saveLevelTestAttempt, summarizeLevelTests, type LevelTestAttempt } from '../lib/saraLevelTests';
-import { getWeeklyTopic, readFreeTopicWeek, type FreeTopicWeek } from '../lib/saraWeeklyTopic';
+import { getDailyTopic, readFreeTopicDay, type FreeTopicDay } from '../lib/saraDailyTopic';
 
 export type SaraToolId = 'placement' | 'speed' | 'worksheet' | 'plan' | 'roleplay' | 'pronunciation' | 'voicecoach';
 export const SARA_TRACKS: SaraTrack[] = [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK];
@@ -290,7 +290,7 @@ const StudyPlan: React.FC<{ uid?: string; unlockAll?: boolean; onOpenTrack?: (tr
   useEffect(() => { setTicks(lsGet(ck, {})); }, [ck]); // eslint-disable-line react-hooks/exhaustive-deps
   const [ticks, setTicks] = useState<Record<string, boolean>>(() => lsGet(ck, {}));
   const [basket, setBasketS] = useState<BasketData>(() => readBasket(uid));
-  const [freeTopicWeek, setFreeTopicWeek] = useState<FreeTopicWeek | null>(() => readFreeTopicWeek(uid));
+  const [freeTopicDay, setFreeTopicDay] = useState<FreeTopicDay | null>(() => readFreeTopicDay(uid));
   const modeKey = `sara_plan_mode_${uid || 'guest'}`;
   const [mode, setModeS] = useState<'smart' | 'basket'>(() => ((saved0?.mode || (lsGet(modeKey, 'smart' as string) as string)) === 'basket' ? 'basket' : 'smart'));
   const setMode = (m: 'smart' | 'basket') => { setModeS(m); lsSet(modeKey, m); };
@@ -310,8 +310,8 @@ const StudyPlan: React.FC<{ uid?: string; unlockAll?: boolean; onOpenTrack?: (tr
     if (uid) getDoc(doc(db, 'users', uid)).then(snap => { const r = snap.data()?.saraBasket as BasketData | undefined;
       let items = basket.items;
       if (r && Array.isArray(r.items) && (r.updatedAt || 0) > (readBasket(uid).updatedAt || 0)) { const b = { items: cleanBasket(r.items), updatedAt: r.updatedAt }; items = b.items; setBasketS(b); writeBasketLocal(uid, b); }
-      const ft = snap.data()?.saraFreeTopicWeek as FreeTopicWeek | undefined;
-      if (ft?.weekKey && ft.topicId && (!freeTopicWeek || ft.weekKey > freeTopicWeek.weekKey || (ft.weekKey === freeTopicWeek.weekKey && ft.done))) setFreeTopicWeek(ft);
+      const ft = snap.data()?.saraFreeTopicDay as FreeTopicDay | undefined;
+      if (ft?.dateKey && ft.topicId && (!freeTopicDay || ft.dateKey > freeTopicDay.dateKey || (ft.dateKey === freeTopicDay.dateKey && ft.done))) setFreeTopicDay(ft);
       const rs = snap.data()?.saraPlanSettings as PlanSettings | undefined;
       if (rs && (rs.updatedAt || 0) > (lsGet<PlanSettings | null>(skey, null)?.updatedAt || 0)) applyRemote(rs, items);
     }).catch(() => {});
@@ -383,8 +383,8 @@ const StudyPlan: React.FC<{ uid?: string; unlockAll?: boolean; onOpenTrack?: (tr
         </div>
         {(plan?.focusAr || []).slice(0, 2).map(f => <p key={f} className="text-[11px] font-bold text-white/85 truncate">• {f}</p>)}
         {plan && !plan.focusAr.length && <p className="text-[11px] font-bold text-white/70">الخطة مبنية على تقدمك الفعلي في المسارات وترتيب فتح الدروس.</p>}
-        {(() => { const w = getWeeklyTopic(new Date()); const done = freeTopicWeek?.weekKey === w.weekKey && freeTopicWeek.done && freeTopicWeek.topicId === w.topic.id;
-          return done ? <p data-testid="plan-topic-week" className="mt-1 inline-flex px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-300/40 text-emerald-200 text-[10.5px] font-black">موضوع الأسبوع ✓ · {w.topic.titleAr}</p> : null; })()}
+        {(() => { const w = getDailyTopic(new Date()); const done = freeTopicDay?.dateKey === w.dateKey && freeTopicDay.done && freeTopicDay.topicId === w.topic.id;
+          return done ? <p data-testid="plan-topic-day" className="mt-1 inline-flex px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-300/40 text-emerald-200 text-[10.5px] font-black">موضوع اليوم ✓ · {w.topic.titleAr}</p> : null; })()}
       </div>
       <div className="flex items-center gap-1.5 text-[11px] font-black text-[#002147]">
         <span>دروس باليوم:</span>
