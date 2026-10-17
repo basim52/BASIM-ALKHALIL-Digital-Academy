@@ -51,7 +51,7 @@ const SaraLessonCall: React.FC<{ preset: CallPreset; uid?: string; level?: strin
           <MessageCircle size={15} />محاورة حرة
         </button>}
       </div>
-      {open && <SaraLivePhoneCallModal isOpen onClose={() => setOpen(null)} studentName={studentName || ''} studentLevel={level || 'A2'} isRtl studentId={uid} preset={open} />}
+      {open && <SaraLivePhoneCallModal isOpen onClose={() => setOpen(null)} studentName={studentName || ''} studentLevel={level || 'A2'} isRtl studentId={uid} preset={open} dailyTopic={open.id === 'free-talk'} />}
     </>
   );
 };

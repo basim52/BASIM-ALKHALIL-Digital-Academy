@@ -7307,6 +7307,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         studentId={profile.uid}
         lessonTitle={activeCurriculumLesson ? (activeCurriculumLesson.titleEn || activeCurriculumLesson.titleAr) : undefined}
         recentMistakes={tutorMemory.frequentMistakes}
+        preset={FREE_CALL_PRESET}
+        dailyTopic={true}
         onSuccessXP={(xp) => {
           setStreak(prev => ({
             ...prev,
