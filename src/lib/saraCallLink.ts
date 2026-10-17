@@ -52,7 +52,7 @@ export async function buildCallContext(uid: string | undefined, opts: { placemen
 }
 
 export interface CallReviewSummary { verdict: string; verdictAr: string; summaryAr: string; points: { area: string; said: string; better: string }[] }
-export interface CallRecord { at: number; scenario: string; scenarioAr: string; seconds: number; turns: number; words: number; avgReplyMs: number; focus: string[]; review?: CallReviewSummary }
+export interface CallRecord { at: number; scenario: string; scenarioAr: string; seconds: number; turns: number; words: number; avgReplyMs: number; focus: string[]; review?: CallReviewSummary; topicId?: string; topicAr?: string; topicEn?: string; weekKey?: string }
 const KEY = (uid?: string) => `sara_calls_${uid || 'guest'}`;
 
 export function readCallRecords(uid?: string): CallRecord[] { try { return JSON.parse(localStorage.getItem(KEY(uid)) || '[]'); } catch { return []; } }

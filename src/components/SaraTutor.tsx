@@ -7296,7 +7296,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
       {/* Free open conversation (no targets, no scoring) */}
       {isFreeChatOpen && <SaraLivePhoneCallModal isOpen onClose={() => setIsFreeChatOpen(false)} studentName={profile.displayName || ''}
-        studentLevel={(profile as any).level || tutorMemory.level || 'A1'} isRtl={isRtl} studentId={profile.uid} preset={FREE_CALL_PRESET} />}
+        studentLevel={(profile as any).level || tutorMemory.level || 'A1'} isRtl={isRtl} studentId={profile.uid} preset={FREE_CALL_PRESET} weeklyTopic />}
       {/* 11G. Sara Live Interactive Hands-Free Phone Call Modal (#7) */}
       <SaraLivePhoneCallModal
         isOpen={isPhoneCallModalOpen}

@@ -24,6 +24,7 @@ import confetti from 'canvas-confetti';
 import { cancelAllSpeech, setExclusiveAudioOwner, prefetchAcademyAudio, playCloudAudioAs } from '../lib/audio';
 import { saraUnlockNarrator } from './SaraTrackPlayer';
 import { buildCallContext, saveCallRecord, type CallContext, type CallRecord } from '../lib/saraCallLink';
+import { getWeeklyTopic, loadFreeTopicWeek, readFreeTopicWeek, saveFreeTopicWeek, type FreeTopicWeek, type WeeklyTopicPick } from '../lib/saraWeeklyTopic';
 
 
 import { mergeSpeech, collapseRepeats, sessionText } from '../lib/speechMerge';
@@ -121,6 +122,8 @@ interface SaraLivePhoneCallModalProps {
   recentMistakes?: string[];
   /** Lesson mode: one fixed scenario (from a lesson) and the key phrases Sara nudges the student to use. */
   preset?: PhoneScenario & { keyPhrases?: string[]; trackTag?: string };
+  /** Pure free chat only: show this week's optional topic card and its two start choices. */
+  weeklyTopic?: boolean;
 }
 
 export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
@@ -135,7 +138,8 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
   studentId,
   lessonTitle,
   recentMistakes,
-  preset
+  preset,
+  weeklyTopic
 }) => {
   const [callCtx, setCallCtx] = useState<CallContext | null>(null);
   useEffect(() => {
@@ -150,6 +154,18 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
   const keyPhrases = preset?.keyPhrases || [];
   const isWords = preset?.trackTag === 'vocab';
   const isFree = preset?.id === 'free-talk';
+  const showWeeklyTopic = isFree && !!weeklyTopic;
+  const weeklyPick: WeeklyTopicPick = React.useMemo(() => getWeeklyTopic(new Date(), studentLevel), [studentLevel]);
+  const [topicWeek, setTopicWeek] = useState<FreeTopicWeek | null>(() => readFreeTopicWeek(studentId));
+  const activeTopicRef = useRef<WeeklyTopicPick | null>(null);
+  const [activeTopic, setActiveTopic] = useState<WeeklyTopicPick | null>(null);
+  useEffect(() => {
+    if (!isOpen || !showWeeklyTopic) return;
+    let alive = true;
+    loadFreeTopicWeek(studentId).then(v => { if (alive) setTopicWeek(v); }).catch(() => {});
+    return () => { alive = false; };
+  }, [isOpen, showWeeklyTopic, studentId]);
+  const topicDoneThisWeek = topicWeek?.weekKey === weeklyPick.weekKey && topicWeek.done && topicWeek.topicId === weeklyPick.topic.id;
   const [typed, setTyped] = useState('');
   type RP = { said: string; better: string; tipAr: string };
   type Review = { tooShort?: boolean; verdict?: string; verdictAr?: string; summaryAr?: string; pronunciationNoteAr?: string; pronunciation?: RP[]; vocabulary?: RP[]; grammar?: RP[]; fluency?: RP[] };
@@ -356,13 +372,30 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
     pumpQueue(turn);
   };
 
+  const startWeeklyTopic = () => {
+    const t = weeklyPick.topic;
+    const scenario: PhoneScenario = {
+      ...(preset as PhoneScenario),
+      titleAr: `محاورة حرة — موضوع الأسبوع: ${t.titleAr}`,
+      titleEn: `Free conversation — Weekly topic: ${t.titleEn}`,
+      initialPrompt: `Open, friendly free conversation. This week's optional topic is ${t.titleEn}: ${t.theme}. Stay close to this topic and gently return to it when natural, but follow the student's interests within it. Ask one engaging question at a time. ${weeklyPick.instructionEn} Do not use scripted lines, correct, test or evaluate during the conversation.`,
+      starterSaraSpeech: weeklyPick.openerEn,
+      starterSaraSpeechAr: '',
+    };
+    activeTopicRef.current = weeklyPick; setActiveTopic(weeklyPick);
+    void handleStartCall(scenario);
+  };
+  const startOwnTopic = () => { activeTopicRef.current = null; setActiveTopic(null); void handleStartCall(preset as PhoneScenario); };
+
   // Start outgoing call: no fake ring — we warm the server and fetch Sara's greeting audio, then connect.
-  const handleStartCall = async () => {
+  const handleStartCall = async (scenarioOverride?: PhoneScenario) => {
     setCallState('calling');
     setCallSeconds(0); setCallTurns(0); setUsedPhrases([]); setStudentWordsSpoken(0); setLatencies([]); setVoiceError(null);
     transcriptRef.current = []; setCallTranscript([]);
     saraUnlockNarrator();
-    const starterText = selectedScenario.starterSaraSpeech;
+    const scenario = scenarioOverride || selectedScenario;
+    if (scenarioOverride) setSelectedScenario(scenarioOverride);
+    const starterText = scenario.starterSaraSpeech;
     fetch('/api/sara/call-turn', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ warm: true }) }).catch(() => {});
     const greeting = await Promise.race([
       prefetchAcademyAudio(starterText, 'en', 'Kore').catch(() => null),
@@ -548,13 +581,20 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
     const earnedXP = Math.max(20, Math.min(100, Math.floor(callSeconds / 3) + (callTurns * 5)));
     try { confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
     if (onSuccessXP) onSuccessXP(earnedXP);
+    const topic = activeTopicRef.current;
+    const topicCompleted = !!topic && callTurns >= 2 && studentWordsSpoken >= 12;
+    if (topicCompleted && topic) {
+      const done: FreeTopicWeek = { weekKey: topic.weekKey, done: true, topicId: topic.topic.id };
+      setTopicWeek(done); void saveFreeTopicWeek(studentId, done);
+    }
     if (callTurns > 0) saveCallRecord(studentId, recRef.current = {
       at: Date.now(), scenario: selectedScenario.titleEn, scenarioAr: selectedScenario.titleAr, seconds: callSeconds, turns: callTurns,
       words: studentWordsSpoken, avgReplyMs: avgLatency,
-      focus: keyPhrases.length ? [`${isRtl ? (isWords ? 'كلمات مستخدمة' : 'عبارات مستخدمة') : 'phrases used'} ${usedPhrases.length}/${keyPhrases.length}`, ...usedPhrases.slice(0, 4)] : (callCtx?.focusAr || []),
+      focus: keyPhrases.length ? [`${isRtl ? (isWords ? 'كلمات مستخدمة' : 'عبارات مستخدمة') : 'phrases used'} ${usedPhrases.length}/${keyPhrases.length}`, ...usedPhrases.slice(0, 4)] : topic ? [`موضوع الأسبوع: ${topic.topic.titleAr}`, ...(callCtx?.focusAr || [])] : (callCtx?.focusAr || []),
+      ...(topic ? { topicId: topic.topic.id, topicAr: topic.topic.titleAr, topicEn: topic.topic.titleEn, weekKey: topic.weekKey } : {}),
     });
     if (onSaveCallSummary) {
-      const summary = `Sara Phone Call (${selectedScenario.titleEn}): ${formatTime(callSeconds)} duration, ${callTurns} speech turns, ${studentWordsSpoken} words spoken.${avgLatency ? ` Avg reply ${(avgLatency / 1000).toFixed(1)}s.` : ''}${keyPhrases.length ? ` Key phrases used ${usedPhrases.length}/${keyPhrases.length}: ${usedPhrases.join('; ') || 'none'}.` : callCtx?.focusEn.length ? ` Focus: ${callCtx.focusEn.join('; ')}.` : ''}`;
+      const summary = `Sara Phone Call (${selectedScenario.titleEn}): ${formatTime(callSeconds)} duration, ${callTurns} speech turns, ${studentWordsSpoken} words spoken.${topic ? ` Weekly topic: ${topic.topic.titleEn} (${topic.weekKey})${topicCompleted ? ' — completed' : ''}.` : ''}${avgLatency ? ` Avg reply ${(avgLatency / 1000).toFixed(1)}s.` : ''}${keyPhrases.length ? ` Key phrases used ${usedPhrases.length}/${keyPhrases.length}: ${usedPhrases.join('; ') || 'none'}.` : callCtx?.focusEn.length ? ` Focus: ${callCtx.focusEn.join('; ')}.` : ''}`;
       onSaveCallSummary(summary);
     }
     setReview(null); setRevVoice('idle');
@@ -657,7 +697,31 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
                   </p>
                 )}
               </div>
-              {preset ? (
+              {showWeeklyTopic ? (
+                <div className="flex-1 min-h-0 flex flex-col gap-2 overflow-hidden">
+                  <div data-testid="weekly-topic-card" className="rounded-2xl border-2 p-3 shrink-0" style={{ background: 'rgba(196,158,58,0.12)', borderColor: GOLD }}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl shrink-0">{weeklyPick.topic.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-black tracking-wide" style={{ color: GOLD }}>{isRtl ? 'موضوع الأسبوع' : "This week's topic"} · {weeklyPick.weekKey}</p>
+                        <p data-testid="weekly-topic-title" className="text-[15px] font-black leading-tight truncate">{isRtl ? weeklyPick.topic.titleAr : weeklyPick.topic.titleEn} <span dir="ltr" className="text-amber-200/80 text-[12px]">{isRtl ? weeklyPick.topic.titleEn : ''}</span></p>
+                      </div>
+                      {topicDoneThisWeek && <span data-testid="weekly-topic-done" className="shrink-0 px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-300/40 text-[10px] font-black">{isRtl ? 'أنجزته ✓' : 'Done ✓'}</span>}
+                    </div>
+                    <p className="mt-1.5 text-[11px] font-bold text-white/75 leading-snug line-clamp-2">{weeklyPick.bandAr}. {isRtl ? 'موضوع اختياري ويتغيّر كل أسبوع.' : 'Optional, and it changes every week.'}</p>
+                    <div className="mt-2 flex flex-wrap gap-1" dir="ltr">
+                      {weeklyPick.examplesEn.map(x => <span key={x} className="px-2 py-1 rounded-lg bg-white/8 border border-white/10 text-[11px] font-bold text-amber-100">{x}</span>)}
+                    </div>
+                  </div>
+                  <button onClick={startWeeklyTopic} data-testid="weekly-topic-start" className="w-full py-3 rounded-2xl font-black text-[13px] cursor-pointer active:scale-[0.98] shrink-0" style={{ background: GOLD, color: NAVY }}>
+                    {isRtl ? `ابدأ بموضوع الأسبوع: ${weeklyPick.topic.titleAr}` : `Start with this week's topic: ${weeklyPick.topic.titleEn}`}
+                  </button>
+                  <button onClick={startOwnTopic} data-testid="free-own-start" className="w-full py-3 rounded-2xl font-black text-[13px] border cursor-pointer active:scale-[0.98] shrink-0" style={{ borderColor: 'rgba(196,158,58,0.55)', color: '#fcd34d', background: 'rgba(255,255,255,0.04)' }}>
+                    {isRtl ? 'حديث حر من اختياري' : 'Free chat — my own topic'}
+                  </button>
+                  <p className="text-center text-[10.5px] font-bold text-white/50 leading-snug">{isRtl ? 'الموضوع اختياري. في الحالتين المحادثة مفتوحة وبدون تصحيح أثناء الكلام.' : 'The topic is optional. Either way, the chat stays open with no corrections mid-flow.'}</p>
+                </div>
+              ) : preset ? (
                 <div className="flex-1 min-h-0 flex flex-col gap-1.5 overflow-hidden" data-testid="call-preset">
                   <p className="text-[11px] font-black" style={{ color: GOLD }}>{keyPhrases.length ? (isRtl ? (isWords ? 'حاول تستخدم هالكلمات في كلامك:' : 'حاول تستخدم هالعبارات في كلامك:') : 'Try to use these phrases:') : (isRtl ? 'عن أي موضوع تحبه — بدون جمل جاهزة ولا تقييم. المكالمة تستمر لين تضغط إنهاء.' : 'Any topic you like — no set sentences, no scoring. It continues until you tap End.')}</p>
                   {keyPhrases.slice(0, 5).map(ph => <p key={ph} dir="ltr" className="text-[12.5px] font-bold text-white text-left rounded-xl px-2.5 py-1.5 border truncate" style={{ borderColor: 'rgba(196,158,58,0.35)', background: 'rgba(255,255,255,0.04)' }}>{ph}</p>)}
@@ -677,12 +741,12 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
                 })}
               </div>
               )}
-              <button onClick={handleStartCall} data-testid="call-start"
+              {!showWeeklyTopic && <button onClick={() => handleStartCall()} data-testid="call-start"
                 className="mt-3 w-full py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shrink-0"
                 style={{ background: GOLD, color: NAVY }}>
                 <Phone size={18} />
                 {isRtl ? 'اتصل بسارة' : 'Call Sara'}
-              </button>
+              </button>}
             </div>
           )}
 
@@ -760,6 +824,7 @@ export const SaraLivePhoneCallModal: React.FC<SaraLivePhoneCallModalProps> = ({
                 {!isFree && <div className="inline-flex p-3 rounded-full mb-2" style={{ background: 'rgba(196,158,58,0.15)', color: GOLD }}><Award size={30} /></div>}
                 <h4 className="text-lg font-black">{isRtl ? 'انتهت المكالمة' : 'Call ended'}</h4>
                 <p className="text-xs text-white/70 mt-1">{isRtl ? selectedScenario.titleAr : selectedScenario.titleEn}</p>
+                {activeTopic && <p data-testid="call-topic-summary" className="mt-1 inline-flex px-2 py-1 rounded-full text-[10.5px] font-black" style={{ background: 'rgba(196,158,58,0.14)', color: '#fcd34d' }}>{isRtl ? `موضوع الأسبوع: ${activeTopic.topic.titleAr}` : `Weekly topic: ${activeTopic.topic.titleEn}`} · {activeTopic.weekKey}</p>}
               </div>
               {!isFree && <div className="grid grid-cols-2 gap-2">
                 {[
