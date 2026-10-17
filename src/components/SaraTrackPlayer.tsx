@@ -8,6 +8,7 @@ import { boardLinesToSpeech } from '../utils/boardToSpeech';
 import { LEGACY_TRACK_IDS, migrateLegacyCount } from '../data/saraTracks/fromCurriculum';
 import { pushTrackProgress, markLastTrack } from '../lib/saraProgressSync';
 import SaraLessonCall, { lessonCallPreset, freeCallPresetFor } from './SaraLessonCall';
+import SaraSentenceBuilder from './SaraSentenceBuilder';
 import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
 import { trackLevels, buildLevelTest, scoreLevelTest, saveLevelTestAttempt, LEVEL_TEST_PASS, type LevelTestQuestion, type LevelTestAttempt } from '../lib/saraLevelTests';
 
@@ -155,7 +156,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   };
   const [useAlt, setUseAlt] = useState(false);
   const [checkPick, setCheckPick] = useState<number | null>(null);
-  const [mode, setMode] = useState<'learn' | 'exercises' | 'board'>('learn');
+  const [mode, setMode] = useState<'learn' | 'exercises' | 'board' | 'sentences'>('learn');
   const [bStep, setBStep] = useState(0);
   const [bPick, setBPick] = useState<number | null>(null);
   const [exIdx, setExIdx] = useState(0);
@@ -385,6 +386,9 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                 <button onClick={goNext} className="flex-1 py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">✅ الدرس التالي ←</button>
               </div>
             )}
+            {passed && track.id === 'conversation_v2' && (
+              <button onClick={() => { stop(); setMode('sentences'); }} data-testid="open-sentence-builder" className="w-full py-2 rounded-xl bg-white border-2 border-[#C49E3A] text-[#002147] text-[13px] font-black">🧩 ابنِ جملك — 5 بطاقات</button>
+            )}
           </div>
         )}
 
@@ -519,6 +523,14 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
             </div>
           );
         })()}
+
+        {lesson?.content && mode === 'sentences' && track.id === 'conversation_v2' && (
+          <SaraSentenceBuilder trackId={track.id} lessonId={lesson.id} uid={uid} titleAr={lesson.titleAr} titleEn={lesson.titleEn} level={lesson.levelId} examples={lesson.content.example}
+            doneLabel="رجوع للدرس" onDone={() => setMode('learn')}
+            talkSlot={sentences => <SaraLessonCall uid={uid} level={lesson.levelId === 'b1' ? 'B1' : lesson.levelId === 'b2' ? 'B2' : lesson.levelId === 'c1' ? 'C1' : lesson.levelId === 'c2' ? 'C2' : 'A2'} label="تحدّث مع سارة"
+              preset={lessonCallPreset({ id: `${lesson.id}-sentences`, titleAr: lesson.titleAr, titleEn: lesson.titleEn, kind: 'conversation', tag: 'conversation', phrases: sentences,
+                starter: `Great! Let's talk and use your sentences. You built: ${sentences.slice(0, 2).join(' ')} Can you say one of your sentences to me?` })} />} />
+        )}
 
         {/* Optional exercises (one per screen, same page frame) */}
         {lesson?.content && mode === 'exercises' && (

@@ -8,6 +8,7 @@ import { VOCAB_LESSONS, VOCAB_TRACK_ID, type SaraVocabLesson, type SaraVocabWord
 import { readUnlocked, progressKey, saraNarrate, saraStopNarrator, saraUnlockNarrator, pauseNarrator, resumeNarrator } from './SaraTrackPlayer';
 import { pushTrackProgress, syncTrackProgress } from '../lib/saraProgressSync';
 import SaraLessonCall, { lessonCallPreset, levelToCefr } from './SaraLessonCall';
+import SaraSentenceBuilder from './SaraSentenceBuilder';
 
 interface Props { isOpen: boolean; onClose: () => void; uid?: string; unlockAll?: boolean }
 interface Q { promptAr: string; show: string; options: string[]; correct: number; say?: string }
@@ -34,7 +35,7 @@ function reviewQs(l: SaraVocabLesson): Q[] {
   return back.flatMap((b, i) => shuffle(b.words, l.order + i).slice(0, i === 0 ? 2 : 1).map((w, k) => makeQ(w, b.words, k + i, l.order * 7 + i * 3 + k)));
 }
 
-type Step = 'learn' | 'practice' | 'review' | 'done';
+type Step = 'learn' | 'practice' | 'review' | 'build' | 'done';
 
 const Lesson: React.FC<{ l: SaraVocabLesson; onBack: () => void; onPassed: () => void; onBoard?: () => void; uid?: string }> = ({ l, onBack, onPassed, onBoard, uid }) => {
   const [step, setStep] = useState<Step>('learn');
@@ -64,7 +65,7 @@ const Lesson: React.FC<{ l: SaraVocabLesson; onBack: () => void; onPassed: () =>
     const ok = picked === q.correct; const r = right + (ok ? 1 : 0); setRight(r); setPicked(null);
     if (qi + 1 < qs.length) { setQi(qi + 1); return; }
     if (step === 'practice' && review.length) { setStep('review'); setQi(0); return; }
-    setStep('done'); if (Math.round((r / total) * 100) >= PASS) onPassed();
+    saraStopNarrator(); setStep('build');
   };
   const score = Math.round((right / total) * 100);
   const controls = (
@@ -81,7 +82,7 @@ const Lesson: React.FC<{ l: SaraVocabLesson; onBack: () => void; onPassed: () =>
         <button onClick={onBack} className="p-1.5 rounded-lg bg-[#002147] text-white" aria-label="back"><ArrowRight size={16} /></button>
         <p className="flex-1 text-[14px] font-black text-[#002147] truncate">{((l.order - 1) % 30) + 1}. {l.icon} {l.titleAr}</p>
         {onBoard && <button onClick={() => { saraStopNarrator(); onBoard(); }} data-testid="open-board" className="shrink-0 px-1.5 py-1 rounded-lg bg-[#083344] text-teal-100 border border-teal-400/60 text-[10px] font-black leading-tight">🧑‍🏫 اشرح بالسبورة التفاعلية</button>}
-        <span className="text-[10px] font-black px-1.5 rounded bg-[#002147] text-amber-300">{step === 'learn' ? `${card + 1}/10` : step === 'done' ? '✓' : `${(step === 'review' ? practice.length : 0) + qi + 1}/${total}`}</span>
+        <span className="text-[10px] font-black px-1.5 rounded bg-[#002147] text-amber-300">{step === 'learn' ? `${card + 1}/10` : step === 'done' ? '✓' : step === 'build' ? '🧩' : `${(step === 'review' ? practice.length : 0) + qi + 1}/${total}`}</span>
       </div>
       {step === 'learn' && <>
         {controls}
@@ -114,6 +115,11 @@ const Lesson: React.FC<{ l: SaraVocabLesson; onBack: () => void; onPassed: () =>
         </div>
         {picked !== null && <button onClick={next} className="py-2.5 rounded-xl bg-[#002147] text-amber-300 font-black text-sm">التالي</button>}
       </>}
+      {step === 'build' && <SaraSentenceBuilder trackId={VOCAB_TRACK_ID} lessonId={l.id} uid={uid} titleAr={l.titleAr} titleEn={l.titleEn} level={l.levelId} vocab={l.words}
+        doneLabel="أكمل الدرس" onDone={() => { setStep('done'); if (score >= PASS) onPassed(); }}
+        talkSlot={sentences => <SaraLessonCall uid={uid} level={levelToCefr(l.levelId)} label="تحدّث مع سارة"
+          preset={lessonCallPreset({ id: `${l.id}-sentences`, titleAr: l.titleAr, titleEn: l.titleEn, icon: l.icon, kind: 'vocab', tag: 'vocab', phrases: sentences,
+            starter: `Great sentences! Let's talk and use them. You built: ${sentences.slice(0, 2).join(' ')} Can you say one of your sentences to me?` })} />} />}
       {step === 'done' && <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center">
         <p className="text-4xl">{score >= PASS ? '🎉' : '💪'}</p>
         <p className="text-[15px] font-black text-[#002147]">{right}/{total} صحيحة ({score}%)</p>
