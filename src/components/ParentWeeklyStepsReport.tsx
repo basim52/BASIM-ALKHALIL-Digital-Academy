@@ -43,7 +43,7 @@ function skillOf(d: any): string {
   return '';
 }
 
-interface Data {
+export interface WeeklyReportData {
   completed: { key: string; title: string; at: number; pct: number | null }[];
   minutes: number | null; // null = no timed sessions
   sessions: { at: number; summary: string; skill: string }[];
@@ -53,9 +53,86 @@ interface Data {
   goal: number | null;
 }
 
+export async function loadWeeklyReportData(uid: string, parentUid: string = auth.currentUser?.uid || ''): Promise<WeeklyReportData> {
+      const empty: WeeklyReportData = { completed: [], minutes: null, sessions: [], lastTest: null, weakest: null, words: [], goal: null };
+  if (uid.startsWith('sim_') || !auth.currentUser) return empty;
+  const since = Date.now() - 7 * DAY;
+  const out: WeeklyReportData = { ...empty };
+
+  // 1) lesson results
+  try {
+    let snap;
+    try { snap = await getDocs(query(collection(db, 'lessonResults'), where('userId', '==', uid))); }
+    catch { snap = await getDocs(query(collection(db, 'lessonResults'), where('userId', '==', uid), where('parentIds', 'array-contains', parentUid))); }
+    const byKey = new Map<string, { key: string; title: string; at: number; pct: number | null; raw: any }>();
+    let latestScored: { pct: number; correct: number; total: number; name: string; at: number } | null = null;
+    snap.forEach(s => {
+      const d: any = s.data();
+      const at = toMs(d.timestamp) || toMs(d.completedAt) || toMs(d.createdAt);
+      if (!at) return; // no completion date → never counted
+      const total = Number(d.total) || 0;
+      const correct = typeof d.score === 'number' ? d.score : NaN;
+      const pct = total > 0 && !isNaN(correct) ? Math.max(0, Math.min(100, Math.round((correct / total) * 100))) : (typeof d.percentage === 'number' ? Math.round(d.percentage) : null);
+      if (total > 0 && !isNaN(correct) && (!latestScored || at > latestScored.at)) {
+        latestScored = { pct: pct ?? 0, correct, total, name: String(d.lessonTitle || d.lessonId || 'درس'), at };
+      }
+      if (at < since) return;
+      const key = `${d.courseId || ''}|${d.lessonId || s.id}`;
+      const prev = byKey.get(key);
+      if (!prev || at > prev.at) byKey.set(key, { key, title: String(d.lessonTitle || d.lessonId || 'درس'), at, pct, raw: d });
+    });
+    const list = Array.from(byKey.values()).sort((a, b) => b.at - a.at);
+    out.completed = list.map(({ key, title, at, pct }) => ({ key, title, at, pct }));
+    out.lastTest = latestScored;
+    const skills = new Map<string, { sum: number; n: number }>();
+    list.forEach(r => { const k = skillOf(r.raw); if (!k || r.pct === null) return; const v = skills.get(k) || { sum: 0, n: 0 }; v.sum += r.pct; v.n++; skills.set(k, v); });
+    const ranked = Array.from(skills.entries()).map(([name, v]) => ({ name, avg: Math.round(v.sum / v.n) })).sort((a, b) => a.avg - b.avg);
+    out.weakest = ranked.length >= 2 ? ranked[0] : null;
+  } catch (e) { console.debug('weekly report lessonResults note:', e); }
+
+  // 2) latest level test (newer than lesson quiz wins)
+  try {
+    const lt = await getDocs(collection(db, 'users', uid, 'saraLevelTests'));
+    lt.forEach(s => {
+      const a: any = s.data();
+      const at = Number(a.createdAtMs) || 0;
+      if (at && (!out.lastTest || at > out.lastTest.at) && typeof a.score === 'number') {
+        out.lastTest = { pct: Math.round(a.score), correct: Number(a.correct) || 0, total: Number(a.total) || 0, name: `اختبار ${a.levelTitleAr || a.levelId || 'المستوى'}`, at };
+      }
+    });
+  } catch (e) { console.debug('weekly report level tests note:', e); }
+
+  // 3) Sara sessions + words
+  try {
+    const mem = await getDoc(doc(db, 'tutorMemory', uid));
+    if (mem.exists()) out.words = ((mem.data() as any).wordsLearned || []).filter((w: any) => typeof w === 'string').slice(-8).reverse();
+    const ss = await getDocs(collection(db, 'tutorMemory', uid, 'sessions'));
+    let mins = 0; let timed = 0;
+    ss.forEach(s => {
+      const d: any = s.data();
+      const st = toMs(d.startedAt);
+      if (!st || st < since) return;
+      out.sessions.push({ at: st, summary: String(d.summary || ''), skill: String(d.skill || '') });
+      const en = toMs(d.endedAt);
+      if (en > st && en - st < 4 * 60 * 60 * 1000) { mins += (en - st) / 60000; timed++; }
+    });
+    out.sessions.sort((a, b) => b.at - a.at);
+    out.minutes = timed > 0 ? Math.round(mins) : null;
+  } catch (e) { console.debug('weekly report sessions note:', e); }
+
+  // 4) goal
+  try {
+    const u = await getDoc(doc(db, 'users', uid));
+    const g = u.exists() ? Number((u.data() as any).weeklyGoalLessons) : NaN;
+    out.goal = Number.isInteger(g) && g >= 1 && g <= 14 ? g : null;
+  } catch (e) { console.debug('weekly report goal note:', e); }
+
+  return out;
+}
+
 export const ParentWeeklyStepsReport: React.FC<Props> = ({ student, parentUid, isParentAdmin = false }) => {
   const [step, setStep] = useState(0);
-  const [data, setData] = useState<Data | null>(null);
+  const [data, setData] = useState<WeeklyReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [goalDraft, setGoalDraft] = useState<number>(3);
   const [saving, setSaving] = useState(false);
@@ -67,79 +144,7 @@ export const ParentWeeklyStepsReport: React.FC<Props> = ({ student, parentUid, i
     if (!uid) return;
     setLoading(true);
     (async () => {
-      const empty: Data = { completed: [], minutes: null, sessions: [], lastTest: null, weakest: null, words: [], goal: null };
-      if (uid.startsWith('sim_') || !auth.currentUser) { if (alive) { setData(empty); setLoading(false); } return; }
-      const since = Date.now() - 7 * DAY;
-      const out: Data = { ...empty };
-
-      // 1) lesson results
-      try {
-        let snap;
-        try { snap = await getDocs(query(collection(db, 'lessonResults'), where('userId', '==', uid))); }
-        catch { snap = await getDocs(query(collection(db, 'lessonResults'), where('userId', '==', uid), where('parentIds', 'array-contains', parentUid))); }
-        const byKey = new Map<string, { key: string; title: string; at: number; pct: number | null; raw: any }>();
-        let latestScored: { pct: number; correct: number; total: number; name: string; at: number } | null = null;
-        snap.forEach(s => {
-          const d: any = s.data();
-          const at = toMs(d.timestamp) || toMs(d.completedAt) || toMs(d.createdAt);
-          if (!at) return; // no completion date → never counted
-          const total = Number(d.total) || 0;
-          const correct = typeof d.score === 'number' ? d.score : NaN;
-          const pct = total > 0 && !isNaN(correct) ? Math.max(0, Math.min(100, Math.round((correct / total) * 100))) : (typeof d.percentage === 'number' ? Math.round(d.percentage) : null);
-          if (total > 0 && !isNaN(correct) && (!latestScored || at > latestScored.at)) {
-            latestScored = { pct: pct ?? 0, correct, total, name: String(d.lessonTitle || d.lessonId || 'درس'), at };
-          }
-          if (at < since) return;
-          const key = `${d.courseId || ''}|${d.lessonId || s.id}`;
-          const prev = byKey.get(key);
-          if (!prev || at > prev.at) byKey.set(key, { key, title: String(d.lessonTitle || d.lessonId || 'درس'), at, pct, raw: d });
-        });
-        const list = Array.from(byKey.values()).sort((a, b) => b.at - a.at);
-        out.completed = list.map(({ key, title, at, pct }) => ({ key, title, at, pct }));
-        out.lastTest = latestScored;
-        const skills = new Map<string, { sum: number; n: number }>();
-        list.forEach(r => { const k = skillOf(r.raw); if (!k || r.pct === null) return; const v = skills.get(k) || { sum: 0, n: 0 }; v.sum += r.pct; v.n++; skills.set(k, v); });
-        const ranked = Array.from(skills.entries()).map(([name, v]) => ({ name, avg: Math.round(v.sum / v.n) })).sort((a, b) => a.avg - b.avg);
-        out.weakest = ranked.length >= 2 ? ranked[0] : null;
-      } catch (e) { console.debug('weekly report lessonResults note:', e); }
-
-      // 2) latest level test (newer than lesson quiz wins)
-      try {
-        const lt = await getDocs(collection(db, 'users', uid, 'saraLevelTests'));
-        lt.forEach(s => {
-          const a: any = s.data();
-          const at = Number(a.createdAtMs) || 0;
-          if (at && (!out.lastTest || at > out.lastTest.at) && typeof a.score === 'number') {
-            out.lastTest = { pct: Math.round(a.score), correct: Number(a.correct) || 0, total: Number(a.total) || 0, name: `اختبار ${a.levelTitleAr || a.levelId || 'المستوى'}`, at };
-          }
-        });
-      } catch (e) { console.debug('weekly report level tests note:', e); }
-
-      // 3) Sara sessions + words
-      try {
-        const mem = await getDoc(doc(db, 'tutorMemory', uid));
-        if (mem.exists()) out.words = ((mem.data() as any).wordsLearned || []).filter((w: any) => typeof w === 'string').slice(-8).reverse();
-        const ss = await getDocs(collection(db, 'tutorMemory', uid, 'sessions'));
-        let mins = 0; let timed = 0;
-        ss.forEach(s => {
-          const d: any = s.data();
-          const st = toMs(d.startedAt);
-          if (!st || st < since) return;
-          out.sessions.push({ at: st, summary: String(d.summary || ''), skill: String(d.skill || '') });
-          const en = toMs(d.endedAt);
-          if (en > st && en - st < 4 * 60 * 60 * 1000) { mins += (en - st) / 60000; timed++; }
-        });
-        out.sessions.sort((a, b) => b.at - a.at);
-        out.minutes = timed > 0 ? Math.round(mins) : null;
-      } catch (e) { console.debug('weekly report sessions note:', e); }
-
-      // 4) goal
-      try {
-        const u = await getDoc(doc(db, 'users', uid));
-        const g = u.exists() ? Number((u.data() as any).weeklyGoalLessons) : NaN;
-        out.goal = Number.isInteger(g) && g >= 1 && g <= 14 ? g : null;
-      } catch (e) { console.debug('weekly report goal note:', e); }
-
+      const out = await loadWeeklyReportData(uid, parentUid);
       if (alive) { setData(out); setGoalDraft(out.goal ?? 3); setLoading(false); }
     })();
     return () => { alive = false; };
