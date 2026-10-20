@@ -178,17 +178,17 @@ export const ParentWeeklyStepsReport: React.FC<Props> = ({ student, parentUid, i
   );
 
   const Tile = ({ label, value, note }: { label: string; value: string; note?: string }) => (
-    <div className="rounded-2xl bg-white border border-slate-200 p-3 flex flex-col justify-between min-h-0">
-      <p className="text-[11px] font-bold text-slate-500 leading-tight">{label}</p>
-      <p className="text-[20px] font-black leading-tight" style={{ color: NAVY }}>{value}</p>
-      {note && <p className="text-[10.5px] font-bold text-slate-500 leading-tight line-clamp-2">{note}</p>}
+    <div className="rounded-2xl bg-[#0a2d5c] border border-[#C49E3A]/40 p-3 flex flex-col justify-between min-h-0">
+      <p className="text-[11px] font-bold text-white/70 leading-tight">{label}</p>
+      <p className="text-[20px] font-black leading-tight" style={{ color: GOLD }}>{value}</p>
+      {note && <p className="text-[10.5px] font-bold text-white/70 leading-tight line-clamp-2">{note}</p>}
     </div>
   );
 
   const steps = ['١. التقرير', '٢. الأنشطة', '٣. الهدف'];
 
   const body = useMemo(() => {
-    if (loading || !data) return <div className="flex-1 flex items-center justify-center text-[13px] font-bold text-slate-500">جاري تحميل التقرير…</div>;
+    if (loading || !data) return <div className="flex-1 flex items-center justify-center text-[13px] font-bold text-white/70">جاري تحميل التقرير…</div>;
     if (step === 0) return (
       <div className="flex-1 flex flex-col gap-3 min-h-0">
         <div className="relative">
@@ -210,41 +210,41 @@ export const ParentWeeklyStepsReport: React.FC<Props> = ({ student, parentUid, i
       ].sort((a, b) => b.at - a.at).slice(0, 4);
       return (
         <div className="flex-1 flex flex-col gap-3 min-h-0">
-          <div className="rounded-2xl bg-white border border-slate-200 p-3">
-            <p className="text-[12px] font-black mb-2" style={{ color: NAVY }}>كلمات تعلّمها مؤخراً</p>
+          <div className="rounded-2xl bg-[#0a2d5c] border border-[#C49E3A]/40 p-3">
+            <p className="text-[12px] font-black mb-2" style={{ color: GOLD }}>كلمات تعلّمها مؤخراً</p>
             {data.words.length ? (
-              <div className="flex flex-wrap gap-1.5">{data.words.map((w, i) => <span key={i} className="px-2 py-0.5 rounded-full text-[11.5px] font-bold bg-[#C49E3A]/15 text-[#002147]" dir="ltr">{w}</span>)}</div>
-            ) : <p className="text-[11.5px] font-bold text-slate-500">— لا توجد كلمات مسجّلة بعد</p>}
-            <p className="mt-1.5 text-[10px] text-slate-400">آخر الكلمات من ذاكرة سارة (غير مؤرّخة بالأسبوع)</p>
+              <div className="flex flex-wrap gap-1.5">{data.words.map((w, i) => <span key={i} className="px-2 py-0.5 rounded-full text-[11.5px] font-bold bg-[#C49E3A]/20 text-[#F5E6B8]" dir="ltr">{w}</span>)}</div>
+            ) : <p className="text-[11.5px] font-bold text-white/70">— لا توجد كلمات مسجّلة بعد</p>}
+            <p className="mt-1.5 text-[10px] text-white/55">آخر الكلمات من ذاكرة سارة (غير مؤرّخة بالأسبوع)</p>
           </div>
-          <div className="rounded-2xl bg-white border border-slate-200 p-3 flex-1 min-h-0 overflow-hidden">
-            <p className="text-[12px] font-black mb-2" style={{ color: NAVY }}>آخر النشاطات</p>
+          <div className="rounded-2xl bg-[#0a2d5c] border border-[#C49E3A]/40 p-3 flex-1 min-h-0 overflow-hidden">
+            <p className="text-[12px] font-black mb-2" style={{ color: GOLD }}>آخر النشاطات</p>
             {items.length ? (
               <ul className="space-y-1.5">{items.map((it, i) => (
-                <li key={i} className="flex items-start gap-2 text-[11.5px] font-bold text-slate-700">
-                  <span>{it.icon}</span><span className="flex-1 line-clamp-1">{it.text}</span><span className="text-slate-400 whitespace-nowrap">{fmtDate(it.at)}</span>
+                <li key={i} className="flex items-start gap-2 text-[11.5px] font-bold text-white">
+                  <span>{it.icon}</span><span className="flex-1 line-clamp-1">{it.text}</span><span className="text-white/55 whitespace-nowrap">{fmtDate(it.at)}</span>
                 </li>))}</ul>
-            ) : <div className="h-full flex items-center justify-center text-[13px] font-black text-slate-500">لا يوجد نشاط هذا الأسبوع</div>}
+            ) : <div className="h-full flex items-center justify-center text-[13px] font-black text-white/70">لا يوجد نشاط هذا الأسبوع</div>}
           </div>
         </div>
       );
     }
     return (
       <div className="flex-1 flex flex-col gap-3 min-h-0">
-        <div className="rounded-2xl bg-white border border-slate-200 p-3">
-          <p className="text-[12px] font-black mb-2" style={{ color: NAVY }}>حدّد هدف الدروس الأسبوعي</p>
+        <div className="rounded-2xl bg-[#0a2d5c] border border-[#C49E3A]/40 p-3">
+          <p className="text-[12px] font-black mb-2" style={{ color: GOLD }}>حدّد هدف الدروس الأسبوعي</p>
           <div className="flex gap-1.5 justify-between">
             {GOAL_PRESETS.map(g => (
-              <button key={g} onClick={() => setGoalDraft(g)} className={`flex-1 py-2 rounded-xl text-[13px] font-black border ${goalDraft === g ? 'bg-[#002147] text-[#C49E3A] border-[#C49E3A]' : 'bg-white text-[#002147] border-slate-200'}`}>{g}</button>
+              <button key={g} onClick={() => setGoalDraft(g)} className={`flex-1 py-2 rounded-xl text-[13px] font-black border ${goalDraft === g ? 'bg-[#002147] text-[#C49E3A] border-[#C49E3A]' : 'bg-[#0a2d5c] text-white border-[#C49E3A]/30'}`}>{g}</button>
             ))}
           </div>
           <div className="mt-3 flex items-center justify-center gap-4">
-            <button aria-label="إنقاص" onClick={() => setGoalDraft(g => Math.max(1, g - 1))} className="w-10 h-10 rounded-full bg-slate-100 text-[20px] font-black text-[#002147]">−</button>
-            <span className="text-[22px] font-black min-w-[72px] text-center" style={{ color: NAVY }}>{goalDraft} دروس</span>
-            <button aria-label="زيادة" onClick={() => setGoalDraft(g => Math.min(14, g + 1))} className="w-10 h-10 rounded-full bg-slate-100 text-[20px] font-black text-[#002147]">+</button>
+            <button aria-label="إنقاص" onClick={() => setGoalDraft(g => Math.max(1, g - 1))} className="w-10 h-10 rounded-full bg-[#002147] border border-[#C49E3A]/50 text-[20px] font-black text-[#C49E3A]">−</button>
+            <span className="text-[22px] font-black min-w-[72px] text-center" style={{ color: GOLD }}>{goalDraft} دروس</span>
+            <button aria-label="زيادة" onClick={() => setGoalDraft(g => Math.min(14, g + 1))} className="w-10 h-10 rounded-full bg-[#002147] border border-[#C49E3A]/50 text-[20px] font-black text-[#C49E3A]">+</button>
           </div>
           <button disabled={saving || goalDraft === goal} onClick={saveGoal} className="mt-3 w-full py-2.5 rounded-xl text-[13px] font-black disabled:opacity-50" style={{ background: GOLD, color: NAVY }}>{saving ? 'جاري الحفظ…' : 'حفظ الهدف'}</button>
-          {msg && <p className="mt-1.5 text-center text-[11.5px] font-bold text-slate-600">{msg}</p>}
+          {msg && <p className="mt-1.5 text-center text-[11.5px] font-bold text-white/80">{msg}</p>}
         </div>
         <GoalBar />
       </div>
@@ -256,7 +256,7 @@ export const ParentWeeklyStepsReport: React.FC<Props> = ({ student, parentUid, i
   void isParentAdmin;
 
   return (
-    <section dir="rtl" data-testid="parent-weekly-steps-report" className="rounded-3xl overflow-hidden border border-[#C49E3A]/40 bg-slate-50 flex flex-col" style={{ height: 'min(560px, calc(100dvh - 140px))', minHeight: 440 }}>
+    <section dir="rtl" data-testid="parent-weekly-steps-report" className="rounded-3xl overflow-hidden border border-[#C49E3A]/40 bg-[#001a38] flex flex-col" style={{ height: 'min(560px, calc(100dvh - 140px))', minHeight: 440 }}>
       <header className="px-4 pt-3 pb-2" style={{ background: NAVY }}>
         <p className="text-[13px] font-black text-white">التقرير الأسبوعي المختصر • آخر 7 أيام</p>
         <p className="text-[11px] font-bold text-[#C49E3A]">{student.displayName || 'الطالب'}</p>
@@ -267,10 +267,10 @@ export const ParentWeeklyStepsReport: React.FC<Props> = ({ student, parentUid, i
         </div>
       </header>
       <div className="flex-1 flex flex-col p-3 min-h-0">{body}</div>
-      <footer className="px-3 py-2.5 border-t border-slate-200 bg-white flex items-center justify-between">
-        <button disabled={step === 0} onClick={() => setStep(s => Math.max(0, s - 1))} className="px-4 py-1.5 rounded-xl text-[12px] font-black border border-slate-200 text-[#002147] disabled:opacity-40">السابق</button>
-        <span className="text-[11.5px] font-bold text-slate-500">خطوة {step + 1} من 3</span>
-        <button disabled={step === 2} onClick={() => setStep(s => Math.min(2, s + 1))} className="px-4 py-1.5 rounded-xl text-[12px] font-black disabled:opacity-40" style={{ background: NAVY, color: GOLD }}>التالي</button>
+      <footer className="px-3 py-2.5 border-t border-[#C49E3A]/30 bg-[#002147] flex items-center justify-between">
+        <button disabled={step === 0} onClick={() => setStep(s => Math.max(0, s - 1))} className="px-4 py-1.5 rounded-xl text-[12px] font-black border border-[#C49E3A]/50 text-white disabled:opacity-40">السابق</button>
+        <span className="text-[11.5px] font-bold text-white/70">خطوة {step + 1} من 3</span>
+        <button disabled={step === 2} onClick={() => setStep(s => Math.min(2, s + 1))} className="px-4 py-1.5 rounded-xl text-[12px] font-black disabled:opacity-40" style={{ background: GOLD, color: NAVY }}>التالي</button>
       </footer>
     </section>
   );
