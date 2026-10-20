@@ -1898,6 +1898,44 @@ Output structure:
   app.post("/api/sara-tutor/save-placement", handleSavePlacement);
 
 
+  // ✍️ Sara grammar check (replaces the old floating companion). JSON schema output, model fallback list.
+  const GRAMMAR_MODELS = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
+  app.post("/api/sara/grammar-check", async (req: express.Request, res: express.Response) => {
+    const sentence = String(req.body?.sentence || "").replace(/\s+/g, " ").trim().slice(0, 400);
+    if (sentence.length < 2) return res.status(400).json({ error: "EMPTY" });
+    if (!initAI() || !aiLive) return res.status(503).json({ error: "AI_NOT_CONFIGURED" });
+    const level = String(req.body?.level || "").slice(0, 10);
+    const schema = { type: Type.OBJECT, properties: {
+      isCorrect: { type: Type.BOOLEAN },
+      corrected: { type: Type.STRING },
+      mistakes: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { wrong: { type: Type.STRING }, right: { type: Type.STRING }, reasonAr: { type: Type.STRING } }, required: ["wrong", "right", "reasonAr"] } },
+      practice: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { sentence: { type: Type.STRING }, answer: { type: Type.STRING }, hintAr: { type: Type.STRING } }, required: ["sentence", "answer", "hintAr"] } },
+    }, required: ["isCorrect", "corrected", "mistakes", "practice"] };
+    const prompt = `You are Sara, a kind English teacher for an Arabic-speaking child${level ? ` (level ${level})` : ""}.
+Check this English sentence for grammar, spelling and word-choice mistakes:
+"""${sentence}"""
+Rules:
+- corrected: the full natural corrected sentence (same meaning). If already correct, repeat it.
+- mistakes: each wrong word/phrase EXACTLY as it appears in the student's sentence, its replacement, and reasonAr = one short simple Arabic sentence (max 15 words) explaining the rule. Empty if correct.
+- practice: exactly 3 NEW short sentences that each contain the SAME kind of mistake for the student to fix, with answer = the corrected sentence and hintAr = a 3-6 word Arabic hint.
+- Use only Western digits. If the text is not English, set isCorrect false, corrected "", mistakes [] and practice [].`;
+    let lastErr: any = null;
+    for (const model of GRAMMAR_MODELS) {
+      try {
+        const r = await aiLive.models.generateContent({ model, contents: [{ role: "user", parts: [{ text: prompt }] }], config: { responseMimeType: "application/json", responseSchema: schema as any, maxOutputTokens: 1500, temperature: 0.3 } });
+        const j = JSON.parse((r.text || "").trim());
+        if (!j || typeof j.corrected !== "string" || !Array.isArray(j.mistakes)) { lastErr = new Error("BAD_SHAPE"); continue; }
+        return res.json({
+          isCorrect: !!j.isCorrect && j.mistakes.length === 0,
+          corrected: String(j.corrected).slice(0, 500),
+          mistakes: j.mistakes.slice(0, 6).map((m: any) => ({ wrong: String(m.wrong || ""), right: String(m.right || ""), reasonAr: String(m.reasonAr || "") })),
+          practice: (Array.isArray(j.practice) ? j.practice : []).slice(0, 3).map((p: any) => ({ sentence: String(p.sentence || ""), answer: String(p.answer || ""), hintAr: String(p.hintAr || "") })),
+        });
+      } catch (e: any) { lastErr = e; logToFile(`grammar-check ${model} failed: ${String(e?.message || e).slice(0, 200)}`); }
+    }
+    res.status(503).json({ error: "AI_FAILED", message: String(lastErr?.message || "").slice(0, 200) });
+  });
+
   // Modern AI Omnipresent Instant Tutor Endpoint
   app.post("/api/ai/instant-tutor", async (req, res) => {
     try {

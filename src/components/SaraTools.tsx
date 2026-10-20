@@ -15,14 +15,14 @@ import { buildSaraPlan, loadPlanState, taskDone, readSavedPlan, savePlan, weekSt
 import { trackLevels, saveLevelTestAttempt, summarizeLevelTests, type LevelTestAttempt } from '../lib/saraLevelTests';
 import { getDailyTopic, readFreeTopicDay, type FreeTopicDay } from '../lib/saraDailyTopic';
 
-export type SaraToolId = 'placement' | 'speed' | 'worksheet' | 'plan' | 'roleplay' | 'pronunciation' | 'voicecoach';
+export type SaraToolId = 'placement' | 'speed' | 'worksheet' | 'plan' | 'roleplay' | 'pronunciation' | 'voicecoach' | 'grammar';
 export const SARA_TRACKS: SaraTrack[] = [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK];
 export interface PlacementOutcome { level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'; bandId: string; trackId: string; score: number }
 interface Props { tool: SaraToolId | null; onClose: () => void; uid?: string; unlockAll?: boolean; onPlacementDone?: (r: PlacementOutcome) => void; onOpenTrack?: (trackId: string) => void }
 
 const TITLES: Record<SaraToolId, string> = {
   placement: '🎯 اختبار تحديد المستوى', speed: '⚡ تحدي السرعة', worksheet: '📝 ورقة عمل', plan: '🗓️ خطة الدراسة الأسبوعية',
-  roleplay: '🎭 مغامرات لعب الأدوار', pronunciation: '🔊 مختبر النطق', voicecoach: '🎙️ مدرب الصوت',
+  roleplay: '🎭 مغامرات لعب الأدوار', pronunciation: '🔊 مختبر النطق', voicecoach: '🎙️ مدرب الصوت', grammar: '✍️ تدقيق نحوي',
 };
 
 const shuffle = <T,>(a: T[]): T[] => { const r = a.slice(); for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; };
@@ -701,6 +701,97 @@ const VoiceCoach: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid, unlo
   );
 };
 
+/* ---------------- ✍️ Grammar check ---------------- */
+interface GcMistake { wrong: string; right: string; reasonAr: string }
+interface GcResult { isCorrect: boolean; corrected: string; mistakes: GcMistake[]; practice: { sentence: string; answer: string; hintAr: string }[] }
+const esc = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+/** Original sentence with each wrong piece marked. */
+const Marked: React.FC<{ text: string; mistakes: GcMistake[] }> = ({ text, mistakes }) => {
+  const parts = mistakes.map(m => m.wrong.trim()).filter(Boolean);
+  if (!parts.length) return <>{text}</>;
+  const re = new RegExp(`(${parts.map(esc).join('|')})`, 'gi');
+  return <>{text.split(re).map((seg, i) => parts.some(p => p.toLowerCase() === seg.toLowerCase())
+    ? <mark key={i} className="bg-rose-500/25 text-rose-200 rounded px-0.5 line-through decoration-rose-400">{seg}</mark>
+    : <span key={i}>{seg}</span>)}</>;
+};
+const GrammarCheck: React.FC = () => {
+  const [text, setText] = useState('');
+  const [checked, setChecked] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const [r, setR] = useState<GcResult | null>(null);
+  const [showPractice, setShowPractice] = useState(false);
+  const [revealed, setRevealed] = useState<number[]>([]);
+  const check = async () => {
+    const s = text.trim(); if (!s || busy) return;
+    setBusy(true); setErr(''); setR(null); setShowPractice(false); setRevealed([]);
+    try {
+      const res = await fetch('/api/sara/grammar-check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sentence: s }) });
+      if (!res.ok) throw new Error(String(res.status));
+      setR(await res.json()); setChecked(s);
+    } catch { setErr('ما قدرت أدقق الجملة الحين، حاول مرة ثانية.'); }
+    finally { setBusy(false); }
+  };
+  return (
+    <div data-testid="sara-grammar-check" className="flex-1 min-h-0 p-3 flex flex-col gap-2 bg-[#001a38] text-white overflow-hidden">
+      <p className="text-[11px] text-amber-200/90 font-bold">اكتب جملة بالإنجليزي وسارة تصححها وتشرح لك السبب.</p>
+      <div className="flex gap-2">
+        <input dir="ltr" value={text} maxLength={300} onChange={e => setText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') void check(); }}
+          placeholder="I am live here since 2 years" data-testid="grammar-input"
+          className="flex-1 min-w-0 rounded-xl bg-[#0a2d5c] border border-amber-400/40 px-3 py-2 text-[14px] font-bold text-white placeholder:text-white/30 outline-none focus:border-amber-400" />
+        <button onClick={() => void check()} disabled={!text.trim() || busy} data-testid="grammar-check-btn"
+          className="px-3 py-2 rounded-xl bg-amber-400 text-[#001a38] text-[13px] font-black disabled:opacity-40 shrink-0">{busy ? 'جاري التدقيق…' : 'دقّق'}</button>
+      </div>
+      {err && <p className="text-[12px] font-bold text-rose-300">{err}</p>}
+      {r && (
+        <div className="flex-1 min-h-0 flex flex-col gap-2">
+          {r.isCorrect ? (
+            <div className="rounded-xl bg-emerald-500/15 border border-emerald-400/40 p-2.5 flex items-center gap-2">
+              <CheckCircle2 size={18} className="text-emerald-300 shrink-0" />
+              <p className="text-[13px] font-black">جملتك صحيحة، أحسنت!</p>
+            </div>
+          ) : (
+            <>
+              <div className="rounded-xl bg-[#0a2d5c] border border-white/10 p-2.5">
+                <p className="text-[10px] text-amber-300 font-black mb-1">جملتك</p>
+                <p dir="ltr" className="text-[14px] font-bold text-start"><Marked text={checked} mistakes={r.mistakes} /></p>
+              </div>
+              <div className="rounded-xl bg-[#0a2d5c] border border-amber-400/50 p-2.5">
+                <p className="text-[10px] text-amber-300 font-black mb-1">التصحيح</p>
+                <p dir="ltr" data-testid="grammar-corrected" className="text-[15px] font-black text-emerald-200 text-start">{r.corrected}</p>
+              </div>
+              <ul className="grid gap-1">
+                {r.mistakes.slice(0, 3).map((m, i) => (
+                  <li key={i} className="rounded-lg bg-white/5 px-2.5 py-1.5 text-[12px] leading-snug">
+                    <span dir="ltr" className="font-black"><span className="text-rose-300 line-through">{m.wrong}</span> ← <span className="text-emerald-300">{m.right}</span></span>
+                    <span className="block text-white/85 font-bold">{m.reasonAr}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          <div className="flex items-center gap-2 flex-wrap">
+            {r.corrected && <SaraSetButton key={r.corrected} text={r.corrected} label="استمع لسارة" />}
+            {r.practice.length > 0 && !showPractice && <Btn tone="ghost" onClick={() => setShowPractice(true)} data-testid="grammar-practice-btn">تدرّب عليها</Btn>}
+          </div>
+          {showPractice && (
+            <div className="grid gap-1.5" data-testid="grammar-practice">
+              {r.practice.map((p, i) => (
+                <button key={i} onClick={() => setRevealed(v => v.includes(i) ? v : [...v, i])} className="rounded-lg bg-[#0a2d5c] border border-amber-400/30 px-2.5 py-1.5 text-start">
+                  <span dir="ltr" className="block text-[13px] font-bold">{i + 1}. {p.sentence}</span>
+                  {revealed.includes(i)
+                    ? <span dir="ltr" className="block text-[12px] font-black text-emerald-300">{p.answer}</span>
+                    : <span className="block text-[11px] text-amber-200/80 font-bold">صحّحها في بالك ثم اضغط للحل · {p.hintAr}</span>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 /** One-page Sara tool (same look as the track player). */
 export const SaraTools: React.FC<Props> = ({ tool, onClose, uid, unlockAll, onPlacementDone, onOpenTrack }) => {
   if (!tool) return null;
@@ -722,6 +813,7 @@ export const SaraTools: React.FC<Props> = ({ tool, onClose, uid, unlockAll, onPl
         {tool === 'roleplay' && <RolePlay {...p} />}
         {tool === 'pronunciation' && <Pronunciation {...p} />}
         {tool === 'voicecoach' && <VoiceCoach {...p} />}
+        {tool === 'grammar' && <GrammarCheck />}
       </div>
     </div>
   );
