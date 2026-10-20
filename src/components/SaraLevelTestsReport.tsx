@@ -1,9 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
-import { toPng } from 'html-to-image';
+import { toPng, getFontEmbedCSS } from 'html-to-image';
 import { db } from '../lib/firebase';
 import { ReportExportLayout, type ReportExportData } from './ReportExportLayout';
-import { loadWeeklyReportData } from './ParentWeeklyStepsReport';
+import { loadWeeklyReportData, type WeeklyReportData } from './ParentWeeklyStepsReport';
+
+// Font embedding is the slowest part of html-to-image: compute once per page and reuse.
+let fontCssPromise: Promise<string> | null = null;
+function preloadExportAssets(node?: HTMLElement | null) {
+  try { const im = new Image(); im.src = '/icon-512.png'; } catch { /* ignore */ }
+  if (!fontCssPromise && node) fontCssPromise = getFontEmbedCSS(node).catch(() => '');
+  return fontCssPromise;
+}
 import { loadTrackProgress } from '../lib/saraProgressSync';
 import { FOUNDATIONS_TRACK } from '../data/saraTracks/foundations';
 import { ADVANCED_TRACK } from '../data/saraTracks/advanced';
@@ -36,6 +44,16 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
   const [exporting, setExporting] = useState(false);
   const [exportMsg, setExportMsg] = useState<string | null>(null);
   const exportRef = useRef<HTMLDivElement>(null);
+  const [weekly, setWeekly] = useState<WeeklyReportData | null | undefined>(undefined);
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!studentId) return;
+    let alive = true;
+    setWeekly(undefined);
+    loadWeeklyReportData(studentId).then(w => { if (alive) setWeekly(w); }).catch(() => { if (alive) setWeekly(null); });
+    const t = setTimeout(() => preloadExportAssets(rootRef.current), 1500);
+    return () => { alive = false; clearTimeout(t); };
+  }, [studentId]);
   useEffect(() => {
     if (!studentId) return;
     getDoc(doc(db, 'users', studentId)).then(s => { const d: any = s.data() || {}; setWho({ name: d.displayName || 'الطالب', level: d.level || d.cefrLevel || d.placementLevel || undefined }); }).catch(() => {});
@@ -47,7 +65,8 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
     if (!studentId || exporting) return;
     setExporting(true); setExportMsg(null);
     try {
-      const wk = await loadWeeklyReportData(studentId).catch(() => null);
+      const t0 = performance.now();
+      const wk = weekly !== undefined ? weekly : await loadWeeklyReportData(studentId).catch(() => null);
       const lt = wk?.lastTest;
       setExportData({
         studentName: who.name, level: (who.level || level || '').toString().trim() || undefined,
@@ -58,14 +77,15 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
         calls: calls.slice(-5).reverse().map(c => ({ title: c.scenarioAr || c.scenario, date: fmt(c.at), duration: dur(c.seconds), turns: c.turns, words: c.words, verdict: c.review?.verdictAr, corrections: (c.review?.points || []).slice(0, 2).map(p => `«${p.said}» ← ${p.better}`), topic: c.topicAr || c.topicEn, focus: c.focus || [] })),
         passMark: LEVEL_TEST_PASS,
       });
-      await new Promise(r => setTimeout(r, 60));
-      try { await (document as any).fonts?.ready; } catch { /* ignore */ }
+      await new Promise(r => requestAnimationFrame(() => r(null)));
       const node = exportRef.current;
       if (!node) throw new Error('no node');
       const imgs = Array.from(node.querySelectorAll('img'));
       await Promise.all(imgs.map(im => im.complete ? null : new Promise(res => { im.onload = im.onerror = () => res(null); })));
       const H = Math.min(1920, Math.max(1350, Math.ceil(node.scrollHeight)));
-      const url = await toPng(node, { width: 1080, height: H, pixelRatio: 1, cacheBust: true, backgroundColor: '#002147' });
+      const fontEmbedCSS = (await preloadExportAssets(rootRef.current || node)) || undefined;
+      const url = await toPng(node, { width: 1080, height: H, pixelRatio: 1.5, cacheBust: false, backgroundColor: '#002147', fontEmbedCSS });
+      console.debug(`[report export] ${Math.round(performance.now() - t0)}ms`);
       const fileName = `تقرير-${who.name}-${new Date().toISOString().slice(0, 10)}.png`;
       const blob = await (await fetch(url)).blob();
       const file = new File([blob], fileName, { type: 'image/png' });
@@ -76,13 +96,13 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
       const a = document.createElement('a'); a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); a.remove();
       setExportMsg('تم تنزيل الصورة ✓');
     } catch (e) {
-      console.warn('report export failed', e); setExportMsg('تعذّر التصدير، حاول مرة ثانية');
+      console.warn('report export failed', e); setExportMsg(isRtl ? 'تعذّر تصدير الصورة، تأكد من الاتصال وحاول مرة ثانية' : 'Export failed, please try again');
     } finally { setExporting(false); }
   };
   const fmt = (ms: number) => new Date(ms).toLocaleDateString(isRtl ? 'ar-SA-u-nu-latn' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   const N = '#002147', G = '#C49E3A';
   return (
-    <div data-testid="sara-level-tests-report" dir={isRtl ? 'rtl' : 'ltr'} className="rounded-3xl p-4 sm:p-5 space-y-4 border border-[#C49E3A]/40 shadow-lg" style={{ background: `linear-gradient(160deg, ${N}, #001428)` }}>
+    <div ref={rootRef} data-testid="sara-level-tests-report" dir={isRtl ? 'rtl' : 'ltr'} className="rounded-3xl p-4 sm:p-5 space-y-4 border border-[#C49E3A]/40 shadow-lg" style={{ background: `linear-gradient(160deg, ${N}, #001428)` }}>
       <div className="flex items-center gap-2">
         <span className="w-9 h-9 rounded-xl bg-[#C49E3A]/15 border border-[#C49E3A]/40 flex items-center justify-center text-lg">🏁</span>
         <div className="flex-1 min-w-0">
@@ -90,7 +110,7 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
           <p className="text-[10.5px] font-bold text-white/60">{isRtl ? `درجة النجاح ${LEVEL_TEST_PASS}%` : `Pass mark ${LEVEL_TEST_PASS}%`}</p>
         </div>
         <button type="button" data-testid="report-export-btn" onClick={handleExport} disabled={exporting || !studentId} className="shrink-0 px-3 py-2 rounded-xl text-[11.5px] font-black disabled:opacity-50" style={{ background: G, color: N }}>
-          {exporting ? (isRtl ? 'جاري التجهيز…' : 'Preparing…') : (isRtl ? '🖼️ تصدير كصورة' : '🖼️ Export image')}
+          {exporting ? <span className="inline-flex items-center gap-1.5"><span className="w-3.5 h-3.5 border-2 border-[#002147] border-t-transparent rounded-full animate-spin" />{isRtl ? 'جاري التجهيز…' : 'Preparing…'}</span> : (isRtl ? '🖼️ تصدير كصورة' : '🖼️ Export image')}
         </button>
       </div>
       {exportMsg && <p className="text-[11px] font-bold text-[#F5E6B8] text-center">{exportMsg}</p>}

@@ -59,6 +59,10 @@ export async function loadWeeklyReportData(uid: string, parentUid: string = auth
   const since = Date.now() - 7 * DAY;
   const out: WeeklyReportData = { ...empty };
 
+  // All reads in parallel (independent queries)
+  let lvl: WeeklyReportData['lastTest'] = null;
+  await Promise.all([
+  (async () => {
   // 1) lesson results
   try {
     let snap;
@@ -90,23 +94,26 @@ export async function loadWeeklyReportData(uid: string, parentUid: string = auth
     out.weakest = ranked.length >= 2 ? ranked[0] : null;
   } catch (e) { console.debug('weekly report lessonResults note:', e); }
 
+  })(),
+  (async () => {
   // 2) latest level test (newer than lesson quiz wins)
   try {
     const lt = await getDocs(collection(db, 'users', uid, 'saraLevelTests'));
     lt.forEach(s => {
       const a: any = s.data();
       const at = Number(a.createdAtMs) || 0;
-      if (at && (!out.lastTest || at > out.lastTest.at) && typeof a.score === 'number') {
-        out.lastTest = { pct: Math.round(a.score), correct: Number(a.correct) || 0, total: Number(a.total) || 0, name: `اختبار ${a.levelTitleAr || a.levelId || 'المستوى'}`, at };
+      if (at && (!lvl || at > lvl.at) && typeof a.score === 'number') {
+        lvl = { pct: Math.round(a.score), correct: Number(a.correct) || 0, total: Number(a.total) || 0, name: `اختبار ${a.levelTitleAr || a.levelId || 'المستوى'}`, at };
       }
     });
   } catch (e) { console.debug('weekly report level tests note:', e); }
 
+  })(),
+  (async () => {
   // 3) Sara sessions + words
   try {
-    const mem = await getDoc(doc(db, 'tutorMemory', uid));
+    const [mem, ss] = await Promise.all([getDoc(doc(db, 'tutorMemory', uid)), getDocs(collection(db, 'tutorMemory', uid, 'sessions'))]);
     if (mem.exists()) out.words = ((mem.data() as any).wordsLearned || []).filter((w: any) => typeof w === 'string').slice(-8).reverse();
-    const ss = await getDocs(collection(db, 'tutorMemory', uid, 'sessions'));
     let mins = 0; let timed = 0;
     ss.forEach(s => {
       const d: any = s.data();
@@ -120,6 +127,8 @@ export async function loadWeeklyReportData(uid: string, parentUid: string = auth
     out.minutes = timed > 0 ? Math.round(mins) : null;
   } catch (e) { console.debug('weekly report sessions note:', e); }
 
+  })(),
+  (async () => {
   // 4) goal
   try {
     const u = await getDoc(doc(db, 'users', uid));
@@ -127,6 +136,9 @@ export async function loadWeeklyReportData(uid: string, parentUid: string = auth
     out.goal = Number.isInteger(g) && g >= 1 && g <= 14 ? g : null;
   } catch (e) { console.debug('weekly report goal note:', e); }
 
+  })(),
+  ]);
+  if (lvl && (!out.lastTest || (lvl as any).at > out.lastTest.at)) out.lastTest = lvl;
   return out;
 }
 
