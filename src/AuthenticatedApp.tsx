@@ -306,7 +306,6 @@ import { macroeconomicAuditsE1 } from './data/lessons/e_c2_2';
 import { existentialInquiryE1 } from './data/lessons/e_c2_3';
 import { linguisticFluidityE1 } from './data/lessons/e_c2_4';
 import { aestheticSynthesisE1 } from './data/lessons/e_c2_5';
-const AIOmniCompanion = lazy(() => import('./components/AIOmniCompanion').then(m => ({ default: m.AIOmniCompanion })));
 const GlobalCommandPalette = lazy(() => import('./components/GlobalCommandPalette').then(m => ({ default: m.GlobalCommandPalette })));
 const AdaptiveLearningPath = lazy(() => import('./components/AdaptiveLearningPath').then(m => ({ default: m.AdaptiveLearningPath })));
 const DynamicWorksheetGenerator = lazy(() => import('./components/DynamicWorksheetGenerator').then(m => ({ default: m.DynamicWorksheetGenerator })));
@@ -7741,12 +7740,6 @@ export default function AuthenticatedApp({
             </AnimatePresence>
           </main>
 
-          {/* Global Omnipresent AI Companion */}
-          {view !== 'sara-tutor' && view !== 'real-time-voice-call' && <AIOmniCompanion
-            isRtl={isRtl}
-            currentContext={`Active Academy Section: ${view}`}
-            onNavigateToView={(targetView) => setView(targetView as AppView)}
-          />}
 
           {/* Global Command Palette (Ctrl+K) */}
           <GlobalCommandPalette

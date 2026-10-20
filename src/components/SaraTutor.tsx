@@ -3339,6 +3339,17 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </div>
               <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">تحدي السرعة</span>
             </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+              <button
+                onClick={() => setSaraTool('grammar')}
+                data-testid="sara-grammar-tool"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-[#001a38] text-amber-300 border-amber-400"
+                aria-label="تدقيق نحوي"
+              >
+                <span className="text-[15px]">✍️</span>
+              </button>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">تدقيق نحوي</span>
+            </div>
             </div>
           </section>
           <section className="shrink-0 rounded-2xl bg-slate-50 border border-slate-200 px-2 pt-1.5 pb-1">
