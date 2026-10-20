@@ -99,6 +99,7 @@ const AdminDashboard = lazy(() => import('./components/AdminDashboard').then(m =
 const VideoLibrary = lazy(() => import('./components/VideoLibrary').then(m => ({ default: m.VideoLibrary })));
 const StoryLibrary = lazy(() => import('./components/StoryLibrary').then(m => ({ default: m.StoryLibrary })));
 const ParentAIInsights = lazy(() => import('./components/ParentAIInsights').then(m => ({ default: m.ParentAIInsights })));
+const ParentWeeklyStepsReport = lazy(() => import('./components/ParentWeeklyStepsReport').then(m => ({ default: m.ParentWeeklyStepsReport })));
 const ParentWeeklyReportCard = lazy(() => import('./components/ParentWeeklyReportCard').then(m => ({ default: m.ParentWeeklyReportCard })));
 const ProgressRoadmap = lazy(() => import('./components/ProgressRoadmap').then(m => ({ default: m.ProgressRoadmap })));
 const ReadingLesson = lazy(() => import('./components/ReadingLesson').then(m => ({ default: m.ReadingLesson })));
@@ -3583,6 +3584,12 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
             className="space-y-8"
           >
             {/* 📑 WEEKLY PROGRESS REPORT CARD FOR CURRENT CHILD */}
+            {currentStudent && (
+              <div id="parent-weekly-steps-report-section">
+                <ParentWeeklyStepsReport student={currentStudent} parentUid={profile.uid} isParentAdmin={profile.role === UserRole.ADMIN} />
+              </div>
+            )}
+
             <div id="parent-weekly-report-section">
               <ParentWeeklyReportCard
                 student={currentStudent}

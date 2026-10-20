@@ -118,6 +118,12 @@ service cloud.firestore {
             'role', 'credits', 'balance', 'points', 'xp', 'level',
             'linkedStudentIds', 'linkedStudentId', 'linkedParentIds', 'parentIds'
           ])
+        ) || (
+          // Linked parent may set ONLY the child's weekly lesson goal (1..14)
+          isParentOf(userId) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['weeklyGoalLessons']) &&
+          request.resource.data.weeklyGoalLessons is int &&
+          request.resource.data.weeklyGoalLessons >= 1 && request.resource.data.weeklyGoalLessons <= 14
         )
       );
 
