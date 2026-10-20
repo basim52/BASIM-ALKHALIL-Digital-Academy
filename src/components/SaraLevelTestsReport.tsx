@@ -54,8 +54,8 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
         dateLabel: new Date().toLocaleDateString('ar-SA-u-nu-latn', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Riyadh' }),
         weekly: wk ? { done: wk.completed.length, goal: wk.goal, minutes: wk.minutes, lastTest: lt ? `${lt.pct}%` : null, weakest: wk.weakest ? `${wk.weakest.name} ${wk.weakest.avg}%` : null } : null,
         tracks: ALL_TRACKS.map(t => ({ title: t.titleAr, done: doneOf(t), total: t.lessons.length })),
-        levelTests: (rows || []).map(r => ({ title: `${r.trackTitleAr} · ${r.levelTitleAr}`, passed: r.best.passed, latest: r.latest.score, best: r.best.score, attempts: r.attempts, weak: r.latest.weakLessons.map(w => w.titleAr) })),
-        calls: calls.slice(-5).reverse().map(c => ({ title: c.scenarioAr || c.scenario, date: fmt(c.at), duration: dur(c.seconds), turns: c.turns, words: c.words })),
+        levelTests: (rows || []).map(r => ({ title: `${r.trackTitleAr} · ${r.levelTitleAr}`, passed: r.best.passed, latest: r.latest.score, best: r.best.score, attempts: r.attempts, date: fmt(r.latest.createdAtMs), weak: r.latest.weakLessons.map(w => `${w.order}. ${w.titleAr}`) })),
+        calls: calls.slice(-5).reverse().map(c => ({ title: c.scenarioAr || c.scenario, date: fmt(c.at), duration: dur(c.seconds), turns: c.turns, words: c.words, verdict: c.review?.verdictAr, corrections: (c.review?.points || []).slice(0, 2).map(p => `«${p.said}» ← ${p.better}`), topic: c.topicAr || c.topicEn, focus: c.focus || [] })),
         passMark: LEVEL_TEST_PASS,
       });
       await new Promise(r => setTimeout(r, 60));
@@ -64,7 +64,8 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
       if (!node) throw new Error('no node');
       const imgs = Array.from(node.querySelectorAll('img'));
       await Promise.all(imgs.map(im => im.complete ? null : new Promise(res => { im.onload = im.onerror = () => res(null); })));
-      const url = await toPng(node, { width: 1080, height: 1350, pixelRatio: 1, cacheBust: true, backgroundColor: '#002147' });
+      const H = Math.min(1920, Math.max(1350, Math.ceil(node.scrollHeight)));
+      const url = await toPng(node, { width: 1080, height: H, pixelRatio: 1, cacheBust: true, backgroundColor: '#002147' });
       const fileName = `تقرير-${who.name}-${new Date().toISOString().slice(0, 10)}.png`;
       const blob = await (await fetch(url)).blob();
       const file = new File([blob], fileName, { type: 'image/png' });
