@@ -30,7 +30,7 @@ export const ReportExportLayout = React.forwardRef<HTMLDivElement, { data: Repor
   return (
     <div ref={ref} dir="rtl" style={{ width: 1080, height: 1350, boxSizing: 'border-box', padding: 56, fontFamily: font, color: '#fff', display: 'flex', flexDirection: 'column', gap: 24, background: `linear-gradient(160deg, ${NAVY} 0%, #001428 100%)`, position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', inset: 18, border: `3px solid ${GOLD}`, borderRadius: 40, pointerEvents: 'none' }} />
-      {data.sampleLabel && <div style={{ position: 'absolute', top: 40, left: 40, background: '#b91c1c', color: '#fff', fontWeight: 900, fontSize: 26, padding: '6px 18px', borderRadius: 12 }}>{data.sampleLabel}</div>}
+      {data.sampleLabel && <div style={{ position: 'absolute', bottom: 40, left: 40, background: '#b91c1c', color: '#fff', fontWeight: 900, fontSize: 26, padding: '6px 18px', borderRadius: 12 }}>{data.sampleLabel}</div>}
       <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
         <img src={logoSrc} alt="" width={110} height={110} style={{ borderRadius: 26, border: `3px solid ${GOLD}` }} />
         <div style={{ flex: 1 }}>
@@ -59,7 +59,7 @@ export const ReportExportLayout = React.forwardRef<HTMLDivElement, { data: Repor
           ))}
         </div>
       </div>
-      <div style={{ ...card, flex: 1, minHeight: 0, overflow: 'hidden' }}>
+      <div style={{ ...card, flexShrink: 0 }}>
         <p style={h}>اختبارات نهاية المستوى <span style={{ fontSize: 20, color: '#ffffffa0' }}>(النجاح {data.passMark}%)</span></p>
         {tracks.length > 0 && <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>{tracks.map(t => (
           <div key={t.title} style={{ flex: 1, background: NAVY, borderRadius: 16, padding: '10px 12px' }}>
@@ -67,7 +67,7 @@ export const ReportExportLayout = React.forwardRef<HTMLDivElement, { data: Repor
             <p style={{ margin: '2px 0 6px', fontSize: 24, fontWeight: 900, color: GOLD }}>{t.done}/{t.total} درس</p>
             <div style={{ height: 8, background: '#ffffff22', borderRadius: 8 }}><div style={{ height: 8, width: `${Math.min(100, (t.done / t.total) * 100)}%`, background: GOLD, borderRadius: 8 }} /></div>
           </div>))}</div>}
-        {data.levelTests.length === 0 ? <p style={{ fontSize: 24, color: '#ffffffb0', margin: 0 }}>— لا توجد اختبارات مستوى بعد</p> : data.levelTests.slice(0, 2).map(t => (
+        {data.levelTests.length === 0 ? <p style={{ fontSize: 24, color: '#ffffffb0', margin: 0 }}>— لا توجد اختبارات مستوى بعد</p> : data.levelTests.slice(0, 3).map(t => (
           <div key={t.title} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '10px 0', borderTop: `1px solid ${GOLD}33` }}>
             <span style={{ fontSize: 24, fontWeight: 900, flex: 1 }}>{t.title}</span>
             <span style={{ background: t.passed ? GOLD : '#7f1d1d', color: t.passed ? NAVY : '#fff', fontWeight: 900, fontSize: 20, padding: '4px 14px', borderRadius: 999 }}>{t.passed ? 'ناجح' : 'لم ينجح بعد'}</span>
