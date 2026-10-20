@@ -3385,7 +3385,7 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-[2.5rem] p-6 sm:p-10 shadow-xl border border-slate-100 text-center relative overflow-hidden"
+          className="bg-[#002147] rounded-[2.5rem] p-6 sm:p-10 shadow-xl border border-[#C49E3A]/50 text-center relative overflow-hidden"
         >
           {linkedStudents.length > 0 && (
             <button 
@@ -3394,18 +3394,18 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
                 setError('');
                 setSuccessMsg('');
               }}
-              className={`absolute top-6 ${isRtl ? 'left-6' : 'right-6'} w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors cursor-pointer`}
+              className={`absolute top-6 ${isRtl ? 'left-6' : 'right-6'} w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer`}
             >
               <X size={18} />
             </button>
           )}
-          <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-sm">
+          <div className="w-20 h-20 bg-[#C49E3A]/15 text-[#C49E3A] rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-sm">
             <Users size={38} />
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-[#002147] mb-2">
+          <h2 className="text-2xl sm:text-3xl font-black text-[#C49E3A] mb-2">
             {isRtl ? "مرحباً بك في بوابة أولياء الأمور 🌟" : "Welcome to the Parent Companion Portal 🌟"}
           </h2>
-          <p className="text-slate-500 mb-6 leading-relaxed text-xs sm:text-sm max-w-lg mx-auto">
+          <p className="text-white/75 mb-6 leading-relaxed text-xs sm:text-sm max-w-lg mx-auto">
             {isRtl 
               ? "لم يتم ربط أي حساب طالب بعد. اربط حساب ابنك لتفعيل المتابعة الأكاديمية والتقرير الأسبوعي الشامل 📊."
               : "No student profile is currently linked. Connect your child using their one-time code to view weekly reports and track progress."}
@@ -3413,32 +3413,32 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
 
           {/* Friendly 3-Step Guide */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-6 text-right max-w-2xl mx-auto" dir={isRtl ? 'rtl' : 'ltr'}>
-            <div className="p-3.5 bg-blue-50/70 border border-blue-100 rounded-2xl">
-              <div className="w-7 h-7 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center mb-2">1</div>
-              <h4 className="text-xs font-black text-[#002147] mb-1">
+            <div className="p-3.5 bg-[#0a2d5c] border border-[#C49E3A]/40 rounded-2xl">
+              <div className="w-7 h-7 rounded-xl bg-[#C49E3A] text-[#002147] font-black text-xs flex items-center justify-center mb-2">1</div>
+              <h4 className="text-xs font-black text-[#C49E3A] mb-1">
                 {isRtl ? 'فتح حساب الطالب' : 'Open Student App'}
               </h4>
-              <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
+              <p className="text-[11px] text-white/75 font-medium leading-relaxed">
                 {isRtl ? 'يدخل ابنك لحسابه في أكاديمية باسم الخليل' : 'Your child logs in to their academy account'}
               </p>
             </div>
 
-            <div className="p-3.5 bg-amber-50/70 border border-amber-100 rounded-2xl">
-              <div className="w-7 h-7 rounded-xl bg-amber-500 text-white font-black text-xs flex items-center justify-center mb-2">2</div>
-              <h4 className="text-xs font-black text-[#002147] mb-1">
+            <div className="p-3.5 bg-[#0a2d5c] border border-[#C49E3A]/40 rounded-2xl">
+              <div className="w-7 h-7 rounded-xl bg-[#C49E3A] text-[#002147] font-black text-xs flex items-center justify-center mb-2">2</div>
+              <h4 className="text-xs font-black text-[#C49E3A] mb-1">
                 {isRtl ? 'توليد كود الربط' : 'Generate Code'}
               </h4>
-              <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
+              <p className="text-[11px] text-white/75 font-medium leading-relaxed">
                 {isRtl ? 'يضغط على "ربط ولي الأمر 👨‍👧‍👦" لإنشاء كود 6 خانات' : 'Click "Link Parent" on home to generate a 6-char code'}
               </p>
             </div>
 
-            <div className="p-3.5 bg-emerald-50/70 border border-emerald-100 rounded-2xl">
-              <div className="w-7 h-7 rounded-xl bg-emerald-600 text-white font-black text-xs flex items-center justify-center mb-2">3</div>
-              <h4 className="text-xs font-black text-[#002147] mb-1">
+            <div className="p-3.5 bg-[#0a2d5c] border border-[#C49E3A]/40 rounded-2xl">
+              <div className="w-7 h-7 rounded-xl bg-[#C49E3A] text-[#002147] font-black text-xs flex items-center justify-center mb-2">3</div>
+              <h4 className="text-xs font-black text-[#C49E3A] mb-1">
                 {isRtl ? 'إدخال الكود هنا' : 'Enter Code Here'}
               </h4>
-              <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
+              <p className="text-[11px] text-white/75 font-medium leading-relaxed">
                 {isRtl ? 'أدخل الكود أدناه لبدء المتابعة وتفعيل التقارير' : 'Enter the code below to link and activate weekly report'}
               </p>
             </div>
@@ -3499,8 +3499,8 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
             </button>
           </div>
           
-          <div className="mt-8 p-4 sm:p-5 bg-slate-50 rounded-2xl border border-dashed border-slate-200 max-w-md mx-auto">
-            <p className="text-xs text-slate-500 font-medium leading-relaxed">
+          <div className="mt-8 p-4 sm:p-5 bg-[#0a2d5c] rounded-2xl border border-dashed border-[#C49E3A]/40 max-w-md mx-auto">
+            <p className="text-xs text-white/75 font-medium leading-relaxed">
               💡 {isRtl 
                 ? 'أكواد الربط مؤمنة بالكامل وصالحة لمدة 24 ساعة فقط للاستخدام لمرة واحدة من قِبل ولي الأمر.' 
                 : 'Invite codes are fully secure and valid for 24 hours for one-time redemption by a parent.'}
@@ -3590,14 +3590,15 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
               </div>
             )}
 
-            <div id="parent-weekly-report-section">
+            {/* Old ParentWeeklyReportCard hidden: replaced by ParentWeeklyStepsReport (real data only) */}
+            {false && <div id="parent-weekly-report-section">
               <ParentWeeklyReportCard
                 student={currentStudent}
                 parentUid={profile.uid}
                 isParentAdmin={profile.role === UserRole.ADMIN}
                 lang={lang}
               />
-            </div>
+            </div>}
 
             {/* 👩‍🏫 SARA AI TUTOR SESSIONS REPORT CARD PER LINKED CHILD */}
             {currentStudent && (
