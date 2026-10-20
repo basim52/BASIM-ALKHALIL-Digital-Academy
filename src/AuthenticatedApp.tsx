@@ -4216,6 +4216,27 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
               </div>
               <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping" />
             </div>
+            <div className="flex flex-wrap items-center gap-2 pt-1" data-testid="parent-header-children">
+              <button
+                type="button"
+                data-testid="parent-link-child-btn"
+                onClick={() => { setShowAddStudent(true); setError(''); setSuccessMsg(''); }}
+                className="bg-[#C49E3A] hover:bg-[#d8b34e] text-[#002147] px-3.5 py-1.5 rounded-full text-[12px] font-black shadow-md flex items-center gap-1"
+              >
+                <Plus size={14} /> {isRtl ? 'ربط ابن' : 'Link child'}
+              </button>
+              {linkedStudents.map((st, i) => (
+                <button
+                  key={st.uid || i}
+                  type="button"
+                  onClick={() => setSelectedStudentIndex(i)}
+                  className={`px-3 py-1.5 rounded-full text-[12px] font-black border flex items-center gap-1.5 ${selectedStudentIndex === i ? 'bg-white/15 border-[#C49E3A] text-white' : 'bg-black/20 border-white/15 text-blue-100'}`}
+                >
+                  <span className="max-w-[110px] truncate">{st.displayName || (isRtl ? 'الطالب' : 'Student')}</span>
+                  <span className="text-[10px] text-[#C49E3A]">{st.level || 'A1'}</span>
+                </button>
+              ))}
+            </div>
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white mb-2 leading-tight">
               {isRtl ? 'بوابة المتابعة الأكاديمية الذكية' : 'Smart Academic Companion Portal'}
             </h1>
