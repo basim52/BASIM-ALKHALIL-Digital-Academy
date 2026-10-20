@@ -40,8 +40,7 @@ export const ReportExportLayout = React.forwardRef<HTMLDivElement, { data: Repor
       </div>
       <div style={{ ...card, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <p style={{ margin: 0, fontSize: 22, color: '#ffffffb0', fontWeight: 700 }}>تقرير الطالب</p>
-          <p style={{ margin: '2px 0 0', fontSize: 40, fontWeight: 900 }}>{data.studentName}</p>
+          <p style={{ margin: 0, fontSize: 40, fontWeight: 900 }}>{data.studentName}</p>
         </div>
         <div style={{ textAlign: 'left' }}>
           {data.level && <span style={{ background: GOLD, color: NAVY, fontWeight: 900, fontSize: 26, padding: '6px 18px', borderRadius: 999 }}>المستوى {data.level}</span>}
