@@ -1,4 +1,4 @@
-const CACHE_NAME = 'alkhalil-academy-v2';
+const CACHE_NAME = 'alkhalil-academy-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/manifest.json',
@@ -31,8 +31,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   
+  const isPage = event.request.mode === 'navigate' || (event.request.headers.get('accept') || '').includes('text/html');
   event.respondWith(
-    fetch(event.request)
+    fetch(isPage ? new Request(event.request, { cache: 'no-store' }) : event.request)
       .then((response) => {
         // Clone and cache successful responses
         if (response && response.status === 200 && response.type === 'basic') {
