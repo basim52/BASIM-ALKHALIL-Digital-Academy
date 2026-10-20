@@ -21,7 +21,7 @@ const h: React.CSSProperties = { color: GOLD, fontSize: 30, fontWeight: 900, mar
 export const ReportExportLayout = React.forwardRef<HTMLDivElement, { data: ReportExportData; logoSrc: string }>(({ data, logoSrc }, ref) => {
   const w = data.weekly;
   const tiles: [string, string][] = [
-    ['الدروس المنجزة (7 أيام)', w ? (w.goal ? `${w.done} / ${w.goal}` : String(w.done)) : '—'],
+    ['الدروس المنجزة (7 أيام)', w ? (w.goal ? `${w.done} من ${w.goal}` : String(w.done)) : '—'],
     ['الدقائق مع سارة', w && w.minutes !== null ? `${w.minutes} د` : '—'],
     ['آخر نتيجة اختبار', w?.lastTest || '—'],
     ['أضعف مهارة', w?.weakest || '—'],
@@ -64,7 +64,7 @@ export const ReportExportLayout = React.forwardRef<HTMLDivElement, { data: Repor
         {tracks.length > 0 && <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>{tracks.map(t => (
           <div key={t.title} style={{ flex: 1, background: NAVY, borderRadius: 16, padding: '10px 12px' }}>
             <p style={{ margin: 0, fontSize: 18, color: '#ffffffc0', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.title}</p>
-            <p style={{ margin: '2px 0 6px', fontSize: 24, fontWeight: 900, color: GOLD }}>{t.done}/{t.total} درس</p>
+            <p style={{ margin: '2px 0 6px', fontSize: 24, fontWeight: 900, color: GOLD }}>{t.done} من {t.total} درس</p>
             <div style={{ height: 8, background: '#ffffff22', borderRadius: 8 }}><div style={{ height: 8, width: `${Math.min(100, (t.done / t.total) * 100)}%`, background: GOLD, borderRadius: 8 }} /></div>
           </div>))}</div>}
         {data.levelTests.length === 0 ? <p style={{ fontSize: 24, color: '#ffffffb0', margin: 0 }}>— لا توجد اختبارات مستوى بعد</p> : data.levelTests.slice(0, 3).map(t => (

@@ -101,7 +101,7 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
             return (
               <div key={t.id} className={`rounded-2xl px-2.5 py-2 border ${full ? 'border-[#C49E3A]' : 'border-[#C49E3A]/25'}`} style={{ background: '#0a2d5c' }}>
                 <p className="text-[10px] font-bold text-white/70 truncate">{t.titleAr}</p>
-                <p className="text-[13px] font-black text-[#C49E3A] leading-tight">{done}/{t.lessons.length} <span className="text-[10px] text-white/60">{isRtl ? 'درس' : 'lessons'}</span>{full && ' ✓'}</p>
+                <p className="text-[13px] font-black text-[#C49E3A] leading-tight">{done} {isRtl ? 'من' : '/'} {t.lessons.length} <span className="text-[10px] text-white/60">{isRtl ? 'درس' : 'lessons'}</span>{full && ' ✓'}</p>
                 <div className="h-1.5 rounded-full bg-white/10 mt-1"><div className="h-full rounded-full bg-[#C49E3A]" style={{ width: `${(done / t.lessons.length) * 100}%` }} /></div>
               </div>
             );
