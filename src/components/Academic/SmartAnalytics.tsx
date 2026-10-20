@@ -484,7 +484,7 @@ export const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({
           </div>
 
           {/* Sara end-of-level tests (all 5 tracks): latest/best, pass/fail, weak lessons */}
-          <SaraLevelTestsReport studentId={studentId} isRtl={isRtl} />
+          <SaraLevelTestsReport studentId={studentId} isRtl={isRtl} level={level} />
 
           {/* 12 ACADEMIC PILLARS MATRIX - Fully linked to each section */}
           <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200/80 shadow-xs space-y-6">

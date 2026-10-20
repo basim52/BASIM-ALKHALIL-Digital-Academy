@@ -17,7 +17,7 @@ import { loadCallRecords, type CallRecord } from '../lib/saraCallLink';
 import { loadLevelTestAttempts, summarizeLevelTests, LEVEL_TEST_PASS, type LevelTestSummary } from '../lib/saraLevelTests';
 
 /** Sara end-of-level tests per track/level: latest + best score, pass/fail, weak lessons, date. Used in parent report + analytics. */
-export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolean }> = ({ studentId, isRtl = true }) => {
+export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolean; level?: string }> = ({ studentId, isRtl = true, level }) => {
   const [rows, setRows] = useState<LevelTestSummary[] | null>(null);
   const [prog, setProg] = useState<Record<string, number>>({});
   const [exam, setExam] = useState<ExamResults>({});
@@ -38,7 +38,7 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
   const exportRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!studentId) return;
-    getDoc(doc(db, 'users', studentId)).then(s => { const d: any = s.data() || {}; setWho({ name: d.displayName || 'الطالب', level: d.level || undefined }); }).catch(() => {});
+    getDoc(doc(db, 'users', studentId)).then(s => { const d: any = s.data() || {}; setWho({ name: d.displayName || 'الطالب', level: d.level || d.cefrLevel || d.placementLevel || undefined }); }).catch(() => {});
   }, [studentId]);
   const ALL_TRACKS = [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK, ...NEW_SKILL_TRACKS];
   const doneOf = (t: { id: string; lessons: unknown[] }) => Math.min(t.lessons.length, Math.max(0, (Number(prog[t.id]) || 1) - 1));
@@ -50,7 +50,7 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
       const wk = await loadWeeklyReportData(studentId).catch(() => null);
       const lt = wk?.lastTest;
       setExportData({
-        studentName: who.name, level: who.level,
+        studentName: who.name, level: (who.level || level || '').toString().trim() || undefined,
         dateLabel: new Date().toLocaleDateString('ar-SA-u-nu-latn', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Riyadh' }),
         weekly: wk ? { done: wk.completed.length, goal: wk.goal, minutes: wk.minutes, lastTest: lt ? `${lt.pct}%` : null, weakest: wk.weakest ? `${wk.weakest.name} ${wk.weakest.avg}%` : null } : null,
         tracks: ALL_TRACKS.map(t => ({ title: t.titleAr, done: doneOf(t), total: t.lessons.length })),
@@ -78,7 +78,7 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
       console.warn('report export failed', e); setExportMsg('تعذّر التصدير، حاول مرة ثانية');
     } finally { setExporting(false); }
   };
-  const fmt = (ms: number) => new Date(ms).toLocaleDateString(isRtl ? 'ar-SA' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const fmt = (ms: number) => new Date(ms).toLocaleDateString(isRtl ? 'ar-SA-u-nu-latn' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   const N = '#002147', G = '#C49E3A';
   return (
     <div data-testid="sara-level-tests-report" dir={isRtl ? 'rtl' : 'ltr'} className="rounded-3xl p-4 sm:p-5 space-y-4 border border-[#C49E3A]/40 shadow-lg" style={{ background: `linear-gradient(160deg, ${N}, #001428)` }}>

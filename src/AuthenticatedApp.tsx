@@ -3609,7 +3609,7 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
                   lang={lang}
                   isRtl={isRtl}
                 />
-                <div className="mt-4"><SaraLevelTestsReport studentId={currentStudent.uid} isRtl={isRtl} /></div>
+                <div className="mt-4"><SaraLevelTestsReport studentId={currentStudent.uid} isRtl={isRtl} level={currentStudent.level} /></div>
               </div>
             )}
 
@@ -5986,7 +5986,7 @@ export default function AuthenticatedApp({
           planItems={globalPlan?.planItems}
           studentName={globalPlan?.studentName || currentStudentName}
           studentId={currentStudentId}
-          level={userProfile?.level || 'B1'}
+          level={((userProfile?.role === 'parent' || userProfile?.role === 'admin') && activeStudentId && activeStudentProfile ? (activeStudentProfile as any).level : userProfile?.level) || 'B1'}
           onNavigateToSection={(target) => setView(target as any)}
         />
       );
