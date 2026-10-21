@@ -2,7 +2,9 @@ import type { SaraTrack } from '../saraTracks/foundations';
 import { NOURA_L1, type TutorLesson } from './nouraL1';
 import { NOURA_L2 } from './nouraL2';
 import { MOHAMMED_L1 } from './mohammedL1';
+import { MOHAMMED_L2 } from './mohammedL2';
 import { ALI_L1 } from './aliL1';
+import { ALI_L2 } from './aliL2';
 /** Specialty tutor tracks. Kept OUT of SARA_TRACKS so Sara's plan/basket/unlocking/level tests are unaffected. Level map: docs/tutor-curricula-levels.md */
 /** Level 1 was written with most answers in position B: move each correct answer to a stable pseudo-random position (swap only, same options). */
 const spread = (lessons: TutorLesson[]): TutorLesson[] => lessons.map(l => {
@@ -28,14 +30,20 @@ export const NOURA_TRACK: TutorTrack = {
 export const MOHAMMED_TRACK: TutorTrack = {
   id: 'tutor-mohammed', personaId: 'business',
   titleAr: 'إنجليزية الأعمال مع محمد', titleEn: 'Business English',
-  levels: [{ id: 'l1', titleAr: 'المستوى الأول: التواصل المهني اليومي', titleEn: 'Level 1: Everyday professional communication' }],
-  lessons: MOHAMMED_L1,
+  levels: [
+    { id: 'l1', titleAr: 'المستوى الأول: التواصل المهني اليومي', titleEn: 'Level 1: Everyday professional communication' },
+    { id: 'l2', titleAr: 'المستوى الثاني: الاجتماعات والعمل الجماعي', titleEn: 'Level 2: Meetings and teamwork' },
+  ],
+  lessons: [...MOHAMMED_L1, ...MOHAMMED_L2],
 };
 export const ALI_TRACK: TutorTrack = {
   id: 'tutor-ali', personaId: 'exams',
   titleAr: 'استراتيجيات IELTS مع علي', titleEn: 'IELTS Strategies',
-  levels: [{ id: 'l1', titleAr: 'المستوى الأول: فهم الاختبار وأساسيات المهارات', titleEn: 'Level 1: The test and first strategies' }],
-  lessons: ALI_L1,
+  levels: [
+    { id: 'l1', titleAr: 'المستوى الأول: فهم الاختبار وأساسيات المهارات', titleEn: 'Level 1: The test and first strategies' },
+    { id: 'l2', titleAr: 'المستوى الثاني: الكتابة Task 1 و Task 2', titleEn: 'Level 2: Writing Task 1 and Task 2' },
+  ],
+  lessons: [...ALI_L1, ...ALI_L2],
 };
 export const TUTOR_TRACKS: TutorTrack[] = [NOURA_TRACK, MOHAMMED_TRACK, ALI_TRACK];
 export type { TutorLesson };
