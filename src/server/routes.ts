@@ -1403,7 +1403,16 @@ RESPOND STRICTLY IN VALID JSON FORMAT with the following schema:
           const candidates = (response as any).candidates;
           const audioPart = candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData?.mimeType?.includes("audio") || p.inlineData);
           if (audioPart && audioPart.inlineData?.data) {
-            const audioData = audioPart.inlineData.data;
+            let audioData: string = audioPart.inlineData.data;
+            // Gemini TTS returns raw 24 kHz mono 16-bit PCM: wrap it as WAV so every browser <audio> can play it.
+            const pcm = Buffer.from(audioData, "base64");
+            if (pcm.subarray(0, 4).toString("ascii") !== "RIFF") {
+              const h = Buffer.alloc(44);
+              h.write("RIFF", 0); h.writeUInt32LE(36 + pcm.length, 4); h.write("WAVE", 8); h.write("fmt ", 12);
+              h.writeUInt32LE(16, 16); h.writeUInt16LE(1, 20); h.writeUInt16LE(1, 22); h.writeUInt32LE(24000, 24);
+              h.writeUInt32LE(48000, 28); h.writeUInt16LE(2, 32); h.writeUInt16LE(16, 34); h.write("data", 36); h.writeUInt32LE(pcm.length, 40);
+              audioData = Buffer.concat([h, pcm]).toString("base64");
+            }
             if (ttsAudioCache.size > 300) {
               const firstKey = ttsAudioCache.keys().next().value;
               if (firstKey) ttsAudioCache.delete(firstKey);
@@ -1411,9 +1420,10 @@ RESPOND STRICTLY IN VALID JSON FORMAT with the following schema:
             ttsAudioCache.set(cacheKey, audioData);
             return audioData;
           }
+          console.error(`[TTS] ${model}: no audio in response (finish: ${candidates?.[0]?.finishReason || "?"})`);
         } catch (err: any) {
           const msg = String(err?.message || "");
-          logToFile(`[TTS] ${model} attempt ${attempt + 1} (${targetVoice}): ${msg.slice(0, 300)}`);
+          console.error(`[TTS] ${model} attempt ${attempt + 1} (${targetVoice}): ${msg.slice(0, 300)}`);
           if (msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED") || err?.status === 429) {
             // per-day quota → block this model until Google's retryDelay; per-minute → 60s. Then try the next model.
             const daily = /per_day|PerDay/.test(msg);
@@ -2463,7 +2473,7 @@ ${context && !free ? `What this student needs (real data from the app): ${String
       send({ t: "s", i, text: sentence });
       if (withAudio) {
         const p = generateSaraSpeechAudio(sentence, "Kore").catch(() => null);
-        audioChain = audioChain.then(async () => { const a = await p; if (a && !firstAudioMs) firstAudioMs = Date.now() - t0; send({ t: "a", i, audio: a }); });
+        audioChain = audioChain.then(async () => { const a = await p; if (a && !firstAudioMs) firstAudioMs = Date.now() - t0; if (!a) console.error(`[call-turn] no TTS audio for sentence ${i}`); send({ t: "a", i, audio: a }); });
       }
     };
     let lastCallErr = "";
