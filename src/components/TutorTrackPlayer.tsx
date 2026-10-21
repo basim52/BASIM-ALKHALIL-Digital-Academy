@@ -77,16 +77,21 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
     return shell(
       <><p className="text-[10px] text-amber-300 font-bold">{persona.emoji} {persona.nameAr}</p><p className="text-[13px] font-black truncate">{track.titleAr}</p></>,
       <div className="flex-1 min-h-0 overflow-y-auto grid gap-1.5 content-start" data-testid="tutor-lessons">
-        {track.lessons.map(l => {
+        {track.lessons.map((l, idx) => {
           const open = l.order <= unlocked;
+          const lvl = track.levels?.find(v => v.id === l.levelId);
+          const showLevel = !!lvl && (track.levels?.length || 0) > 1 && (idx === 0 || track.lessons[idx - 1].levelId !== l.levelId);
           return (
-            <button key={l.id} disabled={!open} onClick={() => { setLesson(l); setStep({ k: 'board' }); const cc = l.content!; v.play(`${cc.explanationAr} ${cc.example.map(e => e.en).join('. ')}`); setPicked(null); setCheckWrong(false); setCorrect(0); }}
+            <React.Fragment key={l.id}>
+            {showLevel && <p className="mt-2 first:mt-0 px-1 text-[12px] font-black text-amber-300" data-testid="tutor-level-head">{lvl!.titleAr}</p>}
+            <button disabled={!open} onClick={() => { setLesson(l); setStep({ k: 'board' }); const cc = l.content!; v.play(`${cc.explanationAr} ${cc.example.map(e => e.en).join('. ')}`); setPicked(null); setCheckWrong(false); setCorrect(0); }}
               className={`flex items-center gap-2 rounded-xl px-3 py-2 text-start border ${open ? 'bg-[#0a2d5c] border-amber-400/40' : 'bg-white/5 border-white/10 opacity-60'}`}>
               <span className="w-7 h-7 shrink-0 rounded-full bg-amber-400 text-[#001a38] text-[12px] font-black flex items-center justify-center">{l.order}</span>
               <span className="flex-1 min-w-0"><span className="block text-[13px] font-black truncate">{l.titleAr}</span><span dir="ltr" className="block text-[11px] text-white/60 font-bold truncate text-start">{l.titleEn}</span></span>
               {!open && <Lock size={14} className="text-white/50 shrink-0" />}
               {l.order < unlocked && <CheckCircle2 size={14} className="text-emerald-300 shrink-0" />}
             </button>
+            </React.Fragment>
           );
         })}
       </div>
