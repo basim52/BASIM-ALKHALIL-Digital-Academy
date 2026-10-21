@@ -209,3 +209,8 @@
   color: #ffffff;
 }
 
+
+/* Arabic + English lines on the tutor board: each paragraph takes the direction of its first letter (Arabic lines read right-to-left, punctuation in place). */
+.magic-whiteboard-inner .tl-rich-text,
+.magic-whiteboard-inner .tl-rich-text p,
+.magic-whiteboard-inner .tl-text-content { unicode-bidi: plaintext; text-align: start; }

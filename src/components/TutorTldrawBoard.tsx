@@ -29,7 +29,15 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
   const [wide, setWide] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 900);
   const [showAvatar, setShowAvatar] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 900);
   const [expanded, setExpanded] = useState(false);
-  useEffect(() => { const f = () => setWide(window.innerWidth >= 900); window.addEventListener('resize', f); return () => window.removeEventListener('resize', f); }, []);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  // Docked avatar only when the BOARD itself is wide (not the window): narrow lesson pages on desktop keep the floating avatar.
+  useEffect(() => {
+    const el = rootRef.current;
+    const f = () => { const w = el ? el.getBoundingClientRect().width : window.innerWidth; setWide(w >= 900); };
+    f();
+    if (el && typeof ResizeObserver !== 'undefined') { const ro = new ResizeObserver(f); ro.observe(el); return () => ro.disconnect(); }
+    window.addEventListener('resize', f); return () => window.removeEventListener('resize', f);
+  }, []);
 
   const fit = (editor: Editor) => { try { editor.zoomToFit({ animation: { duration: 200 } }); if (editor.getZoomLevel() > 1) editor.resetZoom(editor.getViewportScreenCenter(), { animation: { duration: 0 } }); } catch { /* ignore */ } };
 
@@ -97,7 +105,7 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
   );
 
   return (
-    <div data-testid="tldraw-board" className={`${expanded ? 'fixed inset-0 z-[400]' : 'w-full h-full'} flex ${wide ? 'flex-row' : 'flex-col'} gap-2 bg-white rounded-2xl border-2 border-amber-400/70 overflow-hidden`} dir="rtl">
+    <div ref={rootRef} data-testid="tldraw-board" className={`${expanded ? 'fixed inset-0 z-[400]' : 'w-full h-full'} flex ${wide ? 'flex-row' : 'flex-col'} gap-2 bg-white rounded-2xl border-2 border-amber-400/70 overflow-hidden`} dir="rtl">
       {wide && showAvatar && <div className="w-[320px] shrink-0 min-h-0 overflow-hidden p-2">{avatar}</div>}
       <div className="flex-1 min-w-0 min-h-0 flex flex-col">
         <div className="magic-board-toolbar" style={{ overflowX: 'auto', height: 'auto', minHeight: 48, padding: '6px 10px' }}>

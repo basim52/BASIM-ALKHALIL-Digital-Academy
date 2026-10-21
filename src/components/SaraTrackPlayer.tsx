@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { X, ArrowRight, Lock, Volume2, Square, CheckCircle2, Mic, Send } from 'lucide-react';
 import { auth } from '../lib/firebase';
 import { CompletionCertificateModal, type CertificateData } from './CompletionCertificateModal';
@@ -10,6 +10,8 @@ import { pushTrackProgress, markLastTrack } from '../lib/saraProgressSync';
 import SaraLessonCall, { lessonCallPreset, freeCallPresetFor } from './SaraLessonCall';
 import SaraSentenceBuilder from './SaraSentenceBuilder';
 import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
+import { toToolCalls, type BoardAction } from '../lib/boardActions';
+const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
 import { trackLevels, buildLevelTest, scoreLevelTest, saveLevelTestAttempt, LEVEL_TEST_PASS, type LevelTestQuestion, type LevelTestAttempt } from '../lib/saraLevelTests';
 
 interface Props {
@@ -107,8 +109,6 @@ async function narrate(text: string, onBlocked: () => void, onFailed: () => void
   onDone();
 }
 
-/** Visual style of Sara's SmartWhiteboard (default 'maldives_turquoise' theme), reused for the lesson board. */
-const BOARD_THEME = { bgHex: '#083344', gradientToHex: '#0E7490', accentHex: '#2DD4BF', cardBg: 'rgba(4, 33, 44, 0.75)', cardBorder: 'rgba(45, 212, 191, 0.35)', gridColor: 'rgba(45, 212, 191, 0.08)' };
 
 export const progressKey = (trackId: string, uid?: string) => `sara_track_${trackId}_${uid || 'guest'}`;
 export const readUnlocked = (trackId: string, uid?: string) => {
@@ -125,6 +125,18 @@ export const readUnlocked = (trackId: string, uid?: string) => {
 export function lessonPageLines(lesson: SaraTrackLesson, useAlt: boolean): string[] {
   const c = lesson.content!;
   return [lesson.titleAr, useAlt ? c.altExplanationAr : c.explanationAr, ...c.example.map(e => e.en)];
+}
+
+/** The same lesson page, written step by step on the tutor tldraw board (Noura's board): what is written = what Sara reads. */
+export function lessonBoardActions(lesson: SaraTrackLesson, useAlt: boolean): BoardAction[] {
+  const c = lesson.content!;
+  const sentences = (useAlt ? c.altExplanationAr : c.explanationAr).split(/(?<=[.!؟?])\s+/).map(x => x.trim()).filter(Boolean);
+  return [
+    { kind: 'title', text: lesson.titleEn },
+    { kind: 'text', text: lesson.titleAr },
+    ...sentences.map(t => ({ kind: 'text' as const, text: t })),
+    ...c.example.map(e => ({ kind: 'example' as const, en: e.en, ar: e.ar })),
+  ];
 }
 
 const Choice: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (i: number) => void; locked?: boolean }> = ({ q, picked, onPick, locked }) => (
@@ -158,9 +170,8 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   };
   const [useAlt, setUseAlt] = useState(false);
   const [checkPick, setCheckPick] = useState<number | null>(null);
-  const [mode, setMode] = useState<'learn' | 'exercises' | 'board' | 'sentences'>('learn');
-  const [bStep, setBStep] = useState(0);
-  const [bPick, setBPick] = useState<number | null>(null);
+  const [mode, setMode] = useState<'learn' | 'exercises' | 'board' | 'sentences'>('board');
+  const [boardReplay, setBoardReplay] = useState(0);
   const [exIdx, setExIdx] = useState(0);
   const [exPick, setExPick] = useState<number | null>(null);
   const [exScore, setExScore] = useState(0);
@@ -183,6 +194,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   useEffect(() => { if (!isOpen) stop(); }, [isOpen]);
 
   const lesson = useMemo(() => track.lessons.find(l => l.id === lessonId) || null, [lessonId, track]);
+  const boardCalls = useMemo(() => (lesson?.content ? toToolCalls(lessonBoardActions(lesson, useAlt)) : []), [lesson, useAlt]);
 
   /** Narrate the page lines: segments = the exact on-screen lines (title, explanation, each example line). */
   const startNarration = (l: SaraTrackLesson, alt: boolean) => {
@@ -197,7 +209,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   const openLesson = (l: SaraTrackLesson) => {
     unlockNarrator(); // inside the tap
     markLastTrack(uid, track.id);
-    stop(); setLessonId(l.id); setUseAlt(false); setCheckPick(null); setMode('learn'); setExIdx(0); setExPick(null); setExScore(0);
+    stop(); setLessonId(l.id); setUseAlt(false); setCheckPick(null); setMode('board'); setBoardReplay(r => r + 1); setExIdx(0); setExPick(null); setExScore(0);
     startNarration(l, false);
   };
   const nextLesson = lesson ? track.lessons.find(x => x.order === lesson.order + 1) : undefined;
@@ -285,8 +297,8 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
             <p className="text-[10px] text-amber-300 font-bold truncate">{track.titleAr}</p>
             <p className="text-sm font-black truncate">{lesson ? `${lesson.order}. ${lesson.titleAr}` : test ? `🏁 اختبار نهاية المستوى` : `${track.lessons.length} درس`}</p>
           </div>
-          {lesson?.content && mode === 'learn' && (
-            <button onClick={speaking ? stop : speak} className="p-1.5 rounded-lg bg-amber-400 text-slate-950" aria-label="read">
+          {lesson?.content && (mode === 'learn' || mode === 'board') && (
+            <button onClick={speaking ? stop : () => { if (mode === 'board') setBoardReplay(r => r + 1); speak(); }} className="p-1.5 rounded-lg bg-amber-400 text-slate-950" aria-label="read">
               {speaking ? <Square size={16} /> : <Volume2 size={16} />}
             </button>
           )}
@@ -375,8 +387,8 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
               <div className="flex items-center gap-2 mb-1">
                 <p className="text-[10px] font-black text-amber-700">سؤال فهم</p>
                 <span className="flex-1" />
-                <button onClick={() => { stop(); setBStep(0); setBPick(null); setMode('board'); }} data-testid="open-board"
-                  className="px-2 py-0.5 -my-1 rounded-lg bg-[#083344] text-teal-100 border border-teal-400/60 text-[11px] font-black leading-tight">🧑‍🏫 اشرح بالسبورة التفاعلية</button>
+                <button onClick={() => { unlockNarrator(); setMode('board'); setBoardReplay(r => r + 1); startNarration(lesson, useAlt); }} data-testid="open-board"
+                  className="px-2 py-0.5 -my-1 rounded-lg bg-[#002147] text-amber-300 border border-[#C49E3A] text-[11px] font-black leading-tight">🧑‍🏫 ارجع للسبورة</button>
               </div>
               {passed
                 ? <p className="text-[13px] font-black text-emerald-700">✅ صح! {lesson.content.check.options[lesson.content.check.correctIndex]}</p>
@@ -457,74 +469,24 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
           );
         })()}
 
-        {/* Interactive whiteboard: the same lesson, written visually, then its exercises on the board */}
-        {lesson?.content && mode === 'board' && (() => {
-          const c = lesson.content;
-          const th = BOARD_THEME;
-          const qs = [c.check, ...c.exercises];
-          const steps = 2 + qs.length; // explanation, example, then each exercise
-          const qi = bStep - 2;
-          const q = qi >= 0 && qi < qs.length ? qs[qi] : null;
-          const done = bStep >= steps;
-          const icons = ['💡', '📌', '✨', '🎯', '🔑', '🧩'];
-          const points = (useAlt ? c.altExplanationAr : c.explanationAr).split(/(?<=[.!؟?])\s+/).filter(Boolean);
-          const hl = (t: string) => t.split(/([A-Za-z][A-Za-z'’\- ]*[A-Za-z])/g).map((p, i) => i % 2
-            ? <mark key={i} dir="ltr" className="px-1 rounded bg-amber-300/90 text-slate-950 font-black">{p}</mark> : <span key={i}>{p}</span>);
-          const solved = q !== null && bPick === q.correctIndex;
-          return (
-            <div data-testid="lesson-board" className="flex-1 min-h-0 flex flex-col gap-2 p-2.5 overflow-hidden" style={{ background: `linear-gradient(160deg, ${th.bgHex}, ${th.gradientToHex})` }}>
-              <div className="shrink-0 flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-black text-slate-950" style={{ background: th.accentHex }}>🧑‍🏫 سبورة سارة</span>
-                <span className="text-[11px] font-black text-teal-100/80">{Math.min(bStep + 1, steps)} / {steps}</span>
-                <span className="flex-1" />
-                {bStep < 2 && <button onClick={speaking ? stop : speak} className="px-2 py-0.5 rounded-lg bg-amber-400 text-slate-950 text-[11px] font-black">{speaking ? '⏹️' : '🔊'}</button>}
-                <button onClick={() => { stop(); setMode('learn'); }} className="px-2 py-0.5 rounded-lg bg-white/10 text-white text-[11px] font-black">✖ رجوع للصفحة</button>
-              </div>
-              <div className="flex-1 min-h-0 rounded-2xl p-3 flex flex-col gap-2 overflow-hidden" style={{ background: th.cardBg, border: `2px solid ${th.cardBorder}`, backgroundImage: `linear-gradient(${th.gridColor} 1px, transparent 1px), linear-gradient(90deg, ${th.gridColor} 1px, transparent 1px)`, backgroundSize: '22px 22px' }}>
-                {bStep === 0 && (<>
-                  <p className="text-[17px] font-black" style={{ color: th.accentHex }}>📘 {lesson.titleAr}</p>
-                  <p dir="ltr" className="text-[12px] font-bold text-teal-100/80 text-start">{lesson.titleEn}</p>
-                  {points.map((pt, i) => (
-                    <p key={i} className="text-[13px] leading-relaxed font-semibold text-white flex gap-2"><span className="shrink-0">{icons[i % icons.length]}</span><span>{hl(pt)}</span></p>
-                  ))}
-                </>)}
-                {bStep === 1 && (<>
-                  <p className="text-[16px] font-black text-amber-300">🗣️ مثال حي</p>
-                  {c.example.map((e, i) => (
-                    <div key={i} className="rounded-xl p-2 bg-white/10 border border-white/15">
-                      <p dir="ltr" className="text-[14px] font-black text-white text-start">{e.en}</p>
-                      <p className="text-[12px] text-teal-100/90 font-semibold">{e.ar}</p>
-                    </div>
-                  ))}
-                </>)}
-                {q && (<>
-                  <p className="text-[16px] font-black text-amber-300">✍️ تمرين {qi + 1} من {qs.length}</p>
-                  <div className="rounded-xl p-2 bg-white">
-                    <Choice q={q} picked={bPick} locked={solved} onPick={i => { setBPick(i); if (i !== q.correctIndex) setTimeout(() => setBPick(null), 900); }} />
-                  </div>
-                  {bPick !== null && <p className={`text-[13px] font-black ${solved ? 'text-emerald-300' : 'text-rose-300'}`}>{solved ? '✅ صح!' : '❌ حاول مرة ثانية'}</p>}
-                </>)}
-                {done && (
-                  <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center">
-                    <p className="text-3xl">🎉</p>
-                    <p className="text-[15px] font-black text-white">أحسنت! خلصت تمارين السبورة وانفتح لك الدرس التالي</p>
-                  </div>
-                )}
-              </div>
-              <div className="shrink-0 flex gap-2">
-                {bStep > 0 && !done && <button onClick={() => { stop(); setBStep(b => b - 1); setBPick(null); }} className="px-3 py-2 rounded-xl bg-white/10 text-white text-[13px] font-black">→ السابق</button>}
-                {!done && (q === null || solved) && (
-                  <button data-testid="board-next" onClick={() => {
-                    stop(); setBPick(null);
-                    if (bStep + 1 >= steps) { markPassed(); setCheckPick(c.check.correctIndex); }
-                    setBStep(b => b + 1);
-                  }} className="flex-1 py-2 rounded-xl text-slate-950 text-[13px] font-black" style={{ background: th.accentHex }}>{bStep + 1 >= steps ? '🏁 إنهاء' : 'التالي ←'}</button>
-                )}
-                {done && <button data-testid="board-next-lesson" onClick={goNext} className="flex-1 py-2 rounded-xl bg-[#58cc02] text-white text-[14px] font-black">✅ الدرس التالي ←</button>}
-              </div>
+        {/* Tutor tldraw board (same board + writing style as Noura's lessons): the lesson is written step by step while Sara narrates it */}
+        {lesson?.content && mode === 'board' && (
+          <div data-testid="lesson-board" className="flex-1 min-h-0 flex flex-col gap-2 p-2 overflow-hidden bg-[#001a38]">
+            <div className="shrink-0 flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-amber-400 text-[#001a38]">👩‍💼 سارة على السبورة</span>
+              {speaking && <button onClick={togglePause} data-testid="sara-board-pause" className="px-2 py-0.5 rounded-lg bg-white/10 text-white text-[11px] font-black">{paused ? '▶️ كملي' : '⏸️ إيقاف مؤقت'}</button>}
+              {failed && !speaking && <button onClick={() => { setBoardReplay(r => r + 1); speak(); }} className="px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 text-[11px] font-black">🔄 إعادة المحاولة</button>}
+              {blocked && !speaking && <span className="text-[10px] font-bold text-white/70">اضغط 🔊 فوق</span>}
             </div>
-          );
-        })()}
+            <div className="flex-1 min-h-0">
+              <Suspense fallback={<div className="w-full h-full rounded-2xl border-2 border-amber-400/60 bg-[#0a2d5c] flex items-center justify-center text-[12px] font-bold text-amber-200">جاري فتح السبورة…</div>}>
+                <TutorTldrawBoard key={lesson.id + (useAlt ? '-alt' : '')} calls={boardCalls} personaId="sara" speaking={speaking}
+                  replayKey={boardReplay} onSpeak={() => { unlockNarrator(); setBoardReplay(r => r + 1); startNarration(lesson, useAlt); }} />
+              </Suspense>
+            </div>
+            <button data-testid="board-to-check" onClick={() => { stop(); setMode('learn'); }} className="shrink-0 w-full py-2.5 rounded-xl bg-amber-400 text-[#001a38] text-[14px] font-black">{passed ? 'رجوع للدرس ←' : 'سؤال الفهم ←'}</button>
+          </div>
+        )}
 
         {lesson?.content && mode === 'sentences' && track.id === 'conversation_v2' && (
           <SaraSentenceBuilder trackId={track.id} lessonId={lesson.id} uid={uid} titleAr={lesson.titleAr} titleEn={lesson.titleEn} level={lesson.levelId} examples={lesson.content.example}

@@ -8,6 +8,7 @@ import { toToolCalls, type BoardResult } from '../lib/boardActions';
 const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
 import TutorTrackPlayer from './TutorTrackPlayer';
 import { TUTOR_TRACKS, type TutorTrack } from '../data/tutorTracks';
+import { SaraTracksHub } from './SaraTracksHub';
 
 const OWNER = 'sara-board';
 type Step = 'pick' | 'board' | 'check' | 'done';
@@ -58,6 +59,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
   const [saved, setSaved] = useState<'no' | 'ok' | 'fail'>('no');
   const voice = usePersonaVoice();
   const [track, setTrack] = useState<TutorTrack | null>(null);
+  const [saraHub, setSaraHub] = useState(false);
   const calls = useMemo(() => (board ? ((board as any).toolCalls || toToolCalls(board.boardActions)) : []), [board]);
 
   const ask = async () => {
@@ -92,7 +94,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
     <p className="text-[11px] text-amber-200/90 font-bold shrink-0">اختر المعلم واكتب وش تبي تتعلم، ويشرحه لك على السبورة.</p>
     <div className="grid grid-cols-4 gap-1.5 shrink-0">
       {BOARD_PERSONAS.map(p => (
-        <button key={p.id} data-testid={`board-persona-${p.id}`} onClick={() => setPersona(p)}
+        <button key={p.id} data-testid={`board-persona-${p.id}`} onClick={() => { setPersona(p); if (p.id === 'sara' && !mock) { voice.stop(); setSaraHub(true); } }}
           className={`rounded-xl border p-2 flex flex-col items-center gap-0.5 ${persona.id === p.id ? 'bg-amber-400 text-[#001a38] border-amber-300' : 'bg-[#0a2d5c] border-white/10'}`}>
           <span className="text-[22px] leading-none">{p.emoji}</span>
           <span className="text-[13px] font-black">{p.nameAr}</span>
@@ -107,6 +109,14 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
       {persona.examplesAr.map(e => <button key={e} onClick={() => setTopic(e)} className="px-2 py-1 rounded-full bg-white/5 border border-white/15 text-[11px] font-bold" dir="ltr">{e}</button>)}
     </div>
     {err && <p className="text-[12px] font-bold text-rose-300 shrink-0">{err}</p>}
+    {persona.id === 'sara' && (
+      <button onClick={() => { voice.stop(); setSaraHub(true); }} data-testid="sara-curricula-open"
+        className="shrink-0 rounded-xl border border-amber-400/60 bg-[#0a2d5c] px-3 py-2 text-start flex items-center gap-2">
+        <span className="text-[20px]">📚</span>
+        <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-amber-300">مناهج سارة</span><span className="block text-[11px] font-bold text-white/75 truncate">القواعد · المحادثة · القراءة · الكتابة — على السبورة بصوت سارة</span></span>
+      </button>
+    )}
+    {saraHub && <SaraTracksHub isOpen uid={uid} onClose={() => setSaraHub(false)} />}
     {personaTrack && (
       <button onClick={() => { voice.stop(); setTrack(personaTrack); }} data-testid="tutor-track-open"
         className="shrink-0 rounded-xl border border-amber-400/60 bg-[#0a2d5c] px-3 py-2 text-start flex items-center gap-2">
