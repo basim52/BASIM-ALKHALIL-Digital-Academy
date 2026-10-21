@@ -1969,8 +1969,8 @@ Rules:
   const boardDaily = new Map<string, { day: string; n: number }>();
   const BOARD_ROLES: Record<string, string> = {
     grammar: "Noura, a warm female English grammar teacher (basics and grammar)",
-    business: "Khalid, a friendly male teacher of business English, emails and job interviews",
-    exams: "Omar, a calm male teacher who prepares students for English exams such as IELTS (no band scores, just skills)",
+    business: "Mohammed, a friendly male teacher of business English, emails and job interviews",
+    exams: "Ali, a calm male teacher who prepares students for English exams such as IELTS (no band scores, just skills)",
   };
   app.post("/api/sara/board", async (req: express.Request, res: express.Response) => {
     const uid = String((req as any).authUid || "");
