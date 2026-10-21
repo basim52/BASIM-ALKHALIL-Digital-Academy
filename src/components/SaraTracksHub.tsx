@@ -26,7 +26,7 @@ export const SaraTracksHub: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll
   if (!isOpen) return null;
   const advancedOpen = !!unlockAll || readUnlocked(FOUNDATIONS_TRACK.id, uid) >= 2;
   // 💬, 📖 and ✍️ each have a single track: open it directly (its list shows the level sections) once unlocked.
-  const direct = (filter === 'conversation' || filter === 'reading' || filter === 'writing') && advancedOpen;
+  const direct = filter === 'conversation' || ((filter === 'reading' || filter === 'writing') && advancedOpen); // conversation is always open
   if (active || direct) {
     const t = active || (filter === 'reading' ? READING_TRACK : filter === 'writing' ? WRITING_TRACK : CONVERSATION_TRACK);
     return <SaraTrackPlayer isOpen onClose={() => (direct && !active ? onClose() : setActive(null))} track={t} uid={uid} unlockAll={unlockAll} />;
@@ -36,8 +36,8 @@ export const SaraTracksHub: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll
     { track: FOUNDATIONS_TRACK, open: true, note: `${FOUNDATIONS_TRACK.lessons.length} درس`, icon: '🌱' },
     { track: ADVANCED_TRACK, open: advancedOpen, icon: '🎓',
       note: advancedOpen ? `${ADVANCED_TRACK.levels!.length} مستويات · ${built(ADVANCED_TRACK)} درس جاهز` : 'يفتح بعد إنهاء الدرس الأول من الأساسيات' },
-    { track: CONVERSATION_TRACK, open: advancedOpen, icon: '💬',
-      note: advancedOpen ? `${CONVERSATION_TRACK.levels!.length} مستويات · ${built(CONVERSATION_TRACK)} درس جاهز` : 'يفتح بعد إنهاء الدرس الأول من الأساسيات' },
+    { track: CONVERSATION_TRACK, open: true, icon: '💬',
+      note: true ? `${CONVERSATION_TRACK.levels!.length} مستويات · ${built(CONVERSATION_TRACK)} درس جاهز` : 'يفتح بعد إنهاء الدرس الأول من الأساسيات' },
     { track: READING_TRACK, open: advancedOpen, icon: '📖',
       note: advancedOpen ? `${READING_TRACK.levels!.length} مستويات · ${built(READING_TRACK)} درس جاهز` : 'يفتح بعد إنهاء الدرس الأول من الأساسيات' },
     { track: WRITING_TRACK, open: advancedOpen, icon: '✍️',

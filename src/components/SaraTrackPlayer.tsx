@@ -68,7 +68,8 @@ async function fetchLessonAudio(text: string, token: number): Promise<string | n
     if (d) await wait(d);
     if (token !== narratorToken) return null;
     try {
-      const r = await fetch(`/api/tts/lesson?v=Kore&t=${encodeURIComponent(text)}`);
+      const tok = auth.currentUser ? await auth.currentUser.getIdToken().catch(() => '') : '';
+      const r = await fetch(`/api/tts/lesson?v=Kore&t=${encodeURIComponent(text)}`, tok ? { headers: { Authorization: `Bearer ${tok}` } } : undefined);
       if (r.ok && (r.headers.get('content-type') || '').includes('audio')) {
         const url = URL.createObjectURL(await r.blob());
         lessonAudioCache.set(text, url);

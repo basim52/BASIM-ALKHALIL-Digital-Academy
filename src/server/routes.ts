@@ -600,12 +600,17 @@ Looking forward to your reply. Tell me what we're tackling first!`;
   // 🛡️ /api/admin/* — master admin only (server-side check, not just the UI).
   const SERVER_ADMINS = ["basim5252@gmail.com"];
   app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    if (!req.path.startsWith("/api/admin") || req.path === "/api/admin/analyze") return next(); // analyze serves parent/student reports too
+    if (!req.path.startsWith("/api/admin") && req.path !== "/api/gemini/developer-sandbox") return next();
     try {
       const uid = (req as any).authUid as string | undefined;
       if (!uid) return res.status(401).json({ error: "UNAUTHORIZED" });
       const u = await getAdminAuth()!.getUser(uid);
       if ((u.customClaims as any)?.admin === true || SERVER_ADMINS.includes(String(u.email || "").toLowerCase())) return next();
+      // /api/admin/analyze also writes parent reports: allow linked parents (read-only check).
+      if (req.path === "/api/admin/analyze") {
+        const d = (await getAdminDb()?.collection("users").doc(uid).get())?.data();
+        if ((Array.isArray(d?.linkedStudentIds) && d!.linkedStudentIds.length) || d?.linkedStudentId) return next();
+      }
       return res.status(403).json({ error: "FORBIDDEN" });
     } catch { return res.status(403).json({ error: "FORBIDDEN" }); }
   });
@@ -1108,7 +1113,8 @@ ${text}
           model: "gemini-3.8-flash",
           contents: prompt,
           config: {
-            maxOutputTokens: 500
+            maxOutputTokens: 1500,
+            thinkingConfig: { thinkingLevel: "low" as any }
           }
         });
         summary = response.text?.trim() || "";
@@ -1426,6 +1432,12 @@ RESPOND STRICTLY IN VALID JSON FORMAT with the following schema:
   // Lesson narration: ONE request per lesson page, returned as WAV and cached by the Vercel CDN for a year.
   // Lesson text is static, so each page is generated once for everybody and never touches the daily TTS quota again.
   app.get("/api/tts/lesson", async (req, res) => {
+    // Signed-in users only (protects the TTS quota). CDN-cached pages are still served from cache.
+    const th = req.headers.authorization || "";
+    const tok = th.startsWith("Bearer ") ? th.slice(7).trim() : "";
+    const aa = getAdminAuth();
+    if (!tok || !aa) return res.status(401).setHeader("Cache-Control", "no-store").json({ error: "UNAUTHORIZED" });
+    try { await aa.verifyIdToken(tok); } catch { res.setHeader("Cache-Control", "no-store"); return res.status(401).json({ error: "UNAUTHORIZED" }); }
     const text = String(req.query.t || "").slice(0, 2000);
     const voice = String(req.query.v || "Kore");
     if (!text.trim()) return res.status(400).json({ error: "Text is required" });
@@ -2454,10 +2466,11 @@ ${context && !free ? `What this student needs (real data from the app): ${String
         audioChain = audioChain.then(async () => { const a = await p; if (a && !firstAudioMs) firstAudioMs = Date.now() - t0; send({ t: "a", i, audio: a }); });
       }
     };
+    let lastCallErr = "";
     for (const model of CALL_MODELS) {
-      if (Date.now() < (callModelBlockedUntil.get(model) || 0)) continue;
+      if (Date.now() < (callModelBlockedUntil.get(model) || 0)) { lastCallErr = lastCallErr || `${model}: temporarily blocked`; continue; }
       try {
-        const stream = await aiLive.models.generateContentStream({ model, contents, config: { systemInstruction: sys, maxOutputTokens: 160, temperature: 0.8 } });
+        const stream = await aiLive.models.generateContentStream({ model, contents, config: { systemInstruction: sys, maxOutputTokens: 1024, temperature: 0.8, thinkingConfig: { thinkingLevel: "low" as any } } });
         let buf = "";
         for await (const chunk of stream as any) {
           buf += chunk.text || "";
@@ -2475,11 +2488,13 @@ ${context && !free ? `What this student needs (real data from the app): ${String
         const msg = String(err?.message || err);
         logToFile(`[call-turn] ${model}: ${msg.slice(0, 200)}`);
         if (idx > 0) { usedModel = model; break; } // partial reply already spoken: keep it
-        if (/429|RESOURCE_EXHAUSTED/.test(msg)) callModelBlockedUntil.set(model, Date.now() + 60000);
-        else if (/404|NOT_FOUND|not supported|INVALID_ARGUMENT|400/.test(msg)) callModelBlockedUntil.set(model, Date.now() + 6 * 3600 * 1000);
+        lastCallErr = `${model}: ${msg.slice(0, 200)}`;
+        console.error(`[call-turn] ${lastCallErr}`);
+        if (/\b404\b|NOT_FOUND/.test(msg)) callModelBlockedUntil.set(model, Date.now() + 6 * 3600 * 1000); // model really missing
+        else if (/429|RESOURCE_EXHAUSTED|\b400\b|INVALID_ARGUMENT|not supported/.test(msg)) callModelBlockedUntil.set(model, Date.now() + 60000);
       }
     }
-    if (idx === 0) { send({ t: "error", error: "AI_FAILED" }); return res.end(); }
+    if (idx === 0) { console.error(`[call-turn] AI_FAILED ${lastCallErr}`); send({ t: "error", error: "AI_FAILED", reason: lastCallErr || "empty reply" }); return res.end(); }
     await audioChain;
     send({ t: "done", model: usedModel, firstTextMs, firstAudioMs, totalMs: Date.now() - t0 });
     res.end();
@@ -2510,8 +2525,8 @@ Max 2 points per section; only real issues; an empty array is fine. Pronunciatio
       res.json({ verdict, verdictAr: String(j.verdictAr || "").slice(0, 80), summaryAr: String(j.summaryAr || "").slice(0, 400), pronunciationNoteAr: String(j.pronunciationNoteAr || "").slice(0, 200),
         pronunciation: keep(j.pronunciation), vocabulary: keep(j.vocabulary), grammar: keep(j.grammar), fluency: keep(j.fluency), turns: studentLines.length, words });
     } catch (err: any) {
-      logToFile(`[call-review] ${err?.message}`);
-      res.status(502).json({ error: "REVIEW_FAILED" });
+      console.error(`[call-review] ${err?.message}`);
+      res.status(502).json({ error: "REVIEW_FAILED", reason: String(err?.message || "").slice(0, 200) });
     }
   });
 
