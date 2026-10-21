@@ -128,7 +128,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
     </div>
     <div data-testid="board-surface" className="flex-1 min-h-0">
       <Suspense fallback={<div className="w-full h-full rounded-2xl border-2 border-amber-400/60 bg-[#0a2d5c] flex items-center justify-center text-[12px] font-bold text-amber-200">جاري فتح السبورة…</div>}>
-        <TutorTldrawBoard calls={calls} />
+        <TutorTldrawBoard calls={calls} personaId={persona.id} speaking={voice.state === 'loading' || voice.state === 'playing'} onSpeak={() => void voice.play(boardSpeech(board), persona.voice)} />
       </Suspense>
     </div>
     {board.explanationAr && <p className="text-[12px] font-bold text-white/85 shrink-0 line-clamp-3">{board.explanationAr}</p>}

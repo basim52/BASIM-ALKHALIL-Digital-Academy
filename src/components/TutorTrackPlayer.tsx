@@ -47,6 +47,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const [checkWrong, setCheckWrong] = useState(false);
   const [correct, setCorrect] = useState(0);
   const v = useVoice(persona.voice);
+  const [replay, setReplay] = useState(0);
   const calls = useMemo(() => (lesson?.board ? toToolCalls(lesson.board) : []), [lesson]);
 
   const shell = (head: React.ReactNode, body: React.ReactNode) => (
@@ -79,7 +80,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
         {track.lessons.map(l => {
           const open = l.order <= unlocked;
           return (
-            <button key={l.id} disabled={!open} onClick={() => { setLesson(l); setStep({ k: 'board' }); setPicked(null); setCheckWrong(false); setCorrect(0); }}
+            <button key={l.id} disabled={!open} onClick={() => { setLesson(l); setStep({ k: 'board' }); const cc = l.content!; v.play(`${cc.explanationAr} ${cc.example.map(e => e.en).join('. ')}`); setPicked(null); setCheckWrong(false); setCorrect(0); }}
               className={`flex items-center gap-2 rounded-xl px-3 py-2 text-start border ${open ? 'bg-[#0a2d5c] border-amber-400/40' : 'bg-white/5 border-white/10 opacity-60'}`}>
               <span className="w-7 h-7 shrink-0 rounded-full bg-amber-400 text-[#001a38] text-[12px] font-black flex items-center justify-center">{l.order}</span>
               <span className="flex-1 min-w-0"><span className="block text-[13px] font-black truncate">{l.titleAr}</span><span dir="ltr" className="block text-[11px] text-white/60 font-bold truncate text-start">{l.titleEn}</span></span>
@@ -98,10 +99,10 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const narration = `${c.explanationAr} ${c.example.map(e => e.en).join('. ')}`;
 
   if (step.k === 'board') return shell(head, <>
-    <VoiceBtn text={narration} />
+    <div onClickCapture={e => { if ((e.target as HTMLElement).closest('[data-testid=tutor-voice]')) setReplay(r => r + 1); }}><VoiceBtn text={narration} /></div>
     <div className="flex-1 min-h-0">
       <Suspense fallback={<div className="w-full h-full rounded-2xl border-2 border-amber-400/60 bg-[#0a2d5c] flex items-center justify-center text-[12px] font-bold text-amber-200">جاري فتح السبورة…</div>}>
-        <TutorTldrawBoard calls={calls} />
+        <TutorTldrawBoard calls={calls} personaId={persona.id} speaking={v.st === 'loading'} replayKey={replay} onSpeak={() => { setReplay(r => r + 1); v.play(narration); }} />
       </Suspense>
     </div>
     {nextBtn('الشرح', () => setStep({ k: 'explain' }))}

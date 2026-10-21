@@ -799,7 +799,7 @@ export const SaraTools: React.FC<Props> = ({ tool, onClose, uid, unlockAll, onPl
   const p = { uid, unlockAll };
   return (
     <div className="fixed inset-0 z-[210] bg-slate-950/60 flex items-stretch justify-center" dir="rtl">
-      <div data-testid="sara-track-page" className="relative w-full max-w-xl h-[100dvh] bg-[#fdfaf3] flex flex-col overflow-hidden">
+      <div data-testid="sara-track-page" className={`relative w-full ${tool === 'board' ? 'max-w-6xl' : 'max-w-xl'} h-[100dvh] bg-[#fdfaf3] flex flex-col overflow-hidden`}>
         <div className="shrink-0 flex items-center gap-2 px-3 py-2 bg-[#002147] text-white">
           <div className="min-w-0 flex-1">
             <p className="text-[10px] text-amber-300 font-bold truncate">أدوات سارة</p>
