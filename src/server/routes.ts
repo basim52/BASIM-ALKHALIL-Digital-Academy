@@ -6,6 +6,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleGenAI, Modality, Type } from "@google/genai";
 import { getAdminAuth, getAdminDb, FieldValue } from "./firebaseAdmin.js";
+import { sanitizeBoard } from "../lib/boardActions.js";
 
 const logToFile = (msg: string) => {
   // Use console.log directly (no filesystem logging on Vercel or serverless)
@@ -1441,6 +1442,9 @@ RESPOND STRICTLY IN VALID JSON FORMAT with the following schema:
 
   // Lesson narration: ONE request per lesson page, returned as WAV and cached by the Vercel CDN for a year.
   // Lesson text is static, so each page is generated once for everybody and never touches the daily TTS quota again.
+  // Only known Gemini prebuilt voices; anything else falls back to Sara's default "Kore".
+  const ALLOWED_VOICES = new Set(["Kore", "Zephyr", "Aoede", "Charon", "Orus"]);
+  const safeVoice = (v: unknown) => { const x = String(v || "Kore"); return ALLOWED_VOICES.has(x) ? x : "Kore"; };
   app.get("/api/tts/lesson", async (req, res) => {
     // Signed-in users only (protects the TTS quota). CDN-cached pages are still served from cache.
     const th = req.headers.authorization || "";
@@ -1449,7 +1453,7 @@ RESPOND STRICTLY IN VALID JSON FORMAT with the following schema:
     if (!tok || !aa) return res.status(401).setHeader("Cache-Control", "no-store").json({ error: "UNAUTHORIZED" });
     try { await aa.verifyIdToken(tok); } catch { res.setHeader("Cache-Control", "no-store"); return res.status(401).json({ error: "UNAUTHORIZED" }); }
     const text = String(req.query.t || "").slice(0, 2000);
-    const voice = String(req.query.v || "Kore");
+    const voice = safeVoice(req.query.v);
     if (!text.trim()) return res.status(400).json({ error: "Text is required" });
     try {
       const audio = await generateSaraSpeechAudio(text, voice);
@@ -1482,7 +1486,7 @@ RESPOND STRICTLY IN VALID JSON FORMAT with the following schema:
       const { text, voiceName } = req.body;
       if (!text) return res.status(400).json({ error: "Text is required" });
 
-      const audio = await generateSaraSpeechAudio(text, voiceName || "Kore");
+      const audio = await generateSaraSpeechAudio(text, safeVoice(voiceName));
       if (audio) {
         return res.json({ audio });
       }
@@ -1956,6 +1960,61 @@ Rules:
       } catch (e: any) { lastErr = e; logToFile(`grammar-check ${model} failed: ${String(e?.message || e).slice(0, 200)}`); }
     }
     res.status(503).json({ error: "AI_FAILED", message: String(lastErr?.message || "").slice(0, 200) });
+  });
+
+  // Sara smart board: specialty tutors draw a short structured explanation + 2-3 real check questions.
+  // Auth + per-user 10-min rate limit come from the global /api POST middleware; this adds a daily cap per instance.
+  const BOARD_MODELS = GRAMMAR_MODELS;
+  const BOARD_DAILY_CAP = 30;
+  const boardDaily = new Map<string, { day: string; n: number }>();
+  const BOARD_ROLES: Record<string, string> = {
+    grammar: "Noura, a warm female English grammar teacher (basics and grammar)",
+    business: "Khalid, a friendly male teacher of business English, emails and job interviews",
+    exams: "Omar, a calm male teacher who prepares students for English exams such as IELTS (no band scores, just skills)",
+  };
+  app.post("/api/sara/board", async (req: express.Request, res: express.Response) => {
+    const uid = String((req as any).authUid || "");
+    if (!uid) return res.status(401).json({ error: "UNAUTHORIZED" });
+    const persona = String(req.body?.persona || "");
+    if (!BOARD_ROLES[persona]) return res.status(400).json({ error: "BAD_PERSONA" });
+    const topic = String(req.body?.topic || "").replace(/\s+/g, " ").trim().slice(0, 300);
+    if (topic.length < 2) return res.status(400).json({ error: "EMPTY" });
+    const level = String(req.body?.level || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 4);
+    const day = new Date().toISOString().slice(0, 10);
+    const q = boardDaily.get(uid);
+    if (q && q.day === day && q.n >= BOARD_DAILY_CAP) return res.status(429).json({ error: "DAILY_LIMIT", rateLimited: true });
+    boardDaily.set(uid, { day, n: q && q.day === day ? q.n + 1 : 1 });
+    if (boardDaily.size > 5000) for (const [k, v] of boardDaily) if (v.day !== day) boardDaily.delete(k);
+    if (!initAI() || !aiLive) return res.status(503).json({ error: "AI_NOT_CONFIGURED" });
+    const schema = { type: Type.OBJECT, properties: {
+      boardActions: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: {
+        kind: { type: Type.STRING, enum: ["title", "text", "highlight", "example", "fix", "arrow"] },
+        text: { type: Type.STRING }, ar: { type: Type.STRING }, en: { type: Type.STRING },
+        wrong: { type: Type.STRING }, right: { type: Type.STRING }, from: { type: Type.STRING }, to: { type: Type.STRING },
+      }, required: ["kind"] } },
+      explanationAr: { type: Type.STRING },
+      checks: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: {
+        q: { type: Type.STRING }, options: { type: Type.ARRAY, items: { type: Type.STRING } }, correctIndex: { type: Type.INTEGER },
+      }, required: ["q", "options", "correctIndex"] } },
+    }, required: ["boardActions", "explanationAr", "checks"] };
+    const prompt = `You are ${BOARD_ROLES[persona]} teaching an Arabic-speaking student${level ? ` (level ${level})` : ""} on a small phone whiteboard.
+The student asks about: """${topic}"""
+Return:
+- boardActions: 4 to 6 short items in teaching order. Start with one "title". Use "text" (English, optional short Arabic "ar"), "highlight" (key rule), "example" (en + ar), "fix" (wrong -> right), "arrow" (from -> to, e.g. "go" -> "went"). Each item max 120 characters.
+- explanationAr: 1-2 simple Arabic sentences summarizing the idea (max 40 words).
+- checks: exactly 3 multiple-choice questions in English testing this exact idea, 3 options each, correctIndex = index of the right option.
+If the request is unsafe or not about learning English, make a board about polite English for saying "let's study English instead". Use only Western digits. Never mention scores, bands or AI models.`;
+    let lastErr: any = null;
+    for (const model of BOARD_MODELS) {
+      try {
+        const r = await aiLive.models.generateContent({ model, contents: [{ role: "user", parts: [{ text: prompt }] }], config: { responseMimeType: "application/json", responseSchema: schema as any, maxOutputTokens: 2000, temperature: 0.4 } });
+        const clean = sanitizeBoard(JSON.parse((r.text || "").trim()));
+        if (!clean) { lastErr = new Error("BAD_SHAPE"); continue; }
+        return res.json(clean);
+      } catch (e: any) { lastErr = e; logToFile(`sara-board ${model} failed: ${String(e?.message || e).slice(0, 200)}`); }
+    }
+    console.error("[sara-board] all models failed:", String(lastErr?.message || lastErr).slice(0, 200));
+    res.status(503).json({ error: "AI_FAILED" });
   });
 
   // Modern AI Omnipresent Instant Tutor Endpoint
