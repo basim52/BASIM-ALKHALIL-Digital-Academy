@@ -480,7 +480,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
             </div>
             <div className="flex-1 min-h-0">
               <Suspense fallback={<div className="w-full h-full rounded-2xl border-2 border-amber-400/60 bg-[#0a2d5c] flex items-center justify-center text-[12px] font-bold text-amber-200">جاري فتح السبورة…</div>}>
-                <TutorTldrawBoard key={lesson.id + (useAlt ? '-alt' : '')} calls={boardCalls} personaId="sara" speaking={speaking}
+                <TutorTldrawBoard key={lesson.id + (useAlt ? '-alt' : '')} calls={boardCalls} personaId="sara" lessonTitle={`${lesson.titleEn} (${lesson.titleAr})`} speaking={speaking}
                   replayKey={boardReplay} onSpeak={() => { unlockNarrator(); setBoardReplay(r => r + 1); startNarration(lesson, useAlt); }} />
               </Suspense>
             </div>

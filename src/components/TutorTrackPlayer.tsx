@@ -111,7 +111,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
     <div onClickCapture={e => { if ((e.target as HTMLElement).closest('[data-testid=tutor-voice]')) setReplay(r => r + 1); }}><VoiceBtn text={narration} /></div>
     <div className="flex-1 min-h-0">
       <Suspense fallback={<div className="w-full h-full rounded-2xl border-2 border-amber-400/60 bg-[#0a2d5c] flex items-center justify-center text-[12px] font-bold text-amber-200">جاري فتح السبورة…</div>}>
-        <TutorTldrawBoard calls={calls} personaId={persona.id} speaking={v.st === 'loading'} replayKey={replay} onSpeak={() => { setReplay(r => r + 1); v.play(narration); }} />
+        <TutorTldrawBoard calls={calls} personaId={persona.id} lessonTitle={`${lesson.titleEn} (${lesson.titleAr})`} speaking={v.st === 'loading'} replayKey={replay} onSpeak={() => { setReplay(r => r + 1); v.play(narration); }} />
       </Suspense>
     </div>
     {nextBtn('الشرح', () => setStep({ k: 'explain' }))}

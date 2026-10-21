@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Tldraw, createShapeId, toRichText, type Editor } from 'tldraw';
+import { Tldraw, createShapeId, toRichText, renderPlaintextFromRichText, type Editor, type TLShape } from 'tldraw';
+import { playCloudAudioAs, cancelAllSpeech } from '../lib/audio';
 import 'tldraw/tldraw.css';
 import './tutor3d/tutorBoard.css';
 import type { BoardToolCall } from '../lib/boardActions';
@@ -20,9 +21,11 @@ class AvatarBoundary extends React.Component<{ children: React.ReactNode; name: 
   render() { return this.state.failed ? <div className="w-full h-full rounded-xl bg-[#001a38] text-amber-300 flex items-center justify-center text-[12px] font-black p-2 text-center">{this.props.name}</div> : this.props.children; }
 }
 const hasWebGL = () => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; } };
-type Props = { calls: BoardToolCall[]; personaId: string; speaking?: boolean; onSpeak?: () => void; replayKey?: number };
+type Props = { calls: BoardToolCall[]; personaId: string; speaking?: boolean; onSpeak?: () => void; replayKey?: number; lessonTitle?: string };
+const T = { tutor: true };
+const NOTE_GAP_MS = 8000, NOTE_MAX = 12, NOTE_IDLE_MS = 3500;
 
-const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false, onSpeak, replayKey = 0 }) => {
+const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false, onSpeak, replayKey = 0, lessonTitle = '' }) => {
   const persona = personaById(personaId);
   const ed = useRef<Editor | null>(null);
   const timers = useRef<number[]>([]);
@@ -46,26 +49,26 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
     if (c.tool === 'drawBoardText') {
       const id = createShapeId();
       const color = c.payload.color === 'yellow' ? 'blue' : c.payload.color === 'light-blue' ? 'black' : 'black';
-      editor.createShape({ id, type: 'text', x: 100, y, props: { richText: toRichText(c.payload.content), size: c.payload.fontSize, color: c.payload.fontSize === 'l' ? 'blue' : color, font: 'draw', autoSize: false, w: 600 } as any });
+      editor.createShape({ meta: T, id, type: 'text', x: 100, y, props: { richText: toRichText(c.payload.content), size: c.payload.fontSize, color: c.payload.fontSize === 'l' ? 'blue' : color, font: 'draw', autoSize: false, w: 600 } as any });
       return y + (editor.getShapePageBounds(id)?.h ?? 50) + 24;
     }
     if (c.tool === 'highlightError') {
-      editor.createShape({ id: createShapeId(), type: 'geo', x: 80, y, props: { geo: 'rectangle', w: 640, h: 120, color: 'red', fill: 'semi' } as any });
-      editor.createShape({ id: createShapeId(), type: 'text', x: 95, y: y + 15, props: { richText: toRichText(`❌ ${c.payload.incorrectSnippet}\n✅ ${c.payload.correctedSnippet}`), size: 'm', color: 'black', font: 'draw', autoSize: false, w: 600 } as any });
+      editor.createShape({ meta: T, id: createShapeId(), type: 'geo', x: 80, y, props: { geo: 'rectangle', w: 640, h: 120, color: 'red', fill: 'semi' } as any });
+      editor.createShape({ meta: T, id: createShapeId(), type: 'text', x: 95, y: y + 15, props: { richText: toRichText(`❌ ${c.payload.incorrectSnippet}\n✅ ${c.payload.correctedSnippet}`), size: 'm', color: 'black', font: 'draw', autoSize: false, w: 600 } as any });
       return y + 144;
     }
     if (c.tool === 'addNote') {
       const id = createShapeId();
-      editor.createShape({ id, type: 'note', x: 100, y, props: { richText: toRichText(c.payload.content), color: 'yellow', size: 'm', font: 'draw' } as any });
+      editor.createShape({ meta: T, id, type: 'note', x: 100, y, props: { richText: toRichText(c.payload.content), color: 'yellow', size: 'm', font: 'draw' } as any });
       return y + (editor.getShapePageBounds(id)?.h ?? 200) + 24;
     }
     // drawArrow: two words joined by a native tldraw arrow
     const a = createShapeId(); const b = createShapeId();
-    editor.createShape({ id: a, type: 'text', x: 100, y, props: { richText: toRichText(c.payload.from), size: 'l', color: 'black', font: 'draw' } as any });
-    editor.createShape({ id: b, type: 'text', x: 460, y, props: { richText: toRichText(c.payload.to), size: 'l', color: 'green', font: 'draw' } as any });
+    editor.createShape({ meta: T, id: a, type: 'text', x: 100, y, props: { richText: toRichText(c.payload.from), size: 'l', color: 'black', font: 'draw' } as any });
+    editor.createShape({ meta: T, id: b, type: 'text', x: 460, y, props: { richText: toRichText(c.payload.to), size: 'l', color: 'green', font: 'draw' } as any });
     const ba = editor.getShapePageBounds(a); const bb = editor.getShapePageBounds(b);
     const mid = y + (ba?.h ?? 40) / 2;
-    editor.createShape({ id: createShapeId(), type: 'arrow', x: 0, y: 0, props: { start: { x: (ba?.maxX ?? 200) + 20, y: mid }, end: { x: (bb?.minX ?? 440) - 20, y: mid }, color: 'orange', size: 'l' } as any });
+    editor.createShape({ meta: T, id: createShapeId(), type: 'arrow', x: 0, y: 0, props: { start: { x: (ba?.maxX ?? 200) + 20, y: mid }, end: { x: (bb?.minX ?? 440) - 20, y: mid }, color: 'orange', size: 'l' } as any });
     return y + Math.max(ba?.h ?? 40, bb?.h ?? 40) + 30;
   };
 
@@ -84,8 +87,37 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
   useEffect(() => { if (replayKey) draw(true); }, [replayKey, draw]);
   useEffect(() => () => timers.current.forEach(t => clearTimeout(t)), []);
 
+  /** Student notes/questions (text or sticky shapes the student made) -> the tutor answers in lesson context, speaks, writes a reply beside it. */
+  const [asking, setAsking] = useState(false);
+  const [noteErr, setNoteErr] = useState('');
+  const answered = useRef(new Map<string, string>());
+  const lastAsk = useRef(0); const asks = useRef(0); const idle = useRef<number | null>(null);
+  const studentNotes = (editor: Editor) => editor.getCurrentPageShapes().filter((sh: TLShape) => (sh.type === 'note' || sh.type === 'text') && !(sh.meta as any)?.tutor)
+    .map(sh => ({ sh, text: renderPlaintextFromRichText(editor, (sh.props as any).richText).replace(/📝/g, '').trim() }))
+    .filter(n => n.text.length >= 2 && answered.current.get(n.sh.id) !== n.text);
+  const askTutor = async (manual: boolean) => {
+    const editor = ed.current; if (!editor || asking || editor.getEditingShapeId()) return;
+    const pending = studentNotes(editor); const n = pending[pending.length - 1];
+    if (!n) { if (manual) setNoteErr('اكتب سؤالك في ملاحظة لاصقة أو نص على السبورة أول'); return; }
+    if (Date.now() - lastAsk.current < NOTE_GAP_MS || asks.current >= NOTE_MAX) { if (manual) setNoteErr('لحظة، جرّب بعد شوي'); return; }
+    lastAsk.current = Date.now(); asks.current++; answered.current.set(n.sh.id, n.text); setAsking(true); setNoteErr('');
+    try {
+      const r = await fetch('/api/sara/board-note', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ persona: persona.id, note: n.text, lesson: lessonTitle }) });
+      const j = r.ok ? await r.json() : null;
+      if (!j?.answer) { answered.current.delete(n.sh.id); setNoteErr(r.status === 429 ? 'وصلت حد الأسئلة لليوم' : `${persona.nameAr} ما ${persona.gender === 'female' ? 'قدرت ترد' : 'قدر يرد'} الحين`); return; }
+      const bb = editor.getShapePageBounds(n.sh.id);
+      editor.createShape({ meta: T, id: createShapeId(), type: 'text', x: (bb?.maxX ?? 100) + 30, y: bb?.minY ?? 100, props: { richText: toRichText(`${persona.emoji} ${j.answer}`), size: 's', color: 'blue', font: 'draw', autoSize: false, w: 340 } as any });
+      if (j.audio) { cancelAllSpeech('board-note'); void playCloudAudioAs('board-note', j.audio, () => {}); }
+    } catch { answered.current.delete(n.sh.id); setNoteErr('تعذّر الاتصال، جرّب مرة ثانية'); }
+    finally { setAsking(false); }
+  };
+  const askRef = useRef(askTutor); askRef.current = askTutor;
+  useEffect(() => () => { if (idle.current) clearTimeout(idle.current); cancelAllSpeech('board-note'); }, []);
+
   const onMount = (editor: Editor) => {
     ed.current = editor;
+    // auto-detect: after the student stops editing their note for a short pause, the tutor answers it
+    editor.store.listen(() => { if (idle.current) clearTimeout(idle.current); idle.current = window.setTimeout(() => void askRef.current(false), NOTE_IDLE_MS); }, { source: 'user', scope: 'document' });
     editor.user.updateUserPreferences({ colorScheme: 'light' });
     draw(true);
   };
@@ -115,6 +147,7 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
             <button className="board-tool-action-btn" onClick={() => { setExpanded(v => !v); setTimeout(() => ed.current && fit(ed.current), 80); }}><span>🖥️</span><span>{expanded ? 'تصغير' : 'توسيع السبورة'}</span></button>
             <button className="board-tool-action-btn tool-inspect" onClick={() => draw(true)} data-testid="board-replay"><span>📋</span><span>قالب الدرس</span></button>
             <button className="board-tool-action-btn tool-note" onClick={addNote}><span>📝</span><span>ملاحظة لاصقة</span></button>
+            <button className="board-tool-action-btn" onClick={() => void askTutor(true)} disabled={asking} data-testid="board-ask-tutor"><span>🙋</span><span>{asking ? `${persona.nameAr} ${persona.gender === 'female' ? 'ترد' : 'يرد'}…` : `اسأل ${persona.nameAr}`}</span></button>
             <button className="board-tool-action-btn tool-clear" onClick={clear}><span>🧽</span><span>مسح</span></button>
           </div>
         </div>
@@ -122,6 +155,7 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
           <div className="magic-whiteboard-inner" style={{ position: 'absolute', inset: 0 }}>
             <Tldraw onMount={onMount} />
           </div>
+          {noteErr && <div className="absolute top-2 left-1/2 -translate-x-1/2 z-[360] px-3 py-1.5 rounded-xl bg-[#001a38] text-amber-300 text-[12px] font-black" dir="rtl" onClick={() => setNoteErr('')}>{noteErr}</div>}
           {!wide && showAvatar && <div className="absolute bottom-14 right-2 z-[350] w-[170px] h-[230px] rounded-xl overflow-hidden shadow-xl">{avatar}</div>}
         </div>
       </div>

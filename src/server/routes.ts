@@ -2018,6 +2018,42 @@ If the request is unsafe or not about learning English, make a board about polit
     res.status(503).json({ error: "AI_FAILED" });
   });
 
+  // Student note/question written on the tldraw board -> the current tutor answers it in this lesson's context,
+  // in their own cloud voice. Auth + per-user rate limit from the global /api POST middleware, plus a daily cap here.
+  const NOTE_VOICES: Record<string, string> = { sara: "Kore", grammar: "Aoede", business: "Charon", exams: "Orus" };
+  const NOTE_DAILY_CAP = 40;
+  const noteDaily = new Map<string, { day: string; n: number }>();
+  app.post("/api/sara/board-note", async (req: express.Request, res: express.Response) => {
+    const uid = String((req as any).authUid || "");
+    if (!uid) return res.status(401).json({ error: "UNAUTHORIZED" });
+    const persona = String(req.body?.persona || "");
+    if (!BOARD_ROLES[persona]) return res.status(400).json({ error: "BAD_PERSONA" });
+    const note = String(req.body?.note || "").replace(/\s+/g, " ").trim().slice(0, 300);
+    if (note.length < 2) return res.status(400).json({ error: "EMPTY" });
+    const lesson = String(req.body?.lesson || "").replace(/\s+/g, " ").trim().slice(0, 300);
+    const day = new Date().toISOString().slice(0, 10);
+    const q = noteDaily.get(uid);
+    if (q && q.day === day && q.n >= NOTE_DAILY_CAP) return res.status(429).json({ error: "DAILY_LIMIT", rateLimited: true });
+    noteDaily.set(uid, { day, n: q && q.day === day ? q.n + 1 : 1 });
+    if (noteDaily.size > 5000) for (const [k, v] of noteDaily) if (v.day !== day) noteDaily.delete(k);
+    if (!initAI() || !aiLive) return res.status(503).json({ error: "AI_NOT_CONFIGURED" });
+    const prompt = `You are ${BOARD_ROLES[persona]}. An Arabic-speaking student wrote this note or question on the lesson whiteboard: """${note}"""
+${lesson ? `Current lesson: ${lesson}\nAnswer in the context of this lesson.` : ""}
+Reply in at most 2 short sentences (max 35 words). If the student wrote in Arabic, answer in simple Gulf-friendly Arabic with the English example; otherwise answer in simple English. If the note has an English mistake, give the corrected form. If it is not about learning English, kindly steer back to the lesson. No markdown, no emojis, no lists, Western digits only.`;
+    let lastErr: any = null;
+    for (const model of BOARD_MODELS) {
+      try {
+        const r = await aiLive.models.generateContent({ model, contents: [{ role: "user", parts: [{ text: prompt }] }], config: { maxOutputTokens: 300, temperature: 0.4 } });
+        const answer = String(r.text || "").replace(/[*_#`]/g, "").trim().slice(0, 400);
+        if (!answer) { lastErr = new Error("EMPTY"); continue; }
+        const audio = await generateSaraSpeechAudio(answer, NOTE_VOICES[persona]).catch(() => null);
+        return res.json({ answer, audio });
+      } catch (e: any) { lastErr = e; logToFile(`board-note ${model} failed: ${String(e?.message || e).slice(0, 200)}`); }
+    }
+    console.error("[board-note] all models failed:", String(lastErr?.message || lastErr).slice(0, 200));
+    res.status(503).json({ error: "AI_FAILED" });
+  });
+
   // Modern AI Omnipresent Instant Tutor Endpoint
   app.post("/api/ai/instant-tutor", async (req, res) => {
     try {
