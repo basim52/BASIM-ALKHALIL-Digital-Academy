@@ -5,6 +5,7 @@ import { NOURA_L3 } from './nouraL3';
 import { NOURA_L4 } from './nouraL4';
 import { MOHAMMED_L1 } from './mohammedL1';
 import { MOHAMMED_L2 } from './mohammedL2';
+import { MOHAMMED_L3 } from './mohammedL3';
 import { ALI_L1 } from './aliL1';
 import { ALI_L2 } from './aliL2';
 /** Specialty tutor tracks. Kept OUT of SARA_TRACKS so Sara's plan/basket/unlocking/level tests are unaffected. Level map: docs/tutor-curricula-levels.md */
@@ -37,8 +38,9 @@ export const MOHAMMED_TRACK: TutorTrack = {
   levels: [
     { id: 'l1', titleAr: 'المستوى الأول: التواصل المهني اليومي', titleEn: 'Level 1: Everyday professional communication' },
     { id: 'l2', titleAr: 'المستوى الثاني: الاجتماعات والعمل الجماعي', titleEn: 'Level 2: Meetings and teamwork' },
+    { id: 'l3', titleAr: 'المستوى الثالث: مقابلات العمل والسيرة الذاتية', titleEn: 'Level 3: Job interviews and the CV' },
   ],
-  lessons: [...MOHAMMED_L1, ...MOHAMMED_L2],
+  lessons: [...MOHAMMED_L1, ...MOHAMMED_L2, ...MOHAMMED_L3],
 };
 export const ALI_TRACK: TutorTrack = {
   id: 'tutor-ali', personaId: 'exams',
