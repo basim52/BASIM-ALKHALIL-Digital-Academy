@@ -539,6 +539,37 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
   // Plan 1: Voice & Speech Intelligence States (Phonetics, Hesitation, Role-Play)
   const [saraTool, setSaraTool] = useState<SaraToolId | null>(null);
+  /** 🧑‍🏫 فصل المعلمين — long navy & gold banner: fills the empty space under the سارة / التدريب rows (desktop, inside the wrapped toolbar) or sits full-width under the toolbar (phone/tablet). */
+  const renderTeachersBanner = (where: 'desk' | 'mob') => (
+          <button
+            type="button"
+            onClick={() => setSaraTool('board')}
+            data-testid={where === 'desk' ? 'sara-board-tool-desk' : 'sara-board-tool'}
+            aria-label="فصل المعلمين"
+            className={`group relative ${where === 'desk' ? 'hidden lg:block flex-1 min-w-[340px] self-stretch' : 'lg:hidden w-full basis-full order-last mt-1'} overflow-hidden rounded-2xl border border-[#C49E3A]/70 bg-gradient-to-l from-[#001a38] via-[#002147] to-[#0a2d5c] px-3 py-2.5 sm:px-4 sm:py-3 text-start shadow-md hover:shadow-lg hover:border-[#C49E3A] transition-all active:scale-[0.99] cursor-pointer`}
+          >
+            <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-l from-transparent via-[#C49E3A] to-transparent" />
+            <span aria-hidden className="pointer-events-none absolute -left-10 -top-10 w-32 h-32 rounded-full bg-[#C49E3A]/10 blur-2xl" />
+            <span className="relative flex items-center gap-3">
+              <span className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 rounded-full border-2 border-[#C49E3A] bg-[#001a38] flex items-center justify-center text-[18px] sm:text-[20px] shadow-inner">🧑‍🏫</span>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center gap-2">
+                  <span className="text-[15px] sm:text-[16px] font-black text-amber-300 tracking-wide whitespace-nowrap">فصل المعلمين</span>
+                  <span className="hidden sm:inline h-px flex-1 bg-gradient-to-l from-[#C49E3A]/60 to-transparent" />
+                </span>
+                <span className="block text-[10.5px] sm:text-[11px] font-bold text-white/75 truncate">دروس على السبورة<span className="hidden sm:inline"> بصوت كل معلم</span></span>
+              </span>
+              <span className="flex items-center gap-1 sm:gap-1.5 shrink-0" data-testid="sara-board-teachers">
+                {[['👩‍💼', 'سارة'], ['👩‍🏫', 'نورة'], ['👨‍💼', 'محمد'], ['🧑‍🎓', 'علي']].map(([e, n]) => (
+                  <span key={n} className="flex flex-col items-center gap-0.5 w-[38px] sm:w-[46px]">
+                    <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#0a2d5c] border border-[#C49E3A]/70 flex items-center justify-center text-[15px] sm:text-[17px] group-hover:border-[#C49E3A] transition-colors">{e}</span>
+                    <span className="text-[9.5px] sm:text-[10px] font-black text-amber-200 leading-none">{n}</span>
+                  </span>
+                ))}
+              </span>
+            </span>
+          </button>
+  );
   const [isPhoneticModalOpen, _raw_setIsPhoneticModalOpen] = useState<boolean>(false);
   // Tool icon opens the matching Sara tool page (SaraTools).
   const setIsPhoneticModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsPhoneticModalOpen(false); if (v === true) setSaraTool('pronunciation'); };
@@ -3217,17 +3248,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
               <button
-                onClick={() => setSaraTool('board')}
-                data-testid="sara-board-tool"
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-[#002147] text-amber-300 border-[#C49E3A]"
-                aria-label="فصل المعلمين"
-              >
-                <span className="text-[15px]">🧑‍🏫</span>
-              </button>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">فصل المعلمين</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-              <button
                 onClick={() => setSaraTool('grammar')}
                 data-testid="sara-grammar-tool"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-[#002147] text-amber-300 border-[#C49E3A]"
@@ -3595,7 +3615,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </div>
             </div>
           </section>
+          {renderTeachersBanner('desk')}
           </nav>
+          {renderTeachersBanner('mob')}
         </div>
 
         {/* Mobile Redesigned 5-Segment Tab Bar (md:hidden) */}
