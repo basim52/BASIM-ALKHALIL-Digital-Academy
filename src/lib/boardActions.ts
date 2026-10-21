@@ -30,3 +30,22 @@ export function sanitizeBoard(raw: any): BoardResult | null {
   if (!boardActions.length) return null;
   return { boardActions, explanationAr: s(raw.explanationAr, 300), checks };
 }
+
+/** Tutor-board tool calls (same vocabulary as ai-tutor-platform's whiteboard: drawBoardText, highlightError, addNote, drawArrow). */
+export type BoardToolCall =
+  | { tool: 'drawBoardText'; payload: { content: string; fontSize: 's' | 'm' | 'l' | 'xl'; color: 'yellow' | 'white' | 'light-blue' } }
+  | { tool: 'addNote'; payload: { content: string; color: 'yellow' } }
+  | { tool: 'highlightError'; payload: { incorrectSnippet: string; correctedSnippet: string } }
+  | { tool: 'drawArrow'; payload: { from: string; to: string } };
+export function toToolCalls(actions: BoardAction[]): BoardToolCall[] {
+  return actions.map((a): BoardToolCall => {
+    switch (a.kind) {
+      case 'title': return { tool: 'drawBoardText', payload: { content: a.text, fontSize: 'l', color: 'yellow' } };
+      case 'highlight': return { tool: 'addNote', payload: { content: a.text, color: 'yellow' } };
+      case 'example': return { tool: 'drawBoardText', payload: { content: a.ar ? `✏️ ${a.en}\n${a.ar}` : `✏️ ${a.en}`, fontSize: 'm', color: 'white' } };
+      case 'fix': return { tool: 'highlightError', payload: { incorrectSnippet: a.wrong, correctedSnippet: a.right } };
+      case 'arrow': return { tool: 'drawArrow', payload: { from: a.from, to: a.to } };
+      default: return { tool: 'drawBoardText', payload: { content: a.ar ? `${a.text}\n${a.ar}` : a.text, fontSize: 'm', color: 'light-blue' } };
+    }
+  });
+}

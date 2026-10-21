@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { Volume2, Square, ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { playCloudAudioAs, cancelAllSpeech } from '../lib/audio';
 import { BOARD_PERSONAS, personaById, type BoardPersona } from '../data/saraBoardPersonas';
-import type { BoardAction, BoardResult } from '../lib/boardActions';
+import { toToolCalls, type BoardResult } from '../lib/boardActions';
+const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
 
 const OWNER = 'sara-board';
 type Step = 'pick' | 'board' | 'check' | 'done';
@@ -33,17 +34,6 @@ const usePersonaVoice = () => {
 const boardSpeech = (b: BoardResult) => b.boardActions.map(a =>
   a.kind === 'example' ? a.en : a.kind === 'fix' ? `Not "${a.wrong}". Say "${a.right}".` : a.kind === 'arrow' ? `${a.from}, becomes ${a.to}.` : a.text).join('. ');
 
-const ActionRow: React.FC<{ a: BoardAction }> = ({ a }) => {
-  switch (a.kind) {
-    case 'title': return <p dir="ltr" className="text-[17px] font-black text-amber-300 text-start border-b border-amber-400/40 pb-1">{a.text}</p>;
-    case 'highlight': return <p dir="ltr" className="text-[14px] font-black text-[#001a38] bg-amber-300 rounded-lg px-2 py-1 text-start">{a.text}</p>;
-    case 'example': return <div className="rounded-lg bg-white/5 border border-white/10 px-2 py-1"><p dir="ltr" className="text-[14px] font-bold text-start">✏️ {a.en}</p>{a.ar && <p className="text-[11px] text-white/70 font-bold">{a.ar}</p>}</div>;
-    case 'fix': return <p dir="ltr" className="text-[14px] font-bold text-start"><span className="line-through text-rose-300">{a.wrong}</span> <span className="text-amber-300">→</span> <span className="text-emerald-300">{a.right}</span></p>;
-    case 'arrow': return <p dir="ltr" className="text-[14px] font-bold text-start">{a.from} <span className="text-amber-300 font-black">⟶</span> {a.to}</p>;
-    default: return <div><p dir="ltr" className="text-[14px] font-bold text-start">{a.text}</p>{a.ar && <p className="text-[11px] text-white/70 font-bold">{a.ar}</p>}</div>;
-  }
-};
-
 const VoiceBtn: React.FC<{ v: ReturnType<typeof usePersonaVoice>; text: string; p: BoardPersona }> = ({ v, text, p }) => (
   <div className="flex items-center gap-2 shrink-0">
     {v.state === 'loading' || v.state === 'playing'
@@ -65,6 +55,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
   const [correct, setCorrect] = useState(0);
   const [saved, setSaved] = useState<'no' | 'ok' | 'fail'>('no');
   const voice = usePersonaVoice();
+  const calls = useMemo(() => (board ? ((board as any).toolCalls || toToolCalls(board.boardActions)) : []), [board]);
 
   const ask = async () => {
     const t = topic.trim(); if (!t || busy) return;
@@ -122,9 +113,10 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
       <p className="text-[12px] font-black text-amber-300">{persona.emoji} {persona.nameAr} — {persona.roleAr}</p>
       <VoiceBtn v={voice} text={boardSpeech(board)} p={persona} />
     </div>
-    <div data-testid="board-surface" className="flex-1 min-h-0 overflow-hidden rounded-2xl border-2 border-amber-400/60 bg-[#0a2d5c] p-3 flex flex-col gap-1.5"
-      style={{ backgroundImage: 'linear-gradient(rgba(251,191,36,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(251,191,36,.06) 1px,transparent 1px)', backgroundSize: '22px 22px' }}>
-      {board.boardActions.map((a, i) => <ActionRow key={i} a={a} />)}
+    <div data-testid="board-surface" className="flex-1 min-h-0">
+      <Suspense fallback={<div className="w-full h-full rounded-2xl border-2 border-amber-400/60 bg-[#0a2d5c] flex items-center justify-center text-[12px] font-bold text-amber-200">جاري فتح السبورة…</div>}>
+        <TutorTldrawBoard calls={calls} />
+      </Suspense>
     </div>
     {board.explanationAr && <p className="text-[12px] font-bold text-white/85 shrink-0 line-clamp-3">{board.explanationAr}</p>}
     <div className="flex gap-2 shrink-0">

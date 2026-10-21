@@ -6,7 +6,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleGenAI, Modality, Type } from "@google/genai";
 import { getAdminAuth, getAdminDb, FieldValue } from "./firebaseAdmin.js";
-import { sanitizeBoard } from "../lib/boardActions.js";
+import { sanitizeBoard, toToolCalls } from "../lib/boardActions.js";
 
 const logToFile = (msg: string) => {
   // Use console.log directly (no filesystem logging on Vercel or serverless)
@@ -2010,7 +2010,7 @@ If the request is unsafe or not about learning English, make a board about polit
         const r = await aiLive.models.generateContent({ model, contents: [{ role: "user", parts: [{ text: prompt }] }], config: { responseMimeType: "application/json", responseSchema: schema as any, maxOutputTokens: 2000, temperature: 0.4 } });
         const clean = sanitizeBoard(JSON.parse((r.text || "").trim()));
         if (!clean) { lastErr = new Error("BAD_SHAPE"); continue; }
-        return res.json(clean);
+        return res.json({ ...clean, toolCalls: toToolCalls(clean.boardActions) });
       } catch (e: any) { lastErr = e; logToFile(`sara-board ${model} failed: ${String(e?.message || e).slice(0, 200)}`); }
     }
     console.error("[sara-board] all models failed:", String(lastErr?.message || lastErr).slice(0, 200));
