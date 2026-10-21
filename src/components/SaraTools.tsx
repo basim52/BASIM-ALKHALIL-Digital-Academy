@@ -23,7 +23,7 @@ interface Props { tool: SaraToolId | null; onClose: () => void; uid?: string; un
 
 const TITLES: Record<SaraToolId, string> = {
   placement: '🎯 اختبار تحديد المستوى', speed: '⚡ تحدي السرعة', worksheet: '📝 ورقة عمل', plan: '🗓️ خطة الدراسة الأسبوعية',
-  roleplay: '🎭 مغامرات لعب الأدوار', pronunciation: '🔊 مختبر النطق', voicecoach: '🎙️ مدرب الصوت', grammar: '✍️ تدقيق نحوي', board: '🧑‍🏫 السبورة الذكية',
+  roleplay: '🎭 مغامرات لعب الأدوار', pronunciation: '🔊 مختبر النطق', voicecoach: '🎙️ مدرب الصوت', grammar: '✍️ تدقيق نحوي', board: '🧑‍🏫 فصل المعلمين',
 };
 
 const shuffle = <T,>(a: T[]): T[] => { const r = a.slice(); for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; };
