@@ -9,6 +9,7 @@ const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
 import TutorTrackPlayer from './TutorTrackPlayer';
 import { TUTOR_TRACKS, type TutorTrack } from '../data/tutorTracks';
 import { SaraTracksHub } from './SaraTracksHub';
+import TutorConversation from './TutorConversation';
 
 const OWNER = 'sara-board';
 type Step = 'pick' | 'board' | 'check' | 'done';
@@ -60,6 +61,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
   const voice = usePersonaVoice();
   const [track, setTrack] = useState<TutorTrack | null>(null);
   const [saraHub, setSaraHub] = useState(false);
+  const [talk, setTalk] = useState(false);
   const calls = useMemo(() => (board ? ((board as any).toolCalls || toToolCalls(board.boardActions)) : []), [board]);
 
   const ask = async () => {
@@ -87,6 +89,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
     <div data-testid="sara-board-tutor" className="flex-1 min-h-0 p-3 flex flex-col gap-2 bg-[#001a38] text-white overflow-hidden">{children}</div>
   );
 
+  if (talk && persona.id !== 'sara') return <TutorConversation persona={persona} onBack={() => setTalk(false)} />;
   if (track) return <TutorTrackPlayer track={track} uid={uid} onBack={() => setTrack(null)} />;
   const personaTrack = TUTOR_TRACKS.find(t => t.personaId === persona.id);
 
@@ -122,6 +125,13 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
         className="shrink-0 rounded-xl border border-amber-400/60 bg-[#0a2d5c] px-3 py-2 text-start flex items-center gap-2">
         <span className="text-[20px]">📚</span>
         <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-amber-300">دروس {persona.nameAr}</span><span className="block text-[11px] font-bold text-white/75 truncate">{personaTrack.titleAr} · {personaTrack.lessons.length} درس</span></span>
+      </button>
+    )}
+    {persona.id !== 'sara' && (
+      <button onClick={() => { voice.stop(); setTalk(true); }} data-testid={`tutor-talk-open-${persona.id}`}
+        className="shrink-0 rounded-xl border border-[#C49E3A] bg-gradient-to-l from-[#001a38] to-[#0a2d5c] px-3 py-2 text-start flex items-center gap-2">
+        <span className="text-[20px]">💬</span>
+        <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-amber-300">محاورة {persona.nameAr}</span><span className="block text-[11px] font-bold text-white/75 truncate">{persona.gender === 'female' ? 'تكلّم معها بالإنجليزي وترد بصوتها' : 'تكلّم معه بالإنجليزي ويرد بصوته'}</span></span>
       </button>
     )}
     <div className="flex-1" />

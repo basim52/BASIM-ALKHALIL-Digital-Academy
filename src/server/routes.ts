@@ -2511,7 +2511,13 @@ Respond ONLY with a valid JSON object matching:
   const CALL_MODELS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.8-flash"];
   const callModelBlockedUntil = new Map<string, number>();
   app.post("/api/sara/call-turn", async (req, res) => {
-    const { message = "", history = [], scenario = "", level = "B1", name = "", context = "", warm = false, withAudio = true, free = false } = req.body || {};
+    const { message = "", history = [], scenario = "", level = "B1", name = "", context = "", warm = false, withAudio = true, free = false, persona = "" } = req.body || {};
+    // Optional specialty tutor (محاورة نورة / محمد / علي): own role + own cloud voice. Without it this is Sara's call, unchanged.
+    const tutor = ({
+      grammar: { voice: "Aoede", who: "Noura, a warm female English teacher who helps Arabic speakers fix their common mistakes" },
+      business: { voice: "Charon", who: "Mohammed, a friendly male business English coach (workplace talk, emails, meetings, interviews)" },
+      exams: { voice: "Orus", who: "Ali, a calm male IELTS speaking coach (exam-style questions, no band scores or promises)" },
+    } as Record<string, { voice: string; who: string }>)[String(persona)] || null;
     if (warm) { initAI(); return res.json({ ok: true, ai: !!aiLive }); } // warms the function, auth and AI client
     const text = String(message).slice(0, 600).trim();
     if (!text) return res.status(400).json({ error: "message required" });
@@ -2521,7 +2527,7 @@ Respond ONLY with a valid JSON object matching:
     const t0 = Date.now();
     const send = (o: any) => { try { res.write(JSON.stringify(o) + "\n"); (res as any).flush?.(); } catch { /* closed */ } };
     if (!initAI() || !aiLive) { send({ t: "error", error: "AI_UNAVAILABLE" }); return res.end(); }
-    const sys = `You are Sara, a warm English tutor on a live PHONE CALL with ${String(name).slice(0, 40) || "a student"} (CEFR ${String(level).slice(0, 8)}).
+    const sys = `${tutor ? `You are ${tutor.who}, in a live spoken conversation` : "You are Sara, a warm English tutor on a live PHONE CALL"} with ${String(name).slice(0, 40) || "a student"} (CEFR ${String(level).slice(0, 8)}).
 Scenario: ${String(scenario).slice(0, 300)}
 ${context && !free ? `What this student needs (real data from the app): ${String(context).slice(0, 700)}\nWeave this practice in naturally.\n` : ""}Rules: spoken English only, 1-2 short sentences (max 35 words), no lists, no markdown, no emojis. Match the level. ${free ? "This is a free, open conversation: follow the student's topic like a friend on the phone. Do not correct, test or evaluate; just reply naturally and keep the talk going." : "If the student makes a clear mistake, model the correct form briefly, then ask one follow-up question."}`;
     const contents = formatGeminiHistory((Array.isArray(history) ? history : []).slice(-8), text);
@@ -2532,7 +2538,7 @@ ${context && !free ? `What this student needs (real data from the app): ${String
       if (!firstTextMs) firstTextMs = Date.now() - t0;
       send({ t: "s", i, text: sentence });
       if (withAudio) {
-        const p = generateSaraSpeechAudio(sentence, "Kore").catch(() => null);
+        const p = generateSaraSpeechAudio(sentence, tutor ? tutor.voice : "Kore").catch(() => null);
         audioChain = audioChain.then(async () => { const a = await p; if (a && !firstAudioMs) firstAudioMs = Date.now() - t0; if (!a) console.error(`[call-turn] no TTS audio for sentence ${i}`); send({ t: "a", i, audio: a }); });
       }
     };
