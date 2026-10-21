@@ -6,6 +6,8 @@ import { playCloudAudioAs, cancelAllSpeech } from '../lib/audio';
 import { BOARD_PERSONAS, personaById, type BoardPersona } from '../data/saraBoardPersonas';
 import { toToolCalls, type BoardResult } from '../lib/boardActions';
 const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
+import TutorTrackPlayer from './TutorTrackPlayer';
+import { TUTOR_TRACKS, type TutorTrack } from '../data/tutorTracks';
 
 const OWNER = 'sara-board';
 type Step = 'pick' | 'board' | 'check' | 'done';
@@ -55,6 +57,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
   const [correct, setCorrect] = useState(0);
   const [saved, setSaved] = useState<'no' | 'ok' | 'fail'>('no');
   const voice = usePersonaVoice();
+  const [track, setTrack] = useState<TutorTrack | null>(null);
   const calls = useMemo(() => (board ? ((board as any).toolCalls || toToolCalls(board.boardActions)) : []), [board]);
 
   const ask = async () => {
@@ -82,6 +85,9 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
     <div data-testid="sara-board-tutor" className="flex-1 min-h-0 p-3 flex flex-col gap-2 bg-[#001a38] text-white overflow-hidden">{children}</div>
   );
 
+  if (track) return <TutorTrackPlayer track={track} uid={uid} onBack={() => setTrack(null)} />;
+  const personaTrack = TUTOR_TRACKS.find(t => t.personaId === persona.id);
+
   if (step === 'pick') return shell(<>
     <p className="text-[11px] text-amber-200/90 font-bold shrink-0">اختر المعلم واكتب وش تبي تتعلم، ويشرحه لك على السبورة.</p>
     <div className="grid grid-cols-3 gap-1.5 shrink-0">
@@ -101,6 +107,13 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
       {persona.examplesAr.map(e => <button key={e} onClick={() => setTopic(e)} className="px-2 py-1 rounded-full bg-white/5 border border-white/15 text-[11px] font-bold" dir="ltr">{e}</button>)}
     </div>
     {err && <p className="text-[12px] font-bold text-rose-300 shrink-0">{err}</p>}
+    {personaTrack && (
+      <button onClick={() => { voice.stop(); setTrack(personaTrack); }} data-testid="tutor-track-open"
+        className="shrink-0 rounded-xl border border-amber-400/60 bg-[#0a2d5c] px-3 py-2 text-start flex items-center gap-2">
+        <span className="text-[20px]">📚</span>
+        <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-amber-300">دروس {persona.nameAr}</span><span className="block text-[11px] font-bold text-white/75 truncate">{personaTrack.titleAr} · {personaTrack.lessons.length} درس</span></span>
+      </button>
+    )}
     <div className="flex-1" />
     <button onClick={() => void ask()} disabled={!topic.trim() || busy} data-testid="board-ask"
       className="shrink-0 w-full py-3 rounded-xl bg-amber-400 text-[#001a38] text-[15px] font-black disabled:opacity-40">{busy ? `${persona.nameAr} ${persona.gender === 'female' ? 'تجهّز' : 'يجهّز'} السبورة…` : 'اشرح لي على السبورة'}</button>

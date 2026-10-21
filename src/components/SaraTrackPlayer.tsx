@@ -60,8 +60,9 @@ const lessonAudioCache = new Map<string, string>(); // text → object URL (this
  * Sara's real (cloud) voice for a whole lesson page in ONE request. The GET is CDN-cached for a year,
  * so a page is generated once for everybody. Retries with backoff; never substitutes another voice.
  */
-async function fetchLessonAudio(text: string, token: number): Promise<string | null> {
-  const hit = lessonAudioCache.get(text);
+async function fetchLessonAudio(text: string, token: number, voice = 'Kore'): Promise<string | null> {
+  const ck = voice === 'Kore' ? text : `${voice}|${text}`;
+  const hit = lessonAudioCache.get(ck);
   if (hit) return hit;
   const delays = [0, 2500, 6000];
   for (const d of delays) {
@@ -69,10 +70,10 @@ async function fetchLessonAudio(text: string, token: number): Promise<string | n
     if (token !== narratorToken) return null;
     try {
       const tok = auth.currentUser ? await auth.currentUser.getIdToken().catch(() => '') : '';
-      const r = await fetch(`/api/tts/lesson?v=Kore&t=${encodeURIComponent(text)}`, tok ? { headers: { Authorization: `Bearer ${tok}` } } : undefined);
+      const r = await fetch(`/api/tts/lesson?v=${encodeURIComponent(voice)}&t=${encodeURIComponent(text)}`, tok ? { headers: { Authorization: `Bearer ${tok}` } } : undefined);
       if (r.ok && (r.headers.get('content-type') || '').includes('audio')) {
         const url = URL.createObjectURL(await r.blob());
-        lessonAudioCache.set(text, url);
+        lessonAudioCache.set(ck, url);
         return url;
       }
       if (r.status === 503) { const j = await r.json().catch(() => ({})); if (j?.quotaExhausted) return null; }
@@ -86,11 +87,11 @@ export function resumeNarrator() {
   if (narratorEl && narratorEl.src && !narratorEl.ended) { try { const p = narratorEl.play(); if (p) p.catch(() => {}); } catch { /* ignore */ } }
 }
 /** Play the full page text in Sara's voice. onFailed → show «إعادة المحاولة» (no substitute voice). */
-async function narrate(text: string, onBlocked: () => void, onFailed: () => void, onDone: () => void) {
+async function narrate(text: string, onBlocked: () => void, onFailed: () => void, onDone: () => void, voice = 'Kore') {
   const token = ++narratorToken;
   cancelAllSpeech(); // nothing else speaks at the same time
   narratorPaused = false;
-  const url = await fetchLessonAudio(text, token);
+  const url = await fetchLessonAudio(text, token, voice);
   if (token !== narratorToken) return;
   if (!url) { onFailed(); return; }
   while (narratorPaused) { await wait(150); if (token !== narratorToken) return; }

@@ -5,6 +5,8 @@ import { CONVERSATION_TRACK } from '../src/data/saraTracks/conversation';
 import { READING_TRACK } from '../src/data/saraTracks/reading';
 import { WRITING_TRACK } from '../src/data/saraTracks/writing';
 import { trackLevels, buildLevelTest } from '../src/lib/saraLevelTests';
+import { TUTOR_TRACKS } from '../src/data/tutorTracks';
+import { sanitizeBoard } from '../src/lib/boardActions';
 let errors = 0;
 const seen = new Map<string, string>();
 const err = (m: string) => { errors++; console.log('ERROR', m); };
@@ -16,7 +18,7 @@ const checkQ = (id: string, label: string, q: any) => {
   const key = `${q.promptAr}|${q.promptEn || ''}|${(q.options || []).join('/')}`;
   if (seen.has(key)) err(`${id} ${label}: duplicate of ${seen.get(key)}`); else seen.set(key, `${id} ${label}`);
 };
-for (const TRACK of [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK]) {
+for (const TRACK of [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK, ...TUTOR_TRACKS] as typeof FOUNDATIONS_TRACK[]) {
 const counts: string[] = [];
 const ids = new Set<string>();
 let titlesOnly = 0;
@@ -30,7 +32,7 @@ TRACK.lessons.forEach((l, i) => {
   if (!c.explanationAr || !c.altExplanationAr) err(`${l.id}: missing explanation/alt`);
   if (c.explanationAr === c.altExplanationAr) err(`${l.id}: alt equals explanation`);
   if (!Array.isArray(c.example) || c.example.length < 2 || c.example.length > 4 || c.example.some(e => !e.en || !e.ar)) err(`${l.id}: example needs 2–4 lines en+ar`);
-  if (TRACK.id === 'reading' || TRACK.id === 'writing') {
+  if (TRACK.id === 'reading' || TRACK.id === 'writing' || TRACK.id.startsWith('tutor-')) {
     // narrated fields must never contain pronunciation notation (Sara reads them aloud)
     const narrated = [c.explanationAr, c.altExplanationAr, ...c.example.map(e => e.en + ' ' + e.ar)];
     narrated.forEach(t => { if (/[↗↘→_=\/ˈˌ]|\b[a-z]*-?[A-Z]{2,}-[a-z]/.test(t)) err(`${l.id}: pronunciation symbols in narrated text: ${t.slice(0, 40)}`); });
@@ -43,6 +45,21 @@ TRACK.lessons.forEach((l, i) => {
 if (TRACK.levels) TRACK.levels.forEach(v => console.log(`  level ${v.id}: ${TRACK.lessons.filter(l => l.levelId === v.id).length} lessons, ${TRACK.lessons.filter(l => l.levelId === v.id && l.content).length} built`));
 console.log(`${TRACK.id}: lessons ${TRACK.lessons.length}, built ${counts.length}, titles-only ${titlesOnly}, exercises ${counts.reduce((a, c) => a + Number(c.split(':')[1]), 0)}`);
 console.log('  exercise counts:', counts.join(' '));
+}
+// Tutor tracks: board must survive sanitizing unchanged (4–6 known items), title = lesson titleEn, board examples = lesson examples
+for (const TRACK of TUTOR_TRACKS) {
+  for (const l of TRACK.lessons) {
+    const b = l.board;
+    if (!b) { err(`${l.id}: no board`); continue; }
+    if (b.length < 4 || b.length > 6) err(`${l.id}: board has ${b.length} items`);
+    const clean = sanitizeBoard({ boardActions: b, explanationAr: '', checks: [] });
+    if (!clean || clean.boardActions.length !== b.length) err(`${l.id}: board items dropped by sanitizer`);
+    if (b[0]?.kind !== 'title' || (b[0] as any).text !== l.titleEn) err(`${l.id}: board title must equal titleEn`);
+    const ex = new Set((l.content?.example || []).map(e => e.en));
+    b.filter(a => a.kind === 'example').forEach(a => { if (!ex.has((a as any).en)) err(`${l.id}: board example not in lesson examples: ${(a as any).en}`); });
+    b.forEach(a => { const t = JSON.stringify(a); if (t.length > 400) err(`${l.id}: board item too long`); });
+  }
+  console.log(`${TRACK.id}: boards checked ${TRACK.lessons.length}`);
 }
 // End-of-level tests: every 30-lesson level must yield 15–20 distinct questions, correct answer kept after shuffling
 let tests = 0;
