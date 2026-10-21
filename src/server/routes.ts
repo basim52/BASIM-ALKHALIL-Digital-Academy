@@ -1968,6 +1968,7 @@ Rules:
   const BOARD_DAILY_CAP = 30;
   const boardDaily = new Map<string, { day: string; n: number }>();
   const BOARD_ROLES: Record<string, string> = {
+    sara: "Sara, the academy's main warm female English teacher (general English, conversation and vocabulary)",
     grammar: "Noura, a warm female English grammar teacher (basics and grammar)",
     business: "Mohammed, a friendly male teacher of business English, emails and job interviews",
     exams: "Ali, a calm male teacher who prepares students for English exams such as IELTS (no band scores, just skills)",

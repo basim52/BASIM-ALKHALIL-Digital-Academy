@@ -154,7 +154,7 @@ service cloud.firestore {
         allow read: if isOwner(userId) || isParentOf(userId) || isAdmin();
         allow create: if (isOwner(userId) || isAdmin()) &&
           request.resource.data.keys().hasOnly(['personaId', 'topic', 'checksTotal', 'checksCorrect', 'createdAt']) &&
-          request.resource.data.personaId in ['grammar', 'business', 'exams'] &&
+          request.resource.data.personaId in ['sara', 'grammar', 'business', 'exams'] &&
           request.resource.data.topic is string && request.resource.data.topic.size() <= 300 &&
           request.resource.data.checksTotal is int && request.resource.data.checksTotal >= 0 && request.resource.data.checksTotal <= 5 &&
           request.resource.data.checksCorrect is int && request.resource.data.checksCorrect >= 0 && request.resource.data.checksCorrect <= request.resource.data.checksTotal &&

@@ -90,7 +90,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
 
   if (step === 'pick') return shell(<>
     <p className="text-[11px] text-amber-200/90 font-bold shrink-0">اختر المعلم واكتب وش تبي تتعلم، ويشرحه لك على السبورة.</p>
-    <div className="grid grid-cols-3 gap-1.5 shrink-0">
+    <div className="grid grid-cols-4 gap-1.5 shrink-0">
       {BOARD_PERSONAS.map(p => (
         <button key={p.id} data-testid={`board-persona-${p.id}`} onClick={() => setPersona(p)}
           className={`rounded-xl border p-2 flex flex-col items-center gap-0.5 ${persona.id === p.id ? 'bg-amber-400 text-[#001a38] border-amber-300' : 'bg-[#0a2d5c] border-white/10'}`}>

@@ -3079,7 +3079,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           {/* Sara tools: labeled sections (scrolls sideways on phone/tablet, wraps on desktop) */}
           <nav data-testid="sara-toolbar" className="w-full basis-full order-last flex items-stretch gap-2 overflow-x-auto lg:overflow-visible lg:flex-wrap no-scrollbar pb-1 -mx-1 px-1">
           <section className="shrink-0 rounded-2xl bg-slate-50 border border-slate-200 px-2 pt-1.5 pb-1">
-            <p className="text-[10px] font-black text-[#C49E3A] mb-1 px-0.5">{isRtl ? 'المناهج' : 'Curricula'}</p>
+            <p className="text-[10px] font-black text-[#C49E3A] mb-1 px-0.5">{isRtl ? 'سارة' : 'Sara'}</p>
             <div className="flex items-start gap-1">
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 📚 SARA EXCLUSIVE CURRICULUMS (Circular with Glowing Badge) */}
