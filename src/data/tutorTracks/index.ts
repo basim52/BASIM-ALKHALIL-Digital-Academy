@@ -2,6 +2,7 @@ import type { SaraTrack } from '../saraTracks/foundations';
 import { NOURA_L1, type TutorLesson } from './nouraL1';
 import { NOURA_L2 } from './nouraL2';
 import { NOURA_L3 } from './nouraL3';
+import { NOURA_L4 } from './nouraL4';
 import { MOHAMMED_L1 } from './mohammedL1';
 import { MOHAMMED_L2 } from './mohammedL2';
 import { ALI_L1 } from './aliL1';
@@ -26,8 +27,9 @@ export const NOURA_TRACK: TutorTrack = {
     { id: 'l1', titleAr: 'المستوى الأول: أخطاء أساسية', titleEn: 'Level 1: Basic mistakes' },
     { id: 'l2', titleAr: 'المستوى الثاني: أخطاء الأفعال والأزمنة', titleEn: 'Level 2: Verb and tense mistakes' },
     { id: 'l3', titleAr: 'المستوى الثالث: اختيار الكلمة الصحيحة', titleEn: 'Level 3: Choosing the right word' },
+    { id: 'l4', titleAr: 'المستوى الرابع: أخطاء الجملة والكتابة', titleEn: 'Level 4: Sentence and writing mistakes' },
   ],
-  lessons: [...spread(NOURA_L1), ...NOURA_L2, ...NOURA_L3],
+  lessons: [...spread(NOURA_L1), ...NOURA_L2, ...NOURA_L3, ...NOURA_L4],
 };
 export const MOHAMMED_TRACK: TutorTrack = {
   id: 'tutor-mohammed', personaId: 'business',
