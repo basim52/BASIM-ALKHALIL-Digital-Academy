@@ -5,6 +5,7 @@ import { db } from '../lib/firebase';
 import { saraNarrate, saraStopNarrator, saraUnlockNarrator } from './SaraTrackPlayer';
 import { toToolCalls } from '../lib/boardActions';
 import { personaById } from '../data/saraBoardPersonas';
+import TutorConversation from './TutorConversation';
 import type { TutorTrack, TutorLesson } from '../data/tutorTracks';
 import type { SaraChoiceQuestion } from '../data/saraTracks/foundations';
 const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
@@ -48,6 +49,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const [correct, setCorrect] = useState(0);
   const v = useVoice(persona.voice);
   const [replay, setReplay] = useState(0);
+  const [talk, setTalk] = useState(false);
   const calls = useMemo(() => (lesson?.board ? toToolCalls(lesson.board) : []), [lesson]);
 
   const shell = (head: React.ReactNode, body: React.ReactNode) => (
@@ -55,6 +57,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
       <div className="flex items-center gap-2 shrink-0">
         <button onClick={() => { v.stop(); if (lesson) setLesson(null); else onBack(); }} aria-label="رجوع" className="p-1.5 rounded-lg bg-white/10"><ArrowRight size={16} /></button>
         <div className="min-w-0 flex-1">{head}</div>
+        {lesson?.content && <button onClick={() => { v.stop(); setTalk(true); }} data-testid={`tutor-lesson-talk-${persona.id}`} className="shrink-0 px-2.5 py-1.5 rounded-xl bg-[#0a2d5c] border border-[#C49E3A] text-amber-300 text-[11px] font-black">💬 محاورة {persona.nameAr}</button>}
       </div>
       {body}
     </div>
@@ -99,6 +102,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   }
 
   const c = lesson.content!;
+  if (talk) return <TutorConversation persona={persona} onBack={() => setTalk(false)} lesson={{ titleEn: lesson.titleEn, titleAr: lesson.titleAr, examples: c.example.map(e => e.en) }} />;
   const total = 1 + c.exercises.length;
   const head = <><p className="text-[10px] text-amber-300 font-bold">{persona.nameAr} — الدرس {lesson.order}</p><p className="text-[13px] font-black truncate">{lesson.titleAr}</p></>;
   const narration = `${c.explanationAr} ${c.example.map(e => e.en).join('. ')}`;

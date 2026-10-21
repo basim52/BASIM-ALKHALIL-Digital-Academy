@@ -15,8 +15,15 @@ const STARTERS: Record<string, { en: string; scenario: string }> = {
 };
 type Line = { role: 'tutor' | 'me'; text: string };
 
-export const TutorConversation: React.FC<{ persona: BoardPersona; level?: string; name?: string; onBack: () => void }> = ({ persona, level = 'B1', name = '', onBack }) => {
-  const st = STARTERS[persona.id] || STARTERS.grammar;
+/** In-lesson conversation (like Sara's lesson chat): scoped to this lesson's topic and examples only. */
+export type TutorLessonTopic = { titleEn: string; titleAr: string; examples: string[] };
+export const TutorConversation: React.FC<{ persona: BoardPersona; level?: string; name?: string; onBack: () => void; lesson?: TutorLessonTopic }> = ({ persona, level = 'B1', name = '', onBack, lesson }) => {
+  const base = STARTERS[persona.id] || STARTERS.grammar;
+  const st = lesson ? {
+    en: `Hi! Let's practise today's lesson: ${lesson.titleEn}. I'll ask you questions about it. Ready? Try making your own sentence like: ${lesson.examples[0] || ''}`,
+    scenario: `In-lesson practice ONLY about this lesson: "${lesson.titleEn}". Stay on this lesson's point.`,
+    context: `Lesson: "${lesson.titleEn}" (${lesson.titleAr}). Lesson examples: ${lesson.examples.join(' | ')}. Ask one short question at a time that makes the student use exactly this point, gently model the correct form when they get it wrong, and if they drift off-topic, kindly bring them back to this lesson.`,
+  } : { ...base, context: '' };
   const [lines, setLines] = useState<Line[]>([{ role: 'tutor', text: st.en }]);
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
@@ -70,7 +77,7 @@ export const TutorConversation: React.FC<{ persona: BoardPersona; level?: string
     let finished = false; let first = true;
     try {
       const r = await fetch('/api/sara/call-turn', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: m, history, scenario: `${persona.nameEn}: ${st.scenario}`, level, name, persona: persona.id }) });
+        body: JSON.stringify({ message: m, history, scenario: `${persona.nameEn}: ${st.scenario}`, context: st.context, level, name, persona: persona.id }) });
       if (!r.ok || !r.body) throw new Error(String(r.status));
       const reader = r.body.getReader(); const dec = new TextDecoder(); let buf = ''; let failed = false;
       const handle = (line: string) => {
@@ -108,7 +115,7 @@ export const TutorConversation: React.FC<{ persona: BoardPersona; level?: string
       <div className="flex items-center gap-2 shrink-0">
         <button onClick={() => { stopAudio(); onBack(); }} aria-label="رجوع" className="p-1.5 rounded-lg bg-white/10"><ArrowRight size={16} /></button>
         <span className={`w-9 h-9 rounded-full bg-[#0a2d5c] border-2 border-[#C49E3A] flex items-center justify-center text-[18px] ${speaking ? 'ring-4 ring-amber-300/50 animate-pulse' : ''}`}>{persona.emoji}</span>
-        <div className="min-w-0 flex-1"><p className="text-[13px] font-black text-amber-300">محاورة {persona.nameAr}</p><p className="text-[10px] font-bold text-white/70 truncate">{persona.roleAr} · {persona.gender === 'female' ? 'ترد بصوتها' : 'يرد بصوته'}</p></div>
+        <div className="min-w-0 flex-1"><p className="text-[13px] font-black text-amber-300">محاورة {persona.nameAr}</p><p className="text-[10px] font-bold text-white/70 truncate">{lesson ? lesson.titleAr : persona.roleAr} · {persona.gender === 'female' ? 'ترد بصوتها' : 'يرد بصوته'}</p></div>
         {speaking
           ? <button onClick={stopAudio} className="px-2.5 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[11px] font-black"><Square size={12} className="inline" /> إيقاف</button>
           : <button onClick={() => void speakStarter()} data-testid="tutor-talk-listen" className="px-2.5 py-1.5 rounded-xl bg-white/10 border border-amber-400/50 text-[11px] font-black">🔊 البداية</button>}
