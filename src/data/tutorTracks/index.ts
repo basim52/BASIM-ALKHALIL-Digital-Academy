@@ -9,6 +9,8 @@ import { MOHAMMED_L3 } from './mohammedL3';
 import { MOHAMMED_L4 } from './mohammedL4';
 import { ALI_L1 } from './aliL1';
 import { ALI_L2 } from './aliL2';
+import { ALI_L3 } from './aliL3';
+import { ALI_L4 } from './aliL4';
 /** Specialty tutor tracks. Kept OUT of SARA_TRACKS so Sara's plan/basket/unlocking/level tests are unaffected. Level map: docs/tutor-curricula-levels.md */
 /** Level 1 was written with most answers in position B: move each correct answer to a stable pseudo-random position (swap only, same options). */
 const spread = (lessons: TutorLesson[]): TutorLesson[] => lessons.map(l => {
@@ -50,8 +52,10 @@ export const ALI_TRACK: TutorTrack = {
   levels: [
     { id: 'l1', titleAr: 'المستوى الأول: فهم الاختبار وأساسيات المهارات', titleEn: 'Level 1: The test and first strategies' },
     { id: 'l2', titleAr: 'المستوى الثاني: الكتابة Task 1 و Task 2', titleEn: 'Level 2: Writing Task 1 and Task 2' },
+    { id: 'l3', titleAr: 'المستوى الثالث: المحادثة Part 2 و Part 3', titleEn: 'Level 3: Speaking Part 2 and Part 3' },
+    { id: 'l4', titleAr: 'المستوى الرابع: القراءة والاستماع المتقدم', titleEn: 'Level 4: Advanced Reading and Listening' },
   ],
-  lessons: [...ALI_L1, ...ALI_L2],
+  lessons: [...ALI_L1, ...ALI_L2, ...ALI_L3, ...ALI_L4],
 };
 export const TUTOR_TRACKS: TutorTrack[] = [NOURA_TRACK, MOHAMMED_TRACK, ALI_TRACK];
 export type { TutorLesson };
