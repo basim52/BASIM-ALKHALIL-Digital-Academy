@@ -96,19 +96,40 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
     .map(sh => ({ sh, text: renderPlaintextFromRichText(editor, (sh.props as any).richText).replace(/📝/g, '').trim() }))
     .filter(n => n.text.length >= 2 && answered.current.get(n.sh.id) !== n.text);
   const askTutor = async (manual: boolean) => {
-    const editor = ed.current; if (!editor || asking || editor.getEditingShapeId()) return;
+    const editor = ed.current; if (!editor) return;
+    if (asking) { if (manual) setNoteErr(`${persona.nameAr} ${persona.gender === 'female' ? 'ترد' : 'يرد'} على سؤالك…`); return; }
+    if (editor.getEditingShapeId()) {
+      // Still typing: the button finishes the edit; the auto trigger waits until the student stops editing.
+      if (!manual) { if (idle.current) clearTimeout(idle.current); idle.current = window.setTimeout(() => void askRef.current(false), NOTE_IDLE_MS); return; }
+      try { editor.complete(); } catch { /* ignore */ } try { editor.setEditingShape(null); } catch { /* ignore */ }
+    }
     const pending = studentNotes(editor); const n = pending[pending.length - 1];
-    if (!n) { if (manual) setNoteErr('اكتب سؤالك في ملاحظة لاصقة أو نص على السبورة أول'); return; }
-    if (Date.now() - lastAsk.current < NOTE_GAP_MS || asks.current >= NOTE_MAX) { if (manual) setNoteErr('لحظة، جرّب بعد شوي'); return; }
+    if (!n) {
+      if (manual) {
+        const drew = editor.getCurrentPageShapes().some((sh: TLShape) => sh.type === 'draw' && !(sh.meta as any)?.tutor);
+        setNoteErr(drew ? 'ما أقدر أقرأ الكتابة بخط اليد. اكتب سؤالك بأداة النص (T) أو في 📝 ملاحظة لاصقة' : 'اكتب سؤالك في 📝 ملاحظة لاصقة أو بأداة النص (T)، وبعدها اضغط اسأل');
+      }
+      return;
+    }
+    const wait = NOTE_GAP_MS - (Date.now() - lastAsk.current);
+    if (asks.current >= NOTE_MAX) { if (manual) setNoteErr('وصلت حد الأسئلة لهذي السبورة، افتح الدرس من جديد'); return; }
+    if (wait > 0) { if (manual) setNoteErr(`لحظة، جرّب بعد ${Math.ceil(wait / 1000)} ثواني`); else { if (idle.current) clearTimeout(idle.current); idle.current = window.setTimeout(() => void askRef.current(false), wait + 200); } return; }
     lastAsk.current = Date.now(); asks.current++; answered.current.set(n.sh.id, n.text); setAsking(true); setNoteErr('');
     try {
       const r = await fetch('/api/sara/board-note', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ persona: persona.id, note: n.text, lesson: lessonTitle }) });
-      const j = r.ok ? await r.json() : null;
-      if (!j?.answer) { answered.current.delete(n.sh.id); setNoteErr(r.status === 429 ? 'وصلت حد الأسئلة لليوم' : `${persona.nameAr} ما ${persona.gender === 'female' ? 'قدرت ترد' : 'قدر يرد'} الحين`); return; }
+      const j: any = await r.json().catch(() => null);
+      if (!r.ok || !j?.answer) {
+        answered.current.delete(n.sh.id);
+        setNoteErr(r.status === 401 ? 'سجّل دخولك عشان تسأل المعلم' : r.status === 429 ? 'وصلت حد الأسئلة، جرّب بعد شوي' : `${persona.nameAr} ما ${persona.gender === 'female' ? 'قدرت ترد' : 'قدر يرد'} الحين (${r.status}${j?.error ? ' ' + j.error : ''})، جرّب مرة ثانية`);
+        return;
+      }
       const bb = editor.getShapePageBounds(n.sh.id);
-      editor.createShape({ meta: T, id: createShapeId(), type: 'text', x: (bb?.maxX ?? 100) + 30, y: bb?.minY ?? 100, props: { richText: toRichText(`${persona.emoji} ${j.answer}`), size: 's', color: 'blue', font: 'draw', autoSize: false, w: 340 } as any });
-      if (j.audio) { cancelAllSpeech('board-note'); void playCloudAudioAs('board-note', j.audio, () => {}); }
-    } catch { answered.current.delete(n.sh.id); setNoteErr('تعذّر الاتصال، جرّب مرة ثانية'); }
+      const rid = createShapeId();
+      editor.createShape({ meta: T, id: rid, type: 'text', x: bb?.minX ?? 100, y: (bb?.maxY ?? 100) + 16, props: { richText: toRichText(`${persona.emoji} ${j.answer}`), size: 's', color: 'blue', font: 'draw', autoSize: false, w: 360 } as any });
+      try { const rb = editor.getShapePageBounds(rid); if (rb) editor.zoomToBounds(rb.clone().expandBy(80), { animation: { duration: 250 }, targetZoom: Math.min(1, editor.getZoomLevel()) }); } catch { /* ignore */ }
+      if (j.audio) { cancelAllSpeech('board-note'); const p = await playCloudAudioAs('board-note', j.audio, () => {}); if (!p) setNoteErr('الرد مكتوب على السبورة، بس الصوت ما اشتغل. اضغط على الصفحة وجرّب مرة ثانية'); }
+      else setNoteErr('الرد مكتوب على السبورة، بس الصوت غير متاح الحين');
+    } catch { answered.current.delete(n.sh.id); setNoteErr('تعذّر الاتصال بالمعلم، تأكد من النت وجرّب مرة ثانية'); }
     finally { setAsking(false); }
   };
   const askRef = useRef(askTutor); askRef.current = askTutor;
@@ -118,6 +139,7 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
     ed.current = editor;
     // auto-detect: after the student stops editing their note for a short pause, the tutor answers it
     editor.store.listen(() => { if (idle.current) clearTimeout(idle.current); idle.current = window.setTimeout(() => void askRef.current(false), NOTE_IDLE_MS); }, { source: 'user', scope: 'document' });
+    editor.store.listen(() => { if (!editor.getEditingShapeId() && studentNotes(editor).length) { if (idle.current) clearTimeout(idle.current); idle.current = window.setTimeout(() => void askRef.current(false), 1200); } }, { source: 'user', scope: 'session' });
     editor.user.updateUserPreferences({ colorScheme: 'light' });
     draw(true);
   };
