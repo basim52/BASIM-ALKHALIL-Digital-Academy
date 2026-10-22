@@ -223,3 +223,8 @@
 .tutor-photo-head img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;user-select:none;pointer-events:none}
 .tutor-photo-head .tutor-photo-jaw{transform:translateY(var(--pp-jaw,0));-webkit-mask-image:radial-gradient(ellipse 9% 7% at var(--mx) calc(var(--my) + 4.5%),#000 45%,transparent 100%);mask-image:radial-gradient(ellipse 9% 7% at var(--mx) calc(var(--my) + 4.5%),#000 45%,transparent 100%)}
 @media (prefers-reduced-motion:reduce){.tutor-photo-head{transform:none}}
+.tutor-video-face{position:absolute;inset:0;border-radius:50%;overflow:hidden;background:#001a38}
+.tutor-video-face .tutor-video-poster,.tutor-video-clip,img.tutor-video-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%}
+.tutor-video-clip{opacity:0;transition:opacity .25s ease}
+.tutor-video-clip.on{opacity:1}
+@media (prefers-reduced-motion: reduce){.tutor-video-clip{transition:none}}

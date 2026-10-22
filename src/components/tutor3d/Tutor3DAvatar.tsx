@@ -4,6 +4,7 @@ import "./tutorBoard.css";
 import { BOARD_PERSONAS } from "../../data/saraBoardPersonas";
 import { buildHuman, LOOKS } from "./humanAvatar";
 import { getSpeechLevel } from "../../lib/speechLevel";
+import { TutorVideoFace } from "./TutorVideoFace";
 // Ported from ai-tutor-platform; characters rebuilt as procedural human teachers (humanAvatar.ts, no external assets).
 type Agent = { id: string; gender: "male" | "female"; nameAr: string; nameEn: string };
 const AGENTS: Agent[] = BOARD_PERSONAS.map(p => ({ id: p.id, gender: p.gender, nameAr: p.nameAr, nameEn: p.nameEn }));
@@ -36,6 +37,8 @@ export const Tutor3DAvatar: React.FC<Tutor3DAvatarProps> = ({
   const [cameraAngle, setCameraAngle] = useState<"front" | "side" | "closeup">("front");
   const [view, setView] = useState<"photo" | "3d">(() => { try { return (localStorage.getItem("tutorAvatarView") as any) === "3d" ? "3d" : "photo"; } catch { return "photo"; } });
   const photoRef = useRef<HTMLDivElement | null>(null);
+  const [videoFailed, setVideoFailed] = useState(false);
+  useEffect(() => setVideoFailed(false), [agentId]);
 
   // Mutable refs for animation loop access without rebuilding scene
   const stateRef = useRef({
@@ -300,8 +303,12 @@ export const Tutor3DAvatar: React.FC<Tutor3DAvatarProps> = ({
           <div ref={photoRef} className="tutor-photo" style={{ ["--mx" as any]: mx + "%", ["--my" as any]: my + "%" }}>
             <div className="tutor-photo-glow" />
             <div className="tutor-photo-head">
+              {!videoFailed ? (
+                <TutorVideoFace id={agent.id} alt={isArabic ? agent.nameAr : agent.nameEn} isSpeaking={isSpeaking} onFail={() => setVideoFailed(true)} />
+              ) : (<>
               <img src={`/tutors/${agent.id}.webp`} alt={isArabic ? agent.nameAr : agent.nameEn} draggable={false} />
               <img src={`/tutors/${agent.id}.webp`} alt="" aria-hidden className="tutor-photo-jaw" draggable={false} />
+              </>)}
             </div>
           </div>
         </div>

@@ -506,6 +506,7 @@ export const speakAcademyText = async (
   playbackRate: number = 1.0
 ): Promise<{ stop: () => void }> => {
   const owner = pendingOwner || undefined; pendingOwner = null;
+  try { if (owner !== 'call' && typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('tutor-speech-text', { detail: { text } })); } catch (_) { /* avatar cue only */ }
   if (exclusiveOwner && owner !== exclusiveOwner) { onEnd?.(); return { stop: () => {} }; }
   // Cancel active playback sessions and record request ID
   cancelAllSpeech(owner);
