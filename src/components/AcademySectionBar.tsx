@@ -27,7 +27,7 @@ const TITLES: Record<string, [string, string]> = {
 /** One consistent navy/gold section header with a Home button, shown above every academy section (not home, not Sara). */
 export const AcademySectionBar: React.FC<{ view: string; isRtl: boolean; onHome: () => void }> = ({ view, isRtl, onHome }) => {
   const t = TITLES[view];
-  const title = t ? (isRtl ? t[0] : t[1]) : (isRtl ? 'أكاديمية باسم الخليل' : 'Basim Alkhalil Academy');
+  const title = t ? (isRtl ? t[0] : t[1]) : (isRtl ? 'أكاديمية باسم الخليل' : 'Basim Al-Khalil Digital Academy');
   return (
     <div data-testid="academy-section-bar" dir={isRtl ? 'rtl' : 'ltr'} className="mx-3 sm:mx-6 mb-3 mt-1 flex items-center gap-3 rounded-2xl bg-[#002147] px-3 py-2.5 shadow-md border-b-4 border-[#C49E3A]">
       <button onClick={onHome} aria-label={isRtl ? 'الرئيسية' : 'Home'} className="shrink-0 flex items-center gap-1.5 rounded-xl bg-[#C49E3A] text-[#002147] px-3 py-2 min-h-[40px] text-xs font-black active:scale-95 transition-transform">

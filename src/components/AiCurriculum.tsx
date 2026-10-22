@@ -4388,7 +4388,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             prompt: userTxt,
-            context: `We are studying Lesson ${lesson.lesson_number}: "${lesson.lesson_title}" inside track "${lesson.track || ''}". Lesson description: "${lesson.lesson_card?.content || ''}". The student is running an interactive experiment or trying the lesson's prompt challenges. Please behave as an expert tutor from Basim Alkhalil Academy. Respond in beautifully structured Markdown, matching the user's language (Arabic if they ask in Arabic, English if English). Offer deep academic and encouraging answers.`
+            context: `We are studying Lesson ${lesson.lesson_number}: "${lesson.lesson_title}" inside track "${lesson.track || ''}". Lesson description: "${lesson.lesson_card?.content || ''}". The student is running an interactive experiment or trying the lesson's prompt challenges. Please behave as an expert tutor from Basim Al-Khalil Digital Academy. Respond in beautifully structured Markdown, matching the user's language (Arabic if they ask in Arabic, English if English). Offer deep academic and encouraging answers.`
           })
         });
 

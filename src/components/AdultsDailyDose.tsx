@@ -879,7 +879,7 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
                     </button>
                     
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider text-center mt-3">
-                      Basim Alkhalil Digital Academy • Daily Dose Stream Complete
+                      Basim Al-Khalil Digital Academy • Daily Dose Stream Complete
                     </p>
                   </div>
                 </div>

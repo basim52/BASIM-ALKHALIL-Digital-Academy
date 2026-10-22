@@ -56,7 +56,7 @@ export const DailyReminderBanner: React.FC<DailyReminderBannerProps> = ({
               <h4 className="text-sm sm:text-base font-black text-white mt-0.5">
                 {isRtl
                   ? 'وقت التعلم في أكاديمية باسم الخليل 📚 حان موعد جلستك اليومية!'
-                  : 'Time to learn at Basim Alkhalil Academy 📚 Keep your streak alive!'}
+                  : 'Time to learn at Basim Al-Khalil Digital Academy 📚 Keep your streak alive!'}
               </h4>
               <p className="text-xs text-amber-50 font-medium">
                 {isRtl

@@ -958,7 +958,7 @@ ${lessonsContent}
 ──────────────────────────────────────────
 مستخلص فطن وتوصية سلوكية:
 مخرجات هذا الفصل تطور القدرة التحليلية والذكاء السلوكي وتمنحك كفاءة واثقة لتطبيقه في واقعك اليومي وصناعة الريادة بالنفوس والأعمال.`
-          : `[Basim Alkhalil Digital Academy - Full Chapter Textbook Resource]
+          : `[Basim Al-Khalil Digital Academy - Full Chapter Textbook Resource]
 
 "${title}"
 By: ${author}
@@ -991,7 +991,7 @@ Mastering this chapter boosts your actual strategic and behavioral outcomes, pro
 
 **تفاصيل هذا الباب:**
 إن دراسة أمهات الفكر والوقوف على صياغة المؤلف ومصطلحاته الحيوية يمنح عقلك وبصيرتك هيبة الوقار المعرفي والقدرة على تفكيك المشاكل اليومية بشكل مستقل وعميق. حاول قراءة الأسطر بتأن واستخدم المساعد الفطن على اليمين للسؤال والتحقق ومناقشة تفريعات هذا المتن بجودة خارقة!`
-        : `Welcome to the unabridged textbook reader in Basim Alkhalil Digital Academy.
+        : `Welcome to the unabridged textbook reader in Basim Al-Khalil Digital Academy.
 To honor your desire to study the authentic, full developmental texts instead of brief summaries, we have designed this interactive portal to showcase the comprehensive chapters in pristine detail.
 
 Please read through these lines patiently, and utilize the AI scholar on your right to analyze, query, and deconstruct any parts of this textbook with extraordinary grade-A quality!`
@@ -1732,7 +1732,7 @@ Please read through these lines patiently, and utilize the AI scholar on your ri
 
                 {/* PDF Header running elements */}
                 <div className="border-b border-dashed border-[#C49E3A]/15 pb-2 mb-6 flex justify-between items-center text-[10px] font-mono font-black select-none pointer-events-none opacity-50 flex-row-reverse">
-                  <span>{isRtl ? "أكاديمية المعرفة الفطنة والريادة" : "Basim Alkhalil Digital Academy"}</span>
+                  <span>{isRtl ? "أكاديمية المعرفة الفطنة والريادة" : "Basim Al-Khalil Digital Academy"}</span>
                   <span>{uploadedPdfFile ? "مستند بي دي اف خاص" : `«${isRtl ? selectedBook.titleAr : selectedBook.titleEn}»`}</span>
                   <span>Page {pdfCurrentPage}</span>
                 </div>

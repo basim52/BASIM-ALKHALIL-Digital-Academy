@@ -256,7 +256,7 @@ export const CompletionCertificateModal: React.FC<CompletionCertificateModalProp
                       أكاديمية باسم الخليل الرقمية
                     </h2>
                     <p className="text-[10px] sm:text-xs font-bold text-[#C49E3A] uppercase tracking-widest mt-1">
-                      Basim Alkhalil Digital Academy
+                      Basim Al-Khalil Digital Academy
                     </p>
                   </div>
                 </div>

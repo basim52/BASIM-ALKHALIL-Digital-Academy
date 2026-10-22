@@ -34,7 +34,7 @@ export const ParentAIInsights = ({ lang, studentName, studentLevel }: ParentAIIn
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           data: { studentName, studentLevel },
-          prompt: `As an expert language learning advisor from "Basim Alkhalil Academy", generate a "Smart Home Recommendation" as JSON: { "activityTitle": "...", "learningGoal": "...", "parentRole": "...", "steps": ["..."] }. Language: ${isRtl ? 'Arabic' : 'English'}`,
+          prompt: `As an expert language learning advisor from "Basim Al-Khalil Digital Academy", generate a "Smart Home Recommendation" as JSON: { "activityTitle": "...", "learningGoal": "...", "parentRole": "...", "steps": ["..."] }. Language: ${isRtl ? 'Arabic' : 'English'}`,
           useJson: true
         })
       });

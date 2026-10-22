@@ -887,7 +887,7 @@ export const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({
               <div className="text-center sm:text-right space-y-1">
                 <div className="flex items-center justify-center sm:justify-start gap-2">
                   <span className="text-xs font-black text-[#C49E3A] uppercase tracking-widest">
-                    Basim Alkhalil Digital Academy
+                    Basim Al-Khalil Digital Academy
                   </span>
                   <ShieldCheck size={16} className="text-emerald-600" />
                 </div>
@@ -895,7 +895,7 @@ export const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({
                   {isRtl ? 'بطاقة التقرير الأكاديمي الشامل والتقييم اللغوي' : 'Comprehensive Academic Report & Proficiency Card'}
                 </h2>
                 <p className="text-[10px] text-slate-400 font-bold">
-                  {isRtl ? 'أكاديمية باسم الخليل للتميز اللغوي والتعليم الذكي' : 'Basim Alkhalil Academy for Linguistic Excellence'}
+                  {isRtl ? 'أكاديمية باسم الخليل للتميز اللغوي والتعليم الذكي' : 'Basim Al-Khalil Digital Academy for Linguistic Excellence'}
                 </p>
               </div>
 
@@ -956,7 +956,7 @@ export const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({
               <p className="text-xs text-slate-700 leading-relaxed font-bold">
                 {isRtl
                   ? `تشهد أكاديمية باسم الخليل الرقمية بأن الطالب "${studentName}" أظهر تفاعلاً إيجابياً ومتميزاً في مختلف المهارات اللغوية، وحقق معدلاً تراكمياً (${kpis.overallGPA}%) يعكس كفاءة واستيعاباً واعداً. نوصي باستمرار التقويم الدوري والممارسة المستمرة للارتقاء للمستوى المتقدم.`
-                  : `Basim Alkhalil Digital Academy certifies that student "${studentName}" has demonstrated consistent and commendable engagement across core linguistic skills, achieving a cumulative score of ${kpis.overallGPA}%. Continued deliberate practice is highly endorsed.`}
+                  : `Basim Al-Khalil Digital Academy certifies that student "${studentName}" has demonstrated consistent and commendable engagement across core linguistic skills, achieving a cumulative score of ${kpis.overallGPA}%. Continued deliberate practice is highly endorsed.`}
               </p>
             </div>
 

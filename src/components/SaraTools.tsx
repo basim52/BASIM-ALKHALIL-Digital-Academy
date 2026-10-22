@@ -1,4 +1,4 @@
-import { getExplainLang } from '../lib/explainLang';
+import { getExplainLang, L, useExplainLang } from '../lib/explainLang';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { X, Volume2, Square, Mic, Printer, CheckCircle2 } from 'lucide-react';
 import type { SaraTrack, SaraTrackLesson, SaraChoiceQuestion } from '../data/saraTracks/foundations';
@@ -22,6 +22,10 @@ export const SARA_TRACKS: SaraTrack[] = [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONV
 export interface PlacementOutcome { level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'; bandId: string; trackId: string; score: number }
 interface Props { tool: SaraToolId | null; onClose: () => void; uid?: string; unlockAll?: boolean; onPlacementDone?: (r: PlacementOutcome) => void; onOpenTrack?: (trackId: string) => void }
 
+const TITLES_EN: Record<SaraToolId, string> = {
+  placement: '🎯 Placement test', speed: '⚡ Speed challenge', worksheet: '📝 Worksheet', plan: '🗓️ Weekly study plan',
+  roleplay: '🎭 Role-play adventures', pronunciation: '🔊 Pronunciation lab', voicecoach: '🎙️ Voice coach', grammar: '✍️ Grammar check', board: "🧑‍🏫 Teachers' Class",
+};
 const TITLES: Record<SaraToolId, string> = {
   placement: '🎯 اختبار تحديد المستوى', speed: '⚡ تحدي السرعة', worksheet: '📝 ورقة عمل', plan: '🗓️ خطة الدراسة الأسبوعية',
   roleplay: '🎭 مغامرات لعب الأدوار', pronunciation: '🔊 مختبر النطق', voicecoach: '🎙️ مدرب الصوت', grammar: '✍️ تدقيق نحوي', board: '🧑‍🏫 فصل المعلمين',
@@ -64,15 +68,15 @@ const useSaraSet = () => {
   const stop = () => { saraStopNarrator(); setState('idle'); };
   return { state, play, stop };
 };
-const SaraSetButton: React.FC<{ text: string; label?: string }> = ({ text, label = 'استمع لسارة' }) => {
+const SaraSetButton: React.FC<{ text: string; label?: string }> = ({ text, label = L('استمع لسارة', 'Listen to Sara') }) => {
   const s = useSaraSet();
   return (
     <div className="flex items-center gap-2">
       {s.state === 'loading'
-        ? <Btn tone="amber" onClick={s.stop} data-testid="tool-sara-stop"><Square size={14} className="inline" /> إيقاف</Btn>
-        : <Btn tone="amber" onClick={() => s.play(text)} data-testid="tool-sara-play"><Volume2 size={14} className="inline" /> {s.state === 'failed' ? '🔄 إعادة المحاولة' : label}</Btn>}
-      {s.state === 'failed' && <span className="text-[11px] text-rose-700 font-bold">صوت سارة غير متاح الآن، حاول بعد قليل</span>}
-      {s.state === 'blocked' && <span className="text-[11px] text-slate-600 font-bold">اضغط مرة أخرى للتشغيل</span>}
+        ? <Btn tone="amber" onClick={s.stop} data-testid="tool-sara-stop"><Square size={14} className="inline" /> {L("إيقاف", "Stop")}</Btn>
+        : <Btn tone="amber" onClick={() => s.play(text)} data-testid="tool-sara-play"><Volume2 size={14} className="inline" /> {s.state === 'failed' ? L('🔄 إعادة المحاولة', '🔄 Try again') : label}</Btn>}
+      {s.state === 'failed' && <span className="text-[11px] text-rose-700 font-bold">{L("صوت سارة غير متاح الآن، حاول بعد قليل", "Sara's voice is not available right now, try again shortly")}</span>}
+      {s.state === 'blocked' && <span className="text-[11px] text-slate-600 font-bold">{L("اضغط مرة أخرى للتشغيل", "Tap again to play")}</span>}
     </div>
   );
 };
@@ -85,14 +89,14 @@ const useMic = () => {
   const supported = !!getSR();
   useEffect(() => () => { try { recRef.current?.abort(); } catch { /* ignore */ } }, []);
   const listen = () => {
-    const SR = getSR(); if (!SR) { setErr('الميكروفون غير مدعوم في هذا المتصفح'); return; }
+    const SR = getSR(); if (!SR) { setErr(L('الميكروفون غير مدعوم في هذا المتصفح', 'The microphone is not supported in this browser')); return; }
     try {
       const r = new SR(); recRef.current = r; r.lang = 'en-US'; r.interimResults = false; r.maxAlternatives = 1;
       r.onresult = (e: any) => setHeard(String(e.results?.[0]?.[0]?.transcript || ''));
-      r.onerror = (e: any) => setErr(e?.error === 'not-allowed' ? 'اسمح باستخدام الميكروفون' : 'لم أسمع جيداً، حاول مرة أخرى');
+      r.onerror = (e: any) => setErr(e?.error === 'not-allowed' ? L('اسمح باستخدام الميكروفون', 'Allow microphone access') : L('لم أسمع جيداً، حاول مرة أخرى', 'I did not hear well, try again'));
       r.onend = () => setListening(false);
       setHeard(''); setErr(''); setListening(true); r.start();
-    } catch { setListening(false); setErr('تعذر تشغيل الميكروفون'); }
+    } catch { setListening(false); setErr(L('تعذر تشغيل الميكروفون', 'Could not start the microphone')); }
   };
   return { supported, listening, heard, err, listen, reset: () => { setHeard(''); setErr(''); } };
 };
@@ -198,14 +202,14 @@ const SpeedDrill: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid, unlo
     }, 250);
     return () => clearInterval(t);
   }, [run, best]); // eslint-disable-line react-hooks/exhaustive-deps
-  if (!pool.length) return <p className="p-4 text-sm font-bold">ابدأ أول درس لتظهر أسئلة التحدي.</p>;
+  if (!pool.length) return <p className="p-4 text-sm font-bold">{L("ابدأ أول درس لتظهر أسئلة التحدي.", "Start your first lesson to unlock challenge questions.")}</p>;
   if (!run) return (
     <div className="flex-1 min-h-0 p-4 grid content-center gap-3 text-center">
       <p className="text-4xl">⚡</p>
-      <p className="text-[14px] font-black text-[#002147]">{DRILL_SECS} ثانية — أجب عن أكبر عدد من الأسئلة من دروسك</p>
-      {last && <p data-testid="speed-result" className="text-[15px] font-black text-amber-700">نتيجتك: {last.score} · أطول سلسلة: {last.streak}</p>}
-      <p className="text-[12px] text-slate-600">أفضل نتيجة: {best.score} · أفضل سلسلة: {best.streak} · {pool.length} سؤال متاح</p>
-      <Btn data-testid="speed-start" onClick={() => { setLeft(DRILL_SECS); setRun({ end: Date.now() + DRILL_SECS * 1000, score: 0, streak: 0, maxStreak: 0, q: nextQ() }); }}>ابدأ</Btn>
+      <p className="text-[14px] font-black text-[#002147]">{L(`${DRILL_SECS} ثانية — أجب عن أكبر عدد من الأسئلة من دروسك`, `${DRILL_SECS} seconds: answer as many questions from your lessons as you can`)}</p>
+      {last && <p data-testid="speed-result" className="text-[15px] font-black text-amber-700">{L("نتيجتك:", "Your score:")} {last.score} · {L("أطول سلسلة:", "Longest streak:")} {last.streak}</p>}
+      <p className="text-[12px] text-slate-600">{L("أفضل نتيجة:", "Best score:")} {best.score} · {L("أفضل سلسلة:", "Best streak:")} {best.streak} · {pool.length} {L("سؤال متاح", "questions available")}</p>
+      <Btn data-testid="speed-start" onClick={() => { setLeft(DRILL_SECS); setRun({ end: Date.now() + DRILL_SECS * 1000, score: 0, streak: 0, maxStreak: 0, q: nextQ() }); }}>{L("ابدأ", "Start")}</Btn>
     </div>
   );
   const pick = (i: number) => {
@@ -244,19 +248,19 @@ const Worksheet: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid, unloc
   const [id, setId] = useState(first?.id || '');
   const [key, setKey] = useState(false);
   const f = findLesson(id);
-  if (!f || !f.l.content) return <p className="p-4 text-sm font-bold">ابدأ أول درس لإنشاء ورقة عمل.</p>;
+  if (!f || !f.l.content) return <p className="p-4 text-sm font-bold">{L("ابدأ أول درس لإنشاء ورقة عمل.", "Start your first lesson to create a worksheet.")}</p>;
   const c = f.l.content; const items = [c.check, ...c.exercises];
   return (
     <div className="flex-1 min-h-0 p-3 flex flex-col gap-2">
       <style>{`@media print { body * { visibility: hidden !important; } #sara-worksheet, #sara-worksheet * { visibility: visible !important; } #sara-worksheet { position: absolute; inset: 0; overflow: visible !important; height: auto !important; border: 0 !important; } }`}</style>
       <LessonPicker tracks={SARA_TRACKS} uid={uid} unlockAll={unlockAll} value={id} onChange={setId} />
       <div className="flex gap-2">
-        <Btn tone="ghost" data-testid="worksheet-key" onClick={() => setKey(k => !k)}>{key ? 'إخفاء الإجابات' : '🔑 مفتاح الإجابات'}</Btn>
-        <Btn data-testid="worksheet-print" onClick={() => window.print()}><Printer size={14} className="inline" /> طباعة</Btn>
+        <Btn tone="ghost" data-testid="worksheet-key" onClick={() => setKey(k => !k)}>{key ? L('إخفاء الإجابات', 'Hide answers') : L('🔑 مفتاح الإجابات', '🔑 Answer key')}</Btn>
+        <Btn data-testid="worksheet-print" onClick={() => window.print()}><Printer size={14} className="inline" /> {L("طباعة", "Print")}</Btn>
       </div>
       <div id="sara-worksheet" data-testid="worksheet" className="flex-1 min-h-0 overflow-y-auto rounded-xl bg-white border border-amber-200 p-3 text-slate-900">
         <p className="text-[14px] font-black">{f.t.titleAr} — {f.l.order}. {f.l.titleAr}</p>
-        <p className="text-[11px] text-slate-500 mb-2">الاسم: ____________ التاريخ: ________</p>
+        <p className="text-[11px] text-slate-500 mb-2">{L("الاسم: ____________ التاريخ: ________", "Name: ____________ Date: ________")}</p>
         {c.example.length > 0 && <div dir="ltr" className="text-[12px] mb-2 text-start">{c.example.map((e, k) => <p key={k}>• {e.en}</p>)}</div>}
         <ol className="grid gap-2 list-decimal ps-5">
           {items.map((q, k) => (
@@ -591,7 +595,7 @@ const RolePlay: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid, unlock
   const l = lessons.find(x => x.id === id);
   // Script: Sara opens with the lesson's dialogue lines, then each question is a turn where the student chooses the reply.
   const turns = useMemo(() => l?.content ? [l.content.check, ...l.content.exercises].map(shuffleQ) : [], [l]);
-  if (!l?.content) return <p className="p-4 text-sm font-bold">افتح أول درس محادثة لتبدأ المغامرة.</p>;
+  if (!l?.content) return <p className="p-4 text-sm font-bold">{L("افتح أول درس محادثة لتبدأ المغامرة.", "Open your first conversation lesson to start the adventure.")}</p>;
   const lines = l.content.example;
   const end = step >= turns.length;
   const t = turns[step];
@@ -606,19 +610,19 @@ const RolePlay: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid, unlock
       {end ? (
         <div data-testid="roleplay-end" className="grid gap-2 text-center content-center flex-1">
           <p className="text-3xl">{'⭐'.repeat(Math.max(1, stars))}</p>
-          <p className="font-black text-[#002147]">انتهت المغامرة! {stars}/{turns.length} ردود موفقة</p>
-          <Btn onClick={() => { setStep(0); setPicked(null); setStars(0); }}>العب مرة أخرى</Btn>
+          <p className="font-black text-[#002147]">{L("انتهت المغامرة!", "Adventure complete!")} {stars}/{turns.length} {L("ردود موفقة", "good replies")}</p>
+          <Btn onClick={() => { setStep(0); setPicked(null); setStars(0); }}>{L("العب مرة أخرى", "Play again")}</Btn>
         </div>
       ) : (<>
         <QHead q={t} />
         <Choices q={t} picked={picked} onPick={i => { setPicked(i); if (i === t.correctIndex) setStars(s => s + 1); }} />
         {picked !== null && (
           <p className={`text-[12px] font-bold ${picked === t.correctIndex ? 'text-emerald-700' : 'text-rose-700'}`}>
-            {picked === t.correctIndex ? 'سارة: Great reply! 🎉 نكمل…' : `سارة: ممم، لنجرّب طريقة أخرى. ${l.content.altExplanationAr.slice(0, 110)}`}
+            {picked === t.correctIndex ? L('سارة: Great reply! 🎉 نكمل…', 'Sara: Great reply! 🎉 Let\'s continue…') : L(`سارة: ممم، لنجرّب طريقة أخرى. ${l.content.altExplanationAr.slice(0, 110)}`, 'Sara: Hmm, let\'s try another way.')}
           </p>)}
         <div className="mt-auto flex gap-2">
-          {picked !== null && picked !== t.correctIndex && <Btn tone="ghost" onClick={() => setPicked(null)}>جرّب ردًا آخر</Btn>}
-          <Btn data-testid="tool-next" className="flex-1" disabled={picked === null} onClick={() => { setStep(s => s + 1); setPicked(null); }}>متابعة</Btn>
+          {picked !== null && picked !== t.correctIndex && <Btn tone="ghost" onClick={() => setPicked(null)}>{L("جرّب ردًا آخر", "Try another reply")}</Btn>}
+          <Btn data-testid="tool-next" className="flex-1" disabled={picked === null} onClick={() => { setStep(s => s + 1); setPicked(null); }}>{L("متابعة", "Continue")}</Btn>
         </div>
       </>)}
     </div>
@@ -638,10 +642,10 @@ const RepeatCard: React.FC<{ items: string[] }> = ({ items }) => {
         <p dir="ltr" data-testid="repeat-target" className="text-[18px] font-black text-[#002147]">{target}</p>
       </div>
       <div className="flex gap-2 justify-center">
-        <Btn tone="ghost" disabled={i === 0} onClick={() => { setI(i - 1); mic.reset(); }}>السابق</Btn>
+        <Btn tone="ghost" disabled={i === 0} onClick={() => { setI(i - 1); mic.reset(); }}>{L("السابق", "Previous")}</Btn>
         {mic.supported
-          ? <Btn data-testid="tool-mic" onClick={mic.listen} disabled={mic.listening}><Mic size={14} className="inline" /> {mic.listening ? 'أستمع…' : 'كرّر بصوتك'}</Btn>
-          : <span className="text-[11px] font-bold text-slate-600 self-center">الميكروفون غير مدعوم هنا — كرّر بصوت عالٍ وقيّم نفسك</span>}
+          ? <Btn data-testid="tool-mic" onClick={mic.listen} disabled={mic.listening}><Mic size={14} className="inline" /> {mic.listening ? L('أستمع…', 'Listening…') : L('كرّر بصوتك', 'Repeat aloud')}</Btn>
+          : <span className="text-[11px] font-bold text-slate-600 self-center">{L("الميكروفون غير مدعوم هنا — كرّر بصوت عالٍ وقيّم نفسك", "No microphone here: repeat aloud and rate yourself")}</span>}
         <Btn tone="ghost" data-testid="tool-next" disabled={i + 1 >= items.length} onClick={() => { setI(i + 1); mic.reset(); }}>التالي</Btn>
       </div>
       {mic.err && <p className="text-[12px] text-rose-700 font-bold text-center">{mic.err}</p>}
@@ -649,7 +653,7 @@ const RepeatCard: React.FC<{ items: string[] }> = ({ items }) => {
         <div data-testid="repeat-feedback" className="text-center text-[12px] font-bold">
           <p dir="ltr">“{mic.heard}”</p>
           <p className={res.pct >= 80 ? 'text-emerald-700' : res.pct >= 50 ? 'text-amber-700' : 'text-rose-700'}>
-            {res.pct >= 80 ? <><CheckCircle2 size={14} className="inline" /> ممتاز!</> : res.pct >= 50 ? 'قريب جداً، حاول مرة أخرى' : 'لنحاول مجدداً ببطء'} ({res.pct}%)
+            {res.pct >= 80 ? <><CheckCircle2 size={14} className="inline" /> {L('ممتاز!', 'Excellent!')}</> : res.pct >= 50 ? L('قريب جداً، حاول مرة أخرى', 'Very close, try again') : L('لنحاول مجدداً ببطء', 'Let\'s try again slowly')} ({res.pct}%)
           </p>
           {res.missed.length > 0 && <p dir="ltr" className="text-rose-700">{res.missed.join(' · ')}</p>}
         </div>
@@ -678,8 +682,8 @@ const Pronunciation: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid, u
         <option value="pairs">الأزواج المتقاربة (ship / sheep…)</option>
         {lessons.map(x => <option key={x.id} value={x.id}>{x.order}. {x.titleAr}</option>)}
       </select>
-      <p className="text-[11px] text-slate-600">استمع للمجموعة كاملة بصوت سارة، ثم كرّر كل كلمة.</p>
-      <SaraSetButton key={set} text={items.map(s => s.replace(/—/g, ',')).join('. ')} label="استمع للمجموعة" />
+      <p className="text-[11px] text-slate-600">{L("استمع للمجموعة كاملة بصوت سارة، ثم كرّر كل كلمة.", "Listen to the whole set in Sara's voice, then repeat each word.")}</p>
+      <SaraSetButton key={set} text={items.map(s => s.replace(/—/g, ',')).join('. ')} label={L("استمع للمجموعة", "Listen to the set")} />
       <RepeatCard key={set} items={items} />
     </div>
   );
@@ -691,14 +695,14 @@ const VoiceCoach: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid, unlo
   const first = tracks.flatMap(t => reached(t, uid, unlockAll))[0];
   const [id, setId] = useState(first?.id || '');
   const f = findLesson(id);
-  if (!f?.l.content) return <p className="p-4 text-sm font-bold">ابدأ أول درس لتتدرّب مع مدرب الصوت.</p>;
+  if (!f?.l.content) return <p className="p-4 text-sm font-bold">{L("ابدأ أول درس لتتدرّب مع مدرب الصوت.", "Start your first lesson to practise with the voice coach.")}</p>;
   const items = f.l.content.example.map(e => speakable(e.en)).filter(Boolean);
   return (
     <div className="flex-1 min-h-0 p-3 flex flex-col gap-2">
       <LessonPicker tracks={tracks} uid={uid} unlockAll={unlockAll} value={id} onChange={setId} />
-      <p className="text-[11px] text-slate-600">١) استمع لسارة تقرأ جمل الدرس ٢) كرّر كل جملة بالميكروفون ٣) شاهد الكلمات التي فاتتك.</p>
-      <SaraSetButton key={id} text={items.join(' ... ')} label="استمع لسارة" />
-      {items.length ? <RepeatCard key={id} items={items} /> : <p className="text-sm">لا توجد جمل في هذا الدرس</p>}
+      <p className="text-[11px] text-slate-600">{L("١) استمع لسارة تقرأ جمل الدرس ٢) كرّر كل جملة بالميكروفون ٣) شاهد الكلمات التي فاتتك.", "1) Listen to Sara read the lesson sentences 2) Repeat each one with the mic 3) See the words you missed.")}</p>
+      <SaraSetButton key={id} text={items.join(' ... ')} label={L("استمع لسارة", "Listen to Sara")} />
+      {items.length ? <RepeatCard key={id} items={items} /> : <p className="text-sm">{L("لا توجد جمل في هذا الدرس", "No sentences in this lesson")}</p>}
     </div>
   );
 };
@@ -731,18 +735,18 @@ const GrammarCheck: React.FC = () => {
       const res = await fetch('/api/sara/grammar-check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sentence: s, lang: getExplainLang() }) });
       if (!res.ok) throw new Error(String(res.status));
       setR(await res.json()); setChecked(s);
-    } catch { setErr('ما قدرت أدقق الجملة الحين، حاول مرة ثانية.'); }
+    } catch { setErr(L('ما قدرت أدقق الجملة الحين، حاول مرة ثانية.', 'Could not check the sentence right now, try again.')); }
     finally { setBusy(false); }
   };
   return (
     <div data-testid="sara-grammar-check" className="flex-1 min-h-0 p-3 flex flex-col gap-2 bg-[#001a38] text-white overflow-hidden">
-      <p className="text-[11px] text-amber-200/90 font-bold">اكتب جملة بالإنجليزي وسارة تصححها وتشرح لك السبب.</p>
+      <p className="text-[11px] text-amber-200/90 font-bold">{L("اكتب جملة بالإنجليزي وسارة تصححها وتشرح لك السبب.", "Write an English sentence; Sara corrects it and explains why.")}</p>
       <div className="flex gap-2">
         <input dir="ltr" value={text} maxLength={300} onChange={e => setText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') void check(); }}
           placeholder="I am live here since 2 years" data-testid="grammar-input"
           className="flex-1 min-w-0 rounded-xl bg-[#0a2d5c] border border-amber-400/40 px-3 py-2 text-[14px] font-bold text-white placeholder:text-white/30 outline-none focus:border-amber-400" />
         <button onClick={() => void check()} disabled={!text.trim() || busy} data-testid="grammar-check-btn"
-          className="px-3 py-2 rounded-xl bg-amber-400 text-[#001a38] text-[13px] font-black disabled:opacity-40 shrink-0">{busy ? 'جاري التدقيق…' : 'دقّق'}</button>
+          className="px-3 py-2 rounded-xl bg-amber-400 text-[#001a38] text-[13px] font-black disabled:opacity-40 shrink-0">{busy ? L('جاري التدقيق…', 'Checking…') : L('دقّق', 'Check')}</button>
       </div>
       {err && <p className="text-[12px] font-bold text-rose-300">{err}</p>}
       {r && (
@@ -750,16 +754,16 @@ const GrammarCheck: React.FC = () => {
           {r.isCorrect ? (
             <div className="rounded-xl bg-emerald-500/15 border border-emerald-400/40 p-2.5 flex items-center gap-2">
               <CheckCircle2 size={18} className="text-emerald-300 shrink-0" />
-              <p className="text-[13px] font-black">جملتك صحيحة، أحسنت!</p>
+              <p className="text-[13px] font-black">{L("جملتك صحيحة، أحسنت!", "Your sentence is correct, well done!")}</p>
             </div>
           ) : (
             <>
               <div className="rounded-xl bg-[#0a2d5c] border border-white/10 p-2.5">
-                <p className="text-[10px] text-amber-300 font-black mb-1">جملتك</p>
+                <p className="text-[10px] text-amber-300 font-black mb-1">{L("جملتك", "Your sentence")}</p>
                 <p dir="ltr" className="text-[14px] font-bold text-start"><Marked text={checked} mistakes={r.mistakes} /></p>
               </div>
               <div className="rounded-xl bg-[#0a2d5c] border border-amber-400/50 p-2.5">
-                <p className="text-[10px] text-amber-300 font-black mb-1">التصحيح</p>
+                <p className="text-[10px] text-amber-300 font-black mb-1">{L("التصحيح", "Correction")}</p>
                 <p dir="ltr" data-testid="grammar-corrected" className="text-[15px] font-black text-emerald-200 text-start">{r.corrected}</p>
               </div>
               <ul className="grid gap-1">
@@ -773,8 +777,8 @@ const GrammarCheck: React.FC = () => {
             </>
           )}
           <div className="flex items-center gap-2 flex-wrap">
-            {r.corrected && <SaraSetButton key={r.corrected} text={r.corrected} label="استمع لسارة" />}
-            {r.practice.length > 0 && !showPractice && <Btn tone="ghost" onClick={() => setShowPractice(true)} data-testid="grammar-practice-btn">تدرّب عليها</Btn>}
+            {r.corrected && <SaraSetButton key={r.corrected} text={r.corrected} label={L("استمع لسارة", "Listen to Sara")} />}
+            {r.practice.length > 0 && !showPractice && <Btn tone="ghost" onClick={() => setShowPractice(true)} data-testid="grammar-practice-btn">{L("تدرّب عليها", "Practise it")}</Btn>}
           </div>
           {showPractice && (
             <div className="grid gap-1.5" data-testid="grammar-practice">
@@ -783,7 +787,7 @@ const GrammarCheck: React.FC = () => {
                   <span dir="ltr" className="block text-[13px] font-bold">{i + 1}. {p.sentence}</span>
                   {revealed.includes(i)
                     ? <span dir="ltr" className="block text-[12px] font-black text-emerald-300">{p.answer}</span>
-                    : <span className="block text-[11px] text-amber-200/80 font-bold">صحّحها في بالك ثم اضغط للحل · {p.hintAr}</span>}
+                    : <span className="block text-[11px] text-amber-200/80 font-bold">{L("صحّحها في بالك ثم اضغط للحل ·", "Fix it in your head, then tap for the answer ·")} {p.hintAr}</span>}
                 </button>
               ))}
             </div>
@@ -796,15 +800,16 @@ const GrammarCheck: React.FC = () => {
 
 /** One-page Sara tool (same look as the track player). */
 export const SaraTools: React.FC<Props> = ({ tool, onClose, uid, unlockAll, onPlacementDone, onOpenTrack }) => {
+  const [lang] = useExplainLang();
   if (!tool) return null;
   const p = { uid, unlockAll };
   return (
-    <div className="fixed inset-0 z-[210] bg-slate-950/60 flex items-stretch justify-center" dir="rtl">
+    <div className="fixed inset-0 z-[210] bg-slate-950/60 flex items-stretch justify-center" dir={lang === "en" ? "ltr" : "rtl"}>
       <div data-testid="sara-track-page" className={`relative w-full ${tool === 'board' ? 'max-w-6xl' : 'max-w-xl'} h-[100dvh] bg-[#fdfaf3] flex flex-col overflow-hidden`}>
         <div className="shrink-0 flex items-center gap-2 px-3 py-2 bg-[#002147] text-white">
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] text-amber-300 font-bold truncate">أدوات سارة</p>
-            <p data-testid="sara-tool-title" className="text-sm font-black truncate">{TITLES[tool]}</p>
+            <p className="text-[10px] text-amber-300 font-bold truncate">{L("أدوات سارة", "Sara's tools")}</p>
+            <p data-testid="sara-tool-title" className="text-sm font-black truncate">{L(TITLES[tool], TITLES_EN[tool])}</p>
           </div>
           <button onClick={() => { saraStopNarrator(); onClose(); }} className="p-1.5 rounded-lg hover:bg-white/10" aria-label="close"><X size={18} /></button>
         </div>

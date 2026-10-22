@@ -443,7 +443,7 @@ export const ModernCurriculumHome = ({ lang, onBack, onNavigate }: { lang: 'en' 
               <p className="text-white/60 text-lg md:text-xl font-medium leading-relaxed">
                 {isRtl 
                   ? 'مناهج حصرية صممتها أكاديمية باسم الخليل لتوفير أقصى درجات الفعالية في التعلم السريع والمستدام.' 
-                  : 'Exclusive curricula designed by Basim Alkhalil Academy to provide maximum effectiveness in rapid and sustainable learning.'}
+                  : 'Exclusive curricula designed by Basim Al-Khalil Digital Academy to provide maximum effectiveness in rapid and sustainable learning.'}
               </p>
            </div>
         </section>

@@ -3309,7 +3309,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             <div className="relative group/btn">
               <button
                 onClick={() => {
-                  setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Alkhalil Academy');
+                  setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Al-Khalil Digital Academy');
                   setIsPhoneticModalOpen(true);
                 }}
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 text-purple-900 border-purple-200"
@@ -5470,7 +5470,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 {/* 8. Speech Lab */}
                 <div 
                   onClick={() => {
-                    setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Alkhalil Academy');
+                    setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Al-Khalil Digital Academy');
                     setIsPhoneticModalOpen(true);
                   }}
                   className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 p-3 rounded-2xl cursor-pointer active:scale-95 transition-all flex flex-col justify-between gap-2 shadow-2xs"
@@ -6465,7 +6465,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <button
                   onClick={() => {
                     setShowMobileToolsDrawer(false);
-                    setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Alkhalil Academy');
+                    setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Al-Khalil Digital Academy');
                     setIsPhoneticModalOpen(true);
                   }}
                   className="p-3 rounded-2xl border-2 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200 text-purple-950 hover:bg-purple-100 text-start flex flex-col justify-between gap-2 transition-all cursor-pointer"
@@ -6788,7 +6788,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
                 <div>
                   <span className="text-[11px] font-black uppercase tracking-wider text-[#C49E3A] block mb-1">
-                    {isRtl ? 'أكاديمية باسم الخليل للغة الإنجليزية' : 'Basim Alkhalil Academy'}
+                    {isRtl ? 'أكاديمية باسم الخليل للغة الإنجليزية' : 'Basim Al-Khalil Digital Academy'}
                   </span>
                   <h3 className="text-xl sm:text-2xl font-black text-[#002147]">
                     {isRtl ? 'انتهت الحصة المقررة! 🔔🎓' : 'Lesson Time Completed! 🔔🎓'}
@@ -6879,7 +6879,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
                 <div>
                   <span className="text-[11px] font-black uppercase tracking-wider text-[#C49E3A] block mb-1">
-                    {isRtl ? 'أكاديمية باسم الخليل للغة الإنجليزية • توثيق النتيجة 🎓' : 'Basim Alkhalil Academy • Recorded Result 🎓'}
+                    {isRtl ? 'أكاديمية باسم الخليل للغة الإنجليزية • توثيق النتيجة 🎓' : 'Basim Al-Khalil Digital Academy • Recorded Result 🎓'}
                   </span>
                   <h3 className="text-xl sm:text-2xl font-black text-[#002147]">
                     {isRtl ? 'انتهى الدرس وسُجلت النتيجة بنجاح! 🏆' : 'Lesson Finished & Result Saved! 🏆'}

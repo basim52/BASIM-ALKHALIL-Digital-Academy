@@ -281,7 +281,7 @@ export const translations = {
     performance: 'Performance Reports',
     chat: 'Communication Rooms',
     logout: 'Logout',
-    welcome: 'Welcome to Basim Alkhalil Academy',
+    welcome: 'Welcome to Basim Al-Khalil Digital Academy',
     languageToggle: 'العربية',
     // AI Conversation
     aiPartnerHeader: 'Smart Conversation Partner',
@@ -323,12 +323,12 @@ export const translations = {
     unit6: 'Unit 6: Academic Vocabulary (Oxford Core)',
     // Auth
     googleLogin: 'Sign in with Google',
-    academyDescription: 'Basim Alkhalil Digital Academy | Certified Education',
+    academyDescription: 'Basim Al-Khalil Digital Academy | Certified Education',
     promisingStart: 'A very promising start!',
     advancedLevel: 'Advanced level, let\'s reach the top!',
     globalStandard: 'Basim Alkhalil Global Standard',
     intermediate: 'Intermediate',
-    aiPartnerIntro: 'Hello! I am your AI Partner at Basim Alkhalil Academy. Ready to practice speaking today? How about we talk about your typical weekend?',
+    aiPartnerIntro: 'Hello! I am your AI Partner at Basim Al-Khalil Digital Academy. Ready to practice speaking today? How about we talk about your typical weekend?',
     loadingText: 'Loading...',
     linkStudent: 'Link Student Account',
     enterStudentId: "Enter your child's student code",

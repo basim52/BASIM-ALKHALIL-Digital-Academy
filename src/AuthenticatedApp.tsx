@@ -3235,7 +3235,7 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
 
 ملاحظة هامة جداً: يجب أن يُكتب التقرير الأكاديمي هذا كاملاً باللغة العربية الفصحى فقط ولا يحتوي على أي فقرة أو تحليل باللغة الإنجليزية. حافظ على نبرة أكاديمية احترافية، متفائلة، ومشجعة. استخدم تنسيق Markdown (نقاط عريضة وقوائم وعناوين رئيسية وفرعية) لتسهيل قراءته وفهمه بسرعة.`;
       } else if (reportLanguage === 'en') {
-        promptText = `As an expert education consultant at "Basim Alkhalil Academy", analyze this student's data and write a detailed, highly encouraging, and professional academic report for the parent in English.
+        promptText = `As an expert education consultant at "Basim Al-Khalil Digital Academy", analyze this student's data and write a detailed, highly encouraging, and professional academic report for the parent in English.
 The entire text of the report must be written in English.
 
 Format using this outline:
@@ -5035,7 +5035,7 @@ const LessonPlayer = ({ lang, lesson, onBack, onComplete, category, level }: { l
           <div className="w-20 h-20 border-4 border-amber-accent border-t-transparent rounded-full animate-spin mx-auto" />
           <div className="space-y-2">
              <h2 className="text-2xl font-serif font-black text-ink">{isRtl ? 'جاري تحضير المحتوى العلمي...' : 'Synthesizing Academic Content...'}</h2>
-             <p className="text-ink/40 font-bold uppercase tracking-widest text-[10px]">{isRtl ? 'بواسطة أكاديمية باسم الخليل الرقمية' : 'By Basim Alkhalil Digital Academy'}</p>
+             <p className="text-ink/40 font-bold uppercase tracking-widest text-[10px]">{isRtl ? 'بواسطة أكاديمية باسم الخليل الرقمية' : 'By Basim Al-Khalil Digital Academy'}</p>
           </div>
         </div>
       </div>

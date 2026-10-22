@@ -696,7 +696,7 @@ export const ParentWeeklyReportCard: React.FC<ParentWeeklyReportCardProps> = ({
           )}
 
           <div className="mt-3.5 pt-2.5 border-t border-white/10 flex items-center justify-between text-[10px] text-white/60 font-bold">
-            <span>{isRtl ? 'أكاديمية باسم الخليل الرقمية • نظام الذكاء الاصطناعي الأكاديمي' : 'Basim Alkhalil Digital Academy'}</span>
+            <span>{isRtl ? 'أكاديمية باسم الخليل الرقمية • نظام الذكاء الاصطناعي الأكاديمي' : 'Basim Al-Khalil Digital Academy'}</span>
             <span className="text-[#ffc800]">{isRtl ? 'تشخيص تحليلي وتوصيات عملية معتمدة' : 'Diagnostic summary & actionable recommendations'}</span>
           </div>
         </div>
