@@ -1,3 +1,5 @@
+import { LESSON_TRIGRAMS_B64 } from "./generated/lessonTrigrams.js";
+import { textTrigrams } from "./lessonTextNorm.js";
 import "dotenv/config";
 import express from "express";
 import path from "path";
@@ -573,8 +575,31 @@ Looking forward to your reply. Tell me what we're tackling first!`;
     if (/signature|kid/i.test(m)) return "bad-signature";
     return c.replace(/^auth\//, "") || "invalid-token";
   };
+  // 🎓 Curriculum narration allow-list: lesson text may be voiced WITHOUT a Firebase token (e.g. a device whose
+  // session is a local/direct-access session with no Firebase user). Text must be real curriculum text: ≥75% of its
+  // word trigrams must exist in the build-time hash list (src/data + public/lesson-en). Per-IP rate limited.
+  let lessonTri: Set<number> | null = null;
+  const isLessonText = (text: string): boolean => {
+    if (!lessonTri) { const b = Buffer.from(LESSON_TRIGRAMS_B64, "base64"); const u = new Uint32Array(b.buffer, b.byteOffset, b.length >> 2); lessonTri = new Set(u); }
+    const tg = textTrigrams(text);
+    if (tg.length < 2) return false;
+    let hit = 0; for (const h of tg) if (lessonTri.has(h)) hit++;
+    return hit / tg.length >= 0.75;
+  };
+  const ipBuckets = new Map<string, { n: number; reset: number }>();
+  const IP_TTS_LIMIT = Number(process.env.ANON_LESSON_TTS_LIMIT || 120); // per IP per 10 min
+  const anonIpOk = (req: express.Request): boolean => {
+    const ip = String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "?").split(",")[0].trim();
+    const now = Date.now(); const b = ipBuckets.get(ip);
+    if (!b || b.reset < now) { ipBuckets.set(ip, { n: 1, reset: now + 10 * 60 * 1000 }); if (ipBuckets.size > 5000) { for (const [k, v] of ipBuckets) if (v.reset < now) ipBuckets.delete(k); } return true; }
+    return ++b.n <= IP_TTS_LIMIT;
+  };
   app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (req.method !== "POST" || !req.path.startsWith("/api/")) return next();
+    if (req.path === "/api/tts" && !(req.headers.authorization || "").startsWith("Bearer ") && isLessonText(String(req.body?.text || "").slice(0, 1200))) {
+      if (!anonIpOk(req)) return res.status(429).json({ error: "RATE_LIMITED", rateLimited: true });
+      (req as any).authUid = "anon-lesson"; return next();
+    }
     const h = req.headers.authorization || "";
     const idToken = h.startsWith("Bearer ") ? h.slice(7).trim() : "";
     if (!idToken) return res.status(401).json({ error: "UNAUTHORIZED", reason: "no-token", message: "Sign in required" });
@@ -1463,8 +1488,10 @@ RESPOND STRICTLY IN VALID JSON FORMAT with the following schema:
     const th = req.headers.authorization || "";
     const tok = th.startsWith("Bearer ") ? th.slice(7).trim() : "";
     const aa = getAdminAuth();
-    if (!tok || !aa) return res.status(401).setHeader("Cache-Control", "no-store").json({ error: "UNAUTHORIZED", reason: tok ? "auth-not-configured" : "no-token" });
-    try { await aa.verifyIdToken(tok); } catch (e: any) { const reason = authReason(e); logToFile(`[auth] GET /api/tts/lesson 401 ${reason}`); res.setHeader("Cache-Control", "no-store"); return res.status(401).json({ error: "UNAUTHORIZED", reason }); }
+    const lessonOk = !tok && isLessonText(String(req.query.t || "").slice(0, 2000));
+    if (lessonOk && !anonIpOk(req)) return res.status(429).setHeader("Cache-Control", "no-store").json({ error: "RATE_LIMITED", rateLimited: true });
+    if (!lessonOk && (!tok || !aa)) return res.status(401).setHeader("Cache-Control", "no-store").json({ error: "UNAUTHORIZED", reason: tok ? "auth-not-configured" : "no-token" });
+    if (!lessonOk) try { await aa!.verifyIdToken(tok); } catch (e: any) { const reason = authReason(e); logToFile(`[auth] GET /api/tts/lesson 401 ${reason}`); res.setHeader("Cache-Control", "no-store"); return res.status(401).json({ error: "UNAUTHORIZED", reason }); }
     const text = String(req.query.t || "").slice(0, 2000);
     const voice = safeVoice(req.query.v);
     if (!text.trim()) return res.status(400).json({ error: "Text is required" });
