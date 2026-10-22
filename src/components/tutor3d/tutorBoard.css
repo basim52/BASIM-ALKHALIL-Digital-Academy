@@ -214,3 +214,12 @@
 .magic-whiteboard-inner .tl-rich-text,
 .magic-whiteboard-inner .tl-rich-text p,
 .magic-whiteboard-inner .tl-text-content { unicode-bidi: plaintext; text-align: start; }
+
+/* Photo portraits (default teacher faces) */
+.tutor-photo-mount{position:relative;overflow:hidden;background:radial-gradient(circle at 50% 40%,#1b2f55,#0b1730 70%)}
+.tutor-photo{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.tutor-photo-glow{position:absolute;height:92%;aspect-ratio:1;border-radius:50%;box-shadow:0 0 0 2px rgba(196,158,58,calc(var(--pp-glow,.2) + .25)),0 0 calc(10px + var(--pp-glow,.2)*34px) rgba(212,175,55,var(--pp-glow,.2));transition:box-shadow .08s linear}
+.tutor-photo-head{position:relative;height:92%;aspect-ratio:1;border-radius:50%;overflow:hidden;transform:translateY(var(--pp-ty,0)) rotate(var(--pp-rot,0)) scale(var(--pp-scale,1.02));transform-origin:50% 80%;will-change:transform}
+.tutor-photo-head img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;user-select:none;pointer-events:none}
+.tutor-photo-head .tutor-photo-jaw{transform:translateY(var(--pp-jaw,0));-webkit-mask-image:radial-gradient(ellipse 9% 7% at var(--mx) calc(var(--my) + 4.5%),#000 45%,transparent 100%);mask-image:radial-gradient(ellipse 9% 7% at var(--mx) calc(var(--my) + 4.5%),#000 45%,transparent 100%)}
+@media (prefers-reduced-motion:reduce){.tutor-photo-head{transform:none}}

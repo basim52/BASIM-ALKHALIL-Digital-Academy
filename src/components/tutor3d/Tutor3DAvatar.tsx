@@ -34,6 +34,8 @@ export const Tutor3DAvatar: React.FC<Tutor3DAvatarProps> = ({
   const mountRef = useRef<HTMLDivElement | null>(null);
   const [gesture, setGesture] = useState<"idle" | "wave" | "explain" | "celebrate">("idle");
   const [cameraAngle, setCameraAngle] = useState<"front" | "side" | "closeup">("front");
+  const [view, setView] = useState<"photo" | "3d">(() => { try { return (localStorage.getItem("tutorAvatarView") as any) === "3d" ? "3d" : "photo"; } catch { return "photo"; } });
+  const photoRef = useRef<HTMLDivElement | null>(null);
 
   // Mutable refs for animation loop access without rebuilding scene
   const stateRef = useRef({
@@ -64,6 +66,7 @@ export const Tutor3DAvatar: React.FC<Tutor3DAvatarProps> = ({
   };
 
   useEffect(() => {
+    if (view !== "3d") return;
     const container = mountRef.current;
     if (!container) return;
     const look = LOOKS[agent.id] || LOOKS.sara;
@@ -187,7 +190,38 @@ export const Tutor3DAvatar: React.FC<Tutor3DAvatarProps> = ({
       rig.dispose(); haloGeo.dispose(); haloMat.dispose();
       renderer.dispose(); renderer.domElement.remove();
     };
-  }, [agentId, agent.id, compact]);
+  }, [agentId, agent.id, compact, view]);
+
+  // Photo portrait: breathing, gentle head motion, soft jaw motion + gold glow driven by TTS loudness
+  useEffect(() => {
+    if (view !== "photo") return;
+    const el = photoRef.current; if (!el) return;
+    let id = 0, lvl = 0; const t0 = performance.now();
+    const shot = (window as any).__AVATAR_SHOT__ as { speaking?: number } | undefined;
+    const tick = () => {
+      id = requestAnimationFrame(tick);
+      if (document.hidden) return;
+      const t = (performance.now() - t0) / 1000;
+      const live = getSpeechLevel();
+      const st = stateRef.current;
+      const speaking = st.isSpeaking || live >= 0 || !!shot?.speaking;
+      const target = live >= 0 ? live : speaking ? (shot?.speaking ?? (0.3 + 0.4 * Math.abs(Math.sin(t * 10)) * Math.abs(Math.sin(t * 3.1)))) : 0;
+      lvl += (target - lvl) * (target > lvl ? 0.5 : 0.2);
+      const br = Math.sin(t * 1.6);
+      const rot = Math.sin(t * 0.45) * 0.5 + (speaking ? Math.sin(t * 2.1) * 0.6 : 0) + (st.isListening ? 1.2 : 0);
+      const ty = br * 0.35 + (speaking ? Math.sin(t * 2.9) * 0.4 : 0);
+      el.style.setProperty("--pp-scale", String(1.02 + br * 0.004));
+      el.style.setProperty("--pp-rot", rot.toFixed(3) + "deg");
+      el.style.setProperty("--pp-ty", ty.toFixed(3) + "%");
+      el.style.setProperty("--pp-jaw", (Math.min(1, lvl) * 1.1).toFixed(3) + "%");
+      el.style.setProperty("--pp-glow", (speaking ? 0.35 + Math.min(1, lvl) * 0.65 : 0.18 + (br + 1) * 0.04).toFixed(3));
+    };
+    tick();
+    return () => cancelAnimationFrame(id);
+  }, [view, agent.id]);
+  const MOUTH: Record<string, [number, number]> = { sara: [47, 45], grammar: [47, 43], business: [48, 47], exams: [49, 42] };
+  const [mx, my] = MOUTH[agent.id] || [48, 45];
+  const toggleView = () => setView(v => { const n = v === "photo" ? "3d" : "photo"; try { localStorage.setItem("tutorAvatarView", n); } catch {} return n; });
 
   return (
     <div className={`tutor-3d-stage-card ${mode} ${isSpeaking ? "is-speaking" : ""} ${isListening ? "is-listening" : ""}`}>
@@ -198,8 +232,8 @@ export const Tutor3DAvatar: React.FC<Tutor3DAvatarProps> = ({
           <span>
             {isSpeaking
               ? isArabic
-                ? `🔊 ${agent.nameAr} يتحدث الآن (3D Live)`
-                : `🔊 ${agent.nameEn} Speaking (3D Live)`
+                ? `🔊 ${agent.nameAr} ${agent.gender === "female" ? "تتحدث" : "يتحدث"} الآن`
+                : `🔊 ${agent.nameEn} is speaking`
               : isListening
               ? isArabic
                 ? "🎙️ يستمع إليك بانتباه..."
@@ -209,13 +243,16 @@ export const Tutor3DAvatar: React.FC<Tutor3DAvatarProps> = ({
                 ? "⚡ يحلل السبورة بـ Gemini 4..."
                 : "⚡ Analyzing via Gemini 4..."
               : isArabic
-              ? `🧊 مجسّم ثلاثي الأبعاد • ${agent.nameAr}`
-              : `🧊 3D Human Avatar • ${agent.nameEn}`}
+              ? `${agent.gender === "female" ? "المعلمة" : "المعلم"} ${agent.nameAr}`
+              : `Teacher ${agent.nameEn}`}
           </span>
         </div>
 
         <div className="tutor-3d-header-actions">
-          <button
+          <button type="button" onClick={toggleView} className="tutor-3d-mini-btn" title={isArabic ? "تبديل بين الصورة والمجسم 3D" : "Switch photo / 3D"}>
+            {view === "photo" ? "🧊 3D" : (isArabic ? "🖼️ صورة" : "🖼️ Photo")}
+          </button>
+          {view === "3d" && <button
             type="button"
             onClick={() =>
               setCameraAngle((prev) =>
@@ -226,7 +263,7 @@ export const Tutor3DAvatar: React.FC<Tutor3DAvatarProps> = ({
             title={isArabic ? "تغيير زاوية الكاميرا ثلاثية الأبعاد" : "Switch 3D Camera Angle"}
           >
             🎥 {cameraAngle === "front" ? "1x" : cameraAngle === "closeup" ? "Zoom" : "Side"}
-          </button>
+          </button>}
 
           {onToggleFloating && (
             <button
@@ -256,13 +293,22 @@ export const Tutor3DAvatar: React.FC<Tutor3DAvatarProps> = ({
       </div>
 
       {/* WebGL 3D Canvas Container */}
-      <div
-        ref={mountRef}
-        className={`tutor-3d-canvas-mount ${compact ? "compact" : ""}`}
-      />
+      {view === "3d" ? (
+        <div ref={mountRef} className={`tutor-3d-canvas-mount ${compact ? "compact" : ""}`} />
+      ) : (
+        <div className={`tutor-3d-canvas-mount tutor-photo-mount ${compact ? "compact" : ""}`} data-no-i18n>
+          <div ref={photoRef} className="tutor-photo" style={{ ["--mx" as any]: mx + "%", ["--my" as any]: my + "%" }}>
+            <div className="tutor-photo-glow" />
+            <div className="tutor-photo-head">
+              <img src={`/tutors/${agent.id}.webp`} alt={isArabic ? agent.nameAr : agent.nameEn} draggable={false} />
+              <img src={`/tutors/${agent.id}.webp`} alt="" aria-hidden className="tutor-photo-jaw" draggable={false} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Interactive 3D Expression & Voice Bar */}
-      <div className="tutor-3d-controls-bar">
+      {view === "3d" && <div className="tutor-3d-controls-bar">
         <button
           type="button"
           onClick={() => triggerTemporaryGesture("wave")}
@@ -293,7 +339,7 @@ export const Tutor3DAvatar: React.FC<Tutor3DAvatarProps> = ({
             🎙️ {isArabic ? "نطق مباشر" : "Speak"}
           </button>
         )}
-      </div>
+      </div>}
     </div>
   );
 };
