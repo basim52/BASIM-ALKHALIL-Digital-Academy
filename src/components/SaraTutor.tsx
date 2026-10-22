@@ -7318,6 +7318,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         studentLevel={(profile as any).level || tutorMemory.level || 'A1'}
         studentStreak={streak.current || 1}
         isRtl={isRtl}
+        studentUid={profile.uid}
       />
 
       {/* 11E. Sara Achievements, Quests & Trophy Hub Modal (#5) */}

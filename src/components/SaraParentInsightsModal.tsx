@@ -21,6 +21,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { TutorMemoryDoc, TutorSessionDoc } from '../types';
 import { playSnapshotShutterSound } from '../lib/audio';
+import { SaraProgressPanel } from './SaraProgressPanel';
 
 interface SaraParentInsightsModalProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ interface SaraParentInsightsModalProps {
   studentLevel: string;
   studentStreak: number;
   isRtl: boolean;
+  studentUid?: string;
 }
 
 export const SaraParentInsightsModal: React.FC<SaraParentInsightsModalProps> = ({
@@ -39,7 +41,8 @@ export const SaraParentInsightsModal: React.FC<SaraParentInsightsModalProps> = (
   studentName,
   studentLevel,
   studentStreak,
-  isRtl
+  isRtl,
+  studentUid
 }) => {
   const [activeTab, setActiveTab] = useState<'digest' | 'fluency' | 'home_tips'>('digest');
   const [isExporting, setIsExporting] = useState(false);
@@ -52,18 +55,11 @@ export const SaraParentInsightsModal: React.FC<SaraParentInsightsModalProps> = (
   const currentLevelIdx = Math.max(0, levelOrder.indexOf(studentLevel.toUpperCase()));
   const fluencyPercentage = Math.min(100, Math.round(((currentLevelIdx + 1) / 6) * 100));
 
-  const strengthsList = tutorMemory.strengths || [
-    'المشاركة الفعالة في المحادثة والتعبير عن النفس بثقة',
-    'استيعاب القواعد النحوية من خلال التفكيك البصري',
-    'نطق الكلمات الجديدة بوضوح وإيقاع طبيعي'
-  ];
+  // Real data only: no invented strengths/mistakes/word counts.
+  const strengthsList: string[] = tutorMemory.strengths || [];
+  const focusList: string[] = tutorMemory.frequentMistakes || [];
 
-  const focusList = tutorMemory.frequentMistakes || [
-    'توافق الفاعل والمفرد الغائب (He/She goes vs go)',
-    'تصريف الأفعال الشاذة في الماضي البسيط'
-  ];
-
-  const wordsLearnedCount = tutorMemory.wordsLearned?.length || 18;
+  const wordsLearnedCount = tutorMemory.wordsLearned?.length || 0;
 
   // Export Parent Insights Canvas Card
   const handleExportParentCard = async () => {
@@ -290,6 +286,7 @@ export const SaraParentInsightsModal: React.FC<SaraParentInsightsModalProps> = (
           {/* TAB 1: WEEKLY DIGEST */}
           {activeTab === 'digest' && (
             <div className="space-y-4">
+              {studentUid && <SaraProgressPanel uid={studentUid} compact />}
               <div className="p-4 rounded-3xl bg-slate-800/80 border border-emerald-400/30 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-black text-emerald-300 flex items-center gap-1.5">
@@ -302,8 +299,8 @@ export const SaraParentInsightsModal: React.FC<SaraParentInsightsModalProps> = (
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">
                   {tutorMemory.lastSessionSummary || (isRtl
-                    ? 'أظهر الطالب تفاعلاً ممتازاً وحماساً عالياً في جلسات المحادثة واستيعاب المفاهيم الجديدة مع سارة.'
-                    : 'The student demonstrated outstanding participation and enthusiasm across conversational turns.')}
+                    ? 'ما فيه ملخص جلسة محفوظ مع سارة للحين.'
+                    : 'No saved session summary with Sara yet.')}
                 </p>
               </div>
 
@@ -314,6 +311,7 @@ export const SaraParentInsightsModal: React.FC<SaraParentInsightsModalProps> = (
                   <span>{isRtl ? 'ما أتقنه الطالب بجدارة هذا الأسبوع 🌟' : 'Skills Mastered This Week 🌟'}</span>
                 </span>
                 <div className="space-y-1.5">
+                  {!strengthsList.length && <p className="text-[11px] text-slate-400 font-bold">{isRtl ? 'ما رصدت سارة نقاط قوة محفوظة للحين.' : 'No strengths saved by Sara yet.'}</p>}
                   {strengthsList.map((str, idx) => (
                     <div key={idx} className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/20 flex items-center gap-2.5 text-xs text-emerald-100">
                       <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center text-[10px] font-black shrink-0">
@@ -332,6 +330,7 @@ export const SaraParentInsightsModal: React.FC<SaraParentInsightsModalProps> = (
                   <span>{isRtl ? 'التحديات التي رصدتها سارة وتدرب عليها الطالب 🎯' : 'Challenges Addressed with Sara 🎯'}</span>
                 </span>
                 <div className="space-y-1.5">
+                  {!focusList.length && <p className="text-[11px] text-slate-400 font-bold">{isRtl ? 'ما فيه أخطاء متكررة محفوظة للحين.' : 'No recurring mistakes saved yet.'}</p>}
                   {focusList.map((f, idx) => (
                     <div key={idx} className="p-3 rounded-2xl bg-amber-950/30 border border-amber-500/20 flex items-center gap-2.5 text-xs text-amber-100">
                       <span className="text-sm shrink-0">💡</span>

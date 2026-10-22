@@ -2,6 +2,7 @@ import { L, useExplainLang } from '../lib/explainLang';
 import React, { useEffect, useMemo, useState } from 'react';
 import { collection, query, where, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
+import { SaraProgressPanel } from './SaraProgressPanel';
 
 /**
  * Parent weekly report in 3 one-page steps (التقرير / الأنشطة / الهدف).
@@ -274,7 +275,7 @@ export const ParentWeeklyStepsReport: React.FC<Props> = ({ student, parentUid, i
   if (!student?.uid) return null;
   void isParentAdmin;
 
-  return (
+  return (<>
     <section dir={plang === "en" ? "ltr" : "rtl"} data-testid="parent-weekly-steps-report" className="rounded-3xl overflow-hidden border border-[#C49E3A]/40 bg-[#001a38] flex flex-col" style={{ height: 'min(560px, calc(100dvh - 140px))', minHeight: 440 }}>
       <header className="px-4 pt-3 pb-2" style={{ background: NAVY }}>
         <p className="text-[13px] font-black text-white">{L("التقرير الأسبوعي المختصر • آخر 7 أيام", "Weekly summary • last 7 days")}</p>
@@ -292,7 +293,8 @@ export const ParentWeeklyStepsReport: React.FC<Props> = ({ student, parentUid, i
         <button disabled={step === 2} onClick={() => setStep(s => Math.min(2, s + 1))} className="px-4 py-1.5 rounded-xl text-[12px] font-black disabled:opacity-40" style={{ background: GOLD, color: NAVY }}>{L("التالي", "Next")}</button>
       </footer>
     </section>
-  );
+    <div className="mt-3"><SaraProgressPanel uid={student.uid} /></div>
+  </>);
 };
 
 export default ParentWeeklyStepsReport;

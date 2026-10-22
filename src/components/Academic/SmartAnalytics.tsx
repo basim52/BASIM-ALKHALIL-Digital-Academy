@@ -45,7 +45,8 @@ import {
   ShieldCheck,
   RefreshCw
 } from 'lucide-react';
-import { db } from '../../lib/firebase';
+import { db, auth } from '../../lib/firebase';
+import { SaraProgressPanel } from '../SaraProgressPanel';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { Language } from '../../lib/translations';
 import { toPng } from 'html-to-image';
@@ -124,29 +125,18 @@ export const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({
           return;
         }
 
-        const q = query(
-          collection(db, 'lessonResults'),
-          where('userId', '==', studentId),
-          orderBy('timestamp', 'desc'),
-          limit(100)
-        );
-
-        const snap = await getDocs(q);
-        if (snap.empty) {
-          // Fallback to simulated data if no results logged yet
-          setRawResults(loadSimulatedData());
-          setIsDemoMode(true);
-        } else {
-          const list = snap.docs.map(d => ({
-            id: d.id,
-            ...d.data()
-          }));
-          setRawResults(list);
+        // Real data only: parents read via the parentIds-scoped query (rules); no automatic demo fallback.
+        let snap;
+        try { snap = await getDocs(query(collection(db, 'lessonResults'), where('userId', '==', studentId), orderBy('timestamp', 'desc'), limit(100))); }
+        catch {
+          const me = auth.currentUser?.uid || '';
+          try { snap = await getDocs(query(collection(db, 'lessonResults'), where('userId', '==', studentId), limit(200))); }
+          catch { snap = await getDocs(query(collection(db, 'lessonResults'), where('userId', '==', studentId), where('parentIds', 'array-contains', me), limit(200))); }
         }
+        setRawResults(snap.docs.map(d => ({ id: d.id, ...d.data() })));
       } catch (err) {
-        console.warn('Firestore fetch failed, activating demonstration mode:', err);
-        setRawResults(loadSimulatedData());
-        setIsDemoMode(true);
+        console.warn('lessonResults fetch failed (showing real data only):', err);
+        setRawResults([]);
       } finally {
         setLoading(false);
       }
@@ -351,6 +341,8 @@ export const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({
           </button>
         </div>
       </div>
+
+      {studentId && !studentId.startsWith('sim_') && !isDemoMode && <SaraProgressPanel uid={studentId} />}
 
       {/* Demo Mode Alert Banner */}
       {isDemoMode && (
