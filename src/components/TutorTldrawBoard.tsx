@@ -23,7 +23,6 @@ class AvatarBoundary extends React.Component<{ children: React.ReactNode; name: 
   componentDidCatch(e: unknown) { console.warn('[tutor-avatar] disabled:', e); }
   render() { return this.state.failed ? <div className="w-full h-full rounded-xl bg-[#001a38] text-amber-300 flex items-center justify-center text-[12px] font-black p-2 text-center">{this.props.name}</div> : this.props.children; }
 }
-const hasWebGL = () => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; } };
 type Props = { calls: BoardToolCall[]; personaId: string; speaking?: boolean; onSpeak?: () => void; replayKey?: number; lessonTitle?: string };
 const T = { tutor: true };
 const NOTE_GAP_MS = 8000, NOTE_MAX = 12, NOTE_IDLE_MS = 3500;
@@ -222,8 +221,7 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
   };
   const clear = () => { const e = ed.current; if (!e) return; const ids = Array.from(e.getCurrentPageShapeIds()); if (ids.length) e.deleteShapes(ids); };
 
-  const webgl = useRef<boolean | null>(null); if (webgl.current === null) webgl.current = hasWebGL();
-  const avatar = !webgl.current ? <div className="w-full h-full rounded-xl bg-[#001a38] text-amber-300 flex items-center justify-center text-[13px] font-black">{persona.emoji} {persona.nameAr}</div> : (
+  const avatar = (
     <AvatarBoundary name={`${persona.emoji} ${persona.nameAr}`}>
     <Tutor3DAvatar agentId={persona.id} isArabic isSpeaking={speaking} compact mode={wide ? 'docked' : 'floating'}
       onToggleFloating={() => setShowAvatar(false)} onTriggerVoicePreview={onSpeak} />
