@@ -1,3 +1,4 @@
+import { useT } from '../lib/explainLang';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Tldraw, createShapeId, toRichText, renderPlaintextFromRichText, type Editor, type TLShape } from 'tldraw';
 import { playCloudAudioAs, cancelAllSpeech } from '../lib/audio';
@@ -29,6 +30,7 @@ const NOTE_GAP_MS = 8000, NOTE_MAX = 12, NOTE_IDLE_MS = 3500;
 
 const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false, onSpeak, replayKey = 0, lessonTitle = '' }) => {
   const persona = personaById(personaId);
+  const t = useT(); const NM = t(persona.nameAr, persona.nameEn);
   const ed = useRef<Editor | null>(null);
   const timers = useRef<number[]>([]);
   const [wide, setWide] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 900);
@@ -99,7 +101,7 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
     .filter(n => n.text.length >= 2 && answered.current.get(n.sh.id) !== n.text);
   const askTutor = async (manual: boolean) => {
     const editor = ed.current; if (!editor) return;
-    if (asking) { if (manual) setNoteErr(`${persona.nameAr} ${persona.gender === 'female' ? 'ترد' : 'يرد'} على سؤالك…`); return; }
+    if (asking) { if (manual) setNoteErr(t(`${persona.nameAr} ${persona.gender === 'female' ? 'ترد' : 'يرد'} على سؤالك…`, `${persona.nameEn} is answering your question…`)); return; }
     if (editor.getEditingShapeId()) {
       // Still typing: the button finishes the edit; the auto trigger waits until the student stops editing.
       if (!manual) { if (idle.current) clearTimeout(idle.current); idle.current = window.setTimeout(() => void askRef.current(false), NOTE_IDLE_MS); return; }
@@ -109,29 +111,29 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
     if (!n) {
       if (manual) {
         const drew = editor.getCurrentPageShapes().some((sh: TLShape) => sh.type === 'draw' && !(sh.meta as any)?.tutor);
-        setNoteErr(drew ? 'ما أقدر أقرأ الكتابة بخط اليد. اكتب سؤالك بأداة النص (T) أو في 📝 ملاحظة لاصقة' : 'اكتب سؤالك في 📝 ملاحظة لاصقة أو بأداة النص (T)، وبعدها اضغط اسأل');
+        setNoteErr(drew ? t('ما أقدر أقرأ الكتابة بخط اليد. اكتب سؤالك بأداة النص (T) أو في 📝 ملاحظة لاصقة', 'I can\'t read handwriting. Type your question with the text tool (T) or in a 📝 sticky note') : t('اكتب سؤالك في 📝 ملاحظة لاصقة أو بأداة النص (T)، وبعدها اضغط اسأل', 'Write your question in a 📝 sticky note or with the text tool (T), then press Ask'));
       }
       return;
     }
     const wait = NOTE_GAP_MS - (Date.now() - lastAsk.current);
-    if (asks.current >= NOTE_MAX) { if (manual) setNoteErr('وصلت حد الأسئلة لهذي السبورة، افتح الدرس من جديد'); return; }
-    if (wait > 0) { if (manual) setNoteErr(`لحظة، جرّب بعد ${Math.ceil(wait / 1000)} ثواني`); else { if (idle.current) clearTimeout(idle.current); idle.current = window.setTimeout(() => void askRef.current(false), wait + 200); } return; }
+    if (asks.current >= NOTE_MAX) { if (manual) setNoteErr(t('وصلت حد الأسئلة لهذي السبورة، افتح الدرس من جديد', 'Question limit for this board reached, reopen the lesson')); return; }
+    if (wait > 0) { if (manual) setNoteErr(t(`لحظة، جرّب بعد ${Math.ceil(wait / 1000)} ثواني`, `One moment, try again in ${Math.ceil(wait / 1000)} seconds`)); else { if (idle.current) clearTimeout(idle.current); idle.current = window.setTimeout(() => void askRef.current(false), wait + 200); } return; }
     lastAsk.current = Date.now(); asks.current++; answered.current.set(n.sh.id, n.text); setAsking(true); setNoteErr('');
     try {
       const r = await fetch('/api/sara/board-note', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ persona: persona.id, note: n.text, lesson: lessonTitle, lang: getExplainLang() }) });
       const j: any = await r.json().catch(() => null);
       if (!r.ok || !j?.answer) {
         answered.current.delete(n.sh.id);
-        setNoteErr(r.status === 401 ? 'سجّل دخولك عشان تسأل المعلم' : r.status === 429 ? 'وصلت حد الأسئلة، جرّب بعد شوي' : `${persona.nameAr} ما ${persona.gender === 'female' ? 'قدرت ترد' : 'قدر يرد'} الحين (${r.status}${j?.error ? ' ' + j.error : ''})، جرّب مرة ثانية`);
+        setNoteErr(r.status === 401 ? t('سجّل دخولك عشان تسأل المعلم', 'Sign in to ask the teacher') : r.status === 429 ? t('وصلت حد الأسئلة، جرّب بعد شوي', 'Question limit reached, try again later') : t(`${persona.nameAr} ما ${persona.gender === 'female' ? 'قدرت ترد' : 'قدر يرد'} الحين (${r.status}${j?.error ? ' ' + j.error : ''})، جرّب مرة ثانية`, `${persona.nameEn} could not reply right now (${r.status}${j?.error ? ' ' + j.error : ''}), try again`));
         return;
       }
       const bb = editor.getShapePageBounds(n.sh.id);
       const rid = createShapeId();
       editor.createShape({ meta: T, id: rid, type: 'text', x: bb?.minX ?? 100, y: (bb?.maxY ?? 100) + 16, props: { richText: toRichText(`${persona.emoji} ${j.answer}`), size: 's', color: 'blue', font: 'draw', autoSize: false, w: 360 } as any });
       try { const rb = editor.getShapePageBounds(rid); if (rb) editor.zoomToBounds(rb.clone().expandBy(80), { animation: { duration: 250 }, targetZoom: Math.min(1, editor.getZoomLevel()) }); } catch { /* ignore */ }
-      if (j.audio) { cancelAllSpeech('board-note'); const p = await playCloudAudioAs('board-note', j.audio, () => {}); if (!p) setNoteErr('الرد مكتوب على السبورة، بس الصوت ما اشتغل. اضغط على الصفحة وجرّب مرة ثانية'); }
-      else setNoteErr('الرد مكتوب على السبورة، بس الصوت غير متاح الحين');
-    } catch { answered.current.delete(n.sh.id); setNoteErr('تعذّر الاتصال بالمعلم، تأكد من النت وجرّب مرة ثانية'); }
+      if (j.audio) { cancelAllSpeech('board-note'); const p = await playCloudAudioAs('board-note', j.audio, () => {}); if (!p) setNoteErr(t('الرد مكتوب على السبورة، بس الصوت ما اشتغل. اضغط على الصفحة وجرّب مرة ثانية', 'The reply is on the board, but the audio did not play. Tap the page and try again')); }
+      else setNoteErr(t('الرد مكتوب على السبورة، بس الصوت غير متاح الحين', 'The reply is on the board, but audio is not available right now'));
+    } catch { answered.current.delete(n.sh.id); setNoteErr(t('تعذّر الاتصال بالمعلم، تأكد من النت وجرّب مرة ثانية', 'Could not reach the teacher, check your connection and try again')); }
     finally { setAsking(false); }
   };
   const askRef = useRef(askTutor); askRef.current = askTutor;
@@ -161,19 +163,19 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
   );
 
   return (
-    <div ref={rootRef} data-testid="tldraw-board" className={`${expanded ? 'fixed inset-0 z-[400]' : 'w-full h-full'} flex ${wide ? 'flex-row' : 'flex-col'} gap-2 bg-white rounded-2xl border-2 border-amber-400/70 overflow-hidden`} dir="rtl">
+    <div ref={rootRef} data-testid="tldraw-board" className={`${expanded ? 'fixed inset-0 z-[400]' : 'w-full h-full'} flex ${wide ? 'flex-row' : 'flex-col'} gap-2 bg-white rounded-2xl border-2 border-amber-400/70 overflow-hidden`} dir={t("rtl", "ltr")}>
       {wide && showAvatar && <div className="w-[320px] shrink-0 min-h-0 overflow-hidden p-2">{avatar}</div>}
       <div className="flex-1 min-w-0 min-h-0 flex flex-col">
         <div className="magic-board-toolbar" style={{ overflowX: 'auto', height: 'auto', minHeight: 48, padding: '6px 10px' }}>
-          <div className="board-title-group shrink-0"><span className="board-title-badge">📋 السبورة التفاعلية</span><span className="board-coach-tag">{persona.emoji} {persona.nameAr}</span></div>
-          <div className="board-actions-group" dir="rtl">
+          <div className="board-title-group shrink-0"><span className="board-title-badge">📋 {t("السبورة التفاعلية", "Interactive board")}</span><span className="board-coach-tag">{persona.emoji} {NM}</span></div>
+          <div className="board-actions-group" dir={t("rtl", "ltr")}>
             <ExplainLangToggle />
-            <button className="board-tool-action-btn" onClick={() => setShowAvatar(v => !v)}><span>🧊</span><span>معلم 3D</span></button>
-            <button className="board-tool-action-btn" onClick={() => { setExpanded(v => !v); setTimeout(() => ed.current && fit(ed.current), 80); }}><span>🖥️</span><span>{expanded ? 'تصغير' : 'توسيع السبورة'}</span></button>
-            <button className="board-tool-action-btn tool-inspect" onClick={() => draw(true)} data-testid="board-replay"><span>📋</span><span>قالب الدرس</span></button>
-            <button className="board-tool-action-btn tool-note" onClick={addNote}><span>📝</span><span>ملاحظة لاصقة</span></button>
-            <button className="board-tool-action-btn" onClick={() => void askTutor(true)} disabled={asking} data-testid="board-ask-tutor"><span>🙋</span><span>{asking ? `${persona.nameAr} ${persona.gender === 'female' ? 'ترد' : 'يرد'}…` : `اسأل ${persona.nameAr}`}</span></button>
-            <button className="board-tool-action-btn tool-clear" onClick={clear}><span>🧽</span><span>مسح</span></button>
+            <button className="board-tool-action-btn" onClick={() => setShowAvatar(v => !v)}><span>🧊</span><span>{t("معلم 3D", "3D teacher")}</span></button>
+            <button className="board-tool-action-btn" onClick={() => { setExpanded(v => !v); setTimeout(() => ed.current && fit(ed.current), 80); }}><span>🖥️</span><span>{expanded ? t('تصغير', 'Shrink') : t('توسيع السبورة', 'Expand board')}</span></button>
+            <button className="board-tool-action-btn tool-inspect" onClick={() => draw(true)} data-testid="board-replay"><span>📋</span><span>{t("قالب الدرس", "Lesson template")}</span></button>
+            <button className="board-tool-action-btn tool-note" onClick={addNote}><span>📝</span><span>{t("ملاحظة لاصقة", "Sticky note")}</span></button>
+            <button className="board-tool-action-btn" onClick={() => void askTutor(true)} disabled={asking} data-testid="board-ask-tutor"><span>🙋</span><span>{asking ? t(`${persona.nameAr} ${persona.gender === 'female' ? 'ترد' : 'يرد'}…`, `${persona.nameEn} is answering…`) : t(`اسأل ${persona.nameAr}`, `Ask ${persona.nameEn}`)}</span></button>
+            <button className="board-tool-action-btn tool-clear" onClick={clear}><span>🧽</span><span>{t("مسح", "Clear")}</span></button>
           </div>
         </div>
         <div className="magic-canvas-container relative" style={{ height: 'auto', minHeight: 0 }} dir="ltr">

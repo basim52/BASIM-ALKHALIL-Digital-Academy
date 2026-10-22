@@ -1,3 +1,4 @@
+import { useT } from '../lib/explainLang';
 import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { Volume2, Square, Lock, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -43,6 +44,7 @@ const Choices: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: 
 
 export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBack: () => void; mockLessonOrder?: number; mockStep?: Step }> = ({ track, uid, onBack, mockLessonOrder, mockStep }) => {
   const persona = personaById(track.personaId);
+  const t = useT(); const NM = t(persona.nameAr, persona.nameEn);
   const [unlocked, setUnlocked] = useState(() => readTutorUnlocked(track.id, uid));
   const [lessonRaw, setLesson] = useState<TutorLesson | null>(mockLessonOrder ? track.lessons[mockLessonOrder - 1] : null);
   const [lang] = useExplainLang();
@@ -59,10 +61,10 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const shell = (head: React.ReactNode, body: React.ReactNode) => (
     <div data-testid="tutor-track" className="flex-1 min-h-0 p-3 flex flex-col gap-2 bg-[#001a38] text-white overflow-hidden">
       <div className="flex items-center gap-2 shrink-0">
-        <button onClick={() => { v.stop(); if (lesson) setLesson(null); else onBack(); }} aria-label="رجوع" className="p-1.5 rounded-lg bg-white/10"><ArrowRight size={16} /></button>
+        <button onClick={() => { v.stop(); if (lesson) setLesson(null); else onBack(); }} aria-label={t("رجوع", "Back")} className="p-1.5 rounded-lg bg-white/10"><ArrowRight size={16} /></button>
         <div className="min-w-0 flex-1">{head}</div>
         <ExplainLangToggle />
-        {lesson?.content && <button onClick={() => { v.stop(); setTalk(true); }} data-testid={`tutor-lesson-talk-${persona.id}`} className="shrink-0 px-2.5 py-1.5 rounded-xl bg-[#0a2d5c] border border-[#C49E3A] text-amber-300 text-[11px] font-black">💬 محاورة {persona.nameAr}</button>}
+        {lesson?.content && <button onClick={() => { v.stop(); setTalk(true); }} data-testid={`tutor-lesson-talk-${persona.id}`} className="shrink-0 px-2.5 py-1.5 rounded-xl bg-[#0a2d5c] border border-[#C49E3A] text-amber-300 text-[11px] font-black">💬 {t("محاورة", "Talk with")} {NM}</button>}
       </div>
       {body}
     </div>
@@ -70,10 +72,10 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const VoiceBtn: React.FC<{ text: string }> = ({ text }) => (
     <div className="flex items-center gap-2 shrink-0">
       {v.st === 'loading'
-        ? <button onClick={v.stop} className="px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Square size={13} className="inline" /> إيقاف</button>
-        : <button onClick={() => v.play(text)} data-testid="tutor-voice" className="px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Volume2 size={13} className="inline" /> {v.st === 'failed' ? 'إعادة المحاولة' : `استمع لـ${persona.nameAr}`}</button>}
-      {v.st === 'failed' && <span className="text-[10px] text-rose-300 font-bold">الصوت غير متاح الآن</span>}
-      {v.st === 'blocked' && <span className="text-[10px] text-white/70 font-bold">اضغط مرة ثانية</span>}
+        ? <button onClick={v.stop} className="px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Square size={13} className="inline" /> {t("إيقاف", "Stop")}</button>
+        : <button onClick={() => v.play(text)} data-testid="tutor-voice" className="px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Volume2 size={13} className="inline" /> {v.st === 'failed' ? t('إعادة المحاولة', 'Try again') : t(`استمع لـ${persona.nameAr}`, `Listen to ${persona.nameEn}`)}</button>}
+      {v.st === 'failed' && <span className="text-[10px] text-rose-300 font-bold">{t("الصوت غير متاح الآن", "Audio is not available right now")}</span>}
+      {v.st === 'blocked' && <span className="text-[10px] text-white/70 font-bold">{t("اضغط مرة ثانية", "Tap again")}</span>}
     </div>
   );
   const nextBtn = (label: string, onClick: () => void, disabled = false) => (
@@ -109,17 +111,17 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const c = lesson.content!;
   if (talk) return <TutorConversation persona={persona} onBack={() => setTalk(false)} lesson={{ titleEn: lesson.titleEn, titleAr: lesson.titleAr, examples: c.example.map(e => e.en) }} />;
   const total = 1 + c.exercises.length;
-  const head = <><p className="text-[10px] text-amber-300 font-bold">{persona.nameAr} — الدرس {lesson.order}</p><p className="text-[13px] font-black truncate">{lesson.titleAr}{enLoading ? ' · …EN' : ''}</p></>;
+  const head = <><p className="text-[10px] text-amber-300 font-bold">{NM} — {t('الدرس', 'Lesson')} {lesson.order}</p><p className="text-[13px] font-black truncate">{lesson.titleAr}{enLoading ? ' · …EN' : ''}</p></>;
   const narration = `${c.explanationAr} ${c.example.map(e => e.en).join('. ')}`;
 
   if (step.k === 'board') return shell(head, <>
     <div onClickCapture={e => { if ((e.target as HTMLElement).closest('[data-testid=tutor-voice]')) setReplay(r => r + 1); }}><VoiceBtn text={narration} /></div>
     <div className="flex-1 min-h-0">
-      <Suspense fallback={<div className="w-full h-full rounded-2xl border-2 border-amber-400/60 bg-[#0a2d5c] flex items-center justify-center text-[12px] font-bold text-amber-200">جاري فتح السبورة…</div>}>
+      <Suspense fallback={<div className="w-full h-full rounded-2xl border-2 border-amber-400/60 bg-[#0a2d5c] flex items-center justify-center text-[12px] font-bold text-amber-200">{t("جاري فتح السبورة…", "Opening the board…")}</div>}>
         <TutorTldrawBoard calls={calls} personaId={persona.id} lessonTitle={`${lesson.titleEn} (${lesson.titleAr})`} speaking={v.st === 'loading'} replayKey={replay} onSpeak={() => { setReplay(r => r + 1); v.play(narration); }} />
       </Suspense>
     </div>
-    {nextBtn('الشرح', () => setStep({ k: 'explain' }))}
+    {nextBtn(t('الشرح', 'Explanation'), () => setStep({ k: 'explain' }))}
   </>);
 
   if (step.k === 'explain') return shell(head, <>
@@ -132,7 +134,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
         </div>
       ))}
     </div>
-    {nextBtn('سؤال سريع', () => { setPicked(null); setCheckWrong(false); setStep({ k: 'check' }); })}
+    {nextBtn(t('سؤال سريع', 'Quick question'), () => { setPicked(null); setCheckWrong(false); setStep({ k: 'check' }); })}
   </>);
 
   if (step.k === 'check' || step.k === 'ex') {
@@ -140,16 +142,16 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
     const n = step.k === 'check' ? 1 : step.i + 2;
     const isLast = step.k === 'ex' && step.i === c.exercises.length - 1;
     return shell(head, <>
-      <p className="text-[11px] font-black text-amber-300 shrink-0">سؤال {n} من {total}</p>
+      <p className="text-[11px] font-black text-amber-300 shrink-0">{t('سؤال', 'Question')} {n} {t('من', 'of')} {total}</p>
       <div className="rounded-xl bg-[#0a2d5c] border border-amber-400/40 p-3 shrink-0">
         <p className="text-[14px] font-black">{q.promptAr}</p>
         {q.promptEn && <p dir="ltr" className="text-[15px] font-black text-amber-200 text-start mt-1">{q.promptEn}</p>}
       </div>
       <Choices q={q} picked={picked} onPick={i => { setPicked(i); if (i === q.correctIndex) setCorrect(x => x + 1); else if (step.k === 'check') setCheckWrong(true); }} />
-      {picked !== null && <p className={`text-[13px] font-black shrink-0 ${picked === q.correctIndex ? 'text-emerald-300' : 'text-rose-300'}`}>{picked === q.correctIndex ? <><CheckCircle2 size={15} className="inline" /> صح!</> : <><XCircle size={15} className="inline" /> الجواب: <span dir="ltr">{q.options[q.correctIndex]}</span></>}</p>}
+      {picked !== null && <p className={`text-[13px] font-black shrink-0 ${picked === q.correctIndex ? 'text-emerald-300' : 'text-rose-300'}`}>{picked === q.correctIndex ? <><CheckCircle2 size={15} className="inline" /> {t('صح!', 'Correct!')}</> : <><XCircle size={15} className="inline" /> {t('الجواب:', 'Answer:')} <span dir="ltr">{q.options[q.correctIndex]}</span></>}</p>}
       {step.k === 'check' && checkWrong && <p className="text-[12px] leading-6 font-bold text-white/85 rounded-xl bg-white/5 p-2 overflow-hidden" data-testid="tutor-alt">{c.altExplanationAr}</p>}
       <div className="flex-1" />
-      {nextBtn(isLast ? 'النتيجة' : 'التالي', () => {
+      {nextBtn(isLast ? t('النتيجة', 'Result') : t('التالي', 'Next'), () => {
         setPicked(null);
         if (step.k === 'check') setStep({ k: 'ex', i: 0 });
         else if (!isLast) setStep({ k: 'ex', i: step.i + 1 });
@@ -165,14 +167,14 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   return shell(head, <>
     <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center">
       <span className="text-[44px]">{persona.emoji}</span>
-      <p className="text-[18px] font-black text-amber-300" data-testid="tutor-result">جاوبت {correct} من {total} صح</p>
-      <p className="text-[12px] font-bold text-white/80">{correct === total ? 'ممتاز!' : 'تقدر تعيد الدرس متى ما بغيت.'}</p>
+      <p className="text-[18px] font-black text-amber-300" data-testid="tutor-result">{t(`جاوبت ${correct} من ${total} صح`, `You got ${correct} of ${total} right`)}</p>
+      <p className="text-[12px] font-bold text-white/80">{correct === total ? t('ممتاز!', 'Excellent!') : t('تقدر تعيد الدرس متى ما بغيت.', 'You can redo the lesson any time.')}</p>
     </div>
     <div className="flex gap-2 shrink-0">
-      <button onClick={() => { setStep({ k: 'board' }); setCorrect(0); }} className="px-3 py-3 rounded-xl bg-white/10 text-[13px] font-black">أعد الدرس</button>
+      <button onClick={() => { setStep({ k: 'board' }); setCorrect(0); }} className="px-3 py-3 rounded-xl bg-white/10 text-[13px] font-black">{t("أعد الدرس", "Redo lesson")}</button>
       {nextLesson
-        ? <button onClick={() => { setLesson(nextLesson); setStep({ k: 'board' }); setCorrect(0); }} data-testid="tutor-next-lesson" className="flex-1 py-3 rounded-xl bg-amber-400 text-[#001a38] text-[14px] font-black">الدرس التالي</button>
-        : <button onClick={() => setLesson(null)} className="flex-1 py-3 rounded-xl bg-amber-400 text-[#001a38] text-[14px] font-black">قائمة الدروس</button>}
+        ? <button onClick={() => { setLesson(nextLesson); setStep({ k: 'board' }); setCorrect(0); }} data-testid="tutor-next-lesson" className="flex-1 py-3 rounded-xl bg-amber-400 text-[#001a38] text-[14px] font-black">{t("الدرس التالي", "Next lesson")}</button>
+        : <button onClick={() => setLesson(null)} className="flex-1 py-3 rounded-xl bg-amber-400 text-[#001a38] text-[14px] font-black">{t("قائمة الدروس", "Lesson list")}</button>}
     </div>
   </>);
 };
