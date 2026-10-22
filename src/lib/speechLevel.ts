@@ -33,6 +33,19 @@ export function envelopeFromWav(bytes: Uint8Array): Float32Array | null {
     return env;
   } catch { return null; }
 }
+let playingEl: HTMLMediaElement | null = null;
+let bufferPlaying = 0;
+/** True only while real speech audio is actually playing (audio 'playing' event, or a running Web Audio buffer). */
+export function isSpeechPlaying(): boolean {
+  if (bufferPlaying > 0) return true;
+  const e = playingEl; return !!e && !e.paused && !e.ended;
+}
+export function markBufferSpeech(on: boolean) { bufferPlaying = Math.max(0, bufferPlaying + (on ? 1 : -1)); }
+export function watchSpeechElement(el: HTMLMediaElement) {
+  el.addEventListener('playing', () => { playingEl = el; });
+  const off = () => { if (playingEl === el) playingEl = null; };
+  el.addEventListener('pause', off); el.addEventListener('ended', off); el.addEventListener('error', off); el.addEventListener('emptied', off);
+}
 export function trackSpeech(el: HTMLMediaElement, bytes: Uint8Array) {
   setTimeout(() => { const env = envelopeFromWav(bytes); if (!env) return; active = { el, env }; }, 0); // off the playback critical path
   const clear = () => { if (active?.el === el) active = null; };

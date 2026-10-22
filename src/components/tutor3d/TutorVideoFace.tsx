@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { getSpeechLevel } from "../../lib/speechLevel";
+import { isSpeechPlaying } from "../../lib/speechLevel";
 import { ensurePlaybackSession } from "../../lib/audio";
 
 /** Laughter / praise cues. Gemini TTS has no fixed laugh tag in our code; we also catch bracketed style tags like [laughing] / [laughs]. */
@@ -48,7 +48,7 @@ export const TutorVideoFace: React.FC<{ id: string; alt: string; isSpeaking: boo
     const tick = () => {
       raf = requestAnimationFrame(tick);
       if (laughing.current) return;
-      const speaking = speakingRef.current || getSpeechLevel() >= 0;
+      const speaking = isSpeechPlaying(); // real playback only, never the request/text event
       if (speaking && pendingLaugh.current && !reduced) {
         pendingLaugh.current = false; lastLaugh.current = Date.now(); laughing.current = true;
         setLoaded(l => ({ ...l, laugh: true })); setClip("laugh"); return;
@@ -67,7 +67,7 @@ export const TutorVideoFace: React.FC<{ id: string; alt: string; isSpeaking: boo
     });
   }, [clip, visible, loaded, reduced]);
 
-  const endLaugh = () => { laughing.current = false; setClip(speakingRef.current ? "talk" : "idle"); };
+  const endLaugh = () => { laughing.current = false; setClip(isSpeechPlaying() ? "talk" : "idle"); };
 
   if (reduced) return <img className="tutor-video-poster" src={`/tutors/${id}.webp`} alt={alt} draggable={false} />;
   return (

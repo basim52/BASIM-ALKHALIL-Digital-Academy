@@ -1,4 +1,4 @@
-import { trackSpeech } from './speechLevel';
+import { trackSpeech, watchSpeechElement, markBufferSpeech } from './speechLevel';
 import { registerSaraSpeech } from './saraSpeechLevel';
 /**
  * Basim Alkhalil Academic Platform - Unified Speech Engine
@@ -189,7 +189,9 @@ if (typeof window !== "undefined") {
   const handleInitialUserGesture = () => {
     ensurePlaybackSession();
     unlockAudioForMobile();
-    unlockEvents.forEach((ev) => window.removeEventListener(ev, handleInitialUserGesture));
+    // Keep resuming on every gesture: cancelAllSpeech() suspends the shared context, and Android Chrome
+    // only allows resume() inside a user gesture, so a one-shot unlock left later fallback speech silent.
+    try { if (sharedAudioContext && sharedAudioContext.state === 'suspended') sharedAudioContext.resume().catch(() => {}); } catch (_) {}
   };
   unlockEvents.forEach((ev) => window.addEventListener(ev, handleInitialUserGesture, { passive: true }));
 }
@@ -219,6 +221,7 @@ async function playAudioSource(
     const audioUrl = URL.createObjectURL(blob);
     const audio = createManagedAudio(undefined, owner);
     audio.src = audioUrl;
+    try { watchSpeechElement(audio); } catch (_) {}
     try { if (owner !== 'call') trackSpeech(audio, bytes); } catch (_) { /* lip-sync only */ }
     audio.preload = "auto";
     if (playbackRate && playbackRate > 0) {
@@ -269,9 +272,30 @@ async function playAudioSource(
     // Autoplay blocked / decode failure: Web Audio backup, registered so it can be stopped.
     console.debug("HTML5 audio playback failed, falling back to Web Audio API:", html5Err);
     if (exclusiveOwner && owner !== exclusiveOwner) return null;
-    const node = await playAudioBuffer(base64, onEnd, playbackRate);
-    if (node) { silenceOthers(node); currentPlayingNode = node; }
-    return node;
+    const ctx = getAudioContext();
+    if (ctx && ctx.state !== 'suspended') {
+      const node = await playAudioBuffer(base64, onEnd, playbackRate);
+      if (node) { silenceOthers(node); currentPlayingNode = node; return node; }
+    }
+    // Context cannot run without a gesture (Android Chrome): don't play into a silent context.
+    // Retry the normal HTML5 element on the student's next tap instead.
+    return await new Promise(resolve => {
+      const evs = ['pointerdown', 'touchstart', 'keydown'];
+      const t = setTimeout(() => { evs.forEach(e => window.removeEventListener(e, go)); onEnd?.(); resolve(null); }, 15000);
+      function go() {
+        evs.forEach(e => window.removeEventListener(e, go)); clearTimeout(t);
+        try {
+          const bin = window.atob(base64); const b = new Uint8Array(bin.length); for (let i = 0; i < b.length; i++) b[i] = bin.charCodeAt(i);
+          const url = URL.createObjectURL(new Blob([b], { type: 'audio/wav' }));
+          const a = createManagedAudio(url, owner); watchSpeechElement(a); a.volume = 1; a.muted = false;
+          if (playbackRate > 0) a.playbackRate = playbackRate;
+          const done = () => { try { URL.revokeObjectURL(url); } catch (_) {} trackedMedia.delete(a); onEnd?.(); };
+          a.onended = done; a.onerror = done;
+          a.play().then(() => { const node = { el: a, stop: () => { try { a.pause(); } catch (_) {} done(); } }; silenceOthers(a); currentPlayingNode = node as any; resolve(node); }).catch(() => { done(); resolve(null); });
+        } catch (_) { onEnd?.(); resolve(null); }
+      }
+      evs.forEach(e => window.addEventListener(e, go, { passive: true }));
+    });
   }
 }
 
@@ -331,7 +355,10 @@ async function playAudioBuffer(
 
     let isFinished = false;
 
+    let marked = true;
+    const unmark = () => { if (marked) { marked = false; markBufferSpeech(false); } };
     source.onended = () => {
+      unmark();
       if (isFinished) return;
       isFinished = true;
       if (currentPlayingNode?.stop) {
@@ -341,9 +368,11 @@ async function playAudioBuffer(
     };
 
     source.start(0);
+    markBufferSpeech(true);
 
     return {
       stop: () => {
+        unmark();
         if (isFinished) return;
         isFinished = true;
         try {
