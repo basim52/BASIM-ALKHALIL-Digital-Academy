@@ -62,7 +62,6 @@ function getFriendlyAuthErrorMessage(errorCode: string, lang: Language): string 
 interface LoginScreenProps {
   lang: Language;
   onToggleLang: () => void;
-  onAuthenticate: (email: string, role: UserRole, displayName?: string) => void;
   onGoogleSuccess: (user: User) => void;
   onBackToLanding?: () => void;
 }
@@ -70,14 +69,11 @@ interface LoginScreenProps {
 const LoginScreen: React.FC<LoginScreenProps> = ({ 
   lang, 
   onToggleLang, 
-  onAuthenticate,
   onGoogleSuccess,
   onBackToLanding
 }) => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [authErrorCode, setAuthErrorCode] = useState<string | null>(null);
-  const [showCustomEmail, setShowCustomEmail] = useState(false);
-  const [customEmail, setCustomEmail] = useState('');
   const t = translations[lang];
   const isRtl = lang === 'ar';
 
@@ -113,17 +109,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
     } finally {
       setIsLoggingIn(false);
     }
-  };
-
-  const handleCustomEmailSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!customEmail || !customEmail.includes('@')) return;
-    const isMaster = customEmail.trim().toLowerCase() === 'basim5252@gmail.com';
-    onAuthenticate(
-      customEmail.trim(), 
-      isMaster ? UserRole.ADMIN : UserRole.STUDENT,
-      isMaster ? 'أ. باسم الخليل' : undefined
-    );
   };
 
   return (
@@ -218,82 +203,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
           </span>
         </button>
 
-        {/* Quick Direct Profile Access */}
-        <div className="mt-6 pt-5 border-t border-slate-100">
-          <div className="flex items-center justify-between mb-3 text-slate-400 text-[11px] font-bold">
-            <span className="h-px bg-slate-200 flex-1" />
-            <span className="px-2 text-slate-500 font-bold">{isRtl ? 'أو الدخول المباشر' : 'Or Direct Access'}</span>
-            <span className="h-px bg-slate-200 flex-1" />
-          </div>
-
-          <div className="space-y-2.5">
-            {/* Master Admin / Founder direct sign-in */}
-            <button
-              onClick={() => onAuthenticate('basim5252@gmail.com', UserRole.ADMIN, 'أ. باسم الخليل')}
-              className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-[#002147] to-[#002c5f] text-white rounded-2xl hover:brightness-110 active:scale-[0.99] transition-all shadow-md group cursor-pointer border border-[#C49E3A]/40"
-            >
-              <div className="flex items-center gap-3 text-right">
-                <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center font-black text-sm text-[#C49E3A] border border-white/15">
-                  B
-                </div>
-                <div>
-                  <div className="text-xs font-black flex items-center gap-1.5">
-                    <span>{isRtl ? 'دخول المشرف: أ. باسم الخليل' : 'Founder: Basim Al-Khalil'}</span>
-                    <span className="px-1.5 py-0.5 bg-[#C49E3A] text-[#002147] text-[9px] font-black rounded-md">ADMIN</span>
-                  </div>
-                  <div className="text-[10px] text-slate-300 font-mono" dir="ltr">basim5252@gmail.com</div>
-                </div>
-              </div>
-              <Sparkles size={16} className="text-[#C49E3A] shrink-0 group-hover:rotate-12 transition-transform" />
-            </button>
-
-            {/* Demo Student direct sign-in */}
-            <button
-              onClick={() => onAuthenticate('student@academy.com', UserRole.STUDENT, 'طالب الأكاديمية')}
-              className="w-full flex items-center justify-between p-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl transition-all text-xs font-bold cursor-pointer group"
-            >
-              <div className="flex items-center gap-2">
-                <UserCheck size={15} className="text-emerald-600" />
-                <span>{isRtl ? 'دخول كطالب (Student Demo)' : 'Sign In as Demo Student'}</span>
-              </div>
-              <span className="text-[10px] text-slate-400 group-hover:text-slate-600 transition-colors">
-                {isRtl ? 'تجربة الطالب ←' : 'Student Mode →'}
-              </span>
-            </button>
-
-            {/* Any other email toggle */}
-            {!showCustomEmail ? (
-              <button
-                onClick={() => setShowCustomEmail(true)}
-                className="w-full py-2 text-[11px] text-slate-500 hover:text-[#002147] font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
-              >
-                <Mail size={13} />
-                <span>{isRtl ? 'الدخول بحساب بريد إلكتروني آخر' : 'Sign in with another email'}</span>
-              </button>
-            ) : (
-              <form onSubmit={handleCustomEmailSubmit} className="pt-2 space-y-2">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="email"
-                    required
-                    value={customEmail}
-                    onChange={(e) => setCustomEmail(e.target.value)}
-                    placeholder="name@example.com"
-                    className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:border-[#002147]"
-                    dir="ltr"
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-[#002147] text-white rounded-xl text-xs font-bold hover:bg-[#001733] transition-colors cursor-pointer shrink-0"
-                  >
-                    {isRtl ? 'متابعة' : 'Go'}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-
         <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-center opacity-60">
           <span className="text-[10px] font-bold text-[#002147] tracking-wider uppercase">
             {isRtl ? 'أكاديمية باسم الخليل الرقمية' : 'Basim Al Khalil Digital Academy'}
@@ -324,27 +233,16 @@ export default function App() {
     }));
   };
 
-  const handleAuthenticate = (email: string, role: UserRole, displayName?: string) => {
-    const isMasterAdmin = role === UserRole.ADMIN || email.toLowerCase() === 'basim5252@gmail.com';
-    const mockUid = isMasterAdmin ? 'sim_admin_basim' : `sim_student_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
-    const userSession: any = {
-      uid: mockUid,
-      email: email,
-      displayName: displayName || (isMasterAdmin ? 'أ. باسم الخليل' : 'طالب الأكاديمية'),
-      photoURL: null,
-      emailVerified: true
-    };
-    localStorage.setItem('academy_active_user', JSON.stringify(userSession));
-    setCurrentUser(userSession);
-  };
-
   useEffect(() => {
     // 1. Check local persistent session storage first
     const savedUserRaw = localStorage.getItem('academy_active_user');
     if (savedUserRaw) {
       try {
         const savedUser = JSON.parse(savedUserRaw);
-        if (savedUser && savedUser.email) {
+        // Fake "direct access" sessions (sim_*) are no longer allowed: clear them so the real login shows.
+        if (savedUser && typeof savedUser.uid === 'string' && savedUser.uid.startsWith('sim_')) {
+          localStorage.removeItem('academy_active_user');
+        } else if (savedUser && savedUser.email) {
           setCurrentUser(savedUser);
           setLoading(false);
         }
@@ -420,7 +318,6 @@ export default function App() {
         lang={lang} 
         onToggleLang={() => setLang(l => l === 'ar' ? 'en' : 'ar')} 
         onBackToLanding={() => setShowAuthScreen(false)}
-        onAuthenticate={handleAuthenticate} 
         onGoogleSuccess={handleGoogleSuccess}
       />
     );
