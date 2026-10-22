@@ -23,7 +23,10 @@ const strip = (line: string) => line.replace(/^[^:]{1,20}:\s*/, '').trim();
 
 const toListening = (src: SaraCurriculumLesson[], level: 'a' | 'b', start: number): SaraListeningLesson[] => src.map((l, i) => {
   const lines = l.listeningTask!.script.split('\n').map(s => s.trim()).filter(Boolean);
-  const spoken = lines.map(strip).map(x => x.replace(/[↗↘→←↑↓]/g, '').replace(/\/[^/]+\//g, '').replace(/_/g, ' ').replace(/\s+/g, ' ').replace(/ ([.,?!])/g, '$1').trim()).filter(Boolean);
+  const spoken = lines.map(strip).map(x => x.replace(/[↗↘→←↑↓]/g, '').replace(/\/[^/]+\//g, m => (/\s/.test(m.slice(1, -1)) && !/[ɡʊəɪˈʒɔθðʃŋæɑʌɜː]/.test(m) ? m : '')).replace(/(\w)\([a-z]\)(?=\w)/g, '$1 ').replace(/\s\/+(?=\s|$)/g, ' ').replace(/\b[A-Z]{3,}\b/g, w => (/ \/ /.test(l.listeningTask!.script) ? w.toLowerCase() : w)).replace(/_/g, ' ').replace(/\s+/g, ' ').replace(/ ([.,?!])/g, '$1').trim()).filter(Boolean);
+  // Signboards written in capitals: say the words normally (keep codes like HHR, KAEC).
+  const shouty = (l.listeningTask!.script.match(/[A-Z]/g) || []).length > 0.3 * (l.listeningTask!.script.match(/[A-Za-z]/g) || []).length;
+  if (shouty) spoken.forEach((x, k) => { spoken[k] = x.replace(/\b([A-Z])([A-Z]+)\b/g, (w, a, b) => (/[AEIOU]/.test(w) && w !== 'KAEC' ? a + b.toLowerCase() : w)); });
   const dictation = [...spoken].filter(s => s.split(/\s+/).length >= 3).sort((a, b) => a.length - b.length)[0] || spoken[0];
   return { id: `listen-${level}-${String(i + 1).padStart(2, '0')}`, order: start + i, levelId: level, titleAr: l.titleAr, titleEn: l.titleEn, cefr: l.cefr,
     audioText: spoken.join(' '), scriptLines: lines, questions: l.listeningTask!.questions.slice(0, 3), dictation };
