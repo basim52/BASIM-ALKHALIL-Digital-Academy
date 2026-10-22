@@ -103,3 +103,5 @@ export const useLessonView = <T extends LessonLike>(l: T | null, lang: ExplainLa
 /** Tiny i18n helper for hard-coded Arabic UI strings: t('عربي', 'English'). Re-renders on the ع/EN switch. */
 export const useT = () => { const [l] = useExplainLang(); return (ar: string, en: string) => (l === 'en' ? en : ar); };
 export const isEn = () => getExplainLang() === 'en';
+/** Non-hook variant for small child components whose parent already re-renders on the switch. */
+export const L = (ar: string, en: string) => (getExplainLang() === 'en' ? en : ar);

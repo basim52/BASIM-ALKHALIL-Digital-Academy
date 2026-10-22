@@ -1,5 +1,5 @@
 import ExplainLangToggle from './ExplainLangToggle';
-import { useExplainLang, useLessonView, englishLessonAsync } from '../lib/explainLang';
+import { useExplainLang, useLessonView, englishLessonAsync, L } from '../lib/explainLang';
 import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { X, ArrowRight, Lock, Volume2, Square, CheckCircle2, Mic, Send } from 'lucide-react';
 import { auth } from '../lib/firebase';
@@ -236,19 +236,19 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
         })
       });
       const data = await res.json();
-      const reply: string = data?.reply || 'ما قدرت أجاوب الحين، جرّب مرة ثانية 🌸';
+      const reply: string = data?.reply || L('ما قدرت أجاوب الحين، جرّب مرة ثانية 🌸', 'I could not answer right now, please try again 🌸');
       setAskReply(reply); setAskText('');
       setSpeaking(true);
       if (data?.audio) await playB64(data.audio);
       else { const said = boardLinesToSpeech([reply]); const b64 = await prefetchAcademyAudio(said, lang, 'Kore'); if (b64) await playB64(b64); }
       setSpeaking(false);
     } catch {
-      setAskReply('صار خطأ بالاتصال، جرّب مرة ثانية.');
+      setAskReply(L('صار خطأ بالاتصال، جرّب مرة ثانية.', 'Connection error, please try again.'));
     } finally { setAskBusy(false); }
   };
   const startMic = () => {
     const SR: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) { setAskReply('المايك غير مدعوم في هذا المتصفح، اكتب سؤالك.'); return; }
+    if (!SR) { setAskReply(L('المايك غير مدعوم في هذا المتصفح، اكتب سؤالك.', 'The mic is not supported in this browser, please type.')); return; }
     stop();
     const rec = new SR(); rec.lang = 'ar-SA'; rec.interimResults = false;
     rec.onresult = (e: any) => { const t = e.results?.[0]?.[0]?.transcript || ''; setAskText(t); sendAsk(t); };
@@ -290,7 +290,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   const passed = !!lesson?.content && checkPick === lesson.content.check.correctIndex;
 
   return (
-    <div className="fixed inset-0 z-[210] bg-slate-950/60 flex items-stretch justify-center" dir="rtl">
+    <div className="fixed inset-0 z-[210] bg-slate-950/60 flex items-stretch justify-center" dir={lang === "en" ? "ltr" : "rtl"}>
       <div data-testid="sara-track-page" className="relative w-full max-w-xl h-[100dvh] bg-[#fdfaf3] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="shrink-0 flex items-center gap-2 px-3 py-2 bg-[#002147] text-white">
@@ -298,8 +298,8 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
             <button onClick={() => { stop(); setLessonId(null); setTest(null); }} className="p-1.5 rounded-lg hover:bg-white/10" aria-label="back"><ArrowRight size={18} /></button>
           ) : <span className="text-lg">📚</span>}
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] text-amber-300 font-bold truncate">{track.titleAr}</p>
-            <p className="text-sm font-black truncate">{lesson ? `${lesson.order}. ${lesson.titleAr}` : test ? `🏁 اختبار نهاية المستوى` : `${track.lessons.length} درس`}</p>
+            <p className="text-[10px] text-amber-300 font-bold truncate">{L(track.titleAr, track.titleEn || track.titleAr)}</p>
+            <p className="text-sm font-black truncate">{lesson ? `${lesson.order}. ${lesson.titleAr}` : test ? `🏁 اختبار نهاية المستوى` : L(`${track.lessons.length} درس`, `${track.lessons.length} lessons`)}</p>
           </div>
           {enLoading && <span className="text-[10px] font-black text-amber-300">EN…</span>}
           <ExplainLangToggle />
@@ -356,8 +356,8 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
         {lesson && !lesson.content && (
           <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
             <p className="text-4xl">🛠️</p>
-            <p className="text-base font-black text-[#002147]">هذا الدرس قيد البناء</p>
-            <button onClick={() => { stop(); setLessonId(null); }} className="px-5 py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">رجوع للدروس</button>
+            <p className="text-base font-black text-[#002147]">{L("هذا الدرس قيد البناء", "This lesson is being built")}</p>
+            <button onClick={() => { stop(); setLessonId(null); }} className="px-5 py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">{L("رجوع للدروس", "Back to lessons")}</button>
           </div>
         )}
 
@@ -366,48 +366,48 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
           <div className="flex-1 min-h-0 flex flex-col gap-1.5 p-2.5 overflow-hidden">
             <div className="flex items-center gap-2">
               <div className={`w-8 h-8 rounded-full bg-[#002147] text-amber-300 border-2 border-amber-400 flex items-center justify-center font-black shrink-0 ${speaking ? 'animate-pulse ring-4 ring-amber-300/60' : ''}`}>س</div>
-              <button onClick={speak} data-testid="sara-explain" className={`px-2 py-1 rounded-xl bg-amber-400 text-slate-950 text-[11px] font-black shrink-0 ${blocked ? 'animate-bounce' : ''}`}>🔊 اشرحي يا سارة</button>
+              <button onClick={speak} data-testid="sara-explain" className={`px-2 py-1 rounded-xl bg-amber-400 text-slate-950 text-[11px] font-black shrink-0 ${blocked ? 'animate-bounce' : ''}`}>🔊 {L("اشرحي يا سارة", "Explain, Sara")}</button>
               {speaking && (
-                <button onClick={togglePause} data-testid="sara-pause" className="px-2 py-1 rounded-xl bg-[#002147] text-white text-[11px] font-black shrink-0">{paused ? '▶️ كملي' : '⏸️ إيقاف مؤقت'}</button>
+                <button onClick={togglePause} data-testid="sara-pause" className="px-2 py-1 rounded-xl bg-[#002147] text-white text-[11px] font-black shrink-0">{paused ? L('▶️ كملي', '▶️ Continue') : L('⏸️ إيقاف مؤقت', '⏸️ Pause')}</button>
               )}
               {failed && !speaking && (
-                <button onClick={speak} data-testid="sara-retry" className="px-2 py-1 rounded-xl bg-rose-100 border border-rose-300 text-rose-700 text-[11px] font-black shrink-0">🔄 إعادة المحاولة</button>
+                <button onClick={speak} data-testid="sara-retry" className="px-2 py-1 rounded-xl bg-rose-100 border border-rose-300 text-rose-700 text-[11px] font-black shrink-0">{L("🔄 إعادة المحاولة", "🔄 Try again")}</button>
               )}
               <span className="flex-1" />
             </div>
             <div className="flex gap-1.5 -mt-0.5">
-              <button onClick={() => { stop(); setAskOpen(true); }} className="flex-1 py-1 rounded-xl bg-white border-2 border-[#002147]/20 text-[#002147] text-[11px] font-black">❓ اسأل سارة</button>
-              <button onClick={() => { stop(); setChatOpen(true); }} data-testid="lesson-free-chat" className="flex-1 py-1 rounded-xl bg-[#002147] border-2 border-[#C49E3A] text-amber-300 text-[11px] font-black">💬 محاورة سارة</button>
+              <button onClick={() => { stop(); setAskOpen(true); }} className="flex-1 py-1 rounded-xl bg-white border-2 border-[#002147]/20 text-[#002147] text-[11px] font-black">{L("❓ اسأل سارة", "❓ Ask Sara")}</button>
+              <button onClick={() => { stop(); setChatOpen(true); }} data-testid="lesson-free-chat" className="flex-1 py-1 rounded-xl bg-[#002147] border-2 border-[#C49E3A] text-amber-300 text-[11px] font-black">{L("💬 محاورة سارة", "💬 Talk with Sara")}</button>
             </div>
             <div className={`rounded-2xl p-2.5 border-2 transition-all ${activeSeg === 1 ? 'ring-4 ring-amber-300/70' : ''} ${useAlt ? 'bg-sky-50 border-sky-300' : 'bg-white border-amber-200'}`}>
-              {useAlt && <p className="text-[11px] font-black text-sky-700 mb-1">سارة تشرحها لك بطريقة ثانية 👇</p>}
+              {useAlt && <p className="text-[11px] font-black text-sky-700 mb-1">{L("سارة تشرحها لك بطريقة ثانية 👇", "Sara explains it another way 👇")}</p>}
               <p className="text-[13px] leading-relaxed font-semibold text-slate-800">{useAlt ? lesson.content.altExplanationAr : lesson.content.explanationAr}</p>
             </div>
             <div className="rounded-2xl p-2.5 bg-[#002147] text-white space-y-1">
-              <p className="text-[10px] font-black text-amber-300">مثال حي</p>
+              <p className="text-[10px] font-black text-amber-300">{L("مثال حي", "Live example")}</p>
               {lesson.content.example.map((e, i) => (
                 <p key={i} className={`text-[13px] leading-snug rounded-lg px-1 ${activeSeg === i + 2 ? 'bg-amber-400/30' : ''}`}><span dir="ltr" className="block font-bold text-start" style={{ direction: 'ltr' }}>{e.en}</span><span className="block text-[11px] text-amber-100/80">{e.ar}</span></p>
               ))}
             </div>
             <div className="rounded-2xl p-2.5 bg-amber-50 border-2 border-amber-300">
               <div className="flex items-center gap-2 mb-1">
-                <p className="text-[10px] font-black text-amber-700">سؤال فهم</p>
+                <p className="text-[10px] font-black text-amber-700">{L("سؤال فهم", "Check question")}</p>
                 <span className="flex-1" />
                 <button onClick={() => { unlockNarrator(); setMode('board'); setBoardReplay(r => r + 1); startNarration(lesson, useAlt); }} data-testid="open-board"
-                  className="px-2 py-0.5 -my-1 rounded-lg bg-[#002147] text-amber-300 border border-[#C49E3A] text-[11px] font-black leading-tight">🧑‍🏫 ارجع للسبورة</button>
+                  className="px-2 py-0.5 -my-1 rounded-lg bg-[#002147] text-amber-300 border border-[#C49E3A] text-[11px] font-black leading-tight">{L("🧑‍🏫 ارجع للسبورة", "🧑‍🏫 Back to the board")}</button>
               </div>
               {passed
-                ? <p className="text-[13px] font-black text-emerald-700">✅ صح! {lesson.content.check.options[lesson.content.check.correctIndex]}</p>
+                ? <p className="text-[13px] font-black text-emerald-700">{L("✅ صح!", "✅ Correct!")} {lesson.content.check.options[lesson.content.check.correctIndex]}</p>
                 : <Choice q={lesson.content.check} picked={checkPick} onPick={answerCheck} locked={passed} />}
             </div>
             {passed && (
               <div className="flex gap-2">
-                <button onClick={() => { stop(); setMode('exercises'); }} className="flex-1 py-2 rounded-xl bg-[#58cc02] text-white text-[13px] font-black">تمارين ({lesson.content.exercises.length}) — اختياري</button>
-                <button onClick={goNext} className="flex-1 py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">✅ الدرس التالي ←</button>
+                <button onClick={() => { stop(); setMode('exercises'); }} className="flex-1 py-2 rounded-xl bg-[#58cc02] text-white text-[13px] font-black">{L(`تمارين (${lesson.content.exercises.length}) — اختياري`, `Exercises (${lesson.content.exercises.length}), optional`)}</button>
+                <button onClick={goNext} className="flex-1 py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">{L("✅ الدرس التالي ←", "✅ Next lesson →")}</button>
               </div>
             )}
             {passed && track.id === 'conversation_v2' && (
-              <button onClick={() => { stop(); setMode('sentences'); }} data-testid="open-sentence-builder" className="w-full py-2 rounded-xl bg-white border-2 border-[#C49E3A] text-[#002147] text-[13px] font-black">🧩 ابنِ جملك — 5 بطاقات</button>
+              <button onClick={() => { stop(); setMode('sentences'); }} data-testid="open-sentence-builder" className="w-full py-2 rounded-xl bg-white border-2 border-[#C49E3A] text-[#002147] text-[13px] font-black">{L("🧩 ابنِ جملك — 5 بطاقات", "🧩 Build your sentences, 5 cards")}</button>
             )}
           </div>
         )}
@@ -439,7 +439,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                 <div className="shrink-0 flex gap-2">
                   <button data-testid="level-test-retry" onClick={() => { const lv = levels.find(v => v.id === test.levelId); if (lv) startTest(lv); }} className="flex-1 py-2 rounded-xl bg-amber-400 text-slate-950 text-[13px] font-black">🔁 إعادة الاختبار</button>
                   {r.passed && <button data-testid="level-test-cert" onClick={() => setCert({ unitId: `${track.id}:${test.levelId}`, unitTitle: `${track.titleAr} — ${test.levelTitleAr} (${r.score}%)`, unitTitleAr: `${track.titleAr} — ${test.levelTitleAr} (${r.score}%)`, completedAt: r.createdAtMs, studentName: auth.currentUser?.displayName || undefined })} className="flex-1 py-2 rounded-xl bg-[#C49E3A] text-[#002147] text-[13px] font-black">🎓 شهادتي</button>}
-                  <button onClick={() => setTest(null)} className="flex-1 py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">رجوع للدروس</button>
+                  <button onClick={() => setTest(null)} className="flex-1 py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">{L("رجوع للدروس", "Back to lessons")}</button>
                 </div>
               </div>
             );
@@ -479,25 +479,25 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
         {lesson?.content && mode === 'board' && (
           <div data-testid="lesson-board" className="flex-1 min-h-0 flex flex-col gap-2 p-2 overflow-hidden bg-[#001a38]">
             <div className="shrink-0 flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-amber-400 text-[#001a38]">👩‍💼 سارة على السبورة</span>
-              {speaking && <button onClick={togglePause} data-testid="sara-board-pause" className="px-2 py-0.5 rounded-lg bg-white/10 text-white text-[11px] font-black">{paused ? '▶️ كملي' : '⏸️ إيقاف مؤقت'}</button>}
-              {failed && !speaking && <button onClick={() => { setBoardReplay(r => r + 1); speak(); }} className="px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 text-[11px] font-black">🔄 إعادة المحاولة</button>}
-              {blocked && !speaking && <span className="text-[10px] font-bold text-white/70">اضغط 🔊 فوق</span>}
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-amber-400 text-[#001a38]">{L("👩‍💼 سارة على السبورة", "👩‍💼 Sara on the board")}</span>
+              {speaking && <button onClick={togglePause} data-testid="sara-board-pause" className="px-2 py-0.5 rounded-lg bg-white/10 text-white text-[11px] font-black">{paused ? L('▶️ كملي', '▶️ Continue') : L('⏸️ إيقاف مؤقت', '⏸️ Pause')}</button>}
+              {failed && !speaking && <button onClick={() => { setBoardReplay(r => r + 1); speak(); }} className="px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 text-[11px] font-black">{L("🔄 إعادة المحاولة", "🔄 Try again")}</button>}
+              {blocked && !speaking && <span className="text-[10px] font-bold text-white/70">{L("اضغط 🔊 فوق", "Tap 🔊 above")}</span>}
             </div>
             <div className="flex-1 min-h-0">
-              <Suspense fallback={<div className="w-full h-full rounded-2xl border-2 border-amber-400/60 bg-[#0a2d5c] flex items-center justify-center text-[12px] font-bold text-amber-200">جاري فتح السبورة…</div>}>
+              <Suspense fallback={<div className="w-full h-full rounded-2xl border-2 border-amber-400/60 bg-[#0a2d5c] flex items-center justify-center text-[12px] font-bold text-amber-200">{L("جاري فتح السبورة…", "Opening the board…")}</div>}>
                 <TutorTldrawBoard key={lesson.id + (useAlt ? '-alt' : '')} calls={boardCalls} personaId="sara" lessonTitle={`${lesson.titleEn} (${lesson.titleAr})`} speaking={speaking}
                   replayKey={boardReplay} onSpeak={() => { unlockNarrator(); setBoardReplay(r => r + 1); startNarration(lesson, useAlt); }} />
               </Suspense>
             </div>
-            <button data-testid="board-to-check" onClick={() => { stop(); setMode('learn'); }} className="shrink-0 w-full py-2.5 rounded-xl bg-amber-400 text-[#001a38] text-[14px] font-black">{passed ? 'رجوع للدرس ←' : 'سؤال الفهم ←'}</button>
+            <button data-testid="board-to-check" onClick={() => { stop(); setMode('learn'); }} className="shrink-0 w-full py-2.5 rounded-xl bg-amber-400 text-[#001a38] text-[14px] font-black">{passed ? L('رجوع للدرس ←', 'Back to the lesson →') : L('سؤال الفهم ←', 'Check question →')}</button>
           </div>
         )}
 
         {lesson?.content && mode === 'sentences' && track.id === 'conversation_v2' && (
           <SaraSentenceBuilder trackId={track.id} lessonId={lesson.id} uid={uid} titleAr={lesson.titleAr} titleEn={lesson.titleEn} level={lesson.levelId} examples={lesson.content.example}
-            doneLabel="رجوع للدرس" onDone={() => setMode('learn')}
-            talkSlot={sentences => <SaraLessonCall uid={uid} level={lesson.levelId === 'b1' ? 'B1' : lesson.levelId === 'b2' ? 'B2' : lesson.levelId === 'c1' ? 'C1' : lesson.levelId === 'c2' ? 'C2' : 'A2'} label="تحدّث مع سارة"
+            doneLabel={L("رجوع للدرس", "Back to the lesson")} onDone={() => setMode('learn')}
+            talkSlot={sentences => <SaraLessonCall uid={uid} level={lesson.levelId === 'b1' ? 'B1' : lesson.levelId === 'b2' ? 'B2' : lesson.levelId === 'c1' ? 'C1' : lesson.levelId === 'c2' ? 'C2' : 'A2'} label={L("تحدّث مع سارة", "Talk with Sara")}
               preset={lessonCallPreset({ id: `${lesson.id}-sentences`, titleAr: lesson.titleAr, titleEn: lesson.titleEn, kind: 'conversation', tag: 'conversation', phrases: sentences,
                 starter: `Great! Let's talk and use your sentences. You built: ${sentences.slice(0, 2).join(' ')} Can you say one of your sentences to me?` })} />} />
         )}
@@ -507,25 +507,25 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
           <div className="flex-1 min-h-0 flex flex-col gap-3 p-3 overflow-hidden">
             {exIdx < lesson.content.exercises.length ? (
               <>
-                <p className="text-[11px] font-black text-slate-500">تمرين {exIdx + 1} من {lesson.content.exercises.length}</p>
+                <p className="text-[11px] font-black text-slate-500">{L('تمرين', 'Exercise')} {exIdx + 1} {L('من', 'of')} {lesson.content.exercises.length}</p>
                 <div className="rounded-2xl p-3 bg-white border-2 border-amber-200">
                   <Choice q={lesson.content.exercises[exIdx]} picked={exPick} locked={exPick !== null}
                     onPick={i => { setExPick(i); if (i === lesson.content!.exercises[exIdx].correctIndex) setExScore(s => s + 1); }} />
                 </div>
                 {exPick !== null && (
-                  <button onClick={() => { setExIdx(i => i + 1); setExPick(null); }} className="py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">التالي</button>
+                  <button onClick={() => { setExIdx(i => i + 1); setExPick(null); }} className="py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">{L("التالي", "Next")}</button>
                 )}
               </>
             ) : (
               <div className="rounded-2xl p-4 bg-white border-2 border-emerald-300 text-center space-y-2">
                 <p className="text-2xl">🌟</p>
-                <p className="text-sm font-black text-slate-800">نتيجتك: {exScore} من {lesson.content.exercises.length}</p>
+                <p className="text-sm font-black text-slate-800">{L('نتيجتك:', 'Your score:')} {exScore} {L('من', 'of')} {lesson.content.exercises.length}</p>
                 {CALL_TRACKS[track.id] && <SaraLessonCall uid={uid}
                   preset={lessonCallPreset({ id: lesson.id, titleAr: lesson.titleAr, titleEn: lesson.titleEn, kind: CALL_TRACKS[track.id], tag: CALL_TRACKS[track.id],
                     phrases: [...new Set(lesson.content.example.flatMap(e => e.en.replace(/\b[AB]:\s*/g, '\n').split(/\n|(?<=[.!?])\s+/)).map(x => x.trim()).filter(x => x.length > 3 && x.split(/\s+/).length <= 9))].slice(0, 4),
                     starter: `Let's practise "${lesson.titleEn}" in a real conversation. ${lesson.content.example[0]?.en || ''} Now you try — what would you say?` })} />}
-                <button onClick={goNext} className="w-full py-2 rounded-xl bg-[#58cc02] text-white text-[14px] font-black">الدرس التالي ←</button>
-                <button onClick={() => { stop(); setLessonId(null); }} className="w-full py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">رجوع للدروس</button>
+                <button onClick={goNext} className="w-full py-2 rounded-xl bg-[#58cc02] text-white text-[14px] font-black">{L("الدرس التالي ←", "Next lesson →")}</button>
+                <button onClick={() => { stop(); setLessonId(null); }} className="w-full py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">{L("رجوع للدروس", "Back to lessons")}</button>
               </div>
             )}
           </div>
@@ -537,16 +537,16 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
             <div className="w-full max-h-[60%] bg-white rounded-t-3xl p-3 flex flex-col gap-2 shadow-2xl" onClick={e => e.stopPropagation()}>
               <div className="flex items-center gap-2">
                 <div className={`w-8 h-8 rounded-full bg-[#002147] text-amber-300 flex items-center justify-center font-black ${speaking ? 'animate-pulse ring-4 ring-amber-300/60' : ''}`}>س</div>
-                <p className="flex-1 text-[13px] font-black text-[#002147] truncate">اسأل سارة عن: {lesson.titleAr}</p>
+                <p className="flex-1 text-[13px] font-black text-[#002147] truncate">{L("اسأل سارة عن:", "Ask Sara about:")} {lesson.titleAr}</p>
                 <button onClick={() => { stop(); setAskOpen(false); }} className="p-1 rounded-lg text-slate-500" aria-label="close"><X size={16} /></button>
               </div>
               <div className="flex-1 min-h-[60px] overflow-y-auto rounded-2xl bg-slate-50 border p-2.5 text-[13px] leading-relaxed text-slate-800">
-                {askBusy ? 'سارة تفكر… 🤔' : askReply || 'اكتب سؤالك أو اضغط المايك وتكلم 🎙️'}
+                {askBusy ? L('سارة تفكر… 🤔', 'Sara is thinking… 🤔') : askReply || L('اكتب سؤالك أو اضغط المايك وتكلم 🎙️', 'Type your question or tap the mic and speak 🎙️')}
               </div>
               <div className="flex items-center gap-2">
                 <button onClick={startMic} disabled={askBusy} className={`p-2.5 rounded-xl text-white ${listening ? 'bg-rose-500 animate-pulse' : 'bg-[#002147]'}`} aria-label="mic"><Mic size={16} /></button>
                 <input value={askText} onChange={e => setAskText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') sendAsk(askText); }}
-                  placeholder="سؤالك عن الدرس…" className="flex-1 min-w-0 px-3 py-2 rounded-xl border-2 border-slate-200 text-[13px]" />
+                  placeholder={L("سؤالك عن الدرس…", "Your question about the lesson…")} className="flex-1 min-w-0 px-3 py-2 rounded-xl border-2 border-slate-200 text-[13px]" />
                 <button onClick={() => sendAsk(askText)} disabled={askBusy || !askText.trim()} className="p-2.5 rounded-xl bg-[#58cc02] text-white disabled:opacity-50" aria-label="send"><Send size={16} /></button>
               </div>
             </div>

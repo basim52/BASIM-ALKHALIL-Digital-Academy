@@ -117,7 +117,7 @@ export const TutorConversation: React.FC<{ persona: BoardPersona; level?: string
       <div className="flex items-center gap-2 shrink-0">
         <button onClick={() => { stopAudio(); onBack(); }} aria-label={tr("رجوع", "Back")} className="p-1.5 rounded-lg bg-white/10"><ArrowRight size={16} /></button>
         <span className={`w-9 h-9 rounded-full bg-[#0a2d5c] border-2 border-[#C49E3A] flex items-center justify-center text-[18px] ${speaking ? 'ring-4 ring-amber-300/50 animate-pulse' : ''}`}>{persona.emoji}</span>
-        <div className="min-w-0 flex-1"><p className="text-[13px] font-black text-amber-300">{tr('محاورة', 'Talk with')} {NM}</p><p className="text-[10px] font-bold text-white/70 truncate">{lesson ? tr(lesson.titleAr, lesson.titleEn) : tr(persona.roleAr, persona.nameEn)} · {tr(persona.gender === 'female' ? 'ترد بصوتها' : 'يرد بصوته', 'replies in their own voice')}</p></div>
+        <div className="min-w-0 flex-1"><p className="text-[13px] font-black text-amber-300">{tr('محاورة', 'Talk with')} {NM}</p><p className="text-[10px] font-bold text-white/70 truncate">{lesson ? tr(lesson.titleAr, lesson.titleEn) : tr(persona.roleAr, persona.roleEn || persona.nameEn)} · {tr(persona.gender === 'female' ? 'ترد بصوتها' : 'يرد بصوته', 'replies in their own voice')}</p></div>
         {speaking
           ? <button onClick={stopAudio} className="px-2.5 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[11px] font-black"><Square size={12} className="inline" /> {tr("إيقاف", "Stop")}</button>
           : <button onClick={() => void speakStarter()} data-testid="tutor-talk-listen" className="px-2.5 py-1.5 rounded-xl bg-white/10 border border-amber-400/50 text-[11px] font-black">🔊 {tr("البداية", "Start")}</button>}

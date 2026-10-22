@@ -1,3 +1,4 @@
+import { L, useT } from '../lib/explainLang';
 import { getExplainLang } from '../lib/explainLang';
 import ExplainLangToggle from './ExplainLangToggle';
 import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
@@ -42,9 +43,9 @@ const boardSpeech = (b: BoardResult) => b.boardActions.map(a =>
 const VoiceBtn: React.FC<{ v: ReturnType<typeof usePersonaVoice>; text: string; p: BoardPersona }> = ({ v, text, p }) => (
   <div className="flex items-center gap-2 shrink-0">
     {v.state === 'loading' || v.state === 'playing'
-      ? <button onClick={v.stop} data-testid="board-voice-stop" className="px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Square size={13} className="inline" /> إيقاف</button>
-      : <button onClick={() => void v.play(text, p.voice)} data-testid="board-voice-play" className="px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Volume2 size={13} className="inline" /> {v.state === 'failed' ? 'إعادة المحاولة' : `استمع لـ${p.nameAr}`}</button>}
-    {v.state === 'failed' && <span className="text-[10px] text-rose-300 font-bold">الصوت غير متاح الآن</span>}
+      ? <button onClick={v.stop} data-testid="board-voice-stop" className="px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Square size={13} className="inline" /> {L("إيقاف", "Stop")}</button>
+      : <button onClick={() => void v.play(text, p.voice)} data-testid="board-voice-play" className="px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Volume2 size={13} className="inline" /> {v.state === 'failed' ? L('إعادة المحاولة', 'Try again') : L(`استمع لـ${p.nameAr}`, `Listen to ${p.nameEn}`)}</button>}
+    {v.state === 'failed' && <span className="text-[10px] text-rose-300 font-bold">{L("الصوت غير متاح الآن", "Audio is not available right now")}</span>}
   </div>
 );
 
@@ -59,6 +60,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
   const [picked, setPicked] = useState<number | null>(null);
   const [correct, setCorrect] = useState(0);
   const [saved, setSaved] = useState<'no' | 'ok' | 'fail'>('no');
+  useT(); // re-render on the ع/EN switch
   const voice = usePersonaVoice();
   const [track, setTrack] = useState<TutorTrack | null>(null);
   const [saraHub, setSaraHub] = useState(false);
@@ -69,10 +71,10 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
     setBusy(true); setErr('');
     try {
       const r = await fetch('/api/sara/board', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ persona: persona.id, topic: t, lang: getExplainLang() }) });
-      if (r.status === 429) { setErr('وصلت الحد المؤقت للسبورة، جرّب بعد شوي.'); return; }
+      if (r.status === 429) { setErr(L('وصلت الحد المؤقت للسبورة، جرّب بعد شوي.', 'Board limit reached for now, try again later.')); return; }
       if (!r.ok) throw new Error(String(r.status));
       setBoard(await r.json()); setQi(0); setPicked(null); setCorrect(0); setSaved('no'); setStep('board');
-    } catch { setErr(`${persona.nameAr} مشغول الحين، جرّب بعد شوي.`); }
+    } catch { setErr(L(`${persona.nameAr} مشغول الحين، جرّب بعد شوي.`, `${persona.nameEn} is busy right now, try again later.`)); }
     finally { setBusy(false); }
   };
 
@@ -93,14 +95,14 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
   const personaTrack = TUTOR_TRACKS.find(t => t.personaId === persona.id);
 
   if (step === 'pick') return shell(<>
-    <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[11px] text-amber-200/90 font-bold">اختر المعلم واكتب وش تبي تتعلم، ويشرحه لك على السبورة.</p><ExplainLangToggle /></div>
+    <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[11px] text-amber-200/90 font-bold">{L("اختر المعلم واكتب وش تبي تتعلم، ويشرحه لك على السبورة.", "Pick a teacher and type what you want to learn; they explain it on the board.")}</p><ExplainLangToggle /></div>
     <div className="grid grid-cols-4 gap-1.5 shrink-0">
       {BOARD_PERSONAS.map(p => (
         <button key={p.id} data-testid={`board-persona-${p.id}`} onClick={() => { setPersona(p); if (p.id === 'sara' && !mock) { voice.stop(); setSaraHub(true); } }}
           className={`rounded-xl border p-2 flex flex-col items-center gap-0.5 ${persona.id === p.id ? 'bg-amber-400 text-[#001a38] border-amber-300' : 'bg-[#0a2d5c] border-white/10'}`}>
           <span className="text-[22px] leading-none">{p.emoji}</span>
-          <span className="text-[13px] font-black">{p.nameAr}</span>
-          <span className={`text-[9px] font-bold text-center leading-tight ${persona.id === p.id ? 'text-[#001a38]/80' : 'text-white/70'}`}>{p.roleAr}</span>
+          <span className="text-[13px] font-black">{L(p.nameAr, p.nameEn)}</span>
+          <span className={`text-[9px] font-bold text-center leading-tight ${persona.id === p.id ? 'text-[#001a38]/80' : 'text-white/70'}`}>{L(p.roleAr, p.roleEn || p.roleAr)}</span>
         </button>
       ))}
     </div>
@@ -115,7 +117,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
       <button onClick={() => { voice.stop(); setSaraHub(true); }} data-testid="sara-curricula-open"
         className="shrink-0 rounded-xl border border-amber-400/60 bg-[#0a2d5c] px-3 py-2 text-start flex items-center gap-2">
         <span className="text-[20px]">📚</span>
-        <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-amber-300">مناهج سارة</span><span className="block text-[11px] font-bold text-white/75 truncate">القواعد · المحادثة · القراءة · الكتابة — على السبورة بصوت سارة</span></span>
+        <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-amber-300">{L("مناهج سارة", "Sara's Curricula")}</span><span className="block text-[11px] font-bold text-white/75 truncate">{L("القواعد · المحادثة · القراءة · الكتابة — على السبورة بصوت سارة", "Grammar · Conversation · Reading · Writing, on the board in Sara's voice")}</span></span>
       </button>
     )}
     {saraHub && <SaraTracksHub isOpen uid={uid} onClose={() => setSaraHub(false)} />}
@@ -123,31 +125,31 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
       <button onClick={() => { voice.stop(); setTrack(personaTrack); }} data-testid="tutor-track-open"
         className="shrink-0 rounded-xl border border-amber-400/60 bg-[#0a2d5c] px-3 py-2 text-start flex items-center gap-2">
         <span className="text-[20px]">📚</span>
-        <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-amber-300">دروس {persona.nameAr}</span><span className="block text-[11px] font-bold text-white/75 truncate">{personaTrack.titleAr} · {personaTrack.lessons.length} درس</span></span>
+        <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-amber-300">{L(`دروس ${persona.nameAr}`, `${persona.nameEn}'s lessons`)}</span><span className="block text-[11px] font-bold text-white/75 truncate">{L(personaTrack.titleAr, personaTrack.titleEn)} · {personaTrack.lessons.length} {L("درس", "lessons")}</span></span>
       </button>
     )}
     <div className="flex-1" />
     <button onClick={() => void ask()} disabled={!topic.trim() || busy} data-testid="board-ask"
-      className="shrink-0 w-full py-3 rounded-xl bg-amber-400 text-[#001a38] text-[15px] font-black disabled:opacity-40">{busy ? `${persona.nameAr} ${persona.gender === 'female' ? 'تجهّز' : 'يجهّز'} السبورة…` : 'اشرح لي على السبورة'}</button>
+      className="shrink-0 w-full py-3 rounded-xl bg-amber-400 text-[#001a38] text-[15px] font-black disabled:opacity-40">{busy ? L(`${persona.nameAr} ${persona.gender === 'female' ? 'تجهّز' : 'يجهّز'} السبورة…`, `${persona.nameEn} is preparing the board…`) : L('اشرح لي على السبورة', 'Explain it on the board')}</button>
   </>);
 
   if (!board) return shell(null);
 
   if (step === 'board') return shell(<>
     <div className="flex items-center justify-between gap-2 shrink-0">
-      <p className="text-[12px] font-black text-amber-300">{persona.emoji} {persona.nameAr} — {persona.roleAr}</p>
+      <p className="text-[12px] font-black text-amber-300">{persona.emoji} {L(persona.nameAr, persona.nameEn)} — {L(persona.roleAr, persona.roleEn || persona.roleAr)}</p>
       <VoiceBtn v={voice} text={boardSpeech(board)} p={persona} />
     </div>
     <div data-testid="board-surface" className="flex-1 min-h-0">
-      <Suspense fallback={<div className="w-full h-full rounded-2xl border-2 border-amber-400/60 bg-[#0a2d5c] flex items-center justify-center text-[12px] font-bold text-amber-200">جاري فتح السبورة…</div>}>
+      <Suspense fallback={<div className="w-full h-full rounded-2xl border-2 border-amber-400/60 bg-[#0a2d5c] flex items-center justify-center text-[12px] font-bold text-amber-200">{L("جاري فتح السبورة…", "Opening the board…")}</div>}>
         <TutorTldrawBoard calls={calls} personaId={persona.id} lessonTitle={topic} speaking={voice.state === 'loading' || voice.state === 'playing'} onSpeak={() => void voice.play(boardSpeech(board), persona.voice)} />
       </Suspense>
     </div>
     {board.explanationAr && <p className="text-[12px] font-bold text-white/85 shrink-0 line-clamp-3">{board.explanationAr}</p>}
     <div className="flex gap-2 shrink-0">
-      <button onClick={() => { voice.stop(); setStep('pick'); }} className="px-3 py-3 rounded-xl bg-white/10 text-[13px] font-black">موضوع ثاني</button>
+      <button onClick={() => { voice.stop(); setStep('pick'); }} className="px-3 py-3 rounded-xl bg-white/10 text-[13px] font-black">{L("موضوع ثاني", "Another topic")}</button>
       <button onClick={() => { voice.stop(); if (board.checks.length) { setQi(0); setPicked(null); setCorrect(0); setStep('check'); } else void finish(0); }} data-testid="board-next"
-        className="flex-1 py-3 rounded-xl bg-amber-400 text-[#001a38] text-[14px] font-black">{board.checks.length ? 'تأكد إنك فهمت' : 'تم'} <ArrowLeft size={14} className="inline" /></button>
+        className="flex-1 py-3 rounded-xl bg-amber-400 text-[#001a38] text-[14px] font-black">{board.checks.length ? L('تأكد إنك فهمت', 'Check you understood') : L('تم', 'Done')} <ArrowLeft size={14} className="inline" /></button>
     </div>
   </>);
 
@@ -155,7 +157,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
     const c = board.checks[qi];
     const last = qi === board.checks.length - 1;
     return shell(<>
-      <p className="text-[11px] font-black text-amber-300 shrink-0">سؤال {qi + 1} من {board.checks.length}</p>
+      <p className="text-[11px] font-black text-amber-300 shrink-0">{L('سؤال', 'Question')} {qi + 1} {L('من', 'of')} {board.checks.length}</p>
       <div className="rounded-xl bg-[#0a2d5c] border border-amber-400/40 p-3 shrink-0"><p dir="ltr" className="text-[15px] font-black text-start">{c.q}</p></div>
       <div className="grid gap-1.5 shrink-0">
         {c.options.map((o, i) => {
@@ -163,10 +165,10 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
           return <button key={i} dir="ltr" data-testid="board-option" disabled={picked !== null} onClick={() => { setPicked(i); if (i === c.correctIndex) setCorrect(n => n + 1); }} className={`px-3 py-2.5 rounded-xl border text-[14px] font-bold text-start ${st}`}>{o}</button>;
         })}
       </div>
-      {picked !== null && <p className={`text-[13px] font-black shrink-0 ${picked === c.correctIndex ? 'text-emerald-300' : 'text-rose-300'}`}>{picked === c.correctIndex ? <><CheckCircle2 size={15} className="inline" /> صح!</> : <><XCircle size={15} className="inline" /> الجواب الصحيح: <span dir="ltr">{c.options[c.correctIndex]}</span></>}</p>}
+      {picked !== null && <p className={`text-[13px] font-black shrink-0 ${picked === c.correctIndex ? 'text-emerald-300' : 'text-rose-300'}`}>{picked === c.correctIndex ? <><CheckCircle2 size={15} className="inline" /> {L("صح!", "Correct!")}</> : <><XCircle size={15} className="inline" /> {L("الجواب الصحيح:", "Correct answer:")} <span dir="ltr">{c.options[c.correctIndex]}</span></>}</p>}
       <div className="flex-1" />
       <button disabled={picked === null} data-testid="board-check-next" onClick={() => { if (last) void finish(correct); else { setQi(qi + 1); setPicked(null); } }}
-        className="shrink-0 w-full py-3 rounded-xl bg-amber-400 text-[#001a38] text-[15px] font-black disabled:opacity-40">{last ? 'النتيجة' : 'التالي'}</button>
+        className="shrink-0 w-full py-3 rounded-xl bg-amber-400 text-[#001a38] text-[15px] font-black disabled:opacity-40">{last ? L('النتيجة', 'Result') : L('التالي', 'Next')}</button>
     </>);
   }
 
@@ -174,13 +176,13 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
   return shell(<>
     <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center">
       <span className="text-[44px]">{persona.emoji}</span>
-      <p className="text-[18px] font-black text-amber-300">{total ? `جاوبت ${correct} من ${total} صح` : 'خلصنا الشرح'}</p>
-      <p className="text-[12px] font-bold text-white/80">{total && correct === total ? 'ممتاز، فهمت الفكرة.' : 'راجع السبورة مرة ثانية إذا تحب.'}</p>
-      {saved === 'fail' && <p className="text-[11px] font-bold text-rose-300">ما انحفظت الجلسة، بس ما يأثر على دروسك.</p>}
+      <p className="text-[18px] font-black text-amber-300">{total ? L(`جاوبت ${correct} من ${total} صح`, `You got ${correct} of ${total} right`) : L('خلصنا الشرح', 'Explanation finished')}</p>
+      <p className="text-[12px] font-bold text-white/80">{total && correct === total ? L('ممتاز، فهمت الفكرة.', 'Excellent, you got the idea.') : L('راجع السبورة مرة ثانية إذا تحب.', 'Review the board again if you like.')}</p>
+      {saved === 'fail' && <p className="text-[11px] font-bold text-rose-300">{L("ما انحفظت الجلسة، بس ما يأثر على دروسك.", "The session was not saved, but your lessons are not affected.")}</p>}
     </div>
     <div className="flex gap-2 shrink-0">
-      <button onClick={() => setStep('board')} className="px-3 py-3 rounded-xl bg-white/10 text-[13px] font-black">رجوع للسبورة</button>
-      <button onClick={() => { setTopic(''); setBoard(null); setStep('pick'); }} data-testid="board-new" className="flex-1 py-3 rounded-xl bg-amber-400 text-[#001a38] text-[14px] font-black">موضوع جديد</button>
+      <button onClick={() => setStep('board')} className="px-3 py-3 rounded-xl bg-white/10 text-[13px] font-black">{L("رجوع للسبورة", "Back to the board")}</button>
+      <button onClick={() => { setTopic(''); setBoard(null); setStep('pick'); }} data-testid="board-new" className="flex-1 py-3 rounded-xl bg-amber-400 text-[#001a38] text-[14px] font-black">{L("موضوع جديد", "New topic")}</button>
     </div>
   </>);
 };
