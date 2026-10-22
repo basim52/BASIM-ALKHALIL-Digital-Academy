@@ -286,7 +286,7 @@ export const SaraParentInsightsModal: React.FC<SaraParentInsightsModalProps> = (
           {/* TAB 1: WEEKLY DIGEST */}
           {activeTab === 'digest' && (
             <div className="space-y-4">
-              {studentUid && <SaraProgressPanel uid={studentUid} compact />}
+              {studentUid && <SaraProgressPanel uid={studentUid} compact pickChild />}
               <div className="p-4 rounded-3xl bg-slate-800/80 border border-emerald-400/30 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-black text-emerald-300 flex items-center gap-1.5">

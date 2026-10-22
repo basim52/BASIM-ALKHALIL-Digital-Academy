@@ -47,6 +47,7 @@ import {
 } from 'lucide-react';
 import { db, auth } from '../../lib/firebase';
 import { SaraProgressPanel } from '../SaraProgressPanel';
+import { LinkedChildPicker } from '../LinkedChildPicker';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { Language } from '../../lib/translations';
 import { toPng } from 'html-to-image';
@@ -71,11 +72,16 @@ interface SmartAnalyticsProps {
 export const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({
   lang,
   onBack,
-  studentName = 'الطالب المتميز',
-  studentId = 'student_001',
+  studentName: studentNameProp = 'الطالب المتميز',
+  studentId: studentIdProp = 'student_001',
   level = 'B1',
   onNavigateToSection
 }) => {
+  // Parents pick which linked child to view (defaults to the first child); everything below follows the pick.
+  const [studentId, setStudentId] = useState(studentIdProp);
+  const [pickedName, setPickedName] = useState('');
+  useEffect(() => { setStudentId(studentIdProp); setPickedName(''); }, [studentIdProp]);
+  const studentName = pickedName || studentNameProp;
   const [currentLang, setCurrentLang] = useState<Language>(lang);
   const isRtl = currentLang === 'ar';
   const reportRef = useRef<HTMLDivElement>(null);
@@ -342,6 +348,7 @@ export const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({
         </div>
       </div>
 
+      <LinkedChildPicker value={studentId} onChange={(u, n) => { setStudentId(u); setPickedName(n); }} />
       {studentId && !studentId.startsWith('sim_') && !isDemoMode && <SaraProgressPanel uid={studentId} />}
 
       {/* Demo Mode Alert Banner */}

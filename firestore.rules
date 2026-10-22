@@ -97,7 +97,12 @@ service cloud.firestore {
     match /users/{userId} {
       // Read: Owner, linked parent, or admin ONLY (no blanket read for all signed-in users)
       allow get: if isOwner(userId) || isParentOf(userId) || isAdmin();
-      allow list: if isAdmin();
+      // List: admin, or a linked parent querying ONLY their own children (query must filter parentIds/linkedParentIds
+      // array-contains auth.uid; both fields are server-only, every returned doc must name the caller as parent).
+      allow list: if isAdmin() || (isSignedIn() && (
+        ('parentIds' in resource.data && resource.data.parentIds is list && request.auth.uid in resource.data.parentIds) ||
+        ('linkedParentIds' in resource.data && resource.data.linkedParentIds is list && request.auth.uid in resource.data.linkedParentIds)
+      ));
 
       // Create: Owner cannot self-assign admin role or set credit/balance/points/link fields. Only student/parent or no role.
       allow create: if isOwner(userId) && (

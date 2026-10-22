@@ -2,10 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { L, useExplainLang } from '../lib/explainLang';
 import { loadSaraReport, type SaraReport, type TrackRow } from '../lib/saraReportData';
 import { personaById } from '../data/saraBoardPersonas';
+import { LinkedChildPicker } from './LinkedChildPicker';
 
 /** Sara + Teachers' Class progress (real stored data only), navy/gold. Used in the parent report and progress analytics. */
 const GOLD = '#C49E3A';
-export const SaraProgressPanel: React.FC<{ uid: string; compact?: boolean }> = ({ uid, compact = false }) => {
+export const SaraProgressPanel: React.FC<{ uid: string; compact?: boolean; pickChild?: boolean }> = ({ uid: uidProp, compact = false, pickChild = false }) => {
+  const [picked, setPicked] = useState(uidProp); useEffect(() => setPicked(uidProp), [uidProp]);
+  const uid = pickChild ? picked : uidProp;
+  const picker = pickChild ? <LinkedChildPicker value={picked} onChange={u => setPicked(u)} className="mb-2" /> : null;
   const [lang] = useExplainLang(); const en = lang === 'en';
   const [d, setD] = useState<SaraReport | null | undefined>(undefined);
   useEffect(() => { let alive = true; setD(undefined); void loadSaraReport(uid).then(r => { if (alive) setD(r); }); return () => { alive = false; }; }, [uid]);
@@ -31,13 +35,14 @@ export const SaraProgressPanel: React.FC<{ uid: string; compact?: boolean }> = (
     </div>
   );
   const box = 'rounded-3xl bg-[#001a38] border border-[#C49E3A]/40 p-3 text-white';
-  if (d === undefined) return <div data-testid="sara-progress-panel" className={box}><p className="text-[12px] font-bold text-white/70">{L('جاري تحميل تقدم سارة والمعلمين…', 'Loading Sara and teachers progress…')}</p></div>;
+  if (d === undefined) return <div data-testid="sara-progress-panel" className={box}>{picker}<p className="text-[12px] font-bold text-white/70">{L('جاري تحميل تقدم سارة والمعلمين…', 'Loading Sara and teachers progress…')}</p></div>;
   if (d === null) return null;
   const started = (rows: TrackRow[]) => rows.filter(r => r.passed > 0);
   const saraRows = started(d.sara), tutorRows = started(d.tutors);
   const acc = d.board.total ? Math.round((d.board.correct / d.board.total) * 100) : null;
   return (
     <section data-testid="sara-progress-panel" dir={en ? 'ltr' : 'rtl'} className={box}>
+      {picker}
       <div className="flex items-center justify-between gap-2 mb-2">
         <p className="text-[13px] font-black">{L('👩‍💼 تقدم سارة وفصل المعلمين', "👩‍💼 Sara & Teachers' Class progress")}</p>
         <span className="text-[10px] font-bold text-white/60">{L('بيانات حقيقية محفوظة فقط', 'Real saved data only')}</span>

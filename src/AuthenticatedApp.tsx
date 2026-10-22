@@ -107,6 +107,7 @@ const ReadingLesson = lazy(() => import('./components/ReadingLesson').then(m => 
 const EarlyChildhoodHome = lazy(() => import('./components/EarlyChildhood/EarlyChildhoodHome').then(m => ({ default: m.EarlyChildhoodHome })));
 const StudyPlanner = lazy(() => import('./components/Academic/StudyPlanner').then(m => ({ default: m.StudyPlanner })));
 const ResultsChart = lazy(() => import('./components/Academic/ResultsChart').then(m => ({ default: m.ResultsChart })));
+import { loadLinkedChildIds } from './lib/linkedChildren';
 const SmartAnalytics = lazy(() => import('./components/Academic/SmartAnalytics').then(m => ({ default: m.SmartAnalytics })));
 const BiWeeklyTest = lazy(() => import('./components/Academic/BiWeeklyTest').then(m => ({ default: m.BiWeeklyTest })));
 import { ReadingCurriculumCompanion, ReadingLevel, ALL_READING_UNITS } from './components/ReadingCurriculumCompanion';
@@ -2993,13 +2994,8 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
       console.warn("Notice: reading user doc skipped or unavailable:", e);
     }
     
-    const studentIds: string[] = [];
-    if (userData?.linkedStudentIds && Array.isArray(userData.linkedStudentIds)) {
-      studentIds.push(...userData.linkedStudentIds);
-    } else if (userData?.linkedStudentId) {
-      // Migration: convert single ID to array
-      studentIds.push(userData.linkedStudentId);
-    }
+    // Union of every linking field (parent: linkedStudentIds/linkedStudentId/childrenIds; child: parentIds/linkedParentIds/parentId)
+    const studentIds: string[] = await loadLinkedChildIds(profile.uid, userData || {});
 
     const students: any[] = [];
     if (studentIds.length > 0) {
@@ -3039,7 +3035,8 @@ const ParentDashboard = ({ lang, profile, onStudentSelect, onNavigate }: { lang:
 
     const allStudentsInList = [selfStudent, ...students];
     setLinkedStudents(allStudentsInList);
-    setSelectedStudentIndex(prev => (prev === null ? 0 : Math.min(prev, allStudentsInList.length - 1)));
+    // Parents land on their first child (not their own study profile)
+    setSelectedStudentIndex(prev => (prev === null ? (students.length ? 1 : 0) : Math.min(prev, allStudentsInList.length - 1)));
     setLoading(false);
   };
 
