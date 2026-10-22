@@ -1,3 +1,4 @@
+import { setExplainLang } from '../lib/explainLang';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { MessageCircle, 
   ArrowRight, 
@@ -545,7 +546,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             type="button"
             onClick={() => setSaraTool('board')}
             data-testid={where === 'desk' ? 'sara-board-tool-desk' : 'sara-board-tool'}
-            aria-label="فصل المعلمين"
+            aria-label={isRtl ? "فصل المعلمين" : "Teachers' Class"}
             className={`group relative ${where === 'desk' ? 'hidden lg:block flex-1 min-w-[340px] self-stretch' : 'lg:hidden w-full basis-full order-last mt-1'} overflow-hidden rounded-2xl border border-[#C49E3A]/70 bg-gradient-to-l from-[#001a38] via-[#002147] to-[#0a2d5c] px-3 py-2.5 sm:px-4 sm:py-3 text-start shadow-md hover:shadow-lg hover:border-[#C49E3A] transition-all active:scale-[0.99] cursor-pointer`}
           >
             <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-l from-transparent via-[#C49E3A] to-transparent" />
@@ -554,13 +555,13 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               <span className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 rounded-full border-2 border-[#C49E3A] bg-[#001a38] flex items-center justify-center text-[18px] sm:text-[20px] shadow-inner">🧑‍🏫</span>
               <span className="min-w-0 flex-1">
                 <span className="flex items-center gap-2">
-                  <span className="text-[15px] sm:text-[16px] font-black text-amber-300 tracking-wide whitespace-nowrap">فصل المعلمين</span>
+                  <span className="text-[15px] sm:text-[16px] font-black text-amber-300 tracking-wide whitespace-nowrap">{isRtl ? 'فصل المعلمين' : "Teachers' Class"}</span>
                   <span className="hidden sm:inline h-px flex-1 bg-gradient-to-l from-[#C49E3A]/60 to-transparent" />
                 </span>
-                <span className="block text-[10.5px] sm:text-[11px] font-bold text-white/75 truncate">دروس على السبورة<span className="hidden sm:inline"> بصوت كل معلم</span></span>
+                <span className="block text-[10.5px] sm:text-[11px] font-bold text-white/75 truncate">{isRtl ? 'دروس على السبورة' : 'Lessons on the board'}<span className="hidden sm:inline">{isRtl ? ' بصوت كل معلم' : " in each teacher's voice"}</span></span>
               </span>
               <span className="flex items-center gap-1 sm:gap-1.5 shrink-0" data-testid="sara-board-teachers">
-                {[['👩‍💼', 'سارة'], ['👩‍🏫', 'نورة'], ['👨‍💼', 'محمد'], ['🧑‍🎓', 'علي']].map(([e, n]) => (
+                {(isRtl ? [['👩‍💼', 'سارة'], ['👩‍🏫', 'نورة'], ['👨‍💼', 'محمد'], ['🧑‍🎓', 'علي']] : [['👩‍💼', 'Sara'], ['👩‍🏫', 'Noura'], ['👨‍💼', 'Mohammed'], ['🧑‍🎓', 'Ali']]).map(([e, n]) => (
                   <span key={n} className="flex flex-col items-center gap-0.5 w-[38px] sm:w-[46px]">
                     <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#0a2d5c] border border-[#C49E3A]/70 flex items-center justify-center text-[15px] sm:text-[17px] group-hover:border-[#C49E3A] transition-colors">{e}</span>
                     <span className="text-[9.5px] sm:text-[10px] font-black text-amber-200 leading-none">{n}</span>
@@ -741,6 +742,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     if (nextLang === activeLang && targetLang) return;
 
     setActiveLang(nextLang);
+    setExplainLang(nextLang); // one site-wide ع/EN switch
     const nextSpeechLang = nextLang === 'ar' ? 'ar-SA' : 'en-US';
     setSpeechLang(nextSpeechLang);
     if (recognitionRef.current) {
@@ -3128,7 +3130,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-t border-l border-amber-400/40" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">المناهج</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'المناهج' : "Curricula"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* ✨ SMART WHITEBOARD */}
@@ -3156,7 +3158,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">السبورة</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'السبورة' : "Board"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🎯 PLACEMENT TEST */}
@@ -3178,7 +3180,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">تحديد المستوى</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'تحديد المستوى' : "Placement"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 📄 PRINTABLE WORKSHEET */}
@@ -3196,7 +3198,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">ورقة عمل</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'ورقة عمل' : "Worksheet"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
               <button onClick={() => handleOpenCurriculum('listening')} data-testid="sara-listening-icon"
@@ -3204,7 +3206,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 aria-label={isRtl ? 'الاستماع' : 'Listening'}>
                 <Headphones size={16} />
               </button>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">الاستماع</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الاستماع' : "Listening"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
               <button onClick={() => handleOpenCurriculum('pronunciation')} data-testid="sara-pron-icon"
@@ -3212,7 +3214,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 aria-label={isRtl ? 'النطق' : 'Pronunciation'}>
                 <Mic size={16} />
               </button>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">النطق</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'النطق' : "Pronunciation"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
               <button onClick={() => handleOpenCurriculum('vocabulary')} data-testid="sara-vocab-icon"
@@ -3220,7 +3222,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 aria-label={isRtl ? 'المفردات' : 'Vocabulary'}>
                 <span className="text-[13px] font-black">Aa</span>
               </button>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">المفردات</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'المفردات' : "Vocabulary"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
               <button onClick={() => setIsFreeChatOpen(true)} data-testid="sara-free-icon"
@@ -3228,7 +3230,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 aria-label={isRtl ? 'محاورة حرة' : 'Free conversation'}>
                 <MessageCircle size={16} />
               </button>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">محاورة حرة</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'محاورة حرة' : "Free talk"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
               <button onClick={() => handleOpenCurriculum('daily')} data-testid="sara-daily-icon"
@@ -3236,7 +3238,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 aria-label={isRtl ? 'الحياة اليومية' : 'Everyday English'}>
                 <Globe size={16} />
               </button>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">الحياة اليومية</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الحياة اليومية' : "Daily life"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
               <button onClick={() => setIsExamOpen(true)} data-testid="sara-exam-icon"
@@ -3255,7 +3257,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               >
                 <span className="text-[15px]">✍️</span>
               </button>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">تدقيق نحوي</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'تدقيق نحوي' : "Grammar check"}</span>
             </div>
             </div>
           </section>
@@ -3282,7 +3284,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">محادثة لايف</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'محادثة لايف' : "Live chat"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 📞 LIVE PHONE CALL */}
@@ -3300,7 +3302,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">اتصال</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'اتصال' : "Call"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🎙️ PHONETIC LAB */}
@@ -3321,7 +3323,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">مختبر النطق</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'مختبر النطق' : "Pronunciation lab"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🗣️ VOICE COACH */}
@@ -3339,7 +3341,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">مدرب الصوت</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'مدرب الصوت' : "Voice coach"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🎮 12Y ROLE-PLAY ADVENTURES */}
@@ -3361,7 +3363,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">لعب الأدوار</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'لعب الأدوار' : "Role-play"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* ⚡ SPEED DRILLS */}
@@ -3379,7 +3381,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">تحدي السرعة</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'تحدي السرعة' : "Speed challenge"}</span>
             </div>
             </div>
           </section>
@@ -3407,7 +3409,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">الذاكرة</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الذاكرة' : "Memory"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🏆 ACHIEVEMENTS & QUESTS */}
@@ -3425,7 +3427,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">الإنجازات</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الإنجازات' : "Achievements"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 📊 PARENT INSIGHTS */}
@@ -3443,7 +3445,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">تقرير ولي الأمر</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'تقرير ولي الأمر' : "Parent report"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 📓 ERROR NOTEBOOK */}
@@ -3466,7 +3468,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">دفتر الأخطاء</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'دفتر الأخطاء' : "Mistakes notebook"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🔥 STREAK */}
@@ -3481,7 +3483,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">السلسلة</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'السلسلة' : "Streak"}</span>
             </div>
             </div>
           </section>
@@ -3508,7 +3510,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">سارة 3D</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'سارة 3D' : "Sara 3D"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* ⚡ SPEECH SPEED */}
@@ -3529,7 +3531,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">سرعة الصوت</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'سرعة الصوت' : "Voice speed"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 📦 ARCHIVE CURRENT SESSION */}
@@ -3547,7 +3549,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">أرشفة</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'أرشفة' : "Archive"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🗂️ SESSIONS ARCHIVE */}
@@ -3568,7 +3570,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">الأرشيف</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الأرشيف' : "Archive list"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🌐 BILINGUAL SWITCHER */}
@@ -3586,7 +3588,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">اللغة</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'اللغة' : "Language"}</span>
             </div>
             <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
             {/* 🔊 VOICE TOGGLE */}
@@ -3611,7 +3613,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
               </div>
             </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">الصوت</span>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الصوت' : "Sound"}</span>
             </div>
             </div>
           </section>
@@ -5475,7 +5477,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xl">🎙️</span>
-                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-purple-600 text-white">فوري</span>
+                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-purple-600 text-white">{isRtl ? 'فوري' : "Instant"}</span>
                   </div>
                   <div>
                     <h4 className="text-xs font-black text-purple-950">{isRtl ? 'مختبر مخارج النطق' : 'Speech Lab'}</h4>
@@ -5509,7 +5511,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xl">🎯</span>
-                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-blue-600 text-white">معتمد</span>
+                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-blue-600 text-white">{isRtl ? 'معتمد' : "Certified"}</span>
                   </div>
                   <div>
                     <h4 className="text-xs font-black text-[#002147]">{isRtl ? 'تحديد المستوى الشامل' : 'Placement Test'}</h4>

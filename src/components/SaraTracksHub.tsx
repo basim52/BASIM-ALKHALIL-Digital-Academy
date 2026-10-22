@@ -1,4 +1,5 @@
 import ExplainLangToggle from './ExplainLangToggle';
+import { useT } from '../lib/explainLang';
 import React, { useEffect, useState } from 'react';
 import { syncTrackProgress } from '../lib/saraProgressSync';
 import { X, Lock } from 'lucide-react';
@@ -14,6 +15,7 @@ interface Props { isOpen: boolean; onClose: () => void; uid?: string; unlockAll?
 
 /** 📚 Track picker: foundations + advanced grammar (advanced opens after foundations lesson 1). */
 export const SaraTracksHub: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll, filter = 'all' }) => {
+  const t = useT(); const T = (o: { titleAr: string; titleEn?: string }) => t(o.titleAr, o.titleEn || o.titleAr);
   const [active, setActive] = useState<SaraTrack | null>(null);
   const [, setSyncTick] = useState(0);
   // Pull cloud progress (other device / reinstall) when the hub opens; push anything newer from this device.
@@ -34,24 +36,24 @@ export const SaraTracksHub: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll
   }
   const built = (t: SaraTrack) => t.lessons.filter(l => l.content).length;
   const cards: { track: SaraTrack; open: boolean; note: string; icon: string }[] = [
-    { track: FOUNDATIONS_TRACK, open: true, note: `${FOUNDATIONS_TRACK.lessons.length} درس`, icon: '🌱' },
+    { track: FOUNDATIONS_TRACK, open: true, note: t(`${FOUNDATIONS_TRACK.lessons.length} درس`, `${FOUNDATIONS_TRACK.lessons.length} lessons`), icon: '🌱' },
     { track: ADVANCED_TRACK, open: advancedOpen, icon: '🎓',
-      note: advancedOpen ? `${ADVANCED_TRACK.levels!.length} مستويات · ${built(ADVANCED_TRACK)} درس جاهز` : 'يفتح بعد إنهاء الدرس الأول من الأساسيات' },
+      note: advancedOpen ? t(`${ADVANCED_TRACK.levels!.length} مستويات · ${built(ADVANCED_TRACK)} درس جاهز`, `${ADVANCED_TRACK.levels!.length} levels · ${built(ADVANCED_TRACK)} lessons ready`) : t('يفتح بعد إنهاء الدرس الأول من الأساسيات', 'Opens after the first Foundations lesson') },
     { track: CONVERSATION_TRACK, open: true, icon: '💬',
-      note: true ? `${CONVERSATION_TRACK.levels!.length} مستويات · ${built(CONVERSATION_TRACK)} درس جاهز` : 'يفتح بعد إنهاء الدرس الأول من الأساسيات' },
+      note: true ? t(`${CONVERSATION_TRACK.levels!.length} مستويات · ${built(CONVERSATION_TRACK)} درس جاهز`, `${CONVERSATION_TRACK.levels!.length} levels · ${built(CONVERSATION_TRACK)} lessons ready`) : t('يفتح بعد إنهاء الدرس الأول من الأساسيات', 'Opens after the first Foundations lesson') },
     { track: READING_TRACK, open: advancedOpen, icon: '📖',
-      note: advancedOpen ? `${READING_TRACK.levels!.length} مستويات · ${built(READING_TRACK)} درس جاهز` : 'يفتح بعد إنهاء الدرس الأول من الأساسيات' },
+      note: advancedOpen ? t(`${READING_TRACK.levels!.length} مستويات · ${built(READING_TRACK)} درس جاهز`, `${READING_TRACK.levels!.length} levels · ${built(READING_TRACK)} lessons ready`) : t('يفتح بعد إنهاء الدرس الأول من الأساسيات', 'Opens after the first Foundations lesson') },
     { track: WRITING_TRACK, open: advancedOpen, icon: '✍️',
-      note: advancedOpen ? `${WRITING_TRACK.levels!.length} مستويات · ${built(WRITING_TRACK)} درس جاهز` : 'يفتح بعد إنهاء الدرس الأول من الأساسيات' }
+      note: advancedOpen ? t(`${WRITING_TRACK.levels!.length} مستويات · ${built(WRITING_TRACK)} درس جاهز`, `${WRITING_TRACK.levels!.length} levels · ${built(WRITING_TRACK)} lessons ready`) : t('يفتح بعد إنهاء الدرس الأول من الأساسيات', 'Opens after the first Foundations lesson') }
   ].filter(c => filter === 'all'
     || (filter === 'grammar' ? (c.track.id === FOUNDATIONS_TRACK.id || c.track.id === ADVANCED_TRACK.id)
       : filter === 'reading' ? c.track.id === READING_TRACK.id : filter === 'writing' ? c.track.id === WRITING_TRACK.id : c.track.id === CONVERSATION_TRACK.id));
   return (
-    <div className="fixed inset-0 z-[210] bg-slate-950/60 flex items-stretch justify-center" dir="rtl">
+    <div className="fixed inset-0 z-[210] bg-slate-950/60 flex items-stretch justify-center" dir={t("rtl", "ltr")}>
       <div className="w-full max-w-xl h-[100dvh] bg-[#fdfaf3] flex flex-col overflow-hidden">
         <div className="shrink-0 flex items-center gap-2 px-3 py-2 bg-[#002147] text-white">
           <span className="text-lg">📚</span>
-          <p className="flex-1 text-sm font-black">مناهج سارة</p>
+          <p className="flex-1 text-sm font-black">{t("مناهج سارة", "Sara's Curricula")}</p>
           <ExplainLangToggle />
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10" aria-label="close"><X size={18} /></button>
         </div>
@@ -61,9 +63,9 @@ export const SaraTracksHub: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll
               className={`w-full min-w-0 overflow-hidden flex items-center gap-3 p-3 rounded-2xl border-2 text-start ${c.open ? 'bg-white border-amber-300 shadow-sm' : 'bg-slate-100 border-slate-200 opacity-60'}`}>
               <span className="text-2xl">{c.icon}</span>
               <span className="flex-1 min-w-0">
-                <span className="block text-[14px] font-black text-[#002147]">{c.track.titleAr}</span>
+                <span className="block text-[14px] font-black text-[#002147]">{T(c.track)}</span>
                 <span className="block text-[11px] text-slate-500">{c.note}</span>
-                {c.track.levels && <span className="block text-[11px] text-amber-700 font-bold truncate">{c.track.levels.map(l => l.titleAr).join(' · ')}</span>}
+                {c.track.levels && <span className="block text-[11px] text-amber-700 font-bold truncate">{c.track.levels.map(l => T(l as any)).join(' · ')}</span>}
               </span>
               {!c.open && <Lock size={16} className="text-slate-400" />}
             </button>
