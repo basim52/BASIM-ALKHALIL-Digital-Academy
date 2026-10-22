@@ -1,3 +1,4 @@
+import ExplainLangToggle from './ExplainLangToggle';
 import React, { useEffect, useState } from 'react';
 import { syncTrackProgress } from '../lib/saraProgressSync';
 import { X, Lock } from 'lucide-react';
@@ -51,6 +52,7 @@ export const SaraTracksHub: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll
         <div className="shrink-0 flex items-center gap-2 px-3 py-2 bg-[#002147] text-white">
           <span className="text-lg">📚</span>
           <p className="flex-1 text-sm font-black">مناهج سارة</p>
+          <ExplainLangToggle />
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10" aria-label="close"><X size={18} /></button>
         </div>
         <div className="flex-1 min-h-0 overflow-y-auto p-3 grid gap-2 content-start">

@@ -1,3 +1,4 @@
+import { getExplainLang } from '../lib/explainLang';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { X, Volume2, Square, Mic, Printer, CheckCircle2 } from 'lucide-react';
 import type { SaraTrack, SaraTrackLesson, SaraChoiceQuestion } from '../data/saraTracks/foundations';
@@ -727,7 +728,7 @@ const GrammarCheck: React.FC = () => {
     const s = text.trim(); if (!s || busy) return;
     setBusy(true); setErr(''); setR(null); setShowPractice(false); setRevealed([]);
     try {
-      const res = await fetch('/api/sara/grammar-check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sentence: s }) });
+      const res = await fetch('/api/sara/grammar-check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sentence: s, lang: getExplainLang() }) });
       if (!res.ok) throw new Error(String(res.status));
       setR(await res.json()); setChecked(s);
     } catch { setErr('ما قدرت أدقق الجملة الحين، حاول مرة ثانية.'); }

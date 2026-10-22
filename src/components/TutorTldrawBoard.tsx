@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Tldraw, createShapeId, toRichText, renderPlaintextFromRichText, type Editor, type TLShape } from 'tldraw';
 import { playCloudAudioAs, cancelAllSpeech } from '../lib/audio';
+import { getExplainLang } from '../lib/explainLang';
+import ExplainLangToggle from './ExplainLangToggle';
 import 'tldraw/tldraw.css';
 import './tutor3d/tutorBoard.css';
 import type { BoardToolCall } from '../lib/boardActions';
@@ -116,7 +118,7 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
     if (wait > 0) { if (manual) setNoteErr(`لحظة، جرّب بعد ${Math.ceil(wait / 1000)} ثواني`); else { if (idle.current) clearTimeout(idle.current); idle.current = window.setTimeout(() => void askRef.current(false), wait + 200); } return; }
     lastAsk.current = Date.now(); asks.current++; answered.current.set(n.sh.id, n.text); setAsking(true); setNoteErr('');
     try {
-      const r = await fetch('/api/sara/board-note', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ persona: persona.id, note: n.text, lesson: lessonTitle }) });
+      const r = await fetch('/api/sara/board-note', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ persona: persona.id, note: n.text, lesson: lessonTitle, lang: getExplainLang() }) });
       const j: any = await r.json().catch(() => null);
       if (!r.ok || !j?.answer) {
         answered.current.delete(n.sh.id);
@@ -165,6 +167,7 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
         <div className="magic-board-toolbar" style={{ overflowX: 'auto', height: 'auto', minHeight: 48, padding: '6px 10px' }}>
           <div className="board-title-group shrink-0"><span className="board-title-badge">📋 السبورة التفاعلية</span><span className="board-coach-tag">{persona.emoji} {persona.nameAr}</span></div>
           <div className="board-actions-group" dir="rtl">
+            <ExplainLangToggle />
             <button className="board-tool-action-btn" onClick={() => setShowAvatar(v => !v)}><span>🧊</span><span>معلم 3D</span></button>
             <button className="board-tool-action-btn" onClick={() => { setExpanded(v => !v); setTimeout(() => ed.current && fit(ed.current), 80); }}><span>🖥️</span><span>{expanded ? 'تصغير' : 'توسيع السبورة'}</span></button>
             <button className="board-tool-action-btn tool-inspect" onClick={() => draw(true)} data-testid="board-replay"><span>📋</span><span>قالب الدرس</span></button>

@@ -7,6 +7,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleGenAI, Modality, Type } from "@google/genai";
 import { getAdminAuth, getAdminDb, FieldValue } from "./firebaseAdmin.js";
 import { sanitizeBoard, toToolCalls } from "../lib/boardActions.js";
+import crypto from "node:crypto";
 import { NOTE_VOICES, cleanNoteInput, buildNotePrompt, extractNoteAnswer, NOTE_GEN_CONFIG } from "./boardNote.js";
 
 const logToFile = (msg: string) => {
@@ -1932,6 +1933,7 @@ Output structure:
     if (sentence.length < 2) return res.status(400).json({ error: "EMPTY" });
     if (!initAI() || !aiLive) return res.status(503).json({ error: "AI_NOT_CONFIGURED" });
     const level = String(req.body?.level || "").slice(0, 10);
+    const gEn = req.body?.lang === "en";
     const schema = { type: Type.OBJECT, properties: {
       isCorrect: { type: Type.BOOLEAN },
       corrected: { type: Type.STRING },
@@ -1945,7 +1947,7 @@ Rules:
 - corrected: the full natural corrected sentence (same meaning). If already correct, repeat it.
 - mistakes: each wrong word/phrase EXACTLY as it appears in the student's sentence, its replacement, and reasonAr = one short simple Arabic sentence (max 15 words) explaining the rule. Empty if correct.
 - practice: exactly 3 NEW short sentences that each contain the SAME kind of mistake for the student to fix, with answer = the corrected sentence and hintAr = a 3-6 word Arabic hint.
-- Use only Western digits. If the text is not English, set isCorrect false, corrected "", mistakes [] and practice [].`;
+${gEn ? "- LANGUAGE: the student chose English explanations, so write reasonAr and hintAr in simple ENGLISH (no Arabic).\n" : ""}- Use only Western digits. If the text is not English, set isCorrect false, corrected "", mistakes [] and practice [].`;
     let lastErr: any = null;
     for (const model of GRAMMAR_MODELS) {
       try {
@@ -1982,6 +1984,7 @@ Rules:
     const topic = String(req.body?.topic || "").replace(/\s+/g, " ").trim().slice(0, 300);
     if (topic.length < 2) return res.status(400).json({ error: "EMPTY" });
     const level = String(req.body?.level || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 4);
+    const bEn = req.body?.lang === "en";
     const day = new Date().toISOString().slice(0, 10);
     const q = boardDaily.get(uid);
     if (q && q.day === day && q.n >= BOARD_DAILY_CAP) return res.status(429).json({ error: "DAILY_LIMIT", rateLimited: true });
@@ -2005,7 +2008,7 @@ Return:
 - boardActions: 4 to 6 short items in teaching order. Start with one "title". Use "text" (English, optional short Arabic "ar"), "highlight" (key rule), "example" (en + ar), "fix" (wrong -> right), "arrow" (from -> to, e.g. "go" -> "went"). Each item max 120 characters.
 - explanationAr: 1-2 simple Arabic sentences summarizing the idea (max 40 words).
 - checks: exactly 3 multiple-choice questions in English testing this exact idea, 3 options each, correctIndex = index of the right option.
-If the request is unsafe or not about learning English, make a board about polite English for saying "let's study English instead". Use only Western digits. Never mention scores, bands or AI models.`;
+${bEn ? "LANGUAGE: the student chose English explanations. Write everything in simple English only: leave every \"ar\" field empty and write explanationAr in simple ENGLISH.\n" : ""}If the request is unsafe or not about learning English, make a board about polite English for saying "let's study English instead". Use only Western digits. Never mention scores, bands or AI models.`;
     let lastErr: any = null;
     for (const model of BOARD_MODELS) {
       try {
@@ -2017,6 +2020,39 @@ If the request is unsafe or not about learning English, make a board about polit
     }
     console.error("[sara-board] all models failed:", String(lastErr?.message || lastErr).slice(0, 200));
     res.status(503).json({ error: "AI_FAILED" });
+  });
+
+  // EN explanation mode: translate a lesson's Arabic explanation texts to simple English once, then cache (memory + Firestore).
+  const lessonEnMem = new Map<string, string[]>();
+  app.post("/api/lesson/english", async (req: express.Request, res: express.Response) => {
+    const uid = String((req as any).authUid || "");
+    if (!uid) return res.status(401).json({ error: "UNAUTHORIZED" });
+    const id = String(req.body?.id || "").replace(/[^A-Za-z0-9_.-]/g, "").slice(0, 120);
+    const texts: string[] = (Array.isArray(req.body?.texts) ? req.body.texts : []).slice(0, 40).map((t: unknown) => String(t ?? "").slice(0, 1500));
+    if (!id || !texts.length) return res.status(400).json({ error: "BAD_INPUT" });
+    const hash = crypto.createHash("sha1").update(JSON.stringify(texts)).digest("hex").slice(0, 16);
+    const key = `${id}_${hash}`;
+    const mem = lessonEnMem.get(key); if (mem) return res.json({ texts: mem, cached: true });
+    const db = getAdminDb();
+    try { const d = await db?.collection("lessonEnglishCache").doc(key).get(); const t = d?.data()?.texts; if (Array.isArray(t) && t.length === texts.length) { lessonEnMem.set(key, t); return res.json({ texts: t, cached: true }); } } catch { /* cache miss */ }
+    if (!initAI() || !aiLive) return res.status(503).json({ error: "AI_NOT_CONFIGURED" });
+    const schema = { type: Type.OBJECT, properties: { texts: { type: Type.ARRAY, items: { type: Type.STRING } } }, required: ["texts"] };
+    const prompt = `You translate an English lesson for a young learner from Arabic explanations into simple, clear, natural ENGLISH (CEFR A2-B1 wording), keeping every English example, word or sentence exactly as written. Keep the same meaning and teaching point, no extra content, no markdown, no emojis, Western digits only. Return exactly ${texts.length} items in the same order. Empty input stays empty.
+Input JSON array:
+${JSON.stringify(texts)}`;
+    let lastErr: any = null;
+    for (const model of GRAMMAR_MODELS) {
+      try {
+        const r = await aiLive.models.generateContent({ model, contents: [{ role: "user", parts: [{ text: prompt }] }], config: { responseMimeType: "application/json", responseSchema: schema as any, maxOutputTokens: 6000, temperature: 0.2 } });
+        const out = JSON.parse((r.text || "").trim())?.texts;
+        if (!Array.isArray(out) || out.length !== texts.length) { lastErr = new Error("BAD_SHAPE"); continue; }
+        const clean = out.map((t: unknown, i: number) => texts[i] ? String(t ?? "").replace(/[*_#`]/g, "").trim().slice(0, 2000) : "");
+        lessonEnMem.set(key, clean); if (lessonEnMem.size > 3000) lessonEnMem.clear();
+        void db?.collection("lessonEnglishCache").doc(key).set({ id, texts: clean, at: Date.now() }).catch(() => {});
+        return res.json({ texts: clean });
+      } catch (e: any) { lastErr = e; logToFile(`lesson-english ${model} failed: ${String(e?.message || e).slice(0, 200)}`); }
+    }
+    res.status(503).json({ error: "AI_FAILED", message: String(lastErr?.message || "").slice(0, 160) });
   });
 
   // Student note/question written on the tldraw board -> the current tutor answers it in this lesson's context,
@@ -2037,7 +2073,7 @@ If the request is unsafe or not about learning English, make a board about polit
     noteDaily.set(uid, { day, n: q && q.day === day ? q.n + 1 : 1 });
     if (noteDaily.size > 5000) for (const [k, v] of noteDaily) if (v.day !== day) noteDaily.delete(k);
     if (!initAI() || !aiLive) return res.status(503).json({ error: "AI_NOT_CONFIGURED" });
-    const prompt = buildNotePrompt(BOARD_ROLES[persona], note, lesson);
+    const prompt = buildNotePrompt(BOARD_ROLES[persona], note, lesson, req.body?.lang === "en");
     let lastErr: any = null;
     for (const model of BOARD_MODELS) {
       try {

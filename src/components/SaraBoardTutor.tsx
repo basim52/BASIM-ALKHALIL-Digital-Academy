@@ -1,3 +1,5 @@
+import { getExplainLang } from '../lib/explainLang';
+import ExplainLangToggle from './ExplainLangToggle';
 import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { Volume2, Square, ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
@@ -66,7 +68,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
     const t = topic.trim(); if (!t || busy) return;
     setBusy(true); setErr('');
     try {
-      const r = await fetch('/api/sara/board', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ persona: persona.id, topic: t }) });
+      const r = await fetch('/api/sara/board', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ persona: persona.id, topic: t, lang: getExplainLang() }) });
       if (r.status === 429) { setErr('وصلت الحد المؤقت للسبورة، جرّب بعد شوي.'); return; }
       if (!r.ok) throw new Error(String(r.status));
       setBoard(await r.json()); setQi(0); setPicked(null); setCorrect(0); setSaved('no'); setStep('board');
@@ -91,7 +93,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
   const personaTrack = TUTOR_TRACKS.find(t => t.personaId === persona.id);
 
   if (step === 'pick') return shell(<>
-    <p className="text-[11px] text-amber-200/90 font-bold shrink-0">اختر المعلم واكتب وش تبي تتعلم، ويشرحه لك على السبورة.</p>
+    <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[11px] text-amber-200/90 font-bold">اختر المعلم واكتب وش تبي تتعلم، ويشرحه لك على السبورة.</p><ExplainLangToggle /></div>
     <div className="grid grid-cols-4 gap-1.5 shrink-0">
       {BOARD_PERSONAS.map(p => (
         <button key={p.id} data-testid={`board-persona-${p.id}`} onClick={() => { setPersona(p); if (p.id === 'sara' && !mock) { voice.stop(); setSaraHub(true); } }}

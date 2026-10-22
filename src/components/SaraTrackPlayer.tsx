@@ -1,3 +1,5 @@
+import ExplainLangToggle from './ExplainLangToggle';
+import { useExplainLang, useLessonView, englishLessonAsync } from '../lib/explainLang';
 import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { X, ArrowRight, Lock, Volume2, Square, CheckCircle2, Mic, Send } from 'lucide-react';
 import { auth } from '../lib/firebase';
@@ -193,7 +195,9 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   useEffect(() => () => stopNarrator(), []);
   useEffect(() => { if (!isOpen) stop(); }, [isOpen]);
 
-  const lesson = useMemo(() => track.lessons.find(l => l.id === lessonId) || null, [lessonId, track]);
+  const lessonRaw = useMemo(() => track.lessons.find(l => l.id === lessonId) || null, [lessonId, track]);
+  const [lang] = useExplainLang();
+  const { view: lesson, loading: enLoading } = useLessonView(lessonRaw, lang);
   const boardCalls = useMemo(() => (lesson?.content ? toToolCalls(lessonBoardActions(lesson, useAlt)) : []), [lesson, useAlt]);
 
   /** Narrate the page lines: segments = the exact on-screen lines (title, explanation, each example line). */
@@ -210,7 +214,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
     unlockNarrator(); // inside the tap
     markLastTrack(uid, track.id);
     stop(); setLessonId(l.id); setUseAlt(false); setCheckPick(null); setMode('board'); setBoardReplay(r => r + 1); setExIdx(0); setExPick(null); setExScore(0);
-    startNarration(l, false);
+    if (lang === 'en') void englishLessonAsync(l).then(x => startNarration(x, false)); else startNarration(l, false);
   };
   const nextLesson = lesson ? track.lessons.find(x => x.order === lesson.order + 1) : undefined;
   const goNext = () => { if (nextLesson) openLesson(nextLesson); else { stop(); setLessonId(null); } };
@@ -227,7 +231,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}) },
         body: JSON.stringify({
-          message: question, history: [], preferredLang: 'ar',
+          message: question, history: [], preferredLang: lang,
           trackLesson: { title: `${lesson.titleAr} (${lesson.titleEn})`, explanation: useAlt ? lesson.content.altExplanationAr : lesson.content.explanationAr }
         })
       });
@@ -236,7 +240,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
       setAskReply(reply); setAskText('');
       setSpeaking(true);
       if (data?.audio) await playB64(data.audio);
-      else { const said = boardLinesToSpeech([reply]); const b64 = await prefetchAcademyAudio(said, 'ar', 'Kore'); if (b64) await playB64(b64); }
+      else { const said = boardLinesToSpeech([reply]); const b64 = await prefetchAcademyAudio(said, lang, 'Kore'); if (b64) await playB64(b64); }
       setSpeaking(false);
     } catch {
       setAskReply('صار خطأ بالاتصال، جرّب مرة ثانية.');
@@ -297,6 +301,8 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
             <p className="text-[10px] text-amber-300 font-bold truncate">{track.titleAr}</p>
             <p className="text-sm font-black truncate">{lesson ? `${lesson.order}. ${lesson.titleAr}` : test ? `🏁 اختبار نهاية المستوى` : `${track.lessons.length} درس`}</p>
           </div>
+          {enLoading && <span className="text-[10px] font-black text-amber-300">EN…</span>}
+          <ExplainLangToggle />
           {lesson?.content && (mode === 'learn' || mode === 'board') && (
             <button onClick={speaking ? stop : () => { if (mode === 'board') setBoardReplay(r => r + 1); speak(); }} className="p-1.5 rounded-lg bg-amber-400 text-slate-950" aria-label="read">
               {speaking ? <Square size={16} /> : <Volume2 size={16} />}

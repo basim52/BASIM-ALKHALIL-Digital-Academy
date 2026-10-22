@@ -10,4 +10,5 @@ assert.equal(extractNoteAnswer({ text: "", candidates: [{ content: { parts: [{ t
 assert.equal(extractNoteAnswer({ get text() { throw new Error("x"); }, candidates: [] }), "");
 assert.deepEqual(Object.keys(NOTE_VOICES).sort(), ["business", "exams", "grammar", "sara"]);
 assert.ok(NOTE_GEN_CONFIG.maxOutputTokens >= 1024, "room for thinking tokens");
+assert.ok(buildNotePrompt("Ali", "ما معنى", "", true).includes("ONLY in simple English"));
 console.log("board-note tests passed");

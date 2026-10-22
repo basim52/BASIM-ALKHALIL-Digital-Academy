@@ -6,6 +6,8 @@ import { saraNarrate, saraStopNarrator, saraUnlockNarrator } from './SaraTrackPl
 import { toToolCalls } from '../lib/boardActions';
 import { personaById } from '../data/saraBoardPersonas';
 import TutorConversation from './TutorConversation';
+import ExplainLangToggle from './ExplainLangToggle';
+import { useExplainLang, useLessonView, englishLessonAsync } from '../lib/explainLang';
 import type { TutorTrack, TutorLesson } from '../data/tutorTracks';
 import type { SaraChoiceQuestion } from '../data/saraTracks/foundations';
 const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
@@ -42,7 +44,9 @@ const Choices: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: 
 export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBack: () => void; mockLessonOrder?: number; mockStep?: Step }> = ({ track, uid, onBack, mockLessonOrder, mockStep }) => {
   const persona = personaById(track.personaId);
   const [unlocked, setUnlocked] = useState(() => readTutorUnlocked(track.id, uid));
-  const [lesson, setLesson] = useState<TutorLesson | null>(mockLessonOrder ? track.lessons[mockLessonOrder - 1] : null);
+  const [lessonRaw, setLesson] = useState<TutorLesson | null>(mockLessonOrder ? track.lessons[mockLessonOrder - 1] : null);
+  const [lang] = useExplainLang();
+  const { view: lesson, loading: enLoading } = useLessonView(lessonRaw, lang);
   const [step, setStep] = useState<Step>(mockStep || { k: 'board' });
   const [picked, setPicked] = useState<number | null>(null);
   const [checkWrong, setCheckWrong] = useState(false);
@@ -57,6 +61,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
       <div className="flex items-center gap-2 shrink-0">
         <button onClick={() => { v.stop(); if (lesson) setLesson(null); else onBack(); }} aria-label="رجوع" className="p-1.5 rounded-lg bg-white/10"><ArrowRight size={16} /></button>
         <div className="min-w-0 flex-1">{head}</div>
+        <ExplainLangToggle />
         {lesson?.content && <button onClick={() => { v.stop(); setTalk(true); }} data-testid={`tutor-lesson-talk-${persona.id}`} className="shrink-0 px-2.5 py-1.5 rounded-xl bg-[#0a2d5c] border border-[#C49E3A] text-amber-300 text-[11px] font-black">💬 محاورة {persona.nameAr}</button>}
       </div>
       {body}
@@ -87,7 +92,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
           return (
             <React.Fragment key={l.id}>
             {showLevel && <p className="mt-2 first:mt-0 px-1 text-[12px] font-black text-amber-300" data-testid="tutor-level-head">{lvl!.titleAr}</p>}
-            <button disabled={!open} onClick={() => { setLesson(l); setStep({ k: 'board' }); const cc = l.content!; v.play(`${cc.explanationAr} ${cc.example.map(e => e.en).join('. ')}`); setPicked(null); setCheckWrong(false); setCorrect(0); }}
+            <button disabled={!open} onClick={() => { setLesson(l); setStep({ k: 'board' }); const cc = l.content!; if (lang === 'en') { v.stop(); void englishLessonAsync(l).then(x => { const e2 = x.content!; v.play(`${e2.explanationAr} ${e2.example.map(e => e.en).join('. ')}`); }); } else v.play(`${cc.explanationAr} ${cc.example.map(e => e.en).join('. ')}`); setPicked(null); setCheckWrong(false); setCorrect(0); }}
               className={`flex items-center gap-2 rounded-xl px-3 py-2 text-start border ${open ? 'bg-[#0a2d5c] border-amber-400/40' : 'bg-white/5 border-white/10 opacity-60'}`}>
               <span className="w-7 h-7 shrink-0 rounded-full bg-amber-400 text-[#001a38] text-[12px] font-black flex items-center justify-center">{l.order}</span>
               <span className="flex-1 min-w-0"><span className="block text-[13px] font-black truncate">{l.titleAr}</span><span dir="ltr" className="block text-[11px] text-white/60 font-bold truncate text-start">{l.titleEn}</span></span>
@@ -104,7 +109,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const c = lesson.content!;
   if (talk) return <TutorConversation persona={persona} onBack={() => setTalk(false)} lesson={{ titleEn: lesson.titleEn, titleAr: lesson.titleAr, examples: c.example.map(e => e.en) }} />;
   const total = 1 + c.exercises.length;
-  const head = <><p className="text-[10px] text-amber-300 font-bold">{persona.nameAr} — الدرس {lesson.order}</p><p className="text-[13px] font-black truncate">{lesson.titleAr}</p></>;
+  const head = <><p className="text-[10px] text-amber-300 font-bold">{persona.nameAr} — الدرس {lesson.order}</p><p className="text-[13px] font-black truncate">{lesson.titleAr}{enLoading ? ' · …EN' : ''}</p></>;
   const narration = `${c.explanationAr} ${c.example.map(e => e.en).join('. ')}`;
 
   if (step.k === 'board') return shell(head, <>
