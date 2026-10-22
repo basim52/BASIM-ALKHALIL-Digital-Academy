@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useExplainLang } from './lib/explainLang';
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { 
   ArrowRight, 
@@ -307,7 +308,10 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAuthScreen, setShowAuthScreen] = useState(false);
-  const [lang, setLang] = useState<Language>('ar');
+  // One site-wide language: the same ع/EN preference as Sara's explanations (localStorage + users/{uid}.explainLang).
+  const [lang, setLangPref] = useExplainLang();
+  const setLang = (v: Language | ((l: Language) => Language)) => setLangPref(typeof v === 'function' ? v(lang) : v);
+  useEffect(() => { try { document.documentElement.lang = lang; document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'; } catch { /* ignore */ } }, [lang]);
 
   const handleGoogleSuccess = (user: User) => {
     setCurrentUser(user);

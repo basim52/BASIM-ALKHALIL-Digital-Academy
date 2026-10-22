@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useExplainLang } from './lib/explainLang';
 import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { 
   BookOpen, 
@@ -5102,7 +5103,8 @@ export default function AuthenticatedApp({
   const [selectedSaraLesson, setSelectedSaraLesson] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [renderError, setRenderError] = useState<string | null>(null);
-  const [lang, setLang] = useState<Language>(initialLang);
+  const [lang, setLangPref] = useExplainLang();
+  const setLang = (l: Language) => setLangPref(l);
 
   useEffect(() => {
     if (initialLang) {
