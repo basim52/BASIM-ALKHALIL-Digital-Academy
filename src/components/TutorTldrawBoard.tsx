@@ -27,6 +27,23 @@ const hasWebGL = () => { try { const c = document.createElement('canvas'); retur
 type Props = { calls: BoardToolCall[]; personaId: string; speaking?: boolean; onSpeak?: () => void; replayKey?: number; lessonTitle?: string };
 const T = { tutor: true };
 const NOTE_GAP_MS = 8000, NOTE_MAX = 12, NOTE_IDLE_MS = 3500;
+const IMG_MAX_SIDE = 1280, IMG_MAX_B64 = 1_500_000;
+/** tldraw asset src (data:, blob: or http URL) -> downscaled JPEG data URL (~1280px) for the vision request. */
+async function imageToJpeg(src: string): Promise<string> {
+  const blob = await (await fetch(src)).blob();
+  const bmp = await createImageBitmap(blob);
+  let q = 0.82, side = IMG_MAX_SIDE;
+  for (let i = 0; i < 4; i++) {
+    const k = Math.min(1, side / Math.max(bmp.width, bmp.height));
+    const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(bmp.width * k)); c.height = Math.max(1, Math.round(bmp.height * k));
+    const g = c.getContext('2d'); if (!g) throw new Error('NO_CANVAS');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(bmp, 0, 0, c.width, c.height);
+    const url = c.toDataURL('image/jpeg', q);
+    if (url.length <= IMG_MAX_B64 + 30) { bmp.close?.(); return url; }
+    q -= 0.12; side = Math.round(side * 0.8);
+  }
+  bmp.close?.(); throw new Error('TOO_BIG');
+}
 
 const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false, onSpeak, replayKey = 0, lessonTitle = '' }) => {
   const persona = personaById(personaId);
@@ -136,6 +153,52 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
     } catch { answered.current.delete(n.sh.id); setNoteErr(t('تعذّر الاتصال بالمعلم، تأكد من النت وجرّب مرة ثانية', 'Could not reach the teacher, check your connection and try again')); }
     finally { setAsking(false); }
   };
+  /** Student image (paste/drop/upload) -> the tutor reads it with vision, explains it in lesson context, speaks it, writes beside it. */
+  const explainedImgs = useRef(new Set<string>());
+  const studentImages = (editor: Editor) => editor.getCurrentPageShapes().filter((sh: TLShape) => sh.type === 'image' && !(sh.meta as any)?.tutor && (sh.props as any).assetId);
+  const explainImage = async (manual: boolean, shapeId?: string) => {
+    const editor = ed.current; if (!editor) return;
+    if (asking) { if (manual) setNoteErr(t(`${persona.nameAr} ${persona.gender === 'female' ? 'ترد' : 'يرد'} الحين…`, `${persona.nameEn} is answering…`)); return; }
+    const imgs = studentImages(editor);
+    const sel = editor.getSelectedShapes().find(sh => sh.type === 'image');
+    const sh = (shapeId && imgs.find(i => i.id === shapeId)) || (manual && sel) || (manual ? imgs[imgs.length - 1] : imgs.filter(i => !explainedImgs.current.has(i.id)).pop());
+    if (!sh) { if (manual) setNoteErr(t('حط صورة على السبورة (الصق أو اسحبها أو ارفعها) وبعدها اضغط 📷 اشرح الصورة', 'Put an image on the board (paste, drop or upload), then press 📷 Explain image')); return; }
+    const wait = NOTE_GAP_MS - (Date.now() - lastAsk.current);
+    if (asks.current >= NOTE_MAX) { if (manual) setNoteErr(t('وصلت حد الأسئلة لهذي السبورة، افتح الدرس من جديد', 'Question limit for this board reached, reopen the lesson')); return; }
+    if (wait > 0) { if (manual) setNoteErr(t(`لحظة، جرّب بعد ${Math.ceil(wait / 1000)} ثواني`, `One moment, try again in ${Math.ceil(wait / 1000)} seconds`)); else window.setTimeout(() => void imgRef.current(false, sh.id), wait + 200); return; }
+    const asset: any = editor.getAsset((sh.props as any).assetId);
+    let src: string = asset?.props?.src || '';
+    if (!src) { // asset still uploading/resolving: retry shortly (auto) or tell the student
+      if (!manual && !explainedImgs.current.has(sh.id + ':retry')) { explainedImgs.current.add(sh.id + ':retry'); window.setTimeout(() => void imgRef.current(false, sh.id), 1500); }
+      else setNoteErr(t('الصورة لسا تتحمّل، جرّب بعد ثواني', 'The image is still loading, try again in a few seconds'));
+      return;
+    }
+    try { const r = await editor.resolveAssetUrl(asset.id, { shouldResolveToOriginal: true }); if (r) src = r; } catch { /* use raw src */ }
+    explainedImgs.current.add(sh.id); lastAsk.current = Date.now(); asks.current++; setAsking(true);
+    setNoteErr(t(`📷 ${persona.nameAr} ${persona.gender === 'female' ? 'تقرأ' : 'يقرأ'} الصورة…`, `📷 ${persona.nameEn} is reading the image…`));
+    try {
+      let image: string;
+      try { image = await imageToJpeg(src); } catch (e: any) { explainedImgs.current.delete(sh.id); setNoteErr(String(e?.message) === 'TOO_BIG' ? t('الصورة كبيرة مرة، قصّها أو صوّر جزء أصغر', 'The image is too large, crop it or take a smaller photo') : t('ما قدرت أفتح الصورة، جرّب صورة JPG أو PNG', 'Could not open the image, try a JPG or PNG')); return; }
+      const r = await fetch('/api/sara/board-note', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ persona: persona.id, image, lesson: lessonTitle, lang: getExplainLang() }) });
+      const j: any = await r.json().catch(() => null);
+      if (!r.ok || !j?.answer) {
+        explainedImgs.current.delete(sh.id);
+        setNoteErr(r.status === 401 ? t('سجّل دخولك عشان المعلم يشرح الصورة', 'Sign in so the teacher can explain the image') : r.status === 429 ? t('وصلت حد الأسئلة، جرّب بعد شوي', 'Question limit reached, try again later') : r.status === 413 ? t('الصورة كبيرة أو نوعها غير مدعوم', 'The image is too large or not supported') : t(`${persona.nameAr} ما ${persona.gender === 'female' ? 'قدرت تشرح' : 'قدر يشرح'} الصورة الحين (${r.status}${j?.error ? ' ' + j.error : ''})، اضغط 📷 اشرح الصورة`, `${persona.nameEn} could not explain the image right now (${r.status}${j?.error ? ' ' + j.error : ''}), press 📷 Explain image`));
+        return;
+      }
+      setNoteErr('');
+      const bb = editor.getShapePageBounds(sh.id);
+      const rid = createShapeId();
+      const vp = editor.getViewportPageBounds();
+      const right = (bb?.maxX ?? 100) + 24; const below = !bb || right + 420 > vp.maxX + 200 && bb.w > 500;
+      editor.createShape({ meta: T, id: rid, type: 'text', x: below ? (bb?.minX ?? 100) : right, y: below ? (bb?.maxY ?? 100) + 16 : (bb?.minY ?? 100), props: { richText: toRichText(`${persona.emoji} ${j.answer}`), size: 's', color: 'blue', font: 'draw', autoSize: false, w: 400 } as any });
+      try { const rb = editor.getShapePageBounds(rid); if (rb && bb) editor.zoomToBounds(rb.clone().union(bb).expandBy(60), { animation: { duration: 250 }, targetZoom: Math.min(1, editor.getZoomLevel()) }); } catch { /* ignore */ }
+      if (j.audio) { cancelAllSpeech('board-note'); const p = await playCloudAudioAs('board-note', j.audio, () => {}); if (!p) setNoteErr(t('الشرح مكتوب على السبورة، بس الصوت ما اشتغل. اضغط على الصفحة وجرّب مرة ثانية', 'The explanation is on the board, but the audio did not play. Tap the page and try again')); }
+      else setNoteErr(t('الشرح مكتوب على السبورة، بس الصوت غير متاح الحين', 'The explanation is on the board, but audio is not available right now'));
+    } catch { explainedImgs.current.delete(sh.id); setNoteErr(t('تعذّر الاتصال بالمعلم، تأكد من النت وجرّب مرة ثانية', 'Could not reach the teacher, check your connection and try again')); }
+    finally { setAsking(false); }
+  };
+  const imgRef = useRef(explainImage); imgRef.current = explainImage;
   const askRef = useRef(askTutor); askRef.current = askTutor;
   useEffect(() => () => { if (idle.current) clearTimeout(idle.current); cancelAllSpeech('board-note'); }, []);
 
@@ -144,6 +207,11 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
     // auto-detect: after the student stops editing their note for a short pause, the tutor answers it
     editor.store.listen(() => { if (idle.current) clearTimeout(idle.current); idle.current = window.setTimeout(() => void askRef.current(false), NOTE_IDLE_MS); }, { source: 'user', scope: 'document' });
     editor.store.listen(() => { if (!editor.getEditingShapeId() && studentNotes(editor).length) { if (idle.current) clearTimeout(idle.current); idle.current = window.setTimeout(() => void askRef.current(false), 1200); } }, { source: 'user', scope: 'session' });
+    // auto: a new student image (paste/drop/upload) -> explain it once its asset is ready
+    editor.store.listen(({ changes }) => {
+      const added = Object.values(changes.added).filter((r: any) => r.typeName === 'shape' && r.type === 'image' && !r.meta?.tutor);
+      if (added.length) window.setTimeout(() => void imgRef.current(false, (added[added.length - 1] as any).id), 900);
+    }, { scope: 'document' });
     editor.user.updateUserPreferences({ colorScheme: 'light' });
     draw(true);
   };
@@ -175,6 +243,7 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
             <button className="board-tool-action-btn tool-inspect" onClick={() => draw(true)} data-testid="board-replay"><span>📋</span><span>{t("قالب الدرس", "Lesson template")}</span></button>
             <button className="board-tool-action-btn tool-note" onClick={addNote}><span>📝</span><span>{t("ملاحظة لاصقة", "Sticky note")}</span></button>
             <button className="board-tool-action-btn" onClick={() => void askTutor(true)} disabled={asking} data-testid="board-ask-tutor"><span>🙋</span><span>{asking ? t(`${persona.nameAr} ${persona.gender === 'female' ? 'ترد' : 'يرد'}…`, `${persona.nameEn} is answering…`) : t(`اسأل ${persona.nameAr}`, `Ask ${persona.nameEn}`)}</span></button>
+            <button className="board-tool-action-btn" onClick={() => void explainImage(true)} disabled={asking} data-testid="board-explain-image"><span>📷</span><span>{t('اشرح الصورة', 'Explain image')}</span></button>
             <button className="board-tool-action-btn tool-clear" onClick={clear}><span>🧽</span><span>{t("مسح", "Clear")}</span></button>
           </div>
         </div>

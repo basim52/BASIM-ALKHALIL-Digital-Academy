@@ -8,7 +8,7 @@ import { GoogleGenAI, Modality, Type } from "@google/genai";
 import { getAdminAuth, getAdminDb, FieldValue } from "./firebaseAdmin.js";
 import { sanitizeBoard, toToolCalls } from "../lib/boardActions.js";
 import crypto from "node:crypto";
-import { NOTE_VOICES, cleanNoteInput, buildNotePrompt, extractNoteAnswer, NOTE_GEN_CONFIG } from "./boardNote.js";
+import { NOTE_VOICES, cleanNoteInput, buildNotePrompt, extractNoteAnswer, NOTE_GEN_CONFIG, parseBoardImage, buildImagePrompt } from "./boardNote.js";
 
 const logToFile = (msg: string) => {
   // Use console.log directly (no filesystem logging on Vercel or serverless)
@@ -2065,7 +2065,10 @@ ${JSON.stringify(texts)}`;
     const persona = String(req.body?.persona || "");
     if (!BOARD_ROLES[persona]) return res.status(400).json({ error: "BAD_PERSONA" });
     const note = cleanNoteInput(req.body?.note);
-    if (note.length < 2) return res.status(400).json({ error: "EMPTY" });
+    const hasImage = req.body?.image != null;
+    const image = hasImage ? parseBoardImage(req.body.image) : null;
+    if (hasImage && !image) return res.status(413).json({ error: "BAD_IMAGE" });
+    if (!image && note.length < 2) return res.status(400).json({ error: "EMPTY" });
     const lesson = cleanNoteInput(req.body?.lesson);
     const day = new Date().toISOString().slice(0, 10);
     const q = noteDaily.get(uid);
@@ -2073,12 +2076,14 @@ ${JSON.stringify(texts)}`;
     noteDaily.set(uid, { day, n: q && q.day === day ? q.n + 1 : 1 });
     if (noteDaily.size > 5000) for (const [k, v] of noteDaily) if (v.day !== day) noteDaily.delete(k);
     if (!initAI() || !aiLive) return res.status(503).json({ error: "AI_NOT_CONFIGURED" });
-    const prompt = buildNotePrompt(BOARD_ROLES[persona], note, lesson, req.body?.lang === "en");
+    const en = req.body?.lang === "en";
+    const prompt = image ? buildImagePrompt(BOARD_ROLES[persona], note, lesson, en) : buildNotePrompt(BOARD_ROLES[persona], note, lesson, en);
+    const parts: any[] = image ? [{ inlineData: image }, { text: prompt }] : [{ text: prompt }];
     let lastErr: any = null;
     for (const model of BOARD_MODELS) {
       try {
-        const r = await aiLive.models.generateContent({ model, contents: [{ role: "user", parts: [{ text: prompt }] }], config: NOTE_GEN_CONFIG });
-        const answer = extractNoteAnswer(r);
+        const r = await aiLive.models.generateContent({ model, contents: [{ role: "user", parts }], config: NOTE_GEN_CONFIG });
+        const answer = extractNoteAnswer(r, image ? 700 : 400);
         if (!answer) { lastErr = new Error("EMPTY"); continue; }
         const audio = await generateSaraSpeechAudio(answer, NOTE_VOICES[persona]).catch(() => null);
         if (!audio) console.error("[board-note] no TTS audio");
