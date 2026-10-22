@@ -7,5 +7,8 @@ const dict: Record<string, string> = JSON.parse(fs.readFileSync("public/i18n/en.
 const all = arabicStrings();
 const left = all.filter(s => !dict[s] && !EXCEPTIONS.has(s));
 console.log(`Arabic UI strings: ${all.length}; translated: ${all.length - left.length}; exceptions: ${EXCEPTIONS.size}; remaining: ${left.length}`);
+const arVals = Object.entries(dict).filter(([, v]) => /[\u0600-\u06FF]/.test(String(v)));
+console.log(`English values still containing Arabic script: ${arVals.length}`);
+left.push(...arVals.map(([k]) => k));
 if (process.argv.includes("--list")) left.slice(0, 200).forEach(s => console.log("  ", s.slice(0, 120)));
 process.exit(process.argv.includes("--strict") && left.length ? 1 : 0);
