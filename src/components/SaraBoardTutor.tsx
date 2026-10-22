@@ -5,7 +5,7 @@ import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'rea
 import { Volume2, Square, ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { playCloudAudioAs, cancelAllSpeech } from '../lib/audio';
+import { playCloudAudioAs, cancelAllSpeech, fetchCloudVoice } from '../lib/audio';
 import { BOARD_PERSONAS, personaById, type BoardPersona } from '../data/saraBoardPersonas';
 import { toToolCalls, type BoardResult } from '../lib/boardActions';
 const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
@@ -25,8 +25,7 @@ const usePersonaVoice = () => {
   const play = async (text: string, voice: string) => {
     stop(); setState('loading');
     try {
-      const r = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: text.slice(0, 1200), lang: 'en', voiceName: voice }) });
-      const j = r.ok ? await r.json() : null;
+      const j = await fetchCloudVoice(text, voice);
       if (!j?.audio) { setState('failed'); return; }
       setState('playing');
       const p = await playCloudAudioAs(OWNER, j.audio, () => setState('idle'));

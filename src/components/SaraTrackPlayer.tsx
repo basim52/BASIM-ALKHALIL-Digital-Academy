@@ -1,4 +1,4 @@
-import { trackSpeech } from '../lib/speechLevel';
+import { trackSpeech, watchSpeechElement } from '../lib/speechLevel';
 import ExplainLangToggle from './ExplainLangToggle';
 import { useExplainLang, useLessonView, englishLessonAsync, L } from '../lib/explainLang';
 import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
@@ -6,7 +6,7 @@ import { X, ArrowRight, Lock, Volume2, Square, CheckCircle2, Mic, Send } from 'l
 import { auth } from '../lib/firebase';
 import { CompletionCertificateModal, type CertificateData } from './CompletionCertificateModal';
 import type { SaraTrack, SaraTrackLesson, SaraChoiceQuestion } from '../data/saraTracks/foundations';
-import { prefetchAcademyAudio, cancelAllSpeech, createManagedAudio } from '../lib/audio';
+import { prefetchAcademyAudio, cancelAllSpeech, createManagedAudio, ttsDiag } from '../lib/audio';
 import { boardLinesToSpeech } from '../utils/boardToSpeech';
 import { LEGACY_TRACK_IDS, migrateLegacyCount } from '../data/saraTracks/fromCurriculum';
 import { pushTrackProgress, markLastTrack } from '../lib/saraProgressSync';
@@ -34,7 +34,7 @@ const SILENT_WAV = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAE
 let narratorEl: HTMLAudioElement | null = null;
 let narratorToken = 0;
 function getNarrator(): HTMLAudioElement {
-  if (!narratorEl) { narratorEl = createManagedAudio(); narratorEl.preload = 'auto'; }
+  if (!narratorEl) { narratorEl = createManagedAudio(); narratorEl.preload = 'auto'; watchSpeechElement(narratorEl); /* face video talks only while this really plays */ }
   return narratorEl;
 }
 /** Call synchronously inside a click/tap handler. */
@@ -77,6 +77,7 @@ async function fetchLessonAudio(text: string, token: number, voice = 'Kore'): Pr
     try {
       const tok = auth.currentUser ? await auth.currentUser.getIdToken().catch(() => '') : '';
       const r = await fetch(`/api/tts/lesson?v=${encodeURIComponent(voice)}&t=${encodeURIComponent(text)}`, tok ? { headers: { Authorization: `Bearer ${tok}` } } : undefined);
+      ttsDiag('fetch:/api/tts/lesson', { status: r.status, voice, type: r.headers.get('content-type') || '', cache: r.headers.get('x-vercel-cache') || '' });
       if (r.ok && (r.headers.get('content-type') || '').includes('audio')) {
         const blob = await r.blob();
         const url = URL.createObjectURL(blob);
@@ -101,7 +102,7 @@ async function narrate(text: string, onBlocked: () => void, onFailed: () => void
   narratorPaused = false;
   const url = await fetchLessonAudio(text, token, voice);
   if (token !== narratorToken) return;
-  if (!url) { onFailed(); return; }
+  if (!url) { ttsDiag('narrator:no-audio', { voice }); onFailed(); return; }
   while (narratorPaused) { await wait(150); if (token !== narratorToken) return; }
   const el = getNarrator();
   el.src = url;
@@ -109,7 +110,7 @@ async function narrate(text: string, onBlocked: () => void, onFailed: () => void
   const ok = await new Promise<boolean>(resolve => {
     el.onended = () => resolve(true);
     el.onerror = () => resolve(true);
-    el.play().catch(err => resolve(err?.name === 'NotAllowedError' ? false : true));
+    el.play().then(() => ttsDiag('narrator:playing', { voice })).catch(err => { ttsDiag('narrator:play-failed', { voice, err: String(err?.name || err) }); resolve(err?.name === 'NotAllowedError' ? false : true); });
   });
   if (token !== narratorToken) return;
   if (!ok) { onBlocked(); return; }

@@ -1,7 +1,7 @@
 import { useT } from '../lib/explainLang';
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Mic, Send, Square } from 'lucide-react';
-import { playCloudAudioAs, cancelAllSpeech } from '../lib/audio';
+import { playCloudAudioAs, cancelAllSpeech, fetchCloudVoice } from '../lib/audio';
 import type { BoardPersona } from '../data/saraBoardPersonas';
 
 /**
@@ -61,8 +61,7 @@ export const TutorConversation: React.FC<{ persona: BoardPersona; level?: string
   const speakStarter = async () => {
     stopAudio(); const t = turn.current;
     try {
-      const r = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: st.en, lang: 'en', voiceName: persona.voice }) });
-      const j = r.ok ? await r.json() : null;
+      const j = await fetchCloudVoice(st.en, persona.voice);
       if (!j?.audio || t !== turn.current) { if (!j?.audio) setErr(tr('الصوت غير متاح الآن', 'Audio is not available right now')); return; }
       queue.current = [{ text: st.en, audio: j.audio }]; playIdx.current = 0; void pump(t, () => true);
     } catch { setErr(tr('الصوت غير متاح الآن', 'Audio is not available right now')); }

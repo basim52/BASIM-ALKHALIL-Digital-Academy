@@ -10,6 +10,15 @@ let currentPlayingNode: { stop: () => void } | null = null;
 let activeUtterances: SpeechSynthesisUtterance[] = [];
 let sharedAudioContext: AudioContext | null = null;
 
+/** Lightweight speech diagnostics: console.info('[tts] …') + window.__ttsLog (last 40) for tablet debugging. */
+export function ttsDiag(msg: string, extra?: Record<string, unknown>) {
+  try {
+    const e = { t: new Date().toISOString().slice(11, 19), msg, ...(extra || {}) };
+    console.info('[tts]', msg, extra || '');
+    if (typeof window !== 'undefined') { const w = window as any; (w.__ttsLog ||= []).push(e); if (w.__ttsLog.length > 40) w.__ttsLog.shift(); }
+  } catch (_) { /* diagnostics only */ }
+}
+
 /* ================= Central audio manager =================
  * Every sound on the site goes through here: starting any new audio (HTMLAudioElement.play, speechSynthesis.speak,
  * Sara's cloud TTS) first stops whatever is playing. While an exclusive owner (the live phone call) holds the audio,
@@ -259,6 +268,7 @@ async function playAudioSource(
 
     ensurePlaybackSession();
     audio.volume = 1; audio.muted = false;
+    ttsDiag('play:html5', { owner: owner || 'sara', bytes: len, riff: bytes[0] === 82 && bytes[1] === 73, ctx: sharedAudioContext?.state || 'none' });
     const playPromise = audio.play();
     if (owner === 'call') registerSaraSpeech(audio, bytes); // avatar lip-sync (reads only; audio path untouched)
     if (playPromise !== undefined) {
@@ -270,7 +280,7 @@ async function playAudioSource(
     return node;
   } catch (html5Err) {
     // Autoplay blocked / decode failure: Web Audio backup, registered so it can be stopped.
-    console.debug("HTML5 audio playback failed, falling back to Web Audio API:", html5Err);
+    ttsDiag('play:html5-failed', { owner: owner || 'sara', err: String((html5Err as any)?.name || html5Err), ctx: sharedAudioContext?.state || 'none' });
     if (exclusiveOwner && owner !== exclusiveOwner) return null;
     const ctx = getAudioContext();
     if (ctx && ctx.state !== 'suspended') {
@@ -282,7 +292,10 @@ async function playAudioSource(
     return await new Promise(resolve => {
       const evs = ['pointerdown', 'touchstart', 'keydown'];
       const t = setTimeout(() => { evs.forEach(e => window.removeEventListener(e, go)); onEnd?.(); resolve(null); }, 15000);
+      ttsDiag('play:waiting-for-tap', { owner: owner || 'sara' });
       function go() {
+        ttsDiag('play:tap-retry', { owner: owner || 'sara' });
+        try { if (sharedAudioContext && sharedAudioContext.state === 'suspended') sharedAudioContext.resume().catch(() => {}); } catch (_) {}
         evs.forEach(e => window.removeEventListener(e, go)); clearTimeout(t);
         try {
           const bin = window.atob(base64); const b = new Uint8Array(bin.length); for (let i = 0; i < b.length; i++) b[i] = bin.charCodeAt(i);
@@ -440,7 +453,13 @@ function playNativeFallback(
     console.debug("Voice selection lookup:", e);
   }
 
+  // Face video sync: browser-voice speech has no <audio> element, so mark it as playing speech while it runs.
+  let marked = false;
+  const unmark = () => { if (marked) { marked = false; markBufferSpeech(false); } };
+  utterance.onstart = () => { if (!marked) { marked = true; markBufferSpeech(true); } };
+  ttsDiag('fallback:browser-voice', { owner: owner || 'sara', lang });
   utterance.onend = () => {
+    unmark();
     activeUtterances = activeUtterances.filter(u => u !== utterance);
     if (currentPlayingNode?.stop) {
       currentPlayingNode = null;
@@ -449,6 +468,7 @@ function playNativeFallback(
   };
 
   utterance.onerror = (e) => {
+    unmark();
     activeUtterances = activeUtterances.filter(u => u !== utterance);
     if (currentPlayingNode?.stop) {
       currentPlayingNode = null;
@@ -461,6 +481,7 @@ function playNativeFallback(
 
   return {
     stop: () => {
+      unmark();
       try {
         window.speechSynthesis.cancel();
       } catch (e) {}
@@ -606,6 +627,7 @@ export const speakAcademyText = async (
         return { stop: () => {} };
       }
 
+      ttsDiag('fetch:/api/tts', { status: response.status, voice: voiceName || 'Kore' });
       if (response.status === 429) {
         clientTtsCooldownUntil = Date.now() + 50000;
         break; // Fast failover to native fallback without burning quota
@@ -617,6 +639,7 @@ export const speakAcademyText = async (
 
       const data = await response.json();
       if (data?.rateLimited) {
+        ttsDiag('fetch:quota-exhausted', { voice: voiceName || 'Kore' });
         clientTtsCooldownUntil = Date.now() + 50000;
         break;
       }
@@ -661,6 +684,23 @@ export const speakAcademyText = async (
   currentPlayingNode = fallback;
   return fallback;
 };
+
+/** Persona cloud voice fetch (Noura/Mohammed/Ali/board): one retry, diagnostics. Returns base64 WAV or null + reason. */
+export async function fetchCloudVoice(text: string, voiceName: string, lang: 'en' | 'ar' = 'en'): Promise<{ audio: string | null; reason?: string }> {
+  let reason = '';
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const r = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: text.slice(0, 1200), lang, voiceName }) });
+      const j = r.ok ? await r.json().catch(() => null) : null;
+      ttsDiag('fetch:/api/tts', { status: r.status, voice: voiceName, ok: !!j?.audio, rateLimited: !!j?.rateLimited, attempt });
+      if (j?.audio) return { audio: j.audio };
+      reason = r.status === 401 ? 'auth' : (r.status === 429 || j?.rateLimited) ? 'quota' : `http-${r.status}`;
+      if (reason === 'auth' || reason === 'quota') break;
+    } catch (e) { reason = 'network'; ttsDiag('fetch:error', { voice: voiceName, err: String(e) }); }
+    await new Promise(res => setTimeout(res, 900));
+  }
+  return { audio: null, reason };
+}
 
 /** Play Sara's cloud-voice audio (base64 from /api/tts or the call stream) as `owner`. Never a browser voice. */
 export const playCloudAudioAs = (owner: string, b64: string, onEnd?: () => void) => playAudioSource(b64, onEnd, 1, owner);
