@@ -41,7 +41,14 @@ function silenceOthers(keep?: object) {
 }
 
 /** Use instead of `new Audio()` everywhere: the element is tracked so it can always be stopped. */
+/** iOS/iPadOS 17+: muted autoplay <video>s (tutor faces) can leave the page audio session "ambient"/"auto", which
+ * ducks speech and obeys the silent switch. Force "playback" so TTS plays at full volume (no-op elsewhere). */
+export function ensurePlaybackSession() {
+  try { const s = (typeof navigator !== 'undefined' && (navigator as any).audioSession); if (s && s.type !== 'playback') s.type = 'playback'; } catch (_) {}
+}
+if (typeof window !== 'undefined') ensurePlaybackSession();
 export function createManagedAudio(src?: string, owner?: string): HTMLAudioElement {
+  ensurePlaybackSession();
   const a = src === undefined ? new Audio() : new Audio(src);
   trackedMedia.add(a);
   if (owner) mediaOwner.set(a, owner);
@@ -180,6 +187,7 @@ export function unlockAudioForMobile() {
 if (typeof window !== "undefined") {
   const unlockEvents = ["click", "touchstart", "keydown"];
   const handleInitialUserGesture = () => {
+    ensurePlaybackSession();
     unlockAudioForMobile();
     unlockEvents.forEach((ev) => window.removeEventListener(ev, handleInitialUserGesture));
   };
@@ -246,6 +254,8 @@ async function playAudioSource(
       onEnd?.();
     };
 
+    ensurePlaybackSession();
+    audio.volume = 1; audio.muted = false;
     const playPromise = audio.play();
     if (owner === 'call') registerSaraSpeech(audio, bytes); // avatar lip-sync (reads only; audio path untouched)
     if (playPromise !== undefined) {

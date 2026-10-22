@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { getSpeechLevel } from "../../lib/speechLevel";
+import { ensurePlaybackSession } from "../../lib/audio";
 
 /** Laughter / praise cues. Gemini TTS has no fixed laugh tag in our code; we also catch bracketed style tags like [laughing] / [laughs]. */
 const LAUGH_RE = /(ه{3,}|هه+ه|😄|😂|🤣|😆|😁|\[(laugh|laughs|laughing|chuckle|chuckles|giggle)[^\]]*\]|\b(haha+|hehe+|lol)\b|ممتاز|رائع|أحسنت|احسنت|برافو|بطل|\b(excellent|awesome|well done|great job|bravo|perfect|amazing)\b)/i;
@@ -62,7 +63,7 @@ export const TutorVideoFace: React.FC<{ id: string; alt: string; isSpeaking: boo
     (Object.keys(refs) as Clip[]).forEach(k => {
       const v = refs[k].current; if (!v) return;
       const on = visible && !document.hidden && k === clip && !reduced;
-      if (on) { if (k === "laugh") v.currentTime = 0; v.play().catch(() => {}); } else if (!v.paused) v.pause();
+      if (on) { v.muted = true; v.defaultMuted = true; v.volume = 0; ensurePlaybackSession(); if (k === "laugh") v.currentTime = 0; v.play().catch(() => {}); } else if (!v.paused) v.pause();
     });
   }, [clip, visible, loaded, reduced]);
 
@@ -73,7 +74,7 @@ export const TutorVideoFace: React.FC<{ id: string; alt: string; isSpeaking: boo
     <div ref={root} className="tutor-video-face" data-clip={clip}>
       <img className="tutor-video-poster" src={`/tutors/${id}.webp`} alt={alt} draggable={false} />
       {(["idle", "talk", "laugh"] as Clip[]).map(k => loaded[k] && (
-        <video key={id + k} ref={refs[k]} className={`tutor-video-clip ${clip === k ? "on" : ""}`} muted playsInline
+        <video key={id + k} ref={refs[k]} className={`tutor-video-clip ${clip === k ? "on" : ""}`} muted playsInline disableRemotePlayback x-webkit-airplay="deny"
           loop={k !== "laugh"} preload={k === "idle" ? "auto" : "metadata"} autoPlay={k === "idle"} aria-hidden
           onEnded={k === "laugh" ? endLaugh : undefined} onError={k === "idle" ? onFail : undefined}>
           <source src={`/tutors/video/${id}-${k}.webm`} type="video/webm" />
