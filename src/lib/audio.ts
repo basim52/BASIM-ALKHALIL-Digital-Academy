@@ -1,3 +1,4 @@
+import { trackSpeech } from './speechLevel';
 import { registerSaraSpeech } from './saraSpeechLevel';
 /**
  * Basim Alkhalil Academic Platform - Unified Speech Engine
@@ -210,6 +211,7 @@ async function playAudioSource(
     const audioUrl = URL.createObjectURL(blob);
     const audio = createManagedAudio(undefined, owner);
     audio.src = audioUrl;
+    try { if (owner !== 'call') trackSpeech(audio, bytes); } catch (_) { /* lip-sync only */ }
     audio.preload = "auto";
     if (playbackRate && playbackRate > 0) {
       audio.playbackRate = playbackRate;

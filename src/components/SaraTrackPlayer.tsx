@@ -1,3 +1,4 @@
+import { trackSpeech } from '../lib/speechLevel';
 import ExplainLangToggle from './ExplainLangToggle';
 import { useExplainLang, useLessonView, englishLessonAsync, L } from '../lib/explainLang';
 import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
@@ -59,6 +60,7 @@ async function playB64(b64: string): Promise<void> {
 let narratorPaused = false;
 const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
 const lessonAudioCache = new Map<string, string>(); // text → object URL (this session)
+const lessonAudioBytes = new Map<string, Uint8Array>(); // object URL → bytes (avatar lip-sync envelope only)
 
 /**
  * Sara's real (cloud) voice for a whole lesson page in ONE request. The GET is CDN-cached for a year,
@@ -76,7 +78,9 @@ async function fetchLessonAudio(text: string, token: number, voice = 'Kore'): Pr
       const tok = auth.currentUser ? await auth.currentUser.getIdToken().catch(() => '') : '';
       const r = await fetch(`/api/tts/lesson?v=${encodeURIComponent(voice)}&t=${encodeURIComponent(text)}`, tok ? { headers: { Authorization: `Bearer ${tok}` } } : undefined);
       if (r.ok && (r.headers.get('content-type') || '').includes('audio')) {
-        const url = URL.createObjectURL(await r.blob());
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        void blob.arrayBuffer().then(b => { lessonAudioBytes.set(url, new Uint8Array(b)); }).catch(() => {});
         lessonAudioCache.set(ck, url);
         return url;
       }
@@ -101,6 +105,7 @@ async function narrate(text: string, onBlocked: () => void, onFailed: () => void
   while (narratorPaused) { await wait(150); if (token !== narratorToken) return; }
   const el = getNarrator();
   el.src = url;
+  { const b = lessonAudioBytes.get(url); if (b) trackSpeech(el, b); } // read-only lip-sync for the 3D teacher
   const ok = await new Promise<boolean>(resolve => {
     el.onended = () => resolve(true);
     el.onerror = () => resolve(true);
