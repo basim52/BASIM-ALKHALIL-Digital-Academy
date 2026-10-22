@@ -76,6 +76,7 @@ async function fetchLessonAudio(text: string, token: number, voice = 'Kore'): Pr
     if (d) await wait(d);
     if (token !== narratorToken) return null;
     try {
+      if (!auth.currentUser) await Promise.race([auth.authStateReady(), wait(4000)]).catch(() => {});
       const tok = auth.currentUser ? await auth.currentUser.getIdToken(d > 0).catch(() => '') : '';
       const r = await fetch(`/api/tts/lesson?v=${encodeURIComponent(voice)}&t=${encodeURIComponent(text)}`, tok ? { headers: { Authorization: `Bearer ${tok}` } } : undefined);
       ttsDiag('fetch:/api/tts/lesson', { status: r.status, voice, type: r.headers.get('content-type') || '', cache: r.headers.get('x-vercel-cache') || '' });
@@ -86,7 +87,7 @@ async function fetchLessonAudio(text: string, token: number, voice = 'Kore'): Pr
         lessonAudioCache.set(ck, url);
         return url;
       }
-      lastNarrateReason = `lesson-http-${r.status}${tok ? '' : '-notoken'}`;
+      { const j401 = r.status === 401 ? await r.clone().json().catch(() => null) : null; lastNarrateReason = `lesson-http-${r.status}${j401?.reason ? '-' + j401.reason : ''}${tok ? '' : '-notoken'}`; }
       if (r.status === 503) { const j = await r.json().catch(() => ({})); if (j?.quotaExhausted) { lastNarrateReason = 'quota'; return null; } }
     } catch (e) { lastNarrateReason = 'lesson-network'; ttsDiag('fetch:lesson-error', { voice, err: String(e) }); }
   }

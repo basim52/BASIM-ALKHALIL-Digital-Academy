@@ -691,11 +691,11 @@ export async function fetchCloudVoice(text: string, voiceName: string, lang: 'en
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const r = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: text.slice(0, 1200), lang, voiceName }) });
-      const j = r.ok ? await r.json().catch(() => null) : null;
+      const j = await r.json().catch(() => null);
       ttsDiag('fetch:/api/tts', { status: r.status, voice: voiceName, ok: !!j?.audio, rateLimited: !!j?.rateLimited, attempt });
       if (j?.audio) return { audio: j.audio };
-      reason = r.status === 401 ? 'auth' : (r.status === 429 || j?.rateLimited) ? 'quota' : `http-${r.status}`;
-      if (reason === 'auth' || reason === 'quota') break;
+      reason = r.status === 401 ? `auth${j?.reason ? '-' + j.reason : ''}` : (r.status === 429 || j?.rateLimited) ? 'quota' : `http-${r.status}`;
+      if (reason === 'quota' || (reason.startsWith('auth') && attempt > 0)) break;
     } catch (e) { reason = 'network'; ttsDiag('fetch:error', { voice: voiceName, err: String(e) }); }
     await new Promise(res => setTimeout(res, 900));
   }

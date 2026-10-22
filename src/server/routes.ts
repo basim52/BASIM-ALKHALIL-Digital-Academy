@@ -562,15 +562,26 @@ Looking forward to your reply. Tell me what we're tackling first!`;
   const AI_LIMIT = Number(process.env.AI_RATE_LIMIT || 150); // requests per user per window
   const AI_WINDOW_MS = 10 * 60 * 1000;
   const rateBuckets = new Map<string, { n: number; reset: number }>();
+  // Non-sensitive verify failure code for diagnostics (no token contents).
+  const authReason = (e: any): string => {
+    const c = String(e?.code || ""); const m = String(e?.message || "");
+    if (c.includes("id-token-expired")) return "token-expired";
+    if (c.includes("id-token-revoked")) return "token-revoked";
+    if (c.includes("user-disabled")) return "user-disabled";
+    if (/"aud"|audience|project/i.test(m)) return "project-mismatch";
+    if (/iat|issued-at|future/i.test(m)) return "iat-future";
+    if (/signature|kid/i.test(m)) return "bad-signature";
+    return c.replace(/^auth\//, "") || "invalid-token";
+  };
   app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (req.method !== "POST" || !req.path.startsWith("/api/")) return next();
     const h = req.headers.authorization || "";
     const idToken = h.startsWith("Bearer ") ? h.slice(7).trim() : "";
-    if (!idToken) return res.status(401).json({ error: "UNAUTHORIZED", message: "Sign in required" });
+    if (!idToken) return res.status(401).json({ error: "UNAUTHORIZED", reason: "no-token", message: "Sign in required" });
     const adminAuth = getAdminAuth();
     if (!adminAuth) return res.status(503).json({ error: "SERVICE_UNAVAILABLE", message: "Auth not configured" });
     let uid = "";
-    try { uid = (await adminAuth.verifyIdToken(idToken)).uid; } catch { return res.status(401).json({ error: "UNAUTHORIZED", message: "Invalid or expired token" }); }
+    try { uid = (await adminAuth.verifyIdToken(idToken)).uid; } catch (e: any) { const reason = authReason(e); logToFile(`[auth] POST ${req.path} 401 ${reason}`); return res.status(401).json({ error: "UNAUTHORIZED", reason, message: "Invalid or expired token" }); }
     const now = Date.now();
     const b = rateBuckets.get(uid);
     if (!b || b.reset < now) rateBuckets.set(uid, { n: 1, reset: now + AI_WINDOW_MS });
@@ -1452,8 +1463,8 @@ RESPOND STRICTLY IN VALID JSON FORMAT with the following schema:
     const th = req.headers.authorization || "";
     const tok = th.startsWith("Bearer ") ? th.slice(7).trim() : "";
     const aa = getAdminAuth();
-    if (!tok || !aa) return res.status(401).setHeader("Cache-Control", "no-store").json({ error: "UNAUTHORIZED" });
-    try { await aa.verifyIdToken(tok); } catch { res.setHeader("Cache-Control", "no-store"); return res.status(401).json({ error: "UNAUTHORIZED" }); }
+    if (!tok || !aa) return res.status(401).setHeader("Cache-Control", "no-store").json({ error: "UNAUTHORIZED", reason: tok ? "auth-not-configured" : "no-token" });
+    try { await aa.verifyIdToken(tok); } catch (e: any) { const reason = authReason(e); logToFile(`[auth] GET /api/tts/lesson 401 ${reason}`); res.setHeader("Cache-Control", "no-store"); return res.status(401).json({ error: "UNAUTHORIZED", reason }); }
     const text = String(req.query.t || "").slice(0, 2000);
     const voice = safeVoice(req.query.v);
     if (!text.trim()) return res.status(400).json({ error: "Text is required" });
